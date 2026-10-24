@@ -22,13 +22,20 @@ internal static class OpenSearchHttp
         => SendAsync(client, HttpMethod.Post, path, body, NdjsonMediaType, allowNotFound: false,
             cancellationToken: cancellationToken);
 
+    // A bulk reply grows with its items, so it is read within the configured response ceiling.
+    internal static Task<JsonDocument> SendBulkAsync(HttpClient client, string path, string body, ComparisonExecutionOptions policy,
+        CancellationToken cancellationToken)
+        => SendAsync(client, HttpMethod.Post, path, body, NdjsonMediaType, allowNotFound: false,
+            cancellationToken: cancellationToken, policy: policy);
+
     internal static Task<JsonDocument> SendMutationAsync(HttpClient client, HttpMethod method, string path, object? body,
         Scenario scenario, int expectedCopies, CancellationToken cancellationToken)
         => SendAsync(client, method, path, body is null ? null : JsonSerializer.Serialize(body, JsonOptions), JsonMediaType,
             allowNotFound: false, cancellationToken, scenario, expectedCopies);
 
     private static async Task<JsonDocument> SendAsync(HttpClient client, HttpMethod method, string path, string? body,
-        string contentType, bool allowNotFound, CancellationToken cancellationToken, Scenario? mutation = null, int expectedCopies = OpenSearchHttp.ExpectedCopiesDefault)
+        string contentType, bool allowNotFound, CancellationToken cancellationToken, Scenario? mutation = null, int expectedCopies = OpenSearchHttp.ExpectedCopiesDefault,
+        ComparisonExecutionOptions? policy = null)
     {
         using var request = new HttpRequestMessage(method, path);
         if (body is not null)
@@ -46,8 +53,7 @@ internal static class OpenSearchHttp
         {
             response.EnsureSuccessStatusCode();
         }
-        await using var stream = await response.Content.ReadAsStreamAsync(cancellationToken);
-        var json = await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
+        var json = await ReadJsonAsync(response.Content, policy, cancellationToken);
         try
         {
             if (mutation is { } scenario)
@@ -61,5 +67,16 @@ internal static class OpenSearchHttp
             json.Dispose();
             throw;
         }
+    }
+
+    private static async Task<JsonDocument> ReadJsonAsync(HttpContent content, ComparisonExecutionOptions? policy, CancellationToken cancellationToken)
+    {
+        if (policy is not null)
+        {
+            return await ComparisonResponse.ReadJsonAsync(content, policy, cancellationToken);
+        }
+
+        await using var stream = await content.ReadAsStreamAsync(cancellationToken);
+        return await JsonDocument.ParseAsync(stream, cancellationToken: cancellationToken);
     }
 }

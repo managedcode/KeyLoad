@@ -66,6 +66,16 @@ fixtures.
 1. Start the selected topology and wait for its readiness.
 2. Load the base 1,000,000 records and verify the actual data. Measure the load time
    and throughput. Measure the construction of the required indexes separately.
+   Every database loads through the same client procedure: 16 clients send bounded
+   batches of consecutive new records through the database's own bulk API, sized by
+   the vendor's recommendation (`IDocumentComparisonTarget.IngestionBatchRecords`,
+   for example 256 mutations per KeyLoad command, which is the server's
+   `MaxBatchMutations`, and 1,000 rows per Neo4j `UNWIND`). A batch keeps the single
+   create's guarantees: create-only conflicts, the same acknowledgement or replica
+   wait, and checks of every record in the response. Each record keeps its own sample
+   and is acknowledged when its batch is, so load latency percentiles describe batch
+   acknowledgement times. Mixed creates, updates, deletes, reads and queries stay one
+   record per request.
 3. Run separate TUnit operation tests on the loaded database. In the mixed test, a
    shared start launches parallel bounded client streams: add 100,000 new records,
    delete 100,000 selected base records, update 100,000 other records, and run reads

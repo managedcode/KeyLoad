@@ -34,10 +34,16 @@ internal sealed class InfluxDocumentStore(HttpClient http, string name, IOptions
     private const string NonemptyReply = "InfluxWriteReplyRejected";
     private const string Readiness = "SELECT 1 AS value";
     private const long EpochNanoseconds = 1767225600000000000;
+    // InfluxDB 3 recommends 10,000 lines or 10 MB per write, whichever comes first; a canonical 1 KiB document line takes at
+    // most 1,106 bytes, so 10 MB comes first: https://docs.influxdata.com/influxdb3/core/write-data/best-practices/optimize-writes/
+    private const int WriteRequestBytes = 10_000_000, CanonicalLineBytes = 1_106;
+    private const int WriteLines = WriteRequestBytes / CanonicalLineBytes;
+    private const string OversizedWrite = "InfluxWriteBatchExceedsRequestBytes";
     internal override string Target => TargetName;
     internal override string Acknowledgement => Ack;
     internal override string Authorization => Auth;
     internal override bool SupportsDelete => false;
+    internal override int BatchRecords => WriteLines;
     internal override HttpDocumentStore ForClient(HttpClient client) => new InfluxDocumentStore(client, Name, Options);
     internal override async Task AdmitAsync(CancellationToken token)
     {
@@ -81,15 +87,35 @@ internal sealed class InfluxDocumentStore(HttpClient http, string name, IOptions
         {
             throw new NotSupportedException();
         }
+        using var request = new HttpRequestMessage(HttpMethod.Post, Write + Name);
+        request.Content = new StringContent(Line(document), Encoding.UTF8, Media);
+        await RequireEmptyAsync(request, token).ConfigureAwait(false);
+    }
+
+    // One line-protocol write with the single create's precision, all-or-nothing and WAL-sync settings.
+    internal override async Task CreateAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken token)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, Write + Name);
+        request.Content = Rows(string.Empty, documents, Line);
+        if (request.Content.Headers.ContentLength > WriteRequestBytes)
+        {
+            throw new ComparisonFailureException(OversizedWrite);
+        }
+        await RequireEmptyAsync(request, token).ConfigureAwait(false);
+    }
+
+    private static string Line(BenchmarkDocument document)
+    {
         var escaped = document.Json.Replace(Backslash, EscapedBackslash, StringComparison.Ordinal)
             .Replace(Quote, EscapedQuote, StringComparison.Ordinal);
-        var line = LinePrefix + document.Id + BodyField + escaped + NumberField
+        return LinePrefix + document.Id + BodyField + escaped + NumberField
             + document.Number.ToString(CultureInfo.InvariantCulture) + IntegerSuffix
             + checked(EpochNanoseconds + document.Number).ToString(CultureInfo.InvariantCulture);
-        using var request = new HttpRequestMessage(HttpMethod.Post, Write + Name);
-        request.Content = new StringContent(line, Encoding.UTF8, Media);
-        var body = await SendAsync(request, token).ConfigureAwait(false);
-        if (!string.IsNullOrWhiteSpace(body))
+    }
+
+    private async Task RequireEmptyAsync(HttpRequestMessage request, CancellationToken token)
+    {
+        if (!string.IsNullOrWhiteSpace(await SendAsync(request, token).ConfigureAwait(false)))
         {
             throw new ComparisonFailureException(NonemptyReply);
         }

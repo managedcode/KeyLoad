@@ -13,4 +13,9 @@ public interface IDocumentComparisonTarget : IComparisonTarget
             : Task.FromException(new ComparisonFailureException(DocumentProtocolText.DocumentFinalCopiesUnavailable));
     /// <summary>Opens an independently owned actual execution client and admits it before the start barrier.</summary>
     Task<IDocumentComparisonSession> OpenDocumentSessionAsync(CancellationToken cancellationToken);
+    /// <summary>Records one initial-load request carries: the database vendor's recommended bulk size, or one without a bulk path.</summary>
+    int IngestionBatchRecords
+    {
+        get;
+    }
 }

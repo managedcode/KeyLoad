@@ -2,6 +2,10 @@ namespace KeyLoad.Comparisons.Targets;
 
 public sealed partial class HelixDbTarget
 {
+    // HelixDB commits a write batch atomically but publishes no batch size (https://docs.helix-db.com/database/querying-guide/mutations.md); 1,000 nodes are about 1.3 MiB of the 16 MiB local body limit.
+    private const int WriteBatchNodes = 1_000;
+    /// <inheritdoc/>
+    public int IngestionBatchRecords => WriteBatchNodes;
     /// <inheritdoc/>
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {

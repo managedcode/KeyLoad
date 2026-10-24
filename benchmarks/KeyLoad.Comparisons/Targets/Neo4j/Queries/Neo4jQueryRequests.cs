@@ -34,7 +34,9 @@ internal static class Neo4jQueryRequests
         => $"{DisposeAsyncDROPCONSTRAINTText}{label}{DisposeAsyncIdIFEXISTSText}";
 
     private const string ReadCorpusAsyncMATCHNText = "MATCH (n:";
-    private const string ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText = ") WHERE $after IS NULL OR n.id > $after RETURN n.id,n.json ORDER BY n.id LIMIT ";
+    // A plain range predicate lets the uniqueness constraint's range index seek past the last key and supply the order;
+    // an OR with a null test forces a label scan and sort of the whole namespace for every page.
+    private const string ReadCorpusAsyncWHERENIdAfterRETURNNIdNJsonORDERBYNIdLIMITText = ") WHERE n.id > $after RETURN n.id,n.json ORDER BY n.id LIMIT ";
     private const string ReadAsyncIdIdRETURNNJsonText = " {id:$id}) RETURN n.json";
     private const string ExecuteAsyncMATCHAText = "MATCH (a:";
     private const string ExecuteAsyncIdIdLINKSText = " {id:$id})-[:LINKS*1..";
@@ -42,7 +44,7 @@ internal static class Neo4jQueryRequests
     private const string ExecuteAsyncWHEREBIdIdRETURNDISTINCTBIdORDERBYBIdText = ") WHERE b.id<>$id RETURN DISTINCT b.id ORDER BY b.id";
 
     internal static string Corpus(string label, int capacity)
-        => $"{ReadCorpusAsyncMATCHNText}{label}{ReadCorpusAsyncWHEREAfterISNULLORNIdAfterRETURNNIdNJsonORDERBYNIdLIMITText}{capacity}";
+        => $"{ReadCorpusAsyncMATCHNText}{label}{ReadCorpusAsyncWHERENIdAfterRETURNNIdNJsonORDERBYNIdLIMITText}{capacity}";
 
     internal static string Read(string label)
         => $"{ReadCorpusAsyncMATCHNText}{label}{ReadAsyncIdIdRETURNNJsonText}";
@@ -50,10 +52,11 @@ internal static class Neo4jQueryRequests
     internal static string Traverse(string label, int hops)
         => $"{ExecuteAsyncMATCHAText}{label}{ExecuteAsyncIdIdLINKSText}{hops}{ExecuteAsyncBText}{label}{ExecuteAsyncWHEREBIdIdRETURNDISTINCTBIdORDERBYBIdText}";
 
+    // Every corpus identifier is non-empty, so the empty string orders before the first page.
     internal static object After(string? after)
         => new
         {
-            after
+            after = after ?? string.Empty
         };
 
     internal static object Identifier(string id)

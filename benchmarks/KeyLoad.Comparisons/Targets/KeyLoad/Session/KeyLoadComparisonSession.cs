@@ -9,11 +9,14 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
     int topK, int graphDepth, int graphVertices, int graphEdges, int corpusCount, int expectedCopies,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions,
     IOptions<QueryTranslationOptions> translationOptions, TimeProvider? provider = null)
-    : IComparisonSession
+    : IComparisonSession, IDocumentBulkSession
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(runtimeExecutionOptions).Value;
     private readonly ComparisonLifecycleOptions lifecycle = lifecycleOptions.Value;
+
+    public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+        => KeyLoadDocumentOperations.CreateAsync(client, partition, documents, expectedCopies, cancellationToken);
 
     internal Task<OperationResult> ExecuteDocumentOperationAsync(Scenario operation, BenchmarkDocument document, CancellationToken token)
         => operation == Scenario.PointRead ? ExecuteAsync(operation, document, token)

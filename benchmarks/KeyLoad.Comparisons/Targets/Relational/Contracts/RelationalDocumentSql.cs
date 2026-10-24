@@ -33,6 +33,7 @@ internal sealed record RelationalDocumentSql(string Name)
     private const string PgAck = "TimescaleDB hypertable; fsync=on; synchronous_commit=on; one primary WAL flush";
     internal string RequiredSetting => Name == BenchmarkAdditionalTargets.SqlServer ? SqlSetting : Name == BenchmarkAdditionalTargets.MySql ? MySqlSetting : PgSetting;
     internal string Acknowledgement => Name == BenchmarkAdditionalTargets.SqlServer ? SqlAck : Name == BenchmarkAdditionalTargets.MySql ? MySqlAck : PgAck;
+    internal RelationalDocumentBatch Batch { get; } = new(Name);
 
     internal DbCommand Command(DbConnection connection, RelationalDocumentCommand operation, TimeSpan timeout)
     {

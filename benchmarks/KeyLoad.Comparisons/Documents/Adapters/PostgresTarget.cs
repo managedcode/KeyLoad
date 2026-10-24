@@ -5,6 +5,10 @@ public sealed partial class PostgresTarget
     private const string FinalFlushSettingsQuery = "SELECT current_setting('fsync'), current_setting('synchronous_commit')";
     private const string EnabledSetting = "on", FinalFlushFailure = "PostgresFinalDocumentFlushRequired";
     private const int FsyncField = 0, SynchronousCommitField = 1;
+    // PostgreSQL "Populating a Database" loads through one COPY per transaction (https://www.postgresql.org/docs/current/populate.html); 10,000 rows keeps all 16 clients loading.
+    private const int CopyBatchRows = 10_000;
+    /// <inheritdoc/>
+    public int IngestionBatchRecords => CopyBatchRows;
     /// <inheritdoc/>
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {

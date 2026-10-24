@@ -48,6 +48,16 @@ internal sealed class RelationalDocumentSession(DbConnection connection, Relatio
     public IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken cancellationToken)
         => ReadDocumentsAsync(cancellationToken);
 
+    // One bulk operation keeps the single create's autocommit, primary-key rejection and exact acknowledged-row check.
+    public async Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+    {
+        var acknowledged = await sql.Batch.CreateAsync(connection, documents, policy.OperationTimeout, cancellationToken).ConfigureAwait(false);
+        if (acknowledged != documents.Count)
+        {
+            throw new ComparisonFailureException(UnexpectedRows);
+        }
+    }
+
     public async IAsyncEnumerable<FoundDocument> ReadDocumentsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         await using var command = sql.Command(connection, RelationalDocumentCommand.Enumerate, policy.OperationTimeout);

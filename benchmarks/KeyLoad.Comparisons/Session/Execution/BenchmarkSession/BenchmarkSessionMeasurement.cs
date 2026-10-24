@@ -4,8 +4,14 @@ namespace KeyLoad.Comparisons;
 
 internal sealed class BenchmarkSessionMeasurement(BenchmarkSessionContext context)
 {
-    internal async Task<BenchmarkSessionLaneReport> MeasureAsync(string id, int count, int clients,
+    internal Task<BenchmarkSessionLaneReport> MeasureAsync(string id, int count, int clients,
         Func<IComparisonSession, int, CancellationToken, Task> operation, CancellationToken token,
+        BenchmarkSessionStartBarrier? barrier = null, bool openDocumentSessions = true)
+        => MeasureBatchesAsync(id, count, clients, BenchmarkSessionLimits.SingleItemCount,
+            (client, first, _, cancellation) => operation(client, first, cancellation), token, barrier, openDocumentSessions);
+
+    internal async Task<BenchmarkSessionLaneReport> MeasureBatchesAsync(string id, int count, int clients, int batch,
+        Func<IComparisonSession, int, int, CancellationToken, Task> operation, CancellationToken token,
         BenchmarkSessionStartBarrier? barrier = null, bool openDocumentSessions = true)
     {
         var lease = new BenchmarkSessionClientLease(context);
@@ -15,7 +21,7 @@ internal sealed class BenchmarkSessionMeasurement(BenchmarkSessionContext contex
         try
         {
             await lease.OpenAsync(clients, openDocumentSessions, token).ConfigureAwait(false);
-            var execution = new BenchmarkSessionLaneExecution(context, lease, operation, count, openDocumentSessions);
+            var execution = new BenchmarkSessionLaneExecution(context, lease, operation, count, batch, openDocumentSessions);
             result = await execution.RunAsync(id, clients, barrier, token).ConfigureAwait(false);
         }
         catch (Exception error) when (BenchmarkSessionFailure.IsNonfatal(error))

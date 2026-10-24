@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using KeyLoad.Client;
 
 namespace KeyLoad.Comparisons.Targets;
@@ -46,6 +47,33 @@ internal static class KeyLoadDocumentOperations
         KeyLoadCopyAcknowledgements.Require(receipt, expectedCopies);
         ValidateReceipt(receipt, scenario, document);
         return new();
+    }
+
+    /// <summary>Creates new documents in one atomic command, with the single create's conflict, copy and receipt checks.</summary>
+    internal static async Task CreateAsync(KeyLoadClient client, PartitionRef partition,
+        IReadOnlyList<BenchmarkDocument> documents, int expectedCopies, CancellationToken token)
+    {
+        var mutations = documents.Select(document => CreateMutation(Scenario.DocumentWrite, document)).ToImmutableArray();
+        var result = await client.CommitAsync(new(Guid.NewGuid(), partition, mutations), token);
+        if (result.IsFailed && result.Problem.ErrorCode == nameof(ErrorCode.RevisionConflict))
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
+        }
+        var receipt = KeyLoadClientResults.Success(result);
+        KeyLoadCopyAcknowledgements.Require(receipt, expectedCopies);
+        if (receipt.Mutations.Length != documents.Count)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
+        }
+        for (var index = 0; index < documents.Count; index++)
+        {
+            var mutation = receipt.Mutations[index];
+            if (mutation.Resource != ComparisonIdentities.DocumentsCollection || mutation.Id != documents[index].Id
+                || mutation.Revision != KeyLoadWorkloadIdentities.CreatedDocumentRevision)
+            {
+                throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
+            }
+        }
     }
 
     private static void ValidateReceipt(CommitReceipt receipt, Scenario scenario, BenchmarkDocument document)

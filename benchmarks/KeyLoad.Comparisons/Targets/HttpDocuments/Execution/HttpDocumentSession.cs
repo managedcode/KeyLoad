@@ -35,6 +35,17 @@ internal sealed class HttpDocumentSession(HttpDocumentStore store) : IDocumentCo
     public IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken cancellationToken)
         => ReadDocumentsAsync(cancellationToken);
 
+    // One native bulk write per batch with the single create's request settings and reply check.
+    public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(documents);
+        if (documents.Count == EmptyCount || documents.Count > store.BatchRecords)
+        {
+            throw new ArgumentOutOfRangeException(nameof(documents));
+        }
+        return store.CreateAsync(documents, cancellationToken);
+    }
+
     public async IAsyncEnumerable<FoundDocument> ReadDocumentsAsync([EnumeratorCancellation] CancellationToken cancellationToken)
     {
         const string InvalidOrder = "HttpDocumentDatabaseReadbackOrderRejected";

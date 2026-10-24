@@ -6,7 +6,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int topK, int graphDepth, int corpusCount,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, TimeProvider? provider = null)
-    : IComparisonSession
+    : IComparisonSession, IDocumentBulkSession
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
@@ -40,6 +40,9 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
 
     public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         => PostgresDocumentOperations.ReadAsync(connection, document, cancellationToken);
+
+    public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+        => PostgresDocumentOperations.CreateAsync(connection, documents, cancellationToken);
 
     public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         => PostgresStreamOperations.ReadAsync(connection, document, cancellationToken);

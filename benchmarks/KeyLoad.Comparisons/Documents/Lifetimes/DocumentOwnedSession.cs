@@ -14,6 +14,9 @@ internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clie
     public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken token) => session.ReadEventAsync(document, token);
     public IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken token) => session.ReadCorpusAsync(token);
     public IAsyncEnumerable<FoundDocument> ReadDocumentsAsync(CancellationToken token) => readback(token);
+    public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken token)
+        => session is IDocumentBulkSession bulk ? bulk.CreateDocumentsAsync(documents, token)
+            : throw new NotSupportedException(DocumentProtocolText.DocumentBulkCreateUnavailable);
     public ValueTask DisposeAsync()
     {
         lock (gate)

@@ -4,7 +4,11 @@ namespace KeyLoad.Comparisons.Targets;
 
 public sealed partial class KeyLoadTarget
 {
+    // The server commits at most DatabaseLimits.MaxBatchMutations (256) mutations in one atomic command.
+    private const int CommandMutationLimit = 256;
     private bool ownsDocumentNamespace;
+    /// <inheritdoc/>
+    public int IngestionBatchRecords => CommandMutationLimit;
     /// <inheritdoc/>
     public Task VerifyDocumentCopiesAsync(DocumentComparisonSchedule schedule, CancellationToken cancellationToken)
     {

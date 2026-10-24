@@ -5,7 +5,8 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class SurrealDbSession(HttpClient http, string table, string edge, int count, int depth, int topK, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IComparisonSession
+internal sealed class SurrealDbSession(HttpClient http, string table, string edge, int count, int depth, int topK, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
+    : IComparisonSession, IDocumentBulkSession
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private ComparisonExecutionOptions Policy => executionOptions.Value;
@@ -86,6 +87,18 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
         }
 
         throw new NotSupportedException();
+    }
+
+    public async Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(documents);
+        // An existing record ID fails the whole INSERT statement as CreateConflict; every record is returned once.
+        using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbDocumentSql.Insert(table, documents), Policy, cancellationToken: cancellationToken, create: true, timeProvider: timeProvider).ConfigureAwait(false);
+        var created = SurrealDbVectorProtocol.SingleResult(response.RootElement);
+        if (created.ValueKind != JsonValueKind.Array || created.GetArrayLength() != documents.Count)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
+        }
     }
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

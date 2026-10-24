@@ -1,3 +1,6 @@
+using System.Buffers;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
 
@@ -19,6 +22,8 @@ internal abstract class HttpDocumentStore(HttpClient http, string name, IOptions
     internal abstract Task<string> InitializeAsync(CancellationToken token);
     internal abstract Task DropAsync(CancellationToken token);
     internal abstract Task WriteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token);
+    internal abstract int BatchRecords { get; }
+    internal abstract Task CreateAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken token);
     internal abstract Task<JsonDocument> ReadAsync(string id, int? number, CancellationToken token);
     internal abstract Task<JsonDocument> PageAsync(string after, CancellationToken token);
     internal abstract Task IndexAsync(CancellationToken token);
@@ -30,6 +35,22 @@ internal abstract class HttpDocumentStore(HttpClient http, string name, IOptions
             ? document.RootElement : document.RootElement.GetProperty(Data);
         return rows.EnumerateArray().Select(row => new FoundDocument(
             row.GetProperty(Id).GetString()!, row.GetProperty(Body).GetString()!)).ToArray();
+    }
+
+    // Encodes each newline-terminated row straight to UTF-8, so a batch never holds a UTF-16 copy of its whole body.
+    protected static ReadOnlyMemoryContent Rows(string head, IReadOnlyList<BenchmarkDocument> documents, Func<BenchmarkDocument, string> row)
+    {
+        const string Media = "text/plain", RowEnd = "\n";
+        var body = new ArrayBufferWriter<byte>();
+        Encoding.UTF8.GetBytes(head, body);
+        foreach (var document in documents)
+        {
+            Encoding.UTF8.GetBytes(row(document), body);
+            Encoding.UTF8.GetBytes(RowEnd, body);
+        }
+        var content = new ReadOnlyMemoryContent(body.WrittenMemory);
+        content.Headers.ContentType = new MediaTypeHeaderValue(Media) { CharSet = Encoding.UTF8.WebName };
+        return content;
     }
 
     protected async Task<string> SendAsync(HttpRequestMessage request, CancellationToken token, bool indexing = false)

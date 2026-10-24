@@ -6,7 +6,8 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class HelixDbSession(HttpClient http, string label, int count, int depth, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IComparisonSession
+internal sealed class HelixDbSession(HttpClient http, string label, int count, int depth, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider? provider = null)
+    : IComparisonSession, IDocumentBulkSession
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private ComparisonExecutionOptions Policy => executionOptions.Value;
@@ -71,6 +72,32 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
         return new();
     }
 
+    public async Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(documents);
+        var entries = new JsonArray();
+        var names = new JsonArray();
+        foreach (var document in documents)
+        {
+            entries.Add(HelixDbProtocol.Entry(HelixDbProtocol.Node(HelixDbTokens.TokenCount, new()
+            {
+                [HelixDbTokens.TokenInput] = HelixDbDocumentAst.Add(label, document)
+            }), document.Id));
+            names.Add(document.Id);
+        }
+
+        // The write batch commits or rolls back together; the unique id index rejects an existing document as CreateConflict.
+        using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(entries, true, names), true, Policy,
+            token: cancellationToken, create: true, timeProvider: timeProvider).ConfigureAwait(false);
+        foreach (var document in documents)
+        {
+            if (!response.RootElement.TryGetProperty(document.Id, out var created) || Count(created) != 1)
+            {
+                throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
+            }
+        }
+    }
+
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;
     private async Task MutateAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token)
     {
@@ -105,10 +132,11 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
     private static FoundDocument Read(JsonElement row) => new(row.GetProperty(HelixDbTokens.TokenId).GetString()!, row.GetProperty(HelixDbTokens.TokenPayload).GetString()!);
     private static void RequireOne(JsonElement result, Scenario scenario)
     {
-        var count = result.ValueKind == JsonValueKind.Array && result.GetArrayLength() == 1 ? result[0].GetInt64() : result.GetInt64();
-        if (count != 1)
+        if (Count(result) != 1)
         {
             throw new ComparisonFailureException(scenario == Scenario.DocumentUpdate ? ComparisonMutationFailures.UpdateMissing : ComparisonMutationFailures.DeleteMissing);
         }
     }
+
+    private static long Count(JsonElement result) => result.ValueKind == JsonValueKind.Array && result.GetArrayLength() == 1 ? result[0].GetInt64() : result.GetInt64();
 }

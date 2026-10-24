@@ -475,7 +475,22 @@ the lifecycle maximum); deleting a million nodes in one transaction exceeds the 
 transaction memory pool. KeyLoad keeps deleted documents as tombstones in the collection
 range, so its cleanup reads every identifier in one cursor pass before writing anything
 and then deletes them in batches of `KeyLoadDocumentSeedBatchSize`; re-querying from the
-start after each batch would re-read every earlier tombstone.
+start after each batch would re-read every earlier tombstone. The session owner waits
+`DocumentCleanupTimeout` (20 minutes) for a document target's cleanup instead of the
+30-second client `CleanupTimeout`, because a million-record purge in bounded batches
+takes longer than closing a client.
+
+Full readbacks page by key, never by offset. Neo4j's corpus page is
+`WHERE n.id > $after ... ORDER BY n.id LIMIT n` starting from the empty string, so the
+uniqueness constraint's range index seeks past the previous page and supplies the
+order; an `$after IS NULL OR ...` predicate made every page scan and sort the whole
+namespace. KeyLoad's readback relies on the server continuing an identifier-ordered
+query after the last identifier, which the released image must include.
+
+SurrealDB verifies an HTTP Basic credential with Argon2 on every request, which caps a
+client near one hundred requests per second. The SurrealDB document target therefore
+signs in once through `POST /signin` and sends the root bearer token, renewing it before
+new clients open when it is older than 30 minutes (root tokens last one hour).
 
 ```mermaid
 flowchart LR

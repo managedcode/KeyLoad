@@ -6,6 +6,10 @@ public sealed partial class RedisTarget
 {
     private const string FinalPrimaryFailure = "RedisFinalDocumentPrimaryUnavailable", FinalFenceSuffix = "-final-proof";
     private const char NamespaceSeparator = ':';
+    // Redis pipelining guidance sends batches such as 10k commands per round trip (https://redis.io/docs/latest/develop/using-commands/pipelining/).
+    private const int PipelineBatchCommands = 10_000;
+    /// <inheritdoc/>
+    public int IngestionBatchRecords => PipelineBatchCommands;
     private RedisDocumentNamespace? documentNamespace;
     /// <inheritdoc/>
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)

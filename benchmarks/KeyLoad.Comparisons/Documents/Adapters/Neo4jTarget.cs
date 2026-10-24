@@ -3,6 +3,8 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed partial class Neo4jTarget
 {
     /// <inheritdoc/>
+    public int IngestionBatchRecords => Neo4jMutationOperations.TransactionBatchRows;
+    /// <inheritdoc/>
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(initialization);

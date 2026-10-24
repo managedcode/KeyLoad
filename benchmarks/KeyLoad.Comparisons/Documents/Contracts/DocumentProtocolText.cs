@@ -4,6 +4,7 @@ internal static class DocumentProtocolText
 {
     internal const string DocumentPhaseInstrumentationIncomplete = "DocumentPhaseInstrumentationIncomplete";
     internal const string DocumentFinalCopiesUnavailable = "DocumentFinalCopiesUnavailable";
+    internal const string DocumentBulkCreateUnavailable = "DocumentBulkCreateUnavailable";
     internal const string DocumentAdditionalFailureCategories = "DocumentAdditionalFailureCategories";
     internal const string DocumentClientCleanupThresholdExpired = "DocumentClientCleanupThresholdExpired";
     internal const string DocumentContractInvalid = "DocumentContractInvalid";

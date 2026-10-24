@@ -26,6 +26,7 @@ internal sealed class RelationalDocumentTarget(Func<DbConnection> admin, Func<Db
 
     public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite
         or Scenario.DocumentUpdate or Scenario.DocumentDelete;
+    public int IngestionBatchRecords => sql.Batch.Records;
 
     public Task InitializeDocumentsAsync(DocumentComparisonInitialization initialization, CancellationToken token)
     {

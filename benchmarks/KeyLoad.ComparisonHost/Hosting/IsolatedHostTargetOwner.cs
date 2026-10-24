@@ -155,9 +155,11 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
     private async Task DisposeTargetAsync(IComparisonTarget ownedTarget)
     {
         var cleanup = ownedTarget.DisposeAsync().AsTask();
+        // A document target purges its million-record namespace in bounded batches, which outlasts a short client cleanup.
+        var limit = ownedTarget is IDocumentComparisonTarget ? Policy.DocumentCleanupTimeout : Policy.CleanupTimeout;
         try
         {
-            await cleanup.WaitAsync(Policy.CleanupTimeout, Clock);
+            await cleanup.WaitAsync(limit, Clock);
         }
         catch (TimeoutException)
         {

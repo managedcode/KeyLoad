@@ -8,6 +8,7 @@ internal static class BenchmarkSessionProtocol
     internal const string BenchmarkSessionReadMismatch = "BenchmarkSessionReadMismatch";
     internal const string ConcurrentBenchmarkSessionTestsAreForbidden = "ConcurrentBenchmarkSessionTestsAreForbidden";
     internal const string InitialLoadAcknowledgementsIncomplete = "InitialLoadAcknowledgementsIncomplete";
+    internal const string IngestionBatchOutsideClientShare = "IngestionBatchOutsideClientShare";
     internal const string InsufficientSessionClientsForMixedStreams = "InsufficientSessionClientsForMixedStreams";
     internal const string LiveSessionPrerequisiteFailedOrNotExecuted = "LiveSessionPrerequisiteFailedOrNotExecuted";
     internal const string MixedAcknowledgementsIncomplete = "MixedAcknowledgementsIncomplete";

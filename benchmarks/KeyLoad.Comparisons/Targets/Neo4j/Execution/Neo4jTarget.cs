@@ -148,8 +148,9 @@ public sealed partial class Neo4jTarget(HttpClient http, string runId, string im
     }
 
     /// <summary>Executes one comparison session’s document and directed graph queries.</summary>
-    private sealed class Session(Neo4jTarget target, HttpClient? operationClient = null, int? actualCount = null) : IComparisonSession
+    private sealed class Session(Neo4jTarget target, HttpClient? operationClient = null, int? actualCount = null) : IComparisonSession, IDocumentBulkSession
     {
+        public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken) => Neo4jMutationOperations.CreateAsync(QueryAsync, target.label, documents, cancellationToken);
 
         public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
         {

@@ -18,6 +18,7 @@ internal sealed class HttpDocumentTarget(HttpClient http, HttpDocumentStore stor
     public string UnsupportedReason => store.Target == BenchmarkAdditionalTargets.InfluxDb ? InfluxLimit : OutsideContract;
     public bool Supports(Scenario scenario) => scenario is Scenario.PointRead or Scenario.DocumentWrite
         or Scenario.DocumentUpdate || scenario == Scenario.DocumentDelete && store.SupportsDelete;
+    public int IngestionBatchRecords => store.BatchRecords;
 
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {

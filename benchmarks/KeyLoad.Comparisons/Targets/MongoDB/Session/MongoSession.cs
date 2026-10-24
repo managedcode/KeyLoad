@@ -6,7 +6,7 @@ using MongoDB.Driver;
 namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocument> documents,
-    IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events, int graphDepth, int corpusCount, IOptions<ComparisonExecutionOptions> executionOptions) : IComparisonSession
+    IMongoCollection<BsonDocument> edges, IMongoCollection<BsonDocument> events, int graphDepth, int corpusCount, IOptions<ComparisonExecutionOptions> executionOptions) : IComparisonSession, IDocumentBulkSession
 {
     private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(executionOptions).Value;
 
@@ -105,6 +105,21 @@ internal sealed class MongoSession(MongoTarget target, IMongoCollection<BsonDocu
             await documents.InsertOneAsync(MongoSchema.Document(document), cancellationToken: cancellationToken);
         }
         catch (MongoWriteException error) when (error.WriteError.Code == MongoSchema.DuplicateKeyCode)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict, error);
+        }
+    }
+
+    // One ordered InsertMany under the collection's majority journaled write concern; ordered inserts stop at the first conflict.
+    public async Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> batch, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(batch);
+        try
+        {
+            await documents.InsertManyAsync([.. batch.Select(MongoSchema.Document)], new InsertManyOptions { IsOrdered = true },
+                cancellationToken);
+        }
+        catch (MongoBulkWriteException error) when (error.WriteErrors is [{ Code: MongoSchema.DuplicateKeyCode }])
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict, error);
         }

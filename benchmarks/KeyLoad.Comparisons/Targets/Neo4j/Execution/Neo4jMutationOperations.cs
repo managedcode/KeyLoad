@@ -10,6 +10,9 @@ internal static class Neo4jMutationOperations
     private const string ExecuteAsyncIdIdSETNJsonJsonRETURNCountNText = " {id:$id}) SET n.json=$json RETURN count(n)";
     private const string ExecuteAsyncIdIdWITHNNIdASDeletedIdDETACHDELETENRETURNCountDeletedIdText = " {id:$id}) WITH n,n.id AS deletedId DETACH DELETE n RETURN count(deletedId)";
 
+    // Neo4j batches transactional writes at 1,000 rows by default (CALL ... IN TRANSACTIONS); the server heap is 512 MiB.
+    internal const int TransactionBatchRows = 1_000;
+    private const string CreatedCountSuffix = " RETURN count(n)";
     private const string ConstraintConflict = "Neo4j:Neo.ClientError.Schema.ConstraintValidationFailed";
     private const string DataProperty = "data";
     private const string ValuesProperty = "values";
@@ -39,6 +42,28 @@ internal static class Neo4jMutationOperations
             throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
         }
         return new();
+    }
+
+    /// <summary>Creates new nodes with one UNWIND statement in one transaction, with the single create's conflict mapping.</summary>
+    internal static async Task CreateAsync(Func<string, object?, CancellationToken, Task<JsonDocument>> query, string label,
+        IReadOnlyList<BenchmarkDocument> documents, CancellationToken token)
+    {
+        const int FirstElementIndex = 0;
+        try
+        {
+            using var response = await query(Neo4jQueryRequests.Documents(label) + CreatedCountSuffix,
+                Neo4jQueryRequests.DocumentsPayload(documents), token);
+            var rows = response.RootElement.GetProperty(DataProperty).GetProperty(ValuesProperty);
+            if (rows.GetArrayLength() != 1 || rows[FirstElementIndex].GetArrayLength() != 1
+                || rows[FirstElementIndex][FirstElementIndex].GetInt64() != documents.Count)
+            {
+                throw new ComparisonFailureException(ComparisonMutationFailures.CardinalityMismatch);
+            }
+        }
+        catch (ComparisonFailureException error) when (error.Message == ConstraintConflict)
+        {
+            throw new ComparisonFailureException(ComparisonMutationFailures.CreateConflict);
+        }
     }
 
     internal static void RequireAffected(JsonElement rows, Scenario scenario)

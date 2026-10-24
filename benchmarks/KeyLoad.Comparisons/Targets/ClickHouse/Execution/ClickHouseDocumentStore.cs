@@ -36,11 +36,15 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
     private const string Id = "id", Number = "number", Body = "body", After = "after", Data = "data", VersionField = "version";
     private const string NonemptyReply = "ClickHouseWriteReplyRejected";
     private const int FirstRow = 0;
+    // ClickHouse recommends at least 1,000 and ideally 10,000-100,000 rows per insert; the low end keeps a request near 11 MB:
+    // https://clickhouse.com/docs/best-practices/selecting-an-insert-strategy
+    private const int InsertRows = 10_000;
     private string Table => Name + TableSuffix;
     internal override string Target => TargetName;
     internal override string Acknowledgement => Ack;
     internal override string Authorization => Auth;
     internal override bool SupportsDelete => true;
+    internal override int BatchRecords => InsertRows;
     internal override HttpDocumentStore ForClient(HttpClient client) => new ClickHouseDocumentStore(client, Name, Options);
     internal override async Task AdmitAsync(CancellationToken token)
     {
@@ -64,13 +68,24 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
         var parameters = new Dictionary<string, string>(StringComparer.Ordinal) { [Id] = document.Id, [Body] = document.Json };
         var query = scenario switch
         {
-            Scenario.DocumentWrite => Insert + Table + Values + JsonSerializer.Serialize(new { id = document.Id, body = document.Json, number = document.Number }),
+            Scenario.DocumentWrite => Insert + Table + Values + Row(document),
             Scenario.DocumentUpdate => Update + Table + UpdateBody,
             Scenario.DocumentDelete => Update + Table + Delete,
             _ => throw new NotSupportedException()
         };
         return ExecuteAsync(query, scenario == Scenario.DocumentWrite ? null : parameters, token);
     }
+
+    // The same JSONEachRow insert and request settings as the single create, with one row per document.
+    internal override async Task CreateAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken token)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, QueryPath(null));
+        request.Content = Rows(Insert + Table + Values, documents, Row);
+        await RequireEmptyAsync(request, token).ConfigureAwait(false);
+    }
+
+    private static string Row(BenchmarkDocument document)
+        => JsonSerializer.Serialize(new { id = document.Id, body = document.Json, number = document.Number });
 
     internal override Task<JsonDocument> ReadAsync(string id, int? number, CancellationToken token)
     {
@@ -95,6 +110,11 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
     private async Task ExecuteAsync(string sql, Dictionary<string, string>? parameters, CancellationToken token, bool indexing = false)
     {
         using var request = Request(sql, parameters);
+        await RequireEmptyAsync(request, token, indexing).ConfigureAwait(false);
+    }
+
+    private async Task RequireEmptyAsync(HttpRequestMessage request, CancellationToken token, bool indexing = false)
+    {
         if (!string.IsNullOrWhiteSpace(await SendAsync(request, token, indexing).ConfigureAwait(false)))
         {
             throw new ComparisonFailureException(NonemptyReply);
@@ -108,6 +128,9 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
     }
 
     private HttpRequestMessage Request(string sql, Dictionary<string, string>? parameters)
+        => new(HttpMethod.Post, QueryPath(parameters)) { Content = new StringContent(sql, Encoding.UTF8, Media) };
+
+    private string QueryPath(Dictionary<string, string>? parameters)
     {
         var path = Settings + Policy.ClickHouseInsertFlushMilliseconds.ToString(CultureInfo.InvariantCulture);
         if (parameters is not null)
@@ -117,6 +140,6 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
                 path += ParameterPrefix + key + Equal + Uri.EscapeDataString(value);
             }
         }
-        return new(HttpMethod.Post, path) { Content = new StringContent(sql, Encoding.UTF8, Media) };
+        return path;
     }
 }

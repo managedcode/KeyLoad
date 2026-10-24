@@ -49,7 +49,7 @@ internal static class OpenSearchWriteAcknowledgement
         }
     }
 
-    private static bool ErrorIs(JsonElement response, string expected)
+    internal static bool ErrorIs(JsonElement response, string expected)
         => response.TryGetProperty(OpenSearchNames.Error, out var error) && error.ValueKind == JsonValueKind.Object
             && error.TryGetProperty(OpenSearchNames.ErrorType, out var type) && type.ValueKind == JsonValueKind.String && type.GetString() == expected;
 }

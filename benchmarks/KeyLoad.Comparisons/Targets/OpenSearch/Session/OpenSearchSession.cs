@@ -4,7 +4,8 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies, int corpusCount, IOptions<ComparisonExecutionOptions> executionOptions) : IComparisonSession
+internal sealed class OpenSearchSession(HttpClient client, string index, int topK, int expectedCopies, int corpusCount, IOptions<ComparisonExecutionOptions> executionOptions)
+    : IComparisonSession, IDocumentBulkSession
 {
     private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(executionOptions).Value;
 
@@ -110,6 +111,9 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
 
         return new();
     }
+
+    public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+        => OpenSearchBulkCreate.CreateAsync(client, index, documents, expectedCopies, execution, cancellationToken);
 
     private async Task<OperationResult> UpdateAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {

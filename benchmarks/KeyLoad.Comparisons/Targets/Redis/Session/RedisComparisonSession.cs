@@ -6,7 +6,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, string prefix, ComparisonTopology topology, int corpusCount,
     IOptions<ComparisonLifecycleOptions> lifecycleOptions, IOptions<ComparisonExecutionOptions> runtimeExecutionOptions, bool joinOriginalOperations = false)
-    : IComparisonSession
+    : IComparisonSession, IDocumentBulkSession
 {
     private const string ClientCommand = "CLIENT";
     private const string ClientIdSubcommand = "ID";
@@ -75,9 +75,6 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
 
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token)
     {
-        const int SingleItemCount = 1;
-        const int NoObservedItems = 0;
-
         if (scenario == Scenario.PointRead)
         {
             return new(Document: await ReadAsync(document, token));
@@ -86,14 +83,47 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
         {
             throw new NotSupportedException();
         }
+        await AcknowledgeAsync(() => MutateAsync(scenario, document, token), token);
+        return new();
+    }
+
+    // One pipeline of the same SET NX commands, then one WAITAOF receipt covering every write of this connection.
+    public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(documents);
+        return AcknowledgeAsync(() => CreateBatchAsync(documents, cancellationToken), cancellationToken);
+    }
+
+    private async Task AcknowledgeAsync(Func<Task> mutate, CancellationToken token)
+    {
+        const int SingleItemCount = 1;
+        const int NoObservedItems = 0;
+
         var replicated = ComparisonTopologies.NodeCount(topology) > SingleItemCount;
         var before = replicated ? await ReadClientIdAsync(token) : NoObservedItems;
-        await MutateAsync(scenario, document, token);
+        await mutate();
         if (replicated)
         {
             await RequireReplicaReceiptAsync(before, token);
         }
-        return new();
+    }
+
+    private async Task CreateBatchAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken token)
+    {
+        const int FirstElementIndex = 0;
+
+        var batch = database.CreateBatch();
+        var writes = new Task<bool>[documents.Count];
+        for (var index = FirstElementIndex; index < writes.Length; index++)
+        {
+            writes[index] = batch.StringSetAsync(prefix + documents[index].Id, documents[index].Json,
+                when: When.NotExists, flags: CommandFlags.DemandMaster);
+        }
+        batch.Execute();
+        foreach (var created in await RuntimeJoinAsync(Task.WhenAll(writes), token))
+        {
+            RedisMutationContract.RequireSet(created, Scenario.DocumentWrite);
+        }
     }
 
     private async Task MutateAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token)

@@ -2,8 +2,9 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.Comparisons;
 
+/// <summary>Runs one lane; each request covers <paramref name="batch"/> consecutive ordinals and every ordinal keeps its own sample.</summary>
 internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext context, BenchmarkSessionClientLease lease,
-    Func<IComparisonSession, int, CancellationToken, Task> operation, int count, bool documentSessions)
+    Func<IComparisonSession, int, int, CancellationToken, Task> operation, int count, int batch, bool documentSessions)
 {
     private readonly BenchmarkSessionOperationSample[] samples = new BenchmarkSessionOperationSample[count];
     private int attempts;
@@ -59,24 +60,24 @@ internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext cont
     private async Task ExecuteWorkerAsync(int worker, int clients, Task start, CancellationTokenSource stop)
     {
         await start.ConfigureAwait(false);
-        // Each client owns its first ordinal and a disjoint stride, even when every execution await completes synchronously.
-        for (var ordinal = worker; ordinal < count && !stop.IsCancellationRequested; ordinal += clients)
+        // Each client owns its first request and a disjoint stride, even when every execution await completes synchronously.
+        for (var first = worker * batch; first < count && !stop.IsCancellationRequested; first += clients * batch)
         {
-            await ExecuteAttemptAsync(worker, ordinal, stop).ConfigureAwait(false);
+            await ExecuteAttemptAsync(worker, first, Math.Min(batch, count - first), stop).ConfigureAwait(false);
         }
     }
 
-    private async Task ExecuteAttemptAsync(int worker, int ordinal, CancellationTokenSource stop)
+    private async Task ExecuteAttemptAsync(int worker, int first, int length, CancellationTokenSource stop)
     {
         using var deadline = ComparisonDeadline.Create(context.Options.TimeoutSeconds, context.Clock, stop.Token);
         var started = context.Clock.GetTimestamp();
-        var position = Interlocked.Increment(ref attempts) - BenchmarkSessionLimits.SingleItemCount;
+        var position = Interlocked.Add(ref attempts, length) - length;
         var succeeded = false;
         string? failure = null;
         try
         {
-            await operation(lease.At(worker, documentSessions), ordinal, deadline.Token).ConfigureAwait(false);
-            Interlocked.Increment(ref successes);
+            await operation(lease.At(worker, documentSessions), first, length, deadline.Token).ConfigureAwait(false);
+            Interlocked.Add(ref successes, length);
             succeeded = true;
         }
         catch (Exception error) when (BenchmarkSessionFailure.IsNonfatal(error))
@@ -84,20 +85,26 @@ internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext cont
             failure = ComparisonErrors.Safe(error);
             if (error is OperationCanceledException)
             {
-                Interlocked.Increment(ref canceled);
+                Interlocked.Add(ref canceled, length);
             }
             else
             {
-                Interlocked.Increment(ref failed);
+                Interlocked.Add(ref failed, length);
             }
             await stop.CancelAsync().ConfigureAwait(false);
         }
         finally
         {
-            samples[position] = new(ordinal, worker, context.Clock.GetElapsedTime(origin, started).TotalMilliseconds,
-                context.Clock.GetElapsedTime(origin).TotalMilliseconds, succeeded, failure);
-            var completed = Interlocked.Increment(ref settled);
-            if (completed % BenchmarkSessionLimits.ProgressCadence == BenchmarkSessionLimits.NoObservedItems || completed == count)
+            // A batched record is acknowledged when its request is, so it carries that request's start and completion.
+            var startedMs = context.Clock.GetElapsedTime(origin, started).TotalMilliseconds;
+            var completedMs = context.Clock.GetElapsedTime(origin).TotalMilliseconds;
+            for (var offset = BenchmarkSessionLimits.NoObservedItems; offset < length; offset++)
+            {
+                samples[position + offset] = new(first + offset, worker, startedMs, completedMs, succeeded, failure);
+            }
+            var completed = Interlocked.Add(ref settled, length);
+            if (completed / BenchmarkSessionLimits.ProgressCadence != (completed - length) / BenchmarkSessionLimits.ProgressCadence
+                || completed == count)
             {
                 ObserveProgress();
             }

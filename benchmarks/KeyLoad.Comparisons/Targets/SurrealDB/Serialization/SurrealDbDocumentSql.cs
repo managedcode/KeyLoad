@@ -12,6 +12,12 @@ internal static class SurrealDbDocumentSql
     private const string RecordIdentifierEnd = "⟩";
     private const string CREATEONLYSETKeyNumberPayloadEmbeddingFormatTemplate = "CREATE ONLY {0}:{1} SET key = {2}, number = {3}, payload = {4}, embedding = {5};";
     private static readonly System.Text.CompositeFormat CREATEONLYSETKeyNumberPayloadEmbeddingFormat = System.Text.CompositeFormat.Parse(CREATEONLYSETKeyNumberPayloadEmbeddingFormatTemplate);
+    // Plain INSERT (no IGNORE, no ON DUPLICATE KEY UPDATE) fails on an existing record ID exactly as CREATE ONLY does.
+    private const string INSERTINTORETURNVALUEKeyFormatTemplate = "INSERT INTO {0} [{1}] RETURN VALUE key;";
+    private static readonly System.Text.CompositeFormat INSERTINTORETURNVALUEKeyFormat = System.Text.CompositeFormat.Parse(INSERTINTORETURNVALUEKeyFormatTemplate);
+    private const string InsertRecordIdKeyNumberPayloadEmbeddingFormatTemplate = "{{ id: {0}:{1}, key: {2}, number: {3}, payload: {4}, embedding: {5} }}";
+    private static readonly System.Text.CompositeFormat InsertRecordIdKeyNumberPayloadEmbeddingFormat = System.Text.CompositeFormat.Parse(InsertRecordIdKeyNumberPayloadEmbeddingFormatTemplate);
+    private const string InsertRecordSeparator = ", ";
     private const string UPDATESETPayloadRETURNAFTERFormatTemplate = "UPDATE {0}:{1} SET payload = {2} RETURN AFTER;";
     private static readonly System.Text.CompositeFormat UPDATESETPayloadRETURNAFTERFormat = System.Text.CompositeFormat.Parse(UPDATESETPayloadRETURNAFTERFormatTemplate);
     private const string DELETERETURNBEFOREFormatTemplate = "DELETE {0}:{1} RETURN BEFORE;";
@@ -32,6 +38,11 @@ internal static class SurrealDbDocumentSql
     }
 
     internal static string Create(string table, BenchmarkDocument document) => string.Format(System.Globalization.CultureInfo.InvariantCulture, CREATEONLYSETKeyNumberPayloadEmbeddingFormat, table, Key(document.Id), JsonSerializer.Serialize(document.Id), document.Number.ToString(CultureInfo.InvariantCulture), JsonSerializer.Serialize(document.Json), JsonSerializer.Serialize(document.Vector));
+    // The array form writes the same record IDs and fields as Create in one statement.
+    internal static string Insert(string table, IReadOnlyList<BenchmarkDocument> documents)
+        => string.Format(CultureInfo.InvariantCulture, INSERTINTORETURNVALUEKeyFormat, table,
+            string.Join(InsertRecordSeparator, documents.Select(document => InsertRecord(table, document))));
+    private static string InsertRecord(string table, BenchmarkDocument document) => string.Format(CultureInfo.InvariantCulture, InsertRecordIdKeyNumberPayloadEmbeddingFormat, table, Key(document.Id), JsonSerializer.Serialize(document.Id), document.Number.ToString(CultureInfo.InvariantCulture), JsonSerializer.Serialize(document.Json), JsonSerializer.Serialize(document.Vector));
     internal static string Mutation(string table, Scenario scenario, BenchmarkDocument document) => scenario switch
     {
         Scenario.DocumentWrite => Create(table, document),

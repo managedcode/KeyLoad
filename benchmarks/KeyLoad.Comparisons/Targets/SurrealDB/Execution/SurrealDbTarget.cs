@@ -10,11 +10,12 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed partial class SurrealDbTarget(HttpClient http, string runId, string image, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider? provider = null) : IDocumentComparisonTarget
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
+    private readonly SurrealDbBearerToken bearer = new();
     private const string OnePersistentRocksDBNode = "one persistent RocksDB execution node";
     private const string SingleCommittedWriteNotFaultQualified = "single execution committed write; not fault-qualified";
     private const string CommittedPrimaryDirectedGraphAndExactCosine = "committed primary; execution directed graph and exact cosine KNN";
     private const string POSTSqlJSON = "POST /sql JSON";
-    private const string RootBasicAuthentication = "root Basic authentication";
+    private const string RootBearerAuthentication = "root bearer token from /signin";
     private const string SingleCommunityNode = "single Community node";
     private const string PersistentRocksDBDirectory = "persistent RocksDB directory";
     private const string DEFINETABLESCHEMALESSDEFINETABLESCHEMALESSFormatTemplate = "DEFINE TABLE {0} SCHEMALESS; DEFINE TABLE {1} SCHEMALESS;";
@@ -37,7 +38,7 @@ public sealed partial class SurrealDbTarget(HttpClient http, string runId, strin
     public TargetProfile Profile
     {
         get; private set;
-    } = new(SurrealDbTokens.TokenSurrealDB, SurrealDbTokens.TokenUnverified, OnePersistentRocksDBNode, SingleCommittedWriteNotFaultQualified, CommittedPrimaryDirectedGraphAndExactCosine, POSTSqlJSON, RootBasicAuthentication, image)
+    } = new(SurrealDbTokens.TokenSurrealDB, SurrealDbTokens.TokenUnverified, OnePersistentRocksDBNode, SingleCommittedWriteNotFaultQualified, CommittedPrimaryDirectedGraphAndExactCosine, POSTSqlJSON, RootBearerAuthentication, image)
     {
         Cluster = new(1, 1, SingleCommunityNode, [PersistentRocksDBDirectory])
     };
@@ -52,6 +53,7 @@ public sealed partial class SurrealDbTarget(HttpClient http, string runId, strin
         {
             Version = await SurrealDbServer.VerifyAsync(http, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false)
         };
+        await bearer.RenewAsync(http, Policy, cancellationToken).ConfigureAwait(false);
         count = dataset.Documents.Count;
         depth = dataset.Settings.GraphDepth;
         topK = dataset.Settings.TopK;
@@ -94,6 +96,7 @@ public sealed partial class SurrealDbTarget(HttpClient http, string runId, strin
             if (ownsData)
             {
                 using var timeout = new CancellationTokenSource(Policy.CleanupTimeout, timeProvider);
+                await bearer.RenewAsync(http, Policy, timeout.Token).ConfigureAwait(false);
                 await SurrealDbSqlTransport.ExecuteAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, REMOVETABLEREMOVETABLEFormat, edge, table), Policy, cancellationToken: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             }
         }
