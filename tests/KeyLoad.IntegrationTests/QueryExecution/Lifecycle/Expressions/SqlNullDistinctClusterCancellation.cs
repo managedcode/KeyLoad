@@ -37,9 +37,7 @@ internal static class SqlNullDistinctClusterCancellation
                     {
                         var sql = SqlNullDistinctClusterCases.Prefix + item.Clause + SqlNullDistinctClusterCases.Tail;
                         var operation = SqlNullOrderingClusterProtocol.Operation(sql);
-                        var sdk = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                            () => caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
-                        await global::TUnit.Assertions.Assert.That(sdk?.CancellationToken).IsEqualTo(cancelled.Token);
+                        await SqlClusterProtocol.SdkCancelledAsync(await caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
                         var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                             () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
                         await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);

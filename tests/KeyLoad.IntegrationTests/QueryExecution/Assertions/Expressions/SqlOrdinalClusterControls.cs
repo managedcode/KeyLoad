@@ -67,9 +67,7 @@ internal static class SqlOrdinalClusterControls
         await cancelled.CancelAsync();
         var original = cancelled.Token;
         var request = new QueryRequest(state.Partition, Prefix + "2" + Tail, AllowFullScan: true);
-        var sdk = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-            () => callers.Sdk.QueryAsync(request, original));
-        await global::TUnit.Assertions.Assert.That(sdk?.CancellationToken).IsEqualTo(original);
+        await SqlClusterProtocol.SdkCancelledAsync(await callers.Sdk.QueryAsync(request, original));
         var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
             () => callers.Mcp.CallAsync(McpCallerTools.QueryExecute, request, original));
         await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(original);

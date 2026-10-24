@@ -27,7 +27,7 @@ internal static class RemoteTransferRepairClusterTrial
                 }, deadline.Token);
                 var repaired = original.Seed.Identity.Principal with
                 {
-                    PolicyEpoch = checked(original.Seed.Identity.Principal.PolicyEpoch + RemoteTransferRepairClusterProtocol.RepairedGeneration)
+                    PolicyEpoch = checked(original.Seed.Identity.Principal.PolicyEpoch + RemoteTransferRepairClusterProtocol.RepairedEpochOffset)
                 };
                 await MessagingClusterIdentity.UpdateAsync(fixture, repaired, deadline.Token);
                 await RemoteTransferColdCallers.WithAsync(fixture, original.Seed,

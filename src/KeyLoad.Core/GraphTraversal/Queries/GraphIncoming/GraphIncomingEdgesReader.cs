@@ -12,13 +12,14 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
 {
     private const string RangeExceeded = "The graph incoming-edge scan exceeds its bound.";
     private const string InvalidProjection = "A graph reverse projection is inconsistent.";
+    private const string VertexUnavailable = "The graph vertex is unavailable.";
     private ResourceDefinition targetGraph = null!;
     private ResourceDefinition targetCollection = null!;
 
     internal GraphIncomingEdgesPage Read()
     {
         targetGraph = RequireGraphRead(request.Target.Partition);
-        AuthorizationRequire(request.Target.Partition, Capability.DocumentsRead, request.Target.Collection);
+        RequireTargetCollectionRead();
         targetCollection = GraphIncomingReadScope.ReadCollection(view, grant,
             request.Target.Partition, request.Target.Collection, budget);
         request = request with
@@ -138,10 +139,20 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         }
     }
 
+    private void RequireTargetCollectionRead()
+    {
+        try
+        {
+            AuthorizationRequire(request.Target.Partition, Capability.DocumentsRead, request.Target.Collection);
+        }
+        catch (KeyLoadException error) when (error.Code is ErrorCode.PermissionDenied)
+        {
+            throw Errors.Fail(ErrorCode.NotFound, VertexUnavailable);
+        }
+    }
+
     private void RequireVisible(EntityRef entity)
     {
-        const string VertexUnavailable = "The graph vertex is unavailable.";
-
         if (!TryRequireVisible(entity))
         {
             throw Errors.Fail(ErrorCode.NotFound, VertexUnavailable);

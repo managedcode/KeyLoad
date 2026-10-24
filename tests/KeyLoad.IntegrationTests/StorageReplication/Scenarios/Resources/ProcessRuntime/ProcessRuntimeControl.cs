@@ -67,8 +67,10 @@ internal sealed class ProcessRuntimeControl(DistributedApplication app, IReadOnl
         await owner.AcceptAsync(app, receipt, capture, cancellationToken);
         progress.Stage = ProcessRestartStage.HealthWait;
         cancellationToken.ThrowIfCancellationRequested();
+        // AcceptAsync observed the replacement Running, so an Exited, Finished or FailedToStart state now belongs to
+        // that replacement and fails the restart immediately instead of waiting for the lane deadline.
         await app.ResourceNotifications.WaitForResourceHealthyAsync(resourceName,
-            WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
+            WaitBehavior.StopOnResourceUnavailable, cancellationToken);
         progress.Stage = ProcessRestartStage.RuntimeInspection;
         var after = await ClusterFixtureApplicationStartup.ReadAsync(app, resourceName, cancellationToken);
         owner.RequireSameReplacement(ProcessRuntimeProtocol.Identity(after).Launch);
@@ -107,6 +109,13 @@ internal sealed class ProcessRuntimeControl(DistributedApplication app, IReadOnl
             throw;
         }
     }
+
+    /// <summary>Whether a test-owned kill left the resource without a running replacement. Such a resource owns no
+    /// process for shutdown evidence; its kill receipt already records the original process termination.</summary>
+    internal bool IsKilledWithoutReplacement(string resourceName)
+        => pendingReceipts.ContainsKey(resourceName)
+            && (!app.ResourceNotifications.TryGetCurrentState(resourceName, out var current)
+                || current.Snapshot.State?.Text != KnownResourceStates.Running);
 
     private ProcessRestartOwnership RequireRestartOwner(string resourceName)
         => restartOwners.GetOrAdd(resourceName, static _ => new ProcessRestartOwnership());

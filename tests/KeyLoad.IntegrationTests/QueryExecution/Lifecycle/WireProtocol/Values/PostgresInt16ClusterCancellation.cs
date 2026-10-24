@@ -22,9 +22,7 @@ internal static class PostgresInt16ClusterCancellation
                     using var cancelled = new CancellationTokenSource();
                     await cancelled.CancelAsync();
                     var operation = PostgresInt16ClusterProtocol.Operation(PostgresInt16ClusterProtocol.ProbeValue);
-                    var sdk = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                        () => caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
-                    await global::TUnit.Assertions.Assert.That(sdk?.CancellationToken).IsEqualTo(cancelled.Token);
+                    await SqlClusterProtocol.SdkCancelledAsync(await caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
                     var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                         () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
                     await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);

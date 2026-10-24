@@ -15,13 +15,15 @@ internal static class EventingRequiredClaimClusterWarm
         await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.EpochProbe, ErrorCode.PermissionDenied, RequiredProcessingPolicyClusterState.Denied, token);
         await RequiredProcessingPolicyClusterSetup.PolicyAsync(root, input, RequiredProcessingPolicyClusterState.Before, token);
         await EventingRequiredClaimClusterReceive.ReplayAsync(root, reader, state, state.EpochProbe, state.EpochReceipt, token);
+        await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Denied, ErrorCode.PermissionDenied, RequiredProcessingPolicyClusterState.Denied, token);
         await RequiredProcessingPolicyClusterSetup.PrincipalAsync(root, input, 2L, true, token);
         await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Denied, ErrorCode.Unauthenticated, "The credential is unavailable or expired.", token);
         await RequiredProcessingPolicyClusterSetup.PrincipalAsync(root, input, 3L, false, token);
         await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.EpochProbe, ErrorCode.PermissionDenied, RequiredProcessingPolicyClusterState.EpochChanged, token);
-        state.Claimed = await RequiredProcessingPolicyClusterRoutes.ReceiveAsync(reader, input, "first", state.Denied, token);
+        await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Denied, ErrorCode.PermissionDenied, RequiredProcessingPolicyClusterState.EpochChanged, token);
+        state.Claimed = await RequiredProcessingPolicyClusterRoutes.ReceiveAsync(reader, input, "first", state.Claim, token);
         var delivery = state.Claimed.Deliveries.Single();
-        await EventingRequiredClaimClusterReceive.ReplayAsync(root, reader, state, state.Denied, state.Claimed, token);
+        await EventingRequiredClaimClusterReceive.ReplayAsync(root, reader, state, state.Claim, state.Claimed, token);
         var forged = input.Processing(delivery, "first") with
         {
             Token = delivery.Token + ".forged"

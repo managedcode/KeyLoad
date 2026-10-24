@@ -9,17 +9,18 @@ internal static class QueueOrderedRetryPublicTerminal
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Acked, QueueOrderedRetryPublicProtocol.One,
                 QueueOrderedRetryPublicProtocol.Ten, QueueOrderedRetryPublicProtocol.Four, null, null,
-                LeaseVersion: QueueOrderedRetryPublicProtocol.Four, DeliveryGeneration: QueueOrderedRetryPublicProtocol.Two), false, token);
+                LeaseVersion: QueueOrderedRetryPublicProtocol.Four, DeliveryGeneration: QueueOrderedRetryPublicProtocol.Two,
+                EnqueueSequence: QueueOrderedRetryPublicProtocol.One), false, token);
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.Second,
             new(QueueOrderedRetryPublicProtocol.Second, MessageState.Acked, QueueOrderedRetryPublicProtocol.One,
                 QueueOrderedRetryPublicProtocol.Three, QueueOrderedRetryPublicProtocol.Two, null, null,
-                LeaseVersion: QueueOrderedRetryPublicProtocol.One), false, token);
+                LeaseVersion: QueueOrderedRetryPublicProtocol.One, EnqueueSequence: QueueOrderedRetryPublicProtocol.Two), false, token);
         if (healthy)
         {
             await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.Healthy,
                 new(QueueOrderedRetryPublicProtocol.Healthy, MessageState.Acked, QueueOrderedRetryPublicProtocol.One,
                     QueueOrderedRetryPublicProtocol.Three, QueueOrderedRetryPublicProtocol.Five, null, null,
-                    LeaseVersion: QueueOrderedRetryPublicProtocol.One), false, token);
+                    LeaseVersion: QueueOrderedRetryPublicProtocol.One, EnqueueSequence: state.HealthyEnqueue), false, token);
         }
         foreach (var route in QueueLifecyclePublicProtocol.Routes)
         {

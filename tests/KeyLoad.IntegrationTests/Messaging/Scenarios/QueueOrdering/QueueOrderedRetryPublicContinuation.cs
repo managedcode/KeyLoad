@@ -13,7 +13,8 @@ internal static class QueueOrderedRetryPublicContinuation
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Ready, QueueOrderedRetryPublicProtocol.Initial,
                 QueueOrderedRetryPublicProtocol.Eight, QueueOrderedRetryPublicProtocol.Four, null, null,
-                LeaseVersion: QueueOrderedRetryPublicProtocol.Three, DeliveryGeneration: QueueOrderedRetryPublicProtocol.Two), true, token);
+                LeaseVersion: QueueOrderedRetryPublicProtocol.Three, DeliveryGeneration: QueueOrderedRetryPublicProtocol.Two,
+                EnqueueSequence: QueueOrderedRetryPublicProtocol.One, ActiveOrderSequence: state.RedrivenOrder), true, token);
         await StaleAsync(callers, state, token);
         if (state.ParkedHead == QueueParkedHeadPolicy.Continue)
         {
@@ -42,6 +43,7 @@ internal static class QueueOrderedRetryPublicContinuation
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Ready, QueueOrderedRetryPublicProtocol.Initial,
                 QueueOrderedRetryPublicProtocol.Eight, QueueOrderedRetryPublicProtocol.Four, null, null,
-                LeaseVersion: QueueOrderedRetryPublicProtocol.Three, DeliveryGeneration: QueueOrderedRetryPublicProtocol.Two), true, token);
+                LeaseVersion: QueueOrderedRetryPublicProtocol.Three, DeliveryGeneration: QueueOrderedRetryPublicProtocol.Two,
+                EnqueueSequence: QueueOrderedRetryPublicProtocol.One, ActiveOrderSequence: state.RedrivenOrder), true, token);
     }
 }

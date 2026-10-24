@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
@@ -69,7 +70,7 @@ internal static class TypedEndpointJoinRefusals
             var request = TypedEndpointJoinProtocol.Sql(command);
             var result = await callers.Sdk.ExecuteSqlAsync(request, token);
             await Assert.That(result.IsFailed).IsTrue();
-            await Assert.That(result.Value).IsNull();
+            await Assert.That(result.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
             await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
             await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
                 expected, dispatched: true);

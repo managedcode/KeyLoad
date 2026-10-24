@@ -137,7 +137,9 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
         await SaveDiagnosticsAsync(diagnostics, failures, cleanup.Token).ConfigureAwait(false);
         var ownedApp = App;
         App = null!;
-        var stopped = await ClusterFixtureApplicationShutdown.CollectAsync(ownedApp, resourceNames, processEvidenceDirectory,
+        // A node a failed scenario left killed owns no process; requiring one here would replace the original failure.
+        var stopped = await ClusterFixtureApplicationShutdown.CollectAsync(ownedApp,
+            [.. resourceNames.Where(name => processRuntime?.IsKilledWithoutReplacement(name) != true)], processEvidenceDirectory,
             failures, cleanup.Token)
             .ConfigureAwait(false);
         await SaveDiagnosticsAsync(diagnostics, failures, cleanup.Token).ConfigureAwait(false);

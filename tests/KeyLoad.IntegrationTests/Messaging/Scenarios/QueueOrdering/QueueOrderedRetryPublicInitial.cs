@@ -20,14 +20,16 @@ internal static class QueueOrderedRetryPublicInitial
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Scheduled, QueueOrderedRetryPublicProtocol.One,
                 QueueOrderedRetryPublicProtocol.Four, QueueOrderedRetryPublicProtocol.One, retryAt, null,
-                LeaseVersion: QueueOrderedRetryPublicProtocol.One, SafeFailureCode: "RetryRequested"), true, token);
+                LeaseVersion: QueueOrderedRetryPublicProtocol.One, SafeFailureCode: "RetryRequested",
+                EnqueueSequence: QueueOrderedRetryPublicProtocol.One, ActiveOrderSequence: QueueOrderedRetryPublicProtocol.One), true, token);
         await DueRecurringClusterAssertions.WaitForDueTimeAsync(retryAt, token);
         var second = await QueueOrderedRetryPublicOperations.ClaimAsync(callers, state, QueueOrderedRetryPublicProtocol.First, token);
         await QueueOrderedRetryPublicOperations.CompleteAsync(callers, state, second, DeliveryAction.Nack, token);
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.DeadLettered, QueueOrderedRetryPublicProtocol.Two,
                 QueueOrderedRetryPublicProtocol.Seven, QueueOrderedRetryPublicProtocol.Three, null, null,
-                LeaseVersion: QueueOrderedRetryPublicProtocol.Two, SafeFailureCode: "AttemptsExhausted", ParkedSequence: QueueOrderedRetryPublicProtocol.One), true, token);
+                LeaseVersion: QueueOrderedRetryPublicProtocol.Two, SafeFailureCode: "AttemptsExhausted", ParkedSequence: QueueOrderedRetryPublicProtocol.One,
+                EnqueueSequence: QueueOrderedRetryPublicProtocol.One, ActiveOrderSequence: state.ParkedOrder), true, token);
         if (state.ParkedHead == QueueParkedHeadPolicy.Continue)
         {
             state.Second = await QueueOrderedRetryPublicOperations.ClaimAsync(callers, state, QueueOrderedRetryPublicProtocol.Second, token);

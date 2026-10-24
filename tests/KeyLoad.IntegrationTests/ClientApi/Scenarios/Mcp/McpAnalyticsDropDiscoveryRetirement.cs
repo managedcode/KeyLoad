@@ -58,8 +58,8 @@ internal static class McpAnalyticsDropDiscoveryRetirement
         await Assert.That(actual.TenantId).IsEqualTo(request.TenantId);
         await Assert.That(actual.DatabaseId).IsEqualTo(request.DatabaseId);
         await Assert.That(actual.ResourceName).IsEqualTo(request.ResourceName);
-        await Assert.That(actual.Receipt.CommandId).IsNotEqualTo(Guid.Empty);
-        await Assert.That(actual.Receipt.CommandId).IsNotEqualTo(parent);
+        // The drop is the caller's own stable command, so its receipt carries the caller's command ID.
+        await Assert.That(actual.Receipt.CommandId).IsEqualTo(parent);
         await Assert.That(actual.Receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
         await Assert.That(actual.Receipt.Token.AtomicPartitionId).IsEqualTo(CatalogRoute.PartitionId);
         await Assert.That(actual.Receipt.Token.Position).IsGreaterThan(0);

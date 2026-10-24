@@ -2,7 +2,6 @@ using System.Text.Json;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
-using KeyLoad.IntegrationTests.RelationalStorage;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.IntegrationTests.DatabaseComposition;
@@ -45,8 +44,8 @@ internal static class QueueReferenceSelectAssertions
             await Assert.That(json.RootElement.GetProperty(ScoreFieldKey).GetInt32()).IsEqualTo(7);
             await Assert.That(json.RootElement.GetProperty(CustomerNameFieldKey).GetString()).IsEqualTo(masked ? null : item.Name);
         }
-        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, sql);
-        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, official);
-        await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(direct, query);
+        await EventReferenceSelectAssertions.SamePageAsync(direct, sql);
+        await EventReferenceSelectAssertions.SamePageAsync(direct, official);
+        await EventReferenceSelectAssertions.SamePageAsync(direct, query);
     }
 }

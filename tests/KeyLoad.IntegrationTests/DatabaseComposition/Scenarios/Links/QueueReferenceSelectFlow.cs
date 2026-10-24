@@ -1,7 +1,6 @@
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
-using KeyLoad.IntegrationTests.RelationalStorage;
 
 namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
@@ -23,7 +22,7 @@ internal static class QueueReferenceSelectFlow
                     QueueReferenceSelectProtocol.Operation(state.Partition, QueueReferenceSelectProtocol.EmptyQueue), token);
                 await Assert.That(empty.Rows).IsEmpty();
                 await Assert.That(empty.Cursor).IsNull();
-                await RelationalSqlClusterJoinPageAssertions.SameRowsAsync(empty,
+                await EventReferenceSelectAssertions.SamePageAsync(empty,
                     await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp,
                         QueueReferenceSelectProtocol.Operation(state.Partition, QueueReferenceSelectProtocol.EmptyQueue), token));
                 await FailureAsync(callers, QueueReferenceSelectProtocol.Operation(state.Partition) with

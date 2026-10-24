@@ -5,12 +5,13 @@ namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateColdReopen
 {
-    internal static async Task RunAsync(FunctionalGateFixture fixture, CancellationToken token)
+    // Each reopen of the same incarnation owns its own restart receipts.
+    internal static async Task RunAsync(FunctionalGateFixture fixture, long reopen, CancellationToken token)
     {
         var execution = fixture.ColdRuntime
             ?? throw new InvalidOperationException("The original functional runtime is unavailable.");
         var profile = fixture.Identity;
-        var scenario = ProcessRuntimeOwnedReceipt.Scenario(profile.Incarnation, 1);
+        var scenario = ProcessRuntimeOwnedReceipt.Scenario(profile.Incarnation, reopen);
         var stopped = await Task.WhenAll(fixture.NodeNames.Select(node => ObserveAsync(
             () => execution.KillAsync(node, scenario, token)))).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny([.. stopped.SelectMany(item => item)]);

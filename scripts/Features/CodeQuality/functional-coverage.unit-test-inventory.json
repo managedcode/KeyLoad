@@ -19997,9 +19997,9 @@
       "methodName": "HiddenSourceEndpointIsOmittedFromIncomingProjection",
       "instanceName": "HiddenSourceEndpointIsOmittedFromIncomingProjection",
       "sourcePath": "tests/KeyLoad.UnitTests/GraphTraversal/Cases/Graph/GraphIncoming/GraphIncomingPrivacyTests.cs",
-      "sourceSha256": "3b8d0538a2a3c21fa96178c0cbcba2eccf60cdbcc9e4c8a50d775009edb9fafe",
-      "lineNumber": 14,
-      "endLineNumber": 37,
+      "sourceSha256": "efcc8b9585aee902241a9fe762d1622e0f7497030659f5112e097c48c0ea0f98",
+      "lineNumber": 17,
+      "endLineNumber": 40,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -20015,9 +20015,27 @@
       "methodName": "HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows",
       "instanceName": "HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows",
       "sourcePath": "tests/KeyLoad.UnitTests/GraphTraversal/Cases/Graph/GraphIncoming/GraphIncomingPrivacyTests.cs",
-      "sourceSha256": "3b8d0538a2a3c21fa96178c0cbcba2eccf60cdbcc9e4c8a50d775009edb9fafe",
-      "lineNumber": 39,
-      "endLineNumber": 61,
+      "sourceSha256": "efcc8b9585aee902241a9fe762d1622e0f7497030659f5112e097c48c0ea0f98",
+      "lineNumber": 42,
+      "endLineNumber": 64,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-GRAPH-XPART-003"
+      ],
+      "acceptance": [
+        "AC-GRAPH-XPART-003"
+      ]
+    },
+    {
+      "className": "KeyLoad.UnitTests.GraphTraversal.GraphIncomingPrivacyTests",
+      "reportClassName": "KeyLoad.UnitTests.GraphTraversal.GraphIncomingPrivacyTests",
+      "methodName": "TargetCollectionReadDenialIsNotFoundUntilTheGrantIsRepaired",
+      "instanceName": "TargetCollectionReadDenialIsNotFoundUntilTheGrantIsRepaired",
+      "sourcePath": "tests/KeyLoad.UnitTests/GraphTraversal/Cases/Graph/GraphIncoming/GraphIncomingPrivacyTests.cs",
+      "sourceSha256": "efcc8b9585aee902241a9fe762d1622e0f7497030659f5112e097c48c0ea0f98",
+      "lineNumber": 66,
+      "endLineNumber": 96,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -70133,6 +70151,7 @@
         "KeyLoad.UnitTests.GraphTraversal.GraphIncomingMcpContractTests|AndPublicJsonRoundTripsPreserveFullIncomingEdgeAndProjection|AndPublicJsonRoundTripsPreserveFullIncomingEdgeAndProjection",
         "KeyLoad.UnitTests.GraphTraversal.GraphIncomingPrivacyTests|HiddenSourceEndpointIsOmittedFromIncomingProjection|HiddenSourceEndpointIsOmittedFromIncomingProjection",
         "KeyLoad.UnitTests.GraphTraversal.GraphIncomingPrivacyTests|HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows|HiddenTargetEndpointIsNotFoundWithoutReturningProjectionRows",
+        "KeyLoad.UnitTests.GraphTraversal.GraphIncomingPrivacyTests|TargetCollectionReadDenialIsNotFoundUntilTheGrantIsRepaired|TargetCollectionReadDenialIsNotFoundUntilTheGrantIsRepaired",
         "KeyLoad.UnitTests.GraphTraversal.GraphIncomingProjectionTests|LocalCanonicalIncomingEdgeUsesZeroDeliveryRevision|LocalCanonicalIncomingEdgeUsesZeroDeliveryRevision",
         "KeyLoad.UnitTests.GraphTraversal.GraphIncomingProjectionTests|MixedLocalAndCrossRowsProjectProtectedFieldsBeforeRetention|MixedLocalAndCrossRowsProjectProtectedFieldsBeforeRetention",
         "KeyLoad.UnitTests.GraphTraversal.GraphIncomingSortCancellationTests|FullPageSortPreservesCancellationAndDeadlineAndHealthyReadFollows|FullPageSortPreservesCancellationAndDeadlineAndHealthyReadFollows",

@@ -41,7 +41,7 @@ internal static class EventAppendClusterFlow
         await EventAppendClusterAssertions.ReceiptAsync(receipt, healthy, EventAppendClusterProtocol.HealthyRevision);
         await EventAppendClusterAssertions.ReceiptIdentityAsync(winner.Receipt, receipt);
         EventData[] healthyExpected = [.. expected, McpEventStreamScenario.InputEvents[EventAppendClusterProtocol.FirstEventIndex] with
-        { EventId = EventAppendClusterProtocol.PartialEventId, PayloadJson = EventAppendClusterProtocol.HealthyExpected }];
+        { EventId = EventAppendClusterProtocol.PartialEventId, PayloadJson = EventAppendClusterProtocol.HealthyPayload }];
         var complete = await EventAppendClusterAssertions.PageAsync(sdk, official, scenario, healthyExpected, token);
         await EventAppendClusterAssertions.PrefixAsync(afterWinner, complete);
         await EventAppendClusterAssertions.ReplayAsync(sdk, official, healthy, receipt, token);
@@ -115,7 +115,7 @@ internal static class EventAppendClusterFlow
         return (command, receipt, McpEventStreamScenario.InputEvents[EventAppendClusterProtocol.FirstEventIndex] with
         {
             EventId = sdkWon ? EventAppendClusterProtocol.SdkEventId : EventAppendClusterProtocol.McpEventId,
-            PayloadJson = sdkWon ? EventAppendClusterProtocol.SdkExpected : EventAppendClusterProtocol.McpExpected
+            PayloadJson = sdkWon ? EventAppendClusterProtocol.SdkPayload : EventAppendClusterProtocol.McpPayload
         });
     }
 }

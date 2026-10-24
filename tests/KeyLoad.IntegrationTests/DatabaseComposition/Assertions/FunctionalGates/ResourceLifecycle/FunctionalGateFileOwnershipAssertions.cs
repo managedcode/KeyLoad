@@ -15,7 +15,7 @@ internal static class FunctionalGateFileOwnershipAssertions
     private const string ProjectProperty = "project.path";
     private const string ExecutableProperty = "executable.path";
     private const string ArgumentsProperty = "executable.args";
-    private const string WorkDirectoryProperty = "executable.workdir";
+    private const string WorkDirectoryProperty = "executable.workDir";
 
     internal static async Task ModelAsync(FunctionalGateFixture fixture)
     {
@@ -27,10 +27,11 @@ internal static class FunctionalGateFileOwnershipAssertions
             await Assert.That(path).IsEqualTo(Path.GetFullPath(Path.Combine(fixture.Root, name)));
             await Assert.That(paths.Add(path)).IsTrue();
         }
-        var owner = Directory(fixture, ExclusiveOwnerContentionResources.OwnerName);
+        // Contenders start explicitly and an unstarted resource has no process environment yet; their data directory is
+        // compared with the owner's after each actual launch.
         foreach (var name in ExclusiveOwnerContentionResources.ResourceNames)
         {
-            await Assert.That(Directory(fixture, name)).IsEqualTo(owner);
+            await Assert.That(Snapshot(fixture, name).Snapshot.State?.Text).IsEqualTo(KnownResourceStates.NotStarted);
         }
     }
 

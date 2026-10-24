@@ -23,7 +23,7 @@ internal static class ComposedProjectionLineageClusterFlow
             };
             if (denied)
             {
-                await FailureAsync(callers, request, ErrorCode.PermissionDenied, token);
+                await FailureAsync(callers, request, ErrorCode.PermissionDenied, dispatched: true, token);
             }
             else
             {
@@ -40,7 +40,7 @@ internal static class ComposedProjectionLineageClusterFlow
                 {
                     Sql = request.Sql.Replace(LeftPredicate, RightPredicate,
                     StringComparison.Ordinal)
-                }, ErrorCode.UnsupportedCapability, token);
+                }, ErrorCode.UnsupportedCapability, dispatched: false, token);
             }
             return true;
         }, token);
@@ -49,12 +49,12 @@ internal static class ComposedProjectionLineageClusterFlow
     }
 
     private static async Task FailureAsync(RequestCqrsClusterCallers callers, SqlOperationRequest request,
-        ErrorCode code, CancellationToken token)
+        ErrorCode code, bool dispatched, CancellationToken token)
     {
         var actual = await callers.Sdk.ExecuteSqlAsync(request, token);
         await Assert.That(actual.IsFailed).IsTrue();
         await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(code.ToString());
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
-            code, dispatched: true);
+            code, dispatched);
     }
 }

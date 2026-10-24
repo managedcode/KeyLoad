@@ -16,7 +16,9 @@ internal static class EventingRequiredClaimClusterFinal
             await EventingRequiredClaimClusterCurrent.ObserveAsync(root, state, async () => await SqlClusterProtocol.EqualAsync(
                 state.Receipt, await RequiredProcessingPolicyClusterRoutes.ProcessAsync(reader, state.Input, state.Healthy, route, token)), token);
         }
-        await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Denied,
+        await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Denied, ErrorCode.PermissionDenied,
+            RequiredProcessingPolicyClusterState.EpochChanged, token);
+        await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Claim,
             ErrorCode.StaleLease, "The delivery lease is stale.", token);
         await EventingRequiredClaimClusterTenant.RefuseAsync(root, reader, state, token);
         await EventingRequiredClaimClusterExport.RefuseAsync(root, reader, state, token);

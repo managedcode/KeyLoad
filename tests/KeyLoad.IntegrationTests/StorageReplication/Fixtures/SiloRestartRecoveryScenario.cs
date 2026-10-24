@@ -23,14 +23,15 @@ internal static class SiloRestartRecoveryScenario
         var pending = new CommandRequest(Guid.NewGuid(), state.Partition,
             [new PutDocument(Collection, "after-silo-loss", "{}")]);
         await ClusterReplicationTestSupport.MissingCopiesAsync(await surviving.CommitAsync(pending, cancellationToken));
-        await Assert.That(ClusterReplicationTestSupport.Success(await surviving.GetAsync(
-            new(state.Partition, Collection, "o1"), state.Receipt.Token, cancellationToken)).Document!.Revision).IsEqualTo(3);
-        foreach (var index in Enumerable.Range(0, NodeCount).Where(index => index != state.Survivors[0]))
-        {
-            var node = ClusterReplicationTestSupport.NodeName(index + 1);
-            await fixture.RestartServerAsync(node, cancellationToken);
-            stoppedProcesses.Remove(node);
-        }
+        // Two of three voters are lost, so the in-memory membership keeps no quorum: the lone survivor cannot remove the
+        // lost silos or admit fresh incarnations (RapidMembership RM-010), and only its refusal to acknowledge writes is
+        // guaranteed. The copies return through a complete restart over their persisted stores.
+        var survivor = ClusterReplicationTestSupport.NodeName(state.Survivors[0] + 1);
+        stoppedProcesses.Add(survivor);
+        await fixture.KillServerAsync(survivor, SiloFailure, cancellationToken);
+        var nodes = Enumerable.Range(1, NodeCount).Select(ClusterReplicationTestSupport.NodeName).ToArray();
+        await Task.WhenAll(nodes.Select(node => fixture.RestartServerAsync(node, cancellationToken)));
+        stoppedProcesses.Clear();
 
         await ClusterReplicationTestSupport.EventuallyAsync(
             async () => (await surviving.StatusAsync(cancellationToken)).IsSuccess, cancellationToken);
@@ -40,6 +41,8 @@ internal static class SiloRestartRecoveryScenario
         await Assert.That(restored.PersistedCopies).IsEqualTo(NodeCount);
         await SubmissionColdAssertions.ReceiptAsync(ClusterReplicationTestSupport.Success(
             await surviving.CommitAsync(pending, cancellationToken)), restored);
+        await Assert.That(ClusterReplicationTestSupport.Success(await surviving.GetAsync(
+            new(state.Partition, Collection, "o1"), state.Receipt.Token, cancellationToken)).Document!.Revision).IsEqualTo(3);
         var document = ClusterReplicationTestSupport.Success(await surviving.GetAsync(
             new(state.Partition, Collection, "after-silo-loss"), restored.Token, cancellationToken)).Document;
         await Assert.That(document).IsNotNull();

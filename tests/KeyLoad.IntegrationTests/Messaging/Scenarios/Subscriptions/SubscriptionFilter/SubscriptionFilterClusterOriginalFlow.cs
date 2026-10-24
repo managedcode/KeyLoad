@@ -20,6 +20,8 @@ internal static class SubscriptionFilterClusterOriginalFlow
         var br = (await McpCallerAssertions.SuccessAsync<ReceiveSubscriptionResult>(await second.CallAsync(McpCallerTools.SubscriptionsReceive, b, token))).Value;
         await Assert.That(ar.Deliveries.Select(x => x.Event.Position)).IsEquivalentTo(new long[] { 1 }, CollectionOrdering.Matching);
         await Assert.That(br.Deliveries.Select(x => x.Event.Position)).IsEquivalentTo(new long[] { 2, 3 }, CollectionOrdering.Matching);
+        var empty = await McpCallerAssertions.SdkSuccessAsync(await first.ReceiveSubscriptionAsync(new(Guid.NewGuid(), seed.Group), token));
+        await Assert.That(empty.Deliveries).IsEmpty();
         var foreign = new SubscriptionDeliveryCommand(Guid.NewGuid(), seed.Group, ar.Deliveries.Single().Token, DeliveryAction.Ack);
         await McpCallerAssertions.ErrorAsync(await second.CallAsync(McpCallerTools.SubscriptionsComplete, foreign, token), ErrorCode.TokenInvalidated, true);
         var ackFirst = foreign with
@@ -31,8 +33,6 @@ internal static class SubscriptionFilterClusterOriginalFlow
         var receiptThird = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await second.CallAsync(McpCallerTools.SubscriptionsComplete, ackThird, token))).Value;
         await SubscriptionFilterClusterAssertions.StatusAsync(manager, official, seed.Group, SubscriptionFilterClusterProtocol.Initial, SubscriptionFilterClusterProtocol.Gap, false, token);
         await SubscriptionFilterClusterAssertions.StatusAsync(manager, official, seed.Independent, SubscriptionFilterClusterProtocol.Initial, 0, false, token);
-        var empty = await McpCallerAssertions.SdkSuccessAsync(await first.ReceiveSubscriptionAsync(new(Guid.NewGuid(), seed.Group), token));
-        await Assert.That(empty.Deliveries).IsEmpty();
         await SubscriptionFilterClusterAssertions.RefusedAsync(manager, official, seed.Replacement, ErrorCode.Conflict, token);
         var workerDenied = await first.ConfigureSubscriptionAsync(seed.Replacement with
         {

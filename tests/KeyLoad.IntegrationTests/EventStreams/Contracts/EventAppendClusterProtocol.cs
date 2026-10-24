@@ -24,9 +24,6 @@ internal static class EventAppendClusterProtocol
     internal const string PartialEventId = "partial-must-not-appear";
     internal const string ChangedPayload = "{\"changed\":true}";
     internal const string SdkPayload = "{\"producer\":\"sdk\",\"private\":\"mcp-private-event-canary\"}";
-    internal const string SdkExpected = "{\"private\":\"mcp-private-event-canary\",\"producer\":\"sdk\"}";
     internal const string McpPayload = "{\"producer\":\"mcp\",\"private\":\"mcp-private-event-canary\"}";
-    internal const string McpExpected = "{\"private\":\"mcp-private-event-canary\",\"producer\":\"mcp\"}";
     internal const string HealthyPayload = "{\"producer\":\"healthy\",\"private\":\"mcp-private-event-canary\"}";
-    internal const string HealthyExpected = "{\"private\":\"mcp-private-event-canary\",\"producer\":\"healthy\"}";
 }

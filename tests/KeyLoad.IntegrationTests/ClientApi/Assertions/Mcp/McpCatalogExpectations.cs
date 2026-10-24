@@ -118,7 +118,7 @@ internal static class McpCatalogExpectations
         new(QueueDispatchName, false, true, true, McpExpectedBody.Object, true,
             ["tenantId", "databaseId", "queue", "expectedSchemaVersion", "paused"],
             ["name", "kind", "transactionDomainId", "indexes", "fieldPolicies", "headerPolicies",
-                "queuePolicy", "eventRetention", "authority", "schemaVersion", "paused", "blobPolicy",
+                "queuePolicy", "eventRetention", "authority", "schemaVersion", "paused", "filePolicy",
                 "relationalSchema", "vectorProfiles", "inboxPolicy", "analyticsSchema"],
             BodyPropertyFields: ["tenantId", "databaseId", "queue", "expectedSchemaVersion", "paused"]),
         new(McpCallerTools.ResourcesConfigure, false, true, false, McpExpectedBody.Object, true,

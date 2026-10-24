@@ -10,7 +10,10 @@ namespace KeyLoad.IntegrationTests.Authorization;
 internal static class PolicyEpochAuthorityOutage
 {
     private const string Scenario = "policy-cursor-authority-unavailable";
-    private static readonly string[] StoppedNodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node3];
+    // One copy is lost while the membership majority survives: losing a majority stops membership agreement until the
+    // whole cluster restarts, so it cannot model a recoverable authority outage.
+    private static readonly string[] StoppedNodes = [McpCallerProtocol.Node3];
+    private static readonly string[] Survivors = [McpCallerProtocol.Node1, McpCallerProtocol.Node2];
 
     internal static async Task RunAsync(ClusterFixture fixture, RequestCqrsClusterCallers reader,
         KeyLoadClient root, PolicyEpochPublicState state, CancellationToken token)
@@ -27,7 +30,7 @@ internal static class PolicyEpochAuthorityOutage
                 stopped.Add(node);
                 await fixture.KillServerAsync(node, Scenario, token);
             }
-            await PolicyEpochMembership.WaitForSurvivorAsync(fixture, token);
+            await PolicyEpochMembership.WaitForSurvivorsAsync(fixture, Survivors, token);
             await ReadAvailableAsync(reader, state, cursors, token);
             await ClusterReplicationTestSupport.MissingCopiesAsync(await root.CommitAsync(state.Seed, token));
             var available = await PolicyEpochPublicAssertions.ImageAsync(root, state.Scenario, token);

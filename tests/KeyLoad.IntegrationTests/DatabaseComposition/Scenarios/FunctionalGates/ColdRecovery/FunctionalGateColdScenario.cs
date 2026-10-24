@@ -5,6 +5,9 @@ namespace KeyLoad.IntegrationTests.DatabaseComposition;
 
 internal static class FunctionalGateColdScenario
 {
+    private const long FirstReopen = 1;
+    private const long SecondReopen = 2;
+
     internal static Task RunAsync(int nodes, CancellationToken cancellationToken)
         => RunCoreAsync(nodes, fileOwnership: false, cancellationToken);
 
@@ -41,7 +44,7 @@ internal static class FunctionalGateColdScenario
                     }, lifetime.Token);
                 }
                 // All original SDK and MCP caller scopes have joined disposal before any execution node kill.
-                await FunctionalGateColdReopen.RunAsync(fixture, lifetime.Token);
+                await FunctionalGateColdReopen.RunAsync(fixture, FirstReopen, lifetime.Token);
                 await FunctionalGateAnalyticsCold.VerifyAllNodesAsync(fixture, state, lifetime.Token);
                 await FunctionalGateColdCallers.RunAsync(fixture, state, async context =>
                 {
@@ -56,7 +59,7 @@ internal static class FunctionalGateColdScenario
                 var dropped = await FunctionalGateColdCallers.RunAsync(fixture, state,
                     context => FunctionalGateColdDrop.RunAsync(context, state, lifetime.Token), lifetime.Token);
                 // The complete original caller scope has joined before the second same-root kill.
-                await FunctionalGateColdReopen.RunAsync(fixture, lifetime.Token);
+                await FunctionalGateColdReopen.RunAsync(fixture, SecondReopen, lifetime.Token);
                 var repairedPrincipalIds = state.AdditionalIdentities.Select(identity => identity.Principal.Id)
                     .Append(state.Writer.Principal.Id).ToHashSet(StringComparer.Ordinal);
                 await FunctionalGateAnalyticsCold.VerifyAfterPolicyRepairAllNodesAsync(fixture, state,

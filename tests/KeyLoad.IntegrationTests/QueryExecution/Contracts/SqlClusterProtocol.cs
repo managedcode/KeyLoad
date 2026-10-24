@@ -1,12 +1,14 @@
 using System.Text.Json;
 using KeyLoad.Client;
 using KeyLoad.IntegrationTests.ClientApi;
+using ManagedCode.Communication;
 
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
 /// <summary>Canonical SQL envelopes used by real SDK and official MCP callers.</summary>
 internal static class SqlClusterProtocol
 {
+    internal const string ReadUnavailable = "The read response is unavailable.";
     internal const string Argument = "args";
     internal const string CallPrefix = "EXEC ";
     internal const string CallSuffix = " @args";
@@ -42,6 +44,13 @@ internal static class SqlClusterProtocol
 
     internal static async Task EqualAsync<T>(T expected, T actual)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+
+    /// <summary>The SDK reports a caller-cancelled read as a failed result with no value; it does not throw.</summary>
+    internal static async Task SdkCancelledAsync<T>(Result<T> result)
+    {
+        await Assert.That(result.IsFailed).IsTrue();
+        await EqualAsync(Errors.Problem(ErrorCode.Cancelled, ReadUnavailable), result.Problem);
+    }
 
     private static SqlOperationRequest Envelope(PartitionRef partition, string operation, Dictionary<string, JsonElement> arguments)
         => new(partition, CallPrefix + operation + CallSuffix,

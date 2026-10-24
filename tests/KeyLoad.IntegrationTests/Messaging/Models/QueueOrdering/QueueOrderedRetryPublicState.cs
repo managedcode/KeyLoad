@@ -10,4 +10,7 @@ internal sealed record QueueOrderedRetryPublicState(QueueLifecyclePublicState Ca
     {
         get; set;
     }
+    internal long ParkedOrder => ParkedHead == QueueParkedHeadPolicy.Block ? QueueOrderedRetryPublicProtocol.One : QueueOrderedRetryPublicProtocol.Initial;
+    internal long RedrivenOrder => ParkedHead == QueueParkedHeadPolicy.Block ? QueueOrderedRetryPublicProtocol.One : QueueOrderedRetryPublicProtocol.Three;
+    internal long HealthyEnqueue => ParkedHead == QueueParkedHeadPolicy.Block ? QueueOrderedRetryPublicProtocol.Three : QueueOrderedRetryPublicProtocol.Four;
 }
