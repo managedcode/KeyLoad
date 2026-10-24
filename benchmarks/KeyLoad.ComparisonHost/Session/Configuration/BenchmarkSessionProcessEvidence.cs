@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Text.Json;
+using KeyLoad.AppHost.Hosting;
 using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Comparisons;
 using KeyLoad.Diagnostics.ResourceExecution;
@@ -42,9 +43,10 @@ internal static class BenchmarkSessionProcessEvidence
         {
             throw new InvalidDataException(ServerTopologyMismatch);
         }
+        var execution = AppHostOptionsRegistration.BindTestExecution(configuration);
         foreach (var server in servers)
         {
-            ProjectProcessEvidence.Verify(server);
+            ProjectProcessEvidence.Verify(server, execution);
         }
         return new(client, servers);
     }

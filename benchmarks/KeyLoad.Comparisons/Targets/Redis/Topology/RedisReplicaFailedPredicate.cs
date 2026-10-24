@@ -12,5 +12,5 @@ internal enum RedisReplicaFailedPredicate
     HostAgreement,
     RolePort,
     PortAgreement,
-    ConfiguredPrimary,
+    ReplicationIdentity,
 }

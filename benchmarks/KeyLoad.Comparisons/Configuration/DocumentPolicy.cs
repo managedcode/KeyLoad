@@ -9,6 +9,7 @@ internal static class DocumentPolicy
     internal static void Validate(ComparisonExecutionOptions options)
     {
         if (options.DocumentClientMaxConnections != ComparisonExecutionOptions.RequiredDocumentClientConnections
+            || options.DocumentClientMaxResponseHeadersKilobytes != ComparisonExecutionOptions.RequiredDocumentClientResponseHeadersKilobytes
             || options.DocumentVerificationConnectionReserve != ComparisonExecutionOptions.RequiredDocumentClientConnections
             || options.DocumentCleanupTimeout != ComparisonExecutionOptions.RequiredDocumentCleanupTimeout)
         {
@@ -18,6 +19,7 @@ internal static class DocumentPolicy
     internal static void Record(ComparisonExecutionOptions options, IDictionary<string, string> parameters)
     {
         parameters[nameof(options.DocumentClientMaxConnections)] = options.DocumentClientMaxConnections.ToString(CultureInfo.InvariantCulture);
+        parameters[nameof(options.DocumentClientMaxResponseHeadersKilobytes)] = options.DocumentClientMaxResponseHeadersKilobytes.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(options.DocumentVerificationConnectionReserve)] = options.DocumentVerificationConnectionReserve.ToString(CultureInfo.InvariantCulture);
         parameters[nameof(options.DocumentCleanupTimeout)] = options.DocumentCleanupTimeout.ToString(DurationFormat, CultureInfo.InvariantCulture);
     }

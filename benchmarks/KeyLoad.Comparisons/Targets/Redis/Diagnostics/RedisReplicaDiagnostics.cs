@@ -33,11 +33,11 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
     private static readonly string[] KnownHosts = [PrimaryToken, PrimaryDevInternalToken, Replica1Token, Replica1DevInternalToken, KnownHostsResultText, KnownHostsKnownHostsResultText, KnownHostsLocalhostText];
     private static readonly string[] KnownStates = [HandshakeToken, NoneToken, ConnectToken, ConnectingToken, KnownStatesResultText, KnownStatesKnownStatesResultText, KnownStatesUnknownText];
 
-    internal void WriteFailure(EndPoint replica, EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
+    internal void WriteFailure(EndPoint replica, EndPoint primary, string replicationId, Dictionary<string, string> info, RedisResult[] role)
     {
         try
         {
-            Console.Error.WriteLine(Prefix + Project(replica, primary, info, role));
+            Console.Error.WriteLine(Prefix + Project(replica, primary, replicationId, info, role));
         }
         catch (IOException)
         {
@@ -49,24 +49,28 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
         }
     }
 
-    internal string Project(EndPoint replica, EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
+    internal string Project(EndPoint replica, EndPoint primary, string replicationId, Dictionary<string, string> info, RedisResult[] role)
     {
         const int MissingItemIndex = -1;
 
         var infoHost = info.GetValueOrDefault(RedisProtocol.MasterHostField);
         var roleHost = RoleText(role, RedisProtocol.RoleHostIndex);
         var projection = new RedisReplicaDiagnostic(
-            FailedPredicate(primary, info, role).ToString(), Host(primary), Port(primary), Host(replica), Port(replica),
+            FailedPredicate(replicationId, info, role).ToString(), Host(primary), Port(primary), Host(replica), Port(replica),
             KnownRole(info.GetValueOrDefault(RedisProtocol.RoleField)), KnownLink(info.GetValueOrDefault(RedisProtocol.LinkField)),
             KnownHost(infoHost, primary, replica), ValidPort(RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField)), role.Length,
             KnownRole(RoleText(role, RedisProtocol.RoleNameIndex)), KnownHost(roleHost, primary, replica),
             ValidPort(int.TryParse(RoleText(role, RedisProtocol.RolePortIndex), out var port) ? port : MissingItemIndex),
-            KnownStates.Contains(RoleText(role, RoleStateIndex), StringComparer.Ordinal) ? RoleText(role, RoleStateIndex) : null);
+            KnownStates.Contains(RoleText(role, RoleStateIndex), StringComparer.Ordinal) ? RoleText(role, RoleStateIndex) : null,
+            ReplicationIdAgreement(replicationId, info));
         var json = JsonSerializer.Serialize(projection);
         return json.Length <= settings.RedisReplicaMaximumCharacters ? json : Overflow;
     }
 
-    private static RedisReplicaFailedPredicate FailedPredicate(EndPoint primary, Dictionary<string, string> info, RedisResult[] role)
+    private static bool ReplicationIdAgreement(string replicationId, Dictionary<string, string> info)
+        => string.Equals(info.GetValueOrDefault(RedisProtocol.ReplicationIdField), replicationId, StringComparison.Ordinal);
+
+    private static RedisReplicaFailedPredicate FailedPredicate(string replicationId, Dictionary<string, string> info, RedisResult[] role)
     {
         var host = info.GetValueOrDefault(RedisProtocol.MasterHostField);
         var port = RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField);
@@ -106,7 +110,7 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
         {
             return RedisReplicaFailedPredicate.PortAgreement;
         }
-        return RedisProtocol.EndpointMatches(primary, host, port) ? RedisReplicaFailedPredicate.None : RedisReplicaFailedPredicate.ConfiguredPrimary;
+        return ReplicationIdAgreement(replicationId, info) ? RedisReplicaFailedPredicate.None : RedisReplicaFailedPredicate.ReplicationIdentity;
     }
 
     private static string? RoleText(RedisResult[] role, int index)

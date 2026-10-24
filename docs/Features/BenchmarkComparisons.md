@@ -432,6 +432,13 @@ The selected map/combine/reduce path avoids that unsupported API and float
 `_score` ordering. Source/response helpers remain benchmark-owned; unchanged execution
 VectorExact jobs must prove the strategy and resource bounds.
 
+OpenSearch note for the session index case: OpenSearch 3.6.0 answers a synchronous
+`_update_by_query` with one `TASK_RESOURCE_USAGE` response header per scroll batch, so
+the one-million-document backfill returns about 1,000 headers (roughly 230 KB), above
+the .NET default 64 KB response-header bound. The document HTTP client therefore
+declares `DocumentClientMaxResponseHeadersKilobytes` (1024) as recorded policy instead
+of changing the server's task resource tracking.
+
 ```mermaid
 flowchart LR
   Plan[Complete cell plan] --> Jobs[Independent Aspire workloads]

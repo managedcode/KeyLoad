@@ -59,7 +59,7 @@ export async function captureGitHub(identity, signal, saveResponse) {
     && job.status === 'in_progress' && job.conclusion === null
     && [ `https://github.com/${EXECUTION.repository}/actions/runs/${identity.runId}/job/${job.id}`,
       `https://github.com/${EXECUTION.repository}/runs/${identity.runId}/jobs/${job.id}` ].includes(job.html_url)
-    && Array.isArray(job.labels) && job.labels.includes('ubuntu-latest'), 'github.jobIdentity');
+    && Array.isArray(job.labels) && job.labels.includes('ubuntu-24.04'), 'github.jobIdentity');
   return { run, job, pages };
 }
 

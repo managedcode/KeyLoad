@@ -188,7 +188,7 @@ export function validateServerResourceEvidence(value, sidecarSha256, workerSha25
 function validObservationPolicy(value) {
   const bounds = { maxProcesses: 128, maxMounts: 8, maxFileBytes: 4096, minimumCommandBytes: 4096,
     maxHardwareBytes: 262144, maxSampleMetadataBytes: 262144, maxSidecarBytes: 65536, maxWorkerBytes: 67108864,
-    maxSamples: 1680, maxCgroupAncestors: 64, runtimeReadBufferBytes: 4096, runtimeMaxOutputBytes: 4096, standardErrorOutputDivisor: 4096 };
+    maxSamples: 1680, maxCgroupAncestors: 64, runtimeReadBufferBytes: 4096, maxOutputBytes: 4096, standardErrorOutputDivisor: 4096 };
   const timings = { cadenceMilliseconds: 60000, maximumObservationMilliseconds: 8400000,
     cleanupThresholdMilliseconds: 30000, processSettlementMilliseconds: 30000 };
   return keys(value, [...Object.keys(bounds), ...Object.keys(timings)])

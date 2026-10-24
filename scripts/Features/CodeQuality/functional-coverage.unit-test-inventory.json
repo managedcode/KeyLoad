@@ -70159,6 +70159,26 @@
       ],
       "nonContributorReason": "required-control",
       "reviewBasis": "Pure physical namespace/session identity control, with case, incarnation and caller separation. No actual transfer or persisted authority operation occurs."
+    },
+    {
+      "className": "KeyLoad.UnitTests.TestInfrastructure.ProcessEvidenceObserverWindowTests",
+      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ProcessEvidenceObserverWindowTests",
+      "methodName": "CurrentProcessVerifiesInsideTheObserverStartTimeWindowAndRefusesOutsideItOrWithForeignFiles",
+      "instanceName": "CurrentProcessVerifiesInsideTheObserverStartTimeWindowAndRefusesOutsideItOrWithForeignFiles",
+      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ProcessEvidence/ProcessEvidenceObserverWindowTests.cs",
+      "sourceSha256": "5ece1c25f863bbdde88bd2f8be0ed2d47f5c75804a3012f59a5e5ca7bcf58ff7",
+      "lineNumber": 13,
+      "endLineNumber": 30,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-BSESSION-005"
+      ],
+      "acceptance": [
+        "AC-BSESSION-005"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "The live current process is verified against its own captured evidence with start times inside and outside the observer window and with a foreign assembly hash; no server process or database operation runs. Required evidence-identity control; no runtime coverage contribution."
     }
   ],
   "coverageGroups": [

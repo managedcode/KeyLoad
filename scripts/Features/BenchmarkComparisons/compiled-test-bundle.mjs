@@ -108,7 +108,7 @@ async function writeRuntimeImport(directory, descriptor, context, environment) {
   const root = environment.KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY;
   const session = environment.KEYLOAD_BENCHMARK_SESSION_ID;
   requireRuntime(typeof root === 'string' && path.isAbsolute(root)
-    && /^[a-z]+-n[13]$/u.test(session ?? '')
+    && /^[a-z][a-z0-9]*-n[13]$/u.test(session ?? '')
     && root === path.join(context.workspace, 'artifacts/comparisons/sessions/workers', session));
   await mkdir(root, { recursive: true, mode: 0o700 });
   await requirePlainDirectory(root);

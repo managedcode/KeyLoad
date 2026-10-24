@@ -140,7 +140,15 @@ removed; image user defaults and anonymous session volumes own external DB
 files. SDK `PublishContainer` is explicit release/publication work.
 
 Local execution retains actual binary/source/process identities with no
-invented GitHub provenance. It cannot authorize public figures. Matched resource
+invented GitHub provenance. A KeyLoad workload client re-verifies each server
+process recorded by the bootstrap: same PID, executable path and compiled-file
+hashes, with the operating-system start time inside the configured observer
+window (`KeyLoadTests:Execution:ProcessStartTimeObserverWindow`, one second by
+default), because Linux derives `Process.StartTime` from a boot-time estimate
+cached once per observing process and two processes can therefore disagree by
+the coarse clock granularity. Session, heavy-load and aggregation jobs declare the
+explicit `ubuntu-24.04` runner: the `ubuntu-latest` image moved to Ubuntu 26.04 with a
+7.0 kernel that the pinned MongoDB server refuses to start on. It cannot authorize public figures. Matched resource
 qualification for KeyLoad processes and external advertised-endpoint
 reachability remain open until actual execution proves them; measured workload
 reports do not close these independent gates.

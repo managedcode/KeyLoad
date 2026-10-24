@@ -36,12 +36,12 @@ internal static class RedisDocumentCopyProof
         }
 
         await RequireAofAsync(primaryServer, CommandFlags.DemandMaster, deadline.Token).ConfigureAwait(false);
-        await JoinAsync(RedisReplicaProof.VerifyWorkerPrimaryAsync(primary, topology, CancellationToken.None), deadline.Token).ConfigureAwait(false);
+        var replicationId = await JoinAsync(RedisReplicaProof.VerifyWorkerPrimaryAsync(primary, topology, CancellationToken.None), deadline.Token).ConfigureAwait(false);
         var database = primary.GetDatabase();
         var fenced = false;
         try
         {
-            var identities = await ObserveReplicasAsync(primaryEndpoint, primaryIdentity, endpoints, replicas, deadline.Token).ConfigureAwait(false);
+            var identities = await ObserveReplicasAsync(primaryEndpoint, replicationId, primaryIdentity, endpoints, replicas, deadline.Token).ConfigureAwait(false);
             RedisNodeIdentity.RequireUniqueVersionedSet(identities, primaryIdentity, copies);
             var evidence = replicas.Count == NoReplicas ? RedisNodeIdentity.SingleEvidence(primaryIdentity, SingleState)
                 : RedisNodeIdentity.ReplicatedEvidence(primaryIdentity, identities.Skip(PrimaryIdentityCount).ToArray(), ReplicatedState);
@@ -57,9 +57,8 @@ internal static class RedisDocumentCopyProof
             fenced = true;
             await RequireAllFsyncAsync(database, copies - PrimaryCopyCount, clientId, lifecycleOptions.Value.RedisReceiptTimeout, deadline.Token).ConfigureAwait(false);
             var observations = evidence.Observations.ToList();
-            await VerifyReplicaReadbacksAsync(replicas, identities, primaryEndpoint, schedule, readReplica, observations, token).ConfigureAwait(false);
-            await JoinAsync(RedisReplicaProof.VerifyWorkerPrimaryAsync(primary, topology, CancellationToken.None), token).ConfigureAwait(false);
-            RedisNodeIdentity.RequireUnchanged(await JoinAsync(RedisNodeIdentity.ReadAsync(primaryServer, CommandFlags.DemandMaster, CancellationToken.None), token).ConfigureAwait(false), primaryIdentity);
+            await VerifyReplicaReadbacksAsync(replicas, identities, replicationId, schedule, readReplica, observations, token).ConfigureAwait(false);
+            await RequireFinalPrimaryAsync(primary, primaryServer, topology, replicationId, primaryIdentity, token).ConfigureAwait(false);
             return evidence with
             {
                 Observations = observations.Append(string.Format(System.Globalization.CultureInfo.InvariantCulture, FinalFsyncObservationFormat, schedule.Final, copies - PrimaryCopyCount)).ToImmutableArray()
@@ -83,7 +82,16 @@ internal static class RedisDocumentCopyProof
             }
         }
     }
-    private static async Task<List<RedisNodeIdentity>> ObserveReplicasAsync(System.Net.EndPoint primaryEndpoint,
+    private static async Task RequireFinalPrimaryAsync(ConnectionMultiplexer primary, IServer primaryServer, ComparisonTopology topology,
+        string replicationId, RedisNodeIdentity primaryIdentity, CancellationToken token)
+    {
+        if (await JoinAsync(RedisReplicaProof.VerifyWorkerPrimaryAsync(primary, topology, CancellationToken.None), token).ConfigureAwait(false) != replicationId)
+        {
+            throw new ComparisonFailureException(Failure);
+        }
+        RedisNodeIdentity.RequireUnchanged(await JoinAsync(RedisNodeIdentity.ReadAsync(primaryServer, CommandFlags.DemandMaster, CancellationToken.None), token).ConfigureAwait(false), primaryIdentity);
+    }
+    private static async Task<List<RedisNodeIdentity>> ObserveReplicasAsync(System.Net.EndPoint primaryEndpoint, string replicationId,
         RedisNodeIdentity primaryIdentity, string[] endpoints, List<ConnectionMultiplexer> replicas, CancellationToken token)
     {
         var identities = new List<RedisNodeIdentity>(endpoints.Length + PrimaryIdentityCount) { primaryIdentity };
@@ -101,14 +109,14 @@ internal static class RedisDocumentCopyProof
             }
 
             var server = replica.GetServer(actualEndpoint);
-            await RequireReplicaAsync(server, primaryEndpoint, token).ConfigureAwait(false);
+            await RequireReplicaAsync(server, replicationId, token).ConfigureAwait(false);
             await RequireAofAsync(server, CommandFlags.DemandReplica, token).ConfigureAwait(false);
             identities.Add(await JoinAsync(RedisNodeIdentity.ReadAsync(server, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false));
         }
         return identities;
     }
     private static async Task VerifyReplicaReadbacksAsync(List<ConnectionMultiplexer> replicas, List<RedisNodeIdentity> identities,
-        System.Net.EndPoint primaryEndpoint, DocumentComparisonSchedule schedule,
+        string replicationId, DocumentComparisonSchedule schedule,
         Func<ConnectionMultiplexer, CancellationToken, IAsyncEnumerable<FoundDocument>> readReplica,
         List<string> observations, CancellationToken token)
     {
@@ -117,7 +125,7 @@ internal static class RedisDocumentCopyProof
             var readback = await DocumentComparisonOracle.VerifyAsync(readReplica(replicas[index], token), schedule.FinalDocuments(), token).ConfigureAwait(false);
             observations.Add(string.Format(System.Globalization.CultureInfo.InvariantCulture, FinalReplicaObservationFormat, identities[index + PrimaryIdentityCount].RunId, readback.Records, readback.ActualSha256));
             var server = replicas[index].GetServer(RedisProtocol.ConfiguredEndpoint(replicas[index], Failure));
-            await RequireReplicaAsync(server, primaryEndpoint, token).ConfigureAwait(false);
+            await RequireReplicaAsync(server, replicationId, token).ConfigureAwait(false);
             RedisNodeIdentity.RequireUnchanged(await JoinAsync(RedisNodeIdentity.ReadAsync(server, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false), identities[index + PrimaryIdentityCount]);
         }
     }
@@ -144,7 +152,8 @@ internal static class RedisDocumentCopyProof
             throw new ComparisonFailureException(Failure);
         }
     }
-    private static async Task RequireReplicaAsync(IServer server, System.Net.EndPoint primary, CancellationToken token)
+    // Replicas name the primary by its container-network address; the primary's replication id is the follow oracle.
+    private static async Task RequireReplicaAsync(IServer server, string replicationId, CancellationToken token)
     {
         var info = await JoinAsync(RedisProtocol.ReadInfoAsync(server, RedisProtocol.ReplicationSection, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false);
         var role = await JoinAsync(RedisProtocol.ReadRoleAsync(server, CommandFlags.DemandReplica, CancellationToken.None), token).ConfigureAwait(false);
@@ -152,7 +161,8 @@ internal static class RedisDocumentCopyProof
         var port = RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField);
         if (info.GetValueOrDefault(RedisProtocol.RoleField) != RedisProtocol.ReplicaRole
             || info.GetValueOrDefault(RedisProtocol.LinkField) != RedisProtocol.LinkUp || host is null
-            || !RedisProtocol.EndpointMatches(primary, host, port) || role.Length < RedisProtocol.RoleReplicaResponseLength
+            || !string.Equals(info.GetValueOrDefault(RedisProtocol.ReplicationIdField), replicationId, StringComparison.Ordinal)
+            || role.Length < RedisProtocol.RoleReplicaResponseLength
             || role[RedisProtocol.RoleNameIndex].ToString() != RedisProtocol.ReplicaRole
             || !StringComparer.OrdinalIgnoreCase.Equals(role[RedisProtocol.RoleHostIndex].ToString(), host) || role[RedisProtocol.RolePortIndex].ToString() != port.ToString(System.Globalization.CultureInfo.InvariantCulture))
         {
@@ -182,11 +192,7 @@ internal static class RedisDocumentCopyProof
             throw new ComparisonFailureException(Failure);
         }
     }
-    private static async Task JoinAsync(Task original, CancellationToken token)
-    {
-        await original.ConfigureAwait(false);
-        token.ThrowIfCancellationRequested();
-    }
+
     private static async Task<T> JoinAsync<T>(Task<T> original, CancellationToken token)
     {
         var result = await original.ConfigureAwait(false);

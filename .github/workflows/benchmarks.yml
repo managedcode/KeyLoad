@@ -19,7 +19,7 @@ jobs:
   comparison-runtime:
     name: Prepare comparison runtime
     if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 150
     outputs:
       databases: ${{ steps.plan.outputs.database_matrices }}
@@ -109,7 +109,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -156,7 +156,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -167,7 +167,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -178,7 +178,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -189,7 +189,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -200,7 +200,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -211,7 +211,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -222,7 +222,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -233,7 +233,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -244,7 +244,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -255,7 +255,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -266,7 +266,7 @@ jobs:
     name: KeyLoad functional CLUSTER million-record ingestion
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 180
     steps:
       - name: Download source code
@@ -292,7 +292,7 @@ jobs:
     name: Combine benchmark results
     needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, keyload-functional-heavy-load]
     if: ${{ always() && !cancelled() && (github.event_name == 'push' || inputs.mode == 'full') && needs.comparison-runtime.result == 'success' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 150
     env:
       GH_TOKEN: ${{ github.token }}
@@ -333,7 +333,7 @@ jobs:
       !contains(needs.*.result, 'skipped') &&
       github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
       github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     permissions: {actions: write}
     env:

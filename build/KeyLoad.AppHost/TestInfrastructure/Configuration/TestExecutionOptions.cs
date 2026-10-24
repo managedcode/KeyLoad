@@ -24,6 +24,8 @@ internal sealed class TestExecutionOptions
     private const int MaximumOutputCharacters = 65_536;
     private const int DefaultMaximumParallelTests = 50;
     private const int MaximumMaximumParallelTests = 50;
+    private const int ObserverWindowSeconds = 1;
+    private const int MaximumObserverWindowSeconds = 10;
 
     public TimeSpan OrdinaryTimeout { get; set; } = TimeSpan.FromMinutes(OrdinaryMinutes);
     public TimeSpan ClusterTimeout { get; set; } = TimeSpan.FromMinutes(ClusterMinutes);
@@ -40,6 +42,11 @@ internal sealed class TestExecutionOptions
     public TimeSpan ProtectedMovementCaptureCleanupTimeout { get; set; } = TimeSpan.FromSeconds(ProtectedMovementCleanupSeconds);
     public TimeSpan DatabaseReadinessPollInterval { get; set; } = TimeSpan.FromMilliseconds(PollMilliseconds);
     public TimeSpan ProcessExitPollInterval { get; set; } = TimeSpan.FromMilliseconds(PollMilliseconds);
+    // Linux derives Process.StartTime from a boot-time estimate cached once per observing process
+    // (CLOCK_REALTIME_COARSE minus CLOCK_BOOTTIME), so a second process reading the same PID can differ by the
+    // coarse clock granularity. Process identity therefore pairs the PID, executable and compiled-file hashes
+    // with a start time inside this window; a reused PID cannot start inside it while the original was observed alive.
+    public TimeSpan ProcessStartTimeObserverWindow { get; set; } = TimeSpan.FromSeconds(ObserverWindowSeconds);
     public int CleanupOutputCharacters { get; set; } = DefaultOutputCharacters;
 
     public int MaximumFilterCharacters { get; set; } = MaximumArgumentCharacters;
@@ -50,6 +57,8 @@ internal sealed class TestExecutionOptions
         && Bounded(ControlTimeout) && Bounded(ScaledTimeout) && Bounded(VectorTimeout)
         && Bounded(ApplicationCleanupTimeout) && Bounded(ImageCleanupTimeout) && Bounded(TerminationGrace)
         && Bounded(ProcessSettlementTimeout) && Bounded(ProcessExitPollInterval) && Bounded(DatabaseReadinessPollInterval)
+        && Bounded(ProcessStartTimeObserverWindow)
+        && ProcessStartTimeObserverWindow.Ticks <= MaximumObserverWindowSeconds * TimeSpan.TicksPerSecond
         && Bounded(ProtectedMovementSetupRequestLifetime)
         && ProtectedMovementSetupRequestLifetime.Ticks <= ProtectedMovementSetupSeconds * TimeSpan.TicksPerSecond
         && Bounded(ProtectedMovementOutcomeRequestLifetime)

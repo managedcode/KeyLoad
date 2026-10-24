@@ -3,14 +3,16 @@ namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 internal static class IsolatedSurrealDbResources
 {
     private const string SurrealBindAddress = "0.0.0.0:8000";
-    private const string SurrealStorageAddress = "rocksdb:/data/benchmark.db";
+    // The image runs as its nonroot user and owns only its home directory; the declared /data volume root stays root-owned,
+    // so the anonymous session volume is mounted at the home directory the image user can write.
+    private const string SurrealStorageAddress = "rocksdb:" + DataMount + "/benchmark.db";
 
     private const string Target = "SurrealDB";
     private const string Name = "isolated-surrealdb";
     private const string Image = "surrealdb/surrealdb";
     private const string ImageTag = "v3.2.4";
     internal const string ImageReference = "docker.io/surrealdb/surrealdb:v3.2.4@";
-    private const string DataMount = "/data";
+    private const string DataMount = "/home/nonroot";
     private const string Endpoint = "http";
     private const int Port = 8000;
     private const string User = "root";

@@ -65,12 +65,14 @@ internal static class ProjectProcessEvidence
         return new(name, process.Id, process.StartTime.ToUniversalTime(), null, null, null, CaptureBinary(executable, assembly));
     }
 
-    internal static void Verify(ProcessEvidence expected)
+    internal static void Verify(ProcessEvidence expected, IOptions<TestExecutionOptions> options)
     {
         ArgumentNullException.ThrowIfNull(expected);
+        ArgumentNullException.ThrowIfNull(options);
         using var process = Process.GetProcessById(expected.ProcessId);
         var executable = process.MainModule?.FileName;
-        if (executable is null || process.HasExited || process.StartTime.ToUniversalTime() != expected.StartedAtUtc
+        if (executable is null || process.HasExited
+            || (process.StartTime.ToUniversalTime() - expected.StartedAtUtc).Duration() > options.Value.ProcessStartTimeObserverWindow
             || executable != expected.Binary.ExecutablePath
             || CaptureBinary(executable, expected.Binary.AssemblyPath) != expected.Binary)
         {

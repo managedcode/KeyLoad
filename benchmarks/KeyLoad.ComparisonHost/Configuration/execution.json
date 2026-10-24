@@ -14,6 +14,7 @@
     "OpenSearchHealthWaitTimeoutSeconds": 60,
     "CleanupTimeout": "00:00:30",
     "DocumentClientMaxConnections": 1,
+    "DocumentClientMaxResponseHeadersKilobytes": 1024,
     "DocumentVerificationConnectionReserve": 1,
     "DocumentCleanupTimeout": "00:20:00",
     "IndexBuildTimeout": "00:20:00",

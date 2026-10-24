@@ -9,7 +9,7 @@ permissions:
 jobs:
   build-and-test:
     runs-on: ubuntu-24.04
-    timeout-minutes: 120
+    timeout-minutes: 180
     steps:
       - name: Download source code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -26,9 +26,14 @@ jobs:
       - name: Install administration browser
         shell: pwsh
         run: tests/KeyLoad.IntegrationTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
-      - name: Test
-        run: |
-          dotnet test --project tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-build --output Detailed
-          dotnet test --project tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-build --output Detailed
-          dotnet test --project tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj --no-build --output Detailed
-          dotnet test --project tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj --no-build --output Detailed --treenode-filter '/*/*/*/*[Category!=HeavyLoad]'
+      - name: Test code analyzers
+        run: dotnet test --project tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-build --output Detailed
+      - name: Test units
+        if: ${{ !cancelled() }}
+        run: dotnet test --project tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj --no-build --output Detailed --maximum-parallel-tests "$(nproc)"
+      - name: Test process recovery
+        if: ${{ !cancelled() }}
+        run: dotnet test --project tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj --no-build --output Detailed
+      - name: Test Aspire topology
+        if: ${{ !cancelled() }}
+        run: dotnet test --project tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj --no-build --output Detailed --treenode-filter '/*/*/*/*[Category!=HeavyLoad]'

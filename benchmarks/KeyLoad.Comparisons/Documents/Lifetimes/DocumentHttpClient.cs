@@ -11,9 +11,11 @@ internal sealed class DocumentHttpClient : IDisposable
     }
     internal DocumentHttpClient(HttpClient source, IOptions<ComparisonExecutionOptions> options)
     {
+        var settings = ComparisonExecutionOptions.Require(options).Value;
         handler = new()
         {
-            MaxConnectionsPerServer = ComparisonExecutionOptions.Require(options).Value.DocumentClientMaxConnections
+            MaxConnectionsPerServer = settings.DocumentClientMaxConnections,
+            MaxResponseHeadersLength = settings.DocumentClientMaxResponseHeadersKilobytes
         };
         try
         {

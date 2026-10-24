@@ -15,6 +15,8 @@ internal static class RedisProtocol
     public const string MasterHostField = "master_host";
     public const string MasterPortField = "master_port";
     public const string LinkField = "master_link_status";
+    public const string ReplicationIdField = "master_replid";
+    private const int ReplicationIdLength = 40;
     public const string ReplicaCountField = "connected_slaves";
     public const string RoleCommand = "ROLE";
     public const string MasterRole = "master";
@@ -47,8 +49,8 @@ internal static class RedisProtocol
     public static bool SameEndpoint(EndPoint left, EndPoint right)
         => StringComparer.OrdinalIgnoreCase.Equals(EndpointIdentity(left), EndpointIdentity(right));
 
-    public static bool EndpointMatches(EndPoint endpoint, string host, int port)
-        => Port(endpoint) == port && StringComparer.OrdinalIgnoreCase.Equals(Host(endpoint), host);
+    public static bool ValidReplicationId(string? value)
+        => value is { Length: ReplicationIdLength } && value.All(char.IsAsciiHexDigitLower);
 
     public static string EndpointIdentity(EndPoint endpoint) => Host(endpoint) + EndpointSeparator + Port(endpoint);
 
