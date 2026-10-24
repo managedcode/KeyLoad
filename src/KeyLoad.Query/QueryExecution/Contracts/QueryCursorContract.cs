@@ -19,4 +19,5 @@ internal static class QueryCursorContract
     internal const int ExpiresAtField = 11;
     internal const int LifetimeField = 12;
     internal const int VersionField = 13;
+    internal const int AfterIdField = 14;
 }

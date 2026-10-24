@@ -8,9 +8,12 @@ internal static class RowVisibilityFullScan
 {
     private const string CandidateLimitExceeded = "The query access path exceeds its candidate budget.";
 
+    /// <summary>Visits a collection range through the current row-visibility set. A scan that starts after a key
+    /// (<paramref name="partial"/>) or that its visitor stops early covers only part of the collection: it may use a
+    /// complete cached visibility set but never publishes one.</summary>
     internal static void Visit(DatabaseEngine database, PrincipalRecord principal,
         ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, long? sourceEpoch,
-        Func<StorageRecordVisitor, StorageScanResult> scan, Action<DocumentRecord> accept)
+        Func<StorageRecordVisitor, StorageScanResult> scan, Action<DocumentRecord> accept, bool partial = false)
     {
         RowVisibilityLease? lease = null;
         RowVisibilityDraft? draft = null;
@@ -25,7 +28,7 @@ internal static class RowVisibilityFullScan
                     var scope = database.CaptureRowVisibility(principal, resource, request.Partition,
                         request.Query.Collection, epoch);
                     lease = cache.Acquire(scope);
-                    draft = BeginMissing(cache, scope, lease);
+                    draft = BeginMissing(cache, scope, lease, partial);
                 }
                 var result = ScanOriginal(database, principal, budget, lease, draft, scan, accept);
                 if (result.HasMore)
@@ -33,7 +36,10 @@ internal static class RowVisibilityFullScan
                     throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
                 }
                 budget.Check();
-                draft?.Complete();
+                if (!result.StoppedByVisitor)
+                {
+                    draft?.Complete();
+                }
             }
             catch (Exception error)
             {
@@ -48,8 +54,9 @@ internal static class RowVisibilityFullScan
             throw;
         }
     }
-    private static RowVisibilityDraft? BeginMissing(RowVisibilityCache cache, RowVisibilityScope scope, RowVisibilityLease? lease)
-        => lease is null ? cache.Begin(scope) : null;
+    private static RowVisibilityDraft? BeginMissing(RowVisibilityCache cache, RowVisibilityScope scope, RowVisibilityLease? lease,
+        bool partial)
+        => lease is null && !partial ? cache.Begin(scope) : null;
 
     private static StorageScanResult ScanOriginal(DatabaseEngine database, PrincipalRecord principal,
         ReadExecutionBudget budget, RowVisibilityLease? lease, RowVisibilityDraft? draft,

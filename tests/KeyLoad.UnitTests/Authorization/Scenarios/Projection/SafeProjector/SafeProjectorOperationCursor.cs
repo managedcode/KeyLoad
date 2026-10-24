@@ -14,7 +14,7 @@ internal static class SafeProjectorOperationCursor
     private const string InvalidQueryCursor = "The query cursor no longer has a valid authorized read cut.";
     private const string InvalidFeedCursor = "The change-feed cursor requires a fresh authorized snapshot.";
     private const long ResourceSchema = 1;
-    private const int NextOffset = 1;
+    private const int IdContinuationOffset = 0;
 
     internal static async Task<string> CaptureAsync(SafeProjectorOperationDatabase owner, long policyEpoch,
         long documentEpoch, string json, long revision, bool raw, CancellationToken token)
@@ -35,7 +35,8 @@ internal static class SafeProjectorOperationCursor
             await Assert.That(claims.ExpiresAt >= before.Add(lifetime) && claims.ExpiresAt <= after.Add(lifetime)).IsTrue();
             var expected = new QueryCursorClaims(Purpose, owner.Store.Identity.Incarnation, owner.Store.Identity.NodeId,
                 owner.Store.Identity.ReadGeneration, SafeProjectorOperationProtocol.Reader, policyEpoch, ResourceSchema,
-                QueryEngine.QueryHash(PageRequest(owner)), cut, documentEpoch, NextOffset, claims.ExpiresAt, admitted.Lifetime, CursorVersion);
+                QueryEngine.QueryHash(PageRequest(owner)), cut, documentEpoch, IdContinuationOffset, claims.ExpiresAt, admitted.Lifetime,
+                CursorVersion, SafeProjectorOperationProtocol.First);
             await SafeProjectorOperationSeed.EqualAsync(claims, expected);
             var paths = raw ? ImmutableArray<string>.Empty : SafeProjectorOperationProtocol.RedactedPaths;
             await SafeProjectorOperationSeed.EqualAsync(page, new QueryPage(

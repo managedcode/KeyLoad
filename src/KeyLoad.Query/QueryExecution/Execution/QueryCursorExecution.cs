@@ -11,12 +11,14 @@ internal static class QueryCursorExecution
     private const int InitialCursorOffset = 0;
     private const string QueryCursorNoLongerHasAValidAuthorizedReadCutDetail = "The query cursor no longer has a valid authorized read cut.";
 
-    internal readonly record struct State(int Offset, long Cut, long SourceEpoch, ResourceLifetime Lifetime);
+    /// <summary>The page position: an offset, or for an id-ordered page the last emitted document id.</summary>
+    internal readonly record struct State(int Offset, long Cut, long SourceEpoch, ResourceLifetime Lifetime, string? AfterId = null);
 
     internal static State Resolve(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
-        AstQueryRequest request, string hash, TimeProvider clock, ResourceLifetime lifetime)
+        AstQueryRequest request, string hash, TimeProvider clock, ResourceLifetime lifetime, bool keyset = false)
     {
         var offset = request.Query.Offset;
+        string? afterId = null;
         var cut = database.Store.Position;
         var claims = ReadClaims(database, request.Cursor, lifetime);
         var sourceEpoch = database.DocumentEpoch(view, request.Partition, request.Query.Collection);
@@ -27,14 +29,16 @@ internal static class QueryCursorExecution
                 || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion
                 || claims.QueryHash != hash || claims.SourceEpoch != sourceEpoch || claims.CutPosition < InitialSequence || claims.CutPosition > database.Store.Position
                 || claims.ExpiresAt <= clock.GetUtcNow()
-                || claims.Offset < InitialCursorOffset || claims.Offset > database.Limits.MaxScanRecords)
+                || claims.Offset < InitialCursorOffset || claims.Offset > database.Limits.MaxScanRecords
+                || keyset != (claims.AfterId is not null) || (keyset && claims.Offset != InitialCursorOffset))
             {
                 throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorNoLongerHasAValidAuthorizedReadCutDetail);
             }
             offset = claims.Offset;
+            afterId = claims.AfterId;
             cut = claims.CutPosition;
         }
-        return new(offset, cut, sourceEpoch, lifetime);
+        return new(offset, cut, sourceEpoch, lifetime, afterId);
     }
 
     private static QueryCursorClaims? ReadClaims(DatabaseEngine database, string? token, ResourceLifetime lifetime)
@@ -60,12 +64,15 @@ internal static class QueryCursorExecution
         return claims;
     }
 
+    /// <summary>Signs the next page when eligible rows remain after the next offset. For an id-ordered page the
+    /// cursor carries the last emitted document id, and the next page continues after it at offset zero.</summary>
     internal static string? SignNext(DatabaseEngine database, TimeSpan cursorLifetime,
         PrincipalRecord principal, ResourceDefinition resource, string hash, State cursor,
-        int next, int eligibleCount, TimeProvider clock)
+        int next, int eligibleCount, TimeProvider clock, string? afterId = null)
         => next < eligibleCount ? database.Sign(new QueryCursorClaims(QueryCursorContract.Purpose, database.Store.Identity.Incarnation,
             database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
-            principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch, next,
-            clock.GetUtcNow().Add(cursorLifetime), cursor.Lifetime, QueryCursorContract.CurrentVersion)) : null;
+            principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch,
+            afterId is null ? next : InitialCursorOffset, clock.GetUtcNow().Add(cursorLifetime), cursor.Lifetime,
+            QueryCursorContract.CurrentVersion, afterId)) : null;
 }
 

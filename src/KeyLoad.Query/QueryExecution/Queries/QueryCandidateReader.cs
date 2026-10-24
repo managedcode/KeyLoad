@@ -7,7 +7,7 @@ namespace KeyLoad.Query.QueryExecution;
 /// <summary>Streams one authorized access path through the shared read budget.</summary>
 internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
     ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, Action<DocumentRecord> accept,
-    PartitionQueryLeafReadGrant? leafGrant = null, long? visibilitySourceEpoch = null)
+    PartitionQueryLeafReadGrant? leafGrant = null, long? visibilitySourceEpoch = null, QueryKeysetPage? keyset = null)
 {
     private const string PointPath = "point";
     private const string IndexPathPrefix = "index:";
@@ -37,8 +37,18 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, FullScanDenied);
         }
+        var collection = KeySpace.Partition(DocumentSpace, request.Partition, query.Collection);
+        if (keyset is null)
+        {
+            RowVisibilityFullScan.Visit(database, principal, resource, request, budget, visibilitySourceEpoch,
+                visitor => VisitRange(collection, visitor), accept);
+            return FullScanPath;
+        }
+        var afterKey = keyset.AfterId is null ? null
+            : KeySpace.Partition(DocumentSpace, request.Partition, query.Collection, keyset.AfterId);
         RowVisibilityFullScan.Visit(database, principal, resource, request, budget, visibilitySourceEpoch,
-            visitor => VisitRange(KeySpace.Partition(DocumentSpace, request.Partition, query.Collection), visitor), accept);
+            visitor => VisitRange(collection, (key, value) => visitor(key, value) && !keyset.Satisfied(), afterKey),
+            accept, partial: afterKey is not null);
         return FullScanPath;
     }
 
@@ -97,11 +107,13 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         }
     }
 
-    private StorageScanResult VisitRange(byte[] prefix, StorageRecordVisitor visitor)
+    /// <summary>Visits one range, never asking storage for more records than one range read may examine.</summary>
+    private StorageScanResult VisitRange(byte[] prefix, StorageRecordVisitor visitor, byte[]? afterKey = null)
     {
         if (leafGrant is null)
         {
-            return budget.VisitRange(view, prefix, database.Limits.MaxScanRecords, visitor);
+            return budget.VisitRange(view, prefix, Math.Min(database.Limits.MaxScanRecords, view.MaximumRangeRecords),
+                visitor, afterKey);
         }
 
         return leafGrant.VisitRange(view, prefix, visitor);

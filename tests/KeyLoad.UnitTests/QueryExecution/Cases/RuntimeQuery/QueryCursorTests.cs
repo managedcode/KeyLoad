@@ -45,7 +45,8 @@ internal sealed class QueryCursorTests
         await Assert.That(claims.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
         await Assert.That(claims.NodeId).IsEqualTo(fixture.Store.Identity.NodeId);
         await Assert.That(claims.PrincipalId).IsEqualTo(Root);
-        await Assert.That(claims.Offset).IsEqualTo(One);
+        await Assert.That(claims.Offset).IsEqualTo(0);
+        await Assert.That(claims.AfterId).IsEqualTo(First);
         var second = engine.Execute(Root, request with
         {
             Cursor = cursor
