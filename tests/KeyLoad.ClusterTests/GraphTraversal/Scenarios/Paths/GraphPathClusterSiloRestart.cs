@@ -78,7 +78,7 @@ internal static class GraphPathClusterSiloRestart
                 .Where(index => index != stoppedIndex).ToArray();
             var replies = await Task.WhenAll(survivors.Select(index => administrators[index].StatusAsync(cancellationToken)));
             return replies.All(reply => reply.IsSuccess && reply.Value is { RoutingReady: true } status
-                && status.SiloCount == GraphPathClusterNodeClients.Nodes.Length
+                && status.SiloCount == survivors.Length
                 && status.ReplicaCount == GraphPathClusterNodeClients.Nodes.Length);
         }, cancellationToken);
     }
