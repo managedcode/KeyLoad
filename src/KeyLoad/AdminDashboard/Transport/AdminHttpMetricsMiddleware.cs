@@ -67,15 +67,15 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
         && !path.StartsWithSegments(AdminDashboardProtocol.SnapshotPath, StringComparison.OrdinalIgnoreCase)
         && !path.Equals(new PathString(StatusPath), StringComparison.OrdinalIgnoreCase);
 
-    private static global::ManagedCode.Communication.Result<AdminHttpFailureDetail?> Describe(HttpContext context, bool faulted)
+    private static (bool HasValue, AdminHttpFailureDetail? Value) Describe(HttpContext context, bool faulted)
     {
         var aborted = context.RequestAborted.IsCancellationRequested;
         var status = faulted && context.Response.StatusCode < ErrorStatus
             ? StatusCodes.Status500InternalServerError
             : context.Response.StatusCode;
         return faulted || aborted || status >= ErrorStatus
-            ? global::ManagedCode.Communication.Result<AdminHttpFailureDetail?>.Succeed((AdminHttpFailureDetail?)(new AdminHttpFailureDetail(NormalizeMethod(context.Request.Method), RouteTemplate(context), status, aborted)))
-            : global::ManagedCode.Communication.Result<AdminHttpFailureDetail?>.FailNotFound(nameof(Describe));
+            ? (true, (AdminHttpFailureDetail?)(new AdminHttpFailureDetail(NormalizeMethod(context.Request.Method), RouteTemplate(context), status, aborted)))
+            : (false, default(AdminHttpFailureDetail?));
     }
 
     private static string NormalizeMethod(string method)

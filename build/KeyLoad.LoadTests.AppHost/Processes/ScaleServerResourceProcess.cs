@@ -15,7 +15,7 @@ internal static partial class ScaleServerResourceProcess
     private const string InspectFormat = "{{.Id}}|{{.Image}}|{{.State.Pid}}|{{.State.StartedAt}}|{{.State.Status}}|{{range .Mounts}}{{if .RW}}{{.Source}}~{{.Destination}}~{{.Type}};{{end}}{{end}}";
     private const string Separator = "|";
 
-    internal static async Task<global::ManagedCode.Communication.Result<string?>> InspectAsync(string container, ScaleServerResourceSampleBudget budget, CancellationToken token)
+    internal static async Task<(bool HasValue, string? Value)> InspectAsync(string container, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const string ArgumentsText = "inspect";
         const string InspectAsyncArgumentsText = "--format";
@@ -26,11 +26,11 @@ internal static partial class ScaleServerResourceProcess
         var output = await RunAsync(Docker, [ArgumentsText, InspectAsyncArgumentsText, InspectFormat, container], budget, token);
         if (output is null)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(InspectAsync));
+            return (false, default(string?));
         }
 
         var fields = output.TrimEnd(CarriageReturnCharacter, LineFeedCharacter).Split(Separator, StringSplitOptions.None);
-        return fields.Length == InspectFieldCount ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(output.TrimEnd(CarriageReturnCharacter, LineFeedCharacter)))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(InspectAsync));
+        return fields.Length == InspectFieldCount ? (true, ((string?)(output.TrimEnd(CarriageReturnCharacter, LineFeedCharacter)))) : (false, default(string?));
     }
 
     internal static async Task<string?> RunAsync(string executable, string[] arguments,
@@ -68,7 +68,7 @@ internal static partial class ScaleServerResourceProcess
         return (await ObserveAsync(process, output, error, exit, readers, budget)).Value;
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<string?>> ObserveAsync(Process process, Task<byte[]> output, Task<int> error,
+    private static async Task<(bool HasValue, string? Value)> ObserveAsync(Process process, Task<byte[]> output, Task<int> error,
         Task exit, Task readers, ScaleServerResourceSampleBudget budget)
     {
         const int SuccessfulExitCode = 0;
@@ -80,7 +80,7 @@ internal static partial class ScaleServerResourceProcess
             var bytes = await output;
             var diagnosticBytes = await error;
             budget.Charge(bytes.Length + diagnosticBytes);
-            return process.ExitCode == SuccessfulExitCode ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(Encoding.UTF8.GetString(bytes)))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ObserveAsync));
+            return process.ExitCode == SuccessfulExitCode ? (true, ((string?)(Encoding.UTF8.GetString(bytes)))) : (false, default(string?));
         }
         catch (Exception failure)
         {

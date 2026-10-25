@@ -112,18 +112,18 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         }
     }
 
-    private global::ManagedCode.Communication.Result<Candidate?> PrepareCandidate(byte[] key)
+    private (bool HasValue, Candidate? Value) PrepareCandidate(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
         if (!AtomicPartitionRosterKeyValidation.TryReadCandidate(key, out var partition)
             || partition is null)
         {
-            return global::ManagedCode.Communication.Result<Candidate?>.FailNotFound(nameof(PrepareCandidate));
+            return (false, default(Candidate?));
         }
 
         var rosterKey = AtomicPartitionRosterKeys.Partition(partition);
         var retained = candidates.ContainsKey(partition);
-        return ((Candidate?)(retained ? null : new(partition, rosterKey))) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<Candidate?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<Candidate?>.FailNotFound(nameof(PrepareCandidate));
+        return ((Candidate?)(retained ? null : new(partition, rosterKey))) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(Candidate?));
     }
 
     private void RetainCandidate(Candidate? candidate)

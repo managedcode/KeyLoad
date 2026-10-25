@@ -26,7 +26,7 @@ internal static class PostgresStreamOperations
         await command.ExecuteNonQueryAsync(cancellationToken);
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<FoundEvent?>> ReadAsync(NpgsqlConnection connection, BenchmarkDocument document,
+    internal static async Task<(bool HasValue, FoundEvent? Value)> ReadAsync(NpgsqlConnection connection, BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
         const int FirstColumnIndex = 0;
@@ -39,7 +39,7 @@ internal static class PostgresStreamOperations
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
-            return global::ManagedCode.Communication.Result<FoundEvent?>.FailNotFound(nameof(ReadAsync));
+            return (false, default(FoundEvent?));
         }
 
         var found = new FoundEvent(reader.GetGuid(FirstColumnIndex), checked((ulong)reader.GetInt64(SecondColumnIndex)), reader.GetString(ThirdColumnIndex));
@@ -48,7 +48,7 @@ internal static class PostgresStreamOperations
             throw new ComparisonFailureException(CardinalityFailure);
         }
 
-        return global::ManagedCode.Communication.Result<FoundEvent?>.Succeed(((FoundEvent?)(found)));
+        return (true, ((FoundEvent?)(found)));
     }
 
     private static NpgsqlCommand EventInsert(NpgsqlConnection connection, BenchmarkDocument document)

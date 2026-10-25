@@ -40,14 +40,14 @@ internal static class KeyLoadTimeSeriesIntensiveResult
         return new(code, status);
     }
 
-    private static global::ManagedCode.Communication.Result<ErrorCode?> ParseCode(string? raw)
+    private static (bool HasValue, ErrorCode? Value) ParseCode(string? raw)
     {
         if (raw is null || !Enum.TryParse<ErrorCode>(raw, ignoreCase: false, out var code)
             || !Enum.IsDefined(code) || !string.Equals(code.ToString(), raw, StringComparison.Ordinal))
         {
-            return global::ManagedCode.Communication.Result<ErrorCode?>.FailNotFound(nameof(ParseCode));
+            return (false, default(ErrorCode?));
         }
 
-        return global::ManagedCode.Communication.Result<ErrorCode?>.Succeed(((ErrorCode?)(code)));
+        return (true, ((ErrorCode?)(code)));
     }
 }

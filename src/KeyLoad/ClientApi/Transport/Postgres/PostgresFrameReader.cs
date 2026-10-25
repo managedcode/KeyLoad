@@ -9,13 +9,13 @@ internal static class PostgresFrameReader
     internal const int LengthBytes = sizeof(int);
     private const int TypedHeaderBytes = LengthBytes + sizeof(byte);
 
-    internal static async ValueTask<global::ManagedCode.Communication.Result<PostgresFrame?>> ReadAsync(PipeReader input, bool startup,
+    internal static async ValueTask<(bool HasValue, PostgresFrame? Value)> ReadAsync(PipeReader input, bool startup,
         int maximumBytes, PostgresRetainedAdmission admission, CancellationToken token)
     {
         var header = new byte[startup ? LengthBytes : TypedHeaderBytes];
         if (!await FillAsync(input, header, allowEmpty: true, token))
         {
-            return global::ManagedCode.Communication.Result<PostgresFrame?>.FailNotFound(nameof(ReadAsync));
+            return (false, default(PostgresFrame?));
         }
         var size = BinaryPrimitives.ReadInt32BigEndian(header.AsSpan(startup ? PostgresProtocol.FirstField : sizeof(byte), LengthBytes));
         if (size < LengthBytes)
@@ -33,7 +33,7 @@ internal static class PostgresFrameReader
         {
             frame = new(startup ? PostgresProtocol.StartupMessage : header[PostgresProtocol.FirstField], new byte[count], admission);
             _ = await FillAsync(input, frame.Payload, allowEmpty: false, token);
-            return frame;
+            return (true, frame);
         }
         catch (Exception primary)
         {

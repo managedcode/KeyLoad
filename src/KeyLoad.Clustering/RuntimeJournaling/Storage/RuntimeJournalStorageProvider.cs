@@ -85,7 +85,7 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
             && (minimum is null || string.CompareOrdinal(name, minimum) >= RuntimeJournalStoragePolicy.EqualOrdinalComparison)
             && (maximum is null || string.CompareOrdinal(name, maximum) <= RuntimeJournalStoragePolicy.EqualOrdinalComparison);
 
-    private static global::ManagedCode.Communication.Result<string?> FilterValue(JournalId id) => id.IsDefault ? global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(FilterValue)) : global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(id.Value)));
+    private static (bool HasValue, string? Value) FilterValue(JournalId id) => id.IsDefault ? (false, default(string?)) : (true, ((string?)(id.Value)));
 
     private static SemaphoreSlim[] CreateGates(int count)
     {

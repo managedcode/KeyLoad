@@ -114,9 +114,9 @@ internal static class RuntimeJournalValidation
         }
     }
 
-    private static global::ManagedCode.Communication.Result<string?> EffectiveOwner(IReadOnlyDictionary<string, string> properties)
+    private static (bool HasValue, string? Value) EffectiveOwner(IReadOnlyDictionary<string, string> properties)
         => (properties.TryGetValue(Contracts.RuntimeJournalProtocol.OwnerProperty, out var owner)
-            && owner.Length != RuntimeJournalProtocol.EmptyCount ? owner : null) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(EffectiveOwner));
+            && owner.Length != RuntimeJournalProtocol.EmptyCount ? owner : null) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(string?));
 
     private static bool EffectivePoison(IReadOnlyDictionary<string, string> properties)
     {

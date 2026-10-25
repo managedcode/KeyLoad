@@ -88,7 +88,7 @@ internal static class ProductionSourceManifestProcess
             };
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<ProductionSourceManifestProcessResult?>> RunStartedAsync(
+    private static async Task<(bool HasValue, ProductionSourceManifestProcessResult? Value)> RunStartedAsync(
         Process process, TestExecutionOptions options, TimeProvider timeProvider, List<Exception> failures,
         CancellationToken deadline, CancellationToken caller)
     {
@@ -122,10 +122,10 @@ internal static class ProductionSourceManifestProcess
         await cleanup.ConfirmExitAsync(process, options.ProcessExitPollInterval).ConfigureAwait(false);
         if (!original.IsCompletedSuccessfully || exit is null || output is null || error is null || failures.Count != 0)
         {
-            return global::ManagedCode.Communication.Result<ProductionSourceManifestProcessResult?>.FailNotFound(nameof(RunStartedAsync));
+            return (false, default(ProductionSourceManifestProcessResult?));
         }
         var captured = await Task.WhenAll(output, error).ConfigureAwait(false);
-        return global::ManagedCode.Communication.Result<ProductionSourceManifestProcessResult?>.Succeed((ProductionSourceManifestProcessResult?)(new(process.ExitCode, captured[0], captured[1],
+        return (true, (ProductionSourceManifestProcessResult?)(new(process.ExitCode, captured[0], captured[1],
             exit.IsCompletedSuccessfully, output.IsCompletedSuccessfully, error.IsCompletedSuccessfully, false)));
     }
 

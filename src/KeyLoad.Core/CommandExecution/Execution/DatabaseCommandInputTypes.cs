@@ -2,7 +2,7 @@ namespace KeyLoad.Core;
 /// <summary>Executes DatabaseCommandInputTypes operations against the caller's database context.</summary>
 public static class DatabaseCommandInputTypes
 {
-    internal static global::ManagedCode.Communication.Result<Type?> OperationPayloadType(OperationKind kind) => (kind switch
+    internal static (bool HasValue, Type? Value) OperationPayloadType(OperationKind kind) => (kind switch
     {
         OperationKind.Bm25CorpusPublicationPhase => typeof(global::KeyLoad.Core.Search.Bm25CorpusPublicationPhaseCommand),
         OperationKind.OnlineTextPublicationPhase => typeof(global::KeyLoad.Core.Search.OnlineTextPublicationPhaseCommand),
@@ -31,5 +31,5 @@ public static class DatabaseCommandInputTypes
         OperationKind.ReleaseProjectionConsumer => typeof(ReleaseProjectionConsumerRequest),
         OperationKind.PurgeOutbox => typeof(PurgeOutboxRequest),
         _ => null
-    }) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<Type?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<Type?>.FailNotFound(nameof(OperationPayloadType));
+    }) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(Type?));
 }

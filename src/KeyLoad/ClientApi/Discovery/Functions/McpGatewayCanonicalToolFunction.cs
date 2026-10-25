@@ -41,13 +41,13 @@ internal sealed class McpGatewayCanonicalToolFunction : AIFunction
         return result;
     }
 
-    private static global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?> ToJsonArguments(AIFunctionArguments arguments)
+    private static (bool HasValue, Dictionary<string, JsonElement>? Value) ToJsonArguments(AIFunctionArguments arguments)
     {
         const int EmptyArgumentsCount = 0;
 
         if (arguments.Count == EmptyArgumentsCount)
         {
-            return global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.FailNotFound(nameof(ToJsonArguments));
+            return (false, default(Dictionary<string, JsonElement>?));
         }
 
         var values = new Dictionary<string, JsonElement>(arguments.Count, StringComparer.Ordinal);
@@ -58,6 +58,6 @@ internal sealed class McpGatewayCanonicalToolFunction : AIFunction
                 : JsonSerializer.SerializeToElement(pair.Value, pair.Value?.GetType() ?? typeof(object)));
         }
 
-        return global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.Succeed(((Dictionary<string, JsonElement>?)(values)));
+        return (true, ((Dictionary<string, JsonElement>?)(values)));
     }
 }

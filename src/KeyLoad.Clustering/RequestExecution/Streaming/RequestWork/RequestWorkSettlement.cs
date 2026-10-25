@@ -5,54 +5,54 @@ namespace KeyLoad.Clustering;
 /// <summary>Preserves cancellation, join and disposal failures while settling one work owner.</summary>
 internal static class RequestWorkSettlement
 {
-    internal static global::ManagedCode.Communication.Result<Exception?> Observe(Action action)
+    internal static (bool HasValue, Exception? Value) Observe(Action action)
     {
         try
         {
             action();
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Observe));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<Exception?>> CancelAsync(CancellationTokenSource source)
+    internal static async Task<(bool HasValue, Exception? Value)> CancelAsync(CancellationTokenSource source)
     {
         try
         {
             await source.CancelAsync();
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CancelAsync));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<Exception?>> JoinAsync(Task task)
+    internal static async Task<(bool HasValue, Exception? Value)> JoinAsync(Task task)
     {
         try
         {
             await task;
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(JoinAsync));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 

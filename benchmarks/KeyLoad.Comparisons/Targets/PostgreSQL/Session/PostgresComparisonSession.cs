@@ -38,7 +38,7 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
         }
     }
 
-    public Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         => PostgresDocumentOperations.ReadAsync(connection, document, cancellationToken);
 
     public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)

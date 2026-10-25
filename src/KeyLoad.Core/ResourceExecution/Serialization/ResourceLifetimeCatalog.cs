@@ -16,14 +16,14 @@ internal static class ResourceLifetimeCatalog
         => KeyCodec.Encode(LifetimeSpace, tenantId, databaseId, resourceName);
 
     /// <summary>Reads a validated pair; only the complete absence of both records is an absent resource.</summary>
-    internal static global::ManagedCode.Communication.Result<ResourceLifetime?> Read(IKeyValueView view, string tenantId, string databaseId,
+    internal static (bool HasValue, ResourceLifetime? Value) Read(IKeyValueView view, string tenantId, string databaseId,
         string resourceName, ResourceDefinition? definition)
     {
         ArgumentNullException.ThrowIfNull(view);
         var lifetime = view.GetRecord<ResourceLifetime>(Key(tenantId, databaseId, resourceName));
         if (definition is null && lifetime is null)
         {
-            return global::ManagedCode.Communication.Result<ResourceLifetime?>.FailNotFound(nameof(Read));
+            return (false, default(ResourceLifetime?));
         }
         if (definition is null || lifetime is null
             || !string.Equals(definition.Name, resourceName, StringComparison.Ordinal))
@@ -31,7 +31,7 @@ internal static class ResourceLifetimeCatalog
             throw Errors.Fail(ErrorCode.Corruption, InvalidPair);
         }
         ResourceLifetimeIdentity.Validate(lifetime, tenantId, databaseId, definition);
-        return global::ManagedCode.Communication.Result<ResourceLifetime?>.Succeed(((ResourceLifetime?)(lifetime)));
+        return (true, ((ResourceLifetime?)(lifetime)));
     }
 
     /// <summary>Stages a new server-derived lifetime; the caller stages its definition in this same transaction.</summary>

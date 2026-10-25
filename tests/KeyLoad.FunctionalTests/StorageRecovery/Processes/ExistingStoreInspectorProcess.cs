@@ -40,7 +40,7 @@ internal static class ExistingStoreInspectorProcess
             ownerReleased, cleanupWarningExceeded);
     }
 
-    private static global::ManagedCode.Communication.Result<ExistingStoreInspectionReceipt?> ReadReceipt(string output, string error, int exitCode, bool canceled, long outputCharacters)
+    private static (bool HasValue, ExistingStoreInspectionReceipt? Value) ReadReceipt(string output, string error, int exitCode, bool canceled, long outputCharacters)
     {
         if (canceled)
         {
@@ -48,7 +48,7 @@ internal static class ExistingStoreInspectorProcess
             {
                 throw new InvalidDataException(MissingReceiptMessage);
             }
-            return global::ManagedCode.Communication.Result<ExistingStoreInspectionReceipt?>.FailNotFound(nameof(ReadReceipt));
+            return (false, default(ExistingStoreInspectionReceipt?));
         }
         if (exitCode == ProtocolErrorExitCode)
         {
@@ -56,7 +56,7 @@ internal static class ExistingStoreInspectorProcess
             {
                 throw new InvalidDataException(MissingReceiptMessage);
             }
-            return global::ManagedCode.Communication.Result<ExistingStoreInspectionReceipt?>.FailNotFound(nameof(ReadReceipt));
+            return (false, default(ExistingStoreInspectionReceipt?));
         }
         if (output.Length == 0)
         {
@@ -70,7 +70,7 @@ internal static class ExistingStoreInspectorProcess
         {
             throw new InvalidDataException(MissingReceiptMessage);
         }
-        return global::ManagedCode.Communication.Result<ExistingStoreInspectionReceipt?>.Succeed(((ExistingStoreInspectionReceipt?)(JsonSerializer.Deserialize<ExistingStoreInspectionReceipt>(output, ExistingStoreInspectorProtocol.JsonOptions)
+        return (true, ((ExistingStoreInspectionReceipt?)(JsonSerializer.Deserialize<ExistingStoreInspectionReceipt>(output, ExistingStoreInspectorProtocol.JsonOptions)
             ?? throw new InvalidDataException(MissingReceiptMessage))));
     }
 }

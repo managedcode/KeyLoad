@@ -77,11 +77,11 @@ public static class DocumentStorageExecutionDocuments
         }
     }
 
-    internal static global::ManagedCode.Communication.Result<object?[]?> IndexValues(string json, IndexDefinition index)
+    internal static (bool HasValue, object?[]? Value) IndexValues(string json, IndexDefinition index)
     {
         using var document = JsonDocument.Parse(json);
         var values = index.Fields.Select(f => JsonData.Scalar(document.RootElement, f)).ToArray();
-        return ((object?[]?)(values.Any(v => v is null && !index.IncludeNull || v is MissingValue && !index.IncludeMissing) ? null : values)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<object?[]?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<object?[]?>.FailNotFound(nameof(IndexValues));
+        return ((object?[]?)(values.Any(v => v is null && !index.IncludeNull || v is MissingValue && !index.IncludeMissing) ? null : values)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(object?[]?));
     }
 
     internal static byte[] IndexKey(PartitionRef partition, string collection, IndexDefinition index, object?[] values, string id) => KeySpace.Partition(nameof(index), partition, new object?[] { collection, index.Name }.Concat(values).Append(id).ToArray());
@@ -177,7 +177,7 @@ public static class DocumentStorageExecutionDocuments
     /// <returns>The visible record, or null when unavailable.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    public static global::ManagedCode.Communication.Result<DocumentRecord?> ReadVisibleDocument(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, EntityRef reference)
+    public static (bool HasValue, DocumentRecord? Value) ReadVisibleDocument(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, EntityRef reference)
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(view);
@@ -191,7 +191,7 @@ public static class DocumentStorageExecutionDocuments
             EntityReferenceLifetime.RequireStored(view, document.Reference, resource);
         }
 
-        return ((DocumentRecord?)(document is { Deleted: false } && engine.Authorization.CanReadRow(principal, document.Access) ? document : null)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<DocumentRecord?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<DocumentRecord?>.FailNotFound(nameof(ReadVisibleDocument));
+        return ((DocumentRecord?)(document is { Deleted: false } && engine.Authorization.CanReadRow(principal, document.Access) ? document : null)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(DocumentRecord?));
     }
 
     /// <summary>Runs a callback over visible documents after resource authorization.</summary>

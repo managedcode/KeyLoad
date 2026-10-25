@@ -60,15 +60,15 @@ internal sealed class SourceManifestChildOriginals
         await cleanup.ConfirmExitAsync(process, options.ProcessExitPollInterval).ConfigureAwait(false);
     }
 
-    internal async Task<global::ManagedCode.Communication.Result<SourceManifestChildJoined?>> JoinedAsync(Process process, bool pending,
+    internal async Task<(bool HasValue, SourceManifestChildJoined? Value)> JoinedAsync(Process process, bool pending,
         List<Exception> failures, CancellationToken caller)
     {
         if (Original is null || Exit is null || Ready is null || Output is null || Error is null)
         {
-            return global::ManagedCode.Communication.Result<SourceManifestChildJoined?>.FailNotFound(nameof(JoinedAsync));
+            return (false, default(SourceManifestChildJoined?));
         }
         await ObserveSettlementFailuresAsync(Original, Exit, Ready, Output, Error, failures).ConfigureAwait(false);
-        return global::ManagedCode.Communication.Result<SourceManifestChildJoined?>.Succeed((SourceManifestChildJoined?)(new(Original, Exit, Output, Error, Ready.IsCompletedSuccessfully ? await Ready.ConfigureAwait(false) ?? string.Empty : string.Empty,
+        return (true, (SourceManifestChildJoined?)(new(Original, Exit, Output, Error, Ready.IsCompletedSuccessfully ? await Ready.ConfigureAwait(false) ?? string.Empty : string.Empty,
             Output.IsCompletedSuccessfully ? await Output.ConfigureAwait(false) : string.Empty,
             Error.IsCompletedSuccessfully ? await Error.ConfigureAwait(false) : string.Empty,
             pending, process.HasExited, false, false, failures, caller)));

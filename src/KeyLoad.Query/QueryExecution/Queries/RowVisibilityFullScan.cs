@@ -54,9 +54,9 @@ internal static class RowVisibilityFullScan
             throw;
         }
     }
-    private static global::ManagedCode.Communication.Result<RowVisibilityDraft?> BeginMissing(RowVisibilityCache cache, RowVisibilityScope scope, RowVisibilityLease? lease,
+    private static (bool HasValue, RowVisibilityDraft? Value) BeginMissing(RowVisibilityCache cache, RowVisibilityScope scope, RowVisibilityLease? lease,
         bool partial)
-        => lease is null && !partial ? ((RowVisibilityDraft?)((cache.Begin(scope)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RowVisibilityDraft?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RowVisibilityDraft?>.FailNotFound(nameof(BeginMissing)) : global::ManagedCode.Communication.Result<RowVisibilityDraft?>.FailNotFound(nameof(BeginMissing));
+        => lease is null && !partial ? ((RowVisibilityDraft?)((cache.Begin(scope)).Value)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(RowVisibilityDraft?)) : (false, default(RowVisibilityDraft?));
 
     private static StorageScanResult ScanOriginal(DatabaseEngine database, PrincipalRecord principal,
         ReadExecutionBudget budget, RowVisibilityLease? lease, RowVisibilityDraft? draft,

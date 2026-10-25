@@ -124,7 +124,7 @@ internal sealed class RuntimeJournalClient(
         return codecFactory();
     }
 
-    private static global::ManagedCode.Communication.Result<T?> Decode<T>(GrainOperationReply reply, bool allowNull = false) where T : class
+    private static (bool HasValue, T? Value) Decode<T>(GrainOperationReply reply, bool allowNull = false) where T : class
     {
         if (reply.Error is { } error)
         {
@@ -134,10 +134,10 @@ internal sealed class RuntimeJournalClient(
         var value = GrainPayload.Read<GrainValue>(reply.Payload).Value;
         if (value is null && allowNull)
         {
-            return global::ManagedCode.Communication.Result<T?>.FailNotFound(nameof(Decode));
+            return (false, default(T?));
         }
 
-        return global::ManagedCode.Communication.Result<T?>.Succeed(((T?)(value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply))));
+        return (true, ((T?)(value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply))));
     }
 
     private static IOptions<RuntimeJournalOptions> ValidateOptions(IOptions<RuntimeJournalOptions> configuredOptions)

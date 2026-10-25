@@ -44,8 +44,8 @@ internal static class SampleRangeReader
         return result;
     }
 
-    private static global::ManagedCode.Communication.Result<byte[]?> SampleUpperBound(ReadSamplesRequest request)
+    private static (bool HasValue, byte[]? Value) SampleUpperBound(ReadSamplesRequest request)
         => (request.Until.UtcTicks == DateTimeOffset.MaxValue.UtcTicks ? null
             : KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId,
-                new DateTimeOffset(request.Until.UtcTicks + NextTimestampTick, TimeSpan.Zero))) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<byte[]?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(SampleUpperBound));
+                new DateTimeOffset(request.Until.UtcTicks + NextTimestampTick, TimeSpan.Zero))) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(byte[]?));
 }

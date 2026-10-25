@@ -54,7 +54,7 @@ internal sealed class KurrentSession(KurrentDBClient client, KurrentTarget targe
         }
     }
 
-    public Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         => throw new NotSupportedException(KurrentConstants.UnsupportedScenario);
 
     public ValueTask DisposeAsync() => ValueTask.CompletedTask;

@@ -53,40 +53,40 @@ internal static class SiteIsolatedOracle
                 profile.GetProperty(SiteIsolatedFields.Cluster).GetProperty(SiteIsolatedFields.State).GetString()! }
                 .Any(value => Regex.IsMatch(value, "unverified|unobserved|unknown|not recorded", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant));
 
-    private static global::ManagedCode.Communication.Result<JsonElement?> SelectedLane(JsonElement report, string[] parts)
+    private static (bool HasValue, JsonElement? Value) SelectedLane(JsonElement report, string[] parts)
     {
         var lanes = report.GetProperty(SiteIsolatedFields.Lanes).EnumerateArray().ToArray();
         return parts.Length == 2 ? ((JsonElement?)(lanes.Cast<JsonElement?>()
-            .SingleOrDefault(item => item!.Value.GetProperty(SiteIsolatedFields.Id).GetString() == parts[1]))) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<JsonElement?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<JsonElement?>.FailNotFound(nameof(SelectedLane))
-            : lanes.Length == 1 ? global::ManagedCode.Communication.Result<JsonElement?>.Succeed(((JsonElement?)(lanes[0]))) : global::ManagedCode.Communication.Result<JsonElement?>.FailNotFound(nameof(SelectedLane));
+            .SingleOrDefault(item => item!.Value.GetProperty(SiteIsolatedFields.Id).GetString() == parts[1]))) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(JsonElement?))
+            : lanes.Length == 1 ? (true, ((JsonElement?)(lanes[0]))) : (false, default(JsonElement?));
     }
 
-    private static global::ManagedCode.Communication.Result<double?> Value(JsonElement report, JsonElement? lane, string status, bool qualified, string metric)
+    private static (bool HasValue, double? Value) Value(JsonElement report, JsonElement? lane, string status, bool qualified, string metric)
     {
         if (status != "measured" || !qualified)
         {
-            return global::ManagedCode.Communication.Result<double?>.FailNotFound(nameof(Value));
+            return (false, default(double?));
         }
 
         return metric == "duration"
-            ? global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(lane?.GetProperty(SiteIsolatedFields.Measurement).GetProperty(SiteIsolatedFields.ElapsedSeconds).GetDouble()
+            ? (true, ((double?)(lane?.GetProperty(SiteIsolatedFields.Measurement).GetProperty(SiteIsolatedFields.ElapsedSeconds).GetDouble()
                 ?? report.GetProperty(SiteIsolatedFields.ElapsedSeconds).GetDouble())))
-            : lane is null ? global::ManagedCode.Communication.Result<double?>.FailNotFound(nameof(Value)) : ((double?)((Metric(lane.Value.GetProperty(SiteIsolatedFields.Measurement), metric)).Value)) is { } outcomeValue4 ? global::ManagedCode.Communication.Result<double?>.Succeed(outcomeValue4) : global::ManagedCode.Communication.Result<double?>.FailNotFound(nameof(Value));
+            : lane is null ? (false, default(double?)) : ((double?)((Metric(lane.Value.GetProperty(SiteIsolatedFields.Measurement), metric)).Value)) is { } outcomeValue4 ? (true, outcomeValue4) : (false, default(double?));
     }
 
-    private static global::ManagedCode.Communication.Result<double?> Metric(JsonElement measurement, string metric)
+    private static (bool HasValue, double? Value) Metric(JsonElement measurement, string metric)
     {
         var resources = measurement.GetProperty(SiteIsolatedFields.ClientResources);
         var attempts = measurement.GetProperty(SiteIsolatedFields.Attempts).GetDouble();
         return metric switch
         {
-            "throughput" => global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(measurement.GetProperty(SiteIsolatedFields.UsefulOperationsPerSecond).GetDouble()))),
-            "p50" or "p95" or "p99" => global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(measurement.GetProperty(SiteIsolatedFields.Latency).GetProperty(metric + SiteIsolatedFields.Ms).GetDouble()))),
-            "errors" => attempts == 0 ? global::ManagedCode.Communication.Result<double?>.Succeed((double?)(0)) : global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(measurement.GetProperty(SiteIsolatedFields.Failures).GetDouble() / attempts * 100))),
-            "enqueue" or "receive" or "ack" => measurement.GetProperty(metric).ValueKind == JsonValueKind.Null ? global::ManagedCode.Communication.Result<double?>.FailNotFound(nameof(Metric)) : global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(measurement.GetProperty(metric).GetProperty(SiteIsolatedFields.P99Ms).GetDouble()))),
-            "cpu" => resources.ValueKind == JsonValueKind.Null || attempts == 0 ? global::ManagedCode.Communication.Result<double?>.FailNotFound(nameof(Metric)) : global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(resources.GetProperty(SiteIsolatedFields.CpuSeconds).GetDouble() * 1000 / attempts))),
-            "alloc" => resources.ValueKind == JsonValueKind.Null || attempts == 0 ? global::ManagedCode.Communication.Result<double?>.FailNotFound(nameof(Metric)) : global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(resources.GetProperty(SiteIsolatedFields.AllocatedBytes).GetDouble() / 1024 / attempts))),
-            "rss" => resources.ValueKind == JsonValueKind.Null ? global::ManagedCode.Communication.Result<double?>.FailNotFound(nameof(Metric)) : global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(resources.GetProperty(SiteIsolatedFields.PeakObservedWorkingSetBytes).GetDouble() / 1048576))),
+            "throughput" => (true, ((double?)(measurement.GetProperty(SiteIsolatedFields.UsefulOperationsPerSecond).GetDouble()))),
+            "p50" or "p95" or "p99" => (true, ((double?)(measurement.GetProperty(SiteIsolatedFields.Latency).GetProperty(metric + SiteIsolatedFields.Ms).GetDouble()))),
+            "errors" => attempts == 0 ? (true, (double?)(0)) : (true, ((double?)(measurement.GetProperty(SiteIsolatedFields.Failures).GetDouble() / attempts * 100))),
+            "enqueue" or "receive" or "ack" => measurement.GetProperty(metric).ValueKind == JsonValueKind.Null ? (false, default(double?)) : (true, ((double?)(measurement.GetProperty(metric).GetProperty(SiteIsolatedFields.P99Ms).GetDouble()))),
+            "cpu" => resources.ValueKind == JsonValueKind.Null || attempts == 0 ? (false, default(double?)) : (true, ((double?)(resources.GetProperty(SiteIsolatedFields.CpuSeconds).GetDouble() * 1000 / attempts))),
+            "alloc" => resources.ValueKind == JsonValueKind.Null || attempts == 0 ? (false, default(double?)) : (true, ((double?)(resources.GetProperty(SiteIsolatedFields.AllocatedBytes).GetDouble() / 1024 / attempts))),
+            "rss" => resources.ValueKind == JsonValueKind.Null ? (false, default(double?)) : (true, ((double?)(resources.GetProperty(SiteIsolatedFields.PeakObservedWorkingSetBytes).GetDouble() / 1048576))),
             _ => throw new ArgumentOutOfRangeException(nameof(metric))
         };
     }

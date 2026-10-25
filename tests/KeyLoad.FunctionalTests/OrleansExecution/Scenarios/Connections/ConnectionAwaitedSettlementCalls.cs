@@ -67,14 +67,14 @@ internal static class ConnectionAwaitedSettlementCalls
         }
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<Exception?>> FailureAsync(Task<GrainOperationReply> original)
+    internal static async Task<(bool HasValue, Exception? Value)> FailureAsync(Task<GrainOperationReply> original)
     {
         try
         {
             await original;
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(FailureAsync));
+            return (false, default(Exception?));
         }
-        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error))); }
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { return (true, ((Exception?)(error))); }
     }
     internal static async Task JoinOriginalAsync(Task original, Exception? primary,
         bool allowCancellation = false, bool expectedFailure = false)

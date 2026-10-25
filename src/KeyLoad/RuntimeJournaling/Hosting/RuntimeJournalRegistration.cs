@@ -72,7 +72,7 @@ internal static class RuntimeJournalRegistration
         execution.ShouldRetry = (context, error) => (Retry(context, error, settings, clock)).Value;
     }
 
-    private static global::ManagedCode.Communication.Result<DateTimeOffset?> Retry(IJobRunContext context, Exception error, RuntimeDurableJobOptions settings, TimeProvider clock)
+    private static (bool HasValue, DateTimeOffset? Value) Retry(IJobRunContext context, Exception error, RuntimeDurableJobOptions settings, TimeProvider clock)
     {
         if (context.DequeueCount >= settings.MaximumAttempts
             || error is KeyLoadException
@@ -81,9 +81,9 @@ internal static class RuntimeJournalRegistration
                 or ErrorCode.Validation or ErrorCode.Corruption or ErrorCode.FormatUnsupported
             })
         {
-            return global::ManagedCode.Communication.Result<DateTimeOffset?>.FailNotFound(nameof(Retry));
+            return (false, default(DateTimeOffset?));
         }
-        return global::ManagedCode.Communication.Result<DateTimeOffset?>.Succeed(((DateTimeOffset?)(clock.GetUtcNow() + settings.RetryDelay)));
+        return (true, ((DateTimeOffset?)(clock.GetUtcNow() + settings.RetryDelay)));
     }
 }
 #pragma warning restore ORLEANSEXP005

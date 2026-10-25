@@ -5,12 +5,12 @@ namespace KeyLoad.Core;
 /// <summary>Executes OnlineTextImplicitCurrent operations against the caller's database context.</summary>
 public static class OnlineTextImplicitCurrent
 {
-    internal static global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?> ReadOnlineTextImplicitCurrent(this DatabaseEngine engine, IKeyValueView raw, PrincipalRecord principal, PartitionRef partition, string collection, string field, Guid nodeId, ReadExecutionBudget budget)
+    internal static (bool HasValue, OnlineTextCurrentPublication? Value) ReadOnlineTextImplicitCurrent(this DatabaseEngine engine, IKeyValueView raw, PrincipalRecord principal, PartitionRef partition, string collection, string field, Guid nodeId, ReadExecutionBudget budget)
     {
         budget.Check();
         if (!principal.ClusterAdministrator)
         {
-            return global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.FailNotFound(nameof(ReadOnlineTextImplicitCurrent));
+            return (false, default(OnlineTextCurrentPublication?));
         }
 
         OnlineTextCurrentPublication? selected = null;
@@ -46,6 +46,6 @@ public static class OnlineTextImplicitCurrent
             return true;
         });
 
-        return ((OnlineTextCurrentPublication?)(selected)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.FailNotFound(nameof(ReadOnlineTextImplicitCurrent));
+        return ((OnlineTextCurrentPublication?)(selected)) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(OnlineTextCurrentPublication?));
     }
 }

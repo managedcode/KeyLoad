@@ -215,5 +215,5 @@ public sealed class SurrealDbVectorTarget(HttpClient http, string image, string 
     /// <inheritdoc/>
     public IAsyncEnumerable<VectorReadback> ReadbackAsync(CancellationToken cancellationToken) => SurrealDbVectorStorage.ReadbackAsync(http, table, Policy, corpusCount, timeProvider, cancellationToken);
     /// <inheritdoc/>
-    public Task<global::ManagedCode.Communication.Result<VectorReadback?>> ReadAsync(string id, CancellationToken cancellationToken) => SurrealDbVectorStorage.ReadAsync(http, table, Policy, id, cancellationToken: cancellationToken, timeProvider: timeProvider);
+    public Task<(bool HasValue, VectorReadback? Value)> ReadAsync(string id, CancellationToken cancellationToken) => SurrealDbVectorStorage.ReadAsync(http, table, Policy, id, cancellationToken: cancellationToken, timeProvider: timeProvider);
 }

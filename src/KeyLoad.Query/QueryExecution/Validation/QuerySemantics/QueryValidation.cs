@@ -123,17 +123,17 @@ internal static class QueryValidation
             query.ModelSource.Kind == ModelQuerySourceKind.Events ? InvalidEventJoinSource : InvalidQueueJoinSource);
     }
 
-    private static global::ManagedCode.Communication.Result<InnerJoinClause?> NormalizeJoin(InnerJoinClause? join)
+    private static (bool HasValue, InnerJoinClause? Value) NormalizeJoin(InnerJoinClause? join)
     {
         if (join is null)
         {
-            return global::ManagedCode.Communication.Result<InnerJoinClause?>.FailNotFound(nameof(NormalizeJoin));
+            return (false, default(InnerJoinClause?));
         }
         JsonData.Identifier(join.Collection);
         JsonData.Identifier(join.Alias);
         var leftPath = CanonicalPath(join.LeftKeyPath);
         var rightPath = CanonicalPath(join.RightKeyPath);
-        return global::ManagedCode.Communication.Result<InnerJoinClause?>.Succeed(((InnerJoinClause?)(join with
+        return (true, ((InnerJoinClause?)(join with
         {
             LeftKeyPath = leftPath,
             RightKeyPath = rightPath
@@ -178,8 +178,8 @@ internal static class QueryValidation
         }
     }
 
-    private static global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?> NormalizeParameters(Dictionary<string, JsonElement>? parameters,
-        QueryPredicateNormalizer predicates) => parameters is not { Count: > EmptyElementCount } ? global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.FailNotFound(nameof(NormalizeParameters)) : global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.Succeed(((Dictionary<string, JsonElement>?)(parameters.ToDictionary(item =>
+    private static (bool HasValue, Dictionary<string, JsonElement>? Value) NormalizeParameters(Dictionary<string, JsonElement>? parameters,
+        QueryPredicateNormalizer predicates) => parameters is not { Count: > EmptyElementCount } ? (false, default(Dictionary<string, JsonElement>?)) : (true, ((Dictionary<string, JsonElement>?)(parameters.ToDictionary(item =>
     {
         JsonData.Identifier(item.Key);
         return item.Key;

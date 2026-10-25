@@ -16,19 +16,19 @@ public static class OnlineTextOriginalOutcome
         var principal = engine.Principal(view, principalId, engine.EvaluationClock.GetUtcNow());
         return (engine.ReadOnlineTextOriginalOutcome(view, principal, request, budget)).Value;
     });
-    internal static global::ManagedCode.Communication.Result<Result<object>?> ReadOnlineTextOriginalOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
+    internal static (bool HasValue, Result<object>? Value) ReadOnlineTextOriginalOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
     {
         engine.RequireOnlineTextOriginalAuthority(view, principal, request);
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var previous = CommandOutcomeKeyResolver.Select(view, principal.Id, request.CommandId, scope).Outcome;
         if (previous is null)
         {
-            return global::ManagedCode.Communication.Result<Result<object>?>.FailNotFound(nameof(ReadOnlineTextOriginalOutcome));
+            return (false, default(Result<object>?));
         }
 
         engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous, budget);
         budget.Check();
-        return global::ManagedCode.Communication.Result<Result<object>?>.Succeed(((Result<object>?)(previous.Result)));
+        return (true, ((Result<object>?)(previous.Result)));
     }
 
     internal static OnlineTextCurrentPublication? ReadOnlineTextOriginalPublication(this DatabaseEngine engine, string principalId, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget) => engine.Store.Read(raw =>

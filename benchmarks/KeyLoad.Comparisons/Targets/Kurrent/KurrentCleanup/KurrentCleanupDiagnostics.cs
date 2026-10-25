@@ -65,12 +65,12 @@ internal sealed class KurrentCleanupDiagnostics(IOptions<ComparisonDiagnosticOpt
         return (KurrentCleanupFailureReason.Unknown, null);
     }
 
-    private static global::ManagedCode.Communication.Result<int?> RuntimeStatus(RpcException error)
+    private static (bool HasValue, int? Value) RuntimeStatus(RpcException error)
     {
         const int NoObservedItems = 0;
 
         var status = (int)error.StatusCode;
-        return status is >= NoObservedItems and <= MaximumGrpcStatus ? global::ManagedCode.Communication.Result<int?>.Succeed(((int?)(status))) : global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(RuntimeStatus));
+        return status is >= NoObservedItems and <= MaximumGrpcStatus ? (true, ((int?)(status))) : (false, default(int?));
     }
 
     internal void WriteFinal(KurrentCleanupDiagnostic diagnostic)

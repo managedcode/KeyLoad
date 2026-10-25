@@ -11,13 +11,13 @@ internal sealed class AnnStageStore(AnnRootLease root, IOptions<AnnExecutionOpti
     private const int Empty = 0;
     private readonly AnnExecutionOptions options = configured.Value;
 
-    internal global::ManagedCode.Communication.Result<global::KeyLoad.Clustering.AnnProjectionEnrollment?> ReadEnrollment(AnnMaintenanceRequest request)
+    internal (bool HasValue, global::KeyLoad.Clustering.AnnProjectionEnrollment? Value) ReadEnrollment(AnnMaintenanceRequest request)
     {
         var key = new AnnOwnedKey(request.Consumer, request.IndexGeneration);
         var entry = root.Receipt.OriginalOperations.SingleOrDefault(item => item.Key == key);
         if (entry is null)
         {
-            return global::ManagedCode.Communication.Result<global::KeyLoad.Clustering.AnnProjectionEnrollment?>.FailNotFound(nameof(ReadEnrollment));
+            return (false, default(global::KeyLoad.Clustering.AnnProjectionEnrollment?));
         }
         AnnOriginalResults.Require(entry);
         if (!AnnOriginalResults.SameRequest(entry.InitialRequest, request))
@@ -26,9 +26,9 @@ internal sealed class AnnStageStore(AnnRootLease root, IOptions<AnnExecutionOpti
         }
         if (entry.Released || !entry.InitialSettled || entry.PendingRequest is not null)
         {
-            return global::ManagedCode.Communication.Result<global::KeyLoad.Clustering.AnnProjectionEnrollment?>.FailNotFound(nameof(ReadEnrollment));
+            return (false, default(global::KeyLoad.Clustering.AnnProjectionEnrollment?));
         }
-        return global::ManagedCode.Communication.Result<global::KeyLoad.Clustering.AnnProjectionEnrollment?>.Succeed((global::KeyLoad.Clustering.AnnProjectionEnrollment?)(new(entry.InitialRequest,
+        return (true, (global::KeyLoad.Clustering.AnnProjectionEnrollment?)(new(entry.InitialRequest,
             entry.LastRequest ?? throw Errors.Fail(ErrorCode.Corruption, AnnProtocol.Corrupt),
             entry.LastResult ?? throw Errors.Fail(ErrorCode.Corruption, AnnProtocol.Corrupt))));
     }
@@ -37,11 +37,11 @@ internal sealed class AnnStageStore(AnnRootLease root, IOptions<AnnExecutionOpti
         ProjectionConsumerInfo configured, AnnSeed current)
         => root.AdmitOriginal(principal, request, configured, current, options);
 
-    internal global::ManagedCode.Communication.Result<CommitProjectionBatchRequest?> OriginalSettlementIntent(AnnMaintenanceRequest request)
+    internal (bool HasValue, CommitProjectionBatchRequest? Value) OriginalSettlementIntent(AnnMaintenanceRequest request)
     {
         var entry = root.Receipt.OriginalOperations.SingleOrDefault(value => value.Key == new AnnOwnedKey(request.Consumer, request.IndexGeneration));
         return entry is not null && AnnOriginalResults.SameRequest(entry.InitialRequest, request)
-            ? ((CommitProjectionBatchRequest?)(entry.InitialSettlementIntent)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<CommitProjectionBatchRequest?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<CommitProjectionBatchRequest?>.FailNotFound(nameof(OriginalSettlementIntent)) : global::ManagedCode.Communication.Result<CommitProjectionBatchRequest?>.FailNotFound(nameof(OriginalSettlementIntent));
+            ? ((CommitProjectionBatchRequest?)(entry.InitialSettlementIntent)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(CommitProjectionBatchRequest?)) : (false, default(CommitProjectionBatchRequest?));
     }
 
     internal void StartOriginal(AnnMaintenanceRequest request) => root.StartOriginal(request, options);

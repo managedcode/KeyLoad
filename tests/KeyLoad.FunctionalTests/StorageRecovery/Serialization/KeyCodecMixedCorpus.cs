@@ -31,18 +31,18 @@ internal static class KeyCodecMixedCorpus
         return entries;
     }
 
-    private static global::ManagedCode.Communication.Result<object?> CreateValue(int selector) => (selector % 10) switch
+    private static (bool HasValue, object? Value) CreateValue(int selector) => (selector % 10) switch
     {
-        0 => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(MissingValue.Instance))),
-        1 => global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(CreateValue)),
-        2 => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(selector / 10 % 2 == 1))),
-        3 => selector % 3 == 0 ? global::ManagedCode.Communication.Result<object?>.Succeed(((object?)((object)(int.MinValue + selector)))) : global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(ReadInteger(selector)))),
-        4 => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(CreateDecimal(selector)))),
-        5 => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)((long)(ReadEntropy(selector) % 2_000_000) / 100d - 10_000d))),
-        6 => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(CreateTimestamp(selector)))),
-        7 => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(CreateString(selector)))),
-        8 => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(GuidFrom(selector)))),
-        _ => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(CreateBytes(selector))))
+        0 => (true, ((object?)(MissingValue.Instance))),
+        1 => (false, default(object?)),
+        2 => (true, ((object?)(selector / 10 % 2 == 1))),
+        3 => selector % 3 == 0 ? (true, ((object?)((object)(int.MinValue + selector)))) : (true, ((object?)(ReadInteger(selector)))),
+        4 => (true, ((object?)(CreateDecimal(selector)))),
+        5 => (true, ((object?)((long)(ReadEntropy(selector) % 2_000_000) / 100d - 10_000d))),
+        6 => (true, ((object?)(CreateTimestamp(selector)))),
+        7 => (true, ((object?)(CreateString(selector)))),
+        8 => (true, ((object?)(GuidFrom(selector)))),
+        _ => (true, ((object?)(CreateBytes(selector))))
     };
 
     private static decimal CreateDecimal(int selector)

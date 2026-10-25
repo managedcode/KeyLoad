@@ -95,14 +95,14 @@ internal static class PostgresVectorStorage
         }
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<VectorReadback?>> ReadAsync(NpgsqlDataSource source, string id, CancellationToken cancellationToken)
+    internal static async Task<(bool HasValue, VectorReadback? Value)> ReadAsync(NpgsqlDataSource source, string id, CancellationToken cancellationToken)
     {
         await using var connection = await source.OpenConnectionAsync(cancellationToken).ConfigureAwait(false);
         await using var command = connection.CreateCommand();
         command.CommandText = ReadOneSql;
         command.Parameters.AddWithValue(id);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-        return await reader.ReadAsync(cancellationToken).ConfigureAwait(false) ? global::ManagedCode.Communication.Result<VectorReadback?>.Succeed(((VectorReadback?)(ToReadback(reader)))) : global::ManagedCode.Communication.Result<VectorReadback?>.FailNotFound(nameof(ReadAsync));
+        return await reader.ReadAsync(cancellationToken).ConfigureAwait(false) ? (true, ((VectorReadback?)(ToReadback(reader)))) : (false, default(VectorReadback?));
     }
 
     internal static string VectorLiteral(ReadOnlySpan<float> vector, int vectorComponentBuilderCapacity)

@@ -18,24 +18,24 @@ public static class QueueDeadline
         }
     }
 
-    internal static global::ManagedCode.Communication.Result<QueueRetryInput?> ReadQueueDeadlineRetryInput(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, DateTimeOffset evaluatedAt, AdvanceQueueDeadline request)
+    internal static (bool HasValue, QueueRetryInput? Value) ReadQueueDeadlineRetryInput(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, DateTimeOffset evaluatedAt, AdvanceQueueDeadline request)
     {
         if (request.Kind != QueueDeadlineKind.ExpireLease)
         {
-            return global::ManagedCode.Communication.Result<QueueRetryInput?>.FailNotFound(nameof(ReadQueueDeadlineRetryInput));
+            return (false, default(QueueRetryInput?));
         }
 
         var lane = new QueueLaneRef(partition, request.Queue);
         var resource = engine.Resource(view, partition, request.Queue, ResourceKind.WorkQueue);
         if (resource.Paused || engine.DispatchPaused(view) || resource.QueuePolicy.RetryJitter != QueueRetryJitter.Full)
         {
-            return global::ManagedCode.Communication.Result<QueueRetryInput?>.FailNotFound(nameof(ReadQueueDeadlineRetryInput));
+            return (false, default(QueueRetryInput?));
         }
 
         var metadata = MessagingValidationQueueDeadlines.RequireQueueDeadlineState(view, lane, request, evaluatedAt);
         if (metadata.ExpiresAt <= evaluatedAt || metadata.Attempts >= resource.QueuePolicy.MaxAttempts)
         {
-            return global::ManagedCode.Communication.Result<QueueRetryInput?>.FailNotFound(nameof(ReadQueueDeadlineRetryInput));
+            return (false, default(QueueRetryInput?));
         }
 
         var key = MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.LeasedQueueSpace, lane, request.ExpectedDeadline, metadata.Id);
@@ -45,6 +45,6 @@ public static class QueueDeadline
         }
 
         QueueDueAuthority.RequireCurrentQueueDueEntry(lane, metadata, evaluatedAt, leased: true, key);
-        return global::ManagedCode.Communication.Result<QueueRetryInput?>.Succeed(((QueueRetryInput?)(new(lane, resource.QueuePolicy, metadata, key))));
+        return (true, ((QueueRetryInput?)(new(lane, resource.QueuePolicy, metadata, key))));
     }
 }

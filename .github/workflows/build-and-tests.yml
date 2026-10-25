@@ -81,13 +81,13 @@ jobs:
       - name: Build
         run: dotnet build KeyLoad.slnx -warnaserror
       - name: Test functional operations
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/TestResults"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/ci-results"
       - name: Save test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-functional-${{ matrix.shard }}
-          path: TestResults
+          path: tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/ci-results
           if-no-files-found: warn
           retention-days: 30
           overwrite: true
@@ -106,16 +106,18 @@ jobs:
       - name: Build
         run: dotnet build KeyLoad.slnx -warnaserror
       - name: Test code analyzers
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run compiler-analyzers --results-directory "$GITHUB_WORKSPACE/TestResults"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run compiler-analyzers --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0/ci-results"
       - name: Test process recovery
         if: ${{ !cancelled() }}
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run process-crash-recovery --results-directory "$GITHUB_WORKSPACE/TestResults"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run process-crash-recovery --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ProcessRecoveryTests/bin/Debug/net10.0/ci-results"
       - name: Save test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-analyzers-recovery
-          path: TestResults
+          path: |
+            tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0/ci-results
+            tests/KeyLoad.ProcessRecoveryTests/bin/Debug/net10.0/ci-results
           if-no-files-found: warn
           retention-days: 30
           overwrite: true
@@ -148,14 +150,27 @@ jobs:
         if: ${{ matrix.playwright }}
         shell: pwsh
         run: tests/KeyLoad.ClusterTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
+      - name: Trust development HTTPS in Chromium
+        if: ${{ matrix.playwright }}
+        run: |
+          sudo apt-get install --yes --no-install-recommends libnss3-tools
+          mkdir -p "$HOME/.local/share/pki/nssdb"
+          if [ ! -f "$HOME/.local/share/pki/nssdb/cert9.db" ]; then
+            certutil -N --empty-password -d "sql:$HOME/.local/share/pki/nssdb"
+          fi
+          export DOTNET_DEV_CERTS_NSSDB_PATHS="$HOME/.local/share/pki/nssdb"
+          dotnet dev-certs https --trust --verbose
+          dotnet dev-certs https --check --trust --verbose
       - name: Test Aspire topology lanes
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/TestResults"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ClusterTests/bin/Debug/net10.0/ci-results"
       - name: Save test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-cluster-${{ matrix.shard }}
-          path: TestResults
+          path: |
+            tests/KeyLoad.ClusterTests/bin/Debug/net10.0/ci-results
+            tests/KeyLoad.ClusterTests/bin/Debug/net10.0/aspire-diagnostics-*.log
           if-no-files-found: warn
           retention-days: 30
           overwrite: true

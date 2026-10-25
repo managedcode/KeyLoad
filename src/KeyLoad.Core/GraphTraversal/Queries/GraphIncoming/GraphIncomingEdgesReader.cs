@@ -118,15 +118,15 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         return GraphIncomingReadScope.ReadGraphResource(view, grant, partition, request.Graph, budget);
     }
 
-    private global::ManagedCode.Communication.Result<ResourceDefinition?> TryRequireSourceGraphRead(PartitionRef partition)
+    private (bool HasValue, ResourceDefinition? Value) TryRequireSourceGraphRead(PartitionRef partition)
     {
         try
         {
-            return global::ManagedCode.Communication.Result<ResourceDefinition?>.Succeed(((ResourceDefinition?)(RequireGraphRead(partition))));
+            return (true, ((ResourceDefinition?)(RequireGraphRead(partition))));
         }
         catch (KeyLoadException error) when (error.Code is ErrorCode.PermissionDenied or ErrorCode.NotFound)
         {
-            return global::ManagedCode.Communication.Result<ResourceDefinition?>.FailNotFound(nameof(TryRequireSourceGraphRead));
+            return (false, default(ResourceDefinition?));
         }
     }
 

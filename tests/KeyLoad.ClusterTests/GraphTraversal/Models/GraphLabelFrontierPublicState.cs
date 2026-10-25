@@ -101,15 +101,15 @@ internal sealed class GraphLabelFrontierPublicState(GraphIncomingClusterSeed see
     }
     internal TraverseRequest Request(int depth, int profile, int vertices, int edges)
         => new(Seed.TargetPartition, Seed.Graph, Start, depth, vertices, edges, (Labels(profile)).Value);
-    private static global::ManagedCode.Communication.Result<ImmutableArray<string>?> Labels(int profile) => profile switch
+    private static (bool HasValue, ImmutableArray<string>? Value) Labels(int profile) => profile switch
     {
-        0 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.FailNotFound(nameof(Labels)),
-        1 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)([]))),
-        2 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["keep"]))),
-        3 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["keep", "keep"]))),
-        4 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["blocked"]))),
-        5 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["unknown"]))),
-        6 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["KEEP"]))),
+        0 => (false, default(ImmutableArray<string>?)),
+        1 => (true, ((ImmutableArray<string>?)([]))),
+        2 => (true, ((ImmutableArray<string>?)(["keep"]))),
+        3 => (true, ((ImmutableArray<string>?)(["keep", "keep"]))),
+        4 => (true, ((ImmutableArray<string>?)(["blocked"]))),
+        5 => (true, ((ImmutableArray<string>?)(["unknown"]))),
+        6 => (true, ((ImmutableArray<string>?)(["KEEP"]))),
         _ => throw new ArgumentOutOfRangeException(nameof(profile))
     };
     private EntityRef Vertex(string id) => new(Seed.TargetPartition, GraphIncomingClusterScenario.Collection, id);

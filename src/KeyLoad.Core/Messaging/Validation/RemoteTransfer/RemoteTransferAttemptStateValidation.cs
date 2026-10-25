@@ -3,8 +3,8 @@ namespace KeyLoad.Core.Messaging;
 
 internal static class RemoteTransferAttemptStateValidation
 {
-    internal static global::ManagedCode.Communication.Result<RemoteTransferAcceptAttemptState?> Initial(int? ceiling)
-        => ((RemoteTransferAcceptAttemptState?)(ceiling is { } cap ? new(cap, RemoteTransferAttemptProtocol.FirstGeneration, []) : null)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RemoteTransferAcceptAttemptState?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RemoteTransferAcceptAttemptState?>.FailNotFound(nameof(Initial));
+    internal static (bool HasValue, RemoteTransferAcceptAttemptState? Value) Initial(int? ceiling)
+        => ((RemoteTransferAcceptAttemptState?)(ceiling is { } cap ? new(cap, RemoteTransferAttemptProtocol.FirstGeneration, []) : null)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(RemoteTransferAcceptAttemptState?));
 
     internal static void Require(RemoteTransferAcceptAttemptState? state)
     {

@@ -16,11 +16,11 @@ public static class StoredCommandRead
     /// <returns>The owned original command and its actual sequence, or a not-found result if it was never committed here.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    public static global::ManagedCode.Communication.Result<StoredCommand?> ReadStoredCommand(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+    public static (bool HasValue, StoredCommand? Value) ReadStoredCommand(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(engine);
         var original = engine.OwnCommand(operation);
-        return engine.Store.Read<global::ManagedCode.Communication.Result<StoredCommand?>>(view =>
+        return engine.Store.Read<(bool HasValue, StoredCommand? Value)>(view =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             var scope = CommandOutcomePartitionIdentity.Resolve(original);
@@ -28,7 +28,7 @@ public static class StoredCommandRead
             {
                 // A new command is authorized when it is applied, so a denial persists its outcome exactly once and a
                 // retry after a policy change replays that denial instead of running as a new command.
-                return global::ManagedCode.Communication.Result<StoredCommand?>.FailNotFound(nameof(ReadStoredCommand));
+                return (false, default(StoredCommand?));
             }
 
             var principal = engine.Principal(view, original.UserId!, engine.Clock.GetUtcNow());
@@ -36,7 +36,7 @@ public static class StoredCommandRead
             var selected = CommandOutcomeKeyResolver.Select(view, original.UserId!, original.CommandId, scope);
             if (selected.Outcome is not { } outcome)
             {
-                return global::ManagedCode.Communication.Result<StoredCommand?>.FailNotFound(nameof(ReadStoredCommand));
+                return (false, default(StoredCommand?));
             }
 
             engine.ValidateStoredSubmissionIdentity(view, original, selected, outcome);
@@ -49,7 +49,7 @@ public static class StoredCommandRead
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            return global::ManagedCode.Communication.Result<StoredCommand?>.Succeed(new StoredCommand(outcome.CanonicalSequence, retained));
+            return (true, new StoredCommand(outcome.CanonicalSequence, retained));
         });
     }
 

@@ -16,10 +16,10 @@ public sealed partial class SearchEngine
         this.readCutObserver = readCutObserver;
     }
 
-    internal global::ManagedCode.Communication.Result<WaitForIndexReadCutObservation?> CaptureWaitForIndexReadCut(PrincipalRecord principal,
+    internal (bool HasValue, WaitForIndexReadCutObservation? Value) CaptureWaitForIndexReadCut(PrincipalRecord principal,
         ResourceDefinition resource, WaitForIndexRequest request, WaitForIndexResult result, ReadExecutionBudget budget)
-        => readCutObserver is null ? global::ManagedCode.Communication.Result<WaitForIndexReadCutObservation?>.FailNotFound(nameof(CaptureWaitForIndexReadCut))
-            : global::ManagedCode.Communication.Result<WaitForIndexReadCutObservation?>.Succeed(((WaitForIndexReadCutObservation?)(WaitForIndexReadCutObservationDispatch.Capture(database, principal, resource, request, result, budget))));
+        => readCutObserver is null ? (false, default(WaitForIndexReadCutObservation?))
+            : (true, ((WaitForIndexReadCutObservation?)(WaitForIndexReadCutObservationDispatch.Capture(database, principal, resource, request, result, budget))));
 
     internal void PublishWaitForIndexReadCut(WaitForIndexReadCutObservation? observation, ReadExecutionBudget budget)
         => WaitForIndexReadCutObservationDispatch.Observe(readCutObserver, observation, budget);

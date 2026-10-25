@@ -67,10 +67,10 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
         }
     }
 
-    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         var json = await RuntimeJoinAsync(database.StringGetAsync(prefix + document.Id, CommandFlags.DemandMaster), cancellationToken);
-        return json.IsNull ? global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<FoundDocument?>.Succeed((FoundDocument?)(new(document.Id, json.ToString())));
+        return json.IsNull ? (false, default(FoundDocument?)) : (true, (FoundDocument?)(new(document.Id, json.ToString())));
     }
 
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token)

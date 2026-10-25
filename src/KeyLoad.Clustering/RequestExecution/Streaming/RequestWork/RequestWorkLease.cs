@@ -107,37 +107,37 @@ internal sealed class RequestWorkLease : IDisposable, IAsyncDisposable, IRequest
         }
     }
 
-    private global::ManagedCode.Communication.Result<Exception?> DisposeCancellation()
+    private (bool HasValue, Exception? Value) DisposeCancellation()
     {
         try
         {
             cancellation.Dispose();
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(DisposeCancellation));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 
-    private global::ManagedCode.Communication.Result<Exception?> ReleaseAdmission()
+    private (bool HasValue, Exception? Value) ReleaseAdmission()
     {
         try
         {
             owner.Release(this);
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(ReleaseAdmission));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 

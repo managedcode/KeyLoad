@@ -7,10 +7,10 @@ internal static class AnalyticsStoreMcpDescriptions
     private const string Aggregate = "Read complete bounded execution aggregates from one authorized canonical cut of a named analytics store. "
         + "Select declared dimensions and metrics; incomplete history, execution plans or group overflow refuse the operation.";
 
-    internal static global::ManagedCode.Communication.Result<string?> Find(string name) => name switch
+    internal static (bool HasValue, string? Value) Find(string name) => name switch
     {
-        AnalyticsStoreProtocol.ReadTool => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(Read))),
-        AnalyticsStoreProtocol.AggregateTool => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(Aggregate))),
-        _ => global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Find))
+        AnalyticsStoreProtocol.ReadTool => (true, ((string?)(Read))),
+        AnalyticsStoreProtocol.AggregateTool => (true, ((string?)(Aggregate))),
+        _ => (false, default(string?))
     };
 }

@@ -36,7 +36,7 @@ internal static class FunctionalGateFileOwnershipLogs
         throw new InvalidDataException(P.Incomplete);
     }
 
-    private static global::ManagedCode.Communication.Result<string?> ReadBatch(IEnumerable<LogLine> batch, string[] secrets, StringBuilder output)
+    private static (bool HasValue, string? Value) ReadBatch(IEnumerable<LogLine> batch, string[] secrets, StringBuilder output)
     {
         foreach (var line in batch)
         {
@@ -54,9 +54,9 @@ internal static class FunctionalGateFileOwnershipLogs
             output.Append(text).Append(P.LogLineEndingCharacter);
             if (FunctionalGateFileOwnershipAssertions.HasOriginalRefusal(output.ToString()))
             {
-                return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(output.ToString())));
+                return (true, ((string?)(output.ToString())));
             }
         }
-        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadBatch));
+        return (false, default(string?));
     }
 }

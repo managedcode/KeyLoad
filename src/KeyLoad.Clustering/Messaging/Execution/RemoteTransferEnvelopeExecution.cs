@@ -11,7 +11,7 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing)
 {
-    internal async Task<global::ManagedCode.Communication.Result<T?>> ReadAsync<T>(string subject, GrainReadKind kind, ReadOnlyMemory<byte> payload, CancellationToken token) where T : class
+    internal async Task<(bool HasValue, T? Value)> ReadAsync<T>(string subject, GrainReadKind kind, ReadOnlyMemory<byte> payload, CancellationToken token) where T : class
     {
         var requestId = Guid.NewGuid();
         var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
@@ -24,7 +24,7 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
             throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferCoordinationProtocol.InvalidResult);
         }
         var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
-        return value is null ? global::ManagedCode.Communication.Result<T?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<T?>.Succeed(((T?)(value as T ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCoordinationProtocol.InvalidResult))));
+        return value is null ? (false, default(T?)) : (true, ((T?)(value as T ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCoordinationProtocol.InvalidResult))));
     }
 
     internal async Task<GrainOperationReply> ApplyAsync(string subject, CommandRequest request, CancellationToken token)

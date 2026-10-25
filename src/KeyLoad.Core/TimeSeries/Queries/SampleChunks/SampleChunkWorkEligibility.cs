@@ -4,7 +4,7 @@ namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleChunkWorkEligibility
 {
-    internal static global::ManagedCode.Communication.Result<SampleChunkWorkHint?> Read(DatabaseEngine database, IKeyValueView view,
+    internal static (bool HasValue, SampleChunkWorkHint? Value) Read(DatabaseEngine database, IKeyValueView view,
         PartitionRef partition, string set, string series, Guid id, DateTimeOffset now,
         ReadExecutionBudget budget)
     {
@@ -12,7 +12,7 @@ internal static class SampleChunkWorkEligibility
         var state = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(partition, set, series, id));
         if (state is null)
         {
-            return global::ManagedCode.Communication.Result<SampleChunkWorkHint?>.FailNotFound(nameof(Read));
+            return (false, default(SampleChunkWorkHint?));
         }
         SampleChunkWindowValidation.State(state, id, database.TimeSeriesOptions.Value.MaximumChunkWindowRecords,
             database.TimeSeriesOptions.Value.MaximumChunkCorrections);
@@ -20,12 +20,12 @@ internal static class SampleChunkWorkEligibility
         var merge = state.State == SampleChunkWindowState.Sealed && !state.CorrectionSequences.IsEmpty;
         if (!seal && !merge)
         {
-            return global::ManagedCode.Communication.Result<SampleChunkWorkHint?>.FailNotFound(nameof(Read));
+            return (false, default(SampleChunkWorkHint?));
         }
         var principal = database.Principal(view, state.CreatorPrincipalId, now);
         database.Authorization.Require(principal, partition, set, Capability.SeriesManage | Capability.SeriesRead);
         _ = database.Resource(view, partition, set, ResourceKind.TimeSeries);
-        return global::ManagedCode.Communication.Result<SampleChunkWorkHint?>.Succeed((new SampleChunkWorkHint(partition, set, series, id, state.Generation, state.Revision, state.CreatorPrincipalId, seal,
+        return (true, (new SampleChunkWorkHint(partition, set, series, id, state.Generation, state.Revision, state.CreatorPrincipalId, seal,
             SampleChunkJobIdentity.CommandId(partition, set, series, id, state.Generation, state.Revision, seal,
                 principal.PolicyEpoch), principal.PolicyEpoch)));
     }

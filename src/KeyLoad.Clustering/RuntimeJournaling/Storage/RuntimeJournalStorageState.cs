@@ -34,11 +34,11 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
         }
     }
 
-    internal async Task<global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>> CaptureAsync(CancellationToken cancellationToken)
+    internal async Task<(bool HasValue, RuntimeJournalSnapshot? Value)> CaptureAsync(CancellationToken cancellationToken)
     {
         if (retired)
         {
-            return global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.FailNotFound(nameof(CaptureAsync));
+            return (false, default(RuntimeJournalSnapshot?));
         }
 
         if (Captured is null)
@@ -46,19 +46,19 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
             Captured = await client.GetHeaderAsync(JournalId.Value, cancellationToken);
         }
 
-        return ((RuntimeJournalSnapshot?)(Captured)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.FailNotFound(nameof(CaptureAsync));
+        return ((RuntimeJournalSnapshot?)(Captured)) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(RuntimeJournalSnapshot?));
     }
 
-    internal async Task<global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>> ObserveAsync(CancellationToken cancellationToken)
+    internal async Task<(bool HasValue, RuntimeJournalSnapshot? Value)> ObserveAsync(CancellationToken cancellationToken)
     {
         if (retired)
         {
-            return global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.FailNotFound(nameof(ObserveAsync));
+            return (false, default(RuntimeJournalSnapshot?));
         }
 
         var observed = await client.GetHeaderAsync(JournalId.Value, cancellationToken);
         CaptureInitial(observed);
-        return ((RuntimeJournalSnapshot?)(observed)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.FailNotFound(nameof(ObserveAsync));
+        return ((RuntimeJournalSnapshot?)(observed)) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(RuntimeJournalSnapshot?));
     }
 
     internal void CaptureInitial(RuntimeJournalSnapshot? snapshot)

@@ -117,7 +117,7 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
         return observation;
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<ReplicaMember?>> ReadMemberAsync(NpgsqlDataReader reader, bool requireQuorum,
+    private static async Task<(bool HasValue, ReplicaMember? Value)> ReadMemberAsync(NpgsqlDataReader reader, bool requireQuorum,
         CancellationToken cancellationToken)
     {
         const int SecondColumnIndex = 1;
@@ -127,11 +127,11 @@ internal sealed class PostgresTopology(IOptions<ComparisonLifecycleOptions> life
 
         if (reader.GetString(SecondColumnIndex) != Streaming || requireQuorum && reader.GetString(ThirdColumnIndex) != Quorum)
         {
-            return global::ManagedCode.Communication.Result<ReplicaMember?>.FailNotFound(nameof(ReadMemberAsync));
+            return (false, default(ReplicaMember?));
         }
 
         var address = await reader.IsDBNullAsync(FourthColumnIndex, cancellationToken) ? null : reader.GetString(FourthColumnIndex);
-        return global::ManagedCode.Communication.Result<ReplicaMember?>.Succeed((ReplicaMember?)(new(reader.GetString(FirstColumnIndex), address)));
+        return (true, (ReplicaMember?)(new(reader.GetString(FirstColumnIndex), address)));
     }
 
     internal static string QuorumSettings(ComparisonTopology topology) => topology switch

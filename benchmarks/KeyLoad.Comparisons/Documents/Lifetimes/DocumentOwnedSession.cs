@@ -10,7 +10,7 @@ internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clie
     public Guid ClientIdentity { get; } = clientIdentity;
     public bool SingleOperationTiming => singleOperationTiming;
     public Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token) => executeOperation is null ? session.ExecuteAsync(scenario, document, token) : executeOperation(scenario, document, token);
-    public Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken token) => session.ReadAsync(document, token);
+    public Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken token) => session.ReadAsync(document, token);
     public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken token) => session.ReadEventAsync(document, token);
     public IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken token) => session.ReadCorpusAsync(token);
     public IAsyncEnumerable<FoundDocument> ReadDocumentsAsync(CancellationToken token) => readback(token);

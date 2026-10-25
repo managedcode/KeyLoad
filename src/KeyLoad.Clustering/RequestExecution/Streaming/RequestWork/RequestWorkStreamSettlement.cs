@@ -10,19 +10,19 @@ internal static class RequestWorkStreamSettlement
         RequestWorkOwner? owner, Guid requestId, Action settled)
         => (await AcquireOrSettleAwaitedAsync(owner, requestId, () => { settled(); return ValueTask.CompletedTask; }).ConfigureAwait(true)).Value;
 
-    internal static async ValueTask<global::ManagedCode.Communication.Result<RequestWorkLease?>> AcquireOrSettleAwaitedAsync(
+    internal static async ValueTask<(bool HasValue, RequestWorkLease? Value)> AcquireOrSettleAwaitedAsync(
         RequestWorkOwner? owner, Guid requestId, Func<ValueTask> settled)
     {
         var (lease, error) = TryAcquire(owner, requestId);
         if (error is null)
         {
-            return ((RequestWorkLease?)(lease)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RequestWorkLease?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RequestWorkLease?>.FailNotFound(nameof(AcquireOrSettleAwaitedAsync));
+            return ((RequestWorkLease?)(lease)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(RequestWorkLease?));
         }
 
         var failure = await SettleAndReleaseAwaitedAsync<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>(
             null, settled, error, null).ConfigureAwait(true);
         ExceptionDispatchInfo.Capture(failure ?? error).Throw();
-        return global::ManagedCode.Communication.Result<RequestWorkLease?>.FailNotFound(nameof(AcquireOrSettleAwaitedAsync));
+        return (false, default(RequestWorkLease?));
     }
 
     private static (RequestWorkLease? Lease, Exception? Error) TryAcquire(
@@ -79,25 +79,25 @@ internal static class RequestWorkStreamSettlement
             : RequestWorkSettlement.Preserve(failure ?? primary, releaseFailure);
     }
 
-    private static global::ManagedCode.Communication.Result<Exception?> Release(RequestWorkLease? lease)
+    private static (bool HasValue, Exception? Value) Release(RequestWorkLease? lease)
     {
         if (lease is null)
         {
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Release));
+            return (false, default(Exception?));
         }
 
         try
         {
             lease.Dispose();
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Release));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 }

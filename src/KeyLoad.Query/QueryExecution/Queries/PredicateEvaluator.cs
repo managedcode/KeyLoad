@@ -83,18 +83,18 @@ public static class PredicateEvaluator
         }
         return negated ? !found : found;
     }
-    private static global::ManagedCode.Communication.Result<bool?> And(bool? left, bool? right) => left == false || right == false ? global::ManagedCode.Communication.Result<bool?>.Succeed((bool?)(false)) : left is null || right is null ? global::ManagedCode.Communication.Result<bool?>.FailNotFound(nameof(And)) : global::ManagedCode.Communication.Result<bool?>.Succeed((bool?)(true));
-    private static global::ManagedCode.Communication.Result<bool?> Or(bool? left, bool? right) => left == true || right == true ? global::ManagedCode.Communication.Result<bool?>.Succeed((bool?)(true)) : left is null || right is null ? global::ManagedCode.Communication.Result<bool?>.FailNotFound(nameof(Or)) : global::ManagedCode.Communication.Result<bool?>.Succeed((bool?)(false));
+    private static (bool HasValue, bool? Value) And(bool? left, bool? right) => left == false || right == false ? (true, (bool?)(false)) : left is null || right is null ? (false, default(bool?)) : (true, (bool?)(true));
+    private static (bool HasValue, bool? Value) Or(bool? left, bool? right) => left == true || right == true ? (true, (bool?)(true)) : left is null || right is null ? (false, default(bool?)) : (true, (bool?)(false));
     /// <summary>Compares two Q1 scalar values with type and null rules.</summary>
     /// <param name="left">Left scalar.</param>
     /// <param name="operation">Supported comparison operator.</param>
     /// <param name="right">Right scalar.</param>
     /// <returns>True, false, or unknown.</returns>
-    public static global::ManagedCode.Communication.Result<bool?> Compare(object? left, string operation, object? right)
+    public static (bool HasValue, bool? Value) Compare(object? left, string operation, object? right)
     {
         if (left is null or MissingValue || right is null or MissingValue)
         {
-            return global::ManagedCode.Communication.Result<bool?>.FailNotFound(nameof(Compare));
+            return (false, default(bool?));
         }
         if (left.GetType() != right.GetType())
         {
@@ -103,12 +103,12 @@ public static class PredicateEvaluator
         var order = KeyCodec.Encode(left).AsSpan().SequenceCompareTo(KeyCodec.Encode(right));
         return operation switch
         {
-            SqlSyntax.Equals => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order == 0))),
-            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order != 0))),
-            SqlSyntax.Greater => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order > 0))),
-            SqlSyntax.GreaterOrEqual => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order >= 0))),
-            SqlSyntax.Less => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order < 0))),
-            SqlSyntax.LessOrEqual => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order <= 0))),
+            SqlSyntax.Equals => (true, ((bool?)(order == 0))),
+            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => (true, ((bool?)(order != 0))),
+            SqlSyntax.Greater => (true, ((bool?)(order > 0))),
+            SqlSyntax.GreaterOrEqual => (true, ((bool?)(order >= 0))),
+            SqlSyntax.Less => (true, ((bool?)(order < 0))),
+            SqlSyntax.LessOrEqual => (true, ((bool?)(order <= 0))),
             _ => throw Errors.Fail(ErrorCode.Validation, ComparisonOperatorIsInvalidDetail)
         };
     }

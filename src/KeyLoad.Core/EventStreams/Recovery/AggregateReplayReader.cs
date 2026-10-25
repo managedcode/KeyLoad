@@ -75,11 +75,11 @@ internal static class AggregateReplayReader
             KeySpace.Partition(StreamHeadKeySpace, stream.Partition, stream.StreamSet, stream.StreamId))
             ?? new StreamHead(0, 1, 1);
 
-    private static global::ManagedCode.Communication.Result<AggregateSnapshotState?> ReadSnapshot(IKeyValueView view, StreamRef stream,
+    private static (bool HasValue, AggregateSnapshotState? Value) ReadSnapshot(IKeyValueView view, StreamRef stream,
         ReadExecutionBudget budget)
         => (budget.Read(view, AggregateSnapshotPersistence.Key(stream)) is { } bytes
             ? AggregateSnapshotPersistence.Deserialize(bytes)
-            : null) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<AggregateSnapshotState?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<AggregateSnapshotState?>.FailNotFound(nameof(ReadSnapshot));
+            : null) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(AggregateSnapshotState?));
 
     private static long ValidateSnapshot(AggregateSnapshotState snapshot, ReadAggregateReplayRequest request,
         StreamHead head)

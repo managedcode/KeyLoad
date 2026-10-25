@@ -5,14 +5,14 @@ namespace KeyLoad.Core;
 /// <summary>Executes OnlineTextPublicationHead operations against the caller's database context.</summary>
 public static class OnlineTextPublicationHead
 {
-    internal static global::ManagedCode.Communication.Result<Guid?> ReadOnlineTextPublicationHead(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
+    internal static (bool HasValue, Guid? Value) ReadOnlineTextPublicationHead(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
     {
         // Fresh administrator admission authorizes a new publication, not replay of another principal's result.
         engine.RequireOnlineTextOriginalAuthority(view, principal, request);
         var current = view.GetRecord<OnlineTextCurrentPublication>(OnlineTextPublicationKeys.Current(request));
         if (current is null)
         {
-            return global::ManagedCode.Communication.Result<Guid?>.FailNotFound(nameof(ReadOnlineTextPublicationHead));
+            return (false, default(Guid?));
         }
 
         budget.ChargeBytes(OrleansSerialization.Measure(current));
@@ -22,6 +22,6 @@ public static class OnlineTextPublicationHead
         }
 
         budget.Check();
-        return global::ManagedCode.Communication.Result<Guid?>.Succeed(((Guid?)(current.CommandId)));
+        return (true, ((Guid?)(current.CommandId)));
     }
 }

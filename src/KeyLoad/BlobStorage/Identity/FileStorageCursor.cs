@@ -16,11 +16,11 @@ internal sealed class FileStorageCursor(IOptions<NodeOptions> options)
     private const int MaximumCursorCharacters = 8192;
     private const int FirstByte = 0;
 
-    internal global::ManagedCode.Communication.Result<string?> Encode(FileStorageRequest request, string? after)
+    internal (bool HasValue, string? Value) Encode(FileStorageRequest request, string? after)
     {
         if (after is null)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Encode));
+            return (false, default(string?));
         }
         var key = Key();
         try
@@ -31,7 +31,7 @@ internal sealed class FileStorageCursor(IOptions<NodeOptions> options)
             var output = new byte[bytes.Length];
             var tag = new byte[TagBytes];
             cipher.Encrypt(nonce, bytes, output, tag, Context(request));
-            return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(WebEncoders.Base64UrlEncode([.. nonce, .. tag, .. output]))));
+            return (true, ((string?)(WebEncoders.Base64UrlEncode([.. nonce, .. tag, .. output]))));
         }
         finally
         {
@@ -39,11 +39,11 @@ internal sealed class FileStorageCursor(IOptions<NodeOptions> options)
         }
     }
 
-    internal global::ManagedCode.Communication.Result<string?> Decode(FileStorageRequest request, string? cursor)
+    internal (bool HasValue, string? Value) Decode(FileStorageRequest request, string? cursor)
     {
         if (cursor is null)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Decode));
+            return (false, default(string?));
         }
         if (cursor.Length > MaximumCursorCharacters)
         {
@@ -61,7 +61,7 @@ internal sealed class FileStorageCursor(IOptions<NodeOptions> options)
             var output = new byte[bytes.Length - NonceBytes - TagBytes];
             cipher.Decrypt(bytes.AsSpan(FirstByte, NonceBytes), bytes.AsSpan(NonceBytes + TagBytes),
                 bytes.AsSpan(NonceBytes, TagBytes), output, Context(request));
-            return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(Encoding.UTF8.GetString(output))));
+            return (true, ((string?)(Encoding.UTF8.GetString(output))));
         }
         catch (Exception error) when (error is CryptographicException or FormatException)
         {

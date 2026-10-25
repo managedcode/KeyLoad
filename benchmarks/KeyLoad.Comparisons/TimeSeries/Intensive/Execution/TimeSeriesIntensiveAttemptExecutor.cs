@@ -6,7 +6,7 @@ internal static class TimeSeriesIntensiveAttemptExecutor
 {
     private const int NoObservedItems = 0;
 
-    internal static async Task<global::ManagedCode.Communication.Result<TimeSeriesIntensiveAttempt?>> ExecuteAsync(ITimeSeriesIntensiveTarget target, TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, int index, int worker, TimeSeriesIntensiveConcurrency concurrency, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cellCancellation)
+    internal static async Task<(bool HasValue, TimeSeriesIntensiveAttempt? Value)> ExecuteAsync(ITimeSeriesIntensiveTarget target, TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, int index, int worker, TimeSeriesIntensiveConcurrency concurrency, IOptions<ComparisonExecutionOptions> executionOptions, TimeProvider timeProvider, CancellationToken cellCancellation)
     {
         const int NoItems = 0;
         const int NoObservedItems = 0;
@@ -19,13 +19,13 @@ internal static class TimeSeriesIntensiveAttemptExecutor
         }
         catch (Exception error) when (TimeSeriesIntensiveExceptionBoundary.IsNonfatal(error))
         {
-            return global::ManagedCode.Communication.Result<TimeSeriesIntensiveAttempt?>.Succeed(((TimeSeriesIntensiveAttempt?)(TimeSeriesIntensiveAttemptFailures.Capture(phase.Repetition, index, worker,
+            return (true, ((TimeSeriesIntensiveAttempt?)(TimeSeriesIntensiveAttemptFailures.Capture(phase.Repetition, index, worker,
                 call.LatencyTicks, call.Completion, error))));
         }
 
         if (response is not { } observed)
         {
-            return global::ManagedCode.Communication.Result<TimeSeriesIntensiveAttempt?>.FailNotFound(nameof(ExecuteAsync));
+            return (false, default(TimeSeriesIntensiveAttempt?));
         }
 
         concurrency.EnterResponse();
@@ -33,14 +33,14 @@ internal static class TimeSeriesIntensiveAttemptExecutor
         {
             if (call.Completion != TimeSeriesIntensiveOutcome.Succeeded)
             {
-                return global::ManagedCode.Communication.Result<TimeSeriesIntensiveAttempt?>.Succeed((TimeSeriesIntensiveAttempt?)(new(phase.Repetition, index, worker, call.LatencyTicks, NoItems, call.Completion, (observed.Count(phase.Scenario)).Value,
+                return (true, (TimeSeriesIntensiveAttempt?)(new(phase.Repetition, index, worker, call.LatencyTicks, NoItems, call.Completion, (observed.Count(phase.Scenario)).Value,
                     default, observed.Receipt?.Sequence ?? NoObservedItems, new(TimeSeriesIntensiveFailureOrigin.Client, null, null, null))
                 {
                     Acknowledgement = (Acknowledgement(observed)).Value
                 }));
             }
 
-            return global::ManagedCode.Communication.Result<TimeSeriesIntensiveAttempt?>.Succeed(((TimeSeriesIntensiveAttempt?)(Validate(expected, phase, index, worker, call.LatencyTicks, observed, timeProvider: timeProvider))));
+            return (true, ((TimeSeriesIntensiveAttempt?)(Validate(expected, phase, index, worker, call.LatencyTicks, observed, timeProvider: timeProvider))));
         }
         finally
         {
@@ -74,7 +74,7 @@ internal static class TimeSeriesIntensiveAttemptExecutor
         }
     }
 
-    private static global::ManagedCode.Communication.Result<TimeSeriesIntensiveAcknowledgement?> Acknowledgement(TimeSeriesIntensiveResponse response) =>
+    private static (bool HasValue, TimeSeriesIntensiveAcknowledgement? Value) Acknowledgement(TimeSeriesIntensiveResponse response) =>
         response.Receipt is { Sequence: > NoObservedItems } receipt && receipt.CommandId != Guid.Empty
-            ? global::ManagedCode.Communication.Result<TimeSeriesIntensiveAcknowledgement?>.Succeed(((TimeSeriesIntensiveAcknowledgement?)(TimeSeriesIntensiveAcknowledgement.FromReceipt(receipt)))) : global::ManagedCode.Communication.Result<TimeSeriesIntensiveAcknowledgement?>.FailNotFound(nameof(Acknowledgement));
+            ? (true, ((TimeSeriesIntensiveAcknowledgement?)(TimeSeriesIntensiveAcknowledgement.FromReceipt(receipt)))) : (false, default(TimeSeriesIntensiveAcknowledgement?));
 }

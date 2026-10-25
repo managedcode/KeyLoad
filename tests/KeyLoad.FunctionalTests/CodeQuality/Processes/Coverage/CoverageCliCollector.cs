@@ -74,7 +74,7 @@ internal static class CoverageCliCollector
             () => CoverageMergeProcess.AssertSuccessfulChildAsync(result), failures).ConfigureAwait(false);
     }
 
-    private static global::ManagedCode.Communication.Result<string?> PrepareCopy(string ownedRoot, string imageName,
+    private static (bool HasValue, string? Value) PrepareCopy(string ownedRoot, string imageName,
         CoverageDeploymentSnapshot originalSource, string source, CoverageExecutionOptions limits,
         List<Exception> failures)
     {
@@ -83,14 +83,14 @@ internal static class CoverageCliCollector
             limits.ReadBufferBytes), failures);
         if (failures.Count != 0)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(PrepareCopy));
+            return (false, default(string?));
         }
         string? copied = null;
         ServerFailureObserver.Observe(() => copied = CoverageCliDeployment.CopyCliClosure(
             ownedRoot, imageName, limits), failures);
         if (copied is null || failures.Count != 0)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(PrepareCopy));
+            return (false, default(string?));
         }
         ServerFailureObserver.Observe(() => originalSource.VerifyCopyMatches(copied, limits.MaximumFiles,
             limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.MaximumPathCharacters,
@@ -98,10 +98,10 @@ internal static class CoverageCliCollector
         ServerFailureObserver.Observe(() => originalSource.VerifyUnchanged(source, limits.MaximumFiles,
             limits.MaximumFileBytes, limits.MaximumTotalBytes, limits.MaximumPathCharacters,
             limits.ReadBufferBytes), failures);
-        return failures.Count == 0 ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(copied))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(PrepareCopy));
+        return failures.Count == 0 ? (true, ((string?)(copied))) : (false, default(string?));
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<CoverageMergeChildProcess.Result?>> RunCopiedCliAsync(
+    private static async Task<(bool HasValue, CoverageMergeChildProcess.Result? Value)> RunCopiedCliAsync(
         CoverageMergeProcess.ToolingOptions options, string copiedDirectory,
         IReadOnlyList<string> cliArguments, string reportPath, List<Exception> failures,
         CancellationToken cancellationToken)
@@ -113,13 +113,13 @@ internal static class CoverageCliCollector
             || assembly.LinkTarget is not null || (assembly.Attributes & FileAttributes.ReparsePoint) != 0)
         {
             failures.Add(new InvalidDataException("The copied KeyLoad CLI assembly is missing or unsafe."));
-            return global::ManagedCode.Communication.Result<CoverageMergeChildProcess.Result?>.FailNotFound(nameof(RunCopiedCliAsync));
+            return (false, default(CoverageMergeChildProcess.Result?));
         }
         var start = CreateCollectStart(options, copiedDirectory, cli, cliArguments, reportPath);
         ServerFailureObserver.Observe(() => options.Settings.VerifyUnchanged(limits), failures);
         if (failures.Count != 0)
         {
-            return global::ManagedCode.Communication.Result<CoverageMergeChildProcess.Result?>.FailNotFound(nameof(RunCopiedCliAsync));
+            return (false, default(CoverageMergeChildProcess.Result?));
         }
         CoverageMergeChildProcess.Result? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -128,7 +128,7 @@ internal static class CoverageCliCollector
                     options.Tests.ProcessSettlementTimeout, options.Tests.CleanupOutputCharacters, cancellationToken)
                 .ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
-        return ((CoverageMergeChildProcess.Result?)(result)) is { } outcomeValue3 ? global::ManagedCode.Communication.Result<CoverageMergeChildProcess.Result?>.Succeed(outcomeValue3) : global::ManagedCode.Communication.Result<CoverageMergeChildProcess.Result?>.FailNotFound(nameof(RunCopiedCliAsync));
+        return ((CoverageMergeChildProcess.Result?)(result)) is { } outcomeValue3 ? (true, outcomeValue3) : (false, default(CoverageMergeChildProcess.Result?));
     }
 
     private static void ValidateReport(string reportPath, CoverageExecutionOptions options)

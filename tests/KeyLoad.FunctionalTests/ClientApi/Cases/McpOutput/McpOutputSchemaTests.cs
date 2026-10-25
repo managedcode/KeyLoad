@@ -135,15 +135,15 @@ internal sealed class McpOutputSchemaTests
             .SequenceEqual(key!)).IsTrue();
     }
 
-    private static global::ManagedCode.Communication.Result<string?> NullableDomainField(string operationName) => operationName switch
+    private static (bool HasValue, string? Value) NullableDomainField(string operationName) => operationName switch
     {
-        McpCatalogExpectations.DocumentsGet => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("document")),
-        McpCatalogExpectations.MessagesInspect => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("message")),
-        McpCatalogExpectations.QueueTransferInspect => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("transfer")),
-        McpCatalogExpectations.QueueTransferReceipt => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("receipt")),
-        McpCatalogExpectations.ScheduleInspect => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("schedule")),
-        McpCatalogExpectations.SagaInspect => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("saga")),
-        _ => global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(NullableDomainField))
+        McpCatalogExpectations.DocumentsGet => (true, (string?)("document")),
+        McpCatalogExpectations.MessagesInspect => (true, (string?)("message")),
+        McpCatalogExpectations.QueueTransferInspect => (true, (string?)("transfer")),
+        McpCatalogExpectations.QueueTransferReceipt => (true, (string?)("receipt")),
+        McpCatalogExpectations.ScheduleInspect => (true, (string?)("schedule")),
+        McpCatalogExpectations.SagaInspect => (true, (string?)("saga")),
+        _ => (false, default(string?))
     };
 
     private static (JsonElement Root, JsonElement Node) ResultSchema(string operationName)

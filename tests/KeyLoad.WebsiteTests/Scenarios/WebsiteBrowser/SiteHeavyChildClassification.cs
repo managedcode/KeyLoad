@@ -22,7 +22,7 @@ internal static class SiteHeavyChildClassification
             arguments[SiteTokens.Zero].GetString() == SiteIsolatedGitHubFields.VerifyInputs;
     }
 
-    private static global::ManagedCode.Communication.Result<string?> ReadOperation(JsonElement request) =>
+    private static (bool HasValue, string? Value) ReadOperation(JsonElement request) =>
         request.ValueKind == JsonValueKind.Object && request.TryGetProperty(SiteHeavyChildTokens.Operation, out var operation) && operation.ValueKind == JsonValueKind.String
-            ? ((string?)(operation.GetString())) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadOperation)) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadOperation));
+            ? ((string?)(operation.GetString())) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(string?)) : (false, default(string?));
 }

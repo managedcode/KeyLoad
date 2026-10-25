@@ -93,7 +93,7 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
             RequestWorkSettlement.Rethrow(RequestWorkSettlement.Preserve(original, cleanup));
             return;
         }
-        cleanup = Dispose(ownedRetention, cleanup);
+        cleanup = DisposeOwnedRetention(cleanup);
         if (lease is not null)
         {
             var previous = cleanup;
@@ -125,7 +125,24 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
         return Dispose(deadline, cleanup);
     }
 
-    private async Task<global::ManagedCode.Communication.Result<Exception?>> PrepareAsync()
+    private Exception? DisposeOwnedRetention(Exception? previous)
+    {
+        try
+        {
+            ownedRetention?.Dispose();
+            return previous;
+        }
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return RequestWorkSettlement.Preserve(previous, error);
+        }
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            return RequestWorkSettlement.Preserve(previous, error);
+        }
+    }
+
+    private async Task<(bool HasValue, Exception? Value)> PrepareAsync()
     {
         try
         {
@@ -133,19 +150,19 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
             {
                 await lease.PrepareCompletionAsync().ConfigureAwait(true);
             }
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(PrepareAsync));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 
-    private static Exception? Dispose(IDisposable? value, Exception? previous)
+    private static Exception? Dispose(CancellationTokenSource? value, Exception? previous)
     {
         try
         {

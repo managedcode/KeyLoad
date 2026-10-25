@@ -217,10 +217,10 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         return false;
     }
 
-    internal global::ManagedCode.Communication.Result<ScaleServerContainer?> ToRecord()
+    internal (bool HasValue, ScaleServerContainer? Value) ToRecord()
         => _samples == 0 || _containerId is null || _imageId is null || _startedAt is null || _state is null
-            || _cpuLimit is null || _memoryLimit is null ? global::ManagedCode.Communication.Result<ScaleServerContainer?>.FailNotFound(nameof(ToRecord))
-            : global::ManagedCode.Communication.Result<ScaleServerContainer?>.Succeed((ScaleServerContainer?)(new(resourceName, _containerId, _imageId, _startedAt, _state, _cpuLimit, _memoryLimit,
+            || _cpuLimit is null || _memoryLimit is null ? (false, default(ScaleServerContainer?))
+            : (true, (ScaleServerContainer?)(new(resourceName, _containerId, _imageId, _startedAt, _state, _cpuLimit, _memoryLimit,
                 _effectiveEnvelope!.CpuQuota, _effectiveEnvelope.CpuSet, _effectiveEnvelope.MemoryLimitBytes,
                 checked(_lastCpuUsec - _firstCpuUsec), _maxCgroupMemory, _maxRss, _samples, _mounts)));
 

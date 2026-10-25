@@ -52,7 +52,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         return FullScanPath;
     }
 
-    private global::ManagedCode.Communication.Result<string?> IndexPath(Dictionary<string, object?> equality)
+    private (bool HasValue, string? Value) IndexPath(Dictionary<string, object?> equality)
     {
         foreach (var index in resource.Indexes.OrderByDescending(item => item.Fields.Length))
         {
@@ -79,9 +79,9 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
             }
-            return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(IndexPathPrefix + index.Name)));
+            return (true, ((string?)(IndexPathPrefix + index.Name)));
         }
-        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(IndexPath));
+        return (false, default(string?));
     }
 
     private void Candidate(ReadOnlySpan<byte> payload)

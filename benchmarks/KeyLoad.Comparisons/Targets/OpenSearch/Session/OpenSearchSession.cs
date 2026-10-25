@@ -66,27 +66,27 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
         }
     }
 
-    private static global::ManagedCode.Communication.Result<object?> ReadSortValue(JsonElement value) => value.ValueKind switch
+    private static (bool HasValue, object? Value) ReadSortValue(JsonElement value) => value.ValueKind switch
     {
-        JsonValueKind.String => ((object?)(value.GetString())) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<object?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(ReadSortValue)),
-        JsonValueKind.Number => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(value.GetInt64()))),
-        JsonValueKind.True => global::ManagedCode.Communication.Result<object?>.Succeed((object?)(true)),
-        JsonValueKind.False => global::ManagedCode.Communication.Result<object?>.Succeed((object?)(false)),
-        JsonValueKind.Null => global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(ReadSortValue)),
+        JsonValueKind.String => ((object?)(value.GetString())) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(object?)),
+        JsonValueKind.Number => (true, ((object?)(value.GetInt64()))),
+        JsonValueKind.True => (true, (object?)(true)),
+        JsonValueKind.False => (true, (object?)(false)),
+        JsonValueKind.Null => (false, default(object?)),
         _ => throw new ComparisonFailureException(OpenSearchCorpusSortValueInvalidDetail)
     };
 
-    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         using var result = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,
             OpenSearchNames.PathSeparator + index + OpenSearchNames.DocumentPath + Uri.EscapeDataString(document.Id) + OpenSearchNames.RealtimeQuery, null,
             cancellationToken, allowNotFound: true);
         if (!OpenSearchJson.OptionalBoolean(result.RootElement, OpenSearchNames.Found))
         {
-            return global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync));
+            return (false, default(FoundDocument?));
         }
 
-        return global::ManagedCode.Communication.Result<FoundDocument?>.Succeed(((FoundDocument?)(OpenSearchDocument.Read(result.RootElement.GetProperty(OpenSearchNames.Source)))));
+        return (true, ((FoundDocument?)(OpenSearchDocument.Read(result.RootElement.GetProperty(OpenSearchNames.Source)))));
     }
 
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)

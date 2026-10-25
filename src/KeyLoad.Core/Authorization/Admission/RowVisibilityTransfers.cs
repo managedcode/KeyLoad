@@ -2,7 +2,7 @@ namespace KeyLoad.Core.Authorization;
 
 internal static class RowVisibilityTransfers
 {
-    internal static global::ManagedCode.Communication.Result<RowVisibilityCache?> CreateOwner(ICacheMemoryBudget budget)
+    internal static (bool HasValue, RowVisibilityCache? Value) CreateOwner(ICacheMemoryBudget budget)
     {
         ICacheMemoryReservation? acquired = null;
         Exception? primary = null;
@@ -12,9 +12,9 @@ internal static class RowVisibilityTransfers
             {
                 if (!budget.TryReserve(RowVisibilityMemoryModel.OwnerBytes, RowVisibilityMemoryModel.MetadataOnly, out acquired))
                 {
-                    return global::ManagedCode.Communication.Result<RowVisibilityCache?>.FailNotFound(nameof(CreateOwner));
+                    return (false, default(RowVisibilityCache?));
                 }
-                return (Owner(budget, ref acquired));
+                return (true, (Owner(budget, ref acquired)));
             }
             catch (Exception error)
             {
@@ -53,7 +53,7 @@ internal static class RowVisibilityTransfers
         return lease;
     }
 
-    internal static global::ManagedCode.Communication.Result<RowVisibilityLease?> CreateLease(RowVisibilityCache owner,
+    internal static (bool HasValue, RowVisibilityLease? Value) CreateLease(RowVisibilityCache owner,
         ICacheMemoryBudget budget, RowVisibilityEntry entry)
     {
         ICacheMemoryReservation? acquired = null;
@@ -64,9 +64,9 @@ internal static class RowVisibilityTransfers
             {
                 if (!budget.TryReserve(RowVisibilityMemoryModel.LeaseBytes, RowVisibilityMemoryModel.MetadataOnly, out acquired))
                 {
-                    return global::ManagedCode.Communication.Result<RowVisibilityLease?>.FailNotFound(nameof(CreateLease));
+                    return (false, default(RowVisibilityLease?));
                 }
-                return (Lease(owner, entry, ref acquired));
+                return (true, (Lease(owner, entry, ref acquired)));
             }
             catch (Exception error)
             {

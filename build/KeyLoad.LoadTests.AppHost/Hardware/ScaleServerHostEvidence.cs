@@ -63,7 +63,7 @@ internal static class ScaleServerHostEvidence
         return (hardware, envelope);
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<ScaleServerEnvelope?>> ReadCgroupEnvelopeAsync(string cgroupPath,
+    internal static async Task<(bool HasValue, ScaleServerEnvelope? Value)> ReadCgroupEnvelopeAsync(string cgroupPath,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int EmptyValue = 0;
@@ -73,20 +73,20 @@ internal static class ScaleServerHostEvidence
 
         if (!OperatingSystem.IsLinux() || cgroupPath.Length == EmptyValue || cgroupPath[IndexValue] != SlashCharacter)
         {
-            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadCgroupEnvelopeAsync));
+            return (false, default(ScaleServerEnvelope?));
         }
 
         var root = Path.GetFullPath(UnifiedCgroupMountPath);
         var current = Path.GetFullPath(Path.Combine(root, cgroupPath.TrimStart(SlashCharacter)));
         if (current != root && !current.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
-            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadCgroupEnvelopeAsync));
+            return (false, default(ScaleServerEnvelope?));
         }
 
-        return ((ScaleServerEnvelope?)((await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token)).Value)) is { } outcomeValue3 ? global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.Succeed(outcomeValue3) : global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadCgroupEnvelopeAsync));
+        return ((ScaleServerEnvelope?)((await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token)).Value)) is { } outcomeValue3 ? (true, outcomeValue3) : (false, default(ScaleServerEnvelope?));
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<ScaleServerEnvelope?>> ReadEnvelopeAsync(ScaleServerResourceSampleBudget budget,
+    private static async Task<(bool HasValue, ScaleServerEnvelope? Value)> ReadEnvelopeAsync(ScaleServerResourceSampleBudget budget,
         CancellationToken token)
     {
         const string ProcessCgroupMembershipPath = "/proc/self/cgroup";
@@ -100,21 +100,21 @@ internal static class ScaleServerHostEvidence
         var row = membership?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UnifiedMembershipPrefix, StringComparison.Ordinal));
         if (row is null)
         {
-            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadEnvelopeAsync));
+            return (false, default(ScaleServerEnvelope?));
         }
 
         if (!row.StartsWith(UnifiedAbsoluteMembershipPrefix, StringComparison.Ordinal))
         {
-            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadEnvelopeAsync));
+            return (false, default(ScaleServerEnvelope?));
         }
 
         var current = Path.GetFullPath(Path.Combine(CgroupDirectoryMountPath, row[ElementIndex..].TrimStart(SlashCharacter)));
         var root = Path.GetFullPath(CgroupHierarchyRootPath);
         if (current != root && !current.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
-            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadEnvelopeAsync));
+            return (false, default(ScaleServerEnvelope?));
         }
 
-        return ((ScaleServerEnvelope?)((await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token)).Value)) is { } outcomeValue4 ? global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.Succeed(outcomeValue4) : global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadEnvelopeAsync));
+        return ((ScaleServerEnvelope?)((await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token)).Value)) is { } outcomeValue4 ? (true, outcomeValue4) : (false, default(ScaleServerEnvelope?));
     }
 }

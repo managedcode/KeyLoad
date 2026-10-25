@@ -41,11 +41,11 @@ internal static class QueryCursorExecution
         return new(offset, cut, sourceEpoch, lifetime, afterId);
     }
 
-    private static global::ManagedCode.Communication.Result<QueryCursorClaims?> ReadClaims(DatabaseEngine database, string? token, ResourceLifetime lifetime)
+    private static (bool HasValue, QueryCursorClaims? Value) ReadClaims(DatabaseEngine database, string? token, ResourceLifetime lifetime)
     {
         if (token is null)
         {
-            return global::ManagedCode.Communication.Result<QueryCursorClaims?>.FailNotFound(nameof(ReadClaims));
+            return (false, default(QueryCursorClaims?));
         }
         QueryCursorClaims claims;
         try
@@ -61,18 +61,18 @@ internal static class QueryCursorExecution
         {
             throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorNoLongerHasAValidAuthorizedReadCutDetail);
         }
-        return global::ManagedCode.Communication.Result<QueryCursorClaims?>.Succeed(((QueryCursorClaims?)(claims)));
+        return (true, ((QueryCursorClaims?)(claims)));
     }
 
     /// <summary>Signs the next page when eligible rows remain after the next offset. For an id-ordered page the
     /// cursor carries the last emitted document id, and the next page continues after it at offset zero.</summary>
-    internal static global::ManagedCode.Communication.Result<string?> SignNext(DatabaseEngine database, TimeSpan cursorLifetime,
+    internal static (bool HasValue, string? Value) SignNext(DatabaseEngine database, TimeSpan cursorLifetime,
         PrincipalRecord principal, ResourceDefinition resource, string hash, State cursor,
         int next, int eligibleCount, TimeProvider clock, string? afterId = null)
-        => next < eligibleCount ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(database.Sign(new QueryCursorClaims(QueryCursorContract.Purpose, database.Store.Identity.Incarnation,
+        => next < eligibleCount ? (true, ((string?)(database.Sign(new QueryCursorClaims(QueryCursorContract.Purpose, database.Store.Identity.Incarnation,
             database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
             principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch,
             afterId is null ? next : InitialCursorOffset, clock.GetUtcNow().Add(cursorLifetime), cursor.Lifetime,
-            QueryCursorContract.CurrentVersion, afterId))))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(SignNext));
+            QueryCursorContract.CurrentVersion, afterId))))) : (false, default(string?));
 }
 

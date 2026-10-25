@@ -162,22 +162,22 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
         return cleanup;
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<Exception?>> PrepareAsync(RequestWorkLease lease, List<Exception> failures)
+    private static async Task<(bool HasValue, Exception? Value)> PrepareAsync(RequestWorkLease lease, List<Exception> failures)
     {
         try
         {
             await lease.PrepareCompletionAsync();
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(PrepareAsync));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 

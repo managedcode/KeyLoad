@@ -151,16 +151,16 @@ public static class SagaCommands
         return new(timeout.Queue.Queue, messageId, timeout.PayloadJson, timeout.HeadersJson, ExpiresAt: (SagaCommands.AddTtl(deadline, timeout.TimeToLive)).Value, OrderingKey: timeout.OrderingKey);
     }
 
-    internal static global::ManagedCode.Communication.Result<DateTimeOffset?> AddTtl(DateTimeOffset instant, TimeSpan? ttl)
+    internal static (bool HasValue, DateTimeOffset? Value) AddTtl(DateTimeOffset instant, TimeSpan? ttl)
     {
         if (ttl is not { } duration)
         {
-            return global::ManagedCode.Communication.Result<DateTimeOffset?>.FailNotFound(nameof(AddTtl));
+            return (false, default(DateTimeOffset?));
         }
 
         try
         {
-            return global::ManagedCode.Communication.Result<DateTimeOffset?>.Succeed(((DateTimeOffset?)(instant.Add(duration))));
+            return (true, ((DateTimeOffset?)(instant.Add(duration))));
         }
         catch (ArgumentOutOfRangeException)
         {

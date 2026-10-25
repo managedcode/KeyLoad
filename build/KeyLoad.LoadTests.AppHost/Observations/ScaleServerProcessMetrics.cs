@@ -20,14 +20,14 @@ internal static class ScaleServerProcessMetrics
         return row?[UnifiedCgroupMarker.Length..].Trim();
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<int[]?>> ReadPidsAsync(string path, ScaleServerResourceSampleBudget budget, CancellationToken token)
+    internal static async Task<(bool HasValue, int[]? Value)> ReadPidsAsync(string path, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const char LineFeedCharacter = '\n';
 
         var text = (await BoundedText.ReadAsync(path, budget.Settings.MaxFileBytes, budget, token)).Value;
         if (text is null)
         {
-            return global::ManagedCode.Communication.Result<int[]?>.FailNotFound(nameof(ReadPidsAsync));
+            return (false, default(int[]?));
         }
 
         var values = new List<int>();
@@ -35,19 +35,19 @@ internal static class ScaleServerProcessMetrics
         {
             if (!int.TryParse(line, NumberStyles.None, CultureInfo.InvariantCulture, out var pid))
             {
-                return global::ManagedCode.Communication.Result<int[]?>.FailNotFound(nameof(ReadPidsAsync));
+                return (false, default(int[]?));
             }
 
             values.Add(pid);
             if (values.Count > budget.Settings.MaxProcesses)
             {
-                return global::ManagedCode.Communication.Result<int[]?>.FailNotFound(nameof(ReadPidsAsync));
+                return (false, default(int[]?));
             }
         }
-        return global::ManagedCode.Communication.Result<int[]?>.Succeed(((int[]?)(values.ToArray())));
+        return (true, ((int[]?)(values.ToArray())));
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<long?>> ReadRssAsync(int[] pids, string expectedCgroup,
+    internal static async Task<(bool HasValue, long? Value)> ReadRssAsync(int[] pids, string expectedCgroup,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int TotalInitialValue = 0;
@@ -60,12 +60,12 @@ internal static class ScaleServerProcessMetrics
             var after = (await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token)).Value;
             if (before is null || after is null || before != after || !TryRss(status, out var rss))
             {
-                return global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(ReadRssAsync));
+                return (false, default(long?));
             }
 
             total = checked(total + rss);
         }
-        return global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(total)));
+        return (true, ((long?)(total)));
     }
 
     private static bool TryRss(string? status, out long bytes)

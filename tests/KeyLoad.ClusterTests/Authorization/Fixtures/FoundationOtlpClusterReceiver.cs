@@ -134,7 +134,7 @@ internal sealed class FoundationOtlpClusterReceiver : IDisposable
         return apiKey;
     }
 
-    internal async Task<global::ManagedCode.Communication.Result<JsonDocument?>> ReadSnapshotAsync(string path, string node, string traceId, CancellationToken token)
+    internal async Task<(bool HasValue, JsonDocument? Value)> ReadSnapshotAsync(string path, string node, string traceId, CancellationToken token)
     {
         var uri = QueryHelpers.AddQueryString(path, new Dictionary<string, string?>
         {
@@ -145,9 +145,9 @@ internal sealed class FoundationOtlpClusterReceiver : IDisposable
         using var response = await client.GetAsync(new Uri(uri, UriKind.Relative), HttpCompletionOption.ResponseHeadersRead, token);
         if (response.StatusCode == HttpStatusCode.NotFound)
         {
-            return global::ManagedCode.Communication.Result<JsonDocument?>.FailNotFound(nameof(ReadSnapshotAsync));
+            return (false, default(JsonDocument?));
         }
-        return global::ManagedCode.Communication.Result<JsonDocument?>.Succeed(((JsonDocument?)(await ReadAsync(response, settings, token))));
+        return (true, ((JsonDocument?)(await ReadAsync(response, settings, token))));
     }
 
     internal string[] Secrets => [browserToken, apiKey];

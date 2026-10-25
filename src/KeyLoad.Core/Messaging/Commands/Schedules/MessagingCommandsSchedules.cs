@@ -193,16 +193,16 @@ public static class MessagingCommandsSchedules
         return new(definition.Lane.Queue, id, definition.PayloadJson, definition.HeadersJson, dueAt, expiresAt, definition.OrderingKey);
     }
 
-    internal static global::ManagedCode.Communication.Result<DateTimeOffset?> OccurrenceExpiry(DateTimeOffset dueAt, TimeSpan? timeToLive)
+    internal static (bool HasValue, DateTimeOffset? Value) OccurrenceExpiry(DateTimeOffset dueAt, TimeSpan? timeToLive)
     {
         if (timeToLive is not { } ttl)
         {
-            return global::ManagedCode.Communication.Result<DateTimeOffset?>.FailNotFound(nameof(OccurrenceExpiry));
+            return (false, default(DateTimeOffset?));
         }
 
         try
         {
-            return global::ManagedCode.Communication.Result<DateTimeOffset?>.Succeed(((DateTimeOffset?)(dueAt.Add(ttl))));
+            return (true, ((DateTimeOffset?)(dueAt.Add(ttl))));
         }
         catch (ArgumentOutOfRangeException)
         {

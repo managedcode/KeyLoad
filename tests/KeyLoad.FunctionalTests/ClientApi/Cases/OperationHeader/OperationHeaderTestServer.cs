@@ -84,10 +84,10 @@ internal sealed class OperationHeaderTestServer : IAsyncDisposable
     /// <summary>Returns the actual request identity header or null when execution had not been published at start.</summary>
     /// <param name="response">The real Kestrel response.</param>
     /// <returns>The single N-format identity header, or null when absent.</returns>
-    internal static global::ManagedCode.Communication.Result<string?> RequestIdHeader(HttpResponseMessage response)
+    internal static (bool HasValue, string? Value) RequestIdHeader(HttpResponseMessage response)
     {
         ArgumentNullException.ThrowIfNull(response);
-        return response.Headers.TryGetValues(RequestIdHeaderName, out var values) ? ((string?)(values.SingleOrDefault())) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(RequestIdHeader)) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(RequestIdHeader));
+        return response.Headers.TryGetValues(RequestIdHeaderName, out var values) ? ((string?)(values.SingleOrDefault())) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(string?)) : (false, default(string?));
     }
 
     /// <inheritdoc />

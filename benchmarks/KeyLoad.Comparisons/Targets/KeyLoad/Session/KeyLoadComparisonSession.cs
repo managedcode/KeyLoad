@@ -90,11 +90,11 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
 
     private sealed record CorpusQueryMarker;
 
-    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         var found = KeyLoadClientResults.Success(await client.GetAsync(
             new(partition, ComparisonIdentities.DocumentsCollection, document.Id), cancellationToken)).Document;
-        return found is null ? global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<FoundDocument?>.Succeed((FoundDocument?)(new(found.Reference.Id, found.Json)));
+        return found is null ? (false, default(FoundDocument?)) : (true, (FoundDocument?)(new(found.Reference.Id, found.Json)));
     }
 
     public async Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)

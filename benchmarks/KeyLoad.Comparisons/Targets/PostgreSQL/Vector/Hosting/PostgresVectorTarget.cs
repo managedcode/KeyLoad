@@ -115,7 +115,7 @@ public sealed class PostgresVectorTarget : IVectorComparisonTarget
     }
 
     /// <inheritdoc />
-    public Task<global::ManagedCode.Communication.Result<VectorReadback?>> ReadAsync(string id, CancellationToken cancellationToken)
+    public Task<(bool HasValue, VectorReadback? Value)> ReadAsync(string id, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
         return PostgresVectorStorage.ReadAsync(source, id, cancellationToken);

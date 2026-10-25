@@ -7,13 +7,13 @@ namespace KeyLoad.Core;
 /// <summary>Executes SearchQueriesOnlineText operations against the caller's database context.</summary>
 public static class SearchQueriesOnlineText
 {
-    internal static global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?> ReadOnlineTextCurrentPublication(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
+    internal static (bool HasValue, OnlineTextCurrentPublication? Value) ReadOnlineTextCurrentPublication(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
     {
         engine.RequireOnlineTextOriginalAuthority(view, principal, request);
         var current = view.GetRecord<OnlineTextCurrentPublication>(OnlineTextPublicationKeys.Current(request));
         if (current is null)
         {
-            return global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.FailNotFound(nameof(ReadOnlineTextCurrentPublication));
+            return (false, default(OnlineTextCurrentPublication?));
         }
 
         budget.ChargeBytes(OrleansSerialization.Measure(current));
@@ -40,6 +40,6 @@ public static class SearchQueriesOnlineText
         }
 
         budget.Check();
-        return global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.Succeed(((OnlineTextCurrentPublication?)(current)));
+        return (true, ((OnlineTextCurrentPublication?)(current)));
     }
 }

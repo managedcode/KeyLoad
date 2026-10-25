@@ -46,7 +46,7 @@ internal static class TimescaleTimeSeriesIntensiveDataReader
         return ImmutableCollectionsMarshal.AsImmutableArray(records);
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<SampleRecord?>> ReadLatestAsync(NpgsqlDataReader reader, CancellationToken token)
+    internal static async Task<(bool HasValue, SampleRecord? Value)> ReadLatestAsync(NpgsqlDataReader reader, CancellationToken token)
     {
         const int FirstColumnIndex = 0;
         const int SecondColumnIndex = 1;
@@ -59,7 +59,7 @@ internal static class TimescaleTimeSeriesIntensiveDataReader
         if (!await reader.ReadAsync(token).ConfigureAwait(false))
         {
             await TimescaleTimeSeriesIntensiveReader.ValidateEndAsync(reader, token).ConfigureAwait(false);
-            return global::ManagedCode.Communication.Result<SampleRecord?>.FailNotFound(nameof(ReadLatestAsync));
+            return (false, default(SampleRecord?));
         }
         if (await reader.IsDBNullAsync(FirstColumnIndex, token).ConfigureAwait(false)
             || await reader.IsDBNullAsync(SecondColumnIndex, token).ConfigureAwait(false)
@@ -76,7 +76,7 @@ internal static class TimescaleTimeSeriesIntensiveDataReader
             throw TimescaleTimeSeriesIntensiveReader.InvalidReply();
         }
         await TimescaleTimeSeriesIntensiveReader.ValidateEndAsync(reader, token).ConfigureAwait(false);
-        return global::ManagedCode.Communication.Result<SampleRecord?>.Succeed(((SampleRecord?)(sample)));
+        return (true, ((SampleRecord?)(sample)));
     }
 
     internal static async Task<SampleAggregate> ReadAggregateAsync(NpgsqlDataReader reader, CancellationToken token)
@@ -173,8 +173,8 @@ internal static class TimescaleTimeSeriesIntensiveDataReader
             (await NullableDoubleAsync(reader, offset + OrdinalIdentity, token).ConfigureAwait(false)).Value);
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<double?>> NullableDoubleAsync(NpgsqlDataReader reader, int ordinal, CancellationToken token) =>
-        await reader.IsDBNullAsync(ordinal, token).ConfigureAwait(false) ? global::ManagedCode.Communication.Result<double?>.FailNotFound(nameof(NullableDoubleAsync)) : global::ManagedCode.Communication.Result<double?>.Succeed(((double?)(reader.GetDouble(ordinal))));
+    private static async Task<(bool HasValue, double? Value)> NullableDoubleAsync(NpgsqlDataReader reader, int ordinal, CancellationToken token) =>
+        await reader.IsDBNullAsync(ordinal, token).ConfigureAwait(false) ? (false, default(double?)) : (true, ((double?)(reader.GetDouble(ordinal))));
 
     private static DateTimeOffset Utc(DateTime value)
     {

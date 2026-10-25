@@ -82,7 +82,7 @@ public static class RemoteTransferInspection
     }
 
     internal static long InspectionRequestBytes<T>(string principalId, T request) => checked(Encoding.UTF8.GetByteCount(principalId) + OrleansSerialization.Serialize(request).LongLength);
-    internal static global::ManagedCode.Communication.Result<QueueTransferInspection?> InspectQueueTransfer(this DatabaseEngine engine, IKeyValueView view, string principalId, QueueLaneRef source, Guid transferId)
+    internal static (bool HasValue, QueueTransferInspection? Value) InspectQueueTransfer(this DatabaseEngine engine, IKeyValueView view, string principalId, QueueLaneRef source, Guid transferId)
     {
         ValidateTransferLane(source);
         if (transferId == Guid.Empty)
@@ -98,15 +98,15 @@ public static class RemoteTransferInspection
         var record = view.GetRecord<RemoteTransferIntentRecord>(RemoteTransferStorage.IntentKey(source, transferId));
         if (record is null)
         {
-            return global::ManagedCode.Communication.Result<QueueTransferInspection?>.FailNotFound(nameof(InspectQueueTransfer));
+            return (false, default(QueueTransferInspection?));
         }
 
         engine.ValidateIntentRecord(view, record, source, transferId);
         _ = RemoteTransferStorage.RequireSourceCounter(view, source);
-        return global::ManagedCode.Communication.Result<QueueTransferInspection?>.Succeed(((QueueTransferInspection?)(new(source, transferId, record.Destination, record.State, record.IntentToken, record.ReceiptToken))));
+        return (true, ((QueueTransferInspection?)(new(source, transferId, record.Destination, record.State, record.IntentToken, record.ReceiptToken))));
     }
 
-    internal static global::ManagedCode.Communication.Result<QueueTransferReceiptInspection?> InspectQueueTransferReceipt(this DatabaseEngine engine, IKeyValueView view, string principalId, QueueLaneRef destination, QueueLaneRef source, Guid transferId)
+    internal static (bool HasValue, QueueTransferReceiptInspection? Value) InspectQueueTransferReceipt(this DatabaseEngine engine, IKeyValueView view, string principalId, QueueLaneRef destination, QueueLaneRef source, Guid transferId)
     {
         RemoteTransferValidation.ValidateTransferPair(source, destination);
         if (transferId == Guid.Empty)
@@ -122,12 +122,12 @@ public static class RemoteTransferInspection
         var record = view.GetRecord<RemoteTransferTargetReceiptRecord>(RemoteTransferStorage.TargetReceiptKey(source, transferId, destination));
         if (record is null)
         {
-            return global::ManagedCode.Communication.Result<QueueTransferReceiptInspection?>.FailNotFound(nameof(InspectQueueTransferReceipt));
+            return (false, default(QueueTransferReceiptInspection?));
         }
 
         engine.ValidateTargetReceiptRecord(view, record, source, destination, transferId);
         _ = RemoteTransferStorage.RequireTargetCounter(view, destination);
-        return global::ManagedCode.Communication.Result<QueueTransferReceiptInspection?>.Succeed(((QueueTransferReceiptInspection?)(new(destination, source, transferId, record.ReceiptToken, record.TargetCommit))));
+        return (true, ((QueueTransferReceiptInspection?)(new(destination, source, transferId, record.ReceiptToken, record.TargetCommit))));
     }
 
     internal static void ValidateTargetReceiptRecord(this DatabaseEngine engine, IKeyValueView view, RemoteTransferTargetReceiptRecord record, QueueLaneRef source, QueueLaneRef destination, Guid transferId)

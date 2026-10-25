@@ -22,7 +22,7 @@ internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, IAnn
             : NextAsync(current, work, budget, binding, token))).Value;
     }
 
-    private async Task<global::ManagedCode.Communication.Result<AnnProjectionJobState?>> InitializeAsync(AnnProjectionWork work, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding,
+    private async Task<(bool HasValue, AnnProjectionJobState? Value)> InitializeAsync(AnnProjectionWork work, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
         var authority = work.Consumer.MaintenanceAuthority
@@ -31,30 +31,30 @@ internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, IAnn
         {
             if (!work.Consumer.InitialAnnMaintenanceSettled)
             {
-                return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.FailNotFound(nameof(InitializeAsync));
+                return (false, default(AnnProjectionJobState?));
             }
             if (reserved.NodeId != work.NodeId || reserved.Placement.PhysicalShardId != work.Placement.PhysicalShardId
                 || reserved.Placement.Incarnation != work.Placement.Incarnation)
             {
                 var ownInitial = AnnProjectionJobValidation.Initial(work);
-                return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.Succeed((AnnProjectionJobState?)(new(authority, ownInitial, ownInitial, null, null, null, work.ThroughSequence, null)));
+                return (true, (AnnProjectionJobState?)(new(authority, ownInitial, ownInitial, null, null, null, work.ThroughSequence, null)));
             }
             var enrollment = await execution.ReadEnrollmentBoundAsync(work.Principal, reserved, budget, binding, token).ConfigureAwait(true);
             if (enrollment is null)
             {
-                return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.FailNotFound(nameof(InitializeAsync));
+                return (false, default(AnnProjectionJobState?));
             }
             var adopted = new AnnProjectionJobState(authority, enrollment.InitialRequest, null, null,
                 enrollment.LastResult, null, enrollment.LastResult.Source?.ThroughSequence
                     ?? throw Errors.Fail(ErrorCode.Corruption, AnnProjectionJobProtocol.Invalid), enrollment.LastRequest);
             AnnProjectionJobValidation.RequireCurrent(adopted, work);
-            return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.Succeed(((AnnProjectionJobState?)(adopted)));
+            return (true, ((AnnProjectionJobState?)(adopted)));
         }
         var initial = AnnProjectionJobValidation.Initial(work);
-        return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.Succeed((AnnProjectionJobState?)(new(authority, initial, initial, null, null, null, work.ThroughSequence, null)));
+        return (true, (AnnProjectionJobState?)(new(authority, initial, initial, null, null, null, work.ThroughSequence, null)));
     }
 
-    private async Task<global::ManagedCode.Communication.Result<AnnProjectionJobState?>> NextAsync(AnnProjectionJobState original,
+    private async Task<(bool HasValue, AnnProjectionJobState? Value)> NextAsync(AnnProjectionJobState original,
         AnnProjectionWork work, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
@@ -65,20 +65,20 @@ internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, IAnn
         }
         if (original.PendingRequest is not null)
         {
-            return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.Succeed(((AnnProjectionJobState?)(original)));
+            return (true, ((AnnProjectionJobState?)(original)));
         }
         var publication = await execution.ReadPublishedBoundAsync(work.Principal, original.InitialRequest, budget, binding, token)
             .ConfigureAwait(true);
         if (publication.Source.ThroughSequence >= work.ThroughSequence)
         {
-            return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.FailNotFound(nameof(NextAsync));
+            return (false, default(AnnProjectionJobState?));
         }
         var restore = original.InitialRequest with
         {
             CommandId = Guid.NewGuid(),
             Mode = AnnMaintenanceMode.Restore
         };
-        return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.Succeed(((AnnProjectionJobState?)(original with
+        return (true, ((AnnProjectionJobState?)(original with
         {
             PendingRequest = restore,
             JobId = null,

@@ -12,18 +12,18 @@ public static class DatabaseCompositionIdentity
 {
     internal const string MissingCompositionAuthority = "The composition outcome has no saved row authority.";
     internal const string InvalidCompositionAuthority = "The composition outcome row authority is invalid.";
-    internal static global::ManagedCode.Communication.Result<CompositionOutcomeAuthority?> CaptureCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, Result<object> result)
+    internal static (bool HasValue, CompositionOutcomeAuthority? Value) CaptureCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, Result<object> result)
     {
         const int EmptyReverseLength = 0;
         if (Errors.Code(result.Problem).Value is not null || !TryCompositionInput(operation, out var partition, out var mutations))
         {
-            return global::ManagedCode.Communication.Result<CompositionOutcomeAuthority?>.FailNotFound(nameof(CaptureCompositionOutcome));
+            return (false, default(CompositionOutcomeAuthority?));
         }
 
         var reverse = mutations.OfType<GraphToQueueMutation>().ToArray();
         if (!mutations.Any(mutation => mutation is QueueToGraph) && reverse.Length == EmptyReverseLength)
         {
-            return global::ManagedCode.Communication.Result<CompositionOutcomeAuthority?>.FailNotFound(nameof(CaptureCompositionOutcome));
+            return (false, default(CompositionOutcomeAuthority?));
         }
 
         var receipt = result.Get<CommitReceipt>();
@@ -46,7 +46,7 @@ public static class DatabaseCompositionIdentity
             }
         }
 
-        return global::ManagedCode.Communication.Result<CompositionOutcomeAuthority?>.Succeed(((CompositionOutcomeAuthority?)(new(references.ToImmutable()))));
+        return (true, ((CompositionOutcomeAuthority?)(new(references.ToImmutable()))));
     }
 
     internal static ImmutableArray<EntityRef> CompositionMutationReferences(Mutation effect)

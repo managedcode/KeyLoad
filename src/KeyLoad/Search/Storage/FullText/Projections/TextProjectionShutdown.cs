@@ -58,11 +58,11 @@ internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, Tex
         return (Failure(failures)).Value;
     }
 
-    private global::ManagedCode.Communication.Result<Exception?> DeleteBuilding(TextGenerationSlot slot)
+    private (bool HasValue, Exception? Value) DeleteBuilding(TextGenerationSlot slot)
     {
         if (slot.Leaf is null)
         {
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(DeleteBuilding));
+            return (false, default(Exception?));
         }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => physicalGate.Run(() => TextFiles.DeleteBuildingGeneration(
@@ -71,14 +71,14 @@ internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, Tex
         {
             slot.SharedReservation?.CompleteAfterJoinedCleanup();
         }
-        return ((Exception?)((Failure(failures)).Value)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<Exception?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(DeleteBuilding));
+        return ((Exception?)((Failure(failures)).Value)) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(Exception?));
     }
 
-    private static global::ManagedCode.Communication.Result<Exception?> Failure(List<Exception> failures)
+    private static (bool HasValue, Exception? Value) Failure(List<Exception> failures)
         => failures.Count switch
         {
-            0 => global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Failure)),
-            1 => global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(failures[0]))),
-            _ => global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(failures)))
+            0 => (false, default(Exception?)),
+            1 => (true, ((Exception?)(failures[0]))),
+            _ => (true, (Exception?)(new AggregateException(failures)))
         };
 }

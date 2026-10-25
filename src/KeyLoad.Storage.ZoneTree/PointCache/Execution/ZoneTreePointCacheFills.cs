@@ -6,7 +6,7 @@ internal static class ZoneTreePointCacheFills
     private const string ForeignCandidateMessage = "The fill candidate belongs to a different owner.";
     private const string ReservedLengthMismatchMessage = "The published value length must match its reserved length.";
 
-    internal static global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?> TryPrepare(ZoneTreePointCacheState state,
+    internal static (bool HasValue, ZoneTreePointCacheCandidate? Value) TryPrepare(ZoneTreePointCacheState state,
         IZoneTreePointCacheCandidateOwner owner, ReadOnlySpan<byte> key, int valueLength, long generation)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(valueLength);
@@ -18,7 +18,7 @@ internal static class ZoneTreePointCacheFills
                 || valueLength > state.Options.MaxValueBytes)
             {
                 ZoneTreePointCacheState.Increment(ref state.AdmissionBypasses);
-                return global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?>.FailNotFound(nameof(TryPrepare));
+                return (false, default(ZoneTreePointCacheCandidate?));
             }
 
             var charge = ZoneTreePointCacheLedger.EntryCharge(key.Length, valueLength);
@@ -28,12 +28,12 @@ internal static class ZoneTreePointCacheFills
                 if (!TryReserveWithEviction(state, charge, out reservation))
                 {
                     ZoneTreePointCacheState.Increment(ref state.AdmissionBypasses);
-                    return global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?>.FailNotFound(nameof(TryPrepare));
+                    return (false, default(ZoneTreePointCacheCandidate?));
                 }
 
                 var candidate = CreateCandidate(state, owner, key, valueLength, generation, reservation);
                 reservation = null;
-                return (candidate);
+                return (true, (candidate));
             }
             finally
             {

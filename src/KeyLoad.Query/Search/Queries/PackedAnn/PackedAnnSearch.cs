@@ -100,20 +100,20 @@ internal static class PackedAnnSearch
         return PreparedSimilarity.Create(query.AsMemory(), state.Space.Metric);
     }
 
-    private static global::ManagedCode.Communication.Result<ulong[]?> CopyEligibility(int count, ReadOnlyMemory<ulong>? eligibility, int words,
+    private static (bool HasValue, ulong[]? Value) CopyEligibility(int count, ReadOnlyMemory<ulong>? eligibility, int words,
         AnnWorkBudget budget, out int eligibleCount)
     {
         if (eligibility is null)
         {
             eligibleCount = count;
-            return global::ManagedCode.Communication.Result<ulong[]?>.FailNotFound(nameof(CopyEligibility));
+            return (false, default(ulong[]?));
         }
         budget.Charge(checked((long)words * sizeof(ulong)));
         var source = eligibility.Value.Span;
         var copy = new ulong[words];
         source.CopyTo(copy);
         eligibleCount = CountEligible(count, copy, budget);
-        return global::ManagedCode.Communication.Result<ulong[]?>.Succeed(((ulong[]?)(copy)));
+        return (true, ((ulong[]?)(copy)));
     }
 
     private static int CountEligible(int count, ulong[] bitmap, AnnWorkBudget budget)

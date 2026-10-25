@@ -11,14 +11,14 @@ internal static class ScaleServerCgroupEnvelopeReader
     private const string MemoryMaximum = "memory.max";
     private const string Unlimited = "max";
 
-    internal static async Task<global::ManagedCode.Communication.Result<ScaleServerEnvelope?>> ReadFromDirectoryAsync(string current, string root,
+    internal static async Task<(bool HasValue, ScaleServerEnvelope? Value)> ReadFromDirectoryAsync(string current, string root,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int DepthInitialValue = 0;
 
         if (!await ScaleServerCgroupHierarchy.IsSupportedRootAsync(root, budget, token))
         {
-            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync));
+            return (false, default(ScaleServerEnvelope?));
         }
 
         decimal? cpu = null;
@@ -31,7 +31,7 @@ internal static class ScaleServerCgroupEnvelopeReader
             var inputs = (await ReadAncestorInputsAsync(directory, isRoot, budget, token)).Value;
             if (inputs is null)
             {
-                return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync));
+                return (false, default(ScaleServerEnvelope?));
             }
 
             if (cpuSet is null)
@@ -42,7 +42,7 @@ internal static class ScaleServerCgroupEnvelopeReader
             if (!TryAccumulateCpuLimit(inputs.Value.Cpu, isRoot, ref cpu)
                 || !TryAccumulateMemoryLimit(inputs.Value.Memory, ref memory))
             {
-                return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync));
+                return (false, default(ScaleServerEnvelope?));
             }
 
             if (directory == root)
@@ -54,15 +54,15 @@ internal static class ScaleServerCgroupEnvelopeReader
         }
         if (directory != root)
         {
-            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync));
+            return (false, default(ScaleServerEnvelope?));
         }
 
         var cpuValue = cpu?.ToString(CultureInfo.InvariantCulture) ?? Unlimited;
         var memoryValue = memory?.ToString(CultureInfo.InvariantCulture) ?? Unlimited;
-        return cpuSet is null ? global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync)) : global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.Succeed((ScaleServerEnvelope?)(new ScaleServerEnvelope(cpuValue, cpuSet, memoryValue)));
+        return cpuSet is null ? (false, default(ScaleServerEnvelope?)) : (true, (ScaleServerEnvelope?)(new ScaleServerEnvelope(cpuValue, cpuSet, memoryValue)));
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<(string Cpu, string Memory, string CpuSet)?>> ReadAncestorInputsAsync(
+    private static async Task<(bool HasValue, (string Cpu, string Memory, string CpuSet)? Value)> ReadAncestorInputsAsync(
         string directory, bool isRoot, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const string EffectiveCpuSetFileName = "cpuset.cpus.effective";
@@ -78,7 +78,7 @@ internal static class ScaleServerCgroupEnvelopeReader
         var setText = (await BoundedText.ReadAsync(Path.Combine(directory, EffectiveCpuSetFileName),
             budget.Settings.MaxFileBytes, budget, token)).Value;
         return cpuText is null || memoryText is null || string.IsNullOrWhiteSpace(setText)
-            ? global::ManagedCode.Communication.Result<(string Cpu, string Memory, string CpuSet)?>.FailNotFound(nameof(ReadAncestorInputsAsync)) : global::ManagedCode.Communication.Result<(string Cpu, string Memory, string CpuSet)?>.Succeed((((string Cpu, string Memory, string CpuSet)?)((cpuText, memoryText, setText))));
+            ? (false, default((string Cpu, string Memory, string CpuSet)?)) : (true, (((string Cpu, string Memory, string CpuSet)?)((cpuText, memoryText, setText))));
     }
 
     internal static bool TryAccumulateCpuLimit(string cpuText, bool isRoot, ref decimal? cpu)

@@ -10,11 +10,11 @@ public static class DatabaseCompositionTypedEndpointJoin
     internal const string TypedJoinRequiresRelationalCollections = "The endpoint join requires two distinct typed relational collections.";
     internal const string TypedJoinReferenceMismatch = "The queue link does not match its declared endpoint collections.";
     internal const string TypedJoinRecordMismatch = "The typed endpoint record has a different canonical identity.";
-    internal static global::ManagedCode.Communication.Result<(string FromPrimaryKey, string ToPrimaryKey)?> AuthorizeTypedEndpointJoin(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, QueueToGraph command)
+    internal static (bool HasValue, (string FromPrimaryKey, string ToPrimaryKey)? Value) AuthorizeTypedEndpointJoin(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, QueueToGraph command)
     {
         if (command.FromCollection is null && command.ToCollection is null)
         {
-            return global::ManagedCode.Communication.Result<(string FromPrimaryKey, string ToPrimaryKey)?>.FailNotFound(nameof(AuthorizeTypedEndpointJoin));
+            return (false, default((string FromPrimaryKey, string ToPrimaryKey)?));
         }
 
         if (command.FromCollection is null || command.ToCollection is null || StringComparer.Ordinal.Equals(command.FromCollection, command.ToCollection))
@@ -24,7 +24,7 @@ public static class DatabaseCompositionTypedEndpointJoin
 
         var fromPrimaryKey = engine.AuthorizeTypedEndpointResource(view, principal, partition, command.FromCollection);
         var toPrimaryKey = engine.AuthorizeTypedEndpointResource(view, principal, partition, command.ToCollection);
-        return global::ManagedCode.Communication.Result<(string FromPrimaryKey, string ToPrimaryKey)?>.Succeed((((string FromPrimaryKey, string ToPrimaryKey)?)((fromPrimaryKey, toPrimaryKey))));
+        return (true, (((string FromPrimaryKey, string ToPrimaryKey)?)((fromPrimaryKey, toPrimaryKey))));
     }
 
     internal static string AuthorizeTypedEndpointResource(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection)
@@ -42,7 +42,7 @@ public static class DatabaseCompositionTypedEndpointJoin
         return schema.PrimaryKey;
     }
 
-    internal static global::ManagedCode.Communication.Result<QueueGraphLink?> SelectTypedEndpointPair(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, QueueToGraph command, QueueGraphLink link, ReadExecutionBudget budget, string fromPrimaryKey, string toPrimaryKey)
+    internal static (bool HasValue, QueueGraphLink? Value) SelectTypedEndpointPair(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, QueueToGraph command, QueueGraphLink link, ReadExecutionBudget budget, string fromPrimaryKey, string toPrimaryKey)
     {
         if (!StringComparer.Ordinal.Equals(link.From.Collection, command.FromCollection) || !StringComparer.Ordinal.Equals(link.To.Collection, command.ToCollection))
         {
@@ -56,26 +56,26 @@ public static class DatabaseCompositionTypedEndpointJoin
         {
             From = from.Reference,
             To = to.Reference
-        }) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<QueueGraphLink?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<QueueGraphLink?>.FailNotFound(nameof(SelectTypedEndpointPair));
+        }) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(QueueGraphLink?));
     }
 
-    internal static global::ManagedCode.Communication.Result<DocumentRecord?> ReadTypedEndpoint(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, EntityRef reference, ReadExecutionBudget budget, string primaryKey)
+    internal static (bool HasValue, DocumentRecord? Value) ReadTypedEndpoint(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, EntityRef reference, ReadExecutionBudget budget, string primaryKey)
     {
         var record = budget.ReadRecord<DocumentRecord>(view, DocumentStorageExecutionDocuments.DocumentKey(reference.Partition, reference.Collection, reference.Id));
         if (record is null)
         {
-            return global::ManagedCode.Communication.Result<DocumentRecord?>.FailNotFound(nameof(ReadTypedEndpoint));
+            return (false, default(DocumentRecord?));
         }
 
         if (record.Deleted || !engine.Authorization.CanReadRow(principal, record.Access))
         {
-            return global::ManagedCode.Communication.Result<DocumentRecord?>.FailNotFound(nameof(ReadTypedEndpoint));
+            return (false, default(DocumentRecord?));
         }
 
         // Resource and row authority were checked before resolving the caller's explicit lookup.
         _ = engine.BindCompositionInputRecord(budget.CreateView(view), reference, record);
         DatabaseCompositionRetainedPrimaryIdentity.RequireTypedEndpointPrimaryIdentity(record, primaryKey);
-        return global::ManagedCode.Communication.Result<DocumentRecord?>.Succeed(((DocumentRecord?)(record)));
+        return (true, ((DocumentRecord?)(record)));
     }
 
     internal static List<Mutation> ExpandQueueToGraph(this DatabaseEngine engine, IAtomicTransaction transaction, PrincipalRecord principal, PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget)

@@ -101,7 +101,7 @@ internal static class ScaleServerMountReader
         return endpoint?.Trim().StartsWith(UnixPrefix, StringComparison.Ordinal) == true;
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<ScaleServerMount?>> ReadActualMountAsync(string source, string containerPath,
+    private static async Task<(bool HasValue, ScaleServerMount? Value)> ReadActualMountAsync(string source, string containerPath,
         string mountType, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const string ArgumentsText = "--json";
@@ -112,10 +112,10 @@ internal static class ScaleServerMountReader
         {
             canonicalSource = Path.GetFullPath(source);
         }
-        catch (ArgumentException) { return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadActualMountAsync)); }
+        catch (ArgumentException) { return (false, default(ScaleServerMount?)); }
         if (!Directory.Exists(canonicalSource) && !File.Exists(canonicalSource))
         {
-            return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadActualMountAsync));
+            return (false, default(ScaleServerMount?));
         }
 
         var json = await ScaleServerResourceProcess.RunAsync(Findmnt,
@@ -123,13 +123,13 @@ internal static class ScaleServerMountReader
             budget.Settings.MaxOutputBytes);
         if (json is null)
         {
-            return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadActualMountAsync));
+            return (false, default(ScaleServerMount?));
         }
 
-        return ((ScaleServerMount?)((ReadMountDescriptor(canonicalSource, containerPath, mountType, json)).Value)) is { } outcomeValue4 ? global::ManagedCode.Communication.Result<ScaleServerMount?>.Succeed(outcomeValue4) : global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadActualMountAsync));
+        return ((ScaleServerMount?)((ReadMountDescriptor(canonicalSource, containerPath, mountType, json)).Value)) is { } outcomeValue4 ? (true, outcomeValue4) : (false, default(ScaleServerMount?));
     }
 
-    private static global::ManagedCode.Communication.Result<ScaleServerMount?> ReadMountDescriptor(string canonicalSource, string containerPath,
+    private static (bool HasValue, ScaleServerMount? Value) ReadMountDescriptor(string canonicalSource, string containerPath,
         string mountType, string json)
     {
         const string PropertyNameText = "filesystems";
@@ -144,13 +144,13 @@ internal static class ScaleServerMountReader
             if (!document.RootElement.TryGetProperty(PropertyNameText, out var rows)
                 || rows.ValueKind != JsonValueKind.Array || rows.GetArrayLength() != SingleFilesystemCount)
             {
-                return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadMountDescriptor));
+                return (false, default(ScaleServerMount?));
             }
 
             var row = rows[IndexValue];
             if (!HasExactMountFields(row))
             {
-                return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadMountDescriptor));
+                return (false, default(ScaleServerMount?));
             }
 
             var target = Path.GetFullPath(row.GetProperty(TargetField).GetString() ?? string.Empty);
@@ -160,16 +160,16 @@ internal static class ScaleServerMountReader
             if (!IsPathWithin(canonicalSource, target) || string.IsNullOrWhiteSpace(fileSystem)
                 || capacity <= BoundaryValue || available < BoundaryValue || available > capacity)
             {
-                return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadMountDescriptor));
+                return (false, default(ScaleServerMount?));
             }
 
-            return global::ManagedCode.Communication.Result<ScaleServerMount?>.Succeed((ScaleServerMount?)(new ScaleServerMount(containerPath, mountType, fileSystem, capacity, available)));
+            return (true, (ScaleServerMount?)(new ScaleServerMount(containerPath, mountType, fileSystem, capacity, available)));
         }
-        catch (JsonException) { return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadMountDescriptor)); }
-        catch (ArgumentException) { return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadMountDescriptor)); }
-        catch (InvalidOperationException) { return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadMountDescriptor)); }
-        catch (FormatException) { return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadMountDescriptor)); }
-        catch (OverflowException) { return global::ManagedCode.Communication.Result<ScaleServerMount?>.FailNotFound(nameof(ReadMountDescriptor)); }
+        catch (JsonException) { return (false, default(ScaleServerMount?)); }
+        catch (ArgumentException) { return (false, default(ScaleServerMount?)); }
+        catch (InvalidOperationException) { return (false, default(ScaleServerMount?)); }
+        catch (FormatException) { return (false, default(ScaleServerMount?)); }
+        catch (OverflowException) { return (false, default(ScaleServerMount?)); }
     }
 
     private static bool HasExactMountFields(JsonElement value)

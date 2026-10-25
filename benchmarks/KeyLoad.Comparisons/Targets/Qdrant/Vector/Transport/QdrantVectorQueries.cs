@@ -34,11 +34,11 @@ internal static class QdrantVectorQueries
             filter = (Filter(mode)).Value
         };
 
-    private static global::ManagedCode.Communication.Result<object?> Filter(VectorQueryMode mode) => mode switch
+    private static (bool HasValue, object? Value) Filter(VectorQueryMode mode) => mode switch
     {
-        VectorQueryMode.Plain => global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(Filter)),
-        VectorQueryMode.Filtered => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(Match(QdrantVectorProtocol.Filtered)))),
-        VectorQueryMode.Mixed => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(Match(QdrantVectorProtocol.Mixed)))),
+        VectorQueryMode.Plain => (false, default(object?)),
+        VectorQueryMode.Filtered => (true, ((object?)(Match(QdrantVectorProtocol.Filtered)))),
+        VectorQueryMode.Mixed => (true, ((object?)(Match(QdrantVectorProtocol.Mixed)))),
         _ => throw new ArgumentOutOfRangeException(nameof(mode))
     };
 

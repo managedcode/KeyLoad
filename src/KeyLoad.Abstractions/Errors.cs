@@ -6,17 +6,16 @@ namespace KeyLoad;
 public static class Errors
 {
     private const string ProblemTypePrefix = "urn:keyload:error:";
-    private const string MissingDomainProblem = "The result has no database problem.";
     private const string InvalidDomainProblem = "The database command problem is invalid.";
 
-    /// <summary>Reads the exact domain error from a database problem as an explicit result.</summary>
+    /// <summary>Reads the exact domain error from a database problem with explicit presence.</summary>
     /// <param name="problem">The execution problem associated with the database result.</param>
-    /// <returns>The validated domain code, or a not-found result when no problem exists.</returns>
-    public static Result<ErrorCode?> Code(Problem? problem)
+    /// <returns>The presence flag and validated code, or an absent value when no problem exists.</returns>
+    public static (bool HasValue, ErrorCode? Value) Code(Problem? problem)
     {
         if (problem is null)
         {
-            return Result<ErrorCode?>.Fail(Problem(ErrorCode.NotFound, MissingDomainProblem));
+            return (false, null);
         }
         if (!Enum.TryParse<ErrorCode>(problem.ErrorCode, out var code) || !Enum.IsDefined(code)
             || problem.ErrorCode != code.ToString() || problem.Title != code.ToString() || problem.Type != $"{ProblemTypePrefix}{code}"
@@ -24,7 +23,7 @@ public static class Errors
         {
             throw Fail(ErrorCode.Corruption, InvalidDomainProblem);
         }
-        return Result<ErrorCode?>.Succeed(code);
+        return (true, code);
     }
     /// <summary>Returns the HTTP status code associated with an error code.</summary>
     /// <param name="code">Specifies the code value.</param>

@@ -64,12 +64,12 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
     }
     private const int EmptyCount = 0;
 
-    private static global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?> CopyParameters(
+    private static (bool HasValue, Dictionary<string, global::System.Text.Json.JsonElement>? Value) CopyParameters(
         Dictionary<string, global::System.Text.Json.JsonElement>? supplied, Action checkBudget, CancellationToken token)
     {
         if (supplied is null)
         {
-            return global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?>.FailNotFound(nameof(CopyParameters));
+            return (false, default(Dictionary<string, global::System.Text.Json.JsonElement>?));
         }
         var owned = new Dictionary<string, global::System.Text.Json.JsonElement>(supplied.Count, StringComparer.Ordinal);
         foreach (var entry in supplied)
@@ -83,7 +83,7 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
         }
         token.ThrowIfCancellationRequested();
         checkBudget();
-        return global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?>.Succeed(((Dictionary<string, global::System.Text.Json.JsonElement>?)(owned)));
+        return (true, ((Dictionary<string, global::System.Text.Json.JsonElement>?)(owned)));
     }
     private string Name(Dom.ScalarExpression expression)
     {

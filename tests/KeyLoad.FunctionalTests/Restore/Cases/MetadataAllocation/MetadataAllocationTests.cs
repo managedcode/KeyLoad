@@ -45,7 +45,7 @@ internal sealed class MetadataAllocationTests
         await Assert.That(allocatedBytes).IsLessThan(inputLength / 2);
     }
 
-    private static global::ManagedCode.Communication.Result<KeyLoadException?> RejectRestore(string backup, string destination)
+    private static (bool HasValue, KeyLoadException? Value) RejectRestore(string backup, string destination)
     {
         try
         {
@@ -53,10 +53,10 @@ internal sealed class MetadataAllocationTests
         }
         catch (KeyLoadException error)
         {
-            return global::ManagedCode.Communication.Result<KeyLoadException?>.Succeed(((KeyLoadException?)(error)));
+            return (true, ((KeyLoadException?)(error)));
         }
 
-        return global::ManagedCode.Communication.Result<KeyLoadException?>.FailNotFound(nameof(RejectRestore));
+        return (false, default(KeyLoadException?));
     }
 
     private static (KeyLoadException? Failure, long AllocatedBytes) MeasureRejectedRestore(string backup, string destination)

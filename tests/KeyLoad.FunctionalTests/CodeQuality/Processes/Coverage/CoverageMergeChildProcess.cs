@@ -166,14 +166,14 @@ internal static class CoverageMergeChildProcess
         return elapsedAfterPrimaryDeadline >= settlement ? TimeSpan.Zero : settlement - elapsedAfterPrimaryDeadline;
     }
 
-    private static global::ManagedCode.Communication.Result<Result?> MakeResult(Process process, CliBackupRestoreProcessOutput stdout,
+    private static (bool HasValue, Result? Value) MakeResult(Process process, CliBackupRestoreProcessOutput stdout,
         CliBackupRestoreProcessOutput stderr, Task? exit, Task? output, Task? error, Task joined)
     {
         if (!joined.IsCompletedSuccessfully || exit is null || output is null || error is null)
         {
-            return global::ManagedCode.Communication.Result<Result?>.FailNotFound(nameof(MakeResult));
+            return (false, default(Result?));
         }
-        return global::ManagedCode.Communication.Result<Result?>.Succeed((Result?)(new(process.ExitCode, stdout.Text, stderr.Text, exit.IsCompleted, output.IsCompleted,
+        return (true, (Result?)(new(process.ExitCode, stdout.Text, stderr.Text, exit.IsCompleted, output.IsCompleted,
             error.IsCompleted, Disposed: false)));
     }
 

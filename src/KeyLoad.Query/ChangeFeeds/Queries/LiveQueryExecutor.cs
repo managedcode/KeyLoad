@@ -101,16 +101,16 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         return result;
     }
 
-    private global::ManagedCode.Communication.Result<LiveQueryChange?> MapChange(PrincipalRecord principal, ResourceDefinition schema,
+    private (bool HasValue, LiveQueryChange? Value) MapChange(PrincipalRecord principal, ResourceDefinition schema,
         AuthorizedDocumentChange change, AstQueryRequest query, PreparedQuery prepared, ReadExecutionBudget budget)
     {
         budget.Check();
         var matchesAfter = Matches(change.After, query, prepared);
         if (!matchesAfter && !Matches(change.Before, query, prepared))
         {
-            return global::ManagedCode.Communication.Result<LiveQueryChange?>.FailNotFound(nameof(MapChange));
+            return (false, default(LiveQueryChange?));
         }
-        return global::ManagedCode.Communication.Result<LiveQueryChange?>.Succeed((LiveQueryChange?)(new(change.Sequence, change.Commit, matchesAfter ? LiveQueryChangeKind.Upsert : LiveQueryChangeKind.Remove,
+        return (true, (LiveQueryChange?)(new(change.Sequence, change.Commit, matchesAfter ? LiveQueryChangeKind.Upsert : LiveQueryChangeKind.Remove,
             change.After.Reference, change.After.Revision,
             matchesAfter ? queryEngine.Project(principal, schema, change.After, query.Query.Projection,
                 prepared.Paths) : null)));

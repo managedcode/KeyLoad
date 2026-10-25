@@ -46,9 +46,9 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
             ? HttpTelemetryPrivacyPolicy.ServerDisplay : HttpTelemetryPrivacyPolicy.ClientDisplay;
         data.SetStatus(data.Status, null);
     }
-    internal static global::ManagedCode.Communication.Result<MetricStreamConfiguration> ConfigureMetricView(Instrument instrument)
+    internal static (bool HasValue, MetricStreamConfiguration? Value) ConfigureMetricView(Instrument instrument)
         => instrument.Meter.Name is HttpTelemetryPrivacyPolicy.ServerMeter or HttpTelemetryPrivacyPolicy.ClientMeter
-            ? global::ManagedCode.Communication.Result<MetricStreamConfiguration>.Succeed((MetricStreamConfiguration)(new MetricStreamConfiguration { TagKeys = [] })) : global::ManagedCode.Communication.Result<MetricStreamConfiguration>.FailNotFound(nameof(ConfigureMetricView));
+            ? (true, (MetricStreamConfiguration)(new MetricStreamConfiguration { TagKeys = [] })) : (false, default(MetricStreamConfiguration?));
     private bool ClearBaggage(Activity data)
     {
         if (!HasBoundedAncestry(data))

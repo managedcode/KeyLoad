@@ -164,28 +164,28 @@ internal sealed class ClusterStartupTrace
         return true;
     }
 
-    private static global::ManagedCode.Communication.Result<string?> Reason(string line)
+    private static (bool HasValue, string? Value) Reason(string line)
     {
         if (line.Contains("Address already in use", StringComparison.OrdinalIgnoreCase))
         {
-            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("AddressInUse"));
+            return (true, (string?)("AddressInUse"));
         }
         if (line.Contains("Connection refused", StringComparison.OrdinalIgnoreCase))
         {
-            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("ConnectionRefused"));
+            return (true, (string?)("ConnectionRefused"));
         }
         if (line.Contains("Permission denied", StringComparison.OrdinalIgnoreCase))
         {
-            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("PermissionDenied"));
+            return (true, (string?)("PermissionDenied"));
         }
         if (line.Contains("timed out", StringComparison.OrdinalIgnoreCase))
         {
-            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("TimedOut"));
+            return (true, (string?)("TimedOut"));
         }
         if (line.Contains("canceled", StringComparison.OrdinalIgnoreCase))
         {
-            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("Cancelled"));
+            return (true, (string?)("Cancelled"));
         }
-        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Reason));
+        return (false, default(string?));
     }
 }

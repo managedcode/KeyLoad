@@ -69,7 +69,7 @@ internal static class CoberturaBranchPairAssertions
         return new BranchPairCounts(valid, covered);
     }
 
-    private static global::ManagedCode.Communication.Result<BranchPairCounts?> ReadRootBranchPairs(XmlElement root)
+    private static (bool HasValue, BranchPairCounts? Value) ReadRootBranchPairs(XmlElement root)
     {
         var hasValid = root.HasAttribute(BranchesValidAttribute);
         var hasCovered = root.HasAttribute(BranchesCoveredAttribute);
@@ -79,7 +79,7 @@ internal static class CoberturaBranchPairAssertions
         }
         if (!hasValid)
         {
-            return global::ManagedCode.Communication.Result<BranchPairCounts?>.FailNotFound(nameof(ReadRootBranchPairs));
+            return (false, default(BranchPairCounts?));
         }
         var valid = ParseCount(root.GetAttribute(BranchesValidAttribute));
         var covered = ParseCount(root.GetAttribute(BranchesCoveredAttribute));
@@ -87,7 +87,7 @@ internal static class CoberturaBranchPairAssertions
         {
             throw new InvalidDataException(InvalidReport);
         }
-        return global::ManagedCode.Communication.Result<BranchPairCounts?>.Succeed((BranchPairCounts?)(new BranchPairCounts(valid, covered)));
+        return (true, (BranchPairCounts?)(new BranchPairCounts(valid, covered)));
     }
 
     private static long ParseCount(string? value)

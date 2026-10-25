@@ -101,7 +101,7 @@ internal static class Neo4jQueryProtocol
         }
     }
 
-    private static global::ManagedCode.Communication.Result<string?> ReadFirstErrorCode(JsonElement response)
+    private static (bool HasValue, string? Value) ReadFirstErrorCode(JsonElement response)
     {
         if (!TryGetUniqueProperty(response, ErrorsProperty, out var errors, out var duplicate))
         {
@@ -110,7 +110,7 @@ internal static class Neo4jQueryProtocol
                 throw Invalid();
             }
 
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadFirstErrorCode));
+            return (false, default(string?));
         }
 
         if (errors.ValueKind != JsonValueKind.Array)
@@ -125,7 +125,7 @@ internal static class Neo4jQueryProtocol
             firstCode ??= code;
         }
 
-        return ((string?)(firstCode)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadFirstErrorCode));
+        return ((string?)(firstCode)) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(string?));
     }
 
     private static string ReadErrorCode(JsonElement error)

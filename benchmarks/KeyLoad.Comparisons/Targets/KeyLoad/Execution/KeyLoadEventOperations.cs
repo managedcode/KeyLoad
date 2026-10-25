@@ -30,7 +30,7 @@ internal static class KeyLoadEventOperations
         KeyLoadCopyAcknowledgements.Require(receipt, expectedCopies);
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<FoundEvent?>> ReadAsync(KeyLoadClient client, PartitionRef partition,
+    internal static async Task<(bool HasValue, FoundEvent? Value)> ReadAsync(KeyLoadClient client, PartitionRef partition,
         BenchmarkDocument document, CancellationToken cancellationToken)
     {
         const int BeforeFirstRevision = 0;
@@ -42,7 +42,7 @@ internal static class KeyLoadEventOperations
             AfterRevision: BeforeFirstRevision, Limit: RequiredEventReadCount), cancellationToken));
         if (page.Events.Length == NoItems && !page.HasMore)
         {
-            return global::ManagedCode.Communication.Result<FoundEvent?>.FailNotFound(nameof(ReadAsync));
+            return (false, default(FoundEvent?));
         }
 
         if (page.Events.Length != SingleItemCount || page.HasMore)
@@ -51,6 +51,6 @@ internal static class KeyLoadEventOperations
         }
 
         var found = page.Events[FirstElementIndex];
-        return global::ManagedCode.Communication.Result<FoundEvent?>.Succeed((FoundEvent?)(new(Guid.Parse(found.Data.EventId), checked((ulong)found.Revision), found.Data.PayloadJson)));
+        return (true, (FoundEvent?)(new(Guid.Parse(found.Data.EventId), checked((ulong)found.Revision), found.Data.PayloadJson)));
     }
 }

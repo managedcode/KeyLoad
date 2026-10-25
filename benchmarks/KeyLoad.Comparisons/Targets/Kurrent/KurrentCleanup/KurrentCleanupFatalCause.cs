@@ -4,7 +4,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 internal static class KurrentCleanupFatalCause
 {
-    internal static global::ManagedCode.Communication.Result<ExceptionDispatchInfo?> Find(Exception error)
+    internal static (bool HasValue, ExceptionDispatchInfo? Value) Find(Exception error)
     {
         ArgumentNullException.ThrowIfNull(error);
         var visited = new HashSet<Exception>(ReferenceEqualityComparer.Instance);
@@ -18,7 +18,7 @@ internal static class KurrentCleanupFatalCause
             }
             if (IsFatal(current))
             {
-                return global::ManagedCode.Communication.Result<ExceptionDispatchInfo?>.Succeed(((ExceptionDispatchInfo?)(ExceptionDispatchInfo.Capture(current))));
+                return (true, ((ExceptionDispatchInfo?)(ExceptionDispatchInfo.Capture(current))));
             }
             if (current is AggregateException aggregate)
             {
@@ -33,7 +33,7 @@ internal static class KurrentCleanupFatalCause
                 pending.Push(inner);
             }
         }
-        return global::ManagedCode.Communication.Result<ExceptionDispatchInfo?>.FailNotFound(nameof(Find));
+        return (false, default(ExceptionDispatchInfo?));
     }
 
     private static bool IsFatal(Exception error)

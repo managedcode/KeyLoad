@@ -107,7 +107,7 @@ public static class QueueDeliveryExecution
         return engine.Store.Read(view => (engine.InspectMessageRead(view, principalId, lane, id)).Value);
     }
 
-    internal static global::ManagedCode.Communication.Result<MessageInspection?> InspectMessageRead(this DatabaseEngine engine, IKeyValueView view, string principalId, QueueLaneRef lane, string id)
+    internal static (bool HasValue, MessageInspection? Value) InspectMessageRead(this DatabaseEngine engine, IKeyValueView view, string principalId, QueueLaneRef lane, string id)
     {
         var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
         engine.Authorization.Require(principal, lane.Partition, lane.Queue, Capability.QueueInspect);
@@ -120,7 +120,7 @@ public static class QueueDeliveryExecution
                 throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingMetadata);
             }
 
-            return global::ManagedCode.Communication.Result<MessageInspection?>.FailNotFound(nameof(InspectMessageRead));
+            return (false, default(MessageInspection?));
         }
 
         var retainedDeadLetter = metadata.State is MessageState.DeadLettered or MessageState.PendingDeadLetter;
@@ -160,6 +160,6 @@ public static class QueueDeliveryExecution
             throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         }
 
-        return global::ManagedCode.Communication.Result<MessageInspection?>.Succeed(((MessageInspection?)(new MessageInspection(metadata, body is null ? null : engine.Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _), body is null ? null : engine.Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _)))));
+        return (true, ((MessageInspection?)(new MessageInspection(metadata, body is null ? null : engine.Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _), body is null ? null : engine.Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _)))));
     }
 }

@@ -6,20 +6,20 @@ namespace KeyLoad.Comparisons;
 
 internal static class RuntimeComparisonFailure
 {
-    internal static async Task<global::ManagedCode.Communication.Result<Exception?>> ObserveAsync(Task original)
+    internal static async Task<(bool HasValue, Exception? Value)> ObserveAsync(Task original)
     {
         try
         {
             await original.ConfigureAwait(false);
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(ObserveAsync));
+            return (false, default(Exception?));
         }
         catch (Exception failure) when (original.IsFaulted || original.IsCanceled)
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(failure)));
+            return (true, ((Exception?)(failure)));
         }
     }
 
-    internal static global::ManagedCode.Communication.Result<Exception?> Combine(Exception? primary, ImmutableArray<Exception> cleanup)
+    internal static (bool HasValue, Exception? Value) Combine(Exception? primary, ImmutableArray<Exception> cleanup)
     {
         const int SingleItemCount = 1;
         const int NoObservedItems = 0;
@@ -58,9 +58,9 @@ internal static class RuntimeComparisonFailure
         }
         return retained.Length switch
         {
-            NoObservedItems => global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Combine)),
-            SingleItemCount => global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(retained[FirstElementIndex]))),
-            _ => global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(ComparisonEvidenceFailureCodes.ComparisonOperationFailed, retained)))
+            NoObservedItems => (false, default(Exception?)),
+            SingleItemCount => (true, ((Exception?)(retained[FirstElementIndex]))),
+            _ => (true, (Exception?)(new AggregateException(ComparisonEvidenceFailureCodes.ComparisonOperationFailed, retained)))
         };
     }
 }

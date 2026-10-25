@@ -78,7 +78,7 @@ internal static class McpTransportGuard
         }
     }
 
-    private static global::ManagedCode.Communication.Result<string?> ReadRoutingHeader(IHeaderDictionary headers, string name, int maximumCharacters,
+    private static (bool HasValue, string? Value) ReadRoutingHeader(IHeaderDictionary headers, string name, int maximumCharacters,
         McpTransportStage shapeStage, McpTransportStage encodingStage)
     {
         const int EmptyValuesCount = 1;
@@ -90,7 +90,7 @@ internal static class McpTransportGuard
 
         if (!headers.TryGetValue(name, out var values))
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadRoutingHeader));
+            return (false, default(string?));
         }
         if (values.Count != EmptyValuesCount || values[IndexEmptyCount] is not { } value)
         {
@@ -108,7 +108,7 @@ internal static class McpTransportGuard
                 throw InvalidTransport(encodingStage);
             }
         }
-        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(trimmed)));
+        return (true, ((string?)(trimmed)));
     }
 
     private static void CheckRevision(JsonElement fields, string name, McpTransportStage stage)
@@ -120,7 +120,7 @@ internal static class McpTransportGuard
         }
     }
 
-    private static global::ManagedCode.Communication.Result<string?> ReadTargetHeader(IHeaderDictionary headers, int maximumCharacters)
+    private static (bool HasValue, string? Value) ReadTargetHeader(IHeaderDictionary headers, int maximumCharacters)
     {
         const int EmptyDecodedLength = 0;
         const char TabCharacter = '\t';
@@ -131,7 +131,7 @@ internal static class McpTransportGuard
             McpTransportStage.NameHeaderShape, McpTransportStage.NameHeaderEncoding)).Value;
         if (encoded is null)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadTargetHeader));
+            return (false, default(string?));
         }
         if (encoded.StartsWith(McpTransportProtocol.EncodedHeaderPrefix, StringComparison.Ordinal)
             && !encoded.EndsWith(McpTransportProtocol.EncodedHeaderSuffix, StringComparison.Ordinal))
@@ -150,7 +150,7 @@ internal static class McpTransportGuard
                 throw InvalidTransport(McpTransportStage.NameHeaderEncoding);
             }
         }
-        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(decoded)));
+        return (true, ((string?)(decoded)));
     }
 
     private static void CheckTarget(JsonElement parameters, JsonElement method, string expectedName)
@@ -170,8 +170,8 @@ internal static class McpTransportGuard
         }
     }
 
-    private static global::ManagedCode.Communication.Result<string?> TargetField(JsonElement method) => method.ValueEquals(RequestMethods.ResourcesRead) ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(McpTransportProtocol.Uri)))
-        : method.ValueEquals(RequestMethods.ToolsCall) || method.ValueEquals(RequestMethods.PromptsGet) ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(McpTransportProtocol.Name))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(TargetField));
+    private static (bool HasValue, string? Value) TargetField(JsonElement method) => method.ValueEquals(RequestMethods.ResourcesRead) ? (true, ((string?)(McpTransportProtocol.Uri)))
+        : method.ValueEquals(RequestMethods.ToolsCall) || method.ValueEquals(RequestMethods.PromptsGet) ? (true, ((string?)(McpTransportProtocol.Name))) : (false, default(string?));
 
     private static KeyLoadException InvalidTransport(McpTransportStage stage)
     {

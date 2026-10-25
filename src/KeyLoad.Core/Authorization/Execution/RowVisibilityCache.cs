@@ -19,16 +19,16 @@ internal sealed class RowVisibilityCache : IDisposable
     internal static RowVisibilityCache? Create(ICacheMemoryBudget budget)
         => (RowVisibilityTransfers.CreateOwner(budget)).Value;
 
-    internal global::ManagedCode.Communication.Result<RowVisibilityDraft?> Begin(RowVisibilityScope scope)
+    internal (bool HasValue, RowVisibilityDraft? Value) Begin(RowVisibilityScope scope)
     {
         lock (gate)
         {
             RetireStale(scope);
-            return ((RowVisibilityDraft?)(closed || (Find(scope)).Value is not null ? null : (CreateDraft(scope)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RowVisibilityDraft?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RowVisibilityDraft?>.FailNotFound(nameof(Begin));
+            return ((RowVisibilityDraft?)(closed || (Find(scope)).Value is not null ? null : (CreateDraft(scope)).Value)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(RowVisibilityDraft?));
         }
     }
 
-    private global::ManagedCode.Communication.Result<RowVisibilityDraft?> CreateDraft(RowVisibilityScope scope)
+    private (bool HasValue, RowVisibilityDraft? Value) CreateDraft(RowVisibilityScope scope)
     {
         ICacheMemoryReservation? acquired = null;
         Exception? primary = null;
@@ -38,9 +38,9 @@ internal sealed class RowVisibilityCache : IDisposable
             {
                 if (!ReserveEntry(scope, out acquired))
                 {
-                    return global::ManagedCode.Communication.Result<RowVisibilityDraft?>.FailNotFound(nameof(CreateDraft));
+                    return (false, default(RowVisibilityDraft?));
                 }
-                return (RowVisibilityTransfers.Draft(this, budget, scope, ref acquired));
+                return (true, (RowVisibilityTransfers.Draft(this, budget, scope, ref acquired)));
             }
             catch (Exception error)
             {
@@ -84,9 +84,9 @@ internal sealed class RowVisibilityCache : IDisposable
         }
     }
 
-    private global::ManagedCode.Communication.Result<RowVisibilityLease?> Pin(RowVisibilityEntry? entry)
+    private (bool HasValue, RowVisibilityLease? Value) Pin(RowVisibilityEntry? entry)
     {
-        return ((RowVisibilityLease?)(closed || entry is null ? null : (RowVisibilityTransfers.CreateLease(this, budget, entry)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RowVisibilityLease?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RowVisibilityLease?>.FailNotFound(nameof(Pin));
+        return ((RowVisibilityLease?)(closed || entry is null ? null : (RowVisibilityTransfers.CreateLease(this, budget, entry)).Value)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(RowVisibilityLease?));
     }
     private bool ReserveEntry(RowVisibilityScope scope, out ICacheMemoryReservation? acquired)
     {
@@ -152,16 +152,16 @@ internal sealed class RowVisibilityCache : IDisposable
         }
     }
 
-    private global::ManagedCode.Communication.Result<RowVisibilityEntry?> Find(RowVisibilityScope scope)
+    private (bool HasValue, RowVisibilityEntry? Value) Find(RowVisibilityScope scope)
     {
         for (var entry = head; entry is not null; entry = entry.Next)
         {
             if (!entry.Retired && entry.Scope == scope)
             {
-                return global::ManagedCode.Communication.Result<RowVisibilityEntry?>.Succeed(((RowVisibilityEntry?)(entry)));
+                return (true, ((RowVisibilityEntry?)(entry)));
             }
         }
-        return global::ManagedCode.Communication.Result<RowVisibilityEntry?>.FailNotFound(nameof(Find));
+        return (false, default(RowVisibilityEntry?));
     }
 
     private void RetireStale(RowVisibilityScope scope)

@@ -29,6 +29,6 @@ internal static class TimeSeriesIntensiveResultFrames
         frame.Optional(TimeSeriesIntensiveFrameLabels.AverageBits, (Bits(aggregate.Average)).Value);
     }
 
-    private static global::ManagedCode.Communication.Result<long?> Bits(double? value) => value.HasValue ? global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(BitConverter.DoubleToInt64Bits(value.Value)))) : global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(Bits));
+    private static (bool HasValue, long? Value) Bits(double? value) => value.HasValue ? (true, ((long?)(BitConverter.DoubleToInt64Bits(value.Value)))) : (false, default(long?));
 
 }

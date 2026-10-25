@@ -31,11 +31,11 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
         catch (Exception) { Open = false; throw; }
     }
 
-    private global::ManagedCode.Communication.Result<AnnProjectionJobState?> Validate(AnnProjectionJobState? current)
+    private (bool HasValue, AnnProjectionJobState? Value) Validate(AnnProjectionJobState? current)
     {
         if (current is null)
         {
-            return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.FailNotFound(nameof(Validate));
+            return (false, default(AnnProjectionJobState?));
         }
         if (current.Authority is not { } authority || current.InitialRequest is not { } initial
             || string.IsNullOrWhiteSpace(authority.PrincipalId) || authority.ConfigureCommandId == Guid.Empty
@@ -68,7 +68,7 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionJobProtocol.Exhausted);
         }
-        return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.Succeed(((AnnProjectionJobState?)(current)));
+        return (true, ((AnnProjectionJobState?)(current)));
     }
 
     private static void RequireRequest(AnnMaintenanceRequest initial, AnnMaintenanceRequest? request)

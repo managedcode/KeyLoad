@@ -24,7 +24,7 @@ internal static class ZoneTreeCheckpointGeneration
         }
     }
 
-    private static global::ManagedCode.Communication.Result<string?> Prepare(ZoneTreeStoreRuntime runtime, bool replaceTree)
+    private static (bool HasValue, string? Value) Prepare(ZoneTreeStoreRuntime runtime, bool replaceTree)
     {
         if (replaceTree)
         {
@@ -40,14 +40,14 @@ internal static class ZoneTreeCheckpointGeneration
         runtime.Journal.Flush(true);
         if (!replaceTree)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Prepare));
+            return (false, default(string?));
         }
 
         ZoneTreeStoreHandleDisposal.RetireMaintainer(runtime);
         ZoneTreeStoreHandleDisposal.RetireTree(runtime);
         var retiredTree = Path.Combine(runtime.Options.Directory, RetiredTreePrefix + Guid.NewGuid().ToString(GuidFormat));
         Directory.Move(Path.Combine(runtime.Options.Directory, TreeDirectoryName), retiredTree);
-        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(retiredTree)));
+        return (true, ((string?)(retiredTree)));
     }
 
     private static void Swap(ZoneTreeStoreRuntime runtime, string temporary, long cut, bool replaceTree)

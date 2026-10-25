@@ -177,11 +177,11 @@ public static class ChangeFeedsExecutionChangeFeeds
         return new(changes.ToImmutableArray(), engine.ChangeCursor(view, principal, resource, request.Partition, through), through, head.Tail, head.FirstAvailable, through < head.Tail, engine.Store.Position);
     }
 
-    internal static global::ManagedCode.Communication.Result<AuthorizedDocumentChange?> VisibleChange(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, OutboxEntry entry)
+    internal static (bool HasValue, AuthorizedDocumentChange? Value) VisibleChange(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, OutboxEntry entry)
     {
         if (entry.Receipt.Resource != resource.Name || entry.After is not { } after)
         {
-            return global::ManagedCode.Communication.Result<AuthorizedDocumentChange?>.FailNotFound(nameof(VisibleChange));
+            return (false, default(AuthorizedDocumentChange?));
         }
 
         if (after.Reference.Partition != partition || after.Reference.Collection != resource.Name || after.Reference.Id != entry.Receipt.Id || entry.Before is { } beforeIdentity && beforeIdentity.Reference != after.Reference)
@@ -200,10 +200,10 @@ public static class ChangeFeedsExecutionChangeFeeds
         // Historical grants and current row visibility both constrain a historical projection.
         if (current is null || !engine.Authorization.CanReadRow(principal, current.Access) || !engine.Authorization.CanReadRow(principal, after.Access))
         {
-            return global::ManagedCode.Communication.Result<AuthorizedDocumentChange?>.FailNotFound(nameof(VisibleChange));
+            return (false, default(AuthorizedDocumentChange?));
         }
 
         var before = entry.Before is { Deleted: false } old && engine.Authorization.CanReadRow(principal, old.Access) ? old : null;
-        return global::ManagedCode.Communication.Result<AuthorizedDocumentChange?>.Succeed(((AuthorizedDocumentChange?)(new(entry.Sequence, entry.Commit, entry.CommittedAt, before, after))));
+        return (true, ((AuthorizedDocumentChange?)(new(entry.Sequence, entry.Commit, entry.CommittedAt, before, after))));
     }
 }

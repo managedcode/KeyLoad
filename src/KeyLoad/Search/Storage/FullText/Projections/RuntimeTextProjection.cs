@@ -122,11 +122,11 @@ internal sealed class RuntimeTextProjection : ITextProjection
 
     internal void MutatePhysical(Action mutation) => physicalGate.Run(mutation);
 
-    private static global::ManagedCode.Communication.Result<Exception?> Failure(List<Exception> failures)
+    private static (bool HasValue, Exception? Value) Failure(List<Exception> failures)
         => failures.Count switch
         {
-            FailureEmptyCount => global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Failure)),
-            FailureSingleItemCount => global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(failures[FailureIndexEmptyCount]))),
-            _ => global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(failures)))
+            FailureEmptyCount => (false, default(Exception?)),
+            FailureSingleItemCount => (true, ((Exception?)(failures[FailureIndexEmptyCount]))),
+            _ => (true, (Exception?)(new AggregateException(failures)))
         };
 }

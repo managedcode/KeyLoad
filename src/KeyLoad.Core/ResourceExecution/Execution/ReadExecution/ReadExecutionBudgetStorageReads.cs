@@ -5,9 +5,9 @@ namespace KeyLoad.Core.ResourceExecution.Execution;
 /// <summary>Executes gate-scoped reads through the same original budget and execution observers.</summary>
 internal static class ReadExecutionBudgetStorageReads
 {
-    private static global::ManagedCode.Communication.Result<StorageReadObserver?> Observer(ReadExecutionBudget budget, IKeyValueView view)
+    private static (bool HasValue, StorageReadObserver? Value) Observer(ReadExecutionBudget budget, IKeyValueView view)
         => (view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, budget)
-            ? null : (StorageReadObserver)budget.ChargeReadRecord) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<StorageReadObserver?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<StorageReadObserver?>.FailNotFound(nameof(Observer));
+            ? null : (StorageReadObserver)budget.ChargeReadRecord) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(StorageReadObserver?));
 
     internal static byte[]? Read(ReadExecutionBudget budget, IKeyValueView view, byte[] key)
     {

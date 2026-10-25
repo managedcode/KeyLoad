@@ -23,15 +23,15 @@ internal sealed class TextPostingObservation : IDisposable
         return new(callback);
     }
 
-    internal static global::ManagedCode.Communication.Result<Func<CancellationToken, ValueTask>?> Capture()
+    internal static (bool HasValue, Func<CancellationToken, ValueTask>? Value) Capture()
     {
         var original = Current.Value;
         if (original is null)
         {
-            return global::ManagedCode.Communication.Result<Func<CancellationToken, ValueTask>?>.FailNotFound(nameof(Capture));
+            return (false, default(Func<CancellationToken, ValueTask>?));
         }
         ObjectDisposedException.ThrowIf(original.disposed, original);
-        return global::ManagedCode.Communication.Result<Func<CancellationToken, ValueTask>?>.Succeed(((Func<CancellationToken, ValueTask>?)(original.callback)));
+        return (true, ((Func<CancellationToken, ValueTask>?)(original.callback)));
     }
 
     public void Dispose()

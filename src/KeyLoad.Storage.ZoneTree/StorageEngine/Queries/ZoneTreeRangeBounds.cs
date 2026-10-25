@@ -2,11 +2,11 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeRangeBounds
 {
-    internal static global::ManagedCode.Communication.Result<byte[]?> PrefixSuccessor(ReadOnlySpan<byte> prefix)
+    internal static (bool HasValue, byte[]? Value) PrefixSuccessor(ReadOnlySpan<byte> prefix)
     {
         if (prefix.IsEmpty)
         {
-            return global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(PrefixSuccessor));
+            return (false, default(byte[]?));
         }
 
         var successor = prefix.ToArray();
@@ -18,10 +18,10 @@ internal static class ZoneTreeRangeBounds
             }
 
             successor[index]++;
-            return global::ManagedCode.Communication.Result<byte[]?>.Succeed(((byte[]?)(successor[..(index + 1)])));
+            return (true, ((byte[]?)(successor[..(index + 1)])));
         }
 
-        return global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(PrefixSuccessor));
+        return (false, default(byte[]?));
     }
 
     internal static byte[]? Minimum(byte[]? first, byte[]? second)

@@ -32,10 +32,10 @@ internal sealed class RetainedAppendIdentityFault(RetainedAppendIdentityFixture 
             return true;
         });
     }
-    private global::ManagedCode.Communication.Result<EventRecord?> SelectRecord(EventRecord record) => kind switch
+    private (bool HasValue, EventRecord? Value) SelectRecord(EventRecord record) => kind switch
     {
-        "foreign-locator" or "event-id" => global::ManagedCode.Communication.Result<EventRecord?>.FailNotFound(nameof(SelectRecord)),
-        "foreign-record" => global::ManagedCode.Communication.Result<EventRecord?>.Succeed(((EventRecord?)(record with
+        "foreign-locator" or "event-id" => (false, default(EventRecord?)),
+        "foreign-record" => (true, ((EventRecord?)(record with
         {
             Stream = fixture.Stream with
             {
@@ -43,7 +43,7 @@ internal sealed class RetainedAppendIdentityFault(RetainedAppendIdentityFixture 
             },
             Data = RetainedAppendIdentityFixture.Data(RetainedAppendIdentityFixture.Candidate)
         }))),
-        "record-revision" => global::ManagedCode.Communication.Result<EventRecord?>.Succeed(((EventRecord?)(record with
+        "record-revision" => (true, ((EventRecord?)(record with
         {
             Revision = 99,
             Data = RetainedAppendIdentityFixture.Data(RetainedAppendIdentityFixture.Candidate)

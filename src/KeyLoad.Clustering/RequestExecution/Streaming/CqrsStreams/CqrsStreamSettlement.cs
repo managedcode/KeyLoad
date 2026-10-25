@@ -21,62 +21,62 @@ internal static class CqrsStreamSettlement
         return (Combine(primary, disposal, activation)).Value;
     }
 
-    private static async ValueTask<global::ManagedCode.Communication.Result<Exception?>> CaptureActivationAsync(Func<ValueTask> settled)
+    private static async ValueTask<(bool HasValue, Exception? Value)> CaptureActivationAsync(Func<ValueTask> settled)
     {
         try
         {
             await settled().ConfigureAwait(true);
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CaptureActivationAsync));
+            return (false, default(Exception?));
         }
-        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error))); }
-        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error)) { return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error))); }
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { return (true, ((Exception?)(error))); }
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error)) { return (true, ((Exception?)(error))); }
     }
 
-    private static async ValueTask<global::ManagedCode.Communication.Result<Exception?>> CaptureDisposalAsync<T>(IAsyncEnumerator<T>? enumerator)
+    private static async ValueTask<(bool HasValue, Exception? Value)> CaptureDisposalAsync<T>(IAsyncEnumerator<T>? enumerator)
     {
         if (enumerator is null)
         {
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CaptureDisposalAsync));
+            return (false, default(Exception?));
         }
 
         try
         {
             await enumerator.DisposeAsync().ConfigureAwait(true);
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CaptureDisposalAsync));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 
-    private static global::ManagedCode.Communication.Result<Exception?> CaptureActivation(Action settled)
+    private static (bool HasValue, Exception? Value) CaptureActivation(Action settled)
     {
         try
         {
             settled();
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CaptureActivation));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 
-    private static global::ManagedCode.Communication.Result<Exception?> Combine(Exception? primary, Exception? disposal, Exception? activation)
+    private static (bool HasValue, Exception? Value) Combine(Exception? primary, Exception? disposal, Exception? activation)
     {
         var fatal = FindFatal(primary) ?? FindFatal(disposal) ?? FindFatal(activation);
         if (fatal is not null)
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(fatal)));
+            return (true, ((Exception?)(fatal)));
         }
 
         var includePrimary = primary is not null && !Contains(disposal, primary) && !Contains(activation, primary);
@@ -85,24 +85,24 @@ internal static class CqrsStreamSettlement
         {
             if (disposal is not null && activation is not null)
             {
-                return global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(distinctPrimary, disposal, activation)));
+                return (true, (Exception?)(new AggregateException(distinctPrimary, disposal, activation)));
             }
 
             var cleanup = disposal ?? activation;
-            return cleanup is null ? global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Combine)) : global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(distinctPrimary, cleanup)));
+            return cleanup is null ? (false, default(Exception?)) : (true, (Exception?)(new AggregateException(distinctPrimary, cleanup)));
         }
 
         if (disposal is not null && ReferenceEquals(disposal, activation))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(disposal)));
+            return (true, ((Exception?)(disposal)));
         }
 
         if (disposal is not null && activation is not null)
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(disposal, activation)));
+            return (true, (Exception?)(new AggregateException(disposal, activation)));
         }
 
-        return ((Exception?)(disposal ?? activation)) is { } outcomeValue7 ? global::ManagedCode.Communication.Result<Exception?>.Succeed(outcomeValue7) : global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Combine));
+        return ((Exception?)(disposal ?? activation)) is { } outcomeValue7 ? (true, outcomeValue7) : (false, default(Exception?));
     }
 
     private static bool Contains(Exception? error, Exception candidate)

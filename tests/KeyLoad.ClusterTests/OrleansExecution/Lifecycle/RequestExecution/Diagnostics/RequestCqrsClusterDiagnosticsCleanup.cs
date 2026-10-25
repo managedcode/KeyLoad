@@ -46,10 +46,10 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
             lifetime.IsCancellationRequested, cleanupDeadline.IsCancellationRequested, forcedCancellationRequested,
             completionEvidence.Snapshot());
 
-    private global::ManagedCode.Communication.Result<TaskStatus?> StatusFor(string node)
+    private (bool HasValue, TaskStatus? Value) StatusFor(string node)
     {
         var index = Array.FindIndex(resources, resource => string.Equals(resource.Name, node, StringComparison.Ordinal));
-        return index < 0 ? global::ManagedCode.Communication.Result<TaskStatus?>.FailNotFound(nameof(StatusFor)) : global::ManagedCode.Communication.Result<TaskStatus?>.Succeed(((TaskStatus?)(subscriptions[index].Status)));
+        return index < 0 ? (false, default(TaskStatus?)) : (true, ((TaskStatus?)(subscriptions[index].Status)));
     }
 
     internal Task CompleteAndDrainAsync(CancellationToken cancellationToken)

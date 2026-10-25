@@ -119,11 +119,11 @@ internal static class OutcomeStoreOracle
         return true;
     }
 
-    private static global::ManagedCode.Communication.Result<PartitionRef?> Partition<T>(Command<DatabaseCommand> operation, Func<T, PartitionRef?> select)
+    private static (bool HasValue, PartitionRef? Value) Partition<T>(Command<DatabaseCommand> operation, Func<T, PartitionRef?> select)
         where T : class
     {
         var request = OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
-        return request is null ? global::ManagedCode.Communication.Result<PartitionRef?>.FailNotFound(nameof(Partition)) : ((PartitionRef?)(select(request))) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<PartitionRef?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<PartitionRef?>.FailNotFound(nameof(Partition));
+        return request is null ? (false, default(PartitionRef?)) : ((PartitionRef?)(select(request))) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(PartitionRef?));
     }
 
     private static bool IsNonNull<T>(Command<DatabaseCommand> operation) where T : class

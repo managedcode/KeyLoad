@@ -59,7 +59,7 @@ internal static class ZoneTreeRangeReader
         return new(delivered, false, false, work.ReadBytes);
     }
 
-    private static global::ManagedCode.Communication.Result<StorageScanResult?> ProcessCurrent(ZoneTreeBaselineCursor baseline,
+    private static (bool HasValue, StorageScanResult? Value) ProcessCurrent(ZoneTreeBaselineCursor baseline,
         ZoneTreeStagedCursor staged, ZoneTreeRangeWork work, int comparison, int maxRecords,
         StorageRecordVisitor visitor, ref int delivered)
     {
@@ -77,7 +77,7 @@ internal static class ZoneTreeRangeReader
             if (delivered == maxRecords)
             {
                 work.CountLookahead();
-                return global::ManagedCode.Communication.Result<StorageScanResult?>.Succeed(((StorageScanResult?)(new(delivered, true, false, work.ReadBytes))));
+                return (true, ((StorageScanResult?)(new(delivered, true, false, work.ReadBytes))));
             }
 
             var keepGoing = useStaged ? visitor(key, value!) : visitor(key, baseline.Value.Span);
@@ -85,10 +85,10 @@ internal static class ZoneTreeRangeReader
             work.Check();
             if (!keepGoing)
             {
-                return global::ManagedCode.Communication.Result<StorageScanResult?>.Succeed(((StorageScanResult?)(new(delivered, false, true, work.ReadBytes))));
+                return (true, ((StorageScanResult?)(new(delivered, false, true, work.ReadBytes))));
             }
         }
-        return global::ManagedCode.Communication.Result<StorageScanResult?>.FailNotFound(nameof(ProcessCurrent));
+        return (false, default(StorageScanResult?));
     }
 
     private static void Validate(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,

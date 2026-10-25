@@ -21,7 +21,7 @@ public static class DatabaseCompositionExecution
             mutation
         }
     };
-    internal static global::ManagedCode.Communication.Result<(string FromPrimaryKey, string ToPrimaryKey)?> AuthorizeComposition(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
+    internal static (bool HasValue, (string FromPrimaryKey, string ToPrimaryKey)? Value) AuthorizeComposition(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, Mutation mutation)
     {
         if (mutation is QueueToGraph forward)
         {
@@ -31,7 +31,7 @@ public static class DatabaseCompositionExecution
             var target = engine.BatchResource(view, partition, forward.Graph, ResourceKind.Graph);
             engine.RequireRawSource(principal, source);
             engine.RequireTargetWrites(principal, target);
-            return (((string FromPrimaryKey, string ToPrimaryKey)?)((engine.AuthorizeTypedEndpointJoin(view, principal, partition, forward)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<(string FromPrimaryKey, string ToPrimaryKey)?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<(string FromPrimaryKey, string ToPrimaryKey)?>.FailNotFound(nameof(AuthorizeComposition));
+            return (((string FromPrimaryKey, string ToPrimaryKey)?)((engine.AuthorizeTypedEndpointJoin(view, principal, partition, forward)).Value)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default((string FromPrimaryKey, string ToPrimaryKey)?));
         }
         else if (mutation is GraphToQueueMutation reverse)
         {
@@ -44,7 +44,7 @@ public static class DatabaseCompositionExecution
             engine.RequireTargetWrites(principal, target);
         }
 
-        return global::ManagedCode.Communication.Result<(string FromPrimaryKey, string ToPrimaryKey)?>.FailNotFound(nameof(AuthorizeComposition));
+        return (false, default((string FromPrimaryKey, string ToPrimaryKey)?));
     }
 
     internal static void RequireCompositionCapabilities(this DatabaseEngine engine, PrincipalRecord principal, PartitionRef partition, Mutation mutation)

@@ -185,14 +185,14 @@ public sealed partial class Neo4jTarget(HttpClient http, string runId, string im
             }
         }
 
-        public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+        public async Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         {
             const int NoItems = 0;
             const int FirstElementIndex = 0;
 
             using var response = await QueryAsync(Neo4jQueryRequests.Read(target.label), Neo4jQueryRequests.Identifier(document.Id), cancellationToken);
             var rows = DocumentNeo4jProtocol.Rows(response);
-            return rows.GetArrayLength() == NoItems ? global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<FoundDocument?>.Succeed((FoundDocument?)(new(document.Id, rows[FirstElementIndex][FirstElementIndex].GetString()!)));
+            return rows.GetArrayLength() == NoItems ? (false, default(FoundDocument?)) : (true, (FoundDocument?)(new(document.Id, rows[FirstElementIndex][FirstElementIndex].GetString()!)));
         }
         public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
         {

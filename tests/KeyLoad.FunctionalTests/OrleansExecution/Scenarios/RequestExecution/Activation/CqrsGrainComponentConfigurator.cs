@@ -24,20 +24,20 @@ internal sealed class CqrsGrainComponentConfigurator(
             new DefaultGrainActivator(serviceProvider, grainClass)));
     }
 
-    private static global::ManagedCode.Communication.Result<Func<object>?> CreateFactory(Type grainClass)
+    private static (bool HasValue, Func<object>? Value) CreateFactory(Type grainClass)
     {
         if (grainClass == typeof(CqrsStreamGrain))
         {
-            return global::ManagedCode.Communication.Result<Func<object>?>.Succeed(static () => new CqrsStreamGrain());
+            return (true, static () => new CqrsStreamGrain());
         }
         if (grainClass == typeof(CqrsLeafGrain))
         {
-            return global::ManagedCode.Communication.Result<Func<object>?>.Succeed(static () => new CqrsLeafGrain());
+            return (true, static () => new CqrsLeafGrain());
         }
         if (grainClass == typeof(CqrsObservationGrain))
         {
-            return global::ManagedCode.Communication.Result<Func<object>?>.Succeed(static () => new CqrsObservationGrain());
+            return (true, static () => new CqrsObservationGrain());
         }
-        return global::ManagedCode.Communication.Result<Func<object>?>.FailNotFound(nameof(CreateFactory));
+        return (false, default(Func<object>?));
     }
 }

@@ -42,14 +42,14 @@ internal static class AppHostControlOptionsRegistration
         _ = options.Value;
         return options;
     }
-    private static global::ManagedCode.Communication.Result<int?> ReadFunctionalNodeCount(IConfiguration configuration, AppHostControlOptions options)
+    private static (bool HasValue, int? Value) ReadFunctionalNodeCount(IConfiguration configuration, AppHostControlOptions options)
     {
         var section = configuration.GetSection(FunctionalNodeCountSetting);
         var selected = section.Value;
         var nested = section.GetChildren().Take(1).Any();
         if (selected is null && !nested)
         {
-            return global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(ReadFunctionalNodeCount));
+            return (false, default(int?));
         }
         if (!int.TryParse(selected, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture,
                 out var count) || count < 1 || nested
@@ -63,7 +63,7 @@ internal static class AppHostControlOptionsRegistration
         {
             throw new InvalidOperationException(InvalidFunctionalTopology);
         }
-        return global::ManagedCode.Communication.Result<int?>.Succeed(((int?)(count)));
+        return (true, ((int?)(count)));
     }
 
     private static bool ReadProcessFaults(IConfiguration configuration, AppHostControlOptions options)

@@ -74,17 +74,17 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
         return result;
     }
 
-    private static global::ManagedCode.Communication.Result<(int Id, int Secret)?> Cancellation(ReadOnlySpan<byte> payload)
+    private static (bool HasValue, (int Id, int Secret)? Value) Cancellation(ReadOnlySpan<byte> payload)
     {
         var reader = new PostgresPayloadReader(payload);
         if (reader.Int32() != PostgresProtocol.CancelRequest)
         {
-            return global::ManagedCode.Communication.Result<(int Id, int Secret)?>.FailNotFound(nameof(Cancellation));
+            return (false, default((int Id, int Secret)?));
         }
         var id = reader.Int32();
         var secret = reader.Int32();
         reader.Complete();
-        return global::ManagedCode.Communication.Result<(int Id, int Secret)?>.Succeed((((int Id, int Secret)?)((id, secret))));
+        return (true, (((int Id, int Secret)?)((id, secret))));
     }
 
     private sealed record StartupRequest(PostgresStartupDecoder.Startup? Startup, (int Id, int Secret)? Cancel);

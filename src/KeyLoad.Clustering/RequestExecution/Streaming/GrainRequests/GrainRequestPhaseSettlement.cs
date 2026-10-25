@@ -40,20 +40,20 @@ internal sealed class GrainRequestPhaseSettlement(GrainRequestCodec codec)
         ThrowCombined(probeFailure, deactivationFailure);
     }
 
-    private static global::ManagedCode.Communication.Result<Exception?> Capture(Action action)
+    private static (bool HasValue, Exception? Value) Capture(Action action)
     {
         try
         {
             action();
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Capture));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 

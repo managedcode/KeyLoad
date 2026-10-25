@@ -137,21 +137,21 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
         }
     }
 
-    private global::ManagedCode.Communication.Result<CancellationTokenSource?> CreateLinkedToken(CancellationToken viewToken, out CancellationToken effectiveToken)
+    private (bool HasValue, CancellationTokenSource? Value) CreateLinkedToken(CancellationToken viewToken, out CancellationToken effectiveToken)
     {
         var budgetToken = budget.Cancellation;
         if (!viewToken.CanBeCanceled || viewToken == budgetToken)
         {
             effectiveToken = budgetToken;
-            return global::ManagedCode.Communication.Result<CancellationTokenSource?>.FailNotFound(nameof(CreateLinkedToken));
+            return (false, default(CancellationTokenSource?));
         }
         if (!budgetToken.CanBeCanceled)
         {
             effectiveToken = viewToken;
-            return global::ManagedCode.Communication.Result<CancellationTokenSource?>.FailNotFound(nameof(CreateLinkedToken));
+            return (false, default(CancellationTokenSource?));
         }
         var linked = CancellationTokenSource.CreateLinkedTokenSource(budgetToken, viewToken);
         effectiveToken = linked.Token;
-        return (linked);
+        return (true, (linked));
     }
 }

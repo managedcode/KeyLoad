@@ -12,7 +12,7 @@ internal static class PostgresDocumentOperations
     private const string SeedSql = "INSERT INTO documents(id,body,embedding) VALUES ($1,$2,$3::vector)";
     private const string CopySql = "COPY documents(id,body) FROM STDIN (FORMAT BINARY)";
 
-    internal static async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(NpgsqlConnection connection, BenchmarkDocument document,
+    internal static async Task<(bool HasValue, FoundDocument? Value)> ReadAsync(NpgsqlConnection connection, BenchmarkDocument document,
         CancellationToken cancellationToken)
     {
         await using var command = connection.CreateCommand();
@@ -20,10 +20,10 @@ internal static class PostgresDocumentOperations
         command.Parameters.AddWithValue(document.Id);
         if (await command.ExecuteScalarAsync(cancellationToken) is not string json)
         {
-            return global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync));
+            return (false, default(FoundDocument?));
         }
 
-        return global::ManagedCode.Communication.Result<FoundDocument?>.Succeed((FoundDocument?)(new(document.Id, json)));
+        return (true, (FoundDocument?)(new(document.Id, json)));
     }
 
     internal static Task WriteAsync(NpgsqlConnection connection, BenchmarkDocument document, CancellationToken cancellationToken)

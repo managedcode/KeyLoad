@@ -49,14 +49,14 @@ internal static class SiteCoverageRanges
         return snapshots;
     }
 
-    private static global::ManagedCode.Communication.Result<int?> ReadExecutionContext(JsonElement script)
+    private static (bool HasValue, int? Value) ReadExecutionContext(JsonElement script)
     {
         if (!script.TryGetProperty(SiteCoverageTokens.ExecutionContextId, out var context))
         {
-            return global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(ReadExecutionContext));
+            return (false, default(int?));
         }
 
-        return context.TryGetInt32(out var value) ? global::ManagedCode.Communication.Result<int?>.Succeed(((int?)(value))) :
+        return context.TryGetInt32(out var value) ? (true, ((int?)(value))) :
             throw SiteCoverageJson.Invalid(SiteCoverageTokens.JsonFailure);
     }
 

@@ -17,13 +17,13 @@ internal sealed class TextProjectionSlotSet
         || staged?.CleanupActive == true;
     internal bool HasUnleasedRetired => retired is { LeaseActive: false };
     internal int Count => (current is null ? 0 : 1) + (staged is null ? 0 : 1) + (retired is null ? 0 : 1);
-    internal global::ManagedCode.Communication.Result<TextGenerationSlot?> RetiredCandidate
+    internal (bool HasValue, TextGenerationSlot? Value) RetiredCandidate
         => retired is { LeaseActive: false } && staged is null && !transition
-            ? global::ManagedCode.Communication.Result<TextGenerationSlot?>.Succeed(retired)
-            : global::ManagedCode.Communication.Result<TextGenerationSlot?>.FailNotFound(nameof(RetiredCandidate));
+            ? (true, retired)
+            : (false, default(TextGenerationSlot?));
 
-    internal global::ManagedCode.Communication.Result<TextGenerationSlot?> FindCurrent(TextProjectionScope scope)
-        => current?.Generation is { } generation && generation.Scope == scope ? global::ManagedCode.Communication.Result<TextGenerationSlot?>.Succeed(((TextGenerationSlot?)(current))) : global::ManagedCode.Communication.Result<TextGenerationSlot?>.FailNotFound(nameof(FindCurrent));
+    internal (bool HasValue, TextGenerationSlot? Value) FindCurrent(TextProjectionScope scope)
+        => current?.Generation is { } generation && generation.Scope == scope ? (true, ((TextGenerationSlot?)(current))) : (false, default(TextGenerationSlot?));
 
     internal TextGenerationSlot Reserve()
     {

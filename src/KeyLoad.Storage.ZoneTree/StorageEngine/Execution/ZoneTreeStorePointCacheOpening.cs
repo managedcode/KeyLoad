@@ -4,15 +4,15 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeStorePointCacheOpening
 {
-    internal static global::ManagedCode.Communication.Result<ZoneTreePointCache?> Open(ZoneTreeStoreRuntime runtime)
+    internal static (bool HasValue, ZoneTreePointCache? Value) Open(ZoneTreeStoreRuntime runtime)
     {
         if (runtime.Options.EmbeddedPointCache is not { } options)
         {
-            return global::ManagedCode.Communication.Result<ZoneTreePointCache?>.FailNotFound(nameof(Open));
+            return (false, default(ZoneTreePointCache?));
         }
         runtime.OwnershipSettlement.BeginConstructor();
         var cache = ZoneTreePointCache.CreateResolved(options);
         runtime.OwnershipSettlement.ConstructorReturned();
-        return (cache);
+        return (true, (cache));
     }
 }

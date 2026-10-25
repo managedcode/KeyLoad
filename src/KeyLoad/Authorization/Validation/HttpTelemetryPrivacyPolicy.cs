@@ -46,7 +46,7 @@ internal static class HttpTelemetryPrivacyPolicy
     internal const long CounterIncrement = 1;
     private const int MaximumMethodCharacters = 7;
     private const int MaximumProtocolCharacters = 3;
-    internal static global::ManagedCode.Communication.Result<string?> LinkSuppressionReason(Activity activity)
+    internal static (bool HasValue, string? Value) LinkSuppressionReason(Activity activity)
     {
         var count = 0;
         foreach (var link in activity.Links)
@@ -56,14 +56,14 @@ internal static class HttpTelemetryPrivacyPolicy
                 || link.Context.TraceState is not null || link.Context.TraceFlags is not (ActivityTraceFlags.None or ActivityTraceFlags.Recorded)
                 || (link.Tags?.Any() ?? false))
             {
-                return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(UnsafeStateReason)));
+                return (true, ((string?)(UnsafeStateReason)));
             }
             if (++count > 1)
             {
-                return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(ExcessStateReason)));
+                return (true, ((string?)(ExcessStateReason)));
             }
         }
-        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(LinkSuppressionReason));
+        return (false, default(string?));
     }
     internal static bool IsHttp(string source) => source is ServerSource or ClientSource;
     internal static string NormalizeMethod(object? value) => value is string { Length: <= MaximumMethodCharacters } text ? text switch
@@ -79,14 +79,14 @@ internal static class HttpTelemetryPrivacyPolicy
         MethodTrace => MethodTrace,
         _ => OtherMethod
     } : OtherMethod;
-    internal static global::ManagedCode.Communication.Result<string?> NormalizeProtocol(object? value) => value is string { Length: <= MaximumProtocolCharacters } text ? text switch
+    internal static (bool HasValue, string? Value) NormalizeProtocol(object? value) => value is string { Length: <= MaximumProtocolCharacters } text ? text switch
     {
-        Protocol10 => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(Protocol10))),
-        Protocol11 => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(Protocol11))),
-        Protocol2 => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(Protocol2))),
-        Protocol3 => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(Protocol3))),
-        _ => global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(NormalizeProtocol))
-    } : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(NormalizeProtocol));
+        Protocol10 => (true, ((string?)(Protocol10))),
+        Protocol11 => (true, ((string?)(Protocol11))),
+        Protocol2 => (true, ((string?)(Protocol2))),
+        Protocol3 => (true, ((string?)(Protocol3))),
+        _ => (false, default(string?))
+    } : (false, default(string?));
     internal static string Category(string? category)
     {
         if (category?.StartsWith(KeyLoadPrefix, StringComparison.Ordinal) == true)

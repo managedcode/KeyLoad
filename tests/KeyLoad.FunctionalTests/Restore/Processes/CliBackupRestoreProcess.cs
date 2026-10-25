@@ -109,15 +109,15 @@ internal static class CliBackupRestoreProcess
         }
     }
 
-    private static global::ManagedCode.Communication.Result<CliBackupRestoreProcessResult?> BuildResult(Process process,
+    private static (bool HasValue, CliBackupRestoreProcessResult? Value) BuildResult(Process process,
         CliBackupRestoreProcessOutput stdout, CliBackupRestoreProcessOutput stderr,
         Task? exitTask, Task? stdoutTask, Task? stderrTask, Task joined)
     {
         if (!joined.IsCompletedSuccessfully || exitTask is null || stdoutTask is null || stderrTask is null)
         {
-            return global::ManagedCode.Communication.Result<CliBackupRestoreProcessResult?>.FailNotFound(nameof(BuildResult));
+            return (false, default(CliBackupRestoreProcessResult?));
         }
-        return global::ManagedCode.Communication.Result<CliBackupRestoreProcessResult?>.Succeed((CliBackupRestoreProcessResult?)(new(process.ExitCode, stdout.Text, stderr.Text, exitTask.IsCompleted,
+        return (true, (CliBackupRestoreProcessResult?)(new(process.ExitCode, stdout.Text, stderr.Text, exitTask.IsCompleted,
             stdoutTask.IsCompleted, stderrTask.IsCompleted, ProcessDisposed: false)));
     }
 

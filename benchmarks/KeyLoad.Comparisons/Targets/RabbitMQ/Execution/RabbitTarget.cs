@@ -139,7 +139,7 @@ public sealed class RabbitTarget(string connectionString, string runId, string i
     /// <summary>Measures one persistent publish, manual receive, and acknowledgement cycle on its owned channel.</summary>
     private sealed class Session(IChannel channel, string queue, TimeSpan claimPollInterval, TimeProvider timeProvider) : IComparisonSession
     {
-        public Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
 
         public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
         {

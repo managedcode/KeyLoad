@@ -19,12 +19,12 @@ public static class ChangeFeedsExecution
         Search.AnnProjectionPinValidation.RequireOwner(engine, view, principal, request.Consumer.Partition, request);
         return ProjectionConsumerIdentity.ProjectionConsumer(view, request.Consumer);
     });
-    internal static global::ManagedCode.Communication.Result<CommitProjectionBatchRequest?> CreateAnnInitialSettlementIntent(this DatabaseEngine engine, PrincipalRecord principal, AnnMaintenanceRequest original, AnnMaintenanceResult result, Guid childCommandId)
+    internal static (bool HasValue, CommitProjectionBatchRequest? Value) CreateAnnInitialSettlementIntent(this DatabaseEngine engine, PrincipalRecord principal, AnnMaintenanceRequest original, AnnMaintenanceResult result, Guid childCommandId)
     {
         var initial = engine.Store.Read(view => ProjectionConsumerIdentity.ProjectionConsumer(view, original.Consumer));
         if (initial.InitialAnnMaintenance is not { } reserved)
         {
-            return global::ManagedCode.Communication.Result<CommitProjectionBatchRequest?>.FailNotFound(nameof(CreateAnnInitialSettlementIntent));
+            return (false, default(CommitProjectionBatchRequest?));
         }
 
         if (!global::KeyLoad.AnnMaintenanceRequestIdentity.Same(reserved, original))
@@ -34,7 +34,7 @@ public static class ChangeFeedsExecution
                 throw Errors.Fail(ErrorCode.RecoveryRequired, InvalidAnnSettlement);
             }
 
-            return global::ManagedCode.Communication.Result<CommitProjectionBatchRequest?>.FailNotFound(nameof(CreateAnnInitialSettlementIntent));
+            return (false, default(CommitProjectionBatchRequest?));
         }
 
         var checkpoint = result.Checkpoint?.Checkpoint ?? result.Source?.ThroughSequence ?? throw Errors.Fail(ErrorCode.Corruption, InvalidAnnSettlement);
@@ -44,7 +44,7 @@ public static class ChangeFeedsExecution
             throw Errors.Fail(ErrorCode.Conflict, InvalidAnnSettlement);
         }
 
-        return global::ManagedCode.Communication.Result<CommitProjectionBatchRequest?>.Succeed(((CommitProjectionBatchRequest?)(engine.Store.Read(view => engine.CreateValidatedAnnSettlementIntent(principal, original, result, childCommandId, view, checkpoint, page)))));
+        return (true, ((CommitProjectionBatchRequest?)(engine.Store.Read(view => engine.CreateValidatedAnnSettlementIntent(principal, original, result, childCommandId, view, checkpoint, page)))));
     }
 
     internal static CommitProjectionBatchRequest CreateValidatedAnnSettlementIntent(this DatabaseEngine engine, PrincipalRecord principal, AnnMaintenanceRequest original, AnnMaintenanceResult result, Guid childCommandId, IKeyValueView view, long checkpoint, ProjectionBatch page)
@@ -90,11 +90,11 @@ public static class ChangeFeedsExecution
         return authority;
     }
 
-    internal static global::ManagedCode.Communication.Result<ProjectionConsumerInfo?> RequireAnnInitialSettlement(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, CommitProjectionBatchRequest request, ProjectionBatchClaims batch, DateTimeOffset now, bool completed)
+    internal static (bool HasValue, ProjectionConsumerInfo? Value) RequireAnnInitialSettlement(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, CommitProjectionBatchRequest request, ProjectionBatchClaims batch, DateTimeOffset now, bool completed)
     {
         if (request.InitialAnnMaintenanceSettlement is not { } token)
         {
-            return global::ManagedCode.Communication.Result<ProjectionConsumerInfo?>.FailNotFound(nameof(RequireAnnInitialSettlement));
+            return (false, default(ProjectionConsumerInfo?));
         }
 
         var proof = engine.Verify<AnnProjectionSettlementClaims>(token);
@@ -106,7 +106,7 @@ public static class ChangeFeedsExecution
             throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidAnnSettlement);
         }
 
-        return global::ManagedCode.Communication.Result<ProjectionConsumerInfo?>.Succeed(((ProjectionConsumerInfo?)(state)));
+        return (true, ((ProjectionConsumerInfo?)(state)));
     }
 
     internal static byte[] ProjectionReceiptKey(ProjectionBatchClaims claims, CommitProjectionBatchRequest request) => request.InitialAnnMaintenanceSettlement is null ? ProjectionBatchExecution.ProjectionReceiptKey(claims) : KeySpace.Partition(ProjectionOutbox.ProjectionReceiptSpace, claims.Consumer.Partition, claims.Consumer.Name, claims.IndexGeneration, AnnProjectionSettlementClaims.SettlementPurpose, request.CommandId);

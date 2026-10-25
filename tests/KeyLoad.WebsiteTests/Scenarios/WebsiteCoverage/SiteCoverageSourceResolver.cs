@@ -4,7 +4,7 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
 internal static class SiteCoverageSourceResolver
 {
-    public static global::ManagedCode.Communication.Result<string?> ResolveScriptSource(JsonElement script, string runtime, string repository,
+    public static (bool HasValue, string? Value) ResolveScriptSource(JsonElement script, string runtime, string repository,
         IReadOnlyDictionary<string, SiteCoverageSourceEntry> sources, IReadOnlySet<string>? browserOrigins)
     {
         SiteCoverageJson.RequireObject(script, SiteCoverageJson.RuntimeFields.ScriptRequired,
@@ -13,22 +13,22 @@ internal static class SiteCoverageSourceResolver
         var url = SiteCoverageJson.GetString(script, SiteCoverageTokens.Url);
         if (url.Length == SiteCoverageTokens.Zero)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveScriptSource));
+            return (false, default(string?));
         }
 
         return runtime == SiteCoverageTokens.NodeRuntime
-            ? ((string?)((ResolveNodeSource(url, repository, sources)).Value)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveScriptSource))
-            : ((string?)((ResolveBrowserSource(url, browserOrigins!, sources)).Value)) is { } outcomeValue3 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue3) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveScriptSource));
+            ? ((string?)((ResolveNodeSource(url, repository, sources)).Value)) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(string?))
+            : ((string?)((ResolveBrowserSource(url, browserOrigins!, sources)).Value)) is { } outcomeValue3 ? (true, outcomeValue3) : (false, default(string?));
     }
 
-    private static global::ManagedCode.Communication.Result<string?> ResolveNodeSource(string url, string repository,
+    private static (bool HasValue, string? Value) ResolveNodeSource(string url, string repository,
         IReadOnlyDictionary<string, SiteCoverageSourceEntry> sources)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != SiteCoverageTokens.FileScheme ||
             uri.Query.Length != SiteCoverageTokens.Zero || uri.Fragment.Length != SiteCoverageTokens.Zero ||
             uri.UserInfo.Length != SiteCoverageTokens.Zero)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveNodeSource));
+            return (false, default(string?));
         }
 
         var fullPath = Path.GetFullPath(uri.LocalPath);
@@ -36,7 +36,7 @@ internal static class SiteCoverageSourceResolver
             Path.Combine(repository, path.Replace(SiteCoverageTokens.RelativeSeparator, Path.DirectorySeparatorChar)), fullPath));
         if (matched is not null)
         {
-            return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(matched)));
+            return (true, ((string?)(matched)));
         }
 
         var siteRoot = Path.GetFullPath(Path.Combine(repository, SiteCoverageTokens.SiteSourcePrefix));
@@ -49,22 +49,22 @@ internal static class SiteCoverageSourceResolver
             throw SiteCoverageJson.Invalid(SiteCoverageTokens.UnexpectedProductionScriptFailure);
         }
 
-        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveNodeSource));
+        return (false, default(string?));
     }
 
-    private static global::ManagedCode.Communication.Result<string?> ResolveBrowserSource(string url, IReadOnlySet<string> browserOrigins,
+    private static (bool HasValue, string? Value) ResolveBrowserSource(string url, IReadOnlySet<string> browserOrigins,
         IReadOnlyDictionary<string, SiteCoverageSourceEntry> sources)
     {
         if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || uri.Scheme != SiteCoverageTokens.HttpScheme)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveBrowserSource));
+            return (false, default(string?));
         }
 
         var path = uri.AbsolutePath;
         var shared = path.StartsWith("/scripts/Features/BenchmarkComparisons/", StringComparison.Ordinal);
         if (!shared && !path.StartsWith(SiteCoverageTokens.FeatureUrlPrefix, StringComparison.Ordinal))
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveBrowserSource));
+            return (false, default(string?));
         }
 
         if (!browserOrigins.Contains(uri.GetLeftPart(UriPartial.Authority)) || uri.UserInfo.Length != SiteCoverageTokens.Zero ||
@@ -83,12 +83,12 @@ internal static class SiteCoverageSourceResolver
         var sourcePath = shared ? path[1..] : SiteCoverageTokens.FeatureSourcePrefix + path[SiteCoverageTokens.FeatureUrlPrefix.Length..];
         if (sources.ContainsKey(sourcePath))
         {
-            return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(sourcePath)));
+            return (true, ((string?)(sourcePath)));
         }
 
         if (sourcePath.StartsWith(SiteCoverageTokens.VendorSourcePrefix, StringComparison.Ordinal))
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveBrowserSource));
+            return (false, default(string?));
         }
 
         if (sourcePath.EndsWith(SiteCoverageTokens.ModuleExtension, StringComparison.Ordinal))
@@ -96,7 +96,7 @@ internal static class SiteCoverageSourceResolver
             throw SiteCoverageJson.Invalid(SiteCoverageTokens.UnexpectedProductionScriptFailure);
         }
 
-        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ResolveBrowserSource));
+        return (false, default(string?));
     }
 
     private static bool IsWithin(string path, string directory)

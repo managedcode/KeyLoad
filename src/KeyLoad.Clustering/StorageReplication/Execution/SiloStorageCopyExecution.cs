@@ -128,7 +128,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     {
         var members = membership.CurrentSnapshot.Members.Values.Where(member => member.Status == SiloStatus.Active)
             .OrderBy(member => member.Name, StringComparer.Ordinal).ToArray();
-        var reads = new Task<global::ManagedCode.Communication.Result<SiloStorageCut?>>[members.Length];
+        var reads = new Task<(bool HasValue, SiloStorageCut? Value)>[members.Length];
         for (var index = StorageCopyContract.FirstOwner; index < members.Length; index++)
         {
             reads[index] = TryReadCutAsync(members[index].SiloAddress, cancellationToken);
@@ -145,23 +145,23 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         return [.. available];
     }
 
-    private async Task<global::ManagedCode.Communication.Result<SiloStorageCut?>> TryReadCutAsync(SiloAddress silo, CancellationToken cancellationToken)
+    private async Task<(bool HasValue, SiloStorageCut? Value)> TryReadCutAsync(SiloAddress silo, CancellationToken cancellationToken)
     {
         try
         {
             var cut = await storage.On(silo).ReadCutAsync(cancellationToken).ConfigureAwait(true);
             if (cut.Incarnation == incarnation)
             {
-                return global::ManagedCode.Communication.Result<SiloStorageCut?>.Succeed(((SiloStorageCut?)(cut)));
+                return (true, ((SiloStorageCut?)(cut)));
             }
             StorageCopyDiagnostics.CopyExcluded(diagnostics, silo, ErrorCode.RecoveryRequired);
-            return global::ManagedCode.Communication.Result<SiloStorageCut?>.FailNotFound(nameof(TryReadCutAsync));
+            return (false, default(SiloStorageCut?));
         }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested && CqrsBoundaryErrors.IsNonFatal(error))
         {
             StorageCopyDiagnostics.CopyExcluded(diagnostics, silo,
                 error is KeyLoadException failure ? failure.Code : ErrorCode.OwnershipLost);
-            return global::ManagedCode.Communication.Result<SiloStorageCut?>.FailNotFound(nameof(TryReadCutAsync));
+            return (false, default(SiloStorageCut?));
         }
     }
 

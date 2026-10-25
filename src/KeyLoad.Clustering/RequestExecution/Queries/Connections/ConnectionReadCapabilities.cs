@@ -19,7 +19,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
     private ISiloDatabaseService Administration => services.GetRequiredService<SiloDatabaseClient>()
         .On(GrainIdentityContext.RequireOriginSilo());
 
-    internal async Task<global::ManagedCode.Communication.Result<object?>> ReadAsync(DecodedGrainRequest request, Guid requestId,
+    internal async Task<(bool HasValue, object? Value)> ReadAsync(DecodedGrainRequest request, Guid requestId,
         IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
@@ -27,9 +27,9 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (kind == GrainReadKind.Authenticate)
         {
             return request.Envelope.Purpose == AdministratorAuthenticationProtocol.Purpose
-                ? global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(AdministratorAuthenticationRead.Execute(localDatabase, runtimeClock, codec.ExecutionOptions,
+                ? (true, ((object?)(AdministratorAuthenticationRead.Execute(localDatabase, runtimeClock, codec.ExecutionOptions,
                     request, binding, cancellationToken))))
-                : global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(GrainRequestAuthority.Authenticate(localDatabase, request.Payload, runtimeClock))));
+                : (true, ((object?)(GrainRequestAuthority.Authenticate(localDatabase, request.Payload, runtimeClock))));
         }
 
         if (kind == GrainReadKind.RuntimeJournalCatalog
@@ -39,33 +39,33 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
                 KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId))) is null)
         {
             GrainPayload.RequireNoDto(request.Payload);
-            return global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(ReadAsync));
+            return (false, default(object?));
         }
 
         var principal = await ReloadPrincipalAsync(request, requestId, null, cancellationToken).ConfigureAwait(true);
         if (kind == GrainReadKind.FileMetadata)
         {
-            return global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(localDatabase.ReadFileMetadataBound(principal.Id,
+            return (true, ((object?)(localDatabase.ReadFileMetadataBound(principal.Id,
                 GrainPayload.Read<global::KeyLoad.Core.BlobStorage.FileMetadataQuery>(request.Payload),
                 binding, cancellationToken))));
         }
         if (UserAnalyticsReadExecution.Handles(kind))
         {
             return ((object?)(await UserAnalyticsReadExecution.ExecuteAsync(localDatabase, services, principal, kind, request,
-                binding, cancellationToken).ConfigureAwait(true))) is { } outcomeValue5 ? global::ManagedCode.Communication.Result<object?>.Succeed(outcomeValue5) : global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(ReadAsync));
+                binding, cancellationToken).ConfigureAwait(true))) is { } outcomeValue5 ? (true, outcomeValue5) : (false, default(object?));
         }
         if (GrainLifetimeReadCapabilities.Handles(kind))
         {
-            return global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(GrainLifetimeReadCapabilities.Execute(localDatabase, services, runtimeClock,
+            return (true, ((object?)(GrainLifetimeReadCapabilities.Execute(localDatabase, services, runtimeClock,
                 principal, request, binding, cancellationToken))));
         }
         if (GrainMaintenanceReadCapabilities.Handles(kind))
         {
             return ((object?)(await GrainMaintenanceReadCapabilities.ExecuteAsync(services, principal,
-                kind, request, binding, cancellationToken).ConfigureAwait(true))) is { } outcomeValue7 ? global::ManagedCode.Communication.Result<object?>.Succeed(outcomeValue7) : global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(ReadAsync));
+                kind, request, binding, cancellationToken).ConfigureAwait(true))) is { } outcomeValue7 ? (true, outcomeValue7) : (false, default(object?));
         }
         return ((object?)(await ReadCapabilityAsync(kind, principal, request, requestId,
-            binding, cancellationToken).ConfigureAwait(true))) is { } outcomeValue8 ? global::ManagedCode.Communication.Result<object?>.Succeed(outcomeValue8) : global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(ReadAsync));
+            binding, cancellationToken).ConfigureAwait(true))) is { } outcomeValue8 ? (true, outcomeValue8) : (false, default(object?));
     }
 
     private async Task<PrincipalRecord> ReloadPrincipalAsync(DecodedGrainRequest request, Guid requestId,

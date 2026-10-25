@@ -54,7 +54,7 @@ internal static class SurrealDbVectorStorage
         }
     }
 
-    internal static async Task<global::ManagedCode.Communication.Result<VectorReadback?>> ReadAsync(HttpClient http, string table, ComparisonExecutionOptions policy, string id, TimeProvider timeProvider, CancellationToken cancellationToken)
+    internal static async Task<(bool HasValue, VectorReadback? Value)> ReadAsync(HttpClient http, string table, ComparisonExecutionOptions policy, string id, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         using var response = await SurrealDbSqlTransport.QueryAsync(http, SurrealDbVectorProtocol.ReadOneSql(table, id), policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var result = SurrealDbVectorProtocol.SingleResult(response.RootElement);
@@ -64,11 +64,11 @@ internal static class SurrealDbVectorStorage
         }
         if (result.GetArrayLength() == 0)
         {
-            return global::ManagedCode.Communication.Result<VectorReadback?>.FailNotFound(nameof(ReadAsync));
+            return (false, default(VectorReadback?));
         }
 
         var row = result[0];
         var vector = SurrealDbVectorProtocol.ReadVector(row.GetProperty(EmbeddingKey));
-        return global::ManagedCode.Communication.Result<VectorReadback?>.Succeed((VectorReadback?)(new(row.GetProperty(NumberKey).GetInt32(), SurrealDbVectorProtocol.ReadRecordId(table, row.GetProperty(IdKey)), vector.Length, VectorComparisonCorpus.HashVector(vector), Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(SurrealDbVectorProtocol.ReadRequiredString(row, PayloadKey)))))));
+        return (true, (VectorReadback?)(new(row.GetProperty(NumberKey).GetInt32(), SurrealDbVectorProtocol.ReadRecordId(table, row.GetProperty(IdKey)), vector.Length, VectorComparisonCorpus.HashVector(vector), Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(SurrealDbVectorProtocol.ReadRequiredString(row, PayloadKey)))))));
     }
 }

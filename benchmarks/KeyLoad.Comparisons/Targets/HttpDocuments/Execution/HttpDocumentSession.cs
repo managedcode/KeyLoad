@@ -19,16 +19,16 @@ internal sealed class HttpDocumentSession(HttpDocumentStore store) : IDocumentCo
         return new();
     }
 
-    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         using var result = await store.ReadAsync(document.Id, null, cancellationToken).ConfigureAwait(false);
-        return ((FoundDocument?)((One(HttpDocumentStore.Documents(result))).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<FoundDocument?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync));
+        return ((FoundDocument?)((One(HttpDocumentStore.Documents(result))).Value)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(FoundDocument?));
     }
 
-    internal static global::ManagedCode.Communication.Result<FoundDocument?> One(FoundDocument[] rows) => rows.Length switch
+    internal static (bool HasValue, FoundDocument? Value) One(FoundDocument[] rows) => rows.Length switch
     {
-        EmptyCount => global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(One)),
-        SingleCount => global::ManagedCode.Communication.Result<FoundDocument?>.Succeed(((FoundDocument?)(rows[EmptyCount]))),
+        EmptyCount => (false, default(FoundDocument?)),
+        SingleCount => (true, ((FoundDocument?)(rows[EmptyCount]))),
         _ => throw new ComparisonFailureException(ExtraRows)
     };
 

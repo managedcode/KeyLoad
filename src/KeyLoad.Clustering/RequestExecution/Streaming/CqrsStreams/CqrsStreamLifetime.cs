@@ -97,9 +97,9 @@ internal static class CqrsStreamLifetime
         RequestWorkSettlement.Rethrow(primary);
     }
 
-    private static global::ManagedCode.Communication.Result<Exception?> CreationFailure(CqrsEnumeratorCreation creation)
+    private static (bool HasValue, Exception? Value) CreationFailure(CqrsEnumeratorCreation creation)
         => ((Exception?)(creation.Error ?? (creation.Enumerator is null
-            ? Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest) : null))) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<Exception?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CreationFailure));
+            ? Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest) : null))) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(Exception?));
 
     private static CqrsEnumeratorCreation CreateEnumerator(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,

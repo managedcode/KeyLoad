@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Core.StoragePartitions.Contracts;
 
@@ -76,6 +77,11 @@ internal sealed class CapabilityWorkRegistration(CancellationToken requestToken)
         {
             failures.Add(retentionFailure);
         }
+        ReleaseLease(ref failures);
+    }
+
+    private void ReleaseLease(ref CapabilityCleanupFailures failures)
+    {
         if (lease is not null)
         {
             try
@@ -94,43 +100,45 @@ internal sealed class CapabilityWorkRegistration(CancellationToken requestToken)
         }
     }
 
-    internal global::ManagedCode.Communication.Result<RequestWorkLease?> ReleaseAsyncState(ref CapabilityCleanupFailures failures)
+    internal bool TryReleaseAsyncState(ref CapabilityCleanupFailures failures,
+        [NotNullWhen(true)] out RequestWorkLease? original)
     {
+        original = null;
         if (settled)
         {
-            return global::ManagedCode.Communication.Result<RequestWorkLease?>.FailNotFound(nameof(ReleaseAsyncState));
+            return false;
         }
         settled = true;
         CaptureCancellation(ref failures);
-        var original = lease;
+        original = lease;
         lease = null;
         originalBinding = null;
-        return ((RequestWorkLease?)(original)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<RequestWorkLease?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<RequestWorkLease?>.FailNotFound(nameof(ReleaseAsyncState));
+        return original is not null;
     }
 
     internal Task PrepareOwnedReleaseAsync() => ownedRetention is not null && lease is { } original
         ? original.PrepareCompletionAsync() : Task.CompletedTask;
 
-    internal global::ManagedCode.Communication.Result<Exception?> ReleaseOwnedRetention()
+    internal (bool HasValue, Exception? Value) ReleaseOwnedRetention()
     {
         var original = ownedRetention;
         ownedRetention = null;
         if (original is null)
         {
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(ReleaseOwnedRetention));
+            return (false, default(Exception?));
         }
         try
         {
             original.Dispose();
-            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(ReleaseOwnedRetention));
+            return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
+            return (true, ((Exception?)(error)));
         }
     }
 

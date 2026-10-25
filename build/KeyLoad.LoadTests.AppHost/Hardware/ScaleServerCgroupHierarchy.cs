@@ -26,16 +26,16 @@ internal static class ScaleServerCgroupHierarchy
             && HasRequiredControllers(controllers);
     }
 
-    internal static global::ManagedCode.Communication.Result<string?> ReadRootLimit(string path)
+    internal static (bool HasValue, string? Value) ReadRootLimit(string path)
     {
         try
         {
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadRootLimit));
+            return (false, default(string?));
         }
-        catch (FileNotFoundException) { return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(UnlimitedCgroupValue))); }
-        catch (IOException) { return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadRootLimit)); }
-        catch (UnauthorizedAccessException) { return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadRootLimit)); }
+        catch (FileNotFoundException) { return (true, ((string?)(UnlimitedCgroupValue))); }
+        catch (IOException) { return (false, default(string?)); }
+        catch (UnauthorizedAccessException) { return (false, default(string?)); }
     }
 
     private static bool IsRootMount(string mountInfo, string root)
@@ -88,7 +88,7 @@ internal static class ScaleServerCgroupHierarchy
         return count == SingleRootMountCount;
     }
 
-    private static global::ManagedCode.Communication.Result<string?> DecodePath(string value)
+    private static (bool HasValue, string? Value) DecodePath(string value)
     {
         const int IndexInitialValue = 0;
         const char BackslashCharacter = '\\';
@@ -107,13 +107,13 @@ internal static class ScaleServerCgroupHierarchy
             }
             if (index + Step >= value.Length || !TryOctal(value.AsSpan(index + DecodePathStep, LengthValue), out var code))
             {
-                return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(DecodePath));
+                return (false, default(string?));
             }
 
             decoded.Append((char)code);
             index += StructuralValue;
         }
-        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(decoded.ToString())));
+        return (true, ((string?)(decoded.ToString())));
     }
 
     private static bool TryOctal(ReadOnlySpan<char> digits, out int value)

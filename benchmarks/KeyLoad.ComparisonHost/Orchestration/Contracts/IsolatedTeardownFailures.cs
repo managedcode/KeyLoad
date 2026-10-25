@@ -66,17 +66,17 @@ internal sealed class IsolatedTeardownFailures(Exception? primary)
         return ordered;
     }
 
-    private static global::ManagedCode.Communication.Result<Exception?> FindFatal(IEnumerable<Exception> failures)
+    private static (bool HasValue, Exception? Value) FindFatal(IEnumerable<Exception> failures)
     {
         foreach (var failure in failures)
         {
             var fatal = CqrsRuntimeFailures.FindFatal(failure);
             if (fatal is not null)
             {
-                return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(fatal)));
+                return (true, ((Exception?)(fatal)));
             }
         }
-        return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(FindFatal));
+        return (false, default(Exception?));
     }
 
     private static void AddDistinct(List<Exception> target, IEnumerable<Exception> additions)

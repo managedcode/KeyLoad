@@ -51,17 +51,17 @@ internal static class AnnSeedCancellationFailures
         throw new AggregateException(FailureMessage, failures);
     }
 
-    private static global::ManagedCode.Communication.Result<Exception?> FindFatal(List<Exception> failures)
+    private static (bool HasValue, Exception? Value) FindFatal(List<Exception> failures)
     {
         foreach (var failure in failures)
         {
             var fatal = CqrsRuntimeFailures.FindFatal(failure);
             if (fatal is not null)
             {
-                return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(fatal)));
+                return (true, ((Exception?)(fatal)));
             }
         }
-        return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(FindFatal));
+        return (false, default(Exception?));
     }
 
     private static int FindFatalOwner(List<Exception> failures)

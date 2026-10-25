@@ -176,16 +176,16 @@ internal sealed class TextProjectionState
         work.StartLease();
     }
 
-    private global::ManagedCode.Communication.Result<TextGenerationSlot?> ReserveRetiredCleanup()
+    private (bool HasValue, TextGenerationSlot? Value) ReserveRetiredCleanup()
     {
         const int EmptyActiveLeases = 0;
 
         if (work.ActiveLeases != EmptyActiveLeases || slots.RetiredCandidate.Value is not { } retired
             || !slots.BeginRetirement(retired))
         {
-            return global::ManagedCode.Communication.Result<TextGenerationSlot?>.FailNotFound(nameof(ReserveRetiredCleanup));
+            return (false, default(TextGenerationSlot?));
         }
         work.StartCleanup();
-        return global::ManagedCode.Communication.Result<TextGenerationSlot?>.Succeed(((TextGenerationSlot?)(retired)));
+        return (true, ((TextGenerationSlot?)(retired)));
     }
 }

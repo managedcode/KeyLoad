@@ -55,14 +55,14 @@ internal static class ScriptDomSourceLowering
         }
         throw ScriptDomErrors.Unsupported();
     }
-    private static global::ManagedCode.Communication.Result<string?> Alias(Dom.Identifier? alias)
+    private static (bool HasValue, string? Value) Alias(Dom.Identifier? alias)
     {
         if (alias is null)
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Alias));
+            return (false, default(string?));
         }
         global::KeyLoad.Core.JsonData.Identifier(alias.Value);
-        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(alias.Value)));
+        return (true, ((string?)(alias.Value)));
     }
     private static string Identifier(Dom.ScalarExpression expression, ScriptDomLoweringContext context)
     {

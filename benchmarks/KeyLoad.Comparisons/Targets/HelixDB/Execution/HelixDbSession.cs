@@ -11,7 +11,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
 {
     private readonly TimeProvider timeProvider = provider ?? TimeProvider.System;
     private ComparisonExecutionOptions Policy => executionOptions.Value;
-    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         using var response = await QueryAsync(HelixDbDocumentAst.Read(label, document.Id), false, cancellationToken).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
@@ -19,7 +19,7 @@ internal sealed class HelixDbSession(HttpClient http, string label, int count, i
         {
             throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidRows);
         }
-        return rows.GetArrayLength() == 0 ? global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<FoundDocument?>.Succeed(((FoundDocument?)(Read(rows[0]))));
+        return rows.GetArrayLength() == 0 ? (false, default(FoundDocument?)) : (true, ((FoundDocument?)(Read(rows[0]))));
     }
 
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)

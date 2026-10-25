@@ -34,12 +34,12 @@ internal sealed class TextOnlineCheckpointWork
         get;
     }
 
-    internal global::ManagedCode.Communication.Result<OnlineTextPublicationWork?> TryMatch(CommitProjectionBatchRequest command,
+    internal (bool HasValue, OnlineTextPublicationWork? Value) TryMatch(CommitProjectionBatchRequest command,
         string actualPrincipal, DateTimeOffset actualExpiry, ReadExecutionBudget budget)
     {
         if (command.CommandId != Work.CommandId)
         {
-            return global::ManagedCode.Communication.Result<OnlineTextPublicationWork?>.FailNotFound(nameof(TryMatch));
+            return (false, default(OnlineTextPublicationWork?));
         }
         budget.Check();
         if (actualPrincipal != principalId || actualExpiry != expiry)
@@ -51,7 +51,7 @@ internal sealed class TextOnlineCheckpointWork
         {
             throw TextErrors.Mismatch();
         }
-        return global::ManagedCode.Communication.Result<OnlineTextPublicationWork?>.Succeed(((OnlineTextPublicationWork?)(Work)));
+        return (true, ((OnlineTextPublicationWork?)(Work)));
     }
 
     internal async Task<ProjectionBatchResult> RequireAcknowledgedAsync(ProjectionBatchResult acknowledged,

@@ -122,18 +122,18 @@ internal static class FunctionalGateColdConcurrent
             context?.McpOperations ?? NoPublicOperations, failures.ToArray());
     }
 
-    private static async Task<global::ManagedCode.Communication.Result<FunctionalGateColdWorkload?>> ExerciseAsync(FunctionalGateContext context,
+    private static async Task<(bool HasValue, FunctionalGateColdWorkload? Value)> ExerciseAsync(FunctionalGateContext context,
         FunctionalGateColdState state, McpPersistedIdentity identity, int index, bool seed, CancellationToken token)
     {
         if (index < PrimaryIdentities)
         {
             await FunctionalGateColdConcurrentPrimary.RunAsync(context, state, index, token);
-            return global::ManagedCode.Communication.Result<FunctionalGateColdWorkload?>.FailNotFound(nameof(ExerciseAsync));
+            return (false, default(FunctionalGateColdWorkload?));
         }
         var ordinal = index - PrimaryIdentities;
         if (seed)
         {
-            return global::ManagedCode.Communication.Result<FunctionalGateColdWorkload?>.Succeed(((FunctionalGateColdWorkload?)(await FunctionalGateColdWorkloads.SeedOneAsync(context, state, identity,
+            return (true, ((FunctionalGateColdWorkload?)(await FunctionalGateColdWorkloads.SeedOneAsync(context, state, identity,
                 FunctionalGateColdWorkloadProvision.Resource(ordinal), token))));
         }
         var proof = state.Workloads[ordinal];
@@ -144,7 +144,7 @@ internal static class FunctionalGateColdConcurrent
             await FunctionalGateColdReadAssertions.VerifyAsync(context, model, token);
         }
         await FunctionalGateColdRelationalClosure.VerifyAsync(context, state, token);
-        return global::ManagedCode.Communication.Result<FunctionalGateColdWorkload?>.Succeed(((FunctionalGateColdWorkload?)(proof)));
+        return (true, ((FunctionalGateColdWorkload?)(proof)));
     }
 
     private sealed record Result(FunctionalGateColdWorkload? Proof, long SdkOperations,

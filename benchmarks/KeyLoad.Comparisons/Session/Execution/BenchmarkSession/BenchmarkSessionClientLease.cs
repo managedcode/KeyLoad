@@ -5,7 +5,7 @@ namespace KeyLoad.Comparisons;
 internal sealed class BenchmarkSessionClientLease(BenchmarkSessionContext context)
 {
     private readonly List<IDocumentComparisonSession> sessions = [];
-    internal global::ManagedCode.Communication.Result<IComparisonSession> At(int worker, bool documentSessions) => documentSessions ? global::ManagedCode.Communication.Result<IComparisonSession>.Succeed(((IComparisonSession)(sessions[worker]))) : global::ManagedCode.Communication.Result<IComparisonSession>.FailNotFound(nameof(At));
+    internal (bool HasValue, IComparisonSession? Value) At(int worker, bool documentSessions) => documentSessions ? (true, ((IComparisonSession)(sessions[worker]))) : (false, default(IComparisonSession?));
     internal async Task OpenAsync(int clients, bool documentSessions, CancellationToken token)
     {
         for (var index = BenchmarkSessionLimits.NoObservedItems; documentSessions && index < clients; index++)

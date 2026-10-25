@@ -85,12 +85,12 @@ internal static class ScriptDomGraphScalar
         }
         return value;
     }
-    internal static global::ManagedCode.Communication.Result<ImmutableArray<string>?> Strings(Dom.ScalarExpression expression, string function,
+    internal static (bool HasValue, ImmutableArray<string>? Value) Strings(Dom.ScalarExpression expression, string function,
         ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
         {
-            return global::ManagedCode.Communication.Result<ImmutableArray<string>?>.FailNotFound(nameof(Strings));
+            return (false, default(ImmutableArray<string>?));
         }
         var arguments = ScriptDomGraphShape.Call(expression, function, context, depth);
         var values = ImmutableArray.CreateBuilder<string>(arguments.Count);
@@ -98,7 +98,7 @@ internal static class ScriptDomGraphScalar
         {
             values.Add(String(argument, context, depth + ChildDepth));
         }
-        return global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(values.ToImmutable())));
+        return (true, ((ImmutableArray<string>?)(values.ToImmutable())));
     }
     private const int ChildDepth = 1;
     private const long NegativeMinimumMagnitude = 2_147_483_648;

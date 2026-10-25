@@ -113,23 +113,23 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
         return ReplicationIdAgreement(replicationId, info) ? RedisReplicaFailedPredicate.None : RedisReplicaFailedPredicate.ReplicationIdentity;
     }
 
-    private static global::ManagedCode.Communication.Result<string?> RoleText(RedisResult[] role, int index)
-        => index < role.Length && !role[index].IsNull && role[index].Length < NoItems ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(role[index].ToString()))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(RoleText));
+    private static (bool HasValue, string? Value) RoleText(RedisResult[] role, int index)
+        => index < role.Length && !role[index].IsNull && role[index].Length < NoItems ? (true, ((string?)(role[index].ToString()))) : (false, default(string?));
 
-    private static global::ManagedCode.Communication.Result<string?> KnownRole(string? value)
-        => value is RedisProtocol.MasterRole or RedisProtocol.ReplicaRole ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(value))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownRole));
+    private static (bool HasValue, string? Value) KnownRole(string? value)
+        => value is RedisProtocol.MasterRole or RedisProtocol.ReplicaRole ? (true, ((string?)(value))) : (false, default(string?));
 
-    private static global::ManagedCode.Communication.Result<string?> KnownLink(string? value)
-        => value is RedisProtocol.LinkUp or LinkDown ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(value))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownLink));
+    private static (bool HasValue, string? Value) KnownLink(string? value)
+        => value is RedisProtocol.LinkUp or LinkDown ? (true, ((string?)(value))) : (false, default(string?));
 
-    private static global::ManagedCode.Communication.Result<string?> KnownHost(string? value, EndPoint primary, EndPoint replica)
+    private static (bool HasValue, string? Value) KnownHost(string? value, EndPoint primary, EndPoint replica)
     {
         if (!ValidHost(value))
         {
-            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownHost));
+            return (false, default(string?));
         }
         return StringComparer.OrdinalIgnoreCase.Equals(value, (Host(primary)).Value) || StringComparer.OrdinalIgnoreCase.Equals(value, (Host(replica)).Value) ||
-            KnownHosts.Contains(value, StringComparer.OrdinalIgnoreCase) || IPAddress.TryParse(value, out _) ? ((string?)(value)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownHost)) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownHost));
+            KnownHosts.Contains(value, StringComparer.OrdinalIgnoreCase) || IPAddress.TryParse(value, out _) ? ((string?)(value)) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(string?)) : (false, default(string?));
     }
 
     private static bool ValidHost(string? value)
@@ -149,7 +149,7 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
         return value.All(static character => char.IsAsciiLetterOrDigit(character) || character is VersionSeparator or IdentitySeparator);
     }
 
-    private static global::ManagedCode.Communication.Result<string?> Host(EndPoint endpoint)
+    private static (bool HasValue, string? Value) Host(EndPoint endpoint)
     {
         var host = endpoint switch
         {
@@ -157,16 +157,16 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
             IPEndPoint ip => ip.Address.ToString(),
             _ => null
         };
-        return ValidHost(host) ? ((string?)(host)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Host)) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Host));
+        return ValidHost(host) ? ((string?)(host)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(string?)) : (false, default(string?));
     }
 
-    private static global::ManagedCode.Communication.Result<int?> Port(EndPoint endpoint)
+    private static (bool HasValue, int? Value) Port(EndPoint endpoint)
         => endpoint switch
         {
-            DnsEndPoint dns => ((int?)((ValidPort(dns.Port)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<int?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(Port)),
-            IPEndPoint ip => ((int?)((ValidPort(ip.Port)).Value)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<int?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(Port)),
-            _ => global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(Port))
+            DnsEndPoint dns => ((int?)((ValidPort(dns.Port)).Value)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(int?)),
+            IPEndPoint ip => ((int?)((ValidPort(ip.Port)).Value)) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(int?)),
+            _ => (false, default(int?))
         };
 
-    private static global::ManagedCode.Communication.Result<int?> ValidPort(int value) => value is >= MinimumPort and <= MaximumPort ? global::ManagedCode.Communication.Result<int?>.Succeed(((int?)(value))) : global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(ValidPort));
+    private static (bool HasValue, int? Value) ValidPort(int value) => value is >= MinimumPort and <= MaximumPort ? (true, ((int?)(value))) : (false, default(int?));
 }

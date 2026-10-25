@@ -9,13 +9,13 @@ internal readonly record struct TimeSeriesIntensiveResponse(ImmutableArray<Sampl
     private const int SingleItemCount = 1;
     private const int NoObservedItems = 0;
 
-    internal global::ManagedCode.Communication.Result<long?> Count(TimeSeriesIntensiveScenario scenario) => scenario switch
+    internal (bool HasValue, long? Value) Count(TimeSeriesIntensiveScenario scenario) => scenario switch
     {
-        TimeSeriesIntensiveScenario.Append => Receipt is null ? global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(Count)) : global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(SingleItemCount))),
-        TimeSeriesIntensiveScenario.RawRangeRead => Raw.IsDefault ? global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(Count)) : global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(Raw.Length))),
-        TimeSeriesIntensiveScenario.Latest => Latest is null ? global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(NoObservedItems))) : global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(SingleItemCount))),
-        TimeSeriesIntensiveScenario.Aggregate => ((long?)(Aggregate?.Count)) is { } outcomeValue7 ? global::ManagedCode.Communication.Result<long?>.Succeed(outcomeValue7) : global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(Count)),
-        TimeSeriesIntensiveScenario.Windows => Windows.IsDefault ? global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(Count)) : global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(Windows.Length))),
-        _ => global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(Count))
+        TimeSeriesIntensiveScenario.Append => Receipt is null ? (false, default(long?)) : (true, ((long?)(SingleItemCount))),
+        TimeSeriesIntensiveScenario.RawRangeRead => Raw.IsDefault ? (false, default(long?)) : (true, ((long?)(Raw.Length))),
+        TimeSeriesIntensiveScenario.Latest => Latest is null ? (true, ((long?)(NoObservedItems))) : (true, ((long?)(SingleItemCount))),
+        TimeSeriesIntensiveScenario.Aggregate => ((long?)(Aggregate?.Count)) is { } outcomeValue7 ? (true, outcomeValue7) : (false, default(long?)),
+        TimeSeriesIntensiveScenario.Windows => Windows.IsDefault ? (false, default(long?)) : (true, ((long?)(Windows.Length))),
+        _ => (false, default(long?))
     };
 }

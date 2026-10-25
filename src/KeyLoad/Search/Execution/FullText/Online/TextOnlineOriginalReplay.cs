@@ -7,7 +7,7 @@ internal sealed class TextOnlineOriginalReplay(DatabaseEngine database,
     TimeProvider clock, TextResourceOwnership resources, TextOnlineSessions sessions,
     TextOnlineCatalogOwner catalog, Func<TextOnlineSession, Task> cleanupSession)
 {
-    internal async Task<global::ManagedCode.Communication.Result<OnlineTextCapabilityResult?>> ExecuteAsync(PrincipalRecord principal,
+    internal async Task<(bool HasValue, OnlineTextCapabilityResult? Value)> ExecuteAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
         var budget = originalBudget ?? new ReadExecutionBudget(clock, token);
@@ -15,7 +15,7 @@ internal sealed class TextOnlineOriginalReplay(DatabaseEngine database,
         var original = database.ReadOnlineTextOriginalOutcome(principal.Id, request.Request, budget);
         if (original is null)
         {
-            return global::ManagedCode.Communication.Result<OnlineTextCapabilityResult?>.FailNotFound(nameof(ExecuteAsync));
+            return (false, default(OnlineTextCapabilityResult?));
         }
         var result = original.Value.Get<OnlineTextIndexMaintenanceResult>();
         var publication = database.ReadOnlineTextOriginalPublication(principal.Id, request.Request, budget)
@@ -69,7 +69,7 @@ internal sealed class TextOnlineOriginalReplay(DatabaseEngine database,
             ServerFailureObserver.Observe(admitted.CompleteAfterJoinedCleanup, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
-        return global::ManagedCode.Communication.Result<OnlineTextCapabilityResult?>.Succeed(((OnlineTextCapabilityResult?)(CreateReply(request, result, budget))));
+        return (true, ((OnlineTextCapabilityResult?)(CreateReply(request, result, budget))));
     }
 
     private static OnlineTextCapabilityResult CreateReply(OnlineTextCapabilityRequest request,

@@ -64,20 +64,20 @@ internal sealed class TestDatabaseCloseState
         joinFailure?.Throw();
     }
 
-    private static global::ManagedCode.Communication.Result<ExceptionDispatchInfo?> Observe(Action operation)
+    private static (bool HasValue, ExceptionDispatchInfo? Value) Observe(Action operation)
     {
         try
         {
             operation();
-            return global::ManagedCode.Communication.Result<ExceptionDispatchInfo?>.FailNotFound(nameof(Observe));
+            return (false, default(ExceptionDispatchInfo?));
         }
         catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is null)
         {
-            return global::ManagedCode.Communication.Result<ExceptionDispatchInfo?>.Succeed(((ExceptionDispatchInfo?)(ExceptionDispatchInfo.Capture(failure))));
+            return (true, ((ExceptionDispatchInfo?)(ExceptionDispatchInfo.Capture(failure))));
         }
         catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is not null)
         {
-            return global::ManagedCode.Communication.Result<ExceptionDispatchInfo?>.Succeed(((ExceptionDispatchInfo?)(ExceptionDispatchInfo.Capture(failure))));
+            return (true, ((ExceptionDispatchInfo?)(ExceptionDispatchInfo.Capture(failure))));
         }
     }
 }

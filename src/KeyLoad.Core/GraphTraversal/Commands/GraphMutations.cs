@@ -103,12 +103,12 @@ public static class GraphMutations
         }
     }
 
-    internal static global::ManagedCode.Communication.Result<GraphEdgeOwnerVersion?> CurrentOwnerVersion(IKeyValueView view, PartitionRef partition, string graph, string edgeId, EdgeRecord? edge)
+    internal static (bool HasValue, GraphEdgeOwnerVersion? Value) CurrentOwnerVersion(IKeyValueView view, PartitionRef partition, string graph, string edgeId, EdgeRecord? edge)
     {
         var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersion>(view, GraphCrossPartitionKeys.OwnerVersion(partition, graph, edgeId));
         if (owner is null)
         {
-            return global::ManagedCode.Communication.Result<GraphEdgeOwnerVersion?>.FailNotFound(nameof(CurrentOwnerVersion));
+            return (false, default(GraphEdgeOwnerVersion?));
         }
 
         GraphCrossPartitionValidation.ValidateOwnerVersion(owner);
@@ -117,7 +117,7 @@ public static class GraphMutations
             throw Errors.Fail(ErrorCode.Corruption, GraphOwnerVersionMismatch);
         }
 
-        return global::ManagedCode.Communication.Result<GraphEdgeOwnerVersion?>.Succeed(((GraphEdgeOwnerVersion?)(owner)));
+        return (true, ((GraphEdgeOwnerVersion?)(owner)));
     }
 
     internal static long NextRevision(long revision)
