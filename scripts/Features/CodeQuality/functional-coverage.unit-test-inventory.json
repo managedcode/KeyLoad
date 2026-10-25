@@ -64738,7 +64738,7 @@
       "methodName": "AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets",
       "instanceName": "AcEpoch012RejectsDirectorySymlinkSocketAndDeviceWithoutChangingTargets",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/OfflineRegular/OfflineRegularFileEntryTypeTests.cs",
-      "sourceSha256": "71b7a8eafa4b4b3f29fda96ca92530b2396c905faba4f467c8020a7e264b42df",
+      "sourceSha256": "e67672ee960edb647b0807870a60744bf27c2f2488d624d8cb88cae59c12b0b7",
       "lineNumber": 12,
       "endLineNumber": 35,
       "classification": "required-non-contributor",
