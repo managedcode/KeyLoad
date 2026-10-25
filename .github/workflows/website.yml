@@ -87,7 +87,7 @@ jobs:
           printf '%s\n' 'The triggering benchmark run did not complete within the bounded wait.' >&2
           exit 1
       - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.workflow_sha }}
           path: control
@@ -114,7 +114,7 @@ jobs:
       KEYLOAD_SITE_BENCHMARK_MODE: ${{ needs.qualify.outputs.benchmark_mode }}
     steps:
       - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7
         with:
           ref: ${{ github.workflow_sha }}
           path: control

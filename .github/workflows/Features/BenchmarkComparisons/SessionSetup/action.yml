@@ -12,7 +12,7 @@ runs:
   using: composite
   steps:
     - name: Set up .NET
-      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+      uses: actions/setup-dotnet@v6
       with:
         global-json-file: global.json
     - name: Check Docker and kernel settings
@@ -24,7 +24,7 @@ runs:
       shell: bash
       run: node scripts/Features/BenchmarkComparisons/session-github-job.mjs
     - name: Download compiled benchmark runtime
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131
+      uses: actions/download-artifact@v8
       with:
         artifact-ids: ${{ inputs.runtime-artifact-id }}
         path: ${{ runner.temp }}/keyload-compiled-runtime

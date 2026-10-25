@@ -32,9 +32,9 @@ jobs:
       KEYLOAD_COMPARISON_JOB_NAME: Prepare comparison runtime
     steps:
       - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@v7
       - name: Set up .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
       # KeyLoad cells run the released server image; this job compiles only the comparison harness.
@@ -60,7 +60,7 @@ jobs:
         id: plan
         run: node scripts/Features/BenchmarkComparisons/session-plan.mjs --output="$RUNNER_TEMP/session-plan.json" --github-output="$GITHUB_OUTPUT"
       - name: Save the canonical session plan
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v7
         with:
           name: comparison-plan
           path: ${{ runner.temp }}/session-plan.json
@@ -81,14 +81,14 @@ jobs:
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
           reference="$KEYLOAD_IMAGE_REPOSITORY:latest@$digest"
           printf 'reference=%s\n' "$reference" >> "$GITHUB_OUTPUT"
-          printf 'KeyLoad cells use `%s`\n' "$reference" >> "$GITHUB_STEP_SUMMARY"
+          printf 'KeyLoad cells use %s\n' "$reference" >> "$GITHUB_STEP_SUMMARY"
           docker logout ghcr.io
       - name: Pack the compiled benchmark runtime
         if: (github.event_name == 'push' || inputs.mode == 'full')
         run: node scripts/Features/BenchmarkComparisons/compiled-test-bundle.mjs --pack
       - name: Save compiled runtime identities
         if: (github.event_name == 'push' || inputs.mode == 'full')
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v7
         with:
           name: comparison-compiled-runtime-identity
           path: |
@@ -99,7 +99,7 @@ jobs:
       - name: Save the compiled benchmark runtime
         id: runtime-bundle
         if: (github.event_name == 'push' || inputs.mode == 'full')
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v7
         with:
           name: comparison-compiled-test-bundle
           path: artifacts/benchmark-runtime-bundle/*
@@ -108,7 +108,7 @@ jobs:
           retention-days: 90
       - name: Save original preparation diagnostics
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v7
         with:
           name: comparison-runtime-qualification
           path: |
@@ -140,7 +140,7 @@ jobs:
       Benchmarks__KeyLoadImage: ${{ matrix.target == 'KeyLoad' && needs.comparison-runtime.outputs.keyload-image || '' }}
     steps: &database-steps
       - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@v7
       - name: Prepare the execution database session
         id: setup
         uses: ./.github/workflows/Features/BenchmarkComparisons/SessionSetup
@@ -160,7 +160,7 @@ jobs:
         run: node scripts/Features/BenchmarkComparisons/session-finalize.mjs
       - name: Save benchmark results
         if: ${{ !cancelled() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifactName }}
           path: artifacts/comparisons/sessions/workers/${{ matrix.id }}/**
@@ -346,7 +346,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        uses: actions/checkout@v7
       - name: Download original authenticated session results
         run: |
           mkdir -p artifacts/comparisons/sessions
@@ -354,14 +354,14 @@ jobs:
       - name: Check complete session accounting
         run: node scripts/Features/BenchmarkComparisons/session-aggregate-cli.mjs --input="$PWD/artifacts/comparisons/sessions/provider" --output="$PWD/artifacts/comparisons/sessions/aggregate"
       - name: Save combined benchmark results
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v7
         with:
           name: comparison-session-suite
           path: artifacts/comparisons/sessions/aggregate/**
           if-no-files-found: error
           retention-days: 90
       - name: Save GitHub result verification
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        uses: actions/upload-artifact@v7
         with:
           name: comparison-session-provider-evidence
           path: |

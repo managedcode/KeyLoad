@@ -18,9 +18,9 @@ jobs:
         runtime: [linux-x64, linux-arm64, win-x64, win-arm64, osx-x64, osx-arm64]
     steps:
       - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7
       - name: Set up .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
       - name: Publish server and CLI
@@ -31,7 +31,7 @@ jobs:
           dotnet publish src/KeyLoad.Cli/KeyLoad.Cli.csproj --configuration Release --runtime "$RUNTIME" --self-contained true -warnaserror --output artifacts/publish/cli
           tar -czf "artifacts/keyload-$RUNTIME.tar.gz" -C artifacts/publish server cli
       - name: Save applications
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: keyload-${{ matrix.runtime }}
           path: artifacts/keyload-${{ matrix.runtime }}.tar.gz
@@ -49,9 +49,9 @@ jobs:
       IMAGE_REPOSITORY: managedcode/keyload
     steps:
       - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7
       - name: Set up .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
       - name: Sign in to GitHub Container Registry
@@ -69,9 +69,9 @@ jobs:
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ && "$digest" == "$latest" ]]
           mkdir -p artifacts
           printf '%s:%s@%s\n' "$image" "$GITHUB_SHA" "$digest" > artifacts/keyload-server-image.txt
-          printf 'Server image: `%s:%s@%s` (also tagged `latest`)\n' "$image" "$GITHUB_SHA" "$digest" >> "$GITHUB_STEP_SUMMARY"
+          printf 'Server image: %s:%s@%s (also tagged latest)\n' "$image" "$GITHUB_SHA" "$digest" >> "$GITHUB_STEP_SUMMARY"
       - name: Save the image reference
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: keyload-server-image
           path: artifacts/keyload-server-image.txt
@@ -83,15 +83,15 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Download source code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v7
       - name: Set up .NET
-        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
       - name: Build Docker image
         run: dotnet publish benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRepository="keyload/benchmarks" -p:ContainerImageTag="$GITHUB_SHA" -p:ContainerArchiveOutputPath="$GITHUB_WORKSPACE/keyload-benchmarks.tar"
       - name: Save Docker image
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@v7
         with:
           name: keyload-docker-benchmarks
           path: keyload-benchmarks.tar

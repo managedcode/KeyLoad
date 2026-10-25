@@ -56,7 +56,7 @@ runs:
         printf 'KEYLOAD_SITE_BENCHMARK_MODE=%s\n' "$benchmark_mode" >> "$GITHUB_ENV"
         printf 'benchmark_mode=%s\n' "$benchmark_mode" >> "$GITHUB_OUTPUT"
     - name: Download website source
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      uses: actions/checkout@v7
       with:
         ref: ${{ steps.source.outputs.revision }}
         # Keep the TUnit monitor socket below the Unix 103-byte path limit.
@@ -64,7 +64,7 @@ runs:
         persist-credentials: false
     - name: Download current benchmark source
       if: steps.source.outputs.benchmark_mode == 'measured'
-      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      uses: actions/checkout@v7
       with:
         ref: ${{ steps.source.outputs.isolated_measured_revision }}
         path: measured-isolated
@@ -114,7 +114,7 @@ runs:
         cd w || exit
         git ls-files -z | xargs -0 sha256sum > "$EVIDENCE_DIR/source.sha256"
     - name: Set up .NET
-      uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+      uses: actions/setup-dotnet@v6
       with:
         global-json-file: w/global.json
     - name: Build and test code analyzers
@@ -183,12 +183,13 @@ runs:
       uses: ./control/.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite
     - name: Upload website for GitHub Pages
       if: success() && steps.source.outputs.mode == 'publish'
-      uses: actions/upload-pages-artifact@7b1f4a764d45c48632c6b24a0339c27f5614fb0b # v4
+      uses: actions/upload-pages-artifact@v5
       with:
         path: _site
+        include-hidden-files: true
     - name: Save website test results
       if: always()
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@v7
       with:
         name: site-qualification-${{ steps.source.outputs.revision }}-${{ github.run_attempt }}
         path: |

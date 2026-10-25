@@ -7,7 +7,7 @@ runs:
   using: composite
   steps:
     - name: Download checked website files
-      uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
+      uses: actions/download-artifact@v8
       with:
         name: site-qualification-${{ env.QUALIFIED_REVISION }}-${{ github.run_attempt }}
         path: qualification
@@ -31,10 +31,10 @@ runs:
         jq -e '.ok == true' predeploy-isolated-proof.json > /dev/null
         date --utc --iso-8601=seconds > predeploy-checked-at.txt
     - name: Configure GitHub Pages
-      uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
+      uses: actions/configure-pages@v6
     - name: Deploy website to GitHub Pages
       id: deployment
-      uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+      uses: actions/deploy-pages@v5
     - name: Record website deployment result
       if: always()
       env:
@@ -46,7 +46,7 @@ runs:
         jq -n --arg outcome "$DEPLOYMENT_OUTCOME" --arg url "$DEPLOYMENT_URL" --arg revision "$SITE_REVISION" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --argjson attempt "$GITHUB_RUN_ATTEMPT" '{schemaVersion:1,siteSourceRevision:$revision,qualification:{runUrl:$run_url,attempt:$attempt},provider:{outcome:$outcome,pageUrl:$url}}' > deployment-receipt.json
     - name: Save website deployment results
       if: always()
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@v7
       with:
         name: site-publication-${{ github.run_id }}-${{ github.run_attempt }}
         path: |
