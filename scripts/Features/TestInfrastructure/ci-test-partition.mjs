@@ -19,7 +19,7 @@ export function findShard(manifest, shardId) {
 }
 
 // Tree-node paths are /assembly/namespace/class/method; pinning the assembly keeps tests of
-// referenced test assemblies (KeyLoad.RecoveryTests inside KeyLoad.UnitTests) out of the shard.
+// referenced test assemblies (KeyLoad.ProcessRecoveryTests inside KeyLoad.FunctionalTests) out of the shard.
 export function namespaceFilter(suite, namespace) {
   return `/${suite.assembly}/${namespace}/*/*`;
 }
@@ -162,6 +162,17 @@ function checkClasses(suiteId, suite, scan, classes, errors) {
   return (testClass, method) => classOwners.get(testClass.name.toLowerCase()) ?? methodOwners.get(`${testClass.name}.${method}`);
 }
 
+function checkDescriptiveNames(shard, errors) {
+  const descriptiveId = /^[a-z]+(?:-[a-z]+)+$/u;
+  if (!descriptiveId.test(shard.id ?? '') || typeof shard.name !== 'string'
+    || shard.name.trim().length < 12) {
+    errors.push(`Execution group ${shard.id} needs a self-descriptive id and display name.`);
+  }
+  for (const lane of shard.lanes ?? []) {
+    if (!descriptiveId.test(lane.id ?? '')) errors.push(`Lane ${shard.id}/${lane.id} needs a self-descriptive id.`);
+  }
+}
+
 // Static exactly-once partition of every test project the workflow runs.
 export function checkPartition(root, manifest) {
   const errors = [];
@@ -169,6 +180,7 @@ export function checkPartition(root, manifest) {
   const suites = new Map();
   for (const [suiteId, suite] of Object.entries(manifest.suites)) {
     for (const shard of suite.shards) {
+      checkDescriptiveNames(shard, errors);
       if (shardIds.has(shard.id)) errors.push(`Shard id ${shard.id} is used more than once.`);
       shardIds.add(shard.id);
     }

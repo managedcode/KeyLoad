@@ -31,7 +31,7 @@ is owned by InternalSerialization: map it only to REQ-IS-007 / AC-IS-007 in
 It is not evidence for public credential verification or persisted principal
 authorization.
 
-Slice map: policy code `src/KeyLoad.Core/Authorization/`; focused tests mirror `tests/KeyLoad.UnitTests/Authorization/`. HTTP/MCP adapters remain ClientApi and execute on the caller's connection grain. Principals/API keys remain existing shared public contracts. Frontend: N/A, no independent UI is introduced.
+Slice map: policy code `src/KeyLoad.Core/Authorization/`; focused tests mirror `tests/KeyLoad.FunctionalTests/Authorization/`. HTTP/MCP adapters remain ClientApi and execute on the caller's connection grain. Principals/API keys remain existing shared public contracts. Frontend: N/A, no independent UI is introduced.
 
 ```mermaid
 flowchart LR

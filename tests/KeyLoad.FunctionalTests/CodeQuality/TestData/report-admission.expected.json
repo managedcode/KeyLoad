@@ -1,0 +1,45 @@
+{
+  "originalRepository": "/private/tmp/keyload-execution-report-fixture/lane/source",
+  "cases": [
+    {
+      "className": "KeyLoad.FunctionalTests.Authorization.GenerationVisibilityTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Authorization.GenerationVisibilityTests",
+      "methodName": "CompleteSqlGraphSetsRemainTenantEpochScopedThroughPinnedRetirementRepairReplayAndCold",
+      "instanceName": "CompleteSqlGraphSetsRemainTenantEpochScopedThroughPinnedRetirementRepairReplayAndCold",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Features/Authorization/Cases/GenerationVisibilityTests.cs",
+      "sourceSha256": "2512b1e65301a38771b9caf7c3c395ba2d01e823e6d3c23411979199f46f62d3",
+      "lineNumber": 5,
+      "endLineNumber": 10,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AUTH-005",
+        "REQ-AUTH-007"
+      ],
+      "acceptance": [
+        "AC-AUTH-005",
+        "AC-AUTH-007"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Authorization.GenerationVisibilityTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Authorization.GenerationVisibilityTests",
+      "methodName": "SharedAdmissionAndCancelledCallerPreserveCanonicalRowsThenHealthyReplayAndCold",
+      "instanceName": "SharedAdmissionAndCancelledCallerPreserveCanonicalRowsThenHealthyReplayAndCold",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Features/Authorization/Cases/GenerationVisibilityTests.cs",
+      "sourceSha256": "2512b1e65301a38771b9caf7c3c395ba2d01e823e6d3c23411979199f46f62d3",
+      "lineNumber": 12,
+      "endLineNumber": 17,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AUTH-005",
+        "REQ-AUTH-007"
+      ],
+      "acceptance": [
+        "AC-AUTH-005",
+        "AC-AUTH-007"
+      ]
+    }
+  ]
+}

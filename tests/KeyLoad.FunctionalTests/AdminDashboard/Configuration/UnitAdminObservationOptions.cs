@@ -1,0 +1,15 @@
+using KeyLoad.Server;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.FunctionalTests;
+
+/// <summary>Validated execution observation policy for actual filesystem operation tests.</summary>
+internal static class UnitAdminObservationOptions
+{
+    internal static IOptions<AdminObservationOptions> Execution(AdminObservationOptions? configured = null)
+    {
+        var value = configured ?? new AdminObservationOptions();
+        value.Validate();
+        return Options.Create(value);
+    }
+}

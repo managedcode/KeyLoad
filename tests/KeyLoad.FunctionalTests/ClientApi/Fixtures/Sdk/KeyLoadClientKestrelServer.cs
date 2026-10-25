@@ -1,0 +1,102 @@
+using System.Collections.Concurrent;
+using System.Net;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+
+namespace KeyLoad.FunctionalTests.ClientApi;
+
+internal sealed class KeyLoadClientKestrelServer : IAsyncDisposable
+{
+    private const string AuthorizationHeader = "Authorization";
+    private readonly WebApplication app;
+    private KeyLoadClientKestrelServer(WebApplication app, Uri baseAddress, ConcurrentQueue<string> authorizationHeaders,
+        KeyLoadClientKestrelObservation? observation)
+    {
+        this.app = app;
+        Client = observation?.CreateClient(baseAddress)
+            ?? new HttpClient { BaseAddress = baseAddress, Timeout = Timeout.InfiniteTimeSpan };
+        AuthorizationHeaders = authorizationHeaders;
+    }
+
+    public HttpClient Client
+    {
+        get;
+    }
+    public ConcurrentQueue<string> AuthorizationHeaders
+    {
+        get;
+    }
+
+    public static async Task<KeyLoadClientKestrelServer> StartAsync(RequestDelegate handler,
+        KeyLoadClientKestrelObservation? observation = null)
+    {
+        var builder = WebApplication.CreateBuilder();
+        builder.Logging.ClearProviders();
+        if (observation is not null)
+        {
+            builder.Services.AddSingleton<ILoggerProvider>(_ => new KeyLoadClientKestrelLogObservationProvider(observation));
+        }
+        builder.WebHost.ConfigureKestrel(options => options.Listen(IPAddress.Loopback, 0));
+        var app = builder.Build();
+        var authorizationHeaders = new ConcurrentQueue<string>();
+        app.Run(async context =>
+        {
+            observation?.Record(KestrelObservationStage.HandlerEntered, token: context.RequestAborted);
+            if (context.Request.Headers[AuthorizationHeader].SingleOrDefault() is { } authorization)
+            {
+                authorizationHeaders.Enqueue(authorization);
+            }
+            try
+            {
+                await handler(context);
+                observation?.Record(KestrelObservationStage.HandlerCompleted, token: context.RequestAborted);
+            }
+            catch (Exception error)
+            {
+                observation?.Record(KestrelObservationStage.HandlerFailed, error: error, token: context.RequestAborted);
+                throw;
+            }
+        });
+        try
+        {
+            observation?.Record(KestrelObservationStage.HostStarting);
+            await app.StartAsync();
+            observation?.Record(KestrelObservationStage.HostStarted);
+            var addresses = app.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>()!;
+            return new KeyLoadClientKestrelServer(app, new Uri(addresses.Addresses.Single()), authorizationHeaders, observation);
+        }
+        catch (Exception error) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            await FailStartupAsync(app, error);
+            throw;
+        }
+        catch (Exception error) when (!global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            await FailStartupAsync(app, error);
+            throw;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        var failures = new List<Exception>();
+        global::KeyLoad.Server.ServerFailureObserver.Observe(Client.Dispose, failures);
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => app.StopAsync(), failures);
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private static async Task FailStartupAsync(WebApplication app, Exception original)
+    {
+        var failures = new List<Exception> { original };
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => app.StopAsync(), failures);
+        await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => app.DisposeAsync().AsTask(), failures);
+        global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+}

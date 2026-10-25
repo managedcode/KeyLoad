@@ -1,0 +1,8 @@
+namespace KeyLoad.FunctionalTests.StorageRecovery;
+
+internal sealed class DocumentIndexCommittedScanTests
+{
+    [Test]
+    public Task AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen()
+        => DocumentIndexCommittedScanScenario.RunAsync();
+}

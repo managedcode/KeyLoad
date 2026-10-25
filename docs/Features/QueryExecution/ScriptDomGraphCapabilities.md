@@ -34,7 +34,7 @@ flowchart LR
 |---|---|
 | Backend contract | `src/KeyLoad.Query/QueryExecution/Contracts/QueryCapabilityCatalog.cs` |
 | parser | Existing `src/KeyLoad.Query/QueryExecution/Parsing/ScriptDomGraph*.cs`; unchanged by this correction |
-| Unit tests | Existing `tests/KeyLoad.UnitTests/QueryExecution/Cases/SqlGraph/SqlGraphSearchParityTests.cs` and rejection/support roles; separate graph consumer owner |
+| Unit tests | Existing `tests/KeyLoad.FunctionalTests/QueryExecution/Cases/SqlGraph/SqlGraphSearchParityTests.cs` and rejection/support roles; separate graph consumer owner |
 | cluster tests | Existing QueryExecution GraphSearch and Search three-way hybrid scopes; separate graph consumer owner |
 | SDK/MCP/CLI | N/A for new code: the existing query capability contract and graph operation transports are reused |
 | Frontend/benchmark/infrastructure | N/A: no UI, measurement, orchestration or topology change |

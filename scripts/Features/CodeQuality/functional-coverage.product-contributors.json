@@ -3,7 +3,7 @@
   "contributors": [
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryAuthorizationTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryAuthorizationTests",
       "methodName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
       "instanceName": "DenialInLaterPartitionReturnsNoPartialRowsAndDoesNotChangeTheStore",
       "requirements": [
@@ -19,7 +19,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryCancellationTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryCancellationTests",
       "methodName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
       "instanceName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
       "requirements": [
@@ -35,7 +35,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryContractTests",
       "methodName": "GeneratedPlanAndCompleteResultRoundTripWithStableFields",
       "instanceName": "GeneratedPlanAndCompleteResultRoundTripWithStableFields",
       "requirements": [
@@ -51,7 +51,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryContractTests",
       "methodName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
       "instanceName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
       "requirements": [
@@ -67,7 +67,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryContractTests",
       "methodName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
       "instanceName": "EmptyOversizedAndNullPartitionSetsFailAsValidation",
       "requirements": [
@@ -83,7 +83,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMergeTests",
       "methodName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
       "instanceName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
       "requirements": [
@@ -99,7 +99,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMergeTests",
       "methodName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
       "instanceName": "FullReferenceTiesUseOrdinalUnicodePartitionOrder",
       "requirements": [
@@ -115,7 +115,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMergeTests",
       "methodName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
       "instanceName": "IndependentRetainedOracleIncludesPersistedRedactionMetadata",
       "requirements": [
@@ -131,7 +131,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMergeTests",
       "methodName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
       "instanceName": "InvalidLeafSetIsRejectedAndAHealthyQueryStillRuns",
       "requirements": [
@@ -147,7 +147,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicAuthorizationTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryPublicAuthorizationTests",
       "methodName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
       "instanceName": "LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
       "requirements": [
@@ -163,7 +163,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicAuthorizationTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryPublicAuthorizationTests",
       "methodName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
       "instanceName": "ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
       "requirements": [
@@ -181,7 +181,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryPublicContractTests",
       "methodName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
       "instanceName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
       "requirements": [
@@ -197,7 +197,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryPublicContractTests",
       "methodName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
       "instanceName": "DefaultEmptyOversizedDuplicateAndUnsupportedRequestsFailBeforeStorageRead",
       "requirements": [
@@ -213,7 +213,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicMergeTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryPublicMergeTests",
       "methodName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
       "instanceName": "QueryMergesEveryAuthorizedPartitionInCanonicalOrderWithoutCollapsingEqualIds",
       "requirements": [
@@ -229,7 +229,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
       "methodName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
       "instanceName": "FrozenGeneratedAliasesAndFieldIdsRemainExact",
       "requirements": [
@@ -245,7 +245,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
       "methodName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
       "instanceName": "LocalCatalogMatchesExactPartitionQuerySchemaAndEffectHints",
       "requirements": [
@@ -261,7 +261,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
       "methodName": "PublicAndRequestBodiesRoundTripTheSameTypedValues",
       "instanceName": "PublicAndRequestBodiesRoundTripTheSameTypedValues",
       "requirements": [
@@ -277,7 +277,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
       "methodName": "PublicAndPageBodiesRoundTripRowsAndLeafWitnesses",
       "instanceName": "PublicAndPageBodiesRoundTripRowsAndLeafWitnesses",
       "requirements": [
@@ -293,7 +293,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
       "methodName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
       "instanceName": "McpReadDecoderUsesTheActualGeneratedPartitionQueryRequest",
       "requirements": [
@@ -309,7 +309,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
       "methodName": "InvalidPublicVersionFailsBeforeStorageRead",
       "instanceName": "InvalidPublicVersionFailsBeforeStorageRead",
       "requirements": [
@@ -325,7 +325,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMcpContractTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
       "methodName": "UnsupportedAstVersionFailsBeforeStorageRead",
       "instanceName": "UnsupportedAstVersionFailsBeforeStorageRead",
       "requirements": [
@@ -341,7 +341,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinCancellationTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinCancellationTests",
       "methodName": "AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
       "instanceName": "AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
       "requirements": [
@@ -362,7 +362,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinExecutionTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinExecutionTests",
       "methodName": "Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
       "instanceName": "Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
       "requirements": [
@@ -383,7 +383,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinExecutionTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinExecutionTests",
       "methodName": "NoncurrentDialectOrAstFormatsRejectBeforeReadingAndCurrentJoinStillRuns",
       "instanceName": "NoncurrentDialectOrAstFormatsRejectBeforeReadingAndCurrentJoinStillRuns",
       "requirements": [
@@ -405,7 +405,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinExecutionTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinExecutionTests",
       "methodName": "Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2",
       "instanceName": "Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2",
       "requirements": [
@@ -426,7 +426,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinExecutionTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinExecutionTests",
       "methodName": "JoinKeyUseRequiresPersistedGrantsAndProjectedOnlyFieldsRemainSafelyRedacted",
       "instanceName": "JoinKeyUseRequiresPersistedGrantsAndProjectedOnlyFieldsRemainSafelyRedacted",
       "requirements": [
@@ -447,7 +447,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinLifecycleTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinLifecycleTests",
       "methodName": "AcJoinKeepsAtomicPairGenerationsConsistentAcrossConcurrentCommits",
       "instanceName": "AcJoinKeepsAtomicPairGenerationsConsistentAcrossConcurrentCommits",
       "requirements": [
@@ -468,7 +468,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinLifecycleTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinLifecycleTests",
       "methodName": "AcJoinReopensCanonicalZoneTreeAndReturnsThePersistedPair",
       "instanceName": "AcJoinReopensCanonicalZoneTreeAndReturnsThePersistedPair",
       "requirements": [
@@ -489,7 +489,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinOrdinalOrderTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinOrdinalOrderTests",
       "methodName": "AcJoinUsesOrdinalSqlOrderWhenCanonicalKeyBytesHaveTheOppositeOrder",
       "instanceName": "AcJoinUsesOrdinalSqlOrderWhenCanonicalKeyBytesHaveTheOppositeOrder",
       "requirements": [
@@ -510,7 +510,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinRowAuthorizationTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinRowAuthorizationTests",
       "methodName": "AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges",
       "instanceName": "AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges",
       "requirements": [
@@ -531,7 +531,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.DocumentIndexCommittedScanTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.DocumentIndexCommittedScanTests",
       "methodName": "AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen",
       "instanceName": "AcCutDocumentIndexScanKeepsOneOldCutAcrossAtomicWriterAndReopen",
       "requirements": [
@@ -549,7 +549,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.QueryExecution.PartitionQueryPublicClusterTests",
+      "className": "KeyLoad.ClusterTests.QueryExecution.PartitionQueryPublicClusterTests",
       "methodName": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
       "instanceName": "AcPquery006SdkAndOfficialMcpReturnIndependentFullReferenceOrder",
       "requirements": [
@@ -570,7 +570,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.DocumentStorage.McpDocumentCrudParityTests",
+      "className": "KeyLoad.ClusterTests.DocumentStorage.McpDocumentCrudParityTests",
       "methodName": "AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
       "instanceName": "AcDstore001SdkPatchAndMcpDeleteMatchTheMirroredCrudLifecycle",
       "requirements": [
@@ -591,7 +591,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.DocumentStorage.McpDocumentCrudParityTests",
+      "className": "KeyLoad.ClusterTests.DocumentStorage.McpDocumentCrudParityTests",
       "methodName": "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
       "instanceName": "AcDstore001McpPatchAndSdkDeleteMatchTheMirroredCrudLifecycle",
       "requirements": [
@@ -612,7 +612,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.DocumentStorage.McpDocumentCrudParityTests",
+      "className": "KeyLoad.ClusterTests.DocumentStorage.McpDocumentCrudParityTests",
       "methodName": "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
       "instanceName": "AcDstore001StaleExplicitReplacementIsRejectedWithoutChangingRevisionTwo",
       "requirements": [
@@ -633,7 +633,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinTests",
+      "className": "KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinTests",
       "methodName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster",
       "instanceName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster",
       "requirements": [
@@ -657,7 +657,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinAuthorizationTests",
+      "className": "KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinAuthorizationTests",
       "methodName": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
       "instanceName": "RightResourceAndJoinFieldUseDenialsHaveNoEffectsAndHealthyCallersStillRead",
       "requirements": [
@@ -682,7 +682,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinCancellationTests",
+      "className": "KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinCancellationTests",
       "methodName": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
       "instanceName": "CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads",
       "requirements": [
@@ -707,7 +707,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinReadCutTests",
+      "className": "KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinReadCutTests",
       "methodName": "ConcurrentAtomicPairChangesNeverExposeAMixedClusterGeneration",
       "instanceName": "ConcurrentAtomicPairChangesNeverExposeAMixedClusterGeneration",
       "requirements": [
@@ -732,7 +732,7 @@
     },
     {
       "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinBudgetTests",
+      "className": "KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinBudgetTests",
       "methodName": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
       "instanceName": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
       "requirements": [
@@ -757,7 +757,7 @@
     },
     {
       "suite": "recovery",
-      "className": "KeyLoad.RecoveryTests.DocumentStorage.CommandIdempotencyProcessRecoveryTests",
+      "className": "KeyLoad.ProcessRecoveryTests.DocumentStorage.CommandIdempotencyProcessRecoveryTests",
       "methodName": "AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart",
       "instanceName": "AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart",
       "requirements": [
@@ -777,7 +777,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinDeclaredProjectionTests",
+      "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinDeclaredProjectionTests",
       "methodName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup",
       "instanceName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup",
       "requirements": [
@@ -801,7 +801,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.MaintenancePeriodicLifetimeTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.MaintenancePeriodicLifetimeTests",
       "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
       "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(False)",
       "requirements": [
@@ -817,7 +817,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.MaintenancePeriodicLifetimeTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.MaintenancePeriodicLifetimeTests",
       "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
       "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(True)",
       "requirements": [
@@ -833,7 +833,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
       "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
       "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(0, 600000000)",
       "requirements": [
@@ -849,7 +849,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
       "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
       "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(-1, 600000000)",
       "requirements": [
@@ -865,7 +865,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
       "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
       "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(1, 600000000)",
       "requirements": [
@@ -881,7 +881,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
       "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
       "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(42949672950000, 600000000)",
       "requirements": [
@@ -897,7 +897,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
       "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
       "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, -1)",
       "requirements": [
@@ -913,7 +913,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
       "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
       "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, 42949672950000)",
       "requirements": [
@@ -929,7 +929,7 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.ResourceExecution.TenantShutdownWholeFlowTests",
+      "className": "KeyLoad.FunctionalTests.ResourceExecution.TenantShutdownWholeFlowTests",
       "methodName": "OwnerShutdownCancelsSelectedWorkThenOriginalCommandReplayAndSameRootColdPreserveOutcome",
       "instanceName": "OwnerShutdownCancelsSelectedWorkThenOriginalCommandReplayAndSameRootColdPreserveOutcome",
       "requirements": [

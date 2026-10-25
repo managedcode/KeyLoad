@@ -1,0 +1,63 @@
+namespace KeyLoad.FunctionalTests.OrleansExecution;
+
+[RuntimeJournalDataSource]
+[NotInParallel]
+internal sealed class RuntimeJournalGraphCallerTests(RuntimeRuntimeJournalFixture fixture)
+{
+    private const string JournalPrefix = "graph-caller";
+    private const int InitialFirstByte = 7;
+    private const int InitialSecondByte = 2;
+    private const int FollowUpFirstByte = 8;
+    private const int FollowUpSecondByte = 3;
+
+    [Test]
+    public async Task JournalCallerIsExactRestoredAndHealthyAfterDeniedCalls()
+    {
+        var cancellationToken = TestContext.Current!.Execution.CancellationToken;
+        cancellationToken.ThrowIfCancellationRequested();
+        var grainId = $"execution/{JournalPrefix}/{Guid.NewGuid():N}";
+        var grain = fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId);
+        var original = new byte[] { InitialFirstByte, InitialSecondByte };
+        await grain.SetAsync(original);
+        await AssertStoredAsync(grain, original);
+
+        var probe = fixture.Grains.GetGrain<IRuntimeJournalGraphCallerProbeGrain>(Guid.NewGuid());
+        var observation = await probe.ExerciseAsync(cancellationToken);
+        await AssertCallerAndDenialOutcomes(observation);
+        await AssertStoredAsync(grain, original);
+
+        var followUp = new byte[] { FollowUpFirstByte, FollowUpSecondByte };
+        await grain.SetAsync(followUp);
+        var priorActivation = await grain.GetActivationTokenAsync();
+        await grain.DeactivateAsync();
+        await RuntimeJournalGraphCallerSupport.WaitForActivationChangeAsync(grain, priorActivation,
+            fixture.TimingOptions.Value);
+        var reopened = fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId);
+        await AssertStoredAsync(reopened, followUp);
+        var beforeDeleteActivation = await reopened.GetActivationTokenAsync();
+        await reopened.DeleteAsync();
+        await reopened.DeactivateAsync();
+        await RuntimeJournalGraphCallerSupport.WaitForActivationChangeAsync(reopened,
+            beforeDeleteActivation, fixture.TimingOptions.Value);
+        await Assert.That(await fixture.Grains.GetGrain<IRuntimeJournalReplayGrain>(grainId).ReadAsync())
+            .IsNull();
+    }
+
+    private static async Task AssertStoredAsync(IRuntimeJournalReplayGrain grain, byte[] expected)
+    {
+        var actual = await grain.ReadAsync();
+        await Assert.That(actual).IsNotNull();
+        await Assert.That(actual!.SequenceEqual(expected)).IsTrue();
+    }
+
+    private static async Task AssertCallerAndDenialOutcomes(RuntimeJournalGraphCallerResult observation)
+    {
+        await Assert.That(observation.ProviderReadCompleted).IsTrue();
+        await Assert.That(observation.ProviderRestoredScopedCaller).IsTrue();
+        await Assert.That(observation.WrongMethodDenied).IsTrue();
+        await Assert.That(observation.WrongMethodRestoredScopedCaller).IsTrue();
+        await Assert.That(observation.WrongTargetDenied).IsTrue();
+        await Assert.That(observation.WrongTargetRestoredScopedCaller).IsTrue();
+        await Assert.That(observation.ProbeRestoredOriginalCaller).IsTrue();
+    }
+}

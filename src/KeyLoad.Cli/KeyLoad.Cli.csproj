@@ -5,7 +5,7 @@
     <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
   </PropertyGroup>
   <ItemGroup>
-    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.ProcessRecoveryTests" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" />
     <PackageReference Include="Microsoft.Extensions.Configuration.EnvironmentVariables" />
     <PackageReference Include="Microsoft.Extensions.Options" />

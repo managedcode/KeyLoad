@@ -48,7 +48,7 @@ is defined here.
 4. Verify restore returns the current identity and no corrupt frame is partially accepted. Existing SDK/MCP contracts remain.
 5. Qualify build/analyzers/format/governance and real TUnit unit/process/replicated-cluster exact-SHA GitHub gates. Keep this ADR Accepted until all required source/tests/docs/evidence exists. Measured speed, power-loss and endurance remain separate unproven gates.
 
-Canonical slice: src/KeyLoad.Storage.ZoneTree/StorageRecovery and tests/KeyLoad.UnitTests/StorageRecovery; existing real RecoveryTests and replicated-cluster integration suites are mandatory. Frontend/client API:N/A, private durable payload only. No authored public model change.
+Canonical slice: src/KeyLoad.Storage.ZoneTree/StorageRecovery and tests/KeyLoad.FunctionalTests/StorageRecovery; existing real RecoveryTests and replicated-cluster integration suites are mandatory. Frontend/client API:N/A, private durable payload only. No authored public model change.
 
 ## Preserving recovery successor refinement
 

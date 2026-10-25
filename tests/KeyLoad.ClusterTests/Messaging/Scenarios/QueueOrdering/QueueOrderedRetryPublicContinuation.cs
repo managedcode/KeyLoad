@@ -1,0 +1,49 @@
+using KeyLoad.ClusterTests.ClientApi;
+using KeyLoad.ClusterTests.OrleansExecution;
+using KeyLoad.ClusterTests.QueryExecution;
+namespace KeyLoad.ClusterTests.Messaging;
+
+internal static class QueueOrderedRetryPublicContinuation
+{
+    internal static async Task RunAsync(RequestCqrsClusterCallers callers, QueueOrderedRetryPublicState state, CancellationToken token)
+    {
+        await QueueLifecyclePublicRoutes.CommitAsync(callers, state.Caller, new(Guid.NewGuid(), state.Caller.Partition,
+            [new RedriveQueueMessage(state.Caller.Lane.Queue, QueueOrderedRetryPublicProtocol.First,
+                QueueOrderedRetryPublicProtocol.Seven, QueueOrderedRetryPublicProtocol.One)]), token);
+        await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
+            new(QueueOrderedRetryPublicProtocol.First, MessageState.Ready, QueueOrderedRetryPublicProtocol.Initial,
+                QueueOrderedRetryPublicProtocol.Eight, QueueOrderedRetryPublicProtocol.Four, null, null,
+                LeaseVersion: QueueOrderedRetryPublicProtocol.Three, DeliveryGeneration: QueueOrderedRetryPublicProtocol.Two,
+                EnqueueSequence: QueueOrderedRetryPublicProtocol.One, ActiveOrderSequence: state.RedrivenOrder), true, token);
+        await StaleAsync(callers, state, token);
+        if (state.ParkedHead == QueueParkedHeadPolicy.Continue)
+        {
+            await Assert.That((await QueueOrderedRetryPublicOperations.ReceiveAsync(callers, state, token)).Deliveries).IsEmpty();
+            await QueueOrderedRetryPublicOperations.CompleteAsync(callers, state, state.Second!, DeliveryAction.Ack, token);
+        }
+        var fresh = await QueueOrderedRetryPublicOperations.ClaimAsync(callers, state, QueueOrderedRetryPublicProtocol.First, token);
+        await Assert.That(fresh.DeliveryGeneration).IsEqualTo(QueueOrderedRetryPublicProtocol.Two);
+        await QueueOrderedRetryPublicOperations.CompleteAsync(callers, state, fresh, DeliveryAction.Ack, token);
+        if (state.ParkedHead == QueueParkedHeadPolicy.Block)
+        {
+            var second = await QueueOrderedRetryPublicOperations.ClaimAsync(callers, state, QueueOrderedRetryPublicProtocol.Second, token);
+            await QueueOrderedRetryPublicOperations.CompleteAsync(callers, state, second, DeliveryAction.Ack, token);
+        }
+        await QueueOrderedRetryPublicTerminal.RunAsync(callers, state, healthy: false, token);
+        await QueueLifecyclePublicRoutes.ReplayAsync(callers, state.Caller, token);
+    }
+    private static async Task StaleAsync(RequestCqrsClusterCallers callers, QueueOrderedRetryPublicState state, CancellationToken token)
+    {
+        var old = new DeliveryCommand(Guid.NewGuid(), state.Caller.Lane, state.Original!.Token, DeliveryAction.Ack);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, dispatched: true)).Value;
+        var sql = SqlClusterProtocol.Call(state.Caller.Partition, McpCallerTools.MessagesComplete, old);
+        await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), ErrorCode.StaleLease);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.StaleLease, dispatched: true)).Value;
+        await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
+            new(QueueOrderedRetryPublicProtocol.First, MessageState.Ready, QueueOrderedRetryPublicProtocol.Initial,
+                QueueOrderedRetryPublicProtocol.Eight, QueueOrderedRetryPublicProtocol.Four, null, null,
+                LeaseVersion: QueueOrderedRetryPublicProtocol.Three, DeliveryGeneration: QueueOrderedRetryPublicProtocol.Two,
+                EnqueueSequence: QueueOrderedRetryPublicProtocol.One, ActiveOrderSequence: state.RedrivenOrder), true, token);
+    }
+}

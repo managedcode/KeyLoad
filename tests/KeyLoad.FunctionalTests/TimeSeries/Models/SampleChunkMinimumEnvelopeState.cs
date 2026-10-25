@@ -1,0 +1,4 @@
+namespace KeyLoad.FunctionalTests.TimeSeries;
+
+internal sealed record SampleChunkMinimumEnvelopeState(ReadSampleChunkWindowRequest Request,
+    PrincipalRecord Reader, (CommandRequest Request, CommitReceipt Receipt)[] Commands);

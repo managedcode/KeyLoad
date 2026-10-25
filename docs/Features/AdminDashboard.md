@@ -40,7 +40,7 @@ flowchart LR
 - Grain composition: the caller's connection grain, the existing read enum and the silo-local node administration service; no new durable grain state or grain-owned filesystem.
 - API, observations, Blazor Server components and exact asset hosting: `src/KeyLoad/AdminDashboard/`, with server-rendered `Components/`, circuit-owned `Execution/` and the small static `Assets/` surface. Existing shared server configuration is composition only.
 - .NET SDK: `src/KeyLoad.Client/AdminDashboard/`; official MCP/agent declarations consume these same typed capabilities.
-- Tests: `tests/KeyLoad.UnitTests/AdminDashboard/`, `tests/KeyLoad.IntegrationTests/AdminDashboard/`.
+- Tests: `tests/KeyLoad.FunctionalTests/AdminDashboard/`, `tests/KeyLoad.ClusterTests/AdminDashboard/`.
 - Infrastructure: the existing unit, recovery and Aspire cluster gates; public `site/` and Pages publication N/A because operational administration is hosted by the database server, not the public benchmark site.
 - Persisted schema/migrations N/A: observation uses existing records and writes no new database state. Benchmark workload N/A: observation does not establish performance superiority.
 
@@ -114,6 +114,6 @@ Manual exception: subjective visual polish is inspected via desktop/mobile scree
 
 ## Development browser checks
 
-Build the solution, then install the pinned Playwright Chromium browser with `pwsh tests/KeyLoad.IntegrationTests/bin/Debug/net10.0/playwright.ps1 install chromium`.
+Build the solution, then install the pinned Playwright Chromium browser with `pwsh tests/KeyLoad.ClusterTests/bin/Debug/net10.0/playwright.ps1 install chromium`.
 The Build and Tests workflow installs Chromium and its Linux dependencies before tests. `KEYLOAD_ADMIN_CHROME_PATH` optionally selects an existing browser executable through Playwright's launch API.
 Run the TUnit entry with Detailed output and a filter for `AdminDashboardBrowserTests` or `AdminBrowserLifetimeTests`. Screenshots are written under `artifacts/qualification/admin-dashboard` at 1920x1080 and 390x1080. These focused checks do not close distributed fault, recovery, coverage or delivered-source qualification gates.

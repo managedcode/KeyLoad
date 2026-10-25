@@ -1,5 +1,0 @@
-using KeyLoad.Query;
-
-namespace KeyLoad.UnitTests.QueryExecution;
-
-internal sealed record SqlBooleanTruthCase(string Clause, Predicate Predicate, string[] Ids);

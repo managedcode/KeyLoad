@@ -6,9 +6,9 @@
     <ProjectReference Include="../KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" />
     <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
     <InternalsVisibleTo Include="KeyLoad" />
-    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
-    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
-    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.FunctionalTests" />
+    <InternalsVisibleTo Include="KeyLoad.ClusterTests" />
+    <InternalsVisibleTo Include="KeyLoad.ProcessRecoveryTests" />
     <PackageReference Include="Microsoft.Orleans.Serialization" />
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
     <PackageReference Include="ZoneTree" />

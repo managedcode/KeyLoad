@@ -1,0 +1,70 @@
+using System.Collections.Immutable;
+using System.Security.Cryptography;
+using System.Text;
+using KeyLoad.Client;
+using KeyLoad.ClusterTests.ClientApi;
+using KeyLoad.Core;
+
+namespace KeyLoad.ClusterTests.Messaging;
+
+/// <summary>Owns one actually persisted scoped principal and API credential for public Orleans callers.</summary>
+internal sealed record MessagingClusterIdentity(PrincipalRecord Principal, ApiKeyRecord Credential, string Secret)
+{
+    private const int SecretBytes = 32;
+    private const string PrincipalPrefix = "messaging-principal-";
+    private const string CredentialPrefix = "messaging-credential-";
+    private const string SecretSeparator = ".";
+
+    internal static async Task<MessagingClusterIdentity> CreateAsync(ClusterFixture fixture,
+        string tenantId, IReadOnlyCollection<ScopeGrant> grants, ImmutableArray<string> fieldGrants,
+        bool clusterAdministrator, CancellationToken cancellationToken)
+        => await CreateSelectedAsync(fixture, PrincipalPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat),
+            tenantId, grants, fieldGrants, clusterAdministrator, cancellationToken);
+
+    internal static async Task<MessagingClusterIdentity> CreateSelectedAsync(ClusterFixture fixture, string principalId,
+        string tenantId, IReadOnlyCollection<ScopeGrant> grants, ImmutableArray<string> fieldGrants,
+        bool clusterAdministrator, CancellationToken cancellationToken)
+    {
+        JsonData.Identifier(principalId);
+        var principal = new PrincipalRecord(principalId, tenantId,
+            [.. grants], fieldGrants)
+        {
+            ClusterAdministrator = clusterAdministrator
+        };
+        var credentialId = CredentialPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
+        var secret = credentialId + SecretSeparator + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
+        var credential = new ApiKeyRecord(credentialId, principalId,
+            Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))));
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
+        await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), principal,
+            cancellationToken));
+        await Assert.That((await McpCallerAssertions.SdkStatusAsync(await administrator.ConfigureApiKeyAsync(
+            Guid.NewGuid(), credential, cancellationToken))).IsSuccess).IsTrue();
+        return new(principal, credential, secret);
+    }
+
+    internal static async Task UpdateAsync(ClusterFixture fixture, PrincipalRecord updated,
+        CancellationToken cancellationToken)
+    {
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
+        var administrator = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
+        _ = await McpCallerAssertions.SdkSuccessAsync(await administrator.ConfigurePrincipalAsync(Guid.NewGuid(), updated,
+            cancellationToken));
+    }
+
+    internal static PrincipalRecord WithCapability(PrincipalRecord current, QueueLaneRef lane, Capability capabilities)
+        => current with
+        {
+            Grants = [.. current.Grants.Select(grant => grant.Database == lane.Partition.DatabaseId
+                && grant.Resource == lane.Queue ? grant with { Capabilities = capabilities } : grant)],
+            PolicyEpoch = checked(current.PolicyEpoch + 1)
+        };
+
+    internal static PrincipalRecord WithFieldGrants(PrincipalRecord current, ImmutableArray<string> fieldGrants)
+        => current with
+        {
+            FieldGrants = fieldGrants,
+            PolicyEpoch = checked(current.PolicyEpoch + 1)
+        };
+}

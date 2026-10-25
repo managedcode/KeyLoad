@@ -24,12 +24,12 @@ contracts and persistence are `N/A` because the slice runs only at build time.
 Slice map:
 
 - Analyzer source: `analyzers/KeyLoad.Analyzers/`
-- Analyzer tests: `tests/KeyLoad.Analyzers.Tests/`
+- Analyzer tests: `tests/KeyLoad.AnalyzerTests/`
 - Shared build policy: `Directory.Build.props`, `Directory.Build.targets`,
   `.editorconfig`, `KeyLoad.slnx`, `global.json`
 - Coverage and identity tooling: `scripts/Features/CodeQuality/`,
   `build/CodeQuality/FunctionalCompilationIdentity.targets`
-- Product-side coverage tests: `tests/KeyLoad.UnitTests/CodeQuality/`
+- Product-side coverage tests: `tests/KeyLoad.FunctionalTests/CodeQuality/`
 - CI: `.github/workflows/build-and-tests.yml`
 
 ```mermaid
@@ -48,7 +48,7 @@ flowchart LR
 
 ## Requirements and acceptance
 
-Test names below exist under `tests/KeyLoad.Analyzers.Tests/Cases/`
+Test names below exist under `tests/KeyLoad.AnalyzerTests/Cases/`
 unless stated otherwise. A criterion with no automated case names its evidence.
 
 | Requirement | Acceptance (pass condition) | Verified by |
@@ -59,7 +59,7 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 | REQ-CQ-004: quality gates are enforced and qualification is stated honestly | AC-CQ-005: no required gate is skipped, disabled or downgraded to pass. AC-CQ-006: documentation and status record source configuration, local checks and exact-source Linux evidence separately. AC-CQ-022: the complete solution passes the strict Release build and `dotnet format --verify-no-changes`; repairs preserve public signatures, persisted bytes, signed identities, cancellation and lifetime rules. AC-CQ-023: every source-bound method with cyclomatic complexity above 20 is reviewed and, where it helps, split along a real responsibility | Governance check `node scripts/Features/RepositoryGovernance/verify.mjs`; review of `docs/implementation/status.json`; Release build and formatter gates (AC-CQ-022) |
 | REQ-CQ-006: maintainability limits are executable | AC-CQ-008: KLD0030..KLD0033 accept the boundary and reject one past it (file 400, type 200, executable unit 64 including the 63/64/65 edge, nesting 3). AC-CQ-009: the analyzer module reaches the coverage thresholds below from the analyzer suite | `FileCodeLineCountAnalyzerTests`, `AggregateTypeCodeLineCountAnalyzerTests`, `ExecutableUnitCodeLineCountAnalyzerTests`, `ExecutableUnitSpanAndTriviaAnalyzerTests`, `ControlFlowNestingAnalyzerTests`, `ControlFlowNestingExtendedConstructTests`, `NumericAnalyzerSelfInventoryTests`, `SiteAnalyzerCoverage*Tests` |
 | REQ-CQ-008: a pull request replaces its own earlier run and no other run cancels another | AC-CQ-017: the Build and Tests concurrency group is the ref for pull requests (with cancel-in-progress) and the run ID otherwise | Workflow expression review (explicit review exception) |
-| REQ-CQ-009: functional coverage is source-bound, measured and used to find real gaps | AC-CQ-018..021 and AC-CQ-039..048 below | coverage tooling tests in `tests/KeyLoad.UnitTests/CodeQuality/` and CI coverage jobs |
+| REQ-CQ-009: functional coverage is source-bound, measured and used to find real gaps | AC-CQ-018..021 and AC-CQ-039..048 below | coverage tooling tests in `tests/KeyLoad.FunctionalTests/CodeQuality/` and CI coverage jobs |
 | REQ-CQ-010: no object or Monitor lock; typed synchronization only | AC-CQ-025: KLD0034 fires on object-typed locks, `Monitor` calls and synchronous locks inside grains. AC-CQ-026: short synchronous shared-service sections use `System.Threading.Lock`; asynchronous exclusion uses cancellable `SemaphoreSlim.WaitAsync` released in `finally`. AC-CQ-027: grain-owned state relies on Orleans turn scheduling, while node-local storage, journal and apply gates stay | `TypedSynchronizationTests`, `GrainSynchronizationTests`, `SynchronizationDelegateTests`; existing functional lifecycle suites for AC-CQ-026/027 |
 | REQ-CQ-011: runtime-policy numbers and strings use named identities | AC-CQ-029: KLD0035 reports numeric literals (including zero and one) reaching timeouts, delays and deadlines. AC-CQ-030: KLD0036 reports string literals in comparisons and format tokens. AC-CQ-031: fixtures cover aliases, overloads and generated code. AC-CQ-032: the repository has no unreported finding and every migration keeps exact values, formats and persisted bytes | `MagicRuntime*Tests`, `GeneralRuntime*Tests` |
 | REQ-CQ-012: no inline runtime string, numeric or character literals | AC-CQ-033: KLD0035/KLD0036 reject runtime literals outside named `const` declarations, enums and attribute metadata; there is no blanket 0/1/-1 exemption and no suppression baseline | `GeneralRuntimeNumericTests`, `GeneralRuntimeTextTests`, `PersistedPolicyLiteralTests` |
@@ -242,7 +242,7 @@ Evidence scope: tests that exercise the tooling itself (for example
 `CoverageMergeTests`, `ProductionSourceManifestOperationTests`,
 `CoverageImageMaterializationTests`, `CompilationIdentityPackageRootTests`,
 `PathMapCompilerTests` and `ProcessEvidenceWholeFlowTests` in
-`tests/KeyLoad.UnitTests/CodeQuality/Cases/`) are tooling controls. They are
+`tests/KeyLoad.FunctionalTests/CodeQuality/Cases/`) are tooling controls. They are
 required gates but never product coverage contributors.
 
 ## Roslynk semantic tooling, owner direction 2026-10-09

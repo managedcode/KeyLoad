@@ -407,7 +407,7 @@ Feature code uses `Features/<SliceName>/<Responsibility>/` across the solution.
 Start with the [architecture map](docs/Architecture.md), the [feature specs](docs/Features) and [repository rules](AGENTS.md). After building, run a functional suite (`unit`, `recovery`, `cluster`, `analyzers` or `site`):
 
 ```bash
-node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=unit
+node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=functional
 ```
 
 ```bash

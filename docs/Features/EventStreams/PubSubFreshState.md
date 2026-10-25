@@ -1,6 +1,6 @@
 # PubSub fresh state after absence and clearing
 
-This bounded corrective stage belongs to `EventStreams`: product ownership is `src/KeyLoad.Clustering/EventStreams/Streaming/EventFeedPubSubStorage.cs`; genuine provider TUnit cases belong to `tests/KeyLoad.UnitTests/EventStreams/Cases/RuntimeEvent/EventFeedPubSubFreshStateTests.cs`, with their real serializer/activator/provider owner in `Fixtures/EventFeedPubSubFreshStateFixture.cs`. Public SDK/MCP schemas, canonical event storage, frontend and persistence formats are N/A because this provider holds disposable Orleans advisory subscriptions only.
+This bounded corrective stage belongs to `EventStreams`: product ownership is `src/KeyLoad.Clustering/EventStreams/Streaming/EventFeedPubSubStorage.cs`; genuine provider TUnit cases belong to `tests/KeyLoad.FunctionalTests/EventStreams/Cases/RuntimeEvent/EventFeedPubSubFreshStateTests.cs`, with their real serializer/activator/provider owner in `Fixtures/EventFeedPubSubFreshStateFixture.cs`. Public SDK/MCP schemas, canonical event storage, frontend and persistence formats are N/A because this provider holds disposable Orleans advisory subscriptions only.
 
 ## Confirmed source defect and contract
 

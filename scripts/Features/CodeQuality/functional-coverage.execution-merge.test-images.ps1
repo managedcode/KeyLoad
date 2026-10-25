@@ -79,9 +79,9 @@ function Assert-FcTestImageSuiteRelationships([Collections.Generic.Dictionary[st
 
 
 $script:FcTestImageProjects = [ordered]@{
-    'unit' = [ordered]@{ project = 'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'; assembly = 'KeyLoad.UnitTests.dll' }
-    'recovery' = [ordered]@{ project = 'tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj'; assembly = 'KeyLoad.RecoveryTests.dll' }
-    'cluster' = [ordered]@{ project = 'tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj'; assembly = 'KeyLoad.IntegrationTests.dll' }
+    'unit' = [ordered]@{ project = 'tests/KeyLoad.FunctionalTests/KeyLoad.FunctionalTests.csproj'; assembly = 'KeyLoad.FunctionalTests.dll' }
+    'recovery' = [ordered]@{ project = 'tests/KeyLoad.ProcessRecoveryTests/KeyLoad.ProcessRecoveryTests.csproj'; assembly = 'KeyLoad.ProcessRecoveryTests.dll' }
+    'cluster' = [ordered]@{ project = 'tests/KeyLoad.ClusterTests/KeyLoad.ClusterTests.csproj'; assembly = 'KeyLoad.ClusterTests.dll' }
 }
 
 function Read-RuntimeFcTestIdentityManifest([string] $Path, [string] $Repository, [string] $Suite, [object] $Bounds) {

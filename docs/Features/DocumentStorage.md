@@ -27,7 +27,7 @@ DocumentStorage owns tenant/database/domain-scoped JSON documents, revisions, mu
 |---|---|---|
 | Contracts | `src/KeyLoad.Abstractions/Contracts.cs` (`EntityRef`, document mutations/results, `DocumentAuthority`, `IndexDefinition`) | `src/KeyLoad.Abstractions/DocumentStorage/` |
 | Backend | `src/KeyLoad.Core/DocumentStorage/Execution/Documents.cs`, shared mutation dispatch in `DatabaseEngine.cs` | `src/KeyLoad.Core/DocumentStorage/` |
-| Tests | `tests/KeyLoad.UnitTests/DocumentStorage/`, shared atomic batch cases in `Features/ResourceExecution/TransactionTests.cs`, `SecurityAndQueryTests.cs`, `Features/QueryExecution/` | DocumentStorage behavior and its documented cross-slice atomic/query callers |
+| Tests | `tests/KeyLoad.FunctionalTests/DocumentStorage/`, shared atomic batch cases in `Features/ResourceExecution/TransactionTests.cs`, `SecurityAndQueryTests.cs`, `Features/QueryExecution/` | DocumentStorage behavior and its documented cross-slice atomic/query callers |
 | Durable specification | This file | `docs/Features/DocumentStorage.md` |
 | HTTP | `src/KeyLoad/DocumentStorage/Transport/DocumentApi.cs` plus shared `Features/ClientApi/ApiEndpoints.cs`: `POST /documents/get` and mutation command `POST /commands` | Shared HTTP transport belongs to `src/KeyLoad/ClientApi/`; document validation and behavior belong to `src/KeyLoad.Core/DocumentStorage/` |
 | .NET SDK | `src/KeyLoad.Client/DocumentStorage/Transport/KeyLoadClient.cs`: `GetAsync`; `DatabaseComposition/Commands/KeyLoadClient.cs`: `CommitAsync` | Shared client transport belongs to `src/KeyLoad.Client/ClientApi/`; typed document reads belong to DocumentStorage and atomic writes to DatabaseComposition |

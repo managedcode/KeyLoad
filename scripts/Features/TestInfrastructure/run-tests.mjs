@@ -12,13 +12,13 @@ const simdOptions = ['DOTNET_EnableHWIntrinsic', 'COMPlus_EnableHWIntrinsic',
 const heavyLoadEnabledOption = 'HeavyLoad:Enabled';
 const heavyLoadFilter = '/*/*/HeavyDocumentLoadClusterTests/*';
 const ordinaryClusterFilter = '/*/*/*/*[Category!=HeavyLoad]';
-const ordinaryUnitFilter = '/KeyLoad.UnitTests/*/*/*';
+const ordinaryFunctionalFilter = '/KeyLoad.FunctionalTests/*/*/*';
 // TUnit's MONITORTOHOST_ plus a 32-character ID and separator consume 47 bytes.
 const maximumUnixPipeDirectoryBytes = 56;
 const projects = new Map([
-  ['analyzers', 'KeyLoad.Analyzers.Tests'], ['unit', 'KeyLoad.UnitTests'],
-  ['recovery', 'KeyLoad.RecoveryTests'],
-  ['cluster', 'KeyLoad.IntegrationTests'], ['site', 'KeyLoad.SiteTests']
+  ['analyzers', 'KeyLoad.AnalyzerTests'], ['functional', 'KeyLoad.FunctionalTests'],
+  ['process-recovery', 'KeyLoad.ProcessRecoveryTests'],
+  ['cluster', 'KeyLoad.ClusterTests'], ['website', 'KeyLoad.WebsiteTests']
 ]);
 const mapped = new Map([
   ['Filter', '--treenode-filter'], ['ResultsDirectory', '--results-directory'],
@@ -64,7 +64,7 @@ export function runtimeSelection(input, inherited = process.env) {
     throw new Error('Heavy load requires exactly one execution test at a time.');
   }
   if (suite === 'cluster' && !values.has('Filter')) values.set('Filter', ordinaryClusterFilter);
-  if (suite === 'unit' && !values.has('Filter')) values.set('Filter', ordinaryUnitFilter);
+  if (suite === 'functional' && !values.has('Filter')) values.set('Filter', ordinaryFunctionalFilter);
   const environment = { ...inherited };
   const output = path.resolve(root, 'tests', project, 'bin', 'Debug', 'net10.0');
   // Aspire DCP binds Unix sockets below the temp directory; the short shared ipc folder keeps them within the platform bound.

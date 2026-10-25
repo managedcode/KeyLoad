@@ -1,0 +1,11 @@
+namespace KeyLoad.FunctionalTests.ChangeFeeds;
+
+internal static class FeedHealthyAdmission
+{
+    internal static global::ManagedCode.Communication.Result<object> Submit(global::KeyLoad.Core.DatabaseEngine owner,
+        global::ManagedCode.Communication.Commands.Command<DatabaseCommand> operation, bool explicitTime, CancellationToken token)
+    {
+        token.ThrowIfCancellationRequested();
+        return explicitTime ? owner.Apply(operation) : owner.ApplyEmbedded(operation, token);
+    }
+}

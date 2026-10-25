@@ -40,7 +40,7 @@ flowchart TD
 
 ## Ownership and qualification
 
-The wave's builder-lifetime helper (`TwoClusterMembershipBuilderLifetime` in `tests/KeyLoad.IntegrationTests/OrleansExecution/Lifecycle/`) owns only acquisition, current-generation reset, failure retention, transfer and the original disposal task. The wave contains the field and the common cleanup/root-veto hooks. The existing application-shutdown helper keeps its application Stop/deadline/Dispose sequence; the wave keeps its flag bookkeeping and callback Join after that sequence. Startup keeps its ordered stages and Failed callback before real owner cleanup. Direct start owners still settle their owned wave after failure.
+The wave's builder-lifetime helper (`TwoClusterMembershipBuilderLifetime` in `tests/KeyLoad.ClusterTests/OrleansExecution/Lifecycle/`) owns only acquisition, current-generation reset, failure retention, transfer and the original disposal task. The wave contains the field and the common cleanup/root-veto hooks. The existing application-shutdown helper keeps its application Stop/deadline/Dispose sequence; the wave keeps its flag bookkeeping and callback Join after that sequence. Startup keeps its ordered stages and Failed callback before real owner cleanup. Direct start owners still settle their owned wave after failure.
 
 `ClusterStartupEvidenceTests` covers a different in-process cluster owner, and `AspireFailureStartupTests` covers BeforeStart on an already built application; neither substitutes for this gap. The existing Aspire replicated-cluster scenarios that start this wave remain the regression coverage.
 

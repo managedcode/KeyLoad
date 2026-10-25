@@ -3,7 +3,7 @@
 ## Purpose, entry points and ownership
 
 - Owns the static Pages website that presents benchmark comparisons using verified GitHub Actions reports.
-- HTML/modules/styles entry: `Features/BenchmarkComparisons/`; thin builder: `scripts/build.mjs`; real qualification: `tests/KeyLoad.SiteTests` through the unified Aspire AppHost.
+- HTML/modules/styles entry: `Features/BenchmarkComparisons/`; thin builder: `scripts/build.mjs`; real qualification: `tests/KeyLoad.WebsiteTests` through the unified Aspire AppHost.
 - The site MUST display only the complete authenticated current Benchmarks cohort, preserve exact original source/run/attempt/artifact links and pass all publication gates. No fabricated, local-only, durability or production-readiness claims.
 - Do not introduce a backend, credentials, or a second source of truth for benchmark measurements.
 - Preserve the official Three.js 0.186.1 vendor files byte-for-byte against their local manifest and license. `.gitattributes` excludes only upstream `space-before-tab` findings for those exact two files so generic diff checks do not require mutating vendor bytes; authored site files retain normal whitespace checks.

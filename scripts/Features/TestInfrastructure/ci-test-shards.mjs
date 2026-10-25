@@ -14,7 +14,7 @@ import { executionPipeDirectory } from './run-tests.mjs';
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const usage = [
   'Usage: node scripts/Features/TestInfrastructure/ci-test-shards.mjs <command>',
-  '  matrix <suite>                                   GitHub matrix JSON for units or integration',
+  '  matrix <suite>                                   GitHub matrix JSON for functional or cluster',
   '  run <shard> [--results-directory <directory>]    run one shard (default results directory: TestResults)',
   '  verify [<results-directory>]                     exactly-once partition check, plus TRX identities when given',
   '  inventory <suite>                                source inventory with cluster use and lane assignment',
@@ -24,8 +24,8 @@ function matrix(manifest, suiteId) {
   const suite = manifest.suites[suiteId];
   if (!suite) throw new Error(`Unknown suite: ${suiteId}`);
   const include = suite.shards.map(shard => (suite.partition === 'class'
-    ? { shard: shard.id, playwright: shard.playwright === true }
-    : { shard: shard.id }));
+    ? { shard: shard.id, name: shard.name, playwright: shard.playwright === true }
+    : { shard: shard.id, name: shard.name }));
   return JSON.stringify({ include });
 }
 
@@ -70,7 +70,8 @@ async function runShard(manifest, shardId, resultsRoot) {
   const base = path.resolve(root, resultsRoot, suiteId, shard.id);
   const environment = testEnvironment();
   const children = new Set();
-  const forward = signal => () => { for (const child of children) child.kill(signal); };
+  let interrupted = false;
+  const forward = signal => () => { interrupted = true; for (const child of children) child.kill(signal); };
   const handlers = [['SIGINT', forward('SIGINT')], ['SIGTERM', forward('SIGTERM')]];
   for (const [signal, handler] of handlers) process.on(signal, handler);
   const outcomes = [];
@@ -85,6 +86,7 @@ async function runShard(manifest, shardId, resultsRoot) {
     } else if (suite.partition === 'namespace') {
       // One assembly-pinned process per namespace keeps every filter segment literal.
       for (const namespace of shard.namespaces) {
+        if (interrupted) break;
         const run = { label: `${shard.id}/${namespace}`, filter: namespaceFilter(suite, namespace), directory: path.join(base, namespace), parallelism: suite.parallelism };
         outcomes.push(await startRun(suite, run, environment, children));
       }
@@ -96,7 +98,7 @@ async function runShard(manifest, shardId, resultsRoot) {
     for (const [signal, handler] of handlers) process.off(signal, handler);
   }
   for (const { run, code, seconds } of outcomes) process.stdout.write(`[${run.label}] exit ${code} after ${seconds} s\n`);
-  return outcomes.every(outcome => outcome.code === 0) ? 0 : 1;
+  return interrupted ? 130 : outcomes.every(outcome => outcome.code === 0) ? 0 : 1;
 }
 
 function verify(manifest, resultsDirectory) {

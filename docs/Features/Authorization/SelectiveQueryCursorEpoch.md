@@ -28,4 +28,4 @@ flowchart TD
  C2 --> Q[Old fence and fresh pages/receipt/current]
 ```
 
-Slice map: tests/KeyLoad.IntegrationTests/Authorization/{Helpers,Assertions,Models,Contracts}; existing Cases/ResourcePolicyUpdateClusterTests.cs receives a sole continuation. New sub-spec docs/Features/Authorization/SelectiveQueryCursorEpoch.md. Product/frontend/benchmark: N/A; this qualifies existing public policy/cursor contracts and makes no performance claim.
+Slice map: tests/KeyLoad.ClusterTests/Authorization/{Helpers,Assertions,Models,Contracts}; existing Cases/ResourcePolicyUpdateClusterTests.cs receives a sole continuation. New sub-spec docs/Features/Authorization/SelectiveQueryCursorEpoch.md. Product/frontend/benchmark: N/A; this qualifies existing public policy/cursor contracts and makes no performance claim.

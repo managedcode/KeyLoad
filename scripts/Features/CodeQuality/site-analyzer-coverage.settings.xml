@@ -6,7 +6,7 @@
   <CodeCoverage>
     <ModulePaths>
       <IncludeDirectories>
-        <Directory>tests/KeyLoad.Analyzers.Tests/bin/Debug/net10.0</Directory>
+        <Directory>tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0</Directory>
       </IncludeDirectories>
       <Include>
         <ModulePath>^(.+[\\/])?KeyLoad\.Analyzers\.dll$</ModulePath>

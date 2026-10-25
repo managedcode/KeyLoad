@@ -1,0 +1,52 @@
+using KeyLoad.FunctionalTests.Messaging;
+using KeyLoad.FunctionalTests.ResourceExecution;
+using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+
+namespace KeyLoad.FunctionalTests.EventStreams;
+
+internal static class EventAppendSequenceAuthorityAssertions
+{
+    internal static async Task ReceiptAsync(EventAppendWholeFlowFixture fixture, CommandRequest command,
+        Result<object> result, long revision)
+    {
+        var receipt = result.Get<CommitReceipt>();
+        await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
+        await Assert.That(receipt.Token.Position).IsEqualTo(fixture.Database.Database.LastApplied);
+        var expected = new MutationReceipt[]
+        {
+            new("putDocument", EventAppendWholeFlowFixture.Documents, ((PutDocument)command.Mutations[0]).Id, 1L),
+            new("enqueue", EventAppendWholeFlowFixture.Queue, ((EnqueueMessage)command.Mutations[1]).MessageId, 1L),
+            new("appendEvents", EventAppendWholeFlowFixture.Streams, EventAppendWholeFlowFixture.StreamId, revision)
+        };
+        await Assert.That(receipt.Mutations).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+    }
+
+    internal static async Task PageAsync(DatabaseEngine database, StreamRef stream, DateTimeOffset now, CancellationToken token)
+    {
+        var expectedData = new[]
+        {
+            EventAppendWholeFlowFixture.Data(EventAppendWholeFlowFixture.InitialId),
+            EventAppendWholeFlowFixture.Data(EventAppendSequenceAuthorityFlow.Event),
+            EventAppendWholeFlowFixture.Data(EventAppendSequenceAuthorityFlow.HealthyEvent)
+        };
+        var expected = new StreamPage(stream, new(3L, 1L, 1L),
+            [.. expectedData.Select((data, index) => new EventRecord(stream, index + 1L, index + 1L, data, now))],
+            database.LastApplied, false, null, database.LastApplied);
+        var actual = database.ReadStream(EventAppendWholeFlowFixture.Root, stream, cancellationToken: token);
+        await Assert.That(System.Text.Json.JsonSerializer.Serialize(actual, JsonDefaults.Options))
+            .IsEqualTo(System.Text.Json.JsonSerializer.Serialize(expected, JsonDefaults.Options));
+    }
+
+    internal static async Task ReplayAsync(DatabaseEngine database, ZoneTreeStore store, CommandRequest command,
+        Result<object> original, DateTimeOffset now)
+    {
+        var position = store.Position;
+        var before = QueueWholeFlowStorage.Bytes(store);
+        var actual = QueueWholeFlowStorage.Apply(database, OperationKind.Batch, command, command.CommandId, now);
+        await ReplayResultAssertions.Same<CommitReceipt>(actual, original);
+        await Assert.That(store.Position).IsEqualTo(position);
+        await Assert.That(QueueWholeFlowStorage.Bytes(store))
+            .IsEquivalentTo(before, TUnit.Assertions.Enums.CollectionOrdering.Matching);
+    }
+}

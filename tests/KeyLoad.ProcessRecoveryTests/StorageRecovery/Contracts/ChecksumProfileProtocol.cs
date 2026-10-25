@@ -1,0 +1,52 @@
+namespace KeyLoad.ProcessRecoveryTests;
+
+internal static class ChecksumProfileProtocol
+{
+    internal const string SignalSeparator = ":";
+    internal const string VectorCapability = "vector=";
+    internal const string Sse42Capability = "sse42=";
+    internal const string AdvSimdCapability = "advsimd=";
+    internal const string Mode = "execution-checksum-profile";
+    internal const string CapabilitySignalPrefix = "execution-checksum-profile:";
+    internal const string CompletionSignalPrefix = "execution-checksum-profile-complete:";
+    internal const string Seed = "seed";
+    internal const string FirstAppend = "first-append";
+    internal const string SecondAppend = "second-append";
+    internal const string Cold = "cold";
+    internal const string CorruptionRefusal = "corruption-refusal";
+    internal const string CorruptionRefusedSignal = "execution-checksum-corruption-refused:Corruption";
+    internal const string CutFile = "execution-checksum-profile-cut.bin";
+    internal const string FollowUpCommandFile = "execution-checksum-profile-follow-up-command.bin";
+    internal const string FollowUpReceiptFile = "execution-checksum-profile-follow-up.bin";
+    internal const string CutAlias = "keyload.test.execution.checksum-profile-cut";
+    internal const string RowAlias = "keyload.test.execution.checksum-profile-row";
+    internal const string Invalid = "The current execution checksum profile operation did not preserve its complete cut.";
+    internal const int ArgumentCount = 3;
+    internal const int ModeIndex = 0;
+    internal const int RootIndex = 1;
+    internal const int PhaseIndex = 2;
+    internal const int OriginalEffects = 3;
+    internal const int SeedRecords = 257;
+    internal const int TailLengthModulus = 19;
+    internal const int NoAppends = 0;
+    internal const int OneAppend = 1;
+    internal const int TwoAppends = 2;
+    internal const string CorpusKeyFormat = "key-{0:D4}";
+    internal const string CorpusValueFormat = "value-{0}-π-";
+    internal const char CorpusTail = 'x';
+    internal const string FirstCorpusKey = "scalar-append";
+    internal const string FirstCorpusValue = "actual-first-profile-write";
+    internal const string SecondCorpusKey = "hardware-append";
+    internal const string SecondCorpusValue = "actual-second-profile-write";
+    internal const string SecondCommandText = "44102723-85c8-4c33-8509-56ed68d2668d";
+    internal const string SecondDocumentId = "execution-checksum-second-follow-up";
+    internal const string SecondJson = "{\"healthy\":\"second\"}";
+    internal const string SecondCommandFile = "execution-checksum-second-command.bin";
+    internal const string SecondReceiptFile = "execution-checksum-second-receipt.bin";
+    internal const string PutDocumentKind = "putDocument";
+    internal const string Sse2Capability = "sse2=";
+    internal const string Avx2Capability = "avx2=";
+    internal const int EmptyRevision = 0;
+    internal const int InitialRevision = 1;
+    internal const int Success = 0;
+}

@@ -706,7 +706,7 @@ and report mounts. Backend/public API/persistence N/A: no database behavior chan
 | REQ-BC-014: unchanged arithmetic and controls | AC-BC-014: all6 scenarios/11 metrics/profile/repetition/log/whiskers/table/downloads match independent oracle over authentic successful-CI reports | SiteMeasurementTests/SiteMeasurementOracle using actual JS child process; real browser control review |
 | REQ-BC-015: atomic validated report state | AC-BC-015: invalid/path/hash/rapid/error loads never mix data/provenance/downloads; abort and stale generation fencing | SiteEvidenceValidationTests over real production validators and controlled corrupt inputs; required rapid/error browser review |
 | REQ-BC-016: canonical complete asset/build migration | AC-BC-016: feature-owned assets, exact verified vendor/raw bytes and clean isolated output; authored JS≤40KiB gzip/CSS≤20KiB gzip; vendor lazy and separately recorded | SiteBuildTests and source/static/vendor/size/raw-byte checks |
-| REQ-BC-017: GitHub TUnit site qualification | AC-BC-017: independent centrally pinned TUnit/MTP/net10 suite, real bounded Node probe, preserved edge intentions; only exact GitHub run qualifies | KeyLoad.SiteTests full suite in GitHub; explicit visual/lifecycle review exception; numeric coverage per REQ-BC-024 |
+| REQ-BC-017: GitHub TUnit site qualification | AC-BC-017: independent centrally pinned TUnit/MTP/net10 suite, real bounded Node probe, preserved edge intentions; only exact GitHub run qualifies | KeyLoad.WebsiteTests full suite in GitHub; explicit visual/lifecycle review exception; numeric coverage per REQ-BC-024 |
 | REQ-BC-018: honest source/evidence/delivery | AC-BC-018: site/measured revisions, successful run and hashes distinct; no inference from another source, schema3, publication or CLI model | SiteEvidenceValidationTests and strongest complete source/evidence review |
 
 Canonical site files, mounts, TUnit project and limits are frozen in ADR-040. Positive
@@ -928,7 +928,7 @@ local build do not establish publication qualification.
 
 ## Chrome session admission
 
-`REQ-BC-CHROME-001`: Real Chrome work performed by one `KeyLoad.SiteTests`
+`REQ-BC-CHROME-001`: Real Chrome work performed by one `KeyLoad.WebsiteTests`
 process is admitted through a bounded session owner. At most one real
 Chrome process may be active in that process. Admission is acquired before
 the Chrome version probe or original browser launch and remains owned until
@@ -981,7 +981,7 @@ limits remain unchanged, and the test does not serialize unrelated tests globall
 
 Mapping: `REQ-BC-025` and `AC-BC-025` (real browser criteria), plus this focused
 admission acceptance. New TUnit source belongs to
-`tests/KeyLoad.SiteTests/`; no site runtime,
+`tests/KeyLoad.WebsiteTests/`; no site runtime,
 workflow, publication or measurement behavior changes.
 
 Browser lease transfer at factory return: the browser session factory admits one actual

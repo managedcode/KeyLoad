@@ -1,16 +1,16 @@
 $script:FcFunctionalReport = [ordered]@{
-    Assemblies = [ordered]@{ unit = 'KeyLoad.UnitTests'; recovery = 'KeyLoad.RecoveryTests'; cluster = 'KeyLoad.IntegrationTests' }
-    ClusterFixture = 'KeyLoad.IntegrationTests.ClusterFixture'
+    Assemblies = [ordered]@{ unit = 'KeyLoad.FunctionalTests'; recovery = 'KeyLoad.ProcessRecoveryTests'; cluster = 'KeyLoad.ClusterTests' }
+    ClusterFixture = 'KeyLoad.ClusterTests.ClusterFixture'
     ClusterClassAliases = [ordered]@{
-        'KeyLoad.IntegrationTests.QueryExecution|PartitionQueryPublicClusterTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.QueryExecution.PartitionQueryPublicClusterTests'
-        'KeyLoad.IntegrationTests.DocumentStorage|McpDocumentCrudParityTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.DocumentStorage.McpDocumentCrudParityTests'
-        'KeyLoad.IntegrationTests.RelationalStorage|RelationalSqlClusterJoinTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinTests'
-        'KeyLoad.IntegrationTests.RelationalStorage|RelationalSqlClusterJoinAuthorizationTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinAuthorizationTests'
-        'KeyLoad.IntegrationTests.RelationalStorage|RelationalSqlClusterJoinCancellationTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinCancellationTests'
-        'KeyLoad.IntegrationTests.RelationalStorage|RelationalSqlClusterJoinReadCutTests(ClusterFixture)' = 'KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinReadCutTests'
+        'KeyLoad.ClusterTests.QueryExecution|PartitionQueryPublicClusterTests(ClusterFixture)' = 'KeyLoad.ClusterTests.QueryExecution.PartitionQueryPublicClusterTests'
+        'KeyLoad.ClusterTests.DocumentStorage|McpDocumentCrudParityTests(ClusterFixture)' = 'KeyLoad.ClusterTests.DocumentStorage.McpDocumentCrudParityTests'
+        'KeyLoad.ClusterTests.RelationalStorage|RelationalSqlClusterJoinTests(ClusterFixture)' = 'KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinTests'
+        'KeyLoad.ClusterTests.RelationalStorage|RelationalSqlClusterJoinAuthorizationTests(ClusterFixture)' = 'KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinAuthorizationTests'
+        'KeyLoad.ClusterTests.RelationalStorage|RelationalSqlClusterJoinCancellationTests(ClusterFixture)' = 'KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinCancellationTests'
+        'KeyLoad.ClusterTests.RelationalStorage|RelationalSqlClusterJoinReadCutTests(ClusterFixture)' = 'KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinReadCutTests'
     }
     ClusterParameterlessClassAliases = [ordered]@{
-        'KeyLoad.IntegrationTests.RelationalStorage|RelationalSqlClusterJoinBudgetTests' = 'KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinBudgetTests'
+        'KeyLoad.ClusterTests.RelationalStorage|RelationalSqlClusterJoinBudgetTests' = 'KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinBudgetTests'
     }
     Invalid = 'The original execution TUnit report does not match its contributors or has an unsuccessful outcome.'
     RootRequired = @('schemaVersion','assemblyName','machineName','timestamp','tunitVersion','operatingSystem',

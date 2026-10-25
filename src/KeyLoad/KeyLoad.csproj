@@ -7,10 +7,10 @@
     <Content Include="AnalyticsStore/Assets/ZoneTree.Analytics.LICENSE.txt" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
-    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
+    <InternalsVisibleTo Include="KeyLoad.FunctionalTests" />
     <InternalsVisibleTo Include="KeyLoad.ComparisonHost" />
-    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
-    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
+    <InternalsVisibleTo Include="KeyLoad.ProcessRecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.ClusterTests" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../KeyLoad.Clustering/KeyLoad.Clustering.csproj" />

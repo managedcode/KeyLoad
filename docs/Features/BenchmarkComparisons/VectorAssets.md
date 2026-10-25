@@ -13,7 +13,7 @@ visual review); no database/public API/persistence boundary changes.
   provenance and GitHub-only qualification contracts.
 
 Slice ownership: site/Features/BenchmarkComparisons owns HTML, desktop/mobile posters, scene
-geometry/lifecycle/observer and CSS; tests/KeyLoad.SiteTests
+geometry/lifecycle/observer and CSS; tests/KeyLoad.WebsiteTests
 owns actual-source XML and real Chrome assertions. Shared favicon remains the
 unchanged byte-identical mirror of the AdminDashboard canonical logo. Backend,
 SDK/MCP, persisted data and benchmark workload surfaces are N/A: this is an asset

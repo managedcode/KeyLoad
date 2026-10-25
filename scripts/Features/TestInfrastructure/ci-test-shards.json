@@ -1,91 +1,84 @@
 {
-  "description": "Build and Tests shards. Unit shards run one assembly-pinned TUnit process per namespace; integration shards run their lanes as concurrent serial TUnit processes, at most lanesPerRunner cluster lanes per 4-vCPU runner. Add a new test class to exactly one lane or namespace shard; ci-test-shards.mjs verify rejects gaps and overlaps.",
+  "description": "Self-descriptive Build and Tests execution groups. Functional tests run one assembly-pinned TUnit process per namespace; cluster groups run concurrent serial lanes with at most lanesPerRunner clusters per runner. Every test class belongs to exactly one descriptive execution group; verification rejects missing, overlapping or opaque group/lane names.",
   "suites": {
-    "units": {
-      "project": "tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj",
-      "sources": "tests/KeyLoad.UnitTests",
-      "assembly": "KeyLoad.UnitTests",
+    "analyzers": {
+      "project": "tests/KeyLoad.AnalyzerTests/KeyLoad.AnalyzerTests.csproj",
+      "sources": "tests/KeyLoad.AnalyzerTests",
+      "assembly": "KeyLoad.AnalyzerTests",
+      "partition": "assembly",
+      "timeoutMinutes": 20,
+      "shards": [
+        {
+          "id": "compiler-analyzers",
+          "name": "Compiler analyzers"
+        }
+      ]
+    },
+    "functional": {
+      "project": "tests/KeyLoad.FunctionalTests/KeyLoad.FunctionalTests.csproj",
+      "sources": "tests/KeyLoad.FunctionalTests",
+      "assembly": "KeyLoad.FunctionalTests",
       "partition": "namespace",
       "parallelism": "processors",
       "timeoutMinutes": 20,
       "shards": [
         {
-          "id": "U1",
+          "id": "functional-storage-and-clients",
           "namespaces": [
-            "KeyLoad.UnitTests.StorageRecovery",
-            "KeyLoad.UnitTests.StorageReplication",
-            "KeyLoad.UnitTests.ClientApi",
-            "KeyLoad.UnitTests.AdminDashboard",
-            "KeyLoad.UnitTests.BlobStorage"
-          ]
+            "KeyLoad.FunctionalTests.StorageRecovery",
+            "KeyLoad.FunctionalTests.StorageReplication",
+            "KeyLoad.FunctionalTests.ClientApi",
+            "KeyLoad.FunctionalTests.AdminDashboard",
+            "KeyLoad.FunctionalTests.BlobStorage"
+          ],
+          "name": "Storage and client APIs"
         },
         {
-          "id": "U2",
+          "id": "functional-query-and-search",
           "namespaces": [
-            "KeyLoad.UnitTests.Search",
-            "KeyLoad.UnitTests.GraphTraversal",
-            "KeyLoad.UnitTests.QueryExecution",
-            "KeyLoad.UnitTests.TimeSeries",
-            "KeyLoad.UnitTests.RelationalStorage",
-            "KeyLoad.UnitTests.DocumentStorage"
-          ]
+            "KeyLoad.FunctionalTests.Search",
+            "KeyLoad.FunctionalTests.GraphTraversal",
+            "KeyLoad.FunctionalTests.QueryExecution",
+            "KeyLoad.FunctionalTests.TimeSeries",
+            "KeyLoad.FunctionalTests.RelationalStorage",
+            "KeyLoad.FunctionalTests.DocumentStorage"
+          ],
+          "name": "Query, search and data models"
         },
         {
-          "id": "U3",
+          "id": "functional-execution-and-governance",
           "namespaces": [
-            "KeyLoad.UnitTests.ResourceExecution",
-            "KeyLoad.UnitTests.CodeQuality.Cases",
-            "KeyLoad.UnitTests.CodeQuality",
-            "KeyLoad.UnitTests.RepositoryGovernance",
-            "KeyLoad.UnitTests.TestInfrastructure",
-            "KeyLoad.UnitTests.TestInfrastructure.Cases",
-            "KeyLoad.UnitTests"
-          ]
+            "KeyLoad.FunctionalTests.ResourceExecution",
+            "KeyLoad.FunctionalTests.CodeQuality.Cases",
+            "KeyLoad.FunctionalTests.CodeQuality",
+            "KeyLoad.FunctionalTests.RepositoryGovernance",
+            "KeyLoad.FunctionalTests.TestInfrastructure",
+            "KeyLoad.FunctionalTests.TestInfrastructure.Cases",
+            "KeyLoad.FunctionalTests"
+          ],
+          "name": "Execution and repository governance"
         },
         {
-          "id": "U4",
+          "id": "functional-runtime-and-security",
           "namespaces": [
-            "KeyLoad.UnitTests.OrleansExecution",
-            "KeyLoad.UnitTests.Messaging",
-            "KeyLoad.UnitTests.BackupRestore",
-            "KeyLoad.UnitTests.Authorization",
-            "KeyLoad.UnitTests.AnalyticsStore",
-            "KeyLoad.UnitTests.DatabaseComposition",
-            "KeyLoad.UnitTests.EventStreams",
-            "KeyLoad.UnitTests.ChangeFeeds",
-            "KeyLoad.UnitTests.InternalSerialization"
-          ]
+            "KeyLoad.FunctionalTests.OrleansExecution",
+            "KeyLoad.FunctionalTests.Messaging",
+            "KeyLoad.FunctionalTests.BackupRestore",
+            "KeyLoad.FunctionalTests.Authorization",
+            "KeyLoad.FunctionalTests.AnalyticsStore",
+            "KeyLoad.FunctionalTests.DatabaseComposition",
+            "KeyLoad.FunctionalTests.EventStreams",
+            "KeyLoad.FunctionalTests.ChangeFeeds",
+            "KeyLoad.FunctionalTests.InternalSerialization"
+          ],
+          "name": "Orleans, messaging and security"
         }
       ]
     },
-    "analyzers": {
-      "project": "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
-      "sources": "tests/KeyLoad.Analyzers.Tests",
-      "assembly": "KeyLoad.Analyzers.Tests",
-      "partition": "assembly",
-      "timeoutMinutes": 20,
-      "shards": [
-        {
-          "id": "AN"
-        }
-      ]
-    },
-    "recovery": {
-      "project": "tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj",
-      "sources": "tests/KeyLoad.RecoveryTests",
-      "assembly": "KeyLoad.RecoveryTests",
-      "partition": "assembly",
-      "timeoutMinutes": 20,
-      "shards": [
-        {
-          "id": "RC"
-        }
-      ]
-    },
-    "integration": {
-      "project": "tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj",
-      "sources": "tests/KeyLoad.IntegrationTests",
-      "assembly": "KeyLoad.IntegrationTests",
+    "cluster": {
+      "project": "tests/KeyLoad.ClusterTests/KeyLoad.ClusterTests.csproj",
+      "sources": "tests/KeyLoad.ClusterTests",
+      "assembly": "KeyLoad.ClusterTests",
       "partition": "class",
       "parallelism": 1,
       "timeoutMinutes": 45,
@@ -95,11 +88,11 @@
       ],
       "shards": [
         {
-          "id": "I01",
+          "id": "cluster-public-apis-and-administration",
           "playwright": true,
           "lanes": [
             {
-              "id": "L1",
+              "id": "sdk-mcp-and-sql-contracts",
               "kind": "shared-readers",
               "classes": [
                 "CompositeUniqueClusterTests",
@@ -143,7 +136,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "administration-diagnostics-and-index-lifecycle",
               "kind": "isolated-clusters",
               "classes": [
                 "AdminBrowserLifetimeTests",
@@ -176,33 +169,35 @@
                 "TextRowOwnershipPublicTests"
               ]
             }
-          ]
+          ],
+          "name": "Public APIs and administration"
         },
         {
-          "id": "I02",
+          "id": "cluster-queue-workers-and-single-node-recovery",
           "lanes": [
             {
-              "id": "L1",
+              "id": "queue-worker-sdk",
               "kind": "own-clusters",
               "classes": [
                 "QueueWorkerSdkClusterTests"
               ]
             },
             {
-              "id": "L2",
+              "id": "single-node-cold-recovery",
               "kind": "functional-gate",
               "class": "FunctionalDatabaseColdReopenTests",
               "methods": [
                 "SingleInstanceColdReopensAllModelsAndReplaysOriginalPublicCommands"
               ]
             }
-          ]
+          ],
+          "name": "Queue workers and single-node recovery"
         },
         {
-          "id": "I03",
+          "id": "cluster-capabilities-and-single-node-models",
           "lanes": [
             {
-              "id": "L1",
+              "id": "capabilities-leases-and-subscriptions",
               "kind": "own-clusters",
               "classes": [
                 "CapabilityOutputClusterTests",
@@ -213,20 +208,21 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "single-node-data-model-qualification",
               "kind": "functional-gate",
               "class": "FunctionalDatabaseGateTests",
               "methods": [
                 "SingleInstanceRunsEveryModelThroughSdkMcpAndSqlWithPersistedUsers"
               ]
             }
-          ]
+          ],
+          "name": "Capabilities and single-node data models"
         },
         {
-          "id": "I04",
+          "id": "cluster-atomic-processing-and-deadlines",
           "lanes": [
             {
-              "id": "L1",
+              "id": "atomic-session-and-authorization-operations",
               "kind": "own-clusters",
               "classes": [
                 "AtomicTriadStagedClusterTests",
@@ -237,7 +233,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "inbox-deadline-and-lease-operations",
               "kind": "own-clusters",
               "classes": [
                 "InboxProcessingPublicColdTests",
@@ -246,13 +242,14 @@
                 "QueueViewLeaseIsolationTests"
               ]
             }
-          ]
+          ],
+          "name": "Atomic processing and deadlines"
         },
         {
-          "id": "I05",
+          "id": "cluster-query-cursors-and-resource-bounds",
           "lanes": [
             {
-              "id": "L1",
+              "id": "graph-claims-and-time-series-chunks",
               "kind": "own-clusters",
               "classes": [
                 "EventingRequiredClaimClusterTests",
@@ -263,7 +260,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "cursors-authorization-and-read-bounds",
               "kind": "shared-exclusive",
               "classes": [
                 "CredentialSubjectReplacementClusterTests",
@@ -278,13 +275,14 @@
                 "TimeSeriesClusterReadTests"
               ]
             }
-          ]
+          ],
+          "name": "Query cursors and resource bounds"
         },
         {
-          "id": "I06",
+          "id": "cluster-query-policy-and-background-work",
           "lanes": [
             {
-              "id": "L1",
+              "id": "query-generation-and-processing-policy",
               "kind": "own-clusters",
               "classes": [
                 "GraphLabelUseClusterTests",
@@ -295,7 +293,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "events-scheduling-and-derived-reads",
               "kind": "shared-exclusive",
               "classes": [
                 "AdminBackupClientParityTests",
@@ -318,13 +316,14 @@
                 "TopicSqlClusterTests"
               ]
             }
-          ]
+          ],
+          "name": "Query policy and background work"
         },
         {
-          "id": "I07",
+          "id": "cluster-model-authority-and-transfer-repair",
           "lanes": [
             {
-              "id": "L1",
+              "id": "model-authority-and-transfer-policy",
               "kind": "own-clusters",
               "classes": [
                 "ModelHeadAuthorityClusterTests",
@@ -334,7 +333,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "administration-and-model-execution",
               "kind": "shared-exclusive",
               "classes": [
                 "AdminDashboardClusterTests",
@@ -351,13 +350,14 @@
                 "TimeSeriesCurrentCapabilityClusterTests"
               ]
             }
-          ]
+          ],
+          "name": "Model authority and transfer repair"
         },
         {
-          "id": "I08",
+          "id": "cluster-replicated-models-and-file-ownership",
           "lanes": [
             {
-              "id": "L1",
+              "id": "replicated-data-model-qualification",
               "kind": "functional-gate",
               "class": "FunctionalDatabaseGateTests",
               "methods": [
@@ -365,7 +365,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "file-ownership-and-transfer-attempts",
               "kind": "own-clusters",
               "classes": [
                 "CompetingInboxPublicTests",
@@ -374,13 +374,14 @@
                 "ResourcePolicyUpdateClusterTests"
               ]
             }
-          ]
+          ],
+          "name": "Replicated data models and file ownership"
         },
         {
-          "id": "I09",
+          "id": "cluster-replicated-recovery-and-composition",
           "lanes": [
             {
-              "id": "L1",
+              "id": "replicated-cold-recovery",
               "kind": "functional-gate",
               "class": "FunctionalDatabaseColdReopenTests",
               "methods": [
@@ -388,7 +389,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "composition-authorization-and-node-faults",
               "kind": "shared-exclusive",
               "classes": [
                 "AggregateSnapshotRaceClusterWholeFlowTests",
@@ -403,14 +404,15 @@
                 "TimeSeriesClusterReplicaRestartTests"
               ]
             }
-          ]
+          ],
+          "name": "Replicated recovery and composition"
         },
         {
-          "id": "I10",
+          "id": "cluster-administration-and-live-queries",
           "playwright": true,
           "lanes": [
             {
-              "id": "L1",
+              "id": "live-documents-and-transfer-stages",
               "kind": "own-clusters",
               "classes": [
                 "DocumentLiveProfileClusterTests",
@@ -421,7 +423,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "browser-administration-and-stream-recovery",
               "kind": "shared-exclusive",
               "classes": [
                 "AdminDashboardBrowserTests",
@@ -435,13 +437,14 @@
                 "TimeSeriesAggregateScanBoundClusterTests"
               ]
             }
-          ]
+          ],
+          "name": "Administration and live queries"
         },
         {
-          "id": "I11",
+          "id": "cluster-bootstrap-and-authorized-traversal",
           "lanes": [
             {
-              "id": "L1",
+              "id": "bootstrap-epochs-and-sql-budgets",
               "kind": "own-clusters",
               "classes": [
                 "ColdBootstrapSdkTests",
@@ -452,7 +455,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "authorized-traversal-and-retention",
               "kind": "shared-exclusive",
               "classes": [
                 "EventMessageSensitivePublicClusterTests",
@@ -467,13 +470,14 @@
                 "TypedEndpointJoinClusterTests"
               ]
             }
-          ]
+          ],
+          "name": "Bootstrap and authorized traversal"
         },
         {
-          "id": "I12",
+          "id": "cluster-queues-and-restart-recovery",
           "lanes": [
             {
-              "id": "L1",
+              "id": "queue-state-and-restart-recovery",
               "kind": "shared-exclusive",
               "classes": [
                 "DeclarativeCompositionReverseQuotaClusterTests",
@@ -485,7 +489,7 @@
               ]
             },
             {
-              "id": "L2",
+              "id": "bootstrap-files-and-transfer-coordination",
               "kind": "own-clusters",
               "classes": [
                 "CatalogBootstrapAuthorityClusterTests",
@@ -495,7 +499,21 @@
                 "RemoteTransferCoordinatorClusterTests"
               ]
             }
-          ]
+          ],
+          "name": "Queues and restart recovery"
+        }
+      ]
+    },
+    "process-recovery": {
+      "project": "tests/KeyLoad.ProcessRecoveryTests/KeyLoad.ProcessRecoveryTests.csproj",
+      "sources": "tests/KeyLoad.ProcessRecoveryTests",
+      "assembly": "KeyLoad.ProcessRecoveryTests",
+      "partition": "assembly",
+      "timeoutMinutes": 20,
+      "shards": [
+        {
+          "id": "process-crash-recovery",
+          "name": "Process crash recovery"
         }
       ]
     }

@@ -1,0 +1,103 @@
+using System.Net;
+using System.Net.Sockets;
+
+namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
+
+internal sealed class SiteBrowserStaticHostTests
+{
+    [Test]
+    public async Task AC_BC_025_StaticHostUsesBrowserMimeTypesAndSurvivesClientAbort()
+    {
+        await using var temporary = SiteTempDirectory.Create();
+        Directory.CreateDirectory(temporary.Output);
+        await File.WriteAllTextAsync(Path.Combine(temporary.Output, SiteBrowserTokens.ProbeHtmlFileName),
+            SiteBrowserStaticHostTokens.HtmlBody);
+        await File.WriteAllTextAsync(Path.Combine(temporary.Output, SiteBrowserTokens.ProbeStylesheetFileName),
+            SiteBrowserStaticHostTokens.StyleBody);
+        await File.WriteAllTextAsync(Path.Combine(temporary.Output, SiteBrowserTokens.ProbeModuleFileName),
+            SiteBrowserStaticHostTokens.ModuleBody);
+        await File.WriteAllBytesAsync(Path.Combine(temporary.Output, SiteBrowserTokens.AbortProbeFileName),
+            new byte[checked((int)SiteBrowserTokens.ClientAbortTestFileBytes)]);
+        await using var host = SiteStaticFileHost.Start(temporary.Output);
+        var baseUri = new Uri(host.BaseUrl);
+        using var client = new HttpClient
+        {
+            Timeout = SiteExecutionConfiguration.Options.Value.BrowserCommandTimeout,
+        };
+
+        await AssertContentType(client, baseUri, SiteBrowserTokens.ProbeHtmlFileName, SiteBrowserTokens.HtmlContentType);
+        await AssertContentType(client, baseUri, SiteBrowserTokens.ProbeStylesheetFileName, SiteBrowserTokens.CssContentType);
+        await AssertContentType(client, baseUri, SiteBrowserTokens.ProbeModuleFileName, SiteBrowserTokens.JavaScriptContentType);
+        await AbortResponseAndFetchAgain(client, baseUri);
+    }
+
+    /// <summary>
+    /// AC-BC-025 test for website run 37074632196. On the managed (non-Windows) listener, Close() after Stop()
+    /// re-binds the port Stop() already released, so a concurrent owner of that port turns teardown into
+    /// "Address already in use". The static host releases its listener once and leaves the port free.
+    /// </summary>
+    [Test]
+    public async Task AC_BC_025_StaticHostReleasesItsListenerOnceBecauseStopThenCloseRebindsThePort()
+    {
+        var rebindFailed = StopThenCloseFailsWhileThePortIsTaken(ReserveEphemeralPort());
+        await Assert.That(rebindFailed).IsEqualTo(!OperatingSystem.IsWindows());
+
+        await using var temporary = SiteTempDirectory.Create();
+        Directory.CreateDirectory(temporary.Output);
+        await using var host = SiteStaticFileHost.Start(temporary.Output);
+        var hostPort = new Uri(host.BaseUrl).Port;
+        await host.DisposeAsync();
+        using var reuse = new TcpListener(IPAddress.Loopback, hostPort);
+        reuse.Start();
+        await Assert.That(((IPEndPoint)reuse.LocalEndpoint).Port).IsEqualTo(hostPort);
+    }
+
+    private static bool StopThenCloseFailsWhileThePortIsTaken(int port)
+    {
+        using var listener = new HttpListener();
+        listener.Prefixes.Add($"{SiteTokens.StaticHostAddress}{port}{SiteTokens.UrlPathSeparator}");
+        listener.Start();
+        listener.Stop();
+        using var competitor = new TcpListener(IPAddress.Loopback, port);
+        competitor.Start();
+        try
+        {
+            listener.Close();
+            return false;
+        }
+        catch (HttpListenerException)
+        {
+            return true;
+        }
+    }
+
+    private static int ReserveEphemeralPort()
+    {
+        using var reservation = new TcpListener(IPAddress.Loopback, SiteTokens.PortZero);
+        reservation.Start();
+        var port = ((IPEndPoint)reservation.LocalEndpoint).Port;
+        reservation.Stop();
+        return port;
+    }
+
+    private static async Task AssertContentType(HttpClient client, Uri baseUri, string fileName, string expected)
+    {
+        using var response = await client.GetAsync(new Uri(baseUri, fileName), HttpCompletionOption.ResponseHeadersRead);
+        await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert.That(response.Content.Headers.ContentType?.ToString()).IsEqualTo(expected);
+    }
+
+    private static async Task AbortResponseAndFetchAgain(HttpClient client, Uri baseUri)
+    {
+        using (var response = await client.GetAsync(new Uri(baseUri, SiteBrowserTokens.AbortProbeFileName),
+                   HttpCompletionOption.ResponseHeadersRead))
+        {
+            await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
+            await Assert.That(response.Content.Headers.ContentLength).IsEqualTo(SiteBrowserTokens.ClientAbortTestFileBytes);
+        }
+
+        using var recovered = await client.GetAsync(new Uri(baseUri, SiteBrowserTokens.ProbeHtmlFileName));
+        await Assert.That(recovered.StatusCode).IsEqualTo(HttpStatusCode.OK);
+        await Assert.That(await recovered.Content.ReadAsStringAsync()).IsEqualTo(SiteBrowserStaticHostTokens.HtmlBody);
+    }
+}

@@ -1,0 +1,23 @@
+namespace KeyLoad.FunctionalTests.OrleansExecution;
+
+[RequestCqrsHostedDataSource]
+[NotInParallel(KeyLoad.FunctionalTests.OrleansExecution.RequestCqrsFixtureScheduling.SharedSession)]
+internal sealed class RequestCqrsRoutingTests(RequestCqrsHostedRuntimeFixture fixture)
+{
+    internal const string RootPrincipalId = "root";
+    internal const string Collection = "request-cqrs-routes";
+    internal const string DocumentJson = "{\"value\":42}";
+    internal static readonly TimeSpan InvocationBound = TimeSpan.FromSeconds(30);
+
+    [Test]
+    public Task AcCrs001RequestRoutesAStableBatchThroughItsCommandGrain()
+        => RequestCqrsRoutingCases.AcCrs001RequestRoutesAStableBatchThroughItsCommandGrain(fixture);
+
+    [Test]
+    public Task AcCrs003RevokedCommandFailsSafelyAndFollowingRequestSucceeds()
+        => RequestCqrsRoutingCases.AcCrs003RevokedCommandFailsSafelyAndFollowingRequestSucceeds(fixture);
+
+    [Test]
+    public Task AcCrs006MissingAndForgedContextFailBeforeCommandEffects()
+        => RequestCqrsRoutingCases.AcCrs006MissingAndForgedContextFailBeforeCommandEffects(fixture);
+}

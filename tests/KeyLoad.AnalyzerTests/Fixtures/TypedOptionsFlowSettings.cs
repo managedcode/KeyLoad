@@ -1,0 +1,16 @@
+namespace KeyLoad.AnalyzerTests.CodeQuality;
+
+/// <summary>Actual marked options used by the execution registration and execution verification.</summary>
+[KeyLoad.ConfigurationOptions]
+internal sealed class TypedOptionsFlowSettings
+{
+    public TypedOptionsFlowSettings()
+    {
+    }
+
+    /// <summary>Maximum concurrent admissions captured by the consumer.</summary>
+    public int AdmissionCapacity { get; set; } = 64;
+
+    /// <summary>Deadline passed to the execution task operation.</summary>
+    public TimeSpan Deadline { get; set; } = TimeSpan.FromSeconds(30);
+}

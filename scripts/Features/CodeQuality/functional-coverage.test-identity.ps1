@@ -1,11 +1,11 @@
 $script:FcTestIdentity = [ordered]@{
     SchemaVersion = 1
-    ProjectDirectory = 'tests/KeyLoad.UnitTests'
-    ProjectFile = 'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'
+    ProjectDirectory = 'tests/KeyLoad.FunctionalTests'
+    ProjectFile = 'tests/KeyLoad.FunctionalTests/KeyLoad.FunctionalTests.csproj'
     CompilationProducer = 'build/CodeQuality/FunctionalCompilationIdentity.targets'
-    DeploymentDirectory = 'tests/KeyLoad.UnitTests/bin/Debug/net10.0'
-    Dll = 'tests/KeyLoad.UnitTests/bin/Debug/net10.0/KeyLoad.UnitTests.dll'
-    Pdb = 'tests/KeyLoad.UnitTests/bin/Debug/net10.0/KeyLoad.UnitTests.pdb'
+    DeploymentDirectory = 'tests/KeyLoad.FunctionalTests/bin/Debug/net10.0'
+    Dll = 'tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/KeyLoad.FunctionalTests.dll'
+    Pdb = 'tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/KeyLoad.FunctionalTests.pdb'
     MaximumEntries = 5000
     MaximumSources = 5000
     MaximumManifestBytes = 33554432L
@@ -19,7 +19,7 @@ $script:FcTestIdentity = [ordered]@{
         'Directory.Build.targets',
         'Directory.Packages.props',
         'KeyLoad.slnx',
-        'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'
+        'tests/KeyLoad.FunctionalTests/KeyLoad.FunctionalTests.csproj'
     )
     InvalidRoot = 'The UnitTests identity root is absent, linked or unsupported.'
     InvalidInventory = 'The UnitTests project inventory is unsafe, oversized or ambiguous.'
@@ -116,7 +116,7 @@ function Assert-FcTestPdbDocumentSet([object[]] $Sources, [object[]] $Documents)
 
 function Get-FcTestCompiledIdentity([string] $Root, [object[]] $Sources, [object[]] $BuildInputs) {
     $identity = Read-FcCompiledIdentity $Root $script:FcTestIdentity.Dll $script:FcTestIdentity.Pdb $Sources
-    if ($identity.moduleName -cne 'KeyLoad.UnitTests.dll') { throw $script:FcTestIdentity.IncompleteBinding }
+    if ($identity.moduleName -cne 'KeyLoad.FunctionalTests.dll') { throw $script:FcTestIdentity.IncompleteBinding }
     Assert-FcTestPdbDocumentSet $Sources @($identity.documents)
     $beforeDll = Get-FcHash (Resolve-FcPath $Root $script:FcTestIdentity.Dll)
     $beforePdb = Get-FcHash (Resolve-FcPath $Root $script:FcTestIdentity.Pdb)
@@ -272,7 +272,7 @@ function Assert-FcTestCompiledManifest([System.Text.Json.JsonElement] $Element, 
         -not $stampElement.TryGetUInt32([ref] $stamp)) { throw $script:FcTestIdentity.InvalidManifest }
     if ($Element.GetProperty('dll').GetString() -cne $script:FcTestIdentity.Dll -or
         $Element.GetProperty('pdb').GetString() -cne $script:FcTestIdentity.Pdb -or
-        $Element.GetProperty('moduleName').GetString() -cne 'KeyLoad.UnitTests.dll' -or
+        $Element.GetProperty('moduleName').GetString() -cne 'KeyLoad.FunctionalTests.dll' -or
         $Element.GetProperty('qualification').GetString() -cne $ExpectedIdentity.qualification -or
         $Element.GetProperty('dllSha256').GetString() -cne $ExpectedIdentity.dllSha256 -or
         $Element.GetProperty('pdbSha256').GetString() -cne $ExpectedIdentity.pdbSha256 -or

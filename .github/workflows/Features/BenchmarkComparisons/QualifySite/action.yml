@@ -126,7 +126,7 @@ runs:
         pwsh --version > "$EVIDENCE_DIR/powershell-version.txt"
         dotnet restore KeyLoad.slnx
         dotnet build build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore -warnaserror
-        dotnet build tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --no-restore -warnaserror
+        dotnet build tests/KeyLoad.AnalyzerTests/KeyLoad.AnalyzerTests.csproj --no-restore -warnaserror
         mkdir -p "$EVIDENCE_DIR/analyzer-coverage"
         cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"
         pwsh -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Prepare -Repository "$KEYLOAD_SITE_REPOSITORY" -Contract "$KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$EVIDENCE_DIR/analyzer-coverage"
@@ -140,15 +140,15 @@ runs:
       working-directory: w
       shell: bash
       run: |
-        dotnet restore tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj
-        dotnet build tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --no-restore -warnaserror
+        dotnet restore tests/KeyLoad.WebsiteTests/KeyLoad.WebsiteTests.csproj
+        dotnet build tests/KeyLoad.WebsiteTests/KeyLoad.WebsiteTests.csproj --no-restore -warnaserror
     - name: Check website test formatting and repository rules
       working-directory: w
       shell: bash
       run: |
         dotnet format analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzers.txt" 2>&1
-        dotnet format tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzer-tests.txt" 2>&1
-        dotnet format tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-site-tests.txt" 2>&1
+        dotnet format tests/KeyLoad.AnalyzerTests/KeyLoad.AnalyzerTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzer-tests.txt" 2>&1
+        dotnet format tests/KeyLoad.WebsiteTests/KeyLoad.WebsiteTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-site-tests.txt" 2>&1
         node scripts/Features/RepositoryGovernance/verify.mjs
     - name: Run all website tests
       working-directory: w
@@ -156,7 +156,7 @@ runs:
       env:
         NODE_V8_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage/node
       run: |
-        site_args=(--KeyLoadTests:Suite=site --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests")
+        site_args=(--KeyLoadTests:Suite=website --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests")
         if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
           site_args+=('--KeyLoadTests:Filter=/*/*/SiteContent*/*')
         else
@@ -195,8 +195,8 @@ runs:
         path: |
           _site
           artifacts/site-evidence
-          w/artifacts/code-quality/KeyLoad.SiteTests
+          w/artifacts/code-quality/KeyLoad.WebsiteTests
           w/artifacts/code-quality/KeyLoad.Analyzers
-          w/artifacts/code-quality/KeyLoad.Analyzers.Tests
-          w/tests/KeyLoad.Analyzers.Tests/bin/Debug/net10.0/KeyLoad.Analyzers.dll
-          w/tests/KeyLoad.Analyzers.Tests/bin/Debug/net10.0/KeyLoad.Analyzers.pdb
+          w/artifacts/code-quality/KeyLoad.AnalyzerTests
+          w/tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0/KeyLoad.Analyzers.dll
+          w/tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0/KeyLoad.Analyzers.pdb

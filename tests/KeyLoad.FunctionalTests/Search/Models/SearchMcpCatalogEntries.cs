@@ -1,0 +1,21 @@
+namespace KeyLoad.FunctionalTests.Search;
+
+internal static class SearchMcpCatalogEntries
+{
+    private const string AnnRead = "keyload_search_ann_read";
+    private const string AnnReadRoute = "/search/ann";
+    private const string AnnMaintain = "keyload_search_ann_maintain";
+    private const string AnnMaintainRoute = "/search/ann/maintain";
+    private const string TextMaintain = "keyload_search_text_maintain";
+    private const string TextMaintainRoute = "/search/text/maintain";
+
+    internal static System.Collections.Immutable.ImmutableArray<(string Name, string Route, KeyLoad.Clustering.GrainReadKind? ReadKind, OperationKind? CommandKind)> All
+    {
+        get;
+    } =
+    [
+        (AnnRead, AnnReadRoute, KeyLoad.Clustering.GrainReadKind.ApproximateSearch, null),
+        (AnnMaintain, AnnMaintainRoute, null, OperationKind.MaintainAnnIndex),
+        (TextMaintain, TextMaintainRoute, null, OperationKind.MaintainTextIndex),
+    ];
+}

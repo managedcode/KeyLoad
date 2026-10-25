@@ -182,7 +182,7 @@ including their grammatical forms and compound identifiers. Meanings approved by
 the current design stay explicit: Orleans activation migration, real
 TUnit fixtures owned under `tests/.../Fixtures/` and source-resolved test contracts,
 metadata and support reachable from real TUnit cases or lifecycle interfaces;
-real process-recovery fixtures reached from the compiled `KeyLoad.RecoveryTests` entry point;
+real process-recovery fixtures reached from the compiled `KeyLoad.ProcessRecoveryTests` entry point;
 Aspire resource fixtures reached from the `KeyLoad.AppHost` entry point's resolved execution
 `DistributedApplication.CreateBuilder` composition and its builder-typed composition callbacks;
 BenchmarkDotNet fixtures rooted in its benchmark, setup and cleanup attributes

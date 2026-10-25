@@ -307,7 +307,7 @@
   ],
   "configuration": [
     "analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj",
-    "tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj",
+    "tests/KeyLoad.AnalyzerTests/KeyLoad.AnalyzerTests.csproj",
     "Directory.Build.props",
     "Directory.Build.targets",
     "Directory.Packages.props",

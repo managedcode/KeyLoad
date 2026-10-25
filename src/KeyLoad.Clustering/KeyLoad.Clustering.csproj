@@ -1,9 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad" />
-    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
-    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
-    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
+    <InternalsVisibleTo Include="KeyLoad.FunctionalTests" />
+    <InternalsVisibleTo Include="KeyLoad.ProcessRecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.ClusterTests" />
     <ProjectReference Include="../KeyLoad.Core/KeyLoad.Core.csproj" />
     <ProjectReference Include="../KeyLoad.Query/KeyLoad.Query.csproj" />
     <ProjectReference Include="../KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />

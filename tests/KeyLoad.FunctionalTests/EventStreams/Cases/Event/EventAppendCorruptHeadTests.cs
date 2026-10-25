@@ -1,0 +1,11 @@
+namespace KeyLoad.FunctionalTests.EventStreams;
+
+internal sealed class EventAppendCorruptHeadTests
+{
+    [Test]
+    [Arguments(-1L, 1L)]
+    [Arguments(1L, 0L)]
+    [Arguments(1L, 3L)]
+    public Task ActualInvalidHeadRefusesWholeProducerAndRetainsOriginalFailureThenHealthyAppend(long tail, long first)
+        => EventAppendCorruptHeadFlow.RunAsync(tail, first, TestContext.Current!.Execution.CancellationToken);
+}

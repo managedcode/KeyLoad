@@ -34,7 +34,7 @@ $script:Psm = [ordered]@{
     MaximumBindingDiagnosticPaths = 8
     InvalidReceipt = 'The production source manifest or a referenced execution image receipt is invalid.'
     Drift = 'A source, execution image, compile input or producer changed during identity capture.'
-    TestProjects = @('KeyLoad.UnitTests','KeyLoad.RecoveryTests','KeyLoad.IntegrationTests')
+    TestProjects = @('KeyLoad.FunctionalTests','KeyLoad.ProcessRecoveryTests','KeyLoad.ClusterTests')
     CentralNames = @('global.json','Directory.Build.props','Directory.Build.targets',
         'Directory.Packages.props','KeyLoad.slnx')
     ScriptExtensions = @('.ps1','.mjs','.xml','.json')
@@ -205,7 +205,7 @@ function Get-PsmProductRows([string] $Root) {
 }
 
 function Get-PsmTestImage([string] $Root, [string] $ProjectName) {
-    if ($ProjectName -ceq 'KeyLoad.UnitTests') { return Get-FcTestIdentitySnapshot $Root }
+    if ($ProjectName -ceq 'KeyLoad.FunctionalTests') { return Get-FcTestIdentitySnapshot $Root }
     $identity = Get-PsmProjectIdentity $Root $ProjectName $true
     [ordered]@{
         schemaVersion = 1
@@ -279,9 +279,9 @@ function Get-PsmManifest([string] $Root, [object[]] $ScriptInventory) {
     $files = [Collections.Generic.Dictionary[string, byte[]]]::new([StringComparer]::Ordinal)
     $sidecarBytes = 0L
     foreach ($item in @(
-        [ordered]@{ suite = 'unit'; project = 'KeyLoad.UnitTests'; file = 'functional-coverage.test-image.unit.json' },
-        [ordered]@{ suite = 'recovery'; project = 'KeyLoad.RecoveryTests'; file = 'functional-coverage.test-image.recovery.json' },
-        [ordered]@{ suite = 'cluster'; project = 'KeyLoad.IntegrationTests'; file = 'functional-coverage.test-image.cluster.json' }
+        [ordered]@{ suite = 'unit'; project = 'KeyLoad.FunctionalTests'; file = 'functional-coverage.test-image.unit.json' },
+        [ordered]@{ suite = 'recovery'; project = 'KeyLoad.ProcessRecoveryTests'; file = 'functional-coverage.test-image.recovery.json' },
+        [ordered]@{ suite = 'cluster'; project = 'KeyLoad.ClusterTests'; file = 'functional-coverage.test-image.cluster.json' }
     )) {
         $bytes = ConvertTo-PsmJsonBytes $testImages[$item.project]
         if ($sidecarBytes -gt ($script:Psm.MaximumManifestBytes - $bytes.Length)) { throw $script:Psm.InvalidReceipt }

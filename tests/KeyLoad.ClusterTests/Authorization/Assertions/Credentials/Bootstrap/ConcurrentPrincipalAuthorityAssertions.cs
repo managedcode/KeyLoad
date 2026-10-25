@@ -1,0 +1,45 @@
+using KeyLoad.ClusterTests.ClientApi;
+using KeyLoad.ClusterTests.DocumentStorage;
+using KeyLoad.ClusterTests.QueryExecution;
+
+namespace KeyLoad.ClusterTests.Authorization;
+
+internal static class ConcurrentPrincipalAuthorityAssertions
+{
+    internal static Task<global::System.Text.Json.JsonElement> CaptureAsync(ClusterFixture fixture,
+        McpDocumentScenario first, McpDocumentScenario second, CancellationToken token)
+        => AdversarialAuthorityTrial.WithRootAsync(fixture, McpCallerProtocol.Node1, async root =>
+        {
+            var firstDocument = await PublicReadAssertions.DocumentAsync(await root.GetAsync(first.Reference, token));
+            var secondDocument = await PublicReadAssertions.DocumentAsync(await root.GetAsync(second.Reference, token));
+            await SqlClusterProtocol.EqualAsync<DocumentResult?>(Expected(first), firstDocument);
+            await SqlClusterProtocol.EqualAsync<DocumentResult?>(Expected(second), secondDocument);
+            var firstOutbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(first.Partition, token));
+            var secondOutbox = await McpCallerAssertions.SdkSuccessAsync(await root.OutboxStatusAsync(second.Partition, token));
+            return global::System.Text.Json.JsonSerializer.SerializeToElement(new
+            {
+                FirstDocument = firstDocument,
+                SecondDocument = secondDocument,
+                FirstOutbox = firstOutbox,
+                SecondOutbox = secondOutbox
+            },
+                global::KeyLoad.JsonDefaults.Options);
+        });
+
+    internal static Task LiteralAsync(McpDocumentScenario scenario, DocumentResult actual)
+        => SqlClusterProtocol.EqualAsync(Expected(scenario), actual);
+
+    internal static async Task FollowingAsync(McpOfficialClient firstClient, McpOfficialClient secondClient,
+        McpDocumentScenario first, McpDocumentScenario second, CancellationToken token)
+    {
+        var firstRead = await PublicReadAssertions.RequiredDocumentAsync(await firstClient.CallAsync(
+            McpCallerTools.DocumentsGet, new GetDocumentRequest(first.Reference), token));
+        var secondRead = await PublicReadAssertions.RequiredDocumentAsync(await secondClient.CallAsync(
+            McpCallerTools.DocumentsGet, new GetDocumentRequest(second.Reference), token));
+        await LiteralAsync(first, firstRead.Value);
+        await LiteralAsync(second, secondRead.Value);
+    }
+
+    private static DocumentResult Expected(McpDocumentScenario scenario)
+        => new(scenario.StoredReference, McpCallerProtocol.FirstRevision, McpDocumentProtocol.InitialJson, false, []);
+}

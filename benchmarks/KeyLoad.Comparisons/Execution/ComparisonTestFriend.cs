@@ -9,6 +9,6 @@ namespace KeyLoad.Comparisons;
 internal static class ComparisonTestFriend
 {
     internal const string ComparisonHostAssemblyName = "KeyLoad.ComparisonHost";
-    internal const string UnitTestsAssemblyName = "KeyLoad.UnitTests";
+    internal const string UnitTestsAssemblyName = "KeyLoad.FunctionalTests";
     internal const string AppHostAssemblyName = "KeyLoad.AppHost";
 }

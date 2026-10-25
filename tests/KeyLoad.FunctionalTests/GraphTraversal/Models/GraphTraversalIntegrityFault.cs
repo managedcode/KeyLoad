@@ -1,0 +1,16 @@
+namespace KeyLoad.FunctionalTests.GraphTraversal;
+
+internal enum GraphTraversalIntegrityFault
+{
+    MissingEdge,
+    EdgeIdentity,
+    EdgeSource,
+    AdjacencyIdentity,
+    InvalidLabel,
+    InvalidTargetId,
+    InvalidAttributes,
+    NonpositiveRevision,
+    NullTarget,
+    MalformedAdjacency,
+    WrongAdjacencyType
+}

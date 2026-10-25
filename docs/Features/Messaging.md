@@ -20,7 +20,7 @@ Messaging owns durable work-queue state, topic event sources, persistent subscri
 |---|---|---|
 | Contracts | `src/KeyLoad.Abstractions/Contracts.cs`, `Subscriptions.cs` | `src/KeyLoad.Abstractions/Messaging/` |
 | Backend | `src/KeyLoad.Core/Messaging/Execution/Messaging.cs`, `EventSources.cs`, `SubscriptionGroups.cs`, `DatabaseEngine.cs` dispatch | `src/KeyLoad.Core/Messaging/` |
-| Tests | `tests/KeyLoad.UnitTests/Messaging/` message/subscription suites; atomic batch cases in `Features/ResourceExecution/TransactionTests.cs` | Messaging and shared ResourceExecution slices; legacy declarations removed with assertions preserved |
+| Tests | `tests/KeyLoad.FunctionalTests/Messaging/` message/subscription suites; atomic batch cases in `Features/ResourceExecution/TransactionTests.cs` | Messaging and shared ResourceExecution slices; legacy declarations removed with assertions preserved |
 | Durable specification | This file | `docs/Features/Messaging.md` |
 | HTTP | `src/KeyLoad/ApiEndpoints.cs`: command submit, queue receive/delivery/process/inspect, event read, and subscription configure/seek/pause/receive/delivery/process/status | Shared HTTP transport belongs to `src/KeyLoad/ClientApi/`; business behavior belongs to this Messaging slice. Publish/enqueue mutations use the shared command endpoint. |
 | .NET SDK | `src/KeyLoad.Client/Messaging/Transport/KeyLoadClient.cs`: receive, completion, processing, inspection and subscription methods; `DatabaseComposition/Commands/KeyLoadClient.cs`: atomic writes | Shared transport belongs to ClientApi; Messaging owns queue and subscription behavior, and EventStreams owns event-source reads |

@@ -93,7 +93,7 @@ REQ-ROUTE-WORKER-001 is the only accepted pattern for queue, ANN and time-series
 - `src/KeyLoad.Clustering/RequestExecution/`: connection and command grains, bounded CQRS streams and request identity.
 - `src/KeyLoad/OrleansHosting/`: silo composition, lifecycle, telemetry and node endpoints. Request execution and draining are in `src/KeyLoad/RequestExecution/`.
 - `RuntimeJournaling/`, `StoragePartitions/`, `BackgroundExecution/` and `Authorization/` hold their named responsibilities in the participating projects. See the [folder ownership review](../implementation/folder-ownership.md).
-- Tests: `tests/KeyLoad.UnitTests/OrleansExecution/` (TestCluster and real ZoneTree) and `tests/KeyLoad.IntegrationTests/OrleansExecution/` (Aspire-owned cluster through the real .NET SDK and official MCP client).
+- Tests: `tests/KeyLoad.FunctionalTests/OrleansExecution/` (TestCluster and real ZoneTree) and `tests/KeyLoad.ClusterTests/OrleansExecution/` (Aspire-owned cluster through the real .NET SDK and official MCP client).
 - Frontend: N/A, routing has no UI.
 
 ## Subdocuments

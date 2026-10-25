@@ -18,7 +18,7 @@ successful public operations per topology.
   or failed cleanup keeps the corresponding gate open.
 
 These criteria map to both cases in
-[FunctionalDatabaseGateTests](../../../tests/KeyLoad.IntegrationTests/DatabaseComposition/Cases/FunctionalDatabase/FunctionalDatabaseGateTests.cs),
+[FunctionalDatabaseGateTests](../../../tests/KeyLoad.ClusterTests/DatabaseComposition/Cases/FunctionalDatabase/FunctionalDatabaseGateTests.cs),
 under [ADR-136](../../ADR/ADR-136-orleans-partition-ownership.md).
 Original local results below retain their original scenario identities; a
 scenario or product repair requires a new matched pair.

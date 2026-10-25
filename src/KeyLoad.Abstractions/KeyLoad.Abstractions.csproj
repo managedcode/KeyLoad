@@ -12,11 +12,11 @@
     <InternalsVisibleTo Include="KeyLoad.Query" />
     <InternalsVisibleTo Include="KeyLoad" />
     <InternalsVisibleTo Include="KeyLoad.Client" />
-    <InternalsVisibleTo Include="KeyLoad.UnitTests" />
-    <InternalsVisibleTo Include="KeyLoad.IntegrationTests" />
+    <InternalsVisibleTo Include="KeyLoad.FunctionalTests" />
+    <InternalsVisibleTo Include="KeyLoad.ClusterTests" />
     <InternalsVisibleTo Include="KeyLoad.Core" />
     <InternalsVisibleTo Include="KeyLoad.Clustering" />
-    <InternalsVisibleTo Include="KeyLoad.RecoveryTests" />
+    <InternalsVisibleTo Include="KeyLoad.ProcessRecoveryTests" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />

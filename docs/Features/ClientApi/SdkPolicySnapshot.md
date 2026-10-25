@@ -17,4 +17,4 @@ flowchart LR
   Client --> Kestrel[Existing real Kestrel fixture]
 ```
 
-Canonical map: existing src/KeyLoad.Client/ClientApi/Configuration/KeyLoadClientExecutionOptions.cs and Transport/KeyLoadClientTransport.cs; new tests/KeyLoad.UnitTests/ClientApi/Cases/SdkPolicy/SdkPolicySnapshotTests.cs and feature-local Helpers/SdkPolicySnapshotFlow.cs, Assertions/SdkPolicySnapshotAssertions.cs; docs/Features/ClientApi/SdkPolicySnapshot.md. This real transport regression does not claim memory or throughput improvement.
+Canonical map: existing src/KeyLoad.Client/ClientApi/Configuration/KeyLoadClientExecutionOptions.cs and Transport/KeyLoadClientTransport.cs; new tests/KeyLoad.FunctionalTests/ClientApi/Cases/SdkPolicy/SdkPolicySnapshotTests.cs and feature-local Helpers/SdkPolicySnapshotFlow.cs, Assertions/SdkPolicySnapshotAssertions.cs; docs/Features/ClientApi/SdkPolicySnapshot.md. This real transport regression does not claim memory or throughput improvement.

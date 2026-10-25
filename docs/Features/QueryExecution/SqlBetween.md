@@ -22,7 +22,7 @@ flowchart LR
     View --> Rows[Independent expected result and cursor parity]
 ```
 
-Canonical map: parser/token constants under src/KeyLoad.Query/ QueryExecution; existing QueryEngine capability entry; NEW tests/KeyLoad.UnitTests/ Features/QueryExecution/SqlBetween-prefixed files and IntegrationTests matching slice SqlClusterBetweenTests/helper. Strongest source review precedes code and final join. Backend storage/DDL/DML/ security mutation, frontend, migrations and dependency changes are N/A because this stage reuses the same readonly AST, budgets, resource and contracts.
+Canonical map: parser/token constants under src/KeyLoad.Query/ QueryExecution; existing QueryEngine capability entry; NEW tests/KeyLoad.FunctionalTests/ Features/QueryExecution/SqlBetween-prefixed files and IntegrationTests matching slice SqlClusterBetweenTests/helper. Strongest source review precedes code and final join. Backend storage/DDL/DML/ security mutation, frontend, migrations and dependency changes are N/A because this stage reuses the same readonly AST, budgets, resource and contracts.
 
 Test methodology: first-author TUnit grammar/real-store tests from006A; independent literal IDs and hand-built ASTs, exact malformed/budget/error assertions, current normal/scalar plus real cluster SDK/official MCP results. Genuine faults remain failures; no mocks or runtime exceptions are waived. Full Release build, canonical formatter/static governance and independent diff review precede scoped delivery. CI authentic original source/run/attempt/job/report evidence proves execution; coverage remains an open mandatory gate until its collector is configured. Rollback the parser, additive capability values and fixtures together.
 

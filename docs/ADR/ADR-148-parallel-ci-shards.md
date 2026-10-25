@@ -6,7 +6,7 @@ Status: Accepted by owner direction 2026-10-24 ("every test suite runs in parall
 
 Build and Tests ran every suite one after another in one job on a 4-vCPU ubuntu-24.04 runner. Run 40091311302 (commit 336e6b566) took more than two hours and still did not finish:
 
-- Units took 30 minutes and also executed all 215 process recovery cases a second time. KeyLoad.UnitTests references KeyLoad.RecoveryTests, and an unpinned filter registers the referenced assembly's tests.
+- Units took 30 minutes and also executed all 215 process recovery cases a second time. KeyLoad.FunctionalTests references KeyLoad.ProcessRecoveryTests, and an unpinned filter registers the referenced assembly's tests.
 - In the Aspire topology suite, TUnit 1.76 sized `--maximum-parallel-tests` at 4 × processors, so 16 test classes that each start their own 3-node cluster started at once. That is 48 silo processes on four cores. None became ready within the 120-second resource wait, and 27 cluster cases failed at startup. Alone, a 3-node cluster is ready in about 22 seconds; with about 15 at once it took 111 seconds.
 - Every other topology class carries a bare `[NotInParallel]`. TUnit schedules those last, strictly one at a time, so the run had covered 118 of about 357 cases when its 100-minute limit expired.
 
@@ -15,8 +15,8 @@ Build and Tests ran every suite one after another in one job on a 4-vCPU ubuntu-
 Build and Tests is a set of parallel jobs driven by one checked-in manifest, `scripts/Features/TestInfrastructure/ci-test-shards.json`, and its runner `ci-test-shards.mjs`:
 
 - **Build:** governance and website inventory checks, the static shard partition check and `dotnet build KeyLoad.slnx -warnaserror`.
-- **Units:** four shards. Each runs one process per namespace with the assembly-pinned filter `/KeyLoad.UnitTests/<namespace>/*/*` at processor-count parallelism.
-- **Analyzers and process recovery:** one job with filters `/KeyLoad.Analyzers.Tests/*/*/*` and `/KeyLoad.RecoveryTests/*/*/*`.
+- **Units:** four shards. Each runs one process per namespace with the assembly-pinned filter `/KeyLoad.FunctionalTests/<namespace>/*/*` at processor-count parallelism.
+- **Analyzers and process recovery:** one job with filters `/KeyLoad.AnalyzerTests/*/*/*` and `/KeyLoad.ProcessRecoveryTests/*/*/*`.
 - **Aspire topology:** twelve shards of two lanes each.
   - A lane is its own `dotnet test` process with `--maximum-parallel-tests 1` and a 45-minute deadline, so a runner holds at most two clusters. Measured lanes take 20–25 minutes, so the deadline sits well above a complete lane.
   - Lanes are typed: one keyed shared cluster, own clusters, other keyed clusters, or one long functional gate method.

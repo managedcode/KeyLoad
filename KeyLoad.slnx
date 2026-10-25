@@ -11,11 +11,11 @@
     <Project Path="src/KeyLoad.Cli/KeyLoad.Cli.csproj" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/KeyLoad.Analyzers.Tests/KeyLoad.Analyzers.Tests.csproj" />
-    <Project Path="tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj" />
-    <Project Path="tests/KeyLoad.IntegrationTests/KeyLoad.IntegrationTests.csproj" />
-    <Project Path="tests/KeyLoad.RecoveryTests/KeyLoad.RecoveryTests.csproj" />
-    <Project Path="tests/KeyLoad.SiteTests/KeyLoad.SiteTests.csproj" />
+    <Project Path="tests/KeyLoad.AnalyzerTests/KeyLoad.AnalyzerTests.csproj" />
+    <Project Path="tests/KeyLoad.FunctionalTests/KeyLoad.FunctionalTests.csproj" />
+    <Project Path="tests/KeyLoad.ClusterTests/KeyLoad.ClusterTests.csproj" />
+    <Project Path="tests/KeyLoad.ProcessRecoveryTests/KeyLoad.ProcessRecoveryTests.csproj" />
+    <Project Path="tests/KeyLoad.WebsiteTests/KeyLoad.WebsiteTests.csproj" />
   </Folder>
   <Folder Name="/benchmarks/">
     <Project Path="benchmarks/KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj" />

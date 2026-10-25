@@ -43,7 +43,7 @@ flowchart LR
 ```
 
 Canonical implementation map:
-- tests/KeyLoad.IntegrationTests/TimeSeries/Cases/SeriesRetention/SeriesRetentionAtomicPublicTests.cs: one real TUnit declaration.
+- tests/KeyLoad.ClusterTests/TimeSeries/Cases/SeriesRetention/SeriesRetentionAtomicPublicTests.cs: one real TUnit declaration.
 - Models/SeriesRetentionAtomicPublicState.cs: bounded scenario state and original commands/receipts.
 - Assertions/SeriesRetentionAtomicPublicExpected.cs: independent complete DTO literals.
 - Helpers/SeriesRetentionAtomicPublicPreparation.cs: persisted identity and commands.

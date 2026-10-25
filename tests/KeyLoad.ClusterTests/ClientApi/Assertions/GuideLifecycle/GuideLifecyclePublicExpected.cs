@@ -1,0 +1,52 @@
+using System.Text.Json.Nodes;
+
+namespace KeyLoad.ClusterTests.ClientApi;
+
+internal static class GuideLifecyclePublicExpected
+{
+    internal const string ResourceUri = "keyload://guides/agent-quickstart";
+    internal const string ResourceName = "KeyLoad agent quickstart";
+    internal const string PromptName = "keyload_agent_quickstart";
+    internal const string MimeType = "text/markdown";
+    internal const string Description = "How to discover and safely use KeyLoad operations.";
+    internal const int MaximumBytes = 8192;
+    internal const string CompleteResult = "complete";
+    private const string ServerInfoKey = "io.modelcontextprotocol/serverInfo";
+    private const string ServerName = "KeyLoad";
+    private const string ServerVersion = "1.0.0";
+    private const string NameKey = "name";
+    private const string VersionKey = "version";
+    internal const string Markdown = """
+        # KeyLoad agent quickstart
+
+        KeyLoad is a unified database for AI agents and is currently a development preview. It brings documents, tables, graphs, vectors and search, files, queues, events, and time series together while implementation and qualification continue. Do not assume full SQL-client or protocol conformance, production readiness, or an operation that has not been listed and qualified.
+
+        ## Discover and invoke an operation
+
+        Search with `gateway_tools_search`, or route a short task description with `gateway_tools_route`. Inspect the exact returned tool name, complete input schema, output schema, and read-only/idempotent/destructive hints before invoking it. Invoke only a current canonical operation with arguments matching that schema. For example, call `gateway_tools_search` with:
+
+        ```json
+        {"query":"keyload_query_capabilities","maxResults":1}
+        ```
+
+        Then inspect the selected tool and invoke its no-body capability query through `gateway_tool_invoke` with:
+
+        ```json
+        {"toolId":"keyload_query_capabilities","arguments":{}}
+        ```
+
+        Tool discovery documents operations; it grants no access. Persisted server-side rights are checked on each request. Never send credentials, secrets, or caller-supplied roles in tool arguments. Use the operation's returned cursor to continue a bounded read, and stop when no cursor is returned.
+
+        ## Writes and uncertain outcomes
+
+        Use the exact operation schema and retain the same authenticated identity for a retry. If a write returns an unknown outcome or the connection ends after submission, retry only with the same command identity and byte-equivalent payload. Do not create a new command identity to retry an uncertain write; that could apply it twice. Cancellation or a lost response does not prove that a write rolled back.
+
+        This guide is static documentation, not a data browser or authorization grant. Confirm current tool schemas and feature support for each task.
+        """;
+
+    /// <summary>MCP results carry the server identity in their metadata; each result owns its own node.</summary>
+    internal static JsonObject ServerMeta() => new()
+    {
+        [ServerInfoKey] = new JsonObject { [NameKey] = ServerName, [VersionKey] = ServerVersion }
+    };
+}

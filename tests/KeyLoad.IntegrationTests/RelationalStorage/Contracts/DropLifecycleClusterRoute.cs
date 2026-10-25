@@ -1,9 +1,0 @@
-namespace KeyLoad.IntegrationTests.RelationalStorage;
-
-internal enum DropLifecycleClusterRoute
-{
-    Sdk,
-    Mcp,
-    SqlSdk,
-    SqlMcp
-}

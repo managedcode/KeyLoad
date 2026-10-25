@@ -9,13 +9,13 @@ $script:FunctionalCoverage = [ordered]@{
     ReportJsonName = 'functional-coverage.report.json'
     ReportMarkdownName = 'functional-coverage.report.md'
     SettingsCopyName = 'functional-coverage.settings.xml'
-    DeploymentDirectory = 'tests/KeyLoad.UnitTests/bin/Debug/net10.0'
+    DeploymentDirectory = 'tests/KeyLoad.FunctionalTests/bin/Debug/net10.0'
     SourceDirectory = 'src/KeyLoad.Query'
     SourceCount = 266
     ContributorSourceCount = 19
     ContributorClassCount = 8
     ContributorCaseCount = 21
-    TestNamespace = 'KeyLoad.UnitTests.QueryExecution'
+    TestNamespace = 'KeyLoad.FunctionalTests.QueryExecution'
     DllName = 'KeyLoad.Query.dll'
     PdbName = 'KeyLoad.Query.pdb'
     HitUnion = 'logical-or by source path and line number across the two reports'
@@ -149,7 +149,7 @@ function Read-FcContract([string] $Path) {
         $contract.contributors.testClasses.Count -ne $t.ContributorClassCount -or
         $contract.contributors.testNamespace -cne $t.TestNamespace -or
         $contract.contributors.testNamePrefix -cne 'PartitionQuery' -or
-        $contract.contributors.filter -cne '/KeyLoad.UnitTests/*/PartitionQuery*/*' -or
+        $contract.contributors.filter -cne '/KeyLoad.FunctionalTests/*/PartitionQuery*/*' -or
         (@($contract.contributors.suiteNames) -join ',') -cne 'unit' -or
         (@($contract.contributors.testClasses | Sort-Object) -join ',') -cne 'PartitionQueryAuthorizationTests,PartitionQueryCancellationTests,PartitionQueryContractTests,PartitionQueryMcpContractTests,PartitionQueryMergeTests,PartitionQueryPublicAuthorizationTests,PartitionQueryPublicContractTests,PartitionQueryPublicMergeTests' -or
         $contract.contributors.exactCases.Count -ne $t.ContributorCaseCount -or

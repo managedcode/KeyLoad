@@ -20,7 +20,7 @@ flowchart LR
 
 Server owns the existing McpAuthentication.Malformed predicate; UnitTests owns only the new ClientApi regression file. Backend domain, shared binary codecs, public contracts, frontend, storage and deployment changes are N/A because this fixes one existing denial path. Other execution, SQL and benchmark owners retain their scopes.
 
-Local tests use .NET 10, TUnit and Microsoft.Testing.Platform; the owner permits development checks. Focused command: dotnet test --project tests/KeyLoad.UnitTests --no-build --no-restore --treenode-filter '/*/*/AuthenticationReaderFailureTests/*', repeated with DOTNET_EnableHWIntrinsic=0. Preserve the existing complete wrong-root/trailing assertions.
+Local tests use .NET 10, TUnit and Microsoft.Testing.Platform; the owner permits development checks. Focused command: dotnet test --project tests/KeyLoad.FunctionalTests --no-build --no-restore --treenode-filter '/*/*/AuthenticationReaderFailureTests/*', repeated with DOTNET_EnableHWIntrinsic=0. Preserve the existing complete wrong-root/trailing assertions.
 
 No new migration is needed; reverting this predicate restores previous error mapping without modifying data. No broad InvalidOperationException catch, replacement reader, fake exception or grant of authority is permitted. Unforced programming/session failures remain a source-review exception; numeric coverage, full suites, fault/endurance and performance gains are unqualified until their authentic gates exist.
 

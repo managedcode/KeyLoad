@@ -28,6 +28,6 @@ flowchart LR
 
 ## Source map and evidence
 
-The implementation paths are `tests/KeyLoad.UnitTests/OrleansExecution/{Cases,Fixtures,Helpers}/` and the existing `tests/KeyLoad.UnitTests/Messaging/Cases/MultiLane/MultiLaneReceiveWholeFlowTests.cs`. Changes comprise the shared-session key, guarded attribute changes and the genuine two-fixture whole operation case. Frontend, public SDK/MCP operations and server database execution are N/A: this work changes test scheduling and adds original-fixture evidence.
+The implementation paths are `tests/KeyLoad.FunctionalTests/OrleansExecution/{Cases,Fixtures,Helpers}/` and the existing `tests/KeyLoad.FunctionalTests/Messaging/Cases/MultiLane/MultiLaneReceiveWholeFlowTests.cs`. Changes comprise the shared-session key, guarded attribute changes and the genuine two-fixture whole operation case. Frontend, public SDK/MCP operations and server database execution are N/A: this work changes test scheduling and adds original-fixture evidence.
 
 Qualification: the focused cases and the ordinary cohort must run with maximum 50 through the TUnit entry; the solution build, process recovery and Aspire replicated-cluster .NET SDK/official MCP gates remain mandatory and are not proven by this document.

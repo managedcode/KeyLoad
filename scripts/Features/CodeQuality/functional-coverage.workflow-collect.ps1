@@ -15,9 +15,9 @@ $common = @('scripts/Features/TestInfrastructure/run-tests.mjs','--KeyLoadTests:
 $coverage = @('--KeyLoadTests:CoverageSettings=scripts/Features/CodeQuality/functional-coverage.production.settings.xml',
     '--KeyLoadTests:CoverageFormat=coverage')
 
-function Invoke-WorkflowUnit([string] $Id, [string] $Suite, [string] $Filter, [bool] $Covered) {
+function Invoke-WorkflowFunctionalTests([string] $Id, [string] $Suite, [string] $Filter, [bool] $Covered) {
     $directory = Join-Path $EvidenceRoot $Id
-    $arguments = $common + @(('--KeyLoadTests:Suite=' + $Suite),('--KeyLoadTests:ResultsDirectory=' + $directory))
+    $arguments = $common + @('--KeyLoadTests:Suite=functional',('--KeyLoadTests:ResultsDirectory=' + $directory))
     if ($Filter -cne '') { $arguments += '--KeyLoadTests:Filter=' + $Filter }
     if ($Covered) { $arguments += $coverage + @('--KeyLoadTests:CoverageOutput=' + (Join-Path $directory 'coverage.coverage')) }
     & node @arguments
@@ -30,10 +30,10 @@ if ([Environment]::GetEnvironmentVariable('DOTNET_EnableHWIntrinsic') -ceq '0') 
     throw 'Disabled hardware intrinsics are not an admitted current qualification profile.'
 }
 foreach ($suite in @('unit')) {
-    Invoke-WorkflowUnit ($suite + '-census') $suite $script:FcContributors.FullUnitSelector $false
+    Invoke-WorkflowFunctionalTests ($suite + '-census') $suite $script:FcContributors.FullUnitSelector $false
     foreach ($group in $inventory.coverageGroups) {
         $id = $group.groupId
-        Invoke-WorkflowUnit $id $suite ([string] $group.selector) $true
+        Invoke-WorkflowFunctionalTests $id $suite ([string] $group.selector) $true
     }
 }
 $status = [ordered]@{ schemaVersion = 1; sourceRevision = $env:GITHUB_SHA
@@ -44,7 +44,7 @@ $statusPath = Join-Path $EvidenceRoot 'functional-coverage.unit-run-status.json'
 $stream = [IO.File]::Open($statusPath,[IO.FileMode]::CreateNew,[IO.FileAccess]::Write,[IO.FileShare]::None)
 try { $stream.Write($bytes, 0, $bytes.Length); $stream.Flush($true) }
 finally { $stream.Dispose() }
-& node @common @coverage '--KeyLoadTests:Suite=recovery' '--KeyLoadTests:Filter=/*/*/CommandIdempotencyProcessRecoveryTests/*' `
+& node @common @coverage '--KeyLoadTests:Suite=process-recovery' '--KeyLoadTests:Filter=/*/*/CommandIdempotencyProcessRecoveryTests/*' `
     ('--KeyLoadTests:ResultsDirectory=' + (Join-Path $EvidenceRoot 'recovery')) `
     ('--KeyLoadTests:CoverageOutput=' + (Join-Path $EvidenceRoot 'recovery/coverage.coverage'))
 $recoveryExit = [int] $LASTEXITCODE

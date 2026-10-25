@@ -13,7 +13,7 @@ ADR-060 and ADR-117 without changing product formats or admission.
 
 ## Slice map
 
-Tests: `tests/KeyLoad.UnitTests/DocumentStorage/` owns Cases,
+Tests: `tests/KeyLoad.FunctionalTests/DocumentStorage/` owns Cases,
 Fixtures, Helpers, Assertions and Contracts roles for this scenario.
 Backend and shared contracts: existing document batch implementation and
 current generated serializers; no product change. Frontend, SDK/MCP and cluster:

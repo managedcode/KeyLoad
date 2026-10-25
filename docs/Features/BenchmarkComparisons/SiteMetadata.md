@@ -33,8 +33,8 @@ Scope: recognizable shared icons for the public landing and operational console,
 - Production: only `site/Features/BenchmarkComparisons/index.html` head and
   `build-site.mjs`, plus console `Assets/index.html` head and
   `AdminDashboard/Transport/AdminStaticAssets.cs`.
-- Regressions: `SiteMetadata*` files under `tests/KeyLoad.SiteTests/`,
-  `AdminFaviconAssertions` in `tests/KeyLoad.IntegrationTests/AdminDashboard/Assertions/`,
+- Regressions: `SiteMetadata*` files under `tests/KeyLoad.WebsiteTests/`,
+  `AdminFaviconAssertions` in `tests/KeyLoad.ClusterTests/AdminDashboard/Assertions/`,
   and one invocation in `AdminShellAssertions`.
 
 Delivery uses normal scoped main commits and exact-SHA GitHub qualification. The

@@ -141,7 +141,7 @@ and Orleans routing are N/A for this stage.
 |---|---|
 | QueryExecution values | `src/KeyLoad.Query/QueryExecution/Contracts/PartitionQuery/PartitionQueryPlan.cs`, `PartitionQueryLeafPlan.cs`, `PartitionQueryCandidate.cs`, `PartitionQueryLeafResult.cs`, `PartitionQueryResult.cs` |
 | Query validation and execution | QueryExecution feature-local `Validation/` and `Execution/`, with `Execution/PartitionQueryExecution.cs` and one internal owner accessor in `Queries/QueryEngine.cs` |
-| regression cases | `tests/KeyLoad.UnitTests/QueryExecution/Cases/PartitionQuery*Tests.cs`, with actual fixtures and assertions in their owning role folders |
+| regression cases | `tests/KeyLoad.FunctionalTests/QueryExecution/Cases/PartitionQuery*Tests.cs`, with actual fixtures and assertions in their owning role folders |
 | Core grant dependency | Existing `src/KeyLoad.Core/ReadExecutionBudget.cs` and a ResourceExecution role-owned grant helper, only after its exact contract is separately frozen below |
 | Durable ADR | [ADR-100](../../ADR/ADR-100-local-partition-query-merge.md) |
 
@@ -303,7 +303,7 @@ The final public page field order is fixed as accepted: Version `[0]`, Rows `[1]
 
 `PartitionQueryExecution.ExecutePartitionQuery` retains its existing internal calls unchanged. Public normalization validates every requested partition first and uses the first canonical sorted partition as the server-generated `AstQueryRequest.Partition` anchor. All leaves remain in the plan and are authorized separately.
 
-REQ/AC-PQUERY-001/004/005 map to `PartitionQueryPublicContractTests` and `PartitionQueryPublicMergeTests` under `tests/KeyLoad.UnitTests/QueryExecution/Cases/`; REQ/AC-PQUERY-002/003 map to `PartitionQueryPublicAuthorizationTests`; AC-PQUERY-006 maps to `PartitionQueryPublicClusterTests` under `tests/KeyLoad.IntegrationTests/QueryExecution/Cases/`. Root joins the append-only read kind, persisted authority path, signed SDK/HTTP/MCP route and complete independent MCP inventory/schema/codec corpus. All of these tests use the Aspire-owned caller. A focused pass is development evidence; original full Linux unit/scalar/recovery/cluster/fault/endurance evidence remains required.
+REQ/AC-PQUERY-001/004/005 map to `PartitionQueryPublicContractTests` and `PartitionQueryPublicMergeTests` under `tests/KeyLoad.FunctionalTests/QueryExecution/Cases/`; REQ/AC-PQUERY-002/003 map to `PartitionQueryPublicAuthorizationTests`; AC-PQUERY-006 maps to `PartitionQueryPublicClusterTests` under `tests/KeyLoad.ClusterTests/QueryExecution/Cases/`. Root joins the append-only read kind, persisted authority path, signed SDK/HTTP/MCP route and complete independent MCP inventory/schema/codec corpus. All of these tests use the Aspire-owned caller. A focused pass is development evidence; original full Linux unit/scalar/recovery/cluster/fault/endurance evidence remains required.
 
 ### Complete-flow contract regressions
 

@@ -1,0 +1,56 @@
+namespace KeyLoad.FunctionalTests.EventStreams;
+
+internal static class EventQueueStateEnvelopeProtocol
+{
+    internal const string Root = "root";
+    internal const string EdgeFamily = "edge";
+    internal const string AdjacencyFamily = "adjacency";
+    internal const string BodyFamily = "message-body";
+    internal const string EventFamily = "event";
+    internal const string Documents = "envelope-documents";
+    internal const string Streams = "envelope-events";
+    internal const string Topic = "envelope-topic";
+    internal const int TopicEventSequence = 2;
+    internal const string Queue = "envelope-work";
+    internal const string Graph = "envelope-graph";
+    internal const string Item = "same-envelope-id";
+    internal const string Target = "target";
+    internal const string Scheduled = "scheduled";
+    internal const string Processed = "processed";
+    internal const string Group = "envelope-group";
+    internal const string Handler = "envelope-handler";
+    internal const string Label = "next";
+    internal const string Payload = "{\"secret\":\"body\"}";
+    internal const string Headers = "{\"secret\":\"header\"}";
+    internal const string EmptyObject = "{}";
+    internal const string EventType = "Created";
+    internal const string SecretPath = "/secret";
+    internal const string Classification = "envelope-protected";
+    internal const string IdentifierFormat = "N";
+    internal const string MissingRow = "The original execution event/queue envelope is missing.";
+    internal const string ImageLimit = "The feature-owned envelope image exceeds its fixed bound.";
+    internal const int ScanBound = 256;
+    internal const int SingleResult = 1;
+    internal const int TwoMessages = 2;
+    internal const int TwoVertices = 2;
+    internal const int NoUsage = 0;
+    internal const int InitialRevision = 1;
+    internal const int InitialGeneration = 1;
+    internal const int InitialOwnershipEpoch = 1;
+    internal const int InitialPolicyEpoch = 1;
+    internal const int FirstAttempt = 1;
+    internal const int FirstLeaseVersion = 1;
+    internal const int ReadySequence = 1;
+    internal const int ScheduledReadySequence = 2;
+    internal const int InitialStateVersion = 1;
+    internal const int ReadyClaimVersion = 2;
+    internal const int ReadyAckVersion = 3;
+    internal const int ScheduledClaimVersion = 3;
+    internal const int ScheduledAckVersion = 4;
+    internal const int LeaseSeconds = 30;
+    internal const int ScheduledDelaySeconds = 10;
+    internal const int PlacementRequestVersion = 1;
+    internal const int CommitPositionStep = 1;
+    internal const int AfterConfigurationTick = 1;
+    internal const byte MutatedCallerByte = 0xA5;
+}

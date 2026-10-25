@@ -1,0 +1,64 @@
+using System.Collections.Immutable;
+
+namespace KeyLoad.ClusterTests.Authorization;
+
+internal static class SafeProjectorOperationClusterProtocol
+{
+    internal const string TenantPrefix = "safe-operation-tenant-";
+    internal const string Database = "database";
+    internal const string TransactionDomain = "documents";
+    internal const string CredentialSuffix = ".safe-projector-credential-32-characters";
+    internal const string MissingDocument = "The actual public safe projector document is absent.";
+    internal const long PositivePublicPosition = 0;
+    internal const int PlacementReadVersion = 1;
+    internal const int ColdCycles = 2;
+    internal const int FirstColdCycle = 0;
+    internal const string GuidFormat = "N";
+    internal const string Reader = "safe-projector-reader";
+    internal const string Collection = "safe-projector-operations";
+    internal const string First = "a";
+    internal const string Second = "b";
+    internal const string Canary = "SAFE-PROJECTOR-PRIVATE-CANARY";
+    internal const string ReadGrant = "safe.operation.read";
+    internal const string UseGrant = "safe.operation.use";
+    internal const string WriteGrant = "safe.operation.write";
+    internal const string Classification = "safe-operation-private";
+    internal const string NestedPath = "/profile/secret";
+    internal const string LiteralPath = "/odd.name";
+    internal const string ArrayPath = "/contacts/*/secret";
+    internal const string StatusPath = "/status";
+    internal const string NullPath = "/publicNull";
+    internal const string IdPath = "/@id";
+    internal const string Index = "status-index";
+    internal const string Star = "*";
+    internal const string Exposed = "exposed";
+    internal const string LiteralAlias = "odd.name";
+    internal const string InitialStatus = "open";
+    internal const string UpdatedStatus = "updated";
+    internal const string HealthyStatus = "healthy";
+    internal const string PutKind = "putDocument";
+    internal const string PatchKind = "patchDocument";
+    internal const string UseDenied = "The query requires a protected field-use grant.";
+    internal const string WriteDenied = "The mutation requires a protected field-write grant.";
+    internal const string ReplacementDenied = "Replacing a redacted document requires an explicit replacement grant. Use a field patch.";
+    internal const string InitialJson = "{\"status\":\"open\",\"publicNull\":null,\"profile\":{\"visible\":7,\"secret\":\"SAFE-PROJECTOR-PRIVATE-CANARY\"},\"odd.name\":\"SAFE-PROJECTOR-PRIVATE-CANARY\",\"contacts\":[{\"label\":\"one\",\"secret\":\"SAFE-PROJECTOR-PRIVATE-CANARY\"}]}";
+    internal const string UpdatedJson = "{\"contacts\":[{\"label\":\"one\",\"secret\":\"SAFE-PROJECTOR-PRIVATE-CANARY\"}],\"odd.name\":\"SAFE-PROJECTOR-PRIVATE-CANARY\",\"profile\":{\"secret\":\"SAFE-PROJECTOR-PRIVATE-CANARY\",\"visible\":7},\"publicNull\":null,\"status\":\"updated\"}";
+    internal const string HealthyJson = "{\"contacts\":[{\"label\":\"one\",\"secret\":\"SAFE-PROJECTOR-PRIVATE-CANARY\"}],\"odd.name\":\"SAFE-PROJECTOR-PRIVATE-CANARY\",\"profile\":{\"secret\":\"SAFE-PROJECTOR-PRIVATE-CANARY\",\"visible\":7},\"publicNull\":null,\"status\":\"healthy\"}";
+    internal const string InitialSafe = "{\"status\":\"open\",\"publicNull\":null,\"profile\":{\"visible\":7},\"contacts\":[{\"label\":\"one\"}]}";
+    internal const string UpdatedSafe = "{\"contacts\":[{\"label\":\"one\"}],\"profile\":{\"visible\":7},\"publicNull\":null,\"status\":\"updated\"}";
+    internal const string HealthySafe = "{\"contacts\":[{\"label\":\"one\"}],\"profile\":{\"visible\":7},\"publicNull\":null,\"status\":\"healthy\"}";
+    internal const string SecondJson = "{\"status\":\"second\",\"profile\":7}";
+    internal const string TypedNullJson = "{\"exposed\":null}";
+    internal const long AbsentRevision = 0;
+    internal const long InitialRevision = 1;
+    internal const long UpdatedRevision = 2;
+    internal const long HealthyRevision = 3;
+    internal const long InitialPolicyEpoch = 1;
+    internal const long UseOnlyEpoch = 2;
+    internal const long WithdrawnUseEpoch = 3;
+    internal const long RawReadEpoch = 4;
+    internal const long FullWriteEpoch = 5;
+    internal const long FinalMaskedEpoch = 6;
+    internal const int BothRows = 2;
+    internal static ImmutableArray<string> RedactedPaths { get; } = [NestedPath, LiteralPath, ArrayPath];
+}

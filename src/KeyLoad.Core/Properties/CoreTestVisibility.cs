@@ -10,9 +10,9 @@ namespace KeyLoad.Core.InternalSerialization;
 
 internal static class CoreTestVisibility
 {
-    internal const string IntegrationTestsAssembly = "KeyLoad.IntegrationTests";
-    internal const string UnitTestsAssembly = "KeyLoad.UnitTests";
+    internal const string IntegrationTestsAssembly = "KeyLoad.ClusterTests";
+    internal const string UnitTestsAssembly = "KeyLoad.FunctionalTests";
     internal const string BenchmarkScenariosAssembly = "KeyLoad.BenchmarkScenarios";
     internal const string QueryAssembly = "KeyLoad.Query";
-    internal const string RecoveryTestsAssembly = "KeyLoad.RecoveryTests";
+    internal const string RecoveryTestsAssembly = "KeyLoad.ProcessRecoveryTests";
 }

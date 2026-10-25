@@ -1,0 +1,186 @@
+using KeyLoad.Clustering;
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.ProcessRecoveryTests.ResourceExecution;
+using KeyLoad.Server;
+
+namespace KeyLoad.FunctionalTests.StorageRecovery;
+
+/// <summary>Actual physical-host work ownership for bounded execution component reads.</summary>
+internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable
+{
+    private const int NoCleanupFailures = 0;
+    private const int OneCleanupFailure = 1;
+    private const int FirstCleanupFailure = 0;
+
+    private readonly RequestWorkOwner owner;
+
+    private UserAnalyticsHostBoundWork()
+        => owner = new RequestWorkOwner();
+
+    internal static async Task<UserAnalyticsHostBoundWork> OpenAsync(CancellationToken token)
+    {
+        var work = new UserAnalyticsHostBoundWork();
+        try
+        {
+            token.ThrowIfCancellationRequested();
+            return work;
+        }
+        catch (Exception original) when (CqrsBoundaryErrors.IsNonFatal(original))
+        {
+            var failures = new List<Exception> { original };
+            try
+            {
+                await work.DisposeAsync();
+            }
+            catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+        catch (Exception original) when (!CqrsBoundaryErrors.IsNonFatal(original))
+        {
+            var failures = new List<Exception> { original };
+            try
+            {
+                await work.DisposeAsync();
+            }
+            catch (Exception cleanup) when (CqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            catch (Exception cleanup) when (!CqrsBoundaryErrors.IsNonFatal(cleanup))
+            {
+                failures.Add(cleanup);
+            }
+            ServerFailureObserver.ThrowIfAny(failures);
+            throw;
+        }
+    }
+
+    internal async Task AggregateAsync(PartitionHost host, UserAnalyticsRuntime runtime,
+        AggregateAnalyticsRequest request, Func<AnalyticsAggregateResult, Task> consume,
+        CancellationToken token, bool cancelBefore = false)
+    {
+        var lease = owner.Acquire(Guid.NewGuid(), RequestWorkKind.ReadCapability);
+        ResourceLifetimeWorkResultRetention? retention = null;
+        Exception? original = null;
+        var failures = new List<Exception>();
+        var cleanupFailures = new List<Exception>();
+        var acquired = false;
+        try
+        {
+            using var pending = new PendingResultRetention();
+            acquired = true;
+            try
+            {
+                retention = pending.TransferTo(lease);
+                await RuntimeExecuteAsync(host, runtime, request, consume, lease, cancelBefore, token);
+            }
+            catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
+            {
+                original = error;
+                failures.Add(error);
+            }
+            catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
+            {
+                original = error;
+                failures.Add(error);
+            }
+        }
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (acquired)
+            {
+                cleanupFailures.Add(error);
+            }
+            else
+            {
+                original = error;
+                failures.Add(error);
+            }
+        }
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            if (acquired)
+            {
+                cleanupFailures.Add(error);
+            }
+            else
+            {
+                original = error;
+                failures.Add(error);
+            }
+        }
+        await FinishAsync(lease, retention, original, cleanupFailures, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+    }
+
+    private async Task RuntimeExecuteAsync(PartitionHost host, UserAnalyticsRuntime runtime,
+        AggregateAnalyticsRequest request, Func<AnalyticsAggregateResult, Task> consume,
+        RequestWorkLease lease, bool cancelBefore, CancellationToken token)
+    {
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
+        var work = new ReadExecutionBudget(host.Database.EvaluationClock, cancellation.Token);
+        using var admission = host.Database.AdmitQuery(cancellation.Token);
+        var snapshot = host.Database.CaptureAnalyticsAggregateBound(PartitionStoreProtocol.AdministratorId,
+            request, work, lease);
+        if (cancelBefore)
+        {
+            await cancellation.CancelAsync();
+        }
+
+        using var result = await runtime.AggregateAsync(snapshot, lease, cancellation.Token);
+        host.Database.ValidateAnalyticsAggregatePublication(snapshot);
+        work.CheckResult(result.Result);
+        await consume(result.Result);
+    }
+
+    private static async Task FinishAsync(RequestWorkLease lease,
+        ResourceLifetimeWorkResultRetention? retention, Exception? original,
+        List<Exception> cleanupFailures, List<Exception> failures)
+    {
+        var prepared = false;
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            await lease.PrepareCompletionAsync();
+            prepared = true;
+        }, cleanupFailures);
+        if (!prepared)
+        {
+            failures.AddRange(cleanupFailures);
+            return;
+        }
+        ServerFailureObserver.Observe(() => retention?.Dispose(), cleanupFailures);
+        await SettleAsync(lease, original, cleanupFailures, failures);
+    }
+
+    private static async Task SettleAsync(RequestWorkLease lease, Exception? original,
+        List<Exception> cleanupFailures, List<Exception> failures)
+    {
+        var cleanup = cleanupFailures.Count switch
+        {
+            NoCleanupFailures => null,
+            OneCleanupFailure => cleanupFailures[FirstCleanupFailure],
+            _ => new AggregateException(cleanupFailures)
+        };
+        failures.AddRange(cleanupFailures);
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            var settled = await lease.CompleteAsync(original, cleanup);
+            if (settled.CleanupOrJoinFailure is { } failure && !ReferenceEquals(failure, cleanup))
+            {
+                throw failure;
+            }
+        }, failures);
+    }
+
+    internal bool IsJoined => owner.IsJoined;
+
+    public ValueTask DisposeAsync() => owner.DisposeAsync();
+}

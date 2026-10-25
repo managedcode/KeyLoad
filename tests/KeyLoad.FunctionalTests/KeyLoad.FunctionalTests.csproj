@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);KLD0035;KLD0036;KLD0037</NoWarn>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <ItemGroup>
+    <AssemblyMetadata Include="KeyLoadCoverageToolVersion" Value="$(KeyLoadCoverageToolVersion)" />
+    <AssemblyMetadata Include="KeyLoadCoveragePackageRoot" Value="$([System.IO.Path]::Combine('$(NuGetPackageRoot)', 'dotnet-coverage', '$(KeyLoadCoverageToolVersion)'))" />
+    <PackageDownload Include="dotnet-coverage" Version="[$(KeyLoadCoverageToolVersion)]" />
+    <Using Include="KeyLoad.InternalSerialization" />
+    <Using Include="KeyLoad.Core" />
+    <Using Include="KeyLoad.ProcessRecoveryTests.OrleansExecution" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
+    <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Diagnostics/KeyLoad.Diagnostics.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Clustering/KeyLoad.Clustering.csproj" />
+    <ProjectReference Include="../../src/KeyLoad/KeyLoad.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Core/KeyLoad.Core.csproj" />
+    <ProjectReference Include="../KeyLoad.ProcessRecoveryTests/KeyLoad.ProcessRecoveryTests.csproj" />
+    <PackageReference Include="TUnit" />
+    <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
+</Project>

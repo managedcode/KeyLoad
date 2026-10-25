@@ -1,0 +1,13 @@
+using P = KeyLoad.FunctionalTests.Authorization.RowRevisionInferenceProtocol;
+
+namespace KeyLoad.FunctionalTests.Authorization;
+
+internal sealed class RowRevisionInferenceTests
+{
+    [Test]
+    [Arguments(P.Put)]
+    [Arguments(P.Patch)]
+    [Arguments(P.Delete)]
+    public async Task HiddenRowRevisionGuessesStayDeniedBeforeCasAndOwnedRepairReplaysAcrossTwoColdCuts(string kind)
+        => await RowRevisionInferenceFlow.RunAsync(kind, TestContext.Current!.Execution.CancellationToken);
+}

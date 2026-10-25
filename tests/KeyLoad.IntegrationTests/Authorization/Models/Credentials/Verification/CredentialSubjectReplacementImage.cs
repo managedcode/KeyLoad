@@ -1,3 +1,0 @@
-namespace KeyLoad.IntegrationTests.Authorization;
-
-internal sealed record CredentialSubjectReplacementImage(DiscoveryAuthorityImage First, DiscoveryAuthorityImage Second);

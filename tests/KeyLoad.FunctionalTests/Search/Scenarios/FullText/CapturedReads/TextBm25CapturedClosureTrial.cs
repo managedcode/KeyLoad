@@ -1,0 +1,77 @@
+using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Query.Search;
+using KeyLoad.Server;
+using KeyLoad.Server.Search;
+
+namespace KeyLoad.FunctionalTests.Search;
+
+internal static class TextBm25CapturedClosureTrial
+{
+    private const string SourceCollection = "orders";
+
+    internal static async Task RunAsync(Bm25OriginalPhaseRecoveryFlow flow)
+    {
+        var owner = flow.Owner;
+        var lifetimeKey = ResourceLifetimeCatalog.Key(owner.Source.Partition.TenantId,
+            owner.Source.Partition.DatabaseId, SourceCollection);
+        var lifetime = owner.Store.Read(view => view.ReadOwnedValue(lifetimeKey));
+        await Assert.That(lifetime).IsNotNull();
+        var absent = await ReadAsync(flow);
+        var original = flow.Capture(null);
+        var receipt = flow.Publish(original);
+        await flow.RequireHealthyAsync(original, receipt);
+        var entry = OrleansSerialization.Serialize(owner.Entry(original.CommandId));
+        var present = await ReadAsync(flow);
+        await Assert.That(OrleansSerialization.Serialize(present).SequenceEqual(
+            OrleansSerialization.Serialize(absent))).IsTrue();
+        var baseline = Bm25OriginalPhaseRecoveryState.Read(owner);
+        await Assert.That(OrleansSerialization.Serialize(flow.Publish(flow.Reissue(original))).SequenceEqual(
+            OrleansSerialization.Serialize(receipt))).IsTrue();
+        await baseline.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
+        await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(owner, original, entry);
+        owner.Reopen();
+        var cold = await ReadAsync(flow);
+        await Assert.That(OrleansSerialization.Serialize(cold).SequenceEqual(
+            OrleansSerialization.Serialize(absent))).IsTrue();
+        await Bm25OriginalPhaseRecoveryState.RequireRetainedAsync(owner, original, entry);
+        var retainedLifetime = owner.Store.Read(view => view.ReadOwnedValue(lifetimeKey));
+        await Assert.That(retainedLifetime).IsNotNull();
+        await Assert.That(retainedLifetime!.SequenceEqual(lifetime!)).IsTrue();
+    }
+
+    private static async Task<RankedDocument[]> ReadAsync(Bm25OriginalPhaseRecoveryFlow flow)
+    {
+        var owner = flow.Owner;
+        var before = Bm25OriginalPhaseRecoveryState.Read(owner);
+        var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
+        var execution = UnitExecutionOptions.QueryExecution().Value;
+        var request = new SearchRequest(owner.Source.Partition, SourceCollection, "/text", "needle");
+        RuntimeTextProjection? projection = null;
+        ICapturedTextRead? captured = null;
+        RankedDocument[]? result = null;
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            projection = new(Path.Combine(owner.Source.Directory, "bm25-captured-text"), owner.Store.Identity.NodeId,
+                UnitTextOptions.Execution());
+            captured = owner.Database.WithQueryView(Bm25OriginalPhaseRecoveryFlow.Subject,
+                request.Partition, request.Collection, (view, principal, resource) =>
+                    TextCapturedReadFactory.Capture(owner.Database, projection, view,
+                        principal, resource, request, work));
+            var ranker = new TextRanker(request.Text!, request.TextField!, work, execution.TextBudgetCheckInterval,
+                execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+            result = SearchCapturedExecution.Complete(owner.Database, new(captured, ranker, null), request,
+                work, null, FilteredSearchEligibility.Create(null, work));
+            var document = TextBm25ExpectedRows.Document(owner.Source,
+                "first", 1L, "{\"text\":\"needle\"}", false, []);
+            RankedDocument[] expected = [new(document, 1d / 61d, null)];
+            await TextBm25ExpectedRows.RequireOwnershipAsync(expected, result);
+            await TextBm25ExpectedRows.RequireWholeValuesAsync(expected, result);
+        }, failures);
+        ServerFailureObserver.Observe(() => captured?.Dispose(), failures);
+        ServerFailureObserver.Observe(() => projection?.Dispose(), failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+        await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
+        return result!;
+    }
+}

@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <NoWarn>$(NoWarn);KLD0035;KLD0036;KLD0037</NoWarn>
+    <GenerateTestingPlatformEntryPoint>false</GenerateTestingPlatformEntryPoint>
+    <GenerateTestingPlatformApplicationHelper>true</GenerateTestingPlatformApplicationHelper>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="KeyLoad.InternalSerialization" />
+  </ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />
+    <InternalsVisibleTo Include="KeyLoad.FunctionalTests" />
+    <InternalsVisibleTo Include="KeyLoad.ClusterTests" />
+    <ProjectReference Include="../../src/KeyLoad.Cli/KeyLoad.Cli.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Core/KeyLoad.Core.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Query/KeyLoad.Query.csproj" />
+    <ProjectReference Include="../../src/KeyLoad/KeyLoad.csproj" />
+    <ProjectReference Include="../../src/KeyLoad.Storage.ZoneTree/KeyLoad.Storage.ZoneTree.csproj" />
+    <PackageReference Include="TUnit" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
+</Project>

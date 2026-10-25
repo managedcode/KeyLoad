@@ -33,7 +33,7 @@ $script:FcProductDescriptor = [ordered]@{
     OutputDirectory = 'execution-merge'
     RegistryPath = 'scripts/Features/CodeQuality/functional-coverage.product-contributors.json'
     SettingsPath = 'scripts/Features/CodeQuality/functional-coverage.production.settings.xml'
-    ToolProject = 'tests/KeyLoad.UnitTests/KeyLoad.UnitTests.csproj'
+    ToolProject = 'tests/KeyLoad.FunctionalTests/KeyLoad.FunctionalTests.csproj'
     GlobalPackagesPrefix = 'global-packages: '
     ToolPackageId = 'dotnet-coverage'
     ToolRelativePath = 'tools/net8.0/any/dotnet-coverage.dll'
@@ -101,7 +101,7 @@ function Get-PolicyBounds([string] $Root) {
     $snapshot = Get-FcTestIdentitySnapshot $Root
     $assemblyPath = Resolve-FcPath $Root $snapshot.compiledIdentity.dll
     $assembly = [Reflection.Assembly]::LoadFrom($assemblyPath)
-    $type = $assembly.GetType('KeyLoad.UnitTests.CodeQuality.CoverageExecutionOptions', $true)
+    $type = $assembly.GetType('KeyLoad.FunctionalTests.CodeQuality.CoverageExecutionOptions', $true)
     $options = [Activator]::CreateInstance($type, $true)
     $validation = $type.GetMethod('IsValid', [Reflection.BindingFlags] 'Instance,NonPublic')
     if ($null -eq $validation -or -not $validation.Invoke($options, @())) {

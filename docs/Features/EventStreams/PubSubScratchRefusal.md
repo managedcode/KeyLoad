@@ -10,7 +10,7 @@ REQ-EVENTFEED-SCRATCH-002: an original IGrainStorage write whose registered Orle
 
 AC-EVENTFEED-SCRATCH-002: EventFeedPubSubScratchFailureTests uses actual ServiceCollection registered serializers and the original EventFeedPubSubStorage, exact grain identity and valid immutable options. It writes/reads the complete original string, submits a bounded oversized serializer value at its real CAS tag, checks the fixed refusal and unchanged original value/tag/existence/caller tag, then performs genuine replacement, clear and fresh write/read. No fake IGrainStorage, RPC, context, callback or acknowledgment is used.
 
-Source map: src/KeyLoad.Clustering/EventStreams/Serialization/EventFeedPubSubCountingWriter.cs; tests/KeyLoad.UnitTests/EventStreams/Cases/Event/EventFeedPubSubScratchFailureTests.cs. Both AC criteria map to that new TUnit source type. Actual generated UID and compile/runtime admission remain pending. disposable provider operation tests do not qualify callback subscription/loss/drain, durable pins, cluster, process recovery or performance. Existing original case UIDs are retained.
+Source map: src/KeyLoad.Clustering/EventStreams/Serialization/EventFeedPubSubCountingWriter.cs; tests/KeyLoad.FunctionalTests/EventStreams/Cases/Event/EventFeedPubSubScratchFailureTests.cs. Both AC criteria map to that new TUnit source type. Actual generated UID and compile/runtime admission remain pending. disposable provider operation tests do not qualify callback subscription/loss/drain, durable pins, cluster, process recovery or performance. Existing original case UIDs are retained.
 
 ## scratch boundary flow
 

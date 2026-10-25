@@ -238,7 +238,7 @@ function Assert-FcUnitCaseSource([string] $Root, [object] $Case, [object] $UnitS
             Assert-FcUnitCaseShape $canonical
         }
         else { Assert-FcUnitCaseShape $Case }
-        if ($Case.className -cnotmatch '\AKeyLoad\.UnitTests\.(?:[A-Za-z0-9_]+\.)*[A-Za-z0-9_]+\z' -or
+        if ($Case.className -cnotmatch '\AKeyLoad\.FunctionalTests\.(?:[A-Za-z0-9_]+\.)*[A-Za-z0-9_]+\z' -or
             $Case.classification -cnotin @('functional','required-non-contributor') -or
             ($Case.exclusionReason -isnot [System.DBNull] -and $null -ne $Case.exclusionReason) -or
             -not $UnitSources.ContainsKey([string] $Case.sourcePath) -or

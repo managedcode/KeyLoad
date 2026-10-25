@@ -57,8 +57,8 @@ D1 regressions must exercise actual ConfigureResource and compiled CREATE throug
 
 The following source cases map only the D1 implementation slice of REQ-SQLC-006 / AC-SQLC-006 (SQLC-DDL). They do not close the full criterion. Source declarations are distinct from executed evidence:
 
-- **Creation flow:** [ResourceIncarnationWholeFlowTests](../../../tests/KeyLoad.UnitTests/ResourceExecution/Cases/Resource/ResourceIncarnationWholeFlowTests.cs), `OriginalCreationIdentitySurvivesWritesPolicyRepairReplayIndependentStoreAndTwoColdOwners(bool sql)`. Its two actual TUnit arguments select ConfigureResource (`false`) and compiled CREATE TABLE (`true`).
-- **Queue flow:** [ResourceIncarnationQueueWholeFlowTests](../../../tests/KeyLoad.UnitTests/ResourceExecution/Cases/Resource/ResourceIncarnationQueueWholeFlowTests.cs), `QueuePauseResumePreservesLifetimeAndQueuedWorkAcrossCorruptionRepairAndTwoColdOwners()`.
+- **Creation flow:** [ResourceIncarnationWholeFlowTests](../../../tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Resource/ResourceIncarnationWholeFlowTests.cs), `OriginalCreationIdentitySurvivesWritesPolicyRepairReplayIndependentStoreAndTwoColdOwners(bool sql)`. Its two actual TUnit arguments select ConfigureResource (`false`) and compiled CREATE TABLE (`true`).
+- **Queue flow:** [ResourceIncarnationQueueWholeFlowTests](../../../tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Resource/ResourceIncarnationQueueWholeFlowTests.cs), `QueuePauseResumePreservesLifetimeAndQueuedWorkAcrossCorruptionRepairAndTwoColdOwners()`.
 
 | Existing requirement / acceptance slice | Actual owning source case | Whole-operation oracle |
 |---|---|---|

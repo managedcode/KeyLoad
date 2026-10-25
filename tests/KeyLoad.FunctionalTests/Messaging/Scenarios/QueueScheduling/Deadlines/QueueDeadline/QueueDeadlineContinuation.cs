@@ -1,0 +1,65 @@
+using KeyLoad.Clustering;
+using KeyLoad.Core.Messaging;
+using KeyLoad.FunctionalTests.ResourceExecution;
+using KeyLoad.Storage.ZoneTree;
+using ManagedCode.Communication;
+using TUnit.Assertions.Enums;
+
+namespace KeyLoad.FunctionalTests.Messaging;
+
+internal static class QueueDeadlineContinuation
+{
+    internal static async Task RunAsync(DatabaseEngine database, ZoneTreeStore first, string directory,
+        QueueLaneRef lane, CommandRequest command, Result<object> seeded, CommandRequest seed,
+        MessageMetadata metadata, DateTimeOffset due, CancellationToken token)
+    {
+        QueueDeadlineOperations.ConfigureWorker(database, lane.Partition, due, Capability.QueueInspect,
+            RuntimeQueueDeadlineProtocol.Second);
+        var hint = new QueueDeadlineHint(lane, (AdvanceQueueDeadline)command.Mutations.Single());
+        command = command with { CommandId = AttemptId(database, hint, due) };
+        await QueueDeadlineAssertions.RefusedAsync(database, first, lane, command, due, ErrorCode.PermissionDenied);
+        var deniedId = command.CommandId;
+        QueueDeadlineOperations.ConfigureWorker(database, lane.Partition, due,
+            Capability.QueueConsume | Capability.QueueInspect | Capability.QueueAck, RuntimeQueueDeadlineProtocol.Third);
+        command = command with
+        {
+            CommandId = AttemptId(database, hint, due)
+        };
+        await Assert.That(command.CommandId).IsNotEqualTo(deniedId);
+        await Assert.That(AttemptId(database, hint, due)).IsEqualTo(command.CommandId);
+        var result = QueueDeadlineOperations.Batch(database, command, due);
+        var receipt = result.Get<CommitReceipt>();
+        var expectedReceipt = new MutationReceipt(KeyLoad.Core.Messaging.QueueDeadlineProtocol.ReceiptKind, lane.Queue,
+            metadata.Id, metadata.StateVersion + RuntimeQueueDeadlineProtocol.First);
+        await Assert.That(OrleansSerialization.Serialize(receipt.Mutations.Single()).AsSpan()
+            .SequenceEqual(OrleansSerialization.Serialize(expectedReceipt))).IsTrue();
+        var kind = ((AdvanceQueueDeadline)command.Mutations.Single()).Kind;
+        var expected = metadata with
+        {
+            State = kind == QueueDeadlineKind.ExpireMessage ? MessageState.Expired : MessageState.Ready,
+            StateVersion = metadata.StateVersion + RuntimeQueueDeadlineProtocol.First,
+            ReadySequence = kind == QueueDeadlineKind.ExpireMessage ? metadata.ReadySequence
+                : kind == QueueDeadlineKind.ExpireLease ? RuntimeQueueDeadlineProtocol.Second : RuntimeQueueDeadlineProtocol.First,
+            NotBefore = kind == QueueDeadlineKind.ExpireMessage ? metadata.NotBefore : null,
+            LeaseOwner = null,
+            LeaseUntil = null
+        };
+        await QueueDeadlineAssertions.OriginalAsync(database, lane, expected);
+        var bytes = QueueRetryColdAssertions.LaneBytes(first, lane);
+        first.Dispose();
+        token.ThrowIfCancellationRequested();
+        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        var cold = QueueWholeFlowStorage.Open(second);
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueDeadlineOperations.Batch(cold, command, due), result);
+        await ReplayResultAssertions.Same<CommitReceipt>(QueueDeadlineOperations.Batch(cold, seed, due,
+            RuntimeQueueDeadlineProtocol.Root), seeded);
+        await Assert.That(QueueRetryColdAssertions.LaneBytes(second, lane)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
+        await QueueDeadlineAssertions.OriginalAsync(cold, lane, expected);
+        await QueueDeadlineHealthy.RunAsync(cold, lane, due,
+            kind == QueueDeadlineKind.ExpireLease ? RuntimeQueueDeadlineProtocol.Second : RuntimeQueueDeadlineProtocol.First);
+    }
+
+    private static Guid AttemptId(DatabaseEngine database, QueueDeadlineHint hint, DateTimeOffset due)
+        => DueDispatchCommandIdentity.ForDeadline(hint, database.Store.Read(view =>
+            database.Principal(view, RuntimeQueueDeadlineProtocol.Worker, due)));
+}

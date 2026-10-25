@@ -1,0 +1,172 @@
+using KeyLoad.Client;
+using KeyLoad.Core;
+using KeyLoad.ProcessRecoveryTests.Messaging;
+using KeyLoad.Query;
+using KeyLoad.Server;
+using KeyLoad.Server.Search;
+using KeyLoad.Storage.ZoneTree;
+using KeyLoad.Storage.ZoneTree.ResourceExecution;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
+
+namespace KeyLoad.ProcessRecoveryTests;
+
+/// <summary>Explicit validated execution options composition for genuine test-owned engine and replica fixtures.</summary>
+[ConfigurationBinding]
+internal static class CrashExecutionOptions
+{
+    internal static IOptions<KeyLoadClientExecutionOptions> ClientExecution()
+    {
+        var settings = new KeyLoadClientExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<QueueWorkerOptions> ExternalQueueWorker()
+    {
+        var configured = Child().Value;
+        var settings = new QueueWorkerOptions
+        {
+            MaximumConcurrentHandlers = ExternalQueueWorkerCrashProtocol.HandlerLimit,
+            MaximumDeliveries = ExternalQueueWorkerCrashProtocol.DeliveryLimit,
+            LeaseSeconds = ExternalQueueWorkerCrashProtocol.LeaseSeconds,
+            RenewalInterval = configured.ExternalWorkerRenewalInterval
+        };
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<TextExecutionOptions> RuntimeText()
+    {
+        var settings = new TextExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<MessagingExecutionOptions> Messaging()
+    {
+        var settings = new MessagingExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<GraphExecutionOptions> GraphExecution()
+    {
+        var settings = new GraphExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<ChangeFeedExecutionOptions> ChangeFeedExecution()
+    {
+        var settings = new ChangeFeedExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<ClaimsExecutionOptions> RuntimeClaimsExecution(ClaimsExecutionOptions? configured = null)
+    {
+        var value = configured ?? new ClaimsExecutionOptions();
+        value.Validate();
+        return Compose(value, static settings => settings.Validate());
+    }
+
+    internal static IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution()
+    {
+        var settings = new TimeSeriesExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<QueryExecutionOptions> QueryExecution()
+    {
+        var settings = new QueryExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<ZoneTreePointCacheExecutionOptions> PointCacheExecution(ZoneTreePointCacheExecutionOptions? configured = null)
+    {
+        var settings = configured ?? new ZoneTreePointCacheExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<ZoneTreeStorageExecutionOptions> StorageExecution(ZoneTreeStorageExecutionOptions? configured = null)
+    {
+        var settings = configured ?? new ZoneTreeStorageExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<DatabaseLimits> DatabaseLimits(DatabaseLimits? configured = null)
+    {
+        var settings = configured ?? new DatabaseLimits();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static DatabaseLimits RemoteTransferRepairLimits()
+        => DatabaseLimits(new DatabaseLimits
+        {
+            MaxQueueTransferRepairAttempts = global::KeyLoad.ProcessRecoveryTests.Messaging.RemoteTransferRepairCrashProtocol.Ceiling
+        }).Value;
+
+    internal static DatabaseLimits RemoteTransferAttemptLimits()
+        => DatabaseLimits(new DatabaseLimits
+        {
+            MaxQueueTransferAcceptAttempts = global::KeyLoad.ProcessRecoveryTests.Messaging.RemoteTransferAttemptCrashProtocol.Ceiling
+        }).Value;
+
+    internal static IOptions<DueWorkExecutionOptions> DueWork()
+    {
+        var settings = new DueWorkExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<EventSourceExecutionOptions> EventSource()
+    {
+        var settings = new EventSourceExecutionOptions();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+
+    internal static IOptions<CacheMemoryLimits> CacheMemory(CacheMemoryLimits? configured = null)
+    {
+        var settings = configured ?? new CacheMemoryLimits();
+        settings.Validate();
+        return Compose(settings, static value => value.Validate());
+    }
+    internal static IOptions<NodeOptions> Node(NodeOptions selected)
+        => Compose(selected, static value => value.Validate());
+
+    internal static IOptions<RecoveryProcessOptions> Child()
+    {
+        var configuration = new ConfigurationBuilder().AddEnvironmentVariables().Build();
+        var factory = new OptionsFactory<RecoveryProcessOptions>(
+            [new ConfigureFromConfigurationOptions<RecoveryProcessOptions>(
+                configuration.GetSection(RecoveryProcessOptions.SectionName))], [],
+            [new RecoveryProcessOptionsValidator()]);
+        var options = new OptionsManager<RecoveryProcessOptions>(factory);
+        _ = options.Value;
+        return options;
+    }
+
+    private static OptionsManager<T> Compose<T>(T selected, Action<T> validate) where T : class
+    {
+        var options = new OptionsManager<T>(new SelectedFixtureFactory<T>(selected, validate));
+        _ = options.Value;
+        return options;
+    }
+
+    private sealed class SelectedFixtureFactory<T>(T selected, Action<T> validate)
+        : OptionsFactory<T>([], []) where T : class
+    {
+        protected override T CreateInstance(string name)
+        {
+            validate(selected);
+            return selected;
+        }
+    }
+}

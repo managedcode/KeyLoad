@@ -146,7 +146,7 @@ unfinished blob tool or resource may be advertised. The current canonical
 inventory contains the operation names, including the ten BlobStorage operations
 frozen by ADR-038 and the read-only [AdminDashboard](ADR-051-admin-dashboard.md)
 operations. The complete independent schema/effect oracle is
-[McpCatalogExpectations](../../tests/KeyLoad.IntegrationTests/ClientApi/Assertions/Mcp/McpCatalogExpectations.cs).
+[McpCatalogExpectations](../../tests/KeyLoad.ClusterTests/ClientApi/Assertions/Mcp/McpCatalogExpectations.cs).
 All operations are reached through authorized on-demand gateway discovery and
 invocation; the initial public list contains three gateway tools. A catalog count
 cannot qualify operation semantics or replace runtime and delivery gates.

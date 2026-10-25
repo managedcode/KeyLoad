@@ -220,20 +220,20 @@ NuGet publication follow root policy.
 | src/KeyLoad.Client | ClientApi/Transport/KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
 | src/KeyLoad.Cli | Program.cs, ClientApi/Transport/CliClientApi.cs, Restore/Commands/CliBackupRestore.cs | Administrative entry point with typed ClientApi and backup/restore owners. |
 | build/KeyLoad.AppHost | Program.cs, Hosting/, OrleansHosting/Resources/ClusterTelemetryResources.cs, TestInfrastructure/ | Aspire owns cluster resources, readiness, test dependencies, scoped process faults and joined shutdown. |
-| tests/KeyLoad.UnitTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
-| tests/KeyLoad.RecoveryTests | Program.cs, StorageRecovery/Cases/, feature-owned Processes/ and Execution/ | TUnit recovery tests and their real child-process scenarios in the same test assembly. |
-| tests/KeyLoad.IntegrationTests | ClusterFixture.cs, StorageReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/RequestBodyLimitClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
+| tests/KeyLoad.FunctionalTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
+| tests/KeyLoad.ProcessRecoveryTests | Program.cs, StorageRecovery/Cases/, feature-owned Processes/ and Execution/ | TUnit recovery tests and their real child-process scenarios in the same test assembly. |
+| tests/KeyLoad.ClusterTests | ClusterFixture.cs, StorageReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/RequestBodyLimitClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
 | benchmarks/KeyLoad.ComparisonHost | Session/, Orchestration/ | Selected live benchmark topology, measured workloads and original result artifacts. |
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public claim without CI evidence. |
 | benchmarks/KeyLoad.BenchmarkScenarios | Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
 | benchmarks/KeyLoad.Comparisons | Session/, Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
 | benchmarks/KeyLoad.ComparisonHost | Session/ | BenchmarkComparisons; TUnit C# client workload container under [ADR-117](ADR/ADR-117-tunit-ci-entry.md). |
 | site | Features/BenchmarkComparisons/index.html, bootstrap.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction and public views of qualified GitHub JSON. |
-| tests/KeyLoad.SiteTests | KeyLoad.SiteTests.csproj, Cases/, Fixtures/ | BenchmarkComparisons; TUnit suite over the actual Node modules and authentic GitHub report files. |
+| tests/KeyLoad.WebsiteTests | KeyLoad.WebsiteTests.csproj, Cases/, Fixtures/ | BenchmarkComparisons; TUnit suite over the actual Node modules and authentic GitHub report files. |
 | .github/workflows | build-and-tests.yml, benchmarks.yml, website.yml, release.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, website and release workflows. |
 | scripts | Features/RepositoryGovernance/verify.mjs, Features/BenchmarkComparisons/session-plan.mjs | RepositoryGovernance and BenchmarkComparisons; static repository verification and benchmark session tooling with Node built-ins. |
 | analyzers/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, Analyzers/, Analysis/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage or routing. |
-| tests/KeyLoad.Analyzers.Tests | KeyLoad.Analyzers.Tests.csproj, Cases/, Fixtures/ | CodeQuality; real Roslyn/Orleans metadata checks. |
+| tests/KeyLoad.AnalyzerTests | KeyLoad.AnalyzerTests.csproj, Cases/, Fixtures/ | CodeQuality; real Roslyn/Orleans metadata checks. |
 | docs | design/, Features/, ADR/, implementation/ | Product specification and canonical slice/decision records. |
 
 ```mermaid

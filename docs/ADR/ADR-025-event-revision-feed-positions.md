@@ -40,7 +40,7 @@ Related: `REQ-EVENT-001` (bounded work/deadline/cancellation; `AC-MP-005`), `REQ
 4. Validate supported cursor versions and invalidate stale incarnation bindings; never rewind acknowledged positions.
 5. Qualify event and feed behavior through GitHub TUnit, process recovery, and replicated-cluster .NET/MCP tests.
 
-Target ownership is `src/KeyLoad.Abstractions/EventStreams/`, `Features/Messaging/`, and `Features/ChangeFeeds/` for shared contracts; `src/KeyLoad.Core/EventStreams/` for stream revisions and canonical event sequence, `Features/Messaging/` for topic/source positions and event-feed sequencing, and `Features/ChangeFeeds/` for document CDC/outbox sequence; `src/KeyLoad.Query/ChangeFeeds/` for query-facing CDC cursors; and matching `tests/KeyLoad.UnitTests/` slices. Existing unit tests are evidence paths, not passing current CI.
+Target ownership is `src/KeyLoad.Abstractions/EventStreams/`, `Features/Messaging/`, and `Features/ChangeFeeds/` for shared contracts; `src/KeyLoad.Core/EventStreams/` for stream revisions and canonical event sequence, `Features/Messaging/` for topic/source positions and event-feed sequencing, and `Features/ChangeFeeds/` for document CDC/outbox sequence; `src/KeyLoad.Query/ChangeFeeds/` for query-facing CDC cursors; and matching `tests/KeyLoad.FunctionalTests/` slices. Existing unit tests are evidence paths, not passing current CI.
 
 The event-feed vector-map control operations (Open, Offer, Acknowledge, Release, Tail, Refresh) and their read purposes are specified by the REQ-EVENTS-* requirements in [EventStreams](../Features/EventStreams.md). They use the connection grain, fresh persisted authorization and ordinary Orleans stream/grain calls; none of them checks leadership.
 

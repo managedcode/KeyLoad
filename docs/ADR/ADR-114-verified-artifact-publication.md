@@ -73,7 +73,7 @@ flowchart LR
 1. The owner's coherent-implementation before-runtime rule permits proceeding while a shared compilation drift is repaired; no failed build or source inspection qualifies an acceptance gate.
 2. Each file/type/method obeys the existing 400/200/64/3 limits.
 3. The same bounded packet updates only
-   `tests/KeyLoad.UnitTests/Restore/Cases/Cli/CliBackupRestoreLengthMismatchTests.cs`.
+   `tests/KeyLoad.FunctionalTests/Restore/Cases/Cli/CliBackupRestoreLengthMismatchTests.cs`.
    The first-entry case uses an absent destination and the last-entry case an
    initially empty destination. Both real rejected-output restore attempts,
    actual process/pipe settlement, original byte-preservation checks and the

@@ -82,7 +82,7 @@ internal static class ImplementationTestOwnership
     {
         var path = compilation.AssemblyName switch
         {
-            "KeyLoad.RecoveryTests" => ImplementationTermCatalog.TestPath,
+            "KeyLoad.ProcessRecoveryTests" => ImplementationTermCatalog.TestPath,
             "KeyLoad.AppHost" when AspireEntry(compilation, token) => ImplementationTermCatalog.AspireHostPath,
             "KeyLoad.LoadTests.AppHost" when AspireEntry(compilation, token) => ImplementationTermCatalog.LoadTestsHostPath,
             _ => null

@@ -4,7 +4,7 @@ on:
     branches: [main]
     paths:
       - 'site/**'
-      - 'tests/KeyLoad.SiteTests/**'
+      - 'tests/KeyLoad.WebsiteTests/**'
       - 'scripts/Features/BenchmarkComparisons/site-*'
       - 'scripts/Features/BenchmarkComparisons/composite-site-*'
       - 'scripts/Features/BenchmarkComparisons/isolated-github-stream.mjs'

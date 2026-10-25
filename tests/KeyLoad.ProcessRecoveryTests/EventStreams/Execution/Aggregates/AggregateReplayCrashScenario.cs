@@ -1,0 +1,88 @@
+using KeyLoad.Core;
+using KeyLoad.Storage.ZoneTree;
+
+namespace KeyLoad.ProcessRecoveryTests;
+
+internal static class AggregateReplayCrashScenario
+{
+    private const string SnapshotCommandIdText = "cd5b0e77-6dd2-4f1d-8ebf-fb28949d2a5e";
+
+    internal const string Mode = "aggregate-replay";
+    internal const string OperationFile = "aggregate-replay-operation.bin";
+    internal const string HeadFile = "aggregate-replay-head.bin";
+    internal const string EventFile = "aggregate-replay-event.bin";
+    internal const string IdentityFile = "aggregate-replay-identity.bin";
+    internal const string StreamSet = "replay-events";
+    internal const string StreamId = "aggregate-1";
+    internal const string StreamHeadKeySpace = "stream-head";
+    internal const string EventKeySpace = "event";
+    internal const string EventIdentityKeySpace = "event-id";
+    internal const string EventId = "aggregate-event-1";
+    internal const string Reducer = "orders.reducer";
+    internal const string EventType = "AccountChanged";
+    internal const string EventIncrementProperty = "increment";
+    internal const string EventPayloadJson = "{\"" + EventIncrementProperty + "\":1}";
+    internal const int Generation = 1;
+    internal const int StateSchemaVersion = 1;
+    internal const int FirstSnapshotVersion = 1;
+    internal const long EventRevision = 1;
+    internal const int ReplayTailLimit = 1;
+    internal const string StateJson = "{\"count\":0}";
+    internal static PartitionRef Partition
+    {
+        get;
+    } = new(CrashFixtureValues.Tenant, CrashFixtureValues.Database,
+        CrashFixtureValues.Orders, CrashFixtureValues.Partition);
+    internal static Guid SnapshotCommandId { get; } = Guid.Parse(SnapshotCommandIdText);
+
+    internal static async Task RunAsync(string directory, ZoneTreeStore store, CanonicalCrashBoundary boundary)
+    {
+        const int EmptySourceRevision = 0;
+        const int InitialStateSchemaVersion = 1;
+        const int NoSnapshotVersion = 0;
+        const int InitialGeneration = 1;
+        const int PositionStep = 1;
+
+        var database = CrashDatabase.Create(store);
+        Seed(database);
+        await PreserveSourceBytesAsync(directory, store);
+        var command = new StoreAggregateSnapshot(StreamSet, StreamId, EmptySourceRevision, Reducer, InitialStateSchemaVersion, StateJson, NoSnapshotVersion, InitialGeneration);
+        var request = new CommandRequest(SnapshotCommandId, Partition, [command]);
+        var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SnapshotCommandId);
+        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
+        boundary.Position = store.Position + PositionStep;
+        boundary.Armed = true;
+        database.Apply(operation).Get<CommitReceipt>();
+        await RecoveryProcessPause.WaitForKillAsync();
+    }
+
+    private static void Seed(DatabaseEngine database)
+    {
+        const string SeedCommandIdText = "a8ad08f7-0ad4-4e64-944a-b6f68be8592a";
+
+        CrashDatabase.Submit(database, OperationKind.ConfigureResource,
+            new ConfigureResourceRequest(Partition.TenantId, Partition.DatabaseId,
+                new(StreamSet, ResourceKind.StreamSet, Partition.TransactionDomainId)), Guid.NewGuid()).Get<ResourceDefinition>();
+        var appendId = Guid.Parse(SeedCommandIdText);
+        var append = new CommandRequest(appendId, Partition,
+            [new AppendEvents(StreamSet, StreamId, [new(EventId, EventType, EventPayloadJson)],
+                ExpectedStreamRevision.NoStream)]);
+        CrashDatabase.Submit(database, OperationKind.Batch, append, appendId).Get<CommitReceipt>();
+    }
+
+    private static async Task PreserveSourceBytesAsync(string directory, ZoneTreeStore store)
+    {
+        var headKey = KeySpace.Partition(StreamHeadKeySpace, Partition, StreamSet, StreamId);
+        var eventKey = KeySpace.Partition(EventKeySpace, Partition, StreamSet, StreamId, Generation, EventRevision);
+        var identityKey = KeySpace.Partition(EventIdentityKeySpace, Partition, StreamSet, StreamId, Generation, EventId);
+        var source = store.Read(view => new
+        {
+            Head = view.ReadOwnedValue(headKey),
+            Event = view.ReadOwnedValue(eventKey),
+            Identity = view.ReadOwnedValue(identityKey)
+        });
+        await File.WriteAllBytesAsync(Path.Combine(directory, HeadFile), source.Head!);
+        await File.WriteAllBytesAsync(Path.Combine(directory, EventFile), source.Event!);
+        await File.WriteAllBytesAsync(Path.Combine(directory, IdentityFile), source.Identity!);
+    }
+}
