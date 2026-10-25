@@ -159,7 +159,10 @@ jobs:
             certutil -N -d "sql:$HOME/.pki/nssdb" --empty-password
           fi
       - name: Trust standard Aspire development certificate
-        run: dotnet dev-certs https --trust
+        run: |
+          export SSL_CERT_DIR="$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs"
+          echo "SSL_CERT_DIR=$SSL_CERT_DIR" >> "$GITHUB_ENV"
+          dotnet dev-certs https --trust
       - name: Test Aspire topology lanes
         run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ClusterTests/bin/Debug/net10.0/ci-results"
       - name: Save test results
