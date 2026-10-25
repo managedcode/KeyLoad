@@ -17,7 +17,7 @@ internal sealed class OfflineRegularFileEntryTypeTests
             var target = Path.Combine(root, "target.bin");
             var link = Path.Combine(root, "target.link");
             var directory = Path.Combine(root, "directory");
-            var socketPath = Path.Combine(root, "local.socket");
+            var socketPath = Path.Combine(root, "socket");
             byte[] targetBytes = [0x10, 0x00, 0x90];
             await File.WriteAllBytesAsync(target, targetBytes);
             File.CreateSymbolicLink(link, target);
@@ -48,6 +48,9 @@ internal sealed class OfflineRegularFileEntryTypeTests
         {
             await action(root);
         }
-        finally { Directory.Delete(root, recursive: true); }
+        finally
+        {
+            Directory.Delete(root, recursive: true);
+        }
     }
 }
