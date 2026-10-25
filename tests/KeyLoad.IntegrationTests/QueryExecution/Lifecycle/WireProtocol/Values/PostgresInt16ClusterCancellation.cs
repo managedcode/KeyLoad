@@ -26,9 +26,9 @@ internal static class PostgresInt16ClusterCancellation
                     var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                         () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
                     await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
-                    var parameter = new global::Npgsql.NpgsqlParameter(PostgresInt16ClusterProtocol.Parameter,
-                        global::NpgsqlTypes.NpgsqlDbType.Smallint)
+                    var parameter = new global::Npgsql.NpgsqlParameter
                     {
+                        NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Smallint,
                         Value = PostgresInt16ClusterProtocol.ProbeValue
                     };
                     var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(

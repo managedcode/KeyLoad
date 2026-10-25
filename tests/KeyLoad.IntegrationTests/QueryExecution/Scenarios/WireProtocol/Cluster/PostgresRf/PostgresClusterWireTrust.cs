@@ -10,7 +10,7 @@ internal static class PostgresClusterWireTrust
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var authority = X509Certificate2.CreateFromPemFile(authorityPath);
+            using var authority = X509CertificateLoader.LoadCertificateFromFile(authorityPath);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var trust = new X509ChainPolicy

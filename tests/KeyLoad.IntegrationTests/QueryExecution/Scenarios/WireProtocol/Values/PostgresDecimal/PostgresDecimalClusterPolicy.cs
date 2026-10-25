@@ -55,9 +55,9 @@ internal static class PostgresDecimalClusterPolicy
                 state.Reader.Principal.Id, state.Reader.Secret, PostgresClusterCertificate.RootPath(fixture), token);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
-                var parameter = new global::Npgsql.NpgsqlParameter(PostgresDecimalClusterProtocol.Parameter,
-                    global::NpgsqlTypes.NpgsqlDbType.Numeric)
+                var parameter = new global::Npgsql.NpgsqlParameter
                 {
+                    NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric,
                     Value = PostgresDecimalClusterProtocol.BetweenScores
                 };
                 await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(

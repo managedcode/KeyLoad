@@ -38,9 +38,9 @@ internal static class PostgresInt16ClusterPages
                             await caller.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token))).Value, value);
                         foreach (var prepared in new[] { false, true })
                         {
-                            var parameter = new global::Npgsql.NpgsqlParameter(PostgresInt16ClusterProtocol.Parameter,
-                                global::NpgsqlTypes.NpgsqlDbType.Smallint)
+                            var parameter = new global::Npgsql.NpgsqlParameter
                             {
+                                NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Smallint,
                                 Value = value
                             };
                             await PageAsync(await wire.ExecuteAsync<QueryPage>(PostgresInt16ClusterProtocol.DriverSql,

@@ -55,9 +55,9 @@ internal static class PostgresInt16ClusterPolicy
                 state.Reader.Principal.Id, state.Reader.Secret, PostgresClusterCertificate.RootPath(fixture), token);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
-                var parameter = new global::Npgsql.NpgsqlParameter(PostgresInt16ClusterProtocol.Parameter,
-                    global::NpgsqlTypes.NpgsqlDbType.Smallint)
+                var parameter = new global::Npgsql.NpgsqlParameter
                 {
+                    NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Smallint,
                     Value = PostgresInt16ClusterProtocol.ProbeValue
                 };
                 await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(

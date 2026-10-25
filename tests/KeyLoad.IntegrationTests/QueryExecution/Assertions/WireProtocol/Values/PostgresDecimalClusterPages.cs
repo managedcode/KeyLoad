@@ -38,9 +38,9 @@ internal static class PostgresDecimalClusterPages
                             await caller.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token))).Value, value);
                         foreach (var prepared in new[] { false, true })
                         {
-                            var parameter = new global::Npgsql.NpgsqlParameter(PostgresDecimalClusterProtocol.Parameter,
-                                global::NpgsqlTypes.NpgsqlDbType.Numeric)
+                            var parameter = new global::Npgsql.NpgsqlParameter
                             {
+                                NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric,
                                 Value = value
                             };
                             await PageAsync(await wire.ExecuteAsync<QueryPage>(PostgresDecimalClusterProtocol.DriverSql,

@@ -26,9 +26,9 @@ internal static class PostgresDecimalClusterCancellation
                     var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                         () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
                     await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
-                    var parameter = new global::Npgsql.NpgsqlParameter(PostgresDecimalClusterProtocol.Parameter,
-                        global::NpgsqlTypes.NpgsqlDbType.Numeric)
+                    var parameter = new global::Npgsql.NpgsqlParameter
                     {
+                        NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Numeric,
                         Value = PostgresDecimalClusterProtocol.BetweenScores
                     };
                     var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
