@@ -26,6 +26,7 @@ internal static class PostgresProtocol
     internal const byte TextTerminator = 0;
     internal const byte IdleStatus = (byte)'I';
     internal const byte SslAccepted = (byte)'S';
+    internal const string ApplicationProtocol = "postgresql";
     internal const string Terminator = "\0";
     internal const string CommandSeparator = " ";
     internal const int MaximumParameters = 64;

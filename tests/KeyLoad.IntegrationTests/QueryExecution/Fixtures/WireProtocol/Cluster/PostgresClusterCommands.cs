@@ -29,6 +29,7 @@ internal static class PostgresClusterCommands
             SqlFetchCountClusterProtocol.SingularTwo => new(SqlFetchCountClusterProtocol.SingularTwo, connection),
             SqlFetchCountClusterProtocol.BadSql => new(SqlFetchCountClusterProtocol.BadSql, connection),
             SqlFetchCountClusterProtocol.TiesSql => new(SqlFetchCountClusterProtocol.TiesSql, connection),
+            PostgresInt16ClusterProtocol.DriverSql => new(PostgresInt16ClusterProtocol.DriverSql, connection),
             _ => throw new InvalidOperationException(InvalidCommand)
         };
 
