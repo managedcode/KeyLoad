@@ -26,7 +26,7 @@ internal static class CanonicalTextTerms
             }
             else if (word.Length != 0)
             {
-                ChargeToken(ref words, budget, maximumWords);
+                ChargeToken(ref words, maximumWords);
                 yield return word.ToString();
                 word.Clear();
             }
@@ -37,18 +37,17 @@ internal static class CanonicalTextTerms
         }
         if (word.Length != 0)
         {
-            ChargeToken(ref words, budget, maximumWords);
+            ChargeToken(ref words, maximumWords);
             yield return word.ToString();
         }
         budget.Check();
     }
 
-    private static void ChargeToken(ref int words, ReadExecutionBudget budget, int maximumWords)
+    private static void ChargeToken(ref int words, int maximumWords)
     {
         if (++words > maximumWords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DocumentTokenExceeded);
         }
-        budget.ChargeTextToken();
     }
 }

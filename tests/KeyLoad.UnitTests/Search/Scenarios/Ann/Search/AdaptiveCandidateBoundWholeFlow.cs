@@ -16,7 +16,7 @@ internal static class AdaptiveCandidateBoundWholeFlow
         PackedAnnTestData.Seed(database, PackedAnnTestData.QualityRecordCount, space.Dimension, metric);
         var records = PackedAnnTestData.Load(database, metric);
         var options = new PackedAnnOptions { ExactThreshold = 0, EfSearch = 1 };
-        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var budget = PackedAnnIndexTestSupport.Budget();
         var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.AdaptiveCandidateBound,
             space, records, options, budget);
         var query = PackedAnnTestData.Vector(QueryOrdinal, space.Dimension, PackedAnnTestData.CorpusSeed);
@@ -27,22 +27,22 @@ internal static class AdaptiveCandidateBoundWholeFlow
         var original = JsonDefaults.Serialize(records);
         AnnSearchResult? partial = null;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => partial = index.Search(query, bottom.Length,
-            bitmap, PackedAnnIndexTestSupport.Budget(database)));
+            bitmap, PackedAnnIndexTestSupport.Budget()));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(failure.Message).IsEqualTo("The bounded ANN graph did not supply the requested eligible candidates.");
         await Assert.That(partial).IsNull();
         await UnchangedAsync(database, metric, position, original);
         var exactIndex = PackedAnnIndexTestSupport.Build(space, records,
-            options with { ExactThreshold = EligibleCount }, PackedAnnIndexTestSupport.Budget(database));
-        var exact = exactIndex.Search(query, bottom.Length, bitmap, PackedAnnIndexTestSupport.Budget(database));
+            options with { ExactThreshold = EligibleCount }, PackedAnnIndexTestSupport.Budget());
+        var exact = exactIndex.Search(query, bottom.Length, bitmap, PackedAnnIndexTestSupport.Budget());
         await Assert.That(exact.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);
         var expected = AdaptiveFilteredPlannerOracle.Rank(records, query, bottom);
         await Assert.That(exact.Candidates.Select(candidate => candidate.SourceOrdinal).ToArray())
             .IsEquivalentTo(expected.Select(candidate => candidate.SourceOrdinal).ToArray(), CollectionOrdering.Matching);
         await AdaptiveFilteredPlannerOracle.AssertReturnedCandidatesAsync(exact, records, query, bottom);
         await AssertBudgetExceededAsync(() => exactIndex.Search(query, bottom.Length, bitmap,
-            PackedAnnIndexTestSupport.Budget(database, exact.WorkUnits - 1)));
-        var healthy = index.Search(query, 1, null, PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget(exact.WorkUnits - 1)));
+        var healthy = index.Search(query, 1, null, PackedAnnIndexTestSupport.Budget());
         await Assert.That(healthy.Mode).IsEqualTo(AnnSearchMode.Approximate);
         await Assert.That(healthy.Candidates.Length).IsEqualTo(1);
         await AdaptiveFilteredPlannerOracle.AssertReturnedCandidatesAsync(healthy, records, query,

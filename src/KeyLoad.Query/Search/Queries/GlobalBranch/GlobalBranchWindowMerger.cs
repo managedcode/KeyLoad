@@ -10,20 +10,19 @@ internal static class GlobalBranchWindowMerger
     private const int NoRetainedBytes = 0;
     private const int EqualOrder = 0;
 
-    private const string ResourceExceeded = "The global branch merge exceeds its configured bounds.";
     private const string ConflictingDuplicate = "A global branch candidate has conflicting revision or score evidence.";
     private const string InvalidOrder = "A global branch window is not in canonical score order.";
     private const string MissingWindow = "A required global branch window is unavailable or incomplete.";
     private const string ExactUnavailable = "The requested exact branch profile is unavailable.";
 
     internal static GlobalBranchMergeResult Merge(GlobalBranchMergeRequest request,
-        ImmutableArray<GlobalBranchWindow> windows, DatabaseLimits limits, ReadExecutionBudget budget)
+        ImmutableArray<GlobalBranchWindow> windows, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(budget);
         var bytes = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        var received = GlobalBranchValidation.ValidateRequest(request, windows, limits, budget, bytes);
+        var received = GlobalBranchValidation.ValidateRequest(request, windows, budget, bytes);
         budget.Check();
-        var candidateCount = PreflightWindows(windows, limits.MaxScanRecords, budget);
+        var candidateCount = PreflightWindows(windows, budget);
         var missing = MissingIds(request.ExpectedWindowIds, received, budget);
         var complete = missing.IsEmpty;
         var approximate = false;
@@ -57,18 +56,13 @@ internal static class GlobalBranchWindowMerger
         return new(selected, missing, complete, approximate, truncated, exhaustive, candidateCount);
     }
 
-    private static int PreflightWindows(ImmutableArray<GlobalBranchWindow> windows, int maximumRecords,
-        ReadExecutionBudget budget)
+    private static int PreflightWindows(ImmutableArray<GlobalBranchWindow> windows, ReadExecutionBudget budget)
     {
         var records = EmptyElementCount;
         foreach (var window in windows)
         {
             budget.Check();
-            if (window.Candidates.Length > maximumRecords - records)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceExceeded);
-            }
-            records += window.Candidates.Length;
+            records = checked(records + window.Candidates.Length);
         }
         return records;
     }

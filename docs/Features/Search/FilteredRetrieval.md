@@ -8,9 +8,9 @@ Decision: [ADR-087](../../ADR/ADR-087-filtered-retrieval.md). Filtered retrieval
 canonical document IDs in the request's existing partition/collection. Null
 preserves existing exact search. An empty array selects nothing. Duplicates are
 normalized with ordinal identity; unknown, hidden, deleted and stale entities
-never return a hit or an existence/count diagnostic. Validate every identifier,
-the incoming array length against MaxScanRecords, aggregate serialized request
-bytes against MaxQueryBytes and all existing search limits before reading.
+never return a hit or an existence/count diagnostic. Validate every identifier
+and all existing search limits before reading; the array length and the
+serialized request bytes have no KeyLoad ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)).
 Persisted authorization remains required even for an empty allowlist.
 
 | Requirement | Acceptance, pass/fail and mapped tests |

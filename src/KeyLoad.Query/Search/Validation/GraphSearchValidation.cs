@@ -15,7 +15,7 @@ internal static class GraphSearchValidation
     private const string InvalidWalk = "The graph walk specification is invalid.";
     private const int VersionOne = 1;
 
-    internal static void Validate(GraphSearchRequest request, DatabaseLimits limits, ReadExecutionBudget budget,
+    internal static void Validate(GraphSearchRequest request, ReadExecutionBudget budget,
         GraphExecutionOptions execution, QueryExecutionOptions queryExecution)
     {
         if (request.Version != VersionOne)
@@ -30,24 +30,24 @@ internal static class GraphSearchValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
-        SearchRequestValidation.Validate(request.Search, limits, request.Retriever is not null, queryExecution);
+        SearchRequestValidation.Validate(request.Search, request.Retriever is not null, queryExecution);
         EngineResourceAccess.ValidatePartition(request.Search.Partition);
         JsonData.Identifier(request.Search.Collection);
-        ValidateScope(request.Scope, request.Search.Partition, limits, budget, execution);
-        ValidateRetriever(request.Retriever, request.Search.Partition, limits, budget, execution);
+        ValidateScope(request.Scope, request.Search.Partition, budget, execution);
+        ValidateRetriever(request.Retriever, request.Search.Partition, budget, execution);
         ValidateExpansion(request.Expansion, execution);
     }
 
-    private static void ValidateScope(GraphScope? scope, PartitionRef partition, DatabaseLimits limits,
+    private static void ValidateScope(GraphScope? scope, PartitionRef partition,
         ReadExecutionBudget budget, GraphExecutionOptions execution)
     {
         if (scope is not null)
         {
-            ValidateWalk(scope.Walk, partition, limits, budget, execution);
+            ValidateWalk(scope.Walk, partition, budget, execution);
         }
     }
 
-    private static void ValidateRetriever(GraphRetriever? retriever, PartitionRef partition, DatabaseLimits limits,
+    private static void ValidateRetriever(GraphRetriever? retriever, PartitionRef partition,
         ReadExecutionBudget budget, GraphExecutionOptions execution)
     {
         if (retriever is null)
@@ -58,7 +58,7 @@ internal static class GraphSearchValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidWalk);
         }
-        ValidateWalk(retriever.Walk, partition, limits, budget, execution);
+        ValidateWalk(retriever.Walk, partition, budget, execution);
     }
 
     private static void ValidateExpansion(GraphExpansion? expansion, GraphExecutionOptions execution)
@@ -76,12 +76,12 @@ internal static class GraphSearchValidation
         ValidateLabels(expansion.Labels);
     }
 
-    private static void ValidateWalk(GraphWalkSpec? walk, PartitionRef partition, DatabaseLimits limits,
+    private static void ValidateWalk(GraphWalkSpec? walk, PartitionRef partition,
         ReadExecutionBudget budget, GraphExecutionOptions execution)
     {
         if (walk is null || walk.Seeds.IsDefaultOrEmpty || walk.MaxDepth < RootDepth || walk.MaxDepth > execution.MaximumDepth
             || walk.MaxVertices < MinimumPositiveCount || walk.MaxVertices > execution.MaximumVertices || walk.MaxEdges < MinimumPositiveCount || walk.MaxEdges > execution.MaximumEdges
-            || walk.Seeds.Length > walk.MaxVertices || walk.Seeds.Length > limits.MaxScanRecords)
+            || walk.Seeds.Length > walk.MaxVertices)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidWalk);
         }

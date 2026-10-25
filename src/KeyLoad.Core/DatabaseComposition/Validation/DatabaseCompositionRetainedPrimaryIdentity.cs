@@ -2,12 +2,12 @@ namespace KeyLoad.Core;
 /// <summary>Executes DatabaseCompositionRetainedPrimaryIdentity operations against the caller's database context.</summary>
 public static class DatabaseCompositionRetainedPrimaryIdentity
 {
-    internal static void RequireTypedEndpointPrimaryIdentity(this DatabaseEngine engine, DocumentRecord record, string primaryKey)
+    internal static void RequireTypedEndpointPrimaryIdentity(DocumentRecord record, string primaryKey)
     {
         global::System.Text.Json.JsonDocument document;
         try
         {
-            document = global::System.Text.Json.JsonDocument.Parse(record.Json, new global::System.Text.Json.JsonDocumentOptions { MaxDepth = engine.Limits.MaxJsonDepth });
+            document = global::System.Text.Json.JsonDocument.Parse(record.Json);
         }
         catch (global::System.Text.Json.JsonException)
         {

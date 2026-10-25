@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Core.StoragePartitions.Contracts;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -35,7 +34,7 @@ internal sealed class CapabilityWorkRegistration(CancellationToken requestToken)
     }
 
     internal void Admit(RequestWorkOwner owner, Guid requestId, RequestWorkKind kind,
-        IResourceLifetimeWorkBinding? binding = null, IOptions<DatabaseLimits>? ownedLimits = null)
+        IResourceLifetimeWorkBinding? binding = null, bool ownRetention = false)
     {
         lease = owner.Acquire(requestId, kind);
         originalBinding = binding;
@@ -43,9 +42,9 @@ internal sealed class CapabilityWorkRegistration(CancellationToken requestToken)
         {
             lease.AttachResultRetention(binding.ResultRetention);
         }
-        else if (ownedLimits is not null)
+        else if (ownRetention)
         {
-            ownedRetention = new(ownedLimits);
+            ownedRetention = new();
             lease.AttachResultRetention(ownedRetention);
             originalBinding = lease;
         }

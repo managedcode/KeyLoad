@@ -45,7 +45,7 @@ internal sealed class TextOnlineCatalogProof : IDisposable
             var original = database.ReadOnlineTextOriginalOutcome(principalId, request, budget)
                 ?? throw TextErrors.Ownership();
             var result = original.Get<OnlineTextIndexMaintenanceResult>();
-            TextOnlineCatalogSource.RequireOriginal(retained, current, result, database.Limits.MaxScanRecords, budget, options);
+            TextOnlineCatalogSource.RequireOriginal(retained, current, result, budget, options);
             var fresh = CaptureSeed(database, principalId, request, budget);
             TextOnlineCatalogSource.RequireFresh(current, result, generation.Manifest, fresh, budget);
             var scope = new TextProjectionScope(request.NodeId, fresh.Incarnation, fresh.DataEpoch,
@@ -84,8 +84,7 @@ internal sealed class TextOnlineCatalogProof : IDisposable
             var original = database.ReadOnlineTextOriginalOutcome(view, principal, request, budget)
                 ?? throw TextErrors.Ownership();
             var result = original.Get<OnlineTextIndexMaintenanceResult>();
-            TextOnlineCatalogSource.RequireOriginal(retained, current, result,
-                database.Limits.MaxScanRecords, budget, options);
+            TextOnlineCatalogSource.RequireOriginal(retained, current, result, budget, options);
             var fresh = TextSeedCollector.CaptureOnlineQueryView(database, raw, principal.Id,
                 new(request.Consumer, request.ConsumerGeneration, request.Collection, request.Field,
                     request.NodeId, request.Placement), budget);

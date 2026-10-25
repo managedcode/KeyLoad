@@ -12,25 +12,16 @@ internal static class PartitionQueryPublicValidation
     private const int RequestVersion = 1;
     private const string InvalidRequest = "The partition query request is invalid.";
     private const string UnsupportedQuery = "The partition query contains unsupported query options.";
-    private const string RequestBytesExceeded = "The partition query request exceeds its byte budget.";
 
     internal static (AstQueryRequest Request, ImmutableArray<PartitionRef> Partitions) Prepare(
-        PartitionQueryRequest? request, DatabaseLimits limits, QueryExecutionOptions execution)
+        PartitionQueryRequest? request, QueryExecutionOptions execution)
     {
-        ArgumentNullException.ThrowIfNull(limits);
         ValidateHeader(request);
         var partitions = OrderPartitions(request!.Partitions, execution.MaximumPartitions);
         ValidateOptions(request.Query);
         var ast = new AstQueryRequest(partitions[FirstElementIndex], request.Query, request.Parameters,
             request.AllowFullScan, AstVersion: request.AstVersion);
-        var normalized = QueryValidation.Normalize(ast, limits, execution);
-        var boundedRequest = request with
-        {
-            Partitions = partitions,
-            Query = normalized.Query,
-            Parameters = normalized.Parameters
-        };
-        ValidateRequestBytes(boundedRequest, limits);
+        var normalized = QueryValidation.Normalize(ast, execution);
         return (normalized, partitions);
     }
 
@@ -84,15 +75,6 @@ internal static class PartitionQueryPublicValidation
         if (query.Explain || query.ModelSource is not null)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedQuery);
-        }
-    }
-
-    private static void ValidateRequestBytes(PartitionQueryRequest request, DatabaseLimits limits)
-    {
-        var length = JsonDefaults.Serialize(request).Length;
-        if (length > limits.MaxQueryBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, RequestBytesExceeded);
         }
     }
 }

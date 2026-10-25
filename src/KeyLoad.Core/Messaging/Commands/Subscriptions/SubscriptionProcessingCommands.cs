@@ -25,17 +25,16 @@ public static class SubscriptionProcessingCommands
 
             engine.ReauthorizeEffects(tx, principal, request.Subscription.Source.Partition, request.Effects);
             var state = SubscriptionGroups.Group(tx, request.Subscription);
-            var budget = new SubscriptionWindowAuthorityReadBudget(engine.OperationLimitsOptions);
-            var delivery = SubscriptionDeliveryAuthority.ReadSubscriptionWindowDelivery(tx, MessagingSerialization.GroupKey(SubscriptionGroups.SubscriptionGroupsSubscriptionWindowKeySpace, request.Subscription, claims.Generation, claims.Position), budget);
+            var delivery = SubscriptionDeliveryAuthority.ReadSubscriptionWindowDelivery(tx, MessagingSerialization.GroupKey(SubscriptionGroups.SubscriptionGroupsSubscriptionWindowKeySpace, request.Subscription, claims.Generation, claims.Position));
             SubscriptionDeliveryAuthority.RequireSubscriptionWindowReference(delivery, state, claims.Position);
             CommitReceipt acknowledgement;
             if (delivery is { State: GroupDeliveryState.Leased } && delivery.LeaseVersion == claims.LeaseVersion)
             {
-                acknowledgement = engine.CompleteSubscriptionDelivery(tx, principal, new(request.CommandId, request.Subscription, request.Token, DeliveryAction.Ack), now, position, budget);
+                acknowledgement = engine.CompleteSubscriptionDelivery(tx, principal, new(request.CommandId, request.Subscription, request.Token, DeliveryAction.Ack), now, position);
             }
             else
             {
-                engine.ValidateSubscriptionGroupProgress(tx, request.Subscription, state, engine.SourceHead(tx, request.Subscription.Source), budget);
+                SubscriptionDeliveryAuthority.ValidateSubscriptionGroupProgress(tx, request.Subscription, state, engine.SourceHead(tx, request.Subscription.Source));
                 acknowledgement = completed.Receipt;
             }
 

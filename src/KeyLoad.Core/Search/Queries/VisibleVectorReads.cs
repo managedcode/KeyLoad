@@ -7,7 +7,6 @@ namespace KeyLoad.Core.Search;
 internal static class VisibleVectorReads
 {
     internal const string VectorKeySpace = "vector";
-    private const string VectorScanExceeded = "The exact vector scan exceeds its budget.";
 
     internal static void Visit(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, string field, ReadExecutionBudget budget,
@@ -24,8 +23,7 @@ internal static class VisibleVectorReads
         budget.Check();
         var resolver = sourceMetadata is null ? null : new AnnLifetimeResourceResolver(sourceMetadata,
             scopeWork ?? throw new ArgumentNullException(nameof(scopeWork)), principal);
-        var range = budget.VisitRange(view, KeySpace.Partition(VectorKeySpace, partition, collection, field),
-            database.Limits.MaxScanRecords, (key, value) =>
+        _ = budget.VisitAll(view, KeySpace.Partition(VectorKeySpace, partition, collection, field), (key, value) =>
             {
                 var vector = OrleansSerialization.Deserialize<VectorRecord>(value);
                 var document = budget.ReadRecord<DocumentRecord>(view,
@@ -43,9 +41,5 @@ internal static class VisibleVectorReads
                 }
                 return true;
             });
-        if (range.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, VectorScanExceeded);
-        }
     }
 }

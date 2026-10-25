@@ -54,7 +54,7 @@ internal static class EventMessageSensitiveSafeR52Refusals
     {
         await PrivateAsync(JsonDefaults.Serialize(result), state);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(result, code);
-        await Assert.That(result.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(result);
         await SqlClusterProtocol.EqualAsync(Errors.Problem(code, detail), result.Problem);
     }
 

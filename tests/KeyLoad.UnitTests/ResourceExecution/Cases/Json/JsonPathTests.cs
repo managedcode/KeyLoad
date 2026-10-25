@@ -41,14 +41,14 @@ internal sealed class JsonPathTests
     [Test]
     public async Task AcMp006FieldPatchUsesTheSameEscapedPointerAndCanonicalNumberRules()
     {
-        var changed = JsonData.Patch(Source, [new(Field, PatchKind.Set, "2.000")], new());
-        var removed = JsonData.Patch(changed, [new(Field, PatchKind.Remove)], new());
+        var changed = JsonData.Patch(Source, [new(Field, PatchKind.Set, "2.000")]);
+        var removed = JsonData.Patch(changed, [new(Field, PatchKind.Remove)]);
 
         await Assert.That(changed).IsEqualTo(Patched);
         await Assert.That(removed).IsEqualTo(Removed);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Patch("{\"a\":[1]}",
-            [new("/a/0", PatchKind.Remove)], new())).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
+            [new("/a/0", PatchKind.Remove)])).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Patch(Source,
-            [new("/*", PatchKind.Remove)], new())).Code).IsEqualTo(ErrorCode.Validation);
+            [new("/*", PatchKind.Remove)])).Code).IsEqualTo(ErrorCode.Validation);
     }
 }

@@ -56,6 +56,13 @@ internal sealed class ReadExecutionBudgetReadGrant
         return result;
     }
 
+    internal StorageScanResult VisitAll(IKeyValueView view, byte[] prefix, StorageRecordVisitor visitor)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+        return StorageRangePages.VisitAll(view.MaximumRangeRecords,
+            (maxRecords, pageVisitor, after) => VisitRange(view, prefix, maxRecords, pageVisitor, after), visitor);
+    }
+
     internal IKeyValueView CreateView(IKeyValueView view) => budget.CreateView(view, this);
 
     internal bool BelongsTo(ReadExecutionBudget owner) => ReferenceEquals(budget, owner);

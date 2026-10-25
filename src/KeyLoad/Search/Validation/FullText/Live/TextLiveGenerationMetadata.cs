@@ -5,7 +5,7 @@ namespace KeyLoad.Server.Search;
 
 internal static class TextLiveGenerationMetadata
 {
-    internal static void Validate(TextGeneration generation, string path, string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<TextExecutionOptions> executionOptions)
+    internal static void Validate(TextGeneration generation, string path, string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions)
     {
         if (!generation.Published || generation.CurrentIndex is null
             || !StringComparer.Ordinal.Equals(generation.Path, path)
@@ -29,7 +29,7 @@ internal static class TextLiveGenerationMetadata
         {
             throw TextErrors.Ownership();
         }
-        var manifest = TextGenerationFiles.ReadManifest(manifestPath, generation.Scope, limits, executionOptions: executionOptions);
+        var manifest = TextGenerationFiles.ReadManifest(manifestPath, generation.Scope, executionOptions: executionOptions);
         if (!TextLiveManifest.Matches(generation, manifest))
         {
             throw TextErrors.Corrupt();

@@ -44,14 +44,14 @@ internal static class GraphCrossPartitionValidation
         }
     }
 
-    internal static void ValidateIncoming(ReadIncomingGraphEdgesRequest request, DatabaseLimits limits,
+    internal static void ValidateIncoming(ReadIncomingGraphEdgesRequest request,
         ReadExecutionBudget budget)
     {
         const int MinimumResultCount = 1;
 
         if (request is null || request.Version != GraphCrossPartitionProtocol.CurrentVersion
             || request.Target is null || request.Target.Partition is null || request.Graph is null
-            || request.Limit < MinimumResultCount || request.Limit > limits.MaxResults
+            || request.Limit < MinimumResultCount
             || HasNullPartitionPart(request.Target.Partition) || request.Target.Collection is null
             || request.Target.Id is null)
         {
@@ -64,9 +64,6 @@ internal static class GraphCrossPartitionValidation
             JsonData.Identifier(request.Graph);
             JsonData.Identifier(request.Target.Collection);
             JsonData.Identifier(request.Target.Id);
-            budget.Check();
-            using var counter = new ResultByteCounterStream(limits.MaxQueryBytes, budget.Check);
-            JsonSerializer.Serialize(counter, request, JsonDefaults.Options);
             budget.Check();
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Validation)
@@ -89,7 +86,7 @@ internal static class GraphCrossPartitionValidation
     }
 
     internal static void ValidateIntent(GraphCrossPartitionDeliveryIntent? intent,
-        PartitionRef source, string graph, string edgeId, EntityRef destination, DatabaseLimits limits)
+        PartitionRef source, string graph, string edgeId, EntityRef destination)
     {
         if (HasInvalidIntentIdentity(intent, source, graph, edgeId, destination)
             || HasInvalidIntentPolicy(intent!)
@@ -100,7 +97,7 @@ internal static class GraphCrossPartitionValidation
         ValidateStoredLocator(intent!.SourcePartition, intent.Graph, intent.EdgeId,
             intent.Destination, intent.Revision);
         ValidateStoredIdentifier(intent.OriginalPrincipalId);
-        ValidateEdge(intent.Edge, limits);
+        ValidateEdge(intent.Edge);
     }
 
     private static bool HasInvalidIntentIdentity(GraphCrossPartitionDeliveryIntent? intent,
@@ -158,7 +155,7 @@ internal static class GraphCrossPartitionValidation
     private static bool ValidFingerprint(string? value)
         => value is { Length: FingerprintHexCharacters } && value.All(static character => character is >= FirstHexDigit and <= LastHexDigit or >= FirstHexLetter and <= LastHexLetter);
 
-    internal static void ValidateEdge(EdgeRecord edge, DatabaseLimits limits)
+    internal static void ValidateEdge(EdgeRecord edge)
     {
         if (edge.From is null || edge.To is null || edge.From.Partition is null || edge.To.Partition is null
             || edge.Id is null || edge.Label is null || edge.AttributesJson is null || edge.Revision <= AbsentRevision)
@@ -177,7 +174,7 @@ internal static class GraphCrossPartitionValidation
             JsonData.Identifier(edge.From.Id);
             JsonData.Identifier(edge.To.Collection);
             JsonData.Identifier(edge.To.Id);
-            if (JsonData.Validate(edge.AttributesJson, limits) != edge.AttributesJson)
+            if (JsonData.Validate(edge.AttributesJson) != edge.AttributesJson)
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
             }

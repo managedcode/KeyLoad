@@ -13,7 +13,7 @@ public static class SubscriptionDeliveryExecution
         var resource = engine.SourceResource(tx, subscription.Source);
         var head = engine.SourceHead(tx, subscription.Source);
         var dataPrincipal = engine.Principal(tx, state.Definition.DataPrincipalId, now);
-        if (request.MaxEvents < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.MaxEvents > engine.MessagingExecution.MaximumReceiveEvents || request.MaxBytes < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.MaxBytes > engine.Limits.MaxBatchBytes || request.LeaseSeconds < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
+        if (request.MaxEvents < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.MaxEvents > engine.MessagingExecution.MaximumReceiveEvents || request.MaxBytes < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.LeaseSeconds < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
         {
             throw Errors.Fail(ErrorCode.Validation, SubscriptionGroups.SubscriptionGroupsSubscriptionReceiveBudgetOrLeaseIsInvalidDetail);
         }
@@ -29,11 +29,10 @@ public static class SubscriptionDeliveryExecution
             throw Errors.Fail(ErrorCode.HistoryUnavailable, SubscriptionGroups.SubscriptionGroupsSubscriptionHistoryWasRetainedAwayDetail);
         }
 
-        var windowBudget = new SubscriptionWindowAuthorityReadBudget(engine.OperationLimitsOptions);
-        engine.ValidateSubscriptionGroupProgress(tx, subscription, state, head, windowBudget);
+        SubscriptionDeliveryAuthority.ValidateSubscriptionGroupProgress(tx, subscription, state, head);
         var result = new List<SubscriptionDelivery>();
-        state = engine.FillSubscriptionWindow(tx, principal, request, now, state, policy, resource, head, dataPrincipal, result, windowBudget);
-        state = SubscriptionGroups.AdvanceCheckpoint(tx, subscription, state, windowBudget);
+        state = engine.FillSubscriptionWindow(tx, principal, request, now, state, policy, resource, head, dataPrincipal, result);
+        state = SubscriptionGroups.AdvanceCheckpoint(tx, subscription, state);
         tx.PutRecord(MessagingSerialization.GroupKey(SubscriptionGroups.SubscriptionGroupsSubscriptionKeySpace, subscription), state);
         return new(request.RequestId, result.ToImmutableArray(), SubscriptionGroups.ValidatedGroupInfo(subscription, state, head), engine.Token(tx, subscription.Source.Partition, position));
     }

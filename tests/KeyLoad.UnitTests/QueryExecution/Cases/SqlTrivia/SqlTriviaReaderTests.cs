@@ -10,8 +10,6 @@ internal sealed class SqlTriviaReaderTests
     private const string Deep = "/* /* */ */SELECT";
     private const string Quoted = "'/* -- */'";
     private const string Gap = "SEL/* gap */ECT";
-    private const int DepthLimit = 2;
-    private const int ShallowDepth = 1;
     private const int LongCommentLength = 4_096;
     private const int OriginalChunkCharacters = 256;
     private const char CommentCharacter = 'x';
@@ -26,12 +24,12 @@ internal sealed class SqlTriviaReaderTests
         {
             await SeedAsync(database);
             var prefix = Nested[..^Select.Length];
-            var tokens = Tokens(prefix + ScriptDomSelectPages.WindowSql, DepthLimit);
+            var tokens = Tokens(prefix + ScriptDomSelectPages.WindowSql);
             await Assert.That(tokens.First(token => token.Text == Select).Offset).IsEqualTo(prefix.Length);
-            var quoted = Tokens(Quoted, DepthLimit);
+            var quoted = Tokens(Quoted);
             await Assert.That(quoted[0].Offset).IsEqualTo(0);
             await Assert.That(quoted[0].Text).IsEqualTo(Quoted);
-            var gap = Tokens(Gap, DepthLimit);
+            var gap = Tokens(Gap);
             await Assert.That(gap[0].Offset).IsEqualTo(0);
             await Assert.That(gap[0].Text).IsEqualTo("SEL");
             await HealthyAsync(database, prefix + ScriptDomSelectPages.WindowSql);
@@ -49,13 +47,7 @@ internal sealed class SqlTriviaReaderTests
             await RefuseAsync(database, Unclosed + ScriptDomSelectPages.WindowSql, ErrorCode.Validation);
             await HealthyAsync(database, ScriptDomSelectPages.WindowSql + " " + LineAtEnd);
             var deep = Deep[..^Select.Length] + ScriptDomSelectPages.WindowSql;
-            var image = SqlInnerJoinRetainedIdentityFlow.Image(database.Store);
-            var position = database.Store.Position;
-            var identity = JsonDefaults.Serialize(database.Store.Identity);
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() => Tokens(deep, ShallowDepth));
-            await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-            await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
-            var tokens = Tokens(deep, DepthLimit);
+            var tokens = Tokens(deep);
             await Assert.That(tokens.First(token => token.Text == Select).Offset).IsEqualTo(Deep.Length - Select.Length);
             await HealthyAsync(database, deep);
         });
@@ -69,7 +61,7 @@ internal sealed class SqlTriviaReaderTests
             await SeedAsync(database);
             var sql = OpenComment + new string(CommentCharacter, LongCommentLength) + CloseComment + ScriptDomSelectPages.WindowSql;
             await CopyAsync(sql);
-            var tokens = Tokens(sql, DepthLimit);
+            var tokens = Tokens(sql);
             await Assert.That(tokens.First(token => token.Text == Select).Offset)
                 .IsEqualTo(OpenComment.Length + LongCommentLength + CloseComment.Length);
             await HealthyAsync(database, sql);
@@ -85,7 +77,7 @@ internal sealed class SqlTriviaReaderTests
             var prefix = new string(Whitespace, OriginalChunkCharacters - 1);
             var sql = prefix + OpenComment + new string(CommentCharacter, LongCommentLength) + CloseComment + ScriptDomSelectPages.WindowSql;
             await CopyAsync(sql);
-            var tokens = Tokens(sql, DepthLimit);
+            var tokens = Tokens(sql);
             await Assert.That(tokens.First(token => token.Text == Select).Offset)
                 .IsEqualTo(prefix.Length + OpenComment.Length + LongCommentLength + CloseComment.Length);
             await HealthyAsync(database, sql);
@@ -109,10 +101,9 @@ internal sealed class SqlTriviaReaderTests
         await SqlOffsetFixture.PolicyAsync(database, SqlOffsetProtocol.GrantEpoch, true);
     }
 
-    private static IList<global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlParserToken> Tokens(string sql, int depth)
+    private static IList<global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlParserToken> Tokens(string sql)
     {
-        var options = UnitExecutionOptions.DatabaseLimits(new DatabaseLimits { MaxQueryDepth = depth });
-        var budget = new global::KeyLoad.Core.ReadExecutionBudget(options);
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget();
         using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(sql, budget.Check);
         var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
@@ -121,13 +112,13 @@ internal sealed class SqlTriviaReaderTests
         {
             throw new InvalidOperationException("The execution token fixture is malformed.");
         }
-        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens, options.Value, budget.Check);
+        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens, budget.Check);
         return tokens;
     }
 
     private static async Task CopyAsync(string sql)
     {
-        var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits());
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget();
         using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(sql, budget.Check);
         var copied = new global::System.Text.StringBuilder();
         var buffer = new char[OriginalChunkCharacters];

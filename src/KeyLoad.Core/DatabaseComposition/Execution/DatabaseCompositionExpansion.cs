@@ -58,7 +58,7 @@ public static class DatabaseCompositionExpansion
             }
 
             MessagingValidation.RequireQueueReadyAuthority(lane, id, readyKey, metadata, body);
-            var link = engine.ReadLink(body.PayloadJson, partition);
+            var link = DatabaseCompositionExpansion.ReadLink(body.PayloadJson, partition);
             if (command.FromCollection is not null)
             {
                 var selected = engine.SelectTypedEndpointPair(tx, principal, command, link, budget, typedPrimaryKeys!.Value.FromPrimaryKey, typedPrimaryKeys.Value.ToPrimaryKey);
@@ -113,7 +113,7 @@ public static class DatabaseCompositionExpansion
         return effects;
     }
 
-    internal static QueueGraphLink ReadLink(this DatabaseEngine engine, string json, PartitionRef partition)
+    internal static QueueGraphLink ReadLink(string json, PartitionRef partition)
     {
         try
         {
@@ -129,7 +129,7 @@ public static class DatabaseCompositionExpansion
             }
 
             var link = JsonSerializer.Deserialize<QueueGraphLink>(json, JsonDefaults.Options) ?? throw Errors.Fail(ErrorCode.Validation, DatabaseCompositionExecution.InvalidLink);
-            engine.ValidateLink(link, partition);
+            DatabaseCompositionExpansion.ValidateLink(link, partition);
             ValidatePartitionDigest(parsed.RootElement.GetProperty(FromJsonProperty), link.From.Partition);
             ValidatePartitionDigest(parsed.RootElement.GetProperty(ToJsonProperty), link.To.Partition);
             return link;
@@ -183,7 +183,7 @@ public static class DatabaseCompositionExpansion
         return required.All(seen.Contains);
     }
 
-    internal static void ValidateLink(this DatabaseEngine engine, QueueGraphLink link, PartitionRef partition)
+    internal static void ValidateLink(QueueGraphLink link, PartitionRef partition)
     {
         if (link.From is null || link.To is null || link.From.Partition != partition || link.To.Partition != partition)
         {
@@ -195,6 +195,6 @@ public static class DatabaseCompositionExpansion
         JsonData.Identifier(link.To.Collection);
         JsonData.Identifier(link.To.Id);
         JsonData.Identifier(link.Label);
-        JsonData.Validate(link.AttributesJson, engine.Limits);
+        JsonData.Validate(link.AttributesJson);
     }
 }

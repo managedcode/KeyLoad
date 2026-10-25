@@ -17,7 +17,7 @@ public static class GraphTraversalQueriesGraphShortestPath
     public static GraphShortestPathResult ShortestPath(this DatabaseEngine engine, string principalId, GraphShortestPathRequest request, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, timeProvider ?? engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(timeProvider ?? engine.Clock, cancellationToken);
         return engine.ShortestPath(principalId, request, budget);
     }
 
@@ -32,7 +32,7 @@ public static class GraphTraversalQueriesGraphShortestPath
     {
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
-        var labels = GraphShortestPathValidation.Validate(request, engine.Limits, budget, engine.GraphExecution);
+        var labels = GraphShortestPathValidation.Validate(request, budget, engine.GraphExecution);
         return engine.Store.Read(view =>
         {
             var budgetedView = budget.CreateView(view);

@@ -13,8 +13,8 @@ internal static class AnnLifetimeRead
             var bounded = work.CreateView(view);
             var principal = source.Database.Principal(bounded, AnnLifetimeProtocol.Reader, source.Database.EvaluationClock.GetUtcNow());
             var definition = source.Database.Resource(bounded, source.Partition, AnnSeedTestSupport.Collection, ResourceKind.Collection);
-            var definitions = PartitionResourceCatalog.Capture(bounded, source.Partition, source.Database.Limits);
-            var coverage = ResourceLifetimeCoverageValidation.Capture(bounded, source.Partition, definitions, source.Database.Limits.MaxBatchBytes);
+            var definitions = PartitionResourceCatalog.Capture(bounded, source.Partition);
+            var coverage = ResourceLifetimeCoverageValidation.Capture(bounded, source.Partition, definitions);
             return new(definition, coverage, principal, definitions);
         });
 

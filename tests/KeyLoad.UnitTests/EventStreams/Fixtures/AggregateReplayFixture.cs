@@ -132,7 +132,7 @@ internal sealed class AggregateReplayFixture : IDisposable
     {
         var bytes = store.Read(view => view.ReadOwnedValue(SnapshotKey()));
         return bytes is null ? throw new InvalidOperationException("The snapshot is absent.")
-            : AggregateSnapshotPersistence.Deserialize(bytes, database.Limits);
+            : AggregateSnapshotPersistence.Deserialize(bytes);
     }
 
     internal byte[] SnapshotKey(long generation = 1)

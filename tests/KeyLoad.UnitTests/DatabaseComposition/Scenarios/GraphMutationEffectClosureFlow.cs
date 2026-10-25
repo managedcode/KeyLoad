@@ -30,7 +30,7 @@ internal static class GraphMutationEffectClosureFlow
                 : await CompositionPrefixPrepareCommands.CommitAsync(owner,
                     [new UpsertEdge(D.Graph, D.Edge, from, to, D.Label, ExpectedRevision: D.Absent)],
                     [new(D.Upsert, D.Graph, D.Edge, D.FirstRevision)]);
-            var admission = ResourceEffectAdmissionValidation.Read(command.Original, owner.Database.Limits);
+            var admission = ResourceEffectAdmissionValidation.Read(command.Original);
             await Assert.That(admission.Error).IsNull();
             await Assert.That(admission.Bindings.ToHashSet().SetEquals(new[] { D.From, D.To, D.Graph }
                 .Select(name => owner.Lifetimes[name]))).IsTrue();

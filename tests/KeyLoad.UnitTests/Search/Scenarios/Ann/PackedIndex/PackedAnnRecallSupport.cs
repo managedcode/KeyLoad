@@ -12,7 +12,7 @@ internal static class PackedAnnRecallSupport
         new("0.1-percent", 1_000, false), new("geometry-correlated-10-percent", 0, true)
     ];
 
-    internal static async Task<PackedAnnRecallObservation> MeasureCell(TestDatabase database,
+    internal static async Task<PackedAnnRecallObservation> MeasureCell(
         VectorRecord[] records, PackedAnnIndex index, DistanceMetric metric, PackedAnnRecallCell cell)
     {
         var modes = new HashSet<AnnSearchMode>();
@@ -33,7 +33,7 @@ internal static class PackedAnnRecallSupport
             var bitmap = Bitmap(records.Length, eligible);
             var exact = Rank(allScores, eligible);
             var result = index.Search(query, PackedAnnTestData.TopK, bitmap,
-                PackedAnnIndexTestSupport.Budget(database));
+                PackedAnnIndexTestSupport.Budget());
             modes.Add(result.Mode);
             work = checked(work + result.WorkUnits);
             distances = checked(distances + result.DistanceEvaluations);

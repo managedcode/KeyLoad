@@ -9,7 +9,7 @@ internal static class AnalyticsSharedAssertions
     internal static async Task BindingsAsync(TestDatabase fixture, Guid commandId)
     {
         var operation = fixture.ReadStoredOutcome(commandId).PreparedCommand!;
-        var captured = ResourceEffectAdmissionValidation.Read(operation, new DatabaseLimits());
+        var captured = ResourceEffectAdmissionValidation.Read(operation);
         var expected = new[]
         {
             AnalyticsExpectedResourceCreation.Lifetime(fixture, AnalyticsExpectedResourceCreation.SharedStore),

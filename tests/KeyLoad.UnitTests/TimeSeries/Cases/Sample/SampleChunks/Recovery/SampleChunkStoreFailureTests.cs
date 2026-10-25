@@ -42,12 +42,9 @@ internal sealed class SampleChunkStoreFailureTests
         var database = fixture.Database;
         var cut = fixture.CaptureCodecCut();
         var before = SampleChunkStoreFixture.CaptureCanonicalState(database);
-        var limits = database.Database.Limits with
-        {
-            QueryDeadlineSeconds = 1
-        };
         var clock = new SampleRollupWorkClock();
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), clock);
+        var budget = new ReadExecutionBudget(clock);
+        budget.ConstrainLifetime(clock.GetUtcNow().AddSeconds(1));
         budget.ChargeBytes(cut.Encoded.Length);
         clock.Advance(TimeSpan.FromMilliseconds(1_100));
 

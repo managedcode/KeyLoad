@@ -10,14 +10,14 @@ internal static class BoundLeaseDisposalFollowing
         BoundLeaseOperation previous, CancellationToken token)
     {
         var database = state.Leader.Database.Database;
-        using var ledger = new ResourceLifetimeWorkResultRetention(database.OperationLimitsOptions);
+        using var ledger = new ResourceLifetimeWorkResultRetention();
         RequestWorkLease? parent = null;
         var errors = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             parent = previous.Owner.Acquire(previous.Parent.RequestId, RequestWorkKind.RequestProducer);
             parent.AttachResultRetention(ledger);
-            var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+            var budget = new ReadExecutionBudget(database.EvaluationClock, token);
             budget.AttachResourceLifetimeBinding(parent);
             budget.ConstrainLifetime(previous.Expiry);
             var operation = new BoundLeaseOperation(previous.Owner, ledger, parent, budget,

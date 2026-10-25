@@ -40,30 +40,29 @@ internal static class PublicReadFixture
     internal static ErrorCode Code(PublicQueryShape shape)
         => shape == PublicQueryShape.InValues ? ErrorCode.UnsupportedCapability : ErrorCode.Validation;
 
-    internal static ReadOnlyMemory<byte> Encode<T>(T value, GrainReadKind kind, TestDatabase database)
+    internal static ReadOnlyMemory<byte> Encode<T>(T value, GrainReadKind kind)
     {
         // These are real public MCP JSON arguments; only the internal forwarded value becomes execution.
         var arguments = new Dictionary<string, JsonElement>
         {
             [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(value, JsonDefaults.Options)
         };
-        return McpArgumentDecoder.Read<T>(arguments, kind, database.Database.Limits.MaxQueryBytes).Payload;
+        return McpArgumentDecoder.Read<T>(arguments, kind, UnitMcpOptions.CanonicalPayloadBytes).Payload;
     }
 
-    internal static ReadOnlyMemory<byte> Encode(AstQueryRequest query, GrainReadKind kind, TestDatabase database)
+    internal static ReadOnlyMemory<byte> Encode(AstQueryRequest query, GrainReadKind kind)
         => kind switch
         {
-            GrainReadKind.AstQuery => Encode<AstQueryRequest>(query, kind, database),
-            GrainReadKind.LiveQueryStart => Encode(new StartLiveQueryRequest(query), kind, database),
-            GrainReadKind.LiveQueryRead => Encode(new ReadLiveQueryRequest(query, Alias), kind, database),
+            GrainReadKind.AstQuery => Encode<AstQueryRequest>(query, kind),
+            GrainReadKind.LiveQueryStart => Encode(new StartLiveQueryRequest(query), kind),
+            GrainReadKind.LiveQueryRead => Encode(new ReadLiveQueryRequest(query, Alias), kind),
             _ => throw new ArgumentOutOfRangeException(nameof(kind))
         };
 
     internal static DecodedGrainRequest Signed(TestDatabase database, ReadOnlyMemory<byte> payload, GrainReadKind kind,
         string principal = AuthorityFixture.Root)
     {
-        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation,
-            database.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         return codec.Decode(codec.CreateRead(Guid.NewGuid(), principal, kind, payload));
     }
 

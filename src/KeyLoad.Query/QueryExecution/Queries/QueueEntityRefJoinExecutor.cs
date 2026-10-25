@@ -59,7 +59,7 @@ internal static class QueueEntityRefJoinExecutor
         {
             return;
         }
-        var lifetime = budget.CaptureResourceLifetimes(database, view, request.Partition, [target]).Lifetimes.Single();
+        var lifetime = budget.CaptureResourceLifetimes(view, request.Partition, [target]).Lifetimes.Single();
         reference = EntityReferenceLifetime.Bind(reference, lifetime);
         var right = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(reference));
         if (right is null)

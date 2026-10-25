@@ -7,14 +7,14 @@ internal static class PackedAnnIndexTestSupport
 {
     internal const long GenerousWorkLimit = 1_000_000_000;
 
-    internal static AnnWorkBudget Budget(TestDatabase database, long maxWorkUnits = GenerousWorkLimit,
+    internal static AnnWorkBudget Budget(long maxWorkUnits = GenerousWorkLimit,
         CancellationToken token = default)
-        => new(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: token), maxWorkUnits);
+        => new(new ReadExecutionBudget(cancellationToken: token), maxWorkUnits);
 
-    internal static PackedAnnIndex Build(TestDatabase database, DistanceMetric metric, VectorRecord[] records,
+    internal static PackedAnnIndex Build(DistanceMetric metric, VectorRecord[] records,
         PackedAnnOptions? options = null, AnnWorkBudget? budget = null)
         => PackedAnnIndex.Build(PackedAnnTestData.Space(metric, records.FirstOrDefault()?.Values.Length ?? 1), records,
-            UnitExecutionOptions.PackedAnn(options ?? new()), budget ?? Budget(database));
+            UnitExecutionOptions.PackedAnn(options ?? new()), budget ?? Budget());
 
     internal static PackedAnnIndex Build(VectorSpace space, IReadOnlyList<VectorRecord> records,
         PackedAnnOptions options, AnnWorkBudget budget)

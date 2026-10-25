@@ -11,7 +11,7 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
     private const string RootPrincipalId = "root";
     private const string DocumentId = "roster-document";
     private const int JournalFrameLimit = int.MaxValue;
-    private const int DocumentPayloadBudgetDivisor = 4;
+    private const int DocumentPayloadBytes = 262_144;
 
     [Test]
     public async Task AcBackup004RosterFrameExhaustionPersistsRejectedOutcomeWithoutEffect()
@@ -20,7 +20,7 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
         calibration.ConfigureGraph();
         var documentJson = JsonSerializer.Serialize(new
         {
-            payload = new string('x', calibration.Database.Limits.MaxDocumentBytes / DocumentPayloadBudgetDivisor)
+            payload = new string('x', DocumentPayloadBytes)
         });
         var commandId = Guid.NewGuid();
         var successful = calibration.Batch(AtomicPartitionRosterFixture.Source, commandId,

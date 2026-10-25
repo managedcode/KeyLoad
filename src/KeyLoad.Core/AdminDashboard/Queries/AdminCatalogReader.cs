@@ -19,7 +19,7 @@ public sealed class AdminCatalogReader(DatabaseEngine database)
         JsonData.Identifier(request.TenantId);
         JsonData.Identifier(request.DatabaseId);
         AdminReadAuthority.ValidatePage(request.Limit, request.AfterName);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         return database.Store.Read(view => ReadPage(budget.CreateView(view), budget, principalId, request));
     }
 

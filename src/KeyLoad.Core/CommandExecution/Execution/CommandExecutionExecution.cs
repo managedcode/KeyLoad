@@ -38,12 +38,11 @@ public static class CommandExecutionExecution
 
     internal static Command<DatabaseCommand> CreateCommandCore(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> payload, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
     {
-        engine.RequireBudget(payload.Length);
         payload = payload.ToArray();
         var identity = kind switch
         {
             OperationKind.FileMetadata => Identity<global::KeyLoad.Core.BlobStorage.FileMetadataMutation>(payload),
-            OperationKind.Batch => engine.BatchIdentity(payload, work),
+            OperationKind.Batch => CommandExecutionExecution.BatchIdentity(payload, work),
             OperationKind.Receive => Identity<ReceiveRequest>(payload),
             OperationKind.Delivery => Identity<DeliveryCommand>(payload),
             OperationKind.Processing => Identity<ProcessingRequest>(payload),
@@ -71,7 +70,7 @@ public static class CommandExecutionExecution
         return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(id, kind, principalId, identity), work, admissionView);
     }
 
-    internal static string BatchIdentity(this DatabaseEngine engine, ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)
+    internal static string BatchIdentity(ReadOnlyMemory<byte> payload, ReadExecutionBudget? work)
     {
         var request = OrleansSerialization.Deserialize<CommandRequest>(payload.Span, ValidationProfile.PublicInputElements);
         if (!AnalyticsIdentity.HasAnalyticsMutation(request))
@@ -84,7 +83,7 @@ public static class CommandExecutionExecution
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnalyticsWorkRequired);
         }
 
-        return AnalyticsIdentity.Canonicalize(request, work, engine.Limits.MaxBatchBytes);
+        return AnalyticsIdentity.Canonicalize(request, work);
     }
 
     internal const string AnalyticsWorkRequired = "Execution analytics issuance requires the original operation budget.";

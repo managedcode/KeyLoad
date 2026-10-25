@@ -25,13 +25,12 @@ internal static class ResourceLifetimeLedgerSession
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             workOwner = new();
-            retention = new(owner.Database.OperationLimitsOptions);
+            retention = new();
             parent = workOwner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer);
             parent.AttachResultRetention(retention);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(owner.CallerToken, parent.Cancellation);
-            var budget = new ReadExecutionBudget(owner.Database.OperationLimitsOptions,
-                owner.Database.EvaluationClock, linked.Token);
-            var expiry = owner.Database.EvaluationClock.GetUtcNow().AddSeconds(owner.Database.Limits.QueryDeadlineSeconds);
+            var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, linked.Token);
+            var expiry = owner.Database.EvaluationClock.GetUtcNow().Add(UnitExecutionOptions.OperationLifetime);
             budget.ConstrainLifetime(expiry);
             await Assert.That(parent.ResultRetention).IsSameReferenceAs(retention);
             await body(workOwner, retention, parent, budget, expiry);

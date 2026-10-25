@@ -24,7 +24,7 @@ internal static class AnnWaitExecution
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
         }
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -52,7 +52,6 @@ internal static class AnnWaitExecution
         string principalId, WaitForAnnIndexRequest request, ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata = null)
         => database.WithQueryView(principalId, request.Partition, request.Collection, Capability.VectorSearch, (view, principal, resource) =>
         {
-            FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
             database.Authorization.Require(principal, request.Partition, request.Collection, Capability.VectorSearch);
             if (string.IsNullOrEmpty(request.VectorField) || request.Space is null || request.Consumer is null
                 || request.Consumer.Partition != request.Partition || request.IndexGeneration <= InitialPosition

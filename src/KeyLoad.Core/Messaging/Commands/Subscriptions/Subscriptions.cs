@@ -36,8 +36,7 @@ public static class Subscriptions
             throw Errors.Fail(ErrorCode.Corruption, SubscriptionUpdateWindowDetail);
         }
 
-        var windowBudget = new SubscriptionWindowAuthorityReadBudget(engine.OperationLimitsOptions);
-        engine.ValidateSubscriptionGroupProgress(tx, request.Subscription, state, head, windowBudget);
+        SubscriptionDeliveryAuthority.ValidateSubscriptionGroupProgress(tx, request.Subscription, state, head);
         if (JsonData.Fingerprint(state.Definition) == JsonData.Fingerprint(definition))
         {
             return SubscriptionGroups.ValidatedGroupInfo(request.Subscription, state, head);
@@ -54,7 +53,7 @@ public static class Subscriptions
         };
         ClearValidatedSubscriptionDefinitionWindow(tx, request.Subscription, state);
         tx.PutRecord(key, next);
-        engine.ValidateSubscriptionGroupProgress(tx, request.Subscription, next, head, windowBudget);
+        SubscriptionDeliveryAuthority.ValidateSubscriptionGroupProgress(tx, request.Subscription, next, head);
         return SubscriptionGroups.ValidatedGroupInfo(request.Subscription, next, head);
     }
 

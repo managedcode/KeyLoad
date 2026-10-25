@@ -10,7 +10,6 @@ internal static class Bm25CorpusProtocol
     internal const string DigestDomain = "keyload-bm25-corpus-source";
     internal const string Invalid = "The BM25 corpus statistics are inconsistent.";
     internal const string Changed = "The BM25 corpus source or current generation changed.";
-    internal const string Capacity = "The BM25 corpus statistics exceed the configured family budget.";
     internal const string Unavailable = "The BM25 corpus maintenance operation could not complete.";
     internal const string Administrator = "BM25 corpus maintenance requires current administrator authority.";
 }

@@ -25,7 +25,7 @@ internal sealed class DropTableExecution(PartitionHost partition, TimeProvider c
         }
         using var timeout = new CancellationTokenSource(remaining, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
-        var work = new ReadExecutionBudget(partition.Database.OperationLimitsOptions, clock, deadline.Token);
+        var work = new ReadExecutionBudget(clock, deadline.Token);
         work.ConstrainLifetime(originalExpiry);
         await partition.Coordinator.ReadBarrierAsync(deadline.Token);
         var principal = partition.Database.Store.Read(raw => partition.Database.Principal(

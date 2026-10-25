@@ -20,7 +20,7 @@ public static class SearchCommands
 
         var resource = engine.Resource(transaction, current.Partition, current.Collection, ResourceKind.Collection);
         var placement = engine.ReadPlacementWitness(transaction, current.Partition);
-        if (!Bm25CorpusDependencies.Matches(engine, transaction, principal, resource, current, placement, engine.Limits.MaxBatchBytes))
+        if (!Bm25CorpusDependencies.Matches(engine, transaction, principal, resource, current, placement))
         {
             throw Errors.Fail(ErrorCode.Conflict, Bm25CorpusProtocol.Changed);
         }
@@ -32,7 +32,6 @@ public static class SearchCommands
             throw Errors.Fail(ErrorCode.Conflict, Bm25CorpusProtocol.Changed);
         }
 
-        Bm25CorpusFamilyAdmission.Require(transaction, key, current, engine.Limits);
         transaction.PutRecord(key, current);
         return OperationProtocol.Result(new CommitReceipt(operation.CommandId, engine.Token(transaction, current.Partition, position), [], engine.Durability, engine.AcknowledgedPersistedCopies));
     }

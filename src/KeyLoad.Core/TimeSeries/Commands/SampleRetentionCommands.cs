@@ -8,10 +8,8 @@ public static class SampleRetentionCommands
     internal const string InvalidRetentionCutoff = "The time-series retention cutoff is invalid.";
     internal const string InvalidRetentionPage = "The time-series retention page is invalid.";
     internal const string RetentionCutoffMovedBackwards = "The time-series retention cutoff cannot move backwards.";
-    internal const string RetentionReadBudgetExceeded = "The time-series retention scan exceeds its byte budget.";
     internal static MutationReceipt Expire(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ExpireSamples request, DateTimeOffset now)
     {
-        const int ExaminedBytesInitialValue = 0;
         const int PreviousPurgedCountValidationBoundary = 0;
         const string ExpireKindText = "expireSamples";
         var before = engine.ValidateRetention(tx, principal, partition, request, now);
@@ -25,23 +23,12 @@ public static class SampleRetentionCommands
         var prefix = SampleReadKeys.Prefix(partition, request.SeriesSet, request.SeriesId);
         var until = SampleReadKeys.FromInclusive(partition, request.SeriesSet, request.SeriesId, before);
         var deleteKeys = new List<byte[]>(request.MaximumDeletes);
-        long examinedBytes = ExaminedBytesInitialValue;
-        void Charge(long bytes)
-        {
-            if (bytes > engine.Limits.MaxQueryReadBytes - examinedBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, RetentionReadBudgetExceeded);
-            }
-
-            examinedBytes += bytes;
-        }
-
         var scan = tx.VisitRange(prefix, request.MaximumDeletes, (key, value) =>
         {
             ValidateRetainedSample(key, value, partition, request, before);
             deleteKeys.Add(key.ToArray());
             return true;
-        }, untilKey: until, observer: Charge);
+        }, untilKey: until);
         foreach (var key in deleteKeys)
         {
             tx.Delete(key);
@@ -61,7 +48,7 @@ public static class SampleRetentionCommands
         JsonData.Identifier(request.SeriesId);
         engine.Authorization.Require(principal, partition, request.SeriesSet, Capability.SeriesManage);
         _ = engine.Resource(view, partition, request.SeriesSet, ResourceKind.TimeSeries);
-        if (request.MaximumDeletes is < MaximumDeletesFirstCount or > SampleRetentionDefaults.MaximumDeletes || request.MaximumDeletes > engine.Limits.MaxScanRecords)
+        if (request.MaximumDeletes is < MaximumDeletesFirstCount or > SampleRetentionDefaults.MaximumDeletes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidRetentionPage);
         }

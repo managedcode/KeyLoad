@@ -9,7 +9,6 @@ internal static partial class TextSeedCollector
     private const long EmptyPosition = 0;
     private const string InvalidScope = "The text projection source scope is inconsistent.";
     private const string OwnerLost = "The text projection owner no longer matches the canonical placement.";
-    private const string SeedExceeded = "The text projection seed exceeds its record budget.";
     private static readonly string[] MutationKinds = [MutationDiscriminatorNames.PutDocument,
         MutationDiscriminatorNames.PatchDocument, MutationDiscriminatorNames.DeleteDocument];
 
@@ -29,8 +28,7 @@ internal static partial class TextSeedCollector
         var metadata = CaptureMetadataView(database, raw, principalId, pin, budget);
         var partition = pin.Consumer.Partition;
         var documents = new List<DocumentRecord>();
-        var range = budget.VisitRange(raw, DocumentStorageKeys.Prefix(partition, pin.Collection),
-            database.Limits.MaxScanRecords, (key, value) =>
+        _ = budget.VisitAll(raw, DocumentStorageKeys.Prefix(partition, pin.Collection), (key, value) =>
             {
                 budget.ChargeBytes(value.Length);
                 var document = OrleansSerialization.Deserialize<DocumentRecord>(value);
@@ -43,10 +41,6 @@ internal static partial class TextSeedCollector
                 documents.Add(document);
                 return true;
             });
-        if (range.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded);
-        }
         budget.Check();
         return metadata with
         {

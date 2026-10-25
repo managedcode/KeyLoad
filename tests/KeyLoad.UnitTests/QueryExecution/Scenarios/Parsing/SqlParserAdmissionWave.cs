@@ -9,7 +9,7 @@ internal static class SqlParserAdmissionWave
         await ScriptDomOrdinalReadAdmission.RunAsync(fixture, database, store, token);
         await SqlParserAdmissionUnicode.RunAsync(fixture, database, store, token);
         await SqlParserAdmissionNumericControls.RunAsync(fixture, database, store, token);
-        await SqlParserAdmissionModelPages.InsertRefusalAsync(fixture, database, store, token);
+        await SqlParserAdmissionModelPages.InsertRefusalAsync(fixture, store, token);
         foreach (var (sql, code, detail) in SqlParserAdmissionInputs.Corpus())
         {
             await SqlParserAdmissionReads.RefuseAsync(fixture, database, store, sql, code, detail, token);

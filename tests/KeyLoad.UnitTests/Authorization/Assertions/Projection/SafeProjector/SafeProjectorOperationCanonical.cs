@@ -58,8 +58,7 @@ internal static class SafeProjectorOperationCanonical
 
     private static string[] Rows(SafeProjectorOperationDatabase owner, string family) => owner.Store.Read(view =>
     {
-        var page = view.Scan(KeySpace.Partition(family, owner.Source.Partition, SafeProjectorOperationProtocol.Collection),
-            owner.Database.Limits.MaxScanRecords);
+        var page = view.Scan(KeySpace.Partition(family, owner.Source.Partition, SafeProjectorOperationProtocol.Collection), view.MaximumRangeRecords);
         if (page.HasMore)
         {
             throw new InvalidOperationException(IncompleteImage);

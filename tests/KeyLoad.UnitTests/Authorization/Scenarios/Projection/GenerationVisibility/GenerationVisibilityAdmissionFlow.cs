@@ -45,6 +45,6 @@ internal static class GenerationVisibilityAdmissionFlow
         await GenerationVisibilityAssertions.HealthyAsync(db, db.Database, queries, db.Store,
             GenerationVisibilityFlow.InitialRevision, TeamRowPolicyFlow.OriginalJson, token);
         await Assert.That(memory.GetSnapshot().RetainedBytes).IsGreaterThan(NoRetainedBytes);
-        await GenerationVisibilityPartialScanFlow.RunAsync(db, memory, token);
+        await GenerationVisibilityPartialScanFlow.RunAsync(db, token);
     }
 }

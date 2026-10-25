@@ -12,17 +12,12 @@ internal static class SampleChunkWindowOpen
     {
         SampleChunkWindowScope.Require(database, tx, principal, partition, request.SeriesSet, request.SeriesId, request.WindowId);
         SampleRollupValidation.Range(request.From, request.Until);
-        if (options.Value.MaximumChunkWindowRecords > database.Limits.MaxScanRecords)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
-        }
-        var charge = new SampleChunkReadCharge(database.Limits.MaxQueryReadBytes);
-        var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
+        var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId);
         if (watermark.Floor is { } floor && request.From.UtcTicks < floor)
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleChunkLifecycleProtocol.Missing);
         }
-        var windows = SampleChunkStorage.Windows(tx, partition, request.SeriesSet, request.SeriesId, options.Value, charge);
+        var windows = SampleChunkStorage.Windows(tx, partition, request.SeriesSet, request.SeriesId, options.Value);
         if (windows.Count >= options.Value.MaximumChunkWindows)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
@@ -32,24 +27,23 @@ internal static class SampleChunkWindowOpen
         {
             throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing);
         }
-        RequireEmpty(tx, partition, request, charge);
+        RequireEmpty(tx, partition, request);
         var window = new SampleChunkWindow(SampleChunkLifecycleProtocol.Version, request.WindowId,
             request.From.UtcTicks, request.Until.UtcTicks, SampleChunkLifecycleProtocol.First,
             SampleChunkLifecycleProtocol.Absent, SampleChunkWindowState.Open, principal.Id, watermark.Sequence,
             ImmutableArray<SampleRecord>.Empty, ImmutableArray<long>.Empty, Guid.Empty, watermark.Floor);
         SampleChunkStorage.Write(tx, SampleChunkKeys.Window(partition, request.SeriesSet, request.SeriesId, request.WindowId),
-            window, database.Limits.MaxBatchBytes);
+            window);
         return new(SampleChunkLifecycleProtocol.OpenKind, request.SeriesSet, request.SeriesId, window.Revision);
     }
 
-    private static void RequireEmpty(IKeyValueView view, PartitionRef partition, OpenSampleChunkWindow request,
-        SampleChunkReadCharge charge)
+    private static void RequireEmpty(IKeyValueView view, PartitionRef partition, OpenSampleChunkWindow request)
     {
         var found = false;
         view.VisitRange(SampleReadKeys.Prefix(partition, request.SeriesSet, request.SeriesId),
             checked((int)SampleChunkLifecycleProtocol.First), (_, _) => { found = true; return false; },
             SampleReadKeys.FromInclusive(partition, request.SeriesSet, request.SeriesId, request.From),
-            SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.Until), charge.Charge);
+            SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.Until));
         if (found)
         {
             throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing);

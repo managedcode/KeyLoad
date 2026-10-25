@@ -12,7 +12,6 @@ internal sealed class SampleChunkAppendOwner
     private readonly string series;
     private readonly IOptions<TimeSeriesExecutionOptions> options;
     private readonly List<SampleChunkWindow> windows;
-    private readonly SampleChunkReadCharge charge;
 
     internal SampleChunkAppendOwner(DatabaseEngine database, IAtomicTransaction transaction, PartitionRef partition,
         string set, string series, IOptions<TimeSeriesExecutionOptions> options)
@@ -23,8 +22,7 @@ internal sealed class SampleChunkAppendOwner
         this.set = set;
         this.series = series;
         this.options = options;
-        charge = new(database.Limits.MaxQueryReadBytes);
-        windows = SampleChunkStorage.Windows(transaction, partition, set, series, options.Value, charge);
+        windows = SampleChunkStorage.Windows(transaction, partition, set, series, options.Value);
     }
 
     internal void Append(SampleRecord record, DateTimeOffset evaluatedAt)
@@ -57,7 +55,7 @@ internal sealed class SampleChunkAppendOwner
             };
             if (next.OpenRecords.Length >= SampleChunkWire.MaximumRecords || evaluatedAt.UtcTicks >= window.UntilUtcTicks)
             {
-                next = SampleChunkWindowSeal.Seal(database, transaction, partition, set, series, next, options);
+                next = SampleChunkWindowSeal.Seal(transaction, partition, set, series, next, options);
             }
         }
         else
@@ -65,14 +63,14 @@ internal sealed class SampleChunkAppendOwner
             next = Correct(window, next, record);
         }
         SampleChunkStorage.Write(transaction, SampleChunkKeys.Window(partition, set, series, next.WindowId),
-            next, database.Limits.MaxBatchBytes);
+            next);
         windows[index] = next;
     }
 
     private SampleChunkWindow Correct(SampleChunkWindow original, SampleChunkWindow next, SampleRecord record)
     {
         var manifest = SampleChunkManifestReader.Read(transaction, partition, set, series, original,
-            options.Value.MaximumChunkWindowRecords, charge, options);
+            options.Value.MaximumChunkWindowRecords, options);
         if (original.CorrectionSequences.Length >= options.Value.MaximumChunkCorrections
             || manifest.RecordCount + original.CorrectionSequences.Length >= options.Value.MaximumChunkWindowRecords)
         {
@@ -84,7 +82,7 @@ internal sealed class SampleChunkAppendOwner
             throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkLifecycleProtocol.Exhausted);
         }
         SampleChunkStorage.Write(transaction, SampleChunkKeys.Correction(partition, set, series, original.WindowId, record.Sequence),
-            record, database.Limits.MaxBatchBytes);
+            record);
         return next with
         {
             CorrectionSequences = original.CorrectionSequences.Add(record.Sequence),

@@ -50,7 +50,7 @@ internal static class RemoteTransferAttemptColdTrial
         var witness = RemoteTransferAttemptCold.Read(fixture, request).FailureWitness
             ?? throw new InvalidOperationException(RemoteTransferAttemptColdProtocol.Missing);
         await RemoteTransferAttemptColdRefusals.BeforeAdvanceAsync(fixture, transfer, original, request, witness);
-        var claims = fixture.Database.Verify<RemoteTransferAcceptFailureClaims>(witness, fixture.Database.Limits.MaxBatchBytes);
+        var claims = fixture.Database.VerifyRetained<RemoteTransferAcceptFailureClaims>(witness);
         var advance = new CommandRequest(RemoteTransferAttemptIdentity.AdvanceId(hint, hint.AcceptGeneration, claims.OutcomeDigest),
             fixture.SourcePartition, [new AdvanceQueueTransferAttempt(fixture.SourceQueue, transfer.TransferId, hint.AcceptGeneration, witness)]);
         if (ceiling == RemoteTransferAttemptColdProtocol.SingleAttemptCeiling)

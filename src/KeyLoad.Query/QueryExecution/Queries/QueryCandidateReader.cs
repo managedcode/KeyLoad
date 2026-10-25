@@ -107,13 +107,12 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         }
     }
 
-    /// <summary>Visits one range, never asking storage for more records than one range read may examine.</summary>
+    /// <summary>Visits a complete range in storage-sized pages; only the visitor ends it early.</summary>
     private StorageScanResult VisitRange(byte[] prefix, StorageRecordVisitor visitor, byte[]? afterKey = null)
     {
         if (leafGrant is null)
         {
-            return budget.VisitRange(view, prefix, Math.Min(database.Limits.MaxScanRecords, view.MaximumRangeRecords),
-                visitor, afterKey);
+            return budget.VisitAll(view, prefix, visitor, afterKey);
         }
 
         return leafGrant.VisitRange(view, prefix, visitor);

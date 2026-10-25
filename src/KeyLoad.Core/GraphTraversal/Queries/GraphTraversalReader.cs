@@ -11,7 +11,6 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
     int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget)
 {
     private const int EmptyLabelCount = 0;
-    private const long NoReplacementBytes = 0;
 
     private const string AdjacencySpace = "adjacency";
     private const string EdgeSpace = "edge";
@@ -20,13 +19,11 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
     private const string VertexVisitExceeded = "The vertex visit budget was exhausted.";
     private const string MissingEdge = "An adjacency record has no edge.";
     private const string InvalidAdjacency = "An outgoing graph adjacency record is inconsistent.";
-    private const string ResultExceeded = "The graph result byte budget is exceeded.";
     private readonly GraphVertexVisibility visibility = new(database, view, principal, budget);
     private readonly HashSet<EntityRef> visited = [];
-    private readonly Dictionary<string, (EdgeRecord Record, long Bytes)> edges = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, EdgeRecord> edges = new(StringComparer.Ordinal);
     private readonly Queue<(EntityRef Vertex, int Depth)> pending = new();
     private readonly HashSet<string>? labelSet = labels is { Length: > EmptyLabelCount } ? new(labels, StringComparer.Ordinal) : null;
-    private long resultLowerBound;
     private int examinedEdges;
 
     /// <summary>Returns deterministic qualified vertices and projected edges after exact response accounting.</summary>
@@ -47,7 +44,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         }
         var result = new GraphTraversalResult(visited.OrderBy(vertex => vertex.Collection, StringComparer.Ordinal)
             .ThenBy(vertex => vertex.Id, StringComparer.Ordinal).ToImmutableArray(),
-            edges.Values.Select(entry => entry.Record).OrderBy(edge => edge.Id, StringComparer.Ordinal).ToImmutableArray());
+            edges.Values.OrderBy(edge => edge.Id, StringComparer.Ordinal).ToImmutableArray());
         budget.CheckResult(result);
         return result;
     }
@@ -80,7 +77,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace, partition, graph, id))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         budget.Check();
-        GraphCrossPartitionValidation.ValidateEdge(edge, database.Limits);
+        GraphCrossPartitionValidation.ValidateEdge(edge);
         _ = visibility.CanVisit(edge.From);
         if (edge.Id != id || edge.From != source
             || !key.SequenceEqual(KeySpace.Partition(AdjacencySpace, partition, graph,
@@ -104,9 +101,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
 
     private void AddEdge(EdgeRecord edge)
     {
-        const int NoReplacedBytes = 0;
-
-        var replacing = edges.TryGetValue(edge.Id, out var previous);
+        var replacing = edges.ContainsKey(edge.Id);
         if (edges.Count >= maxEdges && !replacing)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeVisitExceeded);
@@ -115,9 +110,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         {
             AttributesJson = database.Authorization.Project(principal, resource.FieldPolicies, edge.AttributesJson, out _)
         };
-        var bytes = budget.MeasureResult(projected);
-        AddResultBytes(bytes, replacing ? previous.Bytes : NoReplacedBytes);
-        edges[edge.Id] = (projected, bytes);
+        edges[edge.Id] = projected;
     }
 
     private void AddVertex(EntityRef vertex, int depth)
@@ -130,18 +123,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, VertexVisitExceeded);
         }
-        AddResultBytes(budget.MeasureResult(vertex));
         visited.Add(vertex);
         pending.Enqueue((vertex, depth));
-    }
-
-    private void AddResultBytes(long bytes, long replacedBytes = NoReplacementBytes)
-    {
-        var retainedBytes = resultLowerBound - replacedBytes;
-        if (bytes > database.Limits.MaxBatchBytes - retainedBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ResultExceeded);
-        }
-        resultLowerBound = retainedBytes + bytes;
     }
 }

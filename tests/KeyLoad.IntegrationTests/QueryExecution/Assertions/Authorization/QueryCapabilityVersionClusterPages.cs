@@ -84,8 +84,7 @@ internal static class QueryCapabilityVersionClusterPages
         var body = JsonSerializer.Serialize(new
         {
             accessPath = "bounded-full-scan",
-            atomicPartition = state.Partition.AtomicPartitionId,
-            scanBudget = 10000
+            atomicPartition = state.Partition.AtomicPartitionId
         }, JsonDefaults.Options);
         foreach (var page in pages)
         {

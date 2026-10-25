@@ -1,14 +1,13 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core.ResourceExecution;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.RecoveryTests.ResourceExecution;
 
 /// <summary>Owns an unattached result ledger until its original lease accepts ownership.</summary>
-internal sealed class PendingResultRetention(IOptions<DatabaseLimits> options) : IDisposable
+internal sealed class PendingResultRetention : IDisposable
 {
     private const string MissingRetention = "The pending result ledger has already been transferred or was not acquired.";
-    private ResourceLifetimeWorkResultRetention? pending = new(options);
+    private ResourceLifetimeWorkResultRetention? pending = new();
 
     internal ResourceLifetimeWorkResultRetention TransferTo(RequestWorkLease lease)
     {

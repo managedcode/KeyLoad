@@ -6,12 +6,9 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices,
-    IOptions<DatabaseLimits> options, IOptions<GrainRoutingOptions> routing) : IGrainStorage, IDisposable
+internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices, IOptions<GrainRoutingOptions> routing) : IGrainStorage, IDisposable
 {
     private const long EmptyBytes = 0;
-    private const int NewEntry = 1;
-    private const int ExistingEntry = 0;
     private readonly Lock gate = new();
     private readonly Dictionary<GrainId, EventFeedPubSubRow> entries = new();
     private long retainedBytes;
@@ -65,13 +62,8 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices,
                 RequireType<T>(before);
             }
             var row = EventFeedPubSubRowEncoding.Create(originalServices, grainId, state.State!,
-                options, routing, cancellationToken);
+                routing, cancellationToken);
             var nextBytes = checked(retainedBytes - (before?.EncodedBytes ?? EmptyBytes) + row.EncodedBytes);
-            var nextCount = checked(entries.Count + (before is null ? NewEntry : ExistingEntry));
-            if (nextBytes > options.Value.MaxQueryReadBytes || nextCount > options.Value.MaxResults)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, EventFeedPubSubProtocol.Capacity);
-            }
             cancellationToken.ThrowIfCancellationRequested();
             entries[row.Key] = row;
             retainedBytes = nextBytes;
@@ -120,7 +112,6 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices,
     {
         cancellationToken.ThrowIfCancellationRequested();
         ObjectDisposedException.ThrowIf(closed, this);
-        options.Value.Validate();
     }
 
     private static void RequireRevision(string? expected, EventFeedPubSubRow? row)

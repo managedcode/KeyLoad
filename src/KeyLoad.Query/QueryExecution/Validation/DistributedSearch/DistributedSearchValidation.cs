@@ -12,11 +12,9 @@ internal static class DistributedSearchValidation
     private const string InvalidShape = "The distributed search shape or partition set is invalid.";
     private const string SelectedGenerationUnsupported = "Selected generations require their owning search operation.";
 
-    internal static ImmutableArray<PartitionRef> Require(DistributedSearchRequest request,
-        DatabaseLimits limits, IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget)
+    internal static ImmutableArray<PartitionRef> Require(DistributedSearchRequest request, IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
@@ -28,9 +26,8 @@ internal static class DistributedSearchValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidShape);
         }
-        FilteredSearchRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, budget);
-        SearchRequestValidation.Validate(request.Search, limits, false, execution);
-        FilteredSearchEligibility.ValidateRequest(request.Search.AllowedIds, limits, budget);
+        SearchRequestValidation.Validate(request.Search, false, execution);
+        FilteredSearchEligibility.ValidateRequest(request.Search.AllowedIds, budget);
         if (request.Search.TextIndex is not null)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, SelectedGenerationUnsupported);

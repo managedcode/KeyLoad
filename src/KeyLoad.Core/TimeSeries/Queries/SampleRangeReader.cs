@@ -6,16 +6,14 @@ internal static class SampleRangeReader
 {
     private const string SampleReadKeySpace = "sample";
     private const string InvalidSampleReadBudget = "The series read budget is invalid.";
-    private const string SampleResultBudgetExceeded = "The series result byte budget is exceeded.";
     private const int NextTimestampTick = 1;
 
     internal static SampleRecord[] Read(DatabaseEngine database, TimeProvider clock, IKeyValueView view,
         string principalId, ReadSamplesRequest request, ReadExecutionBudget budget)
     {
         const int LimitValidationBoundary = 1;
-        const long ResultBytesInitialValue = 0L;
 
-        if (request.From > request.Until || request.Limit < LimitValidationBoundary || request.Limit > database.Limits.MaxResults)
+        if (request.From > request.Until || request.Limit < LimitValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidSampleReadBudget);
         }
@@ -30,8 +28,7 @@ internal static class SampleRangeReader
         var after = KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId, from);
         var until = SampleUpperBound(request);
         var records = new List<SampleRecord>();
-        var resultBytes = ResultBytesInitialValue;
-        budget.VisitRange(view, prefix, request.Limit, (key, value) =>
+        _ = budget.VisitAll(view, prefix, (key, value) =>
         {
             var sample = SampleRawReadDecoder.Read(key, value,
                 request.Partition, request.Set, request.SeriesId);
@@ -39,13 +36,8 @@ internal static class SampleRangeReader
             {
                 TagsJson = database.Authorization.Project(principal, resource.FieldPolicies, sample.TagsJson, out _)
             };
-            resultBytes += budget.MeasureResult(projected);
-            if (resultBytes > database.Limits.MaxBatchBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, SampleResultBudgetExceeded);
-            }
             records.Add(projected);
-            return true;
+            return records.Count < request.Limit;
         }, after, until);
         var result = records.ToArray();
         budget.CheckResult(result);

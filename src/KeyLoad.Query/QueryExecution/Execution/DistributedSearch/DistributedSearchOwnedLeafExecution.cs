@@ -21,7 +21,7 @@ internal static partial class DistributedSearchOwnedLeafExecution
             throw Errors.Fail(ErrorCode.OwnershipLost, InvalidPhase);
         }
         var original = request;
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        var budget = new ReadExecutionBudget(clock, token);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
@@ -30,7 +30,7 @@ internal static partial class DistributedSearchOwnedLeafExecution
         execution.Validate();
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.ConstrainLifetime(originalExpiry);
-        DistributedSearchOwnedLeafValidation.Require(original, database.Limits, execution, budget);
+        DistributedSearchOwnedLeafValidation.Require(original, execution, budget);
         RequireOwner(database, original.Owner, actualOwner);
         budget.ConstrainResultBytes(original.MaxResultBytes);
         var grant = budget.CreateReadGrant(original.MaxReadBytes, original.MaxExaminedRecords);

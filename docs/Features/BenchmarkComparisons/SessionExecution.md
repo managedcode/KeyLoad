@@ -70,8 +70,8 @@ fixtures.
    Every database loads through the same client procedure: 16 clients send bounded
    batches of consecutive new records through the database's own bulk API, sized by
    the vendor's recommendation (`IDocumentComparisonTarget.IngestionBatchRecords`,
-   for example 256 mutations per KeyLoad command, which is the server's
-   `MaxBatchMutations`, and 1,000 rows per Neo4j `UNWIND`). A batch keeps the single
+   for example 256 mutations per KeyLoad command, where the server sets no
+   mutation-count ceiling, and 1,000 rows per Neo4j `UNWIND`). A batch keeps the single
    create's guarantees: create-only conflicts, the same acknowledgement or replica
    wait, and checks of every record in the response. Each record keeps its own sample
    and is acknowledged when its batch is, so load latency percentiles describe batch

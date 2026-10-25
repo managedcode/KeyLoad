@@ -17,7 +17,7 @@ internal static class UserAnalyticsProcessScenario
         var root = args[P.RootArgument];
         using var timeout = new CancellationTokenSource(CrashExecutionOptions.Child().Value.InspectionExecutionTimeout, TimeProvider.System);
         await UserAnalyticsProcessHost.RunAsync(root, (host, options) => args[P.ModeArgument] == P.Prepare
-            ? PrepareAsync(root, host, timeout.Token) : RecoverAsync(root, host, options, timeout.Token), timeout.Token);
+            ? PrepareAsync(root, host, timeout.Token) : RecoverAsync(root, host, timeout.Token), timeout.Token);
         return true;
     }
 
@@ -57,7 +57,7 @@ internal static class UserAnalyticsProcessScenario
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task RecoverAsync(string root, PartitionHost host, ServerRuntimeOptions options, CancellationToken token)
+    private static async Task RecoverAsync(string root, PartitionHost host, CancellationToken token)
     {
         var cut = await UserAnalyticsProcessState.ReadAsync(root, token);
         UserAnalyticsProcessState.Require(host, cut);
@@ -65,7 +65,7 @@ internal static class UserAnalyticsProcessScenario
         var failures = new List<Exception>();
         try
         {
-            await using var ownedRuntime = new UserAnalyticsRuntime(options.Core.DatabaseLimits);
+            await using var ownedRuntime = new UserAnalyticsRuntime();
             runtime = ownedRuntime;
             await ServerFailureObserver.ObserveAsync(async () =>
             {

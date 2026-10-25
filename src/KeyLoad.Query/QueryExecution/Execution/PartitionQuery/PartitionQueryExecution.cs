@@ -14,8 +14,7 @@ internal static class PartitionQueryExecution
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.PartitionQueryOwner.OperationLimitsOptions,
-            timeProvider ?? engine.PartitionQueryOwner.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(timeProvider ?? engine.PartitionQueryOwner.EvaluationClock, cancellationToken);
         return engine.ExecutePartitionQuery(principalId, request, partitions, budget);
     }
 
@@ -29,7 +28,7 @@ internal static class PartitionQueryExecution
         budget.Check();
         using var admission = database.AdmitQuery(budget.Cancellation);
         budget.Check();
-        var normalized = QueryValidation.Normalize(request, database.Limits, engine.Execution);
+        var normalized = QueryValidation.Normalize(request, engine.Execution);
         return ExecuteNormalized(engine, principalId, normalized, partitions, budget, null,
             measureInternalResult: true);
     }
@@ -39,10 +38,9 @@ internal static class PartitionQueryExecution
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(budget);
-        var database = engine.PartitionQueryOwner;
         QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
         budget.Check();
-        var prepared = PartitionQueryPublicValidation.Prepare(request, database.Limits, engine.Execution);
+        var prepared = PartitionQueryPublicValidation.Prepare(request, engine.Execution);
         return ExecuteNormalized(engine, principalId, prepared.Request, prepared.Partitions,
             budget, expectedOwner, measureInternalResult: false);
     }
@@ -55,9 +53,9 @@ internal static class PartitionQueryExecution
         ArgumentException.ThrowIfNullOrWhiteSpace(principalId);
         budget.Check();
         var identity = database.Store.Identity;
-        var plan = PartitionQueryPlanFactory.Create(normalized, identity, partitions, database.Limits, engine.Execution,
+        var plan = PartitionQueryPlanFactory.Create(normalized, identity, partitions, engine.Execution,
             maximumResultBytes: budget.MaximumResultBytes);
-        _ = PartitionQueryPlanValidation.Validate(plan, database.Limits, engine.Execution);
+        _ = PartitionQueryPlanValidation.Validate(plan, engine.Execution);
         var grants = ReserveGrants(budget, plan);
         var results = ImmutableArray.CreateBuilder<PartitionQueryLeafResult>(plan.Leaves.Length);
         var executor = new PartitionQueryLeafExecutor(engine, database, budget, expectedOwner);
@@ -73,7 +71,7 @@ internal static class PartitionQueryExecution
             }
             budget.CompleteReadGrant(grants[index]);
         }
-        var result = PartitionQueryMerge.Complete(plan, results.MoveToImmutable(), identity, database.Limits, budget, engine.Execution);
+        var result = PartitionQueryMerge.Complete(plan, results.MoveToImmutable(), identity, budget, engine.Execution);
         if (measureInternalResult)
         {
             budget.CheckResult(result);

@@ -10,7 +10,7 @@ internal sealed class ReadExecutionBudgetGrantRangeTests
             + ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;
         var result = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
+            var budget = new ReadExecutionBudget();
             var grant = budget.CreateReadGrant(maximumBytes, 2);
             var scan = grant.VisitRange(view, ReadExecutionBudgetGrantSeed.Prefix, 1, static (_, _) => true);
             return (Scan: scan, RootBytes: budget.ReadBytes, GrantBytes: grant.ReadBytes, grant.ExaminedRecords);
@@ -29,7 +29,7 @@ internal sealed class ReadExecutionBudgetGrantRangeTests
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var maximumBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length
             + ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
+        var budget = new ReadExecutionBudget();
         var grant = budget.CreateReadGrant(maximumBytes, 1);
         var visited = 0;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
@@ -54,7 +54,7 @@ internal sealed class ReadExecutionBudgetGrantRangeTests
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var result = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
+            var budget = new ReadExecutionBudget();
             var grant = budget.CreateReadGrant(0, 0);
             var scan = grant.VisitRange(view, ReadExecutionBudgetGrantSeed.EmptyRange, 1, static (_, _) => true);
             return (scan.Records, budget.ReadBytes);
@@ -69,7 +69,7 @@ internal sealed class ReadExecutionBudgetGrantRangeTests
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var maximumBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length - 1;
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
+        var budget = new ReadExecutionBudget();
         var grant = budget.CreateReadGrant(maximumBytes, 1);
         var visited = false;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>

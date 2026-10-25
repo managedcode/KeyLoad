@@ -16,8 +16,7 @@ internal static class AdapterPlanWholeFlowFixture
     };
     internal static AstQueryRequest Ast(TestDatabase database, bool explain)
     {
-        var query = new SqlParser(Sql,
-            UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse() with
+        var query = new SqlParser(Sql, UnitExecutionOptions.QueryExecution()).Parse() with
         {
             Explain = explain
         };

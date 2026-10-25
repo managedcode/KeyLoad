@@ -26,6 +26,6 @@ internal sealed class PackedAnnOwnedSimilarityTests
         var source = PackedAnnOwnedSimilarityTestSupport.Vectors(dimension);
         PackedAnnIndexTestSupport.PersistVectors(database, space, PackedAnnTestData.Field(metric), source);
         var records = PackedAnnTestData.Load(database, metric);
-        await PackedAnnOwnedSimilarityAssertions.VerifyPackedScoresAsync(database, space, metric, records);
+        await PackedAnnOwnedSimilarityAssertions.VerifyPackedScoresAsync(space, metric, records);
     }
 }

@@ -6,22 +6,21 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchGlobalFusion
 {
+    private const int AllCandidates = int.MaxValue;
     private const string IncompleteBranch = "The complete distributed search branch exceeds its original result budget.";
     private const string ConflictingRevision = "The distributed search branches disagree on a selected revision.";
 
     internal static ImmutableArray<GlobalBranchCandidate> Select(SearchRequest request,
         ImmutableArray<GlobalBranchWindow> text, ImmutableArray<GlobalBranchWindow> vector,
-        ImmutableArray<string> expectedWindows, GlobalBranchScope scope,
-        DatabaseLimits limits, ReadExecutionBudget budget, out SearchRankFusion fusion)
+        ImmutableArray<string> expectedWindows, GlobalBranchScope scope, ReadExecutionBudget budget, out SearchRankFusion fusion)
     {
         ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
         var textCandidates = request.Text is null ? ImmutableArray<GlobalBranchCandidate>.Empty
-            : Complete(DistributedSearchBranchNames.Text, GlobalBranchKind.Text, text, expectedWindows, scope, limits, budget);
+            : Complete(DistributedSearchBranchNames.Text, GlobalBranchKind.Text, text, expectedWindows, scope, budget);
         var vectorCandidates = request.Vector is null ? ImmutableArray<GlobalBranchCandidate>.Empty
-            : Complete(DistributedSearchBranchNames.Vector, GlobalBranchKind.Vector, vector, expectedWindows, scope, limits, budget);
+            : Complete(DistributedSearchBranchNames.Vector, GlobalBranchKind.Vector, vector, expectedWindows, scope, budget);
         fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget, request.Explain);
         if (request.Text is not null)
         {
@@ -48,10 +47,10 @@ internal static class DistributedSearchGlobalFusion
 
     private static ImmutableArray<GlobalBranchCandidate> Complete(string name, GlobalBranchKind kind,
         ImmutableArray<GlobalBranchWindow> windows, ImmutableArray<string> expected,
-        GlobalBranchScope scope, DatabaseLimits limits, ReadExecutionBudget budget)
+        GlobalBranchScope scope, ReadExecutionBudget budget)
     {
-        var request = new GlobalBranchMergeRequest(name, kind, scope, expected, limits.MaxResults);
-        var merged = GlobalBranchWindowMerger.Merge(request, windows, limits, budget);
+        var request = new GlobalBranchMergeRequest(name, kind, scope, expected, AllCandidates);
+        var merged = GlobalBranchWindowMerger.Merge(request, windows, budget);
         if (!merged.WindowComplete || merged.Approximate || merged.Truncated || !merged.Exhaustive
             || !merged.MissingWindowIds.IsEmpty)
         {

@@ -12,7 +12,7 @@ internal static class QueryCapabilityVersionPages
         => GraphLabelUseOperations.ObserveAsync(store, async () =>
         {
             var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
-            await RequiredProcessingPolicyAssertions.EqualAsync(QueryCapabilityVersionExpected.Manifest(QueryCapabilityVersionRequests.Limits()), engine.Capabilities);
+            await RequiredProcessingPolicyAssertions.EqualAsync(QueryCapabilityVersionExpected.Manifest(), engine.Capabilities);
             foreach (var version in new[] { 1 })
             {
                 var authored = QueryCapabilityVersionRequests.Ast(fixture.Harness.Partition, version);
@@ -86,8 +86,7 @@ internal static class QueryCapabilityVersionPages
         var body = JsonSerializer.Serialize(new
         {
             accessPath = "bounded-full-scan",
-            atomicPartition = partition.AtomicPartitionId,
-            scanBudget = 10000
+            atomicPartition = partition.AtomicPartitionId
         }, JsonDefaults.Options);
         await RequiredProcessingPolicyAssertions.EqualAsync(new QueryPage([new("explain", 0L, body)], null, cut, "bounded-full-scan"),
             engine.ExecuteAst(QueryCapabilityVersionRequests.Reader, plan, cancellationToken: token));

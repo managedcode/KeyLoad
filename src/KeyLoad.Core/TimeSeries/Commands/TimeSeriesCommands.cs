@@ -27,7 +27,7 @@ public static class TimeSeriesCommands
             throw Errors.Fail(ErrorCode.ResourceExhausted, SampleBatchBudgetDetail);
         }
 
-        var tags = JsonData.Validate(append.TagsJson, engine.Limits);
+        var tags = JsonData.Validate(append.TagsJson);
         var sequenceKey = KeySpace.Partition(SampleSequenceSpace, partition, append.SeriesSet, append.SeriesId);
         var watermark = SampleRollupRecords.Watermark(tx, partition, append.SeriesSet, append.SeriesId);
         var sequence = watermark.Sequence;

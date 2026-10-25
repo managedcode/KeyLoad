@@ -13,7 +13,7 @@ internal static class TextIncrementalCrashInventory
         ReadAsync(TextIncrementalCrashRuntime runtime, TextIndexMaintenanceRequest request)
     {
         var options = runtime.Options.RuntimeText;
-        var budget = new ReadExecutionBudget(CrashExecutionOptions.DatabaseLimits(runtime.Database.Limits));
+        var budget = new ReadExecutionBudget();
         var leaf = TextIncrementalEnrollmentFiles.Find(runtime.ProjectionRoot, request, budget, options)
             ?? throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
         var manifest = TextIncrementalMetadata.ReadManifest(Path.Combine(runtime.ProjectionRoot, leaf),

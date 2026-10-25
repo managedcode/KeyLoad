@@ -29,7 +29,7 @@ internal static class TextOnlineStageExecutor
                 break;
             case OnlineTextCapabilityKind.ApplyIntent:
                 requireCurrentAuthority(session);
-                TextOnlineIntentApplication.Execute(database, session, root, resources, options);
+                TextOnlineIntentApplication.Execute(session, root, resources, options);
                 break;
             case OnlineTextCapabilityKind.Validate:
                 TextOnlineValidation.Execute(database, session, options);

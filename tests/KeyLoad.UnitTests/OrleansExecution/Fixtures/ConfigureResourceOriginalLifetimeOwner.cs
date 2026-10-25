@@ -31,7 +31,7 @@ internal static class ConfigureResourceOriginalLifetimeOwner
         var prepared = false;
         try
         {
-            using var pending = new PendingResultRetention(fixture.Database.OperationLimitsOptions);
+            using var pending = new PendingResultRetention();
             constructed = true;
             await ServerFailureObserver.ObserveAsync(async () =>
             {

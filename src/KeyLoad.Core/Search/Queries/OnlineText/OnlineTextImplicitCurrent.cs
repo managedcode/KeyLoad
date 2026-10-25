@@ -15,7 +15,7 @@ public static class OnlineTextImplicitCurrent
 
         OnlineTextCurrentPublication? selected = null;
         var view = budget.CreateView(raw);
-        var scan = budget.VisitRange(raw, OnlineTextPublicationKeys.Prefix(partition, collection, field), engine.Limits.MaxScanRecords, (key, value) =>
+        _ = budget.VisitAll(raw, OnlineTextPublicationKeys.Prefix(partition, collection, field), (key, value) =>
         {
             budget.ChargeBytes(value.Length);
             var current = OrleansSerialization.Deserialize<OnlineTextCurrentPublication>(value);
@@ -45,10 +45,6 @@ public static class OnlineTextImplicitCurrent
             selected = actual;
             return true;
         });
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, OnlineTextPublicationProtocol.InvalidPublication);
-        }
 
         return selected;
     }

@@ -18,7 +18,7 @@ internal static class PackedAnnStressColdRestore
         byte[] digest;
         using (var output = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read))
         {
-            digest = index.Save(output, storage, PackedAnnIndexTestSupport.Budget(database, token: token));
+            digest = index.Save(output, storage, PackedAnnIndexTestSupport.Budget(token: token));
             await output.FlushAsync(token);
             RandomAccess.FlushToDisk(output.SafeFileHandle);
         }
@@ -38,8 +38,7 @@ internal static class PackedAnnStressColdRestore
         await Assert.That(OrleansSerialization.Serialize(restoredRecords))
             .IsEquivalentTo(OrleansSerialization.Serialize(records), CollectionOrdering.Matching);
         using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read);
-        var budget = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(owner.Limits),
-            cancellationToken: token), PackedAnnIndexTestSupport.GenerousWorkLimit);
+        var budget = new AnnWorkBudget(new ReadExecutionBudget(cancellationToken: token), PackedAnnIndexTestSupport.GenerousWorkLimit);
         var restored = PackedAnnIndex.Load(input, digest, UnitExecutionOptions.PackedAnn(PackedAnnDeleteReinsertStress.Policy),
             storage, budget);
         var result = restored.Search(query, restoredRecords.Length, null, budget);

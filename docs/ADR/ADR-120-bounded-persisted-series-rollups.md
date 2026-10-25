@@ -2,6 +2,8 @@
 
 Status: Accepted; implementation and qualification pending.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 
 
 ## Persisted explicit buckets

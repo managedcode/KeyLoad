@@ -12,16 +12,11 @@ internal static class Bm25CorpusDigest
     {
         work.ChargeBytes(Measure(current, placement));
         work.Check();
-        return Compute(current, placement, work.MaximumResultBytes);
+        return Compute(current, placement);
     }
 
-    internal static string Compute(Bm25CorpusCurrent current, AtomicPartitionPlacementResolution placement,
-        long maximumBytes)
+    internal static string Compute(Bm25CorpusCurrent current, AtomicPartitionPlacementResolution placement)
     {
-        if (Measure(current, placement) > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
-        }
         var bytes = OrleansSerialization.Serialize(current with
         {
             PayloadDigest = string.Empty
@@ -50,15 +45,11 @@ internal static class Bm25CorpusDigest
     {
         work.ChargeBytes(checked(OrleansSerialization.Measure(resource) + SHA256.HashSizeInBytes));
         work.Check();
-        return Resource(resource, work.MaximumResultBytes);
+        return Resource(resource);
     }
 
-    internal static string Resource(ResourceDefinition resource, long maximumBytes)
+    internal static string Resource(ResourceDefinition resource)
     {
-        if (checked(OrleansSerialization.Measure(resource) + SHA256.HashSizeInBytes) > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
-        }
         var bytes = OrleansSerialization.Serialize(resource);
         try
         {

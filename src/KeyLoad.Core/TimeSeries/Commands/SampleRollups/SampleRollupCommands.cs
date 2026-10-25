@@ -13,21 +13,20 @@ internal static class SampleRollupCommands
         Scope(database, tx, principal, partition, request.SeriesSet, request.SeriesId,
             Capability.SeriesManage | Capability.SeriesRead);
         SampleRollupValidation.Range(request.From, request.UntilExclusive, request.ExpectedRevision);
-        SampleAggregateReader.ValidateSampleLimit(request.MaxSamples, database.Limits.MaxScanRecords);
-        var charge = new SampleRollupReadCharge(database.Limits.MaxQueryReadBytes);
+        SampleAggregateReader.ValidateSampleLimit(request.MaxSamples);
         var previous = SampleRollupRecords.Read(tx, partition, request.SeriesSet, request.SeriesId,
-            request.From, request.UntilExclusive, charge.Charge);
+            request.From, request.UntilExclusive);
         Revision(previous, request.ExpectedRevision);
         if (previous is null)
         {
-            AdmitBucket(tx, partition, request, bucketLimit, charge);
+            AdmitBucket(tx, partition, request, bucketLimit);
         }
-        var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
+        var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId);
         if (watermark.Floor is { } floor && request.From.UtcTicks < floor)
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleRollupProtocol.Stale);
         }
-        var aggregate = SampleRollupFold.Read(tx, partition, request, watermark.Sequence, charge);
+        var aggregate = SampleRollupFold.Read(tx, partition, request, watermark.Sequence);
         var next = new SampleRollupState(RuntimeSampleRollup.Version, request.From.UtcTicks, request.UntilExclusive.UtcTicks,
             checked(request.ExpectedRevision + NextRevision), watermark.Sequence, watermark.Floor, false,
             aggregate.Count, aggregate.Sum, aggregate.Minimum, aggregate.Maximum);
@@ -41,9 +40,8 @@ internal static class SampleRollupCommands
     {
         Scope(database, tx, principal, partition, request.SeriesSet, request.SeriesId, Capability.SeriesManage);
         SampleRollupValidation.Range(request.From, request.UntilExclusive, request.ExpectedRevision);
-        var charge = new SampleRollupReadCharge(database.Limits.MaxQueryReadBytes);
         var previous = SampleRollupRecords.Read(tx, partition, request.SeriesSet, request.SeriesId,
-            request.From, request.UntilExclusive, charge.Charge);
+            request.From, request.UntilExclusive);
         Revision(previous, request.ExpectedRevision);
         if (previous is null || previous.Dropped)
         {
@@ -79,10 +77,10 @@ internal static class SampleRollupCommands
         }
     }
     private static void AdmitBucket(IKeyValueView view, PartitionRef partition, RefreshSampleRollup request,
-        int limit, SampleRollupReadCharge charge)
+        int limit)
     {
         var scan = view.VisitRange(SampleRollupKeys.Prefix(partition, request.SeriesSet, request.SeriesId), limit,
-            static (_, _) => true, observer: charge.Charge);
+            static (_, _) => true);
         if (scan.HasMore || scan.Records >= limit)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleRollupProtocol.BucketBudget);

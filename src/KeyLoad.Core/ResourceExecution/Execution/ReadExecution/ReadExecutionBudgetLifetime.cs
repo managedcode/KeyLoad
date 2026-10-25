@@ -2,31 +2,30 @@ using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.Core.ResourceExecution.Execution;
 
-/// <summary>Owns the original monotonic lifetime, absolute deadline, cancellation stages and first uncertain failure.</summary>
+/// <summary>Owns caller cancellation, explicit absolute expiries, cancellation stages and first uncertain failure.</summary>
 internal struct ReadExecutionBudgetLifetime
 {
     private const string DeadlineExceeded = "The read execution deadline is exceeded.";
     private readonly CancellationToken cancellationToken;
     private readonly TimeProvider clock;
     private readonly long started;
-    private TimeSpan lifetimeBound;
+    private TimeSpan? lifetimeBound;
     private DateTimeOffset expiresAt;
     private ReadExecutionBudgetStageCancellation? stageCancellation;
     private ExceptionDispatchInfo? indeterminateMetadata;
 
-    internal ReadExecutionBudgetLifetime(TimeSpan lifetimeBound, TimeProvider? timeProvider,
-        CancellationToken cancellationToken)
+    internal ReadExecutionBudgetLifetime(TimeProvider? timeProvider, CancellationToken cancellationToken)
     {
-        this.lifetimeBound = lifetimeBound;
         this.cancellationToken = cancellationToken;
         clock = timeProvider ?? TimeProvider.System;
         started = clock.GetTimestamp();
-        expiresAt = clock.GetUtcNow() + lifetimeBound;
+        lifetimeBound = null;
+        expiresAt = DateTimeOffset.MaxValue;
         stageCancellation = null;
         indeterminateMetadata = null;
     }
 
-    /// <summary>Gets the earliest original absolute deadline without reminting it from remaining monotonic time.</summary>
+    /// <summary>Gets the earliest explicit absolute expiry without reminting it from remaining monotonic time.</summary>
     internal DateTimeOffset ExpiresAt
     {
         get
@@ -36,12 +35,17 @@ internal struct ReadExecutionBudgetLifetime
         }
     }
 
+    /// <summary>Gets the time left before an explicit expiry, or an infinite span when only cancellation applies.</summary>
     internal TimeSpan RemainingLifetime
     {
         get
         {
             Check();
-            var remaining = lifetimeBound - clock.GetElapsedTime(started);
+            if (lifetimeBound is not { } bound)
+            {
+                return Timeout.InfiniteTimeSpan;
+            }
+            var remaining = bound - clock.GetElapsedTime(started);
             if (remaining <= TimeSpan.Zero)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
@@ -59,7 +63,7 @@ internal struct ReadExecutionBudgetLifetime
             throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
         }
         var bounded = clock.GetElapsedTime(started) + remaining;
-        if (bounded < lifetimeBound)
+        if (lifetimeBound is not { } current || bounded < current)
         {
             lifetimeBound = bounded;
         }
@@ -71,13 +75,15 @@ internal struct ReadExecutionBudgetLifetime
 
     internal readonly CancellationToken Cancellation => cancellationToken;
 
-    /// <summary>Throws when cancellation or the operation deadline prevents further work.</summary>
+    /// <summary>Throws when cancellation or an explicit expiry prevents further work.</summary>
+    /// <remarks>Every check observes the operation's monotonic clock, as the elapsed work is measured on the caller's time provider whether or not an expiry is attached.</remarks>
     internal void Check()
     {
         Volatile.Read(ref indeterminateMetadata)?.Throw();
         cancellationToken.ThrowIfCancellationRequested();
         Volatile.Read(ref stageCancellation)?.Check();
-        if (clock.GetElapsedTime(started) > lifetimeBound)
+        var elapsed = clock.GetElapsedTime(started);
+        if (lifetimeBound is { } bound && elapsed > bound)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
         }

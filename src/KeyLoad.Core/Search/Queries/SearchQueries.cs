@@ -31,7 +31,7 @@ public static class SearchQueries
         return engine.Store.Read<AnnProjectionWorkPage>(view =>
         {
             var bounded = budget.CreateView(view);
-            var page = bounded.Scan(KeyCodec.Encode(ProjectionOutbox.ProjectionConsumerSpace), engine.Limits.MaxScanRecords, after);
+            var page = bounded.Scan(KeyCodec.Encode(ProjectionOutbox.ProjectionConsumerSpace), bounded.MaximumRangeRecords, after);
             var items = ImmutableArray.CreateBuilder<AnnProjectionWork>();
             var rejected = ImmutableArray.CreateBuilder<ErrorCode>();
             foreach (var row in page.Records)

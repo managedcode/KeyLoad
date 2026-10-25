@@ -31,7 +31,7 @@ internal static class ScriptDomWindowLowering
                 limit = Count(window.FetchExpression, context);
             }
         }
-        if (limit < MinimumLimit || offset < EmptyCount || (long)offset + limit > context.Limits.MaxResults)
+        if (limit < MinimumLimit || offset < EmptyCount)
         {
             throw ScriptDomErrors.Invalid();
         }

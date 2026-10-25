@@ -23,14 +23,14 @@ internal static class PackedAnnDeleteReinsertStress
         var space = PackedAnnTestData.Space(metric, Dimension);
         var query = PackedAnnTestData.Vector(QueryOrdinal, Dimension, PackedAnnTestData.CorpusSeed);
         var records = PackedAnnTestData.Load(database, metric);
-        var index = Build(database, space, records, token);
+        var index = Build(space, records, token);
         await PackedAnnStressOracle.VerifyAsync(index, records, query, database, token);
         for (var cycle = InitialCycle; cycle < Cycles; cycle++)
         {
             token.ThrowIfCancellationRequested();
             await ChangeAsync(database, metric, space, index, records, query, cycle, token);
             records = PackedAnnTestData.Load(database, metric);
-            index = Build(database, space, records, token);
+            index = Build(space, records, token);
             await PackedAnnStressOracle.VerifyAsync(index, records, query, database, token);
             await RejectRebuildAsync(database, space, index, records, query, token);
         }
@@ -47,7 +47,7 @@ internal static class PackedAnnDeleteReinsertStress
         var remaining = PackedAnnTestData.Load(database, metric);
         await Assert.That(remaining.Length).IsEqualTo(RecordCount - RevisionStep);
         await Assert.That(remaining.Select(row => row.DocumentId)).DoesNotContain(id);
-        var without = Build(database, space, remaining, token);
+        var without = Build(space, remaining, token);
         await PackedAnnStressOracle.VerifyAsync(without, remaining, query, database, token);
         await PackedAnnStressOracle.VerifyAsync(previous, records, query, database, token);
         var restoredRevision = revision + RevisionStep + RevisionStep;
@@ -67,13 +67,13 @@ internal static class PackedAnnDeleteReinsertStress
     {
         var bytes = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => Build(database, space, [.. records, records[FirstRecord]], token));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => Build(space, [.. records, records[FirstRecord]], token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
         await PackedAnnStressOracle.UnchangedAsync(database.Store, bytes, position);
         await PackedAnnStressOracle.VerifyAsync(index, records, query, database, token);
     }
 
-    private static PackedAnnIndex Build(TestDatabase database, VectorSpace space, VectorRecord[] records,
+    private static PackedAnnIndex Build(VectorSpace space, VectorRecord[] records,
         CancellationToken token) => PackedAnnIndexTestSupport.Build(space, records, Policy,
-        PackedAnnIndexTestSupport.Budget(database, token: token));
+        PackedAnnIndexTestSupport.Budget(token: token));
 }

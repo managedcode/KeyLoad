@@ -100,38 +100,14 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
             ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
-    internal void Reopen(DatabaseLimits? configuredLimits = null)
+    internal void Reopen()
     {
-        if (configuredLimits is not null)
-        {
-            configuredLimits.Validate();
-            var original = Source.Database.Limits;
-            if (configuredLimits.MaxScanRecords > original.MaxScanRecords
-                || configuredLimits != (original with
-                {
-                    MaxScanRecords = configuredLimits.MaxScanRecords
-                }))
-            {
-                throw new ArgumentException("Only the original fixture's validated lower record limit can change.", nameof(configuredLimits));
-            }
-        }
         Join();
         coldStore = ZoneTreeExistingStore.Open(new(Source.Directory)
         {
             Incarnation = originalIdentity.Incarnation
         }, originalIdentity.NodeId, Source.StorageExecution);
-        Database = CreateColdDatabase(coldStore, configuredLimits);
-    }
-
-    private DatabaseEngine CreateColdDatabase(ZoneTreeStore store, DatabaseLimits? configuredLimits)
-    {
-        if (configuredLimits is null)
-        {
-            return Source.CreateConfiguredDatabase(store);
-        }
-        var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(configuredLimits),
-            UnitExecutionOptions.RuntimeClaimsExecution(), null, Source.Database.EvaluationClock);
-        return create(store);
+        Database = Source.CreateConfiguredDatabase(coldStore);
     }
 
     private void Join()

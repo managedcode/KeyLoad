@@ -14,7 +14,7 @@ internal static class RemoteTransferRepairColdAdvance
         await Assert.That(read.FailureWitness).IsNull();
         await Assert.That(read.TargetReceipt).IsNull();
         var witness = read.RepairWitness ?? throw new InvalidOperationException(RemoteTransferRepairColdProtocol.Missing);
-        var claims = fixture.Database.Verify<RemoteTransferRepairClaims>(witness, fixture.Database.Limits.MaxBatchBytes);
+        var claims = fixture.Database.VerifyRetained<RemoteTransferRepairClaims>(witness);
         await Assert.That(claims.OwnerCut.Position).IsEqualTo(claims.ReadGeneration);
         await Assert.That(claims.CurrentPolicyEpoch).IsEqualTo(RemoteTransferRepairCold.Principal(fixture).PolicyEpoch);
         var id = RemoteTransferRepairIdentity.AdvanceId(hint, stage, claims.OutcomeDigest);

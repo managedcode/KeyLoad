@@ -58,8 +58,7 @@ internal static class TextCrashScenario
         var partition = CreatePartition();
         SeedDatabase(database, partition);
         var boundary = new TextCrashBoundary(stage) { Armed = !replacement };
-        using var projection = new RuntimeTextProjection(Path.Combine(directory, RunAsyncPath2Text),
-            CrashExecutionOptions.DatabaseLimits(database.Limits), store.Identity.NodeId, CrashExecutionOptions.RuntimeText(),
+        using var projection = new RuntimeTextProjection(Path.Combine(directory, RunAsyncPath2Text), store.Identity.NodeId, CrashExecutionOptions.RuntimeText(),
             faultObserver: boundary.Observe);
         var search = new SearchEngine(database, CrashExecutionOptions.QueryExecution(), projection);
         if (replacement)

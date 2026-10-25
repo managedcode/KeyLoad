@@ -2,6 +2,8 @@
 
 Status: Accepted; implementation and qualification pending.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed; `MaxQueueTransferAcceptAttempts` stays optional and must be at least 1 when set.
+
 Partition-local processing cannot atomically enqueue on another partition. Retain
 a source-owned immutable intent, commit target enqueue with a dedup receipt, and
 complete the source only with the target's committed proof. The target partition grain

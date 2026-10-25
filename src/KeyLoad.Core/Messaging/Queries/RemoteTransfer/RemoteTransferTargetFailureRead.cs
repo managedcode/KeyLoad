@@ -10,7 +10,7 @@ public static class RemoteTransferTargetFailureRead
 {
     internal static RemoteTransferCoordinationReadResult ReadRemoteTransferTargetFailure(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, RemoteTransferCoordinationReadRequest request)
     {
-        var original = engine.Verify<RemoteTransferIntentClaims>(request.IntentToken, engine.Limits.MaxBatchBytes);
+        var original = engine.VerifyRetained<RemoteTransferIntentClaims>(request.IntentToken);
         engine.ValidateIntentClaims(original, request.Destination, principal.Id);
         if (original.Source != request.Source || original.TransferId != request.TransferId)
         {
@@ -28,14 +28,13 @@ public static class RemoteTransferTargetFailureRead
         var authority = engine.RequireRemoteTransferFailedAuthority(outcome, original, request);
         var bytes = view.ReadOwnedValue(selection.Key) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Unavailable);
         var cut = engine.Token(view, request.Destination.Partition, engine.Store.Position);
-        var claims = new RemoteTransferAcceptFailureClaims(RemoteTransferAttemptProtocol.FailurePurpose, authority, Convert.ToHexString(SHA256.HashData(bytes)), engine.CaptureRemoteTransferDependency(view, principal, request.Destination), cut, cut.Position, RemoteTransferFailureCapture.RemoteTransferFailureKind(outcome.Result));
+        var claims = new RemoteTransferAcceptFailureClaims(RemoteTransferAttemptProtocol.FailurePurpose, authority, Convert.ToHexString(SHA256.HashData(bytes)), engine.CaptureRemoteTransferDependency(view, principal, request.Destination), cut, cut.Position, RemoteTransferAcceptFailureKind.QueueStorage);
         if (!RemoteTransferCapacityRepair.Improved(claims))
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferAttemptProtocol.Stale);
         }
 
         var signed = engine.Sign(claims);
-        engine.RequireTokenBound(signed);
         return new(null, signed, null);
     }
 

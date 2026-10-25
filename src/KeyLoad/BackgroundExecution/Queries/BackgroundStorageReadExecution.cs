@@ -12,7 +12,7 @@ internal static class BackgroundStorageReadExecution
         Func<CancellationToken, T> read, CancellationToken token)
     {
         await using var lifetime = CapabilityWorkLifetime.Acquire(storage.Work, Guid.NewGuid(),
-            RequestWorkKind.RuntimeTransport, storage.Host.Database.OperationLimitsOptions, token)
+            RequestWorkKind.RuntimeTransport, token)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         try
         {
@@ -36,12 +36,11 @@ internal static class BackgroundStorageReadExecution
         Func<ReadExecutionBudget, IResourceLifetimeWorkBinding, CancellationToken, Task<T>> execute,
         CancellationToken token)
     {
-        var database = storage.Host.Database;
-        Require(bounds, database.Limits, clock);
+        Require(bounds, clock);
         await using var lifetime = CapabilityWorkLifetime.Acquire(storage.Work, Guid.NewGuid(),
-            RequestWorkKind.RuntimeTransport, database.OperationLimitsOptions, token)
+            RequestWorkKind.RuntimeTransport, token)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
-        var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, lifetime.Token);
+        var work = new ReadExecutionBudget(clock, lifetime.Token);
         work.ConstrainLifetime(bounds.ExpiresAt);
         work.ConstrainWork(bounds.MaximumReadBytes, bounds.MaximumRecords);
         work.ConstrainResultBytes(bounds.MaximumResultBytes);
@@ -81,16 +80,15 @@ internal static class BackgroundStorageReadExecution
         }
     }
 
-    private static void Require(BackgroundReadBudget bounds, DatabaseLimits limits, TimeProvider clock)
+    private static void Require(BackgroundReadBudget bounds, TimeProvider clock)
     {
         if (bounds is not null && bounds.ExpiresAt <= clock.GetUtcNow())
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
         if (bounds is null || bounds.ExpiresAt.Offset != TimeSpan.Zero
-            || bounds.MaximumReadBytes <= default(long) || bounds.MaximumReadBytes > limits.MaxQueryReadBytes
-            || bounds.MaximumRecords <= default(int) || bounds.MaximumRecords > limits.MaxScanRecords
-            || bounds.MaximumResultBytes <= default(int) || bounds.MaximumResultBytes > limits.MaxBatchBytes)
+            || bounds.MaximumReadBytes <= default(long) || bounds.MaximumRecords <= default(int)
+            || bounds.MaximumResultBytes <= default(int))
         {
             throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }

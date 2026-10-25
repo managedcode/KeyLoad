@@ -7,7 +7,7 @@ public static class AuthorizationCommands
     internal static void AuthorizeBatchMutations(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, CommandRequest request, bool allowEmpty)
     {
         const int EmptyMutationsLength = 0;
-        if (!allowEmpty && request.Mutations.Length == EmptyMutationsLength || request.Mutations.Length > engine.Limits.MaxBatchMutations)
+        if (!allowEmpty && request.Mutations.Length == EmptyMutationsLength)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, CommandAuthorization.MutationCountBudgetMessage);
         }

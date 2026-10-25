@@ -52,7 +52,7 @@ internal static class CompositionReverseFinalImageFlow
     private static Command<DatabaseCommand> Issue(SafeProjectorOperationDatabase owner, CommandRequest request,
         CancellationToken token, out ReadExecutionBudget work)
     {
-        work = new(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
+        work = new(owner.Database.EvaluationClock, token);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
     }

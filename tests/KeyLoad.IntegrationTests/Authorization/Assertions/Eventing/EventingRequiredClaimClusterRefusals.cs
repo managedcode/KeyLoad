@@ -26,7 +26,7 @@ internal static class EventingRequiredClaimClusterRefusals
     internal static async Task SdkAsync<T>(Result<T> actual, ErrorCode code, string detail)
     {
         await Assert.That(actual.IsFailed).IsTrue();
-        await Assert.That(actual.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(actual);
         await SqlClusterProtocol.EqualAsync(Errors.Problem(code, detail), actual.Problem);
     }
     internal static async Task SqlAsync(Result<JsonElement> actual, ErrorCode code, string detail)

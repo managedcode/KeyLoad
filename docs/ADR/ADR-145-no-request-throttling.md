@@ -17,10 +17,10 @@ Two kinds of limits remain:
   32 MiB). An MCP POST whose declared `Content-Length` exceeds it is rejected
   before the body is read. The identity middleware rewrites a Kestrel 413 into a
   `ResourceExhausted` problem (HTTP 429).
-- Per-operation data bounds. `DatabaseLimits` (scanned records, query read bytes,
-  batch bytes, deadlines); the grain reply and stream ceilings in
-  `GrainRoutingOptions` (`MaximumReplyBytes`, `MaximumStartedBytes`,
-  `MaximumCompletedBytes`, `MaximumFailedBytes`, `MaximumAggregateBytes` and
+- Physical reply and protocol bounds. `DatabaseLimits` sets no per-operation
+  data bound ([ADR-149](ADR-149-no-operation-limits.md) removes them); the
+  grain reply and stream ceilings in `GrainRoutingOptions` (`MaximumReplyBytes`,
+  `MaximumStartedBytes`, `MaximumCompletedBytes`, `MaximumFailedBytes`, `MaximumAggregateBytes` and
   `MaximumStreamFrames`, the frames one long-running response stream carries,
   progress plus its terminal frame); the MCP JSON token and property limits; the
   MCP canonical payload ceiling, equal to the server body limit; the classified
@@ -69,8 +69,9 @@ benchmark run with no request throttling, the same as the other databases' clien
   than the cluster can serve waits longer; it does not receive `ResourceExhausted`
   because a node, tenant or principal pool is full.
 - Operators size hardware (silos, CPU, memory, disk) for their load instead of
-  tuning admission pools. Per-operation bounds still stop one request from
-  reading, retaining or returning more than its configured limits.
+  tuning admission pools. The physical reply and protocol bounds above still stop
+  one request from returning more than one reply can carry; ADR-149 removes the
+  configured per-operation data limits.
 - Cancellation, shutdown and recovery do not depend on reserved control capacity.
   Each operation carries its own cancellation, and shutdown closes new work and
   joins running operations before storage closes.

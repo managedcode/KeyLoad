@@ -90,13 +90,12 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         await PersistAsync(token).ConfigureAwait(true);
         await ObserveSchedulingAsync(observation, GrainRequestPhase.SampleChunkAdmissionPersisted, token)
             .ConfigureAwait(true);
-        var runtimeRequest = SampleChunkJobMetadata.Create(this.GetGrainId(), clock.GetUtcNow(), hint,
-            codec.Limits.MaxBatchBytes);
+        var runtimeRequest = SampleChunkJobMetadata.Create(this.GetGrainId(), clock.GetUtcNow(), hint);
         var job = await jobs.ScheduleJobAsync(runtimeRequest, token).ConfigureAwait(true);
         if (observation is not null)
         {
             SampleChunkJobObservation.Returned(services, hint.CommandId, job.Id,
-            runtimeRequest.Metadata![SampleChunkJobProtocol.HintKey], codec.Limits.MaxBatchBytes);
+            runtimeRequest.Metadata![SampleChunkJobProtocol.HintKey]);
         }
         await ObserveSchedulingAsync(observation, GrainRequestPhase.SampleChunkJobReturned, token)
             .ConfigureAwait(true);
@@ -133,7 +132,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
 
     private async Task ExecuteOriginalAsync(IJobRunContext context, CancellationToken cancellationToken)
     {
-        var hint = SampleChunkJobMetadata.Read(context, this.GetGrainId(), codec.Limits.MaxBatchBytes);
+        var hint = SampleChunkJobMetadata.Read(context, this.GetGrainId());
         RequireOpen(hint);
         if (!admissions.TryGetValue(hint.CommandId, out var original))
         {
@@ -147,7 +146,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
         if (codec.PhaseObserver is not null)
         {
             SampleChunkJobObservation.Executing(services, hint.CommandId, context.Job.Id,
-            context.Job.Metadata![SampleChunkJobProtocol.HintKey], codec.Limits.MaxBatchBytes);
+            context.Job.Metadata![SampleChunkJobProtocol.HintKey]);
         }
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, runtime.SchedulingToken);
         using var timeout = new CancellationTokenSource(execution.Value.DispatchDeadline, clock);

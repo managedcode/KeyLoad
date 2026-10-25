@@ -30,7 +30,7 @@ internal static class AnalyticsBoundsOwner
     internal static async Task PutAsync(TestDatabase db, string store, AnalyticsEventData[] events, long generation,
         long expectedRevision = 0)
     {
-        var work = new ReadExecutionBudget(db.Database.OperationLimitsOptions, db.Database.EvaluationClock,
+        var work = new ReadExecutionBudget(db.Database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
         var id = Guid.NewGuid();
         var revisions = events.ToImmutableDictionary(row => row.Id, _ => expectedRevision, StringComparer.Ordinal);

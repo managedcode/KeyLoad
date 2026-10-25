@@ -24,8 +24,7 @@ internal static class TextIncrementalLiteralOracle
             new EntityRef(database.Partition, request.Collection, TextBilingualAudit.EnglishId), cancellationToken: cancellationToken)).IsNull();
         var options = UnitTextOptions.Execution();
         var root = Path.Combine(database.Directory, TextIncrementalProtocol.RootDirectory);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken: cancellationToken);
         var leaf = TextIncrementalEnrollmentFiles.Find(root, request, budget, options)
             ?? throw new InvalidOperationException();
         var manifest = TextIncrementalMetadata.ReadManifest(Path.Combine(root, leaf),

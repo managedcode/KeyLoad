@@ -11,14 +11,12 @@ public static class AtomicMutationApplication
 {
     internal const int AtomicMutationApplicationInitialSequence = 0;
     internal const int AtomicMutationApplicationAdjacentElementOffset = 1;
-    internal const int AtomicMutationApplicationEmptyElementCount = 0;
     internal const string UnsupportedMutationMessage = "The mutation is unsupported.";
     internal const string DocumentEpochSpace = "document-epoch";
     internal static ImmutableArray<MutationReceipt> ApplyMutations(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations, DateTimeOffset now, long position, CommitToken? commitToken = null, Command<DatabaseCommand>? operation = null, bool preparingComposition = false, ReadExecutionBudget? compositionBudget = null)
     {
         var token = commitToken ?? engine.Token(tx, partition, position);
         var receipts = ImmutableArray.CreateBuilder<MutationReceipt>(mutations.Length);
-        TopicPurgeReadBudget? purgeBudget = null;
         var originalPayload = preparingComposition ? operation!.Value! : null;
         List<QueueRetryDecision>? previewChoices = preparingComposition ? [] : null;
         foreach (var (mutation, derived) in engine.ExpandCommandMutations(tx, principal, partition, mutations, now, compositionBudget))
@@ -40,18 +38,13 @@ public static class AtomicMutationApplication
                 DeleteDocument delete => engine.Delete(tx, principal, partition, delete, now, context),
                 _ => null
             };
-            if (mutation is PurgeTopic)
-            {
-                purgeBudget ??= new TopicPurgeReadBudget(engine.OperationLimitsOptions);
-            }
-
             var effectOperation = preparingComposition ? engine.PrepareCompositionQueueRetry(tx, operation!, partition, mutation, originalPayload!, previewChoices!) : operation;
-            var receipt = image?.Receipt ?? engine.ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position, purgeBudget, effectOperation);
+            var receipt = image?.Receipt ?? engine.ApplyNonDocumentMutation(tx, principal, partition, mutation, now, position, effectOperation);
             if (derived)
             {
                 receipt = receipt with
                 {
-                    CompositionReferences = engine.CompositionMutationReferences(mutation)
+                    CompositionReferences = DatabaseCompositionIdentity.CompositionMutationReferences(mutation)
                 };
             }
 
@@ -75,48 +68,36 @@ public static class AtomicMutationApplication
 
     internal static IEnumerable<(Mutation Effect, bool Derived)> ExpandCommandMutations(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ImmutableArray<Mutation> mutations, DateTimeOffset now, ReadExecutionBudget? compositionBudget = null)
     {
-        var count = AtomicMutationApplicationEmptyElementCount;
         var budget = compositionBudget;
         foreach (var requested in mutations)
         {
             if (requested is InsertTypedRow insert)
             {
-                engine.AcceptExpandedMutation(ref count);
                 yield return (engine.ExpandTypedRowInsert(tx, principal, partition, insert), false);
                 continue;
             }
 
             if (requested is not (QueueToGraph or GraphToQueueMutation))
             {
-                engine.AcceptExpandedMutation(ref count);
                 yield return (requested, false);
                 continue;
             }
 
-            budget ??= new ReadExecutionBudget(engine.OperationLimitsOptions, CompositionTimeProvider.Instance);
+            budget ??= new ReadExecutionBudget(CompositionTimeProvider.Instance);
             foreach (var effect in engine.ExpandComposition(tx, principal, partition, requested, now, budget))
             {
-                engine.AcceptExpandedMutation(ref count);
                 yield return (effect, true);
             }
         }
     }
 
-    internal static void AcceptExpandedMutation(this DatabaseEngine engine, ref int count)
-    {
-        if (++count > engine.Limits.MaxBatchMutations)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, CommandAuthorization.MutationCountBudgetMessage);
-        }
-    }
-
-    internal static MutationReceipt ApplyNonDocumentMutation(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, Mutation mutation, DateTimeOffset now, long position, TopicPurgeReadBudget? purgeBudget, Command<DatabaseCommand>? operation) => mutation switch
+    internal static MutationReceipt ApplyNonDocumentMutation(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, Mutation mutation, DateTimeOffset now, long position, Command<DatabaseCommand>? operation) => mutation switch
     {
         UpsertAnalyticsEvents analytics => engine.ApplyAnalyticsUpsert(tx, principal, partition, analytics, now),
         DeleteAnalyticsEvents analytics => engine.ApplyAnalyticsDelete(tx, principal, partition, analytics, now),
         AppendEvents events => engine.Append(tx, principal, partition, events, now),
         PublishTopic topic => engine.Publish(tx, principal, partition, topic, now),
-        PurgeTopic topic => engine.PurgeTopicHistory(tx, partition, topic, purgeBudget),
+        PurgeTopic topic => engine.PurgeTopicHistory(tx, partition, topic),
         EnqueueMessage message => engine.Enqueue(tx, principal, partition, message, now),
         AdvanceQueueDeadline message => engine.ApplyQueueDeadline(tx, partition, message, now, operation),
         RedriveQueueMessage message => engine.ApplyRedriveQueueMessage(tx, partition, message, now),

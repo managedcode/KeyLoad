@@ -74,7 +74,7 @@ public static class DatabaseCompositionTypedEndpointJoin
 
         // Resource and row authority were checked before resolving the caller's explicit lookup.
         _ = engine.BindCompositionInputRecord(budget.CreateView(view), reference, record);
-        engine.RequireTypedEndpointPrimaryIdentity(record, primaryKey);
+        DatabaseCompositionRetainedPrimaryIdentity.RequireTypedEndpointPrimaryIdentity(record, primaryKey);
         return record;
     }
 

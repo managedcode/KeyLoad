@@ -7,8 +7,7 @@ internal static class TextOnlineSeedAssertions
     internal static async Task<long> HealthyAsync(TestDatabase database, TextOnlineSeedFixture fixture,
         CancellationToken cancellationToken)
     {
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken: cancellationToken);
         using var pin = TextOnlineSourcePin.Capture(database.Database,
             TextMaintenanceTestValues.Principal, fixture.Pin, budget);
         var before = budget.ReadBytes;

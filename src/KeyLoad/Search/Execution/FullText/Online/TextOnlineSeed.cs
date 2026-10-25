@@ -23,8 +23,7 @@ internal static class TextOnlineSeed
         session.Current = fresh;
         var scope = session.Scope ?? throw TextErrors.Ownership();
         var budget = session.Budget;
-        var plan = TextIncrementalSeedPlanner.Plan(seed, scope,
-            database.Limits.MaxScanRecords, budget, options.Core.QueryExecution.Value);
+        var plan = TextIncrementalSeedPlanner.Plan(seed, scope, budget, options.Core.QueryExecution.Value);
         session.Leaf = TextValidation.GenerationLeaf();
         session.GenerationId = Guid.ParseExact(session.Leaf[GenerationLeafPrefix.Length..], GenerationIdFormat);
         session.GenerationReservation = resources.ReserveGeneration(root.Directory, session.Leaf, budget);
@@ -48,7 +47,7 @@ internal static class TextOnlineSeed
             seed.UpperSequence, seed.AppliedPosition, plan.NextRecord, plan.Records, files,
             TextProjectionProtocol.TokenizerVersion, TextProjectionProtocol.HashVersion, seed.ResourceSha256, true);
         TextIncrementalValidation.Manifest(manifest, scope, session.Request.Consumer,
-            session.Request.ConsumerGeneration, session.Request.Placement, database.Limits.MaxScanRecords,
+            session.Request.ConsumerGeneration, session.Request.Placement,
             budget, options.RuntimeText);
         TextIncrementalMetadata.Publish(owner.Path, manifest, options.RuntimeText.Value.MaximumDiskBytes,
             budget, options.RuntimeText, resources);

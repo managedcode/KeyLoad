@@ -20,7 +20,7 @@ internal sealed class TextProjectionScopeTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"),
             new PutDocument(Collection, "two", "{\"text\":\"needle\"}"));
-        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), database.Store.Identity.NodeId, UnitTextOptions.Execution());
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
         var oracle = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request);
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
@@ -32,7 +32,7 @@ internal sealed class TextProjectionScopeTests
             SchemaVersion = checked(scope.SchemaVersion + 1)
         };
         var documents = ReadCanonicalDocuments(database);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+        var budget = new ReadExecutionBudget();
         using (var lease = projection.Acquire(alteredSchemaScope, budget))
         {
             ObserveCanonicalCorpus(lease, documents);
@@ -70,8 +70,7 @@ internal sealed class TextProjectionScopeTests
     }
 
     private static DocumentRecord[] ReadCanonicalDocuments(TestDatabase database)
-        => database.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(database.Partition, Collection),
-                database.Database.Limits.MaxScanRecords).Records
+        => database.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(database.Partition, Collection), view.MaximumRangeRecords).Records
             .Select(record => OrleansSerialization.Deserialize<DocumentRecord>(record.Value.Span)).ToArray());
 
     private static string CurrentGeneration(TestDatabase database)

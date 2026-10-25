@@ -6,9 +6,6 @@ internal sealed class AnalyticsBoundsTests
     public Task GroupOverflowRejectsTheWholeQueryThenCompleteBoundedQueryIsHealthy()
         => AnalyticsBoundsFlow.GroupsAsync(TestContext.Current!.Execution.CancellationToken);
     [Test]
-    public Task CanonicalScanAndReadBytesRejectWholeQueryWithoutChangingAnyCanonicalCut()
-        => AnalyticsBoundsSourceFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
-    [Test]
     public Task FiniteInputSumOverflowRefusesAllRowsThenCountOnlyQueryIsHealthy()
         => AnalyticsBoundsFlow.SumAsync(TestContext.Current!.Execution.CancellationToken);
     [Test]

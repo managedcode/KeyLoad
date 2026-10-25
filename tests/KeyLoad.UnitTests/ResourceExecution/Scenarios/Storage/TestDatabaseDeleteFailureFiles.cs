@@ -11,14 +11,13 @@ internal static class TestDatabaseDeleteFailureFiles
         {
             throw new PlatformNotSupportedException(TestDatabaseDeleteFailureProtocol.UnixRequired);
         }
-        var limits = fixture.Database.Limits;
-        var paths = CollectOwnedPaths(fixture.Directory, limits.MaxScanRecords);
+        var paths = CollectOwnedPaths(fixture.Directory, int.MaxValue);
         var bytes = new Dictionary<string, byte[]?>(StringComparer.Ordinal);
         var modes = new Dictionary<string, UnixFileMode>(StringComparer.Ordinal)
         {
             [string.Empty] = File.GetUnixFileMode(fixture.Directory)
         };
-        var remaining = limits.MaxQueryReadBytes;
+        var remaining = long.MaxValue;
         foreach (var path in paths)
         {
             token.ThrowIfCancellationRequested();

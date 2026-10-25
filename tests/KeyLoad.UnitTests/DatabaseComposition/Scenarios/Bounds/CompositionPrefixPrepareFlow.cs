@@ -69,19 +69,18 @@ internal static class CompositionPrefixPrepareFlow
     internal static Task CapacityAsync(CancellationToken token)
         => CompositionPrefixPrepareOwner.RunAsync(new()
         {
-            MaxBatchMutations = D.EffectCap
         }, async owner =>
-        {
-            await CompositionPrefixPrepareSeed.ConfigureAsync(owner);
-            await CompositionPrefixPrepareSeed.VerticesAsync(owner);
-            await CompositionPrefixPrepareCommands.CommitAsync(owner,
-                [new EnqueueMessage(D.Queue, D.Message, CompositionPrefixPrepareScenarios.Link(owner))],
-                [new(D.Enqueue, D.Queue, D.Message, D.FirstRevision)]);
-            await CompositionPrefixPrepareCommands.CommitAsync(owner,
-                [CompositionPrefixPrepareCommands.Forward()],
-                [CompositionPrefixPrepareCommands.Edge(owner, D.Graph, D.Forward + D.Message)], D.BindingCount);
-            await CompositionPrefixPrepareRefusals.LateConflictAsync(owner);
-            await CompositionPrefixPrepareAssertions.ColdAsync(owner,
-                () => CompositionPrefixPrepareAssertions.EdgeAsync(owner, D.Graph, D.Forward + D.Message));
-        }, token);
+    {
+        await CompositionPrefixPrepareSeed.ConfigureAsync(owner);
+        await CompositionPrefixPrepareSeed.VerticesAsync(owner);
+        await CompositionPrefixPrepareCommands.CommitAsync(owner,
+            [new EnqueueMessage(D.Queue, D.Message, CompositionPrefixPrepareScenarios.Link(owner))],
+            [new(D.Enqueue, D.Queue, D.Message, D.FirstRevision)]);
+        await CompositionPrefixPrepareCommands.CommitAsync(owner,
+            [CompositionPrefixPrepareCommands.Forward()],
+            [CompositionPrefixPrepareCommands.Edge(owner, D.Graph, D.Forward + D.Message)], D.BindingCount);
+        await CompositionPrefixPrepareRefusals.LateConflictAsync(owner);
+        await CompositionPrefixPrepareAssertions.ColdAsync(owner,
+            () => CompositionPrefixPrepareAssertions.EdgeAsync(owner, D.Graph, D.Forward + D.Message));
+    }, token);
 }

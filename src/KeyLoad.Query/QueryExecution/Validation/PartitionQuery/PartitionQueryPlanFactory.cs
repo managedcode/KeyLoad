@@ -12,24 +12,25 @@ internal static class PartitionQueryPlanFactory
     private const int EqualOrder = 0;
 
     private const int Version = 1;
+    private const int UnboundedRecords = int.MaxValue;
+    private const long UnboundedReadBytes = long.MaxValue;
     private const string InvalidPartitionsMessage = "The partition query leaf set is invalid.";
     private const string GrantBudgetMessage = "The partition query grants exceed the configured budget.";
     private const string UnsupportedWindowMessage = "Partition query windows are not supported.";
 
     internal static PartitionQueryPlan Create(AstQueryRequest request, StoreIdentity owner,
-        ImmutableArray<PartitionRef> partitions, DatabaseLimits limits, QueryExecutionOptions execution, int? maximumResultBytes = null)
+        ImmutableArray<PartitionRef> partitions, QueryExecutionOptions execution, int? maximumResultBytes = null)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(owner);
-        ArgumentNullException.ThrowIfNull(limits);
         if (request.Query.Offset != EmptyElementCount)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedWindowMessage);
         }
         var sorted = ValidateAndOrderPartitions(partitions, execution.MaximumPartitions);
 
-        var maximumRetainedBytes = Math.Min(QueryResultBudgetPolicy.Resolve(limits, execution),
-            maximumResultBytes ?? limits.MaxBatchBytes);
+        var maximumRetainedBytes = Math.Min(QueryResultBudgetPolicy.Resolve(execution),
+            maximumResultBytes ?? QueryResultBudgetPolicy.Resolve(execution));
         var limit = request.Query.Limit;
         var mergeReserve = PartitionQueryRetention.RootMergeReserve(sorted.Length,
             checked((long)limit * sorted.Length), limit);
@@ -41,8 +42,8 @@ internal static class PartitionQueryPlanFactory
             throw Errors.Fail(ErrorCode.BudgetExceeded, GrantBudgetMessage);
         }
 
-        var examined = Divide(limits.MaxScanRecords, sorted.Length);
-        var readBytes = Divide(limits.MaxQueryReadBytes, sorted.Length);
+        var examined = Divide(UnboundedRecords, sorted.Length);
+        var readBytes = Divide(UnboundedReadBytes, sorted.Length);
         var retained = Divide(remainingRetained, sorted.Length);
         var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafPlan>(sorted.Length);
         for (var index = FirstElementIndex; index < sorted.Length; index++)
@@ -56,7 +57,7 @@ internal static class PartitionQueryPlanFactory
                 retained[index], limit));
         }
         return new(Version, owner.NodeId, owner.Incarnation, owner.ReadGeneration, leaves.MoveToImmutable(),
-            limit, limits.MaxScanRecords, limits.MaxQueryReadBytes, maximumRetainedBytes);
+            limit, UnboundedRecords, UnboundedReadBytes, maximumRetainedBytes);
     }
 
     private static PartitionRef[] ValidateAndOrderPartitions(ImmutableArray<PartitionRef> partitions, int maximumPartitions)

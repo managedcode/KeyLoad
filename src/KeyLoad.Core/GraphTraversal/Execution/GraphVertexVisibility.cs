@@ -6,8 +6,7 @@ namespace KeyLoad.Core.GraphTraversal;
 
 /// <summary>Resolves vertex visibility once per qualified identity within one read cut.</summary>
 internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
-    ReadExecutionBudget budget, Action<EntityRef>? admitVertex = null,
-    Action<PartitionRef, string>? admitCollection = null)
+    ReadExecutionBudget budget)
 {
     private const int InitialSchemaVersion = 0;
     private readonly record struct CollectionDecision(bool Allowed, long SchemaVersion);
@@ -25,7 +24,6 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         {
             throw Errors.Fail(ErrorCode.NotFound, VertexUnavailable);
         }
-        admitVertex?.Invoke(vertex);
         visible[vertex] = true;
         return vertex;
     }
@@ -70,7 +68,6 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         }
         catch (KeyLoadException exception) when (exception.Code is ErrorCode.NotFound or ErrorCode.PermissionDenied)
         {
-            admitCollection?.Invoke(vertex.Partition, vertex.Collection);
             collections[key] = new(false, InitialSchemaVersion);
             return false;
         }
@@ -86,13 +83,11 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         database.Authorization.Require(principal, vertex.Partition, vertex.Collection, Capability.DocumentsRead);
         var resourceView = budget.CreateView(view);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(resourceView, vertex.Partition, vertex.Collection, ResourceKind.Collection);
-        admitCollection?.Invoke(vertex.Partition, vertex.Collection);
         collections[key] = new(true, resource.SchemaVersion);
     }
 
     private bool RememberVertex(EntityRef vertex, bool allowed)
     {
-        admitVertex?.Invoke(vertex);
         visible[vertex] = allowed;
         return allowed;
     }

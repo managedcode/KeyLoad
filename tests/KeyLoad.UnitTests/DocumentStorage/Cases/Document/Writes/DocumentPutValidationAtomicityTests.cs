@@ -2,8 +2,7 @@ namespace KeyLoad.UnitTests.DocumentStorage;
 
 internal sealed class DocumentPutValidationAtomicityTests
 {
-    private const int DefaultDocumentBytes = 1_048_576;
-    private const int DefaultJsonDepth = 32;
+    private const int SystemTextJsonDefaultDepth = 64;
     private const string Collection = DocumentCrudFixture.Collection;
     private const string IndexName = DocumentCrudFixture.IndexName;
     private const string IndexPath = "/value";
@@ -12,16 +11,12 @@ internal sealed class DocumentPutValidationAtomicityTests
     private const string StagedValue = "staged-value";
 
     [Test]
-    public async Task AcDstore001PutRejectsDuplicateOversizedAndOverDepthJsonAfterStagedIndexMutation()
+    public async Task AcDstore001PutRejectsDuplicateAndOverDepthJsonAfterStagedIndexMutation()
     {
         await AssertRejectedPutBatch(new(), "{not-json", ErrorCode.Validation);
         await AssertRejectedPutBatch(new(), "{\"value\":\"a\",\"value\":\"b\"}", ErrorCode.Validation);
-        var oversizedLimits = new DatabaseLimits { MaxDocumentBytes = DefaultDocumentBytes };
-        var oversizedJson = "{\"value\":\"" + new string('x', DefaultDocumentBytes) + "\"}";
-        await AssertRejectedPutBatch(oversizedLimits, oversizedJson, ErrorCode.ResourceExhausted);
-        var depthLimits = new DatabaseLimits { MaxJsonDepth = DefaultJsonDepth };
-        await AssertRejectedPutBatch(depthLimits,
-            DocumentCrudFixture.NestedObjectJson(DefaultJsonDepth + 1), ErrorCode.Validation);
+        await AssertRejectedPutBatch(new(),
+            DocumentCrudFixture.NestedObjectJson(SystemTextJsonDefaultDepth + 1), ErrorCode.Validation);
     }
 
     private static async Task AssertRejectedPutBatch(DatabaseLimits limits, string rejectedJson, ErrorCode expected)

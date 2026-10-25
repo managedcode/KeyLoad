@@ -10,7 +10,6 @@ internal sealed class SqlOffsetWholeFlowTests
         {
             using var database = new TestDatabase(new()
             {
-                MaxResults = SqlOffsetProtocol.WindowBound
             });
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => SqlOffsetFlow.RunAsync(database), failures);

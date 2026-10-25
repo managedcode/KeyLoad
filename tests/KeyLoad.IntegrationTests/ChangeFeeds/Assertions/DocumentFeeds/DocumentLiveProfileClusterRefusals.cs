@@ -57,7 +57,7 @@ internal static class DocumentLiveProfileClusterRefusals
     internal static async Task SdkAsync<T>(Result<T> result, ErrorCode code, string detail)
     {
         await Assert.That(result.IsFailed).IsTrue();
-        await Assert.That(result.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(result);
         await SqlClusterProtocol.EqualAsync(Errors.Problem(code, detail), result.Problem);
     }
     internal static async Task SqlAsync(Result<JsonElement> result, ErrorCode code, string detail)

@@ -10,7 +10,7 @@ public static class CommandResultBinding
     {
         ArgumentNullException.ThrowIfNull(binding);
         work.AttachResourceLifetimeBinding(binding);
-        if (lifetimes.IsDefault || lifetimes.Length > engine.Limits.MaxScanRecords)
+        if (lifetimes.IsDefault)
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
         }

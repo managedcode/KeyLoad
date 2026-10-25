@@ -13,7 +13,6 @@ internal sealed class RuntimeTextProjection : ITextProjection
     private const int NoCleanupFailures = 0;
     private readonly IOptions<TextExecutionOptions> executionOptions;
 
-    private readonly DatabaseLimits limits;
     private readonly TextProjectionState state;
     private readonly TextProjectionPhysicalGate physicalGate = new();
     private readonly RuntimeTextProjectionLifecycle lifecycle;
@@ -22,20 +21,17 @@ internal sealed class RuntimeTextProjection : ITextProjection
     private readonly Lock disposeSync = new();
     private readonly TextResourceOwnership? resources;
 
-    internal RuntimeTextProjection(string directory, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, Func<string, ulong>? tokenHash = null, Action<TextFaultStage>? faultObserver = null, TextResourceOwnership? resources = null)
+    internal RuntimeTextProjection(string directory, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, Func<string, ulong>? tokenHash = null, Action<TextFaultStage>? faultObserver = null, TextResourceOwnership? resources = null)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         executionOptions.Value.Validate();
         this.executionOptions = executionOptions;
         this.resources = resources;
-        ArgumentNullException.ThrowIfNull(limitsOptions);
-        limits = limitsOptions.Value;
-        limits.Validate();
         state = new(executionOptions: executionOptions);
-        var root = TextFiles.InitializeRoot(directory, sourceNodeId, limits, executionOptions: executionOptions, resources: resources);
+        var root = TextFiles.InitializeRoot(directory, sourceNodeId, executionOptions: executionOptions, resources: resources);
         this.tokenHash = tokenHash ?? TextHash.Sha256;
         this.faultObserver = faultObserver;
-        lifecycle = new(root, limitsOptions, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions, resources: resources);
+        lifecycle = new(root, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions, resources: resources);
     }
 
     public ITextProjectionLease Acquire(TextProjectionScope scope, ReadExecutionBudget budget)
@@ -106,7 +102,7 @@ internal sealed class RuntimeTextProjection : ITextProjection
     {
         var failures = new List<Exception>();
         var currentInvalidation = invalidate && state.BeginInvalidation(generation);
-        ServerFailureObserver.Observe(() => TextSettlement.Release(lifecycle.Root, limits, generation,
+        ServerFailureObserver.Observe(() => TextSettlement.Release(lifecycle.Root, generation,
             lifecycle.SourceNodeId, budget, building, invalidate, completed, currentInvalidation,
             () => state.ClearCurrent(generation), () => state.ClearFailedBuild(slot), faultObserver, physicalGate, executionOptions: executionOptions),
             failures);

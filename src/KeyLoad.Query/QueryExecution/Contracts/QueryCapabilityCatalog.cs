@@ -2,7 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.Query.QueryExecution;
 
-/// <summary>Defines the immutable Q1/Q2 capability vocabulary and exposes the current operation limits.</summary>
+/// <summary>Defines the immutable Q1/Q2 capability vocabulary and exposes the configured result ceiling.</summary>
 internal static class QueryCapabilityCatalog
 {
     private const int ManifestVersion = 1;
@@ -53,12 +53,11 @@ internal static class QueryCapabilityCatalog
     private const string DecimalProfile = "TSQL.DecimalScalar";
     private const string NationalStringProfile = "TSQL.NationalStringLiteral";
     private static readonly ImmutableArray<int> SupportedVersions = [QueryVersion];
-    internal static QueryCapabilityManifest Create(DatabaseLimits limits, QueryExecutionOptions execution) => new(
+    internal static QueryCapabilityManifest Create(QueryExecutionOptions execution) => new(
         ManifestVersion, QueryVersion, RuntimeDialect, Scope, ScalarType, MissingSemantics,
         [SqlSurface, JsonSurface, CSharpSurface],
         [ComparisonCapability, AndCapability, OrCapability, NotCapability, InCapability, NotInCapability, BetweenCapability, NotBetweenCapability, NullCapability, NotNullCapability, DistinctCapability, NotDistinctCapability, AstMissingCapability],
-        limits.MaxResults, limits.MaxScanRecords, QueryResultBudgetPolicy.Resolve(limits, execution), limits.MaxQueryDepth, true, true,
-        limits.MaxQueryReadBytes,
+        QueryResultBudgetPolicy.Resolve(execution), true, true,
         [Q1Profile, FeedProfile, LiveProfile, ModelProfile, JoinProfile, LeftPredicateProfile, QueueJoinProfile, EventJoinProfile, Q1OffsetProfile, Q2OffsetProfile, AstNullOrderingProfile, SyntaxProfile, TopProfile, OffsetFetchProfile, DistinctProfile, AllProfile, AliasProfile, DefaultJoinProfile, OrdinalProfile, NamedParameterProfile, WireSlotProfile, DecimalProfile, NationalStringProfile, GraphSearchProfile, AstExplainProfile],
         SupportedVersions, SupportedVersions);
 }

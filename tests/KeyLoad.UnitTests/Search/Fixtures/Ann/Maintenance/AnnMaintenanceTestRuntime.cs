@@ -24,7 +24,6 @@ internal sealed class AnnMaintenanceTestRuntime : IAsyncDisposable
         TimeProvider? phaseClock = null, IConfiguration? configuration = null)
     {
         var registrations = new ServiceCollection().AddRuntimeOptions(configuration ?? new ConfigurationBuilder().Build());
-        registrations.AddSingleton(database.OperationLimitsOptions);
         services = registrations.BuildServiceProvider();
         try
         {

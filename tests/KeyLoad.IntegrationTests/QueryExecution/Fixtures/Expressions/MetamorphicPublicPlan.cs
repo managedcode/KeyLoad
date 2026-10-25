@@ -9,7 +9,7 @@ internal sealed record MetamorphicPublicPlan(QueryRequest Sql, AstQueryRequest P
     {
         var sql = MetamorphicPublicRequests.Sql(partition, shape, descending, offset);
         var parsed = new AstQueryRequest(partition,
-            new SqlParser(sql.Sql, Options.Create(new DatabaseLimits()), Options.Create(new QueryExecutionOptions())).Parse(),
+            new SqlParser(sql.Sql, Options.Create(new QueryExecutionOptions())).Parse(),
             sql.Parameters, AllowFullScan: true);
         parsed = OrleansSerialization.Deserialize<AstQueryRequest>(OrleansSerialization.Serialize(parsed));
         return new(sql, parsed, MetamorphicPublicRequests.Json(partition, shape, descending, offset),

@@ -4,26 +4,27 @@ namespace KeyLoad.UnitTests.TimeSeries;
 
 internal static class ChunkMultiblockReadBudgetCalls
 {
+    private const int UnboundedRecords = int.MaxValue;
+
     internal static ReadExecutionBudget Budget(ChunkSelectedIntegrityFixture fixture, long maximum)
-        => new(UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryReadBytes = checked((int)maximum)
-        }),
-            fixture.Owner.EvaluationClock);
+    {
+        var budget = new ReadExecutionBudget(fixture.Owner.EvaluationClock);
+        budget.ConstrainWork(maximum, UnboundedRecords);
+        return budget;
+    }
 
     internal static SampleRecord[] Read(ChunkSelectedIntegrityFixture fixture, ReadExecutionBudget budget)
         => fixture.Store.Read(original =>
         {
             var options = UnitExecutionOptions.TimeSeriesExecution();
-            var headerCharge = new SampleChunkReadCharge(fixture.Owner.Limits.MaxQueryReadBytes);
             var window = SampleChunkStorage.Require<SampleChunkWindow>(original,
                 SampleChunkKeys.Window(fixture.Partition, SampleChunkCanonicalFixture.Set,
-                    SampleChunkCanonicalFixture.Series, fixture.WindowId), headerCharge);
+                    SampleChunkCanonicalFixture.Series, fixture.WindowId));
             var manifest = SampleChunkManifestReader.Read(original, fixture.Partition,
                 SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, window,
-                options.Value.MaximumChunkWindowRecords, headerCharge, options);
+                options.Value.MaximumChunkWindowRecords, options);
             return SampleChunkGenerationReader.Read(budget.CreateView(original), fixture.Partition,
                 SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, window, manifest,
-                options, new SampleChunkReadCharge(fixture.Owner.Limits.MaxQueryReadBytes), SampleChunkWork.Observe(budget));
+                options, SampleChunkWork.Observe(budget));
         });
 }

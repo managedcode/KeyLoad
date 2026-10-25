@@ -17,7 +17,6 @@ internal static class RelationalInnerJoinExecutor
     private const int EqualOrder = 0;
     private const string AccessPath = "bounded-primary-key-inner-join";
     private const string InvalidJoin = "The bounded relational join is invalid.";
-    private const string WorkExceeded = "The bounded relational join exceeds the configured work budget.";
 
     private sealed record Candidate(DocumentRecord Left, DocumentRecord Right);
     private sealed record CandidateSet(long Cut, SortedSet<Candidate> Rows);
@@ -89,16 +88,10 @@ internal static class RelationalInnerJoinExecutor
         var leftJoinColumn = ColumnName(join.LeftKeyPath);
         var cut = database.Store.Position;
         var candidates = new SortedSet<Candidate>(CandidateComparer.Instance);
-        var work = EmptyCount;
-        var scan = budget.VisitRange(view, DocumentStorageKeys.Prefix(request.Partition, leftResource.Name),
-            database.Limits.MaxScanRecords, (key, payload) =>
+        _ = budget.VisitAll(view, DocumentStorageKeys.Prefix(request.Partition, leftResource.Name),
+            (key, payload) =>
             {
                 budget.Check();
-                work++;
-                if (work > database.Limits.MaxScanRecords)
-                {
-                    throw Errors.Fail(ErrorCode.BudgetExceeded, WorkExceeded);
-                }
                 var left = OrleansSerialization.Deserialize<DocumentRecord>(payload);
                 RelationalInnerJoinRetainedRows.ValidateLeftIdentity(request.Partition, leftResource.Name, key, left);
                 if (left.Deleted || !database.Authorization.CanReadRow(principal, left.Access))
@@ -116,11 +109,6 @@ internal static class RelationalInnerJoinExecutor
                 {
                     return true;
                 }
-                if (work >= database.Limits.MaxScanRecords)
-                {
-                    throw Errors.Fail(ErrorCode.BudgetExceeded, WorkExceeded);
-                }
-                work++;
                 budget.Check();
                 var right = budget.ReadRecord<DocumentRecord>(view,
                     DocumentStorageKeys.RecordKey(request.Partition, rightResource.Name, leftValue.GetString()!));
@@ -137,10 +125,6 @@ internal static class RelationalInnerJoinExecutor
                 Retain(candidates, checked(query.Offset + query.Limit), new(left, right), budget);
                 return true;
             });
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, WorkExceeded);
-        }
 
         return new(cut, candidates);
     }

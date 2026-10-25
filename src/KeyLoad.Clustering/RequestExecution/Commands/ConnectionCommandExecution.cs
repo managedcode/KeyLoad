@@ -1,7 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -9,7 +7,7 @@ namespace KeyLoad.Clustering;
 internal static class ConnectionCommandExecution
 {
     internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
-        global::Orleans.IGrainFactory grains, IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
+        global::Orleans.IGrainFactory grains, GrainRequestCodec codec, TimeProvider clock,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var stage = GrainFailureStage.PartitionResolution;
@@ -20,7 +18,7 @@ internal static class ConnectionCommandExecution
             GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
             var partition = GrainPartitionResolver.Resolve(request);
             stage = GrainFailureStage.CapabilityExecution;
-            var work = new ReadExecutionBudget(services.GetRequiredService<IOptions<DatabaseLimits>>(), clock, token);
+            var work = new ReadExecutionBudget(clock, token);
             work.ConstrainLifetime(request.Envelope.ExpiresAt);
             work.AttachResourceLifetimeBinding(binding);
             var target = grains.GetGrain<ICommandPartitionGrain>(partition);

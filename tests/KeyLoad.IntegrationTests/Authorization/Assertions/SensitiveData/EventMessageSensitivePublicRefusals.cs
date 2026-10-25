@@ -53,7 +53,7 @@ internal static class EventMessageSensitivePublicRefusals
         }
         else
         {
-            await Assert.That(result.Value).IsNull();
+            await McpCallerAssertions.NoValueAsync(result);
         }
         await PrivateAsync(JsonDefaults.Serialize(result));
     }

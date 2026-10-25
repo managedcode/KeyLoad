@@ -59,7 +59,7 @@ internal sealed class HybridQualityRealStoreTests
         var metrics = HybridQualityMetricOracle.Compute(
             execution.Hits.Select(hit => hit.Document.Reference.Id).ToArray(), judgments, query.EligibleIds);
         await HybridQualityAssertions.AssertMetricsInRangeAsync(metrics);
-        var windows = HybridQualityWindowHarness.Evaluate(runtimeBranches, query, judgments, database.Database.Limits);
+        var windows = HybridQualityWindowHarness.Evaluate(runtimeBranches, query, judgments);
         var full = windows.Single(observation => observation.Width == 32);
         await HybridQualityAssertions.AssertProductionMatchesWindow32Async(full, execution.Hits);
         await AssertWindowObservationsAsync(windows, runtimeBranches, query);
@@ -112,7 +112,7 @@ internal sealed class HybridQualityRealStoreTests
     }
 
     private static RuntimeTextProjection CreateProjection(TestDatabase database)
-        => new(Path.Combine(database.Directory, ProjectionFolder), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        => new(Path.Combine(database.Directory, ProjectionFolder),
             database.Store.Identity.NodeId, UnitTextOptions.Execution());
 
     private static byte[] CaptureAuthority(TestDatabase database)

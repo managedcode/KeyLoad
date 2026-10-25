@@ -43,7 +43,6 @@ public static class QueueRetrySelection
         }
 
         var seed = OrleansSerialization.Serialize(new QueueRetrySeed(original.CommandId, lane, metadata.Id, metadata.DeliveryGeneration, metadata.Attempts, metadata.StateVersion));
-        engine.RequireBudget(seed.Length);
         Span<byte> digest = stackalloc byte[QueueRetryProtocol.DigestBytes];
         _ = HMACSHA256.HashData(engine.Store.Identity.SigningKey.Span, seed, digest);
         var draw = BinaryPrimitives.ReadUInt64BigEndian(digest);

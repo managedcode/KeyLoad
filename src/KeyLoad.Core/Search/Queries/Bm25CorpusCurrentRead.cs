@@ -17,7 +17,7 @@ public static class Bm25CorpusCurrentRead
         {
             try
             {
-                current = Bm25CorpusShape.RequireRecord(key, bytes, partition, engine.Limits);
+                current = Bm25CorpusShape.RequireRecord(key, bytes, partition);
             }
             catch (KeyLoadException invalid) when (invalid.Code is ErrorCode.Corruption or ErrorCode.FormatUnsupported)
             {
@@ -29,14 +29,14 @@ public static class Bm25CorpusCurrentRead
             return null;
         }
 
-        Bm25CorpusShape.Require(current, engine.Limits);
+        Bm25CorpusShape.Require(current);
         if (current.Partition != partition || current.Collection != collection || current.Field != field || current.TokenizerVersion != tokenizer || current.PrincipalId != principal.Id)
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
         }
 
         var placement = engine.ReadPlacementWitness(bounded, partition);
-        if (!current.Statistics.Terms.SequenceEqual(terms, StringComparer.Ordinal) || !Bm25CorpusDependencies.Matches(engine, bounded, principal, resource, current, placement, work.MaximumResultBytes, work))
+        if (!current.Statistics.Terms.SequenceEqual(terms, StringComparer.Ordinal) || !Bm25CorpusDependencies.Matches(engine, bounded, principal, resource, current, placement, work))
         {
             return null;
         }

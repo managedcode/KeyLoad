@@ -20,7 +20,7 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
         var image = owner.Store.Read(view =>
         {
             var rows = new List<string>();
-            var scan = view.VisitRange([], owner.Source.Database.Limits.MaxScanRecords,
+            var scan = view.VisitRange([], view.MaximumRangeRecords,
                 (key, value) =>
                 {
                     rows.Add(Convert.ToHexString(key) + ":" + Convert.ToHexString(value));

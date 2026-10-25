@@ -13,10 +13,9 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
     private readonly DatabaseEngine database = flow.Fixture.Destination.Database;
     private readonly PartitionQueryLifetimeMetadata metadata = flow.Capture();
     private readonly IOptions<QueryExecutionOptions> options = UnitExecutionOptions.QueryExecution();
-    private readonly ReadExecutionBudget budget = new(flow.Fixture.Destination.Database.OperationLimitsOptions,
-        flow.Fixture.Destination.Database.EvaluationClock, CancellationToken.None);
+    private readonly ReadExecutionBudget budget = new(flow.Fixture.Destination.Database.EvaluationClock, CancellationToken.None);
     private readonly DateTimeOffset expiry = flow.Fixture.Destination.Database.EvaluationClock.GetUtcNow()
-        + TimeSpan.FromSeconds(flow.Fixture.Destination.Database.Limits.QueryDeadlineSeconds);
+        + UnitExecutionOptions.OperationLifetime;
     private readonly SearchRequest search = new(QueryFixture.Partition,
         QueryFixture.Collection, TextField: QueryFixture.Title,
         Text: QueryLifetimeProtocol.Text, Limit: QueryLifetimeProtocol.Limit);
@@ -35,7 +34,7 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
         var windows = DistributedSearchWorkFactory.WindowIds([search.Partition], budget);
         var candidates = await ExecuteAsync(DistributedSearchPhase.Candidates, witness, witness.Statistics, scope, windows);
         var selected = DistributedSearchGlobalFusion.Select(search, [candidates.Candidates!.Text!], [],
-            windows, scope, database.Limits, budget, out _);
+            windows, scope, budget, out _);
         await Assert.That(selected.Length).IsEqualTo(QueryLifetimeProtocol.Limit);
         var projected = await ExecuteAsync(DistributedSearchPhase.Projection, witness, selected: selected);
         var hit = projected.Projection!.Hits.Single();
@@ -59,8 +58,8 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
         await Assert.That(work.Selected.IsDefault).IsFalse();
         var original = new DistributedSearchOwnedLeaf(QueryLifetimeProtocol.Version, phase, work.Search,
             flow.Fixture.DestinationOwner, QueryFixture.Tenant,
-            database.Limits.MaxQueryReadBytes / QueryLifetimeProtocol.GrantDivisor,
-            database.Limits.MaxScanRecords / QueryLifetimeProtocol.GrantDivisor,
+            long.MaxValue / QueryLifetimeProtocol.GrantDivisor,
+            int.MaxValue / QueryLifetimeProtocol.GrantDivisor,
             work.MaxResultBytes, work.Witness, work.Statistics, work.Scope, work.SourceWindowId, work.Selected, metadata.Definition, metadata.Coverage, metadata.Principal);
         var bytes = OrleansSerialization.Serialize(original);
         var actual = OrleansSerialization.Deserialize<DistributedSearchOwnedLeaf>(bytes);
@@ -71,7 +70,7 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
         };
         await QueryLifetimeAssertions.RefusedAsync(() => _ = OrleansSerialization.Serialize(missing), ErrorCode.Corruption);
         await QueryLifetimeAssertions.RefusedAsync(() => DistributedSearchOwnedLeafValidation.Require(
-            missing, database.Limits, options.Value, budget), ErrorCode.Corruption);
+            missing, options.Value, budget), ErrorCode.Corruption);
         if (phase != DistributedSearchPhase.Projection)
         {
             await Assert.That(actual.Selected.IsEmpty).IsTrue();
@@ -81,7 +80,7 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
             };
             var invalid = OrleansSerialization.Deserialize<DistributedSearchOwnedLeaf>(OrleansSerialization.Serialize(nonempty));
             await QueryLifetimeAssertions.RefusedAsync(() => DistributedSearchOwnedLeafValidation.Require(
-                invalid, database.Limits, options.Value, budget), ErrorCode.Corruption);
+                invalid, options.Value, budget), ErrorCode.Corruption);
         }
         return DistributedSearchOwnedLeafExecution.Execute(database, QueryFixture.Reader, actual,
             flow.Fixture.DestinationOwner, options, database.EvaluationClock, expiry, CancellationToken.None);

@@ -4,13 +4,13 @@ namespace KeyLoad.UnitTests.Search;
 
 internal static class PackedAnnConstructionValueTraversal
 {
-    internal static PackedAnnConstructionValueObservation Measure(TestDatabase database,
+    internal static PackedAnnConstructionValueObservation Measure(
         (VectorRecord[] Records, PackedAnnState State) fixture, DistanceMetric metric)
     {
         var state = fixture.State;
         var queryOrdinal = state.EntryPoint;
         var similarity = PreparedPackedSimilarity.Create(state.Vectors, queryOrdinal, metric);
-        var budget = PackedAnnConstructionValueFixture.Budget(database);
+        var budget = PackedAnnConstructionValueFixture.Budget();
         var capacity = state.Count;
         var buffers = new PackedAnnLayerBuffers(state.Count, capacity, false, budget);
         _ = Run(state, similarity, buffers, budget, 2);

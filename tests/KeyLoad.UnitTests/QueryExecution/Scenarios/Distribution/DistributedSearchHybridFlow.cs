@@ -28,8 +28,7 @@ internal static class DistributedSearchHybridFlow
         var left = Candidates(fixture.Source, sourceRequest, source, statistics, scope, SourceWindow, token);
         var right = Candidates(fixture.Destination, destinationRequest, destination, statistics, scope, DestinationWindow, token);
         var selected = DistributedSearchGlobalFusion.Select(sourceRequest, [left.Text!, right.Text!],
-            [left.Vector!, right.Vector!], [SourceWindow, DestinationWindow], scope,
-            fixture.Source.Database.Limits, budget, out _);
+            [left.Vector!, right.Vector!], [SourceWindow, DestinationWindow], scope, budget, out _);
         var sourceHits = Project(fixture.Source, sourceRequest, source, selected, token);
         var destinationHits = Project(fixture.Destination, destinationRequest, destination, selected, token);
         return selected.Select(candidate => sourceHits.Concat(destinationHits)
@@ -41,7 +40,7 @@ internal static class DistributedSearchHybridFlow
     {
         var budget = Budget(owner, token);
         return DistributedTextStatisticsLeaf.Execute(owner.Database, QueryFixture.Reader, request,
-            placement, QueryFixture.Tenant, UnitExecutionOptions.QueryExecution(), budget, Grant(owner, budget));
+            placement, QueryFixture.Tenant, UnitExecutionOptions.QueryExecution(), budget, Grant(budget));
     }
 
     private static DistributedSearchCandidateLeaf Candidates(DocumentPatchAtomicityOwner owner,
@@ -51,7 +50,7 @@ internal static class DistributedSearchHybridFlow
         var budget = Budget(owner, token);
         return DistributedSearchCandidateExecution.Execute(owner.Database, QueryFixture.Reader,
             request, QueryFixture.Tenant, witness, statistics, scope, window,
-            UnitExecutionOptions.QueryExecution(), budget, Grant(owner, budget));
+            UnitExecutionOptions.QueryExecution(), budget, Grant(budget));
     }
 
     private static ImmutableArray<RankedDocument> Project(DocumentPatchAtomicityOwner owner,
@@ -62,14 +61,12 @@ internal static class DistributedSearchHybridFlow
         return DistributedSearchProjectionExecution.Execute(owner.Database, QueryFixture.Reader,
             request, QueryFixture.Tenant, witness,
             [.. selected.Where(candidate => candidate.Reference.Partition == request.Partition)],
-            budget, Grant(owner, budget)).Hits;
+            budget, Grant(budget)).Hits;
     }
 
     private static ReadExecutionBudget Budget(DocumentPatchAtomicityOwner owner, CancellationToken token)
-        => new(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
+        => new(owner.Database.EvaluationClock, token);
 
-    private static global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant Grant(
-        DocumentPatchAtomicityOwner owner, ReadExecutionBudget budget)
-        => budget.CreateReadGrant(owner.Database.Limits.MaxQueryReadBytes / IndependentOwners,
-            owner.Database.Limits.MaxScanRecords);
+    private static global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant Grant(ReadExecutionBudget budget)
+        => budget.CreateReadGrant(budget.RemainingReadGrantBytes / IndependentOwners, budget.RemainingReadGrantRecords);
 }

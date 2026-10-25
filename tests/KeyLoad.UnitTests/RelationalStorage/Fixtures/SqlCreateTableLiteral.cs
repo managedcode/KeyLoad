@@ -26,9 +26,7 @@ internal static class SqlCreateTableLiteral
         => Compile(partition, id, Sql, token);
     internal static McpDecodedOperation Compile(PartitionRef partition, Guid id, string sql, CancellationToken token)
     {
-        var limits = UnitExecutionOptions.DatabaseLimits();
-        return SqlOperationCompiler.Compile(new(partition, sql, CommandId: id), limits,
-            limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
+        return SqlOperationCompiler.Compile(new(partition, sql, CommandId: id), UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), token);
     }
     internal static Result<object> Apply(DatabaseEngine database, McpDecodedOperation decoded, DateTimeOffset issued)
         => Apply(database, decoded, issued, Root);

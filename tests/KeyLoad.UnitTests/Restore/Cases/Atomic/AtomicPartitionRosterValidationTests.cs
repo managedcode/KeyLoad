@@ -2,7 +2,6 @@ using KeyLoad.Core.BackupRestore.Execution;
 using KeyLoad.Core.BackupRestore.Serialization;
 using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.BackupRestore;
 
@@ -37,13 +36,10 @@ internal sealed class AtomicPartitionRosterValidationTests
     public async Task AcBackup004MalformedRecognizedScopedKeyFailsAsCorruption()
     {
         using var fixture = new AtomicPartitionRosterFixture();
-        var limits = new DatabaseLimits();
-        limits.Validate();
-        var limitOptions = Options.Create(limits);
         var malformedKey = KeyCodec.Encode(PartitionRecordFamilies.Document);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Commit((transaction, position) =>
         {
-            var roster = new AtomicPartitionRosterTransaction(transaction, limitOptions, position, NoStorePosition);
+            var roster = new AtomicPartitionRosterTransaction(transaction, position, NoStorePosition);
             roster.Put(malformedKey, [MalformedKeyValue]);
             return true;
         }));

@@ -7,22 +7,6 @@ namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryAdapterValidationTests
 {
-    [Test]
-    public async Task AcMp003SqlDeadlineInterruptsAnUnterminatedLongLiteralBeforeSyntaxFailure()
-    {
-        using var db = new TestDatabase(new()
-        {
-            QueryDeadlineSeconds = 1
-        });
-        db.Configure("orders", ResourceKind.Collection);
-        var sql = "SELECT * FROM orders WHERE status = '" + new string('x', 8_192);
-        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(db.Partition, sql), new ExpireDuringSqlLexingTimeProvider()));
-
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
 
     [Test]
     public async Task AcMp003SqlCancellationInterruptsAnUnterminatedLongLiteralBeforeSyntaxFailure()
@@ -40,7 +24,7 @@ internal sealed class QueryAdapterValidationTests
     }
 
     [Test]
-    public async Task AstRejectsUnknownVersionOperatorsNonScalarParametersAndBudgetsBeforeScanning()
+    public async Task AstRejectsUnknownVersionOperatorsAndNonScalarParametersBeforeScanning()
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
@@ -74,20 +58,6 @@ internal sealed class QueryAdapterValidationTests
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", malformed)).Code).IsEqualTo(ErrorCode.Validation);
         }
-        Predicate deep = new NullTest(new FieldOperand("/number"), false, false);
-        for (var index = 0; index < 40; index++)
-        {
-            deep = new Negation(deep);
-        }
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request with { Query = query with { Filter = deep } })).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var huge = request with
-        {
-            Query = query with
-            {
-                Filter = new Comparison(new FieldOperand("/status"), "=", ValueOperand.Create(new string('x', 70_000)))
-            }
-        };
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", huge)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]
@@ -100,54 +70,15 @@ internal sealed class QueryAdapterValidationTests
     }
 
     [Test]
-    public async Task InvalidCursorIsRejectedBeforeACollectionScanUsesItsBudget()
+    public async Task InvalidCursorIsRejectedBeforeACollectionScan()
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
         db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
-        var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxScanRecords = 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
         var request = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).ToRequest(true, "invalid-cursor");
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request)).Code).IsEqualTo(ErrorCode.CursorExpired);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request with { Cursor = null })).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
-    public async Task IndexedDocumentLookupsChargeTheirBytesBeforeMaterializingTheCandidateSet()
-    {
-        using var db = new TestDatabase();
-        db.Configure("orders", ResourceKind.Collection, indexes: [new("status", ["/status"])]);
-        db.Commit(Enumerable.Range(0, 6).Select(index => (Mutation)new PutDocument("orders", "order-" + index,
-            JsonSerializer.Serialize(new
-            {
-                status = "open",
-                payload = new string('x', 500)
-            }))).ToArray());
-        var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryReadBytes = 1_500
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => row.Status == "open").ToRequest();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", query)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var point = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).Where(row => QueryFunctions.DocumentId(row) == "order-0").ToRequest();
-        await Assert.That(engine.ExecuteAst("root", point).Rows).HasSingleItem();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.StartLiveQuery("root", new(query))).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
-    public async Task QueryResultByteBudgetIncludesIdentityAndRedactionMetadata()
-    {
-        using var db = new TestDatabase();
-        db.Configure("orders", ResourceKind.Collection, fields: [new("/secret", "pii")]);
-        db.Commit(new PutDocument("orders", new string('a', 200), "{\"secret\":\"CANARY\"}"));
-        var engine = new QueryEngine(new DatabaseEngine(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = 100
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var query = KeyLoadQuery.From<QueryAdapterOrder>(db.Partition, "orders", UnitClientOptions.Translation()).ToRequest(true);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", query)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(engine.ExecuteAst("root", request with { Cursor = null }).Rows.Length).IsEqualTo(2);
     }
 
     [Test]
@@ -170,18 +101,6 @@ internal sealed class QueryAdapterValidationTests
         await Assert.That(continued.CutPosition).IsEqualTo(first.CutPosition);
         db.Commit(new PatchDocument("orders", "a", [new("/changed", PatchKind.Set, "true")], 1));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request with { Cursor = first.Cursor })).Code).IsEqualTo(ErrorCode.CursorExpired);
-    }
-
-    private sealed class ExpireDuringSqlLexingTimeProvider : TimeProvider
-    {
-        private const int ExpireOnTimestampCall = 4;
-        private const long ExpiredTimestamp = 2 * TimeSpan.TicksPerSecond;
-        private int timestampCalls;
-
-        public override long TimestampFrequency => TimeSpan.TicksPerSecond;
-
-        public override long GetTimestamp()
-            => Interlocked.Increment(ref timestampCalls) >= ExpireOnTimestampCall ? ExpiredTimestamp : 0;
     }
 
     private sealed class CancelDuringSqlLexingTimeProvider(CancellationTokenSource cancellation) : TimeProvider

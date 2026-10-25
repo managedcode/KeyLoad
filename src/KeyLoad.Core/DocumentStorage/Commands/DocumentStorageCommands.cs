@@ -39,8 +39,8 @@ public static class DocumentStorageCommands
             engine.Authorization.RequireReplacement(principal, resource, put.ExplicitReplacement);
         }
 
-        RelationalStorage.RelationalRowValidation.ValidateRow(resource, put.Id, put.Json, engine.Limits);
-        var json = JsonData.ValidateContent(put.Json, engine.Limits);
+        RelationalStorage.RelationalRowValidation.ValidateRow(resource, put.Id, put.Json);
+        var json = JsonData.ValidateContent(put.Json);
         foreach (var policy in resource.FieldPolicies)
         {
             engine.Authorization.RequireFieldWrite(principal, resource, policy.Path);
@@ -88,14 +88,14 @@ public static class DocumentStorageCommands
             engine.Authorization.RequireFieldWrite(principal, resource, field.Path);
         }
 
-        RelationalStorage.RelationalRowValidation.ValidatePatchValues(resource, patch.Patches, engine.Limits);
+        RelationalStorage.RelationalRowValidation.ValidatePatchValues(resource, patch.Patches);
         var updated = previous with
         {
-            Json = JsonData.Patch(previous.Json, patch.Patches, engine.Limits),
+            Json = JsonData.Patch(previous.Json, patch.Patches),
             Revision = checked(previous.Revision + RevisionStep),
             UpdatedAt = now
         };
-        RelationalStorage.RelationalRowValidation.ValidateRow(resource, patch.Id, updated.Json, engine.Limits);
+        RelationalStorage.RelationalRowValidation.ValidateRow(resource, patch.Id, updated.Json);
         engine.UpdateIndexes(tx, principal, resource, previous, updated);
         tx.PutRecord(context.Key, updated);
         return new(new(PatchDocumentMutationKind, patch.Collection, patch.Id, updated.Revision), updated);

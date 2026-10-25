@@ -95,7 +95,7 @@ internal static class CatalogArrayPathAssertions
             await Assert.That(Outcome(store, command).AsSpan().SequenceEqual(outcome)).IsTrue();
         });
 
-    private static string Normalize(string json) => JsonData.Validate(json, UnitExecutionOptions.DatabaseLimits().Value);
+    private static string Normalize(string json) => JsonData.Validate(json);
 
     private static async Task EqualAsync<T>(T actual, T expected)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

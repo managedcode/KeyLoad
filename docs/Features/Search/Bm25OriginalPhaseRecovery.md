@@ -15,7 +15,7 @@ The fixture creates one configured TestDatabase and retains its complete origina
 | REQ-BM25-RECOVERY-003: fresh target-subject grants and exact phase target epoch govern old receipts | AC-BM25-RECOVERY-003: actual subject epoch2 removes Query, issuer/submission deny without effects; epoch3 restored grants still deny the old epoch1 phase. A genuinely recaptured fresh-ID phase succeeds with literal target epoch3. |
 | REQ-BM25-RECOVERY-004: recovery preserves ownership and joined cleanup | AC-BM25-RECOVERY-004: second complete close/reopen retains current receipt/full canonical state and original entry/body; the same original successful current phase replays exactly, then a fresh publication and literal Search hit succeed. Original body, every cleanup failure and fatal cause are retained by the existing ServerFailureObserver ledger. |
 
-Complete image means every canonical row under a fail-closed MaxScanRecords traversal and actual before-copy read budget, plus the applied sequence and physical store position. These observations do not prove a concurrent cross-store snapshot, process crash, power loss or cluster acknowledgement. Policy mutations are actual admitted changes; no-effect baselines are captured after those changes. Historical failed receipts are not republished as healthy. Replay uses the original phase input and freshly validated issuer authority, without reconstructing a head or recapturing under the old ID.
+Complete image means every canonical row read in complete storage pages, plus the applied sequence and physical store position. These observations do not prove a concurrent cross-store snapshot, process crash, power loss or cluster acknowledgement. Policy mutations are actual admitted changes; no-effect baselines are captured after those changes. Historical failed receipts are not republished as healthy. Replay uses the original phase input and freshly validated issuer authority, without reconstructing a head or recapturing under the old ID.
 
 ```mermaid
 flowchart TD
@@ -29,5 +29,3 @@ flowchart TD
     Fresh --> Cold[Second joined same owner cold open]
     Cold --> Healthy[Exact receipt replay and fresh literal Search]
 ```
-
-REQ-BM25-RECOVERY-005 → AC-BM25-RECOVERY-005: the integrated configured-count companion may call Reopen(DatabaseLimits? configuredLimits = null). Null preserves the original captured factory. A supplied limit is validated before joining and may change only MaxScanRecords to the same or a lower positive value; every other original limit, option group and evaluation clock stays unchanged. The Core engine is created by the existing configured factory over the actual reopened ZoneTree store. The original canonical identity and joined lifecycle remain unchanged. The complete canonical assertion inventory uses the ORIGINAL observation record/read limits separately from the constrained operation limit; it never claims those observation bounds apply to publication.

@@ -14,7 +14,7 @@ internal static class PackedAnnStressOracle
     {
         var bytes = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
-        var actual = index.Search(query, records.Length, null, PackedAnnIndexTestSupport.Budget(database, token: token));
+        var actual = index.Search(query, records.Length, null, PackedAnnIndexTestSupport.Budget(token: token));
         await ExactAsync(actual, records, query, index.Space.Metric);
         await Assert.That(index.RetainedBytesUpperBound).IsLessThanOrEqualTo(PackedAnnDeleteReinsertStress.Policy.MaxIndexBytes);
         await Assert.That(index.BuildScratchBytesUpperBound).IsLessThanOrEqualTo(PackedAnnDeleteReinsertStress.Policy.MaxScratchBytes);

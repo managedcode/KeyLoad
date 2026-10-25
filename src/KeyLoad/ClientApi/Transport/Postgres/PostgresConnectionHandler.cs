@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.Extensions.Options;
@@ -37,7 +38,7 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 using var deadline = new PostgresTransportDeadline(
-                    TimeSpan.FromSeconds(services.GetRequiredService<IOptions<DatabaseLimits>>().Value.QueryDeadlineSeconds),
+                    services.GetRequiredService<IOptions<GrainRoutingOptions>>().Value.RequestLifetime,
                     services.GetRequiredService<TimeProvider>(), context.ConnectionClosed);
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {

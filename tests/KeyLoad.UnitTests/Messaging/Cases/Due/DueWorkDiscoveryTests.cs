@@ -22,7 +22,6 @@ internal sealed class DueWorkDiscoveryTests
         foreach (var page in pages)
         {
             await Assert.That(page.ExaminedRecords <= fixture.Database.DueExecution.MaximumRecordsPerPage).IsTrue();
-            await Assert.That(page.AdmittedValueBytes <= fixture.Database.Limits.MaxBatchBytes).IsTrue();
             await Assert.That(page.ExaminedBytes >= page.AdmittedValueBytes).IsTrue();
             await Assert.That(page.ExaminedBytes <= fixture.Database.DueExecution.MaximumRangeBytes).IsTrue();
             await Assert.That(page.Rejected.IsEmpty).IsTrue();

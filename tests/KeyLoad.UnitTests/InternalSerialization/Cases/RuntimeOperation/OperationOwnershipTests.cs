@@ -44,18 +44,4 @@ internal sealed class OperationOwnershipTests
         await Assert.That(verified.Value.Input.Span.SequenceEqual(operation.Value.Input.Span)).IsTrue();
     }
 
-    [Test]
-    public async Task ConfiguredBudgetRejectsAnOversizeSnapshotBeforeAnyStoreEffect()
-    {
-        using var database = new TestDatabase();
-        var operation = AuthorityFixture.Create(database);
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
-        {
-            MaxBatchBytes = operation.Value!.Input.Length - 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var before = database.Store.Position;
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.OwnCommand(operation));
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(database.Store.Position).IsEqualTo(before);
-    }
 }

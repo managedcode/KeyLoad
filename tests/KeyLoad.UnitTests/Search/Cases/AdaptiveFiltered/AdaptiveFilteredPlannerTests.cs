@@ -18,14 +18,14 @@ internal sealed class AdaptiveFilteredPlannerTests
         PackedAnnTestData.Seed(database, RecordCount, space.Dimension, metric);
         var records = PackedAnnTestData.Load(database, metric);
         var options = new PackedAnnOptions { ExactThreshold = 32, Seed = PackedAnnTestData.CorpusSeed };
-        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var budget = PackedAnnIndexTestSupport.Budget();
         var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.AdaptiveSelectivity,
             space, records, options, budget);
         var query = PackedAnnTestData.Vector(31_337, space.Dimension, PackedAnnTestData.CorpusSeed);
 
         foreach (var cohort in AdaptiveFilteredPlannerOracle.Cohorts(records, query))
         {
-            await VerifyCohortAsync(database, records, index, query, cohort);
+            await VerifyCohortAsync(records, index, query, cohort);
         }
     }
 
@@ -33,7 +33,7 @@ internal sealed class AdaptiveFilteredPlannerTests
     public async Task AcFilter004PlannerUsesCeilingBreadthAndCapsWithCheckedCorpusArithmetic()
     {
         using var database = new TestDatabase();
-        var work = PackedAnnIndexTestSupport.Budget(database);
+        var work = PackedAnnIndexTestSupport.Budget();
         var full = FilteredVectorPlanner.Create(10_000, 10, 10_000, 32, 128, 4_096, work);
         var tenPercent = FilteredVectorPlanner.Create(10_000, 10, 1_000, 32, 128, 4_096, work);
         var onePercent = FilteredVectorPlanner.Create(10_000, 10, 100, 32, 128, 4_096, work);
@@ -62,14 +62,14 @@ internal sealed class AdaptiveFilteredPlannerTests
         var records = PackedAnnTestData.Load(database, metric);
         var options = new PackedAnnOptions { ExactThreshold = 16 };
         var index = PackedAnnIndexTestSupport.Build(space, records, options,
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         var query = PackedAnnTestData.Vector(77, space.Dimension, PackedAnnTestData.CorpusSeed);
         var selected = new[] { 13, 511, 1_023 };
         var exact = AdaptiveFilteredPlannerOracle.Rank(records, query, selected);
         var small = index.Search(query, selected.Length, AdaptiveFilteredPlannerOracle.Bitmap(records.Length, selected),
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         var empty = index.Search(query, TopCount, new ulong[(records.Length + 63) / 64],
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
 
         await Assert.That(small.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);
         await Assert.That(small.EligibleCount).IsEqualTo(selected.Length);
@@ -97,11 +97,11 @@ internal sealed class AdaptiveFilteredPlannerTests
         PackedAnnTestData.Seed(database, 512, space.Dimension, metric);
         var records = PackedAnnTestData.Load(database, metric);
         var index = PackedAnnIndexTestSupport.Build(space, records,
-            new PackedAnnOptions { ExactThreshold = 0, EfSearch = 4 }, PackedAnnIndexTestSupport.Budget(database));
+            new PackedAnnOptions { ExactThreshold = 0, EfSearch = 4 }, PackedAnnIndexTestSupport.Budget());
         var endpoint = records.Length - 1;
         var eligibility = AdaptiveFilteredPlannerOracle.Bitmap(records.Length, [endpoint]);
         var result = index.Search(records[endpoint].Values.AsMemory(), 1, eligibility,
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
 
         await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.Approximate);
         await Assert.That(result.Candidates.Select(candidate => candidate.SourceOrdinal).ToArray())
@@ -121,26 +121,26 @@ internal sealed class AdaptiveFilteredPlannerTests
         var space = PackedAnnTestData.Space(metric, 2);
         PackedAnnTestData.Seed(database, 256, space.Dimension, metric);
         var records = PackedAnnTestData.Load(database, metric);
-        var index = PackedAnnIndexTestSupport.Build(database, metric, records);
+        var index = PackedAnnIndexTestSupport.Build(metric, records);
         var query = PackedAnnTestData.Vector(99, space.Dimension, PackedAnnTestData.CorpusSeed);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() => index.Search(query, 10, null,
-            PackedAnnIndexTestSupport.Budget(database, token: cancellation.Token)));
-        var healthy = index.Search(query, 10, null, PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget(token: cancellation.Token)));
+        var healthy = index.Search(query, 10, null, PackedAnnIndexTestSupport.Budget());
 
         await Assert.That(failure).IsNotNull();
         await Assert.That(healthy.Candidates.Length).IsEqualTo(10);
         await Assert.That(healthy.EligibleCount).IsEqualTo(records.Length);
     }
 
-    private static async Task VerifyCohortAsync(TestDatabase database, VectorRecord[] records,
+    private static async Task VerifyCohortAsync(VectorRecord[] records,
         PackedAnnIndex index, float[] query, AdaptiveFilteredCohort cohort)
     {
         var bitmap = AdaptiveFilteredPlannerOracle.Bitmap(records.Length, cohort.Ordinals);
-        var result = index.Search(query, TopCount, bitmap, PackedAnnIndexTestSupport.Budget(database));
+        var result = index.Search(query, TopCount, bitmap, PackedAnnIndexTestSupport.Budget());
         var expected = AdaptiveFilteredPlannerOracle.Rank(records, query, cohort.Ordinals).Take(TopCount).ToArray();
-        var repeated = index.Search(query, TopCount, bitmap, PackedAnnIndexTestSupport.Budget(database));
+        var repeated = index.Search(query, TopCount, bitmap, PackedAnnIndexTestSupport.Budget());
         var relevant = result.Candidates.Count(candidate => expected.Any(item => item.SourceOrdinal == candidate.SourceOrdinal));
 
         await Assert.That(result.EligibleCount).IsEqualTo(cohort.Ordinals.Length);

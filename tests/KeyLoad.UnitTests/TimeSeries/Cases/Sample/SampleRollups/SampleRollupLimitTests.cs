@@ -7,10 +7,6 @@ namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleRollupLimitTests
 {
-    private const int ReadByteLimit = 1024;
-    private const int LargeTagLength = 2048;
-    private const string LargeTagsPrefix = "{\"payload\":\"";
-    private const string LargeTagsSuffix = "\"}";
     [Test]
     public async Task AcSeries023BucketIdentityCapRejectsNewBucketButAllowsCasCorrection()
     {
@@ -35,22 +31,6 @@ internal sealed class SampleRollupLimitTests
         await Assert.That(SampleRollupWholeFlow.Rollups(db)).IsEqualTo(rollups);
         Apply(engine, db.Partition, SampleRollupWholeFlow.Refresh(1)).Get<CommitReceipt>();
         await SampleRollupWholeFlow.Literal(SampleRollupWholeFlow.Read(db), 2, 6, 3, 12, 2, 6, 4);
-    }
-    [Test]
-    public async Task AcSeries023ChargedRawBytesRejectWholeBucketAndSmallerRangeRemainsHealthy()
-    {
-        using var db = new TestDatabase(new DatabaseLimits { MaxQueryReadBytes = ReadByteLimit });
-        SampleAggregateTestData.Configure(db);
-        SampleAggregateTestData.Append(db, [new("large", SampleRollupWholeFlow.Start, 2)],
-            LargeTagsPrefix + new string('x', LargeTagLength) + LargeTagsSuffix);
-        await SampleRollupWholeFlow.FailedRetry(db, SampleRollupWholeFlow.Refresh(0),
-            ErrorCode.BudgetExceeded, SampleRollupProtocol.ByteBudget);
-        var from = SampleRollupWholeFlow.End;
-        var until = from.AddMinutes(1);
-        db.Commit(new RefreshSampleRollup(SampleRollupWholeFlow.Set, SampleRollupWholeFlow.Series, from, until, 0));
-        var healthy = db.Database.ReadSampleRollup(SampleRollupWholeFlow.Root,
-            new(db.Partition, SampleRollupWholeFlow.Set, SampleRollupWholeFlow.Series, from, until));
-        await Assert.That(healthy).IsEqualTo(new SampleRollupResult(1, new(from, until, 1, null, new(0, 0, null, null, null))));
     }
     private static DatabaseEngine Engine(TestDatabase db, TimeSeriesExecutionOptions options)
         => new(db.Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),

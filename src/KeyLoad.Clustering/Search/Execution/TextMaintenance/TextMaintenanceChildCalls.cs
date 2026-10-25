@@ -12,7 +12,7 @@ internal sealed class TextMaintenanceChildCalls(DecodedGrainRequest parent,
 {
     internal Guid ParentRequestId => parent.Envelope.RequestId;
     internal Guid SessionId { get; } = Guid.NewGuid();
-    internal DatabaseLimits Limits => services.GetRequiredService<IOptions<DatabaseLimits>>().Value;
+    internal int ProjectionPageBytes => services.GetRequiredService<IOptions<GrainRoutingOptions>>().Value.MaximumReplyBytes;
 
     internal Task<TextMaintenanceCapabilityResult> CapabilityAsync(TextIndexMaintenanceRequest request,
         TextMaintenanceCapabilityKind kind, CancellationToken token)

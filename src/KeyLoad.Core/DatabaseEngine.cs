@@ -18,7 +18,7 @@ public sealed class DatabaseEngine
     /// <summary>Creates a node-owned engine with centrally validated operation policy snapshots.</summary>
     /// <param name = "store">The externally owned node-local atomic store.</param>
     /// <param name = "authorization">Evaluator for persisted operation, row and field policy.</param>
-    /// <param name = "limits">Centrally validated operation resource limits.</param>
+    /// <param name = "limits">Centrally validated optional queue transfer attempt policies.</param>
     /// <param name = "dueWorkOptions">Centrally validated node-local due discovery policy.</param>
     /// <param name = "eventSourceOptions">Centrally validated event continuation policy.</param>
     /// <param name = "messagingOptions">Centrally validated topic, catch-up and retry work limits.</param>
@@ -50,7 +50,6 @@ public sealed class DatabaseEngine
         TimeSeriesOptions = timeSeriesOptions;
         timeSeriesExecution = timeSeriesOptions.Value;
         timeSeriesExecution.Validate();
-        OperationLimitsOptions = limits;
         GraphOptions = graphOptions;
         var operationLimits = limits.Value;
         dueExecution = dueWorkOptions.Value;
@@ -80,7 +79,6 @@ public sealed class DatabaseEngine
 
     private readonly MessagingExecutionOptions messagingExecution;
     private readonly GraphExecutionOptions graphExecution;
-    internal IOptions<DatabaseLimits> OperationLimitsOptions { get; }
     internal IOptions<GraphExecutionOptions> GraphOptions { get; }
     internal GraphExecutionOptions GraphExecution => graphExecution;
 
@@ -93,7 +91,7 @@ public sealed class DatabaseEngine
     public IAtomicStore Store { get; }
     /// <summary>Gets the evaluator for persisted authorization policy.</summary>
     public IAuthorizationPolicy Authorization { get; }
-    /// <summary>Gets the configured operation resource limits.</summary>
+    /// <summary>Gets the configured optional queue transfer attempt policies.</summary>
     public DatabaseLimits Limits { get; }
     /// <summary>Gets or sets the acknowledgement durability reported in commit receipts.</summary>
     public DurabilityProfile Durability { get; set; }

@@ -33,12 +33,10 @@ internal static class QueueViewLeaseIsolationReads
                     Explain = true
                 }
             };
-            var capabilities = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.QueryCapabilitiesAsync(token));
             var json = JsonSerializer.Serialize(new
             {
                 AccessPath = QueuePath,
-                ModelViews = true,
-                ScanBudget = capabilities.MaxCandidates
+                ModelViews = true
             }, JsonDefaults.Options);
             var expected = new QueryRow(ExplainId, Empty, json);
             var sdk = await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.QueryAstAsync(explain, token));

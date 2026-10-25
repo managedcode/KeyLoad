@@ -27,20 +27,15 @@ internal class ResourceEffectObservationView(IKeyValueView inner, ResourceEffect
         return new(rows.ToImmutable(), scanned.HasMore);
     }
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)
-        => inner.ReadValue(key, reader, observed => Charge(observed, observer));
+        => inner.ReadValue(key, reader, observer);
     public StorageScanResult VisitRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null, StorageReadObserver? observer = null,
         CancellationToken cancellationToken = default)
         => inner.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey,
-            observed => Charge(observed, observer), cancellationToken);
+            observer, cancellationToken);
     public StorageScanResult VisitReverseRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null, StorageReadObserver? observer = null,
         CancellationToken cancellationToken = default)
         => inner.VisitReverseRange(prefix, maxRecords, visitor, afterKey, untilKey,
-            observed => Charge(observed, observer), cancellationToken);
-    private void Charge(long bytes, StorageReadObserver? observer)
-    {
-        scope.ChargeRead(bytes);
-        observer?.Invoke(bytes);
-    }
+            observer, cancellationToken);
 }

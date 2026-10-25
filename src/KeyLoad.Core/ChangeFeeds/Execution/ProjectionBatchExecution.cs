@@ -100,11 +100,6 @@ public static class ProjectionBatchExecution
                 {
                     InitialAnnMaintenanceSettled = true
                 };
-                if (OrleansSerialization.Measure(settled) > engine.Limits.MaxBatchBytes)
-                {
-                    throw Errors.Fail(ErrorCode.BudgetExceeded, ChangeFeedsExecution.InvalidAnnSettlement);
-                }
-
                 tx.PutRecord(ProjectionOutbox.ConsumerKey(request.Consumer), settled);
                 tx.PutRecord(key, new ProjectionReceipt(fingerprint, emptyReceipt, state.Checkpoint));
             }

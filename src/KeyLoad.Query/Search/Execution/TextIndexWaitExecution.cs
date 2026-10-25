@@ -19,7 +19,6 @@ internal static class TextIndexWaitExecution
         WaitForIndexReadCutObservation? observation = null;
         var completed = database.WithQueryView(principalId, request.Partition, request.Collection, Capability.None, (view, principal, resource) =>
         {
-            FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
             if (string.IsNullOrEmpty(request.TextField) || request.MinimumToken is null)
             {
                 throw Errors.Fail(ErrorCode.Validation, WaitInvalidRequest);

@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.Messaging;
 using KeyLoad.IntegrationTests.OrleansExecution;
@@ -20,7 +21,7 @@ internal static class SqlPendingQueuePublicFlow
         principal = await McpCallerAssertions.SdkSuccessAsync(await administrator.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), principal, token));
         await using var reader = await RequestCqrsClusterCallers.ConnectAsync(fixture.App, McpCallerProtocol.Node2, identity.Secret, token);
         var request = new QueryRequest(state.Partition,
-            $"SELECT * FROM QUEUE_MESSAGES('{state.Lane.Queue}') ORDER BY id LIMIT {QueueLifecyclePublicProtocol.Two}", AllowFullScan: true);
+            $"SELECT TOP ({QueueLifecyclePublicProtocol.Two}) * FROM QUEUE_MESSAGES('{state.Lane.Queue}') ORDER BY id", AllowFullScan: true);
         await DeniedAsync(reader, state, request, token);
         await SqlPendingQueuePublicAssertions.UnchangedAsync(administrator, state, token);
         principal = principal with
@@ -76,7 +77,7 @@ internal static class SqlPendingQueuePublicFlow
         var sql = SqlClusterProtocol.Call(state.Partition, tool, request);
         var q1 = await reader.Sdk.ExecuteSqlAsync(sql, token);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(q1, ErrorCode.PermissionDenied);
-        await Assert.That(q1.Value).IsNull();
+        await Assert.That(q1.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true);
     }
 }

@@ -34,7 +34,7 @@ internal static class SubscriptionIndependentCheckpointR52Refusals
     internal static async Task FailureAsync<T>(ManagedCode.Communication.Result<T> failure, ErrorCode code, string detail)
     {
         await Assert.That(failure.IsFailed).IsTrue();
-        await Assert.That(failure.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(failure);
         await SubscriptionFilterClusterAssertions.EqualAsync(failure.Problem, Errors.Problem(code, detail));
     }
 

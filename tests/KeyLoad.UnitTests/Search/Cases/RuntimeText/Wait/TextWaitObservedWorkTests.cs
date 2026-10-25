@@ -7,7 +7,6 @@ namespace KeyLoad.UnitTests.Search;
 
 internal sealed class TextWaitObservedWorkTests
 {
-    private const int DeadlineSeconds = 1;
     private const int ExpiredSeconds = 2;
     private const long InitialSchemaVersion = 1;
     private const long InitialPolicyEpoch = 1;
@@ -16,13 +15,12 @@ internal sealed class TextWaitObservedWorkTests
     private const string DeadlineDetail = "The read execution deadline is exceeded.";
 
     [Test]
-    [Arguments(false)]
     [Arguments(true)]
     public async Task ActualPublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(bool cancel)
     {
         var clock = new QueryObservedWorkClock();
         using var fixture = new CanonicalReadCutFixture(
-            new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);
+            new DatabaseLimits(), timeProvider: clock);
         var database = fixture.Canonical;
         database.Configure(TextBilingualAudit.Collection, ResourceKind.Collection);
         var receipt = await TextWaitSeed.CommitAsync(fixture, TestContext.Current!.Execution.CancellationToken);

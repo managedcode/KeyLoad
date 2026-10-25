@@ -9,16 +9,14 @@ internal sealed class SampleChunkBenchmarkState
     private readonly SampleRecord[] records;
     private readonly byte[][] runtimeValues;
     private readonly byte[] chunk;
-    private readonly IOptions<DatabaseLimits> limitsOptions;
     private readonly IOptions<TimeSeriesExecutionOptions> executionOptions;
 
-    internal SampleChunkBenchmarkState(SampleRecord[] records, IOptions<DatabaseLimits> limitsOptions,
+    internal SampleChunkBenchmarkState(SampleRecord[] records,
         IOptions<TimeSeriesExecutionOptions> executionOptions)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
         executionOptions.Value.Validate();
         this.records = records;
-        this.limitsOptions = limitsOptions;
         this.executionOptions = executionOptions;
         runtimeValues = RuntimeEncode();
         chunk = ChunkEncode();
@@ -71,7 +69,7 @@ internal sealed class SampleChunkBenchmarkState
         return SampleChunkCodec.Decode(chunk, budget, executionOptions);
     }
 
-    private ReadExecutionBudget Budget() => new(limitsOptions);
+    private static ReadExecutionBudget Budget() => new();
 
     private static void RequireExact(SampleRecord[] expected, SampleRecord[] actual)
     {

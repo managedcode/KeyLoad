@@ -67,7 +67,7 @@ public static class SubscriptionGroups
     internal static SubscriptionInfo GroupInfo(this DatabaseEngine engine, IKeyValueView view, SubscriptionRef subscription, GroupState state)
     {
         var head = engine.SourceHead(view, subscription.Source);
-        engine.ValidateSubscriptionGroupProgress(view, subscription, state, head);
+        SubscriptionDeliveryAuthority.ValidateSubscriptionGroupProgress(view, subscription, state, head);
         return ValidatedGroupInfo(subscription, state, head);
     }
 
@@ -186,13 +186,13 @@ public static class SubscriptionGroups
         return engine.GroupInfo(tx, request.Subscription, state);
     }
 
-    internal static GroupState AdvanceCheckpoint(IAtomicTransaction tx, SubscriptionRef subscription, GroupState state, SubscriptionWindowAuthorityReadBudget budget)
+    internal static GroupState AdvanceCheckpoint(IAtomicTransaction tx, SubscriptionRef subscription, GroupState state)
     {
         var checkpoint = state.Checkpoint;
         while (checkpoint < state.IssuedPosition)
         {
             var key = MessagingSerialization.GroupKey(SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, checkpoint + SubscriptionGroupsAdjacentElementOffset);
-            var delivery = SubscriptionDeliveryAuthority.ReadSubscriptionWindowDelivery(tx, key, budget);
+            var delivery = SubscriptionDeliveryAuthority.ReadSubscriptionWindowDelivery(tx, key);
             SubscriptionDeliveryAuthority.RequireSubscriptionWindowReference(delivery, state, checkpoint + SubscriptionGroupsAdjacentElementOffset);
             if (delivery?.State is not (GroupDeliveryState.Acked or GroupDeliveryState.Filtered))
             {

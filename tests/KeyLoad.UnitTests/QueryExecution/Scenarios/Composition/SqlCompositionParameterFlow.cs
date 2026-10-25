@@ -67,7 +67,7 @@ internal static class SqlCompositionParameterFlow
         bool reverse, CancellationToken token)
     {
         var request = SqlCompositionParameterData.Request(command, reverse);
-        var compiled = SqlOperationTestData.Compile(request, fixture.Database.Limits, cancellationToken: token);
+        var compiled = SqlOperationTestData.Compile(request, cancellationToken: token);
         await Assert.That(compiled.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(compiled.ReadKind).IsNull();
         await Assert.That(compiled.CommandId).IsEqualTo(command.CommandId);

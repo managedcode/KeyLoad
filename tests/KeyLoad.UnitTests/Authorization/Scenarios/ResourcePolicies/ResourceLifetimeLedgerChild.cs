@@ -22,8 +22,7 @@ internal static class ResourceLifetimeLedgerChild
         {
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(owner.CallerToken, lease.Cancellation);
             await Assert.That(lease.ResultRetention).IsSameReferenceAs(retention);
-            var budget = new ReadExecutionBudget(owner.Database.OperationLimitsOptions,
-                owner.Database.EvaluationClock, linked.Token);
+            var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, linked.Token);
             budget.ConstrainLifetime(expiry);
             if (maximumBytes is { } limit)
             {

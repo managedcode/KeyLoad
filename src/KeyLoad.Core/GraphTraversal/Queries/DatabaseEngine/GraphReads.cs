@@ -27,7 +27,7 @@ public static class GraphReads
     public static global::KeyLoad.GraphTraversal Traverse(this DatabaseEngine engine, string principalId, PartitionRef partition, string graph, EntityRef start, int maxDepth = DefaultTraversalDepth, int maxVertices = DefaultTraversalVertices, int maxEdges = DefaultTraversalEdges, string[]? labels = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.TraverseRead(principalId, partition, graph, start, maxDepth, maxVertices, maxEdges, labels, budget);
     }
 

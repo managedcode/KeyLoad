@@ -11,8 +11,7 @@ internal sealed class PostgresMessageDispatch(IServiceProvider services, global:
         switch (frame.Type)
         {
             case PostgresMessageProtocol.Parse:
-                var parsed = PostgresPreparedDecoder.Parse(frame.Payload, Options,
-                    services.GetRequiredService<IOptions<DatabaseLimits>>(), token);
+                var parsed = PostgresPreparedDecoder.Parse(frame.Payload, Options, token);
                 catalog.PutStatement(parsed.Name, parsed.Statement);
                 writer.Empty(PostgresWireWriter.ParseComplete);
                 break;

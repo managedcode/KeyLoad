@@ -94,23 +94,4 @@ internal sealed class SearchStreamingTests
             TestContext.Current!.Execution.CancellationToken)).IsEmpty();
     }
 
-    [Test]
-    public async Task RejectedResultLeavesStoreUsableForFollowingSearch()
-    {
-        using var db = new TestDatabase();
-        db.Configure(Collection, ResourceKind.Collection);
-        db.Commit(new PutDocument(Collection, "a", "{\"text\":\"alpha\",\"padding\":\"" + new string('x', 1_024) + "\"}"));
-        var position = db.Store.Position;
-        var bounded = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = 128
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => bounded.SearchAsync("root",
-            new(db.Partition, Collection, TextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)))!;
-        await Assert.That(failure.Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(db.Store.Position).IsEqualTo(position);
-        await Assert.That(await new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", new(db.Partition, Collection, TextPath, "alpha"),
-            TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
-    }
 }

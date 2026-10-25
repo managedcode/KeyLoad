@@ -9,15 +9,13 @@ internal static class AnnDependencyIdentity
     private const string Domain = "keyload.ann.execution-policy";
     private const int DigestBytes = 32;
     private const string InvalidIdentity = "The canonical ANN dependency identity is inconsistent.";
-    private const string ScanExceeded = "The canonical ANN dependency scope exceeds its budget.";
 
     internal static string Capture(DatabaseEngine database, IKeyValueView view, PartitionRef partition,
         ReadExecutionBudget budget, AnnSeedWork work)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         hash.AppendData(System.Text.Encoding.UTF8.GetBytes(Domain));
-        var scanned = budget.VisitRange(view, KeySpace.ResourcePrefix(partition.TenantId, partition.DatabaseId),
-            database.Limits.MaxScanRecords, (key, value) =>
+        _ = budget.VisitAll(view, KeySpace.ResourcePrefix(partition.TenantId, partition.DatabaseId), (key, value) =>
             {
                 work.Charge();
                 var resource = OrleansSerialization.Deserialize<ResourceDefinition>(value);
@@ -35,10 +33,6 @@ internal static class AnnDependencyIdentity
                 }
                 return true;
             });
-        if (scanned.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded);
-        }
         work.Check();
         Span<byte> digest = stackalloc byte[DigestBytes];
         if (!hash.TryGetHashAndReset(digest, out var written) || written != DigestBytes)

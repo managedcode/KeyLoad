@@ -66,14 +66,4 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
     internal Task<RankedDocument[]> SearchAsync()
         => new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(Subject,
             new(database.Partition, Collection, Field, Term), Token);
-
-    internal void RequireAdmission(Bm25CorpusCurrent current, DatabaseLimits limits)
-    {
-        limits.Validate();
-        database.Store.Read(view =>
-        {
-            Bm25CorpusFamilyAdmission.Require(view, Bm25CorpusKeys.Current(current), current, limits);
-            return true;
-        });
-    }
 }

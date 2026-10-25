@@ -23,13 +23,13 @@ internal sealed class PackedAnnRecallTests
             var records = PackedAnnTestData.Load(database, metric);
             await Assert.That(records.Length).IsEqualTo(PackedAnnTestData.QualityRecordCount);
             var space = PackedAnnTestData.Space(metric, PackedAnnTestData.QualityDimension);
-            var budget = PackedAnnIndexTestSupport.Budget(database);
+            var budget = PackedAnnIndexTestSupport.Budget();
             var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.RecallMetric,
                 space, records, options, budget);
             await Assert.That(index.Count).IsEqualTo(PackedAnnTestData.QualityRecordCount);
             foreach (var cell in PackedAnnRecallSupport.Cells)
             {
-                var observation = await PackedAnnRecallSupport.MeasureCell(database, records, index, metric, cell);
+                var observation = await PackedAnnRecallSupport.MeasureCell(records, index, metric, cell);
                 await PackedAnnRecallSupport.AssertCell(observation, metric, cell, options);
             }
         }

@@ -14,7 +14,7 @@ internal static class AdministratorAuthenticationRead
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        var work = new ReadExecutionBudget(clock, token);
         work.AttachResourceLifetimeBinding(binding);
         work.ConstrainLifetime(request.Envelope.ExpiresAt);
         if (!AdministratorAuthenticationScope.Validate(request.Envelope))
@@ -22,7 +22,7 @@ internal static class AdministratorAuthenticationRead
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
         var input = GrainPayload.Read<AdministratorAuthenticationRequest>(request.Payload);
-        Require(input, request.Envelope.ExpiresAt, database.Limits);
+        Require(input, request.Envelope.ExpiresAt);
         work.ConstrainWork(input.MaximumReadBytes, input.MaximumExaminedRecords);
         work.ConstrainResultBytes(input.MaximumResultBytes);
         binding.Bind(ImmutableArray<ResourceLifetime>.Empty);
@@ -50,12 +50,10 @@ internal static class AdministratorAuthenticationRead
         return reply;
     }
 
-    private static void Require(AdministratorAuthenticationRequest input, DateTimeOffset expiry, DatabaseLimits limits)
+    private static void Require(AdministratorAuthenticationRequest input, DateTimeOffset expiry)
     {
         if (string.IsNullOrEmpty(input.Secret) || input.ExpiresAt != expiry
-            || input.MaximumReadBytes <= 0 || input.MaximumReadBytes > limits.MaxQueryReadBytes
-            || input.MaximumExaminedRecords <= 0 || input.MaximumExaminedRecords > limits.MaxScanRecords
-            || input.MaximumResultBytes <= 0 || input.MaximumResultBytes > limits.MaxBatchBytes)
+            || input.MaximumReadBytes <= 0 || input.MaximumExaminedRecords <= 0 || input.MaximumResultBytes <= 0)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

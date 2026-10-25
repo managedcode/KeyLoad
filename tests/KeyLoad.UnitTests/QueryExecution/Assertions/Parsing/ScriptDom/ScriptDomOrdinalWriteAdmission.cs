@@ -23,7 +23,7 @@ internal static class ScriptDomOrdinalWriteAdmission
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             {
                 partial = SqlOperationCompiler.Compile(new(fixture.Partition, SqlTypedInsertLiteral.Sql, values,
-                    CommandId: state.Created.Command.CommandId), limits, limits.Value.MaxBatchBytes,
+                    CommandId: state.Created.Command.CommandId), UnitMcpOptions.CanonicalPayloadBytes,
                     UnitExecutionOptions.QueryExecution(), token);
                 outcome = SqlTypedInsertLiteral.Apply(fixture.Database, partial, state.Created.At);
             });
@@ -37,7 +37,7 @@ internal static class ScriptDomOrdinalWriteAdmission
                 [SqlTypedInsertLiteral.ActiveColumn] = JsonSerializer.SerializeToElement(true)
             };
             var repaired = SqlOperationCompiler.Compile(new(fixture.Partition, SqlTypedInsertLiteral.Sql, exact,
-                CommandId: state.Created.Command.CommandId), limits, limits.Value.MaxBatchBytes,
+                CommandId: state.Created.Command.CommandId), UnitMcpOptions.CanonicalPayloadBytes,
                 UnitExecutionOptions.QueryExecution(), token);
             await SqlTypedInsertAssertions.SameAsync(state.Created.Result,
                 SqlTypedInsertLiteral.Apply(fixture.Database, repaired, state.Created.At));

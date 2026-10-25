@@ -12,7 +12,7 @@ public static class ResourceEffectApply
     internal static void RequireOriginalEffectAdmission(this DatabaseEngine engine, AtomicPartitionRosterTransaction transaction, PrincipalRecord principal, Command<DatabaseCommand> operation) => engine.RequireResourceEffectAdmission(transaction, principal, operation);
     internal static void RequireResourceEffectAdmission(this DatabaseEngine engine, AtomicPartitionRosterTransaction transaction, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
-        var admission = ResourceEffectAdmissionValidation.Read(operation, engine.Limits);
+        var admission = ResourceEffectAdmissionValidation.Read(operation);
         if (admission.Error is { } error)
         {
             throw Errors.Fail(error, admission.SafeDetail!);
@@ -45,7 +45,7 @@ public static class ResourceEffectApply
         _ = engine.Store.Read(raw =>
         {
             var view = work is null ? raw : work.CreateView(raw);
-            var current = new ResourceEffectBindingScope(engine.OperationLimitsOptions);
+            var current = new ResourceEffectBindingScope();
             var observed = new ResourceEffectObservationView(view, current);
             var principal = engine.Principal(observed, operation.UserId!, admittedAt);
             if (!engine.AuthorizeResourceEffectSubmission(observed, principal, operation))
@@ -62,7 +62,7 @@ public static class ResourceEffectApply
                 return true;
             }
 
-            var admission = ResourceEffectAdmissionValidation.Read(operation, engine.Limits);
+            var admission = ResourceEffectAdmissionValidation.Read(operation);
             if (admission.Error is { } capturedError)
             {
                 if (capturedError is ErrorCode.Corruption or ErrorCode.FormatUnsupported or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome)
@@ -110,7 +110,7 @@ public static class ResourceEffectApply
         catch (KeyLoadException denial) when (denial.Code == ErrorCode.PermissionDenied)
         {
             // Bound current-policy refusals retain their original canonical failed-outcome boundary.
-            _ = ResourceEffectAdmissionValidation.Read(operation, engine.Limits);
+            _ = ResourceEffectAdmissionValidation.Read(operation);
             return false;
         }
     }

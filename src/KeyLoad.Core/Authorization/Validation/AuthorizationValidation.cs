@@ -12,7 +12,7 @@ public static class AuthorizationValidation
         {
             var projectedPayload = engine.Authorization.Project(principal, resource.FieldPolicies, payload, out _);
             var projectedHeaders = engine.Authorization.Project(principal, resource.HeaderPolicies, headers, out _);
-            if (!engine.CachedProjectionMatches(payload, projectedPayload) || !engine.CachedProjectionMatches(headers, projectedHeaders))
+            if (!AuthorizationValidation.CachedProjectionMatches(payload, projectedPayload) || !AuthorizationValidation.CachedProjectionMatches(headers, projectedHeaders))
             {
                 throw Errors.Fail(ErrorCode.PermissionDenied, CachedDeliveryPolicyChangedDetail);
             }
@@ -23,19 +23,15 @@ public static class AuthorizationValidation
         }
     }
 
-    internal static bool CachedProjectionMatches(this DatabaseEngine engine, string original, string projected)
+    internal static bool CachedProjectionMatches(string original, string projected)
     {
         if (string.Equals(original, projected, StringComparison.Ordinal))
         {
             return true;
         }
 
-        var options = new JsonDocumentOptions
-        {
-            MaxDepth = engine.Limits.MaxJsonDepth
-        };
-        using var originalDocument = JsonDocument.Parse(original, options);
-        using var projectedDocument = JsonDocument.Parse(projected, options);
+        using var originalDocument = JsonDocument.Parse(original);
+        using var projectedDocument = JsonDocument.Parse(projected);
         return JsonElement.DeepEquals(originalDocument.RootElement, projectedDocument.RootElement);
     }
 }

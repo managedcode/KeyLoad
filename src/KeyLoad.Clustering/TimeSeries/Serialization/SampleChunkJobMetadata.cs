@@ -5,14 +5,9 @@ namespace KeyLoad.Clustering;
 
 internal static class SampleChunkJobMetadata
 {
-    private const int MaximumBase64Expansion = 2;
     internal static ScheduleJobRequest Create(GrainId target, DateTimeOffset dueAt,
-        SampleChunkWorkHint hint, int maximumBytes)
+        SampleChunkWorkHint hint)
     {
-        if (OrleansSerialization.Measure(hint) > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkJobProtocol.Exhausted);
-        }
         return new ScheduleJobRequest
         {
             Target = target,
@@ -27,14 +22,14 @@ internal static class SampleChunkJobMetadata
         };
     }
 
-    internal static SampleChunkWorkHint Read(IJobRunContext context, GrainId target, int maximumBytes)
+    internal static SampleChunkWorkHint Read(IJobRunContext context, GrainId target)
     {
         ArgumentNullException.ThrowIfNull(context);
         var job = context.Job;
         if (job is null || job.TargetGrainId != target || job.Name != SampleChunkJobProtocol.JobName
             || job.Metadata is not { } metadata || metadata.Count != SampleChunkJobProtocol.MetadataCount
             || !metadata.TryGetValue(SampleChunkJobProtocol.HintKey, out var encoded)
-            || string.IsNullOrEmpty(encoded) || encoded.Length > checked(maximumBytes * MaximumBase64Expansion))
+            || string.IsNullOrEmpty(encoded))
         {
             throw Errors.Fail(ErrorCode.Validation, SampleChunkJobProtocol.Invalid);
         }
@@ -44,10 +39,6 @@ internal static class SampleChunkJobMetadata
             bytes = Convert.FromBase64String(encoded);
         }
         catch (FormatException) { throw Errors.Fail(ErrorCode.Validation, SampleChunkJobProtocol.Invalid); }
-        if (bytes.Length > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, SampleChunkJobProtocol.Exhausted);
-        }
         return OrleansSerialization.Deserialize<SampleChunkWorkHint>(bytes);
     }
 }

@@ -10,7 +10,6 @@ internal static class ModelQueueQueryRows
     private const string MetadataSpace = "message-meta";
     private const string BodySpace = "message-body";
     private const string QueueCorrupt = "The retained queue source is inconsistent.";
-    private const string ScanExceeded = "The model query scan exceeds its configured candidate budget.";
 
     internal static void Visit(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, ResourceDefinition resource, ModelQuerySource source, ReadExecutionBudget budget,
@@ -35,7 +34,7 @@ internal static class ModelQueueQueryRows
         Action<DocumentRecord> accept)
     {
         var prefix = KeySpace.Partition(MetadataSpace, partition, resource.Name);
-        var scan = budget.VisitRange(view, prefix, database.Limits.MaxScanRecords, (key, bytes) =>
+        var scan = budget.VisitAll(view, prefix, (key, bytes) =>
         {
             budget.Check();
             var metadata = Deserialize(bytes);
@@ -43,10 +42,6 @@ internal static class ModelQueueQueryRows
             Accept(database, view, principal, partition, resource, metadata, budget, accept);
             return true;
         });
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded);
-        }
     }
 
     private static MessageMetadata Deserialize(ReadOnlySpan<byte> bytes)

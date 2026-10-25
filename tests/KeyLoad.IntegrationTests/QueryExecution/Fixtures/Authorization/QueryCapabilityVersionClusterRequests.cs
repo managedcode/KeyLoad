@@ -10,11 +10,6 @@ internal static class QueryCapabilityVersionClusterRequests
     private const string MinimumParameterName = "minimum";
     internal const string Collection = "query_versions";
     internal const string Reader = "query-version-reader";
-    internal static DatabaseLimits Limits() => new()
-    {
-        MaxBatchBytes = 8192,
-        MaxQueryBytes = 32768
-    };
     internal static CommandRequest Seed(PartitionRef partition) => new(Guid.NewGuid(), partition,
         [new PutDocument(Collection, "a", """{"order_id":"a","title":"Alpha","score":10,"active":true}"""),
          new PutDocument(Collection, "b", """{"order_id":"b","title":"Bravo","score":20,"active":true}"""),

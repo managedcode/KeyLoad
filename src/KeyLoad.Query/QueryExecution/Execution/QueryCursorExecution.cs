@@ -29,7 +29,7 @@ internal static class QueryCursorExecution
                 || claims.PrincipalId != principal.Id || claims.PolicyEpoch != principal.PolicyEpoch || claims.SchemaVersion != resource.SchemaVersion
                 || claims.QueryHash != hash || claims.SourceEpoch != sourceEpoch || claims.CutPosition < InitialSequence || claims.CutPosition > database.Store.Position
                 || claims.ExpiresAt <= clock.GetUtcNow()
-                || claims.Offset < InitialCursorOffset || claims.Offset > database.Limits.MaxScanRecords
+                || claims.Offset < InitialCursorOffset
                 || keyset != (claims.AfterId is not null) || (keyset && claims.Offset != InitialCursorOffset))
             {
                 throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorNoLongerHasAValidAuthorizedReadCutDetail);

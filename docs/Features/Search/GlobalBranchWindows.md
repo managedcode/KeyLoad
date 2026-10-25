@@ -32,9 +32,10 @@ AllowIncomplete=false); GlobalBranchMergeResult(Candidates,MissingWindowIds,
 WindowComplete,Approximate,Truncated,Exhaustive,ExaminedCandidateCount).
 String identifiers are nonblank and bounded by JsonData.Identifier; candidate
 revision is positive; arrays are initialized; duplicate/unknown source IDs reject.
-The merger receives DatabaseLimits and the shared ReadExecutionBudget, charges
-every examined record and exact bytes before retaining it, and retains no
-more than MaxScanRecords/MaxBatchBytes. No unbounded window list is accepted.
+The merger receives the shared ReadExecutionBudget, charges every examined
+record and exact bytes before retaining it, and retains no more bytes than the
+budget's result ceiling (the optional `QueryExecutionOptions.MaximumResultBytes`).
+There is no record or window-count ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)).
 Strict mode rejects Approximate or Truncated input; explicit incomplete mode
 retains those flags. Exhaustive also requires every source Exhaustive and no
 candidate omitted by the requested output window. Local fusion may use a narrow
@@ -54,12 +55,12 @@ identity. Full fan-out/read-cut/policy/statistics contracts remain a later stage
 Validation rejects malformed requests, identifiers, uninitialized arrays,
 nonpositive/oversized limits and duplicate/unknown logical source windows.
 Corruption rejects malformed/conflicting candidates or incomparable scope.
-BudgetExceeded rejects record/byte/window/deadline exhaustion; cancellation keeps
+BudgetExceeded rejects result-byte and explicit-expiry exhaustion; cancellation keeps
 its cancellation exception. Strict missing/incomplete windows give
 OwnershipLost; strict approximate/truncated windows give UnsupportedCapability.
-Expected and received window lists each obey MaxScanRecords and their exact
-metadata is included in the one shared MaxBatchBytes accounting. Every
-examined candidate across all windows counts against the same MaxScanRecords.
+The exact metadata of the expected and received window lists is included in
+the one shared result-byte accounting. Every examined candidate across all
+windows is counted in the same read ledger.
 
 The merger and order live in the Query Search slice (Contracts/Models/Queries/Validation) with a narrow join into SearchRankFusion; rankers, physical topology, persisted statistics, public SearchRequest, policy projections and existing expected results are unchanged.
 

@@ -28,7 +28,7 @@ internal static class RemoteTransferPendingDeadlineAssertions
 
     private static string[] Image(RemoteTransferDatabase fixture) => fixture.Store.Read(view =>
     {
-        var page = view.Scan([], fixture.Database.Limits.MaxResults);
+        var page = view.Scan([], view.MaximumRangeRecords);
         if (page.HasMore)
         {
             throw new InvalidOperationException(IncompleteImage);

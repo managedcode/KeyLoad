@@ -21,7 +21,7 @@ public static class GraphTraversalValidation
         }
 
         engine.RequireGraphWrite(view, principal, source, destination.Partition, graph);
-        var intent = GraphTraversalCommands.CurrentIntent(view, source, graph, edgeId, destination, engine.Limits);
+        var intent = GraphTraversalCommands.CurrentIntent(view, source, graph, edgeId, destination);
         if (intent is { Deleted: false })
         {
             engine.VisibleVertex(view, principal, intent.Edge.From);

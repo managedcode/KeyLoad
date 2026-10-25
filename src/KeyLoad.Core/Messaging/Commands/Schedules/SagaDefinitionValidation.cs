@@ -4,14 +4,14 @@ namespace KeyLoad.Core;
 /// <summary>Owns the SagaDefinitionValidation operation contract.</summary>
 internal static class SagaDefinitionValidation
 {
-    internal static CompareExchangeSaga NormalizeSagaRequest(this DatabaseEngine engine, CompareExchangeSaga request, PartitionRef partition, DateTimeOffset now)
+    internal static CompareExchangeSaga NormalizeSagaRequest(CompareExchangeSaga request, PartitionRef partition, DateTimeOffset now)
     {
         if (request.SagaId == Guid.Empty || request.ExpectedRevision < SagaCommands.SagaCommandsInitialSequence || !Enum.IsDefined(request.Phase))
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }
 
-        var stateJson = JsonData.Validate(request.StateJson, engine.Limits);
+        var stateJson = JsonData.Validate(request.StateJson);
         if (request.Phase == SagaPhase.TimedOut)
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
@@ -53,15 +53,15 @@ internal static class SagaDefinitionValidation
         return request with
         {
             StateJson = stateJson,
-            Timeout = engine.NormalizeTimeoutDefinition(timeout)
+            Timeout = SagaDefinitionValidation.NormalizeTimeoutDefinition(timeout)
         };
     }
 
-    internal static SagaTimeoutDefinition NormalizeTimeoutDefinition(this DatabaseEngine engine, SagaTimeoutDefinition timeout)
+    internal static SagaTimeoutDefinition NormalizeTimeoutDefinition(SagaTimeoutDefinition timeout)
     {
         JsonData.Identifier(timeout.Queue.Queue);
-        var payload = JsonData.Validate(timeout.PayloadJson, engine.Limits);
-        var headers = JsonData.Validate(timeout.HeadersJson, engine.Limits);
+        var payload = JsonData.Validate(timeout.PayloadJson);
+        var headers = JsonData.Validate(timeout.HeadersJson);
         if (timeout.OrderingKey is not null)
         {
             JsonData.Identifier(timeout.OrderingKey);

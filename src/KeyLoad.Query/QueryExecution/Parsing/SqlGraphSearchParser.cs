@@ -1,26 +1,21 @@
 using KeyLoad.Core;
 using KeyLoad.Query.QueryExecution;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query;
 
 /// <summary>Parses the closed Q1.Search statement into the existing graph-search request.</summary>
 internal static class SqlGraphSearchParser
 {
-    internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, IOptions<DatabaseLimits> limitsOptions, ReadExecutionBudget budget,
+    internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, ReadExecutionBudget budget,
         int maximumParameters)
     {
         ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(limitsOptions);
         ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(limitsOptions);
-        var limits = limitsOptions.Value;
-        limits.Validate();
         ValidateEnvelope(request);
-        SqlGraphSearchRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, maximumParameters, budget.Cancellation);
+        SqlGraphSearchRequestSizer.EnsureBounded(request, maximumParameters, budget.Cancellation);
         budget.Check();
-        var context = new global::KeyLoad.Query.QueryExecution.ScriptDomGraphContext(request.Query, limitsOptions, budget, SqlGraphSearchSyntax.ParameterDetail);
-        var arguments = global::KeyLoad.Query.QueryExecution.ScriptDomGraphShape.Read(request.Query.Sql, limitsOptions, context,
+        var context = new global::KeyLoad.Query.QueryExecution.ScriptDomGraphContext(request.Query, budget, SqlGraphSearchSyntax.ParameterDetail);
+        var arguments = global::KeyLoad.Query.QueryExecution.ScriptDomGraphShape.Read(request.Query.Sql, context,
             global::KeyLoad.Query.QueryExecution.ScriptDomGraphSearch.Function);
         return global::KeyLoad.Query.QueryExecution.ScriptDomGraphSearch.Read(arguments, context);
     }

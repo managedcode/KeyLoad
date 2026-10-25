@@ -21,6 +21,5 @@ internal static class PartitionQueryClusterProtocol
     internal const int AstVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const int Limit = 100;
     internal const int MaxPartitions = 8;
-    internal const int MaxResults = 1_000;
     internal const int RowRevision = 1;
 }

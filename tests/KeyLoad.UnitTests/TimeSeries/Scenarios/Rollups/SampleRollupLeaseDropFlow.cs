@@ -57,7 +57,7 @@ internal static class SampleRollupLeaseDropFlow
         {
             return db.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(db.Database.OperationLimitsOptions, db.Database.EvaluationClock, cancellation);
+            var budget = new ReadExecutionBudget(db.Database.EvaluationClock, cancellation);
             var request = new ReadSampleRollupRequest(db.Partition, SampleRollupWholeFlow.Set,
                 SampleRollupWholeFlow.Series, SampleRollupWholeFlow.Start, SampleRollupWholeFlow.End);
             var result = SampleRollupReader.Read(db.Database, budget.CreateView(view), SampleRollupWholeFlow.Root, request, budget);

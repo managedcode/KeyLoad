@@ -65,8 +65,7 @@ internal static class AnnLineageColdContinuation
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var seeds = new AnnSeedOptions();
-                var read = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Limits),
-                    database.EvaluationClock, token);
+                var read = new ReadExecutionBudget(database.EvaluationClock, token);
                 var current = AnnSeedCollector.CapturePinned(database, AnnProjectionPinTestSupport.Principal,
                     request, Options.Create(seeds), read);
                 await AnnLineageReplayOracle.AssertSeedAsync(current, AnnLineageReplayOracle.Stage.Reprojected);

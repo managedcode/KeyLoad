@@ -2,6 +2,8 @@
 
 Status: Accepted current implementation decision. Original runtime and performance qualification remain OPEN.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 ## Decision and reason
 
 KeyLoad retains one replaceable exact-Terms statistics head per full partition/collection/field/tokenizer/authenticated-subject identity in ZoneTree family `bm25-corpus-current`. This reduces repeated exact statistics calculation only when every current canonical dependency matches. [Bm25CorpusCurrent](../Features/Search/Bm25CorpusCurrent.md) is the canonical alias/field/phase/bounds and REQ/AC inventory; [ADR-018](ADR-018-global-rank-fusion.md) continues to own distributed statistics and final ranking.

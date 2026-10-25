@@ -173,7 +173,7 @@ internal static class Bm25InvalidationDependencyFlow
         var budget = database.CreateReadWork(TestContext.Current.Execution.CancellationToken);
         return database.Store.Read(view =>
         {
-            var page = budget.Scan(view, [], UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords);
+            var page = budget.Scan(view, [], view.MaximumRangeRecords);
             if (page.HasMore)
             {
                 throw new InvalidOperationException("The full execution dependency image exceeded its original scan budget.");

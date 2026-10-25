@@ -132,7 +132,7 @@ internal static class TypedEndpointJoinColdFlow
         var request = TypedEndpointJoinProtocol.Sql(command);
         var result = await callers.Sdk.ExecuteSqlAsync(request, token);
         await Assert.That(result.IsFailed).IsTrue();
-        await Assert.That(result.Value).IsNull();
+        await Assert.That(result.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
             ErrorCode.Validation, dispatched: true);

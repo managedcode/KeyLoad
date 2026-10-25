@@ -12,7 +12,7 @@ internal static class Bm25RequestEnvelopes
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var verified = CommandExecutionIdentity.SnapshotCommand(operation, scope.Limits);
+        var verified = CommandExecutionIdentity.SnapshotCommand(operation);
         if (verified.Value!.Kind != OperationKind.Bm25CorpusPublicationPhase)
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired);
@@ -25,7 +25,7 @@ internal static class Bm25RequestEnvelopes
             PrincipalId = verified.UserId,
             CommandKind = verified.Value!.Kind,
             CommandId = verified.CommandId,
-            Payload = GrainPayload.Copy(OrleansSerialization.Serialize(verified), scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(OrleansSerialization.Serialize(verified)),
             ExpiresAt = expiry
         };
     }

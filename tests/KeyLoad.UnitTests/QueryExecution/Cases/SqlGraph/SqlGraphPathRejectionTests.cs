@@ -13,7 +13,6 @@ internal sealed class SqlGraphPathRejectionTests
     private const int MaximumParameters = 257;
     private const string SelectAll = "SELECT *";
     private const string SelectId = "SELECT id";
-    private const string SqlGraphWithNestedComment = "/* outer /* nested */ outer */ ";
     private const string ExistingCollection = "orders";
     private const string UnsupportedDetail = "The SQL statement or execution clause is unsupported.";
     private const string ParameterDetail = "A named SQL graph-path parameter is missing or has the wrong scalar type.";
@@ -91,35 +90,15 @@ internal sealed class SqlGraphPathRejectionTests
     }
 
     [Test]
-    public async Task CompleteRequestBytesTokensAndParameterCountAreBounded()
+    public async Task ParameterCountIsBounded()
     {
         using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var smallRequestEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Core.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryBytes = 32
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var tokenEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Core.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryTokens = 8
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var depthEngine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Core.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryDepth = 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var engine = CreateEngine(database);
         var tooMany = Enumerable.Range(0, MaximumParameters).ToDictionary(index => "p" + index,
             index => JsonSerializer.SerializeToElement(index), StringComparer.Ordinal);
-        var byteFailure = Failure(smallRequestEngine, SqlGraphPathTestSupport.Request(database,
-            SqlGraphPathTestSupport.LiteralSql));
-        var tokenFailure = Failure(tokenEngine, SqlGraphPathTestSupport.Request(database,
-            SqlGraphPathTestSupport.LiteralSql));
-        var depthSql = SqlGraphWithNestedComment + SqlGraphPathTestSupport.LiteralSql;
-        var depthFailure = Failure(depthEngine, SqlGraphPathTestSupport.Request(database, depthSql));
-        var parameterFailure = Failure(tokenEngine, SqlGraphPathTestSupport.Request(database,
+        var parameterFailure = Failure(engine, SqlGraphPathTestSupport.Request(database,
             SqlGraphPathTestSupport.LiteralSql, tooMany));
 
-        await Assert.That(byteFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(tokenFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(depthFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(parameterFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 

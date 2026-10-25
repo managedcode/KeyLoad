@@ -37,8 +37,7 @@ internal static class GenerationVisibilityWriteAssertions
         var plan = JsonSerializer.Serialize(new
         {
             AccessPath = Scan,
-            AtomicPartition = partition.AtomicPartitionId,
-            ScanBudget = UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords
+            AtomicPartition = partition.AtomicPartitionId
         }, JsonDefaults.Options);
         var explanation = new global::KeyLoad.Query.AstQueryRequest(partition,
             new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.QueryExecution.SqlSyntax.Star,

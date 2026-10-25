@@ -13,14 +13,14 @@ internal sealed class PackedAnnConcurrencyTests
         var records = PackedAnnTestData.Load(database, DistanceMetric.Cosine);
         var space = PackedAnnTestData.Space(DistanceMetric.Cosine, PackedAnnTestData.QualityDimension);
         var index = PackedAnnIndexTestSupport.Build(space, records, new PackedAnnOptions { ExactThreshold = 0 },
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         var queries = Enumerable.Range(0, 16).Select(number =>
             PackedAnnTestData.Vector(number, space.Dimension, PackedAnnTestData.CorpusSeed)).ToArray();
         var expected = queries.Select(query => index.Search(query, 10, null,
-            PackedAnnIndexTestSupport.Budget(database))).ToArray();
+            PackedAnnIndexTestSupport.Budget())).ToArray();
 
         var tasks = queries.Select(query => Task.Run(() => index.Search(query, 10, null,
-            PackedAnnIndexTestSupport.Budget(database)))).ToArray();
+            PackedAnnIndexTestSupport.Budget()))).ToArray();
         var results = await Task.WhenAll(tasks);
         for (var queryIndex = 0; queryIndex < queries.Length; queryIndex++)
         {

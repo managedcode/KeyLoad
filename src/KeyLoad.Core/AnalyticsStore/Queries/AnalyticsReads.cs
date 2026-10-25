@@ -19,7 +19,7 @@ public static class AnalyticsReads
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(request);
-        var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock, cancellationToken);
+        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
         return engine.ReadAnalyticsEventsRead(principalId, request, work);
     }
 
@@ -36,7 +36,7 @@ public static class AnalyticsReads
         ArgumentNullException.ThrowIfNull(request);
         work.Check();
         AnalyticsStoreValidation.Range(request.FromInclusive, request.ToExclusive);
-        if (request.Limit <= MinimumAnalyticsReadLimit || request.Limit > engine.Limits.MaxResults)
+        if (request.Limit <= MinimumAnalyticsReadLimit)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, AnalyticsStoreValidation.Budget);
         }
@@ -72,7 +72,7 @@ public static class AnalyticsReads
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(request);
-        var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock, cancellationToken);
+        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
         return engine.CaptureAnalyticsAggregateRead(principalId, request, work);
     }
 
@@ -96,7 +96,7 @@ public static class AnalyticsReads
             var generation = AnalyticsStoreReadScope.Generation(work.CreateView(raw), request.Partition, request.Store);
             var identity = engine.Store.Identity;
             work.Check();
-            return new AnalyticsAggregateSnapshot(request, scope.Principal, scope.Resource, scope.Lifetime, rows, identity.Incarnation, identity.ReadGeneration, generation, engine.Store.Position, work, engine.OperationLimitsOptions, engine.EvaluationClock);
+            return new AnalyticsAggregateSnapshot(request, scope.Principal, scope.Resource, scope.Lifetime, rows, identity.Incarnation, identity.ReadGeneration, generation, engine.Store.Position, work, engine.EvaluationClock);
         });
     }
 }

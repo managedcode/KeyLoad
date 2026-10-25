@@ -24,7 +24,7 @@ internal static class AnnEnrollmentRead
             try
             {
                 AnnMaintenanceAdmission.Request(original, original.CommandId, database.Store.Identity.NodeId);
-                var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+                var read = originalBudget ?? new ReadExecutionBudget(clock, token);
                 var eligible = binding is null
                     ? database.ReadProjectionMaintenanceEligibility(original.Consumer, original.IndexGeneration, read)
                     : database.ReadProjectionMaintenanceEligibilityBound(original.Consumer, original.IndexGeneration, read, binding);

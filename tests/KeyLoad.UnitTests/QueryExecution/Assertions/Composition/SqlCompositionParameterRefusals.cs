@@ -53,8 +53,7 @@ internal static class SqlCompositionParameterRefusals
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() => SqlOperationTestData.Compile(request,
-                fixture.Database.Limits, cancellationToken: token));
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => SqlOperationTestData.Compile(request, cancellationToken: token));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
             await Assert.That(failure.Message).IsEqualTo(SqlCompositionParameterData.Invalid);
             await Assert.That(JsonDefaults.Serialize(request).AsSpan().SequenceEqual(parameters)).IsTrue();

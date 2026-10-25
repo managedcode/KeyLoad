@@ -7,7 +7,7 @@ internal sealed record IssuedPurposeCut(long Position, string[] Rows)
     internal static IssuedPurposeCut Read(ConnectionServerDatabase fixture)
         => fixture.Store.Read(view =>
         {
-            var page = view.Scan([], fixture.Database.Limits.MaxScanRecords);
+            var page = view.Scan([], view.MaximumRangeRecords);
             if (page.HasMore)
             {
                 throw new InvalidOperationException("The complete original execution cut exceeded its bound.");

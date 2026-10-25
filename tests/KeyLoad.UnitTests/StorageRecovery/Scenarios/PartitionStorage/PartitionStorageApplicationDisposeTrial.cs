@@ -41,7 +41,7 @@ internal static class PartitionStorageApplicationDisposeTrial
             captured = PartitionStorageApplicationDisposeCapture.Read(application.Services);
             await Assert.That(owner.Closing is null).IsTrue();
             await Assert.That(captured.Node.Closing is null).IsTrue();
-            maximumBytes = owner.Borrow().Database.Limits.MaxQueryReadBytes;
+            maximumBytes = long.MaxValue;
             files = await PartitionStorageApplicationDisposeFiles.ReadAsync(captured.Directory,
                 maximumBytes, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);

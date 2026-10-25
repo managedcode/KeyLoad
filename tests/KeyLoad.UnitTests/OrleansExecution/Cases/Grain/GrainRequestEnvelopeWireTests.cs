@@ -48,8 +48,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task IssuedReadPreservesPayloadAndVersionedPurpose()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var payload = OrleansSerialization.Serialize(new GetDocumentRequest(new(fixture.Partition, Principal, Principal)));
         var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.Document, payload);
@@ -67,8 +66,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task DefaultOrEmptyPayloadIsRejectedAtTheRealScopeBoundary(bool missing)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var invalid = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(NoDtoMarker)) with
         {
@@ -83,8 +81,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task UnsupportedPurposeIsInvalidated()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
         var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(NoDtoMarker)) with
         {

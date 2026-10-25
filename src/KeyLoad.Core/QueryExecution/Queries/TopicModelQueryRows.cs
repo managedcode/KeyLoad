@@ -6,14 +6,14 @@ namespace KeyLoad.Core;
 /// <summary>Executes TopicModelQueryRows operations against the caller's database context.</summary>
 public static class TopicModelQueryRows
 {
-    internal static void VisitTopicModelRows(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, ResourceDefinition resource, ModelQuerySource modelSource, ReadExecutionBudget budget, bool explain, Action<DocumentRecord> accept)
+    internal static void VisitTopicModelRows(IKeyValueView view, PartitionRef partition, ResourceDefinition resource, ModelQuerySource modelSource, ReadExecutionBudget budget, bool explain, Action<DocumentRecord> accept)
     {
         ArgumentNullException.ThrowIfNull(accept);
         budget.Check();
         var budgetedView = budget.CreateView(view);
         var source = new EventSourceRef(partition, resource.Name, EventSourceKind.Topic, Generation: modelSource.Generation);
         var head = EventSources.SourceHead(budgetedView, source, resource);
-        TopicModelQueryValidation.RequireHead(head, engine.Limits.MaxScanRecords);
+        TopicModelQueryValidation.RequireHead(head);
         if (explain || head.FirstAvailablePosition > head.TailPosition)
         {
             return;

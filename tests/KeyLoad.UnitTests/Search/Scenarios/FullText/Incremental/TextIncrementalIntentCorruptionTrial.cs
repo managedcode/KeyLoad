@@ -20,11 +20,10 @@ internal static class TextIncrementalIntentCorruptionTrial
         var original = await PrepareAsync(database, request, token);
         var options = UnitTextOptions.Execution();
         var root = Path.Combine(database.Directory, TextIncrementalProtocol.RootDirectory);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: token);
+        var budget = new ReadExecutionBudget(cancellationToken: token);
         var leaf = TextIncrementalEnrollmentFiles.Find(root, request, budget, options)
             ?? throw new InvalidOperationException();
         var path = Path.Combine(root, leaf, TextIncrementalProtocol.IntentFile);
-        await Assert.That(new FileInfo(path).Length).IsLessThanOrEqualTo((long)database.Database.Limits.MaxBatchBytes);
         var bytes = await File.ReadAllBytesAsync(path, token);
         var damaged = bytes.ToArray();
         damaged[^1] ^= DamageMask;

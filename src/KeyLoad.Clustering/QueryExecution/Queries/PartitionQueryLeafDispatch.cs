@@ -46,7 +46,7 @@ internal sealed class PartitionQueryLeafDispatch(DatabaseEngine database, string
         using var scope = parent.EnterReadGrant(grant);
         return database.WithQueryView(principalId, plan.Partition, plan.Request.Query.Collection,
             Capability.None, (view, principal, definition) => new PartitionQueryLifetimeMetadata(definition,
-                parent.BindResourceLifetimes(database, view, plan.Partition, [definition]), principal), parent);
+                parent.BindResourceLifetimes(view, plan.Partition, [definition]), principal), parent);
     }
 
     private async Task<PartitionQueryOwnedLeaf> RunAsync(IPartitionQueryGrain target, SiloAddress address,

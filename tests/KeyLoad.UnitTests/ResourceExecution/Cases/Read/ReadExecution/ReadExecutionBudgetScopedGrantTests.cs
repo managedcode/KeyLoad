@@ -2,6 +2,9 @@ namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ReadExecutionBudgetScopedGrantTests
 {
+    private const int CallerRecords = 10_000;
+    private static readonly TimeSpan CallerLifetime = TimeSpan.FromSeconds(30);
+
     [Test]
     public async Task MetadataAndRawProducerReadsShareExactScopeWhileOrdinaryViewsKeepTheirContract()
     {
@@ -10,7 +13,7 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var actual = database.Store.Read(view =>
         {
-            var work = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+            var work = new ReadExecutionBudget();
             var grant = work.CreateReadGrant(firstBytes + secondBytes, 2);
             bool metadata;
             bool producer;
@@ -35,13 +38,11 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
     public async Task FailedReaderRetainsAllowanceAndFreshIndependentReaderContinues()
     {
         var bytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
-        {
-            MaxQueryReadBytes = bytes
-        });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var actual = database.Store.Read(view =>
         {
-            var work = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+            var work = new ReadExecutionBudget();
+            work.ConstrainWork(bytes, CallerRecords);
             var grant = work.CreateReadGrant(bytes - 1, 1);
             var consumed = false;
             KeyLoadException failure;
@@ -51,7 +52,7 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
                     .ReadValue(ReadExecutionBudgetGrantSeed.FirstKey, _ => consumed = true));
             }
             var reserve = Assert.ThrowsExactly<KeyLoadException>(() => work.CreateReadGrant(2, 0));
-            var fresh = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+            var fresh = new ReadExecutionBudget();
             var freshGrant = fresh.CreateReadGrant(bytes, 1);
             bool found;
             using (fresh.EnterReadGrant(freshGrant))
@@ -75,13 +76,14 @@ internal sealed class ReadExecutionBudgetScopedGrantTests
     public async Task DeadlineCapCannotRenewOriginalLifetimeAndExpiredCapDoesNotAffectFreshRead()
     {
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
-        var work = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+        var work = new ReadExecutionBudget();
+        work.ConstrainLifetime(TimeProvider.System.GetUtcNow().Add(CallerLifetime));
         var original = work.RemainingLifetime;
         work.ConstrainLifetime(TimeProvider.System.GetUtcNow().Add(original + original));
         await Assert.That(work.RemainingLifetime <= original).IsTrue();
         var expired = Assert.ThrowsExactly<KeyLoadException>(() => work.ConstrainLifetime(TimeProvider.System.GetUtcNow().AddTicks(-1)));
         await Assert.That(expired.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var fresh = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+        var fresh = new ReadExecutionBudget();
         var found = database.Store.Read(view => fresh.CreateView(view).ReadValue(ReadExecutionBudgetGrantSeed.FirstKey, static _ => { }));
         await Assert.That(found).IsTrue();
     }

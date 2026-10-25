@@ -85,8 +85,7 @@ internal static class ClassificationLineageCorruptionFlow
 
     private static async Task HealthyAsync(EventProjectionFixture fixture)
     {
-        var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore),
-            UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
+        var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore), fixture.Harness.Store.Identity.NodeId,
             UnitTextOptions.Execution());
         try
         {

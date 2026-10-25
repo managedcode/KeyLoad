@@ -68,7 +68,7 @@ internal static class AnalyticsCommandIdentityFlow
 
     private static Command<DatabaseCommand> Issue(SafeProjectorOperationDatabase owner, CommandRequest request)
     {
-        var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, owner.CallerToken);
+        var work = new ReadExecutionBudget(owner.Database.EvaluationClock, owner.CallerToken);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
             owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
     }

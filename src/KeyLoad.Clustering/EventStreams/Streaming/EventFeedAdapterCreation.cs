@@ -18,13 +18,11 @@ internal static class EventFeedAdapterCreation
         {
             throw Errors.Fail(ErrorCode.Validation, EventFeedPubSubProtocol.Invalid);
         }
-        var limits = services.GetRequiredService<IOptions<DatabaseLimits>>();
-        limits.Value.Validate();
-        var cacheOptions = new SimpleQueueCacheOptions { CacheSize = limits.Value.MaxResults };
+        var cacheOptions = new SimpleQueueCacheOptions();
         var cache = new SimpleQueueAdapterCache(cacheOptions, providerName,
             services.GetRequiredService<ILoggerFactory>());
         var admission = new EventFeedHintBatchAdmission(
-            services.GetRequiredService<Serializer<MemoryMessageBody>>(), limits,
+            services.GetRequiredService<Serializer<MemoryMessageBody>>(),
             services.GetRequiredService<IOptions<GrainRoutingOptions>>());
         var original = MemoryAdapterFactory<DefaultMemoryMessageBodySerializer>.Create(services, providerName);
         return new EventFeedQueueAdapterFactory(original, cache, admission);

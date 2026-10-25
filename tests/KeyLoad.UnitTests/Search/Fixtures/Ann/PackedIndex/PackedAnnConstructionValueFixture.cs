@@ -21,7 +21,7 @@ internal static class PackedAnnConstructionValueFixture
     {
         var records = PackedAnnTestData.Load(database, metric);
         var state = PackedAnnBuilder.Build(PackedAnnTestData.Space(metric, Dimension), records,
-            UnitExecutionOptions.PackedAnn(new PackedAnnOptions()), Budget(database));
+            UnitExecutionOptions.PackedAnn(new PackedAnnOptions()), Budget());
         return (records, state);
     }
 
@@ -32,10 +32,10 @@ internal static class PackedAnnConstructionValueFixture
         PackedAnnIndexTestSupport.PersistVectors(database, space,
             PackedAnnTestData.Field(DistanceMetric.DotProduct), values);
         var records = PackedAnnTestData.Load(database, DistanceMetric.DotProduct);
-        var state = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(new PackedAnnOptions()), Budget(database));
+        var state = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(new PackedAnnOptions()), Budget());
         return (records, state);
     }
 
-    internal static AnnWorkBudget Budget(TestDatabase database)
-        => new(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)), WorkLimit);
+    internal static AnnWorkBudget Budget()
+        => new(new ReadExecutionBudget(), WorkLimit);
 }

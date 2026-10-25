@@ -34,17 +34,16 @@ internal static class OnlineTextParentFlow
         var result = await children.PublishAsync(issued, token).ConfigureAwait(true);
         var reconciled = await children.CapabilityAsync(request, OnlineTextCapabilityKind.ReconcileCommitted, token)
             .ConfigureAwait(true);
-        RequireOriginal(result, reconciled.OriginalResult, children.Limits.MaxQueryReadBytes);
+        RequireOriginal(result, reconciled.OriginalResult);
         await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.Published).ConfigureAwait(true);
         await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.RetirementMarked).ConfigureAwait(true);
         return result;
     }
 
     private static void RequireOriginal(OnlineTextIndexMaintenanceResult result,
-        OnlineTextIndexMaintenanceResult? original, long maximumBytes)
+        OnlineTextIndexMaintenanceResult? original)
     {
-        if (original is null || OrleansSerialization.Measure(result) > maximumBytes
-            || OrleansSerialization.Measure(original) > maximumBytes
+        if (original is null
             || !OrleansSerialization.Serialize(result).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original)))
         {
             throw Errors.Fail(ErrorCode.UnknownWriteOutcome, TextIndexMaintenanceProtocol.Interrupted);

@@ -47,8 +47,7 @@ internal static class TeamRowPolicyAssertions
         var plan = JsonSerializer.Serialize(new
         {
             AccessPath = Scan,
-            AtomicPartition = db.Partition.AtomicPartitionId,
-            ScanBudget = UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords
+            AtomicPartition = db.Partition.AtomicPartitionId
         }, JsonDefaults.Options);
         QueryRow[] explanation = [new("explain", AbsentRevision, plan)];
         var explanationRequest = new AstQueryRequest(db.Partition,

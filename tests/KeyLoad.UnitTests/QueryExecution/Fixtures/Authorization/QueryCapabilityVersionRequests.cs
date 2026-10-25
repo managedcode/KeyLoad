@@ -12,8 +12,6 @@ internal static class QueryCapabilityVersionRequests
     internal const string Reader = "query-version-reader";
     internal static DatabaseLimits Limits() => new()
     {
-        MaxBatchBytes = 8192,
-        MaxQueryBytes = 32768
     };
     internal static CommandRequest Seed(PartitionRef partition) => new(Guid.NewGuid(), partition,
         [new PutDocument(Collection, "a", """{"order_id":"a","title":"Alpha","score":10,"active":true}"""),

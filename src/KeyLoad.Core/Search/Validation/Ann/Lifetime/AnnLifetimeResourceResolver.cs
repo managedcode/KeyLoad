@@ -5,12 +5,12 @@ namespace KeyLoad.Core.Search;
 
 internal sealed class AnnLifetimeResourceResolver(AnnReadLifetimeMetadata metadata, AnnSeedWork work, PrincipalRecord targetPrincipal)
 {
-    internal ResourceDefinition? Resolve(DatabaseEngine database, IKeyValueView raw, PartitionRef partition,
+    internal ResourceDefinition? Resolve(IKeyValueView raw, PartitionRef partition,
         ResourceDefinition target, ReadExecutionBudget budget)
     {
         work.Check();
         var view = budget.CreateView(raw);
-        _ = budget.CaptureResourceLifetimes(database, view, partition, [target]);
+        _ = budget.CaptureResourceLifetimes(view, partition, [target]);
         foreach (var definition in metadata.Definitions)
         {
             work.Charge(checked((long)definition.Name.Length + target.Name.Length));
@@ -21,7 +21,7 @@ internal sealed class AnnLifetimeResourceResolver(AnnReadLifetimeMetadata metada
                     return null;
                 }
                 var lifetime = metadata.Coverage.Lifetimes.Single(value => value.ResourceName == definition.Name);
-                budget.CaptureAuthenticatedResourceLifetimes(database, view,
+                budget.CaptureAuthenticatedResourceLifetimes(view,
                     new ResourceLifetimeCoverage(partition, [lifetime]), [definition]);
                 return definition;
             }

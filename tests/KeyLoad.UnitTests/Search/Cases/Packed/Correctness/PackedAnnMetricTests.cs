@@ -28,21 +28,21 @@ internal sealed class PackedAnnMetricTests
         var space = PackedAnnTestData.Space(metric, dimension);
         PackedAnnIndexTestSupport.PersistVectors(database, space, PackedAnnTestData.Field(metric), ExtremeVectors(dimension));
         var records = PackedAnnTestData.Load(database, metric);
-        var index = PackedAnnIndexTestSupport.Build(database, metric, records);
+        var index = PackedAnnIndexTestSupport.Build(metric, records);
         if (dimension == 4_096)
         {
             await Assert.That(index.RetainedBytesUpperBound).IsLessThan(1_048_576L);
         }
         foreach (var query in Queries(dimension))
         {
-            await AssertQueryMatchesExactAsync(index, database, records, metric, query);
+            await AssertQueryMatchesExactAsync(index, records, metric, query);
         }
     }
 
-    private static async Task AssertQueryMatchesExactAsync(PackedAnnIndex index, TestDatabase database,
+    private static async Task AssertQueryMatchesExactAsync(PackedAnnIndex index,
         VectorRecord[] records, DistanceMetric metric, float[] query)
     {
-        var result = index.Search(query, records.Length, null, PackedAnnIndexTestSupport.Budget(database));
+        var result = index.Search(query, records.Length, null, PackedAnnIndexTestSupport.Budget());
         var exact = Exact(records, query, metric);
         await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);
         await Assert.That(result.Candidates.Select(candidate => candidate.DocumentId))

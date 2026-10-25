@@ -40,7 +40,7 @@ internal static class RuntimeJournalRegistration
     {
         var codec = new Lazy<GrainRequestCodec>(provider.GetRequiredService<GrainRequestCodec>);
         return new RuntimeJournalClient(provider.GetRequiredService<IGrainFactory>(),
-            () => codec.Value, provider.GetRequiredService<IOptions<DatabaseLimits>>(), provider,
+            () => codec.Value, provider,
             provider.GetRequiredService<TimeProvider>(),
             provider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),

@@ -114,7 +114,7 @@ internal static class ProjectionDigestAssertions
     private static AnnSeed Capture(EventProjectionFixture fixture)
         => AnnSeedCollector.Capture(fixture.Database, EventProjectionFixture.ReaderId, fixture.Partition,
             fixture.TargetCollection, EventProjectionFixture.VectorField, EventProjectionFixture.Space,
-            Options.Create(new AnnSeedOptions()), new(UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits)));
+            Options.Create(new AnnSeedOptions()), new());
 
     internal static async Task EqualAsync<T>(T actual, T expected)
         => await Assert.That(OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();

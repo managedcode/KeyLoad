@@ -23,19 +23,19 @@ public sealed partial class ReadExecutionBudget
     internal void ObserveAuthenticatedResourceLifetimes(ImmutableArray<ResourceLifetime> lifetimes)
         => LifetimeBindings.ObserveAuthenticated(lifetimes);
 
-    internal ResourceLifetimeCoverage BindResourceLifetimes(DatabaseEngine database, IKeyValueView authorizedView,
+    internal ResourceLifetimeCoverage BindResourceLifetimes(IKeyValueView authorizedView,
         PartitionRef partition, ImmutableArray<ResourceDefinition> definitions)
-        => LifetimeBindings.Capture(database, authorizedView, partition, definitions, requireBinding: true);
+        => LifetimeBindings.Capture(authorizedView, partition, definitions, requireBinding: true);
 
     // Lower direct APIs retain same-cut pairs without D4 ownership; hosted Bound entries attach first.
-    internal ResourceLifetimeCoverage CaptureResourceLifetimes(DatabaseEngine database, IKeyValueView authorizedView,
+    internal ResourceLifetimeCoverage CaptureResourceLifetimes(IKeyValueView authorizedView,
         PartitionRef partition, ImmutableArray<ResourceDefinition> definitions)
-        => LifetimeBindings.Capture(database, authorizedView, partition, definitions, requireBinding: false);
-    internal ResourceLifetimeCoverage BindAuthenticatedResourceLifetimes(DatabaseEngine database,
+        => LifetimeBindings.Capture(authorizedView, partition, definitions, requireBinding: false);
+    internal ResourceLifetimeCoverage BindAuthenticatedResourceLifetimes(
         IKeyValueView authorizedLocalView, ResourceLifetimeCoverage coverage, ImmutableArray<ResourceDefinition> definitions)
-        => LifetimeBindings.CaptureAuthenticated(database, authorizedLocalView, coverage, definitions, requireBinding: true);
+        => LifetimeBindings.CaptureAuthenticated(authorizedLocalView, coverage, definitions, requireBinding: true);
 
-    internal ResourceLifetimeCoverage CaptureAuthenticatedResourceLifetimes(DatabaseEngine database,
+    internal ResourceLifetimeCoverage CaptureAuthenticatedResourceLifetimes(
         IKeyValueView authorizedLocalView, ResourceLifetimeCoverage coverage, ImmutableArray<ResourceDefinition> definitions)
-        => LifetimeBindings.CaptureAuthenticated(database, authorizedLocalView, coverage, definitions, requireBinding: false);
+        => LifetimeBindings.CaptureAuthenticated(authorizedLocalView, coverage, definitions, requireBinding: false);
 }

@@ -6,8 +6,7 @@ namespace KeyLoad.Core.TimeSeries;
 internal static class SampleChunkGenerationReader
 {
     internal static SampleRecord[] Read(IKeyValueView view, PartitionRef partition, string set, string series,
-        SampleChunkWindow window, SampleChunkManifest manifest, IOptions<TimeSeriesExecutionOptions> options,
-        SampleChunkReadCharge charge, SampleChunkWork work = default)
+        SampleChunkWindow window, SampleChunkManifest manifest, IOptions<TimeSeriesExecutionOptions> options, SampleChunkWork work = default)
     {
         var records = new List<SampleRecord>(manifest.RecordCount + window.CorrectionSequences.Length);
         for (var ordinal = SampleChunkLifecycleProtocol.FirstIndex; ordinal < manifest.BlockDigests.Length; ordinal++)
@@ -28,7 +27,7 @@ internal static class SampleChunkGenerationReader
                         }
                     }
                     records.AddRange(decoded);
-                }, charge.Charge);
+                });
             if (!present)
             {
                 throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
@@ -43,7 +42,7 @@ internal static class SampleChunkGenerationReader
         {
             throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
         }
-        AddCorrections(view, partition, set, series, window, manifest, options.Value.MaximumChunkWindowRecords, charge, records, work);
+        AddCorrections(view, partition, set, series, window, manifest, options.Value.MaximumChunkWindowRecords, records, work);
         if (records.Select(record => record.Sequence).Distinct().Count() != records.Count
             || records.Select(record => record.Sample.EventId).Distinct(StringComparer.Ordinal).Count() != records.Count)
         {
@@ -53,8 +52,7 @@ internal static class SampleChunkGenerationReader
     }
 
     private static void AddCorrections(IKeyValueView view, PartitionRef partition, string set, string series,
-        SampleChunkWindow window, SampleChunkManifest manifest, int maximumRecords,
-        SampleChunkReadCharge charge, List<SampleRecord> records, SampleChunkWork work)
+        SampleChunkWindow window, SampleChunkManifest manifest, int maximumRecords, List<SampleRecord> records, SampleChunkWork work)
     {
         if (manifest.RecordCount + window.CorrectionSequences.Length > maximumRecords)
         {
@@ -64,7 +62,7 @@ internal static class SampleChunkGenerationReader
         {
             work.Check();
             var record = SampleChunkStorage.Require<SampleRecord>(view,
-                SampleChunkKeys.Correction(partition, set, series, window.WindowId, sequence), charge);
+                SampleChunkKeys.Correction(partition, set, series, window.WindowId, sequence));
             SampleChunkWindowValidation.Record(record, window, series);
             if (record.Sequence != sequence || sequence <= manifest.SourceSequence)
             {

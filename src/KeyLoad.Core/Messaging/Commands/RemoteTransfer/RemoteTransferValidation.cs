@@ -1,4 +1,3 @@
-using System.Text;
 using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
 
@@ -40,7 +39,7 @@ internal static class RemoteTransferValidation
         }
     }
 
-    internal static void ValidateTransferMessage(this DatabaseEngine engine, EnqueueMessage message, QueueLaneRef destination, DateTimeOffset now)
+    internal static void ValidateTransferMessage(EnqueueMessage message, QueueLaneRef destination, DateTimeOffset now)
     {
         if (message is null || message.Queue != destination.Queue)
         {
@@ -48,19 +47,11 @@ internal static class RemoteTransferValidation
         }
 
         JsonData.Identifier(message.MessageId);
-        _ = JsonData.Validate(message.PayloadJson, engine.Limits);
-        _ = JsonData.Validate(message.HeadersJson, engine.Limits);
+        _ = JsonData.Validate(message.PayloadJson);
+        _ = JsonData.Validate(message.HeadersJson);
         if (message.ExpiresAt <= now || message.ExpiresAt <= message.NotBefore)
         {
             throw Errors.Fail(ErrorCode.Validation, RemoteTransferCommands.TransferInvalidMessage);
-        }
-    }
-
-    internal static void RequireTokenBound(this DatabaseEngine engine, string token)
-    {
-        if (Encoding.UTF8.GetByteCount(token) > engine.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteTransferCommands.TransferCapacityMessage);
         }
     }
 
@@ -98,7 +89,7 @@ internal static class RemoteTransferValidation
             throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCommands.TransferCorruptionMessage);
         }
 
-        var claims = engine.Verify<RemoteTransferIntentClaims>(record.IntentToken!, engine.Limits.MaxBatchBytes);
+        var claims = engine.VerifyRetained<RemoteTransferIntentClaims>(record.IntentToken!);
         if (claims is null || claims.Source is null || claims.Destination is null || claims.Message is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCommands.TransferCorruptionMessage);
@@ -125,7 +116,7 @@ internal static class RemoteTransferValidation
     {
         if (record.ReceiptToken is { } receiptToken)
         {
-            var receipt = engine.Verify<RemoteTransferReceiptClaims>(receiptToken, engine.Limits.MaxBatchBytes);
+            var receipt = engine.VerifyRetained<RemoteTransferReceiptClaims>(receiptToken);
             if (receipt is null || receipt.Source is null || receipt.Destination is null || receipt.TargetCommit is null)
             {
                 throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCommands.TransferCorruptionMessage);

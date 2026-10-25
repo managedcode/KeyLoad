@@ -8,7 +8,6 @@ using KeyLoad.RecoveryTests.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.BackupRestore;
 
@@ -158,7 +157,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         var record = new DocumentRecord(reference, 1, json, new RowAccess(), Database.EvaluationClock.GetUtcNow());
         Store.Commit((transaction, position) =>
         {
-            var roster = new AtomicPartitionRosterTransaction(transaction, Options.Create(limits), position, NoAppliedIndex);
+            var roster = new AtomicPartitionRosterTransaction(transaction, position, NoAppliedIndex);
             roster.Put(KeySpace.Partition(PartitionRecordFamilies.Document, partition, Collection, id),
                 OrleansSerialization.Serialize(record));
             roster.PersistCandidates();

@@ -16,31 +16,9 @@ internal sealed class GraphReadBudgetTests
     private const string EdgeAB = "ab";
     private const string EdgeBC = "bc";
     private const string EdgeBD = "bd";
-    private const string NextLabel = "next";
     private const string WalkLabel = "walk";
     private const string SkipLabel = "skip";
-    private const int PaddingLength = 12_000;
-    private const int ReadByteLimit = 4_096;
     private const int MaximumEdges = 2;
-
-    [Test]
-    public async Task GraphEdgeAndVertexDereferencesConsumeTheReadByteBudget()
-    {
-        using var database = new TestDatabase(new()
-        {
-            MaxQueryReadBytes = ReadByteLimit
-        });
-        database.Configure(Orders, ResourceKind.Collection);
-        database.Configure(Links, ResourceKind.Graph);
-        EntityRef Vertex(string id) => new(database.Partition, Orders, id);
-        database.Commit(
-            new PutDocument(Orders, VertexA, "{}"),
-            new PutDocument(Orders, VertexB, "{\"padding\":\"" + new string('x', PaddingLength) + "\"}"),
-            new UpsertEdge(Links, EdgeAB, Vertex(VertexA), Vertex(VertexB), NextLabel));
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => database.Database.Traverse(RootIdentity, database.Partition,
-            Links, Vertex(VertexA), cancellationToken: TestContext.Current!.Execution.CancellationToken)).Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
-    }
 
     [Test]
     [Arguments(false)]

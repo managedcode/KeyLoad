@@ -4,7 +4,6 @@ using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Diagnostics.ResourceExecution;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -45,7 +44,7 @@ internal sealed class CapabilityWorkLifetime : IDisposable, IAsyncDisposable, IR
         IResourceLifetimeWorkBinding? binding = null) => registration.Admit(owner, requestId, kind, binding);
 
     internal static CapabilityWorkLifetime? Acquire(RequestWorkOwner? owner, Guid requestId,
-        RequestWorkKind kind, IOptions<DatabaseLimits> options, CancellationToken token)
+        RequestWorkKind kind, CancellationToken token)
     {
         if (owner is null)
         {
@@ -55,7 +54,7 @@ internal sealed class CapabilityWorkLifetime : IDisposable, IAsyncDisposable, IR
         var lifetime = new CapabilityWorkLifetime(token);
         try
         {
-            lifetime.registration.Admit(owner, requestId, kind, ownedLimits: options);
+            lifetime.registration.Admit(owner, requestId, kind, ownRetention: true);
             return lifetime;
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))

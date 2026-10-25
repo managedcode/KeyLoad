@@ -12,7 +12,7 @@ internal sealed class AnnMaintenanceAdmissions
     private (Guid Id, string Principal, AnnMaintenanceRequest Request, MaintenanceSessionWork Work)? retainedWork;
 
     internal MaintenanceSessionWork RequireWork(string principal, AnnMaintenanceCapabilityRequest request,
-        ServerRuntimeOptions configured, TimeProvider clock, DateTimeOffset? expiry, CancellationToken shutdown)
+        TimeProvider clock, DateTimeOffset? expiry, CancellationToken shutdown)
     {
         lock (gate)
         {
@@ -31,8 +31,8 @@ internal sealed class AnnMaintenanceAdmissions
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, AnnProtocol.Ownership);
             }
-            var work = new MaintenanceSessionWork(configured.Core.DatabaseLimits, clock,
-                expiry ?? clock.GetUtcNow().AddSeconds(configured.Core.DatabaseLimits.Value.QueryDeadlineSeconds), shutdown);
+            var work = new MaintenanceSessionWork(clock,
+                expiry, shutdown);
             retainedWork = (request.SessionId, principal, request.Maintenance, work);
             return work;
         }

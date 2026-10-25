@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.Server;
@@ -10,10 +9,10 @@ internal static class ScriptDomDropTableSyntax
     private const int FirstName = 0;
     private const string TemporaryPrefix = "#";
 
-    internal static string Read(Dom.DropTableStatement statement, IOptions<DatabaseLimits> configured,
+    internal static string Read(Dom.DropTableStatement statement,
         Action checkBudget, CancellationToken token)
     {
-        var context = new ScriptDomTableLoweringContext(configured, checkBudget, token);
+        var context = new ScriptDomTableLoweringContext(checkBudget, token);
         context.Check();
         if (statement.IsIfExists || statement.Objects.Count != SingleName)
         {

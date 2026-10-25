@@ -37,16 +37,16 @@ the actual state and signed intent/receipt to that authorized operator; it does 
 claim a general worker authorization model. Tokens and PII are never diagnostics.
 Source stores an owned payload; it does not depend on a disposable source message
 or unpinned external blob. Pending intents and destination dedup records are not
-automatically expired or collected. Finite record/byte admission must reject excess
-before mutation; no guessed horizon may discard unresolved state. Destination
+automatically expired or collected. Retained transfer state has no KeyLoad record
+or byte cap; no guessed horizon may discard unresolved state. Destination
 permission, schema, quota and expiry failures leave the source pending and explicit.
 Retrying uses the original identity after timeout or unknown ACK; cancellation
 cannot undo a committed enqueue. A remote DLQ is an ordinary durable destination
 queue.
 
-The accepted caps per source/destination lane are MaxScanRecords retained records
-and MaxBatchBytes retained-state bytes, with atomic counters. Encoded
-intent-token bytes also fit MaxBatchBytes before source admission; never commit an
+Atomic counters account the retained records and retained-state bytes of each
+source/destination lane; they do not cap retention
+([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). Never commit an
 intent which the destination cannot accept under its token contract. Administrator
 status is checked on the original persisted principal; data/field/header checks
 reuse the same authorization evaluator with ClusterAdministrator=false, preserving
@@ -65,7 +65,7 @@ before using this proof to complete the source.
 | REQ-XFER-001: persist immutable source intent atomically | AC-XFER-001: producer rollback creates no intent; same identity replays; changed destination/payload conflicts; pending survives real store reopen. `RemoteTransferIntentTests` |
 | REQ-XFER-002: target effect and dedup receipt are atomic | AC-XFER-002: repeat/unknown-ACK/reopen gives one enqueue and byte-identical receipt; failed quota/auth creates neither effect nor receipt. `RemoteTransferDestinationTests` |
 | REQ-XFER-003: only authenticated committed receipt completes source | AC-XFER-003: wrong purpose/incarnation/principal/source/target/fingerprint/tampered receipt rejects; duplicate completion is stable; source stays pending on every target failure. `RemoteTransferReceiptTests` |
-| REQ-XFER-004: retention and resources cannot lose unresolved work | AC-XFER-004: exact/excess record/byte/token/work bounds, source message removal and destination ACK/retry preserve intent/dedup; no premature GC. `RemoteTransferRetentionTests` |
+| REQ-XFER-004: retention and resources cannot lose unresolved work | AC-XFER-004: destination queue quota refusals, source message removal and destination ACK/retry preserve intent/dedup; no premature GC. `RemoteTransferRetentionTests` |
 | REQ-XFER-005: Orleans owns bounded coordination and real clients | AC-XFER-005: Orleans grain calls perform source/destination/completion without network I/O under the apply gate; restart/loss at each stage through .NET and official MCP clients on the replicated cluster yields one target effect. Planned `RemoteTransferRecoveryTests`/`RemoteTransferClusterTests` |
 
 ## Ordered execution and ownership
@@ -159,10 +159,11 @@ ID, and an authorized operator uses the public Accept/Complete.
 
 ### Bounded capacity retry and policy repair
 
-`DatabaseLimits.MaxQueueTransferAcceptAttempts` is nullable, default null, validated
-positive and no larger than MaxScanRecords. A newly created source intent reserves
+`DatabaseLimits.MaxQueueTransferAcceptAttempts` is nullable, default null, and at
+least 1 when set. A newly created source intent reserves
 its immutable ceiling; only a genuine no-effect ResourceExhausted outcome of a
-single Accept can retain the original failure authority. The source batch
+single Accept, a refusal by the destination queue's own `MaxStoredMessages` or
+`MaxStoredBytes` quota, can retain the original failure authority. The source batch
 `AdvanceQueueTransferAttempt` (alias `keyload.queue-transfer.advance-attempt`)
 verifies the signed failure witness and the exact immutable intent, then appends one
 history reference and increments the generation in one transaction, charging one
@@ -175,11 +176,11 @@ fresh authorization first and the current epoch against the epoch recorded with 
 original failure, and a repaired command re-derives its ID from the immutable tuple
 and the new generation.
 
-A complete coordination read charges every examined authorization, resource, intent,
-history, outcome and receipt record against the operation's centrally validated read
-limits; a due-discovery page size is not a substitute for that admission
-(REQ/AC-XFER-COORDINATION-READ-001). A genuine MaxScanRecords or MaxQueryReadBytes
-refusal remains a failed result without partial output or effects.
+A complete coordination read accounts every examined authorization, resource, intent,
+history, outcome and receipt record in one read ledger with no configured record or
+byte ceiling; a due-discovery page size does not truncate it
+(REQ/AC-XFER-COORDINATION-READ-001). Cancellation or expiry fails the read without
+partial output or effects.
 
 ```mermaid
 flowchart LR

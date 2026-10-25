@@ -1,6 +1,5 @@
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using P = KeyLoad.UnitTests.StorageRecovery.PartitionStorageProtocol;
 
 namespace KeyLoad.UnitTests.StorageRecovery;
@@ -13,7 +12,7 @@ internal static class PartitionStorageReplay
         CancellationToken token)
     {
         var database = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow().Database;
-        var work = new ReadExecutionBudget(Options.Create(database.Limits), source.GetRequiredService<TimeProvider>(), token);
+        var work = new ReadExecutionBudget(source.GetRequiredService<TimeProvider>(), token);
         work.Check();
         byte[]? bytes = null;
         database.Store.Read(view => view.ReadValue(KeySpace.PartitionOutcome(P.Partition, P.Root, P.Command),

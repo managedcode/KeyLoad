@@ -8,11 +8,6 @@ internal static class TextCandidateReader
         IReadOnlyList<EntityRef> positives, ReadExecutionBudget budget, Func<string, ulong> hash,
         Action markInvalid)
     {
-        var limit = generation.Limits.MaxScanRecords;
-        if (positives.Count > limit || terms.Count > generation.Limits.MaxSearchTextTokens)
-        {
-            throw TextErrors.BoundExceeded();
-        }
         budget.Check();
         var positiveSet = new HashSet<EntityRef>(positives);
         if (positiveSet.Count != positives.Count)
@@ -33,14 +28,14 @@ internal static class TextCandidateReader
             var token = hash(term);
             if (tokenHashes.Add(token))
             {
-                ReadTokenCandidates(generation, token, candidateSet, budget, limit);
+                ReadTokenCandidates(generation, token, candidateSet, budget);
             }
         }
         VerifyPositives(generation, positiveSet, candidateSet, markInvalid, budget);
     }
 
     private static void ReadTokenCandidates(TextGeneration generation, ulong token,
-        HashSet<EntityRef> candidates, ReadExecutionBudget budget, int maximumCandidates)
+        HashSet<EntityRef> candidates, ReadExecutionBudget budget)
     {
         using var iterator = generation.Index.ZoneTree1.CreateIterator(global::ZoneTree.IteratorType.NoRefresh,
             contributeToTheBlockCache: false);
@@ -58,12 +53,12 @@ internal static class TextCandidateReader
             {
                 return;
             }
-            AddCandidate(generation, key.Record, candidates, maximumCandidates);
+            AddCandidate(generation, key.Record, candidates);
         }
     }
 
     private static void AddCandidate(TextGeneration generation, ulong id,
-        HashSet<EntityRef> candidates, int maximumCandidates)
+        HashSet<EntityRef> candidates)
     {
         const int IdEmptyCount = 0;
         const int RecordsSecondIndex = 1;
@@ -73,10 +68,6 @@ internal static class TextCandidateReader
             throw TextErrors.Corrupt();
         }
         candidates.Add(generation.Records[checked((int)id - RecordsSecondIndex)].Reference);
-        if (candidates.Count > maximumCandidates)
-        {
-            throw TextErrors.BoundExceeded();
-        }
     }
 
     private static void VerifyPositives(TextGeneration generation, HashSet<EntityRef> positives,

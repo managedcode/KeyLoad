@@ -17,7 +17,7 @@ internal static class SqlTypedInsertParameterParity
         };
         var request = new SqlOperationRequest(fixture.Partition, WireSql, values,
             CommandId: state.Created.Command.CommandId);
-        var wire = SqlOperationCompiler.CompileSession(request, limits, limits.Value.MaxBatchBytes,
+        var wire = SqlOperationCompiler.CompileSession(request, UnitMcpOptions.CanonicalPayloadBytes,
             UnitExecutionOptions.QueryExecution(), 1, token);
         await SqlTypedInsertAssertions.SameAsync(state.Created.Command.Payload, wire.Payload);
         await SqlTypedInsertAssertions.SameAsync(state.Created.Result,
@@ -25,18 +25,16 @@ internal static class SqlTypedInsertParameterParity
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertAssertions.SameAsync(state.Created.Bytes,
             SqlTypedInsertAssertions.OutcomeBytes(fixture.Store, fixture.Partition, wire.CommandId));
-        await RefuseAsync(() => SqlOperationCompiler.Compile(request, limits, limits.Value.MaxBatchBytes,
+        await RefuseAsync(() => SqlOperationCompiler.Compile(request, UnitMcpOptions.CanonicalPayloadBytes,
             UnitExecutionOptions.QueryExecution(), token), ErrorCode.UnsupportedCapability);
         await RefuseAsync(() => SqlOperationCompiler.CompileSession(request with
         {
             Sql = InvalidSlot
-        },
-            limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), 1, token), ErrorCode.Validation);
+        }, UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), 1, token), ErrorCode.Validation);
         await RefuseAsync(() => SqlOperationCompiler.CompileSession(request with
         {
             Sql = SqlTypedInsertLiteral.Sql
-        },
-            limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), 1, token), ErrorCode.Validation);
+        }, UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), 1, token), ErrorCode.Validation);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertHot.ReplayAsync(fixture, state.Created);
         await SqlTypedInsertAssertions.ImageAsync(fixture, fixture.Store, fixture.Database, repaired: false);

@@ -17,12 +17,12 @@ internal sealed class TextProjectionLeaseTests
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
-        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), database.Store.Identity.NodeId, UnitTextOptions.Execution());
         var scope = CaptureScope(database);
-        using (var held = projection.Acquire(scope, new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits))))
+        using (var held = projection.Acquire(scope, new()))
         {
             var saturated = Assert.ThrowsExactly<KeyLoadException>(() =>
-                projection.Acquire(scope, new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits))));
+                projection.Acquire(scope, new()));
             await Assert.That(saturated.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         }
 
@@ -36,48 +36,13 @@ internal sealed class TextProjectionLeaseTests
         await Assert.That(result.Document.Reference.Id).IsEqualTo("one");
     }
 
-    [Test]
-    public async Task RecordAndTokenBudgetFailuresPreservePositionAndReleaseLease()
-    {
-        using var database = new TestDatabase();
-        database.Configure(Collection, ResourceKind.Collection);
-        database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"),
-            new PutDocument(Collection, "two", "{\"text\":\"needle\"}"));
-        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution());
-        var request = new SearchRequest(database.Partition, Collection, TextPath, "needle");
-        var position = database.Store.Position;
-        var recordBound = BoundedEngine(database, new()
-        {
-            MaxScanRecords = 1
-        }, projection);
-        var recordFailure = Assert.ThrowsExactly<KeyLoadException>(() => recordBound.Search("root", request));
-        var tokenBound = BoundedEngine(database, new()
-        {
-            MaxSearchTextTokens = 1
-        }, projection);
-        var tokenFailure = Assert.ThrowsExactly<KeyLoadException>(() => tokenBound.Search("root", request));
-
-        await Assert.That(recordFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(tokenFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-        var recovered = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request,
-            TestContext.Current!.Execution.CancellationToken);
-        await Assert.That(recovered.Length).IsEqualTo(2);
-        await Assert.That(recovered.Select(row => row.Document.Reference.Id).Order(StringComparer.Ordinal))
-            .IsEquivalentTo(new[] { "one", "two" }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
-    }
-
-    private static SearchEngine BoundedEngine(TestDatabase database, DatabaseLimits limits, ITextProjection projection)
-        => new(new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution(), projection);
-
     private static async Task<OperationCanceledException> CancelActiveVerificationAsync(TestDatabase database,
         RuntimeTextProjection projection)
     {
         using var cancellation = new CancellationTokenSource();
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(cancellationToken: cancellation.Token);
         using var lease = projection.Acquire(CaptureScope(database), budget);
-        var document = database.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(database.Partition, Collection),
-            database.Database.Limits.MaxScanRecords).Records.Select(record =>
+        var document = database.Store.Read(view => view.Scan(DocumentStorageKeys.Prefix(database.Partition, Collection), view.MaximumRangeRecords).Records.Select(record =>
             OrleansSerialization.Deserialize<DocumentRecord>(record.Value.Span)).Single());
         lease.BeginRecord(document.Reference, document.Revision);
         lease.ObserveToken("needle");

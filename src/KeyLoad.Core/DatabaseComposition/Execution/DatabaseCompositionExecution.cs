@@ -25,7 +25,7 @@ public static class DatabaseCompositionExecution
     {
         if (mutation is QueueToGraph forward)
         {
-            engine.ValidateForward(forward);
+            DatabaseCompositionExecution.ValidateForward(forward);
             engine.RequireCompositionCapabilities(principal, partition, forward);
             var source = engine.BatchResource(view, partition, forward.Queue, ResourceKind.WorkQueue);
             var target = engine.BatchResource(view, partition, forward.Graph, ResourceKind.Graph);
@@ -88,12 +88,12 @@ public static class DatabaseCompositionExecution
         }
     }
 
-    internal static void ValidateForward(this DatabaseEngine engine, QueueToGraph command)
+    internal static void ValidateForward(QueueToGraph command)
     {
         JsonData.Identifier(command.Graph);
         JsonData.Identifier(command.Queue);
         JsonData.Identifier(command.EdgeIdPrefix);
-        if (command.Resource != command.Graph || command.MaxMessages < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxMessages > engine.Limits.MaxBatchMutations)
+        if (command.Resource != command.Graph || command.MaxMessages < DatabaseCompositionAuthorizationMinimumPositiveCount)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidComposition);
         }
@@ -104,7 +104,7 @@ public static class DatabaseCompositionExecution
         JsonData.Identifier(command.Queue);
         JsonData.Identifier(command.Graph);
         JsonData.Identifier(command.MessageIdPrefix);
-        if (command.Resource != command.Queue || command.Start is null || command.Start.Partition != partition || command.MaxDepth < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxDepth > engine.GraphExecution.MaximumDepth || command.MaxVertices < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxVertices > engine.GraphExecution.MaximumVertices || command.MaxEdges < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxEdges > engine.Limits.MaxBatchMutations)
+        if (command.Resource != command.Queue || command.Start is null || command.Start.Partition != partition || command.MaxDepth < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxDepth > engine.GraphExecution.MaximumDepth || command.MaxVertices < DatabaseCompositionAuthorizationMinimumPositiveCount || command.MaxVertices > engine.GraphExecution.MaximumVertices || command.MaxEdges < DatabaseCompositionAuthorizationMinimumPositiveCount)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidComposition);
         }

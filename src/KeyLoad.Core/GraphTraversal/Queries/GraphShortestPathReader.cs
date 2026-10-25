@@ -1,6 +1,5 @@
 using KeyLoad.Core.GraphTraversal.Validation;
 using KeyLoad.Storage;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.GraphTraversal;
 
@@ -15,10 +14,8 @@ internal sealed class GraphShortestPathReader
     private const string MissingEdge = "A graph adjacency record has no canonical edge.";
     private const string InconsistentVisitor = "The graph path adjacency visitor stopped inconsistently.";
     private readonly IKeyValueView view;
-    private readonly IOptions<DatabaseLimits> limits;
     private readonly GraphShortestPathRequest request;
     private readonly ReadExecutionBudget budget;
-    private readonly GraphPathRetention retention;
     private readonly GraphShortestPathResultProjector projector;
     private readonly HashSet<EntityRef> visited = [];
     private readonly Dictionary<EntityRef, GraphPathPredecessor> predecessors = [];
@@ -33,12 +30,10 @@ internal sealed class GraphShortestPathReader
         const int EmptyLabelCount = 0;
 
         this.view = view;
-        limits = database.OperationLimitsOptions;
         this.request = request;
         this.budget = budget;
-        retention = new(database.OperationLimitsOptions, budget);
-        visibility = new(database, view, principal, budget, retention.AdmitVertex, retention.AdmitCollection);
-        projector = new(database, view, principal, graph, request, budget, retention);
+        visibility = new(database, view, principal, budget);
+        projector = new(database, view, principal, graph, request, budget);
         labelSet = labels is { Length: > EmptyLabelCount } ? new(labels, StringComparer.Ordinal) : null;
     }
 
@@ -114,11 +109,11 @@ internal sealed class GraphShortestPathReader
             request.Partition, request.Graph, edgeId));
         if (edge is not null)
         {
-            GraphCrossPartitionValidation.ValidateEdge(edge, limits.Value);
+            GraphCrossPartitionValidation.ValidateEdge(edge);
             _ = visibility.CanVisit(edge.From);
         }
         GraphShortestPathValidation.ValidateAdjacency(key, edgeId, edge, source,
-            request.Partition, request.Graph, limits.Value, budget);
+            request.Partition, request.Graph, budget);
         var validEdge = edge ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         if (labelSet is not null && !labelSet.Contains(validEdge.Label))
         {
@@ -133,7 +128,6 @@ internal sealed class GraphShortestPathReader
             throw Errors.Fail(ErrorCode.BudgetExceeded, VertexBudgetExceeded);
         }
         var predecessor = new GraphPathPredecessor(source, edgeId);
-        retention.AdmitPredecessor(validEdge.To, predecessor);
         visited.Add(validEdge.To);
         predecessors.Add(validEdge.To, predecessor);
         next.Add(validEdge.To);

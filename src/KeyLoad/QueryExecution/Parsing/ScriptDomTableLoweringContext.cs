@@ -1,20 +1,15 @@
-using Microsoft.Extensions.Options;
+using KeyLoad.Core;
+
 namespace KeyLoad.Server;
 
 internal sealed class ScriptDomTableLoweringContext
 {
     private readonly Action checkBudget;
     private readonly CancellationToken token;
-    private readonly int maximumNodes;
-    private int nodes;
-    internal ScriptDomTableLoweringContext(IOptions<DatabaseLimits> configured, Action checkBudget,
+    internal ScriptDomTableLoweringContext(Action checkBudget,
         CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(configured);
         ArgumentNullException.ThrowIfNull(checkBudget);
-        var limits = configured.Value;
-        limits.Validate();
-        maximumNodes = limits.MaxQueryTokens;
         this.checkBudget = checkBudget;
         this.token = token;
     }
@@ -22,9 +17,6 @@ internal sealed class ScriptDomTableLoweringContext
     {
         token.ThrowIfCancellationRequested();
         checkBudget();
-        if (++nodes > maximumNodes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, global::KeyLoad.QueryExecution.ScriptDomErrors.NodesDetail);
-        }
+        ExecutionStackGuard.Ensure();
     }
 }

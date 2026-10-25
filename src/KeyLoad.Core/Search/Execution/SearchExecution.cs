@@ -18,8 +18,7 @@ public static class SearchExecution
             PayloadDigest = Bm25CorpusDigest.Compute(current, placement, work)
         };
         var phase = new Bm25CorpusPublicationPhaseCommand(commandId, current, expectedGeneration, originalExpiry, placement);
-        Bm25CorpusShape.RequirePhase(phase, engine.Limits);
-        Bm25CorpusFamilyAdmission.Require(view, Bm25CorpusKeys.Current(current), current, engine.Limits);
+        Bm25CorpusShape.RequirePhase(phase);
         return phase;
     }
 }

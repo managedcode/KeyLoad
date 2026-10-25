@@ -26,8 +26,8 @@ internal static class DistributedSearchCandidateExecution
         budget.Check();
         var execution = options.Value;
         execution.Validate();
-        SearchRequestValidation.Validate(request, database.Limits, false, execution);
-        FilteredSearchEligibility.ValidateRequest(request.AllowedIds, database.Limits, budget);
+        SearchRequestValidation.Validate(request, false, execution);
+        FilteredSearchEligibility.ValidateRequest(request.AllowedIds, budget);
         var eligibility = FilteredSearchEligibility.Create(request.AllowedIds, budget);
         using var admission = database.AdmitQuery(budget.Cancellation);
         using var charged = budget.EnterReadGrant(grant);

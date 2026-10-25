@@ -4,10 +4,9 @@ namespace KeyLoad.Core;
 /// <summary>Executes SubscriptionDeliveryCommands operations against the caller's database context.</summary>
 public static class SubscriptionDeliveryCommands
 {
-    internal static CommitReceipt CompleteSubscriptionDelivery(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, SubscriptionDeliveryCommand request, DateTimeOffset now, long position, SubscriptionWindowAuthorityReadBudget? budget = null)
+    internal static CommitReceipt CompleteSubscriptionDelivery(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, SubscriptionDeliveryCommand request, DateTimeOffset now, long position)
     {
-        budget ??= new SubscriptionWindowAuthorityReadBudget(engine.OperationLimitsOptions);
-        var (_, state, delivery) = engine.SubscriptionLease(tx, principal, request.Subscription, request.Token, now, budget);
+        var (_, state, delivery) = engine.SubscriptionLease(tx, principal, request.Subscription, request.Token, now);
         var policy = state.Definition.Policy;
         var key = MessagingSerialization.GroupKey(SubscriptionGroups.SubscriptionGroupsSubscriptionWindowKeySpace, request.Subscription, state.Generation, delivery.Position);
         switch (request.Action)
@@ -48,7 +47,7 @@ public static class SubscriptionDeliveryCommands
         }
 
         tx.PutRecord(key, delivery);
-        state = SubscriptionGroups.AdvanceCheckpoint(tx, request.Subscription, state, budget);
+        state = SubscriptionGroups.AdvanceCheckpoint(tx, request.Subscription, state);
         tx.PutRecord(MessagingSerialization.GroupKey(SubscriptionGroups.SubscriptionGroupsSubscriptionKeySpace, request.Subscription), state);
         return new(request.CommandId, engine.Token(tx, request.Subscription.Source.Partition, position), [new(request.Action.ToString(), request.Subscription.Source.Resource, delivery.Position.ToString(System.Globalization.CultureInfo.InvariantCulture), delivery.LeaseVersion)], engine.Durability, engine.AcknowledgedPersistedCopies);
     }

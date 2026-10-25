@@ -25,7 +25,6 @@ public static class SearchIdentity
             engine.RequireBm25Subject(view, administrator, phase, evaluatedAt);
             work.ChargeBytes(OrleansSerialization.Measure(phase));
             var payload = OrleansSerialization.Serialize(phase);
-            engine.RequireBudget(payload.Length);
             return engine.CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId, administrator.Id, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(phase.CommandId, OperationKind.Bm25CorpusPublicationPhase, administrator.Id, CommandExecutionExecution.Identity<Bm25CorpusPublicationPhaseCommand>(payload)), work, view);
         });
     }
@@ -37,7 +36,7 @@ public static class SearchIdentity
             throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
         }
 
-        Bm25CorpusShape.RequirePhase(phase, engine.Limits);
+        Bm25CorpusShape.RequirePhase(phase);
         var current = phase.Current;
         var principal = engine.Principal(view, current.PrincipalId, evaluatedAt);
         engine.Authorization.Require(principal, current.Partition, current.Collection, Capability.Query | Capability.DocumentsRead);

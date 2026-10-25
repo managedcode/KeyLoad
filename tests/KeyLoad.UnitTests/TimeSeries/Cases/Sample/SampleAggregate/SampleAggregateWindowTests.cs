@@ -85,32 +85,4 @@ internal sealed class SampleAggregateWindowTests
         await Assert.That(inverted.Code).IsEqualTo(ErrorCode.Validation);
     }
 
-    [Test]
-    public async Task AcSeries010CalculatedWindowCountIsRejectedBeforeResultAllocation()
-    {
-        using var db = new TestDatabase(new DatabaseLimits { MaxResults = SampleAggregateTestData.ServerWindowLimit });
-        SampleAggregateTestData.Configure(db);
-        var request = new AggregateSampleWindowsRequest(db.Partition, SampleAggregateTestData.Set,
-            SampleAggregateTestData.EmptySeries, SampleAggregateTestData.Start,
-            SampleAggregateTestData.Start.Add(SampleAggregateTestData.ThreeMinutes), SampleAggregateTestData.Minute,
-            MaxWindows: SampleAggregateTestData.ServerWindowLimit);
-
-        var exact = db.Database.AggregateSampleWindows(SampleAggregateTestData.RootPrincipal, request);
-        var oneOverCaller = SampleAggregateTestData.Failure(() => db.Database.AggregateSampleWindows(
-            SampleAggregateTestData.RootPrincipal, request with
-            {
-                MaxWindows = SampleAggregateTestData.ServerWindowLimit - 1
-            }),
-            ErrorCode.BudgetExceeded);
-        var overServer = SampleAggregateTestData.Failure(() => db.Database.AggregateSampleWindows(
-            SampleAggregateTestData.RootPrincipal, request with
-            {
-                MaxWindows = SampleAggregateTestData.ServerWindowLimit + 1
-            }),
-            ErrorCode.BudgetExceeded);
-
-        await Assert.That(exact.Windows.Length).IsEqualTo(SampleAggregateTestData.ExactWindowCount);
-        await Assert.That(oneOverCaller.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(overServer.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
 }

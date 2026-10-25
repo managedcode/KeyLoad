@@ -16,7 +16,4 @@ internal sealed class RemoteTransferCapacityAuthorityTests
     public async Task GenuineRetainedTransferRefusesInconsistentCapacityThenOriginalColdRepairAndHealthyFlow(
         bool source, RemoteTransferCapacityAuthorityFault fault)
         => await RemoteTransferCapacityAuthorityWholeFlow.RunAsync(source, fault, TestContext.Current!.Execution.CancellationToken);
-    [Test]
-    public async Task ActualRetainedSourceByteCeilingReturnsTypedWholeOutcomeThenColdExactRepairAndFreshCompletion()
-        => await RemoteTransferCapacityAuthorityCeiling.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

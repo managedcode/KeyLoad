@@ -20,7 +20,7 @@ public static class SampleReads
     public static SampleRecord[] ReadSamples(this DatabaseEngine engine, string principalId, PartitionRef partition, string set, string seriesId, DateTimeOffset from, DateTimeOffset until, int limit = DefaultSampleReadLimit, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         budget.Check();
         var request = new ReadSamplesRequest(partition, set, seriesId, from, until, limit);
         return engine.Store.Read(view => SampleRangeReader.Read(engine, engine.Clock, view, principalId, request, budget));

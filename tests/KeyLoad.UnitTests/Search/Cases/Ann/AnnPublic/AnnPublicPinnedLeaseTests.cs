@@ -21,7 +21,7 @@ internal sealed class AnnPublicPinnedLeaseTests
             {
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    var budget = new ReadExecutionBudget(database.Database.OperationLimitsOptions, database.Database.EvaluationClock);
+                    var budget = new ReadExecutionBudget(database.Database.EvaluationClock);
                     held = database.Database.WithQueryView(AnnProjectionPinTestSupport.Principal, request.Search.Partition,
                         request.Search.Collection, (view, principal, resource) =>
                         {

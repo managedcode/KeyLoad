@@ -19,8 +19,7 @@ internal static class TextMissingSettledAuthorityFlow
         TextIndexMaintenanceRequest restore, string path, byte[] original, CancellationToken token)
     {
         var options = UnitTextOptions.Execution();
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            cancellationToken: token);
+        var budget = new ReadExecutionBudget(cancellationToken: token);
         var directory = Path.GetDirectoryName(path) ?? throw new InvalidOperationException();
         var manifest = TextIncrementalMetadata.ReadManifest(directory, options.Value.MaximumDiskBytes, budget);
         await Assert.That(manifest.Bootstrap).IsFalse();

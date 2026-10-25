@@ -56,7 +56,7 @@ public static class TopicPublishReads
         }
     }
 
-    internal static TopicPublicationProgress AppendTopicEvents(this DatabaseEngine engine, IAtomicTransaction tx, EventSourceRef source, ResourceDefinition resource, ImmutableArray<EventData> events, DateTimeOffset now, long tail, long sequence, long firstAvailablePosition, long storedBytes)
+    internal static TopicPublicationProgress AppendTopicEvents(IAtomicTransaction tx, EventSourceRef source, ResourceDefinition resource, ImmutableArray<EventData> events, DateTimeOffset now, long tail, long sequence, long firstAvailablePosition, long storedBytes)
     {
         foreach (var item in events)
         {
@@ -70,8 +70,8 @@ public static class TopicPublishReads
             var idKey = KeySpace.Partition(TopicEventIdKeySpace, source.Partition, source.Resource, source.Generation, item.EventId);
             var data = item with
             {
-                PayloadJson = JsonData.ValidateContent(item.PayloadJson, engine.Limits),
-                HeadersJson = JsonData.ValidateContent(item.HeadersJson, engine.Limits)
+                PayloadJson = JsonData.ValidateContent(item.PayloadJson),
+                HeadersJson = JsonData.ValidateContent(item.HeadersJson)
             };
             if (tx.ReadOwnedValue(TopicRetentionCommands.PurgedTopicIdentityKey(source, item.EventId)) is { } purgedBytes)
             {

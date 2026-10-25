@@ -41,7 +41,7 @@ public static class VectorReads
     public static (DocumentRecord Document, VectorRecord Vector)[] ReadVisibleVectors(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection, string field, ReadExecutionBudget? budget = null)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        budget ??= new(engine.OperationLimitsOptions, timeProvider: engine.Clock);
+        budget ??= new(timeProvider: engine.Clock);
         var eligible = new List<(DocumentRecord, VectorRecord)>();
         engine.VisitVisibleVectors(view, principal, partition, collection, field, budget, (document, vector) => eligible.Add((document, vector)));
         return eligible.ToArray();

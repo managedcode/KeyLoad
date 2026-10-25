@@ -16,7 +16,7 @@ internal static class Bm25CorpusCapture
         ArgumentNullException.ThrowIfNull(options);
         var execution = options.Value;
         execution.Validate();
-        SearchRequestValidation.Validate(request, database.Limits, false, execution);
+        SearchRequestValidation.Validate(request, false, execution);
         if (request.Text is null || request.TextField is null || request.Vector is not null || commandId == Guid.Empty)
         {
             throw Errors.Fail(ErrorCode.Validation, Bm25CorpusProtocol.Invalid);

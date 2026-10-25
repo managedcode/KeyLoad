@@ -39,7 +39,7 @@ public class SampleChunkSerializationBenchmarks
         }
         var runtime = EmbeddedBenchmarkRuntimeRegistration.Read();
         var candidate = new SampleChunkBenchmarkState(SampleChunkBenchmarkCorpus.Create(RecordCount, Corpus),
-            runtime.Database, runtime.TimeSeriesExecution);
+            runtime.TimeSeriesExecution);
         SampleChunkBenchmarkManifest.Write(RecordCount, Corpus, candidate, BenchmarkArtifactRegistration.ReadSampleChunk());
         state = candidate;
     }

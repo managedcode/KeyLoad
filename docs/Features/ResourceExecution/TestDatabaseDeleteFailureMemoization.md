@@ -1,6 +1,6 @@
 # fixture deletion failure memoization
 
-REQ-FIXTURE-DELETE-001 / AC-FIXTURE-DELETE-001 creates a genuine TestDatabase, configures its collection, commits and replays a fixed original command with the complete independently expected receipt, full document/record/page and canonical state from the [concurrent-close contract](TestDatabaseConcurrentSuccessfulClose.md). Only actual successful JoinOwnedResources admits a complete closed-owner filesystem baseline. The finite inventory uses the actual fixture MaxScanRecords entry cap, MaxQueryReadBytes total file-byte cap and storage FileBufferBytes; it includes all files, directories and original Unix modes, including the root. It rejects a linked root before enumeration and rejects every linked entry before enqueueing a directory. The explicit nonrecursive queue shares one total entry cap plus one-entry lookahead across the complete inventory; links are refused rather than skipped. Original owners are closed and this private fixture admits no external path-swap actor; no hostile TOCTOU proof is claimed. It is not publication or a performance measurement.
+REQ-FIXTURE-DELETE-001 / AC-FIXTURE-DELETE-001 creates a genuine TestDatabase, configures its collection, commits and replays a fixed original command with the complete independently expected receipt, full document/record/page and canonical state from the [concurrent-close contract](TestDatabaseConcurrentSuccessfulClose.md). Only actual successful JoinOwnedResources admits a complete closed-owner filesystem baseline. The inventory reads every entry and file byte of the owned root with the storage FileBufferBytes; it includes all files, directories and original Unix modes, including the root. It rejects a linked root before enumeration and rejects every linked entry before enqueueing a directory. The explicit nonrecursive queue walks the complete inventory; links are refused rather than skipped. Original owners are closed and this private fixture admits no external path-swap actor; no hostile TOCTOU proof is claimed. It is not publication or a performance measurement.
 
 REQ-FIXTURE-DELETE-002 / AC-FIXTURE-DELETE-002 temporarily removes ALL read and write bits from ONLY that owned root, preserving original execute and other bits. A genuine default Directory.EnumerateFileSystemEntries(root).ToArray must first refuse with UnauthorizedAccessException. If root privileges, capabilities or ACLs permit enumeration, the precondition fails honestly, mode is independently restored and fixture.Dispose is never invoked. There is no skip, fabricated permission exception, changed subtree mode or unrelated filesystem intervention. Windows is explicitly unsupported by this test; Linux qualification is required.
 
@@ -15,7 +15,7 @@ The [ResourceExecution](../ResourceExecution.md) feature and [ADR-117](../../ADR
 ```mermaid
 flowchart LR
   Seed[full receipt and replay] --> Join[Original owners joined]
-  Join --> Baseline[Complete bounded file and mode inventory]
+  Join --> Baseline[Complete file and mode inventory]
   Baseline --> Deny[Root read and write denied]
   Deny --> Probe[Actual enumeration must refuse]
   Probe --> Failure[Actual first Dispose failure]

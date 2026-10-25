@@ -14,7 +14,7 @@ internal static class SampleAggregateReader
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
         ValidateRange(request.From, request.UntilExclusive);
-        ValidateSampleLimit(request.MaxSamples, database.Limits.MaxScanRecords);
+        ValidateSampleLimit(request.MaxSamples);
         var scope = SampleReadScope.Open(database, view, principalId, request.Partition, request.Set, request.SeriesId);
         var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
         var from = retention is not null && retention.BeforeUtcTicks > request.From.UtcTicks
@@ -58,9 +58,9 @@ internal static class SampleAggregateReader
         }
     }
 
-    internal static void ValidateSampleLimit(int maxSamples, int serverMaximum)
+    internal static void ValidateSampleLimit(int maxSamples)
     {
-        if (maxSamples < 1 || maxSamples > serverMaximum)
+        if (maxSamples < 1)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidSampleBudget);
         }

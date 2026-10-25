@@ -29,7 +29,7 @@ public static class AnalyticsStoreCommands
 
     internal static void AuthorizeAnalyticsUpsert(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, UpsertAnalyticsEvents upsert, AnalyticsStoreSchema schema)
     {
-        engine.ValidateAnalyticsUpsert(upsert, schema);
+        AnalyticsStoreCommands.ValidateAnalyticsUpsert(upsert, schema);
         foreach (var value in upsert.Events)
         {
             var previous = AnalyticsStoreAuthorization.Previous(view, partition, upsert.Store, value.Id);
@@ -45,7 +45,7 @@ public static class AnalyticsStoreCommands
 
     internal static void AuthorizeAnalyticsDelete(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, DeleteAnalyticsEvents delete)
     {
-        engine.ValidateAnalyticsDelete(delete);
+        AnalyticsStoreCommands.ValidateAnalyticsDelete(delete);
         foreach (var id in delete.ExpectedRevisions.Keys)
         {
             var previous = AnalyticsStoreAuthorization.Previous(view, partition, delete.Store, id);
@@ -56,22 +56,22 @@ public static class AnalyticsStoreCommands
         }
     }
 
-    internal static void ValidateAnalyticsUpsert(this DatabaseEngine engine, UpsertAnalyticsEvents mutation, AnalyticsStoreSchema schema)
+    internal static void ValidateAnalyticsUpsert(UpsertAnalyticsEvents mutation, AnalyticsStoreSchema schema)
     {
-        if (mutation.Events.IsDefaultOrEmpty || mutation.ExpectedRevisions is null || mutation.Events.Length > engine.Limits.MaxBatchMutations || mutation.Events.Any(value => value is null) || mutation.Events.Select(value => value.Id).Distinct(StringComparer.Ordinal).Count() != mutation.Events.Length || !mutation.Events.Select(value => value.Id).Order(StringComparer.Ordinal).SequenceEqual(mutation.ExpectedRevisions.Keys.Order(StringComparer.Ordinal)) || mutation.ExpectedRevisions.Values.Any(value => value < AnalyticsMinimumExpectedRevision))
+        if (mutation.Events.IsDefaultOrEmpty || mutation.ExpectedRevisions is null || mutation.Events.Any(value => value is null) || mutation.Events.Select(value => value.Id).Distinct(StringComparer.Ordinal).Count() != mutation.Events.Length || !mutation.Events.Select(value => value.Id).Order(StringComparer.Ordinal).SequenceEqual(mutation.ExpectedRevisions.Keys.Order(StringComparer.Ordinal)) || mutation.ExpectedRevisions.Values.Any(value => value < AnalyticsMinimumExpectedRevision))
         {
             throw Errors.Fail(ErrorCode.Validation, AnalyticsStoreValidation.Invalid);
         }
 
         foreach (var value in mutation.Events)
         {
-            AnalyticsStoreValidation.Event(value, schema, engine.Limits);
+            AnalyticsStoreValidation.Event(value, schema);
         }
     }
 
-    internal static void ValidateAnalyticsDelete(this DatabaseEngine engine, DeleteAnalyticsEvents mutation)
+    internal static void ValidateAnalyticsDelete(DeleteAnalyticsEvents mutation)
     {
-        if (mutation.ExpectedRevisions is null || mutation.ExpectedRevisions.Count == AnalyticsEmptyRevisionCount || mutation.ExpectedRevisions.Count > engine.Limits.MaxBatchMutations || mutation.ExpectedRevisions.Values.Any(value => value <= AnalyticsMinimumExpectedRevision))
+        if (mutation.ExpectedRevisions is null || mutation.ExpectedRevisions.Count == AnalyticsEmptyRevisionCount || mutation.ExpectedRevisions.Values.Any(value => value <= AnalyticsMinimumExpectedRevision))
         {
             throw Errors.Fail(ErrorCode.Validation, AnalyticsStoreValidation.Invalid);
         }

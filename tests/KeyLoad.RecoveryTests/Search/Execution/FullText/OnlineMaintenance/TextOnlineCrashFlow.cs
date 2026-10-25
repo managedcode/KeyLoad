@@ -6,14 +6,15 @@ namespace KeyLoad.RecoveryTests.Search;
 
 internal static class TextOnlineCrashFlow
 {
+    private static readonly TimeSpan PhaseLifetime = TimeSpan.FromSeconds(30);
+
     internal static async Task<OnlineTextIndexMaintenanceResult> RunAsync(TextOnlineCrashRuntime runtime,
         OnlineTextIndexMaintenanceRequest request, CancellationToken token,
         Func<OnlineTextIndexMaintenanceResult, Task>? afterOriginalCommit = null)
     {
         var session = Guid.NewGuid();
         var database = runtime.Canonical.Database;
-        var expiry = database.EvaluationClock.GetUtcNow().AddSeconds(
-            runtime.Canonical.Options.Core.DatabaseLimits.Value.QueryDeadlineSeconds);
+        var expiry = database.EvaluationClock.GetUtcNow().Add(PhaseLifetime);
         var original = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ResolveOriginal, expiry, token);
         if (original.OriginalResult is { } replay)
         {

@@ -15,7 +15,6 @@ public static class JsonData
     private const int LastComponentFromEnd = 1;
 
     private const string UnsupportedScalarFieldDetail = "This field is not a scalar value.";
-    private const string PayloadLimitDetail = "The JSON payload exceeds its byte limit.";
     private const string ObjectRequiredDetail = "The JSON payload must be an object.";
     private const string InvalidPayloadDetail = "The JSON payload is invalid or too deeply nested.";
     private const string InvalidDocumentDetail = "A document must be an object.";
@@ -27,28 +26,22 @@ public static class JsonData
     private const string NullJsonValue = "null";
     private const int MaximumIdentifierBytes = 256;
 
-    /// <summary>Returns canonical JSON while enforcing input size, nesting and decimal-number policy.</summary>
+    /// <summary>Returns canonical JSON while enforcing the serializer's default nesting and decimal-number policy.</summary>
     /// <param name="json">Owned input JSON text.</param>
-    /// <param name="limits">Input byte and nesting limits.</param>
     /// <param name="requireObject">Whether the root must be an object.</param>
     /// <returns>Owned canonical text with ordinal property order.</returns>
-    public static string Validate(string json, DatabaseLimits limits, bool requireObject = true)
-        => ValidateCore(json, limits, requireObject, preserveContent: false);
+    public static string Validate(string json, bool requireObject = true)
+        => ValidateCore(json, requireObject, preserveContent: false);
 
-    internal static string ValidateContent(string json, DatabaseLimits limits)
-        => ValidateCore(json, limits, requireObject: true, preserveContent: true);
+    internal static string ValidateContent(string json)
+        => ValidateCore(json, requireObject: true, preserveContent: true);
 
-    private static string ValidateCore(string json, DatabaseLimits limits, bool requireObject, bool preserveContent)
+    private static string ValidateCore(string json, bool requireObject, bool preserveContent)
     {
         ArgumentNullException.ThrowIfNull(json);
-        ArgumentNullException.ThrowIfNull(limits);
-        if (Encoding.UTF8.GetByteCount(json) > limits.MaxDocumentBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, PayloadLimitDetail);
-        }
         try
         {
-            using var document = JsonDocument.Parse(json, new JsonDocumentOptions { MaxDepth = limits.MaxJsonDepth });
+            using var document = JsonDocument.Parse(json);
             if (requireObject && document.RootElement.ValueKind != JsonValueKind.Object)
             {
                 throw Errors.Fail(ErrorCode.Validation, ObjectRequiredDetail);
@@ -143,13 +136,11 @@ public static class JsonData
     /// <summary>Applies field patches in order and returns canonical validated JSON.</summary>
     /// <param name="json">Existing object JSON.</param>
     /// <param name="patches">Validated concrete field patches.</param>
-    /// <param name="limits">Input and resulting document limits.</param>
     /// <returns>Owned canonical object JSON after all patches.</returns>
-    public static string Patch(string json, IReadOnlyList<FieldPatch> patches, DatabaseLimits limits)
+    public static string Patch(string json, IReadOnlyList<FieldPatch> patches)
     {
         ArgumentNullException.ThrowIfNull(json);
         ArgumentNullException.ThrowIfNull(patches);
-        ArgumentNullException.ThrowIfNull(limits);
         var root = JsonNode.Parse(json) as JsonObject ?? throw Errors.Fail(ErrorCode.Validation, InvalidDocumentDetail);
         foreach (var patch in patches)
         {
@@ -178,10 +169,10 @@ public static class JsonData
             }
             else
             {
-                target[field] = JsonNode.Parse(Validate(patch.ValueJson ?? NullJsonValue, limits, false));
+                target[field] = JsonNode.Parse(Validate(patch.ValueJson ?? NullJsonValue, false));
             }
         }
-        return Validate(root.ToJsonString(), limits);
+        return Validate(root.ToJsonString());
     }
 
     /// <summary>Rejects missing, oversized or control-containing database identifiers.</summary>

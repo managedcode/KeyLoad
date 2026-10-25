@@ -9,7 +9,7 @@ internal static class SampleChunkGenerationWriter
 {
     internal static SampleChunkManifest Write(IAtomicTransaction tx, PartitionRef partition, string set,
         string series, SampleChunkWindow window, ReadOnlySpan<SampleRecord> records,
-        IOptions<TimeSeriesExecutionOptions> options, int maximumBytes)
+        IOptions<TimeSeriesExecutionOptions> options)
     {
         var digests = ImmutableArray.CreateBuilder<ReadOnlyMemory<byte>>();
         for (var offset = SampleChunkLifecycleProtocol.FirstIndex; offset < records.Length;
@@ -17,7 +17,7 @@ internal static class SampleChunkGenerationWriter
         {
             var size = Math.Min(SampleChunkWire.MaximumRecords, records.Length - offset);
             var encoded = SampleChunkCodec.EncodeOrdered(records.Slice(offset, size), options,
-                Math.Min(maximumBytes, SampleChunkCodec.MaximumEncodedBytes));
+                SampleChunkCodec.MaximumEncodedBytes);
             var key = SampleChunkKeys.Block(partition, set, series, window.WindowId, window.Generation, digests.Count);
             if (tx.ReadOwnedValue(key) is not null)
             {
@@ -36,7 +36,7 @@ internal static class SampleChunkGenerationWriter
             throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
         }
         var bytes = OrleansSerialization.Serialize(manifest);
-        SampleChunkStorage.Write(tx, manifestKey, new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)), maximumBytes);
+        SampleChunkStorage.Write(tx, manifestKey, new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)));
         return manifest;
     }
 

@@ -4,7 +4,6 @@ internal static class ScriptDomCreateTableOperation
 {
     internal static McpDecodedOperation Compile(SqlOperationRequest request,
         global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement statement,
-        global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limits,
         int maximumPayloadBytes, Action checkBudget, CancellationToken token)
     {
         checkBudget();
@@ -15,7 +14,7 @@ internal static class ScriptDomCreateTableOperation
             throw ScriptDomOperationErrors.Invalid();
         }
         var identity = SqlOriginalMutationIdentity.Required(request.CommandId);
-        var definition = ScriptDomCreateTableDefinition.Read(request.Partition, statement, limits, checkBudget, token);
+        var definition = ScriptDomCreateTableDefinition.Read(request.Partition, statement, checkBudget, token);
         var arguments = new Dictionary<string, global::System.Text.Json.JsonElement>(StringComparer.Ordinal)
         {
             [McpCatalogProtocol.Request] = global::System.Text.Json.JsonSerializer.SerializeToElement(definition, JsonDefaults.Options),

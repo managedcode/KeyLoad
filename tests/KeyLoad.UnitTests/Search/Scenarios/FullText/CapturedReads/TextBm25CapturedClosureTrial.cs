@@ -52,8 +52,7 @@ internal static class TextBm25CapturedClosureTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            projection = new(Path.Combine(owner.Source.Directory, "bm25-captured-text"),
-                UnitExecutionOptions.DatabaseLimits(owner.Database.Limits), owner.Store.Identity.NodeId,
+            projection = new(Path.Combine(owner.Source.Directory, "bm25-captured-text"), owner.Store.Identity.NodeId,
                 UnitTextOptions.Execution());
             captured = owner.Database.WithQueryView(Bm25OriginalPhaseRecoveryFlow.Subject,
                 request.Partition, request.Collection, (view, principal, resource) =>

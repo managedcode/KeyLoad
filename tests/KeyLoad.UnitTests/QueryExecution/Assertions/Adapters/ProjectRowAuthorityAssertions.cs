@@ -31,13 +31,11 @@ internal static class ProjectRowAuthorityAssertions
         var plan = JsonSerializer.Serialize(new
         {
             AccessPath = ScanPath,
-            AtomicPartition = db.Partition.AtomicPartitionId,
-            ScanBudget = UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords
+            AtomicPartition = db.Partition.AtomicPartitionId
         }, JsonDefaults.Options);
         var explain = engine.ExecuteAst(Reader, new AstQueryRequest(db.Partition,
-            new SqlParser(Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution(),
-                new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
-                    cancellationToken: token)).Parse() with
+            new SqlParser(Sql, UnitExecutionOptions.QueryExecution(),
+                new global::KeyLoad.Core.ReadExecutionBudget(cancellationToken: token)).Parse() with
             {
                 Explain = true
             }, AllowFullScan: true), cancellationToken: token);
@@ -59,9 +57,8 @@ internal static class ProjectRowAuthorityAssertions
             {
                 _ = explain
                 ? engine.ExecuteAst(Reader, new AstQueryRequest(db.Partition,
-                    new SqlParser(Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution(),
-                new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
-                    cancellationToken: token)).Parse() with
+                    new SqlParser(Sql, UnitExecutionOptions.QueryExecution(),
+                new global::KeyLoad.Core.ReadExecutionBudget(cancellationToken: token)).Parse() with
                     {
                         Explain = true
                     }, AllowFullScan: true), cancellationToken: token)

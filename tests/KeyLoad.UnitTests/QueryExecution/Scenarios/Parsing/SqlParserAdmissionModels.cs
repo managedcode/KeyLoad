@@ -32,7 +32,7 @@ internal static class SqlParserAdmissionModels
                 new("updated", "Updated", "{\"value\":2}", "{}")], ExpectedStreamRevision.NoStream)]);
         await RememberAsync(fixture, append, [new("appendEvents", Events, "source", 2L)]);
         var id = Guid.NewGuid();
-        var compiled = Compile(db.Database, db.Partition, id, Insert, CancellationToken.None);
+        var compiled = Compile(db.Partition, id, Insert, CancellationToken.None);
         var request = OrleansSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
         await RequiredProcessingPolicyAssertions.EqualAsync(new CommandRequest(id, db.Partition, [new InsertTypedRow(Table, TypedJson)]), request);
         await RememberAsync(fixture, request, [new("putDocument", Table, "typed-row", 1L)]);
@@ -45,7 +45,6 @@ internal static class SqlParserAdmissionModels
         await RequiredProcessingPolicyAssertions.ReceiptAsync(expected, db.Submit(OperationKind.Batch, request, id: request.CommandId).Get<CommitReceipt>());
         fixture.Additional.Add((request, expected, RequiredProcessingPolicyAssertions.Outcome(db.Store, db.Partition, "root", request.CommandId)));
     }
-    internal static McpDecodedOperation Compile(DatabaseEngine database, PartitionRef partition, Guid id, string sql, CancellationToken token)
-        => SqlOperationCompiler.Compile(new(partition, sql, CommandId: id), database.OperationLimitsOptions,
-            database.Limits.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
+    internal static McpDecodedOperation Compile(PartitionRef partition, Guid id, string sql, CancellationToken token)
+        => SqlOperationCompiler.Compile(new(partition, sql, CommandId: id), UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), token);
 }

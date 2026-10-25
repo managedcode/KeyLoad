@@ -22,10 +22,9 @@ internal static class SqlMcpCatalog
         McpSchemaFactory.CreateOutput(typeof(JsonElement), true), new(false, false, true),
         null, adapter: true);
 
-    internal static McpDecodedOperation Decode(IDictionary<string, JsonElement>? arguments, int maximumPayloadBytes,
-        IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken)
+    internal static McpDecodedOperation Decode(IDictionary<string, JsonElement>? arguments, int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken)
     {
         var request = McpArgumentDecoder.Request<SqlOperationRequest>(arguments, false);
-        return SqlOperationCompiler.Compile(request, limitsOptions, maximumPayloadBytes, queryOptions, cancellationToken);
+        return SqlOperationCompiler.Compile(request, maximumPayloadBytes, queryOptions, cancellationToken);
     }
 }

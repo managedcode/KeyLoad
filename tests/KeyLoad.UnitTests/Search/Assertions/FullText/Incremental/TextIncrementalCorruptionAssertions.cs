@@ -17,8 +17,7 @@ internal static class TextIncrementalCorruptionAssertions
     {
         var options = UnitTextOptions.Execution();
         var root = Path.Combine(database.Directory, TextIncrementalProtocol.RootDirectory);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            cancellationToken: token);
+        var budget = new ReadExecutionBudget(cancellationToken: token);
         var leaf = TextIncrementalEnrollmentFiles.Find(root, build, budget, options)
             ?? throw new InvalidOperationException();
         var path = Path.Combine(root, leaf, TextIncrementalProtocol.ManifestFile);

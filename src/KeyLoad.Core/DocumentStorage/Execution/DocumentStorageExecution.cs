@@ -7,7 +7,7 @@ public static class DocumentStorageExecution
     internal static DocumentResult? GetDocumentBound(this DatabaseEngine engine, string principalId, EntityRef reference, CommitToken? minimumToken, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock, cancellationToken);
+        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
         return engine.GetDocumentBound(principalId, new GetDocumentRequest(reference, minimumToken), work, binding);
     }
 

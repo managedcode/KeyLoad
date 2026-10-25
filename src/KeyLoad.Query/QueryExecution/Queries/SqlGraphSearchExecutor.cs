@@ -10,14 +10,14 @@ internal static class SqlGraphSearchExecutor
         IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
-        var graphRequest = SqlGraphSearchParser.Parse(request, database.OperationLimitsOptions, budget, execution.MaximumParameters);
+        var graphRequest = SqlGraphSearchParser.Parse(request, budget, execution.MaximumParameters);
         budget.Check();
         var result = await search.GraphSearchAsync(principalId, graphRequest, budget, cancellationToken);
         if (execution.MaximumResultBytes is not null)

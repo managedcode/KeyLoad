@@ -27,8 +27,7 @@ internal static class QueryAdapterIndexedTrials
             var expected = await QueryAdapterIndexedPages.ReadAsync(store, () => engine.Execute(QueryAdapterIndexedCorpus.Principal,
                 new(partition, sql)), independent.Rows, independent.Continues);
             var json = await QueryAdapterIndexedPages.ReadAsync(store, () => engine.ExecuteAst(QueryAdapterIndexedCorpus.Principal,
-                QueryAdapterTestSupport.RoundTrip(new(partition, new SqlParser(sql,
-                    UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse()))),
+                QueryAdapterTestSupport.RoundTrip(new(partition, new SqlParser(sql, UnitExecutionOptions.QueryExecution()).Parse()))),
                 independent.Rows, independent.Continues);
             var csharp = KeyLoadQuery.From<QueryAdapterOrder>(partition, QueryAdapterIndexedCorpus.Collection, UnitClientOptions.Translation())
                 .Where(row => row.Status == status && row.Number >= minimum)

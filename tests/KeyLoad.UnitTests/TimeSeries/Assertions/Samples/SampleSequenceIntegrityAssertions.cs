@@ -73,7 +73,7 @@ internal static class SampleSequenceIntegrityAssertions
     {
         var originals = fixture.Originals.ToArray();
         var prefix = KeySpace.Partition("outbox", fixture.Source.Owner.Partition);
-        var page = fixture.Store.Read(view => view.Scan(prefix, fixture.Database.Limits.MaxScanRecords));
+        var page = fixture.Store.Read(view => view.Scan(prefix, view.MaximumRangeRecords));
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Records.Length).IsEqualTo(originals.Length);
         for (var index = 0; index < originals.Length; index++)

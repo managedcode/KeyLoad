@@ -1,3 +1,4 @@
+using System.Text.Json;
 using KeyLoad.IntegrationTests.ClientApi;
 using KeyLoad.IntegrationTests.OrleansExecution;
 using KeyLoad.IntegrationTests.QueryExecution;
@@ -57,7 +58,7 @@ internal static class EventReferenceSelectFlow
     {
         var result = await callers.Sdk.ExecuteSqlAsync(request, token);
         await Assert.That(result.IsSuccess).IsFalse();
-        await Assert.That(result.Value).IsNull();
+        await Assert.That(result.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
         await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
             code, dispatched: true);

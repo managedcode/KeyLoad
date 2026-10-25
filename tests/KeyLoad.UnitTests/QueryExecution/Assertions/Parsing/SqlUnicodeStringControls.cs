@@ -28,7 +28,6 @@ internal static class SqlUnicodeStringControls
             await RefuseAsync(database, engine, SqlNullDistinctCases.Prefix + clause + SqlNullDistinctCases.Tail,
             code, image, position, identity);
         }
-        await TokenBoundAsync(database, engine, image, position, identity);
         await CancelledAsync(database, engine, image, position, identity);
     }
 
@@ -69,24 +68,6 @@ internal static class SqlUnicodeStringControls
         }
     }
 
-    private static async Task TokenBoundAsync(TestDatabase database, global::KeyLoad.Query.QueryEngine engine,
-        string[] image, long position, byte[] identity)
-    {
-        var sql = SqlNullDistinctCases.Prefix + SqlNullDistinctCases.UnicodeClause
-            + string.Concat(Enumerable.Repeat(EmptyFragment, database.Database.Limits.MaxQueryTokens))
-            + SqlNullDistinctCases.Tail;
-        await Assert.That(global::System.Text.Encoding.UTF8.GetByteCount(sql)
-            <= database.Database.Limits.MaxQueryBytes).IsTrue();
-        var request = new QueryRequest(database.Partition, sql, AllowFullScan: true);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(
-            SqlNullOrderingProtocol.Reader, request)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
-        await SqlNullDistinctPages.HealthyAsync(database.Database, database.Store, database.Partition,
-            SqlNullDistinctRefusals.InitialRevision);
-        await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
-    }
-
-    private const string EmptyFragment = "\n''";
     private const string Low = "low";
     private const string LowProjection = "{\"label\":\"low\"}";
     private const string BoundedFullScan = "bounded-full-scan";

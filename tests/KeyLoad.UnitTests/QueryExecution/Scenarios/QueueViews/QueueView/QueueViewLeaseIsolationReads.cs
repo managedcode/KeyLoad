@@ -41,8 +41,7 @@ internal static class QueueViewLeaseIsolationReads
             var json = JsonSerializer.Serialize(new
             {
                 AccessPath = QueuePath,
-                ModelViews = true,
-                ScanBudget = state.Owner.Database.Limits.MaxScanRecords
+                ModelViews = true
             }, JsonDefaults.Options);
             await QueueViewLeaseIsolationRows.SameAsync(actual, new([new(ExplainId, Empty, json)],
                 null, state.Owner.Store.Position, QueuePath));

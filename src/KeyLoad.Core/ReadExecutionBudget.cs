@@ -1,44 +1,31 @@
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core;
 
-/// <summary>Bounds logical storage work, output bytes and elapsed time within one consistent read cut.</summary>
-public sealed partial class ReadExecutionBudget
+/// <summary>Accounts logical storage work and output bytes within one consistent read cut under caller cancellation.</summary>
+/// <remarks>Starts a ledger for one operation; only caller cancellation and explicit bounds stop its work.</remarks>
+/// <param name="timeProvider">Optional operation clock, defaulting to system time.</param>
+/// <param name="cancellationToken">Caller cancellation for all subsequent work.</param>
+public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
 {
 
     internal const string ReadBytesExceeded = "The read execution byte budget is exceeded.";
-    private const string TextTokensExceeded = "The search corpus token budget is exceeded.";
     private const long NoReservedReadBytes = 0;
-    private readonly DatabaseLimits limits;
+    private const long UnboundedReadBytes = long.MaxValue;
+    private const int UnboundedRecords = int.MaxValue;
+    private const int UnboundedResultBytes = int.MaxValue;
     private ReadExecutionBudgetScopedReadGrants? readGrants;
-    private ReadExecutionBudgetLifetime executionLifetime;
+    private ReadExecutionBudgetLifetime executionLifetime = new(timeProvider, cancellationToken);
     private long bytes;
-    private ReadExecutionBudgetWork runtimeWork;
-    private int resultBytesLimit;
-    private long textTokens;
-
-    /// <summary>Starts a budget for one operation; the clock does not alter the hosting runtime.</summary>
-    /// <param name="options">Execution centrally validated operation limits, captured once for this read.</param>
-    /// <param name="cancellationToken">Caller cancellation for all subsequent work.</param>
-    /// <param name="timeProvider">Optional operation clock, defaulting to system time.</param>
-    public ReadExecutionBudget(IOptions<DatabaseLimits> options, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
-    {
-        ArgumentNullException.ThrowIfNull(options);
-        limits = options.Value;
-        limits.Validate();
-        var lifetimeBound = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
-        resultBytesLimit = limits.MaxBatchBytes;
-        runtimeWork = new(limits.MaxQueryReadBytes, limits.MaxScanRecords);
-        executionLifetime = new(lifetimeBound, timeProvider, cancellationToken);
-    }
+    private ReadExecutionBudgetWork runtimeWork = new(UnboundedReadBytes, UnboundedRecords);
+    private int resultBytesLimit = UnboundedResultBytes;
 
     /// <summary>Gets accepted logical key/value bytes; this is not physical disk I/O.</summary>
     public long ReadBytes => bytes;
 
-    /// <summary>Gets the earliest original absolute deadline without reminting it from remaining monotonic time.</summary>
+    /// <summary>Gets the earliest explicit absolute expiry without reminting it from remaining monotonic time.</summary>
     internal DateTimeOffset ExpiresAt => executionLifetime.ExpiresAt;
 
     internal TimeSpan RemainingLifetime => executionLifetime.RemainingLifetime;
@@ -86,7 +73,7 @@ public sealed partial class ReadExecutionBudget
             ? view : new BudgetedReadView(view, this, readGrants?.Current);
     }
 
-    /// <summary>Throws when cancellation or the operation deadline prevents further work.</summary>
+    /// <summary>Throws when cancellation or an explicit expiry prevents further work.</summary>
     public void Check() => executionLifetime.Check();
 
     internal bool HasIndeterminateMetadata => executionLifetime.HasIndeterminateMetadata;
@@ -108,17 +95,6 @@ public sealed partial class ReadExecutionBudget
             throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
         }
         bytes += count;
-    }
-
-    /// <summary>Accepts one examined text token from the shared search corpus.</summary>
-    public void ChargeTextToken()
-    {
-        Check();
-        if (textTokens >= limits.MaxSearchTextTokens)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, TextTokensExceeded);
-        }
-        textTokens++;
     }
 
     /// <summary>Returns an owned value copy only after the raw work has been accepted.</summary>
@@ -147,6 +123,17 @@ public sealed partial class ReadExecutionBudget
     public StorageScanResult VisitRange(IKeyValueView view, byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null)
         => ReadExecutionBudgetStorageReads.VisitRange(this, view, prefix, maxRecords, visitor, afterKey, untilKey);
+
+    /// <summary>Visits every record of a range in provider-sized pages with one cumulative operation budget.</summary>
+    /// <param name="view">Storage view inside its read or transaction gate.</param>
+    /// <param name="prefix">Required key prefix.</param>
+    /// <param name="visitor">Read-only callback; returning false stops the traversal.</param>
+    /// <param name="afterKey">Optional exclusive lower bound.</param>
+    /// <param name="untilKey">Optional exclusive upper bound.</param>
+    /// <returns>Delivered count, early stop and examined logical storage bytes across all pages.</returns>
+    internal StorageScanResult VisitAll(IKeyValueView view, byte[] prefix, StorageRecordVisitor visitor,
+        byte[]? afterKey = null, byte[]? untilKey = null)
+        => ReadExecutionBudgetStorageReads.VisitAll(this, view, prefix, visitor, afterKey, untilKey);
 
     /// <summary>Materializes only records whose raw work passed the shared budget.</summary>
     /// <param name="view">Storage view inside its read or transaction gate.</param>

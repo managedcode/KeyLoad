@@ -24,7 +24,7 @@ internal static class AnalyticsStoreTestOperations
     internal static async Task<AnalyticsStoreTestCommit> CommitAsync(TestDatabase db, Mutation mutation,
         string kind, string lastId, long generation, CancellationToken token)
     {
-        var work = new ReadExecutionBudget(db.Database.OperationLimitsOptions, db.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(db.Database.EvaluationClock, token);
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, db.Partition, [mutation]);
         var issued = db.Database.CreateCommand(OperationKind.Batch, id, D.Root,
@@ -40,7 +40,7 @@ internal static class AnalyticsStoreTestOperations
     internal static async Task RefusedAsync(TestDatabase db, Mutation mutation, CancellationToken token)
     {
         var before = db.Database.GetOutboxStatus(D.Root, db.Partition);
-        var work = new ReadExecutionBudget(db.Database.OperationLimitsOptions, db.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(db.Database.EvaluationClock, token);
         var id = Guid.NewGuid();
         var issued = db.Database.CreateCommand(OperationKind.Batch, id, D.Root,
             TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(new CommandRequest(id, db.Partition, [mutation])), work);

@@ -23,7 +23,7 @@ internal static partial class DistributedSearchCoordinator
         ArgumentNullException.ThrowIfNull(prepare);
         ArgumentNullException.ThrowIfNull(sourceBarrier);
         ArgumentNullException.ThrowIfNull(clock);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, original);
+        var budget = new ReadExecutionBudget(clock, original);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
@@ -31,14 +31,14 @@ internal static partial class DistributedSearchCoordinator
         QueryResultBudgetPolicy.Constrain(budget, options.Value);
         budget.ConstrainLifetime(originalExpiry);
         using var admission = database.AdmitQuery(original);
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds), clock);
+        using var deadline = new CancellationTokenSource(budget.RemainingLifetime, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(original, deadline.Token);
         using var stage = budget.EnterStageCancellation(execution.Token);
         try
         {
-            var partitions = DistributedSearchValidation.Require(request, database.Limits, options, budget);
+            var partitions = DistributedSearchValidation.Require(request, options, budget);
             var grants = DistributedSearchGrants.Reserve(partitions.Length, budget);
-            return await new DistributedSearchOperation(database, request, partitions, options, budget, grants,
+            return await new DistributedSearchOperation(request, partitions, options, budget, grants,
                 prepare, sourceBarrier, execution, statisticsCaptured).RunAsync().ConfigureAwait(true);
         }
         catch (OperationCanceledException) when (original.IsCancellationRequested)

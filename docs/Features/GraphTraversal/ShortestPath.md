@@ -28,7 +28,8 @@ a separate `RawReadGrant` does not authorize filtering. Without the use grant,
 the operation returns `PermissionDenied` before adjacency traversal.
 Version/shape/identifier/label errors are Validation; invalid numeric caps are
 BudgetExceeded; a foreign endpoint partition is UnsupportedCapability.
-Existing request/read/result byte caps, deadline and cancellation apply.
+Caller cancellation, explicit expiry and the grain reply ceiling apply; no
+KeyLoad request, read or result byte cap applies ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)).
 Alias: `keyload.contract.graph-shortest-path-request`.
 
 `GraphShortestPathResult` generated IDs: 0 Version=1, 1 Found, 2 nullable Hops,
@@ -55,8 +56,8 @@ statements, expressions and alternate grammar. `SqlGraphPathRequest` carries
 Version/QueryRequest at generated IDs0/1 and alias
 `keyload.contract.sql-graph-path-request`; Cursor must be null and
 AllowFullScan=true. Parsing, validation, reads and exact output share one
-ReadExecutionBudget started before parsing. Do not reset the deadline at the
-Core join. This explicit bounded profile does not claim full SQL/protocol support.
+ReadExecutionBudget started before parsing. Do not reset its explicit expiry at
+the Core join. This explicit bounded profile does not claim full SQL/protocol support.
 Both SQL endpoint literals resolve within QueryRequest.Partition; the grammar
 has no separate endpoint-partition argument. An unauthorized whole SQL scope
 fails persisted authorization. Only the direct typed operation can express a
@@ -68,7 +69,7 @@ foreign endpoint, which fails UnsupportedCapability.
 |---|---|
 | REQ-GRAPH-007: shortest path and explicit depth frontiers | AC-GRAPH-006: independent input-model BFS agrees on ordered full EntityRef vertices and edges for direct/longer/converging paths, shuffled insertion, overlapping IDs across collections, cycles/self-loops, unreachable and depth0/exact/one-short cases. Equal-hop ties follow frontier discovery order then ordinal edge-ID order. GraphShortestPathTests and independent GraphPath reference oracle. |
 | REQ-GRAPH-008: one authorized current read cut | AC-GRAPH-007: denied graph/source collection propagates PermissionDenied; missing/hidden/deleted source is NotFound. Hidden/missing/denied/deleted target and hidden intermediate give the same closed no-path result. A nonempty label filter requires the persisted graph `/label` field policy `RawUseGrant`; `RawReadGrant` is distinct and does not authorize filter use. A missing use grant returns `PermissionDenied` before adjacency traversal; null/empty labels do not apply this field-use check. Edge `AttributesJson` is projected by current persisted graph policy. Actual-store revocation/read-cut plus SDK/official MCP Linux cluster failover cases exclude stale/hidden payload. |
-| REQ-GRAPH-009: finite node/edge/time/byte work | AC-GRAPH-008: charge every examined candidate before label/visibility filtering. Exact required node/edge cap succeeds; one less throws BudgetExceeded without partial success. Check cancellation/deadline during every frontier, scan, dereference, predecessor walk and output. Retention is admitted before insertion; exact output includes protocol metadata. Real during-work cancellation and healthy follow-up preserve committed position. |
+| REQ-GRAPH-009: finite node/edge work under caller cancellation and expiry | AC-GRAPH-008: charge every examined candidate before label/visibility filtering. Exact required node/edge cap succeeds; one less throws BudgetExceeded without partial success. Check cancellation and explicit expiry during every frontier, scan, dereference, predecessor walk and output. Real during-work cancellation and healthy follow-up preserve committed position. |
 | REQ-GRAPH-010: shared SQL/SDK/MCP execution | AC-GRAPH-009: literal/parameter SQL matches direct result/CutPosition/errors. Reject malformed versions/syntax/parameters, extra statements, foreign partitions and exhausted bounds. Real Aspire replicated-cluster SDK/official MCP preserve the connection-grain and CQRS lifecycle; official discovery verifies both `keyload_graph_shortest_path` and `keyload_query_graph_path`, exact typed request/result schemas, and read-only/idempotent/non-destructive hints against the independent ClientApi oracle. Nested `PartitionRef` has exactly its four identity fields plus computed `atomicPartitionId`; only the four identity fields are required. |
 
 ## Execution and bounds
@@ -95,25 +96,18 @@ Expand one explicit depth frontier and collect only the next. Visit each executi
 adjacency prefix in ordinal order without materializing high-degree pages.
 Visited identity is the complete EntityRef. Keep only first predecessor edge
 ID/reference/depth, and stop at the first minimum-depth target; later equal-hop
-paths cannot replace it. Depth exhaustion returns no-path success; node/edge/
-read/retention/deadline exhaustion throws. Validate adjacency/edge ID/from/partition
+paths cannot replace it. Depth exhaustion returns no-path success; node/edge exhaustion,
+cancellation and explicit expiry throw. Validate adjacency/edge ID/from/partition
 agreement as Corruption. Re-read only final path edges through charged reads,
 then project attributes; retain neither all explored edge payloads nor documents.
 
-Reuse GraphVertexVisibility's policy/boolean caches. Optional
-feature-local admission callbacks charge each new vertex/collection decision
-before insertion; existing callers keep their behavior. Before retaining any
-decision, predecessor or frontier, reserve conservative modeled metadata against
-MaxBatchBytes: twice its exact JSON bytes plus128 fixed bytes per vertex or
-predecessor; twice partition/name metadata bytes plus128 per collection decision.
-Use checked arithmetic and cancellation checks. This includes frontier references
-and cache overhead conservatively; it is not a measured RSS claim.
-Traversal metadata and the exact serialized result have separate finite ledgers,
-each capped by MaxBatchBytes. Result admission reserves the empty-array envelope
-and each serialized array item plus its comma before retention; final measurement
-checks the complete protocol result. The metadata cap is not added to the output
-size when deciding the exact output boundary. These ledgers do not establish an
-aggregate RSS bound.
+Reuse GraphVertexVisibility's policy/boolean caches. Vertex, predecessor,
+collection-decision and frontier metadata and the serialized result have no
+KeyLoad byte ledger ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)): the
+node and edge caps, caller cancellation and explicit expiry bound the traversal,
+and the grain reply ceiling (`GrainRoutingOptions.MaximumReplyBytes`) bounds the
+delivered result. Use checked arithmetic and cancellation checks. None of this
+establishes an aggregate RSS bound.
 
 ## Ordered ownership, verification and rollout
 

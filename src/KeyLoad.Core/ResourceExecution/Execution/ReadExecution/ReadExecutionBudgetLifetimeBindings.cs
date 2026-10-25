@@ -74,7 +74,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
         work.Check();
     }
 
-    internal ResourceLifetimeCoverage Capture(DatabaseEngine database, IKeyValueView authorizedView, PartitionRef partition,
+    internal ResourceLifetimeCoverage Capture(IKeyValueView authorizedView, PartitionRef partition,
         ImmutableArray<ResourceDefinition> definitions, bool requireBinding)
     {
         work.Check();
@@ -93,13 +93,13 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
             values.Add(lifetime);
         }
         var coverage = new ResourceLifetimeCoverage(partition, values.MoveToImmutable());
-        ResourceLifetimeCoverageValidation.Require(coverage, partition, definitions, database.Limits.MaxBatchBytes);
+        ResourceLifetimeCoverageValidation.Require(coverage, partition, definitions);
         binding?.Bind(coverage);
         work.Check();
         return coverage;
     }
 
-    internal ResourceLifetimeCoverage CaptureAuthenticated(DatabaseEngine database, IKeyValueView authorizedLocalView,
+    internal ResourceLifetimeCoverage CaptureAuthenticated(IKeyValueView authorizedLocalView,
         ResourceLifetimeCoverage coverage, ImmutableArray<ResourceDefinition> definitions, bool requireBinding)
     {
         work.Check();
@@ -111,7 +111,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority);
         }
-        ResourceLifetimeCoverageValidation.Require(coverage, coverage.Partition, definitions, database.Limits.MaxBatchBytes);
+        ResourceLifetimeCoverageValidation.Require(coverage, coverage.Partition, definitions);
         var bindingView = new AuthenticatedResourceLifetimeReadView(authorizedLocalView, this);
         for (var index = 0; index < definitions.Length; index++)
         {

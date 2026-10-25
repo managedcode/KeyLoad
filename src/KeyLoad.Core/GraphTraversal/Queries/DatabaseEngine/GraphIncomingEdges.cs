@@ -16,18 +16,18 @@ public static class GraphIncomingEdges
     public static GraphIncomingEdgesPage ReadIncomingGraphEdges(this DatabaseEngine engine, string principalId, ReadIncomingGraphEdgesRequest request, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, timeProvider ?? engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(timeProvider ?? engine.Clock, cancellationToken);
         return engine.ReadIncomingGraphEdgesRead(principalId, request, timeProvider ?? engine.Clock, budget);
     }
 
     internal static GraphIncomingEdgesPage ReadIncomingGraphEdgesRead(this DatabaseEngine engine, string principalId, ReadIncomingGraphEdgesRequest request, TimeProvider clock, ReadExecutionBudget budget)
     {
         budget.Check();
-        GraphCrossPartitionValidation.ValidateIncoming(request, engine.Limits, budget);
+        GraphCrossPartitionValidation.ValidateIncoming(request, budget);
         return engine.Store.Read(view =>
         {
             budget.Check();
-            var grant = budget.CreateReadGrant(engine.Limits.MaxQueryReadBytes, engine.Limits.MaxScanRecords);
+            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
             var principal = GraphIncomingReadScope.ReadPrincipal(view, grant, principalId, clock.GetUtcNow());
             return new GraphIncomingEdgesReader(engine, view, principal, request, budget, grant, engine.Store.Position).Read();
         });

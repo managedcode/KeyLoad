@@ -18,7 +18,7 @@ internal sealed class AnalyticalAdmissionTests
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
-        var zero = Assert.ThrowsExactly<InvalidOperationException>(() => _ = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxScanRecords = 0 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()));
+        var zero = Assert.ThrowsExactly<InvalidOperationException>(() => _ = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new() { MaxQueueTransferAcceptAttempts = 0 }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()));
         await Assert.That(zero.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
         var reservations = new List<IDisposable>();
         try
@@ -90,9 +90,4 @@ internal sealed class AnalyticalAdmissionTests
         await Assert.That(await search.SearchAsync(Principal, request)).IsEmpty();
     }
 
-    [Test]
-    public async Task AcMp012_ReadBudgetFailureReleasesAllowanceForFollowingSearch()
-    {
-        await AnalyticalReadBudgetFailureFlow.RunAsync();
-    }
 }

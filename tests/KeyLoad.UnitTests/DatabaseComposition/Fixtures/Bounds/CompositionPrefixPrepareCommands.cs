@@ -10,7 +10,7 @@ internal static class CompositionPrefixPrepareCommands
         ImmutableArray<Mutation> mutations, string principal = D.Root, DateTimeOffset? evaluatedAt = null)
     {
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
-        var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, owner.Token);
+        var work = new ReadExecutionBudget(owner.Database.EvaluationClock, owner.Token);
         var original = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, principal,
             evaluatedAt ?? owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
         var decoded = OrleansSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
@@ -24,7 +24,7 @@ internal static class CompositionPrefixPrepareCommands
         var issued = Issue(owner, mutations, principal);
         if (bindings is { } count)
         {
-            var admission = ResourceEffectAdmissionValidation.Read(issued.Original, owner.Database.OperationLimitsOptions.Value);
+            var admission = ResourceEffectAdmissionValidation.Read(issued.Original);
             await Assert.That(admission.Error).IsNull();
             await Assert.That(admission.Bindings.Length).IsEqualTo(count);
             await Assert.That(admission.Bindings.ToHashSet().SetEquals(new[] { D.From, D.To, D.Queue, D.Graph }

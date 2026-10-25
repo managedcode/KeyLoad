@@ -32,7 +32,7 @@ public static class RecurringSagaAuthorization
         switch (mutation)
         {
             case ConfigureRecurringSchedule configure:
-                var definition = engine.NormalizeScheduleDefinition(configure.Definition);
+                var definition = RecurringScheduleValidation.NormalizeScheduleDefinition(configure.Definition);
                 RecurringScheduleValidation.ValidateScheduleScope(definition.Lane, definition.ScheduleId, partition);
                 engine.RequireScheduleCapability(principal, definition.Lane);
                 engine.RequireScheduleWriteAuthority(principal, definition.Lane, engine.Resource(view, partition, definition.Lane.Queue, ResourceKind.WorkQueue));
@@ -53,7 +53,7 @@ public static class RecurringSagaAuthorization
                 RecurringScheduleValidation.ValidateScheduleScope(expire.Lane, expire.SagaId, partition);
                 engine.RequireScheduleCapability(principal, expire.Lane);
                 _ = engine.Resource(view, partition, expire.Lane.Queue, ResourceKind.WorkQueue);
-                var sagaRecord = engine.RequireSaga(view, expire.Lane, expire.SagaId);
+                var sagaRecord = SagaCommands.RequireSaga(view, expire.Lane, expire.SagaId);
                 if (sagaRecord.Timeout is { } timeout)
                 {
                     engine.RequireScheduleCapability(principal, timeout.Queue);
@@ -150,7 +150,7 @@ public static class RecurringSagaAuthorization
 
     internal static void RequireScheduleCreator(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid scheduleId, DateTimeOffset now)
     {
-        var record = engine.RequireSchedule(view, lane, scheduleId);
+        var record = RecurringScheduleValidation.RequireSchedule(view, lane, scheduleId);
         var creator = engine.Principal(view, record.CreatorPrincipalId, now);
         engine.RequireScheduleCapability(creator, lane);
         var resource = engine.Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
@@ -163,10 +163,10 @@ public static class RecurringSagaAuthorization
         engine.RequireScheduleCapability(creator, record.Lane);
     }
 
-    internal static void RequireScheduleCreatorManagement(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid scheduleId, DateTimeOffset now) => engine.RequireScheduleCreatorManagement(view, engine.RequireSchedule(view, lane, scheduleId), now);
+    internal static void RequireScheduleCreatorManagement(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid scheduleId, DateTimeOffset now) => engine.RequireScheduleCreatorManagement(view, RecurringScheduleValidation.RequireSchedule(view, lane, scheduleId), now);
     internal static void RequireScheduleCreatorWrite(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid scheduleId, DateTimeOffset now)
     {
-        var record = engine.RequireSchedule(view, lane, scheduleId);
+        var record = RecurringScheduleValidation.RequireSchedule(view, lane, scheduleId);
         var creator = engine.Principal(view, record.CreatorPrincipalId, now);
         engine.RequireScheduleCapability(creator, lane);
         var resource = engine.Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
@@ -180,7 +180,7 @@ public static class RecurringSagaAuthorization
         engine.RequireQueueFieldWrites(creator, resource);
     }
 
-    internal static void RequireSagaCreatorWrite(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid sagaId, SagaTimeoutDefinition? timeout, DateTimeOffset now) => engine.RequireSagaCreatorWrite(view, engine.RequireSaga(view, lane, sagaId), timeout, now);
+    internal static void RequireSagaCreatorWrite(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid sagaId, SagaTimeoutDefinition? timeout, DateTimeOffset now) => engine.RequireSagaCreatorWrite(view, SagaCommands.RequireSaga(view, lane, sagaId), timeout, now);
     internal static void RequireSagaCreatorWrite(this DatabaseEngine engine, IKeyValueView view, SagaRecord record, SagaTimeoutDefinition? timeout, DateTimeOffset now)
     {
         var creator = engine.Principal(view, record.CreatorPrincipalId, now);
@@ -198,7 +198,7 @@ public static class RecurringSagaAuthorization
 
     internal static void RequireSagaCreator(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid sagaId, DateTimeOffset now, bool timeout)
     {
-        var record = engine.RequireSaga(view, lane, sagaId);
+        var record = SagaCommands.RequireSaga(view, lane, sagaId);
         var creator = engine.Principal(view, record.CreatorPrincipalId, now);
         engine.RequireScheduleCapability(creator, lane);
         var source = engine.Resource(view, lane.Partition, lane.Queue, ResourceKind.WorkQueue);

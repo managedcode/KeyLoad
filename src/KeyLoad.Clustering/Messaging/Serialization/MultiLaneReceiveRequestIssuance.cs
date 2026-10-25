@@ -19,7 +19,7 @@ internal static class MultiLaneReceiveRequestIssuance
             Incarnation = context.Scope.Incarnation,
             CommandKind = OperationKind.Receive,
             CommandId = commandId,
-            Payload = GrainPayload.Copy(payload, context.Scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(payload),
             ExpiresAt = expiry
         };
         _ = MultiLaneReceiveChildScope.Validate(envelope);

@@ -1,5 +1,4 @@
 using Aspire.Hosting;
-using Aspire.Hosting.ApplicationModel;
 using Aspire.Hosting.Testing;
 using KeyLoad.IntegrationTests.StorageReplication;
 using TUnit.Aspire;
@@ -17,13 +16,13 @@ internal sealed class FunctionalGateApplicationFixture(FunctionalGateFixture own
     {
         ClusterFixtureComposition.ConfigureLogging(builder);
         _ = FunctionalGateProjectModel.ReadResourceNames(builder, owner.NodeNames);
-        builder.Eventing.Subscribe<BeforeStartEvent>((_, _) =>
-        {
-            owner.OwnApplication(App);
-            return Task.CompletedTask;
-        });
     }
 
+    // The testing factory runs before-start hooks concurrently with the build returning, so the application is owned
+    // here, where it is passed in.
     protected override Task WaitForResourcesAsync(DistributedApplication app, CancellationToken cancellationToken)
-        => owner.ObserveReadyAsync(cancellationToken);
+    {
+        owner.OwnApplication(app);
+        return owner.ObserveReadyAsync(cancellationToken);
+    }
 }

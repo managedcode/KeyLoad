@@ -1,3 +1,4 @@
+using KeyLoad.Core;
 using KeyLoad.RecoveryTests.DocumentStorage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -22,13 +23,13 @@ internal static class ChecksumProfileEvidence
 
     private static ChecksumProfileCut Capture(ZoneTreeStore store) => store.Read<ChecksumProfileCut>(view =>
     {
-        var page = view.Scan([], CrashExecutionOptions.DatabaseLimits().Value.MaxScanRecords);
-        if (page.HasMore || page.Records.Sum(row => row.Key.Length + (long)row.Value.Length)
+        var records = view.ScanAll([]);
+        if (records.Sum(row => row.Key.Length + (long)row.Value.Length)
             > CommandIdempotencyCrashContract.EvidenceMaximumBytes)
         {
             throw new InvalidOperationException(ChecksumProfileProtocol.Invalid);
         }
         return new(store.Identity.NodeId, store.Identity.Incarnation, store.Position, store.Identity.ReadGeneration,
-            [.. page.Records.Select(row => new ChecksumProfileRow(row.Key.ToArray(), row.Value.ToArray()))]);
+            [.. records.Select(row => new ChecksumProfileRow(row.Key.ToArray(), row.Value.ToArray()))]);
     });
 }

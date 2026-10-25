@@ -30,7 +30,6 @@ public static class OnlineTextCheckpointValidation
             }
 
             var payload = OrleansSerialization.Serialize(intent);
-            engine.RequireBudget(payload.Length);
             var fingerprint = DatabaseCommandFingerprint.Compute(intent.CommandId, OperationKind.CommitProjectionBatch, principal.Id, CommandExecutionExecution.Identity<CommitProjectionBatchRequest>(payload));
             if (outcome.Fingerprint != fingerprint)
             {
@@ -39,8 +38,6 @@ public static class OnlineTextCheckpointValidation
         }
 
         var actual = outcome.Result.Get<ProjectionBatchResult>();
-        engine.RequireBudget(OrleansSerialization.Measure(actual));
-        engine.RequireBudget(OrleansSerialization.Measure(acknowledged));
         if (!OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(acknowledged)) || acknowledged.Checkpoint != ProjectionConsumerAuthority.RequireActiveProjectionConsumer(view, principal, request.Consumer, request.ConsumerGeneration).Checkpoint)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);

@@ -67,7 +67,7 @@ internal static class ResourcePairBindingBm25
     {
         var current = database.WithQueryView(CorpusSubject, state.Source.Partition, Corpus,
             (view, principal, resource) => database.ReadBm25CorpusCurrent(view, principal, resource, state.Source.Partition,
-                Corpus, CorpusField, TextProjectionProtocol.TokenizerVersion, [CorpusTerm], new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token)));
+                Corpus, CorpusField, TextProjectionProtocol.TokenizerVersion, [CorpusTerm], new ReadExecutionBudget(database.EvaluationClock, token)));
         if (expectedCurrent)
         {
             await ResourceIncarnationAssertions.EqualAsync(new DistributedTextStatistics([CorpusTerm], One, One, [One]), current!);

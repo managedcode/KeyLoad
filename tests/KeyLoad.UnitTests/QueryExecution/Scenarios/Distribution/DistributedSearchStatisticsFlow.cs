@@ -13,9 +13,8 @@ internal static class DistributedSearchStatisticsFlow
     internal static DistributedTextWitness Capture(DocumentPatchAtomicityOwner owner,
         PartitionRef partition, PhysicalShardRecord placement, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
-        var grant = budget.CreateReadGrant(owner.Database.Limits.MaxQueryReadBytes / IndependentOwners,
-            owner.Database.Limits.MaxScanRecords);
+        var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
+        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes / IndependentOwners, budget.RemainingReadGrantRecords);
         return DistributedTextStatisticsLeaf.Execute(owner.Database, QueryFixture.Reader,
             Request(partition), placement, QueryFixture.Tenant,
             UnitExecutionOptions.QueryExecution(), budget, grant);
@@ -24,7 +23,7 @@ internal static class DistributedSearchStatisticsFlow
     internal static DistributedTextStatistics Combine(DocumentPatchAtomicityOwner source,
         DistributedTextWitness first, DistributedTextWitness second, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(source.Database.OperationLimitsOptions, source.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(source.Database.EvaluationClock, token);
         return DistributedTextStatisticsMerge.Combine([first.Statistics, second.Statistics],
             UnitExecutionOptions.QueryExecution(), budget);
     }
@@ -32,9 +31,8 @@ internal static class DistributedSearchStatisticsFlow
     internal static RankedDocument[] Rank(DocumentPatchAtomicityOwner owner, DistributedTextWitness witness,
         DistributedTextStatistics statistics, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
-        var grant = budget.CreateReadGrant(owner.Database.Limits.MaxQueryReadBytes / IndependentOwners,
-            owner.Database.Limits.MaxScanRecords);
+        var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
+        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes / IndependentOwners, budget.RemainingReadGrantRecords);
         using var admission = owner.Database.AdmitQuery(token);
         using var charged = budget.EnterReadGrant(grant);
         return owner.Database.WithPartitionQueryFenceView(QueryFixture.Reader, witness.Partition,

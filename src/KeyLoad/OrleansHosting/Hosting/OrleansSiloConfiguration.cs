@@ -45,7 +45,6 @@ internal static class OrleansSiloConfiguration
     }
 
     private static void ConfigureMessaging(IServiceCollection services)
-        => services.AddOptions<SiloMessagingOptions>().Configure<IOptions<DatabaseLimits>,
-            IOptions<GrainRoutingOptions>>((messaging, limits, routing) => messaging.MaxMessageBodySize = Math.Max(
-                limits.Value.MaxBatchBytes, routing.Value.MaximumCompletedBytes));
+        => services.AddOptions<SiloMessagingOptions>().Configure<IOptions<GrainRoutingOptions>>(
+            (messaging, routing) => messaging.MaxMessageBodySize = routing.Value.MaximumCompletedBytes);
 }

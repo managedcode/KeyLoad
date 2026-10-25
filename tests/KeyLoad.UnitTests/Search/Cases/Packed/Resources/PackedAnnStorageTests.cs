@@ -32,18 +32,18 @@ internal sealed class PackedAnnStorageTests
         var before = Snapshot(db);
         var position = db.Store.Position;
         using var originalFile = Open(db, OriginalFile);
-        var originalDigest = index.Save(originalFile, storage, PackedAnnIndexTestSupport.Budget(db));
+        var originalDigest = index.Save(originalFile, storage, PackedAnnIndexTestSupport.Budget());
         await originalFile.FlushAsync(TestContext.Current!.Execution.CancellationToken);
         RandomAccess.FlushToDisk(originalFile.SafeFileHandle);
         var restored = PackedAnnIndex.Load(originalFile, originalDigest, UnitExecutionOptions.PackedAnn(policy),
-            storage, PackedAnnIndexTestSupport.Budget(db));
+            storage, PackedAnnIndexTestSupport.Budget());
         using var restoredFile = Open(db, RestoredFile);
-        var restoredDigest = restored.Save(restoredFile, storage, PackedAnnIndexTestSupport.Budget(db));
+        var restoredDigest = restored.Save(restoredFile, storage, PackedAnnIndexTestSupport.Budget());
         await Assert.That(restoredDigest).IsEquivalentTo(originalDigest, CollectionOrdering.Matching);
         var originalBytes = await File.ReadAllBytesAsync(originalFile.Name, TestContext.Current!.Execution.CancellationToken);
         var restoredBytes = await File.ReadAllBytesAsync(restoredFile.Name, TestContext.Current!.Execution.CancellationToken);
         await Assert.That(originalBytes).IsEquivalentTo(restoredBytes, CollectionOrdering.Matching);
-        await AssertResultsAsync(db, index, restored);
+        await AssertResultsAsync(index, restored);
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
     }
@@ -57,7 +57,7 @@ internal sealed class PackedAnnStorageTests
         var index = Build(db, policy);
         var storage = Options.Create(new PackedAnnStorageOptions());
         using var file = Open(db, OriginalFile);
-        var digest = index.Save(file, storage, PackedAnnIndexTestSupport.Budget(db));
+        var digest = index.Save(file, storage, PackedAnnIndexTestSupport.Budget());
         var bytes = await File.ReadAllBytesAsync(file.Name, TestContext.Current!.Execution.CancellationToken);
         var before = Snapshot(db);
         var position = db.Store.Position;
@@ -65,20 +65,20 @@ internal sealed class PackedAnnStorageTests
         corrupt[^Step] ^= DigestBit;
         using var corruptFile = new MemoryStream(corrupt, writable: false);
         var damaged = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnIndex.Load(corruptFile, digest,
-            UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget(db)));
+            UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget()));
         await Assert.That(damaged.Code).IsEqualTo(ErrorCode.Corruption);
         using var truncatedFile = new MemoryStream(bytes.AsSpan(First, bytes.Length - Step).ToArray(), writable: false);
         var truncated = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnIndex.Load(truncatedFile, digest,
-            UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget(db)));
+            UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget()));
         await Assert.That(truncated.Code).IsEqualTo(ErrorCode.Corruption);
         var wrongProfile = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnIndex.Load(file, digest,
             UnitExecutionOptions.PackedAnn(policy with
             {
                 Seed = policy.Seed + Step
-            }), storage, PackedAnnIndexTestSupport.Budget(db)));
+            }), storage, PackedAnnIndexTestSupport.Budget()));
         await Assert.That(wrongProfile.Code).IsEqualTo(ErrorCode.Corruption);
-        var healthy = PackedAnnIndex.Load(file, digest, UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget(db));
-        await AssertResultsAsync(db, index, healthy);
+        var healthy = PackedAnnIndex.Load(file, digest, UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget());
+        await AssertResultsAsync(index, healthy);
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         var healthyBytes = await File.ReadAllBytesAsync(file.Name, TestContext.Current!.Execution.CancellationToken);
@@ -97,30 +97,30 @@ internal sealed class PackedAnnStorageTests
         var index = Build(db, policy);
         using var file = Open(db, OriginalFile);
         var storage = Options.Create(new PackedAnnStorageOptions());
-        var digest = index.Save(file, storage, PackedAnnIndexTestSupport.Budget(db));
+        var digest = index.Save(file, storage, PackedAnnIndexTestSupport.Budget());
         await Assert.That(file.Length).IsGreaterThan(MinimumFileBytes);
         using var exact = Open(db, RestoredFile);
         var bounded = Options.Create(storage.Value with
         {
             MaxFileBytes = file.Length
         });
-        await Assert.That(index.Save(exact, bounded, PackedAnnIndexTestSupport.Budget(db))).IsEquivalentTo(digest, CollectionOrdering.Matching);
+        await Assert.That(index.Save(exact, bounded, PackedAnnIndexTestSupport.Budget())).IsEquivalentTo(digest, CollectionOrdering.Matching);
         using var below = new MemoryStream();
         var excess = Assert.ThrowsExactly<KeyLoadException>(() => index.Save(below,
             Options.Create(storage.Value with
             {
                 MaxFileBytes = file.Length - Step
-            }), PackedAnnIndexTestSupport.Budget(db)));
+            }), PackedAnnIndexTestSupport.Budget()));
         await Assert.That(excess.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => PackedAnnIndex.Load(file, digest,
-            UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget(db, token: cancelled.Token)));
+            UnitExecutionOptions.PackedAnn(policy), storage, PackedAnnIndexTestSupport.Budget(token: cancelled.Token)));
         await Assert.That(error.CancellationToken).IsEqualTo(cancelled.Token);
-        var restored = PackedAnnIndex.Load(file, digest, UnitExecutionOptions.PackedAnn(policy), bounded, PackedAnnIndexTestSupport.Budget(db));
+        var restored = PackedAnnIndex.Load(file, digest, UnitExecutionOptions.PackedAnn(policy), bounded, PackedAnnIndexTestSupport.Budget());
         var query = PackedAnnTestData.Vector(First, BoundaryDimension, PackedAnnTestData.CorpusSeed);
-        var expected = index.Search(query, ResultCount, null, PackedAnnIndexTestSupport.Budget(db));
-        var actual = restored.Search(query, ResultCount, null, PackedAnnIndexTestSupport.Budget(db));
+        var expected = index.Search(query, ResultCount, null, PackedAnnIndexTestSupport.Budget());
+        var actual = restored.Search(query, ResultCount, null, PackedAnnIndexTestSupport.Budget());
         await Assert.That(actual.Candidates).IsEquivalentTo(expected.Candidates, CollectionOrdering.Matching);
         await Assert.That(actual.WorkUnits).IsEqualTo(expected.WorkUnits);
         await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
@@ -138,16 +138,16 @@ internal sealed class PackedAnnStorageTests
     {
         var records = PackedAnnTestData.Load(db, DistanceMetric.DotProduct);
         return PackedAnnIndexTestSupport.Build(PackedAnnTestData.Space(DistanceMetric.DotProduct,
-            records.First().Values.Length), records, policy, PackedAnnIndexTestSupport.Budget(db));
+            records.First().Values.Length), records, policy, PackedAnnIndexTestSupport.Budget());
     }
 
     private static FileStream Open(TestDatabase db, string name)
         => new(Path.Combine(db.Directory, name), FileMode.CreateNew, FileAccess.ReadWrite, FileShare.Read);
 
-    private static async Task AssertResultsAsync(TestDatabase db, PackedAnnIndex index, PackedAnnIndex restored)
+    private static async Task AssertResultsAsync(PackedAnnIndex index, PackedAnnIndex restored)
     {
-        var expected = index.Search(Query, ResultCount, null, PackedAnnIndexTestSupport.Budget(db));
-        var actual = restored.Search(Query, ResultCount, null, PackedAnnIndexTestSupport.Budget(db));
+        var expected = index.Search(Query, ResultCount, null, PackedAnnIndexTestSupport.Budget());
+        var actual = restored.Search(Query, ResultCount, null, PackedAnnIndexTestSupport.Budget());
         await Assert.That(actual.Candidates.Select(row => row.DocumentId).ToArray()).IsEquivalentTo(LiteralIds, CollectionOrdering.Matching);
         await Assert.That(actual.Candidates.Select(row => row.Score).ToArray()).IsEquivalentTo(LiteralScores, CollectionOrdering.Matching);
         await Assert.That(actual.Candidates.Select(row => row.DocumentRevision).ToArray()).IsEquivalentTo([1L, 1L, 1L], CollectionOrdering.Matching);

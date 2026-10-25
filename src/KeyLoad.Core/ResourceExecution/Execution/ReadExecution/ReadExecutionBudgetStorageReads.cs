@@ -40,6 +40,15 @@ internal static class ReadExecutionBudgetStorageReads
         return result;
     }
 
+    internal static StorageScanResult VisitAll(ReadExecutionBudget budget, IKeyValueView view, byte[] prefix,
+        StorageRecordVisitor visitor, byte[]? afterKey, byte[]? untilKey)
+    {
+        ArgumentNullException.ThrowIfNull(view);
+        return StorageRangePages.VisitAll(view.MaximumRangeRecords,
+            (maxRecords, pageVisitor, after) => VisitRange(budget, view, prefix, maxRecords, pageVisitor, after, untilKey),
+            visitor, afterKey);
+    }
+
     internal static ScanPage Scan(ReadExecutionBudget budget, IKeyValueView view, byte[] prefix,
         int maxRecords, byte[]? afterKey)
     {

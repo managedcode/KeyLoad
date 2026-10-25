@@ -13,7 +13,6 @@ internal static class EventFeedProviderRegistration
         builder.ConfigureServices(static services => services.AddKeyedSingleton<IGrainStorage>(
             EventFeedPubSubProtocol.ProviderName, static (originalServices, _) =>
                 new EventFeedPubSubStorage(originalServices,
-                    originalServices.GetRequiredService<IOptions<DatabaseLimits>>(),
                     originalServices.GetRequiredService<IOptions<GrainRoutingOptions>>())));
         builder.AddMemoryStreams(EventFeedPubSubProtocol.ProviderName, static provider =>
             provider.ConfigureComponent<IQueueAdapterFactory>(EventFeedAdapterCreation.Create));

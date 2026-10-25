@@ -51,7 +51,7 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
         };
         var officialBoundary = Assert.ThrowsExactly<KeyLoadException>(() =>
             McpArgumentDecoder.HeaderCommand<ConfigureResourceRequest>(arguments, OperationKind.ConfigureResource,
-                database.Database.Limits.MaxBatchBytes));
+                UnitMcpOptions.CanonicalPayloadBytes));
         await Assert.That(officialBoundary.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(officialBoundary.Message).IsEqualTo(InvalidArguments);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);

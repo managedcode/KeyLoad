@@ -50,7 +50,7 @@ internal static class AnnOriginalOperationExecution
             using var memory = originalSession is null ? owner.MaintenanceMemory.Reserve() : null;
             try
             {
-                var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+                var read = originalBudget ?? new ReadExecutionBudget(clock, token);
                 var fresh = database.Store.Read(view => database.Principal(view, principal.Id, clock.GetUtcNow()));
                 if (!fresh.ClusterAdministrator || fresh.Revoked || fresh.PolicyEpoch != principal.PolicyEpoch)
                 {

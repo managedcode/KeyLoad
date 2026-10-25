@@ -23,7 +23,7 @@ internal static class TextIncrementalCrashQuery
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var projection = new TextSelectedProjection(new RuntimeTextProjection(
-                Path.Combine(Path.GetDirectoryName(projectionRoot)!, BootstrapDirectory), options.Core.DatabaseLimits,
+                Path.Combine(Path.GetDirectoryName(projectionRoot)!, BootstrapDirectory),
                 database.Store.Identity.NodeId, options.RuntimeText), owner, owner);
             await ServerFailureObserver.ObserveAsync(async () =>
             {

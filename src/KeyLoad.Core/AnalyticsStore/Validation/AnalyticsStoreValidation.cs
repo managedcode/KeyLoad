@@ -67,14 +67,13 @@ internal static class AnalyticsStoreValidation
         return names.SequenceEqual(names.Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal));
     }
 
-    internal static void Event(AnalyticsEventData value, AnalyticsStoreSchema schema, DatabaseLimits limits)
+    internal static void Event(AnalyticsEventData value, AnalyticsStoreSchema schema)
     {
         if (value is null || value.Dimensions is null || value.Metrics is null || value.Links.IsDefault
             || value.Timestamp.Offset != TimeSpan.Zero || value.Dimensions.Any(item => item.Value is null)
             || value.Metrics.Any(item => !double.IsFinite(item.Value))
             || !value.Dimensions.Keys.Order(StringComparer.Ordinal).SequenceEqual(schema.Dimensions)
-            || !value.Metrics.Keys.Order(StringComparer.Ordinal).SequenceEqual(schema.Metrics)
-            || value.Links.Length > limits.MaxBatchMutations)
+            || !value.Metrics.Keys.Order(StringComparer.Ordinal).SequenceEqual(schema.Metrics))
         {
             throw Errors.Fail(ErrorCode.Validation, Invalid);
         }
@@ -85,10 +84,6 @@ internal static class AnalyticsStoreValidation
         }
 
         JsonData.Identifier(value.Id);
-        if (OrleansSerialization.Measure(value) > limits.MaxDocumentBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, Budget);
-        }
     }
 
     internal static void Range(DateTimeOffset from, DateTimeOffset to)

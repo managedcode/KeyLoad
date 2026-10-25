@@ -102,7 +102,7 @@ internal static class TextOnlineReplacementRollbackFlow
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         var session = Guid.NewGuid();
-        var expiry = runtime.FreshExpiry(fixture);
+        var expiry = TextOnlineTestRuntime.FreshExpiry(fixture);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -120,8 +120,7 @@ internal static class TextOnlineReplacementRollbackFlow
 
     private static byte[] ReadCurrent(TestDatabase fixture, OnlineTextIndexMaintenanceRequest request, CancellationToken token)
     {
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits),
-            fixture.Database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(fixture.Database.EvaluationClock, token);
         return fixture.Store.Read(view =>
         {
             var principal = fixture.Database.Principal(view, TextMaintenanceTestValues.Principal,

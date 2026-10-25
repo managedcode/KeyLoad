@@ -19,7 +19,7 @@ internal static class IssuedPurposeCold
                 var store = stores.Canonical;
                 await WalFileFixture.AssertPreservedIdentity(fixture.Identity, store.Identity);
                 await Assert.That(store.Position).IsEqualTo(expected.Position);
-                var rows = store.Read(view => view.Scan([], fixture.Limits.MaxScanRecords));
+                var rows = store.Read(view => view.Scan([], view.MaximumRangeRecords));
                 await Assert.That(rows.HasMore).IsFalse();
                 var actual = rows.Records.Select(static row => Convert.ToHexString(row.Key.Span) + ":"
                     + Convert.ToHexString(row.Value.Span)).ToArray();

@@ -16,7 +16,7 @@ Fresh typed permissions apply before outcome selection. Successful cached replay
 
 ## Bounds and unsupported forms
 
-Existing validated source/token/depth/parameter, MaxBatchMutations, document, batch, payload and index bounds apply; no bound is increased. Each serialized row is charged before retention, and the original operation token is checked throughout lowering and execution. There is no retained AST, new session dispatcher or new resource setting. INSERT SELECT, DEFAULT VALUES, OUTPUT, identity/default/computed fields, schema-qualified targets, foreign keys and general DML remain explicit unsupported/open families. Existing graph/queue INSERT composition is preserved.
+SQL text, token count, expression depth, row count and document, batch and payload size have no KeyLoad ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)); the INSERT expression walker fails the request with `Validation` when the execution stack runs short, and existing parameter and index validation applies. Each serialized row is charged before retention, and the original operation token is checked throughout lowering and execution. There is no retained AST, new session dispatcher or new resource setting. INSERT SELECT, DEFAULT VALUES, OUTPUT, identity/default/computed fields, schema-qualified targets, foreign keys and general DML remain explicit unsupported/open families. Existing graph/queue INSERT composition is preserved.
 
 ## Complete operation gates
 

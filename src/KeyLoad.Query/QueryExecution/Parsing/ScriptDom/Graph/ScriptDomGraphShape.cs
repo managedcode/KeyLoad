@@ -1,15 +1,14 @@
 using KeyLoad.QueryExecution;
-using Microsoft.Extensions.Options;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.Query.QueryExecution;
 
 internal static class ScriptDomGraphShape
 {
-    internal static IList<Dom.ScalarExpression> Read(string sql, IOptions<DatabaseLimits> limitsOptions,
+    internal static IList<Dom.ScalarExpression> Read(string sql,
         ScriptDomGraphContext context, string function)
     {
-        var statement = ScriptDomSyntax.Parse(sql, limitsOptions, context.Budget.Check, RequireTerminalSemicolon, context.Budget.Cancellation);
+        var statement = ScriptDomSyntax.Parse(sql, context.Budget.Check, RequireTerminalSemicolon, context.Budget.Cancellation);
         context.Check(statement, RootDepth);
         if (statement is not Dom.SelectStatement select || select.QueryExpression is not Dom.QuerySpecification query
             || select.WithCtesAndXmlNamespaces is not null || select.Into is not null || select.On is not null

@@ -30,7 +30,7 @@ internal static class AnnRetiredReaderAssertions
             await Assert.That(OrleansSerialization.Serialize(held.Records[index]).AsSpan()
                 .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
         }
-        var read = new global::KeyLoad.Core.ReadExecutionBudget(database.Database.OperationLimitsOptions,
+        var read = new global::KeyLoad.Core.ReadExecutionBudget(
             database.Database.EvaluationClock, TestContext.Current!.Execution.CancellationToken);
         var actual = held.Search(Query, Count, Eligible, new AnnWorkBudget(read, held.CallerSeedOptions.Value.MaxWorkUnits));
         await Assert.That(actual.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);

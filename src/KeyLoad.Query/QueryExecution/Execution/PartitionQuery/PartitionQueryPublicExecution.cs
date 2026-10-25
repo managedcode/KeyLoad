@@ -15,7 +15,7 @@ internal static class PartitionQueryPublicExecution
         ArgumentException.ThrowIfNullOrWhiteSpace(principalId);
         ValidateOwner(expectedOwner);
         var owner = engine.PartitionQueryOwner;
-        var budget = new ReadExecutionBudget(owner.OperationLimitsOptions, timeProvider ?? owner.EvaluationClock,
+        var budget = new ReadExecutionBudget(timeProvider ?? owner.EvaluationClock,
             cancellationToken);
         if (binding is not null)
         {
@@ -25,7 +25,7 @@ internal static class PartitionQueryPublicExecution
         using var admission = owner.AdmitQuery(cancellationToken);
         budget.Check();
         var result = engine.ExecutePartitionQuery(principalId, request, budget, expectedOwner);
-        return PartitionQueryPublicMapper.MapPublic(result, owner.Limits, budget);
+        return PartitionQueryPublicMapper.MapPublic(result, budget);
     }
 
     private static void ValidateOwner(PhysicalShardRecord? owner)

@@ -10,7 +10,7 @@ internal static class TextOnlineWholeFlow
         Func<Task>? whileSnapshotPinned = null)
     {
         var session = Guid.NewGuid();
-        var expiry = runtime.FreshExpiry(fixture);
+        var expiry = TextOnlineTestRuntime.FreshExpiry(fixture);
         var original = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.ResolveOriginal, expiry, token);
         if (original.OriginalResult is { } replay)
         {

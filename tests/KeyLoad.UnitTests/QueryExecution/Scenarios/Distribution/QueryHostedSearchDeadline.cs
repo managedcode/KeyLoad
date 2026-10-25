@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using KeyLoad.Server;
 
 namespace KeyLoad.UnitTests.QueryExecution;
@@ -40,7 +41,7 @@ internal static class QueryHostedSearchDeadline
             var clock = (QueryObservedWorkClock)read.Coordinator.Clock;
             await Assert.That(clocks.Contains(clock)).IsTrue();
             clock.Arm(() => read.PhysicalReads.All(physical => physical.HasProgress),
-                () => clock.Advance(TimeSpan.FromSeconds(owner.Database.Database.Limits.QueryDeadlineSeconds + PastDeadlineSeconds)));
+                () => clock.Advance(new GrainRoutingOptions().MaximumFuture + TimeSpan.FromSeconds(PastDeadlineSeconds)));
             read.Release.TrySetResult();
             var reply = await operation.WaitAsync(completion.Token).ConfigureAwait(false);
             await read.Disposed.Task.WaitAsync(completion.Token).ConfigureAwait(false);

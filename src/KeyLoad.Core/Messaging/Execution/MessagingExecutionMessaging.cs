@@ -66,7 +66,7 @@ public static class MessagingExecutionMessaging
             engine.Authorization.RequireFieldWrite(principal, resource with { FieldPolicies = resource.HeaderPolicies }, policy.Path);
         }
 
-        var body = new MessageBody(message.MessageId, JsonData.ValidateContent(message.PayloadJson, engine.Limits), JsonData.ValidateContent(message.HeadersJson, engine.Limits), message.OrderingKey, JsonData.Fingerprint(message));
+        var body = new MessageBody(message.MessageId, JsonData.ValidateContent(message.PayloadJson), JsonData.ValidateContent(message.HeadersJson), message.OrderingKey, JsonData.Fingerprint(message));
         PersistEnqueuedMessage(tx, lane, message, resource, body, now);
         return new(QueueSweepTransitions.EnqueueReceiptKind, message.Queue, message.MessageId, MessagingSingleElementCount);
     }
@@ -139,4 +139,12 @@ public static class MessagingExecutionMessaging
         ArgumentNullException.ThrowIfNull(engine);
         return CoreClaims.Verify<T>(engine.Store.Identity.SigningKey.Span, token, maximumCharacters);
     }
+
+    /// <summary>Verifies a server-issued token whose size only its carrying record bounds.</summary>
+    /// <typeparam name = "T">Claim type.</typeparam>
+    /// <param name = "engine">The shared database execution context.</param>
+    /// <param name = "token">Signed token.</param>
+    /// <returns>Verified claims.</returns>
+    internal static T VerifyRetained<T>(this DatabaseEngine engine, string token)
+        => engine.Verify<T>(token, CoreClaims.UnboundedCharacters);
 }

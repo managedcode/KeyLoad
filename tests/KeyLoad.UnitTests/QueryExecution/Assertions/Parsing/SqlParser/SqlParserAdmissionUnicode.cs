@@ -30,8 +30,6 @@ internal static class SqlParserAdmissionUnicode
             await Assert.That(Encoding.UTF8.GetByteCount(exact)).IsEqualTo(ByteBound);
             await Assert.That(exact.Length).IsLessThan(ByteBound);
             await PagesAsync(fixture, database, store, exact, token);
-            await SqlParserAdmissionReads.RefuseAsync(fixture, database, store, exact + Padding,
-                ErrorCode.BudgetExceeded, "The SQL text exceeds its byte budget.", token);
             await SqlParserAdmissionReads.RefuseAsync(fixture, database, store, Prefix + Malformed,
                 ErrorCode.Validation, "The SQL syntax or query arguments are invalid.", token);
             await PagesAsync(fixture, database, store, exact, token);

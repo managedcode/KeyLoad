@@ -11,12 +11,12 @@ internal sealed class GraphIncomingSortCancellationTests
     private const string DeadlineDiagnostic = "The read execution deadline is exceeded.";
     private const string Label = "sort-links";
     private const int IncomingCount = 8;
+    private static readonly TimeSpan CallerLifetime = TimeSpan.FromSeconds(1);
 
     [Test]
     public async Task FullPageSortPreservesCancellationAndDeadlineAndHealthyReadFollows()
     {
-        using var database = GraphCrossPartitionTestSupport.CreateDatabase(
-            new DatabaseLimits { MaxResults = IncomingCount });
+        using var database = GraphCrossPartitionTestSupport.CreateDatabase(new DatabaseLimits());
         var partition = GraphCrossPartitionTestSupport.Partition(TargetPartitionKey);
         var target = GraphCrossPartitionTestSupport.Vertex(partition, TargetId);
         var sources = CreateSources(partition).Select(database.ExpectedReference).ToArray();
@@ -36,7 +36,7 @@ internal sealed class GraphIncomingSortCancellationTests
     {
         using var cancellation = new CancellationTokenSource();
         var clock = new GraphIncomingSortCancellationTimeProvider(cancellation);
-        var budget = CreateBudget(database, clock, cancellation.Token);
+        var budget = CreateBudget(clock, cancellation.Token);
         var builder = CreateBuilder(database, page, target, budget);
         clock.CancelAfterTimestampCalls(2);
 
@@ -50,7 +50,7 @@ internal sealed class GraphIncomingSortCancellationTests
     {
         using var cancellation = new CancellationTokenSource();
         var clock = new GraphIncomingSortCancellationTimeProvider(cancellation);
-        var budget = CreateBudget(database, clock, cancellation.Token);
+        var budget = CreateBudget(clock, cancellation.Token);
         var builder = CreateBuilder(database, page, target, budget);
         clock.ExceedDeadlineAfterTimestampCalls(2);
 
@@ -60,12 +60,12 @@ internal sealed class GraphIncomingSortCancellationTests
         await Assert.That(clock.DeadlineTriggered).IsTrue();
     }
 
-    private static ReadExecutionBudget CreateBudget(TestDatabase database, TimeProvider clock,
-        CancellationToken cancellationToken)
-        => new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
-        {
-            QueryDeadlineSeconds = 1
-        }), clock, cancellationToken);
+    private static ReadExecutionBudget CreateBudget(TimeProvider clock, CancellationToken cancellationToken)
+    {
+        var budget = new ReadExecutionBudget(clock, cancellationToken);
+        budget.ConstrainLifetime(clock.GetUtcNow() + CallerLifetime);
+        return budget;
+    }
 
     private static GraphIncomingEdgesPageBuilder CreateBuilder(TestDatabase database,
         GraphIncomingEdgesPage page, EntityRef target, ReadExecutionBudget budget)
@@ -116,8 +116,7 @@ internal sealed class GraphIncomingSortCancellationTests
         TestDatabase database, ReadExecutionBudget budget, PartitionRef partition)
         => database.Store.Read(view =>
         {
-            var grant = budget.CreateReadGrant(database.Database.Limits.MaxQueryReadBytes,
-                database.Database.Limits.MaxScanRecords);
+            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
             var principal = GraphIncomingReadScope.ReadPrincipal(view, grant,
                 GraphCrossPartitionTestSupport.Root, TimeProvider.System.GetUtcNow());
             var graph = GraphIncomingReadScope.ReadGraphResource(view, grant, partition,

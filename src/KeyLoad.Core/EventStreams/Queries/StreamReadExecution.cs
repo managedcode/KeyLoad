@@ -9,11 +9,11 @@ public static class StreamReadExecution
     internal const string StreamHistoryUnavailable = "The requested event history was retained away.";
     internal const string StreamHeadSpace = "stream-head";
     internal const string EventSpace = "event";
-    internal static void ValidateStreamRead(this DatabaseEngine engine, long afterRevision, int limit)
+    internal static void ValidateStreamRead(long afterRevision, int limit)
     {
         const int LimitFirstCount = 1;
         const int AfterRevisionValidationBoundary = 0;
-        if (limit is < LimitFirstCount || limit > engine.Limits.MaxResults || afterRevision < AfterRevisionValidationBoundary)
+        if (limit is < LimitFirstCount || afterRevision < AfterRevisionValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, StreamReadBudgetInvalid);
         }

@@ -52,7 +52,7 @@ internal static class GraphIncomingPublicRoutes
         }
         else
         {
-            await Assert.That(result.Value).IsNull();
+            await McpCallerAssertions.NoValueAsync(result);
         }
         var text = Encoding.UTF8.GetString(JsonDefaults.Serialize(result.Problem));
         await Assert.That(text.Contains(credential, StringComparison.Ordinal)).IsFalse();

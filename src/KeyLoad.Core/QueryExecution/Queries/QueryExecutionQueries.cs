@@ -99,7 +99,7 @@ public static class QueryExecutionQueries
         ArgumentNullException.ThrowIfNull(budget);
         if (source.Kind == ModelQuerySourceKind.TopicEvents)
         {
-            engine.VisitTopicModelRows(view, partition, resource, source, budget, explain, accept);
+            TopicModelQueryRows.VisitTopicModelRows(view, partition, resource, source, budget, explain, accept);
             return;
         }
 

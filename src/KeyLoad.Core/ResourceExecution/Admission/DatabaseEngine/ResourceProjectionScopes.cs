@@ -32,7 +32,7 @@ public static class ResourceProjectionScopes
 
     internal static void ObserveProjectionResources(this DatabaseEngine engine, IKeyValueView view, ProjectionConsumerRef consumer, ProjectionConsumerDefinition definition)
     {
-        if (definition.Resources.IsDefault || definition.Resources.Length > engine.Limits.MaxBatchMutations)
+        if (definition.Resources.IsDefault)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, CommandAuthorization.MutationCountBudgetMessage);
         }

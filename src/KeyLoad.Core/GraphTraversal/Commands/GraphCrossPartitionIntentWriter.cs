@@ -7,44 +7,38 @@ namespace KeyLoad.Core.GraphTraversal;
 
 internal static class GraphCrossPartitionIntentWriter
 {
-    private const string IntentScanExceeded = "The pending graph delivery intent scan is exhausted.";
-    private const string IntentBytesExceeded = "The pending graph delivery intent byte budget is exhausted.";
     private const string InvalidIntentKey = "A graph delivery intent key is inconsistent.";
 
     internal static void Persist(DatabaseEngine database, IAtomicTransaction transaction,
         PrincipalRecord principal, PartitionRef source, string graph, string edgeId,
-        EdgeRecord? previous, EdgeRecord? next, long nextRevision, DatabaseLimits limits)
+        EdgeRecord? previous, EdgeRecord? next, long nextRevision)
     {
         const int EmptyUpdateCount = 0;
 
-        var desired = ReadPendingTargets(transaction, source, graph, edgeId, limits);
+        var desired = ReadPendingTargets(transaction, source, graph, edgeId);
         AddPriorTarget(desired, source, previous, next, nextRevision);
         AddCurrentTarget(desired, source, next);
         var updates = BuildUpdates(database, transaction, principal, source, graph,
-            desired, next, nextRevision, limits);
+            desired, next, nextRevision);
         if (updates.Count > EmptyUpdateCount)
         {
             GraphCrossPartitionCapacityWriter.Apply(transaction, source,
                 GraphCrossPartitionCapacityDirection.PendingIntents,
-                GraphCrossPartitionKeys.IntentPrefix(source), updates, limits);
+                GraphCrossPartitionKeys.IntentPrefix(source), updates);
         }
     }
 
     private static Dictionary<EntityRef, EdgeRecord> ReadPendingTargets(IAtomicTransaction transaction,
-        PartitionRef source, string graph, string edgeId, DatabaseLimits limits)
+        PartitionRef source, string graph, string edgeId)
     {
-        const int NoEncodedBytes = 0;
-
         var targets = new Dictionary<EntityRef, EdgeRecord>();
         var prefix = GraphCrossPartitionKeys.IntentEdgePrefix(source, graph, edgeId);
-        long encodedBytes = NoEncodedBytes;
-        var scan = transaction.VisitRange(prefix, limits.MaxScanRecords, (key, bytes) =>
+        _ = transaction.VisitAll(prefix, (key, bytes) =>
         {
-            AcceptRowBytes(key, bytes, limits.MaxBatchBytes, ref encodedBytes);
             var intent = GraphCrossPartitionRecords.Decode<GraphCrossPartitionDeliveryIntent>(bytes)
                 ?? throw Errors.Fail(ErrorCode.Corruption, InvalidIntentKey);
             GraphCrossPartitionValidation.ValidateIntent(intent, source, graph, edgeId,
-                intent.Destination, limits);
+                intent.Destination);
             if (!key.SequenceEqual(GraphCrossPartitionKeys.Intent(intent)))
             {
                 throw Errors.Fail(ErrorCode.Corruption, InvalidIntentKey);
@@ -52,22 +46,7 @@ internal static class GraphCrossPartitionIntentWriter
             targets[intent.Destination] = intent.Edge;
             return true;
         });
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, IntentScanExceeded);
-        }
         return targets;
-    }
-
-    private static void AcceptRowBytes(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value,
-        long maximumBytes, ref long encodedBytes)
-    {
-        var rowBytes = checked((long)value.Length + key.Length);
-        if (rowBytes > maximumBytes - encodedBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, IntentBytesExceeded);
-        }
-        encodedBytes = checked(encodedBytes + rowBytes);
     }
 
     private static void AddPriorTarget(Dictionary<EntityRef, EdgeRecord> desired,
@@ -94,7 +73,7 @@ internal static class GraphCrossPartitionIntentWriter
 
     private static List<GraphCrossPartitionRecordWrite> BuildUpdates(DatabaseEngine database,
         IAtomicTransaction transaction, PrincipalRecord principal, PartitionRef source, string graph,
-        Dictionary<EntityRef, EdgeRecord> desired, EdgeRecord? next, long revision, DatabaseLimits limits)
+        Dictionary<EntityRef, EdgeRecord> desired, EdgeRecord? next, long revision)
     {
         var updates = new List<GraphCrossPartitionRecordWrite>(desired.Count);
         foreach (var (target, snapshot) in desired.OrderBy(pair => pair.Key.Partition.TenantId,
@@ -110,14 +89,14 @@ internal static class GraphCrossPartitionIntentWriter
             {
                 Revision = revision
             } : next!;
-            AddUpdate(updates, principal, source, graph, edge, target, deleted, limits);
+            AddUpdate(updates, principal, source, graph, edge, target, deleted);
         }
         return updates;
     }
 
     private static void AddUpdate(List<GraphCrossPartitionRecordWrite> updates,
         PrincipalRecord principal, PartitionRef source, string graph, EdgeRecord edge,
-        EntityRef target, bool deleted, DatabaseLimits limits)
+        EntityRef target, bool deleted)
     {
         const int FirstTargetIndex = 0;
 
@@ -127,7 +106,7 @@ internal static class GraphCrossPartitionIntentWriter
             source, graph, edge.Id, target, edge.Revision, deleted, edge, principal.Id,
             principal.PolicyEpoch, fingerprint);
         var key = GraphCrossPartitionKeys.Intent(intent);
-        var value = GraphCrossPartitionRecords.Encode(intent, limits.MaxBatchBytes);
+        var value = GraphCrossPartitionRecords.Encode(intent);
         var index = updates.FindIndex(write => write.Key.AsSpan().SequenceEqual(key));
         var replacement = new GraphCrossPartitionRecordWrite(key, value);
         if (index < FirstTargetIndex)

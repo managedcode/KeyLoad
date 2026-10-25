@@ -12,8 +12,6 @@ public sealed partial class GrainRequestCodec
     internal IOptions<GrainRoutingOptions> ExecutionOptions => executionOptions;
 
     internal Guid Incarnation { get; }
-    internal IOptions<DatabaseLimits> OperationLimits { get; }
-    internal DatabaseLimits Limits { get; }
     internal TimeProvider RuntimeClock => clock;
 
     internal (GrainRequestCodec Scope, DateTimeOffset Now, TimeSpan Lifetime) LifetimeReadContext
@@ -31,25 +29,20 @@ public sealed partial class GrainRequestCodec
         get; init;
     }
 
-    /// <summary>Creates the envelope issuer for one database incarnation with centrally validated limits.</summary>
+    /// <summary>Creates the envelope issuer for one database incarnation.</summary>
     /// <param name="incarnation">The database incarnation every envelope is scoped to.</param>
-    /// <param name="limits">Central database operation limits.</param>
     /// <param name="clock">The clock that stamps and checks envelope expiry.</param>
     /// <param name="options">Request lifetime and execution bounds.</param>
-    public GrainRequestCodec(Guid incarnation, IOptions<DatabaseLimits> limits, TimeProvider clock,
+    public GrainRequestCodec(Guid incarnation, TimeProvider clock,
         IOptions<GrainRoutingOptions> options)
     {
         if (incarnation == Guid.Empty)
         {
             throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }
-        ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(clock);
         ArgumentNullException.ThrowIfNull(options);
         Incarnation = incarnation;
-        OperationLimits = limits;
-        Limits = limits.Value;
-        Limits.Validate();
         this.clock = clock;
         settings = options.Value;
         executionOptions = options;
@@ -99,8 +92,8 @@ public sealed partial class GrainRequestCodec
     internal void ObserveProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext? context)
         => GrainRequestPhaseObservation.ProducerDisposed(PhaseObserver, identity, context);
 
-    private ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)
-        => GrainPayload.Copy(payload, Limits.MaxBatchBytes);
+    private static ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)
+        => GrainPayload.Copy(payload);
 
     internal GrainRequestEnvelope Issue(GrainRequestEnvelope request)
     {

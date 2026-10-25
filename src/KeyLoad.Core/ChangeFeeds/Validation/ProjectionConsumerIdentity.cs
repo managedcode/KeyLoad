@@ -24,17 +24,10 @@ public static class ProjectionConsumerIdentity
         }
     }
 
-    internal static ImmutableArray<ProjectionConsumerInfo> ProjectionConsumers(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition)
+    internal static ImmutableArray<ProjectionConsumerInfo> ProjectionConsumers(IKeyValueView view, PartitionRef partition)
     {
         const string ProjectionConsumersSpaceText = "projection-consumer";
-        const string ProjectionConsumersDetailText = "The projection consumer limit is inconsistent.";
-        var page = view.Scan(KeySpace.Partition(ProjectionConsumersSpaceText, partition), engine.Limits.MaxProjectionConsumers);
-        if (page.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, ProjectionConsumersDetailText);
-        }
-
-        return page.Records.Select(record => RequireProjectionConsumerRecord(record, partition)).ToImmutableArray();
+        return view.ScanAll(KeySpace.Partition(ProjectionConsumersSpaceText, partition)).Select(record => RequireProjectionConsumerRecord(record, partition)).ToImmutableArray();
     }
 
     internal static ProjectionConsumerInfo RequireProjectionConsumerRecord(KeyValueRecord record, PartitionRef partition)

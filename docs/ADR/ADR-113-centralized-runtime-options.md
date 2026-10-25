@@ -3,6 +3,8 @@
 Status: Accepted (implementation and verification pending)
 Date: 2026-10-06
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 The current runtime contract centralizes operational policy in validated execution
 IOptions<T>, consumed by its execution owner. Immutable protocol identities use
 feature-owned constants or nameof. CodeQuality REQ-CQ-012/013 and AC-CQ-033..035/037/038

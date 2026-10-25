@@ -10,18 +10,17 @@ internal static class SampleChunkWindowMerge
         PartitionRef partition, MergeSampleChunkWindow request, IOptions<TimeSeriesExecutionOptions> options)
     {
         SampleChunkWindowScope.Require(database, tx, principal, partition, request.SeriesSet, request.SeriesId, request.WindowId);
-        var charge = new SampleChunkReadCharge(database.Limits.MaxQueryReadBytes);
         var previous = SampleChunkWindowScope.Load(tx, partition, request.SeriesSet, request.SeriesId,
-            request.WindowId, request.ExpectedRevision, options, charge);
+            request.WindowId, request.ExpectedRevision, options);
         if (previous.State != SampleChunkWindowState.Sealed || previous.CorrectionSequences.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Invalid);
         }
         var manifest = SampleChunkManifestReader.Read(tx, partition, request.SeriesSet, request.SeriesId,
-            previous, options.Value.MaximumChunkWindowRecords, charge, options);
+            previous, options.Value.MaximumChunkWindowRecords, options);
         var records = SampleChunkGenerationReader.Read(tx, partition, request.SeriesSet, request.SeriesId, previous,
-            manifest, options, charge);
-        var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
+            manifest, options);
+        var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId);
         var next = previous with
         {
             Revision = checked(previous.Revision + SampleChunkLifecycleProtocol.First),
@@ -32,10 +31,10 @@ internal static class SampleChunkWindowMerge
             MaintenanceCommandId = Guid.Empty
         };
         SampleChunkGenerationWriter.Write(tx, partition, request.SeriesSet, request.SeriesId, next, records,
-            options, database.Limits.MaxBatchBytes);
+            options);
         SampleChunkRepresentationRetirement.Delete(tx, partition, request.SeriesSet, request.SeriesId, previous, manifest);
         SampleChunkStorage.Write(tx, SampleChunkKeys.Window(partition, request.SeriesSet, request.SeriesId, next.WindowId),
-            next, database.Limits.MaxBatchBytes);
+            next);
         return new(SampleChunkLifecycleProtocol.MergeKind, request.SeriesSet, request.SeriesId, next.Revision);
     }
 }

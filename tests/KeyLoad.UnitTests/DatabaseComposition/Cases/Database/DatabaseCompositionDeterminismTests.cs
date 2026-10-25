@@ -5,6 +5,7 @@ namespace KeyLoad.UnitTests.DatabaseComposition;
 
 internal sealed class DatabaseCompositionDeterminismTests
 {
+    private const int ProbeLifetimeSeconds = 1;
     private const string Collection = "entities";
     private const string Graph = "relations";
     private const string Queue = "actions";
@@ -17,7 +18,6 @@ internal sealed class DatabaseCompositionDeterminismTests
     private const string EdgeSpace = "edge";
     private const string MessageBodySpace = "message-body";
     private const string MessageMetadataSpace = "message-meta";
-    private const int OneSecondDeadline = 1;
     private const long NextSequence = 1;
     private const int EvaluationDelayMinutes = 5;
 
@@ -36,13 +36,14 @@ internal sealed class DatabaseCompositionDeterminismTests
             var work = left.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
             var operation = left.Database.CreateCommand(OperationKind.Batch, commandId, "root", fixedEvaluation,
                 OrleansSerialization.Serialize(request), work);
-            var limits = new DatabaseLimits { QueryDeadlineSeconds = OneSecondDeadline };
+            var limits = new DatabaseLimits();
             var steady = new DivergentClock(DateTimeOffset.UnixEpoch, timestampStep: 0);
             var jumping = new DivergentClock(DateTimeOffset.UnixEpoch.AddYears(50), TimeSpan.TicksPerHour);
             var leftEngine = new DatabaseEngine(left.Store, left.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), steady);
             var rightEngine = new DatabaseEngine(right.Store, right.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), jumping);
 
-            var probe = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), jumping);
+            var probe = new ReadExecutionBudget(jumping);
+            probe.ConstrainLifetime(jumping.GetUtcNow().AddSeconds(ProbeLifetimeSeconds));
             var elapsedFailure = Assert.ThrowsExactly<KeyLoadException>(probe.Check);
             await Assert.That(elapsedFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             var sequence = checked(leftEngine.LastApplied + NextSequence);

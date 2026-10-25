@@ -29,7 +29,7 @@ internal sealed class PackedAnnPreparedValueOracleTests
     {
         using var database = PackedAnnPreparedValueTestSupport.CreateDatabase();
         var records = PackedAnnPreparedValueTestSupport.PersistAndLoad(database, 8, DistanceMetric.Cosine);
-        var packed = PackedAnnPreparedValueTestSupport.Copy(database, records,
+        var packed = PackedAnnPreparedValueTestSupport.Copy(records,
             PackedAnnTestData.Space(DistanceMetric.Cosine, 8));
         var value = PreparedPackedSimilarity.Create(packed, 0, DistanceMetric.Cosine);
 
@@ -46,7 +46,7 @@ internal sealed class PackedAnnPreparedValueOracleTests
             DistanceMetric.Euclidean);
         ImmutableCollectionsMarshal.AsArray(invalidRecords[0].Values)![0] = float.NaN;
         await PackedAnnPreparedValueTestSupport.AssertValidationAsync(() =>
-            PackedAnnPreparedValueTestSupport.Copy(nonFiniteDatabase, invalidRecords,
+            PackedAnnPreparedValueTestSupport.Copy(invalidRecords,
                 PackedAnnTestData.Space(DistanceMetric.Euclidean, 8)));
     }
 
@@ -57,9 +57,9 @@ internal sealed class PackedAnnPreparedValueOracleTests
         using var secondDatabase = PackedAnnPreparedValueTestSupport.CreateDatabase();
         var firstRecords = PackedAnnPreparedValueTestSupport.PersistAndLoad(firstDatabase, 1, DistanceMetric.DotProduct);
         var secondRecords = PackedAnnPreparedValueTestSupport.PersistAndLoad(secondDatabase, 2, DistanceMetric.DotProduct);
-        var firstPacked = PackedAnnPreparedValueTestSupport.Copy(firstDatabase, firstRecords,
+        var firstPacked = PackedAnnPreparedValueTestSupport.Copy(firstRecords,
             PackedAnnTestData.Space(DistanceMetric.DotProduct, 1));
-        var secondPacked = PackedAnnPreparedValueTestSupport.Copy(secondDatabase, secondRecords,
+        var secondPacked = PackedAnnPreparedValueTestSupport.Copy(secondRecords,
             PackedAnnTestData.Space(DistanceMetric.DotProduct, 2));
         var value = PreparedPackedSimilarity.Create(firstPacked, 0, DistanceMetric.DotProduct);
 
@@ -74,7 +74,7 @@ internal sealed class PackedAnnPreparedValueOracleTests
         {
             using var database = PackedAnnPreparedValueTestSupport.CreateDatabase();
             var records = PackedAnnPreparedValueTestSupport.PersistAndLoad(database, dimension, metric);
-            var packed = PackedAnnPreparedValueTestSupport.Copy(database, records,
+            var packed = PackedAnnPreparedValueTestSupport.Copy(records,
                 PackedAnnTestData.Space(metric, dimension));
             _ = PackedAnnPreparedValueTestSupport.RunScoringLoop(packed, metric, 2);
             _ = PackedAnnPreparedValueTestSupport.RunScoringLoop(packed, metric, 2);

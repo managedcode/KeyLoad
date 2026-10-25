@@ -4,7 +4,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
-internal sealed class QueueDeadlineScan(DatabaseEngine database, IKeyValueView view,
+internal sealed class QueueDeadlineScan(IKeyValueView view,
     QueueDeadlineCursor cursor, DuePrefixCursor bounds, DuePageState page)
 {
     private const int IndexedRecordCost = 2;
@@ -14,7 +14,6 @@ internal sealed class QueueDeadlineScan(DatabaseEngine database, IKeyValueView v
     private readonly ImmutableArray<byte> upper = bounds.UpperKey
         ?? throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidCursor);
     private bool atUpper;
-    private long admittedBytes;
 
     internal bool Visit(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
@@ -36,15 +35,10 @@ internal sealed class QueueDeadlineScan(DatabaseEngine database, IKeyValueView v
             return false;
         }
         page.ExamineRecord();
-        if (value.Length > database.Limits.MaxBatchBytes || value.Length > database.Limits.MaxBatchBytes - admittedBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, DueWorkProtocol.RangeBytesExceeded);
-        }
-        admittedBytes = checked(admittedBytes + value.Length);
         last = DueWorkRecordDecoder.CopyKey(key);
         try
         {
-            if (QueueDeadlineRecordDecoder.Read(database, view, key, value, page) is { } hint)
+            if (QueueDeadlineRecordDecoder.Read(view, key, value, page) is { } hint)
             {
                 hints.Enqueue(hint, hint.Mutation.ExpectedDeadline);
             }

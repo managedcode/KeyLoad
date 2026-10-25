@@ -30,46 +30,45 @@ internal static class CompositionPrefixPrepareRefusals
     internal static Task CoarseAuthorizationAsync(CancellationToken token)
         => CompositionPrefixPrepareOwner.RunAsync(new()
         {
-            MaxBatchMutations = D.EffectCap
         }, async owner =>
+    {
+        await CompositionPrefixPrepareSeed.ConfigureAsync(owner);
+        await CompositionPrefixPrepareSeed.VerticesAsync(owner);
+        foreach (var id in new[] { D.First, D.Second })
         {
-            await CompositionPrefixPrepareSeed.ConfigureAsync(owner);
-            await CompositionPrefixPrepareSeed.VerticesAsync(owner);
-            foreach (var id in new[] { D.First, D.Second })
-            {
-                await CompositionPrefixPrepareCommands.CommitAsync(owner,
-                    [new EnqueueMessage(D.Queue, id, CompositionPrefixPrepareScenarios.Link(owner))],
-                    [new(D.Enqueue, D.Queue, id, D.FirstRevision)]);
-            }
-            var principal = new PrincipalRecord(D.Reader, owner.Source.Partition.TenantId, [], []);
-            var configured = owner.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
-                owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
-            await CompositionPrefixPrepareAssertions.EqualAsync(principal, owner.Submit(configured).Get<PrincipalRecord>());
-            var denied = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()], D.Reader);
-            var image = CompositionPrefixPrepareAssertions.ModelImage(owner);
-            var outcome = owner.Submit(denied.Original);
-            await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-            await Assert.That(outcome.Problem?.Detail).IsEqualTo("The principal cannot perform this operation in this scope.");
-            denied = denied with
-            {
-                Error = ErrorCode.PermissionDenied,
-                SafeDetail = "The principal cannot perform this operation in this scope."
-            };
-            owner.Commands.Add(denied);
-            var bounded = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()]);
-            var overflow = owner.Submit(bounded.Original);
-            await Assert.That(Errors.Code(overflow.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
-            await Assert.That(overflow.Problem?.Detail).IsEqualTo(D.SourceOverflow);
-            owner.Commands.Add(bounded with
-            {
-                Error = ErrorCode.BudgetExceeded,
-                SafeDetail = D.SourceOverflow
-            });
-            await Assert.That(CompositionPrefixPrepareAssertions.ModelImage(owner).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
-            await CompositionPrefixPrepareAssertions.ColdAsync(owner, async () =>
-            {
-                await Assert.That(owner.Database.Traverse(D.Root, owner.Source.Partition, D.Graph,
-                    CompositionPrefixPrepareSeed.Fresh(owner, D.From, D.First)).Edges).IsEmpty();
-            });
-        }, token);
+            await CompositionPrefixPrepareCommands.CommitAsync(owner,
+                [new EnqueueMessage(D.Queue, id, CompositionPrefixPrepareScenarios.Link(owner))],
+                [new(D.Enqueue, D.Queue, id, D.FirstRevision)]);
+        }
+        var principal = new PrincipalRecord(D.Reader, owner.Source.Partition.TenantId, [], []);
+        var configured = owner.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
+            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
+        await CompositionPrefixPrepareAssertions.EqualAsync(principal, owner.Submit(configured).Get<PrincipalRecord>());
+        var denied = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()], D.Reader);
+        var image = CompositionPrefixPrepareAssertions.ModelImage(owner);
+        var outcome = owner.Submit(denied.Original);
+        await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(outcome.Problem?.Detail).IsEqualTo("The principal cannot perform this operation in this scope.");
+        denied = denied with
+        {
+            Error = ErrorCode.PermissionDenied,
+            SafeDetail = "The principal cannot perform this operation in this scope."
+        };
+        owner.Commands.Add(denied);
+        var bounded = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()]);
+        var overflow = owner.Submit(bounded.Original);
+        await Assert.That(Errors.Code(overflow.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(overflow.Problem?.Detail).IsEqualTo(D.SourceOverflow);
+        owner.Commands.Add(bounded with
+        {
+            Error = ErrorCode.BudgetExceeded,
+            SafeDetail = D.SourceOverflow
+        });
+        await Assert.That(CompositionPrefixPrepareAssertions.ModelImage(owner).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
+        await CompositionPrefixPrepareAssertions.ColdAsync(owner, async () =>
+        {
+            await Assert.That(owner.Database.Traverse(D.Root, owner.Source.Partition, D.Graph,
+                CompositionPrefixPrepareSeed.Fresh(owner, D.From, D.First)).Edges).IsEmpty();
+        });
+    }, token);
 }

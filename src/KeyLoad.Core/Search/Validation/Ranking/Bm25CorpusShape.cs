@@ -16,7 +16,7 @@ internal static class Bm25CorpusShape
     private const char LowestHexLetter = 'a';
     private const char HighestHexLetter = 'f';
 
-    internal static void Require(Bm25CorpusCurrent current, DatabaseLimits limits)
+    internal static void Require(Bm25CorpusCurrent current)
     {
         if (current is null || current.Partition is null || current.SourceOwner is null
             || current.Statistics is null || current.FormatVersion != Bm25CorpusProtocol.Format
@@ -37,8 +37,8 @@ internal static class Bm25CorpusShape
         var statistics = current.Statistics;
         if (statistics.Terms.IsDefault || statistics.DocumentFrequencies.IsDefault
             || statistics.Terms.Length != statistics.DocumentFrequencies.Length
-            || statistics.DocumentCount < MinimumDocumentCount || statistics.DocumentCount > limits.MaxScanRecords
-            || statistics.TotalLength < MinimumCorpusLength || statistics.Terms.Length > limits.MaxScanRecords)
+            || statistics.DocumentCount < MinimumDocumentCount
+            || statistics.TotalLength < MinimumCorpusLength)
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
         }
@@ -59,7 +59,7 @@ internal static class Bm25CorpusShape
         }
     }
 
-    internal static void RequirePhase(Bm25CorpusPublicationPhaseCommand phase, DatabaseLimits limits)
+    internal static void RequirePhase(Bm25CorpusPublicationPhaseCommand phase)
     {
         if (phase is null || phase.Current is null || phase.CommandId == Guid.Empty
             || phase.CommandId != phase.Current.Generation || phase.SourcePlacement is null
@@ -70,23 +70,18 @@ internal static class Bm25CorpusShape
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
         }
-        Require(phase.Current, limits);
-        if (phase.Current.PayloadDigest != Bm25CorpusDigest.Compute(phase.Current, phase.SourcePlacement,
-            limits.MaxBatchBytes))
+        Require(phase.Current);
+        if (phase.Current.PayloadDigest != Bm25CorpusDigest.Compute(phase.Current, phase.SourcePlacement))
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
         }
     }
 
     internal static Bm25CorpusCurrent RequireRecord(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value,
-        PartitionRef partition, DatabaseLimits limits)
+        PartitionRef partition)
     {
-        if (checked((long)key.Length + value.Length) > limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Capacity);
-        }
         var current = OrleansSerialization.Deserialize<Bm25CorpusCurrent>(value);
-        Require(current, limits);
+        Require(current);
         if (current.Partition != partition || !key.SequenceEqual(Bm25CorpusKeys.Current(current)))
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);

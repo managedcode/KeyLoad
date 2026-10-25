@@ -3,6 +3,8 @@
 Status: Accepted; implementation and qualification pending.
 Date: 2026-10-05. Scope: prerequisite for distributed query fan-out only.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 The cancellation-observation amendment implements
 AC-DQUERY-PREREQ-005 with an already-armed, owned observation thread and
 the unchanged synchronous real ZoneTree query. Exact case/helper ownership,

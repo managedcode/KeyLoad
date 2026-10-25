@@ -1,4 +1,3 @@
-using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.UnitTests.Messaging;
@@ -10,37 +9,6 @@ internal sealed class SourceReadBudgetTests
     private const string ReaderId = "source-reader";
     private const string EventType = "Created";
     private const string CursorPurpose = "event-source-page";
-    private const string TopicHeadSpace = "topic-head";
-    private const string TopicEventSpace = "topic-event";
-    private const string FailureDirectoryPrefix = "keyload-source-read-failure-";
-    private const string GuidFormat = "N";
-
-    [Test]
-    public async Task AcMp005ExactRawReadBudgetSucceedsAndOneByteShortBudgetFails()
-    {
-        using var database = CreateTopicDatabase();
-        var requiredBytes = TopicReadBytes(database);
-        var exact = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryReadBytes = requiredBytes
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var shortBudget = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryReadBytes = requiredBytes - 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var source = new EventSourceRef(database.Partition, TopicName, EventSourceKind.Topic);
-
-        var before = database.Store.GetReadDiagnostics();
-        var exactPage = exact.ReadEventSource(ReaderId, new(source));
-        var after = database.Store.GetReadDiagnostics();
-        await Assert.That(exactPage.Events).HasSingleItem();
-        await Assert.That(after.PointExaminedBytes - before.PointExaminedBytes).IsEqualTo(requiredBytes);
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => shortBudget.ReadEventSource(ReaderId, new(source)));
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(exact.ReadEventSource(ReaderId, new(source)).Events).HasSingleItem();
-    }
 
     [Test]
     public async Task AcMp005PreCancelledReadAndTamperedCursorDoNotPoisonLaterReads()
@@ -59,7 +27,7 @@ internal sealed class SourceReadBudgetTests
     }
 
     [Test]
-    public async Task AcMp005CursorScopeExpiryAndEmptyEnvelopeLimitsAreValidated()
+    public async Task AcMp005CursorScopeAndExpiryAreValidated()
     {
         using var database = CreateTopicDatabase();
         ConfigureTopic(database, OtherTopicName);
@@ -84,45 +52,6 @@ internal sealed class SourceReadBudgetTests
         var expiredError = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ReadEventSource("root",
             new(source, Cursor: expired)));
         await Assert.That(expiredError.Code).IsEqualTo(ErrorCode.CursorExpired);
-
-        using var empty = new TestDatabase();
-        ConfigureTopic(empty, TopicName);
-        var limited = new DatabaseEngine(empty.Store, empty.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var envelopeError = Assert.ThrowsExactly<KeyLoadException>(() => limited.ReadEventSource("root",
-            new(new(empty.Partition, TopicName, EventSourceKind.Topic))));
-        await Assert.That(envelopeError.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
-    public async Task AcMp005TopicFactoryFailureReleasesOwnedDirectoryAndAllowsSamePathReopen()
-    {
-        var directory = NewFailureDirectory();
-        try
-        {
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            {
-                using var unexpected = CreateTopicDatabase(
-                    new()
-                    {
-                        MaxBatchBytes = 1
-                    }, directory);
-            });
-            await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(Directory.Exists(directory)).IsFalse();
-
-            using var reopened = new TestDatabase(directory: directory);
-            await Assert.That(Directory.Exists(directory)).IsTrue();
-        }
-        finally
-        {
-            if (Directory.Exists(directory))
-            {
-                Directory.Delete(directory, true);
-            }
-        }
     }
 
     private static TestDatabase CreateTopicDatabase(DatabaseLimits? limits = null, string? directory = null)
@@ -143,39 +72,6 @@ internal sealed class SourceReadBudgetTests
             database.Dispose();
             throw;
         }
-    }
-
-    private static string NewFailureDirectory()
-    {
-        string directory;
-        do
-        {
-            directory = Path.Combine(AppContext.BaseDirectory, FailureDirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-        }
-        while (Directory.Exists(directory) || File.Exists(directory));
-
-        return directory;
-    }
-
-    private static long TopicReadBytes(TestDatabase database)
-    {
-        var keys = new[]
-        {
-            KeySpace.Principal(ReaderId),
-            KeySpace.Resource(database.Partition.TenantId, database.Partition.DatabaseId, TopicName),
-            ResourceLifetimeCatalog.Key(database.Partition.TenantId, database.Partition.DatabaseId, TopicName),
-            KeySpace.Partition(TopicHeadSpace, database.Partition, TopicName),
-            KeySpace.Partition(TopicEventSpace, database.Partition, TopicName, 1L, 1L)
-        };
-        return database.Store.Read(view =>
-        {
-            var bytes = 0L;
-            foreach (var key in keys)
-            {
-                view.ReadValue(key, static _ => { }, count => bytes += count);
-            }
-            return bytes;
-        });
     }
 
     private static void ConfigureTopic(TestDatabase database, string name)

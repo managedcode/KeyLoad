@@ -10,7 +10,7 @@ internal static class QuerySelectionNormalization
     private const string QueryProjectionHasDuplicateAliasesOrAnInvalidStarDetail = "The query projection has duplicate aliases or an invalid star.";
     private const string QueryOrderingEntryIsMissingDetail = "A query ordering entry is missing.";
 
-    internal static ImmutableArray<Selection> Projection(ImmutableArray<Selection> input, int maximumDepth)
+    internal static ImmutableArray<Selection> Projection(ImmutableArray<Selection> input)
     {
         var projection = input.Select(selection =>
         {
@@ -18,7 +18,7 @@ internal static class QuerySelectionNormalization
             {
                 throw Errors.Fail(ErrorCode.Validation, QueryProjectionEntryIsMissingDetail);
             }
-            QueryValidation.Path(selection.Path, maximumDepth, true);
+            QueryValidation.Path(selection.Path, true);
             JsonData.Identifier(selection.Alias);
             if (selection.SourceAlias is not null)
             {
@@ -36,14 +36,14 @@ internal static class QuerySelectionNormalization
         return projection;
     }
 
-    internal static ImmutableArray<Ordering> Order(ImmutableArray<Ordering> input, int maximumDepth)
+    internal static ImmutableArray<Ordering> Order(ImmutableArray<Ordering> input)
         => input.Select(item =>
         {
             if (item is null)
             {
                 throw Errors.Fail(ErrorCode.Validation, QueryOrderingEntryIsMissingDetail);
             }
-            QueryValidation.Path(item.Path, maximumDepth);
+            QueryValidation.Path(item.Path);
             return item with
             {
             };

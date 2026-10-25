@@ -98,7 +98,7 @@ internal static class EventEntityRefJoinBinding
             }
             throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
         }
-        budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition, [streamSet, target]);
+        budget.CaptureResourceLifetimes(budget.CreateView(view), request.Partition, [streamSet, target]);
         return target;
     }
 

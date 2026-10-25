@@ -1,14 +1,12 @@
 using System.Runtime.ExceptionServices;
 using global::Orleans.Streams;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class EventFeedAdvisoryPublisher(IOptions<DatabaseLimits> databaseOptions)
+internal static class EventFeedAdvisoryPublisher
 {
-    private const string InvalidContext = "The execution event feed advisory context exceeds its bound.";
 
-    internal async Task PublishAsync(IAsyncObserver<EventFeedWakeupHint> actualProducer,
+    internal static async Task PublishAsync(IAsyncObserver<EventFeedWakeupHint> actualProducer,
         EventFeedWakeupHint actualHint, CancellationToken originalCancellationToken)
     {
         ArgumentNullException.ThrowIfNull(actualProducer);
@@ -44,17 +42,11 @@ internal sealed class EventFeedAdvisoryPublisher(IOptions<DatabaseLimits> databa
         originalCancellationToken.ThrowIfCancellationRequested();
     }
 
-    private List<KeyValuePair<string, object>> CaptureContext()
+    private static List<KeyValuePair<string, object>> CaptureContext()
     {
-        var limits = databaseOptions.Value;
-        limits.Validate();
         var original = new List<KeyValuePair<string, object>>();
         foreach (var entry in RequestContext.Entries)
         {
-            if (original.Count >= limits.MaxResults)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, InvalidContext);
-            }
             // Borrow the already-owned caller context; never encode or enqueue its identity/data.
             original.Add(new(entry.Key, entry.Value));
         }

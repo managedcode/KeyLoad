@@ -27,7 +27,7 @@ internal static class TextOnlinePagePreparation
         }
         var filtered = FilterCoveredSeed(page, manifest.ThroughSequence, budget);
         var plan = TextIncrementalPagePlanner.Plan(filtered, manifest.Records, manifest.NextRecord,
-            session.Request.Collection, session.Request.Field, database.Limits.MaxScanRecords,
+            session.Request.Collection, session.Request.Field,
             budget, options.Core.QueryExecution.Value);
         var through = Math.Max(manifest.ThroughSequence, page.ThroughSequence);
         var bootstrap = page.ThroughSequence < original.UpperSequence;
@@ -44,8 +44,7 @@ internal static class TextOnlinePagePreparation
             session.Request.Placement, checkpoint, page.ThroughSequence, command, plan.Changes, plan.Records,
             plan.NextRecord, bootstrap, original.ResourceSha256, fresh.UpperSequence, fresh.AppliedPosition);
         TextIncrementalIntentValidation.Require(intent, manifest.Scope, session.Request.Consumer,
-            session.Request.ConsumerGeneration, session.Request.Placement, database.Limits.MaxScanRecords,
-            database.Limits.MaxScanRecords, budget);
+            session.Request.ConsumerGeneration, session.Request.Placement, budget);
         TextIncrementalMetadata.PersistIntent(RequireOwner(session).Path, intent,
             options.RuntimeText.Value.MaximumDiskBytes, budget, options.RuntimeText, resources);
         session.Intent = intent;

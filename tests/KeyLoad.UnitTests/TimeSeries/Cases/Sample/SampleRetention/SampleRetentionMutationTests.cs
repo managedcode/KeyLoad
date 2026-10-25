@@ -100,13 +100,6 @@ internal sealed class SampleRetentionMutationTests
         await Assert.That(zero.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(overLimit.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(statusAfter).IsEqualTo(statusBefore);
-
-        using var limited = new TestDatabase(new DatabaseLimits { MaxScanRecords = 32 });
-        SampleAggregateTestData.Configure(limited);
-        var limitedNow = TimeProvider.System.GetUtcNow();
-        var constrained = Failure(limited, new(SampleAggregateTestData.Set, SampleAggregateTestData.Series,
-            SampleAggregateTestData.Start, 33), limitedNow, ErrorCode.BudgetExceeded);
-        await Assert.That(constrained.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     private static SampleRetentionStatus Status(TestDatabase db)

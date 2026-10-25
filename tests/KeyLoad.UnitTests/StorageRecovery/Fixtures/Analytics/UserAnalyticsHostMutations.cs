@@ -23,7 +23,7 @@ internal static class UserAnalyticsHostMutations
     internal static async Task<(Command<DatabaseCommand> Original, CommitReceipt Receipt)> ApplyAsync(PartitionHost host,
         Mutation mutation, string kind, string id, long generation)
     {
-        var work = new ReadExecutionBudget(host.Database.OperationLimitsOptions, host.Database.EvaluationClock,
+        var work = new ReadExecutionBudget(host.Database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
         var command = new CommandRequest(Guid.NewGuid(), P.Partition, [mutation]);
         var operation = host.Database.CreateCommand(OperationKind.Batch, command.CommandId,

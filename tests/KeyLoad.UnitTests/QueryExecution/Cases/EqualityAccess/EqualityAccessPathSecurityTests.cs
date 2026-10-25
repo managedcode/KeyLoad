@@ -7,12 +7,11 @@ internal sealed class EqualityAccessPathSecurityTests
     private const string SensitiveLabel = "pii";
     private const string Owner = "alice";
     private const string OtherOwner = "bob";
-    private const int MinimumReadBudgetBytes = 8_192;
 
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task AcAisql008ProtectedReversedEqualityIsDeniedBeforeTheIndexReadBudget(bool parameterized)
+    public async Task AcAisql008ProtectedReversedEqualityIsDeniedBeforeTheIndexRead(bool parameterized)
     {
         using var db = new TestDatabase();
         db.Configure(EqualityAccessPathSupport.Collection, ResourceKind.Collection,
@@ -22,9 +21,7 @@ internal sealed class EqualityAccessPathSecurityTests
         var payload = "{\"status\":\"open\",\"payload\":\"" + new string('x', 512) + "\"}";
         db.Commit([.. Enumerable.Range(0, 64).Select(index => (Mutation)new PutDocument(
             EqualityAccessPathSupport.Collection, "budget-" + index, payload))]);
-        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits with { MaxQueryReadBytes = MinimumReadBudgetBytes });
-        var admitted = EqualityAccessPathSupport.Request(db, indexed: true, parameterized, reversed: false);
-        await Assert.That(EqualityAccessPathSupport.Failure(engine, admitted).Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits);
         await Assert.That(engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE id = 'absent'")).Rows).IsEmpty();
         foreach (var reversed in new[] { false, true })
         {
@@ -72,7 +69,7 @@ internal sealed class EqualityAccessPathSecurityTests
     public async Task AcAisql008MissingReversedParameterIsRejectedBeforeCandidateSelection(bool indexed)
     {
         using var db = EqualityAccessPathSupport.Create();
-        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits with { MaxQueryReadBytes = MinimumReadBudgetBytes });
+        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits);
         foreach (var reversed in new[] { false, true })
         {
             var request = EqualityAccessPathSupport.Request(db, indexed, parameterized: true, reversed) with

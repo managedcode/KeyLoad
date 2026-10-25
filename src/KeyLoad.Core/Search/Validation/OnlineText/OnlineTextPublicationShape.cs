@@ -14,14 +14,14 @@ internal static class OnlineTextPublicationShape
     private const char MinimumHexLetter = 'a';
     private const char MaximumHexLetter = 'f';
 
-    internal static void Require(OnlineTextPublicationPhaseCommand command, int maximumRecords)
+    internal static void Require(OnlineTextPublicationPhaseCommand command)
     {
         var request = command.Request;
         var result = command.Result;
         if (command.SessionId == Guid.Empty || command.GenerationId == Guid.Empty || request.CommandId == Guid.Empty
             || result.CommandId != request.CommandId || result.Consumer != request.Consumer
             || result.ConsumerGeneration != request.ConsumerGeneration || request.ConsumerGeneration <= EmptyConsumerGeneration
-            || result.TrackedRecords < EmptyTrackedRecords || result.TrackedRecords > maximumRecords
+            || result.TrackedRecords < EmptyTrackedRecords
             || command.Leaf != GenerationPrefix + command.GenerationId.ToString(GuidFormat)
             || !IsCanonicalSha(command.ManifestSha256) || !IsCanonicalSha(result.IndexSha256)
             || request.NodeId == Guid.Empty || result.BaseCut.NodeId != request.NodeId

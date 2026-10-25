@@ -25,7 +25,7 @@ public static class RemoteTransferRepairCurrent
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferRepairProtocol.Stale);
         }
 
-        var fresh = engine.Verify<RemoteTransferRepairClaims>(current.RepairWitness, engine.Limits.MaxBatchBytes);
+        var fresh = engine.VerifyRetained<RemoteTransferRepairClaims>(current.RepairWitness);
         if (fresh.OutcomeDigest != witness.OutcomeDigest || fresh.CommandFingerprint != witness.CommandFingerprint || fresh.OriginalPolicyEpoch != witness.OriginalPolicyEpoch || fresh.CurrentPolicyEpoch != witness.CurrentPolicyEpoch || fresh.CurrentFieldHeaderDigest != witness.CurrentFieldHeaderDigest || fresh.ReceiptDigest != witness.ReceiptDigest)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferRepairProtocol.Stale);

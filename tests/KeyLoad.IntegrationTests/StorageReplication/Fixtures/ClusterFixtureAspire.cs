@@ -24,25 +24,23 @@ internal sealed partial class ClusterFixture
 
     protected override void ConfigureBuilder(IDistributedApplicationTestingBuilder builder)
     {
-        ClusterFixtureComposition.ConfigureTestOverrides(builder, maximumBodyBytes, databaseLimits, queryExecution);
+        ClusterFixtureComposition.ConfigureTestOverrides(builder, maximumBodyBytes, queryExecution);
         queueDeadline?.Configure(builder);
         runtimeSql.Configure(builder, Root);
         RemoteTransferCoordinatorFixtureConfiguration.Configure(builder, transferCoordinator);
         resourceNames = ClusterFixtureComposition.GetResourceNames(builder);
         ClusterFixtureComposition.ConfigureLogging(builder);
-        builder.Eventing.Subscribe<BeforeStartEvent>((_, _) =>
-        {
-            App = base.App;
-            AdminKey = Identity.AdminKey;
-            processRuntime = new(App, resourceNames, ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
-            diagnostics = new(App);
-            diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
-            return Task.CompletedTask;
-        });
     }
 
+    // The testing factory runs the AppHost entry point, including its before-start hooks, concurrently with the build
+    // returning, so the fixture's application is taken here, where it is passed in, and not from a before-start hook.
     protected override async Task WaitForResourcesAsync(DistributedApplication app, CancellationToken cancellationToken)
     {
+        App = app;
+        AdminKey = Identity.AdminKey;
+        processRuntime = new(App, resourceNames, ClusterFixtureDiagnostics.FindRepositoryRoot().FullName);
+        diagnostics = new(App);
+        diagnostics.Start(App.Services.GetRequiredService<ResourceLoggerService>());
         processEvidenceDirectory = await ClusterFixtureApplicationStartup.ObserveStartedAsync(app, resourceNames,
             cancellationToken).ConfigureAwait(false);
     }

@@ -5,7 +5,7 @@ namespace KeyLoad.Core;
 /// <summary>Executes SubscriptionWindowFill operations against the caller's database context.</summary>
 public static class SubscriptionWindowFill
 {
-    internal static GroupState FillSubscriptionWindow(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request, DateTimeOffset now, GroupState state, SubscriptionPolicy policy, ResourceDefinition resource, EventSourceHead head, PrincipalRecord dataPrincipal, List<SubscriptionDelivery> result, SubscriptionWindowAuthorityReadBudget budget)
+    internal static GroupState FillSubscriptionWindow(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request, DateTimeOffset now, GroupState state, SubscriptionPolicy policy, ResourceDefinition resource, EventSourceHead head, PrincipalRecord dataPrincipal, List<SubscriptionDelivery> result)
     {
         var subscription = request.Subscription;
         long bytes = SubscriptionGroups.SubscriptionGroupsNoRetainedBytes;
@@ -13,7 +13,7 @@ public static class SubscriptionWindowFill
         for (var sequence = state.Checkpoint + SubscriptionGroups.SubscriptionGroupsAdjacentElementOffset; sequence <= windowEnd && result.Count < request.MaxEvents; sequence++)
         {
             var key = MessagingSerialization.GroupKey(SubscriptionGroups.SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, sequence);
-            var delivery = SubscriptionDeliveryAuthority.ReadSubscriptionWindowDelivery(tx, key, budget);
+            var delivery = SubscriptionDeliveryAuthority.ReadSubscriptionWindowDelivery(tx, key);
             SubscriptionDeliveryAuthority.RequireSubscriptionWindowReference(delivery, state, sequence);
             delivery ??= new(sequence, GroupDeliveryState.Pending, SubscriptionGroups.SubscriptionGroupsEmptyElementCount, SubscriptionGroups.SubscriptionGroupsInitialSequence);
             if (delivery.State is GroupDeliveryState.Acked or GroupDeliveryState.Filtered or GroupDeliveryState.Parked || delivery.State == GroupDeliveryState.Leased && delivery.LeaseUntil > now || delivery.AvailableAt > now)
@@ -21,7 +21,7 @@ public static class SubscriptionWindowFill
                 continue;
             }
 
-            var record = SourceEventReader.Read(tx, subscription.Source, sequence, budget.Observe);
+            var record = SourceEventReader.Read(tx, subscription.Source, sequence);
             if (state.Definition.EventTypes.Length != SubscriptionGroups.SubscriptionGroupsEmptyElementCount && !state.Definition.EventTypes.Contains(record.Data.EventType, StringComparer.Ordinal))
             {
                 tx.PutRecord(key, delivery with { State = GroupDeliveryState.Filtered });

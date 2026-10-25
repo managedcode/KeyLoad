@@ -11,7 +11,6 @@ namespace KeyLoad.Clustering;
 internal sealed class RuntimeJournalClient(
     IGrainFactory grains,
     Func<GrainRequestCodec> codecFactory,
-    IOptions<DatabaseLimits> databaseLimits,
     IServiceProvider services,
     TimeProvider clock,
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
@@ -76,7 +75,7 @@ internal sealed class RuntimeJournalClient(
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
-        var codec = await PrepareAsync(payload, token);
+        var codec = await PrepareAsync(token);
         var requestId = Guid.NewGuid();
         var issued = codec.CreateRuntimeJournalRead(requestId, kind, payload);
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
@@ -96,7 +95,7 @@ internal sealed class RuntimeJournalClient(
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
         var token = deadline.Token;
-        var codec = await PrepareAsync(payload, token);
+        var codec = await PrepareAsync(token);
         var requestId = Guid.NewGuid();
         var issued = codec.CreateRuntimeJournalCommand(requestId, RuntimeJournalIdentity.ProtectedPrincipalId, commandId, payload);
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
@@ -118,11 +117,10 @@ internal sealed class RuntimeJournalClient(
         return result;
     }
 
-    private async Task<GrainRequestCodec> PrepareAsync(ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+    private async Task<GrainRequestCodec> PrepareAsync(CancellationToken cancellationToken)
     {
         await admission.WaitAsync(cancellationToken);
         cancellationToken.ThrowIfCancellationRequested();
-        ValidateDatabaseLimits(databaseLimits.Value, payload);
         return codecFactory();
     }
 
@@ -140,15 +138,6 @@ internal sealed class RuntimeJournalClient(
         }
 
         return value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
-    }
-
-    private static void ValidateDatabaseLimits(DatabaseLimits limits, ReadOnlyMemory<byte> payload)
-    {
-        // The envelope has its own additive allowance. Bound the complete execution DTO here.
-        if (payload.Length > limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
-        }
     }
 
     private static IOptions<RuntimeJournalOptions> ValidateOptions(IOptions<RuntimeJournalOptions> configuredOptions)

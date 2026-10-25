@@ -21,7 +21,7 @@ public static class ResourceExecutionQueriesResolveSubmissionOutcome
         {
             var view = work.CreateView(raw);
             var result = engine.ReadValidatedSubmissionOutcome(view, normalized);
-            engine.ObserveConfiguredResourceOutcome(view, normalized, result, work);
+            ConfiguredResourceOutcome.ObserveConfiguredResourceOutcome(view, normalized, result, work);
             work.CheckResult(result.Value ?? result);
             work.Check();
             return result;

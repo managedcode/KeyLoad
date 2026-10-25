@@ -9,7 +9,7 @@ namespace KeyLoad.Core;
 public static class ConfiguredResourceOutcome
 {
     internal const string ConfiguredOutcomeLifetimeChanged = "The configured resource belongs to a different lifetime.";
-    internal static void ObserveConfiguredResourceOutcome(this DatabaseEngine engine, IKeyValueView view, Command<DatabaseCommand> operation, Result<object> result, ReadExecutionBudget work)
+    internal static void ObserveConfiguredResourceOutcome(IKeyValueView view, Command<DatabaseCommand> operation, Result<object> result, ReadExecutionBudget work)
     {
         if (operation.Value!.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable) || Errors.Code(result.Problem) is not null)
         {
@@ -32,7 +32,7 @@ public static class ConfiguredResourceOutcome
 
         var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(tenantId, databaseId, resourceName));
         var lifetime = ResourceLifetimeCatalog.Read(view, tenantId, databaseId, resourceName, definition) ?? throw Errors.Fail(ErrorCode.NotFound, EngineResourceAccess.DatabaseEngineResourceIsNotConfiguredDetail);
-        var admitted = ResourceEffectAdmissionValidation.Read(operation, engine.Limits);
+        var admitted = ResourceEffectAdmissionValidation.Read(operation);
         var sameLifetime = admitted.Bindings.IsEmpty ? lifetime.CreationFingerprint == DatabaseCommandFingerprint.Compute(operation) : admitted.Bindings.Contains(lifetime);
         if (!sameLifetime)
         {

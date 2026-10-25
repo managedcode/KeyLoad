@@ -5,6 +5,8 @@ and Docker cluster qualification pending.
 Related: REQ-ZT-003, REQ-FTS-001..006 / AC-FTS-001..006 in
 [FullTextProjection](../Features/Search/FullTextProjection.md).
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 ## provider and authority
 
 Pin the published MIT ZoneTree.FullTextSearch package; its exact version, like

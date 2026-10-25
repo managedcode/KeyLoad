@@ -68,7 +68,7 @@ internal static class DueDiscoveryDeadlineFlow
 
     private static string[] Image(RecurringSagaDatabase fixture) => fixture.Store.Read(view =>
     {
-        var page = view.Scan([], fixture.Database.Limits.MaxResults);
+        var page = view.Scan([], view.MaximumRangeRecords);
         if (page.HasMore)
         {
             throw new InvalidOperationException(IncompleteImage);

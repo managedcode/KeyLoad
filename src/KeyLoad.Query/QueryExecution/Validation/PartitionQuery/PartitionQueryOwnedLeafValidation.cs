@@ -11,7 +11,7 @@ internal static class PartitionQueryOwnedLeafValidation
     private const string InvalidDetail = "The partition query plan is invalid.";
     private const string BudgetDetail = "The partition query plan exceeds its resource budget.";
 
-    internal static void Validate(PartitionQueryOwnedLeafRequest request, DatabaseLimits limits,
+    internal static void Validate(PartitionQueryOwnedLeafRequest request,
         QueryExecutionOptions execution)
     {
         var leaf = request.Plan;
@@ -25,12 +25,12 @@ internal static class PartitionQueryOwnedLeafValidation
         }
         EngineResourceAccess.ValidatePartition(leaf.Partition);
         JsonData.Identifier(request.Tenant);
-        if (leaf.MaxCandidates < MinimumCount || leaf.MaxCandidates > limits.MaxResults
-            || leaf.MaxExaminedRecords < EmptyRecords || leaf.MaxExaminedRecords > limits.MaxScanRecords
-            || leaf.MaxReadBytes < EmptyBytes || leaf.MaxReadBytes > limits.MaxQueryReadBytes
+        if (leaf.MaxCandidates < MinimumCount
+            || leaf.MaxExaminedRecords < EmptyRecords
+            || leaf.MaxReadBytes < EmptyBytes
             || leaf.MaxRetainedBytes < checked(PartitionQueryRetention.LeafHeapReserve(leaf.MaxCandidates)
                 + PartitionQueryRetention.CandidateArrayBytes(leaf.MaxCandidates))
-            || leaf.MaxRetainedBytes > QueryResultBudgetPolicy.Resolve(limits, execution))
+            || leaf.MaxRetainedBytes > QueryResultBudgetPolicy.Resolve(execution))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, BudgetDetail);
         }

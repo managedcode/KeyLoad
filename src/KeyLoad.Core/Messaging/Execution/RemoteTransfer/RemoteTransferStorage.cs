@@ -1,6 +1,5 @@
 using System.Text;
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 
 namespace KeyLoad.Core.Messaging;
 
@@ -11,12 +10,8 @@ internal static class RemoteTransferStorage
     private const int NoRetainedRecords = 0;
     private const int CapacityWitnessRecords = 1;
     private const int AdjacentElementOffset = 1;
-    private const string RetainedQueueTransferCapacityIsExhaustedDetail = "The retained queue transfer capacity is exhausted.";
 
     private const string CorruptCapacityMessage = "Persisted queue transfer capacity is inconsistent.";
-
-    internal static bool IsCapacityFailure(Result<object> result)
-        => Errors.Code(result.Problem) == ErrorCode.ResourceExhausted && result.Problem?.Detail == RetainedQueueTransferCapacityIsExhaustedDetail;
 
     internal static byte[] IntentKey(QueueLaneRef source, Guid transferId)
         => KeySpace.Partition(RemoteTransferProtocol.IntentSpace, source.Partition, source.Queue,
@@ -64,29 +59,22 @@ internal static class RemoteTransferStorage
     internal static RemoteTransferCapacity Add(RemoteTransferCapacity current, long bytes)
         => new(checked(current.StoredRecords + AdjacentElementOffset), checked(current.StoredBytes + bytes));
 
-    internal static RemoteTransferCapacity Replace(RemoteTransferCapacity current, long oldBytes, long newBytes,
-        DatabaseLimits limits)
+    internal static RemoteTransferCapacity Replace(RemoteTransferCapacity current, long oldBytes, long newBytes)
     {
         RequireCounter(current);
         if (oldBytes < NoRetainedBytes || newBytes < NoRetainedBytes || oldBytes > current.StoredBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, CorruptCapacityMessage);
         }
-        var retainedBytes = current.StoredBytes - oldBytes;
-        if (newBytes > limits.MaxBatchBytes - retainedBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RetainedQueueTransferCapacityIsExhaustedDetail);
-        }
-        return new(current.StoredRecords, checked(retainedBytes + newBytes));
+        return new(current.StoredRecords, checked(current.StoredBytes - oldBytes + newBytes));
     }
 
-    internal static void RequireCapacity(RemoteTransferCapacity current, long additionalBytes, DatabaseLimits limits)
+    internal static void RequireCapacity(RemoteTransferCapacity current, long additionalBytes)
     {
         RequireCounter(current);
-        if (current.StoredRecords >= limits.MaxScanRecords
-            || additionalBytes < NoRetainedBytes || additionalBytes > limits.MaxBatchBytes - current.StoredBytes)
+        if (additionalBytes < NoRetainedBytes)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RetainedQueueTransferCapacityIsExhaustedDetail);
+            throw Errors.Fail(ErrorCode.Corruption, CorruptCapacityMessage);
         }
     }
 

@@ -38,41 +38,19 @@ internal sealed class QueryResourceTests
     }
 
     [Test]
-    public async Task AcMp003RawCandidateBudgetRejectsBeforeReturningPartialPage()
-    {
-        using var db = new TestDatabase();
-        db.Configure(Collection, ResourceKind.Collection);
-        db.Commit(new PutDocument(Collection, "a", "{\"payload\":\"" + new string('x', 16_384) + "\"}"));
-        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits with { MaxQueryReadBytes = 8_192 });
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(db.Partition, BudgetSql, AllowFullScan: true)));
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(engine.Execute("root", new(db.Partition, "SELECT * FROM orders WHERE id = 'absent'")).Rows).IsEmpty();
-    }
-
-    [Test]
-    public async Task AcMp003ExplainValidatesAccessPathWithoutEvaluatingOrderAndRejectsOverflow()
+    public async Task AcMp003ExplainValidatesAccessPathWithoutEvaluatingOrder()
     {
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
         db.Commit(new PutDocument(Collection, "a", "{\"score\":{\"nested\":1}}"));
-        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits with { MaxScanRecords = 1 });
+        var engine = QueryBudgetReadOwner.Create(db, db.Database.Limits);
         var explain = engine.ExecuteAst("root", new(db.Partition,
-            new SqlParser(ExplainSql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
+            new SqlParser(ExplainSql,
                 UnitExecutionOptions.QueryExecution()).Parse() with
             {
                 Explain = true
             }, AllowFullScan: true));
         await Assert.That(explain.AccessPath).IsEqualTo("bounded-full-scan");
-        db.Commit(new PutDocument(Collection, "b", "{\"score\":2}"));
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
-            new(db.Partition, new SqlParser(ExplainSql,
-                UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
-                UnitExecutionOptions.QueryExecution()).Parse() with
-            {
-                Explain = true
-            }, AllowFullScan: true)));
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]

@@ -26,6 +26,11 @@ internal static class McpCallerAssertions
     /// <typeparam name="T">The public result type.</typeparam>
     /// <param name="result">The actual HTTP SDK result.</param>
     /// <returns>The actual typed value, including an allowed null result.</returns>
+    /// <summary>Requires a failed SDK result to carry no value: null for object results, and an undefined element for
+    /// raw JSON results such as SQL, whose value type is a struct.</summary>
+    internal static async Task NoValueAsync<T>(Result<T> result)
+        => await Assert.That(result.Value is null or JsonElement { ValueKind: JsonValueKind.Undefined }).IsTrue();
+
     internal static async Task<T> SdkSuccessAsync<T>(Result<T> result)
     {
         await Assert.That(result.IsSuccess).IsTrue().Because(SafeSdkFailureReason(result.Problem));

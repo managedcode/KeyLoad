@@ -92,14 +92,14 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
         }
         if (request.Kind == AnnMaintenanceCapabilityKind.Release)
         {
-            using var release = new MaintenanceSessionWork(configured.Core.DatabaseLimits, clock,
-                expiry ?? clock.GetUtcNow().AddSeconds(configured.Core.DatabaseLimits.Value.QueryDeadlineSeconds), shutdown.Token);
+            using var release = new MaintenanceSessionWork(clock,
+                expiry, shutdown.Token);
             using var releaseStage = release.EnterStage(binding, token);
             var released = await ExecuteCoreAsync(principal, request, release, token);
             release.Budget.CheckResult(released);
             return released;
         }
-        var work = admitted.RequireWork(principal.Id, request, configured, clock, expiry, shutdown.Token);
+        var work = admitted.RequireWork(principal.Id, request, clock, expiry, shutdown.Token);
         using var stage = work.EnterStage(binding, token);
         var result = await ExecuteCoreAsync(principal, request, work, token);
         work.Budget.CheckResult(result);

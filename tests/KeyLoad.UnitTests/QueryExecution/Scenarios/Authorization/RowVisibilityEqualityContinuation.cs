@@ -62,7 +62,7 @@ internal static class RowVisibilityEqualityContinuation
             await Assert.That(JsonDefaults.Serialize(page.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(rows))).IsTrue();
             await PageAsync(page, cut, path);
             var explain = engine.ExecuteAst(owner, new AstQueryRequest(request.Partition,
-                new SqlParser(request.Sql, UnitExecutionOptions.DatabaseLimits(db.Database.Limits),
+                new SqlParser(request.Sql,
                     UnitExecutionOptions.QueryExecution()).Parse() with
                 {
                     Explain = true
@@ -71,8 +71,7 @@ internal static class RowVisibilityEqualityContinuation
             var plan = JsonSerializer.Serialize(new
             {
                 AccessPath = path,
-                AtomicPartition = db.Partition.AtomicPartitionId,
-                ScanBudget = UnitExecutionOptions.DatabaseLimits().Value.MaxScanRecords
+                AtomicPartition = db.Partition.AtomicPartitionId
             }, JsonDefaults.Options);
             QueryRow[] explanation = [new(ExplainId, ExplainRevision, plan)];
             await Assert.That(JsonDefaults.Serialize(explain.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(explanation))).IsTrue();

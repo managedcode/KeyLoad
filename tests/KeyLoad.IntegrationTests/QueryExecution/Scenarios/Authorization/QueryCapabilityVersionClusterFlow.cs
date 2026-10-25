@@ -12,7 +12,7 @@ internal static class QueryCapabilityVersionClusterFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var fixture = new ClusterFixture(QueryCapabilityVersionClusterRequests.Limits(), new QueryExecutionOptions());
+            await using var fixture = new ClusterFixture(new QueryExecutionOptions());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();

@@ -42,14 +42,7 @@ internal sealed class DuePrefixScanState
         }
         page.ExamineRecord();
         var atUpper = key.SequenceEqual(upper);
-        if (value.Length > database.Limits.MaxBatchBytes)
-        {
-            rejected.Add(new(kind, ErrorCode.ResourceExhausted));
-            lastKey = DueWorkRecordDecoder.CopyKey(key);
-            reachedUpper = atUpper;
-            return false;
-        }
-        if (value.Length > database.Limits.MaxBatchBytes - admittedBytes)
+        if (admittedBytes > NoRetainedBytes && value.Length > page.MaximumRangeBytes - admittedBytes)
         {
             deferred = true;
             return false;
@@ -88,7 +81,7 @@ internal sealed class DuePrefixScanState
     {
         try
         {
-            if (DueWorkRecordDecoder.Read(database, kind, key, value, page.WakeAt) is { } hint)
+            if (DueWorkRecordDecoder.Read(kind, key, value, page.WakeAt) is { } hint)
             {
                 hints.Add(hint);
             }

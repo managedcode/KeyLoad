@@ -37,7 +37,8 @@ internal static class TextCapturedReadFactory
             try
             {
                 execution = owner.CaptureReadCut(raw,
-                    new(grant.RemainingRecords, grant.RemainingBytes, budget.RemainingLifetime), budget.Cancellation);
+                    owner.BoundReadCut(grant.RemainingRecords, grant.RemainingBytes, budget.RemainingLifetime),
+                    budget.Cancellation);
             }
             catch (AggregateException) { captureUncertain = true; throw; }
             RequireCut(execution, authority);

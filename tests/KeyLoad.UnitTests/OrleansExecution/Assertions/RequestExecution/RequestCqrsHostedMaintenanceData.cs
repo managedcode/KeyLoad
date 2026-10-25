@@ -53,6 +53,6 @@ internal static class RequestCqrsHostedMaintenanceData
     }
 
     internal static RuntimeTextProjection Open(RequestCqrsHostedDatabase database)
-        => new(Path.Combine(database.Directory, ProjectionDirectory), database.Database.OperationLimitsOptions,
+        => new(Path.Combine(database.Directory, ProjectionDirectory),
             database.Store.Identity.NodeId, UnitTextOptions.Execution());
 }

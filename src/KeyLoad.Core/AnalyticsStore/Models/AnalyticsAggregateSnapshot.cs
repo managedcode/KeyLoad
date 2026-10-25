@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core;
 
@@ -8,9 +7,8 @@ public sealed class AnalyticsAggregateSnapshot
 {
     internal AnalyticsAggregateSnapshot(AggregateAnalyticsRequest request, PrincipalRecord principal,
         ResourceDefinition resource, ResourceLifetime lifetime, ImmutableArray<AnalyticsEventRecord> rows,
-        Guid incarnation, long readGeneration, long generation, long position, ReadExecutionBudget work, IOptions<DatabaseLimits> options, TimeProvider clock)
+        Guid incarnation, long readGeneration, long generation, long position, ReadExecutionBudget work, TimeProvider clock)
     {
-        ArgumentNullException.ThrowIfNull(options);
         Request = request;
         Principal = principal;
         Resource = resource;
@@ -21,7 +19,6 @@ public sealed class AnalyticsAggregateSnapshot
         SourceGeneration = generation;
         SourcePosition = position;
         Work = work;
-        Limits = options.Value;
         Clock = clock;
     }
     /// <summary>Gets the exact original aggregate request.</summary>
@@ -69,10 +66,6 @@ public sealed class AnalyticsAggregateSnapshot
         get;
     }
     internal ReadExecutionBudget Work
-    {
-        get;
-    }
-    internal DatabaseLimits Limits
     {
         get;
     }

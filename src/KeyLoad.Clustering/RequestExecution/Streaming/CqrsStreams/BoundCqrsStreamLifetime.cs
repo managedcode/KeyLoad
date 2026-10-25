@@ -12,7 +12,7 @@ internal static class BoundCqrsStreamLifetime
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         Guid requestId, TimeProvider clock, Func<ValueTask> settled, IOptions<GrainRoutingOptions> options,
-        RequestWorkOwner owner, CqrsStreamPurpose purpose, IOptions<DatabaseLimits> databaseLimits,
+        RequestWorkOwner owner, CqrsStreamPurpose purpose,
         Func<RequestWorkLease> acquireVerified, CancellationToken cancellationToken,
         [EnumeratorCancellation] CancellationToken enumerationToken = default)
     {
@@ -22,7 +22,7 @@ internal static class BoundCqrsStreamLifetime
         Exception? primary = null;
         try
         {
-            work.Start(clock, options, owner, purpose, databaseLimits, acquireVerified,
+            work.Start(clock, options, owner, purpose, acquireVerified,
                 cancellationToken, enumerationToken);
             var creation = Create(createStream, work.Token);
             enumerator = creation.Enumerator;

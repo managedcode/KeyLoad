@@ -14,8 +14,8 @@ internal static class OnlineTextReplay
         {
             var upper = state.CurrentCut?.ThroughSequence
                 ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
-            var page = await children.ReadPageAsync(new(request.Consumer, children.Limits.MaxResults,
-                children.Limits.MaxProjectionBatchBytes, upper), token).ConfigureAwait(true);
+            var page = await children.ReadPageAsync(new(request.Consumer, ProjectionReplayPage.Records,
+                children.ProjectionPageBytes, upper), token).ConfigureAwait(true);
             if (page.ThroughSequence > upper || page.Consumer.Consumer != request.Consumer
                 || page.Consumer.Definition.IndexGeneration != request.ConsumerGeneration || page.Consumer.Released)
             {

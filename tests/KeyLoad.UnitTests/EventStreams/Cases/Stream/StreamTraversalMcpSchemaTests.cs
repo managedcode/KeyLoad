@@ -30,7 +30,7 @@ internal sealed class StreamTraversalMcpSchemaTests
         using var fixture = new StreamReadResourceFixture(eventCount: StreamTraversalTestProtocol.Third, protectedFields: true);
         var first = fixture.Traverse(fixture.Traversal(StreamReadDirection.Backward, limit: StreamTraversalTestProtocol.First));
         var expected = fixture.Traversal(StreamReadDirection.Backward, limit: StreamTraversalTestProtocol.Second,
-            maxBytes: new DatabaseLimits().MaxBatchBytes, cursor: first.Cursor);
+            maxBytes: int.MaxValue, cursor: first.Cursor);
         await Assert.That(McpOperationCatalog.TryGet(Tool, out var descriptor)).IsTrue();
         var operation = descriptor ?? throw new InvalidOperationException();
         await Assert.That(operation.Route).IsEqualTo(Route);

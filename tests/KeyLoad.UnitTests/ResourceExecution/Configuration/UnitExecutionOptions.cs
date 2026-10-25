@@ -9,6 +9,8 @@ namespace KeyLoad.UnitTests;
 [ConfigurationBinding]
 internal static partial class UnitExecutionOptions
 {
+    /// <summary>Explicit test operation expiry; the product no longer applies a fixed operation deadline.</summary>
+    internal static readonly TimeSpan OperationLifetime = TimeSpan.FromSeconds(30);
 
     internal static IOptions<ZoneTreeStorageExecutionOptions> StorageExecution(ZoneTreeStorageExecutionOptions? configured = null)
     {

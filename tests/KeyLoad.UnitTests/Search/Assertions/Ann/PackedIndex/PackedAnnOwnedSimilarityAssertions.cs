@@ -5,10 +5,10 @@ namespace KeyLoad.UnitTests.Search;
 
 internal static class PackedAnnOwnedSimilarityAssertions
 {
-    internal static async Task VerifyPackedScoresAsync(TestDatabase database, VectorSpace space,
+    internal static async Task VerifyPackedScoresAsync(VectorSpace space,
         DistanceMetric metric, VectorRecord[] records)
     {
-        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var budget = PackedAnnIndexTestSupport.Budget();
         var options = new PackedAnnOptions();
         var layout = PackedAnnAdmission.Create(space, records, options, budget);
         var packed = PackedAnnVectors.Copy(records, layout, budget, options.VectorBudgetCheckInterval);
@@ -20,7 +20,7 @@ internal static class PackedAnnOwnedSimilarityAssertions
         await AssertScoresAsync(packed, prepared, expected);
         PoisonSource(records);
         await AssertValidationAsync(() => PackedAnnVectors.Copy(records, layout,
-            PackedAnnIndexTestSupport.Budget(database), options.VectorBudgetCheckInterval));
+            PackedAnnIndexTestSupport.Budget(), options.VectorBudgetCheckInterval));
         await AssertScoresAsync(packed, prepared, expected);
     }
 

@@ -10,11 +10,10 @@ internal static class GraphCrossPartitionCapacityWriter
 
     private const string MissingCounter = "Graph projection capacity metadata is missing for stored rows.";
     private const string InvalidCounter = "Graph projection capacity metadata is malformed.";
-    private const string CapacityExceeded = "The graph projection capacity is exhausted.";
 
     internal static void Apply(IAtomicTransaction transaction, PartitionRef partition,
         GraphCrossPartitionCapacityDirection direction, byte[] rowPrefix,
-        IReadOnlyList<GraphCrossPartitionRecordWrite> writes, DatabaseLimits limits)
+        IReadOnlyList<GraphCrossPartitionRecordWrite> writes)
     {
         const int EmptyProjectionValue = 0;
         const int NoCapacityChange = 0;
@@ -24,21 +23,16 @@ internal static class GraphCrossPartitionCapacityWriter
         if (counter is not null)
         {
             GraphCrossPartitionValidation.ValidateCapacity(counter, direction);
-            if (counter.RecordCount > limits.MaxScanRecords || counter.EncodedBytes > limits.MaxBatchBytes)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, InvalidCounter);
-            }
         }
         else if (HasAnyRows(transaction, rowPrefix))
         {
             throw Errors.Fail(ErrorCode.Corruption, MissingCounter);
         }
 
-        var delta = MeasureDelta(transaction, writes, limits.MaxBatchBytes);
+        var delta = MeasureDelta(transaction, writes);
         var currentCount = counter?.RecordCount ?? EmptyProjectionValue;
         var currentBytes = counter?.EncodedBytes ?? EmptyProjectionValue;
         var next = CalculateNext(currentCount, currentBytes, delta);
-        RequireCapacity(next.RecordCount, next.EncodedBytes, limits);
 
         PersistWrites(transaction, writes);
         if (delta.RecordCount != NoCapacityChange || delta.EncodedBytes != NoCapacityChange || counter is null)
@@ -71,16 +65,8 @@ internal static class GraphCrossPartitionCapacityWriter
         return (nextCount, nextBytes);
     }
 
-    private static void RequireCapacity(long nextCount, long nextBytes, DatabaseLimits limits)
-    {
-        if (nextCount > limits.MaxScanRecords || nextBytes > limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, CapacityExceeded);
-        }
-    }
-
     private static (long RecordCount, long EncodedBytes) MeasureDelta(IAtomicTransaction transaction,
-        IReadOnlyList<GraphCrossPartitionRecordWrite> writes, int maxBytes)
+        IReadOnlyList<GraphCrossPartitionRecordWrite> writes)
     {
         const int NoRecordDelta = 0;
         const int NoEncodedByteDelta = 0;
@@ -91,7 +77,7 @@ internal static class GraphCrossPartitionCapacityWriter
         {
             var currentLength = ExistingLength(transaction, write.Key);
             recordCount = checked(recordCount + RecordDelta(currentLength, write.Value));
-            encodedBytes = checked(encodedBytes + ByteDelta(currentLength, write.Value, maxBytes));
+            encodedBytes = checked(encodedBytes + ByteDelta(currentLength, write.Value));
         }
         return (recordCount, encodedBytes);
     }
@@ -99,14 +85,10 @@ internal static class GraphCrossPartitionCapacityWriter
     private static int RecordDelta(int? currentLength, byte[]? nextValue)
         => currentLength.HasValue ? nextValue is null ? RemovedRecordCount : 0 : nextValue is null ? 0 : 1;
 
-    private static long ByteDelta(int? currentLength, byte[]? nextValue, int maxBytes)
+    private static long ByteDelta(int? currentLength, byte[]? nextValue)
     {
         const int NoNextValueBytes = 0;
 
-        if (nextValue is { Length: var length } && length > maxBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, CapacityExceeded);
-        }
         return (nextValue?.LongLength ?? NoNextValueBytes) - currentLength.GetValueOrDefault();
     }
 

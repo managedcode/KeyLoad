@@ -11,8 +11,6 @@ internal sealed class GrainRequestCodecTests
     private const string Payload = "{\"text\":\"Україна \\u2603 \\\"quoted\\\"\"}";
     private const string InvalidJson = "{\"unclosed\":";
     private const byte InvalidUtf8 = 0xff;
-    private const char Padding = 'x';
-    private const int RepresentativeCharacters = 4_096;
     private const int NoDtoMarker = 0;
     private const int AdditionalByte = 1;
 
@@ -21,8 +19,7 @@ internal sealed class GrainRequestCodecTests
     public async Task ExactUnicodePayloadAndDistinctReadActorKeysArePreserved()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var bytes = OrleansSerialization.Serialize(Payload);
         var firstId = Guid.NewGuid();
         var secondId = Guid.NewGuid();
@@ -35,29 +32,13 @@ internal sealed class GrainRequestCodecTests
     }
 
     /// <summary>AC-ROUTE-001: exact execution input bytes are accepted at the existing budget, with one extra byte rejected.</summary>
-    [Test]
-    public async Task IssuedPayloadIsBoundedByActualBytes()
-    {
-        var bytes = OrleansSerialization.Serialize(new string(Padding, RepresentativeCharacters));
-        using var fixture = new TestDatabase(new DatabaseLimits { MaxBatchBytes = bytes.Length });
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
-        var id = Guid.NewGuid();
-        var issued = codec.CreateRead(id, null, GrainReadKind.Authenticate, bytes);
-        await Assert.That(codec.DecodeRead(issued, id).Payload.Span.SequenceEqual(bytes)).IsTrue();
-        await Assert.That(OrleansSerialization.Measure(new string(Padding, RepresentativeCharacters))).IsEqualTo((long)bytes.Length);
-        var oversized = bytes.Append((byte)AdditionalByte).ToArray();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(Guid.NewGuid(), null,
-            GrainReadKind.Authenticate, oversized)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
-    }
 
     /// <summary>AC-ROUTE-001: issuance snapshots caller bytes before the envelope is handed to Orleans.</summary>
     [Test]
     public async Task IssuedPayloadNeverRetainsCallersMutableBuffer()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var bytes = OrleansSerialization.Serialize(Payload);
         var expected = bytes.ToArray();
         var id = Guid.NewGuid();
@@ -81,8 +62,7 @@ internal sealed class GrainRequestCodecTests
     public async Task InvalidScopeIsDenied(GrainRequestMutation mutation)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var id = Guid.NewGuid();
         var envelope = codec.DecodeRead(codec.CreateRead(id, Principal, GrainReadKind.QueryCapabilities,
             OrleansSerialization.Serialize(NoDtoMarker)), id).Envelope;
@@ -110,8 +90,7 @@ internal sealed class GrainRequestCodecTests
     public async Task WrongActorKeyAndForeignIncarnationAreDenied()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var id = Guid.NewGuid();
         var envelope = codec.CreateRead(id, Principal, GrainReadKind.Document, OrleansSerialization.Serialize(Payload));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.DecodeRead(envelope, Guid.NewGuid())).Code).IsEqualTo(ErrorCode.TokenInvalidated);
@@ -124,8 +103,7 @@ internal sealed class GrainRequestCodecTests
     public async Task ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateCommand(Guid.NewGuid(), Principal,
             (OperationKind)8, Guid.NewGuid(), OrleansSerialization.Serialize(NoDtoMarker))).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(Guid.NewGuid(), Principal,
@@ -141,8 +119,7 @@ internal sealed class GrainRequestCodecTests
     public async Task MalformedOrTrailingPayloadIsDenied(bool trailing)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var id = Guid.NewGuid();
         var marker = OrleansSerialization.Serialize(NoDtoMarker);
         var request = codec.DecodeRead(codec.CreateRead(id, Principal, GrainReadKind.QueryCapabilities, marker), id).Envelope;
@@ -159,8 +136,7 @@ internal sealed class GrainRequestCodecTests
     public async Task LegacyJsonAndMalformedAreDeniedBeforeIssuance()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation,
-            fixture.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var invalid = new byte[][] { Encoding.UTF8.GetBytes(InvalidJson), [InvalidUtf8] };
         foreach (var bytes in invalid)
         {

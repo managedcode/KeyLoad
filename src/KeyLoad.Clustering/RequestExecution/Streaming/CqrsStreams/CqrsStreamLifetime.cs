@@ -46,10 +46,10 @@ internal static class CqrsStreamLifetime
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
         Guid requestId, TimeProvider clock, Func<ValueTask> settled, IOptions<GrainRoutingOptions> options,
-        RequestWorkOwner owner, CqrsStreamPurpose purpose, IOptions<DatabaseLimits> databaseLimits,
+        RequestWorkOwner owner, CqrsStreamPurpose purpose,
         Func<RequestWorkLease> acquireVerified, CancellationToken cancellationToken)
         => BoundCqrsStreamLifetime.Run(createStream, serializer, requestId, clock, settled, options,
-            owner, purpose, databaseLimits, acquireVerified, cancellationToken);
+            owner, purpose, acquireVerified, cancellationToken);
 
     private static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> RunCore(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,

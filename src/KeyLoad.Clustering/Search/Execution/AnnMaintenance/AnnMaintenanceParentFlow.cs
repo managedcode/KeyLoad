@@ -113,7 +113,7 @@ internal static class AnnMaintenanceParentFlow
         for (var pageNumber = EmptyCount; pageNumber < maximumPages; pageNumber++)
         {
             var page = await children.ReadAsync<ReadProjectionBatchRequest, ProjectionBatch>(GrainReadKind.ProjectionBatch,
-                new(request.Consumer, children.Limits.MaxResults, children.Limits.MaxProjectionBatchBytes, upper), token).ConfigureAwait(true);
+                new(request.Consumer, ProjectionReplayPage.Records, children.ProjectionPageBytes, upper), token).ConfigureAwait(true);
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != upper || !page.Entries.IsEmpty)

@@ -171,16 +171,15 @@ public static class CommandOutcomeOperations
             throw Errors.Fail(ErrorCode.TokenInvalidated, EarlierSubscriptionGenerationMessage);
         }
 
-        var budget = new SubscriptionWindowAuthorityReadBudget(engine.OperationLimitsOptions);
         foreach (var delivery in cached.Deliveries)
         {
-            var lease = engine.ReadSubscriptionLease(view, principal, subscription, delivery.Token, operation.Timestamp, budget);
+            var lease = engine.ReadSubscriptionLease(view, principal, subscription, delivery.Token, operation.Timestamp);
             var resource = engine.SourceResource(view, subscription.Source);
             var dataPrincipal = engine.Principal(view, lease.State.Definition.DataPrincipalId, operation.Timestamp);
             engine.RequireCachedDeliveryProjection(dataPrincipal, resource, delivery.Event.Data.PayloadJson, delivery.Event.Data.HeadersJson);
             engine.RequireCachedDeliveryProjection(principal, resource, delivery.Event.Data.PayloadJson, delivery.Event.Data.HeadersJson);
         }
 
-        engine.ValidateSubscriptionGroupProgress(view, subscription, state, engine.SourceHead(view, subscription.Source), budget);
+        SubscriptionDeliveryAuthority.ValidateSubscriptionGroupProgress(view, subscription, state, engine.SourceHead(view, subscription.Source));
     }
 }

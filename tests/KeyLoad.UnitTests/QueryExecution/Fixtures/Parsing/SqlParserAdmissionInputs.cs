@@ -9,9 +9,6 @@ internal static class SqlParserAdmissionInputs
     {
         const int LexicalCases = 32;
         const int FirstCase = 0;
-        const int ExcessiveDepth = 17;
-        const int ExcessiveConditions = 40;
-        const int ExcessiveUtf8Characters = 2048;
         for (var index = FirstCase; index < LexicalCases; index++)
         {
             var suffix = Convert.ToHexString(global::System.Security.Cryptography.SHA256.HashData(
@@ -19,12 +16,6 @@ internal static class SqlParserAdmissionInputs
             yield return ("SELECT title FROM offsetleft WHERE title = '" + Secret + suffix, ErrorCode.Validation, Invalid);
         }
         yield return ("SELECT title FROM offsetleft WHERE title = @" + Secret + " AND", ErrorCode.Validation, Invalid);
-        yield return ("SELECT title FROM offsetleft WHERE " + new string('(', ExcessiveDepth) + "title = 'first'" + new string(')', ExcessiveDepth),
-            ErrorCode.BudgetExceeded, "The SQL syntax exceeds its depth budget.");
-        yield return ("SELECT title FROM offsetleft WHERE " + string.Join(" OR ", Enumerable.Repeat("title = 'first'", ExcessiveConditions)),
-            ErrorCode.BudgetExceeded, "The SQL syntax exceeds its token budget.");
-        yield return ("SELECT title FROM offsetleft WHERE title = '" + new string('界', ExcessiveUtf8Characters) + "'",
-            ErrorCode.BudgetExceeded, "The SQL text exceeds its byte budget.");
         yield return ("SELECT DISTINCT title FROM offsetleft", ErrorCode.UnsupportedCapability, Unsupported);
         foreach (var sql in new[]
         {
@@ -38,6 +29,5 @@ internal static class SqlParserAdmissionInputs
         {
             yield return (sql, ErrorCode.UnsupportedCapability, Unsupported);
         }
-
     }
 }

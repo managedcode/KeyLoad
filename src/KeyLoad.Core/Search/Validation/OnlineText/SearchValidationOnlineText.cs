@@ -8,7 +8,7 @@ public static class SearchValidationOnlineText
 {
     internal static void ValidateOnlineTextCanonicalSource(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextPublicationPhaseCommand command)
     {
-        OnlineTextPublicationShape.Require(command, engine.Limits.MaxScanRecords);
+        OnlineTextPublicationShape.Require(command);
         var request = command.Request;
         var source = command.Result.PublishedCut;
         var consumer = ProjectionConsumerAuthority.RequireActiveProjectionConsumer(view, principal, request.Consumer, request.ConsumerGeneration);

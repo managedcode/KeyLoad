@@ -38,7 +38,7 @@ internal static class AnnCrashState
     {
         var seeds = runtime.Options.Core.AnnSeed;
         var seed = AnnSeedCollector.CapturePinned(database, CrashFixtureValues.Principal, request, seeds,
-            new ReadExecutionBudget(CrashExecutionOptions.DatabaseLimits(database.Limits)));
+            new ReadExecutionBudget());
         var snapshot = new AnnCrashSnapshot(seed.Records.ToArray(), result.Source!, result.IndexSha256 ?? string.Empty,
             Convert.ToHexString(OrleansSerialization.Serialize(receipt)), Raw(database), database.Store.Position);
         await File.WriteAllTextAsync(Path.Combine(directory, file), JsonSerializer.Serialize(snapshot, JsonDefaults.Options));

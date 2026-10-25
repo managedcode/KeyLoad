@@ -7,11 +7,11 @@ namespace KeyLoad.Server;
 internal static class PostgresPreparedDecoder
 {
     internal static (string Name, PostgresPreparedStatement Statement) Parse(ReadOnlySpan<byte> payload,
-        PostgresSessionOptions options, IOptions<DatabaseLimits> limitsOptions, CancellationToken token)
+        PostgresSessionOptions options, CancellationToken token)
     {
         var reader = new PostgresPayloadReader(payload);
         var name = reader.Text(options.MaximumRetainedBytes);
-        var sql = reader.Text(Math.Min(options.MaximumRetainedBytes, limitsOptions.Value.MaxQueryBytes));
+        var sql = reader.Text(options.MaximumRetainedBytes);
         var count = reader.Int16();
         if (count < PostgresProtocol.AllRows || count > PostgresProtocol.MaximumParameters)
         {
@@ -25,15 +25,14 @@ internal static class PostgresPreparedDecoder
             RequireOid(oids[index]);
         }
         reader.Complete();
-        var inspection = Inspect(sql, count, limitsOptions, token);
+        var inspection = Inspect(sql, count, token);
         var bytes = checked((name.Length + sql.Length) * sizeof(char) + oids.Length * sizeof(int));
         return (name, new(sql, oids, inspection.Rows, bytes, inspection.UsesProfileDialect));
     }
 
-    internal static (bool Rows, bool UsesProfileDialect) Inspect(string sql, int positionalParameterCount,
-        IOptions<DatabaseLimits> limitsOptions, CancellationToken token)
+    internal static (bool Rows, bool UsesProfileDialect) Inspect(string sql, int positionalParameterCount, CancellationToken token)
     {
-        var syntax = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql, limitsOptions,
+        var syntax = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql,
             token.ThrowIfCancellationRequested, token);
         global::KeyLoad.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(syntax,
             positionalParameterCount, token.ThrowIfCancellationRequested, token);
@@ -42,11 +41,11 @@ internal static class PostgresPreparedDecoder
         {
             case global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table:
                 RequireNoPositionalParameters(positionalParameterCount);
-                _ = ScriptDomCreateTableSyntax.Read(table, limitsOptions, token.ThrowIfCancellationRequested, token);
+                _ = ScriptDomCreateTableSyntax.Read(table, token.ThrowIfCancellationRequested, token);
                 break;
             case global::Microsoft.SqlServer.TransactSql.ScriptDom.DropTableStatement drop:
                 RequireNoPositionalParameters(positionalParameterCount);
-                _ = ScriptDomDropTableSyntax.Read(drop, limitsOptions, token.ThrowIfCancellationRequested, token);
+                _ = ScriptDomDropTableSyntax.Read(drop, token.ThrowIfCancellationRequested, token);
                 break;
             case global::Microsoft.SqlServer.TransactSql.ScriptDom.SetCommandStatement control:
                 RequireNoPositionalParameters(positionalParameterCount);

@@ -9,18 +9,14 @@ internal sealed record AnnReadLifetimeMetadata(ResourceDefinition Definition,
 {
     private const string Invalid = "The ANN source lifetime metadata is invalid.";
 
-    internal void Require(PartitionRef partition, int maximumBytes)
+    internal void Require(PartitionRef partition)
     {
         if (Definition is null || Principal is null || Definitions.IsDefaultOrEmpty
             || Definition.Kind != ResourceKind.Collection || Definition.TransactionDomainId != partition.TransactionDomainId)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }
-        ResourceLifetimeCoverageValidation.Require(Coverage, partition, Definitions, maximumBytes);
-        if (OrleansSerialization.Measure(Definitions) > maximumBytes || OrleansSerialization.Measure(Definition) > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, Invalid);
-        }
+        ResourceLifetimeCoverageValidation.Require(Coverage, partition, Definitions);
         var primary = Definitions.FirstOrDefault(value => value.Name == Definition.Name);
         if (primary is null || !OrleansSerialization.Serialize(primary).AsSpan().SequenceEqual(OrleansSerialization.Serialize(Definition)))
         {

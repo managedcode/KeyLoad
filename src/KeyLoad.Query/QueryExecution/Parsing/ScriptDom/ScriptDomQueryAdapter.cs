@@ -6,22 +6,19 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class ScriptDomQueryAdapter
 {
-    internal static AstQueryRequest Lower(Dom.TSqlStatement statement, QueryRequest request, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions,
+    internal static AstQueryRequest Lower(Dom.TSqlStatement statement, QueryRequest request,
         global::Microsoft.Extensions.Options.IOptions<QueryExecutionOptions> executionOptions, ReadExecutionBudget budget, CancellationToken cancellationToken)
-        => Lower(statement, request, limitsOptions, executionOptions, budget, null, cancellationToken);
+        => Lower(statement, request, executionOptions, budget, null, cancellationToken);
 
-    internal static AstQueryRequest Lower(Dom.TSqlStatement statement, QueryRequest request, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions,
+    internal static AstQueryRequest Lower(Dom.TSqlStatement statement, QueryRequest request,
         global::Microsoft.Extensions.Options.IOptions<QueryExecutionOptions> executionOptions, ReadExecutionBudget budget, int? positionalParameterCount,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(statement);
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(limitsOptions);
         ArgumentNullException.ThrowIfNull(executionOptions);
-        var limits = limitsOptions.Value;
         var execution = executionOptions.Value;
-        limits.Validate();
         execution.Validate();
         cancellationToken.ThrowIfCancellationRequested();
         budget.Check();
@@ -34,7 +31,7 @@ internal static class ScriptDomQueryAdapter
         {
             throw ScriptDomErrors.Invalid();
         }
-        var context = new ScriptDomLoweringContext(limitsOptions, executionOptions, budget, limits.MaxQueryTokens,
+        var context = new ScriptDomLoweringContext(executionOptions, budget,
             request.Parameters, positionalParameterCount);
         var query = ScriptDomSelectLowering.Read(statement, request.QueryDialectVersion, context);
         cancellationToken.ThrowIfCancellationRequested();

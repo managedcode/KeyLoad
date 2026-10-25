@@ -18,16 +18,16 @@ internal static class SampleAggregateWindowReader
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
         SampleAggregateReader.ValidateRange(request.From, request.UntilExclusive);
-        SampleAggregateReader.ValidateSampleLimit(request.MaxSamples, database.Limits.MaxScanRecords);
+        SampleAggregateReader.ValidateSampleLimit(request.MaxSamples);
         ValidateWidth(request.Width);
-        ValidateWindowLimit(request.MaxWindows, database.Limits.MaxResults);
+        ValidateWindowLimit(request.MaxWindows);
         var scope = SampleReadScope.Open(database, view, principalId, request.Partition, request.Set, request.SeriesId);
         var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
         var readFrom = retention is not null && retention.BeforeUtcTicks > request.From.UtcTicks
             ? SampleRetentionStateReader.Before(retention) : request.From;
         var endTicks = request.UntilExclusive?.UtcTicks ?? AfterMaximumUtcTicks;
         var windowCount = CountWindows(request.From.UtcTicks, endTicks, request.Width.Ticks);
-        ValidateCalculatedCount(windowCount, request.MaxWindows, database.Limits.MaxResults);
+        ValidateCalculatedCount(windowCount, request.MaxWindows);
         if (windowCount == EmptyWindowCount)
         {
             budget.Check();
@@ -63,9 +63,9 @@ internal static class SampleAggregateWindowReader
         }
     }
 
-    private static void ValidateWindowLimit(int maxWindows, int serverMaximum)
+    private static void ValidateWindowLimit(int maxWindows)
     {
-        if (maxWindows < 1 || maxWindows > serverMaximum)
+        if (maxWindows < 1)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidWindowBudget);
         }
@@ -81,9 +81,9 @@ internal static class SampleAggregateWindowReader
         return span % widthTicks == EmptySpanWidthTicks ? complete : checked(complete + CompleteStep);
     }
 
-    private static void ValidateCalculatedCount(long count, int callerMaximum, int serverMaximum)
+    private static void ValidateCalculatedCount(long count, int callerMaximum)
     {
-        if (count > callerMaximum || count > serverMaximum)
+        if (count > callerMaximum)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, WindowBudgetExceeded);
         }

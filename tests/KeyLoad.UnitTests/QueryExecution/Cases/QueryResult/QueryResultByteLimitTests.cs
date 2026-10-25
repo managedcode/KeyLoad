@@ -42,36 +42,6 @@ internal sealed class QueryResultByteLimitTests
     }
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task NullOrLargerResultCeilingStillRejectsAboveBatchLimitAndHealthyReadWorks(bool larger)
-    {
-        using var database = new TestDatabase(new DatabaseLimits { MaxBatchBytes = QueryResultByteLimitFixture.RuntimeCap });
-        QueryResultByteLimitFixture.Seed(database, 5_000);
-        var sources = QueryResultByteLimitFixture.Sources(database);
-        var position = database.Store.Position;
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution(new QueryExecutionOptions
-        {
-            MaximumResultBytes = larger ? QueryResultByteLimitFixture.LargerCap : null
-        }));
-        KeyLoadException? failure = null;
-        QueryPage? partial = null;
-        try
-        {
-            partial = QueryResultByteLimitFixture.Execute(engine, database, false, false, false);
-        }
-        catch (KeyLoadException exception)
-        {
-            failure = exception;
-        }
-        await Assert.That(failure).IsNotNull();
-        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(failure!.Message).IsEqualTo("The query result byte budget is exceeded.");
-        await Assert.That(partial).IsNull();
-        await VerifyHealthyAsync(database, engine, false, false, sources, position);
-    }
-
-    [Test]
     [Arguments(0)]
     [Arguments(-1)]
     public async Task InvalidResultCeilingDeniesOwnerAdmissionBeforeReadAndHealthyOwnerStillWorks(int maximum)

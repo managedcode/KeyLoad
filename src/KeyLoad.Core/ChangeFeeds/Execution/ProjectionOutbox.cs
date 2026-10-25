@@ -6,7 +6,6 @@ namespace KeyLoad.Core;
 public static class ProjectionOutbox
 {
     internal const string ConsumerIdentityRequiresNewGenerationDetail = "Use a new consumer identity for a different index generation or rebuild.";
-    internal const string ProjectionConsumerQuotaExhaustedDetail = "The projection consumer quota is exhausted.";
     internal const string ReleasedProjectionGenerationDetail = "The projection generation was released.";
     internal const string FirstProjectionEntryExceedsBudgetDetail = "The first projection entry exceeds the batch byte budget.";
     internal const string EmptyProjectionBatchEffectsDetail = "An empty projection batch cannot produce effects.";
@@ -63,11 +62,6 @@ public static class ProjectionOutbox
             return previous;
         }
 
-        if (engine.ProjectionConsumers(tx, request.Consumer.Partition).Length >= engine.Limits.MaxProjectionConsumers)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ProjectionConsumerQuotaExhaustedDetail);
-        }
-
         var head = engine.ReadOutboxHead(tx, request.Consumer.Partition);
         var checkpoint = request.StartAfter ?? head.FirstAvailable - FirstAvailableStep;
         CheckOutboxPosition(head, checkpoint);
@@ -76,11 +70,6 @@ public static class ProjectionOutbox
             MaintenanceAuthority = authority,
             InitialAnnMaintenance = request.InitialAnnMaintenance
         };
-        if (OrleansSerialization.Measure(state) > engine.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ProjectionMaintenanceConfiguration.InvalidMaintenanceProfile);
-        }
-
         tx.PutRecord(key, state);
         return state;
     }
@@ -166,7 +155,7 @@ public static class ProjectionOutbox
         const int StoredRecordsStep = 1;
         const string PurgeOutboxSpaceText = "outbox-head";
         EngineResourceAccess.ValidatePartition(request.Partition);
-        if (request.Limit < LimitValidationBoundary || request.Limit > engine.Limits.MaxResults)
+        if (request.Limit < LimitValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, OutboxPurgeBatchLimitDetail);
         }
@@ -177,7 +166,7 @@ public static class ProjectionOutbox
             throw Errors.Fail(ErrorCode.Validation, InvalidOutboxPurgePositionDetail);
         }
 
-        var consumers = engine.ProjectionConsumers(tx, request.Partition);
+        var consumers = ProjectionConsumerIdentity.ProjectionConsumers(tx, request.Partition);
         foreach (var consumer in consumers)
         {
             ProjectionConsumerIdentity.RequireProjectionRetentionCheckpoint(consumer, head);

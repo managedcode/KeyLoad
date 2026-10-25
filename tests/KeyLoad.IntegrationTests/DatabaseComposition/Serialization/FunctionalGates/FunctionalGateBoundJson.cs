@@ -8,21 +8,12 @@ internal static class FunctionalGateBoundJson
 {
     internal static string Serialize(object value)
     {
-        var limits = IntegrationExecutionOptions.DatabaseLimits().Value;
         var bytes = JsonDefaults.Serialize(value);
-        if (bytes.Length > limits.MaxDocumentBytes)
-        {
-            throw new InvalidOperationException("The trusted functional-gate JSON exceeds the original document bound.");
-        }
-        using var document = JsonDocument.Parse(bytes, new JsonDocumentOptions { MaxDepth = limits.MaxJsonDepth });
+        using var document = JsonDocument.Parse(bytes);
         using var output = new MemoryStream(bytes.Length);
         using (var writer = new Utf8JsonWriter(output))
         {
             Write(writer, document.RootElement);
-        }
-        if (output.Length > limits.MaxDocumentBytes)
-        {
-            throw new InvalidOperationException("The trusted functional-gate JSON exceeds the original document bound.");
         }
         return Encoding.UTF8.GetString(output.ToArray());
     }

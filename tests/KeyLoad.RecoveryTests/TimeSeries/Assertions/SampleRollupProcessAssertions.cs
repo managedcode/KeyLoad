@@ -82,8 +82,7 @@ internal static class SampleRollupProcessAssertions
         var receipt = OrleansSerialization.Deserialize<CommitReceipt>(originalReceipt);
         await Assert.That(receipt.CommandId).IsEqualTo(SampleRollupCrashContract.AcknowledgedId);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(SampleRollupCrashContract.Partition.AtomicPartitionId);
-        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleRollupCrashContract.AcknowledgedId,
-            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
+        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleRollupCrashContract.AcknowledgedId);
         await Assert.That(receipt.Token).IsEqualTo(expectedToken);
         await Assert.That(receipt.Token.Incarnation).IsNotEqualTo(Guid.Empty);
 

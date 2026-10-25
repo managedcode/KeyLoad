@@ -5,8 +5,7 @@ namespace KeyLoad.Server.Search;
 
 internal static class TextIncrementalReplayPreparation
 {
-    internal static void Prepare(string root, string leaf, TextIncrementalIntent expected,
-        int maximumRecords, int maximumChanges, ReadExecutionBudget budget,
+    internal static void Prepare(string root, string leaf, TextIncrementalIntent expected, ReadExecutionBudget budget,
         IOptions<TextExecutionOptions> options, TextResourceOwnership? resources = null)
     {
         budget.Check();
@@ -22,7 +21,7 @@ internal static class TextIncrementalReplayPreparation
         }
         var actual = TextIncrementalMetadata.ReadIntent(path, options.Value.MaximumDiskBytes, budget);
         TextIncrementalIntentValidation.Require(actual, expected.Scope, expected.Consumer,
-            expected.Generation, expected.Placement, maximumRecords, maximumChanges, budget);
+            expected.Generation, expected.Placement, budget);
         RequireOriginal(actual, expected, budget);
         var pending = Path.Combine(path, TextIncrementalProtocol.PendingManifestFile);
         if (File.Exists(pending))

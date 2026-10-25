@@ -87,7 +87,7 @@ public static class RemoteTransferReauthorization
             throw Errors.Fail(ErrorCode.Validation, RemoteTransferCommands.TransferInvalidMessage);
         }
 
-        var claims = engine.Verify<RemoteTransferIntentClaims>(request.IntentToken, engine.Limits.MaxBatchBytes);
+        var claims = engine.VerifyRetained<RemoteTransferIntentClaims>(request.IntentToken);
         engine.ValidateIntentClaims(claims, request.DestinationQueue, principal.Id);
         engine.RequireTransferCapabilities(principal, request.DestinationQueue, Capability.QueuePublish);
         var resource = engine.Resource(view, request.DestinationQueue.Partition, request.DestinationQueue.Queue, ResourceKind.WorkQueue);
@@ -106,7 +106,7 @@ public static class RemoteTransferReauthorization
             throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferCommands.TransferReceiptInvalidMessage);
         }
 
-        var claims = engine.Verify<RemoteTransferReceiptClaims>(request.ReceiptToken, engine.Limits.MaxBatchBytes);
+        var claims = engine.VerifyRetained<RemoteTransferReceiptClaims>(request.ReceiptToken);
         engine.ValidateReceipt(view, claims, record);
         if (record.State != QueueTransferState.Delivered || record.ReceiptToken != request.ReceiptToken)
         {
@@ -144,7 +144,7 @@ public static class RemoteTransferReauthorization
             throw Errors.Fail(ErrorCode.Validation, RemoteTransferCommands.TransferInvalidMessage);
         }
 
-        var claims = engine.Verify<RemoteTransferReceiptClaims>(request.ReceiptToken, engine.Limits.MaxBatchBytes);
+        var claims = engine.VerifyRetained<RemoteTransferReceiptClaims>(request.ReceiptToken);
         engine.ValidateReceiptRequestScope(view, claims, request.SourceQueue, request.TransferId, principal.Id);
     }
 

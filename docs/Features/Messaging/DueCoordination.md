@@ -30,16 +30,15 @@ and never claim a cross-page snapshot or authoritative due ordering.
 
 Use borrowed VisitRange bytes, charge examined bytes (including lookahead) before
 decoding, cap a page at 32 records and admitted/decoded value bytes at
-DatabaseLimits.MaxBatchBytes, and check a 100 ms discovery deadline before and
-after work. A single corrupt or oversized record within the readable provider range
+`DueWorkExecutionOptions.MaximumRangeBytes` (default 64 MiB), and check a 100 ms
+discovery deadline before and after work. A single corrupt record within the readable provider range
 yields a safe rejected-record marker and advances its bounded key rather than
 executing it or indefinitely starving the following key. Actual examined bytes
 include the borrowed lookahead/rejected row and remain bounded by the execution
 ZoneTree 64 MiB range-work ceiling; they must never be reported as admitted bytes.
 If a valid next value would cross the admitted page budget, stop before
-decoding/copying it and retain the preceding key so the value is revisited. A
-single value above MaxBatchBytes is not decoded/copied: reject it, advance only its
-canonical bounded key and stop that page. A physically unreadable frame or range
+decoding/copying it and retain the preceding key so the value is revisited. There
+is no separate per-value ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). A physically unreadable frame or range
 exceeding the ceiling fails explicitly; no unknown key is invented. The
 cursor key ceiling is 4,096 bytes. A raw key above that ceiling, including
 captured-tail discovery, fails the page/prefix with Corruption before copying; it

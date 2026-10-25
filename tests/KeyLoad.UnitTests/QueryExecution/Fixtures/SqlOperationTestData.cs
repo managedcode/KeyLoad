@@ -25,7 +25,6 @@ internal static class SqlOperationTestData
     internal const string WrongCaseKey = "Request";
     internal const string PrivateMarker = "private-input-canary";
     internal const int MaximumPayloadBytes = 65_536;
-    internal static readonly DatabaseLimits Limits = new();
 
     internal static SqlOperationRequest Call(string name, IDictionary<string, JsonElement>? arguments = null) =>
         Request(CallPrefix + name + CallSuffix, JsonSerializer.SerializeToElement(arguments ??
@@ -35,9 +34,9 @@ internal static class SqlOperationTestData
         new(McpCanonicalTestData.Partition, sql,
             new Dictionary<string, JsonElement>(StringComparer.Ordinal) { [Parameter] = parameter });
 
-    internal static McpDecodedOperation Compile(SqlOperationRequest request, DatabaseLimits? limits = null,
+    internal static McpDecodedOperation Compile(SqlOperationRequest request,
         int maximumPayloadBytes = MaximumPayloadBytes, CancellationToken cancellationToken = default) =>
-        SqlOperationCompiler.Compile(request, Microsoft.Extensions.Options.Options.Create(limits ?? Limits), maximumPayloadBytes, UnitExecutionOptions.QueryExecution(), cancellationToken);
+        SqlOperationCompiler.Compile(request, maximumPayloadBytes, UnitExecutionOptions.QueryExecution(), cancellationToken);
 
     internal static McpOperationDescriptor Find(string name) => McpOperationCatalog.TryGet(name, out var descriptor)
         ? descriptor : throw new InvalidOperationException(name);
@@ -51,9 +50,9 @@ internal static class SqlOperationTestData
     }
 
     internal static async Task Reject(SqlOperationRequest request, ErrorCode code,
-        DatabaseLimits? limits = null, int maximumPayloadBytes = MaximumPayloadBytes)
+        int maximumPayloadBytes = MaximumPayloadBytes)
     {
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => Compile(request, limits, maximumPayloadBytes));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => Compile(request, maximumPayloadBytes));
         await Assert.That(failure.Code).IsEqualTo(code);
         await Assert.That(failure.Message).DoesNotContain(PrivateMarker);
     }

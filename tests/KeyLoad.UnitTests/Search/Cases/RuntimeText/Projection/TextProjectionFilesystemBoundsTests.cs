@@ -90,7 +90,7 @@ internal sealed class TextProjectionFilesystemBoundsTests
 
     private static void OpenProjection(string path, TestDatabase database)
     {
-        using var projection = new RuntimeTextProjection(path, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var projection = new RuntimeTextProjection(path, database.Store.Identity.NodeId, UnitTextOptions.Execution());
     }
 
     private static string CreateGeneration(TestDatabase database)
@@ -98,7 +98,7 @@ internal sealed class TextProjectionFilesystemBoundsTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         var root = Path.Combine(database.Directory, "execution-filesystem");
-        using (var projection = new RuntimeTextProjection(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution()))
+        using (var projection = new RuntimeTextProjection(root, database.Store.Identity.NodeId, UnitTextOptions.Execution()))
         {
             _ = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).Search("root",
                 new(database.Partition, Collection, "/text", "needle"));

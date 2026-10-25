@@ -35,7 +35,7 @@ public sealed partial class SearchEngine
     public RankedDocument[] Search(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -50,7 +50,7 @@ public sealed partial class SearchEngine
     public Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -66,7 +66,7 @@ public sealed partial class SearchEngine
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         return GraphSearchAsync(principalId, request, budget, cancellationToken);
     }
 

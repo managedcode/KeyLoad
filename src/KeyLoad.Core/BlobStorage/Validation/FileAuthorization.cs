@@ -19,7 +19,7 @@ public static class FileAuthorization
             _ => Capability.BlobWrite
         };
         engine.Authorization.Require(principal, request.Address.Partition, request.Address.Resource, capability);
-        if (!pair.Definition.FilePolicy.IsValid() || request.ContentType is null || request.ContentType.Length > FileStorageProtocol.MaximumContentTypeCharacters || request.ContentType.Any(char.IsControl) || request.Metadata is null || request.Metadata.Count > engine.Limits.MaxBatchMutations || request.Metadata.Any(pair => pair.Key is null || pair.Value is null) || OrleansSerialization.Measure(request.Metadata) > engine.Limits.MaxQueryBytes || request.TransferOwner is null || request.TransferOwner.Length > FileStorageProtocol.MaximumContentTypeCharacters || request.Access is null || request.Sha256 is null || !Enum.IsDefined(request.Action))
+        if (!pair.Definition.FilePolicy.IsValid() || request.ContentType is null || request.ContentType.Length > FileStorageProtocol.MaximumContentTypeCharacters || request.ContentType.Any(char.IsControl) || request.Metadata is null || request.Metadata.Any(pair => pair.Key is null || pair.Value is null) || request.TransferOwner is null || request.TransferOwner.Length > FileStorageProtocol.MaximumContentTypeCharacters || request.Access is null || request.Sha256 is null || !Enum.IsDefined(request.Action))
         {
             throw Errors.Fail(ErrorCode.Validation, FileStorageProtocol.Invalid);
         }

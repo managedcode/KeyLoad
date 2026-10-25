@@ -88,7 +88,7 @@ internal sealed class TextProjectionParityTests
     }
 
     private static RuntimeTextProjection CreateProjection(TestDatabase database, Func<string, ulong>? tokenHash = null)
-        => new(Path.Combine(database.Directory, "execution-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        => new(Path.Combine(database.Directory, "execution-text"),
             database.Store.Identity.NodeId, UnitTextOptions.Execution(), tokenHash);
 
     private static string CurrentGeneration(TestDatabase database)

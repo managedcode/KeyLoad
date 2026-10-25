@@ -7,7 +7,6 @@ namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal static class QueryRuleOptimizationClusterPages
 {
-    private const int ExpectedScanBudget = 10000;
 
     private const int Routes = 6;
     internal static async Task RunAsync(RequestCqrsClusterCallers reader, QueryRuleOptimizationClusterState state, bool denied, CancellationToken token)
@@ -124,8 +123,7 @@ internal static class QueryRuleOptimizationClusterPages
         var body = JsonSerializer.Serialize(new
         {
             accessPath = path,
-            atomicPartition = ast.Partition.AtomicPartitionId,
-            scanBudget = ExpectedScanBudget
+            atomicPartition = ast.Partition.AtomicPartitionId
         }, JsonDefaults.Options);
         foreach (var page in pages)
         {

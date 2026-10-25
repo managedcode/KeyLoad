@@ -27,8 +27,11 @@ separate and are returned with event reads.
 Reads use a half-open UTC time range and ordinal ID continuation. Continuation is
 explicitly a new read rather than a persisted snapshot token. Aggregation supports
 Count, Sum, Average, Min and Max, grouped by declared dimensions. Count selects no
-source metric. Requested groups, captured records, bytes, query lifetime and output
-are bounded by actual server limits; overflow fails the complete aggregate.
+source metric. KeyLoad sets no group, record, byte or lifetime ceiling
+([ADR-149](../ADR/ADR-149-no-operation-limits.md)): it sizes the engine's
+ingestion queue by the captured row count, never truncates dimension values and
+sets the engine query timeout only from the caller's explicit expiry. The output
+must fit the grain reply ceiling.
 Canonical timestamps may be ahead of system UTC. Each disposable generation
 configures the engine's ingestion skew to include its latest already captured
 timestamp. Original timestamps, capture limits and complete-ingestion checks stay
@@ -60,7 +63,7 @@ Dispose, then removes the disposable directory only after successful joined clos
 The connection operation holds the shared analytical admission through the execution
 join and fresh source/authorization validation before output publication. The
 final validation uses the remaining original read budget; it does not renew the
-deadline. The internal same-process result
+explicit expiry. The internal same-process result
 and snapshot never become an extra public or inter-grain payload. The raw execution
 files are never read as authority, do not acknowledge a database mutation and are
 excluded from canonical backup authority. Interrupted disposable

@@ -10,11 +10,9 @@ public static class TopicRetentionCommands
     internal const string PurgedIdentitySuffix = "retained-digest";
     internal const string InvalidTopicPurgeCut = "The topic purge cut is outside retained history.";
     internal const string PinnedTopicHistory = "The topic purge cut is pinned by a subscription checkpoint.";
-    internal const string TopicPurgeScanExhausted = "The topic purge scan budget is exhausted.";
     internal static byte[] PurgedTopicIdentityKey(EventSourceRef source, string eventId) => KeySpace.Partition(TopicPublishReads.TopicEventIdKeySpace, source.Partition, source.Resource, source.Generation, eventId, PurgedIdentitySuffix);
-    internal static MutationReceipt PurgeTopicHistory(this DatabaseEngine engine, IAtomicTransaction tx, PartitionRef partition, PurgeTopic request, TopicPurgeReadBudget? budget)
+    internal static MutationReceipt PurgeTopicHistory(this DatabaseEngine engine, IAtomicTransaction tx, PartitionRef partition, PurgeTopic request)
     {
-        ArgumentNullException.ThrowIfNull(budget);
         var source = new EventSourceRef(partition, request.Topic, EventSourceKind.Topic, Generation: request.Generation);
         engine.SourceResource(tx, source);
         var head = TopicPublishReads.ReadTopicHead(tx, source);
@@ -23,11 +21,11 @@ public static class TopicRetentionCommands
             throw Errors.Fail(ErrorCode.Validation, InvalidTopicPurgeCut);
         }
 
-        engine.RequireTopicPurgePins(tx, source, head.Head.TailPosition, request.ThroughPosition, budget);
+        TopicRetentionCommands.RequireTopicPurgePins(tx, source, head.Head.TailPosition, request.ThroughPosition);
         var bytes = head.StoredBytes;
         for (var position = head.Head.FirstAvailablePosition; position <= request.ThroughPosition; position++)
         {
-            bytes = checked(bytes - PurgeTopicRecord(tx, source, position, budget));
+            bytes = checked(bytes - PurgeTopicRecord(tx, source, position));
         }
 
         if (bytes < NoRetainedBytes)
@@ -39,7 +37,7 @@ public static class TopicRetentionCommands
         return new(PurgeTopicKind, request.Topic, request.ThroughPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), request.ThroughPosition);
     }
 
-    internal static long PurgeTopicRecord(IAtomicTransaction tx, EventSourceRef source, long position, TopicPurgeReadBudget budget)
+    internal static long PurgeTopicRecord(IAtomicTransaction tx, EventSourceRef source, long position)
     {
         SourceEventRecord? record = null;
         var key = EventSources.SourceKey(source, position);
@@ -48,7 +46,7 @@ public static class TopicRetentionCommands
         {
             record = OrleansSerialization.Deserialize<SourceEventRecord>(value);
             removedBytes = value.Length;
-        }, budget.ObserveBytes);
+        });
         if (!found || record is null || record.Source != source || record.Position != position)
         {
             throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
@@ -56,12 +54,12 @@ public static class TopicRetentionCommands
 
         var identityKey = KeySpace.Partition(TopicPublishReads.TopicEventIdKeySpace, source.Partition, source.Resource, source.Generation, record.Data.EventId);
         var indexedPosition = NoRetainedBytes;
-        if (!tx.ReadValue(identityKey, value => indexedPosition = OrleansSerialization.Deserialize<long>(value), budget.ObserveBytes) || indexedPosition != position)
+        if (!tx.ReadValue(identityKey, value => indexedPosition = OrleansSerialization.Deserialize<long>(value)) || indexedPosition != position)
         {
             throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
         }
 
-        if (tx.ReadValue(PurgedTopicIdentityKey(source, record.Data.EventId), _ => throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail), budget.ObserveBytes))
+        if (tx.ReadValue(PurgedTopicIdentityKey(source, record.Data.EventId), _ => throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail)))
         {
             throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
         }
@@ -72,10 +70,10 @@ public static class TopicRetentionCommands
         return removedBytes;
     }
 
-    internal static void RequireTopicPurgePins(this DatabaseEngine engine, IKeyValueView view, EventSourceRef source, long tail, long cut, TopicPurgeReadBudget budget)
+    internal static void RequireTopicPurgePins(IKeyValueView view, EventSourceRef source, long tail, long cut)
     {
         var prefix = KeySpace.Partition(SubscriptionGroups.SubscriptionGroupsSubscriptionKeySpace, source.Partition, source.Resource, source.Kind.ToString(), source.StreamId, source.Generation);
-        var scan = view.VisitRange(prefix, engine.Limits.MaxScanRecords, (key, value) =>
+        _ = view.VisitAll(prefix, (key, value) =>
         {
             var group = EventStreamsValidation.ReadTopicPurgePin(key, value, tail);
             if (cut > group.Checkpoint)
@@ -84,10 +82,6 @@ public static class TopicRetentionCommands
             }
 
             return true;
-        }, observer: budget.ObserveBytes);
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, TopicPurgeScanExhausted);
-        }
+        });
     }
 }

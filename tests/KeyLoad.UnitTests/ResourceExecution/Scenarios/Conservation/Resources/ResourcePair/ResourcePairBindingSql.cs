@@ -12,7 +12,7 @@ internal static class ResourcePairBindingSql
         var source = state.Source;
         var id = Guid.NewGuid();
         var compiled = SqlOperationCompiler.Compile(new(source.Partition, SqlInsert, CommandId: id),
-            source.Database.OperationLimitsOptions, source.Database.Limits.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
+            UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), token);
         await Assert.That(compiled.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(compiled.CommandId).IsEqualTo(id);
         var request = OrleansSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);

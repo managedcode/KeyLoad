@@ -51,15 +51,11 @@ internal static class OutcomeStoreOracle
 
     internal static StoredOutcome ReadStored(DatabaseEngine database, Guid commandId, CancellationToken token)
     {
-        var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(database.EvaluationClock, token);
         return database.Store.Read(raw =>
         {
-            var page = work.CreateView(raw).Scan(KeyCodec.Encode(ScopedOutcomeSpace), database.Limits.MaxScanRecords);
-            if (page.HasMore)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, "The outcome oracle scan exceeded its record bound.");
-            }
-            var matches = page.Records.Select(row => OrleansSerialization.Deserialize<StoredOutcome>(row.Value.Span))
+            var records = work.CreateView(raw).ScanAll(KeyCodec.Encode(ScopedOutcomeSpace));
+            var matches = records.Select(row => OrleansSerialization.Deserialize<StoredOutcome>(row.Value.Span))
                 .Where(outcome => outcome.PreparedCommand.CommandId == commandId).ToArray();
             if (matches.Length != 1)
             {

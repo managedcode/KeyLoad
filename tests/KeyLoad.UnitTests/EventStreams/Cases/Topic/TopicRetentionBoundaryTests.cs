@@ -1,4 +1,3 @@
-using KeyLoad.UnitTests.Messaging;
 
 namespace KeyLoad.UnitTests.EventStreams;
 
@@ -33,40 +32,4 @@ internal sealed class TopicRetentionBoundaryTests
         await TopicRetentionIdentityFlow.VerifyAsync(fixture);
     }
 
-    [Test]
-    public async Task AcEventRetention002CompletePinScanCannotSilentlySkipGroupsAtRecordLimit()
-    {
-        using var fixture = new TopicRetentionFixture();
-        fixture.ReleasePins();
-        fixture.SetLimits(new()
-        {
-            MaxScanRecords = 1
-        });
-        var command = fixture.Purge();
-        await TopicRetentionAssertions.Reject(fixture, command, ErrorCode.BudgetExceeded);
-        await Assert.That(fixture.Submit(command).Problem?.Detail)
-            .IsEqualTo("The resource effect admission exceeds the original operation budget.");
-        fixture.SetLimits(new());
-        fixture.Submit(fixture.Purge()).Get<CommitReceipt>();
-        await TopicRetentionIdentityFlow.VerifyAsync(fixture);
-    }
-
-    [Test]
-    public async Task AcEventRetention002PinBytesAreChargedBeforeRetentionDecision()
-    {
-        using var fixture = new TopicRetentionFixture();
-        fixture.ReleasePins();
-        _ = SubscriptionTestActions.Configure(fixture.Owner, "large", start: SubscriptionStart.FromNow,
-            types: ["Created", .. Enumerable.Range(0, 120).Select(index => "EventType" + index.ToString("D3", System.Globalization.CultureInfo.InvariantCulture) + new string('x', 40))]);
-        var key = KeySpace.Partition("subscription", fixture.Owner.Partition, "topic", "Topic", null, 1L, "large");
-        await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(key)!.Length)).IsGreaterThan(4096);
-        fixture.SetLimits(new()
-        {
-            MaxBatchBytes = 4096
-        });
-        await TopicRetentionAssertions.Reject(fixture, fixture.Purge(), ErrorCode.ResourceExhausted);
-        fixture.SetLimits(new());
-        fixture.Submit(fixture.Purge()).Get<CommitReceipt>();
-        await TopicRetentionIdentityFlow.VerifyAsync(fixture);
-    }
 }

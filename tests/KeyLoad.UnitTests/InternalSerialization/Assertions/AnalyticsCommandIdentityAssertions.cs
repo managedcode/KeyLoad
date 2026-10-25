@@ -25,8 +25,8 @@ internal static class AnalyticsCommandIdentityAssertions
     {
         var request = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span);
         using var document = JsonSerializer.SerializeToDocument(request, JsonDefaults.Options);
-        var work = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits());
-        await Assert.That(AnalyticsIdentity.Canonicalize(request, work, new DatabaseLimits().MaxBatchBytes))
+        var work = new ReadExecutionBudget();
+        await Assert.That(AnalyticsIdentity.Canonicalize(request, work))
             .IsEqualTo(D.CanonicalIdentity(request.CommandId, request.Partition, delete));
         await Assert.That(operation.Value.Fingerprint).IsEqualTo(JsonData.Fingerprint(new
         {
@@ -120,7 +120,7 @@ internal static class AnalyticsCommandIdentityAssertions
     {
         var identity = JsonSerializer.Serialize(request, JsonDefaults.Options);
         var operation = database.CreateCommand(kind, id, D.Root, database.EvaluationClock.GetUtcNow(), identity);
-        var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock,
+        var work = new ReadExecutionBudget(database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
         var charged = database.CreateCommand(kind, id, D.Root, new DateTimeOffset(operation.Timestamp), OrleansSerialization.Serialize(request), work);
         await Assert.That(JsonSerializer.Serialize(OrleansSerialization.Deserialize<T>(charged.Value!.Input.Span,

@@ -22,7 +22,7 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         var source = query.ModelSource!;
         if (source.Kind == ModelQuerySourceKind.Events && query.InnerJoin is not null)
         {
-            budget.ConstrainWork(database.Limits.MaxQueryReadBytes, database.Limits.MaxScanRecords);
+            budget.ConstrainWork(budget.RuntimeMaximumReadBytes, budget.MaximumScanRecords);
         }
         return database.WithModelQueryView(principalId, request.Partition, query.Collection, source, budget,
             (view, principal, resource) => ExecuteModelView(view, principal, resource, request, budget));
@@ -33,7 +33,7 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
     {
         var query = request.Query;
         var source = query.ModelSource!;
-        budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition, [resource]);
+        budget.CaptureResourceLifetimes(budget.CreateView(view), request.Partition, [resource]);
         var modelResource = ModelQueryPolicies.Rebase(resource);
         if (query.InnerJoin is not null)
         {
@@ -67,8 +67,7 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         var row = new QueryRow(QueryEngine.ExplainId, InitialSequence, JsonSerializer.Serialize(new
         {
             AccessPath = accessPath,
-            ModelViews = true,
-            ScanBudget = database.Limits.MaxScanRecords
+            ModelViews = true
         }, JsonDefaults.Options));
         var page = new QueryPage([row], null, database.Store.Position, accessPath);
         budget.CheckResult(page);

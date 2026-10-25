@@ -1,18 +1,17 @@
 using System.Text.Json;
+using KeyLoad.Core;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 namespace KeyLoad.Server;
 
 internal static class ScriptDomInsertScalar
 {
     internal static void Write(Utf8JsonWriter writer, Dom.ScalarExpression value,
-        ScriptDomCompositionParameters parameters, int maximumDepth, int depth, Action checkBudget, CancellationToken token)
+        ScriptDomCompositionParameters parameters, int depth, Action checkBudget, CancellationToken token)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(depth);
         checkBudget();
         token.ThrowIfCancellationRequested();
-        if (depth > maximumDepth)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, DepthExceeded);
-        }
+        ExecutionStackGuard.Ensure();
         if (value is Dom.PrimaryExpression { Collation: not null })
         {
             throw ScriptDomOperationErrors.Unsupported();
@@ -35,7 +34,7 @@ internal static class ScriptDomInsertScalar
                 Parameter(writer, parameters.ReadScalar(value));
                 break;
             case Dom.ParenthesisExpression grouped:
-                Write(writer, grouped.Expression, parameters, maximumDepth, depth + 1, checkBudget, token);
+                Write(writer, grouped.Expression, parameters, depth + 1, checkBudget, token);
                 break;
             default:
                 throw ScriptDomOperationErrors.Unsupported();
@@ -90,7 +89,6 @@ internal static class ScriptDomInsertScalar
     }
     private const int Empty = 0;
     private const char ZeroDigit = '0';
-    private const string DepthExceeded = "The SQL INSERT expression exceeds its existing depth limit.";
     private const string DotExponent = ".e";
     private const string ZeroDotExponent = ".0e";
     private const string DotUpperExponent = ".E";

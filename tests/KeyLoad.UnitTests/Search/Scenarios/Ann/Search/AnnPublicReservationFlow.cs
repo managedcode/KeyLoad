@@ -63,7 +63,7 @@ internal static class AnnPublicReservationFlow
     }
 
     private static ReadExecutionBudget Read(TestDatabase database)
-        => new(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Database.EvaluationClock,
+        => new(database.Database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
 
     private static async Task RequireAsync(TestDatabase database, AnnGenerationOwner owner,

@@ -17,8 +17,7 @@ internal static class TextHostSearch
         {
             try
             {
-                original = new(Path.Combine(directory, TextHostResourceRoots.BootstrapDirectory),
-                    options.Core.DatabaseLimits, database.Store.Identity.NodeId, options.RuntimeText, resources: resources);
+                original = new(Path.Combine(directory, TextHostResourceRoots.BootstrapDirectory), database.Store.Identity.NodeId, options.RuntimeText, resources: resources);
                 var result = OpenMaintenance(database, directory, options, clock, observer, resources, original);
                 original = null;
                 return result;

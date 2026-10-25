@@ -1,34 +1,14 @@
-using System.Text;
 
 namespace KeyLoad.UnitTests.RelationalStorage;
 
 internal sealed class RelationalResourceTests
 {
     private const string Alpha = "alpha";
-    private const string UnicodeValue = "𝄞𝄞𝄞𝄞";
     private const string EmptyKey = "\"key\":\"first\",";
     private const string NullableIndex = "nullable-name";
     private const string NullablePath = "/note";
     private const string NullNote = ",\"note\":null}";
     private const string Beta = "beta";
-
-    [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task AcAisql003OriginalUtf8ByteLimitRejectsBeforeRowPublication(bool unicode)
-    {
-        var row = unicode ? RelationalTestData.Row().Replace(Alpha, UnicodeValue, StringComparison.Ordinal) : RelationalTestData.Row();
-        var byteLimit = unicode ? row.Length : Encoding.UTF8.GetByteCount(row) - 1;
-        using var database = new TestDatabase(new()
-        {
-            MaxDocumentBytes = byteLimit
-        });
-        RelationalTestData.Configure(database);
-        var rejected = RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, row));
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(database.Database.GetDocument(RelationalTestData.Root,
-            new(database.Partition, RelationalTestData.Table, RelationalTestData.First))).IsNull();
-    }
 
     [Test]
     public async Task AcAisql003RequiredPrimaryColumnCannotBeAbsent()

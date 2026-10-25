@@ -1,4 +1,3 @@
-using System.Text;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.QueryExecution;
@@ -7,31 +6,23 @@ internal static class ScriptDomSyntax
 {
     /// <summary>Parses exactly one execution T-SQL statement inside the existing operation lifetime.</summary>
     /// <param name="sql">Original bounded SQL text.</param>
-    /// <param name="limitsOptions">Validated operation limits.</param>
     /// <param name="checkBudget">Original operation deadline and work callback.</param>
     /// <param name="cancellationToken">Original caller token.</param>
     /// <returns>The execution statement; successful parsing does not authorize its execution.</returns>
-    internal static Dom.TSqlStatement Parse(string sql, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions, Action checkBudget, CancellationToken cancellationToken)
-        => Parse(sql, limitsOptions, checkBudget, null, cancellationToken);
+    internal static Dom.TSqlStatement Parse(string sql, Action checkBudget, CancellationToken cancellationToken)
+        => Parse(sql, checkBudget, null, cancellationToken);
 
-    internal static Dom.TSqlStatement Parse(string sql, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions,
+    internal static Dom.TSqlStatement Parse(string sql,
         Action checkBudget, Action<IList<Dom.TSqlParserToken>, Action>? validateTokens, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(sql);
-        ArgumentNullException.ThrowIfNull(limitsOptions);
-        var limits = limitsOptions.Value;
         ArgumentNullException.ThrowIfNull(checkBudget);
         void Check()
         {
             cancellationToken.ThrowIfCancellationRequested();
             checkBudget();
         }
-        limits.Validate();
         Check();
-        if (sql.Length > limits.MaxQueryBytes || Encoding.UTF8.GetByteCount(sql) > limits.MaxQueryBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.BytesDetail);
-        }
         var parser = new Dom.TSql180Parser(initialQuotedIdentifiers: true, Dom.SqlEngineType.Standalone);
         using var reader = new ScriptDomBoundedReader(sql, Check);
         var tokens = parser.GetTokenStream(reader, out var lexicalErrors);
@@ -40,8 +31,8 @@ internal static class ScriptDomSyntax
         {
             throw ScriptDomErrors.Invalid();
         }
-        ScriptDomTokenBounds.Require(tokens, limits, Check, validateTokens);
-        var fragment = parser.Parse(new ScriptDomCheckedTokens(tokens, limitsOptions, Check), out var errors);
+        ScriptDomTokenBounds.Require(tokens, Check, validateTokens);
+        var fragment = parser.Parse(new ScriptDomCheckedTokens(tokens, Check), out var errors);
         Check();
         if (errors.Count != EmptyCount)
         {
@@ -65,7 +56,8 @@ internal static class ScriptDomSyntax
             throw ScriptDomErrors.Unsupported();
         }
         var statement = script.Batches[FirstIndex].Statements[FirstIndex];
-        statement.Accept(new ScriptDomSlotVisitor(RequireOrigin(statement), null, Check, cancellationToken));
+        _ = RequireOrigin(statement);
+        statement.Accept(new ScriptDomSlotVisitor(null, Check, cancellationToken));
         Check();
         return statement;
     }
@@ -80,7 +72,8 @@ internal static class ScriptDomSyntax
         }
         cancellationToken.ThrowIfCancellationRequested();
         checkBudget();
-        statement.Accept(new ScriptDomSlotVisitor(RequireOrigin(statement), positionalParameterCount, checkBudget, cancellationToken));
+        _ = RequireOrigin(statement);
+        statement.Accept(new ScriptDomSlotVisitor(positionalParameterCount, checkBudget, cancellationToken));
         cancellationToken.ThrowIfCancellationRequested();
         checkBudget();
     }

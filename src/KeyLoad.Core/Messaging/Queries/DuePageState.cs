@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Options;
-
 namespace KeyLoad.Core;
 
 internal sealed class DuePageState
@@ -11,12 +9,13 @@ internal sealed class DuePageState
     private readonly long started;
     private readonly ReadExecutionBudget budget;
     private readonly long maximumRangeBytes;
+    internal long MaximumRangeBytes => maximumRangeBytes;
     internal int MaximumRecordsPerPage
     {
         get;
     }
 
-    internal DuePageState(IOptions<DatabaseLimits> limits, DateTimeOffset wakeAt, TimeProvider clock, TimeSpan discoveryDeadline, int maximumRecordsPerPage, long maximumRangeBytes,
+    internal DuePageState(DateTimeOffset wakeAt, TimeProvider clock, TimeSpan discoveryDeadline, int maximumRecordsPerPage, long maximumRangeBytes,
         CancellationToken cancellationToken)
     {
         this.clock = clock;
@@ -26,7 +25,7 @@ internal sealed class DuePageState
         MaximumRecordsPerPage = maximumRecordsPerPage;
         WakeAt = wakeAt;
         CancellationToken = cancellationToken;
-        budget = new(limits, clock, cancellationToken);
+        budget = new(clock, cancellationToken);
     }
 
     internal DateTimeOffset WakeAt

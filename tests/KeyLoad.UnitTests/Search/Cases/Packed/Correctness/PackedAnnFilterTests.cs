@@ -15,9 +15,9 @@ internal sealed class PackedAnnFilterTests
         PackedAnnIndexTestSupport.PersistVectors(database, space, PackedAnnTestData.Field(metric),
             [[1, 0], [1, 0], [0, 1], [-1, 0], [0, -1]]);
         var records = PackedAnnTestData.Load(database, metric);
-        var index = PackedAnnIndexTestSupport.Build(database, metric, records);
+        var index = PackedAnnIndexTestSupport.Build(metric, records);
         var eligible = Bits(records.Length, 0, 1);
-        var result = index.Search(new float[] { 1, 0 }, 2, eligible, PackedAnnIndexTestSupport.Budget(database));
+        var result = index.Search(new float[] { 1, 0 }, 2, eligible, PackedAnnIndexTestSupport.Budget());
         await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);
         await Assert.That(result.Candidates.Select(candidate => candidate.DocumentId))
             .IsEquivalentTo(new[] { records[0].DocumentId, records[1].DocumentId }, CollectionOrdering.Matching);
@@ -25,9 +25,9 @@ internal sealed class PackedAnnFilterTests
         await Assert.That(result.Candidates[1].DocumentId).IsEqualTo(records[1].DocumentId);
         await Assert.That(result.Candidates[0].Score).IsEqualTo(result.Candidates[1].Score);
         await AssertValidation(() => index.Search(new float[] { 1, 0 }, 1, Array.Empty<ulong>(),
-            PackedAnnIndexTestSupport.Budget(database)));
+            PackedAnnIndexTestSupport.Budget()));
         await AssertValidation(() => index.Search(new float[] { 1, 0 }, 1, new ulong[] { 1UL << records.Length },
-            PackedAnnIndexTestSupport.Budget(database)));
+            PackedAnnIndexTestSupport.Budget()));
     }
 
     [Test]
@@ -40,10 +40,10 @@ internal sealed class PackedAnnFilterTests
         PackedAnnTestData.Seed(database, 512, space.Dimension, metric);
         var records = PackedAnnTestData.Load(database, metric);
         var options = new PackedAnnOptions { Connections = 4, EfConstruction = 64, EfSearch = 16, ExactThreshold = 8 };
-        var index = PackedAnnIndexTestSupport.Build(space, records, options, PackedAnnIndexTestSupport.Budget(database));
+        var index = PackedAnnIndexTestSupport.Build(space, records, options, PackedAnnIndexTestSupport.Budget());
         var bitmap = Bits(records.Length, Enumerable.Range(0, records.Length).Where(indexValue => indexValue % 2 == 0).ToArray());
         var query = PackedAnnTestData.Vector(88, space.Dimension, PackedAnnTestData.CorpusSeed);
-        var result = index.Search(query, 10, bitmap, PackedAnnIndexTestSupport.Budget(database));
+        var result = index.Search(query, 10, bitmap, PackedAnnIndexTestSupport.Budget());
         await Assert.That(result.Mode).IsEqualTo(AnnSearchMode.Approximate);
         await Assert.That(result.EdgeVisits > 0).IsTrue();
         await Assert.That(result.Candidates.Length).IsEqualTo(10);
@@ -71,7 +71,7 @@ internal sealed class PackedAnnFilterTests
             ExactThreshold = 0,
             Seed = PackedAnnTestData.CorpusSeed
         };
-        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var budget = PackedAnnIndexTestSupport.Budget();
         var index = PackedAnnBuildObservationRunner.Build(PackedAnnBuildScenario.FilteredCandidateBound,
             space, records, options, budget);
         var selected = Enumerable.Range(0, records.Length).Where(ordinal => ordinal % 100 == 0).ToArray();
@@ -81,11 +81,11 @@ internal sealed class PackedAnnFilterTests
         var original = JsonDefaults.Serialize(records);
         AnnSearchResult? partial = null;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => partial = index.Search(query, selected.Length,
-            bitmap, PackedAnnIndexTestSupport.Budget(database)));
+            bitmap, PackedAnnIndexTestSupport.Budget()));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(failure.Message).IsEqualTo("The bounded ANN graph did not supply the requested eligible candidates.");
         await Assert.That(partial).IsNull();
-        var healthy = index.Search(query, 1, null, PackedAnnIndexTestSupport.Budget(database));
+        var healthy = index.Search(query, 1, null, PackedAnnIndexTestSupport.Budget());
         await Assert.That(healthy.Mode).IsEqualTo(AnnSearchMode.Approximate);
         await Assert.That(healthy.Candidates.Length).IsEqualTo(1);
         await AdaptiveFilteredPlannerOracle.AssertReturnedCandidatesAsync(healthy, records, query,

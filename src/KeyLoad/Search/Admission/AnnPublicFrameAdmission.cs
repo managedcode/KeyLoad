@@ -34,6 +34,10 @@ internal static class AnnPublicFrameAdmission
     private static long Scratch(ServerRuntimeOptions configured, ReadExecutionBudget budget)
         => checked(configured.Core.PackedAnn.Value.MaxScratchBytes
             + ((long)configured.Core.AnnSeed.Value.MaxRecords + BitmapRemainder) / BitmapWordBits * BitmapWordBytes
-            + (long)budget.MaximumResultBytes * Utf16BytesPerWireByte
+            + (long)ReplyBytes(configured, budget) * Utf16BytesPerWireByte
             + (long)configured.Core.QueryExecution.Value.MaximumSearchResults * RankingBytesPerResult);
+
+    // One public ANN page returns as one grain reply, so its encoded result never exceeds the reply ceiling.
+    private static int ReplyBytes(ServerRuntimeOptions configured, ReadExecutionBudget budget)
+        => Math.Min(budget.MaximumResultBytes, configured.GrainRouting.Value.MaximumReplyBytes);
 }

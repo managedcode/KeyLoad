@@ -14,11 +14,11 @@ internal static class TextIncrementalPagePlanner
 
     internal static TextIncrementalPagePlan Plan(ProjectionBatch batch,
         TextIncrementalRecord[] records, ulong nextRecord, string collection, string field,
-        int maximumRecords, ReadExecutionBudget budget, QueryExecutionOptions execution)
+        ReadExecutionBudget budget, QueryExecutionOptions execution)
     {
         budget.Check();
         if (batch.Entries.IsDefault || batch.Consumer.Released || records is null
-            || nextRecord < InitialRecord || records.Length > maximumRecords
+            || nextRecord < InitialRecord
             || batch.ThroughSequence < batch.Consumer.Checkpoint)
         {
             throw TextErrors.Corrupt();
@@ -51,7 +51,7 @@ internal static class TextIncrementalPagePlanner
             var after = entry.After ?? throw TextErrors.Corrupt();
             map.TryGetValue(after.Reference, out var current);
             TextIncrementalRevision.Require(entry, current, batch.Consumer.Consumer.Partition, collection, budget);
-            var id = current?.Id ?? Allocate(map.Count, maximumRecords, ref nextRecord);
+            var id = current?.Id ?? Allocate(ref nextRecord);
             var removals = TextIncrementalTokens.Capture(entry.Before, field, id, budget, execution);
             var additions = TextIncrementalTokens.Capture(after, field, id, budget, execution);
             var retained = new TextIncrementalRecord(id, after.Reference, after.Revision,
@@ -64,9 +64,9 @@ internal static class TextIncrementalPagePlanner
         return new(changes.ToArray(), map.Values.OrderBy(record => record.Id).ToArray(), nextRecord);
     }
 
-    private static ulong Allocate(int count, int maximumRecords, ref ulong nextRecord)
+    private static ulong Allocate(ref ulong nextRecord)
     {
-        if (count >= maximumRecords || nextRecord == ulong.MaxValue)
+        if (nextRecord == ulong.MaxValue)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, MapExceeded);
         }

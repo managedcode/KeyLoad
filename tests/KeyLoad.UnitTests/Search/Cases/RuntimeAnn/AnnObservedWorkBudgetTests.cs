@@ -8,16 +8,14 @@ namespace KeyLoad.UnitTests.Search;
 internal sealed class AnnObservedWorkBudgetTests
 {
     private const int Count = 3;
-    private const int DeadlineSeconds = 1;
     private const int ExpiredSeconds = 2;
     private const string DeadlineDetail = "The read execution deadline is exceeded.";
 
     [Test]
-    [Arguments(false)]
     [Arguments(true)]
     public async Task ActualOwnedVerifyWorkRejectsOriginalCancellationOrElapsedBudgetThenPublishesHealthy(bool cancel)
     {
-        using var database = AnnSeedTestSupport.Create(Count, new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds });
+        using var database = AnnSeedTestSupport.Create(Count, new DatabaseLimits());
         var request = AnnMaintenanceTestData.Pin(database);
         var clock = new QueryObservedWorkClock();
         AnnMaintenanceCapabilityResult? built = null;

@@ -4,6 +4,7 @@ namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class CanonicalJsonTests
 {
+    private const int SystemTextJsonDefaultDepth = 64;
     private const string NestedInput = "{\"z\":null,\"a\":{\"é\":\"line\\n\",\"B\":1e+01}}";
     private const string NestedCanonical = "{\"a\":{\"B\":10,\"\\u00E9\":\"line\\n\"},\"z\":null}";
     private const string OrderedFingerprint = "d898aa36fe59fe1b7fcbcad5943548b75b80e65bf34a76b209c9eae8086dd0d0";
@@ -19,11 +20,11 @@ internal sealed class CanonicalJsonTests
     [Test]
     public async Task AcMp006CanonicalValidationOrdersNestedPropertiesAndPreservesEscaping()
     {
-        var canonical = JsonData.Validate(NestedInput, new DatabaseLimits());
+        var canonical = JsonData.Validate(NestedInput);
 
         await Assert.That(canonical).IsEqualTo(NestedCanonical);
-        await Assert.That(JsonData.Validate("1.2300", new DatabaseLimits(), requireObject: false)).IsEqualTo("1.23");
-        await Assert.That(JsonData.Validate("null", new DatabaseLimits(), requireObject: false)).IsEqualTo("null");
+        await Assert.That(JsonData.Validate("1.2300", requireObject: false)).IsEqualTo("1.23");
+        await Assert.That(JsonData.Validate("null", requireObject: false)).IsEqualTo("null");
     }
 
     [Test]
@@ -44,49 +45,36 @@ internal sealed class CanonicalJsonTests
     {
         using var document = JsonDocument.Parse(NestedUnicodeInput);
 
-        await Assert.That(JsonData.Validate(NestedUnicodeInput, new())).IsEqualTo(NestedUnicodeCanonical);
+        await Assert.That(JsonData.Validate(NestedUnicodeInput)).IsEqualTo(NestedUnicodeCanonical);
         await Assert.That(JsonData.Fingerprint(document.RootElement)).IsEqualTo(NestedUnicodeFingerprint);
     }
 
     [Test]
-    public async Task AcMp006ValidationRejectsDuplicateDecimalDepthAndInputBudgetErrors()
+    public async Task AcMp006ValidationRejectsDuplicateDecimalAndDepthErrors()
     {
-        var duplicate = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("{\"a\":1,\"a\":2}", new()));
+        var duplicate = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("{\"a\":1,\"a\":2}"));
         using var duplicateDocument = JsonDocument.Parse("{\"a\":1,\"a\":2}");
         var fingerprintDuplicate = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Fingerprint(duplicateDocument.RootElement));
-        var decimalRange = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("1e1000", new(), false));
-        var depth = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("{\"a\":{\"b\":{\"c\":1}}}",
-            new()
-            {
-                MaxJsonDepth = 2
-            }));
-        var inputBytes = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("{} ",
-            new()
-            {
-                MaxDocumentBytes = 2
-            }));
-        var requiredObject = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("null", new()));
+        var decimalRange = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("1e1000", false));
+        var depth = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate(
+            string.Concat(Enumerable.Repeat("{\"a\":", SystemTextJsonDefaultDepth + 1)) + "1"
+            + new string('}', SystemTextJsonDefaultDepth + 1)));
+        var requiredObject = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Validate("null"));
 
         await Assert.That(duplicate.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fingerprintDuplicate.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(decimalRange.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(depth.Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(inputBytes.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(requiredObject.Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(JsonData.Validate("{}", new()
-        {
-            MaxDocumentBytes = 2
-        })).IsEqualTo("{}");
+        await Assert.That(JsonData.Validate("{}")).IsEqualTo("{}");
     }
 
     [Test]
     public async Task AcMp006ValidationRejectsNullArgumentsBeforeWork()
     {
-        var missingJson = Assert.ThrowsExactly<ArgumentNullException>(() => JsonData.Validate(null!, new()));
-        var missingLimits = Assert.ThrowsExactly<ArgumentNullException>(() => JsonData.Validate("{}", null!));
+        var missingJson = Assert.ThrowsExactly<ArgumentNullException>(() => JsonData.Validate(null!));
 
         await Assert.That(missingJson.ParamName).IsEqualTo("json");
-        await Assert.That(missingLimits.ParamName).IsEqualTo("limits");
     }
 
     [Test]

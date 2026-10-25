@@ -98,7 +98,7 @@ internal static class QueueEntityRefJoinBinding
             }
             throw Errors.Fail(ErrorCode.UnsupportedCapability, Invalid);
         }
-        budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition, [queue, target]);
+        budget.CaptureResourceLifetimes(budget.CreateView(view), request.Partition, [queue, target]);
         return target;
     }
 

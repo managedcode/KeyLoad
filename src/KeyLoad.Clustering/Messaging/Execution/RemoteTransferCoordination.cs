@@ -31,12 +31,12 @@ internal static class RemoteTransferCoordination
             {
                 if (hint.AcceptAttemptCeiling is not null && error == ErrorCode.ResourceExhausted)
                 {
-                    await RemoteTransferAttemptCoordination.AdvanceAsync(execution, codec, hint, source.IntentToken,
+                    await RemoteTransferAttemptCoordination.AdvanceAsync(execution, hint, source.IntentToken,
                         lifetime.Token).ConfigureAwait(true);
                 }
                 if (hint.RepairCeiling is not null && error == ErrorCode.PermissionDenied)
                 {
-                    await RemoteTransferRepairCoordination.AdvanceAsync(execution, codec, hint, source.IntentToken,
+                    await RemoteTransferRepairCoordination.AdvanceAsync(execution, hint, source.IntentToken,
                         QueueTransferRepairStage.Accept, null, lifetime.Token).ConfigureAwait(true);
                 }
                 return new(error);
@@ -47,10 +47,10 @@ internal static class RemoteTransferCoordination
         {
             return new(ErrorCode.UnknownWriteOutcome);
         }
-        return await CompleteAsync(execution, codec, hint, receipt, lifetime.Token).ConfigureAwait(true);
+        return await CompleteAsync(execution, hint, receipt, lifetime.Token).ConfigureAwait(true);
     }
 
-    private static async Task<DueDispatchResult> CompleteAsync(RemoteTransferEnvelopeExecution execution, GrainRequestCodec codec,
+    private static async Task<DueDispatchResult> CompleteAsync(RemoteTransferEnvelopeExecution execution,
         RemoteTransferCoordinationHint hint, QueueTransferReceiptInspection receipt, CancellationToken token)
     {
         var source = await SourceAsync(execution, hint, token).ConfigureAwait(true);
@@ -68,7 +68,7 @@ internal static class RemoteTransferCoordination
             [new CompleteQueueTransfer(hint.Source, hint.TransferId, receipt.ReceiptToken)]), token).ConfigureAwait(true);
         if (hint.RepairCeiling is not null && reply.Error == ErrorCode.PermissionDenied)
         {
-            await RemoteTransferRepairCoordination.AdvanceAsync(execution, codec, hint, source.IntentToken,
+            await RemoteTransferRepairCoordination.AdvanceAsync(execution, hint, source.IntentToken,
                 QueueTransferRepairStage.Complete, receipt.ReceiptToken, token).ConfigureAwait(true);
         }
         return new(reply.Error);

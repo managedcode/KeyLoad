@@ -8,7 +8,7 @@ public static class ResourceOutboxScopes
     internal const int ResourceOutboxPriorSequence = 1;
     internal static void ObservePurgedOutboxResources(this DatabaseEngine engine, IKeyValueView view, PurgeOutboxRequest request)
     {
-        if (request.Limit < ResourceOutboxPriorSequence || request.Limit > engine.Limits.MaxResults)
+        if (request.Limit < ResourceOutboxPriorSequence)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, CommandAuthorization.MutationCountBudgetMessage);
         }

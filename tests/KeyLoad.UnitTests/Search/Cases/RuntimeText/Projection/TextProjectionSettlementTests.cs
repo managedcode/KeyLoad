@@ -20,14 +20,14 @@ internal sealed class TextProjectionSettlementTests
         var nodeId = database.Store.Identity.NodeId;
         var scope = CaptureScope(database);
         var root = TextFiles.InitializeRoot(Path.Combine(database.Directory, "execution-text-settlement"),
-            nodeId, database.Database.Limits, UnitTextOptions.Execution());
+            nodeId, UnitTextOptions.Execution());
         var leaf = TextValidation.GenerationLeaf();
-        TextFiles.WriteOwner(root, leaf, nodeId, scope, database.Database.Limits, UnitTextOptions.Execution());
+        TextFiles.WriteOwner(root, leaf, nodeId, scope, UnitTextOptions.Execution());
         TextGeneration? generation = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            generation = new TextGeneration(root, leaf, nodeId, scope, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+            generation = new TextGeneration(root, leaf, nodeId, scope,
                 new TextFileStreamProvider(root, leaf, nodeId, UnitTextOptions.Execution()), UnitTextOptions.Execution());
             var foreignPath = Path.Combine(generation.Path, TextProtocol.RuntimeDirectoryCore, "foreign-entry.bin");
             var foreignBytes = new byte[] { 0x4b, 0x4c, 0x01, 0xff };
@@ -36,7 +36,7 @@ internal sealed class TextProjectionSettlementTests
             var sourceBytes = ReadCanonicalDocument(database);
             using var canceled = new CancellationTokenSource();
             await canceled.CancelAsync();
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: canceled.Token);
+            var budget = new ReadExecutionBudget(cancellationToken: canceled.Token);
 
             var failure = Assert.ThrowsExactly<AggregateException>(() => generation.CloseAndCapture(budget));
             var cancellationRetained = failure.InnerExceptions.Any(exception => exception is OperationCanceledException);

@@ -32,8 +32,8 @@ internal sealed class EventFeedPubSubFreshStateFixture : IDisposable
                 MinimumScratchBytes = MinimumScratchBytes,
                 MaximumScratchBytes = MaximumScratchBytes
             });
-            var limits = Options.Create(new DatabaseLimits { MaxResults = MaximumRows });
-            var actualStorage = new EventFeedPubSubStorage(actualServices, limits, routing);
+            var limits = Options.Create(new DatabaseLimits());
+            var actualStorage = new EventFeedPubSubStorage(actualServices, routing);
             acquiredStorage = actualStorage;
             var actualId = IdFor(Flow);
             services = actualServices;

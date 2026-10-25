@@ -13,11 +13,10 @@ internal static class DistributedSearchOwnedLeafValidation
     private const string InvalidBudget = "The distributed search receiving phase exceeds its original grant.";
     private const string CanonicalTextRequired = "The distributed statistics require the canonical text profile.";
 
-    internal static void Require(DistributedSearchOwnedLeaf request, DatabaseLimits limits,
+    internal static void Require(DistributedSearchOwnedLeaf request,
         QueryExecutionOptions execution, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(execution);
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
@@ -29,15 +28,15 @@ internal static class DistributedSearchOwnedLeafValidation
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
         }
-        if (request.MaxReadBytes < NoBytes || request.MaxReadBytes > limits.MaxQueryReadBytes
-            || request.MaxExaminedRecords < NoRecords || request.MaxExaminedRecords > limits.MaxScanRecords
+        if (request.MaxReadBytes < NoBytes
+            || request.MaxExaminedRecords < NoRecords
             || request.MaxResultBytes < MinimumResultBytes
-            || request.MaxResultBytes > QueryResultBudgetPolicy.Resolve(limits, execution))
+            || request.MaxResultBytes > QueryResultBudgetPolicy.Resolve(execution))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidBudget);
         }
-        SearchRequestValidation.Validate(request.Search, limits, false, execution);
-        FilteredSearchEligibility.ValidateRequest(request.Search.AllowedIds, limits, budget);
+        SearchRequestValidation.Validate(request.Search, false, execution);
+        FilteredSearchEligibility.ValidateRequest(request.Search.AllowedIds, budget);
         if (request.Search.TextIndex is not null)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, CanonicalTextRequired);

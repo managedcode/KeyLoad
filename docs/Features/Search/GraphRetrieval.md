@@ -35,9 +35,9 @@ No existing IDs/aliases are reused.
 
 All walks are outgoing, in the Search partition and a configured graph in the
 same tenant/database. Depth0..16, vertices1..10000, examined edges1..50000,
-nondefault nonempty seeds no greater than MaxVertices/MaxScanRecords, finite
-nonnegative weight, valid identifiers and serialized whole-request MaxQueryBytes
-are validated before reads. Unknown versions fail Validation. Every operator
+nondefault nonempty seeds no greater than MaxVertices, finite nonnegative
+weight and valid identifiers are validated before reads; the serialized request
+has no KeyLoad byte ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). Unknown versions fail Validation. Every operator
 shares the request's read-work, cancellation and retained/output-byte budgets;
 its local caps never reset the shared budget. Limit exhaustion fails explicitly,
 with no truncated success or exact/completeness claim.

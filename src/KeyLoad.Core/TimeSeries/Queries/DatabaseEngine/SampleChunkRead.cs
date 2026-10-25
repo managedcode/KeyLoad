@@ -12,7 +12,7 @@ public static class SampleChunkRead
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.ReadSampleChunkWindowRead(principalId, request, budget);
     }
 
@@ -21,7 +21,7 @@ public static class SampleChunkRead
         budget.Check();
         return engine.Store.Read(original =>
         {
-            var grant = budget.CreateReadGrant(engine.Limits.MaxQueryReadBytes, engine.Limits.MaxScanRecords);
+            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
             var view = budget.CreateView(original, grant);
             var result = TimeSeries.SampleChunkWindowReader.Read(engine, view, principalId, request, budget, engine.TimeSeriesOptions, engine.Store.Position);
             if (request.MinimumToken is { } minimum)

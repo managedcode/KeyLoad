@@ -9,8 +9,7 @@ internal static class SampleChunkWorkEligibility
         ReadExecutionBudget budget)
     {
         budget.Check();
-        var charge = new SampleChunkReadCharge(database.Limits.MaxQueryReadBytes);
-        var state = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(partition, set, series, id), charge);
+        var state = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(partition, set, series, id));
         if (state is null)
         {
             return null;

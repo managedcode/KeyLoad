@@ -14,10 +14,9 @@ internal sealed class FilteredSearchEligibility
     internal bool IsEmpty => allowed is { Count: 0 };
     internal int Count => allowed?.Count ?? int.MaxValue;
 
-    internal static void ValidateRequest(ImmutableArray<string>? requested, DatabaseLimits limits,
+    internal static void ValidateRequest(ImmutableArray<string>? requested,
         ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(budget);
         if (requested is null)
         {
@@ -27,10 +26,6 @@ internal sealed class FilteredSearchEligibility
         if (input.IsDefault)
         {
             throw Errors.Fail(ErrorCode.Validation, FilteredSearchErrors.InvalidAllowlist);
-        }
-        if (input.Length > limits.MaxScanRecords)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, FilteredSearchErrors.AllowlistExceeded);
         }
         foreach (var id in input)
         {

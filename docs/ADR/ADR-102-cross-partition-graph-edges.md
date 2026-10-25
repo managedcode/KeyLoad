@@ -2,6 +2,8 @@
 
 Status: Accepted implementation contract; source integration and actual tests remain required. Related REQ/AC-GRAPH-XPART-001..005. See [CrossPartitionEdges](../Features/GraphTraversal/CrossPartitionEdges.md).
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 ## Decision
 
 The source atomic partition remains the canonical owner of each graph edge. For a distinct target atomic partition, the source mutation commits a revisioned graph-owned delivery intent in its ordinary atomic transaction. The destination reverse adjacency is a derived record applied in a separate ordinary atomic transaction; the apply reaches the target partition grain through an ordinary Orleans call and runs on that partition's silo-local ZoneTree owner ([ADR-136](ADR-136-orleans-partition-ownership.md)). Source completion is another separate source transaction. We do not claim cross-partition atomic commit. The delivery uses the existing authenticated signed-CQRS envelope and persisted current grants as trust authority; locator fields and original principal/policy metadata never authorize a caller. Completion reloads the committed receiver high-water state through the target partition grain.

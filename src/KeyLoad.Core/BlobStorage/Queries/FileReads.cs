@@ -9,7 +9,7 @@ public static class FileReads
 {
     internal static FileMetadataState ReadFileMetadataBound(this DatabaseEngine engine, string principalId, FileMetadataQuery request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
-        var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock, cancellationToken);
+        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
         work.AttachResourceLifetimeBinding(binding);
         using var admission = engine.AdmitQuery(cancellationToken);
         var result = engine.Store.Read(raw => engine.ReadFileMetadata(work.CreateView(raw), principalId, request));
@@ -48,7 +48,7 @@ public static class FileReads
 
     internal static FileMetadataState ReadFilePage(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, FileMetadataQuery request, ResourceIncarnation incarnation)
     {
-        if (request.Limit < FileStorageProtocol.FirstRecordCount || request.Limit > engine.Limits.MaxResults || view.MaximumRangeRecords < FileStorageProtocol.FirstRecordCount)
+        if (request.Limit < FileStorageProtocol.FirstRecordCount || view.MaximumRangeRecords < FileStorageProtocol.FirstRecordCount)
         {
             throw Errors.Fail(ErrorCode.Validation, FileStorageProtocol.Invalid);
         }

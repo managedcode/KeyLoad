@@ -8,12 +8,12 @@ internal static class DueWorkRecordDecoder
     private const int InitialSequence = 0;
     private const int MinimumPositiveCount = 1;
 
-    internal static DueWorkHint? Read(DatabaseEngine database, DueWorkKind kind, ReadOnlySpan<byte> key,
+    internal static DueWorkHint? Read(DueWorkKind kind, ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
         => kind switch
         {
-            DueWorkKind.Schedule => ReadSchedule(database, key, value, wakeAt),
-            DueWorkKind.Saga => ReadSaga(database, key, value, wakeAt),
+            DueWorkKind.Schedule => ReadSchedule(key, value, wakeAt),
+            DueWorkKind.Saga => ReadSaga(key, value, wakeAt),
             _ => throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord)
         };
 
@@ -33,11 +33,11 @@ internal static class DueWorkRecordDecoder
     internal static ErrorCode SafeError(ErrorCode code)
         => code is ErrorCode.Validation or ErrorCode.ResourceExhausted ? ErrorCode.Corruption : code;
 
-    private static DueWorkHint? ReadSchedule(DatabaseEngine database, ReadOnlySpan<byte> key,
+    private static DueWorkHint? ReadSchedule(ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
     {
         var record = OrleansSerialization.Deserialize<RecurringScheduleRecord>(value);
-        ValidateSchedule(database, key, record);
+        ValidateSchedule(key, record);
         var dueAt = OccurrenceTime(record.Definition, record.NextOrdinal);
         ValidateOccurrenceExpiry(record.Definition, dueAt);
         if (record.Cancelled)
@@ -50,18 +50,18 @@ internal static class DueWorkRecordDecoder
             : null;
     }
 
-    private static DueWorkHint? ReadSaga(DatabaseEngine database, ReadOnlySpan<byte> key,
+    private static DueWorkHint? ReadSaga(ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
     {
         var record = OrleansSerialization.Deserialize<SagaRecord>(value);
-        ValidateSaga(database, key, record);
+        ValidateSaga(key, record);
         return record.Phase == SagaPhase.Waiting && record.Deadline is { } dueAt && dueAt <= wakeAt
             ? new(DueWorkKind.Saga, record.Lane, record.SagaId, record.CreatorPrincipalId,
                 record.Revision, InitialSequence, InitialSequence, dueAt)
             : null;
     }
 
-    private static void ValidateSchedule(DatabaseEngine database, ReadOnlySpan<byte> key,
+    private static void ValidateSchedule(ReadOnlySpan<byte> key,
         RecurringScheduleRecord record)
     {
         if (HasInvalidScheduleShape(record))
@@ -71,8 +71,8 @@ internal static class DueWorkRecordDecoder
         ValidateLane(record.Lane!);
         JsonData.Identifier(record.CreatorPrincipalId!);
         ValidateKey(key, DueWorkProtocol.ScheduleSpace, record.Lane!, record.ScheduleId);
-        _ = JsonData.Validate(record.Definition!.PayloadJson!, database.Limits);
-        _ = JsonData.Validate(record.Definition!.HeadersJson!, database.Limits);
+        _ = JsonData.Validate(record.Definition!.PayloadJson!);
+        _ = JsonData.Validate(record.Definition!.HeadersJson!);
         if (record.Definition.OrderingKey is { } orderingKey)
         {
             JsonData.Identifier(orderingKey);
@@ -96,7 +96,7 @@ internal static class DueWorkRecordDecoder
             || record.Definition.Misfire != RecurringMisfirePolicy.CatchUp
             || record.Definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > RecurringSagaProtocol.MaximumMessageTimeToLiveTicks);
 
-    private static void ValidateSaga(DatabaseEngine database, ReadOnlySpan<byte> key, SagaRecord record)
+    private static void ValidateSaga(ReadOnlySpan<byte> key, SagaRecord record)
     {
         if (record is null || record.Lane is null || record.Lane.Partition is null
             || record.CreatorPrincipalId is null || record.SagaId == Guid.Empty || record.Revision < MinimumPositiveCount
@@ -111,14 +111,14 @@ internal static class DueWorkRecordDecoder
         ValidateLane(record.Lane);
         JsonData.Identifier(record.CreatorPrincipalId);
         ValidateKey(key, DueWorkProtocol.SagaSpace, record.Lane, record.SagaId);
-        _ = JsonData.Validate(record.StateJson, database.Limits);
+        _ = JsonData.Validate(record.StateJson);
         if (record.Timeout is { } timeout)
         {
-            ValidateTimeout(database, record.Lane, timeout, record.Deadline!.Value);
+            ValidateTimeout(record.Lane, timeout, record.Deadline!.Value);
         }
     }
 
-    private static void ValidateTimeout(DatabaseEngine database, QueueLaneRef lane,
+    private static void ValidateTimeout(QueueLaneRef lane,
         SagaTimeoutDefinition timeout, DateTimeOffset deadline)
     {
         if (timeout.Queue is null || timeout.Queue.Partition is null || timeout.Queue.Partition != lane.Partition
@@ -132,8 +132,8 @@ internal static class DueWorkRecordDecoder
         {
             JsonData.Identifier(orderingKey);
         }
-        _ = JsonData.Validate(timeout.PayloadJson, database.Limits);
-        _ = JsonData.Validate(timeout.HeadersJson, database.Limits);
+        _ = JsonData.Validate(timeout.PayloadJson);
+        _ = JsonData.Validate(timeout.HeadersJson);
         if (timeout.TimeToLive is { } duration)
         {
             try

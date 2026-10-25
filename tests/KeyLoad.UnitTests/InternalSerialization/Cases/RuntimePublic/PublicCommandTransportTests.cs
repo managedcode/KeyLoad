@@ -16,11 +16,10 @@ internal sealed class PublicCommandTransportTests
     {
         using var database = new TestDatabase();
         var operation = PublicNormalizationFixture.Create(database, shape);
-        var decoded = Decode(database, operation);
+        var decoded = Decode(operation);
         await Assert.That(decoded.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(decoded.CommandKind).IsEqualTo(operation.Value!.Kind);
-        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation,
-            database.Database.OperationLimitsOptions, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var request = codec.Decode(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
             operation.Value.Kind, operation.CommandId, decoded.Payload));
         var actorKey = GrainPartitionResolver.Resolve(request);
@@ -40,7 +39,7 @@ internal sealed class PublicCommandTransportTests
         await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();
     }
 
-    private static McpDecodedOperation Decode(TestDatabase database, Command<DatabaseCommand> operation)
+    private static McpDecodedOperation Decode(Command<DatabaseCommand> operation)
     {
         using var document = JsonDocument.Parse(PublicNormalizationFixture.PublicJson(operation));
         var arguments = new Dictionary<string, JsonElement>
@@ -50,10 +49,10 @@ internal sealed class PublicCommandTransportTests
         if (operation.Value!.Kind == OperationKind.Batch)
         {
             return McpArgumentDecoder.Command<CommandRequest>(arguments, operation.Value!.Kind, value => value.CommandId,
-                database.Database.Limits.MaxBatchBytes);
+                UnitMcpOptions.CanonicalPayloadBytes);
         }
         arguments[McpCatalogProtocol.CommandId] = JsonSerializer.SerializeToElement(operation.CommandId, JsonDefaults.Options);
         return McpArgumentDecoder.HeaderCommand<ConfigurePrincipalRequest>(arguments, operation.Value!.Kind,
-            database.Database.Limits.MaxBatchBytes);
+            UnitMcpOptions.CanonicalPayloadBytes);
     }
 }

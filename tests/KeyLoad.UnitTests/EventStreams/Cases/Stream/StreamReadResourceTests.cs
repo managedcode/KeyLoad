@@ -11,29 +11,12 @@ internal sealed class StreamReadResourceTests
         var exactBytes = JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options).Length;
         fixture.Reopen(new()
         {
-            MaxBatchBytes = exactBytes
         });
 
         var actual = fixture.Read();
 
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
-    }
-
-    [Test]
-    public async Task AcMp005CompletePageMetadataCountsTowardTheResultLimit()
-    {
-        using var fixture = new StreamReadResourceFixture(eventCount: 1);
-        var expected = fixture.Read();
-        var exactBytes = JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options).Length;
-        fixture.Reopen(new()
-        {
-            MaxBatchBytes = exactBytes - 1
-        });
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read());
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]
@@ -49,23 +32,6 @@ internal sealed class StreamReadResourceTests
         await Assert.That(secondPage.Events.Select(record => record.Revision).SequenceEqual([3L])).IsTrue();
         await Assert.That(secondPage.HasMore).IsFalse();
         await Assert.That(firstPage.CutPosition).IsEqualTo(secondPage.CutPosition);
-    }
-
-    [Test]
-    public async Task AcMp005RangeWorkStopsBeforeTheNextEventAndAHealthyReadStillWorks()
-    {
-        using var fixture = new StreamReadResourceFixture(eventCount: 3);
-        var headAndFirstEventBytes = fixture.HeadAndFirstEventReadBytes();
-        fixture.Reopen(new()
-        {
-            MaxQueryReadBytes = headAndFirstEventBytes - 1
-        });
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read());
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-
-        fixture.Reopen(new());
-        await Assert.That(fixture.Read().Events.Length).IsEqualTo(3);
     }
 
     [Test]

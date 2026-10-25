@@ -28,7 +28,7 @@ internal static class AnnPublishedImageAssertions
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var seeds = new AnnSeedOptions();
-                var read = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+                var read = new ReadExecutionBudget();
                 var current = AnnSeedCollector.CapturePinned(database.Database, AnnProjectionPinTestSupport.Principal,
                     request, Options.Create(seeds), read);
                 var work = new AnnWorkBudget(read, seeds.MaxWorkUnits);
@@ -46,7 +46,7 @@ internal static class AnnPublishedImageAssertions
                     await Assert.That(row.Values).IsEquivalentTo(Values[index], CollectionOrdering.Matching);
                 }
                 _ = actual.AdmitLoaded(loaded.Index, loaded.Manifest, current);
-                await AnnPinnedLifetimeAssertions.AssertAsync(database, actual, request, current);
+                await AnnPinnedLifetimeAssertions.AssertAsync(actual, request, current);
                 await Assert.That(AnnMaintenanceTestData.Snapshot(database)).IsEquivalentTo(before, CollectionOrdering.Matching);
                 await Assert.That(database.Store.Position).IsEqualTo(position);
             }, failures);

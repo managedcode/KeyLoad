@@ -2,9 +2,8 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Search;
 
-internal sealed class TextProjectionShutdown(string root, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
 {
-    private readonly DatabaseLimits limits = limitsOptions.Value;
     internal void Run(TextGenerationSlot?[] slots)
     {
         const int SlotsFirstIndex = 0;
@@ -39,7 +38,7 @@ internal sealed class TextProjectionShutdown(string root, IOptions<DatabaseLimit
         if (generation.Published && generation.CurrentIndex is not null)
         {
             var beforeRefresh = failures.Count;
-            ServerFailureObserver.Observe(() => TextSettlement.Refresh(root, limits, generation,
+            ServerFailureObserver.Observe(() => TextSettlement.Refresh(root, generation,
                 budget: null, faultObserver, physicalGate, executionOptions: executionOptions), failures);
             canDelete = failures.Count == beforeRefresh;
         }
@@ -50,7 +49,7 @@ internal sealed class TextProjectionShutdown(string root, IOptions<DatabaseLimit
         if (!keepFiles && canDelete && generation.CurrentIndex is null)
         {
             ServerFailureObserver.Observe(() => physicalGate.Run(() => TextFiles.DeleteBuildingGeneration(
-                root, generation.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: resources)), failures);
+                root, generation.Leaf, sourceNodeId, executionOptions: executionOptions, resources: resources)), failures);
             if (failures.Count == 0)
             {
                 slot.SharedReservation?.CompleteAfterJoinedCleanup();
@@ -67,7 +66,7 @@ internal sealed class TextProjectionShutdown(string root, IOptions<DatabaseLimit
         }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => physicalGate.Run(() => TextFiles.DeleteBuildingGeneration(
-            root, slot.Leaf, sourceNodeId, limits, executionOptions: executionOptions, resources: resources)), failures);
+            root, slot.Leaf, sourceNodeId, executionOptions: executionOptions, resources: resources)), failures);
         if (failures.Count == 0)
         {
             slot.SharedReservation?.CompleteAfterJoinedCleanup();

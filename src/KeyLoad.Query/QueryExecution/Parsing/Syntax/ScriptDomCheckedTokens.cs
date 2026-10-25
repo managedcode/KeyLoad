@@ -1,17 +1,17 @@
+using KeyLoad.Core;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.QueryExecution;
 
-internal sealed class ScriptDomCheckedTokens(IList<Dom.TSqlParserToken> tokens, global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions, Action check)
+internal sealed class ScriptDomCheckedTokens(IList<Dom.TSqlParserToken> tokens, Action check)
     : IList<Dom.TSqlParserToken>
 {
-    internal int MaximumDepth => limitsOptions.Value.MaxQueryDepth;
-    internal int MaximumNodes => limitsOptions.Value.MaxQueryTokens;
     public Dom.TSqlParserToken this[int index]
     {
         get
         {
             check();
+            ExecutionStackGuard.Ensure();
             var token = tokens[index];
             ScriptDomParsingObservation.Token(index);
             check();

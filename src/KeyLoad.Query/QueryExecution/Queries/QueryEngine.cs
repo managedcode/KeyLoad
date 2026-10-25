@@ -41,8 +41,8 @@ public sealed partial class QueryEngine
     public QueryPage Execute(string principalId, QueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
         => Execute(principalId, budget => global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(
-            global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql, database.OperationLimitsOptions, budget.Check, cancellationToken),
-            request, database.OperationLimitsOptions, executionOptions, budget, cancellationToken), timeProvider, cancellationToken);
+            global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql, budget.Check, cancellationToken),
+            request, executionOptions, budget, cancellationToken), timeProvider, cancellationToken);
 
     /// <summary>Executes a bounded Q1.Search statement through the canonical graph-search engine.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>
@@ -61,11 +61,11 @@ public sealed partial class QueryEngine
     public QueryPage ExecuteAst(string principalId, AstQueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default) => Execute(principalId, _ => request, timeProvider, cancellationToken);
     /// <summary>Describes the supported query language and configured budgets.</summary>
-    public QueryCapabilityManifest Capabilities => QueryCapabilityCatalog.Create(database.Limits, execution);
+    public QueryCapabilityManifest Capabilities => QueryCapabilityCatalog.Create(execution);
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
         CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null, ReadExecutionBudget? originalBudget = null)
     {
-        var budget = originalBudget ?? new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = originalBudget ?? new ReadExecutionBudget(timeProvider ?? database.EvaluationClock, cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
@@ -74,7 +74,7 @@ public sealed partial class QueryEngine
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         budget.Check();
-        var request = QueryValidation.Normalize(adapt(budget), database.Limits, execution);
+        var request = QueryValidation.Normalize(adapt(budget), execution);
         var query = request.Query;
         if (query.ModelSource is not null)
         {

@@ -12,7 +12,7 @@ internal static class QueryValidation
     private const int MinimumPositiveCount = 1;
     private const string QueryStructureExceedsItsBudgetDetail = "The query structure exceeds its budget.";
     private const int RootPredicateDepth = 1;
-    private const string QueryRequestExceedsItsByteBudgetDetail = "The query request exceeds its byte budget.";
+    private const string QueryWindowIsNotRepresentableDetail = "The query offset and limit exceed the representable row positions.";
     private const string ModelQuerySourceIsUnsupportedDetail = "The model query source is unsupported.";
     private const string ModelQueryRequiresExplicitFullScanConsentDetail = "A model query requires explicit full-scan consent.";
     private const string ModelQueryContinuationIsNotSupportedDetail = "Model query continuation is not supported.";
@@ -25,7 +25,7 @@ internal static class QueryValidation
     private const string InvalidQueueJoinSource = "The queue entity-reference join is unsupported.";
     private const string InvalidEventJoinSource = "The event entity-reference join is unsupported.";
 
-    public static AstQueryRequest Normalize(AstQueryRequest request, DatabaseLimits limits, QueryExecutionOptions execution)
+    public static AstQueryRequest Normalize(AstQueryRequest request, QueryExecutionOptions execution)
     {
         if (request is null || request.Partition is null || request.Query is null)
         {
@@ -43,24 +43,28 @@ internal static class QueryValidation
         if (query.Projection.IsDefault || query.Order.IsDefault
             || query.Projection.Length < MinimumPositiveCount || query.Projection.Length > execution.MaximumProjection
             || query.Order.Length > execution.MaximumOrdering || query.Limit < MinimumPositiveCount
-            || query.Offset < EmptyElementCount || (long)query.Offset + query.Limit > limits.MaxResults
+            || query.Offset < EmptyElementCount
             || request.Parameters?.Count > execution.MaximumParameters)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, QueryStructureExceedsItsBudgetDetail);
         }
+        if ((long)query.Offset + query.Limit > int.MaxValue)
+        {
+            throw Errors.Fail(ErrorCode.Validation, QueryWindowIsNotRepresentableDetail);
+        }
 
-        var projection = QuerySelectionNormalization.Projection(query.Projection, limits.MaxQueryDepth);
-        var order = QuerySelectionNormalization.Order(query.Order, limits.MaxQueryDepth);
+        var projection = QuerySelectionNormalization.Projection(query.Projection);
+        var order = QuerySelectionNormalization.Order(query.Order);
         ValidateJoinShape(request, query, projection);
-        var join = NormalizeJoin(query.InnerJoin, limits);
+        var join = NormalizeJoin(query.InnerJoin);
         if (join is not null)
         {
             JsonData.Identifier(query.Alias!);
-            order = NormalizeJoinOrder(order, limits);
+            order = NormalizeJoinOrder(order);
         }
 
-        var predicates = new QueryPredicateNormalizer(limits.MaxQueryDepth, limits.MaxQueryTokens, execution.MaximumInValues,
-            value => JsonData.Validate(value, limits, false));
+        var predicates = new QueryPredicateNormalizer(execution.MaximumInValues,
+            value => JsonData.Validate(value, false));
         var filter = query.Filter is null ? null : predicates.Filter(query.Filter, RootPredicateDepth);
         var parameters = NormalizeParameters(request.Parameters, predicates);
         if (query.ModelSource is null)
@@ -83,10 +87,6 @@ internal static class QueryValidation
             },
             Parameters = parameters
         };
-        if (JsonDefaults.Serialize(normalized).Length > limits.MaxQueryBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, QueryRequestExceedsItsByteBudgetDetail);
-        }
         return normalized;
     }
 
@@ -122,7 +122,7 @@ internal static class QueryValidation
             query.ModelSource.Kind == ModelQuerySourceKind.Events ? InvalidEventJoinSource : InvalidQueueJoinSource);
     }
 
-    private static InnerJoinClause? NormalizeJoin(InnerJoinClause? join, DatabaseLimits limits)
+    private static InnerJoinClause? NormalizeJoin(InnerJoinClause? join)
     {
         if (join is null)
         {
@@ -130,8 +130,8 @@ internal static class QueryValidation
         }
         JsonData.Identifier(join.Collection);
         JsonData.Identifier(join.Alias);
-        var leftPath = CanonicalPath(join.LeftKeyPath, limits.MaxQueryDepth);
-        var rightPath = CanonicalPath(join.RightKeyPath, limits.MaxQueryDepth);
+        var leftPath = CanonicalPath(join.LeftKeyPath);
+        var rightPath = CanonicalPath(join.RightKeyPath);
         return join with
         {
             LeftKeyPath = leftPath,
@@ -139,14 +139,14 @@ internal static class QueryValidation
         };
     }
 
-    private static string CanonicalPath(string path, int maximumDepth)
+    private static string CanonicalPath(string path)
     {
-        Path(path, maximumDepth);
+        Path(path);
         return JsonData.Path(JsonData.PathSegments(path));
     }
 
-    private static ImmutableArray<Ordering> NormalizeJoinOrder(ImmutableArray<Ordering> order, DatabaseLimits limits)
-        => order.Select(item => item with { Path = CanonicalPath(item.Path, limits.MaxQueryDepth) }).ToImmutableArray();
+    private static ImmutableArray<Ordering> NormalizeJoinOrder(ImmutableArray<Ordering> order)
+        => order.Select(item => item with { Path = CanonicalPath(item.Path) }).ToImmutableArray();
 
     private static void ValidateModelSource(AstQueryRequest request, SelectQuery query)
     {
@@ -184,13 +184,13 @@ internal static class QueryValidation
         return item.Key;
     }, item => predicates.Scalar(item.Value), StringComparer.Ordinal);
 
-    internal static void Path(string path, int maximumDepth, bool star = false)
+    internal static void Path(string path, bool star = false)
     {
         if (star && path == SqlSyntax.Star)
         {
             return;
         }
-        if (string.IsNullOrEmpty(path) || JsonData.PathSegments(path).Length > maximumDepth)
+        if (string.IsNullOrEmpty(path))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPath);
         }

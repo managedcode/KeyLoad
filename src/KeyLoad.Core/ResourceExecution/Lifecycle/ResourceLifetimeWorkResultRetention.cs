@@ -1,26 +1,18 @@
 using System.Collections.Immutable;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.ResourceExecution;
 
-/// <summary>Shares one bounded, deduplicated resource lifetime ledger across an original request and its children.</summary>
+/// <summary>Shares one deduplicated resource lifetime ledger across an original request and its children.</summary>
 internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
 {
     private const int Empty = 0;
-    private const string Capacity = "The retained resource lifetimes exceed the operation result budget.";
+    private const string Capacity = "The retained resource lifetimes exceed the operation result bytes.";
+    private const int Unbounded = int.MaxValue;
     private const string Invalid = "The resource lifetime ledger input is invalid.";
     private readonly Lock gate = new();
     private readonly HashSet<ResourceLifetime> retained = [];
-    private readonly DatabaseLimits limits;
     private long retainedBytes;
     private bool disposed;
-
-    internal ResourceLifetimeWorkResultRetention(IOptions<DatabaseLimits> options)
-    {
-        ArgumentNullException.ThrowIfNull(options);
-        limits = options.Value;
-        limits.Validate();
-    }
 
     internal int RetainedEntries
     {
@@ -47,7 +39,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
     }
 
     internal void Reserve(ImmutableArray<ResourceLifetime> lifetimes)
-        => Reserve(lifetimes, limits.MaxBatchBytes);
+        => Reserve(lifetimes, Unbounded);
 
     internal void Reserve(ImmutableArray<ResourceLifetime> lifetimes, int maximumBytes)
     {
@@ -58,7 +50,6 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            var bound = Math.Min(maximumBytes, limits.MaxBatchBytes);
             var pending = new HashSet<ResourceLifetime>();
             long additionalBytes = Empty;
             foreach (var lifetime in lifetimes)
@@ -68,13 +59,12 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
                 {
                     additionalBytes += OrleansSerialization.Measure(lifetime);
                 }
-                if (additionalBytes > bound - retainedBytes
-                    || pending.Count > limits.MaxScanRecords - retained.Count)
+                if (additionalBytes > maximumBytes - retainedBytes)
                 {
                     throw Errors.Fail(ErrorCode.BudgetExceeded, Capacity);
                 }
             }
-            if (retainedBytes > bound)
+            if (retainedBytes > maximumBytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, Capacity);
             }
@@ -89,7 +79,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            var available = Math.Min(maximumBytes, limits.MaxBatchBytes) - retainedBytes;
+            var available = maximumBytes - retainedBytes;
             if (available <= Empty)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, Capacity);

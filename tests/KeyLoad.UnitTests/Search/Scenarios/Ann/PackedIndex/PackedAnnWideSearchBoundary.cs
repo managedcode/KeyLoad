@@ -10,12 +10,12 @@ internal static class PackedAnnWideSearchBoundary
     private const int StartTimeoutSeconds = 5;
     private const int ObserverTimeoutSeconds = 15;
 
-    internal static async Task AssertCancellationAsync(PackedAnnIndex index, float[] query, DatabaseLimits limits)
+    internal static async Task AssertCancellationAsync(PackedAnnIndex index, float[] query)
     {
         var cancellation = new CancellationTokenSource();
         try
         {
-            var run = await StartAsync(index, query, cancellation, limits);
+            var run = await StartAsync(index, query, cancellation);
             var observer = CancelAfterEdgeAsync(run, cancellation);
             try
             {
@@ -39,12 +39,12 @@ internal static class PackedAnnWideSearchBoundary
         => PackedAnnDeadlineBoundary.AssertOneSecondDeadlineAsync(index, query, SearchLimit);
 
     internal static async Task<PackedAnnStartedSearch> StartAsync(PackedAnnIndex index,
-        float[] query, CancellationTokenSource request, DatabaseLimits limits)
+        float[] query, CancellationTokenSource request)
     {
         var ready = new TaskCompletionSource<AnnWorkBudget>(TaskCreationOptions.RunContinuationsAsynchronously);
         var search = Task.Run(() =>
         {
-            var budget = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), TimeProvider.System, request.Token),
+            var budget = new AnnWorkBudget(new ReadExecutionBudget(TimeProvider.System, request.Token),
                 PackedAnnIndexTestSupport.GenerousWorkLimit);
             ready.SetResult(budget);
             return index.Search(query, SearchLimit, null, budget);

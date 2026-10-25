@@ -84,28 +84,17 @@ internal sealed class SqlGraphSearchRejectionTests
     }
 
     [Test]
-    public async Task ParameterCountAndCompleteRequestBoundsAreEnforced()
+    public async Task ParameterCountIsEnforced()
     {
         using var database = new TestDatabase();
-        var engine = new QueryEngine(new KeyLoad.Core.DatabaseEngine(database.Store, new KeyLoad.Core.Authorization.AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryBytes = 512
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
+        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var excessiveParameters = Enumerable.Range(0, 257)
             .ToDictionary(index => $"p{index}", index => System.Text.Json.JsonSerializer.SerializeToElement(index));
-        const string textSql = SearchPrefix + "TEXT_MATCH('/text',@text,1), NULL" + GraphTail;
 
         var parameterFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.SearchSqlAsync("root",
             SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly, excessiveParameters))))!;
-        var sizeFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.SearchSqlAsync("root",
-            SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly + " " + new string(' ', 600)))))!;
-        var parameterSizeFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.SearchSqlAsync("root",
-            SqlGraphSearchTestSupport.Request(database.Partition, textSql,
-                SqlGraphSearchTestSupport.Parameters((TextParameter, new string('n', 600)))))))!;
 
         await Assert.That(parameterFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(sizeFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(parameterSizeFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]

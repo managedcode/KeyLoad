@@ -2,6 +2,8 @@
 
 Status: Accepted 2026-10-24 under the owner's direction to make KeyLoad serve real workloads at benchmark scale. In source; Linux qualification pending.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): `MaxScanRecords` is removed, so a query range read asks storage for at most `MaximumRangeRecords` records.
+
 ## Context
 
 A query cursor carried only an offset. Every page re-ran the whole access path and

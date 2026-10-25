@@ -14,7 +14,6 @@ internal sealed class SqlQueueReferenceJoinTests
                 var seed = SqlQueueReferenceJoinFixture.Seed(database);
                 await SqlQueueReferenceJoinOperation.VerifyAsync(database);
                 await SqlQueueReferenceJoinOperation.RefusalsAsync(database);
-                await SqlQueueReferenceJoinBudget.RunAsync(database);
                 await SqlQueueReferenceJoinPolicy.RunAsync(database);
                 await SqlQueueReferenceJoinCold.RunAsync(database, seed.Command, seed.Receipt);
             }

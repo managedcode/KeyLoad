@@ -11,7 +11,7 @@ public static class ProjectionReadBody
         var now = engine.Clock.GetUtcNow();
         var principal = engine.Principal(view, principalId, now);
         ProjectionBatchExecution.RequireProjectionAdministrator(principal);
-        if (request.Limit < ProjectionOutbox.MinimumProjectionReadCount || request.Limit > engine.Limits.MaxResults || request.MaxBytes < ProjectionOutbox.MinimumProjectionReadCount || request.MaxBytes > engine.Limits.MaxProjectionBatchBytes)
+        if (request.Limit < ProjectionOutbox.MinimumProjectionReadCount || request.MaxBytes < ProjectionOutbox.MinimumProjectionReadCount)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ProjectionOutbox.ProjectionBatchBudgetDetail);
         }
@@ -22,7 +22,7 @@ public static class ProjectionReadBody
             throw Errors.Fail(ErrorCode.TokenInvalidated, ProjectionOutbox.ReleasedProjectionGenerationDetail);
         }
 
-        engine.BindProjectionReadResources(view, request.Consumer.Partition, state.Definition.Resources);
+        ChangeFeedsQueries.BindProjectionReadResources(view, request.Consumer.Partition, state.Definition.Resources);
         var head = engine.ReadOutboxHead(view, request.Consumer.Partition);
         ProjectionOutbox.CheckOutboxPosition(head, state.Checkpoint);
         var upper = ProjectionBatchExecution.ProjectionUpperSequence(request, state, head);
@@ -62,10 +62,10 @@ public static class ProjectionReadBody
         ProjectionBatchExecution.RequireProjectionAdministrator(engine.Principal(view, principalId, engine.Clock.GetUtcNow()));
         EngineResourceAccess.ValidatePartition(partition);
         var head = engine.ReadOutboxHead(view, partition);
-        var consumers = engine.ProjectionConsumers(view, partition);
+        var consumers = ProjectionConsumerIdentity.ProjectionConsumers(view, partition);
         foreach (var consumer in consumers)
         {
-            engine.BindProjectionReadResources(view, partition, consumer.Definition.Resources);
+            ChangeFeedsQueries.BindProjectionReadResources(view, partition, consumer.Definition.Resources);
             ProjectionConsumerIdentity.RequireProjectionRetentionCheckpoint(consumer, head);
         }
 

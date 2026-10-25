@@ -30,7 +30,7 @@ internal static class RemoteTransferRepairCrashScenario
             hint.AcceptPolicyGeneration, hint.CompleteGeneration, failed.Receipt);
         var witness = database.ReadRemoteTransferCoordination(CrashFixtureValues.Principal, request, CancellationToken.None).RepairWitness
             ?? throw new InvalidOperationException(RemoteTransferRepairCrashProtocol.Missing);
-        var claims = database.Verify<RemoteTransferRepairClaims>(witness, database.Limits.MaxBatchBytes);
+        var claims = database.VerifyRetained<RemoteTransferRepairClaims>(witness);
         var id = RemoteTransferRepairIdentity.AdvanceId(hint, stage, claims.OutcomeDigest);
         var command = new CommandRequest(id, source.Partition, [new AdvanceQueueTransferRepair(source,
             transfer.TransferId, stage, hint.AcceptGeneration, hint.AcceptPolicyGeneration, hint.CompleteGeneration, witness)]);

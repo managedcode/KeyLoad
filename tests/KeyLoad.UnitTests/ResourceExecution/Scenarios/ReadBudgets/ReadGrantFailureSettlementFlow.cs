@@ -18,11 +18,7 @@ internal static class ReadGrantFailureSettlementFlow
         var failures = new List<Exception>();
         try
         {
-            using var fixture = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
-            {
-                MaxQueryReadBytes = maximum,
-                MaxScanRecords = RuntimeRecords
-            });
+            using var fixture = ReadExecutionBudgetGrantSeed.CreateDatabase();
             ZoneTreeStore? cold = null;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -53,6 +49,7 @@ internal static class ReadGrantFailureSettlementFlow
         TestDatabase fixture, CancellationTokenSource cancellation)
     {
         var budget = fixture.CreateReadWork(cancellation.Token);
+        budget.ConstrainWork(FirstBytes + SecondBytes, RuntimeRecords);
         var grant = budget.CreateReadGrant(FirstBytes + SecondBytes, RuntimeRecords);
         var originalFailure = new IOException(ConsumerFailure);
         ArgumentException? active = null;
@@ -108,11 +105,8 @@ internal static class ReadGrantFailureSettlementFlow
     {
         var actual = store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
-            {
-                MaxQueryReadBytes = maximum,
-                MaxScanRecords = RuntimeRecords
-            }));
+            var budget = new ReadExecutionBudget();
+            budget.ConstrainWork(maximum, RuntimeRecords);
             var grant = budget.CreateReadGrant(maximum, RuntimeRecords);
             byte[]? first = null;
             byte[]? second = null;

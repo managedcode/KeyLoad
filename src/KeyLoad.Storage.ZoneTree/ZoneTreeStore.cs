@@ -100,6 +100,15 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile)
         => ZoneTreeStoreCommitExecution.Commit(runtime, compile);
 
+    /// <summary>Bounds caller work for one captured read cut by the configured storage read-cut ceiling.</summary>
+    internal ZoneTreeReadCutLimits BoundReadCut(int records, long bytes, TimeSpan remaining)
+    {
+        var options = runtime.Options;
+        return new(Math.Min(records, options.MaximumReadCutRecords), Math.Min(bytes, options.MaximumReadCutExaminedBytes),
+            remaining == Timeout.InfiniteTimeSpan || remaining > options.MaximumReadCutElapsed
+                ? options.MaximumReadCutElapsed : remaining);
+    }
+
     internal ZoneTreeReadCutLease CaptureReadCut(IKeyValueView view, ZoneTreeReadCutLimits limits,
         CancellationToken cancellationToken)
     {

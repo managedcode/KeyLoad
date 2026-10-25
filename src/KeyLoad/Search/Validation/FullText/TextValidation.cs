@@ -10,7 +10,7 @@ internal static class TextValidation
     private const string GenerationIdentityFormat = "N";
     private const string ParentDirectorySegment = "..";
 
-    internal static void ValidateManifest(TextManifest manifest, TextProjectionScope scope, int maximumRecords, IOptions<TextExecutionOptions> executionOptions)
+    internal static void ValidateManifest(TextManifest manifest, TextProjectionScope scope, IOptions<TextExecutionOptions> executionOptions)
     {
         const int EmptyFilesLength = 0;
         const int IndexInitialValue = 0;
@@ -18,8 +18,7 @@ internal static class TextValidation
         if (manifest is null || manifest.FormatVersion != TextProtocol.FormatVersion || manifest.Scope != scope
             || manifest.TokenizerVersion != TextProjectionProtocol.TokenizerVersion
             || manifest.HashVersion != TextProjectionProtocol.HashVersion || manifest.Records is null
-            || manifest.Files is null || (manifest.Files.Length == EmptyFilesLength || manifest.Files.Length > executionOptions.Value.MaximumFiles)
-            || manifest.Records.Length > maximumRecords)
+            || manifest.Files is null || (manifest.Files.Length == EmptyFilesLength || manifest.Files.Length > executionOptions.Value.MaximumFiles))
         {
             throw TextErrors.Corrupt();
         }

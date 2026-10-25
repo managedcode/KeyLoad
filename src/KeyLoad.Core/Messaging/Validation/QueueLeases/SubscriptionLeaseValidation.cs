@@ -22,19 +22,18 @@ public static class SubscriptionLeaseValidation
         return claims;
     }
 
-    internal static (GroupClaims Claims, GroupState State, GroupDelivery Delivery) SubscriptionLease(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, SubscriptionRef subscription, string token, DateTimeOffset now, SubscriptionWindowAuthorityReadBudget? budget = null)
+    internal static (GroupClaims Claims, GroupState State, GroupDelivery Delivery) SubscriptionLease(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, SubscriptionRef subscription, string token, DateTimeOffset now)
     {
-        budget ??= new SubscriptionWindowAuthorityReadBudget(engine.OperationLimitsOptions);
-        var lease = engine.ReadSubscriptionLease(view, principal, subscription, token, now, budget);
-        engine.ValidateSubscriptionGroupProgress(view, subscription, lease.State, engine.SourceHead(view, subscription.Source), budget);
+        var lease = engine.ReadSubscriptionLease(view, principal, subscription, token, now);
+        SubscriptionDeliveryAuthority.ValidateSubscriptionGroupProgress(view, subscription, lease.State, engine.SourceHead(view, subscription.Source));
         return lease;
     }
 
-    internal static (GroupClaims Claims, GroupState State, GroupDelivery Delivery) ReadSubscriptionLease(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, SubscriptionRef subscription, string token, DateTimeOffset now, SubscriptionWindowAuthorityReadBudget budget)
+    internal static (GroupClaims Claims, GroupState State, GroupDelivery Delivery) ReadSubscriptionLease(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, SubscriptionRef subscription, string token, DateTimeOffset now)
     {
         var claims = engine.ValidateGroupClaims(view, principal, subscription, token, now);
         var state = SubscriptionGroups.Group(view, subscription);
-        var delivery = SubscriptionDeliveryAuthority.ReadSubscriptionWindowDelivery(view, MessagingSerialization.GroupKey(SubscriptionGroups.SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, claims.Position), budget);
+        var delivery = SubscriptionDeliveryAuthority.ReadSubscriptionWindowDelivery(view, MessagingSerialization.GroupKey(SubscriptionGroups.SubscriptionGroupsSubscriptionWindowKeySpace, subscription, state.Generation, claims.Position));
         SubscriptionDeliveryAuthority.RequireSubscriptionWindowReference(delivery, state, claims.Position);
         if (delivery is null || delivery.State != GroupDeliveryState.Leased || delivery.PrincipalId != principal.Id || delivery.LeaseVersion != claims.LeaseVersion)
         {

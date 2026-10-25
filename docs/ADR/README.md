@@ -131,3 +131,4 @@ source artifacts own those checks.
 | [ADR-146: Group commit](ADR-146-group-commit.md) |
 | [ADR-147: Id-ordered query continuation](ADR-147-id-ordered-query-continuation.md) |
 | [ADR-148: Parallel CI shards](ADR-148-parallel-ci-shards.md) |
+| [ADR-149: No operation limits](ADR-149-no-operation-limits.md) |

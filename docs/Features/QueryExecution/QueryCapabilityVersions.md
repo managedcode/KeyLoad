@@ -40,7 +40,7 @@ All collection operations require current persisted `Query | DocumentsRead` in t
 
 Unknown AST versions and operators refuse before candidate execution. Public JSON discriminator failures retain their existing validation boundary. grammar, adapter support, AST semantics and transport compatibility remain distinct qualification gates.
 
-`MaxBytes` is the effective existing output ceiling: execution `MaxBatchBytes`, optionally reduced by `MaximumResultBytes`. It covers the serialized `QueryPage` including rows, cursor, cut and access path. SDK Result/MCP transport wrappers have separate framing limits. It is not `MaxQueryBytes` or a promise that request bytes and result bytes share a ceiling. The old complete `SqlOffsetPages.ManifestAsync` oracle now independently expects `MaxBatchBytes` for its unchanged default query options; all its other complete manifest fields remain literal and unchanged apart from the explicit Explain profile.
+`MaxBytes` reports the configured `QueryExecutionOptions.MaximumResultBytes`, or `int.MaxValue` when no result ceiling is configured ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). It covers the serialized `QueryPage` including rows, cursor, cut and access path. SDK Result/MCP transport wrappers and the grain reply ceilings have separate framing limits. It is not a request-byte ceiling. The manifest reports no row, candidate, depth or candidate-byte limit, because none is configured.
 
 ## Normal examples
 

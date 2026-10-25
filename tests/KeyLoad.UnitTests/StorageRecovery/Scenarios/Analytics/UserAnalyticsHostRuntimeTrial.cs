@@ -13,7 +13,7 @@ internal static class UserAnalyticsHostRuntimeTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var runtime = original = new UserAnalyticsRuntime(ServerRuntimeTestOptions.Runtime(fixture.Options).Core.DatabaseLimits);
+            await using var runtime = original = new UserAnalyticsRuntime();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 runtime.Open(host);

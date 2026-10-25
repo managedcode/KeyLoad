@@ -10,11 +10,11 @@ internal static class TextIncrementalSeedPlanner
     private const ulong RecordStep = 1;
 
     internal static TextIncrementalSeedPlan Plan(TextSeedCapture seed,
-        TextProjectionScope scope, int maximumRecords, ReadExecutionBudget budget,
+        TextProjectionScope scope, ReadExecutionBudget budget,
         QueryExecutionOptions execution)
     {
         budget.Check();
-        if (seed.Documents is null || seed.Documents.Length > maximumRecords
+        if (seed.Documents is null
             || scope.Incarnation != seed.Incarnation || scope.DataEpoch != seed.DataEpoch
             || scope.ReadGeneration != seed.ReadGeneration
             || scope.Position != seed.Position || scope.PrincipalId != seed.PrincipalId

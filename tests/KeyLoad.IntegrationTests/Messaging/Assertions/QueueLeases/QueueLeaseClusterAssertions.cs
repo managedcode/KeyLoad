@@ -19,7 +19,7 @@ internal static class QueueLeaseClusterAssertions
     internal static async Task DeniedAsync<T>(Result<T> actual, ErrorCode expected)
     {
         await Assert.That(actual.IsFailed).IsTrue();
-        await Assert.That(actual.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(actual);
         await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(expected.ToString());
     }
 

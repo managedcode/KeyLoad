@@ -28,7 +28,7 @@ internal sealed class ConnectionServerDatabase(Func<RequestCqrsHostedRuntimeFixt
             throw new ArgumentException(CoordinatorTime, nameof(time));
         }
         var token = originalToken();
-        var work = new ReadExecutionBudget(Database.OperationLimitsOptions, source().Clock, token);
+        var work = new ReadExecutionBudget(source().Clock, token);
         Coordinator.ReadBarrierAsync(token).GetAwaiter().GetResult();
         var result = Coordinator.RuntimeSubmitAsync(kind, id ?? Guid.NewGuid(), principal,
             OrleansSerialization.Serialize(payload), work, token).GetAwaiter().GetResult();

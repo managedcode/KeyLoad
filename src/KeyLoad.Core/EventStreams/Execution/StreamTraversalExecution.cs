@@ -14,26 +14,30 @@ public static class StreamTraversalExecution
     public static StreamPage ReadStream(this DatabaseEngine engine, string principalId, ReadStreamRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        return engine.ReadStreamTraversal(principalId, request, new(engine.OperationLimitsOptions, engine.Clock, cancellationToken));
+        return engine.ReadStreamTraversal(principalId, request, new(engine.Clock, cancellationToken));
     }
 
     internal static StreamPage ReadStream(this DatabaseEngine engine, string principalId, ReadStreamRequest request, PhysicalShardRecord configuredOwner, CancellationToken cancellationToken = default)
     {
         engine.VerifyStorageOwner(configuredOwner, cancellationToken);
-        return engine.ReadStreamTraversal(principalId, request, new(engine.OperationLimitsOptions, engine.Clock, cancellationToken));
+        return engine.ReadStreamTraversal(principalId, request, new(engine.Clock, cancellationToken));
     }
 
     internal static StreamPage ReadStreamTraversal(this DatabaseEngine engine, string principalId, ReadStreamRequest request, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Stream);
-        if (request.AfterRevision < StreamTraversalProtocol.EmptyRevision || request.Direction is not (StreamReadDirection.Forward or StreamReadDirection.Backward) || request.MaxBytes < StreamTraversalProtocol.UnspecifiedBytes || request.MaxBytes > engine.Limits.MaxBatchBytes || request.Cursor is not null && request.AfterRevision != StreamTraversalProtocol.EmptyRevision)
+        if (request.AfterRevision < StreamTraversalProtocol.EmptyRevision || request.Direction is not (StreamReadDirection.Forward or StreamReadDirection.Backward) || request.MaxBytes < StreamTraversalProtocol.UnspecifiedBytes || request.Cursor is not null && request.AfterRevision != StreamTraversalProtocol.EmptyRevision)
         {
             throw Errors.Fail(ErrorCode.Validation, StreamTraversalProtocol.InvalidRequest);
         }
 
-        engine.ValidateStreamRead(request.AfterRevision, request.Limit);
-        budget.ConstrainResultBytes(request.MaxBytes == StreamTraversalProtocol.UnspecifiedBytes ? engine.Limits.MaxBatchBytes : request.MaxBytes);
+        StreamReadExecution.ValidateStreamRead(request.AfterRevision, request.Limit);
+        if (request.MaxBytes != StreamTraversalProtocol.UnspecifiedBytes)
+        {
+            budget.ConstrainResultBytes(request.MaxBytes);
+        }
+
         return engine.Store.Read(view => engine.ReadStreamTraversal(view, principalId, request, budget));
     }
 

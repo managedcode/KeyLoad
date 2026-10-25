@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Query.Search;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Search;
 
@@ -10,7 +9,6 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
     private readonly ITextSelectedIndexLeaseOwner slot;
     private readonly TextSelectedReadLease admission;
     private readonly ReadExecutionBudget budget;
-    private readonly IOptions<DatabaseLimits> limits;
     private readonly HashSet<EntityRef> visited = [];
     private readonly Dictionary<EntityRef, TextIncrementalRecord> byReference;
     private readonly Dictionary<ulong, TextIncrementalRecord> byId;
@@ -22,10 +20,9 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
 
     internal TextSelectedProjectionLease(TextSelectedReadAdmission admissionOwner,
         Func<(ITextSelectedIndexLeaseOwner Slot, TextIncrementalManifest Manifest)> capture,
-        ReadExecutionBudget budget, IOptions<DatabaseLimits> limits)
+        ReadExecutionBudget budget)
     {
         this.budget = budget;
-        this.limits = limits;
         try
         {
             admission = admissionOwner.EnterRead();
@@ -103,10 +100,6 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
         {
             throw TextErrors.Corrupt();
         }
-        if (references.Count > limits.Value.MaxScanRecords || terms.Count > limits.Value.MaxSearchTextTokens)
-        {
-            throw TextErrors.BoundExceeded();
-        }
         var candidates = new HashSet<EntityRef>();
         foreach (var term in terms)
         {
@@ -156,10 +149,6 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
                     }
                     budget.ChargeBytes(OrleansSerialization.Measure(record.Reference));
                     candidates.Add(record.Reference);
-                    if (candidates.Count > limits.Value.MaxScanRecords)
-                    {
-                        throw TextErrors.BoundExceeded();
-                    }
                 }
             }, failures);
         }, failures);

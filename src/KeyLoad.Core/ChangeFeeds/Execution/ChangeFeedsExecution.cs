@@ -76,11 +76,6 @@ public static class ChangeFeedsExecution
         {
             InitialAnnMaintenanceSettlement = engine.Sign(proof)
         };
-        if (OrleansSerialization.Measure(intent) > engine.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAnnSettlement);
-        }
-
         return intent;
     }
 

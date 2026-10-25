@@ -44,7 +44,7 @@ internal static class Bm25CorpusMaintenance
             work.CreateView(view), actual.UserId!, partition.Database.EvaluationClock.GetUtcNow()));
         var requestId = Guid.NewGuid();
         var envelope = node.CatalogRequestCodec().CreateBm25CorpusPublication(requestId, actual, envelopeExpiry);
-        return await Bm25CorpusCall.ExecuteAsync(node, partition, principal, requestId,
+        return await Bm25CorpusCall.ExecuteAsync(node, principal, requestId,
             actual.CommandId, envelope, work, token);
     }
 
@@ -54,7 +54,7 @@ internal static class Bm25CorpusMaintenance
         var clock = partition.Database.EvaluationClock;
         var remaining = originalExpiry - clock.GetUtcNow();
         var lifetime = work.RemainingLifetime;
-        var bounded = remaining < lifetime ? remaining : lifetime;
+        var bounded = lifetime == Timeout.InfiniteTimeSpan || remaining < lifetime ? remaining : lifetime;
         if (bounded <= TimeSpan.Zero)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Changed);

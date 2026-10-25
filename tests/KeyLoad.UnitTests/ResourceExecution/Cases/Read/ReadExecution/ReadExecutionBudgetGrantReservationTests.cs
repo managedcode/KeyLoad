@@ -2,6 +2,9 @@ namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ReadExecutionBudgetGrantReservationTests
 {
+    private const long CallerBytes = 64;
+    private const int CallerRecords = 10_000;
+
     private const string ExaminedExceededDiagnostic = "The read execution examined-record budget is exceeded.";
     [Test]
     public async Task ExactLeafGrantsShareOneAggregateByteLedger()
@@ -10,11 +13,10 @@ internal sealed class ReadExecutionBudgetGrantReservationTests
             + ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
         {
-            MaxQueryReadBytes = maximumBytes
         });
         var result = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+            var budget = new ReadExecutionBudget();
             var firstGrant = budget.CreateReadGrant(ReadExecutionBudgetGrantSeed.FirstKey.Length
                 + ReadExecutionBudgetGrantSeed.FirstValue.Length, 1);
             var secondGrant = budget.CreateReadGrant(ReadExecutionBudgetGrantSeed.SecondKey.Length
@@ -35,28 +37,28 @@ internal sealed class ReadExecutionBudgetGrantReservationTests
     [Test]
     public async Task FixedReservationsCannotBeConsumedByRootOrLaterGrants()
     {
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
-        {
-            MaxQueryReadBytes = 64
-        });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var rootCharge = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(_ =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
-            budget.CreateReadGrant(64, database.Database.Limits.MaxScanRecords);
+            var budget = new ReadExecutionBudget();
+            budget.ConstrainWork(CallerBytes, CallerRecords);
+            budget.CreateReadGrant(64, budget.RemainingReadGrantRecords);
             budget.ChargeBytes(1);
             return true;
         }));
         var additionalGrant = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(_ =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
-            budget.CreateReadGrant(64, database.Database.Limits.MaxScanRecords);
+            var budget = new ReadExecutionBudget();
+            budget.ConstrainWork(CallerBytes, CallerRecords);
+            budget.CreateReadGrant(64, budget.RemainingReadGrantRecords);
             budget.CreateReadGrant(1, 0);
             return true;
         }));
         var recordGrant = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(_ =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
-            budget.CreateReadGrant(0, database.Database.Limits.MaxScanRecords);
+            var budget = new ReadExecutionBudget();
+            budget.ConstrainWork(CallerBytes, CallerRecords);
+            budget.CreateReadGrant(0, budget.RemainingReadGrantRecords);
             budget.CreateReadGrant(0, 1);
             return true;
         }));

@@ -67,7 +67,7 @@ internal sealed class TextProjectionRemovalTests
     }
 
     private static RuntimeTextProjection Create(TestDatabase db, string root)
-        => new(root, UnitExecutionOptions.DatabaseLimits(db.Database.Limits), db.Store.Identity.NodeId,
+        => new(root, db.Store.Identity.NodeId,
             UnitTextOptions.Execution());
 
     private static (string Key, string Value)[] Snapshot(TestDatabase db) => db.Store.Read(view =>

@@ -7,37 +7,7 @@ internal sealed class GraphSearchBudgetTests
     private const string Tenant = "tenant";
     private const string DatabaseId = "database";
     private const string Domain = "orders";
-    private const string PartitionKey = "customer-1";
     private const string OtherPartitionKey = "other-partition";
-
-    [Test]
-    public async Task GraphRequestByteLimitAcceptsExactSizeAndRejectsOneByteLess()
-    {
-        var partition = new PartitionRef(Tenant, DatabaseId, Domain, PartitionKey);
-        var request = BuildRequest(partition);
-        var exactBytes = JsonDefaults.Serialize(request).Length;
-        using var exact = new TestDatabase(new()
-        {
-            MaxQueryBytes = exactBytes
-        });
-        GraphSearchTestSupport.Configure(exact);
-        GraphSearchTestSupport.AddPath(exact);
-        var accepted = await new SearchEngine(exact.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request, Token());
-
-        using var excess = new TestDatabase(new()
-        {
-            MaxQueryBytes = exactBytes - 1
-        });
-        GraphSearchTestSupport.Configure(excess);
-        GraphSearchTestSupport.AddPath(excess);
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            new SearchEngine(excess.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request, Token())))!;
-
-        await Assert.That(accepted.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
-            .IsEquivalentTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit],
-                TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
 
     [Test]
     public async Task EdgeExhaustionAndPreCancellationReturnNoPartialResultThenAllowHealthySearch()

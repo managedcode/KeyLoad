@@ -7,24 +7,16 @@ internal static class GlobalBranchValidation
 {
     private const string InvalidRequest = "The global branch merge request is invalid.";
     private const string InvalidWindow = "A global branch window is malformed or incomparable.";
-    private const string ResourceExceeded = "The global branch merge exceeds its configured bounds.";
     private const int MaximumIdentifierCharacters = 256;
 
-    internal static HashSet<string> ValidateRequest(GlobalBranchMergeRequest request, ImmutableArray<GlobalBranchWindow> windows,
-        DatabaseLimits limits, ReadExecutionBudget budget, GlobalBranchByteAdmission bytes)
+    internal static HashSet<string> ValidateRequest(GlobalBranchMergeRequest request, ImmutableArray<GlobalBranchWindow> windows, ReadExecutionBudget budget, GlobalBranchByteAdmission bytes)
     {
         ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(budget);
         if (!Enum.IsDefined(request.Kind) || request.Scope is null || request.ExpectedWindowIds.IsDefault
-            || windows.IsDefault || request.Limit < 1 || request.Limit > limits.MaxResults
-            || request.Limit > limits.MaxScanRecords)
+            || windows.IsDefault || request.Limit < 1)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
-        }
-        if (request.ExpectedWindowIds.Length > limits.MaxScanRecords || windows.Length > limits.MaxScanRecords)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceExceeded);
         }
         PreflightIdentifiers(request, windows, budget);
         bytes.Accept(OrleansSerialization.Measure(request));

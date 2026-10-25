@@ -25,7 +25,7 @@ internal sealed class TextProjectionDisposalTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, DocumentId, Payload));
         var root = Path.Combine(database.Directory, Collection);
-        using var projection = new RuntimeTextProjection(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var projection = new RuntimeTextProjection(root, database.Store.Identity.NodeId, UnitTextOptions.Execution());
         var request = new SearchRequest(database.Partition, Collection, Field, Query);
         var cancellation = TestContext.Current!.Execution.CancellationToken;
         var original = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync(Principal, request, cancellation);
@@ -34,7 +34,7 @@ internal sealed class TextProjectionDisposalTests
         projection.Dispose();
         await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() =>
             new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync(Principal, request, cancellation));
-        using var reopened = new RuntimeTextProjection(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var reopened = new RuntimeTextProjection(root, database.Store.Identity.NodeId, UnitTextOptions.Execution());
         var recovered = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), reopened).SearchAsync(Principal, request, cancellation);
         await Assert.That(recovered).HasSingleItem();
         await Assert.That(recovered[0].Document.Reference).IsEqualTo(original[0].Document.Reference);
@@ -48,7 +48,7 @@ internal sealed class TextProjectionDisposalTests
         using var deadlineTimeout = new CancellationTokenSource(WaitLimit, TimeProvider.System);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellation, deadlineTimeout.Token);
         var scope = CaptureScope(database);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+        var budget = new ReadExecutionBudget();
         using var lease = projection.Acquire(scope, budget);
         lease.BeginRecord(document.Document.Reference, document.Document.Revision);
         lease.ObserveToken(Query);
@@ -57,7 +57,7 @@ internal sealed class TextProjectionDisposalTests
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await WaitForClosedAdmissionAsync(projection, scope, database.Database.Limits, deadline.Token);
+            await WaitForClosedAdmissionAsync(projection, scope, deadline.Token);
             await Assert.That(disposals.All(task => !task.IsCompleted)).IsTrue();
             lease.VerifyCandidates([Query], [document.Document.Reference], budget);
         }, failures);
@@ -66,15 +66,14 @@ internal sealed class TextProjectionDisposalTests
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task WaitForClosedAdmissionAsync(RuntimeTextProjection projection, TextProjectionScope scope,
-        DatabaseLimits limits, CancellationToken cancellation)
+    private static async Task WaitForClosedAdmissionAsync(RuntimeTextProjection projection, TextProjectionScope scope, CancellationToken cancellation)
     {
         while (true)
         {
             cancellation.ThrowIfCancellationRequested();
             try
             {
-                using var rejected = projection.Acquire(scope, new(UnitExecutionOptions.DatabaseLimits(limits)));
+                using var rejected = projection.Acquire(scope, new());
             }
             catch (ObjectDisposedException)
             {

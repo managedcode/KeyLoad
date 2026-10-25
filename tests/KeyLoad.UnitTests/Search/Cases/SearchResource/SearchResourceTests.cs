@@ -1,17 +1,14 @@
 using System.Text;
 using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Query;
-using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Search;
 
 internal sealed class SearchResourceTests
 {
-    private const string Collection = "orders";
     private const string SmallCollection = "small-search";
     private const string LargeCollection = "large-search";
     private const string TextPath = "/text";
-    private const string VectorPath = "/embedding";
     private const string SearchTerm = "needle";
     private const string HitId = "hit";
     private const int CorpusDocuments = 64;
@@ -19,7 +16,6 @@ internal sealed class SearchResourceTests
     private const int MeasurementPairs = 3;
     private const long FixedAllocationAllowance = 131_072;
     private const double ScoreTolerance = 0.0000000000005;
-    private static VectorSpace Space { get; } = new("search-resource", 2, DistanceMetric.DotProduct, "test", "1");
 
     [Test]
     public async Task AcMp003LargeNonmatchingPayloadsDoNotAllocateRawCorpusCopies()
@@ -103,57 +99,4 @@ internal sealed class SearchResourceTests
         await Assert.That(updatedAt.All(time => time == evaluatedAt)).IsTrue();
     }
 
-    [Test]
-    public async Task AcMp005ExactSearchEnvelopeBoundaryAndFollowingRead()
-    {
-        using var db = new TestDatabase();
-        db.Configure(Collection, ResourceKind.Collection);
-        db.Commit(new PutDocument(Collection, HitId, "{\"text\":\"needle\"}"));
-        var request = new SearchRequest(db.Partition, Collection, TextPath, SearchTerm);
-        var expected = await new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request);
-        var exactBytes = JsonDefaults.Serialize(expected).Length;
-        var exact = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = exactBytes
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var shortBudget = new SearchEngine(new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = exactBytes - 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution()), UnitExecutionOptions.QueryExecution());
-        var position = db.Store.Position;
-
-        var accepted = await exact.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken);
-        var rejected = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => shortBudget.SearchAsync("root", request,
-            TestContext.Current!.Execution.CancellationToken)))!;
-
-        await Assert.That(JsonDefaults.Serialize(accepted))
-            .IsEquivalentTo(JsonDefaults.Serialize(expected), CollectionOrdering.Matching);
-        await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(db.Store.Position).IsEqualTo(position);
-        await Assert.That(await exact.SearchAsync("root", request, TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
-    }
-
-    [Test]
-    public async Task AcMp004MidScanTextWorkRejectionReleasesReadGate()
-    {
-        using var db = new TestDatabase(new()
-        {
-            MaxSearchTextTokens = 2
-        });
-        db.Configure(Collection, ResourceKind.Collection);
-        db.Commit(new PutDocument(Collection, HitId, "{\"text\":\"needle other\"}"),
-            new PutVector(Collection, HitId, VectorPath, [1, 0], Space, 1));
-        var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        var position = db.Store.Position;
-
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => search.SearchAsync("root",
-            new(db.Partition, Collection, TextPath, SearchTerm), TestContext.Current!.Execution.CancellationToken)))!;
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(db.Store.Position).IsEqualTo(position);
-        var healthy = await Assert.That(await search.SearchAsync("root", new(db.Partition, Collection,
-            VectorField: VectorPath, Vector: [1, 0], Space: Space),
-            TestContext.Current!.Execution.CancellationToken)).HasSingleItem();
-        await Assert.That(healthy.Document.Reference.Id).IsEqualTo(HitId);
-    }
 }

@@ -7,30 +7,29 @@ namespace KeyLoad.Server;
 /// <summary>Compiles one admitted SQL envelope to the sole canonical operation decoder, without execution.</summary>
 internal static class SqlOperationCompiler
 {
-    internal static McpDecodedOperation Compile(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
+    internal static McpDecodedOperation Compile(SqlOperationRequest request,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken = default)
-        => RequireOperation(CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, null, false, cancellationToken));
-    internal static McpDecodedOperation CompileSession(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
+        => RequireOperation(CompileCore(request, maximumPayloadBytes, queryOptions, null, false, cancellationToken));
+    internal static McpDecodedOperation CompileSession(SqlOperationRequest request,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int positionalParameterCount,
         CancellationToken cancellationToken = default)
-        => RequireOperation(CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, positionalParameterCount, false, cancellationToken));
-    internal static SqlSessionCompilation CompileSessionPlan(SqlOperationRequest request,
-        IOptions<DatabaseLimits> limitsOptions, int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions,
+        => RequireOperation(CompileCore(request, maximumPayloadBytes, queryOptions, positionalParameterCount, false, cancellationToken));
+    internal static SqlSessionCompilation CompileSessionPlan(SqlOperationRequest request, int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions,
         int positionalParameterCount, CancellationToken cancellationToken)
-        => CompileCore(request, limitsOptions, maximumPayloadBytes, queryOptions, positionalParameterCount, true, cancellationToken);
+        => CompileCore(request, maximumPayloadBytes, queryOptions, positionalParameterCount, true, cancellationToken);
     private static McpDecodedOperation RequireOperation(SqlSessionCompilation compilation)
         => compilation.Operation ?? throw ScriptDomOperationErrors.Unsupported();
-    private static SqlSessionCompilation CompileCore(SqlOperationRequest request, IOptions<DatabaseLimits> limitsOptions,
+    private static SqlSessionCompilation CompileCore(SqlOperationRequest request,
         int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions, int? positionalParameterCount, bool identityControl, CancellationToken token)
     {
-        SqlOperationBounds.Validate(request, limitsOptions, maximumPayloadBytes, queryOptions, token);
+        SqlOperationBounds.Validate(request, maximumPayloadBytes, queryOptions, token);
         SqlOriginalMutationIdentity.ValidateDeclared(request.CommandId);
         if (positionalParameterCount is < 0 || positionalParameterCount > queryOptions.Value.MaximumParameters)
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        var budget = new global::KeyLoad.Core.ReadExecutionBudget(limitsOptions, cancellationToken: token);
-        var statement = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql, limitsOptions, budget.Check, token);
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget(cancellationToken: token);
+        var statement = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql, budget.Check, token);
         if (positionalParameterCount is { } count)
         {
             global::KeyLoad.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement, count, budget.Check, token);
@@ -48,22 +47,21 @@ internal static class SqlOperationCompiler
         var operation = statement switch
         {
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SelectStatement { Into: null } => Select(request, statement,
-                maximumPayloadBytes, limitsOptions, queryOptions, budget, positionalParameterCount, token),
+                maximumPayloadBytes, queryOptions, budget, positionalParameterCount, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement execute => ScriptDomExecOperation.Compile(request,
                 execute, maximumPayloadBytes, positionalParameterCount, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement insert => Composition(request, insert,
-                maximumPayloadBytes, limitsOptions, positionalParameterCount, budget.Check, token),
+                maximumPayloadBytes, positionalParameterCount, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.DropTableStatement drop => ScriptDomDropTableOperation.Compile(
-                request, drop, limitsOptions, maximumPayloadBytes, budget.Check, token),
+                request, drop, maximumPayloadBytes, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table => ScriptDomCreateTableOperation.Compile(
-                request, table, limitsOptions, maximumPayloadBytes, budget.Check, token),
+                request, table, maximumPayloadBytes, budget.Check, token),
             _ => throw ScriptDomOperationErrors.Unsupported()
         };
         return new(SqlOriginalMutationIdentity.Require(request.CommandId, operation), null);
     }
     private static McpDecodedOperation Select(SqlOperationRequest request,
-        global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement statement, int maximumPayloadBytes,
-        IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> queryOptions,
+        global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement statement, int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions,
         global::KeyLoad.Core.ReadExecutionBudget budget, int? positionalParameterCount, CancellationToken token)
     {
         if (request.Partition is null)
@@ -72,16 +70,14 @@ internal static class SqlOperationCompiler
         }
         var query = new QueryRequest(request.Partition, request.Sql, request.Parameters,
             request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
-        var ast = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query,
-            limitsOptions, queryOptions, budget, positionalParameterCount, token);
+        var ast = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query, queryOptions, budget, positionalParameterCount, token);
         return Decode(McpToolNames.QueryAst, ast, maximumPayloadBytes, budget.Check, token);
     }
     private static McpDecodedOperation Composition(SqlOperationRequest request,
-        global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement statement, int maximumPayloadBytes,
-        IOptions<DatabaseLimits> limitsOptions, int? positionalParameterCount, Action checkBudget, CancellationToken token)
+        global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement statement, int maximumPayloadBytes, int? positionalParameterCount, Action checkBudget, CancellationToken token)
     {
         var command = statement.InsertSpecification.InsertSource is global::Microsoft.SqlServer.TransactSql.ScriptDom.ValuesInsertSource
-            ? ScriptDomValuesInsertOperation.Compile(request, statement, limitsOptions, maximumPayloadBytes, positionalParameterCount, checkBudget, token)
+            ? ScriptDomValuesInsertOperation.Compile(request, statement, maximumPayloadBytes, positionalParameterCount, checkBudget, token)
             : SqlCompositionInsert.Compile(request, statement, positionalParameterCount, checkBudget, token);
         return Decode(McpToolNames.DocumentsCommit, command, maximumPayloadBytes, checkBudget, token);
     }

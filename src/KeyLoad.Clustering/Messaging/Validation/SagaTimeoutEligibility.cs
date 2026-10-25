@@ -31,7 +31,7 @@ internal static class SagaTimeoutEligibility
             throw Errors.Fail(ErrorCode.Corruption, InconsistentSagaDetail);
         }
 
-        _ = JsonData.Validate(record.StateJson, database.Limits);
+        _ = JsonData.Validate(record.StateJson);
         if (record.Timeout is { } timeout)
         {
             if (timeout.Queue is null || timeout.Queue.Partition != hint.Lane.Partition

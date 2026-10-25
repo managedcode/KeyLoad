@@ -31,10 +31,10 @@ internal static class GlobalBranchTestSupport
             truncated, exhaustive);
 
     internal static GlobalBranchMergeResult Merge(GlobalBranchMergeRequest request,
-        ImmutableArray<GlobalBranchWindow> windows, DatabaseLimits? limits = null,
+        ImmutableArray<GlobalBranchWindow> windows,
         ReadExecutionBudget? budget = null)
-        => GlobalBranchWindowMerger.Merge(request, windows, limits ?? new DatabaseLimits(),
-            budget ?? new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new DatabaseLimits())));
+        => GlobalBranchWindowMerger.Merge(request, windows,
+            budget ?? new ReadExecutionBudget());
 
     internal static GlobalBranchCandidate[] IndependentOrder(IEnumerable<GlobalBranchCandidate> candidates)
         => candidates.OrderByDescending(candidate => candidate.Score)

@@ -26,7 +26,7 @@ internal static class AggregateSnapshotPersistence
     internal static byte[] Serialize(AggregateSnapshotState snapshot)
         => OrleansSerialization.Serialize(new AggregateSnapshotEnvelope(CurrentFormatVersion, snapshot));
 
-    internal static AggregateSnapshotState Deserialize(ReadOnlySpan<byte> value, DatabaseLimits limits)
+    internal static AggregateSnapshotState Deserialize(ReadOnlySpan<byte> value)
     {
         const int SnapshotVersionValidationBoundary = 1;
         const int SourceRevisionValidationBoundary = 0;
@@ -46,7 +46,7 @@ internal static class AggregateSnapshotPersistence
         }
         try
         {
-            _ = JsonData.Validate(snapshot.StateJson, limits, requireObject: false);
+            _ = JsonData.Validate(snapshot.StateJson, requireObject: false);
         }
         catch (KeyLoadException)
         {

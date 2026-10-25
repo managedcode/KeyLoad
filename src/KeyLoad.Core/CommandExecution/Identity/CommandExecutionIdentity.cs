@@ -9,7 +9,6 @@ public static class CommandExecutionIdentity
     internal const string DatabaseCommandType = nameof(DatabaseCommand);
     internal const string InvalidDatabaseCommand = "The database command identity, subject, time or input is invalid.";
     internal const int FingerprintCharacters = 64;
-    internal const int SnapshotStart = 0;
     /// <summary>Snapshots a trusted execution command before asynchronous admission or retained use.</summary>
     /// <param name = "operation">Execution command whose subject was bound by the server boundary.</param>
     /// <returns>An independently owned command and generated execution input.</returns>
@@ -18,22 +17,19 @@ public static class CommandExecutionIdentity
     public static Command<DatabaseCommand> OwnCommand(this DatabaseEngine engine, Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        return SnapshotCommand(operation, engine.Limits);
+        return SnapshotCommand(operation);
     }
 
-    internal static Command<DatabaseCommand> SnapshotCommand(Command<DatabaseCommand> operation, DatabaseLimits limits)
+    internal static Command<DatabaseCommand> SnapshotCommand(Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        ArgumentNullException.ThrowIfNull(limits);
-        ValidateDatabaseCommand(operation, limits);
-        using var buffer = new DatabaseCommandSnapshotBuffer.CommandSnapshotBuffer(limits.MaxBatchBytes);
-        OrleansSerialization.Serialize(operation, buffer);
-        var owned = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(buffer.GetBuffer().AsSpan(SnapshotStart, checked((int)buffer.Length)));
-        ValidateDatabaseCommand(owned, limits);
+        ValidateDatabaseCommand(operation);
+        var owned = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(OrleansSerialization.Serialize(operation));
+        ValidateDatabaseCommand(owned);
         return owned;
     }
 
-    internal static void ValidateDatabaseCommand(Command<DatabaseCommand> operation, DatabaseLimits limits)
+    internal static void ValidateDatabaseCommand(Command<DatabaseCommand> operation)
     {
         var input = operation.Value;
         if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId) || operation.CommandType != DatabaseCommandType || operation.Timestamp.Kind != DateTimeKind.Utc || input is null || input.Input.IsEmpty || !Enum.IsDefined(input.Kind) || string.IsNullOrEmpty(input.Fingerprint) || input.Fingerprint.Length != FingerprintCharacters || input.Fingerprint.Any(character => !char.IsAsciiHexDigitLower(character)))
@@ -41,7 +37,6 @@ public static class CommandExecutionIdentity
             throw Errors.Fail(ErrorCode.Validation, InvalidDatabaseCommand);
         }
 
-        RequireBudget(checked((long)input.Input.Length + input.RetryDecisions.Length + input.ResourceAdmission.Length), limits.MaxBatchBytes);
         _ = OrleansSerialization.Deserialize(input.Input.Span, DatabaseCommandInputTypes.OperationPayloadType(input.Kind) ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
     }
 
@@ -59,7 +54,7 @@ public static class CommandExecutionIdentity
             }
 
             work?.Check();
-            admission = engine.EncodeResourceEffectAdmission(engine.CaptureResourceEffectAdmission(admissionView, operation, fingerprint, preserveBudgetFailure: work is not null));
+            admission = ResourceEffectCapture.EncodeResourceEffectAdmission(engine.CaptureResourceEffectAdmission(admissionView, operation, fingerprint, preserveBudgetFailure: work is not null));
             work?.Check();
         }
         else
@@ -79,14 +74,5 @@ public static class CommandExecutionIdentity
         var evaluated = engine.OwnCommand(operation);
         evaluated.Timestamp = evaluatedAt.UtcDateTime;
         return evaluated;
-    }
-
-    internal static void RequireBudget(this DatabaseEngine engine, long byteCount) => RequireBudget(byteCount, engine.Limits.MaxBatchBytes);
-    internal static void RequireBudget(long byteCount, int maximumBytes)
-    {
-        if (byteCount > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, AtomicCommandCommit.InvalidCommandBudgetMessage);
-        }
     }
 }

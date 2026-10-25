@@ -25,19 +25,19 @@ internal sealed class PackedAnnNeighborCountTests
         var records = PackedAnnTestData.Load(database, metric);
         var space = PackedAnnTestData.Space(metric, Dimension);
         var options = Options();
-        var measuredBudget = PackedAnnIndexTestSupport.Budget(database);
+        var measuredBudget = PackedAnnIndexTestSupport.Budget();
         var measured = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(options), measuredBudget);
-        var measuredGraph = PackedAnnAdjacencyAssertions.Snapshot(measured, PackedAnnIndexTestSupport.Budget(database));
+        var measuredGraph = PackedAnnAdjacencyAssertions.Snapshot(measured, PackedAnnIndexTestSupport.Budget());
         var slots = await AssertShapeAsync(measured, measuredGraph);
-        await AssertReplaceClearRestoreAsync(measured, measuredGraph, slots, database);
+        await AssertReplaceClearRestoreAsync(measured, measuredGraph, slots);
         await AssertCountBudgetAsync(measured,
-            (slots.PartialUpperSource, slots.PartialUpperLayer), database);
+            (slots.PartialUpperSource, slots.PartialUpperLayer));
         var replay = PackedAnnBuilder.Build(space, records, UnitExecutionOptions.PackedAnn(options),
-            PackedAnnIndexTestSupport.Budget(database, measuredBudget.WorkUnits));
+            PackedAnnIndexTestSupport.Budget(measuredBudget.WorkUnits));
         await PackedAnnAdjacencyAssertions.AssertSameAsync(measuredGraph,
-            PackedAnnAdjacencyAssertions.Snapshot(replay, PackedAnnIndexTestSupport.Budget(database)));
-        await AssertBuildLimitAndCancellationAsync(space, records, options, measuredBudget.WorkUnits, database);
-        await PackedAnnNeighborCandidateAssertions.VerifyAsync(measured, measuredGraph, space, records, options, metric, database);
+            PackedAnnAdjacencyAssertions.Snapshot(replay, PackedAnnIndexTestSupport.Budget()));
+        await AssertBuildLimitAndCancellationAsync(space, records, options, measuredBudget.WorkUnits);
+        await PackedAnnNeighborCandidateAssertions.VerifyAsync(measured, measuredGraph, space, records, options, metric);
     }
 
     private static PackedAnnOptions Options() => new()
@@ -100,19 +100,18 @@ internal sealed class PackedAnnNeighborCountTests
     }
 
     private static async Task AssertReplaceClearRestoreAsync(PackedAnnState state, int[][][] snapshot,
-        (int FullBaseSource, int FullBaseLayer, int PartialUpperSource, int PartialUpperLayer) slots,
-        TestDatabase database)
+        (int FullBaseSource, int FullBaseLayer, int PartialUpperSource, int PartialUpperLayer) slots)
     {
         await ReplaceAndRestoreAsync(state.Graph, slots.FullBaseSource, slots.FullBaseLayer,
-            snapshot[slots.FullBaseSource][slots.FullBaseLayer], database);
+            snapshot[slots.FullBaseSource][slots.FullBaseLayer]);
         await ReplaceAndRestoreAsync(state.Graph, slots.PartialUpperSource, slots.PartialUpperLayer,
-            snapshot[slots.PartialUpperSource][slots.PartialUpperLayer], database);
+            snapshot[slots.PartialUpperSource][slots.PartialUpperLayer]);
     }
 
     private static async Task ReplaceAndRestoreAsync(PackedAnnGraph graph, int source, int layer,
-        int[] original, TestDatabase database)
+        int[] original)
     {
-        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var budget = PackedAnnIndexTestSupport.Budget();
         var shortened = original[..^1];
         graph.ReplaceNeighbors(source, layer, shortened, budget);
         await Assert.That(graph.NeighborCount(source, layer, budget)).IsEqualTo(shortened.Length);
@@ -132,17 +131,17 @@ internal sealed class PackedAnnNeighborCountTests
     }
 
     private static async Task AssertCountBudgetAsync(PackedAnnState state,
-        (int Source, int Layer) slot, TestDatabase database)
+        (int Source, int Layer) slot)
     {
-        var measured = PackedAnnIndexTestSupport.Budget(database);
+        var measured = PackedAnnIndexTestSupport.Budget();
         measured.Charge(1);
         var expected = state.Graph.NeighborCount(slot.Source, slot.Layer, measured);
         var work = measured.WorkUnits;
-        var exact = PackedAnnIndexTestSupport.Budget(database, work);
+        var exact = PackedAnnIndexTestSupport.Budget(work);
         exact.Charge(1);
         await Assert.That(state.Graph.NeighborCount(slot.Source, slot.Layer, exact)).IsEqualTo(expected);
         await Assert.That(exact.WorkUnits).IsEqualTo(work);
-        var below = PackedAnnIndexTestSupport.Budget(database, work - 1);
+        var below = PackedAnnIndexTestSupport.Budget(work - 1);
         below.Charge(1);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             state.Graph.NeighborCount(slot.Source, slot.Layer, below));
@@ -151,15 +150,14 @@ internal sealed class PackedAnnNeighborCountTests
 
     // Charges only count work; cancellation is observed where the build starts and before it returns.
     private static async Task AssertBuildLimitAndCancellationAsync(VectorSpace space, VectorRecord[] records,
-        PackedAnnOptions options, long work, TestDatabase database)
+        PackedAnnOptions options, long work)
     {
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnBuilder.Build(space, records,
-            UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget(database, work - 1)));
+            UnitExecutionOptions.PackedAnn(options), PackedAnnIndexTestSupport.Budget(work - 1)));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var canceled = new AnnWorkBudget(new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
+        var canceled = new AnnWorkBudget(new ReadExecutionBudget(TimeProvider.System, cancellation.Token), PackedAnnIndexTestSupport.GenerousWorkLimit);
         Assert.ThrowsExactly<OperationCanceledException>(() => PackedAnnBuilder.Build(space, records,
             UnitExecutionOptions.PackedAnn(options), canceled));
         await Assert.That(canceled.WorkUnits).IsEqualTo(0L);

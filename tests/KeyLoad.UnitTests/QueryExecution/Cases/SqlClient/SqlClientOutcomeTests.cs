@@ -29,12 +29,8 @@ internal sealed class SqlClientOutcomeTests
     private const string QuotedRoot = "\"SELECT\" * FROM orders";
     private const string Unclosed = "/* unclosed EXEC keyload_documents_commit @arguments";
     private const string Empty = "-- only a comment";
-    private const string OpenComment = "/*";
-    private const string CloseComment = "*/";
     private const string ArgumentName = "arguments";
     private const string StableCommandId = "ed659b4c-1309-4dc4-9500-4c1ad8116a31";
-    private const char Padding = 'x';
-    private const char MultibytePadding = '\u00E9';
     private const int TimeoutSeconds = 10;
 
     [Test]
@@ -52,19 +48,6 @@ internal sealed class SqlClientOutcomeTests
     [Arguments(Empty, ErrorCode.UnknownWriteOutcome)]
     public async Task AC_SQLC_005_RealUnavailableReplyKeepsSqlAndClassifiesOutcome(string sql, ErrorCode expected)
         => await VerifyOutcomeAsync(sql, expected);
-
-    [Test]
-    public async Task AC_SQLC_005_ClassificationBoundsRemainConservative()
-    {
-        var limits = new DatabaseLimits();
-        await VerifyOutcomeAsync(OpenComment + new string(Padding, limits.MaxQueryBytes) + CloseComment + Select,
-            ErrorCode.UnknownWriteOutcome);
-        await VerifyOutcomeAsync(OpenComment + new string(MultibytePadding, limits.MaxQueryBytes / 2) + CloseComment + Select,
-            ErrorCode.UnknownWriteOutcome);
-        var deeplyNested = string.Concat(Enumerable.Repeat(OpenComment, limits.MaxQueryDepth + 1))
-            + string.Concat(Enumerable.Repeat(CloseComment, limits.MaxQueryDepth + 1)) + Select;
-        await VerifyOutcomeAsync(deeplyNested, ErrorCode.UnknownWriteOutcome);
-    }
 
     [Test]
     [Arguments(CommentedSelect, ErrorCode.OwnershipLost)]

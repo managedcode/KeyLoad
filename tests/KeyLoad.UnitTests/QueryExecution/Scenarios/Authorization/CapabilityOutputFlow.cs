@@ -10,11 +10,7 @@ internal static class CapabilityOutputFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var database = new TestDatabase(new DatabaseLimits
-            {
-                MaxBatchBytes = CapabilityOutputFixture.RuntimeBytes,
-                MaxQueryBytes = CapabilityOutputFixture.RequestBytes
-            });
+            using var database = new TestDatabase(new DatabaseLimits());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var seeds = CapabilityOutputFixture.Seed(database);

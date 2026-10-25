@@ -41,12 +41,6 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
             .ConfigureAwait(false);
         var overflow = scenario.Request(CreateTooManyPartitions(scenario.Partitions));
         await AssertFailureAsync(sdk, mcp, overflow, ErrorCode.Validation, deadline.Token).ConfigureAwait(false);
-        var resultLimit = scenario.Request(query: scenario.Query with
-        {
-            Limit = PartitionQueryClusterProtocol.MaxResults + 1
-        });
-        await AssertFailureAsync(sdk, mcp, resultLimit, ErrorCode.BudgetExceeded, deadline.Token)
-            .ConfigureAwait(false);
         var valid = scenario.Request([scenario.Partitions[0]]);
         var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.PartitionQueryAsync(valid, deadline.Token)
             .ConfigureAwait(false)).ConfigureAwait(false);

@@ -99,7 +99,7 @@ internal static class ModelRootPolicyAssertions
             HeadersJson = Normalize(record.Data.HeadersJson)
         }
     };
-    private static string Normalize(string json) => JsonData.Validate(json, UnitExecutionOptions.DatabaseLimits().Value);
+    private static string Normalize(string json) => JsonData.Validate(json);
     internal static async Task EqualAsync<T>(T actual, T expected)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
 }

@@ -7,7 +7,6 @@ namespace KeyLoad.UnitTests.QueryExecution;
 
 internal static class QueryRuleOptimizationPages
 {
-    private const int ExpectedScanBudget = 10000;
     private const string FieldUseDenied = "The query requires a protected field-use grant.";
     private const string ScanConsentDenied = "The query requires an index or explicit full-scan permission.";
 
@@ -112,8 +111,7 @@ internal static class QueryRuleOptimizationPages
         var body = System.Text.Json.JsonSerializer.Serialize(new
         {
             accessPath = path,
-            atomicPartition = ast.Partition.AtomicPartitionId,
-            scanBudget = ExpectedScanBudget
+            atomicPartition = ast.Partition.AtomicPartitionId
         }, JsonDefaults.Options);
         await RequiredProcessingPolicyAssertions.EqualAsync(new QueryPage([new("explain", 0L, body)], null, cut, path),
             engine.ExecuteAst(QueryRuleOptimizationData.Reader, explain, cancellationToken: token));

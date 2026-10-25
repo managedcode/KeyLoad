@@ -62,8 +62,9 @@ internal sealed class ReadExecutionBudgetAbsoluteDeadlineTests
     }
 
     private static ReadExecutionBudget Create(ControlledReadClock clock, CancellationToken token)
-        => new(UnitExecutionOptions.DatabaseLimits(new()
-        {
-            QueryDeadlineSeconds = QuerySeconds
-        }), clock, token);
+    {
+        var work = new ReadExecutionBudget(clock, token);
+        work.ConstrainLifetime(clock.GetUtcNow().AddSeconds(QuerySeconds));
+        return work;
+    }
 }

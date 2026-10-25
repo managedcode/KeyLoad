@@ -24,7 +24,7 @@ internal static class SignedClaimsExecutionPolicyFlow
 
     // This engine borrows the same genuine store; only its execution claim admission snapshot differs.
     internal static DatabaseEngine Borrow(TestDatabase database, IOptions<ClaimsExecutionOptions> claimsOptions)
-        => new(database.Store, database.Database.Authorization, database.Database.OperationLimitsOptions,
+        => new(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             database.Database.GraphOptions, UnitExecutionOptions.ChangeFeedExecution(),
             claimsOptions,

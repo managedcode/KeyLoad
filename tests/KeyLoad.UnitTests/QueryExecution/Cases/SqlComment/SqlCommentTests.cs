@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using KeyLoad.Query;
 using TUnit.Assertions.Enums;
@@ -32,14 +31,12 @@ internal sealed class SqlCommentTests
         await Assert.That(commented.AccessPath).IsEqualTo(SqlCommentTestData.IndexPath);
 
         var plainExplain = engine.ExecuteAst(SqlCommentTestData.Principal,
-            new(db.Partition, new SqlParser(SqlCommentTestData.PlainExplain,
-                UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse() with
+            new(db.Partition, new SqlParser(SqlCommentTestData.PlainExplain, UnitExecutionOptions.QueryExecution()).Parse() with
             {
                 Explain = true
             }));
         var commentedExplain = engine.ExecuteAst(SqlCommentTestData.Principal,
-            new(db.Partition, new SqlParser(SqlCommentTestData.CommentedExplain,
-                UnitExecutionOptions.DatabaseLimits(db.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse() with
+            new(db.Partition, new SqlParser(SqlCommentTestData.CommentedExplain, UnitExecutionOptions.QueryExecution()).Parse() with
             {
                 Explain = true
             }));
@@ -82,55 +79,22 @@ internal sealed class SqlCommentTests
         await Assert.That(result.Rows.Select(row => row.EntityId)).IsEquivalentTo(
             [SqlCommentTestData.DocumentA], CollectionOrdering.Matching);
         await Assert.That(result.AccessPath).IsEqualTo(SqlCommentTestData.NumberIndexPath);
-        await Assert.That(() => new SqlParser(SqlCommentTestData.NumericArithmeticLikeSql, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse())
+        await Assert.That(() => new SqlParser(SqlCommentTestData.NumericArithmeticLikeSql, UnitExecutionOptions.QueryExecution()).Parse())
             .Throws<KeyLoadException>();
     }
 
     [Test]
     public async Task AcSqlc002_UnclosedDeepSplicedAndSecondStatementCommentsAreRejected()
     {
-        var limits = new DatabaseLimits { MaxQueryDepth = SqlCommentTestData.OverDepth };
-        await Assert.That(new SqlParser(SqlCommentTestData.DeepComment, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryDepth = SqlCommentTestData.MaximumCommentDepth
-        }), UnitExecutionOptions.QueryExecution()).Parse().Collection)
+        await Assert.That(new SqlParser(SqlCommentTestData.DeepComment, UnitExecutionOptions.QueryExecution()).Parse().Collection)
             .IsEqualTo(SqlCommentTestData.Collection);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SqlCommentTestData.UnclosedComment, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SqlCommentTestData.DeepPredicate, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(() => new SqlParser(SqlCommentTestData.IdentifierSplice, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse())
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser(SqlCommentTestData.UnclosedComment, UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(() => new SqlParser(SqlCommentTestData.IdentifierSplice, UnitExecutionOptions.QueryExecution()).Parse())
             .Throws<KeyLoadException>();
-        await Assert.That(() => new SqlParser(SqlCommentTestData.OperatorSplice, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse())
+        await Assert.That(() => new SqlParser(SqlCommentTestData.OperatorSplice, UnitExecutionOptions.QueryExecution()).Parse())
             .Throws<KeyLoadException>();
-        await Assert.That(() => new SqlParser(SqlCommentTestData.SecondStatement, UnitExecutionOptions.DatabaseLimits(new()), UnitExecutionOptions.QueryExecution()).Parse())
+        await Assert.That(() => new SqlParser(SqlCommentTestData.SecondStatement, UnitExecutionOptions.QueryExecution()).Parse())
             .Throws<KeyLoadException>();
-    }
-
-    [Test]
-    public async Task AcSqlc002_CommentBytesAndTokensRemainInsideOriginalLimits()
-    {
-        var byteCount = Encoding.UTF8.GetByteCount(SqlCommentTestData.ExactBoundedQuery);
-        var exactLimits = new DatabaseLimits { MaxQueryBytes = byteCount };
-        var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(exactLimits));
-        using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(SqlCommentTestData.ExactBoundedQuery, budget.Check);
-        var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
-            global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
-        var tokens = parser.GetTokenStream(reader, out var errors);
-        await Assert.That(errors.Count).IsEqualTo(0);
-        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens,
-            exactLimits with
-            {
-                MaxQueryTokens = SqlCommentTestData.ExactTokenCount
-            }, budget.Check);
-        await Assert.That(new SqlParser(SqlCommentTestData.ExactBoundedQuery, UnitExecutionOptions.DatabaseLimits(exactLimits), UnitExecutionOptions.QueryExecution()).Parse().Collection)
-            .IsEqualTo(SqlCommentTestData.Collection);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => _ = new SqlParser(SqlCommentTestData.ExactBoundedQuery, UnitExecutionOptions.DatabaseLimits(exactLimits with { MaxQueryBytes = byteCount - 1 }), UnitExecutionOptions.QueryExecution()).Parse()).Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens,
-            exactLimits with
-            {
-                MaxQueryTokens = SqlCommentTestData.ExcessTokenCount
-            }, budget.Check)).Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]

@@ -9,64 +9,15 @@ internal sealed class ReadBudgetAllocationTests
     private const int LargeValueBytes = 1_048_576;
     private const long RejectionAllocationAllowance = 131_072;
     private const long SerializationAllocationAllowance = 262_144;
-    private const int SmallReadBudget = 16;
     private const int ResultParts = 4_096;
     private const int ResultPartCharacters = 512;
     private const string Prefix = "budget/";
     private const string FirstKey = "budget/1";
     private const string SecondKey = "budget/2";
-    private const string ThirdKey = "budget/3";
     private const string MissingKey = "budget/missing";
     private const string EscapedUnicode = "київ café \"line\"\n";
     private const string TemporaryDirectoryPrefix = "keyload-read-budget-";
     private const string RuntimeValueAlias = "keyload.tests.read-budget.value";
-
-    [Test]
-    public async Task AcMp002PointLimitRejectsBeforeAllocatingAnOwnedLargeValue()
-    {
-        using var fixture = new StoreFixture();
-        var key = Key(FirstKey);
-        fixture.Store.Commit((tx, _) => { tx.Put(key, new byte[LargeValueBytes]); return true; });
-        var limits = new DatabaseLimits { MaxQueryReadBytes = SmallReadBudget };
-        var token = TestContext.Current!.Execution.CancellationToken;
-        Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: token).Read(view, key)));
-
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: token);
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => budget.Read(view, key)));
-        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(allocated).IsLessThan(RejectionAllocationAllowance);
-        await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(key)!.Length)).IsEqualTo(LargeValueBytes);
-    }
-
-    [Test]
-    public async Task AcMp002RangeLimitRejectsBeforeMaterializingTheWholePage()
-    {
-        using var fixture = new StoreFixture();
-        fixture.Store.Commit((tx, _) =>
-        {
-            foreach (var key in new[] { FirstKey, SecondKey, ThirdKey })
-            {
-                tx.Put(Key(key), new byte[LargeValueBytes]);
-            }
-            return true;
-        });
-        var limits = new DatabaseLimits { MaxQueryReadBytes = SmallReadBudget };
-        var prefix = Key(Prefix);
-        var token = TestContext.Current!.Execution.CancellationToken;
-        Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: token).Scan(view, prefix, 3)));
-
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: token);
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => budget.Scan(view, prefix, 3)));
-        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(allocated).IsLessThan(RejectionAllocationAllowance);
-        await Assert.That(fixture.Store.Read(view => view.Scan(prefix, 3).Records.Length)).IsEqualTo(3);
-    }
 
     [Test]
     public async Task AcMp002TypedReadsDecodeTheStoredValueWithoutAnIntermediateRawCopy()
@@ -87,30 +38,11 @@ internal sealed class ReadBudgetAllocationTests
     }
 
     [Test]
-    public async Task AcMp005ResultLimitIncludesExactUnicodeEscapingAndProtocolMetadata()
-    {
-        var result = new JsonRecord(EscapedUnicode);
-        var bytes = JsonDefaults.Serialize(result).Length;
-        new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = bytes
-        })).CheckResult(result);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
-            {
-                MaxBatchBytes = bytes - 1
-            })).CheckResult(result));
-
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
     public async Task AcMp005ResultCountingDoesNotAllocateACompleteSerializedResultBuffer()
     {
         var result = Enumerable.Repeat(new string('x', ResultPartCharacters), ResultParts).ToArray();
-        var limits = new DatabaseLimits();
-        new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits)).CheckResult(result);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), cancellationToken: TestContext.Current!.Execution.CancellationToken);
+        new ReadExecutionBudget().CheckResult(result);
+        var budget = new ReadExecutionBudget(cancellationToken: TestContext.Current!.Execution.CancellationToken);
 
         var before = GC.GetAllocatedBytesForCurrentThread();
         budget.CheckResult(result);
@@ -128,7 +60,7 @@ internal sealed class ReadBudgetAllocationTests
         var position = fixture.Store.Position;
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(cancellationToken: cancellation.Token);
 
         await Assert.That(() => fixture.Store.Read(view => budget.Read(view, key))).Throws<OperationCanceledException>();
         await Assert.That(() => fixture.Store.Read(view => budget.Scan(view, Key(Prefix), 1))).Throws<OperationCanceledException>();

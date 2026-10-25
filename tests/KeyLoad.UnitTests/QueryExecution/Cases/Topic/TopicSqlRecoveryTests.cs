@@ -32,15 +32,11 @@ internal sealed class TopicSqlRecoveryTests
     }
 
     [Test]
-    public async Task ActualTopicCompleteHistoryScanOverflowAndOriginalCancellationRejectThenPurgeMakesReadHealthy()
+    public async Task ActualTopicOriginalCancellationRejectsThenPurgeMakesReadHealthy()
     {
         using var database = TopicSqlSeed.Create();
         TopicSqlSeed.Publish(database, TopicSqlSeed.Command(database));
-        var engine = QueryBudgetReadOwner.Create(database, database.Database.Limits with
-        {
-            MaxScanRecords = TopicSqlProtocol.FirstPosition
-        });
-        await RefuseAsync(database, engine, ErrorCode.BudgetExceeded);
+        var engine = QueryBudgetReadOwner.Create(database, database.Database.Limits);
         var bytes = QueueWholeFlowStorage.Bytes(database.Store);
         var position = database.Store.Position;
         using var cancelled = new CancellationTokenSource();

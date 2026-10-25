@@ -25,30 +25,30 @@ internal static class ScriptDomMoneyModePages
                 [SlotParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement("a", JsonDefaults.Options)
             }
         };
-        var budget = new global::KeyLoad.Core.ReadExecutionBudget(database.Database.OperationLimitsOptions);
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget();
         var statement = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(wire.Sql,
-            database.Database.OperationLimitsOptions, budget.Check, CancellationToken.None);
+            budget.Check, CancellationToken.None);
         global::KeyLoad.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
             1, budget.Check, CancellationToken.None);
         var ast = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(statement, wire,
-            database.Database.OperationLimitsOptions, UnitExecutionOptions.QueryExecution(), budget, 1, CancellationToken.None);
+            UnitExecutionOptions.QueryExecution(), budget, 1, CancellationToken.None);
         await SqlOffsetPages.ExactAsync(engine.ExecuteAst(SqlOffsetProtocol.Reader, ast), expected);
         var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlOffsetProtocol.Reader, wire));
         await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         foreach (var slot in InvalidSlots)
         {
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() => Validate(database, slot));
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => Validate(slot));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
             await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
             await SqlOffsetPages.ExactAsync(engine.Execute(SqlOffsetProtocol.Reader, named), expected);
         }
         await SqlNullOrderingRefusals.UnchangedAsync(database.Store, image, position, identity);
     }
-    private static void Validate(TestDatabase database, string slot)
+    private static void Validate(string slot)
     {
-        var budget = new global::KeyLoad.Core.ReadExecutionBudget(database.Database.OperationLimitsOptions);
+        var budget = new global::KeyLoad.Core.ReadExecutionBudget();
         var statement = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(
-            Prefix + slot + Suffix, database.Database.OperationLimitsOptions, budget.Check, CancellationToken.None);
+            Prefix + slot + Suffix, budget.Check, CancellationToken.None);
         global::KeyLoad.QueryExecution.ScriptDomSyntax.ValidateSessionSlots(statement,
             1, budget.Check, CancellationToken.None);
     }

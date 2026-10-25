@@ -22,7 +22,7 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
         parent.Check();
         var source = database.WithQueryView(principalId, phase.Search.Partition, phase.Search.Collection,
             Capability.None, (view, principal, definition) => (Definition: definition,
-                Coverage: parent.BindResourceLifetimes(database, view, phase.Search.Partition, [definition]),
+                Coverage: parent.BindResourceLifetimes(view, phase.Search.Partition, [definition]),
                 Principal: principal), parent);
         var target = grains.GetGrain<IPartitionQueryGrain>(PartitionQueryGrainIdentity.For(phase.Search.Partition));
         var selected = await ResolveOwnerAsync(target, phase, parent, token).ConfigureAwait(true);

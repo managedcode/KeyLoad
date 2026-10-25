@@ -9,18 +9,16 @@ internal static class EventFeedPubSubRowEncoding
     private const string ETagFormat = "N";
 
     internal static EventFeedPubSubRow Create<T>(IServiceProvider originalServices, GrainId grainId,
-        T state, IOptions<DatabaseLimits> options, IOptions<GrainRoutingOptions> routing,
+        T state, IOptions<GrainRoutingOptions> routing,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(originalServices);
-        ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(routing);
         if (state is null)
         {
             throw Errors.Fail(ErrorCode.Validation, EventFeedPubSubProtocol.Invalid);
         }
-        options.Value.Validate();
-        var maximum = checked((int)Math.Min(options.Value.MaxBatchBytes, options.Value.MaxQueryReadBytes));
+        var maximum = routing.Value.MaximumReplyBytes;
         var etag = Guid.NewGuid().ToString(ETagFormat);
         var keySerializer = originalServices.GetRequiredService<Serializer<GrainId>>();
         var stringSerializer = originalServices.GetRequiredService<Serializer<string>>();

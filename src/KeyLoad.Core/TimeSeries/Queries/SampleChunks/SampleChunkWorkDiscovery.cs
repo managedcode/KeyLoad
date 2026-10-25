@@ -9,7 +9,7 @@ internal static class SampleChunkWorkDiscovery
     internal static SampleChunkWorkPage Read(DatabaseEngine database, byte[]? afterKey,
         CancellationToken cancellationToken)
     {
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         var hints = ImmutableArray.CreateBuilder<SampleChunkWorkHint>();
         byte[]? last = null;

@@ -12,52 +12,9 @@ internal sealed class SearchReadBudgetTests
     private const string TestVersion = "1";
     private const int VectorDimensions = 2;
     private const int VectorVersion = 1;
-    private const int PaddingLength = 12_000;
-    private const int ReadByteLimit = 4_096;
-    private const int MaximumVisibleTextTokens = 5;
     private const int FusionConstant = 61;
     private const double TwelveDecimalPlacesTolerance = 0.0000000000005;
     private static VectorSpace Space { get; } = new(TestName, VectorDimensions, DistanceMetric.Cosine, TestName, TestVersion);
-
-    [Test]
-    public async Task VectorDocumentDereferencesConsumeTheReadByteBudget()
-    {
-        using var database = new TestDatabase(new()
-        {
-            MaxQueryReadBytes = ReadByteLimit
-        });
-        database.Configure(Orders, ResourceKind.Collection);
-        database.Commit(new PutDocument(Orders, "a", "{\"padding\":\"" + new string('x', PaddingLength) + "\"}"),
-            new PutVector(Orders, "a", EmbeddingPath, [1, 0], Space, VectorVersion));
-        var position = database.Store.Position;
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
-            new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", VectorRequest(database), TestContext.Current!.Execution.CancellationToken)))!;
-        await Assert.That(failure.Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-    }
-
-    [Test]
-    public async Task TextAndVectorBranchesShareOneReadByteBudget()
-    {
-        await SharedSearchReadBudgetFlow.RunAsync();
-    }
-
-    [Test]
-    public async Task TextTokenLimitAppliesToTheWholeVisibleCorpus()
-    {
-        using var database = new TestDatabase(new()
-        {
-            MaxSearchTextTokens = MaximumVisibleTextTokens
-        });
-        database.Configure(Orders, ResourceKind.Collection);
-        database.Commit(new PutDocument(Orders, "a", "{\"text\":\"alpha beta gamma\"}"),
-            new PutDocument(Orders, "b", "{\"text\":\"alpha beta gamma\"}"));
-        var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution())
-            .SearchAsync("root", new(database.Partition, Orders, TextPath, "alpha"), TestContext.Current!.Execution.CancellationToken)))!;
-        await Assert.That(failure.Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
-    }
 
     [Test]
     public async Task StreamingBm25PreservesUnicodeRepeatedTermsAndMissingFieldRanks()
@@ -94,7 +51,4 @@ internal sealed class SearchReadBudgetTests
         var contribution = double.MaxValue / (int.MaxValue + 1.0);
         await Assert.That(result.Score).IsEqualTo(contribution + contribution);
     }
-
-    private static SearchRequest VectorRequest(TestDatabase database) => new(database.Partition, Orders,
-        VectorField: EmbeddingPath, Vector: [1, 0], Space: Space);
 }

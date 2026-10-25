@@ -10,14 +10,14 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
         var work = owner.Source.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
         var image = owner.Store.Read(view =>
         {
-            var rows = Scan(view, [], work, owner.Database.Limits.MaxScanRecords);
+            var rows = Scan(view, [], work, view.MaximumRangeRecords);
             byte[][] domain =
             [
-                Scan(view, DocumentStorageKeys.Prefix(partition, DocumentPatchAtomicityContract.Collection), work, owner.Database.Limits.MaxScanRecords),
-                Scan(view, KeySpace.Partition("index", partition, DocumentPatchAtomicityContract.Collection), work, owner.Database.Limits.MaxScanRecords),
-                Scan(view, KeySpace.Partition("unique", partition, DocumentPatchAtomicityContract.Collection), work, owner.Database.Limits.MaxScanRecords),
-                Scan(view, KeySpace.Partition("outbox", partition), work, owner.Database.Limits.MaxScanRecords),
-                Scan(view, KeySpace.Partition("outbox-head", partition), work, owner.Database.Limits.MaxScanRecords)
+                Scan(view, DocumentStorageKeys.Prefix(partition, DocumentPatchAtomicityContract.Collection), work, view.MaximumRangeRecords),
+                Scan(view, KeySpace.Partition("index", partition, DocumentPatchAtomicityContract.Collection), work, view.MaximumRangeRecords),
+                Scan(view, KeySpace.Partition("unique", partition, DocumentPatchAtomicityContract.Collection), work, view.MaximumRangeRecords),
+                Scan(view, KeySpace.Partition("outbox", partition), work, view.MaximumRangeRecords),
+                Scan(view, KeySpace.Partition("outbox-head", partition), work, view.MaximumRangeRecords)
             ];
             return (Rows: rows, Domain: domain);
         });

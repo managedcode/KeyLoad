@@ -45,7 +45,7 @@ internal static class RemoteTransferAttemptCrashScenario
             Destination, transfer.TransferId, original.IntentToken, hint.AcceptGeneration, accept.CommandId);
         var witness = database.ReadRemoteTransferCoordination(CrashFixtureValues.Principal, read, CancellationToken.None).FailureWitness
             ?? throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing);
-        var claims = database.Verify<RemoteTransferAcceptFailureClaims>(witness, database.Limits.MaxBatchBytes);
+        var claims = database.VerifyRetained<RemoteTransferAcceptFailureClaims>(witness);
         var advance = new CommandRequest(RemoteTransferAttemptIdentity.AdvanceId(hint, hint.AcceptGeneration, claims.OutcomeDigest),
             Source.Partition, [new AdvanceQueueTransferAttempt(Source, transfer.TransferId, hint.AcceptGeneration, witness)]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, advance, advance.CommandId);

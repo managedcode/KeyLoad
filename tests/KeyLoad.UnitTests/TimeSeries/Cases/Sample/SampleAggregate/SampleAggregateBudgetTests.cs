@@ -4,6 +4,7 @@ namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleAggregateBudgetTests
 {
+    private const int CallerLifetimeMilliseconds = 1;
     [Test]
     public async Task AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate()
     {
@@ -32,15 +33,11 @@ internal sealed class SampleAggregateBudgetTests
     }
 
     [Test]
-    public async Task AcSeries011InvalidOrOverServerSampleAndWindowCapsReturnBudgetExceeded()
+    public async Task AcSeries011InvalidSampleAndWindowCapsReturnBudgetExceeded()
     {
         using var db = new TestDatabase();
         SampleAggregateTestData.Configure(db);
-        var limits = db.Database.Limits with
-        {
-            MaxScanRecords = SampleAggregateTestData.OneResult,
-            MaxResults = SampleAggregateTestData.OneResult
-        };
+        var limits = db.Database.Limits;
         var create = TestDatabaseEngineFactory.Capture(UnitExecutionOptions.DatabaseLimits(limits),
             UnitExecutionOptions.RuntimeClaimsExecution(), null, db.Database.EvaluationClock);
         var bounded = create(db.Store);
@@ -58,92 +55,19 @@ internal sealed class SampleAggregateBudgetTests
                 MaxSamples = SampleAggregateTestData.ZeroScanRecords
             }),
             ErrorCode.BudgetExceeded);
-        var overSamples = SampleAggregateTestData.Failure(() => bounded.AggregateSamples(
-            SampleAggregateTestData.RootPrincipal, aggregate with
-            {
-                MaxSamples = SampleAggregateTestData.OneResult + 1
-            }),
-            ErrorCode.BudgetExceeded);
         var zeroWindows = SampleAggregateTestData.Failure(() => bounded.AggregateSampleWindows(
             SampleAggregateTestData.RootPrincipal, windows with
             {
                 MaxWindows = SampleAggregateTestData.ZeroResults
             }),
             ErrorCode.BudgetExceeded);
-        var overWindows = SampleAggregateTestData.Failure(() => bounded.AggregateSampleWindows(
-            SampleAggregateTestData.RootPrincipal, windows with
-            {
-                MaxWindows = SampleAggregateTestData.OneResult + 1
-            }),
-            ErrorCode.BudgetExceeded);
 
         await Assert.That(zeroSamples.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(overSamples.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(zeroWindows.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(overWindows.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]
-    public async Task AcSeries011CompleteJsonOutputAcceptsExactBytesAndRejectsOneByteLess()
-    {
-        using var db = new TestDatabase();
-        SampleAggregateTestData.Configure(db);
-        SampleAggregateTestData.Append(db, SampleAggregateTestData.Data(1, SampleAggregateTestData.Start, -2));
-        var request = new AggregateSamplesRequest(db.Partition, SampleAggregateTestData.Set,
-            SampleAggregateTestData.Series, SampleAggregateTestData.Start,
-            SampleAggregateTestData.Start.AddTicks(1));
-        var expected = db.Database.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
-        var exactLength = JsonDefaults.Serialize(expected).Length;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = exactLength
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var oneByteShort = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = exactLength - SampleAggregateTestData.ExactBatchExtraByte
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-
-        var actual = exact.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
-        var failure = SampleAggregateTestData.Failure(() => oneByteShort.AggregateSamples(
-            SampleAggregateTestData.RootPrincipal, request), ErrorCode.BudgetExceeded);
-
-        await Assert.That(actual).IsEqualTo(expected);
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
-    public async Task AcSeries011CompleteRawReadBudgetAcceptsExactBytesAndRejectsOneByteLess()
-    {
-        using var db = new TestDatabase();
-        SampleAggregateTestData.Configure(db);
-        SampleAggregateTestData.Append(db, SampleAggregateTestData.Data(1, SampleAggregateTestData.Start, 8));
-        var request = new AggregateSamplesRequest(db.Partition, SampleAggregateTestData.Set,
-            SampleAggregateTestData.Series, SampleAggregateTestData.Start,
-            SampleAggregateTestData.Start.AddTicks(1));
-        var before = db.Store.GetReadDiagnostics();
-        var expected = db.Database.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
-        var after = db.Store.GetReadDiagnostics();
-        var readBytes = after.PointExaminedBytes - before.PointExaminedBytes
-            + after.RangeExaminedBytes - before.RangeExaminedBytes;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryReadBytes = readBytes
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var oneByteShort = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryReadBytes = readBytes - SampleAggregateTestData.ExactBatchExtraByte
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-
-        var actual = exact.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
-        var failure = SampleAggregateTestData.Failure(() => oneByteShort.AggregateSamples(
-            SampleAggregateTestData.RootPrincipal, request), ErrorCode.BudgetExceeded);
-
-        await Assert.That(actual).IsEqualTo(expected);
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
-    public async Task AcSeries011ReadByteBudgetPreCancellationAndElapsedDeadlineRejectAndPreserveStore()
+    public async Task AcSeries011PreCancellationAndElapsedCallerExpiryRejectAndPreserveStore()
     {
         using var db = new TestDatabase();
         SampleAggregateTestData.Configure(db);
@@ -151,32 +75,18 @@ internal sealed class SampleAggregateBudgetTests
         var request = new AggregateSamplesRequest(db.Partition, SampleAggregateTestData.Set,
             SampleAggregateTestData.EmptySeries, SampleAggregateTestData.Start,
             SampleAggregateTestData.Start.Add(SampleAggregateTestData.Minute));
-        var limited = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxQueryReadBytes = SampleAggregateTestData.TinyReadBytes
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var readFailure = SampleAggregateTestData.Failure(() => limited.AggregateSamples(
-            SampleAggregateTestData.RootPrincipal, request), ErrorCode.BudgetExceeded);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        var cancellation = Assert.ThrowsExactly<OperationCanceledException>(() => limited.AggregateSamples(
+        var cancellation = Assert.ThrowsExactly<OperationCanceledException>(() => db.Database.AggregateSamples(
             SampleAggregateTestData.RootPrincipal, request, cancelled.Token));
-        var invalidDeadline = new DatabaseLimits { QueryDeadlineSeconds = SampleAggregateTestData.InvalidDeadlineSeconds };
-        var invalidConfiguration = Assert.ThrowsExactly<InvalidOperationException>(invalidDeadline.Validate);
-        await Assert.That(invalidDeadline.IsValid()).IsFalse();
-        await Assert.That(invalidConfiguration.Message).IsEqualTo(DatabaseLimits.ValidationMessage);
-        var expiredBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(
-            new()
-            {
-                QueryDeadlineSeconds = SampleAggregateTestData.DeadlineSeconds
-            }), TimeProvider.System);
+        var expiredBudget = new ReadExecutionBudget(TimeProvider.System);
+        expiredBudget.ConstrainLifetime(TimeProvider.System.GetUtcNow().AddMilliseconds(CallerLifetimeMilliseconds));
         await Task.Delay(TimeSpan.FromMilliseconds(SampleAggregateTestData.DeadlineElapsedWaitMilliseconds), TimeProvider.System, TestContext.Current!.Execution.CancellationToken);
         var deadlineFailure = SampleAggregateTestData.Failure(() => db.Store.Read(view =>
             SampleAggregateReader.Read(db.Database, expiredBudget.CreateView(view), SampleAggregateTestData.RootPrincipal,
                 request, expiredBudget)), ErrorCode.BudgetExceeded);
         var healthy = db.Database.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
 
-        await Assert.That(readFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(cancellation).IsNotNull();
         await Assert.That(deadlineFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(deadlineFailure.Message).IsEqualTo(SampleAggregateTestData.DeadlineExceededDetail);

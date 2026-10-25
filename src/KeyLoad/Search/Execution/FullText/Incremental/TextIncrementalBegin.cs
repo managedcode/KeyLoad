@@ -14,18 +14,17 @@ internal static class TextIncrementalBegin
         TextResourceOwnership? resources, Action<string, TextResourceReservation> retainGeneration,
         DateTimeOffset? expiry, IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
-        var work = new MaintenanceSessionWork(configured.Core.DatabaseLimits, clock,
-            expiry ?? clock.GetUtcNow().AddSeconds(configured.Core.DatabaseLimits.Value.QueryDeadlineSeconds), shutdown.Token);
+        var work = new MaintenanceSessionWork(clock,
+            expiry, shutdown.Token);
         var captureStarted = false;
         var captured = false;
         try
         {
             sessions.BeginWork(request.SessionId, work);
             using var stage = work.EnterStage(binding, token);
-            var limits = configured.Core.DatabaseLimits.Value;
             captureStarted = true;
             var actual = Capture(database, root, request.SessionId, principal,
-                request.Maintenance, work, limits.MaxScanRecords, limits.MaxScanRecords, configured.RuntimeText,
+                request.Maintenance, work, configured.RuntimeText,
                 faultObserver, resources, retainGeneration, sessions.Own);
             captured = true;
             sessions.Add(actual);
@@ -49,8 +48,7 @@ internal static class TextIncrementalBegin
     }
 
     private static TextIncrementalSession Capture(DatabaseEngine database, string root,
-        Guid sessionId, PrincipalRecord principal, TextIndexMaintenanceRequest request, MaintenanceSessionWork work,
-        int maximumRecords, int maximumChanges, IOptions<TextExecutionOptions> options,
+        Guid sessionId, PrincipalRecord principal, TextIndexMaintenanceRequest request, MaintenanceSessionWork work, IOptions<TextExecutionOptions> options,
         Action<TextFaultStage>? faultObserver = null, TextResourceOwnership? resources = null,
         Action<string, TextResourceReservation>? retainGeneration = null,
         Action<TextIncrementalSession>? ownSession = null)
@@ -81,8 +79,7 @@ internal static class TextIncrementalBegin
                 return Create(root, sessionId, request, admitted, work, options, faultObserver,
                     resources, retainGeneration, CaptureOwnership);
             }
-            return Restore(root, leaf, sessionId, request, admitted, work, maximumRecords,
-                maximumChanges, options, faultObserver, resources, CaptureOwnership);
+            return Restore(root, leaf, sessionId, request, admitted, work, options, faultObserver, resources, CaptureOwnership);
         }
         catch (Exception primary)
         {
@@ -134,8 +131,7 @@ internal static class TextIncrementalBegin
     }
 
     private static TextIncrementalSession Restore(string root, string leaf, Guid sessionId,
-        TextIndexMaintenanceRequest request, TextSeedCapture admitted, MaintenanceSessionWork work,
-        int maximumRecords, int maximumChanges, IOptions<TextExecutionOptions> options,
+        TextIndexMaintenanceRequest request, TextSeedCapture admitted, MaintenanceSessionWork work, IOptions<TextExecutionOptions> options,
         Action<TextFaultStage>? faultObserver, TextResourceOwnership? resources,
         Action<TextIncrementalSession> captureOwnership)
     {
@@ -159,13 +155,13 @@ internal static class TextIncrementalBegin
         {
             session.Manifest = TextIncrementalMetadata.ReadManifest(path, options.Value.MaximumDiskBytes, budget);
             TextIncrementalValidation.Manifest(session.Manifest, enrolled.Scope, request.Consumer,
-                request.IndexGeneration, request.Placement, maximumRecords, budget, options);
+                request.IndexGeneration, request.Placement, budget, options);
         }
         if (hasIntent)
         {
             session.Intent = TextIncrementalMetadata.ReadIntent(path, options.Value.MaximumDiskBytes, budget);
             TextIncrementalIntentValidation.Require(session.Intent, enrolled.Scope, request.Consumer,
-                request.IndexGeneration, request.Placement, maximumRecords, maximumChanges, budget);
+                request.IndexGeneration, request.Placement, budget);
             TextIncrementalRecoveryIdentity.RequireIntent(enrolled, session.Intent, session.Manifest, budget);
             session.Target = TextIncrementalRecoveryTarget.FromIntent(session.Intent, session.Manifest, budget);
         }

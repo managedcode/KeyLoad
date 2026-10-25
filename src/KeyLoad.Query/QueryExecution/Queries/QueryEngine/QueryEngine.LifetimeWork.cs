@@ -10,8 +10,8 @@ public sealed partial class QueryEngine
     {
         ArgumentNullException.ThrowIfNull(binding);
         return Execute(principalId, budget => global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(
-            global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql, database.OperationLimitsOptions,
-                budget.Check, cancellationToken), request, database.OperationLimitsOptions, executionOptions, budget,
+            global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(request.Sql,
+                budget.Check, cancellationToken), request, executionOptions, budget,
             cancellationToken), timeProvider, cancellationToken, binding);
     }
 

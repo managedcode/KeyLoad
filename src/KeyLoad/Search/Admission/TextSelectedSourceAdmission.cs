@@ -45,7 +45,7 @@ internal static class TextSelectedSourceAdmission
             TextIndexMaintenanceMode.Restore);
         var manifest = TextIncrementalMetadata.ReadManifest(generationPath, options.Value.MaximumDiskBytes, budget);
         TextIncrementalValidation.Manifest(manifest, enrollment.Scope, selection.Consumer,
-            selection.Generation, enrollment.Placement, database.Limits.MaxScanRecords, budget, options);
+            selection.Generation, enrollment.Placement, budget, options);
         if (manifest.Bootstrap)
         {
             throw TextErrors.Mismatch();

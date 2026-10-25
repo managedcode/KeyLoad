@@ -4,12 +4,10 @@ namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnWaitObservedWorkTests
 {
-    private const int DeadlineSeconds = 1;
     private const int ExpiredSeconds = 2;
     private const string DeadlineDetail = "The read execution deadline is exceeded.";
 
     [Test]
-    [Arguments(false)]
     [Arguments(true)]
     public Task ActualAcquisitionCancellationOrDeadlineSettlesNoPartialThenSamePrefixIsHealthy(bool cancel)
     {
@@ -49,6 +47,6 @@ internal sealed class AnnWaitObservedWorkTests
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
             await AnnWaitWholeFlow.HealthyAsync(database, runtime, request, TestContext.Current!.Execution.CancellationToken);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
-        }, new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds }, clock);
+        }, new DatabaseLimits(), clock);
     }
 }

@@ -1,20 +1,16 @@
+using KeyLoad.Core;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.QueryExecution;
 
-internal sealed class ScriptDomSlotVisitor(ScriptDomCheckedTokens bounds, int? positionalCount,
+internal sealed class ScriptDomSlotVisitor(int? positionalCount,
     Action checkBudget, CancellationToken cancellationToken) : Dom.TSqlFragmentVisitor
 {
-    private int nodes;
-    private int depth;
     public override void Visit(Dom.TSqlFragment fragment)
     {
         cancellationToken.ThrowIfCancellationRequested();
         checkBudget();
-        if (++nodes > bounds.MaximumNodes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail);
-        }
+        ExecutionStackGuard.Ensure();
     }
     public override void ExplicitVisit(Dom.MoneyLiteral literal)
     {
@@ -44,14 +40,7 @@ internal sealed class ScriptDomSlotVisitor(ScriptDomCheckedTokens bounds, int? p
     {
         cancellationToken.ThrowIfCancellationRequested();
         checkBudget();
-        if (++depth > bounds.MaximumDepth)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail);
-        }
-        try
-        {
-            visit();
-        }
-        finally { depth--; }
+        ExecutionStackGuard.Ensure();
+        visit();
     }
 }

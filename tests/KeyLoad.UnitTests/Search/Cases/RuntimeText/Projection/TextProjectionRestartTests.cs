@@ -27,7 +27,7 @@ internal sealed class TextProjectionRestartTests
         var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
-        var beforeRestart = new RuntimeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        var beforeRestart = new RuntimeTextProjection(indexDirectory,
             database.Store.Identity.NodeId, UnitTextOptions.Execution());
         var firstResult = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), beforeRestart).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
@@ -35,7 +35,7 @@ internal sealed class TextProjectionRestartTests
         await AssertRecognizedGenerationAsync(indexDirectory, database);
         beforeRestart.Dispose();
 
-        using var afterRestart = new RuntimeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        using var afterRestart = new RuntimeTextProjection(indexDirectory,
             database.Store.Identity.NodeId, UnitTextOptions.Execution());
         var rebuiltResult = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), afterRestart).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
@@ -52,7 +52,7 @@ internal sealed class TextProjectionRestartTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         var indexDirectory = Path.Combine(database.Directory, "execution-text");
-        using (var projection = new RuntimeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        using (var projection = new RuntimeTextProjection(indexDirectory,
                    database.Store.Identity.NodeId, UnitTextOptions.Execution()))
         {
             _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root",
@@ -106,7 +106,7 @@ internal sealed class TextProjectionRestartTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         var indexDirectory = Path.Combine(database.Directory, "execution-text");
-        using (var projection = new RuntimeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        using (var projection = new RuntimeTextProjection(indexDirectory,
                    database.Store.Identity.NodeId, UnitTextOptions.Execution()))
         {
             _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root",
@@ -161,7 +161,7 @@ internal sealed class TextProjectionRestartTests
 
     private static void OpenForRestart(string indexDirectory, TestDatabase database)
     {
-        using var projection = new RuntimeTextProjection(indexDirectory, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        using var projection = new RuntimeTextProjection(indexDirectory,
             database.Store.Identity.NodeId, UnitTextOptions.Execution());
     }
 

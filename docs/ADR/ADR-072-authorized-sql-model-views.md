@@ -4,6 +4,8 @@ Status: Accepted bounded implementation contract; qualification pending.
 Date: 2026-10-03. Related: REQ/AC-SQLVIEW-001..005 in [QueryExecution](../Features/QueryExecution.md).
 Extends ADR-065/067; does not complete full SQL, JOIN or client transport.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 ## Decision and scope
 
 Extend the existing normalized SelectQuery with optional ModelSource at execution

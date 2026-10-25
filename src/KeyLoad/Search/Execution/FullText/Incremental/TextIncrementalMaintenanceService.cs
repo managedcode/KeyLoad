@@ -83,11 +83,10 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         RequireSelectedSettled();
         token.ThrowIfCancellationRequested();
         TextIncrementalAdmission.Request(request, database.Store.Identity.NodeId);
-        var limits = configured.Core.DatabaseLimits.Value;
         if (request.Kind == TextMaintenanceCapabilityKind.Release)
         {
-            using var release = new MaintenanceSessionWork(configured.Core.DatabaseLimits, clock,
-                originalExpiry ?? clock.GetUtcNow().AddSeconds(limits.QueryDeadlineSeconds), shutdown.Token);
+            using var release = new MaintenanceSessionWork(clock,
+                originalExpiry, shutdown.Token);
             using var stage = release.EnterStage(binding, token);
             var budget = release.Budget;
             TextIncrementalRelease.Execute(database, principal.Id, request.Maintenance,
@@ -106,8 +105,7 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         retained.Work.RequireExpiry(originalExpiry);
         using var retainedStage = retained.Work.EnterStage(binding, token);
         return TextIncrementalSessionOperations.Execute(database, retained,
-            principal, request, configured.Core.QueryExecution.Value, limits.MaxScanRecords,
-            limits.MaxScanRecords, configured.RuntimeText, token);
+            principal, request, configured.Core.QueryExecution.Value, configured.RuntimeText, token);
     }
 
     public async Task AbortAsync(Guid sessionId)
@@ -174,7 +172,7 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         try
         {
             var actual = new TextSelectedProjectionLease(selectedAdmission,
-                () => CaptureSelected(view, request, budget), budget, configured.Core.DatabaseLimits);
+                () => CaptureSelected(view, request, budget), budget);
             return reservation is null ? actual : new TextResourceProjectionLease(actual, reservation);
         }
         catch (Exception primary)

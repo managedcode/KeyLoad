@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Query;
 using KeyLoad.Storage;
 using KeyLoad.UnitTests.DocumentStorage;
 using ManagedCode.Communication;
@@ -13,7 +12,6 @@ internal sealed class TimeProviderOperationTests
     private const string Entity = "clock-entry";
     private const string Root = "root";
     private const string Json = "{\"clock\":true}";
-    private const string Sql = "SELECT * FROM orders";
     private const int DeadlineSeconds = 5;
     private static readonly DateTimeOffset Epoch = new(2040, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
@@ -40,28 +38,6 @@ internal sealed class TimeProviderOperationTests
         await Assert.That(replay.Get<CommitReceipt>().Token).IsEqualTo(outcome.Get<CommitReceipt>().Token);
         await Assert.That(DocumentCrudFixture.ReadRecord(fixture, reference)!.UpdatedAt).IsEqualTo(committedAt);
         await Assert.That(fixture.Database.GetDocument(Root, reference)!.Revision).IsEqualTo(1);
-    }
-
-    [Test]
-    public async Task DefaultQueryClockExpiresWithoutSleepingAndPreservesCommittedDocument()
-    {
-        var clock = new ControlledReadClock(Epoch);
-        using var fixture = new TestDatabase(new()
-        {
-            QueryDeadlineSeconds = DeadlineSeconds
-        }, timeProvider: clock);
-        fixture.Configure(Collection, ResourceKind.Collection);
-        fixture.Commit(new PutDocument(Collection, Entity, Json));
-        var before = fixture.Store.Position;
-        var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
-        clock.TimestampStep = TimeSpan.FromSeconds(DeadlineSeconds + 1);
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(Root, new(fixture.Partition, Sql, AllowFullScan: true)));
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(fixture.Store.Position).IsEqualTo(before);
-        clock.TimestampStep = TimeSpan.Zero;
-        var page = engine.Execute(Root, new(fixture.Partition, Sql, AllowFullScan: true));
-        await Assert.That(page.Rows.Select(row => row.EntityId)).IsEquivalentTo(new[] { Entity });
-        await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, Entity))!.Json).IsEqualTo(Json);
     }
 
     [Test]
@@ -92,10 +68,8 @@ internal sealed class TimeProviderOperationTests
         using var fixture = new TestDatabase(timeProvider: clock);
         fixture.Configure(Collection, ResourceKind.Collection);
         fixture.Commit(new PutDocument(Collection, Entity, Json));
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
-        {
-            QueryDeadlineSeconds = DeadlineSeconds
-        }), clock);
+        var budget = new ReadExecutionBudget(clock);
+        budget.ConstrainLifetime(clock.GetUtcNow().AddSeconds(DeadlineSeconds));
         var before = fixture.Store.Position;
         clock.MoveUtc(Epoch.AddYears(1));
         var record = fixture.Store.Read(view => budget.CreateView(view).GetRecord<DocumentRecord>(

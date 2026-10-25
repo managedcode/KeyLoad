@@ -19,7 +19,6 @@ internal sealed class DatabaseCompositionFlowTests
     private const string ReadySpace = "ready";
     private const string MetadataSpace = "message-meta";
     private const string EdgeSpace = "edge";
-    private const int ThreeEffects = 3;
 
     [Test]
     public async Task AcComp002And003ForwardAndReverseKeepSourcesAndCanonicalReferences()
@@ -137,29 +136,6 @@ internal sealed class DatabaseCompositionFlowTests
         {
             db.Dispose();
         }
-    }
-
-    [Test]
-    public async Task AcComp006ExactExpandedEffectCapSucceedsAndCumulativeOverflowRollsBack()
-    {
-        using var db = NewDatabase(limits: new()
-        {
-            MaxBatchMutations = ThreeEffects
-        });
-        var payload = JsonSerializer.Serialize(new QueueGraphLink(Vertex(db, First), Vertex(db, Second), Label), JsonDefaults.Options);
-        db.Commit(new EnqueueMessage(Queue, "a", payload), new EnqueueMessage(Queue, "b", payload),
-            new EnqueueMessage(Queue, "c", payload));
-
-        var exact = db.Commit(new QueueToGraph(Graph, Queue, "exact-", MaxMessages: ThreeEffects));
-        await Assert.That(exact.Mutations.Length).IsEqualTo(ThreeEffects);
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => db.Commit(
-            new QueueToGraph(Graph, Queue, "overflow-a-", MaxMessages: ThreeEffects),
-            new QueueToGraph(Graph, Queue, "overflow-b-", MaxMessages: ThreeEffects)));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        var absent = db.Store.Read(view => view.GetRecord<EdgeRecord>(
-            KeySpace.Partition(EdgeSpace, db.Partition, Graph, "overflow-a-a")));
-        await Assert.That(absent).IsNull();
     }
 
     private static TestDatabase NewDatabase(bool withVertices = true, DatabaseLimits? limits = null)

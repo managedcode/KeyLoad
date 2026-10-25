@@ -36,13 +36,13 @@ public static class GraphMutations
         var previous = tx.GetRecord<EdgeRecord>(key);
         if (previous is not null)
         {
-            engine.ValidateCanonicalEdge(previous, partition, edge.EdgeId);
+            GraphMutations.ValidateCanonicalEdge(previous, partition, edge.EdgeId);
         }
 
         var ownerVersion = CurrentOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, previous);
         DocumentStorageExecutionDocuments.CheckRevision(ownerVersion?.Revision ?? previous?.Revision ?? AbsentRevision, edge.ExpectedRevision);
         var nextRevision = NextRevision(ownerVersion?.Revision ?? previous?.Revision ?? AbsentRevision);
-        var record = new EdgeRecord(edge.EdgeId, from, to, edge.Label, JsonData.Validate(edge.AttributesJson, engine.Limits), nextRevision);
+        var record = new EdgeRecord(edge.EdgeId, from, to, edge.Label, JsonData.Validate(edge.AttributesJson), nextRevision);
         if (edge.To.Partition != partition)
         {
             engine.RequireGraphWrite(tx, principal, partition, edge.To.Partition, edge.Graph);
@@ -50,7 +50,7 @@ public static class GraphMutations
 
         PersistCanonicalEdge(tx, partition, edge, key, previous, record);
         PersistOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, nextRevision, deleted: false);
-        GraphCrossPartitionIntentWriter.Persist(engine, tx, principal, partition, edge.Graph, edge.EdgeId, previous, record, nextRevision, engine.Limits);
+        GraphCrossPartitionIntentWriter.Persist(engine, tx, principal, partition, edge.Graph, edge.EdgeId, previous, record, nextRevision);
         return new(MutationDiscriminatorNames.UpsertEdge, edge.Graph, edge.EdgeId, nextRevision);
     }
 
@@ -59,7 +59,7 @@ public static class GraphMutations
         engine.Resource(tx, partition, edge.Graph, ResourceKind.Graph);
         var key = GraphTraversalStorage.EdgeKey(partition, edge.Graph, edge.EdgeId);
         var previous = tx.GetRecord<EdgeRecord>(key) ?? throw Errors.Fail(ErrorCode.NotFound, GraphEdgeUnavailable);
-        engine.ValidateCanonicalEdge(previous, partition, edge.EdgeId);
+        GraphMutations.ValidateCanonicalEdge(previous, partition, edge.EdgeId);
         engine.VisibleVertex(tx, principal, previous.From);
         engine.VisibleVertex(tx, principal, previous.To);
         var ownerVersion = CurrentOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, previous);
@@ -69,7 +69,7 @@ public static class GraphMutations
         RemoveAdjacency(tx, partition, edge.Graph, previous);
         tx.Delete(key);
         PersistOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, nextRevision, deleted: true);
-        GraphCrossPartitionIntentWriter.Persist(engine, tx, principal, partition, edge.Graph, edge.EdgeId, previous, null, nextRevision, engine.Limits);
+        GraphCrossPartitionIntentWriter.Persist(engine, tx, principal, partition, edge.Graph, edge.EdgeId, previous, null, nextRevision);
         return new(MutationDiscriminatorNames.DeleteEdge, edge.Graph, edge.EdgeId, nextRevision);
     }
 
@@ -94,9 +94,9 @@ public static class GraphMutations
         tx.Delete(GraphTraversalStorage.AdjacencyKey(partition, graph, GraphIncomingAdjacencyDirection, edge.To, edge.Id));
     }
 
-    internal static void ValidateCanonicalEdge(this DatabaseEngine engine, EdgeRecord edge, PartitionRef source, string edgeId)
+    internal static void ValidateCanonicalEdge(EdgeRecord edge, PartitionRef source, string edgeId)
     {
-        GraphCrossPartitionValidation.ValidateEdge(edge, engine.Limits);
+        GraphCrossPartitionValidation.ValidateEdge(edge);
         if (edge.Id != edgeId || edge.From.Partition != source)
         {
             throw Errors.Fail(ErrorCode.Corruption, GraphCanonicalKeyMismatch);

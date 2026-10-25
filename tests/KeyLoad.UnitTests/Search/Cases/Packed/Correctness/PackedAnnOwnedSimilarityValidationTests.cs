@@ -14,7 +14,7 @@ internal sealed class PackedAnnOwnedSimilarityValidationTests
         var source = PackedAnnOwnedSimilarityTestSupport.Vectors(dimension);
         PackedAnnIndexTestSupport.PersistVectors(database, space, PackedAnnTestData.Field(metric), source);
         var records = PackedAnnTestData.Load(database, metric);
-        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var budget = PackedAnnIndexTestSupport.Budget();
         var options = new PackedAnnOptions();
         var layout = PackedAnnAdmission.Create(space, records, options, budget);
         var packed = PackedAnnVectors.Copy(records, layout, budget, options.VectorBudgetCheckInterval);
@@ -43,6 +43,6 @@ internal sealed class PackedAnnOwnedSimilarityValidationTests
         var mutable = System.Runtime.InteropServices.ImmutableCollectionsMarshal.AsArray(records[1].Values)!;
         mutable[0] = float.NaN;
         await PackedAnnOwnedSimilarityAssertions.AssertValidationAsync(
-            () => PackedAnnVectors.Copy(records, layout, PackedAnnIndexTestSupport.Budget(database), options.VectorBudgetCheckInterval));
+            () => PackedAnnVectors.Copy(records, layout, PackedAnnIndexTestSupport.Budget(), options.VectorBudgetCheckInterval));
     }
 }

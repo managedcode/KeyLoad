@@ -96,7 +96,7 @@ internal static class TextAuthorityContinuation
         => new(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
 
     private static RuntimeTextProjection OpenProjection(TestDatabase database)
-        => new(Path.Combine(database.Directory, ProjectionDirectory), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        => new(Path.Combine(database.Directory, ProjectionDirectory),
             database.Store.Identity.NodeId, UnitTextOptions.Execution());
 
     private static async Task UnchangedAsync(ZoneTreeStore store, string[] bytes, long cut)

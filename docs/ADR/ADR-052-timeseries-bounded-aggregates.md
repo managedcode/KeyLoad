@@ -5,6 +5,8 @@ Date: 2026-10-02.
 Related: REQ/AC-SERIES-008..012; REQ-STORAGE-013 /
 AC-RANGE-REV-001..003; ADR-004/005/010/014/035/036/041/050.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 ## Decision and rationale
 
 Add typed read-only latest, whole-range statistics and dense fixed-window

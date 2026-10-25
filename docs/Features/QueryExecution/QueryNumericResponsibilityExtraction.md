@@ -13,4 +13,4 @@ flowchart LR
   C --> D[Same typed plan and ordered result]
 ```
 
-Existing complete QueryAdapterTests, PartitionQueryContractTests, PartitionQueryAuthorizationTests, and PartitionQueryPublicBudgetTests retain their original declarations/arguments/oracles. Public cluster tests keep real SDK/MCP callers and the Aspire-owned topology.
+Existing complete QueryAdapterTests, PartitionQueryContractTests and PartitionQueryAuthorizationTests retain their original declarations/arguments/oracles. Public cluster tests keep real SDK/MCP callers and the Aspire-owned topology.

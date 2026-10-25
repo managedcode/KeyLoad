@@ -5,10 +5,10 @@ namespace KeyLoad.Core.TimeSeries;
 internal static class SampleChunkManifestReader
 {
     internal static SampleChunkManifest Read(IKeyValueView view, PartitionRef partition, string set,
-        string series, SampleChunkWindow window, int maximumRecords, SampleChunkReadCharge charge, Microsoft.Extensions.Options.IOptions<TimeSeriesExecutionOptions> options, SampleChunkWork work = default)
+        string series, SampleChunkWindow window, int maximumRecords, Microsoft.Extensions.Options.IOptions<TimeSeriesExecutionOptions> options, SampleChunkWork work = default)
     {
         var envelope = SampleChunkStorage.Require<SampleChunkManifestEnvelope>(view,
-            SampleChunkKeys.Manifest(partition, set, series, window.WindowId, window.Generation), charge);
+            SampleChunkKeys.Manifest(partition, set, series, window.WindowId, window.Generation));
         SampleChunkEncodedDigest.Require(envelope.Encoded.Span, envelope.Digest.Span, work, options.Value.HashChunkBytes);
         var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
         if (manifest.Version != SampleChunkLifecycleProtocol.Version)

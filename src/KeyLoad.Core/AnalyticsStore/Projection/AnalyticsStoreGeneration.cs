@@ -31,7 +31,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
     {
         ArgumentNullException.ThrowIfNull(snapshot);
         snapshot.Work.Check();
-        if (snapshot.Rows.IsDefault || snapshot.Rows.Length > snapshot.Limits.MaxScanRecords)
+        if (snapshot.Rows.IsDefault)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, AnalyticsStoreValidation.Budget);
         }
@@ -43,12 +43,12 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         this.snapshot = snapshot;
         dimensions = new(snapshot);
         var names = snapshot.Request.GroupBy.Select(name => AnalyticsStoreMapping.Dimension(snapshot.Schema, name)).ToArray();
-        options = AnalyticsStoreOptions.Create(ownedEmptyDirectory, snapshot.Limits, names,
+        options = AnalyticsStoreOptions.Create(ownedEmptyDirectory, snapshot.Rows.Length, names,
             snapshot.Request.Metrics.Where(value => value.Operation != AnalyticsAggregateKind.Count)
                 .Select(value => value.Metric).Distinct(StringComparer.Ordinal).Count(), failures);
         IncludeCapturedTimestamps();
         options.Queries.MaxGroups = snapshot.Request.MaxGroups;
-        options.Queries.Timeout = snapshot.Work.RemainingLifetime;
+        options.Queries.Timeout = AnalyticsStoreOptions.QueryTimeout(snapshot.Work.RemainingLifetime);
     }
 
     /// <summary>Gets whether the actual execution engine has completed successful joined disposal.</summary>

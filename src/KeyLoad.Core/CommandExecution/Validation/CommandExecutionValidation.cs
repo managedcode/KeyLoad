@@ -1,4 +1,3 @@
-using System.Text;
 using System.Text.Json;
 using KeyLoad.Core.InternalSerialization;
 using KeyLoad.InternalSerialization;
@@ -23,7 +22,6 @@ public static class CommandExecutionValidation
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(payloadJson);
-        engine.RequireBudget(Encoding.UTF8.GetByteCount(payloadJson));
         var payload = kind switch
         {
             OperationKind.Batch => NormalizePayload<CommandRequest>(payloadJson),

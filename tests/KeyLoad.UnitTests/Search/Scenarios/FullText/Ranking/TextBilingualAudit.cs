@@ -25,7 +25,7 @@ internal static class TextBilingualAudit
     internal static SearchRequest Request(PartitionRef partition, string text)
         => new(partition, Collection, TextPath, text, Limit: Limit);
     internal static RuntimeTextProjection Open(TestDatabase database)
-        => new(Path.Combine(database.Directory, ProjectionDirectory), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        => new(Path.Combine(database.Directory, ProjectionDirectory),
             database.Store.Identity.NodeId, UnitTextOptions.Execution());
     internal static DatabaseEngine Owner(ZoneTreeStore store)
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),

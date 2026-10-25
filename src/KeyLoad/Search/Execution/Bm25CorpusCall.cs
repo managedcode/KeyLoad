@@ -10,7 +10,7 @@ internal static class Bm25CorpusCall
     private const int SingleFailureCount = 1;
     private const int OriginalFailureIndex = 0;
 
-    internal static async Task<CommitReceipt> ExecuteAsync(OrleansNode node, PartitionHost partition,
+    internal static async Task<CommitReceipt> ExecuteAsync(OrleansNode node,
         PrincipalRecord principal, Guid requestId, Guid commandId, GrainRequestEnvelope envelope,
         ReadExecutionBudget work, CancellationToken token)
     {
@@ -55,8 +55,7 @@ internal static class Bm25CorpusCall
         {
             work.Check();
             token.ThrowIfCancellationRequested();
-            if (reply.Payload.Length > partition.Database.Limits.MaxBatchBytes
-                || reply.Payload.Length > work.MaximumResultBytes)
+            if (reply.Payload.Length > work.MaximumResultBytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
             }

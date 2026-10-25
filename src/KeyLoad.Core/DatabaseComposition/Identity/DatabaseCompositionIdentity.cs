@@ -10,7 +10,6 @@ namespace KeyLoad.Core;
 /// <summary>Executes DatabaseCompositionIdentity operations against the caller's database context.</summary>
 public static class DatabaseCompositionIdentity
 {
-    internal const int BaseReferencesPerMutation = 2;
     internal const string MissingCompositionAuthority = "The composition outcome has no saved row authority.";
     internal const string InvalidCompositionAuthority = "The composition outcome row authority is invalid.";
     internal static CompositionOutcomeAuthority? CaptureCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, Result<object> result)
@@ -36,26 +35,26 @@ public static class DatabaseCompositionIdentity
             // A later mutation may delete the row; retain that admission instead of re-reading its final row image.
             engine.Authorization.Require(principal, partition, mutation.Start.Collection, Capability.DocumentsRead);
             var start = engine.BindEntityReference(view, mutation.Start);
-            engine.AddCompositionReference(start, partition, distinct, references);
+            DatabaseCompositionIdentity.AddCompositionReference(start, partition, distinct, references);
         }
 
         foreach (var effect in receipt.Mutations)
         {
             foreach (var reference in effect.CompositionReferences)
             {
-                engine.AddCompositionReference(reference, partition, distinct, references);
+                DatabaseCompositionIdentity.AddCompositionReference(reference, partition, distinct, references);
             }
         }
 
         return new(references.ToImmutable());
     }
 
-    internal static ImmutableArray<EntityRef> CompositionMutationReferences(this DatabaseEngine engine, Mutation effect)
+    internal static ImmutableArray<EntityRef> CompositionMutationReferences(Mutation effect)
     {
         var references = effect switch
         {
             UpsertEdge edge => [edge.From, edge.To],
-            EnqueueMessage message => engine.MessageCompositionReferences(message),
+            EnqueueMessage message => DatabaseCompositionIdentity.MessageCompositionReferences(message),
             _ => throw Errors.Fail(ErrorCode.Corruption, InvalidCompositionAuthority)
         };
         foreach (var reference in references)
@@ -66,7 +65,7 @@ public static class DatabaseCompositionIdentity
         return references;
     }
 
-    internal static ImmutableArray<EntityRef> MessageCompositionReferences(this DatabaseEngine engine, EnqueueMessage message)
+    internal static ImmutableArray<EntityRef> MessageCompositionReferences(EnqueueMessage message)
     {
         try
         {
@@ -76,7 +75,7 @@ public static class DatabaseCompositionIdentity
                 throw Errors.Fail(ErrorCode.Corruption, InvalidCompositionAuthority);
             }
 
-            var link = engine.ReadLink(message.PayloadJson, candidate.From.Partition);
+            var link = DatabaseCompositionExpansion.ReadLink(message.PayloadJson, candidate.From.Partition);
             return [link.From, link.To];
         }
         catch (JsonException)
@@ -93,12 +92,12 @@ public static class DatabaseCompositionIdentity
         }
 
         var references = previous.CompositionAuthority?.References ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingCompositionAuthority);
-        if (references.IsDefault || references.Length > engine.MaximumSavedCompositionReferences(mutations))
+        if (references.IsDefault)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidCompositionAuthority);
         }
 
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, CompositionTimeProvider.Instance);
+        var budget = new ReadExecutionBudget(CompositionTimeProvider.Instance);
         if (mutations.Any(mutation => mutation is QueueToGraph { FromCollection: not null }))
         {
             engine.ValidateTypedEndpointOutcomeReferences(view, principal, partition, references, budget);
@@ -132,18 +131,12 @@ public static class DatabaseCompositionIdentity
         return false;
     }
 
-    internal static void AddCompositionReference(this DatabaseEngine engine, EntityRef reference, PartitionRef partition, HashSet<EntityRef> distinct, ImmutableArray<EntityRef>.Builder references)
+    internal static void AddCompositionReference(EntityRef reference, PartitionRef partition, HashSet<EntityRef> distinct, ImmutableArray<EntityRef>.Builder references)
     {
-        const int MaxBatchMutationsScaleFactor = 3;
         ValidateCompositionReference(reference, partition);
         EntityReferenceLifetime.RequireBound(reference);
         if (distinct.Add(reference))
         {
-            if (references.Count >= checked(MaxBatchMutationsScaleFactor * engine.Limits.MaxBatchMutations))
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidCompositionAuthority);
-            }
-
             references.Add(reference);
         }
     }
@@ -158,6 +151,4 @@ public static class DatabaseCompositionIdentity
         JsonData.Identifier(reference.Collection);
         JsonData.Identifier(reference.Id);
     }
-
-    internal static int MaximumSavedCompositionReferences(this DatabaseEngine engine, ImmutableArray<Mutation> mutations) => checked(BaseReferencesPerMutation * engine.Limits.MaxBatchMutations + mutations.Count(mutation => mutation is GraphToQueueMutation));
 }

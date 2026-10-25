@@ -38,7 +38,6 @@ internal sealed class TimeSeriesReadResourceTests
         db.Commit(new AppendSamples(SetName, Series, later, tags));
         var bounded = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
         {
-            MaxQueryReadBytes = 4_096
         }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         bounded.ReadSamples(Principal, db.Partition, SetName, Series, Timestamp, Timestamp);
 
@@ -71,30 +70,6 @@ internal sealed class TimeSeriesReadResourceTests
         await Assert.That(minimum.Select(record => record.Sample.EventId)).IsEquivalentTo(new[] { MinimumId }, CollectionOrdering.Matching);
         await Assert.That(maximum.Select(record => record.Sample.EventId)).IsEquivalentTo(new[] { MaximumFirstId, MaximumSecondId }, CollectionOrdering.Matching);
         await Assert.That(withOffset.Select(record => record.Sample.EventId)).IsEquivalentTo(new[] { OffsetId }, CollectionOrdering.Matching);
-    }
-
-    [Test]
-    public async Task AcMp005CompleteArrayBudgetAcceptsItsExactBoundaryAndRejectsOneByteLess()
-    {
-        using var db = new TestDatabase();
-        db.Configure(SetName, ResourceKind.TimeSeries);
-        db.Commit(new AppendSamples(SetName, Series, [new(SelectedId, Timestamp, 1)]));
-        var expected = db.Database.ReadSamples(Principal, db.Partition, SetName, Series, Timestamp, Timestamp);
-        var length = JsonDefaults.Serialize(expected).Length;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = length
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var shortBudget = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = length - 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-
-        var actual = exact.ReadSamples(Principal, db.Partition, SetName, Series, Timestamp, Timestamp);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => shortBudget.ReadSamples(Principal, db.Partition, SetName, Series, Timestamp, Timestamp));
-
-        await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]

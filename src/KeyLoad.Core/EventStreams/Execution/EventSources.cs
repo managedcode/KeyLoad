@@ -12,14 +12,12 @@ public static class EventSources
     internal const int RetainedSourcePositionOffset = 1;
     internal const string EventSourceRetainedHistoryDetail = "The requested event history was retained away.";
     internal const string EventSourceCursorBeyondTailDetail = "The requested position is beyond the source tail.";
-    internal const long InitialEventSourceReadBytes = 0L;
     internal const int NextEventSourcePositionOffset = 1;
     internal const int EmptyEventSourceResultCount = 0;
     internal const int LastPublishedEventOffset = 1;
     internal const int LastReadPositionOffset = 1;
     internal const string SourceCursorPurpose = "event-source-page";
     internal const string SourceReadStartInvalidMessage = "The event source read budget or start position is invalid.";
-    internal const string SourceReadResultExceededMessage = "The event source result exceeds its byte budget.";
     internal static Capability SourceReadCapability(EventSourceRef source) => source.Kind == EventSourceKind.Topic ? Capability.TopicsRead : Capability.EventsRead;
     internal static ResourceDefinition SourceResource(this DatabaseEngine engine, IKeyValueView view, EventSourceRef source, bool authorizedRead = false)
     {
@@ -101,7 +99,7 @@ public static class EventSources
         var headKey = KeySpace.Partition(TopicPublishReads.TopicHeadKeySpace, partition, publish.Topic);
         var sequenceKey = KeySpace.Partition(TopicPublishReads.EventSequenceKeySpace, partition);
         var sequence = tx.ReadOwnedValue(sequenceKey) is { } prior ? OrleansSerialization.Deserialize<long>(prior) : PublishAbsentCount;
-        var progress = engine.AppendTopicEvents(tx, source, resource, publish.Events, now, head.TailPosition, sequence, head.FirstAvailablePosition, topicHead.StoredBytes);
+        var progress = TopicPublishReads.AppendTopicEvents(tx, source, resource, publish.Events, now, head.TailPosition, sequence, head.FirstAvailablePosition, topicHead.StoredBytes);
         tx.PutRecord(headKey, new TopicHead(progress.Tail, head.FirstAvailablePosition, publish.Generation, progress.StoredBytes));
         tx.PutRecord(sequenceKey, progress.Sequence);
         return new(TopicPublishReads.PublishTopicKind, publish.Topic, publish.Events[^LastPublishedEventOffset].EventId, progress.Tail);
@@ -145,14 +143,14 @@ public static class EventSources
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         budget.Check();
         return engine.Store.Read(view => engine.ReadEventSource(view, principalId, request, budget));
     }
 
     internal static EventSourcePage ReadEventSource(this DatabaseEngine engine, IKeyValueView gatedView, string principalId, ReadEventSourceRequest request, ReadExecutionBudget budget)
     {
-        if (request.Limit is < MinimumEventSourcePageRecords || request.Limit > engine.Limits.MaxResults || request.AfterPosition < MinimumEventSourceAfterPosition || request.Cursor is not null && request.AfterPosition != UnpositionedEventSourceCursor)
+        if (request.Limit is < MinimumEventSourcePageRecords || request.AfterPosition < MinimumEventSourceAfterPosition || request.Cursor is not null && request.AfterPosition != UnpositionedEventSourceCursor)
         {
             throw Errors.Fail(ErrorCode.Validation, SourceReadStartInvalidMessage);
         }
@@ -175,21 +173,13 @@ public static class EventSources
         }
 
         var records = new List<SourceEventRecord>();
-        var projectedBytes = InitialEventSourceReadBytes;
         var position = after;
         while (position < head.TailPosition && records.Count < request.Limit)
         {
             position = checked(position + NextEventSourcePositionOffset);
             budget.Check();
             var record = engine.ProjectEvent(principal, resource, SourceRecord(view, request.Source, position));
-            var eventBytes = budget.MeasureResult(record);
-            if (eventBytes > engine.Limits.MaxBatchBytes - projectedBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, SourceReadResultExceededMessage);
-            }
-
             records.Add(record);
-            projectedBytes += eventBytes;
         }
 
         var last = records.Count == EmptyEventSourceResultCount ? after : records[^LastReadPositionOffset].Position;

@@ -78,7 +78,6 @@ public static class QueueRetryPreparation
         }
 
         var decisions = OrleansSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version, operation.Timestamp, choices.MoveToImmutable()));
-        engine.RequireBudget(decisions.Length);
         var payload = operation.Value!;
         var prepared = engine.OwnCommand(operation);
         prepared.Value = payload with

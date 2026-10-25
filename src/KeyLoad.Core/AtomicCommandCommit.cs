@@ -12,7 +12,6 @@ namespace KeyLoad.Core;
 public static class AtomicCommandCommit
 {
     internal const int AtomicCommandCommitInitialSequence = 0;
-    internal const string InvalidCommandBudgetMessage = "The operation ID or byte budget is invalid.";
     internal const string PreviousCommandIncarnationMessage = "This command belongs to a previous database incarnation.";
     internal const string CommandContentConflictMessage = "The command ID was already used with different content.";
     internal const string CommittedClockAheadMessage = "The operation time is behind the committed storage time.";
@@ -77,7 +76,7 @@ public static class AtomicCommandCommit
 
     internal static StorageOperationResult ApplyCommittedCommand(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, long position, long replicationIndex, bool siloLocal, CancellationToken cancellationToken)
     {
-        var rosterTransaction = new AtomicPartitionRosterTransaction(transaction, engine.OperationLimitsOptions, position, replicationIndex);
+        var rosterTransaction = new AtomicPartitionRosterTransaction(transaction, position, replicationIndex);
         var partitionScope = CommandOutcomePartitionIdentity.Resolve(operation);
         var fingerprint = OperationProtocol.CommandFingerprint(operation);
         var outcome = engine.ExecuteAndBuildOutcome(rosterTransaction, operation, position, replicationIndex, fingerprint, partitionScope, siloLocal, out var replayed, out var selection, out var persistOutcome, cancellationToken);

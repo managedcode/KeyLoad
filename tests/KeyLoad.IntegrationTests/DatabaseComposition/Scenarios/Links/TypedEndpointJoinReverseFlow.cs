@@ -132,7 +132,7 @@ internal static class TypedEndpointJoinReverseFlow
         var sql = DeclarativeCompositionSql.Reverse(command, (GraphToQueueMutation)command.Mutations[0]);
         var actual = await callers.Sdk.ExecuteSqlAsync(sql, token);
         await Assert.That(actual.IsFailed).IsTrue();
-        await Assert.That(actual.Value).IsNull();
+        await Assert.That(actual.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(actual.Problem!.ErrorCode).IsEqualTo(code.ToString());
         var official = await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
         await McpCallerAssertions.ErrorAsync(official, code, dispatched: true);

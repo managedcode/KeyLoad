@@ -12,7 +12,7 @@ public static class EventStreamsRecovery
     public static AggregateReplayPage ReadAggregateReplay(this DatabaseEngine engine, string principalId, ReadAggregateReplayRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         budget.Check();
         return engine.Store.Read(view => AggregateReplayReader.Read(engine, view, principalId, request, budget));
     }

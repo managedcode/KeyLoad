@@ -21,7 +21,7 @@ internal sealed class TextGenerationCapacityTests
         var leaves = CreateOwnerLeaves(root, database, scope, 3).Order(StringComparer.Ordinal).ToArray();
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => TextFiles.WriteOwner(root,
-            TextValidation.GenerationLeaf(), database.Store.Identity.NodeId, scope, database.Database.Limits, UnitTextOptions.Execution()));
+            TextValidation.GenerationLeaf(), database.Store.Identity.NodeId, scope, UnitTextOptions.Execution()));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(GenerationPaths(root).SequenceEqual(leaves)).IsTrue();
@@ -47,7 +47,7 @@ internal sealed class TextGenerationCapacityTests
         var original = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request, cancellation);
         var retired = Path.Combine(root, GenerationPaths(root).Single());
         var oldScope = CaptureScope(database);
-        var oldBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+        var oldBudget = new ReadExecutionBudget();
         var oldLease = cleanup.TrackLease(projection.Acquire(oldScope, oldBudget));
         oldLease.BeginRecord(original[0].Document.Reference, original[0].Document.Revision);
         oldLease.ObserveToken("needle");
@@ -93,8 +93,7 @@ internal sealed class TextGenerationCapacityTests
         File.Delete(foreign);
         var existingLeaves = GenerationPaths(root);
         var thirdLeaf = TextValidation.GenerationLeaf();
-        TextFiles.WriteOwner(root, thirdLeaf, database.Store.Identity.NodeId, CaptureScope(database),
-            database.Database.Limits, UnitTextOptions.Execution());
+        TextFiles.WriteOwner(root, thirdLeaf, database.Store.Identity.NodeId, CaptureScope(database), UnitTextOptions.Execution());
         var expectedLeaves = existingLeaves.Append(thirdLeaf).Order(StringComparer.Ordinal).ToArray();
         await Assert.That(expectedLeaves.Length).IsEqualTo(3);
         await Assert.That(GenerationPaths(root).SequenceEqual(expectedLeaves)).IsTrue();
@@ -112,7 +111,7 @@ internal sealed class TextGenerationCapacityTests
 
     private static string InitializeRoot(TestDatabase database)
         => TextFiles.InitializeRoot(Path.Combine(database.Directory, "execution-text-generation-capacity"),
-            database.Store.Identity.NodeId, database.Database.Limits, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution());
 
     private static string[] CreateOwnerLeaves(string root, TestDatabase database, TextProjectionScope scope, int count)
     {
@@ -120,8 +119,7 @@ internal sealed class TextGenerationCapacityTests
         for (var index = 0; index < count; index++)
         {
             leaves[index] = TextValidation.GenerationLeaf();
-            TextFiles.WriteOwner(root, leaves[index], database.Store.Identity.NodeId, scope,
-                database.Database.Limits, UnitTextOptions.Execution());
+            TextFiles.WriteOwner(root, leaves[index], database.Store.Identity.NodeId, scope, UnitTextOptions.Execution());
         }
         return leaves;
     }
@@ -133,7 +131,7 @@ internal sealed class TextGenerationCapacityTests
             .Select(path => Path.GetFileName(path)!).Order(StringComparer.Ordinal).ToArray();
 
     private static RuntimeTextProjection OpenForRestart(string root, TestDatabase database)
-        => new(root, UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        => new(root, database.Store.Identity.NodeId, UnitTextOptions.Execution());
 
     private static TextProjectionScope CaptureScope(TestDatabase database)
     {

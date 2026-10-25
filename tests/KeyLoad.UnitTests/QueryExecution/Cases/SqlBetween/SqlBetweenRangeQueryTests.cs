@@ -156,8 +156,7 @@ internal sealed class SqlBetweenRangeQueryTests
         await Assert.That(sqlNext.Cursor).IsNull();
 
         var sqlExplain = engine.ExecuteAst(SqlBetweenTestData.Root, new AstQueryRequest(database.Partition,
-            new SqlParser("SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id",
-                UnitExecutionOptions.DatabaseLimits(database.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse() with
+            new SqlParser("SELECT TOP (2) * FROM orders WHERE number BETWEEN 1 AND 9 ORDER BY id", UnitExecutionOptions.QueryExecution()).Parse() with
             {
                 Explain = true
             }, AllowFullScan: true));

@@ -13,8 +13,8 @@ internal sealed class PartitionQueryContractTests
         PartitionQueryTestSupport.AddRows(database, partitions[0], new PartitionQuerySeed("same", 5, "first"));
         PartitionQueryTestSupport.AddRows(database, partitions[1], new PartitionQuerySeed("same", 4, "second"));
         var limits = database.Database.Limits;
-        var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 2), limits, UnitExecutionOptions.QueryExecution().Value);
-        var plan = PartitionQueryPlanFactory.Create(request, database.Store.Identity, [.. partitions], limits, UnitExecutionOptions.QueryExecution().Value);
+        var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 2), UnitExecutionOptions.QueryExecution().Value);
+        var plan = PartitionQueryPlanFactory.Create(request, database.Store.Identity, [.. partitions], UnitExecutionOptions.QueryExecution().Value);
         var planRoundTrip = OrleansSerialization.Deserialize<PartitionQueryPlan>(OrleansSerialization.Serialize(plan));
         var result = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, 2), [.. partitions]);
@@ -33,8 +33,8 @@ internal sealed class PartitionQueryContractTests
         var partitions = PartitionQueryTestSupport.Partitions(database)[..2];
         PartitionQueryTestSupport.AddRows(database, partitions[0], new PartitionQuerySeed("valid-leaf", 1, "healthy"));
         var limits = database.Database.Limits;
-        var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 1), limits, UnitExecutionOptions.QueryExecution().Value);
-        var plan = PartitionQueryPlanFactory.Create(request, database.Store.Identity, [.. partitions], limits, UnitExecutionOptions.QueryExecution().Value);
+        var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 1), UnitExecutionOptions.QueryExecution().Value);
+        var plan = PartitionQueryPlanFactory.Create(request, database.Store.Identity, [.. partitions], UnitExecutionOptions.QueryExecution().Value);
         var original = plan.Leaves[1];
         var invalid = plan with
         {
@@ -48,7 +48,7 @@ internal sealed class PartitionQueryContractTests
             })
         };
         var position = database.Store.Position;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanValidation.Validate(invalid, limits, UnitExecutionOptions.QueryExecution().Value));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanValidation.Validate(invalid, UnitExecutionOptions.QueryExecution().Value));
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(database.Store.Position).IsEqualTo(position);
@@ -63,19 +63,18 @@ internal sealed class PartitionQueryContractTests
     {
         using var database = PartitionQueryTestSupport.Create(out var creation);
         PartitionQueryTestSupport.AddRows(database, database.Partition, new PartitionQuerySeed("valid-leaf", 1, "healthy"));
-        var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 1),
-            database.Database.Limits, UnitExecutionOptions.QueryExecution().Value);
+        var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 1), UnitExecutionOptions.QueryExecution().Value);
         var position = database.Store.Position;
         var oversized = Enumerable.Range(0, 9).Select(index => database.Partition with
         {
             PartitionKey = "leaf-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture)
         }).ToArray();
         var emptyFailure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanFactory.Create(
-            request, database.Store.Identity, [], database.Database.Limits, UnitExecutionOptions.QueryExecution().Value));
+            request, database.Store.Identity, [], UnitExecutionOptions.QueryExecution().Value));
         var oversizedFailure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanFactory.Create(
-            request, database.Store.Identity, [.. oversized], database.Database.Limits, UnitExecutionOptions.QueryExecution().Value));
+            request, database.Store.Identity, [.. oversized], UnitExecutionOptions.QueryExecution().Value));
         var nullFailure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanFactory.Create(
-            request, database.Store.Identity, [database.Partition, null!], database.Database.Limits, UnitExecutionOptions.QueryExecution().Value));
+            request, database.Store.Identity, [database.Partition, null!], UnitExecutionOptions.QueryExecution().Value));
 
         await Assert.That(emptyFailure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(oversizedFailure.Code).IsEqualTo(ErrorCode.Validation);

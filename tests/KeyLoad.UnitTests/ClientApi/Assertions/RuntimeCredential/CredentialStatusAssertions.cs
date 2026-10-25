@@ -41,7 +41,7 @@ internal static class CredentialStatusAssertions
         var database = state.Scenario.Fixture.Database;
         var rows = database.Store.Read(view =>
         {
-            var page = view.Scan([], database.Database.Limits.MaxScanRecords);
+            var page = view.Scan([], view.MaximumRangeRecords);
             if (page.HasMore)
             {
                 throw new InvalidOperationException(P.Failure);

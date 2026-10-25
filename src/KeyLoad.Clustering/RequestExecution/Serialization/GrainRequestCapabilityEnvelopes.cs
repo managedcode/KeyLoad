@@ -18,7 +18,7 @@ internal static class GrainRequestCapabilityEnvelopes
             Incarnation = scope.Incarnation,
             PrincipalId = principalId,
             ReadKind = kind,
-            Payload = GrainPayload.Copy(payload, scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(payload),
             ExpiresAt = expiresAt
         };
     }
@@ -32,7 +32,7 @@ internal static class GrainRequestCapabilityEnvelopes
             Incarnation = scope.Incarnation,
             PrincipalId = principalId,
             ReadKind = kind,
-            Payload = GrainPayload.Copy(payload, scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(payload),
             ExpiresAt = clock.GetUtcNow() + requestLifetime
         };
 
@@ -46,7 +46,7 @@ internal static class GrainRequestCapabilityEnvelopes
             PrincipalId = principalId,
             CommandKind = OperationKind.RuntimeJournal,
             CommandId = commandId,
-            Payload = GrainPayload.Copy(payload, scope.Limits.MaxBatchBytes),
+            Payload = GrainPayload.Copy(payload),
             ExpiresAt = clock.GetUtcNow() + requestLifetime
         };
 }

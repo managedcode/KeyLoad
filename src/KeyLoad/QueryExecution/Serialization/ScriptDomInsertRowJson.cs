@@ -1,13 +1,11 @@
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 namespace KeyLoad.Server;
 
 internal static class ScriptDomInsertRowJson
 {
-    internal static string Read(string[] columns, Dom.RowValue row, ScriptDomCompositionParameters parameters,
-        IOptions<DatabaseLimits> limits, int maximumBytes, Action checkBudget, CancellationToken token)
+    internal static string Read(string[] columns, Dom.RowValue row, ScriptDomCompositionParameters parameters, int maximumBytes, Action checkBudget, CancellationToken token)
     {
         if (row.ColumnValues.Count != columns.Length)
         {
@@ -16,19 +14,19 @@ internal static class ScriptDomInsertRowJson
         using var counter = new SqlOperationByteCounter(maximumBytes, token);
         using (var writer = new Utf8JsonWriter(counter))
         {
-            Write(writer, columns, row, parameters, limits.Value.MaxQueryDepth, checkBudget, token);
+            Write(writer, columns, row, parameters, checkBudget, token);
         }
         using var buffer = new MemoryStream(checked((int)counter.Length));
         using (var writer = new Utf8JsonWriter(buffer))
         {
-            Write(writer, columns, row, parameters, limits.Value.MaxQueryDepth, checkBudget, token);
+            Write(writer, columns, row, parameters, checkBudget, token);
         }
         checkBudget();
         token.ThrowIfCancellationRequested();
         return Encoding.UTF8.GetString(buffer.GetBuffer(), Empty, checked((int)buffer.Length));
     }
     private static void Write(Utf8JsonWriter writer, string[] columns, Dom.RowValue row,
-        ScriptDomCompositionParameters parameters, int maximumDepth, Action checkBudget, CancellationToken token)
+        ScriptDomCompositionParameters parameters, Action checkBudget, CancellationToken token)
     {
         writer.WriteStartObject();
         for (var index = Empty; index < columns.Length; index++)
@@ -36,7 +34,7 @@ internal static class ScriptDomInsertRowJson
             checkBudget();
             token.ThrowIfCancellationRequested();
             writer.WritePropertyName(columns[index]);
-            ScriptDomInsertScalar.Write(writer, row.ColumnValues[index], parameters, maximumDepth, Empty, checkBudget, token);
+            ScriptDomInsertScalar.Write(writer, row.ColumnValues[index], parameters, Empty, checkBudget, token);
         }
         writer.WriteEndObject();
     }

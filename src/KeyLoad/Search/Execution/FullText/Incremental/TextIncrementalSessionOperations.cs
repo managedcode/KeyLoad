@@ -10,8 +10,7 @@ internal static class TextIncrementalSessionOperations
 {
     internal static TextMaintenanceCapabilityResult Execute(DatabaseEngine database,
         TextIncrementalSession session, PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, QueryExecutionOptions query,
-        int maximumRecords, int maximumChanges, IOptions<TextExecutionOptions> options,
+        TextMaintenanceCapabilityRequest request, QueryExecutionOptions query, IOptions<TextExecutionOptions> options,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -25,14 +24,14 @@ internal static class TextIncrementalSessionOperations
             case TextMaintenanceCapabilityKind.PreparePage:
                 session.Target = TextIncrementalPagePreparation.Prepare(session,
                     request.Page ?? throw TextErrors.Corrupt(),
-                    request.CheckpointIntent ?? throw TextErrors.Corrupt(), maximumRecords,
+                    request.CheckpointIntent ?? throw TextErrors.Corrupt(),
                     session.Budget, query, options);
                 break;
             case TextMaintenanceCapabilityKind.ApplyIntent:
                 session.Manifest = TextIncrementalGenerationFlow.Apply(
                     TextIncrementalPagePreparation.RequireOwner(session),
                     session.Intent ?? throw TextErrors.Corrupt(),
-                    session.Target ?? throw TextErrors.Corrupt(), maximumRecords, maximumChanges,
+                    session.Target ?? throw TextErrors.Corrupt(),
                     session.Budget, options);
                 break;
             case TextMaintenanceCapabilityKind.SettleCheckpoint:

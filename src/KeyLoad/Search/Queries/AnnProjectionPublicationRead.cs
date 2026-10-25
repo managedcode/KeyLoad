@@ -40,7 +40,7 @@ internal static class AnnProjectionPublicationRead
         ReadExecutionBudget? originalBudget = null, IResourceLifetimeWorkBinding? binding = null)
     {
         AnnMaintenanceAdmission.Request(request, request.CommandId, database.Store.Identity.NodeId);
-        var read = originalBudget ?? new ReadExecutionBudget(configured.Core.DatabaseLimits, clock, token);
+        var read = originalBudget ?? new ReadExecutionBudget(clock, token);
         var eligible = binding is null
             ? database.ReadProjectionMaintenanceEligibility(request.Consumer, request.IndexGeneration, read)
             : database.ReadProjectionMaintenanceEligibilityBound(request.Consumer, request.IndexGeneration, read, binding);

@@ -23,7 +23,7 @@ internal sealed class BudgetedReadViewTests
         SaveRecords(database);
         var observation = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
+            var budget = new ReadExecutionBudget();
             var bounded = budget.CreateView(view);
             var foundObserverBudget = 0L;
             byte[]? foundValue = null;
@@ -50,7 +50,7 @@ internal sealed class BudgetedReadViewTests
         SaveRecords(database);
         var observation = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()));
+            var budget = new ReadExecutionBudget();
             var bounded = budget.CreateView(view);
             var chargedAtVisitor = 0L;
             var range = bounded.VisitRange(Prefix, 1, (_, _) =>
@@ -71,21 +71,6 @@ internal sealed class BudgetedReadViewTests
     }
 
     [Test]
-    public async Task AcMp005PointBudgetRejectsOversizedRawValueBeforeReturningIt()
-    {
-        using var database = new TestDatabase();
-        SaveRecords(database);
-        var limits = new DatabaseLimits { MaxQueryReadBytes = FirstKey.Length + FirstValue.Length - 1 };
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
-        {
-            var bounded = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits)).CreateView(view);
-            return bounded.ReadOwnedValue(FirstKey);
-        }));
-
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
     public async Task AcMp005RangeHonorsViewAndBudgetCancellationTokens()
     {
         using var database = new TestDatabase();
@@ -96,12 +81,12 @@ internal sealed class BudgetedReadViewTests
         await budgetCancellation.CancelAsync();
         var viewError = Assert.ThrowsExactly<OperationCanceledException>(() => database.Store.Read(view =>
         {
-            var bounded = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new())).CreateView(view);
+            var bounded = new ReadExecutionBudget().CreateView(view);
             return bounded.VisitRange(Prefix, 2, static (_, _) => true, cancellationToken: viewCancellation.Token);
         }));
         var budgetError = Assert.ThrowsExactly<OperationCanceledException>(() => database.Store.Read(view =>
         {
-            var bounded = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: budgetCancellation.Token).CreateView(view);
+            var bounded = new ReadExecutionBudget(cancellationToken: budgetCancellation.Token).CreateView(view);
             return bounded.VisitRange(Prefix, 2, static (_, _) => true);
         }));
 
@@ -118,7 +103,7 @@ internal sealed class BudgetedReadViewTests
         using var viewCancellation = new CancellationTokenSource();
         var interrupted = Assert.ThrowsExactly<OperationCanceledException>(() => database.Store.Read(view =>
         {
-            var bounded = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: cancellation.Token).CreateView(view);
+            var bounded = new ReadExecutionBudget(cancellationToken: cancellation.Token).CreateView(view);
             return bounded.VisitRange(Prefix, 2, (_, _) =>
             {
                 cancellation.Cancel();
@@ -127,14 +112,14 @@ internal sealed class BudgetedReadViewTests
         }));
         var viewInterrupted = Assert.ThrowsExactly<OperationCanceledException>(() => database.Store.Read(view =>
         {
-            var bounded = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new())).CreateView(view);
+            var bounded = new ReadExecutionBudget().CreateView(view);
             return bounded.VisitRange(Prefix, 2, (_, _) =>
             {
                 viewCancellation.Cancel();
                 return false;
             }, cancellationToken: viewCancellation.Token);
         }));
-        var following = database.Store.Read(view => new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new())).CreateView(view).Scan(Prefix, 2));
+        var following = database.Store.Read(view => new ReadExecutionBudget().CreateView(view).Scan(Prefix, 2));
 
         await Assert.That(interrupted.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(viewInterrupted.CancellationToken).IsEqualTo(viewCancellation.Token);
@@ -151,10 +136,10 @@ internal sealed class BudgetedReadViewTests
         var consumed = false;
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => database.Store.Read(view =>
         {
-            var bounded = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: cancellation.Token).CreateView(view);
+            var bounded = new ReadExecutionBudget(cancellationToken: cancellation.Token).CreateView(view);
             return bounded.ReadValue(FirstKey, _ => consumed = true, _ => cancellation.Cancel());
         }));
-        var healthy = database.Store.Read(view => new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new())).CreateView(view)
+        var healthy = database.Store.Read(view => new ReadExecutionBudget().CreateView(view)
             .ReadValue(FirstKey, static _ => { }));
 
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);

@@ -3,34 +3,22 @@ using KeyLoad.QueryExecution;
 
 namespace KeyLoad.Query.QueryExecution;
 
-internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Options.IOptions<DatabaseLimits> limitsOptions,
-    global::Microsoft.Extensions.Options.IOptions<QueryExecutionOptions> executionOptions,
-    ReadExecutionBudget? budget, int maximumNodes, Dictionary<string, global::System.Text.Json.JsonElement>? parameters = null,
+internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Options.IOptions<QueryExecutionOptions> executionOptions,
+    ReadExecutionBudget? budget, Dictionary<string, global::System.Text.Json.JsonElement>? parameters = null,
     int? positionalParameterCount = null)
 {
     private readonly Dictionary<string, global::System.Text.Json.JsonElement>? ownedParameters = CopyParameters(parameters, budget);
-    private int nodes;
     internal bool UseDocumentMetadata { get; set; } = true;
     internal Dictionary<string, global::System.Text.Json.JsonElement>? Parameters => ownedParameters;
     internal int? PositionalParameterCount => positionalParameterCount;
-    internal DatabaseLimits Limits => limitsOptions.Value;
     internal QueryExecutionOptions Execution => executionOptions.Value;
     internal void Observe(int depth)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(depth);
         budget?.Check();
-        if (depth > limitsOptions.Value.MaxQueryDepth)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail);
-        }
+        ExecutionStackGuard.Ensure();
     }
-    internal void Check(int depth)
-    {
-        Observe(depth);
-        if (++nodes > maximumNodes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail);
-        }
-    }
+    internal void Check(int depth) => Observe(depth);
     private static Dictionary<string, global::System.Text.Json.JsonElement>? CopyParameters(
         Dictionary<string, global::System.Text.Json.JsonElement>? supplied, ReadExecutionBudget? work)
     {

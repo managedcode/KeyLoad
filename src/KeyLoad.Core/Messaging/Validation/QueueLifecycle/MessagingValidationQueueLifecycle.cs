@@ -12,13 +12,6 @@ public static class MessagingValidationQueueLifecycle
             return;
         }
 
-        long examined = QueueOrderProtocol.Initial;
-        void Observe(long bytes)
-        {
-            examined = checked(examined + bytes);
-            engine.RequireBudget(examined);
-        }
-
         var metadata = view.VisitRange(KeyCodec.Encode([QueueSweepTransitions.MessageMetadataSpace, request.TenantId, request.DatabaseId]), engine.MessagingExecution.QueueScanPageSize, (key, value) =>
         {
             var parts = KeyCodec.Decode(key);
@@ -37,7 +30,7 @@ public static class MessagingValidationQueueLifecycle
             _ = MessagingExecutionMessaging.Counters(view, lane);
             if (view.ReadValue(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, item.Id), static _ =>
             {
-            }, Observe))
+            }))
             {
                 throw Errors.Fail(ErrorCode.Conflict, QueueOrderProtocol.NonemptyChange);
             }
@@ -48,16 +41,16 @@ public static class MessagingValidationQueueLifecycle
             }
 
             return true;
-        }, observer: Observe);
+        });
         if (metadata.HasMore)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, QueueOrderProtocol.IncompleteAbsence);
         }
 
-        engine.RequireQueuePolicyBodyAbsence(view, request, Observe);
+        engine.RequireQueuePolicyBodyAbsence(view, request);
     }
 
-    internal static void RequireQueuePolicyBodyAbsence(this DatabaseEngine engine, IKeyValueView view, ConfigureResourceRequest request, StorageReadObserver observe)
+    internal static void RequireQueuePolicyBodyAbsence(this DatabaseEngine engine, IKeyValueView view, ConfigureResourceRequest request)
     {
         var bodies = view.VisitRange(KeyCodec.Encode([QueueSweepTransitions.MessageBodySpace, request.TenantId, request.DatabaseId]), engine.MessagingExecution.QueueScanPageSize, (key, _) =>
         {
@@ -67,7 +60,7 @@ public static class MessagingValidationQueueLifecycle
             }
 
             return true;
-        }, observer: observe);
+        });
         if (bodies.HasMore)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, QueueOrderProtocol.IncompleteAbsence);

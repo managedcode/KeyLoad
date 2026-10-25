@@ -58,8 +58,7 @@ internal static class ClassificationLineageWholeFlow
 
     private static async Task WithProviderAsync(EventProjectionFixture fixture, Func<RuntimeTextProjection, Task> action)
     {
-        var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore),
-            UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), fixture.Harness.Store.Identity.NodeId,
+        var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore), fixture.Harness.Store.Identity.NodeId,
             UnitTextOptions.Execution());
         try
         {

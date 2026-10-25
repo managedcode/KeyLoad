@@ -1,28 +1,12 @@
 using System.Collections.Immutable;
 using KeyLoad.Storage;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.ResourceExecution;
 
-internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> options)
+internal sealed class ResourceEffectBindingScope
 {
-    private readonly DatabaseLimits limits = options.Value;
     private readonly HashSet<ResourceLifetime> observed = [];
     private ResourceEffectAdmission? admitted;
-    private long retainedBytes;
-    private long readBytes;
-    private long examined;
-
-    internal void ChargeRead(long bytes)
-    {
-        if (bytes < ResourceEffectAdmissionProtocol.Zero || bytes > limits.MaxQueryReadBytes - readBytes
-            || examined >= limits.MaxScanRecords)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceEffectAdmissionProtocol.Capacity);
-        }
-        readBytes += bytes;
-        examined++;
-    }
 
     internal void Observe(PartitionRef partition, ResourceLifetime lifetime)
     {
@@ -44,13 +28,7 @@ internal sealed class ResourceEffectBindingScope(IOptions<DatabaseLimits> option
         {
             return;
         }
-        var bytes = OrleansSerialization.Measure(lifetime);
-        if (bytes <= ResourceEffectAdmissionProtocol.Zero || bytes > limits.MaxBatchBytes - retainedBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ResourceEffectAdmissionProtocol.Capacity);
-        }
         observed.Add(lifetime);
-        retainedBytes += bytes;
     }
 
     internal ImmutableArray<ResourceLifetime> Capture()

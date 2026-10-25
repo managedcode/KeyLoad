@@ -30,21 +30,19 @@ internal sealed class TextCapturedCommitAuthorityHarness : IDisposable
         var options = UnitExecutionOptions.QueryExecution();
         execution = options.Value;
         execution.Validate();
-        budget = new(UnitExecutionOptions.DatabaseLimits(database.Limits), database.EvaluationClock, token);
+        budget = new(database.EvaluationClock, token);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
-        SearchRequestValidation.Validate(request, database.Limits, false, execution);
+        SearchRequestValidation.Validate(request, false, execution);
         if (request.Text is null || request.TextField is null || request.Vector is not null)
         {
             throw new InvalidOperationException(InvalidRequest);
         }
-        FilteredSearchEligibility.ValidateRequest(request.AllowedIds, database.Limits, budget);
-        FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
+        FilteredSearchEligibility.ValidateRequest(request.AllowedIds, budget);
         eligibility = FilteredSearchEligibility.Create(request.AllowedIds, budget);
         try
         {
-            projection = new(Path.Combine(fixture.Directory, ProjectionDirectory),
-                UnitExecutionOptions.DatabaseLimits(database.Limits), fixture.Store.Identity.NodeId,
+            projection = new(Path.Combine(fixture.Directory, ProjectionDirectory), fixture.Store.Identity.NodeId,
                 UnitTextOptions.Execution());
             Search = new(database, options, projection);
             Capture(fixture, principalId);

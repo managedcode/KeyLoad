@@ -6,9 +6,9 @@ namespace KeyLoad.UnitTests.QueryExecution;
 internal sealed class LiveQueryResultCompositionTests
 {
     [Test]
-    public async Task HiddenOutboxReadWorkRefusesWholePageThenOriginalCursorResumesBoundedLiteralPages()
+    public async Task HiddenOutboxPagesResumeFromTheOriginalCursorWithLiteralPages()
     {
-        using var db = new TestDatabase(new DatabaseLimits { MaxQueryReadBytes = 65_536 });
+        using var db = new TestDatabase(new DatabaseLimits());
         db.Configure("orders", ResourceKind.Collection);
         db.Configure("hidden", ResourceKind.Collection);
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
@@ -24,13 +24,7 @@ internal sealed class LiveQueryResultCompositionTests
         var image = LiveQueryResultCompositionAssertions.Bytes(db);
         var position = db.Store.Position;
         var identity = Convert.ToHexString(JsonDefaults.Serialize(db.Store.Identity));
-        var request = new ReadLiveQueryRequest(query, start.Cursor, Limit: 10, MaxBytes: db.Database.Limits.MaxBatchBytes);
-        LiveQueryPage? partial = null;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => partial = engine.ReadLiveQuery("root", request));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(failure.Message).IsEqualTo("The read execution byte budget is exceeded.");
-        await Assert.That(partial).IsNull();
-        await LiveQueryResultCompositionAssertions.UnchangedAsync(db, image, position, identity);
+        var request = new ReadLiveQueryRequest(query, start.Cursor, Limit: 10, MaxBytes: int.MaxValue);
         var first = engine.ReadLiveQuery("root", request with
         {
             Limit = 1
@@ -92,7 +86,7 @@ internal sealed class LiveQueryResultCompositionTests
         var secondCommit = db.Commit(new PutDocument("orders", "b", LiveQueryResultCompositionAssertions.Body("b"), 1));
         var before = LiveQueryResultCompositionAssertions.Bytes(db);
         var position = db.Store.Position;
-        var request = new ReadLiveQueryRequest(full, start.Cursor, Limit: 10, MaxBytes: db.Database.Limits.MaxBatchBytes);
+        var request = new ReadLiveQueryRequest(full, start.Cursor, Limit: 10, MaxBytes: int.MaxValue);
         var baseline = original.ReadLiveQuery("root", request);
         var sizes = baseline.Changes.Select(change => JsonDefaults.Serialize(change).Length).ToArray();
         await Assert.That(sizes.Length).IsEqualTo(2);
@@ -111,7 +105,7 @@ internal sealed class LiveQueryResultCompositionTests
         await Assert.That(db.Store.Position).IsEqualTo(position);
         await Assert.That(LiveQueryResultCompositionAssertions.Bytes(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         var healthy = bounded.ReadLiveQuery("root", new(compact, smallStart.Cursor, Limit: 10,
-            MaxBytes: db.Database.Limits.MaxBatchBytes));
+            MaxBytes: int.MaxValue));
         await LiveQueryResultCompositionAssertions.PageAsync(db, healthy, start.ThroughSequence + 2, false,
             start.ThroughSequence + 1, ["a", "b"], [firstCommit.Token, secondCommit.Token], true);
         await OriginalPageBoundaryAsync(db, bounded, request, start.ThroughSequence, sizes.Max(), firstCommit.Token, secondCommit.Token);

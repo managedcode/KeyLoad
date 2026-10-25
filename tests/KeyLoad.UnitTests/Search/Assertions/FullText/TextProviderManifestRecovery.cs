@@ -32,8 +32,7 @@ internal static class TextProviderManifestRecovery
     private static async Task HealthyAsync(TestDatabase database, string indexDirectory,
         CancellationToken cancellationToken)
     {
-        using var projection = new RuntimeTextProjection(indexDirectory,
-            UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId,
+        using var projection = new RuntimeTextProjection(indexDirectory, database.Store.Identity.NodeId,
             UnitTextOptions.Execution());
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var results = await search.SearchAsync(Principal,

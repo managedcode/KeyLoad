@@ -10,10 +10,9 @@ internal static class SampleChunkWindowDrop
         PartitionRef partition, DropSampleChunkWindow request, IOptions<TimeSeriesExecutionOptions> options)
     {
         SampleChunkWindowScope.Require(database, tx, principal, partition, request.SeriesSet, request.SeriesId, request.WindowId);
-        var charge = new SampleChunkReadCharge(database.Limits.MaxQueryReadBytes);
         var previous = SampleChunkWindowScope.Load(tx, partition, request.SeriesSet, request.SeriesId,
-            request.WindowId, request.ExpectedRevision, options, charge);
-        var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId, charge.Charge);
+            request.WindowId, request.ExpectedRevision, options);
+        var watermark = SampleRollupRecords.Watermark(tx, partition, request.SeriesSet, request.SeriesId);
         if (watermark.Floor is not { } floor || floor < previous.UntilUtcTicks)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, SampleChunkLifecycleProtocol.Invalid);
@@ -21,8 +20,8 @@ internal static class SampleChunkWindowDrop
         if (previous.State == SampleChunkWindowState.Sealed)
         {
             var manifest = SampleChunkManifestReader.Read(tx, partition, request.SeriesSet, request.SeriesId,
-                previous, options.Value.MaximumChunkWindowRecords, charge, options);
-            _ = SampleChunkGenerationReader.Read(tx, partition, request.SeriesSet, request.SeriesId, previous, manifest, options, charge);
+                previous, options.Value.MaximumChunkWindowRecords, options);
+            _ = SampleChunkGenerationReader.Read(tx, partition, request.SeriesSet, request.SeriesId, previous, manifest, options);
             SampleChunkRepresentationRetirement.Delete(tx, partition, request.SeriesSet, request.SeriesId, previous, manifest);
         }
         var next = previous with
@@ -36,7 +35,7 @@ internal static class SampleChunkWindowDrop
             MaintenanceCommandId = Guid.Empty
         };
         SampleChunkStorage.Write(tx, SampleChunkKeys.Window(partition, request.SeriesSet, request.SeriesId, next.WindowId),
-            next, database.Limits.MaxBatchBytes);
+            next);
         return new(SampleChunkLifecycleProtocol.DropKind, request.SeriesSet, request.SeriesId, next.Revision);
     }
 }

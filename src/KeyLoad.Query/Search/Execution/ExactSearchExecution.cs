@@ -9,11 +9,10 @@ internal static class ExactSearchExecution
         QueryExecutionOptions execution, string principalId, SearchRequest request, ReadExecutionBudget budget)
     {
         budget.Check();
-        SearchRequestValidation.Validate(request, database.Limits, false, execution);
-        FilteredSearchEligibility.ValidateRequest(request.AllowedIds, database.Limits, budget);
+        SearchRequestValidation.Validate(request, false, execution);
+        FilteredSearchEligibility.ValidateRequest(request.AllowedIds, budget);
         var similarity = request.Vector is { } vector
             ? PreparedSimilarity.Create(vector.AsMemory(), request.Space!.Metric) : null;
-        FilteredSearchRequestSizer.EnsureBounded(request, database.Limits.MaxQueryBytes, budget);
         var eligibility = FilteredSearchEligibility.Create(request.AllowedIds, budget);
         var original = database.WithQueryView(principalId, request.Partition, request.Collection,
             request.Vector is null ? Capability.None : Capability.VectorSearch,

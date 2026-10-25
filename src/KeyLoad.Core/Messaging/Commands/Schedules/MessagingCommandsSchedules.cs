@@ -18,13 +18,13 @@ public static class MessagingCommandsSchedules
     internal static MutationReceipt ApplyConfigureRecurringSchedule(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ConfigureRecurringSchedule request, DateTimeOffset now)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var definition = engine.NormalizeScheduleDefinition(request.Definition);
+        var definition = RecurringScheduleValidation.NormalizeScheduleDefinition(request.Definition);
         RecurringScheduleValidation.ValidateScheduleScope(definition.Lane, definition.ScheduleId, partition);
         var resource = engine.Resource(tx, partition, definition.Lane.Queue, ResourceKind.WorkQueue);
         engine.RequireScheduleWriteAuthority(principal, definition.Lane, resource);
         var key = RecurringSagaStorage.ScheduleKey(definition.Lane, definition.ScheduleId);
         var existing = tx.GetRecord<RecurringScheduleRecord>(key);
-        engine.ValidateScheduleRevision(request.ExpectedRevision, existing, definition.Lane, definition.ScheduleId);
+        RecurringScheduleValidation.ValidateScheduleRevision(request.ExpectedRevision, existing, definition.Lane, definition.ScheduleId);
         if (existing is not null)
         {
             engine.RequireScheduleCreatorWrite(tx, existing, resource, now);
@@ -33,7 +33,7 @@ public static class MessagingCommandsSchedules
         var capacity = existing is null ? RecurringSagaStorage.Capacity(tx, definition.Lane) : RecurringSagaStorage.RequireCapacity(tx, definition.Lane);
         var next = MessagingCommandsSchedules.NewScheduleRecord(existing, definition, principal.Id);
         var nextBytes = RecurringSagaStorage.SerializedBytes(next);
-        var updatedCapacity = existing is null ? RecurringSagaStorage.Add(capacity, nextBytes, engine.Limits) : RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(existing), nextBytes, engine.Limits);
+        var updatedCapacity = existing is null ? RecurringSagaStorage.Add(capacity, nextBytes) : RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(existing), nextBytes);
         tx.PutRecord(key, next);
         tx.PutRecord(RecurringSagaStorage.CapacityKey(definition.Lane), updatedCapacity);
         return MessagingCommandsSchedules.ScheduleReceipt(RecurringSagaProtocol.ScheduleReceipt, definition.Lane, definition.ScheduleId, next.Revision);
@@ -45,7 +45,7 @@ public static class MessagingCommandsSchedules
         RecurringScheduleValidation.ValidateScheduleScope(request.Lane, request.ScheduleId, partition);
         var resource = engine.Resource(tx, partition, request.Lane.Queue, ResourceKind.WorkQueue);
         engine.RequireScheduleWriteAuthority(principal, request.Lane, resource);
-        var record = engine.RequireSchedule(tx, request.Lane, request.ScheduleId);
+        var record = RecurringScheduleValidation.RequireSchedule(tx, request.Lane, request.ScheduleId);
         RecurringScheduleValidation.RequireScheduleRevision(request.ExpectedRevision, record.Revision);
         engine.RequireScheduleCreatorManagement(tx, record, now);
         if (record.Cancelled)
@@ -59,7 +59,7 @@ public static class MessagingCommandsSchedules
             Cancelled = true
         };
         var capacity = RecurringSagaStorage.RequireCapacity(tx, request.Lane);
-        var updatedCapacity = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record), RecurringSagaStorage.SerializedBytes(next), engine.Limits);
+        var updatedCapacity = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record), RecurringSagaStorage.SerializedBytes(next));
         tx.PutRecord(RecurringSagaStorage.ScheduleKey(request.Lane, request.ScheduleId), next);
         tx.PutRecord(RecurringSagaStorage.CapacityKey(request.Lane), updatedCapacity);
         return MessagingCommandsSchedules.ScheduleReceipt(RecurringSagaProtocol.CancelReceipt, request.Lane, request.ScheduleId, next.Revision);
@@ -76,7 +76,7 @@ public static class MessagingCommandsSchedules
 
         var resource = engine.Resource(tx, partition, request.Lane.Queue, ResourceKind.WorkQueue);
         engine.RequireScheduleWriteAuthority(principal, request.Lane, resource);
-        var record = engine.RequireSchedule(tx, request.Lane, request.ScheduleId);
+        var record = RecurringScheduleValidation.RequireSchedule(tx, request.Lane, request.ScheduleId);
         if (record.Generation != request.ExpectedGeneration)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, RecurringSagaProtocol.GenerationChanged);
@@ -95,7 +95,7 @@ public static class MessagingCommandsSchedules
 
         var nextOrdinal = MessagingCommandsSchedules.NextOccurrenceOrdinal(due[^MessagingCommandsSchedules.RecurringScheduleCommandsLastComponentFromEnd].Ordinal);
         engine.EmitOccurrences(tx, principal, record, due, now);
-        engine.UpdateScheduleOrdinal(tx, record, nextOrdinal);
+        MessagingCommandsSchedules.UpdateScheduleOrdinal(tx, record, nextOrdinal);
         return MessagingCommandsSchedules.ScheduleReceipt(RecurringSagaProtocol.EmitReceipt, request.Lane, request.ScheduleId, record.Revision);
     }
 
@@ -136,14 +136,14 @@ public static class MessagingCommandsSchedules
         }
     }
 
-    internal static void UpdateScheduleOrdinal(this DatabaseEngine engine, IAtomicTransaction tx, RecurringScheduleRecord record, long nextOrdinal)
+    internal static void UpdateScheduleOrdinal(IAtomicTransaction tx, RecurringScheduleRecord record, long nextOrdinal)
     {
         var next = record with
         {
             NextOrdinal = nextOrdinal
         };
         var capacity = RecurringSagaStorage.RequireCapacity(tx, record.Lane);
-        var updated = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record), RecurringSagaStorage.SerializedBytes(next), engine.Limits);
+        var updated = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record), RecurringSagaStorage.SerializedBytes(next));
         tx.PutRecord(RecurringSagaStorage.ScheduleKey(record.Lane, record.ScheduleId), next);
         tx.PutRecord(RecurringSagaStorage.CapacityKey(record.Lane), updated);
     }

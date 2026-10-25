@@ -3,6 +3,8 @@
 Status: Accepted implementation contract under the owner-authorized scope;
 source and runtime qualification pending. Date: 2026-10-03.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 Related: REQ/AC-EVENT-007..010, ADR-002/011/015/024/025/029/030/060.
 
 ## Decision

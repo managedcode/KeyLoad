@@ -1,13 +1,12 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Query.QueryExecution;
 
-/// <summary>Measures the whole typed path envelope under MaxQueryBytes without retaining serialized bytes.</summary>
+/// <summary>Checks the typed path envelope parameter count and serializability without retaining serialized bytes.</summary>
 internal static class SqlGraphPathRequestSizer
 {
-    internal static void EnsureBounded(SqlGraphPathRequest request, int maximumBytes, int maximumParameters, ReadExecutionBudget budget)
+    internal static void EnsureBounded(SqlGraphPathRequest request, int maximumParameters, ReadExecutionBudget budget)
     {
         budget.Check();
         if (request.Query.Parameters?.Count > maximumParameters)
@@ -16,8 +15,7 @@ internal static class SqlGraphPathRequestSizer
         }
         try
         {
-            using var counter = new ResultByteCounterStream(maximumBytes, budget.Check);
-            JsonSerializer.Serialize(counter, request, JsonDefaults.Options);
+            JsonSerializer.Serialize(Stream.Null, request, JsonDefaults.Options);
             budget.Check();
         }
         catch (Exception exception) when (exception is JsonException or NotSupportedException

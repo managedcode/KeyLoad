@@ -27,7 +27,7 @@ public static class MessagingCommandsRemoteTransfer
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferAttemptProtocol.Stale);
         }
 
-        var witness = engine.Verify<RemoteTransferAcceptFailureClaims>(request.FailureWitness, engine.Limits.MaxBatchBytes);
+        var witness = engine.VerifyRetained<RemoteTransferAcceptFailureClaims>(request.FailureWitness);
         var hint = new RemoteTransferCoordinationHint(record.Source, record.Destination, record.TransferId, record.PrincipalId, record.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(record.IntentToken), engine.Token(tx, partition, engine.Store.Position), state.Generation, state.Ceiling);
         RemoteTransferFailureWitness.RequireRemoteTransferFailureWitness(witness, hint);
         if (!RemoteTransferCapacityRepair.Improved(witness))
@@ -51,12 +51,7 @@ public static class MessagingCommandsRemoteTransfer
             }
         };
         var capacity = RemoteTransferStorage.RequireSourceCounter(tx, request.SourceQueue);
-        var next = RemoteTransferStorage.Replace(capacity, RemoteTransferStorage.SourceAccountedBytes(record), RemoteTransferStorage.SourceAccountedBytes(updated), engine.Limits);
-        if (next.StoredRecords >= engine.Limits.MaxScanRecords)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteTransferAttemptProtocol.Capacity);
-        }
-
+        var next = RemoteTransferStorage.Replace(capacity, RemoteTransferStorage.SourceAccountedBytes(record), RemoteTransferStorage.SourceAccountedBytes(updated));
         next = next with
         {
             StoredRecords = checked(next.StoredRecords + RemoteTransferAttemptProtocol.FirstGeneration)

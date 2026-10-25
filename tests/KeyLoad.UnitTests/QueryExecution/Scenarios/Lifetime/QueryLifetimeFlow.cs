@@ -66,14 +66,13 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
     internal PartitionQueryLifetimeMetadata Capture()
     {
         var database = fixture.Source.Database;
-        var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, CancellationToken.None);
-        var grant = work.CreateReadGrant(database.Limits.MaxQueryReadBytes / QueryLifetimeProtocol.GrantDivisor,
-            database.Limits.MaxScanRecords / QueryLifetimeProtocol.GrantDivisor);
+        var work = new ReadExecutionBudget(database.EvaluationClock, CancellationToken.None);
+        var grant = work.CreateReadGrant(work.RemainingReadGrantBytes / QueryLifetimeProtocol.GrantDivisor, work.RemainingReadGrantRecords / QueryLifetimeProtocol.GrantDivisor);
         return database.WithPartitionQueryFenceView<PartitionQueryLifetimeMetadata>(QueryFixture.Reader,
             QueryFixture.Partition, QueryFixture.Collection, grant,
             (view, principal, resource, _) => new(resource,
                 ResourceLifetimeCoverageValidation.Capture(work.CreateView(view, grant),
-                    QueryFixture.Partition, [resource], database.Limits.MaxBatchBytes), principal));
+                    QueryFixture.Partition, [resource]), principal));
     }
 
     internal ResourceLifetimeCoverage CreateOtherLifetime()
@@ -84,7 +83,7 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
             OperationKind.ConfigureResource, Guid.NewGuid(), new ConfigureResourceRequest(QueryFixture.Tenant,
                 QueryFixture.Partition.DatabaseId, definition))).Get<ResourceDefinition>();
         return fixture.Source.Store.Read(view => ResourceLifetimeCoverageValidation.Capture(view,
-            QueryFixture.Partition, [definition], fixture.Source.Database.Limits.MaxBatchBytes));
+            QueryFixture.Partition, [definition]));
     }
 
     internal PartitionQueryLeafResult Query(string path = QueryLifetimeProtocol.Star,
@@ -98,9 +97,9 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
         var request = new AstQueryRequest(QueryFixture.Partition,
             new(QueryFixture.Collection, null, [new(path, QueryLifetimeProtocol.SecretAlias)],
                 filter, [], QueryLifetimeProtocol.Limit), AllowFullScan: true);
-        var normalized = QueryValidation.Normalize(request, database.Limits, engine.Execution);
+        var normalized = QueryValidation.Normalize(request, engine.Execution);
         var plan = PartitionQueryPlanFactory.Create(normalized, database.Store.Identity,
-            [request.Partition], database.Limits, engine.Execution).Leaves.Single();
+            [request.Partition], engine.Execution).Leaves.Single();
         var input = new PartitionQueryOwnedLeafRequest(plan,
             fixture.DestinationOwner, QueryFixture.Tenant,
             metadata.Definition, metadata.Coverage, metadata.Principal);
@@ -108,7 +107,7 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
             ? OrleansSerialization.Deserialize<PartitionQueryOwnedLeafRequest>(OrleansSerialization.Serialize(input)) : input;
         return PartitionQueryLifetimeLeafExecution.Execute(engine, QueryFixture.Reader, roundTrip,
             fixture.DestinationOwner, database.EvaluationClock,
-            database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds), cancellationToken);
+            database.EvaluationClock.GetUtcNow() + UnitExecutionOptions.OperationLifetime, cancellationToken);
     }
 
     internal DistributedSearchLeafResult Statistics(PartitionQueryLifetimeMetadata? captured = null,
@@ -122,15 +121,15 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
                 QueryFixture.Collection, TextField: field,
                 Text: text, Limit: QueryLifetimeProtocol.Limit),
             fixture.DestinationOwner, QueryFixture.Tenant,
-            database.Limits.MaxQueryReadBytes / QueryLifetimeProtocol.GrantDivisor,
-            database.Limits.MaxScanRecords / QueryLifetimeProtocol.GrantDivisor,
-            QueryResultBudgetPolicy.Resolve(database.Limits, UnitExecutionOptions.QueryExecution().Value)
+            long.MaxValue / QueryLifetimeProtocol.GrantDivisor,
+            int.MaxValue / QueryLifetimeProtocol.GrantDivisor,
+            QueryResultBudgetPolicy.Resolve(UnitExecutionOptions.QueryExecution().Value)
                 / QueryLifetimeProtocol.GrantDivisor, null, null, null, null, [], metadata.Definition, metadata.Coverage, metadata.Principal);
         var roundTrip = runtimeRoundTrip
             ? OrleansSerialization.Deserialize<DistributedSearchOwnedLeaf>(OrleansSerialization.Serialize(input)) : input;
         return DistributedSearchOwnedLeafExecution.Execute(database, QueryFixture.Reader,
             roundTrip, fixture.DestinationOwner, UnitExecutionOptions.QueryExecution(),
-            database.EvaluationClock, database.EvaluationClock.GetUtcNow() + TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds),
+            database.EvaluationClock, database.EvaluationClock.GetUtcNow() + UnitExecutionOptions.OperationLifetime,
             CancellationToken.None);
     }
 

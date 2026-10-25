@@ -24,7 +24,6 @@ internal static class SqlSyntax
     internal const string MetadataPrefix = "/@";
     internal const string MetadataIdPath = MetadataPrefix + MetadataId;
     internal const string MetadataRevisionPath = MetadataPrefix + MetadataRevision;
-    internal const string ByteBudgetDetail = "The SQL byte budget is exceeded.";
     internal const string InvalidDetail = "The SQL statement is invalid for the supported dialect.";
     internal const string UnsupportedJoinDetail = "The query dialect does not support joins.";
     internal const int DefaultLimit = 100;

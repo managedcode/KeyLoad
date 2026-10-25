@@ -334,7 +334,7 @@ ANN/FTS projections can speed up startup; canonical records allow them to be reb
 
 ## 7. Document storage and scalar indexing
 
-Documents are stored as validated UTF-8 JSON. The format defines handling of duplicate property names, maximum nesting, numeric rules and the maximum document size. Proposal: reject duplicate names, unsupported numeric cases and documents above the configured maximum.
+Documents are stored as validated UTF-8 JSON. The format defines handling of duplicate property names, nesting and numeric rules. Duplicate names and unsupported numeric cases are rejected; nesting follows the System.Text.Json default maximum depth (64), and KeyLoad configures no maximum document size ([ADR-149](../ADR/ADR-149-no-operation-limits.md)).
 
 Index kinds: equality, ordered range, composite, unique-in-partition. Further kinds: covering, partial, multikey arrays, exists/missing, schema-specific computed fields. Dynamic indexing of all arbitrary fields can create an uncontrolled number of entries, so indexes are defined explicitly.
 
@@ -346,7 +346,7 @@ Online rebuild: consistent cut + retained committed deltas → build generation 
 
 Vertices are entity references to documents. An edge has EdgeId, From, To, Label, Attributes and Revision. A separate edge record gives direct access by EdgeId; two adjacency structures serve outgoing/incoming scans.
 
-Operations: neighbors, labeled traversal, bounded BFS, unweighted shortest path. Traversal defines maxDepth, maxVisitedNodes, maxVisitedEdges, deadline, memory budget and cancellation. The algorithm batch-fetches neighbors for the frontier; the storage path has no per-edge RPC.
+Operations: neighbors, labeled traversal, bounded BFS, unweighted shortest path. Traversal defines maxDepth, maxVisitedNodes, maxVisitedEdges, an optional explicit expiry and cancellation. The algorithm batch-fetches neighbors for the frontier; the storage path has no per-edge RPC.
 
 Proposed protective default limits: maxDepth=5, maxVisitedNodes=10 000, maxVisitedEdges=100 000. These values are settings and are verified under load. Exhausting the budget returns `BudgetExceeded`, or an explicit `PartialResult` on opt-in.
 
@@ -479,7 +479,7 @@ A response contains results, revision, watermark/token, the index generations us
 
 Tenant isolation starts in KeyCodec, routing and query planning. Transport authentication, authorization for collection/admin operations, bounded payloads, quotas and audit are required before use with real data. Orleans carries all internal calls between silos.
 
-Request limits: document/request size, number of batch operations, fan-out, scanned records, top-k, vector dimensions, graph traversal, query memory, deadline. Reaching a limit yields an explicit outcome. An expensive full scan requires explicit opt-in or an administrative policy.
+Request limits are the server-wide request body size, configured partition fan-out, and the bounds a caller states: top-k, vector dimensions, graph traversal caps and an explicit expiry. KeyLoad configures no document-size, batch-operation, scanned-record, query-memory or deadline limit ([ADR-149](../ADR/ADR-149-no-operation-limits.md)); physical reply and storage ceilings bound one reply and one storage range operation. Reaching a limit yields an explicit outcome. An expensive full scan requires explicit opt-in or an administrative policy.
 
 Node resources: total managed/memory, WAL backlog, projection lag, compaction work, free disk headroom, open files, pending write queue, CPU concurrency. Engines plan their own memory and disk (cache memory budgets, ANN resident and disk planning, text-search reader leases); callers are not throttled by request count or reserved bytes, so overload appears as latency and operators size hardware for their load. Every maintainer registers with the node-level scheduler.
 

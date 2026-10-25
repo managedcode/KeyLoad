@@ -1,6 +1,5 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.Placement;
@@ -42,7 +41,6 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
             execution => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => ExecuteAsync(request, envelope, writer, purpose, settlement), execution),
             serializer, requestId, clock, settled, options, owner, purpose,
-            services.GetRequiredService<IOptions<DatabaseLimits>>(),
             () => owner.Acquire(requestId, RequestWorkKind.RequestProducer), token);
     }
 
@@ -93,8 +91,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
     private Task<GrainOperationReply> ExecuteLeafAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
         SiloAddress owner, RequestWorkLease binding, CancellationToken token)
         => request.Envelope.CommandKind is not null && !ConnectionParentExecution.Handles(request.Envelope.CommandKind)
-            ? ConnectionCommandExecution.ExecuteAsync(request, envelope, GrainFactory,
-                services, codec, clock, binding, token)
+            ? ConnectionCommandExecution.ExecuteAsync(request, envelope, GrainFactory, codec, clock, binding, token)
             : storage.ExecuteAsync(owner, envelope, token);
 
     /// <inheritdoc />

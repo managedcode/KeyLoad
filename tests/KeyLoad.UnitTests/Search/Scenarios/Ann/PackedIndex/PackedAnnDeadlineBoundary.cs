@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Search;
 
 internal static class PackedAnnDeadlineBoundary
 {
-    private const int QueryDeadlineSeconds = 1;
+    private const int CallerLifetimeSeconds = 1;
     private const int StartupTimeoutSeconds = 5;
     private const int CompletionTimeoutSeconds = 15;
 
@@ -13,8 +13,7 @@ internal static class PackedAnnDeadlineBoundary
         PackedAnnIndex index, float[] query, int searchLimit)
     {
         using var cancellation = new CancellationTokenSource();
-        var limits = new DatabaseLimits { QueryDeadlineSeconds = QueryDeadlineSeconds };
-        var run = await StartAsync(index, query, searchLimit, limits, cancellation);
+        var run = await StartAsync(index, query, searchLimit, cancellation);
         KeyLoadException? expectedFailure = null;
         try
         {
@@ -36,7 +35,7 @@ internal static class PackedAnnDeadlineBoundary
             await Assert.That(run.Budget.WorkUnits).IsGreaterThan(0);
             await Assert.That(run.Budget.EdgeVisits).IsGreaterThan(0);
             await Assert.That(run.Observation.StartedTimestamp.Elapsed)
-                .IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(QueryDeadlineSeconds));
+                .IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(CallerLifetimeSeconds));
         }
         catch (Exception assertionFailure)
         {
@@ -62,12 +61,11 @@ internal static class PackedAnnDeadlineBoundary
     }
 
     private static async Task<PackedAnnDeadlineSearch> StartAsync(PackedAnnIndex index, float[] query,
-        int searchLimit, DatabaseLimits limits, CancellationTokenSource cancellation)
+        int searchLimit, CancellationTokenSource cancellation)
     {
         var ready = new TaskCompletionSource<AnnWorkBudget>(TaskCreationOptions.RunContinuationsAsynchronously);
         var observation = new PackedAnnDeadlineObservation();
-        var search = Task.Run(() => SearchUntilDeadline(index, query, searchLimit,
-            limits, ready, observation, cancellation.Token));
+        var search = Task.Run(() => SearchUntilDeadline(index, query, searchLimit, ready, observation, cancellation.Token));
         try
         {
             var budget = await ready.Task.WaitAsync(TimeSpan.FromSeconds(StartupTimeoutSeconds), TimeProvider.System);
@@ -88,13 +86,13 @@ internal static class PackedAnnDeadlineBoundary
     }
 
     private static AnnSearchResult SearchUntilDeadline(PackedAnnIndex index, float[] query,
-        int searchLimit, DatabaseLimits limits, TaskCompletionSource<AnnWorkBudget> ready,
+        int searchLimit, TaskCompletionSource<AnnWorkBudget> ready,
         PackedAnnDeadlineObservation observation, CancellationToken cancellationToken)
     {
         var started = new TestElapsedClock(TimeProvider.System);
-        var budget = new AnnWorkBudget(
-            new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), started.Provider, cancellationToken),
-            PackedAnnIndexTestSupport.GenerousWorkLimit);
+        var read = new ReadExecutionBudget(started.Provider, cancellationToken);
+        read.ConstrainLifetime(started.Provider.GetUtcNow().AddSeconds(CallerLifetimeSeconds));
+        var budget = new AnnWorkBudget(read, PackedAnnIndexTestSupport.GenerousWorkLimit);
         observation.Start(started);
         ready.SetResult(budget);
         while (true)

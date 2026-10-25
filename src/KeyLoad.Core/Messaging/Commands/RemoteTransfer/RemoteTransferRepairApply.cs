@@ -24,7 +24,7 @@ public static class RemoteTransferRepairApply
         }
 
         var hint = new RemoteTransferCoordinationHint(record.Source, record.Destination, record.TransferId, record.PrincipalId, record.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(record.IntentToken), engine.Token(tx, partition, engine.Store.Position), generation, record.Attempts?.Ceiling, state.AcceptPolicyGeneration, state.CompleteGeneration, state.Ceiling);
-        var witness = engine.Verify<RemoteTransferRepairClaims>(request.FailureWitness, engine.Limits.MaxBatchBytes);
+        var witness = engine.VerifyRetained<RemoteTransferRepairClaims>(request.FailureWitness);
         RemoteTransferRepairWitness.RequireRemoteTransferRepairWitness(witness, hint);
         if (witness.Stage != request.Stage || witness.CurrentPolicyEpoch != principal.PolicyEpoch)
         {
@@ -55,19 +55,14 @@ public static class RemoteTransferRepairApply
         {
             Repairs = nextState
         };
-        engine.StageRemoteTransferRepairState(tx, request, key, record, updated);
+        RemoteTransferRepairApply.StageRemoteTransferRepairState(tx, request, key, record, updated);
         return RemoteTransferCommands.TransferMutationReceipt(RemoteTransferRepairProtocol.AdvanceKind, request.SourceQueue, request.TransferId, request.Stage == QueueTransferRepairStage.Accept ? nextState.AcceptPolicyGeneration : nextState.CompleteGeneration);
     }
 
-    internal static void StageRemoteTransferRepairState(this DatabaseEngine engine, IAtomicTransaction tx, AdvanceQueueTransferRepair request, byte[] key, RemoteTransferIntentRecord record, RemoteTransferIntentRecord updated)
+    internal static void StageRemoteTransferRepairState(IAtomicTransaction tx, AdvanceQueueTransferRepair request, byte[] key, RemoteTransferIntentRecord record, RemoteTransferIntentRecord updated)
     {
         var current = RemoteTransferStorage.RequireSourceCounter(tx, request.SourceQueue);
-        var next = RemoteTransferStorage.Replace(current, RemoteTransferStorage.SourceAccountedBytes(record), RemoteTransferStorage.SourceAccountedBytes(updated), engine.Limits);
-        if (next.StoredRecords >= engine.Limits.MaxScanRecords)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteTransferRepairProtocol.Capacity);
-        }
-
+        var next = RemoteTransferStorage.Replace(current, RemoteTransferStorage.SourceAccountedBytes(record), RemoteTransferStorage.SourceAccountedBytes(updated));
         next = next with
         {
             StoredRecords = checked(next.StoredRecords + RemoteTransferRepairProtocol.InitialGeneration)

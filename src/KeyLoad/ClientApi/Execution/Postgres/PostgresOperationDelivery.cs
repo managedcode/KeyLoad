@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -15,7 +16,7 @@ internal static class PostgresOperationDelivery
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var deadline = new PostgresTransportDeadline(
-                TimeSpan.FromSeconds(services.GetRequiredService<IOptions<DatabaseLimits>>().Value.QueryDeadlineSeconds),
+                services.GetRequiredService<IOptions<GrainRoutingOptions>>().Value.RequestLifetime,
                 services.GetRequiredService<TimeProvider>(), original);
             await ServerFailureObserver.ObserveAsync(async () =>
             {

@@ -17,12 +17,11 @@ internal static class PartitionQueryPlanValidation
     private const string InvalidPlanMessage = "The partition query plan is invalid.";
     private const string PlanBudgetMessage = "The partition query plan exceeds its resource budget.";
 
-    internal static PartitionRef[] Validate(PartitionQueryPlan plan, DatabaseLimits limits, QueryExecutionOptions execution)
+    internal static PartitionRef[] Validate(PartitionQueryPlan plan, QueryExecutionOptions execution)
     {
         ArgumentNullException.ThrowIfNull(plan);
-        ArgumentNullException.ThrowIfNull(limits);
-        ValidateBounds(plan, limits, execution.MaximumPartitions);
-        if (plan.MaxRetainedBytes > QueryResultBudgetPolicy.Resolve(limits, execution))
+        ValidateBounds(plan, execution.MaximumPartitions);
+        if (plan.MaxRetainedBytes > QueryResultBudgetPolicy.Resolve(execution))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, PlanBudgetMessage);
         }
@@ -72,7 +71,7 @@ internal static class PartitionQueryPlanValidation
         return partitions;
     }
 
-    private static void ValidateBounds(PartitionQueryPlan plan, DatabaseLimits limits, int maximumLeafCount)
+    private static void ValidateBounds(PartitionQueryPlan plan, int maximumLeafCount)
     {
         if (plan.Version != VersionOne || plan.NodeId == Guid.Empty || plan.Incarnation == Guid.Empty
             || plan.ReadGeneration < InitialSequence || plan.Leaves.IsDefaultOrEmpty
@@ -80,10 +79,8 @@ internal static class PartitionQueryPlanValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidPlanMessage);
         }
-        if (plan.Limit < MinimumPositiveCount || plan.Limit > limits.MaxResults || plan.MaxExaminedRecords < MinimumPositiveCount
-            || plan.MaxExaminedRecords > limits.MaxScanRecords || plan.MaxReadBytes < NoRetainedBytes
-            || plan.MaxReadBytes > limits.MaxQueryReadBytes || plan.MaxRetainedBytes < NoRetainedBytes
-            || plan.MaxRetainedBytes > limits.MaxBatchBytes)
+        if (plan.Limit < MinimumPositiveCount || plan.MaxExaminedRecords < MinimumPositiveCount
+            || plan.MaxReadBytes < NoRetainedBytes || plan.MaxRetainedBytes < NoRetainedBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, PlanBudgetMessage);
         }

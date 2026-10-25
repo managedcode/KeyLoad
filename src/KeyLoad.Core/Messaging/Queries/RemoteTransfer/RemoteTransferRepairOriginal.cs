@@ -29,7 +29,7 @@ public static class RemoteTransferRepairOriginal
                 throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferRepairProtocol.Stale);
             }
 
-            engine.ValidateReceipt(view, engine.Verify<RemoteTransferReceiptClaims>(request.ReceiptToken!, engine.Limits.MaxBatchBytes), record);
+            engine.ValidateReceipt(view, engine.VerifyRetained<RemoteTransferReceiptClaims>(request.ReceiptToken!), record);
         }
 
         return original;

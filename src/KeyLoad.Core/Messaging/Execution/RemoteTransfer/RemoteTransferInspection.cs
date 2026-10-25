@@ -19,7 +19,7 @@ public static class RemoteTransferInspection
     public static QueueTransferInspection? InspectQueueTransfer(this DatabaseEngine engine, string principalId, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.InspectQueueTransferRead(principalId, source, transferId, budget);
     }
 
@@ -55,7 +55,7 @@ public static class RemoteTransferInspection
     public static QueueTransferReceiptInspection? InspectQueueTransferReceipt(this DatabaseEngine engine, string principalId, QueueLaneRef destination, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.InspectQueueTransferReceiptRead(principalId, destination, source, transferId, budget);
     }
 
@@ -137,7 +137,7 @@ public static class RemoteTransferInspection
             throw Errors.Fail(ErrorCode.Corruption, TransferReceiptCorruptMessage);
         }
 
-        var claims = engine.Verify<RemoteTransferReceiptClaims>(record.ReceiptToken, engine.Limits.MaxBatchBytes);
+        var claims = engine.VerifyRetained<RemoteTransferReceiptClaims>(record.ReceiptToken);
         if (claims is null || claims.Source is null || claims.Destination is null || claims.TargetCommit is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, TransferReceiptCorruptMessage);

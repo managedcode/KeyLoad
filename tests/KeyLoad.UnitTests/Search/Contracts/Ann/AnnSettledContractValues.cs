@@ -41,7 +41,7 @@ internal sealed record AnnSettledContractValues(AnnMaintenanceRequest Request,
         };
         var captured = global::KeyLoad.Core.Search.AnnSeedCollector.CapturePinned(database.Database,
             AnnProjectionPinTestSupport.Principal, request, UnitAnnSeedOptions.Execution(),
-            new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
+            new global::KeyLoad.Core.ReadExecutionBudget());
         var source = AnnCanonicalSource.Source(captured);
         var page = AnnProjectionPinTestSupport.Read(database, consumer);
         var intent = AnnMaintenanceTestData.Intent(page);

@@ -23,15 +23,15 @@ internal static class QueueDeadlineDiscovery
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, IndexedPageBudgetRequired);
         }
-        var page = new DuePageState(database.OperationLimitsOptions, now, database.EvaluationClock,
+        var page = new DuePageState(now, database.EvaluationClock,
             database.DueDiscoveryDeadline, database.DueExecution.MaximumRecordsPerPage,
             database.DueExecution.MaximumRangeBytes, cancellationToken);
         page.Check();
-        return database.Store.Read(view => Read(database, view,
+        return database.Store.Read(view => Read(view,
             QueueDeadlineCursor.Match(database.Store.Identity, previous), page));
     }
 
-    private static QueueDeadlinePage Read(DatabaseEngine database, IKeyValueView view,
+    private static QueueDeadlinePage Read(IKeyValueView view,
         QueueDeadlineCursor cursor, DuePageState page)
     {
         page.Check();
@@ -53,7 +53,7 @@ internal static class QueueDeadlineDiscovery
         {
             return new([], [], cursor.Advance(DuePrefixCursor.Empty), page.ExaminedRecords, page.ExaminedBytes);
         }
-        var state = new QueueDeadlineScan(database, view, cursor, bounds, page);
+        var state = new QueueDeadlineScan(view, cursor, bounds, page);
         var remaining = page.MaximumRecordsPerPage - page.ExaminedRecords - LookaheadRecord;
         if (remaining <= Initial)
         {

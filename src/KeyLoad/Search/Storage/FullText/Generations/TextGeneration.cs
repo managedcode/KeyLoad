@@ -17,7 +17,7 @@ internal sealed class TextGeneration
     private TextRecord[]? sealedRecords;
     private HashSet<EntityRef>? references = [];
 
-    internal TextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, IOptions<DatabaseLimits> limitsOptions, TextFileStreamProvider provider, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal TextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, TextFileStreamProvider provider, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
     {
         this.executionOptions = executionOptions;
         this.resources = resources;
@@ -26,7 +26,6 @@ internal sealed class TextGeneration
         Leaf = leaf;
         Path = System.IO.Path.Combine(root, leaf);
         Scope = scope;
-        Limits = limitsOptions.Value;
         CurrentIndex = RuntimeTextIndex.Open(System.IO.Path.Combine(Path, TextProtocol.RuntimeDirectoryCore), provider, executionOptions: executionOptions);
     }
 
@@ -48,10 +47,6 @@ internal sealed class TextGeneration
     }
     internal IndexOfTokenRecordPreviousToken<ulong, ulong> Index
         => CurrentIndex ?? throw new ObjectDisposedException(nameof(TextGeneration));
-    internal DatabaseLimits Limits
-    {
-        get;
-    }
     internal TextFile[] Files { get; private set; } = [];
     internal Exception? DeferredBudgetFailure
     {
@@ -72,16 +67,12 @@ internal sealed class TextGeneration
         const int RevisionValidationBoundary = 0;
         const int PendingRecordsCountStep = 1;
 
-        if (pendingRecords!.Count >= Limits.MaxScanRecords)
-        {
-            throw TextErrors.BoundExceeded();
-        }
         if (revision < RevisionValidationBoundary || reference.Partition != Scope.Partition || reference.Collection != Scope.Collection
             || string.IsNullOrEmpty(reference.Id) || !references!.Add(reference))
         {
             throw TextErrors.Corrupt();
         }
-        var record = new TextRecord((ulong)pendingRecords.Count + PendingRecordsCountStep, reference, revision);
+        var record = new TextRecord((ulong)pendingRecords!.Count + PendingRecordsCountStep, reference, revision);
         budget.ChargeBytes(OrleansSerialization.Measure(record));
         pendingRecords.Add(record);
     }
@@ -155,7 +146,7 @@ internal sealed class TextGeneration
         {
             return;
         }
-        var manifest = TextFiles.ValidatePublishedGeneration(root, Leaf, sourceNodeId, Scope, Limits, budget, executionOptions: executionOptions);
+        var manifest = TextFiles.ValidatePublishedGeneration(root, Leaf, sourceNodeId, Scope, budget, executionOptions: executionOptions);
         VerifyRecords(manifest.Records, budget);
         VerifyFiles(manifest.Files, budget);
         budget.Check();

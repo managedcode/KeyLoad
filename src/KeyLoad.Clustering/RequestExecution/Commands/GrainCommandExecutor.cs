@@ -19,7 +19,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             ValidateRoute(request, actorKey, cancellationToken);
             stage = GrainFailureStage.CapabilityExecution;
             await using var work = CapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
-                RequestWorkKind.CommandCapability, database.OperationLimitsOptions, cancellationToken);
+                RequestWorkKind.CommandCapability, cancellationToken);
             coreEntered = true;
             return await ExecuteCoreAsync(request, work, context,
                 work?.Token ?? cancellationToken).ConfigureAwait(true);
@@ -43,7 +43,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         var stage = GrainFailureStage.CapabilityExecution;
         try
         {
-            var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, operationToken);
+            var budget = new ReadExecutionBudget(clock, operationToken);
             budget.ConstrainLifetime(request.Envelope.ExpiresAt);
             if (work is not null)
             {

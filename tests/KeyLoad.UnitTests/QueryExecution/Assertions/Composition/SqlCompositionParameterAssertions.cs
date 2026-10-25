@@ -73,8 +73,7 @@ internal static class SqlCompositionParameterAssertions
             expected.Add(new(expected.Count + 1L, 0, original.Expected.Token, new DateTimeOffset(original.Operation.Timestamp),
                 original.Effect, original.Expected.Mutations[0]));
         }
-        var page = fixture.Store.Read(view => view.Scan(KeySpace.Partition("outbox", fixture.Source.Partition),
-            fixture.Database.Limits.MaxScanRecords));
+        var page = fixture.Store.Read(view => view.Scan(KeySpace.Partition("outbox", fixture.Source.Partition), view.MaximumRangeRecords));
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Records.Length).IsEqualTo(expected.Count);
         for (var index = 0; index < expected.Count; index++)

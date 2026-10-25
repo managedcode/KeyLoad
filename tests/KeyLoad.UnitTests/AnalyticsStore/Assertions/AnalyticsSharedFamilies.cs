@@ -60,7 +60,7 @@ internal static class AnalyticsSharedFamilies
         byte[] key, byte[] value, CancellationToken token)
     {
         var page = fixture.Store.Read(view => PartitionRecordPageReader.Read(view, partition, family,
-            10, new DatabaseLimits().MaxBatchBytes, new DatabaseLimits().MaxQueryReadBytes, cancellationToken: token));
+            10, int.MaxValue, long.MaxValue, cancellationToken: token));
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Continuation).IsNull();
         await Assert.That(page.Records.Length).IsEqualTo(1);

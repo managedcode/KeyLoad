@@ -37,6 +37,6 @@ internal static class QueryCapabilityVersionRefusals
             await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
             await Assert.That(unsupported.Message).IsEqualTo("The query comparison is unsupported.");
         }
-        await RequiredProcessingPolicyAssertions.EqualAsync(QueryCapabilityVersionExpected.Manifest(QueryCapabilityVersionRequests.Limits()), engine.Capabilities);
+        await RequiredProcessingPolicyAssertions.EqualAsync(QueryCapabilityVersionExpected.Manifest(), engine.Capabilities);
     });
 }

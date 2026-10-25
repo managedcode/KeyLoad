@@ -23,7 +23,7 @@ internal sealed class TextProjectionAuthorityTests
         SeedProtectedRows(database);
         PersistReader(database, ReaderId, [UseGrant]);
         PersistReader(database, DeniedId, []);
-        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), database.Store.Identity.NodeId, UnitTextOptions.Execution());
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var request = new SearchRequest(database.Partition, Collection, TextPath, "needle", Limit: 10);
         var token = TestContext.Current!.Execution.CancellationToken;

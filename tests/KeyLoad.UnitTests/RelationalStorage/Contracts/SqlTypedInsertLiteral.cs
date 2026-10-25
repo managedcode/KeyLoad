@@ -52,9 +52,7 @@ internal static class SqlTypedInsertLiteral
         {
             [ActiveColumn] = global::System.Text.Json.JsonSerializer.SerializeToElement(true)
         } : null;
-        var limits = UnitExecutionOptions.DatabaseLimits();
-        return SqlOperationCompiler.Compile(new(partition, sql, parameters, CommandId: id), limits,
-            limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
+        return SqlOperationCompiler.Compile(new(partition, sql, parameters, CommandId: id), UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), token);
     }
     internal static Result<object> Apply(DatabaseEngine database, McpDecodedOperation command, DateTimeOffset at)
         => database.Apply(database.CreateCommand(OperationKind.Batch, command.CommandId, Writer, at, command.Payload));

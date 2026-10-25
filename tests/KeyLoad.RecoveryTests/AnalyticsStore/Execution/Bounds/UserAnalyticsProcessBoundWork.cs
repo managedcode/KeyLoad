@@ -72,7 +72,7 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
         var acquired = false;
         try
         {
-            using var pending = new PendingResultRetention(host.Database.OperationLimitsOptions);
+            using var pending = new PendingResultRetention();
             acquired = true;
             try
             {
@@ -128,8 +128,7 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
         RequestWorkLease lease, bool cancelBefore, CancellationToken token)
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token, owner.ShutdownToken, lease.Cancellation);
-        var work = new ReadExecutionBudget(host.Database.OperationLimitsOptions,
-            host.Database.EvaluationClock, cancellation.Token);
+        var work = new ReadExecutionBudget(host.Database.EvaluationClock, cancellation.Token);
         using var admission = host.Database.AdmitQuery(cancellation.Token);
         var snapshot = host.Database.CaptureAnalyticsAggregateBound(PartitionStoreProtocol.AdministratorId,
             request, work, lease);

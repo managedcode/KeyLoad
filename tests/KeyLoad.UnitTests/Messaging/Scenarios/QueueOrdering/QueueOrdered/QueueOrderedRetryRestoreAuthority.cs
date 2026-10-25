@@ -11,7 +11,6 @@ internal static class QueueOrderedRetryRestoreAuthority
     internal const string Administrator = "ordered-administrator";
     private const string Wildcard = "*";
     private const string HistoricalMissing = "The original ordered restore authority is missing.";
-    private const string HistoricalBound = "The ordered restore historical image exceeds its original bound.";
 
     internal static Task ProvisionAsync(DatabaseEngine database, QueueOrderedRetryState state)
         => ConfigureAsync(database, state, Expected(state, QueueOrderedRetryProtocol.One));
@@ -41,11 +40,6 @@ internal static class QueueOrderedRetryRestoreAuthority
         var key = KeySpace.PartitionOutcome(state.Partition, state.Principal, id);
         var rejectedBytes = database.Store.Read(view => view.ReadOwnedValue(key))
             ?? throw new InvalidOperationException(HistoricalMissing);
-        if (rejectedBytes.Length + state.HistoricalOutcomes.Values.Sum(bytes => bytes.LongLength)
-            + state.RestoredResourceBytes!.LongLength > UnitExecutionOptions.DatabaseLimits().Value.MaxBatchBytes)
-        {
-            throw new InvalidOperationException(HistoricalBound);
-        }
         state.HistoricalOutcomes.Add(id, rejectedBytes);
         await ConfigureAsync(database, state, Expected(state, QueueOrderedRetryProtocol.Three));
         await RefusedAsync(database, state, operation, image, ErrorCode.PermissionDenied);
@@ -142,25 +136,14 @@ internal static class QueueOrderedRetryRestoreAuthority
 
     private static void CaptureHistorical(DatabaseEngine database, QueueOrderedRetryState state, QueueOrderedRetryState original)
     {
-        var remaining = UnitExecutionOptions.DatabaseLimits().Value.MaxBatchBytes;
         state.RestoredResourceBytes = database.Store.Read(view => view.ReadOwnedValue(
             KeySpace.Resource(state.Partition.TenantId, state.Partition.DatabaseId, state.Lane.Queue)))
             ?? throw new InvalidOperationException(HistoricalMissing);
-        if (state.RestoredResourceBytes.Length > remaining)
-        {
-            throw new InvalidOperationException(HistoricalBound);
-        }
-        remaining -= state.RestoredResourceBytes.Length;
         foreach (var item in original.Outcomes.Where(item => Errors.Code(item.Result.Problem) is null
             && item.Operation.Value!.Kind is OperationKind.Batch or OperationKind.Receive or OperationKind.Delivery))
         {
             var bytes = database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, state.Principal, item.Operation.CommandId)))
                 ?? throw new InvalidOperationException(HistoricalMissing);
-            if (bytes.Length > remaining)
-            {
-                throw new InvalidOperationException(HistoricalBound);
-            }
-            remaining -= bytes.Length;
             state.HistoricalOutcomes.Add(item.Operation.CommandId, bytes);
         }
     }

@@ -21,7 +21,7 @@ internal sealed class PublicReadElementsTests
         var decoded = JsonDefaults.Deserialize<AstQueryRequest>(json);
         var original = Assert.ThrowsExactly<KeyLoadException>(() => new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution())
             .ExecuteAst(AuthorityFixture.Root, decoded));
-        var payload = PublicReadFixture.Encode(query, kind, database);
+        var payload = PublicReadFixture.Encode(query, kind);
         var request = PublicReadFixture.Signed(database, payload, kind);
         var position = database.Store.Position;
         var execution = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
@@ -38,7 +38,7 @@ internal sealed class PublicReadElementsTests
     {
         using var database = new TestDatabase();
         var query = PublicReadFixture.Query(database, PublicQueryShape.Projection);
-        var payload = PublicReadFixture.Encode(query, GrainReadKind.AstQuery, database);
+        var payload = PublicReadFixture.Encode(query, GrainReadKind.AstQuery);
         var request = PublicReadFixture.Signed(database, payload, GrainReadKind.AstQuery,
             AuthorityFixture.OtherPrincipal);
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
@@ -67,7 +67,7 @@ internal sealed class PublicReadElementsTests
         var original = database.Database.Traverse(AuthorityFixture.Root, publicValue.Partition, publicValue.Graph,
             publicValue.Start, labels: publicValue.Labels?.ToArray());
         var request = PublicReadFixture.Signed(database,
-            PublicReadFixture.Encode(query, GrainReadKind.Traverse, database), GrainReadKind.Traverse);
+            PublicReadFixture.Encode(query, GrainReadKind.Traverse), GrainReadKind.Traverse);
         var principal = GrainRequestAuthority.Reload(database.Database, request.Envelope.PrincipalId!, TimeProvider.System);
         var execution = (global::KeyLoad.GraphTraversal)new GrainCoreReadCapabilities(database.Database).Execute(GrainReadKind.Traverse,
             principal.Id, request.Payload, CancellationToken.None)!;

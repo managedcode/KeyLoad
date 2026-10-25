@@ -6,12 +6,8 @@ namespace KeyLoad.Core.GraphTraversal;
 /// <summary>Re-reads and projects only the selected shortest path for bounded output.</summary>
 internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, IKeyValueView view,
     PrincipalRecord principal, ResourceDefinition graph, GraphShortestPathRequest request,
-    ReadExecutionBudget budget, GraphPathRetention retention)
+    ReadExecutionBudget budget)
 {
-    private const int FirstElementIndex = 0;
-    private const int NoSeparatorBytes = 0;
-    private const int CommaBytes = 1;
-
     private const int ContractVersion = 1;
     private const int OneHop = 1;
     private const string EdgeSpace = "edge";
@@ -25,7 +21,6 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
     {
         var envelope = new GraphShortestPathResult(ContractVersion, true, hops,
             ImmutableArray<EntityRef>.Empty, ImmutableArray<EdgeRecord>.Empty, database.Store.Position);
-        retention.AdmitResult(budget.MeasureResult(envelope));
         var vertices = ProjectVertices(path);
         var edges = ProjectEdges(path, predecessors);
         var result = envelope with
@@ -41,7 +36,6 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
     {
         var result = new GraphShortestPathResult(ContractVersion, false, null, ImmutableArray<EntityRef>.Empty,
             ImmutableArray<EdgeRecord>.Empty, database.Store.Position);
-        retention.AdmitResult(budget.MeasureResult(result));
         budget.CheckResult(result);
         return result;
     }
@@ -55,7 +49,6 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
         {
             budget.Check();
             var vertex = path[index];
-            retention.AdmitResult(ArrayElementBytes(vertex, index));
             vertices.Add(vertex);
         }
         return vertices.MoveToImmutable();
@@ -82,18 +75,14 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
             GraphShortestPathValidation.ValidateAdjacency(
                 KeySpace.Partition(AdjacencySpace, request.Partition, request.Graph, OutDirection,
                     predecessor.Previous.Collection, predecessor.Previous.Id, predecessor.EdgeId),
-                predecessor.EdgeId, edge, predecessor.Previous, request.Partition, request.Graph, database.Limits, budget);
+                predecessor.EdgeId, edge, predecessor.Previous, request.Partition, request.Graph, budget);
             var visible = edge with
             {
                 AttributesJson = database.Authorization.Project(principal, graph.FieldPolicies,
                     edge.AttributesJson, out _)
             };
-            retention.AdmitResult(ArrayElementBytes(visible, index));
             projected.Add(visible);
         }
         return projected.MoveToImmutable();
     }
-
-    private long ArrayElementBytes<T>(T value, int index)
-        => checked(budget.MeasureResult(value) + (index == FirstElementIndex ? NoSeparatorBytes : CommaBytes));
 }

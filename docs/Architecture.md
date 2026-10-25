@@ -47,7 +47,7 @@ classDiagram
     QueueGraphLink --> EntityRef : canonical endpoints
     CommandRequest --> Mutation : ordered source and effect stages
     DatabaseEngine --> QueueGraphLink : authorized transaction expansion
-    DatabaseEngine --> ReadExecutionBudget : cumulative deterministic bounds
+    DatabaseEngine --> ReadExecutionBudget : cumulative read accounting
 ```
 
 ## Cluster and execution concept
@@ -65,9 +65,11 @@ own; scaling means adding silos to the Orleans cluster.
   ([ADR-125](ADR/ADR-125-connection-owned-execution.md),
   [connection ownership](Features/ClientApi.md#persistent-connection-ownership)).
   Each operation carries its own verified identity, fresh persisted
-  authorization, per-operation data bounds, cancellation and idempotent command
-  outcome. No node, tenant, principal or connection pool throttles callers
-  ([ADR-145](ADR/ADR-145-no-request-throttling.md)).
+  authorization, caller-supplied bounds and expiry, cancellation and idempotent
+  command outcome. No node, tenant, principal or connection pool throttles
+  callers ([ADR-145](ADR/ADR-145-no-request-throttling.md)), and no configured
+  operation limit refuses work
+  ([ADR-149](ADR/ADR-149-no-operation-limits.md)).
   The connection grain never caches trusted roles and never owns storage.
 - **Partition grains.** A logical partition grain is an ordinary Orleans grain
   that serializes and routes the commands of one logical (atomic) partition.
@@ -525,7 +527,7 @@ classDiagram
     GraphTraversalReader --> ReadExecutionBudget : visibility and output
     JsonData --> CanonicalJsonWriter : exact canonical bytes
     CanonicalJsonWriter --> CanonicalHashStream : incremental fingerprint
-    ReadExecutionBudget --> IKeyValueView : bounded work
+    ReadExecutionBudget --> IKeyValueView : accounted work
     ZoneTreeStore ..|> IKeyValueView : gate scoped implementation
     ZoneTreeStore --> ZoneTreeStoreRuntime : sole node local owner
     ZoneTreeStoreRuntime --> ZoneTreeTransaction : staged atomic work

@@ -17,7 +17,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(timeProvider ?? database.EvaluationClock, cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
@@ -37,7 +37,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(timeProvider ?? database.EvaluationClock, cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
@@ -47,7 +47,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         using var reservation = database.AdmitQuery(cancellationToken);
         var query = LiveRequest(request.Query);
         var hash = QueryEngine.QueryHash(query);
-        var prepared = new PreparedQuery(query.Query, 0, database.Limits.MaxScanRecords);
+        var prepared = new PreparedQuery(query.Query, 0, PreparedQuery.CallerSizedCandidates);
         budget.Check();
         return database.WithQueryView(principalId, query.Partition, query.Query.Collection, Capability.ChangesRead,
             (view, principal, resource) => ReadView(budget.CreateView(view), principal, resource, query, hash, prepared, request,
@@ -116,9 +116,9 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
                 prepared.Paths) : null);
     }
 
-    private ResourceLifetime CaptureLifetime(IKeyValueView view, AstQueryRequest query,
+    private static ResourceLifetime CaptureLifetime(IKeyValueView view, AstQueryRequest query,
         ResourceDefinition resource, ReadExecutionBudget budget)
-        => budget.CaptureResourceLifetimes(database, view, query.Partition, [resource]).Lifetimes.Single();
+        => budget.CaptureResourceLifetimes(view, query.Partition, [resource]).Lifetimes.Single();
 
     private static bool Matches(DocumentRecord? record, AstQueryRequest query, PreparedQuery prepared)
     {
@@ -137,7 +137,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
 
     private AstQueryRequest LiveRequest(AstQueryRequest request)
     {
-        request = QueryValidation.Normalize(request, database.Limits, queryEngine.Execution);
+        request = QueryValidation.Normalize(request, queryEngine.Execution);
         if (request.Query.ModelSource is not null || request.Cursor is not null
             || request.Query.Order.Length != 0 || request.Query.Explain
             || request.Query.Offset != 0)

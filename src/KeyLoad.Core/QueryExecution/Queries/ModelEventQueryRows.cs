@@ -11,9 +11,8 @@ internal static class ModelEventQueryRows
     private const string EventSpace = "event";
     private const string EventCorrupt = "The retained event source is inconsistent.";
     private const string StaleGeneration = "The event source generation is stale.";
-    private const string ScanExceeded = "The model query scan exceeds its configured candidate budget.";
 
-    internal static void Visit(DatabaseEngine database, IKeyValueView view, PartitionRef partition,
+    internal static void Visit(IKeyValueView view, PartitionRef partition,
         ResourceDefinition resource, ModelQuerySource source, ReadExecutionBudget budget, bool explain,
         Action<DocumentRecord> accept)
     {
@@ -41,7 +40,7 @@ internal static class ModelEventQueryRows
             return;
         }
 
-        VisitRetained(database, view, partition, resource, source, budget, head, accept);
+        VisitRetained(view, partition, resource, source, budget, head, accept);
     }
 
     private static void ValidateHead(StreamHead head)
@@ -59,7 +58,7 @@ internal static class ModelEventQueryRows
         }
     }
 
-    private static void VisitRetained(DatabaseEngine database, IKeyValueView view, PartitionRef partition,
+    private static void VisitRetained(IKeyValueView view, PartitionRef partition,
         ResourceDefinition resource, ModelQuerySource source, ReadExecutionBudget budget, StreamHead head,
         Action<DocumentRecord> accept)
     {
@@ -68,12 +67,7 @@ internal static class ModelEventQueryRows
 
         var state = new EventScanState(head.FirstAvailableRevision);
         var prefix = KeySpace.Partition(EventSpace, partition, resource.Name, source.Item, source.Generation);
-        var scan = budget.VisitRange(view, prefix, database.Limits.MaxScanRecords,
-            (key, bytes) => VisitOne(view, partition, resource, source, budget, state, key, bytes, accept));
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded);
-        }
+        var scan = budget.VisitAll(view, prefix, (key, bytes) => VisitOne(view, partition, resource, source, budget, state, key, bytes, accept));
 
         var expectedCount = head.TailRevision < head.FirstAvailableRevision
             ? EmptyRetainedEventCount : (ulong)head.TailRevision - (ulong)head.FirstAvailableRevision + InclusiveRevisionRangeOffset;

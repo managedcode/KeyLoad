@@ -17,13 +17,11 @@ internal sealed class QueryKeysetPagingTests
     private const int Documents = 200;
     private const int PageRows = 10;
     private const int Parity = 2;
-    private const int ScanBudget = 40;
-    private const int StorageRangeMaximum = 100_000;
 
     [Test]
-    public async Task AcQuery009IdOrderedPagesReadEveryDocumentOnceWithAScanBudgetSmallerThanTheCollection()
+    public async Task AcQuery009IdOrderedPagesReadEveryDocumentOnce()
     {
-        using var fixture = Fixture(new DatabaseLimits { MaxScanRecords = ScanBudget });
+        using var fixture = Fixture();
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
 
         var all = ReadAll(engine, new(fixture.Partition, PageSql, AllowFullScan: true), out var pages);
@@ -33,15 +31,12 @@ internal sealed class QueryKeysetPagingTests
         await Assert.That(pages).IsEqualTo(Documents / PageRows);
         await Assert.That(even).IsEquivalentTo(Enumerable.Range(0, Documents).Where(IsEven).Select(Id));
         await Assert.That(evenPages).IsEqualTo(Documents / Parity / PageRows);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-            engine.Execute(Root, new(fixture.Partition, "SELECT * FROM pages", AllowFullScan: true))).Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     [Test]
-    public async Task AcQuery009ScanBudgetAboveTheStorageRangeMaximumStillServesFullScans()
+    public async Task AcQuery009FullScansServeEveryDocumentInIdOrderedPages()
     {
-        using var fixture = Fixture(new DatabaseLimits { MaxScanRecords = StorageRangeMaximum * 11 });
+        using var fixture = Fixture();
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
 
         var page = engine.Execute(Root, new(fixture.Partition, PageSql, AllowFullScan: true));
@@ -72,9 +67,9 @@ internal sealed class QueryKeysetPagingTests
         return ids;
     }
 
-    private static TestDatabase Fixture(DatabaseLimits limits)
+    private static TestDatabase Fixture()
     {
-        var fixture = new TestDatabase(limits);
+        var fixture = new TestDatabase();
         try
         {
             fixture.Configure(Collection, ResourceKind.Collection);

@@ -9,13 +9,13 @@ internal static class HybridQualityWindowHarness
 
     internal static ImmutableArray<HybridQualityWindowObservation> Evaluate(
         ImmutableArray<HybridQualityBranch> branches, HybridQualityQuery query,
-        ImmutableArray<HybridQualityJudgment> judgments, DatabaseLimits limits)
+        ImmutableArray<HybridQualityJudgment> judgments)
     {
         var observations = ImmutableArray.CreateBuilder<HybridQualityWindowObservation>(Widths.Length);
         HashSet<string>? previous = null;
         foreach (var width in Widths)
         {
-            var run = EvaluateWidth(branches, query, judgments, limits, width);
+            var run = EvaluateWidth(branches, query, judgments, width);
             var current = run.CandidateIds.ToHashSet(StringComparer.Ordinal);
             if (previous is not null && !previous.IsSubsetOf(current))
             {
@@ -28,9 +28,9 @@ internal static class HybridQualityWindowHarness
     }
 
     private static HybridQualityWindowObservation EvaluateWidth(ImmutableArray<HybridQualityBranch> branches,
-        HybridQualityQuery query, ImmutableArray<HybridQualityJudgment> judgments, DatabaseLimits limits, int width)
+        HybridQualityQuery query, ImmutableArray<HybridQualityJudgment> judgments, int width)
     {
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
+        var budget = new ReadExecutionBudget();
         var fusion = new SearchRankFusion(HybridQualityCorpus.FusionConstant,
             HybridQualityCorpus.ResultLimit, budget);
         var union = new HashSet<string>(StringComparer.Ordinal);
@@ -41,7 +41,7 @@ internal static class HybridQualityWindowHarness
             var window = CreateWindow(branch, source, branch.Hits.Length > width);
             var request = new GlobalBranchMergeRequest(branch.Name, branch.Kind, Scope,
                 [HybridQualityCorpus.WindowId], HybridQualityCorpus.ResultLimit, AllowIncomplete: true);
-            var merged = GlobalBranchWindowMerger.Merge(request, [window], limits, budget);
+            var merged = GlobalBranchWindowMerger.Merge(request, [window], budget);
             truncated |= merged.Truncated;
             foreach (var candidate in merged.Candidates)
             {

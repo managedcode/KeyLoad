@@ -11,7 +11,7 @@ internal static class SampleChunkWindowReader
         IOptions<TimeSeriesExecutionOptions> options, long cutPosition)
     {
         SampleChunkWindowValidation.Identity(request.SeriesId, request.WindowId);
-        if (request.Limit < SampleChunkLifecycleProtocol.First || request.Limit > database.Limits.MaxResults)
+        if (request.Limit < SampleChunkLifecycleProtocol.First)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleChunkLifecycleProtocol.Exhausted);
         }
@@ -19,13 +19,12 @@ internal static class SampleChunkWindowReader
         database.Authorization.Require(principal, request.Partition, request.Set, Capability.SeriesRead);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, request.Partition, request.Set, ResourceKind.TimeSeries);
         var tag = SampleChunkTagPredicate.Prepare(database, principal, resource, request);
-        var charge = new SampleChunkReadCharge(database.Limits.MaxQueryReadBytes);
         var window = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(request.Partition,
-            request.Set, request.SeriesId, request.WindowId), charge)
+            request.Set, request.SeriesId, request.WindowId))
             ?? throw Errors.Fail(ErrorCode.NotFound, SampleChunkLifecycleProtocol.Missing);
         SampleChunkWindowValidation.State(window, request.WindowId, options.Value.MaximumChunkWindowRecords,
             options.Value.MaximumChunkCorrections);
-        var watermark = SampleRollupRecords.Watermark(view, request.Partition, request.Set, request.SeriesId, charge.Charge);
+        var watermark = SampleRollupRecords.Watermark(view, request.Partition, request.Set, request.SeriesId);
         if (window.SourceSequence > watermark.Sequence)
         {
             throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);
@@ -34,7 +33,7 @@ internal static class SampleChunkWindowReader
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleChunkLifecycleProtocol.Missing);
         }
-        var records = Records(view, request, window, options, charge, budget, tag);
+        var records = Records(view, request, window, options, budget, tag);
         var selected = ImmutableArray.CreateBuilder<SampleRecord>();
         foreach (var record in records)
         {
@@ -66,7 +65,7 @@ internal static class SampleChunkWindowReader
     }
 
     private static SampleRecord[] Records(IKeyValueView view, ReadSampleChunkWindowRequest request,
-        SampleChunkWindow window, IOptions<TimeSeriesExecutionOptions> options, SampleChunkReadCharge charge,
+        SampleChunkWindow window, IOptions<TimeSeriesExecutionOptions> options,
         ReadExecutionBudget budget, string[]? tag)
     {
         if (window.State == SampleChunkWindowState.Open)
@@ -75,13 +74,13 @@ internal static class SampleChunkWindowReader
         }
         var work = SampleChunkWork.Observe(budget);
         var manifest = SampleChunkManifestReader.Read(view, request.Partition, request.Set, request.SeriesId,
-            window, options.Value.MaximumChunkWindowRecords, charge, options, work);
+            window, options.Value.MaximumChunkWindowRecords, options, work);
         if (window.CorrectionSequences.IsEmpty && !manifest.TagJsonValues.Any(json =>
             SampleChunkTagPredicate.Matches(json, tag, request.TagValue)))
         {
             return [];
         }
         return SampleChunkGenerationReader.Read(view, request.Partition, request.Set, request.SeriesId,
-            window, manifest, options, charge, work);
+            window, manifest, options, work);
     }
 }

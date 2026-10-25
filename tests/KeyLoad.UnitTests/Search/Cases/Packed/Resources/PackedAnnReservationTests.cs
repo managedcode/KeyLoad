@@ -19,31 +19,31 @@ internal sealed class PackedAnnReservationTests
         var space = PackedAnnTestData.Space(metric, 2);
         PackedAnnIndexTestSupport.PersistVectors(database, space, PackedAnnTestData.Field(metric), [[1, 0]]);
         var records = PackedAnnTestData.Load(database, metric);
-        var measured = PackedAnnIndexTestSupport.Build(space, records, new(), PackedAnnIndexTestSupport.Budget(database));
+        var measured = PackedAnnIndexTestSupport.Build(space, records, new(), PackedAnnIndexTestSupport.Budget());
         var retainedReservation = measured.RetainedBytesUpperBound;
         await Assert.That(retainedReservation > 1_024).IsTrue();
         var retainedAtCap = PackedAnnIndexTestSupport.Build(space, records,
             new()
             {
                 MaxIndexBytes = retainedReservation
-            }, PackedAnnIndexTestSupport.Budget(database));
+            }, PackedAnnIndexTestSupport.Budget());
         await Assert.That(retainedAtCap.RetainedBytesUpperBound).IsEqualTo(retainedReservation);
         await AssertBudgetExceeded(() => PackedAnnIndexTestSupport.Build(space, records,
             new()
             {
                 MaxIndexBytes = retainedReservation - 1
-            }, PackedAnnIndexTestSupport.Budget(database)));
+            }, PackedAnnIndexTestSupport.Budget()));
         var reservation = measured.BuildScratchBytesUpperBound;
         await Assert.That(reservation > 1_024).IsTrue();
         var cappedOptions = new PackedAnnOptions { MaxScratchBytes = reservation };
         var atCap = PackedAnnIndexTestSupport.Build(space, records, cappedOptions,
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         await Assert.That(atCap.BuildScratchBytesUpperBound).IsEqualTo(reservation);
         await AssertBudgetExceeded(() => PackedAnnIndexTestSupport.Build(space, records,
             cappedOptions with
             {
                 MaxScratchBytes = reservation - 1
-            }, PackedAnnIndexTestSupport.Budget(database)));
+            }, PackedAnnIndexTestSupport.Budget()));
     }
 
     [Test]
@@ -59,10 +59,10 @@ internal sealed class PackedAnnReservationTests
         var eligibility = SparseBitmap(records.Length);
         var options = SparseOptions();
         var measuredIndex = PackedAnnIndexTestSupport.Build(space, records, options,
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         var query = PackedAnnTestData.Vector(810, space.Dimension, PackedAnnTestData.CorpusSeed);
         var measured = measuredIndex.Search(query, SparseRecordCount, eligibility,
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         var reservation = measured.ScratchBytesUpperBound;
         await Assert.That(reservation > 1_024).IsTrue();
         await Assert.That(measured.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);
@@ -74,10 +74,10 @@ internal sealed class PackedAnnReservationTests
             MaxScratchBytes = reservation
         };
         var atCapIndex = PackedAnnIndexTestSupport.Build(space, records, cappedOptions,
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         await Assert.That(atCapIndex.BuildScratchBytesUpperBound <= reservation).IsTrue();
         var atCap = atCapIndex.Search(query, SparseRecordCount, eligibility,
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         await Assert.That(atCap.ScratchBytesUpperBound).IsEqualTo(reservation);
         await Assert.That(atCap.Candidates.Select(candidate => candidate.DocumentId))
             .IsEquivalentTo(measured.Candidates.Select(candidate => candidate.DocumentId));
@@ -93,10 +93,10 @@ internal sealed class PackedAnnReservationTests
             MaxScratchBytes = reservation - 1
         };
         var belowIndex = PackedAnnIndexTestSupport.Build(space, records, oneBelow,
-            PackedAnnIndexTestSupport.Budget(database));
+            PackedAnnIndexTestSupport.Budget());
         await Assert.That(belowIndex.BuildScratchBytesUpperBound < reservation).IsTrue();
         await AssertBudgetExceeded(() => belowIndex.Search(query, SparseRecordCount, eligibility,
-            PackedAnnIndexTestSupport.Budget(database)));
+            PackedAnnIndexTestSupport.Budget()));
     }
 
     [Test]
@@ -112,11 +112,11 @@ internal sealed class PackedAnnReservationTests
         {
             Id = null!
         }, records, UnitExecutionOptions.PackedAnn(new()),
-            PackedAnnIndexTestSupport.Budget(database)));
+            PackedAnnIndexTestSupport.Budget()));
         await AssertValidation(() => PackedAnnIndex.Build(space, [records[0] with { DocumentId = null! }], UnitExecutionOptions.PackedAnn(new()),
-            PackedAnnIndexTestSupport.Budget(database)));
+            PackedAnnIndexTestSupport.Budget()));
         await AssertValidation(() => PackedAnnIndex.Build(space, [records[0] with { Field = null! }], UnitExecutionOptions.PackedAnn(new()),
-            PackedAnnIndexTestSupport.Budget(database)));
+            PackedAnnIndexTestSupport.Budget()));
     }
 
     private static PackedAnnOptions SparseOptions()

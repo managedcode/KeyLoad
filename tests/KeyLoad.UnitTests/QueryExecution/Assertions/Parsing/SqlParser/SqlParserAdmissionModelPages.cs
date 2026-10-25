@@ -38,11 +38,11 @@ internal static class SqlParserAdmissionModelPages
             await GraphLabelUseOperations.ReplayAsync(database, store, command.Request, command.Receipt, command.Outcome);
         }
     }
-    internal static Task InsertRefusalAsync(SqlParserAdmissionFixture fixture, DatabaseEngine database, ZoneTreeStore store, CancellationToken token)
+    internal static Task InsertRefusalAsync(SqlParserAdmissionFixture fixture, ZoneTreeStore store, CancellationToken token)
         => GraphLabelUseOperations.ObserveAsync(store, async () =>
         {
             McpDecodedOperation? partial = null;
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() => partial = SqlParserAdmissionModels.Compile(database, fixture.Harness.Partition,
+            var failure = Assert.ThrowsExactly<KeyLoadException>(() => partial = SqlParserAdmissionModels.Compile(fixture.Harness.Partition,
                 Guid.NewGuid(), "INSERT INTO [parser-typed] (id,title,amount) VALUES ('refused','private',-1 COLLATE Latin1_General_100_BIN2)", token));
             await Assert.That(partial).IsNull();
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);

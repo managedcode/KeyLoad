@@ -6,6 +6,8 @@ namespace KeyLoad.Core.InternalSerialization;
 internal static class CoreClaims
 {
     internal const string Prefix = "KLT2.";
+    /// <summary>Character bound for server-issued tokens retained in canonical state; only the record that carries them bounds their size.</summary>
+    internal const int UnboundedCharacters = int.MaxValue;
     private const string InvalidToken = "The signed token is invalid.";
     private const char Separator = '.';
     private const char Padding = '=';

@@ -4,13 +4,8 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainPayload
 {
-    internal static ReadOnlyMemory<byte> Copy(ReadOnlyMemory<byte> payload, int maximumBytes)
+    internal static ReadOnlyMemory<byte> Copy(ReadOnlyMemory<byte> payload)
     {
-        if (payload.Length > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
-        }
-
         Validate(payload.Span);
         return payload.ToArray();
     }

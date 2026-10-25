@@ -11,7 +11,6 @@ internal sealed class AdapterNormalizedPlanWholeFlowTests
     private const int ReadSurfaces = 3;
     private const string AccessPathProperty = "accessPath";
     private const string AtomicPartitionProperty = "atomicPartition";
-    private const string ScanBudgetProperty = "scanBudget";
     private const string IdProperty = "id";
     private const string NumberProperty = "number";
     private const string StatusProperty = "status";
@@ -41,10 +40,9 @@ internal sealed class AdapterNormalizedPlanWholeFlowTests
             await Assert.That(plan.Cursor).IsNull();
             await Assert.That(plan.CutPosition).IsEqualTo(position);
             using var json = JsonDocument.Parse(plan.Rows.Single().Json);
-            await Assert.That(json.RootElement.EnumerateObject().Count()).IsEqualTo(3);
+            await Assert.That(json.RootElement.EnumerateObject().Count()).IsEqualTo(2);
             await Assert.That(json.RootElement.GetProperty(AccessPathProperty).GetString()).IsEqualTo("index:status");
             await Assert.That(json.RootElement.GetProperty(AtomicPartitionProperty).GetString()).IsEqualTo(database.Partition.AtomicPartitionId);
-            await Assert.That(json.RootElement.GetProperty(ScanBudgetProperty).GetInt32()).IsEqualTo(database.Database.Limits.MaxScanRecords);
         }
         var sql = new QueryRequest(database.Partition, AdapterPlanWholeFlowFixture.Sql, AdapterPlanWholeFlowFixture.Parameters());
         var failures = new[] { Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("denied", sql)),

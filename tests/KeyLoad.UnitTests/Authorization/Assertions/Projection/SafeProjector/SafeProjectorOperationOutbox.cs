@@ -17,7 +17,7 @@ internal static class SafeProjectorOperationOutbox
         SafeProjectorOperationCommand? patch = null, SafeProjectorOperationCommand? healthy = null)
     {
         var expected = Expected(owner, state, patch, healthy);
-        var page = owner.Store.Read(view => view.Scan(KeySpace.Partition(Outbox, owner.Source.Partition), owner.Database.Limits.MaxScanRecords));
+        var page = owner.Store.Read(view => view.Scan(KeySpace.Partition(Outbox, owner.Source.Partition), view.MaximumRangeRecords));
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Records.Length).IsEqualTo(expected.Length);
         foreach (var (row, literal) in page.Records.Zip(expected))

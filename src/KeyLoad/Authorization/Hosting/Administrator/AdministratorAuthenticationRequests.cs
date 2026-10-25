@@ -15,8 +15,7 @@ internal static class AdministratorAuthenticationRequests
         IOptions<McpExecutionOptions> options, CancellationToken token)
     {
         var context = node.CatalogRequestCodec().LifetimeReadContext;
-        var work = new ReadExecutionBudget(context.Scope.OperationLimits,
-            context.Scope.RuntimeClock, token);
+        var work = new ReadExecutionBudget(context.Scope.RuntimeClock, token);
         var expiry = context.Now + context.Lifetime;
         work.ConstrainLifetime(expiry);
         return AuthenticateAsync(node, secret, options, work, expiry, token);

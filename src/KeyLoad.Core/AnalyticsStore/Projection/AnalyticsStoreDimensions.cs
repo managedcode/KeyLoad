@@ -21,11 +21,6 @@ internal sealed class AnalyticsStoreDimensions
                 var original = row.Dimensions[name];
                 var bytes = AnalyticsStoreDimensionValues.Require(original);
                 var encodedLength = checked(Prefix.Length + ((long)bytes + Base64InputPadding) / Base64InputBytes * Base64OutputCharacters);
-                if (encodedLength > snapshot.Limits.MaxBatchBytes)
-                {
-                    throw Errors.Fail(ErrorCode.BudgetExceeded, AnalyticsStoreValidation.Budget);
-                }
-
                 snapshot.Work.ChargeBytes(encodedLength);
                 if (dimension.Encoded.ContainsKey(original))
                 {

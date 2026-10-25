@@ -54,7 +54,7 @@ internal static class CompositeUniqueClusterAssertions
     internal static async Task RejectAsync<T>(Result<T> result, ErrorCode code)
     {
         await Assert.That(result.IsFailed).IsTrue();
-        await Assert.That(result.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(result);
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(code.ToString());
         await Assert.That(result.Problem.StatusCode).IsEqualTo(Errors.Status(code));
         await Assert.That(result.Problem.Detail).IsEqualTo(Detail(code));

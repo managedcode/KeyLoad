@@ -11,7 +11,7 @@ internal static class OrleansRequestServiceRegistration
         {
             var runtime = provider.GetRequiredService<ServerRuntimeOptions>();
             var node = runtime.Node.Value;
-            return new GrainRequestCodec(node.Incarnation, runtime.Core.DatabaseLimits,
+            return new GrainRequestCodec(node.Incarnation,
                 provider.GetRequiredService<TimeProvider>(), provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
             {
                 PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>(),

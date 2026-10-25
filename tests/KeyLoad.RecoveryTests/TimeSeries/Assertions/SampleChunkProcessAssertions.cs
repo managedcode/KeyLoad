@@ -68,16 +68,14 @@ internal static class SampleChunkProcessAssertions
         var outcome = OrleansSerialization.Deserialize<Result<object>>(Convert.FromHexString(snapshot.OriginalInflightResult!));
         var receipt = outcome.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(SampleChunkCrashContract.InflightId);
-        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleChunkCrashContract.InflightId,
-            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
+        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, SampleChunkCrashContract.InflightId);
         await Assert.That(receipt.Token).IsEqualTo(expectedToken);
     }
 
     private static async Task<SampleChunkCrashSnapshot> ReadAsync(string root, string name, CancellationToken token)
     {
         var path = Path.Combine(root, name);
-        var bytes = await SampleChunkSnapshotFile.ReadAsync(path,
-            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes, token).ConfigureAwait(false);
+        var bytes = await SampleChunkSnapshotFile.ReadAsync(path, token).ConfigureAwait(false);
         return JsonSerializer.Deserialize<SampleChunkCrashSnapshot>(bytes, JsonDefaults.Options)
             ?? throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
     }

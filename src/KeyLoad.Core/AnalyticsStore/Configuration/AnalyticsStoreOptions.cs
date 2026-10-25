@@ -7,10 +7,14 @@ internal static class AnalyticsStoreOptions
 {
     internal const string Site = "keyload-analytics-store";
     internal const string Event = "canonical-event";
-    private const int MinimumSegmentItems = 1_000;
-    private const int MinimumDiskSegmentItems = 10_000;
+    private const int MinimumQueuedEvents = 1;
+    private const int UntruncatedValueLength = int.MaxValue;
+    private const int UnboundedQueryRows = int.MaxValue;
 
-    internal static AnalyticsOptions Create(string ownedDirectory, DatabaseLimits limits,
+    /// <summary>Maps the operation's remaining lifetime to the engine timeout; only an explicit expiry bounds a query.</summary>
+    internal static TimeSpan? QueryTimeout(TimeSpan remaining) => remaining == Timeout.InfiniteTimeSpan ? null : remaining;
+
+    internal static AnalyticsOptions Create(string ownedDirectory, int rowCount,
         IReadOnlyCollection<string> dimensions, int metricCount, ZoneTree.Logger.ILogger failures)
     {
         var options = new AnalyticsOptions
@@ -21,8 +25,6 @@ internal static class AnalyticsStoreOptions
         };
         options.Storage.Logger = failures;
         options.Storage.StoreRawEvents = true;
-        options.Storage.RawEvents.MutableSegmentMaxItemCount = Math.Max(MinimumSegmentItems, limits.MaxScanRecords);
-        options.Storage.RawEvents.DiskSegmentMaxItemCount = Math.Max(MinimumDiskSegmentItems, limits.MaxScanRecords);
         options.Storage.DimensionIndexes.Dimensions.Clear();
         options.Storage.RollupIndexes.Definitions.Clear();
         options.Rollups.Granularities = Granularity.None;
@@ -37,21 +39,20 @@ internal static class AnalyticsStoreOptions
         options.Privacy.AllowedDimensions = new HashSet<string>(dimensions, StringComparer.Ordinal);
         options.Privacy.MaxCustomDimensions = dimensions.Count;
         options.Privacy.MaxCustomValues = metricCount;
-        options.Privacy.MaxValueLength = limits.MaxBatchBytes;
+        options.Privacy.MaxValueLength = UntruncatedValueLength;
         options.Web.GeoLocator = null;
         options.Web.UserAgentParser = null;
         options.Web.BotDetectors.Clear();
         options.Ingestion.WorkerCount = 1;
-        options.Ingestion.QueueCapacity = limits.MaxScanRecords;
-        options.Ingestion.MaxBufferedRollupRows = limits.MaxScanRecords;
+        options.Ingestion.QueueCapacity = Math.Max(MinimumQueuedEvents, rowCount);
+        options.Ingestion.MaxBufferedRollupRows = Math.Max(MinimumQueuedEvents, rowCount);
         options.Ingestion.QueueFullBehavior = QueueFullBehavior.Drop;
         options.Retention.RawEvents = null;
-        options.Queries.Timeout = TimeSpan.FromSeconds(limits.QueryDeadlineSeconds);
+        options.Queries.Timeout = null;
         options.Queries.MaxDegreeOfParallelism = 1;
         options.Queries.MaxGroupBy = Math.Max(1, dimensions.Count);
-        options.Queries.MaxGroups = limits.MaxResults;
-        options.Queries.MaxTimeBuckets = limits.MaxResults;
-        options.Queries.MaxFilledRows = limits.MaxResults;
+        options.Queries.MaxTimeBuckets = UnboundedQueryRows;
+        options.Queries.MaxFilledRows = UnboundedQueryRows;
         return options;
     }
 }

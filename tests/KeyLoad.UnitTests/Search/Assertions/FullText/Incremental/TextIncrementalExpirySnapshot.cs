@@ -25,12 +25,10 @@ internal sealed class TextIncrementalExpirySnapshot
         TextIndexMaintenanceRequest request, CancellationToken cancellationToken)
     {
         var root = Path.Combine(database.Directory, TextIncrementalProtocol.RootDirectory);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            cancellationToken: cancellationToken);
+        var budget = new ReadExecutionBudget(cancellationToken: cancellationToken);
         var leaf = TextIncrementalEnrollmentFiles.Find(root, request, budget, UnitTextOptions.Execution())
             ?? throw new InvalidOperationException();
         var path = Path.Combine(root, leaf, TextIncrementalProtocol.IntentFile);
-        await Assert.That(new FileInfo(path).Length).IsLessThanOrEqualTo((long)database.Database.Limits.MaxBatchBytes);
         await DocumentsAsync(database, cancellationToken);
         return new(path, await File.ReadAllBytesAsync(path, cancellationToken), Status(database), Outbox(database));
     }

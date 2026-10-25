@@ -22,6 +22,8 @@ internal sealed class PreparedQuery
     private readonly ImmutableArray<Ordering> order;
     private readonly PriorityQueue<PreparedRow, PreparedRow>? ordinaryRows;
     private PreparedRow?[]? partitionRows;
+    /// <summary>Candidate count when only the caller's own offset and limit size the retained rows.</summary>
+    internal const int CallerSizedCandidates = int.MaxValue;
     private readonly int capacity;
     private int rowCount;
     private readonly bool ordinalFullReferenceOrder;

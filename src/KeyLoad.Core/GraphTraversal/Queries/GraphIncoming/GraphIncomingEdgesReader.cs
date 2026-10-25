@@ -10,7 +10,6 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
     PrincipalRecord principal, ReadIncomingGraphEdgesRequest request, ReadExecutionBudget budget,
     ReadExecutionBudgetReadGrant grant, long cutPosition)
 {
-    private const string RangeExceeded = "The graph incoming-edge scan exceeds its bound.";
     private const string InvalidProjection = "A graph reverse projection is inconsistent.";
     private const string VertexUnavailable = "The graph vertex is unavailable.";
     private ResourceDefinition targetGraph = null!;
@@ -28,19 +27,11 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         };
         RequireVisible(request.Target);
         var page = new GraphIncomingEdgesPageBuilder(database, principal, request.Limit, budget, cutPosition);
-        var local = grant.VisitRange(view,
+        _ = grant.VisitAll(view,
             GraphCrossPartitionKeys.LocalIncomingPrefix(request.Target, request.Graph),
-            database.Limits.MaxScanRecords, (key, value) => VisitLocal(page, key, value));
-        if (local.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, RangeExceeded);
-        }
-        var scan = grant.VisitRange(view, GraphCrossPartitionKeys.ReversePrefix(request.Target, request.Graph),
-            database.Limits.MaxScanRecords, (key, value) => VisitRemote(page, key, value));
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, RangeExceeded);
-        }
+            (key, value) => VisitLocal(page, key, value));
+        _ = grant.VisitAll(view, GraphCrossPartitionKeys.ReversePrefix(request.Target, request.Graph),
+            (key, value) => VisitRemote(page, key, value));
         return page.Build();
     }
 
@@ -58,7 +49,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         var edge = GraphCrossPartitionRecords.Read<EdgeRecord>(view,
             GraphCrossPartitionKeys.CanonicalEdge(request.Target.Partition, request.Graph, edgeId), grant)
             ?? throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);
-        GraphCrossPartitionValidation.ValidateEdge(edge, database.Limits);
+        GraphCrossPartitionValidation.ValidateEdge(edge);
         EntityReferenceLifetime.RequireStored(budget.CreateView(view, grant), edge.To, targetCollection);
         if (edge.Id != edgeId || edge.From.Partition != request.Target.Partition
             || edge.To != request.Target)
@@ -180,7 +171,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         string? resource = null)
         => database.Authorization.Require(principal, partition, resource ?? request.Graph, capability);
 
-    private bool IsCurrentEdge(GraphCrossPartitionReceiverState state,
+    private static bool IsCurrentEdge(GraphCrossPartitionReceiverState state,
         GraphEdgeOwnerVersion owner, EdgeRecord? edge)
     {
         if (edge is null)
@@ -191,7 +182,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
             }
             return false;
         }
-        GraphCrossPartitionValidation.ValidateEdge(edge, database.Limits);
+        GraphCrossPartitionValidation.ValidateEdge(edge);
         if (edge.Id != state.EdgeId || edge.From.Partition != state.SourcePartition
             || edge.To != state.Destination || edge.Revision != state.Revision
             || owner.Deleted || owner.Revision != edge.Revision

@@ -28,11 +28,6 @@ internal static class GrainRequestPayloadVerification
         }
 
         codec.ValidateVerifiedScope(request);
-        if (request.Payload.Length > codec.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.InvalidRequest);
-        }
-
         GrainPayload.Validate(request.Payload.Span);
         return new(request, request.Payload);
     }

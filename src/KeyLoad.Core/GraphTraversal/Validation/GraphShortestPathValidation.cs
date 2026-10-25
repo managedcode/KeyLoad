@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text.Json;
 using KeyLoad.Core.GraphTraversal.Validation;
 using KeyLoad.Core.ResourceExecution;
 
@@ -21,11 +20,10 @@ internal static class GraphShortestPathValidation
     private const string ForeignEndpoint = "Graph path endpoints must belong to the request partition.";
     private const string InvalidAdjacency = "A graph adjacency record is inconsistent with its canonical edge.";
 
-    internal static string[]? Validate(GraphShortestPathRequest request, DatabaseLimits limits,
+    internal static string[]? Validate(GraphShortestPathRequest request,
         ReadExecutionBudget budget, GraphExecutionOptions execution)
     {
         ValidateShape(request);
-        MeasureRequest(request, limits.MaxQueryBytes, budget);
         ValidateIdentifiers(request, budget);
         if (request.MaxDepth < MinimumDepth || request.MaxDepth > execution.MaximumDepth
             || request.MaxVertices < MinimumVertices || request.MaxVertices > execution.MaximumVertices
@@ -57,25 +55,8 @@ internal static class GraphShortestPathValidation
         => partition.TenantId is null || partition.DatabaseId is null
            || partition.TransactionDomainId is null || partition.PartitionKey is null;
 
-    private static void MeasureRequest(GraphShortestPathRequest request, int maximumBytes,
-        ReadExecutionBudget budget)
-    {
-        budget.Check();
-        try
-        {
-            using var counter = new ResultByteCounterStream(maximumBytes, budget.Check);
-            JsonSerializer.Serialize(counter, request, JsonDefaults.Options);
-            budget.Check();
-        }
-        catch (Exception exception) when (exception is JsonException or NotSupportedException
-            or InvalidOperationException or ArgumentException)
-        {
-            throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
-        }
-    }
-
     internal static void ValidateAdjacency(ReadOnlySpan<byte> key, string edgeId, EdgeRecord? edge,
-        EntityRef source, PartitionRef partition, string graph, DatabaseLimits limits, ReadExecutionBudget budget)
+        EntityRef source, PartitionRef partition, string graph, ReadExecutionBudget budget)
     {
         ValidateStoredIdentifier(edgeId, budget);
         if (edge is null || edgeId != edge.Id || edge.From != source || edge.To is null
@@ -86,7 +67,7 @@ internal static class GraphShortestPathValidation
         }
         ValidateStoredIdentifiers(edge, budget);
         budget.Check();
-        GraphCrossPartitionValidation.ValidateEdge(edge, limits);
+        GraphCrossPartitionValidation.ValidateEdge(edge);
         budget.Check();
     }
 

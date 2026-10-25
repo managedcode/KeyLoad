@@ -137,7 +137,7 @@ internal static class QueueGraphIdentityFlow
         await Assert.That(compiled.CommandId).IsEqualTo(command.CommandId);
         var decoded = OrleansSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(command))).IsTrue();
-        var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock,
+        var work = new ReadExecutionBudget(engine.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
         return engine.CreateCommand(OperationKind.Batch, command.CommandId, QueueGraphIdentityState.Root, at,
             OrleansSerialization.Serialize(decoded), work);

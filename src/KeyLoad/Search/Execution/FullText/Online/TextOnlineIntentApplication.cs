@@ -1,10 +1,9 @@
-using KeyLoad.Core;
 
 namespace KeyLoad.Server.Search;
 
 internal static class TextOnlineIntentApplication
 {
-    internal static void Execute(DatabaseEngine database, TextOnlineSession session,
+    internal static void Execute(TextOnlineSession session,
         TextOnlineRoot root, TextResourceOwnership resources, ServerRuntimeOptions options)
     {
         var budget = session.Budget;
@@ -13,8 +12,7 @@ internal static class TextOnlineIntentApplication
         var intent = session.Intent ?? throw TextErrors.Ownership();
         var target = session.Target ?? throw TextErrors.Ownership();
         TextIncrementalIntentValidation.Require(intent, target.Scope, target.Consumer,
-            target.Generation, target.Placement, database.Limits.MaxScanRecords,
-            database.Limits.MaxScanRecords, budget);
+            target.Generation, target.Placement, budget);
         budget.ChargeBytes(OrleansSerialization.Measure(intent.Records));
         budget.ChargeBytes(OrleansSerialization.Measure(target.Records));
         if (intent.NextRecord != target.NextRecord || !OrleansSerialization.Serialize(intent.Records).AsSpan()
@@ -33,7 +31,7 @@ internal static class TextOnlineIntentApplication
                 Files = actual.CloseAndCapture(budget)
             };
             TextIncrementalValidation.Manifest(completed, target.Scope, target.Consumer,
-                target.Generation, target.Placement, database.Limits.MaxScanRecords, budget, options.RuntimeText);
+                target.Generation, target.Placement, budget, options.RuntimeText);
             TextIncrementalMetadata.Publish(actual.Path, completed,
                 options.RuntimeText.Value.MaximumDiskBytes, budget, options.RuntimeText, resources);
         }, failures);

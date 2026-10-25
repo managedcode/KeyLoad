@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.Search;
 
 internal static class PackedAnnConstructionValueAssertions
 {
-    internal static async Task AssertEquivalentAsync(TestDatabase database,
+    internal static async Task AssertEquivalentAsync(
         (VectorRecord[] Records, PackedAnnState State) fixture, DistanceMetric metric, int queryOrdinal)
     {
         var state = fixture.State;
@@ -17,18 +17,18 @@ internal static class PackedAnnConstructionValueAssertions
         var oracle = fixture.Records.Select(record => record.Values.ToArray()).ToArray();
         for (var layer = 0; layer <= state.MaximumLevel; layer++)
         {
-            await AssertGreedyAsync(database, state, classValue, ownedValue, layer);
-            await AssertLayerAsync(database, state, classValue, ownedValue, layer, query, oracle, metric);
+            await AssertGreedyAsync(state, classValue, ownedValue, layer);
+            await AssertLayerAsync(state, classValue, ownedValue, layer, query, oracle, metric);
         }
     }
 
-    internal static async Task AssertInvalidOrdinalAsync(TestDatabase database,
+    internal static async Task AssertInvalidOrdinalAsync(
         (VectorRecord[] Records, PackedAnnState State) fixture, DistanceMetric metric)
     {
         var classValue = PreparedSimilarity.CreatePacked(fixture.State.Vectors, 0, metric);
         var ownedValue = PreparedPackedSimilarity.Create(fixture.State.Vectors, 0, metric);
-        var classBudget = PackedAnnConstructionValueFixture.Budget(database);
-        var ownedBudget = PackedAnnConstructionValueFixture.Budget(database);
+        var classBudget = PackedAnnConstructionValueFixture.Budget();
+        var ownedBudget = PackedAnnConstructionValueFixture.Budget();
         var classFailure = Assert.ThrowsExactly<KeyLoadException>(() =>
             PackedAnnLayerSearch.Score(fixture.State.Vectors, fixture.State.Count, classValue,
                 fixture.State.Space.Dimension, classBudget));
@@ -39,13 +39,13 @@ internal static class PackedAnnConstructionValueAssertions
         await Assert.That(ownedFailure.Code).IsEqualTo(ErrorCode.Validation);
     }
 
-    internal static async Task AssertZeroTieOrderAsync(TestDatabase database,
+    internal static async Task AssertZeroTieOrderAsync(
         (VectorRecord[] Records, PackedAnnState State) fixture)
     {
         var state = fixture.State;
         var similarity = PreparedPackedSimilarity.Create(state.Vectors, state.EntryPoint,
             DistanceMetric.DotProduct);
-        var budget = PackedAnnConstructionValueFixture.Budget(database);
+        var budget = PackedAnnConstructionValueFixture.Budget();
         var buffers = new PackedAnnLayerBuffers(state.Count, state.Count, false, budget);
         var count = PackedAnnLayerSearch.SearchLayer(state.Graph, state.Vectors, similarity,
             state.EntryPoint, 0, state.Count, state.Space.Dimension, buffers, budget);
@@ -60,11 +60,11 @@ internal static class PackedAnnConstructionValueAssertions
         }
     }
 
-    private static async Task AssertGreedyAsync(TestDatabase database, PackedAnnState state,
+    private static async Task AssertGreedyAsync(PackedAnnState state,
         PreparedSimilarity classValue, PreparedPackedSimilarity ownedValue, int layer)
     {
-        var classBudget = PackedAnnConstructionValueFixture.Budget(database);
-        var ownedBudget = PackedAnnConstructionValueFixture.Budget(database);
+        var classBudget = PackedAnnConstructionValueFixture.Budget();
+        var ownedBudget = PackedAnnConstructionValueFixture.Budget();
         var classNode = PackedAnnLayerSearch.Greedy(state.Graph, state.Vectors, classValue,
             state.EntryPoint, layer, state.Space.Dimension, classBudget);
         var ownedNode = PackedAnnLayerSearch.Greedy(state.Graph, state.Vectors, ownedValue,
@@ -73,12 +73,12 @@ internal static class PackedAnnConstructionValueAssertions
         await AssertCountersAsync(classBudget, ownedBudget);
     }
 
-    private static async Task AssertLayerAsync(TestDatabase database, PackedAnnState state,
+    private static async Task AssertLayerAsync(PackedAnnState state,
         PreparedSimilarity classValue, PreparedPackedSimilarity ownedValue, int layer,
         float[] query, float[][] oracle, DistanceMetric metric)
     {
-        var classBudget = PackedAnnConstructionValueFixture.Budget(database);
-        var ownedBudget = PackedAnnConstructionValueFixture.Budget(database);
+        var classBudget = PackedAnnConstructionValueFixture.Budget();
+        var ownedBudget = PackedAnnConstructionValueFixture.Budget();
         var classBuffers = new PackedAnnLayerBuffers(state.Count, state.Count, false, classBudget);
         var ownedBuffers = new PackedAnnLayerBuffers(state.Count, state.Count, false, ownedBudget);
         var classCount = PackedAnnLayerSearch.SearchLayer(state.Graph, state.Vectors, classValue,

@@ -2,7 +2,7 @@ namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ReadExecutionBudgetGrantCancellationTests
 {
-    private const int QueryDeadlineSeconds = 30;
+    private const int CallerLifetimeSeconds = 30;
 
     [Test]
     public async Task GrantRangeUsesRootCancellationAndLeavesStoreReadable()
@@ -12,7 +12,7 @@ internal sealed class ReadExecutionBudgetGrantCancellationTests
         var observed = 0;
         var error = Assert.ThrowsExactly<OperationCanceledException>(() => database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()), cancellationToken: cancellation.Token);
+            var budget = new ReadExecutionBudget(cancellationToken: cancellation.Token);
             var grant = budget.CreateReadGrant(64, 2);
             return grant.VisitRange(view, ReadExecutionBudgetGrantSeed.Prefix, 2, (_, _) =>
             {
@@ -21,7 +21,7 @@ internal sealed class ReadExecutionBudgetGrantCancellationTests
                 return true;
             });
         }));
-        var following = database.Store.Read(view => new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new())).Scan(view,
+        var following = database.Store.Read(view => new ReadExecutionBudget().Scan(view,
             ReadExecutionBudgetGrantSeed.Prefix, 2));
 
         await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
@@ -38,15 +38,13 @@ internal sealed class ReadExecutionBudgetGrantCancellationTests
         var visited = 0;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(new()
-            {
-                QueryDeadlineSeconds = QueryDeadlineSeconds
-            }), clock);
+            var budget = new ReadExecutionBudget(clock);
+            budget.ConstrainLifetime(clock.GetUtcNow().AddSeconds(CallerLifetimeSeconds));
             var grant = budget.CreateReadGrant(64, 2);
             return grant.VisitRange(view, ReadExecutionBudgetGrantSeed.Prefix, 2, (_, _) =>
             {
                 visited++;
-                clock.Advance(TimeSpan.FromSeconds(QueryDeadlineSeconds + 1));
+                clock.Advance(TimeSpan.FromSeconds(CallerLifetimeSeconds + 1));
                 return true;
             });
         }));

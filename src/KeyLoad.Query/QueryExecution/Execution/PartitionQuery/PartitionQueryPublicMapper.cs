@@ -14,11 +14,10 @@ internal static class PartitionQueryPublicMapper
     private const int WitnessDescriptorBytes = 64;
     private const string MappingBudgetExceeded = "The public partition query page exceeds its retained-byte budget.";
 
-    internal static PartitionQueryPage MapPublic(PartitionQueryResult result, DatabaseLimits limits,
+    internal static PartitionQueryPage MapPublic(PartitionQueryResult result,
         ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(result);
-        ArgumentNullException.ThrowIfNull(limits);
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
         var mappingBytes = MappingBytes(result.Rows.Length, result.Leaves.Length);

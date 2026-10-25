@@ -27,7 +27,7 @@ internal static class RemoteTransferAttemptCoordination
         return current;
     }
 
-    internal static async Task AdvanceAsync(RemoteTransferEnvelopeExecution execution, GrainRequestCodec codec, RemoteTransferCoordinationHint hint,
+    internal static async Task AdvanceAsync(RemoteTransferEnvelopeExecution execution, RemoteTransferCoordinationHint hint,
         string intentToken, CancellationToken token)
     {
         if (hint.AcceptAttemptCeiling is not { } ceiling || hint.AcceptGeneration >= ceiling
@@ -42,7 +42,7 @@ internal static class RemoteTransferAttemptCoordination
             return;
         }
         var witness = value.FailureWitness ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Unavailable);
-        var claims = CoreClaims.Decode<RemoteTransferAcceptFailureClaims>(witness, codec.Limits.MaxBatchBytes);
+        var claims = CoreClaims.Decode<RemoteTransferAcceptFailureClaims>(witness, CoreClaims.UnboundedCharacters);
         var digest = claims.OutcomeDigest;
         var id = RemoteTransferAttemptIdentity.AdvanceId(hint, hint.AcceptGeneration, digest);
         var reply = await execution.ApplyAsync(hint.PrincipalId, new(id, hint.Source.Partition,

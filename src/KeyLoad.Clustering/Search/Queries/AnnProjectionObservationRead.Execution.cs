@@ -22,7 +22,7 @@ internal static partial class AnnProjectionObservationRead
         }
         var request = GrainPayload.Read<AnnProjectionObservationRequest>(original.Payload);
         var metadata = Require(request, principal, database, clock);
-        var work = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
+        var work = new ReadExecutionBudget(clock, cancellationToken);
         work.AttachResourceLifetimeBinding(binding);
         work.ConstrainLifetime(original.Envelope.ExpiresAt);
         work.ConstrainWork(request.MaximumReadBytes, request.MaximumRecords);
@@ -73,7 +73,7 @@ internal static partial class AnnProjectionObservationRead
         }
         var metadata = new AnnReadLifetimeMetadata(request.Definition, request.Coverage,
             request.Principal, request.Definitions);
-        metadata.Require(source.Consumer.Partition, database.Limits.MaxBatchBytes);
+        metadata.Require(source.Consumer.Partition);
         database.Authorization.Require(request.Principal, source.Consumer.Partition, source.Collection, Capability.VectorSearch);
         return metadata;
     }

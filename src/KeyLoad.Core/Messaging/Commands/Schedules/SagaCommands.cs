@@ -14,10 +14,10 @@ public static class SagaCommands
     {
         ArgumentNullException.ThrowIfNull(request);
         RecurringScheduleValidation.ValidateScheduleScope(request.Lane, request.SagaId, partition);
-        request = engine.NormalizeSagaRequest(engine.AuthorizeSagaWrite(tx, principal, request, partition), partition, now);
+        request = SagaDefinitionValidation.NormalizeSagaRequest(engine.AuthorizeSagaWrite(tx, principal, request, partition), partition, now);
         var key = RecurringSagaStorage.SagaKey(request.Lane, request.SagaId);
         var existing = tx.GetRecord<SagaRecord>(key);
-        engine.RequireSagaCas(request.ExpectedRevision, request.Phase, existing, request.Lane, request.SagaId);
+        SagaCommands.RequireSagaCas(request.ExpectedRevision, request.Phase, existing, request.Lane, request.SagaId);
         if (existing is not null)
         {
             engine.RequireSagaCreatorWrite(tx, existing, request.Timeout, now);
@@ -26,7 +26,7 @@ public static class SagaCommands
         var next = SagaCommands.NewSagaRecord(existing, request, principal.Id);
         var nextBytes = RecurringSagaStorage.SerializedBytes(next);
         var capacity = existing is null ? RecurringSagaStorage.Capacity(tx, request.Lane) : RecurringSagaStorage.RequireCapacity(tx, request.Lane);
-        var updatedCapacity = existing is null ? RecurringSagaStorage.Add(capacity, nextBytes, engine.Limits) : RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(existing), nextBytes, engine.Limits);
+        var updatedCapacity = existing is null ? RecurringSagaStorage.Add(capacity, nextBytes) : RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(existing), nextBytes);
         tx.PutRecord(key, next);
         tx.PutRecord(RecurringSagaStorage.CapacityKey(request.Lane), updatedCapacity);
         return SagaCommands.SagaReceipt(RecurringSagaProtocol.SagaReceipt, request.Lane, request.SagaId, next.Revision);
@@ -36,7 +36,7 @@ public static class SagaCommands
     {
         ArgumentNullException.ThrowIfNull(request);
         RecurringScheduleValidation.ValidateScheduleScope(request.Lane, request.SagaId, partition);
-        var record = engine.RequireSaga(tx, request.Lane, request.SagaId);
+        var record = SagaCommands.RequireSaga(tx, request.Lane, request.SagaId);
         SagaCommands.RequireSagaRevision(request.ExpectedRevision, record);
         if (record.Phase != SagaPhase.Waiting)
         {
@@ -61,7 +61,7 @@ public static class SagaCommands
             Phase = SagaPhase.TimedOut
         };
         var capacity = RecurringSagaStorage.RequireCapacity(tx, request.Lane);
-        var updatedCapacity = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record), RecurringSagaStorage.SerializedBytes(next), engine.Limits);
+        var updatedCapacity = RecurringSagaStorage.Replace(capacity, RecurringSagaStorage.SerializedBytes(record), RecurringSagaStorage.SerializedBytes(next));
         tx.PutRecord(RecurringSagaStorage.SagaKey(request.Lane, request.SagaId), next);
         tx.PutRecord(RecurringSagaStorage.CapacityKey(request.Lane), updatedCapacity);
         return SagaCommands.SagaReceipt(RecurringSagaProtocol.TimeoutReceipt, request.Lane, request.SagaId, next.Revision);
@@ -72,7 +72,7 @@ public static class SagaCommands
         engine.RequireScheduleCapability(principal, request.Lane);
         var source = engine.Resource(view, partition, request.Lane.Queue, ResourceKind.WorkQueue);
         engine.RequireQueueFieldWrites(principal, source);
-        var normalized = engine.NormalizeSagaRequest(request, partition, DateTimeOffset.MinValue);
+        var normalized = SagaDefinitionValidation.NormalizeSagaRequest(request, partition, DateTimeOffset.MinValue);
         if (normalized.Timeout is { } timeout)
         {
             engine.RequireScheduleCapability(principal, timeout.Queue);
@@ -83,7 +83,7 @@ public static class SagaCommands
         return normalized;
     }
 
-    internal static void RequireSagaCas(this DatabaseEngine engine, long expectedRevision, SagaPhase nextPhase, SagaRecord? existing, QueueLaneRef lane, Guid sagaId)
+    internal static void RequireSagaCas(long expectedRevision, SagaPhase nextPhase, SagaRecord? existing, QueueLaneRef lane, Guid sagaId)
     {
         if (expectedRevision < SagaCommands.SagaCommandsInitialSequence || (existing is null ? expectedRevision != SagaCommands.SagaCommandsInitialSequence : expectedRevision != existing.Revision))
         {
@@ -100,7 +100,7 @@ public static class SagaCommands
             return;
         }
 
-        engine.ValidateSagaRecord(existing, lane, sagaId);
+        SagaCommands.ValidateSagaRecord(existing, lane, sagaId);
         if (existing.Phase != SagaPhase.Waiting || nextPhase is not (SagaPhase.Waiting or SagaPhase.Completed or SagaPhase.Cancelled))
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RecurringSagaProtocol.RevisionConflict);
@@ -123,25 +123,25 @@ public static class SagaCommands
         }
     }
 
-    internal static SagaRecord RequireSaga(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid sagaId)
+    internal static SagaRecord RequireSaga(IKeyValueView view, QueueLaneRef lane, Guid sagaId)
     {
         var record = view.GetRecord<SagaRecord>(RecurringSagaStorage.SagaKey(lane, sagaId)) ?? throw Errors.Fail(ErrorCode.NotFound, RecurringSagaProtocol.MissingSaga);
-        engine.ValidateSagaRecord(record, lane, sagaId);
+        SagaCommands.ValidateSagaRecord(record, lane, sagaId);
         return record;
     }
 
-    internal static void ValidateSagaRecord(this DatabaseEngine engine, SagaRecord record, QueueLaneRef lane, Guid sagaId)
+    internal static void ValidateSagaRecord(SagaRecord record, QueueLaneRef lane, Guid sagaId)
     {
         if (record.Lane is null || record.CreatorPrincipalId is null || record.SagaId != sagaId || record.Lane != lane || record.Revision < SagaCommands.SagaCommandsMinimumPositiveCount || !Enum.IsDefined(record.Phase) || record.StateJson is null || (record.Deadline is null) != (record.Timeout is null) || record.Phase == SagaPhase.TimedOut && record.Deadline is null || record.Phase is SagaPhase.Completed or SagaPhase.Cancelled && record.Deadline is not null)
         {
             throw Errors.Fail(ErrorCode.Corruption, RecurringSagaProtocol.CorruptRecord);
         }
 
-        _ = JsonData.Validate(record.StateJson, engine.Limits);
+        _ = JsonData.Validate(record.StateJson);
         if (record.Timeout is { } timeout)
         {
             SagaDefinitionValidation.ValidateTimeoutDefinition(timeout, lane, lane.Partition, record.Deadline!.Value);
-            _ = engine.NormalizeTimeoutDefinition(timeout);
+            _ = SagaDefinitionValidation.NormalizeTimeoutDefinition(timeout);
         }
     }
 

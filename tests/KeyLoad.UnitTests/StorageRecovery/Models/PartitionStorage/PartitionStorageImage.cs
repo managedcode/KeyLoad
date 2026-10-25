@@ -1,6 +1,5 @@
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.UnitTests.StorageRecovery;
 
@@ -12,8 +11,8 @@ internal sealed record PartitionStorageImage(StoreIdentity Identity, long Positi
         CancellationToken token)
     {
         var rows = new List<KeyValueRecord>();
-        var work = new ReadExecutionBudget(Options.Create(host.Database.Limits), host.Database.EvaluationClock, token);
-        var scan = view.VisitRange([], host.Database.Limits.MaxScanRecords, (key, value) =>
+        var work = new ReadExecutionBudget(host.Database.EvaluationClock, token);
+        var scan = view.VisitRange([], view.MaximumRangeRecords, (key, value) =>
         {
             rows.Add(new(key.ToArray(), value.ToArray()));
             return true;

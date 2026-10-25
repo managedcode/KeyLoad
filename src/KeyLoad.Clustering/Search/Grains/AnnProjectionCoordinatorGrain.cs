@@ -19,12 +19,12 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     IOptions<GrainRoutingOptions> routing, IOptions<RuntimeJournalOptions> journal)
     : Grain, IAnnProjectionCoordinatorGrain, IDurableJobHandler
 {
-    private readonly AnnProjectionJobStateOwner owner = new(state, journal, codec.Limits.MaxBatchBytes);
+    private readonly AnnProjectionJobStateOwner owner = new(state, journal);
     private readonly AnnProjectionJobExecution execution = new(storage,
         new(codec, services, clock, serializer, routing));
 
     public Task ScheduleAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId, CancellationToken cancellationToken)
-        => AnnProjectionJobOperation.RunAsync(services, codec.OperationLimits,
+        => AnnProjectionJobOperation.RunAsync(services,
             (binding) => ScheduleCoreAsync(consumer, generation, nodeId, binding), cancellationToken);
 
     private async Task ScheduleCoreAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId,
@@ -36,7 +36,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
-        var budget = new ReadExecutionBudget(codec.OperationLimits, clock, token);
+        var budget = new ReadExecutionBudget(clock, token);
         budget.ConstrainLifetime(expiry);
         budget.AttachResourceLifetimeBinding(binding);
         var target = await storage.ResolveAnnOwnerAsync(nodeId, token).ConfigureAwait(true);
@@ -78,7 +78,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken cancellationToken)
         => RequestContextHelper.RunWithCurrentCallerAsync(typeof(AnnProjectionCoordinatorGrain).FullName!,
             nameof(IDurableJobHandler.ExecuteJobAsync), () => AnnProjectionJobOperation.RunAsync(
-                services, codec.OperationLimits,
+                services,
                 (binding) => ExecuteOriginalAsync(context, binding), cancellationToken));
 
     private async Task ExecuteOriginalAsync(IJobRunContext context, CapabilityWorkLifetime binding)
@@ -96,7 +96,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
         var token = deadline.Token;
-        var budget = new ReadExecutionBudget(codec.OperationLimits, clock, token);
+        var budget = new ReadExecutionBudget(clock, token);
         budget.ConstrainLifetime(expiry);
         budget.AttachResourceLifetimeBinding(binding);
         var target = await storage.ResolveAnnOwnerAsync(original.PendingRequest.NodeId, token).ConfigureAwait(true);

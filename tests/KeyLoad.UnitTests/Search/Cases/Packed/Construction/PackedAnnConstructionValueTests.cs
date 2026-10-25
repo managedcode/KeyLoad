@@ -13,7 +13,7 @@ internal sealed class PackedAnnConstructionValueTests
             using var database = new TestDatabase();
             PackedAnnConstructionValueFixture.Seed(database);
             var fixture = PackedAnnConstructionValueFixture.Build(database, metric);
-            await PackedAnnConstructionValueAssertions.AssertEquivalentAsync(database, fixture, metric,
+            await PackedAnnConstructionValueAssertions.AssertEquivalentAsync(fixture, metric,
                 fixture.State.EntryPoint);
         }
     }
@@ -24,9 +24,9 @@ internal sealed class PackedAnnConstructionValueTests
         using var database = new TestDatabase();
         PackedAnnTestData.Configure(database);
         var fixture = PackedAnnConstructionValueFixture.BuildZeroDotProduct(database);
-        await PackedAnnConstructionValueAssertions.AssertEquivalentAsync(database, fixture,
+        await PackedAnnConstructionValueAssertions.AssertEquivalentAsync(fixture,
             DistanceMetric.DotProduct, fixture.State.EntryPoint);
-        await PackedAnnConstructionValueAssertions.AssertZeroTieOrderAsync(database, fixture);
+        await PackedAnnConstructionValueAssertions.AssertZeroTieOrderAsync(fixture);
     }
 
     [Test, NotInParallel]
@@ -37,7 +37,7 @@ internal sealed class PackedAnnConstructionValueTests
         foreach (var metric in Metrics)
         {
             var fixture = PackedAnnConstructionValueFixture.Build(database, metric);
-            var observation = PackedAnnConstructionValueTraversal.Measure(database, fixture, metric);
+            var observation = PackedAnnConstructionValueTraversal.Measure(fixture, metric);
             await Assert.That(observation.AllocatedBytes).IsEqualTo(0L);
             await Assert.That(observation.CandidateCount).IsGreaterThan(0);
             await Assert.That(observation.WorkUnits).IsGreaterThan(0L);
@@ -52,7 +52,7 @@ internal sealed class PackedAnnConstructionValueTests
         using var database = new TestDatabase();
         PackedAnnConstructionValueFixture.Seed(database);
         var fixture = PackedAnnConstructionValueFixture.Build(database, DistanceMetric.Cosine);
-        await PackedAnnConstructionValueAssertions.AssertInvalidOrdinalAsync(database, fixture,
+        await PackedAnnConstructionValueAssertions.AssertInvalidOrdinalAsync(fixture,
             DistanceMetric.Cosine);
     }
 }

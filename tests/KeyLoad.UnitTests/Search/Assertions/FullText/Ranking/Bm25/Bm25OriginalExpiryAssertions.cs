@@ -18,8 +18,7 @@ internal static class Bm25OriginalExpiryAssertions
         var work = owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token);
         return owner.Store.Read(view =>
         {
-            var page = work.Scan(view, Bm25CorpusKeys.Prefix(owner.Source.Partition),
-                owner.Source.Database.Limits.MaxScanRecords);
+            var page = work.Scan(view, Bm25CorpusKeys.Prefix(owner.Source.Partition), view.MaximumRangeRecords);
             if (page.HasMore)
             {
                 throw new InvalidOperationException("The original corpus family exceeded its inspection bound.");

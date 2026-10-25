@@ -75,7 +75,7 @@ internal static class TimeSeriesCurrentCapabilityClusterRefusal
     private static async Task DeniedAsync<T>(ManagedCode.Communication.Result<T> result)
     {
         await Assert.That(result.IsFailed).IsTrue();
-        await Assert.That(result.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(result);
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
     }
 }

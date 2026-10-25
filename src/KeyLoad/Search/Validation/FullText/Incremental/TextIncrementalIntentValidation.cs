@@ -7,7 +7,7 @@ internal static class TextIncrementalIntentValidation
 {
     internal static void Require(TextIncrementalIntent intent, TextProjectionScope scope,
         ProjectionConsumerRef consumer, long generation, PhysicalShardRecord placement,
-        int maximumRecords, int maximumChanges, ReadExecutionBudget budget)
+        ReadExecutionBudget budget)
     {
         budget.Check();
         if (intent is null || intent.FormatVersion != TextIncrementalProtocol.FormatVersion
@@ -26,12 +26,11 @@ internal static class TextIncrementalIntentValidation
             || intent.CheckpointCommand.Consumer != consumer
             || string.IsNullOrEmpty(intent.CheckpointCommand.Token)
             || intent.CheckpointCommand.Effects.IsDefault || !intent.CheckpointCommand.Effects.IsEmpty
-            || intent.Changes is null || intent.Changes.Length > maximumChanges)
+            || intent.Changes is null)
         {
             throw TextErrors.Corrupt();
         }
-        TextIncrementalValidation.Records(intent.Records, intent.NextRecord, scope,
-            maximumRecords, budget);
+        TextIncrementalValidation.Records(intent.Records, intent.NextRecord, scope, budget);
         var retained = intent.Records.ToDictionary(record => record.Id);
         foreach (var change in intent.Changes)
         {

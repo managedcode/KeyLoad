@@ -9,7 +9,6 @@ public static class RemoteTransferDependencyRead
     {
         var resource = engine.Resource(view, destination.Partition, destination.Queue, ResourceKind.WorkQueue);
         var counters = MessagingExecutionMessaging.Counters(view, destination);
-        var retained = RemoteTransferStorage.TargetCapacity(view, destination);
-        return new(principal.PolicyEpoch, JsonData.Fingerprint(new { resource.FieldPolicies, resource.HeaderPolicies }), resource.QueuePolicy.MaxStoredMessages, resource.QueuePolicy.MaxStoredBytes, counters.StoredMessages, counters.StoredBytes, retained.StoredRecords, retained.StoredBytes, engine.Limits.MaxBatchBytes, engine.Limits.MaxScanRecords);
+        return new(principal.PolicyEpoch, JsonData.Fingerprint(new { resource.FieldPolicies, resource.HeaderPolicies }), resource.QueuePolicy.MaxStoredMessages, resource.QueuePolicy.MaxStoredBytes, counters.StoredMessages, counters.StoredBytes);
     }
 }

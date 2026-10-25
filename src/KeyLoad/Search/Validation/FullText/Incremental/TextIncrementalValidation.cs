@@ -13,7 +13,7 @@ internal static class TextIncrementalValidation
 
     internal static void Manifest(TextIncrementalManifest manifest,
         TextProjectionScope scope, ProjectionConsumerRef consumer, long generation,
-        PhysicalShardRecord placement, int maximumRecords, ReadExecutionBudget budget,
+        PhysicalShardRecord placement, ReadExecutionBudget budget,
         IOptions<TextExecutionOptions> executionOptions)
     {
         budget.Check();
@@ -33,15 +33,15 @@ internal static class TextIncrementalValidation
         }
         TextValidation.ValidateScope(scope, scope.NodeId);
         SettledRequest(manifest.LastSettledCheckpointRequest, consumer, budget);
-        Records(manifest.Records, manifest.NextRecord, scope, maximumRecords, budget);
+        Records(manifest.Records, manifest.NextRecord, scope, budget);
         TextValidation.ValidateFiles(manifest.Files, executionOptions);
         budget.Check();
     }
 
     internal static void Records(TextIncrementalRecord[] records, ulong nextRecord,
-        TextProjectionScope scope, int maximumRecords, ReadExecutionBudget budget)
+        TextProjectionScope scope, ReadExecutionBudget budget)
     {
-        if (records is null || records.Length > maximumRecords
+        if (records is null
             || nextRecord < TextIncrementalProtocol.InitialRecord)
         {
             throw TextErrors.Corrupt();

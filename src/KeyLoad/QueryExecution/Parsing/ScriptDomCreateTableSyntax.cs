@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 namespace KeyLoad.Server;
 
@@ -7,10 +6,9 @@ internal static class ScriptDomCreateTableSyntax
     private const int SingleName = 1;
     private const int FirstName = 0;
     private const string TemporaryPrefix = "#";
-    internal static (string Name, RelationalSchema Schema) Read(Dom.CreateTableStatement statement,
-        IOptions<DatabaseLimits> configured, Action checkBudget, CancellationToken token)
+    internal static (string Name, RelationalSchema Schema) Read(Dom.CreateTableStatement statement, Action checkBudget, CancellationToken token)
     {
-        var context = new ScriptDomTableLoweringContext(configured, checkBudget, token);
+        var context = new ScriptDomTableLoweringContext(checkBudget, token);
         ScriptDomCreateTableShape.Require(statement, context);
         if (statement.SchemaObjectName.Identifiers.Count != SingleName)
         {

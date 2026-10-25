@@ -37,6 +37,6 @@ internal static class TextLiveGenerationPreflight
         }
     }
 
-    internal static void Validate(TextGeneration generation, string path, string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<TextExecutionOptions> executionOptions)
-        => TextLiveGenerationMetadata.Validate(generation, path, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
+    internal static void Validate(TextGeneration generation, string path, string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions)
+        => TextLiveGenerationMetadata.Validate(generation, path, root, leaf, sourceNodeId, executionOptions: executionOptions);
 }

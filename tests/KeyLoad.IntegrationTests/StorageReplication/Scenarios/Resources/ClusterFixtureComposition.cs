@@ -52,15 +52,11 @@ internal static class ClusterFixtureComposition
     }
 
     internal static void ConfigureTestOverrides(IDistributedApplicationTestingBuilder builder, int? maximumBodyBytes,
-        DatabaseLimits? databaseLimits, QueryExecutionOptions? queryExecution = null)
+        QueryExecutionOptions? queryExecution = null)
     {
         ArgumentNullException.ThrowIfNull(builder);
         ConfigureBodyLimit(builder, maximumBodyBytes);
         ClusterFixtureQueryResultLimits.Configure(builder, queryExecution);
-        if (databaseLimits is not null)
-        {
-            ClusterFixtureDatabaseLimits.Configure(builder, databaseLimits);
-        }
     }
 
     internal static string[] GetResourceNames(IDistributedApplicationTestingBuilder builder)

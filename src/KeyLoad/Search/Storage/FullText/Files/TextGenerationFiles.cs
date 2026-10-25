@@ -6,9 +6,9 @@ namespace KeyLoad.Server.Search;
 
 internal static class TextGenerationFiles
 {
-    internal static void CreateOwner(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, DatabaseLimits limits, TextGenerationSlot? first, TextGenerationSlot? second, TextGenerationSlot? third, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal static void CreateOwner(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, TextGenerationSlot? first, TextGenerationSlot? second, TextGenerationSlot? third, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
     {
-        EnsureGenerationCapacity(root, sourceNodeId, limits, first, second, third, executionOptions: executionOptions);
+        EnsureGenerationCapacity(root, sourceNodeId, first, second, third, executionOptions: executionOptions);
         var path = Path.Combine(root, leaf);
         if (Directory.Exists(path) || File.Exists(path))
         {
@@ -29,14 +29,14 @@ internal static class TextGenerationFiles
                 [new(TextProtocol.RuntimeDirectoryCore, true)]), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
     }
 
-    internal static TextManifest ReadManifest(string path, TextProjectionScope scope, DatabaseLimits limits, IOptions<TextExecutionOptions> executionOptions)
+    internal static TextManifest ReadManifest(string path, TextProjectionScope scope, IOptions<TextExecutionOptions> executionOptions)
     {
-        var manifest = TextFileIO.ReadEnvelope<TextManifest>(path, limits.MaxQueryReadBytes);
-        TextValidation.ValidateManifest(manifest, scope, limits.MaxScanRecords, executionOptions: executionOptions);
+        var manifest = TextFileIO.ReadEnvelope<TextManifest>(path, executionOptions.Value.MaximumDiskBytes);
+        TextValidation.ValidateManifest(manifest, scope, executionOptions: executionOptions);
         return manifest;
     }
 
-    internal static TextManifest ValidatePublished(string generationPath, string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, DatabaseLimits limits, ReadExecutionBudget budget, IOptions<TextExecutionOptions> executionOptions)
+    internal static TextManifest ValidatePublished(string generationPath, string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, ReadExecutionBudget budget, IOptions<TextExecutionOptions> executionOptions)
     {
         budget.Check();
         TextFileIO.VerifyDirectory(generationPath);
@@ -49,21 +49,21 @@ internal static class TextGenerationFiles
             throw TextErrors.Corrupt();
         }
         TextInventory.ValidateTrackedLayout(generationPath, owner.OwnedPaths, budget: budget, executionOptions: executionOptions);
-        var manifest = ReadManifest(Path.Combine(generationPath, TextProtocol.ManifestFile), scope, limits, executionOptions: executionOptions);
+        var manifest = ReadManifest(Path.Combine(generationPath, TextProtocol.ManifestFile), scope, executionOptions: executionOptions);
         TextInventory.Verify(generationPath, owner.OwnedPaths, manifest.Files, budget: budget, executionOptions: executionOptions);
         TextFiles.CheckGenerationBound(generationPath, budget: budget, executionOptions: executionOptions);
         budget.Check();
         return manifest;
     }
 
-    internal static void DeleteOwned(string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal static void DeleteOwned(string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
     {
         var path = Path.Combine(root, leaf);
         if (!Directory.Exists(path))
         {
             return;
         }
-        ValidateGeneration(path, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
+        ValidateGeneration(path, root, leaf, sourceNodeId, executionOptions: executionOptions);
         if (resources is null)
         {
             Directory.Delete(path, recursive: true);
@@ -74,7 +74,7 @@ internal static class TextGenerationFiles
         }
     }
 
-    internal static void DeleteBuilding(string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal static void DeleteBuilding(string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
     {
         var path = Path.Combine(root, leaf);
         if (!Directory.Exists(path))
@@ -92,7 +92,7 @@ internal static class TextGenerationFiles
         if (File.Exists(Path.Combine(path, TextProtocol.ManifestFile))
             || File.Exists(Path.Combine(path, TextProtocol.PendingManifestFile)))
         {
-            ValidateGeneration(path, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
+            ValidateGeneration(path, root, leaf, sourceNodeId, executionOptions: executionOptions);
         }
         else
         {
@@ -108,7 +108,7 @@ internal static class TextGenerationFiles
         }
     }
 
-    internal static void ValidateGeneration(string path, string root, string leaf, Guid sourceNodeId, DatabaseLimits limits, IOptions<TextExecutionOptions> executionOptions)
+    internal static void ValidateGeneration(string path, string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions)
     {
         TextFileIO.VerifyDirectory(path);
         VerifyGenerationEntries(path);
@@ -123,18 +123,18 @@ internal static class TextGenerationFiles
         }
         var hasInventory = File.Exists(manifestPath) || File.Exists(pendingPath);
         TextInventory.ValidateTrackedLayout(path, owner.OwnedPaths, runtimeAllowMissing: !hasInventory, executionOptions: executionOptions);
-        ValidateManifestIfPresent(manifestPath, owner, path, limits, executionOptions: executionOptions);
-        ValidateManifestIfPresent(pendingPath, owner, path, limits, executionOptions: executionOptions);
+        ValidateManifestIfPresent(manifestPath, owner, path, executionOptions: executionOptions);
+        ValidateManifestIfPresent(pendingPath, owner, path, executionOptions: executionOptions);
         TextFiles.CheckGenerationBound(path, executionOptions: executionOptions);
     }
 
-    private static void ValidateManifestIfPresent(string manifestPath, TextOwnerReceipt owner, string generationPath, DatabaseLimits limits, IOptions<TextExecutionOptions> executionOptions)
+    private static void ValidateManifestIfPresent(string manifestPath, TextOwnerReceipt owner, string generationPath, IOptions<TextExecutionOptions> executionOptions)
     {
         if (!File.Exists(manifestPath))
         {
             return;
         }
-        var manifest = ReadManifest(manifestPath, owner.Scope!, limits, executionOptions: executionOptions);
+        var manifest = ReadManifest(manifestPath, owner.Scope!, executionOptions: executionOptions);
         TextInventory.Verify(generationPath, owner.OwnedPaths, manifest.Files, executionOptions: executionOptions);
     }
 
@@ -161,7 +161,7 @@ internal static class TextGenerationFiles
         }
     }
 
-    private static void EnsureGenerationCapacity(string root, Guid sourceNodeId, DatabaseLimits limits, TextGenerationSlot? first, TextGenerationSlot? second, TextGenerationSlot? third, IOptions<TextExecutionOptions> executionOptions)
+    private static void EnsureGenerationCapacity(string root, Guid sourceNodeId, TextGenerationSlot? first, TextGenerationSlot? second, TextGenerationSlot? third, IOptions<TextExecutionOptions> executionOptions)
     {
         TextRootFiles.VerifyReceipt(root, sourceNodeId, executionOptions: executionOptions);
         const int EmptyInventory = 0;
@@ -186,11 +186,11 @@ internal static class TextGenerationFiles
                 first, second, third);
             if (live is null)
             {
-                ValidateGeneration(entry, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
+                ValidateGeneration(entry, root, leaf, sourceNodeId, executionOptions: executionOptions);
             }
             else
             {
-                TextLiveGenerationPreflight.Validate(live, entry, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
+                TextLiveGenerationPreflight.Validate(live, entry, root, leaf, sourceNodeId, executionOptions: executionOptions);
             }
             var measured = TextFileIO.MeasureRegularFiles(entry, executionOptions.Value.MaximumFiles,
                 executionOptions.Value.MaximumDiskBytes, executionOptions: executionOptions);

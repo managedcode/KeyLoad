@@ -12,10 +12,6 @@ internal static class ChunkMultiblockCrashState
         string? inflight = null, string? appended = null, string? merged = null)
     {
         var receiptPath = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
-        if (new FileInfo(receiptPath).Length > database.Limits.MaxBatchBytes)
-        {
-            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
-        }
         var acknowledged = await File.ReadAllBytesAsync(receiptPath).ConfigureAwait(false);
         var window = database.ReadSampleChunkWindow(CrashFixtureValues.Principal,
             new(SampleChunkCrashContract.Partition, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series,
@@ -28,7 +24,7 @@ internal static class ChunkMultiblockCrashState
         var snapshot = new ChunkMultiblockCrashSnapshot(window, raw, SampleChunkCrashState.Raw(database),
             Blocks(database, window.Generation), digest, database.Store.Position, database.Store.Identity.Incarnation, database.Store.Identity.Durability, Convert.ToHexString(acknowledged),
             additional, inflight, appended, merged);
-        await SampleChunkSnapshotFile.WriteAsync(Path.Combine(root, name), snapshot, database.Limits.MaxBatchBytes).ConfigureAwait(false);
+        await SampleChunkSnapshotFile.WriteAsync(Path.Combine(root, name), snapshot).ConfigureAwait(false);
     }
 
     internal static string ReplayUnchanged(DatabaseEngine database, Func<Result<object>> replay)

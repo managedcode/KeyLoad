@@ -20,7 +20,7 @@ internal static partial class PartitionQueryRemoteExecution
         CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, cancellationToken);
+        var budget = new ReadExecutionBudget(clock, cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
@@ -29,16 +29,15 @@ internal static partial class PartitionQueryRemoteExecution
         budget.ConstrainLifetime(originalExpiry);
         budget.Check();
         using var admission = database.AdmitQuery(cancellationToken);
-        using var deadline = new CancellationTokenSource(TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds), clock);
+        using var deadline = new CancellationTokenSource(budget.RemainingLifetime, clock);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
         using var stage = budget.EnterStageCancellation(execution.Token);
         try
         {
-            var prepared = PartitionQueryPublicValidation.Prepare(request, database.Limits, engine.Execution);
+            var prepared = PartitionQueryPublicValidation.Prepare(request, engine.Execution);
             var identity = database.Store.Identity;
-            var plan = PartitionQueryPlanFactory.Create(prepared.Request, identity, prepared.Partitions,
-                database.Limits, engine.Execution, budget.MaximumResultBytes);
-            _ = PartitionQueryPlanValidation.Validate(plan, database.Limits, engine.Execution);
+            var plan = PartitionQueryPlanFactory.Create(prepared.Request, identity, prepared.Partitions, engine.Execution, budget.MaximumResultBytes);
+            _ = PartitionQueryPlanValidation.Validate(plan, engine.Execution);
             var grants = Reserve(plan, budget);
             var preparedLeaves = await PrepareLeavesAsync(plan, grants, budget, prepare, execution.Token).ConfigureAwait(true);
             var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafResult>(plan.Leaves.Length);
@@ -62,9 +61,8 @@ internal static partial class PartitionQueryRemoteExecution
             await RevalidateAsync(revalidate, deadline, execution.Token, cancellationToken).ConfigureAwait(true);
             budget.Check();
             CompleteReadAccounting(leaves, grants);
-            var result = PartitionQueryMerge.Complete(plan, leaves.MoveToImmutable(), identity,
-                database.Limits, budget, engine.Execution, owners.MoveToImmutable());
-            return PartitionQueryPublicMapper.MapPublic(result, database.Limits, budget);
+            var result = PartitionQueryMerge.Complete(plan, leaves.MoveToImmutable(), identity, budget, engine.Execution, owners.MoveToImmutable());
+            return PartitionQueryPublicMapper.MapPublic(result, budget);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {

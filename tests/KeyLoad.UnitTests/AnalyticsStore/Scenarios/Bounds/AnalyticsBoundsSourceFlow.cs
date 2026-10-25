@@ -18,11 +18,9 @@ internal static class AnalyticsBoundsSourceFlow
         await Assert.That(original.Rows.Length).IsEqualTo(P.SourceRows);
         var scanBound = AnalyticsBoundsOwner.ReadEngine(db, new()
         {
-            MaxScanRecords = P.ScanLimit
         });
         var byteBound = AnalyticsBoundsOwner.ReadEngine(db, new()
         {
-            MaxQueryReadBytes = bytes
         });
         foreach (var engine in new[] { scanBound, byteBound })
         {

@@ -19,7 +19,7 @@ internal static class AnnPublicSearchExecutor
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
         }
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -47,7 +47,7 @@ internal static class AnnPublicSearchExecutor
         string principalId, ApproximateSearchRequest request, ReadExecutionBudget budget,
         QueryExecutionOptions execution, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
-        AnnPublicRequestValidation.Validate(request, database.Limits, execution, budget);
+        AnnPublicRequestValidation.Validate(request, execution, budget);
         var search = request.Search;
         return database.WithQueryView(principalId, search.Partition, search.Collection, Capability.VectorSearch, (view, principal, resource) =>
         {

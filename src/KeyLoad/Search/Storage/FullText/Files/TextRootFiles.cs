@@ -19,7 +19,7 @@ internal static class TextRootFiles
             root, string.Empty, sourceNodeId, null, []), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
     }
 
-    internal static void RetireRestartGenerations(string root, Guid sourceNodeId, DatabaseLimits limits, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal static void RetireRestartGenerations(string root, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
     {
         const int FilesInitialValue = 0;
         const int BytesInitialValue = 0;
@@ -43,7 +43,7 @@ internal static class TextRootFiles
                 throw TextErrors.Ownership();
             }
             leaves.Add(leaf);
-            TextGenerationFiles.ValidateGeneration(entry, root, leaf, sourceNodeId, limits, executionOptions: executionOptions);
+            TextGenerationFiles.ValidateGeneration(entry, root, leaf, sourceNodeId, executionOptions: executionOptions);
             var measured = TextFileIO.MeasureRegularFiles(entry, executionOptions.Value.MaximumFiles,
                 executionOptions.Value.MaximumDiskBytes, executionOptions: executionOptions);
             if (measured.Files > executionOptions.Value.MaximumFiles - files

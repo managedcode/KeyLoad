@@ -35,9 +35,7 @@ internal static class ResourceIncarnationLiteral
         {
             return fixture.Database.CreateCommand(OperationKind.ConfigureResource, OriginalId, "root", issued, RawCreate);
         }
-        var limits = UnitExecutionOptions.DatabaseLimits();
-        var decoded = SqlOperationCompiler.Compile(new(fixture.Partition, Sql, CommandId: OriginalId), limits,
-            limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
+        var decoded = SqlOperationCompiler.Compile(new(fixture.Partition, Sql, CommandId: OriginalId), UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), token);
         return fixture.Database.CreateCommand(OperationKind.CreateTable, decoded.CommandId, "root", issued, decoded.Payload);
     }
 

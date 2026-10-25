@@ -28,9 +28,8 @@ internal static class RelationalSqlClusterJoinBudgetData
     private const string CustomerIdOutput = "customer_id";
     private const string DetailOutput = "left_detail";
     private const string NameOutput = "right_name";
-    private const int WorkRows = 3;
+    private const int SeededPairs = 1;
     private const int SourcesPerPair = 2;
-    private const int ReadPayloadCharacters = 3_000;
     private const int ResultPayloadCharacters = 2_500;
     private const string SmallValue = "small";
     private const char LargeValue = 'x';
@@ -70,22 +69,22 @@ internal static class RelationalSqlClusterJoinBudgetData
     }
 
     internal static async Task<JoinBudgetSeed> SeedAsync(KeyLoadClient sdk, PartitionRef partition,
-        (EntityRefLifetime Left, EntityRefLifetime Right) lifetimes, JoinBudgetKind kind, bool healthy, CancellationToken token)
+        (EntityRefLifetime Left, EntityRefLifetime Right) lifetimes, bool healthy, CancellationToken token)
     {
-        var count = healthy || kind == JoinBudgetKind.ResultBytes ? 1 : WorkRows;
+        var count = SeededPairs;
         var references = ImmutableArray.CreateBuilder<EntityRef>(count * SourcesPerPair);
         var stored = ImmutableArray.CreateBuilder<EntityRef>(count * SourcesPerPair);
         var position = 0L;
         var expectedOrderId = LeftIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + 1.ToString(CultureInfo.InvariantCulture);
         var expectedCustomerId = CustomerIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + 1.ToString(CultureInfo.InvariantCulture);
-        var expectedDetail = Payload(kind, healthy);
-        var expectedName = Payload(kind, healthy);
+        var expectedDetail = Payload(healthy);
+        var expectedName = Payload(healthy);
         for (var index = 1; index <= count; index++)
         {
             var orderId = LeftIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + index.ToString(CultureInfo.InvariantCulture);
             var customerId = CustomerIdPrefix + (healthy ? HealthyMarker : OverBudgetMarker) + "-" + index.ToString(CultureInfo.InvariantCulture);
-            var detail = Payload(kind, healthy);
-            var name = Payload(kind, healthy);
+            var detail = Payload(healthy);
+            var name = Payload(healthy);
             references.Add(new(partition, LeftCollection, orderId));
             references.Add(new(partition, RightCollection, customerId));
             stored.Add(new(partition, LeftCollection, orderId) { Lifetime = lifetimes.Left });
@@ -108,9 +107,8 @@ internal static class RelationalSqlClusterJoinBudgetData
             expectedCustomerId, expectedDetail, expectedName);
     }
 
-    private static string Payload(JoinBudgetKind kind, bool healthy)
-        => healthy || kind == JoinBudgetKind.Work ? SmallValue
-            : new string(LargeValue, kind == JoinBudgetKind.ReadBytes ? ReadPayloadCharacters : ResultPayloadCharacters);
+    private static string Payload(bool healthy)
+        => healthy ? SmallValue : new string(LargeValue, ResultPayloadCharacters);
 
     private static async Task<EntityRefLifetime> ConfigureOneAsync(KeyLoadClient sdk, PartitionRef partition,
         ResourceDefinition resource, CancellationToken token)

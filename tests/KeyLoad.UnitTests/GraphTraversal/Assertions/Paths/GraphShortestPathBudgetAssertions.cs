@@ -22,46 +22,6 @@ internal static class GraphShortestPathBudgetAssertions
         await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 
-    internal static long MetadataCharge(int jsonBytes) => checked(checked(2L * jsonBytes) + 128);
-
-    internal static async Task AssertQueryBudgetExceeded(TestDatabase database,
-        GraphShortestPathRequest request, int maxQueryBytes)
-    {
-        var position = database.Store.Position;
-        var limits = new DatabaseLimits { MaxQueryBytes = maxQueryBytes };
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPath(
-            GraphShortestPathTestSupport.RootPrincipal, request));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-    }
-
-    internal static async Task AssertReadBudgetExceeded(TestDatabase database,
-        GraphShortestPathRequest request, long maxReadBytes)
-    {
-        var position = database.Store.Position;
-        var limits = new DatabaseLimits { MaxQueryReadBytes = maxReadBytes };
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPath(
-            GraphShortestPathTestSupport.RootPrincipal, request, budget));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-    }
-
-    internal static async Task AssertResponseBudgetExceeded(TestDatabase database,
-        GraphShortestPathRequest request, long maxReadBytes, int maxBatchBytes)
-    {
-        var position = database.Store.Position;
-        var limits = new DatabaseLimits { MaxQueryReadBytes = maxReadBytes, MaxBatchBytes = maxBatchBytes };
-        var engine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits));
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ShortestPath(
-            GraphShortestPathTestSupport.RootPrincipal, request, budget));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-    }
-
     internal static async Task RequireShapeRefusalsAsync(TestDatabase database,
         GraphShortestPathRequest request, CancellationToken token)
     {

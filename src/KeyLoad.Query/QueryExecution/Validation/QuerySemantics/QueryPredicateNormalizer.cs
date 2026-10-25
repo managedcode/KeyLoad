@@ -4,20 +4,17 @@ using KeyLoad.Query.QueryExecution;
 
 namespace KeyLoad.Query;
 
-/// <summary>Normalizes one bounded predicate tree and its scalar values using frozen operation budgets.</summary>
-internal sealed class QueryPredicateNormalizer(int maximumDepth, int maximumNodes, int maximumInValues,
+/// <summary>Normalizes one predicate tree and its scalar values; nesting stops only when the execution stack runs short.</summary>
+internal sealed class QueryPredicateNormalizer(int maximumInValues,
     Func<string, string> normalizeScalarJson)
 {
     private const string EmptyFieldAlias = "";
-    private const string QueryASTExceedsItsDepthOrNodeBudgetDetail = "The query AST exceeds its depth or node budget.";
     private const string QueryOperandIsUnsupportedDetail = "The query operand is unsupported.";
     private const int AdjacentElementOffset = 1;
     private const int MinimumPositiveCount = 1;
     private const string QueryPredicateIsUnsupportedDetail = "The query predicate is unsupported.";
     private const string QueryComparisonIsUnsupportedDetail = "The query comparison is unsupported.";
     private const string QueryLogicalOperatorIsUnsupportedDetail = "The query logical operator is unsupported.";
-
-    private int count;
 
     internal JsonElement Scalar(JsonElement value)
     {
@@ -26,12 +23,10 @@ internal sealed class QueryPredicateNormalizer(int maximumDepth, int maximumNode
         return normalized.RootElement.Clone();
     }
 
-    private void Visit(int depth)
+    private static void Visit(int depth)
     {
-        if (depth > maximumDepth || ++count > maximumNodes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, QueryASTExceedsItsDepthOrNodeBudgetDetail);
-        }
+        ArgumentOutOfRangeException.ThrowIfNegative(depth);
+        ExecutionStackGuard.Ensure();
     }
 
     private Operand NormalizeOperand(Operand operand, int depth)
@@ -40,7 +35,7 @@ internal sealed class QueryPredicateNormalizer(int maximumDepth, int maximumNode
         switch (operand)
         {
             case FieldOperand field:
-                QueryValidation.Path(field.Path, maximumDepth);
+                QueryValidation.Path(field.Path);
                 return new FieldOperand(field.Path);
             case ValueOperand value:
                 return ValueOperand.Create(Scalar(value.Value));

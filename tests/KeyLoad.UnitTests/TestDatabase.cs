@@ -131,7 +131,7 @@ internal sealed class TestDatabase : IDisposable
         => Store.Read(view => (view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
             ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
     internal ReadExecutionBudget CreateReadWork(CancellationToken cancellationToken)
-        => new(limits, Database.EvaluationClock, cancellationToken);
+        => new(Database.EvaluationClock, cancellationToken);
 
     internal void JoinOwnedResources()
     {

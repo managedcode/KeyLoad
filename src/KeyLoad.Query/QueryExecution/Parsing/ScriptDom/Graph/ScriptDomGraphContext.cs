@@ -1,29 +1,21 @@
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.QueryExecution;
-using Microsoft.Extensions.Options;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.Query.QueryExecution;
 
-internal sealed class ScriptDomGraphContext(QueryRequest query, IOptions<DatabaseLimits> limitsOptions, ReadExecutionBudget budget, string parameterDetail)
+internal sealed class ScriptDomGraphContext(QueryRequest query, ReadExecutionBudget budget, string parameterDetail)
 {
     private readonly Dictionary<string, JsonElement>? parameters = CopyParameters(query.Parameters, budget, parameterDetail);
-    private int nodes;
     internal QueryRequest Query => query;
     internal string ParameterDetail => parameterDetail;
     internal ReadExecutionBudget Budget => budget;
     internal void Check(Dom.TSqlFragment fragment, int depth)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(depth);
         budget.Check();
-        if (depth > limitsOptions.Value.MaxQueryDepth)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.DepthDetail);
-        }
-        if (++nodes > limitsOptions.Value.MaxQueryTokens)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScriptDomErrors.NodesDetail);
-        }
+        ExecutionStackGuard.Ensure();
         if (fragment is Dom.PrimaryExpression { Collation: not null })
         {
             throw ScriptDomErrors.Unsupported();

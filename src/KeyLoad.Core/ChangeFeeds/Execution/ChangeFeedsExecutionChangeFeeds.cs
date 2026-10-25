@@ -57,7 +57,7 @@ public static class ChangeFeedsExecutionChangeFeeds
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(principalId);
         ArgumentNullException.ThrowIfNull(request);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.ReadChangeFeedRead(principalId, request, budget);
     }
 
@@ -67,7 +67,7 @@ public static class ChangeFeedsExecutionChangeFeeds
         return engine.Store.Read<ChangeFeedPage>(original =>
         {
             budget.Check();
-            var grant = budget.CreateReadGrant(engine.Limits.MaxQueryReadBytes, engine.Limits.MaxScanRecords);
+            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
             var view = budget.CreateView(original, grant);
             var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
             var page = engine.ReadChangeFeedView(view, principal, request, (resource, change) => new DocumentChange(change.Sequence, change.Commit, change.CommittedAt, change.After.Reference, change.After.Revision, change.After.Deleted, change.Before is { } before ? engine.Project(principal, resource, before) : null, change.After.Deleted ? null : engine.Project(principal, resource, change.After)), budget.CheckResult);
@@ -117,7 +117,7 @@ public static class ChangeFeedsExecutionChangeFeeds
         var now = engine.Clock.GetUtcNow();
         engine.Authorization.Require(principal, request.Partition, request.Collection, Capability.ChangesRead | Capability.DocumentsRead);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, request.Partition, request.Collection, ResourceKind.Collection);
-        if (request.Limit < LimitValidationBoundary || request.Limit > engine.Limits.MaxResults || request.MaxBytes < MaxBytesValidationBoundary || request.MaxBytes > engine.Limits.MaxBatchBytes || request.Start is not (ChangeFeedStart.Beginning or ChangeFeedStart.Now))
+        if (request.Limit < LimitValidationBoundary || request.MaxBytes < MaxBytesValidationBoundary || request.Start is not (ChangeFeedStart.Beginning or ChangeFeedStart.Now))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidChangeReadBoundsDetail);
         }

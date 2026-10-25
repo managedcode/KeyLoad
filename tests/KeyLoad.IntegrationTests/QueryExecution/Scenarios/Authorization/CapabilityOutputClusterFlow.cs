@@ -11,11 +11,7 @@ internal static class CapabilityOutputClusterFlow
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var fixture = new ClusterFixture(new DatabaseLimits
-            {
-                MaxBatchBytes = CapabilityOutputClusterProtocol.RuntimeBytes,
-                MaxQueryBytes = CapabilityOutputClusterProtocol.RequestBytes
-            }, CapabilityOutputClusterProtocol.Options(mode));
+            await using var fixture = new ClusterFixture(CapabilityOutputClusterProtocol.Options(mode));
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();

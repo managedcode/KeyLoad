@@ -48,8 +48,8 @@ internal sealed class TextOnlineTestRuntime : IAsyncDisposable
         }
     }
 
-    internal DateTimeOffset FreshExpiry(TestDatabase fixture)
-        => fixture.Database.EvaluationClock.GetUtcNow().AddSeconds(Options.Core.DatabaseLimits.Value.QueryDeadlineSeconds);
+    internal static DateTimeOffset FreshExpiry(TestDatabase fixture)
+        => fixture.Database.EvaluationClock.GetUtcNow().Add(UnitExecutionOptions.OperationLifetime);
 
     internal Task<OnlineTextCapabilityResult> PhaseAsync(TestDatabase fixture, Guid session,
         OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityKind kind, DateTimeOffset expiry,

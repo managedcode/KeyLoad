@@ -1,5 +1,4 @@
 using System.Text.Json;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -107,8 +106,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             writer.Empty(PostgresWireWriter.EmptyQueryResponse);
             return;
         }
-        var inspection = PostgresPreparedDecoder.Inspect(sql, PostgresProtocol.AllRows,
-            services.GetRequiredService<IOptions<DatabaseLimits>>(), closed);
+        var inspection = PostgresPreparedDecoder.Inspect(sql, PostgresProtocol.AllRows, closed);
         var statement = new PostgresPreparedStatement(sql, [], inspection.Rows,
             checked(sql.Length * sizeof(char)), inspection.UsesProfileDialect);
         var portal = new PostgresBoundPortal(statement, new Dictionary<string, JsonElement>(StringComparer.Ordinal),
@@ -120,7 +118,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
     private string ReadQueryText(ReadOnlySpan<byte> bytes)
     {
         var reader = new PostgresPayloadReader(bytes);
-        var sql = reader.Text(services.GetRequiredService<IOptions<DatabaseLimits>>().Value.MaxQueryBytes);
+        var sql = reader.Text(Options.MaximumFrameBytes);
         reader.Complete();
         return sql;
     }

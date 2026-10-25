@@ -7,7 +7,7 @@ namespace KeyLoad.Core.ResourceExecution;
 internal static class ResourceLifetimeCoverageValidation
 {
     internal static ResourceLifetimeCoverage Capture(IKeyValueView view, PartitionRef partition,
-        ImmutableArray<ResourceDefinition> definitions, int maximumBytes)
+        ImmutableArray<ResourceDefinition> definitions)
     {
         if (definitions.IsDefault)
         {
@@ -20,12 +20,12 @@ internal static class ResourceLifetimeCoverageValidation
                 definition.Name, definition) ?? throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority));
         }
         var result = new ResourceLifetimeCoverage(partition, values.MoveToImmutable());
-        Require(result, partition, definitions, maximumBytes);
+        Require(result, partition, definitions);
         return result;
     }
 
     internal static void Require(ResourceLifetimeCoverage coverage, PartitionRef partition,
-        ImmutableArray<ResourceDefinition> definitions, int maximumBytes)
+        ImmutableArray<ResourceDefinition> definitions)
     {
         if (coverage is null || coverage.Partition != partition || coverage.Lifetimes.IsDefault
             || definitions.IsDefault || coverage.Lifetimes.Length != definitions.Length)
@@ -43,10 +43,6 @@ internal static class ResourceLifetimeCoverageValidation
             }
             ResourceLifetimeIdentity.Validate(coverage.Lifetimes[index], partition.TenantId,
                 partition.DatabaseId, definition);
-        }
-        if (OrleansSerialization.Measure(coverage) > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceLifetimeValidationMessages.Capacity);
         }
     }
 

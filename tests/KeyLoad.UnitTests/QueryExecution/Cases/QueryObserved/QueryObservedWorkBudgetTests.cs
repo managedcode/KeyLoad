@@ -6,7 +6,6 @@ namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryObservedWorkBudgetTests
 {
-    private const int DeadlineSeconds = 1;
     private const int ExpiredSeconds = 2;
     private const string DeadlineDetail = "The read execution deadline is exceeded.";
     private const string IndexSql = "SELECT * FROM orders WHERE status = 'open' ORDER BY id";
@@ -14,19 +13,15 @@ internal sealed class QueryObservedWorkBudgetTests
     private const string Principal = EqualityAccessPathSupport.Root;
 
     [Test]
-    [Arguments(false, false, false)]
     [Arguments(false, false, true)]
-    [Arguments(false, true, false)]
     [Arguments(false, true, true)]
-    [Arguments(true, false, false)]
     [Arguments(true, false, true)]
-    [Arguments(true, true, false)]
     [Arguments(true, true, true)]
     public async Task AcMp003ObservedQueryWorkRejectsWithoutPartialPageThenReturnsCompleteHealthyPage(
         bool typed, bool indexed, bool cancel)
     {
         var clock = new QueryObservedWorkClock();
-        using var database = new TestDatabase(new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);
+        using var database = new TestDatabase(new DatabaseLimits(), timeProvider: clock);
         database.Configure(EqualityAccessPathSupport.Collection, ResourceKind.Collection,
             indexes: [new(EqualityAccessPathSupport.StatusIndex, [EqualityAccessPathSupport.StatusPath])]);
         database.Commit(new PutDocument(EqualityAccessPathSupport.Collection, EqualityAccessPathSupport.PrimaryId,
@@ -36,7 +31,7 @@ internal sealed class QueryObservedWorkBudgetTests
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var sql = indexed ? IndexSql : ScanSql;
         var request = new QueryRequest(database.Partition, sql, AllowFullScan: !indexed);
-        var query = new SqlParser(sql, UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        var query = new SqlParser(sql,
             UnitExecutionOptions.QueryExecution()).Parse();
         var ast = QueryAdapterTestSupport.RoundTrip(new(database.Partition, query, AllowFullScan: !indexed));
         using var cancellation = new CancellationTokenSource();

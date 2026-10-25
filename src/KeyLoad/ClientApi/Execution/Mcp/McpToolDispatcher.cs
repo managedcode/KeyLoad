@@ -66,7 +66,6 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
             }
             var operation = descriptor.IsAdapter
                 ? SqlMcpCatalog.Decode(arguments, state.MaximumPayloadBytes,
-                    context.RequestServices.GetRequiredService<IOptions<DatabaseLimits>>(),
                     context.RequestServices.GetRequiredService<IOptions<QueryExecutionOptions>>(), cancellationToken)
                 : descriptor.Decode(arguments, state.MaximumPayloadBytes);
             var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,

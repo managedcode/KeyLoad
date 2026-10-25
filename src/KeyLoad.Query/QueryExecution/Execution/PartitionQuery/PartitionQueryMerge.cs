@@ -24,13 +24,13 @@ internal static class PartitionQueryMerge
     private const string IncompleteMessage = "A partition query leaf did not complete.";
 
     internal static PartitionQueryResult Complete(PartitionQueryPlan plan,
-        ImmutableArray<PartitionQueryLeafResult> leaves, StoreIdentity owner, DatabaseLimits limits,
+        ImmutableArray<PartitionQueryLeafResult> leaves, StoreIdentity owner,
         ReadExecutionBudget budget, QueryExecutionOptions execution,
         ImmutableArray<PhysicalShardRecord> physicalOwners = default)
     {
         ArgumentNullException.ThrowIfNull(owner);
         ArgumentNullException.ThrowIfNull(budget);
-        var partitions = PartitionQueryPlanValidation.Validate(plan, limits, execution);
+        var partitions = PartitionQueryPlanValidation.Validate(plan, execution);
         if (leaves.IsDefault || leaves.Length != plan.Leaves.Length)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, IncompleteMessage);

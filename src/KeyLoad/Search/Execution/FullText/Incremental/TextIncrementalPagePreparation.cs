@@ -8,7 +8,7 @@ namespace KeyLoad.Server.Search;
 internal static class TextIncrementalPagePreparation
 {
     internal static TextIncrementalManifest Prepare(TextIncrementalSession session,
-        ProjectionBatch page, CommitProjectionBatchRequest command, int maximumRecords,
+        ProjectionBatch page, CommitProjectionBatchRequest command,
         ReadExecutionBudget budget, QueryExecutionOptions query, IOptions<TextExecutionOptions> options)
     {
         budget.Check();
@@ -23,7 +23,7 @@ internal static class TextIncrementalPagePreparation
             throw TextErrors.Corrupt();
         }
         var bootstrap = session.Manifest is null || session.Manifest.Bootstrap;
-        var plan = Plan(session, page, bootstrap, maximumRecords, budget, query);
+        var plan = Plan(session, page, bootstrap, budget, query);
         var through = bootstrap ? session.CurrentReplayUpperSequence : page.ThroughSequence;
         var target = new TextIncrementalManifest(TextIncrementalProtocol.ManifestFormatVersion,
             session.Scope, session.Request.Consumer, session.Request.IndexGeneration, session.Request.Placement,
@@ -44,13 +44,12 @@ internal static class TextIncrementalPagePreparation
     }
 
     private static TextIncrementalPagePlan Plan(TextIncrementalSession session,
-        ProjectionBatch page, bool bootstrap, int maximumRecords, ReadExecutionBudget budget,
+        ProjectionBatch page, bool bootstrap, ReadExecutionBudget budget,
         QueryExecutionOptions query)
     {
         if (session.Manifest is null)
         {
-            var seed = TextIncrementalSeedPlanner.Plan(session.Upper, session.Scope,
-                maximumRecords, budget, query);
+            var seed = TextIncrementalSeedPlanner.Plan(session.Upper, session.Scope, budget, query);
             var changes = new TextIncrementalChange[seed.Records.Length];
             for (var index = TextIncrementalSourceProtocol.EmptyRecords; index < changes.Length; index++)
             {
@@ -64,8 +63,7 @@ internal static class TextIncrementalPagePreparation
             return new([], session.Manifest.Records, session.Manifest.NextRecord);
         }
         return TextIncrementalPagePlanner.Plan(page, session.Manifest.Records,
-            session.Manifest.NextRecord, session.Request.Collection, session.Request.Field,
-            maximumRecords, budget, query);
+            session.Manifest.NextRecord, session.Request.Collection, session.Request.Field, budget, query);
     }
 
     internal static TextIncrementalOwner RequireOwner(TextIncrementalSession session)

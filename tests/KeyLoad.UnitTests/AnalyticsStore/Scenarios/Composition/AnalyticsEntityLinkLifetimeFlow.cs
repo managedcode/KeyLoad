@@ -57,7 +57,7 @@ internal static class AnalyticsEntityLinkLifetimeFlow
         };
         var request = new CommandRequest(id, owner.Source.Partition,
             [new UpsertAnalyticsEvents(D.Store, [value], AnalyticsStoreTestOperations.Revisions((D.First, revision)))]);
-        var work = new ReadExecutionBudget(owner.Database.OperationLimitsOptions, owner.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
         return owner.Database.CreateCommand(OperationKind.Batch, id, D.Root, owner.Database.EvaluationClock.GetUtcNow(),
             OrleansSerialization.Serialize(request), work);
     }

@@ -2,6 +2,9 @@ namespace KeyLoad.UnitTests.ResourceExecution;
 
 internal sealed class ReadExecutionBudgetSettledGrantTests
 {
+    private const long CallerBytes = 67_108_864;
+    private const int CallerRecords = 10_000;
+
     [Test]
     public async Task AcMp004005012FailedBorrowedReaderSettlesOnlyAfterScopeExitThenCancelledCleanupAndColdHealthyRead()
         => await ReadGrantFailureSettlementFlow.RunAsync();
@@ -12,14 +15,12 @@ internal sealed class ReadExecutionBudgetSettledGrantTests
         var firstBytes = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
         var secondBytes = ReadExecutionBudgetGrantSeed.SecondKey.Length + ReadExecutionBudgetGrantSeed.SecondValue.Length;
         var maximum = firstBytes + secondBytes;
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
-        {
-            MaxQueryReadBytes = maximum
-        });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var result = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
-            var first = budget.CreateReadGrant(maximum, database.Database.Limits.MaxScanRecords);
+            var budget = new ReadExecutionBudget();
+            budget.ConstrainWork(maximum, CallerRecords);
+            var first = budget.CreateReadGrant(maximum, budget.RemainingReadGrantRecords);
             var firstFound = first.ReadValue(view, ReadExecutionBudgetGrantSeed.FirstKey, static _ => { });
             budget.CompleteReadGrant(first);
             var remaining = budget.RemainingReadGrantBytes;
@@ -42,8 +43,9 @@ internal sealed class ReadExecutionBudgetSettledGrantTests
         using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var result = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
-            var grant = budget.CreateReadGrant(database.Database.Limits.MaxQueryReadBytes, database.Database.Limits.MaxScanRecords);
+            var budget = new ReadExecutionBudget();
+            budget.ConstrainWork(CallerBytes, CallerRecords);
+            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
             grant.ReadValue(view, ReadExecutionBudgetGrantSeed.FirstKey, static _ => { });
             budget.CompleteReadGrant(grant);
             var before = budget.ReadBytes;
@@ -64,13 +66,11 @@ internal sealed class ReadExecutionBudgetSettledGrantTests
     public async Task CompletionDoesNotReleaseAnotherUnsettledChildReservation()
     {
         var maximum = ReadExecutionBudgetGrantSeed.FirstKey.Length + ReadExecutionBudgetGrantSeed.FirstValue.Length;
-        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase(new()
-        {
-            MaxQueryReadBytes = maximum
-        });
+        using var database = ReadExecutionBudgetGrantSeed.CreateDatabase();
         var result = database.Store.Read(view =>
         {
-            var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+            var budget = new ReadExecutionBudget();
+            budget.ConstrainWork(maximum, CallerRecords);
             var pending = budget.CreateReadGrant(maximum, 1);
             var settledEmpty = budget.CreateReadGrant(0, 0);
             budget.CompleteReadGrant(settledEmpty);

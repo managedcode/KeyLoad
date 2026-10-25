@@ -30,7 +30,7 @@ internal static class AnalyticsBoundCoreOwner
         ResourceLifetimeWorkResultRetention? ledger = null;
         try
         {
-            using var pending = new PendingResultRetention(fixture.Database.OperationLimitsOptions);
+            using var pending = new PendingResultRetention();
             try
             {
                 var lease = owner.Acquire(Guid.NewGuid(), RequestWorkKind.ReadCapability);
@@ -42,7 +42,7 @@ internal static class AnalyticsBoundCoreOwner
                 {
                     await ServerFailureObserver.ObserveAsync(async () =>
                     {
-                        var work = new ReadExecutionBudget(fixture.Database.OperationLimitsOptions, fixture.Database.EvaluationClock, token);
+                        var work = new ReadExecutionBudget(fixture.Database.EvaluationClock, token);
                         work.AttachResourceLifetimeBinding(lease);
                         await body(lease, ledger, work);
                     }, failures);

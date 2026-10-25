@@ -19,7 +19,7 @@ internal static class SqlOffsetPages
         global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, PartitionRef partition, string principal, string window)
     {
         var engine = new QueryEngine(owner, UnitExecutionOptions.QueryExecution());
-        await ManifestAsync(engine, owner.Limits);
+        await ManifestAsync(engine);
         var sql = SqlOffsetProtocol.ScalarRequest(partition) with
         {
             Sql = SqlOffsetProtocol.ScalarSql.Replace("OFFSET 1 ROWS FETCH NEXT 1 ROW ONLY", window, StringComparison.Ordinal)
@@ -89,14 +89,9 @@ internal static class SqlOffsetPages
     }
     internal static async Task ExactAsync(QueryPage actual, QueryPage expected)
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-    private static async Task ManifestAsync(QueryEngine engine, DatabaseLimits limits)
-    {
-        var expected = new QueryCapabilityManifest(1, 1, "TSQL.ScriptDOM180", "atomicPartition", "decimal", "distinctFromNull",
-            ["SQL", "JSON", "C#"], ["comparison", "AND", "OR", "NOT", "IN", "NOT IN", "BETWEEN", "NOT BETWEEN", "IS NULL", "IS NOT NULL", "IS DISTINCT FROM", "IS NOT DISTINCT FROM", "AST.IS MISSING"],
-            limits.MaxResults, limits.MaxScanRecords, limits.MaxBatchBytes, limits.MaxQueryDepth, true, true,
-            limits.MaxQueryReadBytes, ["Q1", "documentChangeFeed", "scalarLiveQuery", "modelViews", "Q2.InnerJoin", "Q2.InnerJoin.LeftPredicate", "Q2.QueueEntityRefJoin", "Q2.EventEntityRefJoin", "Q1.Offset", "Q2.InnerJoin.Offset", "Q1.NullOrdering", "TSQL.ScriptDOM180", "TSQL.Top", "TSQL.OffsetFetch", "TSQL.NullDistinct", "TSQL.SelectAll", "TSQL.ImplicitProjectionAlias", "TSQL.DefaultInnerJoin", "TSQL.OrdinalOrder", "TSQL.NamedParameters", "TSQL.SessionSlots", "TSQL.DecimalScalar", "TSQL.NationalStringLiteral", "graph-search", "AST.Explain"], [1], [1]);
-        await Assert.That(JsonDefaults.Serialize(engine.Capabilities).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-    }
+    private static async Task ManifestAsync(QueryEngine engine)
+        => await Assert.That(JsonDefaults.Serialize(engine.Capabilities).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(QueryCapabilityVersionExpected.Manifest()))).IsTrue();
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine owner, CommandRequest seed, CommitReceipt receipt)
     {
         var actual = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, SqlOffsetProtocol.Root, default, global::System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();

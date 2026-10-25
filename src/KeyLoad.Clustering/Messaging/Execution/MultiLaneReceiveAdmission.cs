@@ -9,7 +9,7 @@ internal static class MultiLaneReceiveAdmission
     internal const string Exceeded = "The multi-lane receive budget was exceeded.";
 
     internal static void Validate(MultiLaneReceiveRequest request, Guid commandId,
-        MessagingExecutionOptions messaging, DatabaseLimits limits, CancellationToken token)
+        MessagingExecutionOptions messaging, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (request.RequestId == Guid.Empty || request.RequestId != commandId || request.Requests.IsDefaultOrEmpty)
@@ -23,7 +23,6 @@ internal static class MultiLaneReceiveAdmission
         var ids = new HashSet<Guid> { request.RequestId };
         var lanes = new HashSet<QueueLaneRef>();
         long messages = 0;
-        long bytes = 0;
         foreach (var leaf in request.Requests)
         {
             token.ThrowIfCancellationRequested();
@@ -37,8 +36,7 @@ internal static class MultiLaneReceiveAdmission
             EngineResourceAccess.ValidatePartition(leaf.Lane.Partition);
             JsonData.Identifier(leaf.Lane.Queue);
             messages += leaf.MaxMessages;
-            bytes += leaf.MaxBytes;
-            if (messages > messaging.MaximumReceiveMessages || bytes > limits.MaxBatchBytes)
+            if (messages > messaging.MaximumReceiveMessages)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, Exceeded);
             }

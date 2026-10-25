@@ -24,7 +24,7 @@ internal static class AdministratorAuthenticationRequestIssuance
                 Incarnation = codec.Incarnation,
                 PrincipalId = null,
                 ReadKind = GrainReadKind.Authenticate,
-                Payload = GrainPayload.Copy(bytes, codec.Limits.MaxBatchBytes),
+                Payload = GrainPayload.Copy(bytes),
                 ExpiresAt = request.ExpiresAt
             });
         }

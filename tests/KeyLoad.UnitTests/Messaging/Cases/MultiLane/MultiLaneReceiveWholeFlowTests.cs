@@ -94,7 +94,7 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsHostedRuntimeFix
         await HealthyAsync();
     }
 
-    [Test, Arguments(0), Arguments(1), Arguments(2), Arguments(3), Arguments(4), Arguments(5), Arguments(6), Arguments(7), Arguments(8)]
+    [Test, Arguments(0), Arguments(1), Arguments(2), Arguments(3), Arguments(4), Arguments(5), Arguments(6), Arguments(7)]
     public async Task InvalidGroupFailsBeforeAnyClaimAndHealthyFollowingRequestSucceeds(int kind)
     {
         var lanes = MultiLaneReceiveFlow.Seed(fixture, 2);
@@ -108,17 +108,16 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsHostedRuntimeFix
             2 => [first, second with { RequestId = first.RequestId }],
             3 => [first with { RequestId = id }, second],
             4 => [first with { MaxMessages = 100 }, second],
-            5 => [first with { MaxBytes = fixture.Database.Database.Limits.MaxBatchBytes }, second],
-            6 => [.. Enumerable.Range(0, 9).Select(index => new ReceiveRequest(Guid.NewGuid(),
+            5 => [.. Enumerable.Range(0, 9).Select(index => new ReceiveRequest(Guid.NewGuid(),
                 new QueueLaneRef(fixture.Database.Partition, "over-limit-" + index)))],
-            7 => [first with { MaxMessages = 0 }, second],
+            6 => [first with { MaxMessages = 0 }, second],
             _ => [first with { LeaseSeconds = 0 }, second]
         };
         var state = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;
         var rejected = await MultiLaneReceiveFlow.ReceiveAsync(fixture, new(id, entries));
-        await Assert.That(rejected.Error).IsEqualTo(kind is >= 4 and <= 6 ? ErrorCode.BudgetExceeded : ErrorCode.Validation);
-        await Assert.That(rejected.SafeDetail).IsEqualTo(kind is >= 4 and <= 6 ? MultiLaneReceiveAdmission.Exceeded : MultiLaneReceiveAdmission.Invalid);
+        await Assert.That(rejected.Error).IsEqualTo(kind is >= 4 and <= 5 ? ErrorCode.BudgetExceeded : ErrorCode.Validation);
+        await Assert.That(rejected.SafeDetail).IsEqualTo(kind is >= 4 and <= 5 ? MultiLaneReceiveAdmission.Exceeded : MultiLaneReceiveAdmission.Invalid);
         await Assert.That(rejected.Payload.IsEmpty).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);

@@ -25,8 +25,8 @@ public static class DropTableExecution
             throw Errors.Fail(ErrorCode.Validation, TableRemovalKind);
         }
 
-        var work = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.EvaluationClock, cancellationToken);
-        var plan = TableDataCleanup.Capture(transaction, lifetime, work, engine.Limits);
+        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
+        var plan = TableDataCleanup.Capture(transaction, lifetime, work);
         foreach (var retained in plan)
         {
             work.Check();

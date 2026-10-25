@@ -10,7 +10,7 @@ internal static class AnnSeedCancellationCapture
     {
         using var cancellation = new CancellationTokenSource();
         using var started = new ManualResetEventSlim(false);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(cancellationToken: cancellation.Token);
         var observer = new AnnSeedCancellationThread(budget, cancellation, started);
         var startedAt = new TestElapsedClock(TimeProvider.System);
         AnnSeed? seed = null;

@@ -21,8 +21,7 @@ internal sealed class RemoteTransferPendingBudget : IDisposable
         => new(database, coordination: true, original);
 
     private RemoteTransferPendingBudget(DatabaseEngine database, bool coordination, CancellationToken token)
-        : this(database, coordination, new ReadExecutionBudget(database.OperationLimitsOptions,
-            database.EvaluationClock, token))
+        : this(database, coordination, new ReadExecutionBudget(database.EvaluationClock, token))
     {
     }
 

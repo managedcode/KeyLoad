@@ -29,14 +29,14 @@ internal sealed class BoundLeaseSession
         var services = state.Leader.PhysicalServices;
         var database = services.GetRequiredService<DatabaseEngine>();
         Owner = services.GetRequiredService<PartitionStorageScope>().Work;
-        Ledger = new(database.OperationLimitsOptions);
+        Ledger = new();
         Parent = Owner.Acquire(Guid.NewGuid(), RequestWorkKind.RequestProducer);
         Parent.AttachResultRetention(Ledger);
         Linked = CancellationTokenSource.CreateLinkedTokenSource(token, Parent.Cancellation);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, Linked.Token);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, Linked.Token);
         budget.AttachResourceLifetimeBinding(Parent);
         var lifetime = state.Leader.RoutingOptions.Value.RequestLifetime;
-        var queryLifetime = TimeSpan.FromSeconds(database.Limits.QueryDeadlineSeconds);
+        var queryLifetime = UnitExecutionOptions.OperationLifetime;
         var expiry = database.EvaluationClock.GetUtcNow() + (lifetime < queryLifetime ? lifetime : queryLifetime);
         budget.ConstrainLifetime(expiry);
         return new(Owner, Ledger, Parent, budget, expiry, Linked.Token);

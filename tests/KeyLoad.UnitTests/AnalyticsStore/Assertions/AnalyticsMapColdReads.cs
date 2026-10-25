@@ -40,14 +40,6 @@ internal static class AnalyticsMapColdReads
                 await VerifyAsync(owner, events, token);
             }
             AnalyticsEventsPage? published = null;
-            var bounded = AnalyticsBoundsOwner.ReadEngine(owner.Source, new()
-            {
-                MaxQueryReadBytes = 1
-            });
-            var readFailure = Assert.ThrowsExactly<KeyLoadException>(() => published = bounded.ReadAnalyticsEvents(D.Root, D.Read(owner.Source), token));
-            await Assert.That(readFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-            await Assert.That(published).IsNull();
-            await VerifyAsync(owner, events, token);
             await N.RefusedAsync(() => N.Query(owner.Database, D.Query(owner.Source), token, resultBytes: 1));
             await VerifyAsync(owner, events, token);
             using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);

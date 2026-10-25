@@ -17,9 +17,6 @@ internal static class RemoteTransferCapacityRepair
                 || current.QueueStoredBytes < original.QueueStoredBytes
                 || current.QueueMaxStoredMessages > original.QueueMaxStoredMessages
                 || current.QueueMaxStoredBytes > original.QueueMaxStoredBytes,
-            RemoteTransferAcceptFailureKind.TransferRetention => current.TransferStoredRecords < original.TransferStoredRecords
-                || current.TransferStoredBytes < original.TransferStoredBytes
-                || current.MaxBatchBytes > original.MaxBatchBytes || current.MaxScanRecords > original.MaxScanRecords,
             _ => false
         };
     }

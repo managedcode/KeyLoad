@@ -14,7 +14,7 @@ internal static class AnnPinnedLifetimeAssertions
     private static readonly long[] LiteralRevisions = [1, 1, 1];
     private static readonly float[] Query = [1, 0, 0];
 
-    internal static async Task AssertAsync(TestDatabase database, AnnGenerationOwner owner,
+    internal static async Task AssertAsync(AnnGenerationOwner owner,
         AnnMaintenanceRequest request, AnnSeed seed)
     {
         AnnIndexLease? lease = null;
@@ -29,14 +29,14 @@ internal static class AnnPinnedLifetimeAssertions
             var second = concurrent;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await AssertLiteralSearchAsync(database, second);
+                await AssertLiteralSearchAsync(second);
                 disposal = owner.DisposeAsync().AsTask();
                 await Assert.That(disposal.IsCompleted).IsFalse();
                 _ = Assert.ThrowsExactly<ObjectDisposedException>(() => AcquireUnexpected(owner, request, seed));
                 second.Dispose();
                 concurrent = null;
                 await Assert.That(disposal.IsCompleted).IsFalse();
-                await AssertLiteralSearchAsync(database, actual);
+                await AssertLiteralSearchAsync(actual);
             }, failures);
         }
         finally
@@ -54,9 +54,9 @@ internal static class AnnPinnedLifetimeAssertions
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task AssertLiteralSearchAsync(TestDatabase database, AnnIndexLease actual)
+    private static async Task AssertLiteralSearchAsync(AnnIndexLease actual)
     {
-        var result = actual.Index.Search(Query, Count, null, PackedAnnIndexTestSupport.Budget(database));
+        var result = actual.Index.Search(Query, Count, null, PackedAnnIndexTestSupport.Budget());
         await Assert.That(result.Candidates.Select(row => row.DocumentId).ToArray()).IsEquivalentTo(LiteralIds, CollectionOrdering.Matching);
         for (var index = 0; index < Count; index++)
         {

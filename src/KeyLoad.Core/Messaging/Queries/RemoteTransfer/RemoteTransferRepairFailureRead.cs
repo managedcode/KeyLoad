@@ -15,7 +15,7 @@ public static class RemoteTransferRepairFailureRead
             throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferRepairProtocol.Unavailable);
         }
 
-        var intent = engine.Verify<RemoteTransferIntentClaims>(request.IntentToken, engine.Limits.MaxBatchBytes);
+        var intent = engine.VerifyRetained<RemoteTransferIntentClaims>(request.IntentToken);
         engine.ValidateIntentClaims(intent, request.Destination, principal.Id);
         if (intent.Source != request.Source || intent.TransferId != request.TransferId)
         {
@@ -55,7 +55,6 @@ public static class RemoteTransferRepairFailureRead
         var cut = engine.Token(view, partition, engine.Store.Position);
         var claims = new RemoteTransferRepairClaims(RemoteTransferRepairProtocol.Purpose, intent.Source, intent.Destination, intent.TransferId, principal.Id, intent.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(request.IntentToken), request.RepairStage!.Value, request.ExpectedGeneration, request.PolicyGeneration, request.CompleteGeneration, original.CommandId, outcome.Fingerprint, Convert.ToHexString(SHA256.HashData(bytes)), outcome.PolicyEpoch, principal.PolicyEpoch, JsonData.Fingerprint(new { resource.FieldPolicies, resource.HeaderPolicies }), cut, cut.Position, request.ReceiptToken is null ? null : RemoteTransferCoordinationIdentity.IntentDigest(request.ReceiptToken));
         var signed = engine.Sign(claims);
-        engine.RequireTokenBound(signed);
         return new(null, null, null, signed);
     }
 }

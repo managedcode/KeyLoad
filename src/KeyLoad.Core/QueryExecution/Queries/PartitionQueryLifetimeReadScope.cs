@@ -12,7 +12,7 @@ public static class PartitionQueryLifetimeReadScope
     {
         ArgumentNullException.ThrowIfNull(metadata);
         budget.Check();
-        ResourceLifetimeCoverageValidation.Require(metadata.Coverage, partition, [metadata.Definition], engine.Limits.MaxBatchBytes);
+        ResourceLifetimeCoverageValidation.Require(metadata.Coverage, partition, [metadata.Definition]);
         if (metadata.Principal is null || metadata.Principal.Id != principalId || metadata.Definition.Name != collection || metadata.Definition.Kind != ResourceKind.Collection)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, PartitionQuerySourceMetadataInvalid);
@@ -27,15 +27,13 @@ public static class PartitionQueryLifetimeReadScope
         return engine.Store.Read(view => engine.ReadPartitionQueryFenceView(view, principalId, partition, collection, grant, (raw, principal, resource, digest) =>
         {
             budget.Check();
-            engine.RequireBudget(OrleansSerialization.Measure(principal));
-            engine.RequireBudget(OrleansSerialization.Measure(metadata.Principal));
             if (!OrleansSerialization.Serialize(principal).AsSpan().SequenceEqual(OrleansSerialization.Serialize(metadata.Principal)))
             {
                 throw Errors.Fail(ErrorCode.PermissionDenied, PartitionQueryReceivingIdentityChanged);
             }
 
             budget.Check();
-            budget.CaptureAuthenticatedResourceLifetimes(engine, budget.CreateView(raw, grant), metadata.Coverage, [metadata.Definition]);
+            budget.CaptureAuthenticatedResourceLifetimes(budget.CreateView(raw, grant), metadata.Coverage, [metadata.Definition]);
             return read(raw, principal, resource, digest);
         }, budget));
     }

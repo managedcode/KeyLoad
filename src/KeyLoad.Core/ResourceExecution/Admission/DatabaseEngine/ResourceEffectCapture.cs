@@ -12,7 +12,7 @@ public static class ResourceEffectCapture
     {
         var fingerprint = operation.Value!.Fingerprint;
         var captured = ResourceEffectCompositionScopes.RequiresCompositionEffectCapture(operation) ? engine.Store.Prepare((transaction, position) => engine.CaptureResourceEffectAdmission(transaction, operation, fingerprint, preparationPosition: position)) : engine.Store.Read(raw => engine.CaptureResourceEffectAdmission(raw, operation, fingerprint));
-        return engine.EncodeResourceEffectAdmission(captured);
+        return ResourceEffectCapture.EncodeResourceEffectAdmission(captured);
     }
 
     internal static byte[] CaptureResourceEffectAdmission(this DatabaseEngine engine, Command<DatabaseCommand> operation, ReadExecutionBudget work)
@@ -21,13 +21,13 @@ public static class ResourceEffectCapture
         var fingerprint = operation.Value!.Fingerprint;
         var captured = ResourceEffectCompositionScopes.RequiresCompositionEffectCapture(operation) ? engine.Store.Prepare((transaction, position) => engine.CaptureResourceEffectAdmission(transaction, operation, fingerprint, preserveBudgetFailure: true, preparationPosition: position, preparationWork: work)) : engine.Store.Read(raw => engine.CaptureResourceEffectAdmission(work.CreateView(raw), operation, fingerprint, preserveBudgetFailure: true));
         work.Check();
-        return engine.EncodeResourceEffectAdmission(captured);
+        return ResourceEffectCapture.EncodeResourceEffectAdmission(captured);
     }
 
     internal static ResourceEffectAdmission CaptureResourceEffectAdmission(this DatabaseEngine engine, IKeyValueView raw, Command<DatabaseCommand> operation, string fingerprint, bool preserveBudgetFailure = false, long? preparationPosition = null, ReadExecutionBudget? preparationWork = null)
     {
-        var scope = new ResourceEffectBindingScope(engine.OperationLimitsOptions);
-        var preparation = preparationPosition is { } position ? new ResourceEffectPreparationTransaction(new KeyLoad.Core.BackupRestore.Execution.AtomicPartitionRosterTransaction((IAtomicTransaction)raw, engine.OperationLimitsOptions, position, KeyLoad.Core.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoCanonicalSequence), scope, preparationWork ?? new ReadExecutionBudget(engine.OperationLimitsOptions, CompositionTimeProvider.Instance)) : null;
+        var scope = new ResourceEffectBindingScope();
+        var preparation = preparationPosition is { } position ? new ResourceEffectPreparationTransaction(new KeyLoad.Core.BackupRestore.Execution.AtomicPartitionRosterTransaction((IAtomicTransaction)raw, position, KeyLoad.Core.BackupRestore.Serialization.AtomicPartitionRosterProtocol.NoCanonicalSequence), scope, preparationWork ?? new ReadExecutionBudget(CompositionTimeProvider.Instance)) : null;
         var view = preparation is null ? new ResourceEffectObservationView(raw, scope) : preparation;
         try
         {
@@ -49,10 +49,9 @@ public static class ResourceEffectCapture
         }
     }
 
-    internal static byte[] EncodeResourceEffectAdmission(this DatabaseEngine engine, ResourceEffectAdmission admission)
+    internal static byte[] EncodeResourceEffectAdmission(ResourceEffectAdmission admission)
     {
         var bytes = OrleansSerialization.Serialize(admission);
-        engine.RequireBudget(bytes.Length);
         return bytes;
     }
 }

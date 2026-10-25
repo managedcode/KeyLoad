@@ -88,7 +88,7 @@ internal sealed class GraphSearchReachabilityReader(
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
         var edge = budget.ReadRecord<EdgeRecord>(view, KeySpace.Partition(EdgeSpace, partition, walk.Graph, edgeId))
             ?? throw Errors.Fail(ErrorCode.Corruption, MissingEdge);
-        GraphCrossPartitionValidation.ValidateEdge(edge, database.Limits);
+        GraphCrossPartitionValidation.ValidateEdge(edge);
         _ = visibility.CanVisit(edge.From);
         budget.Check();
         if (edge.Id != edgeId || edge.From != current.Reference || edge.To.Partition != partition

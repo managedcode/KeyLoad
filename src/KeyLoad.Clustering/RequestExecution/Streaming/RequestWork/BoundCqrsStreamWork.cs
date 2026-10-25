@@ -23,7 +23,7 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
     internal CancellationToken Token => selected?.Token ?? execution?.Token ?? request?.Token ?? originalToken;
 
     internal void Start(TimeProvider clock, IOptions<GrainRoutingOptions> options, RequestWorkOwner owner,
-        CqrsStreamPurpose purpose, IOptions<DatabaseLimits> databaseLimits,
+        CqrsStreamPurpose purpose,
         Func<RequestWorkLease> acquireVerified, CancellationToken cancellationToken, CancellationToken enumerationToken)
     {
         originalPurpose = purpose;
@@ -35,7 +35,7 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
             ownerRequest = CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);
             execution = CancellationTokenSource.CreateLinkedTokenSource(ownerRequest.Token, deadline.Token);
             lease = acquireVerified();
-            ownedRetention = new(databaseLimits);
+            ownedRetention = new();
             lease.AttachResultRetention(ownedRetention);
             _ = lease.ResultRetention;
             selected = CancellationTokenSource.CreateLinkedTokenSource(execution.Token, lease.Cancellation);

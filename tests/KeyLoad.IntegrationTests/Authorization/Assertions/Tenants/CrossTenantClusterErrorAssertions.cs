@@ -12,7 +12,7 @@ internal static class CrossTenantClusterErrorAssertions
     internal static async Task SdkAsync<T>(Result<T> result, string secret) where T : class?
     {
         await Assert.That(result.IsFailed).IsTrue();
-        await Assert.That(result.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(result);
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await Assert.That(result.Problem.Detail).IsEqualTo(Detail);
         await PrivateAsync(JsonSerializer.Serialize(result, JsonDefaults.Options), secret);

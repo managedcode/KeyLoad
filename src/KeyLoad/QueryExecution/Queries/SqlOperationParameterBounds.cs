@@ -1,14 +1,11 @@
 using System.Text.Json;
-using Microsoft.Extensions.Options;
+using KeyLoad.Core;
 
 namespace KeyLoad.Server;
 
-/// <summary>Rejects excessive or duplicate JSON argument structure before canonical DTO allocation.</summary>
-internal sealed class SqlOperationParameterBounds(IOptions<DatabaseLimits> limitsOptions, CancellationToken cancellationToken)
+/// <summary>Rejects duplicate JSON argument structure before canonical DTO allocation; nesting stops only when the execution stack runs short.</summary>
+internal sealed class SqlOperationParameterBounds(CancellationToken cancellationToken)
 {
-    private readonly DatabaseLimits limits = limitsOptions.Value;
-    private int tokens;
-
     internal void Visit(JsonElement value, int depth = 1)
     {
         const int DepthStep = 1;
@@ -51,10 +48,8 @@ internal sealed class SqlOperationParameterBounds(IOptions<DatabaseLimits> limit
 
     private void Count(int depth)
     {
+        ArgumentOutOfRangeException.ThrowIfNegative(depth);
         cancellationToken.ThrowIfCancellationRequested();
-        if (depth > limits.MaxJsonDepth || ++tokens > limits.MaxQueryTokens)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, SqlOperationSyntax.StructureExceeded);
-        }
+        ExecutionStackGuard.Ensure();
     }
 }

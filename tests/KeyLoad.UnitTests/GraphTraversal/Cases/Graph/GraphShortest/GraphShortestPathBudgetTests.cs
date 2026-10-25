@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text.Json;
 
 namespace KeyLoad.UnitTests.GraphTraversal;
 
@@ -71,64 +70,6 @@ internal sealed class GraphShortestPathBudgetTests
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.ShortestPath(
             GraphShortestPathTestSupport.Alice, shortRequest, cancellationToken: token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-    }
-
-    [Test]
-    public async Task AcGraph008ReadAndResponseByteCapsAdmitExactBytesAndRejectOneLess()
-    {
-        using var database = GraphShortestPathTestSupport.CreateDatabase(null, Nodes);
-        var source = GraphShortestPathTestSupport.Ref(Nodes, "bytes-source");
-        var target = GraphShortestPathTestSupport.Ref(Nodes, "bytes-target");
-        GraphShortestPathTestSupport.PersistVertices(database, [source, target]);
-        var attributes = JsonSerializer.Serialize(new
-        {
-            payload = new string('p', 8_192)
-        });
-        GraphShortestPathTestSupport.PersistEdges(database,
-            [new("bytes-edge", source, target, GraphShortestPathTestSupport.Walk, attributes)]);
-        var position = database.Store.Position;
-        var request = GraphShortestPathTestSupport.Request(database, source, target);
-        var sourceEntity = GraphShortestPathTestSupport.Vertex(database, source.Collection, source.Id);
-        var targetEntity = GraphShortestPathTestSupport.Vertex(database, target.Collection, target.Id);
-        var requestBytes = JsonDefaults.Serialize(request).Length;
-        var measuredBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
-        var expected = database.Database.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, request, measuredBudget);
-        await Assert.That(expected.Edges.Single().AttributesJson).IsEqualTo(attributes);
-        var readBytes = measuredBudget.ReadBytes;
-        var responseBytes = JsonDefaults.Serialize(expected).Length;
-        var predecessorMetadata = new
-        {
-            Vertex = targetEntity,
-            Previous = sourceEntity,
-            EdgeId = "bytes-edge"
-        };
-        var collectionMetadata = new
-        {
-            Partition = sourceEntity.Partition,
-            Collection = sourceEntity.Collection
-        };
-        var retainedMetadataBytes = GraphShortestPathBudgetAssertions.MetadataCharge(JsonDefaults.Serialize(sourceEntity).Length)
-            + GraphShortestPathBudgetAssertions.MetadataCharge(JsonDefaults.Serialize(targetEntity).Length)
-            + GraphShortestPathBudgetAssertions.MetadataCharge(JsonDefaults.Serialize(predecessorMetadata).Length)
-            + GraphShortestPathBudgetAssertions.MetadataCharge(JsonDefaults.Serialize(collectionMetadata).Length);
-        await Assert.That((long)responseBytes).IsGreaterThan(retainedMetadataBytes);
-        var exactLimits = new DatabaseLimits
-        {
-            MaxQueryBytes = requestBytes,
-            MaxQueryReadBytes = readBytes,
-            MaxBatchBytes = responseBytes
-        };
-        var exactEngine = new DatabaseEngine(database.Store, database.Database.Authorization, UnitExecutionOptions.DatabaseLimits(exactLimits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var exactBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(exactLimits));
-        var exact = exactEngine.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, request, exactBudget);
-
-        await Assert.That(exact.Found).IsTrue();
-        await Assert.That(exactBudget.ReadBytes).IsEqualTo(readBytes);
-        await Assert.That(JsonDefaults.Serialize(exact).Length).IsEqualTo(responseBytes);
-        await GraphShortestPathBudgetAssertions.AssertQueryBudgetExceeded(database, request, requestBytes - 1);
-        await GraphShortestPathBudgetAssertions.AssertReadBudgetExceeded(database, request, readBytes - 1);
-        await GraphShortestPathBudgetAssertions.AssertResponseBudgetExceeded(database, request, readBytes, responseBytes - 1);
         await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 

@@ -85,8 +85,7 @@ internal static class ChunkMultiblockProcessAssertions
     private static async Task ReceiptAsync(string root, string bytes, ChunkMultiblockCrashSnapshot authority,
         Guid command, string kind, long revision)
     {
-        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, command,
-            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes);
+        var expectedToken = SampleChunkSnapshotFile.ReadExpectedToken(root, command);
         var expected = new CommitReceipt(command, expectedToken, [new(kind, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series, revision)], authority.StorageDurability, (authority.StorageDurability == DurabilityProfile.Buffered ? 0 : 1));
         var actual = OrleansSerialization.Deserialize<Result<object>>(Convert.FromHexString(bytes)).Get<CommitReceipt>();
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
@@ -94,7 +93,6 @@ internal static class ChunkMultiblockProcessAssertions
     }
 
     private static async Task<ChunkMultiblockCrashSnapshot> ReadAsync(string root, string name, CancellationToken token)
-        => JsonSerializer.Deserialize<ChunkMultiblockCrashSnapshot>(await SampleChunkSnapshotFile.ReadAsync(Path.Combine(root, name),
-            RecoveryExecutionOptions.DatabaseLimits().Value.MaxBatchBytes, token).ConfigureAwait(false), JsonDefaults.Options)
+        => JsonSerializer.Deserialize<ChunkMultiblockCrashSnapshot>(await SampleChunkSnapshotFile.ReadAsync(Path.Combine(root, name), token).ConfigureAwait(false), JsonDefaults.Options)
             ?? throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
 }

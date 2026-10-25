@@ -4,6 +4,8 @@ Status: Accepted implementation contract, not qualified. Date: 2026-10-03.
 Scope: time-series expiry; REQ-SERIES-013..016 / AC-SERIES-013..016 in [TimeSeries](../Features/TimeSeries.md).
 Rollups and chunk encoding remain separate required stages.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 ## Decision and alternatives
 
 Persist an exclusive UTC retention floor per canonical series. A replicated

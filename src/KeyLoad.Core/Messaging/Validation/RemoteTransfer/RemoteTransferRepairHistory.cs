@@ -19,7 +19,7 @@ public static class RemoteTransferRepairHistory
         foreach (var reference in state.History)
         {
             var hint = new RemoteTransferCoordinationHint(record.Source, record.Destination, record.TransferId, record.PrincipalId, record.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(record.IntentToken), engine.Token(view, record.Source.Partition, engine.Store.Position), reference.CapacityGeneration, record.Attempts?.Ceiling, reference.PolicyGeneration, reference.CompleteGeneration, state.Ceiling);
-            var claims = engine.Verify<RemoteTransferRepairClaims>(reference.WitnessToken, engine.Limits.MaxBatchBytes);
+            var claims = engine.VerifyRetained<RemoteTransferRepairClaims>(reference.WitnessToken);
             RemoteTransferRepairWitness.RequireRemoteTransferRepairWitness(claims, hint);
             if (claims.Stage != reference.Stage || claims.FailedCommandId != reference.FailedCommandId || claims.CommandFingerprint != reference.Fingerprint || claims.OutcomeDigest != reference.OutcomeDigest || claims.OwnerCut.Incarnation != intent.Incarnation || reference.CapacityGeneration > (record.Attempts?.Generation ?? RemoteTransferRepairProtocol.InitialGeneration))
             {

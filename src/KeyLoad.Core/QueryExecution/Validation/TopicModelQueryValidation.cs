@@ -7,23 +7,14 @@ internal static class TopicModelQueryValidation
     private const long EmptyTail = 0L;
     private const long FirstPosition = 1L;
     private const int InitialSchemaVersion = 1;
-    private const ulong InclusivePosition = 1UL;
-    private const ulong EmptyCount = 0UL;
     private const string Corrupt = "The retained topic source is inconsistent.";
-    private const string ScanExceeded = "The model query scan exceeds its configured candidate budget.";
 
-    internal static void RequireHead(EventSourceHead head, int maximumScanRecords)
+    internal static void RequireHead(EventSourceHead head)
     {
         if (head.TailPosition < EmptyTail || head.FirstAvailablePosition < FirstPosition
             || head.TailPosition < long.MaxValue && head.FirstAvailablePosition > head.TailPosition + FirstPosition)
         {
             throw Errors.Fail(ErrorCode.Corruption, Corrupt);
-        }
-        var count = head.TailPosition < head.FirstAvailablePosition ? EmptyCount
-            : (ulong)head.TailPosition - (ulong)head.FirstAvailablePosition + InclusivePosition;
-        if (count > (ulong)maximumScanRecords)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ScanExceeded);
         }
     }
 

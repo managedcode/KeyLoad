@@ -23,7 +23,7 @@ internal static class DistributedTextStatisticsLeaf
         budget.Check();
         var execution = options.Value;
         execution.Validate();
-        SearchRequestValidation.Validate(request, database.Limits, false, execution);
+        SearchRequestValidation.Validate(request, false, execution);
         if (request.TextIndex is not null)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, CanonicalTextRequired);

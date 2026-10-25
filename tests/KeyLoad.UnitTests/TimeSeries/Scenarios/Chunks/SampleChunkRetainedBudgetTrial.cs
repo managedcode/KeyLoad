@@ -4,10 +4,12 @@ internal static class SampleChunkRetainedBudgetTrial
 {
     private const long OneByte = 1;
     private const int OneRecord = 1;
+    private const long UnboundedBytes = long.MaxValue;
+    private const int UnboundedRecords = int.MaxValue;
     internal static async Task RunAsync(SampleChunkPartialRetentionFixture fixture, bool merged, bool fresh = false)
     {
         var before = SampleRawIntegrityAssertions.Capture(fixture.Store);
-        var original = Read(fixture, fixture.Owner.Limits.MaxQueryReadBytes, fixture.Owner.Limits.MaxScanRecords);
+        var original = Read(fixture, UnboundedBytes, UnboundedRecords);
         await SampleChunkRetainedBudgetExpected.RequireAsync(fixture, original.Result, merged, fresh);
         await Assert.That(original.Bytes > OneByte).IsTrue();
         await Assert.That(original.Records > OneRecord).IsTrue();
@@ -17,14 +19,14 @@ internal static class SampleChunkRetainedBudgetTrial
         await Assert.That(exact.Bytes).IsEqualTo(original.Bytes);
         await Assert.That(exact.Records).IsEqualTo(original.Records);
         await SampleRawIntegrityAssertions.UnchangedAsync(fixture.Store, before);
-        await RefuseAsync(fixture, original.Bytes - OneByte, fixture.Owner.Limits.MaxScanRecords,
+        await RefuseAsync(fixture, original.Bytes - OneByte, UnboundedRecords,
             precedingRead: false, merged, fresh);
-        await RefuseAsync(fixture, fixture.Owner.Limits.MaxQueryReadBytes, original.Records - OneRecord,
+        await RefuseAsync(fixture, UnboundedBytes, original.Records - OneRecord,
             precedingRead: false, merged, fresh);
-        await RefuseAsync(fixture, original.Bytes, fixture.Owner.Limits.MaxScanRecords,
+        await RefuseAsync(fixture, original.Bytes, UnboundedRecords,
             precedingRead: true, merged, fresh);
-        var cumulative = Read(fixture, fixture.Owner.Limits.MaxQueryReadBytes,
-            fixture.Owner.Limits.MaxScanRecords, precedingRead: true);
+        var cumulative = Read(fixture, UnboundedBytes,
+            UnboundedRecords, precedingRead: true);
         await SampleChunkRetainedBudgetExpected.RequireAsync(fixture, cumulative.Result, merged, fresh);
         await Assert.That(cumulative.Bytes > original.Bytes).IsTrue();
         await Assert.That(cumulative.Records).IsEqualTo(original.Records + OneRecord);
@@ -42,7 +44,7 @@ internal static class SampleChunkRetainedBudgetTrial
         long maximumBytes, int maximumRecords, bool precedingRead = false)
     {
         var budget = new global::KeyLoad.Core.ReadExecutionBudget(
-            UnitExecutionOptions.DatabaseLimits(fixture.Owner.Limits), fixture.Clock);
+            fixture.Clock);
         budget.ConstrainWork(maximumBytes, maximumRecords);
         var result = fixture.Store.Read(view =>
         {

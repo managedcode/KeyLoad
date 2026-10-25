@@ -21,7 +21,7 @@ public sealed partial class QueryEngine
     private GraphShortestPathResult ExecuteShortestPathSql(string principalId, SqlGraphPathRequest request,
         TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, timeProvider ?? database.EvaluationClock, cancellationToken);
+        var budget = new ReadExecutionBudget(timeProvider ?? database.EvaluationClock, cancellationToken);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
@@ -34,7 +34,7 @@ public sealed partial class QueryEngine
         }
         using var admission = database.AdmitQuery(cancellationToken);
         budget.Check();
-        var graphRequest = SqlGraphPathParser.Parse(request, database.OperationLimitsOptions, budget, execution.MaximumParameters, database.GraphExecution.MaximumLabels);
+        var graphRequest = SqlGraphPathParser.Parse(request, budget, execution.MaximumParameters, database.GraphExecution.MaximumLabels);
         budget.Check();
         return database.ShortestPath(principalId, graphRequest, budget);
     }

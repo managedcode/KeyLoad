@@ -89,13 +89,13 @@ internal sealed class QueryCursorTests
     {
         using var fixture = Fixture();
         var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution());
-        var query = new AstQueryRequest(fixture.Partition, new SqlParser(LiveSql, UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits), UnitExecutionOptions.QueryExecution()).Parse());
+        var query = new AstQueryRequest(fixture.Partition, new SqlParser(LiveSql, UnitExecutionOptions.QueryExecution()).Parse());
         var snapshot = engine.StartLiveQuery(Root, new(query));
         var claims = fixture.Database.Verify<LiveCursorClaims>(snapshot.Cursor);
         await Assert.That(OrleansSerialization.Deserialize<LiveCursorClaims>(OrleansSerialization.Serialize(claims))).IsEqualTo(claims);
         await Assert.That(snapshot.Cursor.StartsWith(RuntimePrefix, StringComparison.Ordinal)).IsTrue();
         await Assert.That(claims.ChangeCursor.StartsWith(RuntimePrefix, StringComparison.Ordinal)).IsTrue();
-        await Assert.That(claims.QueryHash).IsEqualTo(QueryEngine.QueryHash(QueryValidation.Normalize(query, fixture.Database.Limits, UnitExecutionOptions.QueryExecution().Value)));
+        await Assert.That(claims.QueryHash).IsEqualTo(QueryEngine.QueryHash(QueryValidation.Normalize(query, UnitExecutionOptions.QueryExecution().Value)));
         var cases = new[] { Tamper(snapshot.Cursor), fixture.Database.Sign(claims with { QueryHash = WrongHash }) };
         foreach (var invalid in cases)
         {

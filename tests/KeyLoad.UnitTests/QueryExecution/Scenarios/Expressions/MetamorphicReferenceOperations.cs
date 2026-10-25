@@ -43,8 +43,7 @@ internal static class MetamorphicReferenceOperations
                     var json = System.Text.Json.JsonSerializer.Serialize(new
                     {
                         accessPath = path,
-                        atomicPartition = fixture.Harness.Partition.AtomicPartitionId,
-                        scanBudget = database.Limits.MaxScanRecords
+                        atomicPartition = fixture.Harness.Partition.AtomicPartitionId
                     }, JsonDefaults.Options);
                     await MetamorphicReferenceAssertions.PageAsync(page, [new("explain", 0L, json)], store.Position, path, true);
                 });

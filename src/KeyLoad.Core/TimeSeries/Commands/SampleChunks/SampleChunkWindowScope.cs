@@ -14,9 +14,9 @@ internal static class SampleChunkWindowScope
     }
 
     internal static SampleChunkWindow Load(IKeyValueView view, PartitionRef partition, string set,
-        string series, Guid id, long revision, IOptions<TimeSeriesExecutionOptions> options, SampleChunkReadCharge charge)
+        string series, Guid id, long revision, IOptions<TimeSeriesExecutionOptions> options)
     {
-        var window = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(partition, set, series, id), charge)
+        var window = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(partition, set, series, id))
             ?? throw Errors.Fail(ErrorCode.NotFound, SampleChunkLifecycleProtocol.Missing);
         SampleChunkWindowValidation.State(window, id, options.Value.MaximumChunkWindowRecords,
             options.Value.MaximumChunkCorrections);

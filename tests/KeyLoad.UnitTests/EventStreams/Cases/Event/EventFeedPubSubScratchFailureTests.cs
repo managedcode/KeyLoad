@@ -45,11 +45,11 @@ internal sealed class EventFeedPubSubScratchFailureTests
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var routing = Routing(4096);
-                var limits = Options.Create(new DatabaseLimits { MaxResults = 1 });
+                var limits = Options.Create(new DatabaseLimits());
                 var storageFailures = new List<Exception>();
                 try
                 {
-                    using var storage = new EventFeedPubSubStorage(services, limits, routing);
+                    using var storage = new EventFeedPubSubStorage(services, routing);
                     await KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                         () => RequireRegisteredAsync(storage, routing, token), storageFailures);
                 }

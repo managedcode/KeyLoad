@@ -6,7 +6,7 @@ internal static class SampleRollupFold
 {
     private const long FirstSequence = 1;
     internal static SampleAggregate Read(IKeyValueView view, PartitionRef partition, RefreshSampleRollup request,
-        long sequence, SampleRollupReadCharge charge)
+        long sequence)
     {
         var accumulator = new SampleAggregateAccumulator();
         var scan = view.VisitRange(SampleReadKeys.Prefix(partition, request.SeriesSet, request.SeriesId),
@@ -17,8 +17,7 @@ internal static class SampleRollupFold
                 accumulator.Add(record);
                 return true;
             }, SampleReadKeys.FromInclusive(partition, request.SeriesSet, request.SeriesId, request.From),
-            SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.UntilExclusive),
-            observer: charge.Charge);
+            SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.UntilExclusive));
         if (scan.HasMore)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleAggregateReader.SampleBudgetExceeded);

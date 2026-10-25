@@ -36,10 +36,9 @@ internal static class QueryApi
             ApiGrainDispatch.ReadAsync(context, GrainReadKind.LiveQueryRead, request));
     }
 
-    private static async Task<IResult> ExecuteSqlAsync(SqlOperationRequest request, HttpContext context,
-        IOptions<DatabaseLimits> limitsOptions, IOptions<QueryExecutionOptions> queryOptions, IOptions<ServerExecutionOptions> server)
+    private static async Task<IResult> ExecuteSqlAsync(SqlOperationRequest request, HttpContext context, IOptions<QueryExecutionOptions> queryOptions, IOptions<ServerExecutionOptions> server)
     {
-        var operation = SqlOperationCompiler.Compile(request, limitsOptions, server.Value.MaximumBodyBytes, queryOptions,
+        var operation = SqlOperationCompiler.Compile(request, server.Value.MaximumBodyBytes, queryOptions,
             context.RequestAborted);
         var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
             operation.CommandKind, operation.CommandId, operation.Payload, context.RequestAborted);

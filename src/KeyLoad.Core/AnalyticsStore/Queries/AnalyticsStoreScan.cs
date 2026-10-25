@@ -11,7 +11,7 @@ internal static class AnalyticsStoreScan
         DateTimeOffset to, ReadExecutionBudget work)
     {
         var rows = ImmutableArray.CreateBuilder<AnalyticsEventRecord>();
-        var scan = work.VisitRange(raw, AnalyticsStoreKeys.Events(partition, store), database.Limits.MaxScanRecords,
+        _ = work.VisitAll(raw, AnalyticsStoreKeys.Events(partition, store),
             (key, value) =>
             {
                 work.Check();
@@ -30,11 +30,6 @@ internal static class AnalyticsStoreScan
 
                 return true;
             });
-        if (scan.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, AnalyticsStoreValidation.Budget);
-        }
-
         return [.. rows.OrderBy(row => row.Id, StringComparer.Ordinal)];
     }
 }

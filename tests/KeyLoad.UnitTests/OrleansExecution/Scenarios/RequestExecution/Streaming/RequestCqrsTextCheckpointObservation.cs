@@ -13,7 +13,7 @@ internal static class RequestCqrsTextCheckpointObservation
     {
         var database = fixture.Database;
         var before = QueueWholeFlowStorage.Bytes(database.Store);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), fixture.Clock, token);
+        var budget = new ReadExecutionBudget(fixture.Clock, token);
         var options = UnitTextOptions.Execution();
         var root = Path.Combine(database.Directory, TextIncrementalProtocol.RootDirectory);
         var leaf = TextIncrementalEnrollmentFiles.Find(root, request, budget, options)

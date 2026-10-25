@@ -23,7 +23,7 @@ internal static class TextProjectionRecoveryAssertions
             var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
             var request = new SearchRequest(receipt.Partition, receipt.Collection, "/text", receipt.Query, Limit: 10);
             var oracle = await new SearchEngine(database, RecoveryExecutionOptions.QueryExecution()).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
-            using var projection = new RuntimeTextProjection(indexDirectory, RecoveryExecutionOptions.DatabaseLimits(database.Limits), store.Identity.NodeId,
+            using var projection = new RuntimeTextProjection(indexDirectory, store.Identity.NodeId,
                 RecoveryExecutionOptions.RuntimeText());
             var actual = await new SearchEngine(database, RecoveryExecutionOptions.QueryExecution(), projection).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
 

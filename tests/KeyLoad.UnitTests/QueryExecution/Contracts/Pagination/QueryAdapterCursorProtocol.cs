@@ -19,7 +19,7 @@ internal static class QueryAdapterCursorProtocol
 
     internal static AstQueryRequest Json(PartitionRef partition, string? cursor = null)
         => QueryAdapterTestSupport.RoundTrip(new(partition,
-            new SqlParser(Sql.Replace("2.00", "2", StringComparison.Ordinal), UnitExecutionOptions.DatabaseLimits(new()),
+            new SqlParser(Sql.Replace("2.00", "2", StringComparison.Ordinal),
                 UnitExecutionOptions.QueryExecution()).Parse(), new(), true, cursor));
 
     internal static KeyLoadQuery<QueryAdapterOrder> Builder(PartitionRef partition)

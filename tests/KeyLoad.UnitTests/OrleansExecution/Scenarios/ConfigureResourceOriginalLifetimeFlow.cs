@@ -74,7 +74,7 @@ internal static class ConfigureResourceOriginalLifetimeFlow
                 : OrleansSerialization.Serialize(request);
             original = fixture.Database.CreateCommand(createTable ? OperationKind.CreateTable : OperationKind.ConfigureResource,
                 Guid.NewGuid(), Subject, fixture.Database.EvaluationClock.GetUtcNow(), payload, work);
-            var admitted = ResourceEffectAdmissionValidation.Read(original, fixture.Database.OperationLimitsOptions.Value);
+            var admitted = ResourceEffectAdmissionValidation.Read(original);
             await Assert.That(admitted.Bindings.Length).IsEqualTo(previous is null ? 0 : 1);
             fixture.Database.ValidateResourceEffectSubmission(original, new DateTimeOffset(original.Timestamp), lease, work);
             await Assert.That(lease.Dependencies.Count).IsEqualTo(previous is null ? 0 : 1);

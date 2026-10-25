@@ -29,20 +29,19 @@ internal static class RecurringSagaStorage
 
     internal static long SerializedBytes<T>(T value) => OrleansSerialization.Serialize(value).LongLength;
 
-    internal static RecurringSagaCapacity Add(RecurringSagaCapacity current, long bytes, DatabaseLimits limits)
+    internal static RecurringSagaCapacity Add(RecurringSagaCapacity current, long bytes)
     {
         RequireCounter(current);
         var records = checked(current.Records + AdjacentElementOffset);
         var totalBytes = checked(current.Bytes + bytes);
-        if (records > limits.MaxScanRecords || bytes < NoRetainedBytes || totalBytes > limits.MaxBatchBytes)
+        if (bytes < NoRetainedBytes)
         {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RecurringSagaProtocol.CapacityExhausted);
+            throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity);
         }
         return new(records, totalBytes);
     }
 
-    internal static RecurringSagaCapacity Replace(RecurringSagaCapacity current, long oldBytes, long newBytes,
-        DatabaseLimits limits)
+    internal static RecurringSagaCapacity Replace(RecurringSagaCapacity current, long oldBytes, long newBytes)
     {
         RequireCounter(current);
         if (oldBytes < NoRetainedBytes || newBytes < NoRetainedBytes || oldBytes > current.Bytes)
@@ -50,10 +49,6 @@ internal static class RecurringSagaStorage
             throw Errors.Fail(ErrorCode.Corruption, CorruptCapacity);
         }
         var totalBytes = checked(current.Bytes - oldBytes + newBytes);
-        if (totalBytes > limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, RecurringSagaProtocol.CapacityExhausted);
-        }
         return current with
         {
             Bytes = totalBytes

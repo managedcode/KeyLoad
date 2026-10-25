@@ -14,10 +14,6 @@ internal static class SampleChunkCrashState
         string? inflightResult = null)
     {
         var receiptPath = Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile);
-        if (new FileInfo(receiptPath).Length > database.Limits.MaxBatchBytes)
-        {
-            throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
-        }
         var receipt = await File.ReadAllBytesAsync(receiptPath).ConfigureAwait(false);
         var window = database.ReadSampleChunkWindow(CrashFixtureValues.Principal,
             new(SampleChunkCrashContract.Partition, SampleChunkCrashContract.Set, SampleChunkCrashContract.Series,
@@ -27,7 +23,7 @@ internal static class SampleChunkCrashState
             SampleChunkCrashContract.Until, SampleChunkCrashContract.SampleLimit);
         var state = new SampleChunkCrashSnapshot(window, rows, Raw(database), database.Store.Position,
             Convert.ToHexString(receipt), inflightResult);
-        await SampleChunkSnapshotFile.WriteAsync(Path.Combine(root, name), state, database.Limits.MaxBatchBytes)
+        await SampleChunkSnapshotFile.WriteAsync(Path.Combine(root, name), state)
             .ConfigureAwait(false);
     }
 

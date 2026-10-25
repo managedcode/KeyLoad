@@ -13,23 +13,13 @@ internal static class SqlTypedInsertControls
             await RefusalAsync(() => SqlTypedInsertLiteral.Compile(fixture.Partition, Guid.NewGuid(), sql, token), ErrorCode.UnsupportedCapability);
         }
         await RefusalAsync(() => SqlTypedInsertLiteral.Compile(fixture.Partition, Guid.NewGuid(), DuplicateColumns, token), ErrorCode.Validation);
-        var options = UnitExecutionOptions.DatabaseLimits();
-        await RefusalAsync(() => SqlOperationCompiler.Compile(new(fixture.Partition, SqlTypedInsertLiteral.Repair), options,
-            options.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token), ErrorCode.Validation);
-        await BoundAsync(fixture, new DatabaseLimits { MaxBatchMutations = SingleRow }, SqlTypedInsertLiteral.Sql, token);
-        await BoundAsync(fixture, new DatabaseLimits { MaxDocumentBytes = ShortRowBytes }, SqlTypedInsertLiteral.Repair, token);
+        await RefusalAsync(() => SqlOperationCompiler.Compile(new(fixture.Partition, SqlTypedInsertLiteral.Repair), UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), token), ErrorCode.Validation);
         await CancelAsync(fixture, token);
         var changed = SqlTypedInsertLiteral.Compile(fixture.Partition, state.Created.Command.CommandId, SqlTypedInsertLiteral.Repair, token);
         await Assert.That(Errors.Code(SqlTypedInsertLiteral.Apply(fixture.Database, changed, state.Created.At).Problem)).IsEqualTo(ErrorCode.Conflict);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertHot.ReplayAsync(fixture, state.Created);
         await SqlTypedInsertAssertions.ImageAsync(fixture, fixture.Store, fixture.Database, repaired: false);
-    }
-    private static async Task BoundAsync(TestDatabase fixture, DatabaseLimits value, string sql, CancellationToken token)
-    {
-        var options = UnitExecutionOptions.DatabaseLimits(value);
-        await RefusalAsync(() => SqlOperationCompiler.Compile(new(fixture.Partition, sql, CommandId: Guid.NewGuid()), options,
-            options.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token), ErrorCode.ResourceExhausted);
     }
     private static async Task RefusalAsync(Func<object> operation, ErrorCode expected)
     {
@@ -63,6 +53,4 @@ internal static class SqlTypedInsertControls
         "INSERT INTO dbo.[sql-values] (id,title) VALUES (N'x',N'x')"];
     private const string DuplicateColumns = "INSERT INTO [sql-values] (id,id) VALUES (N'x',N'x')";
     private const string MissingCancellation = "The original SQL INSERT token was not retained.";
-    private const int SingleRow = 1;
-    private const int ShortRowBytes = 16;
 }

@@ -10,6 +10,7 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
     private const string SecondId = "sort-beta";
     private const string ThirdId = "sort-gamma";
     private const int SeedCount = 3;
+    private static readonly TimeSpan CallerLifetime = TimeSpan.FromSeconds(30);
 
     [Test]
     public async Task ReachabilitySortPreservesCancellationAndDeadlineAndHealthyFollowup()
@@ -52,7 +53,8 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
     private static GraphSearchReachability[] ReadReachability(TestDatabase database, GraphWalkSpec walk,
         TimeProvider clock, CancellationToken cancellationToken)
     {
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits), clock, cancellationToken);
+        var budget = new ReadExecutionBudget(clock, cancellationToken);
+        budget.ConstrainLifetime(clock.GetUtcNow() + CallerLifetime);
         return database.Database.WithQueryView(PrincipalId, database.Partition,
             GraphSearchTestSupport.Documents, (view, principal, _) =>
                 database.Database.ReadGraphSearchReachability(view, principal, database.Partition, walk, budget));

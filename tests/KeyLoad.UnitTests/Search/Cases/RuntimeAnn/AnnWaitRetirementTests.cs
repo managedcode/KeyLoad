@@ -59,7 +59,7 @@ internal sealed class AnnWaitRetirementTests
 
     private static IAnnProjectionLease Acquire(TestDatabase database, AnnMaintenanceTestRuntime runtime, WaitForAnnIndexRequest request)
     {
-        var budget = new ReadExecutionBudget(database.Database.OperationLimitsOptions, database.Database.EvaluationClock);
+        var budget = new ReadExecutionBudget(database.Database.EvaluationClock);
         return database.Database.WithQueryView(AnnWaitWholeFlow.Root, request.Partition, request.Collection, (view, principal, resource) =>
         {
             database.Database.Authorization.Require(principal, request.Partition, request.Collection, Capability.VectorSearch);

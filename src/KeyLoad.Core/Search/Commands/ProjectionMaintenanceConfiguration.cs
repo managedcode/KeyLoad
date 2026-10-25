@@ -42,10 +42,6 @@ public static class ProjectionMaintenanceConfiguration
 
         var principal = engine.Principal(view, operation.UserId!, engine.Clock.GetUtcNow());
         Search.AnnProjectionPinValidation.RequireOwner(engine, view, principal, configure.Consumer.Partition, original);
-        if (OrleansSerialization.Measure(original) > engine.Limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidMaintenanceProfile);
-        }
     }
 
     internal static void RequireInitialMaintenanceReservation(ProjectionConsumerInfo previous, ConfigureProjectionConsumerRequest configure)

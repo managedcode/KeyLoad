@@ -58,7 +58,7 @@ internal static class RecurringSagaSchemaCanonical
                 new(SagaKind, Queue, SagaId.ToString(Format), One))
         };
         var partition = owner.Source.Partition;
-        var page = owner.Store.Read(view => view.Scan(KeySpace.Partition(Outbox, partition), owner.Database.Limits.MaxScanRecords));
+        var page = owner.Store.Read(view => view.Scan(KeySpace.Partition(Outbox, partition), view.MaximumRangeRecords));
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Records.Length).IsEqualTo(Two);
         foreach (var (row, literal) in page.Records.Zip(expected))

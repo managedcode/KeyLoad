@@ -23,7 +23,7 @@ flowchart LR
 
 ## Automated mapping
 
-AC001 maps to SqlGraphPathParityTests, SqlGraphPathRejectionTests, SqlGraphPathParameterBoundaryTests, SqlGraphPathDeadlineTests, SqlGraphPathOperationFlowTests, GraphPathClusterParityTests and its existing GraphPathRawReadR43Trial continuation. GraphPathFieldUseR43State and GraphPathRebindR44State already use the shortest-path SELECT form. GraphPathPayloadTests separately qualifies payload/envelope identity without interpreting its opaque SQL sample.
+AC001 maps to SqlGraphPathParityTests, SqlGraphPathRejectionTests, SqlGraphPathParameterBoundaryTests, SqlGraphPathOperationFlowTests, GraphPathClusterParityTests and its existing GraphPathRawReadR43Trial continuation. GraphPathFieldUseR43State and GraphPathRebindR44State already use the shortest-path SELECT form. GraphPathPayloadTests separately qualifies payload/envelope identity without interpreting its opaque SQL sample.
 
 AC002 maps to all original SqlGraphSearchParityTests and SqlGraphSearchResultCompositionTests, their original SqlGraphSearchTestSupport and AdapterVectorWholeFlow, SqlGraphSearchClusterTests and ThreeWayHybridClusterTests. The text/vector/scope/retriever/expansion corpus, independent rank fields, allowlist semantics and all original zero-weight/label/refusal assertions remain.
 

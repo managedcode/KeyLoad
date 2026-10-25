@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.QueryExecution;
 
-internal sealed class DistributedSearchOperation(DatabaseEngine database, DistributedSearchRequest request,
+internal sealed class DistributedSearchOperation(DistributedSearchRequest request,
     ImmutableArray<PartitionRef> partitions, IOptions<QueryExecutionOptions> options,
     ReadExecutionBudget budget, ReadExecutionBudgetReadGrant[] grants,
     Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
@@ -38,8 +38,7 @@ internal sealed class DistributedSearchOperation(DatabaseEngine database, Distri
             request.Search, witnesses, statistics, scope, windows, default, budget);
         var candidates = await RunAsync(DistributedSearchPhase.Candidates, candidateWork).ConfigureAwait(true);
         var selected = DistributedSearchGlobalFusion.Select(request.Search,
-            Branches(candidates, text: true), Branches(candidates, text: false), windows, scope,
-            database.Limits, budget, out var fusion);
+            Branches(candidates, text: true), Branches(candidates, text: false), windows, scope, budget, out var fusion);
         var projectionWork = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Projection, partitions,
             request.Search, witnesses, null, null, default, selected, budget);
         var projected = await RunAsync(DistributedSearchPhase.Projection, projectionWork).ConfigureAwait(true);

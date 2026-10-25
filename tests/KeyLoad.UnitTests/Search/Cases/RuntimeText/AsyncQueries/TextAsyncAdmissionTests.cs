@@ -103,7 +103,7 @@ internal sealed class TextAsyncAdmissionTests
 
     private static RuntimeTextProjection CreateProjection(TestDatabase database,
         Action<TextFaultStage>? faultObserver = null)
-        => new(Path.Combine(database.Directory, "execution-text"), UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
+        => new(Path.Combine(database.Directory, "execution-text"),
             database.Store.Identity.NodeId, UnitTextOptions.Execution(), faultObserver: faultObserver);
 
     private static SearchRequest Request(TestDatabase database) => new(database.Partition, Collection, TextPath, Query);

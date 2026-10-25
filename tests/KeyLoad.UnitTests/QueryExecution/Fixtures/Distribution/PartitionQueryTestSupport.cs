@@ -77,13 +77,6 @@ internal static class PartitionQueryTestSupport
         return new(database.Partition, query, AllowFullScan: true);
     }
 
-    internal static QueryEngine ReadEngine(TestDatabase database, DatabaseLimits? limits)
-    {
-        var engine = limits is null ? database.Database : TestDatabaseEngineFactory.Capture(
-            UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.RuntimeClaimsExecution(), null, database.Database.EvaluationClock)(database.Store);
-        return new(engine, UnitExecutionOptions.QueryExecution());
-    }
-
     internal static AstQueryRequest IndexedRequest(TestDatabase database, int limit)
     {
         var filter = new Comparison(new FieldOperand(StatusPath), "=", ValueOperand.Create("open"));

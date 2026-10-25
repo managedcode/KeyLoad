@@ -40,7 +40,7 @@ internal static class RequestCqrsAnnPinnedLifetimeFlow
     {
         var database = fixture.Database.Database;
         var runtime = fixture.RuntimeAnnMaintenance ?? throw new InvalidOperationException();
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, token);
         return database.WithQueryView(RequestCqrsAnnTestData.Principal, request.Consumer.Partition, request.Collection,
             (view, principal, resource) =>
             {
@@ -89,7 +89,7 @@ internal static class RequestCqrsAnnPinnedLifetimeFlow
             RequestCqrsAnnTestData.Field, RequestCqrsAnnTestData.Space, [0, 0, 1], RequestCqrsAnnTestData.ChangedRevision),
             held.Records[FirstOrdinal]);
         var database = fixture.Database.Database;
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, token);
         var actual = held.Search(RequestCqrsAnnTestData.Query, SingleRecord, new ulong[] { EligibleFirst },
             new AnnWorkBudget(budget, held.CallerSeedOptions.Value.MaxWorkUnits));
         await Assert.That(actual.Mode).IsEqualTo(AnnSearchMode.ExactSmallSet);

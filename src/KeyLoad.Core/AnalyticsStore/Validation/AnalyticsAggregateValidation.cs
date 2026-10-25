@@ -9,8 +9,7 @@ internal static class AnalyticsAggregateValidation
             || request.GroupBy.Distinct(StringComparer.Ordinal).Count() != request.GroupBy.Length
             || request.Metrics.IsDefaultOrEmpty || request.Metrics.Any(value => value is null)
             || request.Metrics.Select(value => value.Name).Distinct(StringComparer.Ordinal).Count() != request.Metrics.Length
-            || request.MaxGroups <= 0 || request.MaxGroups > database.Limits.MaxResults
-            || request.Metrics.Length > database.Limits.MaxResults)
+            || request.MaxGroups <= 0)
         {
             throw Errors.Fail(ErrorCode.Validation, AnalyticsStoreValidation.Invalid);
         }

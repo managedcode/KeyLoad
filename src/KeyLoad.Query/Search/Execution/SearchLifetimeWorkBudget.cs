@@ -9,7 +9,7 @@ internal static class SearchLifetimeWorkBudget
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+        var budget = new ReadExecutionBudget(database.EvaluationClock, token);
         budget.AttachResourceLifetimeBinding(binding);
         QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();

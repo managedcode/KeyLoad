@@ -4,8 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class EventFeedHintBatchAdmission(Serializer<MemoryMessageBody> runtimeSerializer,
-    IOptions<DatabaseLimits> databaseOptions, IOptions<GrainRoutingOptions> routingOptions)
+internal sealed class EventFeedHintBatchAdmission(Serializer<MemoryMessageBody> runtimeSerializer, IOptions<GrainRoutingOptions> routingOptions)
 {
     private const int Version = 1;
     private const long FirstRevision = 1;
@@ -26,10 +25,7 @@ internal sealed class EventFeedHintBatchAdmission(Serializer<MemoryMessageBody> 
         {
             throw Errors.Fail(ErrorCode.Validation, Invalid);
         }
-        var limits = databaseOptions.Value;
-        limits.Validate();
-        var maximumBytes = checked((int)Math.Min(limits.MaxBatchBytes, limits.MaxQueryReadBytes));
-        using var counter = new GrainCountingWriter(maximumBytes, routingOptions, CancellationToken.None);
+        using var counter = new GrainCountingWriter(routingOptions.Value.MaximumReplyBytes, routingOptions, CancellationToken.None);
         runtimeSerializer.Serialize(new MemoryMessageBody(new object[] { hint }, null), counter);
         return hint;
     }

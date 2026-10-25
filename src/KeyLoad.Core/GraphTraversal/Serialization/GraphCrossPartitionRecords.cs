@@ -7,7 +7,6 @@ namespace KeyLoad.Core.GraphTraversal.Serialization;
 internal static class GraphCrossPartitionRecords
 {
     private const string Malformed = "A committed graph cross-partition record is malformed.";
-    private const string CapacityExceeded = "The graph projection capacity is exhausted.";
 
     internal static T? Read<T>(IKeyValueView view, byte[] key) where T : class
     {
@@ -24,15 +23,7 @@ internal static class GraphCrossPartitionRecords
         return record;
     }
 
-    internal static byte[] Encode<T>(T record, int maximumBytes)
-    {
-        var bytes = OrleansSerialization.Serialize(record);
-        if (bytes.Length > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, CapacityExceeded);
-        }
-        return bytes;
-    }
+    internal static byte[] Encode<T>(T record) => OrleansSerialization.Serialize(record);
 
     internal static string Fingerprint(PartitionRef source, string graph, string edgeId,
         EntityRef destination, long revision, bool deleted, EdgeRecord edge)

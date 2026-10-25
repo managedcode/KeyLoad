@@ -2,6 +2,8 @@
 
 Status: Source joined with local operation evidence; public cluster, complete negative inventory and original Linux qualification pending. Date: 2026-10-07. This is a first operator slice under existing REQ-REL-004 and REQ-QUERY-007; it does not close either requirement or the full SQL workstream.
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 ## Product boundary
 
 ```mermaid

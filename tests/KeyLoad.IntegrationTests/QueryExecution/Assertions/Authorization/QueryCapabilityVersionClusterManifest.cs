@@ -8,7 +8,7 @@ internal static class QueryCapabilityVersionClusterManifest
 {
     internal static async Task RunAsync(RequestCqrsClusterCallers caller, PartitionRef partition, CancellationToken token)
     {
-        var expected = QueryCapabilityVersionClusterExpected.Manifest(QueryCapabilityVersionClusterRequests.Limits());
+        var expected = QueryCapabilityVersionClusterExpected.Manifest();
         await SqlClusterProtocol.EqualAsync(expected, await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token)));
         await SqlClusterProtocol.EqualAsync(expected, (await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
             await caller.Mcp.CallWithoutBodyAsync(McpCallerTools.QueryCapabilities, token))).Value);

@@ -30,33 +30,6 @@ internal sealed class SqlOperationCommentRejectionTests
     }
 
     [Test]
-    public async Task AcSqlc002ConfiguredCommentDepthAcceptsEqualityAndRejectsOneMore()
-    {
-        var limits = SqlOperationTestData.Limits with
-        {
-            MaxQueryDepth = SqlOperationCommentTestData.ShallowDepth
-        };
-        var accepted = SqlOperationCommentTestData.Request(
-            SqlOperationCommentTestData.Nested(SqlOperationCommentTestData.ShallowDepth) + SqlOperationCommentTestData.PlainCall);
-        var budget = new global::KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(SqlOperationTestData.Limits));
-        using var reader = new global::KeyLoad.QueryExecution.ScriptDomBoundedReader(accepted.Sql, budget.Check);
-        var parser = new global::Microsoft.SqlServer.TransactSql.ScriptDom.TSql180Parser(true,
-            global::Microsoft.SqlServer.TransactSql.ScriptDom.SqlEngineType.Standalone);
-        var tokens = parser.GetTokenStream(reader, out var errors);
-        await Assert.That(errors.Count).IsEqualTo(0);
-        global::KeyLoad.QueryExecution.ScriptDomTokenBounds.Require(tokens, limits, budget.Check);
-        await SqlOperationTestData.Same(SqlOperationTestData.Compile(accepted),
-            SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
-        var rejected = accepted with
-        {
-            Sql = SqlOperationCommentTestData.Nested(SqlOperationCommentTestData.ExcessDepth) + SqlOperationCommentTestData.PlainCall
-        };
-        await SqlOperationTestData.Reject(rejected, ErrorCode.BudgetExceeded, limits);
-        await SqlOperationTestData.Same(SqlOperationTestData.Compile(accepted),
-            SqlOperationTestData.Find(McpCatalogExpectations.QueryCapabilities).Decode(null));
-    }
-
-    [Test]
     public async Task AcSqlc002CommentsCannotConcatenateIdentifiersOrDelimiterCharacters()
     {
         await SqlOperationTestData.Reject(SqlOperationCommentTestData.Request(SplitRoot), ErrorCode.Validation);

@@ -46,7 +46,7 @@ public static class ChangeFeedsQueries
         });
     }
 
-    internal static void BindProjectionReadResources(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, ImmutableArray<string> names)
+    internal static void BindProjectionReadResources(IKeyValueView view, PartitionRef partition, ImmutableArray<string> names)
     {
         if (view is not IResourceLifetimeReadBindingView)
         {
@@ -55,7 +55,7 @@ public static class ChangeFeedsQueries
 
         if (names.Length == ProjectionOutbox.ProjectionAcceptsEmptyResourcesLength)
         {
-            foreach (var resource in PartitionResourceCatalog.Capture(view, partition, engine.Limits))
+            foreach (var resource in PartitionResourceCatalog.Capture(view, partition))
             {
                 _ = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, resource.Name);
             }

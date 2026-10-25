@@ -64,7 +64,6 @@ internal sealed class SqlOperationCommentCompilerTests
     [Test]
     public async Task AcSqlc003CommentedSelectLowersToTheSameTypedPlanAsThePlainText()
     {
-        var limits = Microsoft.Extensions.Options.Options.Create(SqlOperationTestData.Limits);
         var execution = UnitExecutionOptions.QueryExecution();
         foreach (var sql in new[] { SqlOperationCommentTestData.Select, SqlOperationCommentTestData.Top })
         {
@@ -75,10 +74,10 @@ internal sealed class SqlOperationCommentCompilerTests
             var request = new SqlOperationRequest(McpCanonicalTestData.Partition, sql, parameters,
                 AllowFullScan: true, Cursor: SqlOperationTestData.Cursor);
             var query = new QueryRequest(request.Partition, sql, parameters, true, request.Cursor);
-            var budget = new global::KeyLoad.Core.ReadExecutionBudget(limits);
+            var budget = new global::KeyLoad.Core.ReadExecutionBudget();
             var plan = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(
-                global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql, limits, budget.Check, CancellationToken.None),
-                query, limits, execution, budget, null, CancellationToken.None);
+                global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql, budget.Check, CancellationToken.None),
+                query, execution, budget, null, CancellationToken.None);
             var expected = SqlOperationTestData.Find(McpCatalogExpectations.QueryAst).Decode(
                 new Dictionary<string, JsonElement>(StringComparer.Ordinal)
                 {

@@ -24,7 +24,6 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
     private readonly Authorization.FoundationOtlpClusterSelection? telemetry;
     private readonly Messaging.QueueDeadlineClusterSelection? queueDeadline;
     private readonly QueryExecution.PostgresClusterFixtureOwnership runtimeSql = new();
-    private readonly DatabaseLimits? databaseLimits;
     private readonly QueryExecutionOptions? queryExecution;
     private ClusterFixtureDiagnostics? diagnostics;
     private ProcessRuntimeControl? processRuntime;
@@ -55,14 +54,8 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
     internal ClusterFixture(int maximumBodyBytes)
         => this.maximumBodyBytes = maximumBodyBytes;
 
-    /// <summary>Creates an Orleans fixture with the server's typed database execution limits.</summary>
-    /// <param name="databaseLimits">The validated limits applied to every Aspire Orleans node.</param>
-    internal ClusterFixture(DatabaseLimits databaseLimits)
-        => this.databaseLimits = ClusterFixtureDatabaseLimits.Validate(databaseLimits);
-
-    /// <summary>Creates an Orleans fixture with explicit database and additional query result bounds.</summary>
-    internal ClusterFixture(DatabaseLimits databaseLimits, QueryExecutionOptions queryExecution)
-        : this(databaseLimits)
+    /// <summary>Creates an Orleans fixture with explicit query result bounds.</summary>
+    internal ClusterFixture(QueryExecutionOptions queryExecution)
         => this.queryExecution = ClusterFixtureQueryResultLimits.Validate(queryExecution);
 
     /// <summary>Gets the unique private host directory used by the Aspire application.</summary>

@@ -8,26 +8,22 @@ internal sealed class RuntimeTextProjectionLifecycle
 {
     private readonly IOptions<TextExecutionOptions> executionOptions;
 
-    private readonly DatabaseLimits limits;
-    private readonly IOptions<DatabaseLimits> limitsOptions;
     private readonly TextProjectionState state;
     private readonly TextProjectionPhysicalGate physicalGate;
     private readonly Action<TextFaultStage>? faultObserver;
     private readonly TextProjectionShutdown shutdown;
     private readonly TextResourceOwnership? resources;
 
-    internal RuntimeTextProjectionLifecycle(string root, IOptions<DatabaseLimits> limitsOptions, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal RuntimeTextProjectionLifecycle(string root, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
     {
         this.executionOptions = executionOptions;
         this.resources = resources;
         Root = root;
         SourceNodeId = sourceNodeId;
-        this.limitsOptions = limitsOptions;
-        limits = limitsOptions.Value;
         this.state = state;
         this.physicalGate = physicalGate;
         this.faultObserver = faultObserver;
-        shutdown = new(root, limitsOptions, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions, resources: resources);
+        shutdown = new(root, sourceNodeId, state, physicalGate, faultObserver, executionOptions: executionOptions, resources: resources);
     }
 
     internal string Root
@@ -51,7 +47,7 @@ internal sealed class RuntimeTextProjectionLifecycle
             physicalGate.Run(() =>
             {
                 state.CaptureSlots(out var first, out var second, out var third);
-                TextFiles.WriteOwner(Root, leaf, SourceNodeId, scope, limits, first: first, second: second, third: third, executionOptions: executionOptions, resources: resources);
+                TextFiles.WriteOwner(Root, leaf, SourceNodeId, scope, first: first, second: second, third: third, executionOptions: executionOptions, resources: resources);
                 state.MarkOwnerCreated(slot);
             });
             faultObserver?.Invoke(TextFaultStage.OwnerFlushed);
@@ -59,7 +55,7 @@ internal sealed class RuntimeTextProjectionLifecycle
             var provider = new TextFileStreamProvider(Root, leaf, SourceNodeId, executionOptions: executionOptions, resources: resources);
             generation = physicalGate.Run(() =>
             {
-                var created = new TextGeneration(Root, leaf, SourceNodeId, scope, limitsOptions, provider, executionOptions: executionOptions, resources: resources);
+                var created = new TextGeneration(Root, leaf, SourceNodeId, scope, provider, executionOptions: executionOptions, resources: resources);
                 state.AttachGeneration(slot, created);
                 return created;
             });
@@ -88,7 +84,7 @@ internal sealed class RuntimeTextProjectionLifecycle
         physicalGate.Run(() => TextFiles.CheckGenerationBound(generation.Path, budget: budget, executionOptions: executionOptions));
         budget.Check();
         physicalGate.Run(() => TextFiles.WritePendingManifest(Root, generation.Leaf, generation.Scope,
-            generation.SealRecords(), files, limits, budget: budget, executionOptions: executionOptions, resources: resources));
+            generation.SealRecords(), files, budget: budget, executionOptions: executionOptions, resources: resources));
         budget.Check();
         faultObserver?.Invoke(TextFaultStage.InventoryFlushed);
         budget.Check();
@@ -108,7 +104,7 @@ internal sealed class RuntimeTextProjectionLifecycle
             {
                 var generation = slot.Generation ?? throw TextErrors.Corrupt();
                 generation.DisposeIndex();
-                TextFiles.DeleteOwnedGeneration(Root, generation.Leaf, SourceNodeId, limits, executionOptions: executionOptions, resources: resources);
+                TextFiles.DeleteOwnedGeneration(Root, generation.Leaf, SourceNodeId, executionOptions: executionOptions, resources: resources);
                 slot.SharedReservation?.CompleteAfterJoinedCleanup();
             }
             catch (Exception error)
@@ -173,7 +169,7 @@ internal sealed class RuntimeTextProjectionLifecycle
             {
                 var previousGeneration = previous.Generation ?? throw TextErrors.Corrupt();
                 previousGeneration.DisposeIndex();
-                TextFiles.DeleteOwnedGeneration(Root, previousGeneration.Leaf, SourceNodeId, limits, executionOptions: executionOptions, resources: resources);
+                TextFiles.DeleteOwnedGeneration(Root, previousGeneration.Leaf, SourceNodeId, executionOptions: executionOptions, resources: resources);
                 previous.SharedReservation?.CompleteAfterJoinedCleanup();
                 state.CompleteReplacement(previous, generation);
             }
@@ -197,7 +193,7 @@ internal sealed class RuntimeTextProjectionLifecycle
         {
             ServerFailureObserver.Observe(() => physicalGate.Run(() =>
             {
-                TextFiles.DeleteBuildingGeneration(Root, leaf, SourceNodeId, limits, executionOptions: executionOptions, resources: resources);
+                TextFiles.DeleteBuildingGeneration(Root, leaf, SourceNodeId, executionOptions: executionOptions, resources: resources);
                 slot.SharedReservation?.CompleteAfterJoinedCleanup();
                 state.ClearFailedBuild(slot);
             }), failures);

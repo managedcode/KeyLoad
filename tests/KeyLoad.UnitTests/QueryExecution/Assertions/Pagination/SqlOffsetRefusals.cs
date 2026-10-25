@@ -33,7 +33,7 @@ internal static class SqlOffsetRefusals
             await UnchangedAsync(database.Store, before, position, identity);
         }
         var ast = SqlOffsetProtocol.Join(database.Partition);
-        foreach (var offset in new[] { -1, SqlOffsetProtocol.WindowBound, int.MaxValue })
+        foreach (var (offset, offsetCode) in new[] { (-1, ErrorCode.BudgetExceeded), (int.MaxValue, ErrorCode.Validation) })
         {
             await ErrorAsync(() => engine.ExecuteAst(SqlOffsetProtocol.Root,
                 ast with
@@ -42,7 +42,7 @@ internal static class SqlOffsetRefusals
                     {
                         Offset = offset
                     }
-                }), ErrorCode.BudgetExceeded);
+                }), offsetCode);
             await UnchangedAsync(database.Store, before, position, identity);
         }
         var first = engine.Execute(SqlOffsetProtocol.Root, SqlOffsetProtocol.ScalarRequest(database.Partition));

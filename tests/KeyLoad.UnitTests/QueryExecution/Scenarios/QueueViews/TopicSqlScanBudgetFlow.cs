@@ -22,18 +22,12 @@ internal static class TopicSqlScanBudgetFlow
             [new PublishTopic(TopicSqlProtocol.Topic,
                 [.. Enumerable.Range(FirstAdditionalPosition, AdditionalRecords).Select(Event)])]);
         var appended = TopicSqlSeed.Publish(database, append);
-        var engine = QueryBudgetReadOwner.Create(database, database.Database.Limits with { MaxScanRecords = ScanRecords });
-        var bytes = QueueWholeFlowStorage.Bytes(database.Store);
-        var position = database.Store.Position;
-        var rejected = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(TopicSqlProtocol.Root,
-            TopicSqlSeed.Request(database, TopicSqlProtocol.LimitedSql)));
-        await Assert.That(rejected.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await TopicSqlAssertions.UnchangedAsync(database, bytes, position);
+        var engine = QueryBudgetReadOwner.Create(database, database.Database.Limits);
         var purge = new CommandRequest(Guid.NewGuid(), database.Partition,
             [new PurgeTopic(TopicSqlProtocol.Topic, PurgeThrough)]);
         var purged = database.Submit(OperationKind.Batch, purge, id: purge.CommandId).Get<CommitReceipt>();
-        bytes = QueueWholeFlowStorage.Bytes(database.Store);
-        position = database.Store.Position;
+        var bytes = QueueWholeFlowStorage.Bytes(database.Store);
+        var position = database.Store.Position;
         var unavailable = Assert.ThrowsExactly<KeyLoadException>(() => TopicSqlSeed.Read(database));
         await Assert.That(unavailable.Code).IsEqualTo(ErrorCode.HistoryUnavailable);
         await TopicSqlAssertions.UnchangedAsync(database, bytes, position);

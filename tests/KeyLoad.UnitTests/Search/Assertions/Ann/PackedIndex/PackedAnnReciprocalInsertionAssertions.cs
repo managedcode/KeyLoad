@@ -22,17 +22,17 @@ internal static class PackedAnnReciprocalInsertionAssertions
             ExactThreshold = 0,
             Seed = PackedAnnTestData.CorpusSeed
         };
-        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var budget = PackedAnnIndexTestSupport.Budget();
         var measured = PackedAnnReciprocalObservation.Build(space, records, options, budget);
         var state = measured.State;
-        var adjacency = PackedAnnAdjacencyAssertions.Snapshot(state, PackedAnnIndexTestSupport.Budget(database));
+        var adjacency = PackedAnnAdjacencyAssertions.Snapshot(state, PackedAnnIndexTestSupport.Budget());
         PackedAnnReciprocalObservation.Write(measured, adjacency, options, budget);
         await Assert.That(records.Length).IsEqualTo(recordCount);
         await AssertValidAdjacencyAsync(state, records, adjacency);
-        var replayBudget = PackedAnnIndexTestSupport.Budget(database);
+        var replayBudget = PackedAnnIndexTestSupport.Budget();
         var replayMeasured = PackedAnnReciprocalObservation.Build(space, records, options, replayBudget);
         var replay = replayMeasured.State;
-        var replayAdjacency = PackedAnnAdjacencyAssertions.Snapshot(replay, PackedAnnIndexTestSupport.Budget(database));
+        var replayAdjacency = PackedAnnAdjacencyAssertions.Snapshot(replay, PackedAnnIndexTestSupport.Budget());
         PackedAnnReciprocalObservation.Write(replayMeasured, replayAdjacency, options, replayBudget);
         await PackedAnnAdjacencyAssertions.AssertSameAsync(adjacency, replayAdjacency);
         await Assert.That(replayBudget.WorkUnits).IsEqualTo(budget.WorkUnits);

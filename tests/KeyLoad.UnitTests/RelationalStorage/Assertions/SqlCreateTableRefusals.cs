@@ -22,12 +22,10 @@ internal static class SqlCreateTableRefusals
         await RejectAsync(fixture, InvalidPrimary, id, ErrorCode.Validation, token);
         await RejectAsync(fixture, Malformed, id, ErrorCode.Validation, token);
         await RejectAsync(fixture, SqlCreateTableLiteral.Sql, Guid.Empty, ErrorCode.Validation, token);
-        var limits = UnitExecutionOptions.DatabaseLimits();
         KeyLoadException? missing = null;
         try
         {
-            SqlOperationCompiler.Compile(new(fixture.Partition, SqlCreateTableLiteral.Sql),
-            limits, limits.Value.MaxBatchBytes, UnitExecutionOptions.QueryExecution(), token);
+            SqlOperationCompiler.Compile(new(fixture.Partition, SqlCreateTableLiteral.Sql), UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), token);
         }
         catch (KeyLoadException failure) { missing = failure; }
         await RequireAsync(missing, ErrorCode.Validation);

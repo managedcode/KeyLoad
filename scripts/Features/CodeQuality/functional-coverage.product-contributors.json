@@ -83,54 +83,6 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
-      "methodName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
-      "instanceName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
-      "requirements": [
-        "REQ-PQUERY-004"
-      ],
-      "acceptance": [
-        "AC-PQUERY-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Query"
-      ],
-      "operationOutcomeAndState": "measured ZoneTree observer charges exact bytes/records; exact allowances pass and each one-under bound returns BudgetExceeded"
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
-      "methodName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
-      "instanceName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
-      "requirements": [
-        "REQ-PQUERY-004"
-      ],
-      "acceptance": [
-        "AC-PQUERY-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Query"
-      ],
-      "operationOutcomeAndState": "independent serialization/retention bound admits a complete real merge at exact bytes and rejects one byte less"
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
-      "methodName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
-      "instanceName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
-      "requirements": [
-        "REQ-PQUERY-004"
-      ],
-      "acceptance": [
-        "AC-PQUERY-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Query"
-      ],
-      "operationOutcomeAndState": "execution index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
-    },
-    {
-      "suite": "unit",
       "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
       "methodName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
       "instanceName": "RealZoneTreeLeavesMatchIndependentGlobalOrderBeforeProjection",
@@ -405,90 +357,6 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinBudgetTests",
-      "methodName": "AcJoinWorkCountsLeftRecordsAndRightProbesAndLeavesStoreUsableAfterRejection",
-      "instanceName": "AcJoinWorkCountsLeftRecordsAndRightProbesAndLeavesStoreUsableAfterRejection",
-      "requirements": [
-        "REQ-REL-004",
-        "REQ-QUERY-007"
-      ],
-      "acceptance": [
-        "AC-REL-004-JOIN-004",
-        "AC-QUERY-007-JOIN-002"
-      ],
-      "executedModules": [
-        "KeyLoad.Abstractions",
-        "KeyLoad.Core",
-        "KeyLoad.Query",
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "measures the real left scan and right probes, admits the exact work bound, rejects over-bound work without changing committed position, and completes a healthy join"
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinBudgetTests",
-      "methodName": "AcJoinActualZoneTreeReadBudgetAdmitsTheMeasuredScanAndAllRightProbesAtItsExactBoundary",
-      "instanceName": "AcJoinActualZoneTreeReadBudgetAdmitsTheMeasuredScanAndAllRightProbesAtItsExactBoundary",
-      "requirements": [
-        "REQ-REL-004",
-        "REQ-QUERY-007"
-      ],
-      "acceptance": [
-        "AC-REL-004-JOIN-004",
-        "AC-QUERY-007-JOIN-002"
-      ],
-      "executedModules": [
-        "KeyLoad.Abstractions",
-        "KeyLoad.Core",
-        "KeyLoad.Query",
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "measures actual ZoneTree scan/probe bytes, admits the exact read-byte bound, rejects omitted-probe and one-byte-short budgets without mutation, and repeats the healthy join"
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinBudgetTests",
-      "methodName": "AcJoinPageBytesIncludeBothSourcesAndAdmitOnlyTheExactSerializedPageBound",
-      "instanceName": "AcJoinPageBytesIncludeBothSourcesAndAdmitOnlyTheExactSerializedPageBound",
-      "requirements": [
-        "REQ-REL-004",
-        "REQ-QUERY-007"
-      ],
-      "acceptance": [
-        "AC-REL-004-JOIN-004",
-        "AC-QUERY-007-JOIN-002"
-      ],
-      "executedModules": [
-        "KeyLoad.Abstractions",
-        "KeyLoad.Core",
-        "KeyLoad.Query",
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "admits the exact serialized page including both source identities, rejects one byte below without store mutation, and confirms identical healthy output"
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinBudgetTests",
-      "methodName": "AcJoinResultCountAdmitsTwoActualRowsAndRejectsTheNextRequestedResultWithHealthyFollowUp",
-      "instanceName": "AcJoinResultCountAdmitsTwoActualRowsAndRejectsTheNextRequestedResultWithHealthyFollowUp",
-      "requirements": [
-        "REQ-REL-004",
-        "REQ-QUERY-007"
-      ],
-      "acceptance": [
-        "AC-REL-004-JOIN-004",
-        "AC-QUERY-007-JOIN-002"
-      ],
-      "executedModules": [
-        "KeyLoad.Abstractions",
-        "KeyLoad.Core",
-        "KeyLoad.Query",
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "admits two actual joined rows, rejects a request requiring a third with BudgetExceeded and unchanged position, then rereads both rows"
-    },
-    {
-      "suite": "unit",
       "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinCancellationTests",
       "methodName": "AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
       "instanceName": "AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
@@ -507,27 +375,6 @@
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "cancels the original query token only after observed execution range progress, asserts the same cancellation token and unchanged position, then verifies exact healthy joined rows and source revisions"
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.SqlInnerJoinCancellationTests",
-      "methodName": "AcJoinDeadlineAfterRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
-      "instanceName": "AcJoinDeadlineAfterRangeProgressSettlesTheReadAndKeepsTheStoreHealthy",
-      "requirements": [
-        "REQ-REL-004",
-        "REQ-QUERY-007"
-      ],
-      "acceptance": [
-        "AC-REL-004-JOIN-004",
-        "AC-QUERY-007-JOIN-002"
-      ],
-      "executedModules": [
-        "KeyLoad.Abstractions",
-        "KeyLoad.Core",
-        "KeyLoad.Query",
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "expires the configured query deadline after observed execution range progress, asserts BudgetExceeded and unchanged position, then verifies exact healthy joined rows and source revisions"
     },
     {
       "suite": "unit",
@@ -898,56 +745,6 @@
         "KeyLoad.Storage.ZoneTree"
       ],
       "operationOutcomeAndState": "interleaves atomic pair-generation commits with SDK and official MCP direct/unified reads; each page must represent the complete previous or next pair generation and final pages agree across all four routes"
-    },
-    {
-      "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinBudgetTests",
-      "methodName": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
-      "instanceName": "JoinWorkBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
-      "requirements": [
-        "REQ-REL-004",
-        "REQ-QUERY-007"
-      ],
-      "acceptance": [
-        "AC-REL-004-JOIN-004",
-        "AC-REL-004-JOIN-006",
-        "AC-QUERY-007-JOIN-002"
-      ],
-      "executedModules": [
-        "KeyLoad.Abstractions",
-        "KeyLoad.Client",
-        "KeyLoad.Core",
-        "KeyLoad.Clustering",
-        "KeyLoad.Query",
-        "KeyLoad",
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "applies a real CLUSTER scan-work limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
-    },
-    {
-      "suite": "cluster",
-      "className": "KeyLoad.IntegrationTests.RelationalStorage.RelationalSqlClusterJoinBudgetTests",
-      "methodName": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
-      "instanceName": "JoinReadByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
-      "requirements": [
-        "REQ-REL-004",
-        "REQ-QUERY-007"
-      ],
-      "acceptance": [
-        "AC-REL-004-JOIN-004",
-        "AC-REL-004-JOIN-006",
-        "AC-QUERY-007-JOIN-002"
-      ],
-      "executedModules": [
-        "KeyLoad.Abstractions",
-        "KeyLoad.Client",
-        "KeyLoad.Core",
-        "KeyLoad.Clustering",
-        "KeyLoad.Query",
-        "KeyLoad",
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "applies a real CLUSTER raw read-byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
     },
     {
       "suite": "cluster",

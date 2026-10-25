@@ -12,12 +12,7 @@ internal sealed class HeavyDocumentLoadClusterTests : IAsyncDisposable
     private int disposed;
     public HeavyDocumentLoadClusterTests()
     {
-        var limits = new DatabaseLimits
-        {
-            MaxScanRecords = HeavyDocumentLoadProtocol.Records,
-            MaxQueryReadBytes = HeavyDocumentLoadProtocol.QueryReadBytes
-        };
-        fixture = new ClusterFixture(limits);
+        fixture = new ClusterFixture();
         scenario = new(fixture);
     }
 

@@ -24,7 +24,7 @@ public static class GraphTraversalCommands
         }
 
         engine.RequireGraphWrite(tx, principal, request.SourcePartition, targetPartition, request.Graph);
-        var intent = CurrentIntent(tx, request.SourcePartition, request.Graph, request.EdgeId, request.Destination, engine.Limits);
+        var intent = CurrentIntent(tx, request.SourcePartition, request.Graph, request.EdgeId, request.Destination);
         if (intent is null || intent.Revision != request.ExpectedRevision)
         {
             return NoChange(ApplyNoChangeReceipt, request.Graph, request.EdgeId, intent?.Revision ?? request.ExpectedRevision);
@@ -38,7 +38,7 @@ public static class GraphTraversalCommands
         var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersion>(tx, GraphCrossPartitionKeys.OwnerVersion(request.SourcePartition, request.Graph, request.EdgeId));
         GraphCrossPartitionValidation.ValidateOwnerVersion(owner);
         var canonical = tx.GetRecord<EdgeRecord>(GraphTraversalStorage.EdgeKey(request.SourcePartition, request.Graph, request.EdgeId));
-        engine.VerifyCurrentIntent(intent, owner!, canonical);
+        GraphTraversalCommands.VerifyCurrentIntent(intent, owner!, canonical);
         if (!intent.Deleted)
         {
             engine.VisibleVertex(tx, principal, intent.Edge.From);
@@ -67,8 +67,8 @@ public static class GraphTraversalCommands
         }
 
         var state = new GraphCrossPartitionReceiverState(GraphCrossPartitionProtocol.CurrentVersion, request.SourcePartition, request.Graph, request.EdgeId, request.Destination, intent.Revision, intent.Deleted, intent.Fingerprint);
-        var encoded = GraphCrossPartitionRecords.Encode(state, engine.Limits.MaxBatchBytes);
-        GraphCrossPartitionCapacityWriter.Apply(tx, targetPartition, GraphCrossPartitionCapacityDirection.ReceiverStates, GraphCrossPartitionKeys.ReversePartitionPrefix(targetPartition), [new(key, encoded)], engine.Limits);
+        var encoded = GraphCrossPartitionRecords.Encode(state);
+        GraphCrossPartitionCapacityWriter.Apply(tx, targetPartition, GraphCrossPartitionCapacityDirection.ReceiverStates, GraphCrossPartitionKeys.ReversePartitionPrefix(targetPartition), [new(key, encoded)]);
         return new(ApplyReceipt, request.Graph, request.EdgeId, intent.Revision);
     }
 
@@ -82,7 +82,7 @@ public static class GraphTraversalCommands
         }
 
         engine.RequireGraphWrite(tx, principal, sourcePartition, request.Destination.Partition, request.Graph);
-        var intent = CurrentIntent(tx, sourcePartition, request.Graph, request.EdgeId, request.Destination, engine.Limits);
+        var intent = CurrentIntent(tx, sourcePartition, request.Graph, request.EdgeId, request.Destination);
         if (intent is null || intent.Revision != request.ExpectedRevision)
         {
             return NoChange(CompleteNoChangeReceipt, request.Graph, request.EdgeId, intent?.Revision ?? request.ExpectedRevision);
@@ -95,7 +95,7 @@ public static class GraphTraversalCommands
         var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersion>(tx, GraphCrossPartitionKeys.OwnerVersion(sourcePartition, request.Graph, request.EdgeId));
         GraphCrossPartitionValidation.ValidateOwnerVersion(owner);
         var canonical = tx.GetRecord<EdgeRecord>(GraphTraversalStorage.EdgeKey(sourcePartition, request.Graph, request.EdgeId));
-        engine.VerifyCurrentIntent(intent, owner!, canonical);
+        GraphTraversalCommands.VerifyCurrentIntent(intent, owner!, canonical);
         var receiverKey = GraphCrossPartitionKeys.Reverse(request.Destination.Partition, request.Graph, request.Destination, sourcePartition, request.EdgeId);
         var receiver = GraphCrossPartitionRecords.Read<GraphCrossPartitionReceiverState>(tx, receiverKey) ?? throw Errors.Fail(ErrorCode.Conflict, ReceiverNotCommitted);
         GraphCrossPartitionValidation.ValidateReceiver(receiver, sourcePartition, request.Graph, request.EdgeId, request.Destination);
@@ -104,7 +104,7 @@ public static class GraphTraversalCommands
             throw Errors.Fail(ErrorCode.Conflict, ReceiverNotCommitted);
         }
 
-        GraphCrossPartitionCapacityWriter.Apply(tx, sourcePartition, GraphCrossPartitionCapacityDirection.PendingIntents, GraphCrossPartitionKeys.IntentPrefix(sourcePartition), [new(GraphCrossPartitionKeys.Intent(intent), null)], engine.Limits);
+        GraphCrossPartitionCapacityWriter.Apply(tx, sourcePartition, GraphCrossPartitionCapacityDirection.PendingIntents, GraphCrossPartitionKeys.IntentPrefix(sourcePartition), [new(GraphCrossPartitionKeys.Intent(intent), null)]);
         return new(CompleteReceipt, request.Graph, request.EdgeId, intent.Revision);
     }
 
@@ -116,7 +116,7 @@ public static class GraphTraversalCommands
         _ = engine.Resource(view, destination, graph, ResourceKind.Graph);
     }
 
-    internal static GraphCrossPartitionDeliveryIntent? CurrentIntent(IKeyValueView view, PartitionRef source, string graph, string edgeId, EntityRef destination, DatabaseLimits limits)
+    internal static GraphCrossPartitionDeliveryIntent? CurrentIntent(IKeyValueView view, PartitionRef source, string graph, string edgeId, EntityRef destination)
     {
         var key = GraphCrossPartitionKeys.Intent(source, graph, edgeId, destination);
         var intent = GraphCrossPartitionRecords.Read<GraphCrossPartitionDeliveryIntent>(view, key);
@@ -125,25 +125,25 @@ public static class GraphTraversalCommands
             var definition = ResourceDefinitionBinding.BindResourceDefinition(view, destination.Partition, destination.Collection, ResourceKind.Collection);
             destination = EntityReferenceLifetime.Bind(view, destination, definition);
             EntityReferenceLifetime.RequireStored(view, intent.Destination, definition);
-            GraphCrossPartitionValidation.ValidateIntent(intent, source, graph, edgeId, destination, limits);
+            GraphCrossPartitionValidation.ValidateIntent(intent, source, graph, edgeId, destination);
         }
 
         return intent;
     }
 
-    internal static void VerifyCurrentIntent(this DatabaseEngine engine, GraphCrossPartitionDeliveryIntent intent, GraphEdgeOwnerVersion owner, EdgeRecord? canonical)
+    internal static void VerifyCurrentIntent(GraphCrossPartitionDeliveryIntent intent, GraphEdgeOwnerVersion owner, EdgeRecord? canonical)
     {
         var canonicalDeleted = owner.Deleted && canonical is null;
         var canonicalActive = !owner.Deleted && canonical is not null && canonical.Revision == owner.Revision;
-        if (owner.Revision != intent.Revision || !(canonicalDeleted || canonicalActive) || canonical is not null && !engine.CanonicalMatchesOwner(canonical, intent, owner) || !IntentMatchesCanonical(intent, owner, canonical) || GraphCrossPartitionRecords.Fingerprint(intent.SourcePartition, intent.Graph, intent.EdgeId, intent.Destination, intent.Revision, intent.Deleted, intent.Edge) != intent.Fingerprint)
+        if (owner.Revision != intent.Revision || !(canonicalDeleted || canonicalActive) || canonical is not null && !GraphTraversalCommands.CanonicalMatchesOwner(canonical, intent, owner) || !IntentMatchesCanonical(intent, owner, canonical) || GraphCrossPartitionRecords.Fingerprint(intent.SourcePartition, intent.Graph, intent.EdgeId, intent.Destination, intent.Revision, intent.Deleted, intent.Edge) != intent.Fingerprint)
         {
             throw Errors.Fail(ErrorCode.Corruption, InconsistentIntent);
         }
     }
 
-    internal static bool CanonicalMatchesOwner(this DatabaseEngine engine, EdgeRecord canonical, GraphCrossPartitionDeliveryIntent intent, GraphEdgeOwnerVersion owner)
+    internal static bool CanonicalMatchesOwner(EdgeRecord canonical, GraphCrossPartitionDeliveryIntent intent, GraphEdgeOwnerVersion owner)
     {
-        GraphCrossPartitionValidation.ValidateEdge(canonical, engine.Limits);
+        GraphCrossPartitionValidation.ValidateEdge(canonical);
         return canonical.Id == intent.EdgeId && canonical.From.Partition == intent.SourcePartition && canonical.Revision == owner.Revision;
     }
 

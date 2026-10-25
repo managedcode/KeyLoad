@@ -22,7 +22,6 @@ internal sealed class TextMaintenanceTestRuntime : IAsyncDisposable
     internal TextMaintenanceTestRuntime(DatabaseEngine database, string directory, TimeProvider? phaseClock = null)
     {
         var registrations = new ServiceCollection().AddRuntimeOptions(new ConfigurationBuilder().Build());
-        registrations.AddSingleton(database.OperationLimitsOptions);
         services = registrations.BuildServiceProvider();
         try
         {

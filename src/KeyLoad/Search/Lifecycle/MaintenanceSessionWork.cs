@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Core.StoragePartitions.Contracts;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Search;
 
@@ -17,6 +16,7 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
     private bool closed;
     private bool releaseAfterStage;
     private bool disposed;
+    /// <summary>Gets the caller's explicit expiry, or <see cref="DateTimeOffset.MaxValue"/> when only cancellation ends the session.</summary>
     internal DateTimeOffset OriginalExpiry { get; }
     internal ReadExecutionBudget Budget { get; }
     internal bool ReleaseRequested => releaseAfterStage || disposed;
@@ -29,23 +29,25 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
         }
     }
 
-    internal MaintenanceSessionWork(IOptions<DatabaseLimits> limits, TimeProvider clock,
-        DateTimeOffset originalExpiry, CancellationToken shutdown)
+    internal MaintenanceSessionWork(TimeProvider clock,
+        DateTimeOffset? originalExpiry, CancellationToken shutdown)
     {
-        OriginalExpiry = originalExpiry;
-        var remaining = originalExpiry - clock.GetUtcNow();
-        if (remaining <= TimeSpan.Zero)
+        OriginalExpiry = originalExpiry ?? DateTimeOffset.MaxValue;
+        var remaining = originalExpiry is { } expiry ? expiry - clock.GetUtcNow() : Timeout.InfiniteTimeSpan;
+        if (originalExpiry is not null && remaining <= TimeSpan.Zero)
         {
             throw TextErrors.Ownership();
         }
-        retention = new(limits);
-        var bound = TimeSpan.FromSeconds(limits.Value.QueryDeadlineSeconds);
-        deadline = new(remaining < bound ? remaining : bound, clock);
+        retention = new();
+        deadline = new(remaining, clock);
         lifetime = CancellationTokenSource.CreateLinkedTokenSource(shutdown, deadline.Token);
         try
         {
-            Budget = new(limits, clock, lifetime.Token);
-            Budget.ConstrainLifetime(originalExpiry);
+            Budget = new(clock, lifetime.Token);
+            if (originalExpiry is { } explicitExpiry)
+            {
+                Budget.ConstrainLifetime(explicitExpiry);
+            }
             Budget.AttachResourceLifetimeBinding(this);
         }
         catch (Exception primary)

@@ -11,7 +11,7 @@ internal static class InboxProcessingClusterAssertions
     internal static async Task DeniedAsync<T>(Result<T> result, ErrorCode expected)
     {
         await Assert.That(result.IsFailed).IsTrue();
-        await Assert.That(result.Value).IsNull();
+        await McpCallerAssertions.NoValueAsync(result);
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
     }
 

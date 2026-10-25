@@ -16,7 +16,7 @@ public static class QueueDeliveryExecution
             throw Errors.Fail(ErrorCode.DispatchPaused, QueueSweepTransitions.DispatchPausedMessage);
         }
 
-        if (request.MaxMessages < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.MaxMessages > engine.MessagingExecution.MaximumReceiveMessages || request.MaxBytes is < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.MaxBytes > engine.Limits.MaxBatchBytes || request.LeaseSeconds < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
+        if (request.MaxMessages < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.MaxMessages > engine.MessagingExecution.MaximumReceiveMessages || request.MaxBytes is < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.LeaseSeconds < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
         {
             throw Errors.Fail(ErrorCode.Validation, QueueSweepTransitions.InvalidReceiveBudget);
         }

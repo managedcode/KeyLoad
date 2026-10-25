@@ -1,12 +1,11 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 /// <summary>Retains bounded original derived generations inside the existing physical host lifetime.</summary>
-internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : IUserAnalytics, IAsyncDisposable
+internal sealed class UserAnalyticsRuntime() : IUserAnalytics, IAsyncDisposable
 {
     private const int NoCleanupFailures = 0;
     private const string Unavailable = "The user analytics physical owner is unavailable.";
@@ -36,7 +35,6 @@ internal sealed class UserAnalyticsRuntime(IOptions<DatabaseLimits> options) : I
             {
                 throw new InvalidOperationException(Unavailable);
             }
-            options.Value.Validate();
             UserAnalyticsGenerationPaths.PrepareRoot(physical);
             host = physical;
         }

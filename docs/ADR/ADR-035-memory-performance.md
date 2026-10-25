@@ -6,6 +6,8 @@ not claim an unqualified source or measured performance result. Related:
 REQ-MP-001..006 / AC-MP-001..012 in
 [ResourceExecution](../Features/ResourceExecution.md).
 
+Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+
 ## Decision and invariant
 
 The atomic partition remains the business consistency identity. A local physical

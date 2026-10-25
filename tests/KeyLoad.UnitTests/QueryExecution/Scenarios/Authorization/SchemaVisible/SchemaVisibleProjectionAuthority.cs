@@ -74,7 +74,7 @@ internal static class SchemaVisibleProjectionAuthority
         var rows = new List<string>();
         foreach (var family in new[] { "document", "index", "unique", "document-epoch", "outbox", "outbox-head" })
         {
-            var page = view.Scan(KeySpace.Partition(family, fixture.Partition), fixture.Database.Limits.MaxScanRecords);
+            var page = view.Scan(KeySpace.Partition(family, fixture.Partition), view.MaximumRangeRecords);
             if (page.HasMore)
             {
                 throw new InvalidOperationException("The schema refusal domain image exceeded its configured bound.");

@@ -59,7 +59,7 @@ internal sealed class TextOnlineSourcePin : IDisposable
             throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidPin);
         }
         var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
-        var limits = new ZoneTreeReadCutLimits(grant.RemainingRecords, grant.RemainingBytes, budget.RemainingLifetime);
+        var limits = owner.BoundReadCut(grant.RemainingRecords, grant.RemainingBytes, budget.RemainingLifetime);
         ZoneTreeReadCutLease execution;
         try
         {

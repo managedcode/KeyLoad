@@ -78,7 +78,7 @@ internal sealed class AnnSeedHashScratchPolicyTests
     public async Task InvalidStandaloneScratchRejectsBeforeReadAndWorkChargingAsync(int scratchBytes)
     {
         using var database = AnnSeedTestSupport.Create(1);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+        var budget = new ReadExecutionBudget();
         var options = Options.Create(new AnnSeedOptions { HashScratchBytes = scratchBytes });
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => Capture(database, AnnSeedTestSupport.Space(), options, budget));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
@@ -95,8 +95,7 @@ internal sealed class AnnSeedHashScratchPolicyTests
         var options = Bind(scratchBytes);
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits),
-            cancellationToken: cancellation.Token);
+        var budget = new ReadExecutionBudget(cancellationToken: cancellation.Token);
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             Capture(database, AnnSeedTestSupport.Space(), options, budget));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
@@ -108,7 +107,7 @@ internal sealed class AnnSeedHashScratchPolicyTests
         ReadExecutionBudget? budget = null)
         => AnnSeedCollector.Capture(database.Database, AnnSeedTestSupport.Principal, database.Partition,
             AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field, space, options,
-            budget ?? new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits)));
+            budget ?? new ReadExecutionBudget());
 
     private static IOptions<AnnSeedOptions> Bind(int scratchBytes)
     {

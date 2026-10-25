@@ -4,58 +4,9 @@ namespace KeyLoad.UnitTests.Search;
 
 internal sealed class AnnProjectionPinBudgetTests
 {
-    private const string FirstConsumer = "ann-pin-budget-first";
-    private const string SecondConsumer = "ann-pin-budget-second";
-    private const string ExcessConsumer = "ann-pin-budget-excess";
     private const string ByteBoundaryConsumer = "ann-pin-byte-boundary";
     private const string CorruptHistoryConsumer = "ann-pin-corrupt-history";
     private static readonly ImmutableArray<float> FirstValues = [1f, 2f, 3f];
-    private static readonly ImmutableArray<float> SecondValues = [4f, 5f, 6f];
-    private static readonly ImmutableArray<float> ThirdValues = [7f, 8f, 9f];
-
-    [Test]
-    public async Task ConsumerAndBatchRecordCountsEnforceInclusiveLimits()
-    {
-        using var database = AnnProjectionPinTestSupport.Create(new()
-        {
-            MaxResults = 2,
-            MaxProjectionConsumers = 2
-        });
-        var start = AnnProjectionPinTestSupport.Tail(database);
-        var first = AnnProjectionPinTestSupport.Consumer(database, FirstConsumer);
-        var second = AnnProjectionPinTestSupport.Consumer(database, SecondConsumer);
-        AnnProjectionPinTestSupport.Configure(database, first, start);
-        AnnProjectionPinTestSupport.Configure(database, second, start);
-
-        var excess = AnnProjectionPinTestSupport.Consumer(database, ExcessConsumer);
-        var excessId = Guid.NewGuid();
-        var rejectedConsumer = database.Submit(OperationKind.ConfigureProjectionConsumer,
-            new ConfigureProjectionConsumerRequest(excessId, excess,
-                new(1, [AnnProjectionPinTestSupport.Collection], [AnnProjectionPinTestSupport.VectorMutation]), start), id: excessId);
-        await Assert.That(Errors.Code(rejectedConsumer.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Consumers.Length).IsEqualTo(2);
-
-        AnnProjectionPinTestSupport.PutVector(database, FirstValues);
-        AnnProjectionPinTestSupport.PutVector(database, SecondValues);
-        AnnProjectionPinTestSupport.PutVector(database, ThirdValues);
-        var headBefore = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Head;
-        var checkpointBefore = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition)
-            .Consumers.Single(info => info.Consumer == first).Checkpoint;
-        var exact = AnnProjectionPinTestSupport.Read(database, first, limit: 2);
-        await Assert.That(exact.Entries.Length).IsEqualTo(2);
-        await Assert.That(exact.ThroughSequence).IsEqualTo(start + 2);
-        await Assert.That(exact.HasMore).IsTrue();
-        await Assert.That(exact.Entries.Select(entry => entry.Sequence))
-            .IsEquivalentTo(new long[] { start + 1, start + 2 });
-
-        var excessLimit = Assert.ThrowsExactly<KeyLoadException>(() =>
-            AnnProjectionPinTestSupport.Read(database, first, limit: 3));
-        await Assert.That(excessLimit.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var after = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition);
-        await Assert.That(after.Head).IsEqualTo(headBefore);
-        await Assert.That(after.Consumers.Single(info => info.Consumer == first).Checkpoint)
-            .IsEqualTo(checkpointBefore);
-    }
 
     [Test]
     public async Task ProjectionBatchByteBoundaryUsesTheActualOutboxRecordLength()
@@ -63,7 +14,6 @@ internal sealed class AnnProjectionPinBudgetTests
         var runtimeBytesCore = MeasureVectorEntryBytes();
         using var database = AnnProjectionPinTestSupport.Create(new()
         {
-            MaxProjectionBatchBytes = runtimeBytesCore
         });
         var consumer = AnnProjectionPinTestSupport.Consumer(database, ByteBoundaryConsumer);
         var start = AnnProjectionPinTestSupport.Tail(database);

@@ -33,7 +33,7 @@ internal static class PostgresOperationExecutor
                 QueryDialectVersion: portal.Statement.Rows || portal.Statement.UsesProfileDialect
                     ? profile.QueryDialectVersion : SqlOperationProtocol.DefaultQueryDialectVersion,
                 CommandId: mutationIdentity);
-            var compilation = SqlOperationCompiler.CompileSessionPlan(request, services.GetRequiredService<IOptions<DatabaseLimits>>(),
+            var compilation = SqlOperationCompiler.CompileSessionPlan(request,
                 options.MaximumCanonicalPayloadBytes, services.GetRequiredService<IOptions<QueryExecutionOptions>>(),
                 portal.Statement.ParameterOids.Length, token);
             if (TryCompleteControl(compilation, catalog, result, maximumJsonBytes, portal, token))

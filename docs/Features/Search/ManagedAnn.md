@@ -64,7 +64,7 @@ internal sealed class PackedAnnIndex {
 }
 ```
 
-PackedAnnOptions: Connections=16 (4/8/16/32/64 only), EfConstruction=128 (Connections..4096), EfSearch=128 (1..4096), MaxLevel=16 (1..16), ExactThreshold=256 (0..4096), MaxRecords=5,000,000 (1..5,000,000), MaxIndexBytes=268,435,456 (1024..8,589,934,592), MaxScratchBytes=8,388,608 (1024..268,435,456), Seed=0x4B45594C4F414431UL. These are finite internal candidate caps, not changes to public DatabaseLimits; numeric products, array lengths and growth arithmetic are checked before allocation.
+PackedAnnOptions: Connections=16 (4/8/16/32/64 only), EfConstruction=128 (Connections..4096), EfSearch=128 (1..4096), MaxLevel=16 (1..16), ExactThreshold=256 (0..4096), MaxRecords=5,000,000 (1..5,000,000), MaxIndexBytes=268,435,456 (1024..8,589,934,592), MaxScratchBytes=8,388,608 (1024..268,435,456), Seed=0x4B45594C4F414431UL. These are finite internal candidate caps, not public operation limits; numeric products, array lengths and growth arithmetic are checked before allocation.
 
 Input identities are nonempty canonical JsonData.Identifier values, unique and strictly StringComparer.Ordinal ordered. All records have one field, the full supplied VectorSpace, a positive DocumentRevision and finite vectors of its dimension 1..4096. The full space identifiers/metric/dimension and the input are validated even when empty; unordered or duplicate input is rejected rather than sorted inside an unbudgeted dictionary (the canonical collector owns its bounded charged sort). Build copies vectors into dimension-aligned blocks of at most 64 KiB, keeps only identity/revision metadata and packed primitive graph arrays and retains no caller list, DocumentRecord, borrowed view, database handle or source vector array.
 

@@ -5,7 +5,7 @@ namespace KeyLoad.UnitTests.QueryExecution;
 
 internal sealed class QueryCapabilityVersionFixture : IDisposable
 {
-    internal TestDatabase Harness { get; } = new(QueryCapabilityVersionRequests.Limits());
+    internal TestDatabase Harness { get; } = new();
     internal ResourceLifetime Creation { get; private set; } = null!;
     internal CommandRequest Seed { get; private set; } = null!;
     internal CommitReceipt Receipt { get; private set; } = null!;

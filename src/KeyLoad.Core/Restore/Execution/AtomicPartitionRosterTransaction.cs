@@ -2,7 +2,6 @@ using KeyLoad.Core.BackupRestore.Serialization;
 using KeyLoad.Core.BackupRestore.Validation;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core.BackupRestore.Execution;
 
@@ -14,20 +13,16 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     {
         get;
     }
-    private readonly IOptions<DatabaseLimits> limits;
     private readonly long storePosition;
     private readonly long appliedIndex;
     private readonly Dictionary<PartitionRef, byte[]> candidates = [];
-    private const long NoRetainedKeyBytes = 0;
-    private long retainedKeyBytes;
     private readonly record struct Candidate(PartitionRef Partition, byte[] Key);
 
-    internal AtomicPartitionRosterTransaction(IAtomicTransaction inner, IOptions<DatabaseLimits> limits,
+    internal AtomicPartitionRosterTransaction(IAtomicTransaction inner,
         long storePosition, long appliedIndex)
     {
         this.inner = inner ?? throw new ArgumentNullException(nameof(inner));
-        this.limits = limits ?? throw new ArgumentNullException(nameof(limits));
-        EffectAdmission = new(limits);
+        EffectAdmission = new();
         this.storePosition = storePosition;
         this.appliedIndex = appliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
             ? appliedIndex : AtomicPartitionRosterProtocol.NoCanonicalSequence;
@@ -66,14 +61,13 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     public void Reset()
     {
         candidates.Clear();
-        retainedKeyBytes = NoRetainedKeyBytes;
         inner.Reset();
     }
 
     void IResourceEffectCompletion.RequireCompleteResourceEffects() => EffectAdmission.RequireComplete();
 
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
-        => AtomicPartitionRosterPreparation.Prepare(inner, limits, storePosition, appliedIndex, prepare);
+        => AtomicPartitionRosterPreparation.Prepare(inner, storePosition, appliedIndex, prepare);
 
     public void ValidateCommit() => inner.ValidateCommit();
 
@@ -114,12 +108,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
                 ? AtomicPartitionRosterProtocol.NoStorePosition : storePosition;
             var entry = new AtomicPartitionCatalogEntry(AtomicPartitionRosterProtocol.CurrentVersion,
                 candidate.Key, firstSeenStorePosition, appliedIndex);
-            var bytes = OrleansSerialization.Serialize(entry);
-            if (bytes.Length > limits.Value.MaxBatchBytes)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, AtomicPartitionRosterProtocol.CandidateBudgetExhausted);
-            }
-            inner.Put(candidate.Value, bytes);
+            inner.Put(candidate.Value, OrleansSerialization.Serialize(entry));
         }
     }
 
@@ -134,11 +123,6 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
         var rosterKey = AtomicPartitionRosterKeys.Partition(partition);
         var retained = candidates.ContainsKey(partition);
-        if (!retained && (candidates.Count >= limits.Value.MaxBatchMutations || rosterKey.Length > limits.Value.MaxBatchBytes
-            || rosterKey.Length > limits.Value.MaxBatchBytes - retainedKeyBytes))
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, AtomicPartitionRosterProtocol.CandidateBudgetExhausted);
-        }
         return retained ? null : new(partition, rosterKey);
     }
 
@@ -150,6 +134,5 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         }
         var prepared = candidate.Value;
         candidates.Add(prepared.Partition, prepared.Key);
-        retainedKeyBytes += prepared.Key.Length;
     }
 }

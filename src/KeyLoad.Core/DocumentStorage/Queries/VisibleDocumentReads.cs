@@ -7,7 +7,6 @@ namespace KeyLoad.Core.DocumentStorage;
 internal static class VisibleDocumentReads
 {
     private const string CollectionMissing = "The collection resource is unavailable.";
-    private const string CollectionScanExceeded = "The collection scan exceeds its budget. Use an index or a narrower partition.";
 
     internal static void Visit(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, ReadExecutionBudget budget, Action<DocumentRecord> visitor)
@@ -22,8 +21,7 @@ internal static class VisibleDocumentReads
         var definition = ResourceDefinitionBinding.BindResourceDefinition(metadata, partition, collection, ResourceKind.Collection);
         var lifetime = ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, collection, definition)
             ?? throw Errors.Fail(ErrorCode.NotFound, CollectionMissing);
-        var range = budget.VisitRange(view, DocumentStorageKeys.Prefix(partition, collection),
-            database.Limits.MaxScanRecords, (key, value) =>
+        _ = budget.VisitAll(view, DocumentStorageKeys.Prefix(partition, collection), (key, value) =>
             {
                 var document = OrleansSerialization.Deserialize<DocumentRecord>(value);
                 EntityReferenceLifetime.RequireStored(document.Reference, lifetime);
@@ -34,9 +32,5 @@ internal static class VisibleDocumentReads
                 }
                 return true;
             });
-        if (range.HasMore)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, CollectionScanExceeded);
-        }
     }
 }

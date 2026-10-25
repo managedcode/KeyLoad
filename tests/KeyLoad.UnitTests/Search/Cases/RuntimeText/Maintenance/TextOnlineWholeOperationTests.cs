@@ -37,7 +37,7 @@ internal sealed class TextOnlineWholeOperationTests
         using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
         await cancelled.CancelAsync();
         _ = await Assert.ThrowsAsync<OperationCanceledException>(() => runtime.PhaseAsync(fixture, Guid.NewGuid(), request,
-            OnlineTextCapabilityKind.ResolveOriginal, runtime.FreshExpiry(fixture), cancelled.Token));
+            OnlineTextCapabilityKind.ResolveOriginal, TextOnlineTestRuntime.FreshExpiry(fixture), cancelled.Token));
         var healthy = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(healthy.CommandId).IsEqualTo(request.CommandId);
         await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
@@ -52,7 +52,7 @@ internal sealed class TextOnlineWholeOperationTests
         var request = new OnlineTextIndexMaintenanceRequest(Guid.NewGuid(), seed.Pin.Consumer,
             seed.Pin.Collection, seed.Pin.Field, seed.Pin.Generation, seed.Pin.NodeId, seed.Pin.Placement);
         var owners = new List<Guid>();
-        var expiry = runtime.FreshExpiry(fixture);
+        var expiry = TextOnlineTestRuntime.FreshExpiry(fixture);
         var failures = new List<Exception>();
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -159,7 +159,7 @@ internal sealed class TextOnlineWholeOperationTests
         var request = new OnlineTextIndexMaintenanceRequest(Guid.NewGuid(), seed.Pin.Consumer,
             seed.Pin.Collection, seed.Pin.Field, seed.Pin.Generation, seed.Pin.NodeId, seed.Pin.Placement);
         var first = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
-        var budget = new KeyLoad.Core.ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(fixture.Database.Limits),
+        var budget = new KeyLoad.Core.ReadExecutionBudget(
             fixture.Database.EvaluationClock, token);
         var publication = fixture.Database.ReadOnlineTextOriginalPublication(TextMaintenanceTestValues.Principal, request, budget)!;
         var path = Path.Combine(fixture.Directory, KeyLoad.Server.Search.TextOnlineRoot.DirectoryName, publication.Authority.Leaf);

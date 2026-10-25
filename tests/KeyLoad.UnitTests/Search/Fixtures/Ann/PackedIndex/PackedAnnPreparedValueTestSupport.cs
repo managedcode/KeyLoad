@@ -26,9 +26,9 @@ internal static class PackedAnnPreparedValueTestSupport
                 .OrderBy(record => record.DocumentId, StringComparer.Ordinal).ToArray());
     }
 
-    internal static PackedAnnVectors Copy(TestDatabase database, VectorRecord[] records, VectorSpace space)
+    internal static PackedAnnVectors Copy(VectorRecord[] records, VectorSpace space)
     {
-        var budget = PackedAnnIndexTestSupport.Budget(database);
+        var budget = PackedAnnIndexTestSupport.Budget();
         var options = UnitExecutionOptions.PackedAnn(new()).Value;
         var admission = PackedAnnAdmission.Create(space, records, options, budget);
         return PackedAnnVectors.Copy(records, admission, budget, options.VectorBudgetCheckInterval);
@@ -39,7 +39,7 @@ internal static class PackedAnnPreparedValueTestSupport
     {
         var records = PersistAndLoad(database, dimension, metric, vectors);
         var oracle = records.Select(record => record.Values.ToArray()).ToArray();
-        var packed = Copy(database, records, PackedAnnTestData.Space(metric, dimension));
+        var packed = Copy(records, PackedAnnTestData.Space(metric, dimension));
         MutateOneSource(records);
         for (var query = 0; query < packed.Count; query++)
         {

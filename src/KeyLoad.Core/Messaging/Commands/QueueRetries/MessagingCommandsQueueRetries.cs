@@ -20,11 +20,6 @@ public static class MessagingCommandsQueueRetries
 
         if (requested is AdvanceQueueDeadline deadline && engine.ReadQueueDeadlineRetryInput(view, partition, original.Timestamp, deadline) is { } input)
         {
-            if (choices.Count >= engine.Limits.MaxBatchMutations)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, CommandAuthorization.MutationCountBudgetMessage);
-            }
-
             var delay = engine.ChooseQueueRetryDelay(original, input.Lane, input.Policy, input.Metadata);
             choices.Add(new(input.Lane, input.Metadata.Id, input.Metadata.StateVersion, input.Metadata.LeaseVersion, input.Metadata.DeliveryGeneration, input.Metadata.Attempts, input.DueIndexKey, SHA256.HashData(OrleansSerialization.Serialize(input.Policy)), delay, original.Timestamp.AddMilliseconds(delay)));
         }
@@ -35,13 +30,11 @@ public static class MessagingCommandsQueueRetries
         }
 
         var decisions = OrleansSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version, original.Timestamp, choices.ToImmutableArray()));
-        engine.RequireBudget(decisions.Length);
         var candidate = engine.OwnCommand(original);
         candidate.Value = payload with
         {
             RetryDecisions = decisions
         };
-        engine.RequireBudget(OrleansSerialization.Measure(candidate));
         return candidate;
     }
 }

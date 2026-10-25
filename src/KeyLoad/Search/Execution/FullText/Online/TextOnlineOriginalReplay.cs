@@ -3,14 +3,14 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Server.Search;
 
-internal sealed class TextOnlineOriginalReplay(DatabaseEngine database, ServerRuntimeOptions options,
+internal sealed class TextOnlineOriginalReplay(DatabaseEngine database,
     TimeProvider clock, TextResourceOwnership resources, TextOnlineSessions sessions,
     TextOnlineCatalogOwner catalog, Func<TextOnlineSession, Task> cleanupSession)
 {
     internal async Task<OnlineTextCapabilityResult?> ExecuteAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
-        var budget = originalBudget ?? new ReadExecutionBudget(options.Core.DatabaseLimits, clock, token);
+        var budget = originalBudget ?? new ReadExecutionBudget(clock, token);
         budget.ConstrainLifetime(expiry);
         var original = database.ReadOnlineTextOriginalOutcome(principal.Id, request.Request, budget);
         if (original is null)

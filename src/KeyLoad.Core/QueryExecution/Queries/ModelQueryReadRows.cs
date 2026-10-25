@@ -25,7 +25,7 @@ internal static class ModelQueryReadRows
         switch (source.Kind)
         {
             case ModelQuerySourceKind.Events:
-                ModelEventQueryRows.Visit(database, view, partition, resource, source, budget, explain, accept);
+                ModelEventQueryRows.Visit(view, partition, resource, source, budget, explain, accept);
                 break;
             case ModelQuerySourceKind.QueueMessages:
                 ModelQueueQueryRows.Visit(database, view, principal, partition, resource, source, budget, explain, accept);

@@ -13,7 +13,7 @@ public static class SubscriptionDeliveryAuthority
         }
     }
 
-    internal static void ValidateSubscriptionGroupProgress(this DatabaseEngine engine, IKeyValueView view, SubscriptionRef subscription, GroupState state, EventSourceHead head, SubscriptionWindowAuthorityReadBudget? budget = null)
+    internal static void ValidateSubscriptionGroupProgress(IKeyValueView view, SubscriptionRef subscription, GroupState state, EventSourceHead head)
     {
         ValidateSubscriptionGroupLowerBounds(state);
         if (state.Checkpoint > head.TailPosition || state.IssuedPosition < state.Checkpoint || state.IssuedPosition > head.TailPosition || state.IssuedPosition - state.Checkpoint > state.Definition.Policy.MaxWindow)
@@ -21,10 +21,10 @@ public static class SubscriptionDeliveryAuthority
             throw Errors.Fail(ErrorCode.Corruption, SubscriptionGroups.SubscriptionGroupsSubscriptionDeliveryWindowIsInconsistentDetail);
         }
 
-        ValidateSubscriptionGroupWindow(view, subscription, state, budget ?? new SubscriptionWindowAuthorityReadBudget(engine.OperationLimitsOptions));
+        ValidateSubscriptionGroupWindow(view, subscription, state);
     }
 
-    internal static void ValidateSubscriptionGroupWindow(IKeyValueView view, SubscriptionRef subscription, GroupState state, SubscriptionWindowAuthorityReadBudget budget)
+    internal static void ValidateSubscriptionGroupWindow(IKeyValueView view, SubscriptionRef subscription, GroupState state)
     {
         var maximum = state.Definition.Policy.MaxWindow;
         if (maximum is < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount or > SubscriptionGroups.SubscriptionGroupsMaximumSubscriptionWindow)
@@ -44,17 +44,17 @@ public static class SubscriptionDeliveryAuthority
 
             rows++;
             return true;
-        }, observer: budget.Observe);
+        });
         if (scan.HasMore || scan.StoppedByVisitor || rows != state.IssuedPosition - state.Checkpoint)
         {
             throw Errors.Fail(ErrorCode.Corruption, SubscriptionGroups.SubscriptionGroupsSubscriptionDeliveryWindowIsInconsistentDetail);
         }
     }
 
-    internal static GroupDelivery? ReadSubscriptionWindowDelivery(IKeyValueView view, byte[] key, SubscriptionWindowAuthorityReadBudget budget)
+    internal static GroupDelivery? ReadSubscriptionWindowDelivery(IKeyValueView view, byte[] key)
     {
         GroupDelivery? delivery = null;
-        view.ReadValue(key, value => delivery = OrleansSerialization.Deserialize<GroupDelivery>(value), budget.Observe);
+        view.ReadValue(key, value => delivery = OrleansSerialization.Deserialize<GroupDelivery>(value));
         return delivery;
     }
 

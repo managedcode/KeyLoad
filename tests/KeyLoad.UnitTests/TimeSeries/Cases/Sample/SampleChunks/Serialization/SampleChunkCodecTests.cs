@@ -4,6 +4,9 @@ namespace KeyLoad.UnitTests.TimeSeries;
 
 internal sealed class SampleChunkCodecTests
 {
+    private const int UnboundedRecords = int.MaxValue;
+    private static readonly TimeSpan CallerLifetime = TimeSpan.FromSeconds(1);
+
     [Test]
     public async Task AcChunk001FixedAndSeededRowsRoundTripEveryPersistedFieldExactly()
     {
@@ -159,9 +162,9 @@ internal sealed class SampleChunkCodecTests
     {
         var records = SampleChunkTestData.FixedRecords();
         var encoded = SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
-        var limits = new DatabaseLimits { MaxQueryReadBytes = encoded.Length - 1 };
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            SampleChunkTestData.ChargedDecodeBudget(encoded, limits));
+        var constrained = SampleChunkTestData.Budget();
+        constrained.ConstrainWork(encoded.Length - 1, UnboundedRecords);
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => constrained.ChargeBytes(encoded.Length));
         var actual = SampleChunkCodec.Decode(encoded, SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution());
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
@@ -180,10 +183,11 @@ internal sealed class SampleChunkCodecTests
             SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(cancellationToken: cancellation.Token), UnitExecutionOptions.TimeSeriesExecution()));
         var decodeCancelled = Assert.ThrowsExactly<OperationCanceledException>(() =>
             SampleChunkCodec.Decode(encoded, decodeBudget, UnitExecutionOptions.TimeSeriesExecution()));
-        var deadlineLimits = new DatabaseLimits { QueryDeadlineSeconds = 1 };
         var deadlineClock = new SampleRollupWorkClock();
-        var deadlineBudget = SampleChunkTestData.Budget(deadlineLimits, clock: deadlineClock);
-        var decodeDeadlineBudget = SampleChunkTestData.ChargedDecodeBudget(encoded, deadlineLimits, clock: deadlineClock);
+        var deadlineBudget = SampleChunkTestData.Budget(clock: deadlineClock);
+        var decodeDeadlineBudget = SampleChunkTestData.ChargedDecodeBudget(encoded, clock: deadlineClock);
+        deadlineBudget.ConstrainLifetime(deadlineClock.GetUtcNow() + CallerLifetime);
+        decodeDeadlineBudget.ConstrainLifetime(deadlineClock.GetUtcNow() + CallerLifetime);
         deadlineClock.Advance(TimeSpan.FromMilliseconds(1_100));
         var encodeDeadline = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Encode(records, deadlineBudget, UnitExecutionOptions.TimeSeriesExecution()));
         var decodeDeadline = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(encoded, decodeDeadlineBudget, UnitExecutionOptions.TimeSeriesExecution()));

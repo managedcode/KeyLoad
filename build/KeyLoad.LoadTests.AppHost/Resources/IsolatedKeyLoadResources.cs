@@ -78,11 +78,9 @@ internal static class IsolatedKeyLoadResources
                 .WithEnvironment(AdminKeyEnvironment, secrets.Admin).WithEnvironment(MembershipSecretEnvironment, secrets.Membership)
                 .WithEnvironment(MembershipPortEnvironment, MembershipPort.ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment(LogEnvironment, runtime.Execution.Cluster.Value.LoggingLevel);
-            DocumentResourceBounds.ApplyKeyLoad(node, runtime.Deployment.Value);
             context.BindEndpoint(index, node, HttpEndpoint);
         }
         context.Client.Set(AdminEnvironment, secrets.Admin.Resource);
-        DocumentResourceBounds.ApplyClient(context.Client, runtime.Deployment.Value);
         context.BindImage(image.Reference);
     }
 

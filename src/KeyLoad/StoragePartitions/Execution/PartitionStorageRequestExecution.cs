@@ -40,7 +40,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         IGrainContext context, CancellationToken token)
     {
         var work = CapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
-            RequestWorkKind.RuntimeTransport, database.OperationLimitsOptions, token)
+            RequestWorkKind.RuntimeTransport, token)
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         var original = work.OriginalProducer;
         var sessionId = Guid.Empty;

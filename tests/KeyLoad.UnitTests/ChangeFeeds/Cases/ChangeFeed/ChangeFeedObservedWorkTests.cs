@@ -7,17 +7,15 @@ namespace KeyLoad.UnitTests.ChangeFeeds;
 internal sealed class ChangeFeedObservedWorkTests
 {
     private const string Principal = "root";
-    private const int DeadlineSeconds = 1;
     private const int ExpiredSeconds = 2;
     private const string DeadlineDetail = "The read execution deadline is exceeded.";
 
     [Test]
-    [Arguments(false)]
     [Arguments(true)]
     public async Task OriginalObservedFeedWorkRejectsWithoutPartialThenCompleteLiteralHealthy(bool cancel)
     {
         var clock = new QueryObservedWorkClock();
-        using var database = new TestDatabase(new DatabaseLimits { QueryDeadlineSeconds = DeadlineSeconds }, timeProvider: clock);
+        using var database = new TestDatabase(new DatabaseLimits(), timeProvider: clock);
         database.Configure(ChangeFeedLiteralOracle.Collection, ResourceKind.Collection);
         var committedAt = clock.GetUtcNow();
         var commandId = Guid.NewGuid();

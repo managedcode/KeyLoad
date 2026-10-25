@@ -7,19 +7,17 @@ namespace KeyLoad.Server.Search;
 internal static class TextIncrementalGenerationFlow
 {
     internal static TextIncrementalManifest Apply(TextIncrementalOwner actual,
-        TextIncrementalIntent intent, TextIncrementalManifest proposed,
-        int maximumRecords, int maximumChanges, ReadExecutionBudget budget,
+        TextIncrementalIntent intent, TextIncrementalManifest proposed, ReadExecutionBudget budget,
         IOptions<TextExecutionOptions> options)
     {
         TextIncrementalIntentValidation.Require(intent, proposed.Scope, proposed.Consumer,
-            proposed.Generation, proposed.Placement, maximumRecords, maximumChanges, budget);
+            proposed.Generation, proposed.Placement, budget);
         if (intent.NextRecord != proposed.NextRecord)
         {
             throw TextErrors.Corrupt();
         }
         RequireRecords(intent, proposed, budget);
-        TextIncrementalReplayPreparation.Prepare(actual.Root, actual.Leaf, intent, maximumRecords,
-            maximumChanges, budget, options, actual.Resources);
+        TextIncrementalReplayPreparation.Prepare(actual.Root, actual.Leaf, intent, budget, options, actual.Resources);
         var failures = new List<Exception>();
         TextIncrementalManifest? completed = null;
         try
@@ -35,7 +33,7 @@ internal static class TextIncrementalGenerationFlow
                     Files = files
                 };
                 TextIncrementalValidation.Manifest(completed, proposed.Scope, proposed.Consumer,
-                    proposed.Generation, proposed.Placement, maximumRecords, budget, options);
+                    proposed.Generation, proposed.Placement, budget, options);
                 TextIncrementalMetadata.Publish(actual.Path, completed,
                     options.Value.MaximumDiskBytes, budget, options, actual.Resources);
                 actual.Observe(TextFaultStage.ManifestPublished);

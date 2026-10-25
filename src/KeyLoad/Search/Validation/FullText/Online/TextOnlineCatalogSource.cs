@@ -9,7 +9,7 @@ internal static class TextOnlineCatalogSource
 {
     internal static void RequireOriginal(TextOnlineGenerationPin retained,
         OnlineTextCurrentPublication current, OnlineTextIndexMaintenanceResult result,
-        int maximumRecords, ReadExecutionBudget budget, IOptions<TextExecutionOptions> options)
+        ReadExecutionBudget budget, IOptions<TextExecutionOptions> options)
     {
         retained.RequireActive();
         var generation = retained.Owner;
@@ -28,7 +28,7 @@ internal static class TextOnlineCatalogSource
             throw TextErrors.Mismatch();
         }
         TextIncrementalValidation.Manifest(manifest, manifest.Scope, current.Consumer,
-            current.ConsumerGeneration, current.Authority.Placement, maximumRecords, budget, options);
+            current.ConsumerGeneration, current.Authority.Placement, budget, options);
         var path = Path.Combine(generation.Root, current.Authority.Leaf);
         TextOnlineStagingFiles.RequireCommitted(path, current, result, budget, options);
         var envelope = Path.Combine(path, TextIncrementalProtocol.ManifestFile);

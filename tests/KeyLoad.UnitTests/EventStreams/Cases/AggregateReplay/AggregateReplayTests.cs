@@ -10,7 +10,6 @@ internal sealed class AggregateReplayTests
     private const string ThirdEventId = "replay-event-3";
     private const string IncrementField = "increment";
     private const string TotalField = "total";
-    private const string ValueField = "value";
     private const string StreamHeadSpace = "stream-head";
     private const string OtherReducer = "other.reducer";
 
@@ -125,46 +124,6 @@ internal sealed class AggregateReplayTests
     }
 
     [Test]
-    public async Task AcEvent010RawReadAndResultBytesAreBounded()
-    {
-        using var rawBudget = new AggregateReplayFixture();
-        rawBudget.Append(Event(FirstEventId, 1));
-        rawBudget.Reopen(new()
-        {
-            MaxQueryReadBytes = 32
-        });
-        var rawError = Assert.ThrowsExactly<KeyLoadException>(() => rawBudget.Read(maximumEvents: 1));
-
-        using var resultBudget = new AggregateReplayFixture();
-        resultBudget.Append(new EventData(FirstEventId, AggregateReplayFixture.EventType,
-            "{\"" + ValueField + "\":\"" + new string('x', 512) + "\"}"));
-        resultBudget.Reopen(new()
-        {
-            MaxBatchBytes = 256
-        });
-        var resultError = Assert.ThrowsExactly<KeyLoadException>(() => resultBudget.Read(maximumEvents: 1));
-
-        await Assert.That(rawError.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(resultError.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
-    public async Task AcEvent010ReadDeadlineRejectsTheWholeReplay()
-    {
-        using var fixture = new AggregateReplayFixture(new()
-        {
-            QueryDeadlineSeconds = 1
-        },
-            timeProvider: new ExpiredReplayClock());
-        fixture.Append(Event(FirstEventId, 1), Event(SecondEventId, 2));
-        fixture.StoreSnapshot(1);
-
-        var deadline = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read(maximumEvents: 2));
-
-        await Assert.That(deadline.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-    }
-
-    [Test]
     public async Task AcEvent010PureReadPreservesEventQueueAndCut()
     {
         using var fixture = new AggregateReplayFixture();
@@ -204,13 +163,4 @@ internal sealed class AggregateReplayTests
         return total;
     }
 
-    private sealed class ExpiredReplayClock : TimeProvider
-    {
-        private const long TimestampStep = 10 * TimeSpan.TicksPerSecond;
-        private long timestamp;
-
-        public override long TimestampFrequency => TimeSpan.TicksPerSecond;
-        public override DateTimeOffset GetUtcNow() => TimeProvider.System.GetUtcNow();
-        public override long GetTimestamp() => Interlocked.Add(ref timestamp, TimestampStep);
-    }
 }

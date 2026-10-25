@@ -26,7 +26,7 @@ internal sealed class TextProtectedRebuildColdOwner : IDisposable
     {
         get
         {
-            projection ??= new(ProjectionRoot, UnitExecutionOptions.DatabaseLimits(Database.Limits),
+            projection ??= new(ProjectionRoot,
                 Store.Identity.NodeId, UnitTextOptions.Execution());
             return new(Database, UnitExecutionOptions.QueryExecution(), projection);
         }

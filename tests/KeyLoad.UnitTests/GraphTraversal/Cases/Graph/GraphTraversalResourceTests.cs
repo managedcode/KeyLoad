@@ -10,7 +10,6 @@ internal sealed class GraphTraversalResourceTests
     private const string Walk = "walk";
     private const string Skip = "skip";
     private const int LargePayloadCharacters = 12_000;
-    private const int OneLargeVertexReadBudget = 20_000;
 
     [Test]
     public async Task AcMp005_ConvergingLargeTargetUsesOneVisibilityLookup()
@@ -50,7 +49,6 @@ internal sealed class GraphTraversalResourceTests
     {
         using var db = new TestDatabase(new()
         {
-            MaxQueryReadBytes = OneLargeVertexReadBudget
         });
         Configure(db);
         var start = Vertex(db, "a");
@@ -87,38 +85,6 @@ internal sealed class GraphTraversalResourceTests
         var traversal = db.Database.Traverse(Root, db.Partition, Graph, start, maxEdges: 3, labels: [Walk], cancellationToken: token);
         await Assert.That(traversal.Vertices.Length).IsEqualTo(2);
         await Assert.That(traversal.Edges.Select(edge => edge.Id)).IsEquivalentTo(new[] { "ab", "ba" });
-    }
-
-    [Test]
-    public async Task AcMp012_ExactResponseLimitAndCancellationPreserveCommitPosition()
-    {
-        using var db = new TestDatabase();
-        Configure(db);
-        var start = Vertex(db, "a");
-        db.Commit(new PutDocument(Collection, start.Id, "{}"));
-        var expected = db.Database.Traverse(Root, db.Partition, Graph, start, maxDepth: 0);
-        var bytes = JsonDefaults.Serialize(expected).Length;
-        var exact = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = bytes
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        var shortLimit = new DatabaseEngine(db.Store, db.Database.Authorization, UnitExecutionOptions.DatabaseLimits(new()
-        {
-            MaxBatchBytes = bytes - 1
-        }), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-        await Assert.That(exact.Traverse(Root, db.Partition, Graph, start, maxDepth: 0).Vertices)
-            .IsEquivalentTo(expected.Vertices);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => shortLimit.Traverse(Root, db.Partition, Graph, start,
-            maxDepth: 0)).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-
-        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current!.Execution.CancellationToken);
-        await cancellation.CancelAsync();
-        var position = db.Store.Position;
-        await Assert.That(() => db.Database.Traverse(Root, db.Partition, Graph, start, cancellationToken: cancellation.Token))
-            .Throws<OperationCanceledException>();
-        await Assert.That(db.Store.Position).IsEqualTo(position);
-        db.Commit(new PutDocument(Collection, "after", "{}"));
-        await Assert.That(db.Database.Traverse(Root, db.Partition, Graph, start, maxDepth: 0).Vertices).HasSingleItem();
     }
 
     private static string LargeDocument() => "{\"padding\":\"" + new string('x', LargePayloadCharacters) + "\"}";

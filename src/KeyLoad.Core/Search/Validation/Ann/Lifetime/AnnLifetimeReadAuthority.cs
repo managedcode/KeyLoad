@@ -13,7 +13,7 @@ internal static class AnnLifetimeReadAuthority
         AnnReadLifetimeMetadata source, ReadExecutionBudget budget)
     {
         budget.Check();
-        source.Require(partition, database.Limits.MaxBatchBytes);
+        source.Require(partition);
         if (source.Principal is null || source.Principal.Id != target.Id
             || source.Definition.Name != collection || source.Definition.Kind != ResourceKind.Collection)
         {
@@ -24,7 +24,7 @@ internal static class AnnLifetimeReadAuthority
             throw Errors.Fail(ErrorCode.Unauthenticated, Invalid);
         }
         var metadata = budget.CreateView(view);
-        var lifetime = budget.CaptureResourceLifetimes(database, metadata, partition, [targetResource]).Lifetimes.Single();
+        var lifetime = budget.CaptureResourceLifetimes(metadata, partition, [targetResource]).Lifetimes.Single();
         RequireSchema(database, source.Principal, source.Definition, field);
         RequireSchema(database, target, targetResource, field);
         database.Authorization.Require(source.Principal, partition, collection, Capability.VectorSearch);
@@ -32,7 +32,7 @@ internal static class AnnLifetimeReadAuthority
         database.Authorization.RequireFieldUse(source.Principal, source.Definition, field);
         database.Authorization.RequireFieldUse(target, targetResource, field);
         var sourceLifetime = source.Coverage.Lifetimes.Single(value => value.ResourceName == source.Definition.Name);
-        budget.CaptureAuthenticatedResourceLifetimes(database, metadata,
+        budget.CaptureAuthenticatedResourceLifetimes(metadata,
             new ResourceLifetimeCoverage(partition, [sourceLifetime]), [source.Definition]);
         return lifetime;
     }

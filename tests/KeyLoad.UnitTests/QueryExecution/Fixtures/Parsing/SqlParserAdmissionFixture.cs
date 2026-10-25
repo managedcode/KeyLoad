@@ -11,9 +11,6 @@ internal sealed class SqlParserAdmissionFixture : IDisposable
         get;
     } = new(new()
     {
-        MaxQueryBytes = 4096,
-        MaxQueryTokens = 128,
-        MaxQueryDepth = 16
     },
 timeProvider: new ControlledReadClock(Epoch));
     internal List<(CommandRequest Request, CommitReceipt Receipt, byte[] Outcome)> Additional

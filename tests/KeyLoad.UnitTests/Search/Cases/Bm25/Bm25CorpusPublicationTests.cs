@@ -1,4 +1,3 @@
-using KeyLoad.Core.Search;
 using KeyLoad.UnitTests.ResourceExecution;
 using TUnit.Assertions.Enums;
 
@@ -69,54 +68,4 @@ internal sealed class Bm25CorpusPublicationTests
             await Assert.That((await flow.SearchAsync()).Single().Document.Reference.Id).IsEqualTo("first");
         });
 
-    [Test]
-    public Task RetainedRawAdmissionHonorsExactByteAndRecordBoundariesAndExcludesLargerReplacedHead()
-        => Bm25CorpusPublicationFlow.RunAsync(async flow =>
-        {
-            var original = flow.Capture(Guid.NewGuid(), null, "needle another");
-            flow.Publish(original);
-            var replacement = Bm25CorpusPublicationFlow.Phase(flow.Capture(Guid.NewGuid(), original.CommandId)).Current;
-            var prior = Bm25CorpusPublicationFlow.Phase(original).Current;
-            var key = Bm25CorpusKeys.Current(replacement);
-            var replacementBytes = OrleansSerialization.Serialize(replacement);
-            var priorBytes = flow.Database.Store.Read(view => view.ReadOwnedValue(Bm25CorpusKeys.Current(prior)))
-                ?? throw new InvalidOperationException("The actual original retained head is missing.");
-            var exact = checked(key.Length + replacementBytes.Length);
-            await Assert.That(replacementBytes.Length).IsLessThan(priorBytes.Length);
-            var full = flow.Database.Database.Limits with
-            {
-                MaxBatchBytes = exact
-            };
-            var before = CanonicalStoreCut.Read(flow.Database);
-            flow.RequireAdmission(replacement, full);
-            var deniedBytes = Assert.ThrowsExactly<KeyLoadException>(() => flow.RequireAdmission(replacement,
-                full with
-                {
-                    MaxBatchBytes = exact - 1
-                }));
-            await Assert.That(deniedBytes.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-            await before.RequireAsync(CanonicalStoreCut.Read(flow.Database));
-            flow.SetPrincipal(flow.Principal with
-            {
-                Id = "bm25-second-subject"
-            });
-            var other = Bm25CorpusPublicationFlow.Phase(flow.Capture(Guid.NewGuid(), null, subject: "bm25-second-subject")).Current;
-            var count = flow.Database.Store.Read(view =>
-            {
-                var page = view.Scan(Bm25CorpusKeys.Prefix(flow.Database.Partition), flow.Database.Database.Limits.MaxScanRecords, null);
-                if (page.HasMore)
-                {
-                    throw new InvalidOperationException("The actual retained family was not complete.");
-                }
-                return page.Records.Length;
-            });
-            var countBefore = CanonicalStoreCut.Read(flow.Database);
-            var deniedRecords = Assert.ThrowsExactly<KeyLoadException>(() => flow.RequireAdmission(other,
-                flow.Database.Database.Limits with
-                {
-                    MaxScanRecords = count
-                }));
-            await Assert.That(deniedRecords.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-            await countBefore.RequireAsync(CanonicalStoreCut.Read(flow.Database));
-        });
 }

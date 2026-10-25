@@ -7,7 +7,6 @@ internal sealed class AnnPublicObservedWorkTests
     private const string Deadline = "The read execution deadline is exceeded.";
 
     [Test]
-    [Arguments(false)]
     [Arguments(true)]
     public Task ActualAuthorizedReadWorkCancelsOrExpiresWithoutPartialAndReleasesLeaseBeforeHealthy(bool cancel)
     {
@@ -30,7 +29,7 @@ internal sealed class AnnPublicObservedWorkTests
                     }
                     else
                     {
-                        clock.Advance(TimeSpan.FromSeconds(database.Database.Limits.QueryDeadlineSeconds + 1));
+                        clock.Advance(UnitExecutionOptions.OperationLifetime);
                     }
                 });
             AnnSearchPage? partial = null;

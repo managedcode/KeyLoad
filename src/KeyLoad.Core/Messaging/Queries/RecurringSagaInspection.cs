@@ -22,7 +22,7 @@ public static class RecurringSagaInspection
     public static RecurringScheduleInspection? InspectRecurringSchedule(this DatabaseEngine engine, string principalId, QueueLaneRef lane, Guid scheduleId, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.InspectRecurringScheduleRead(principalId, lane, scheduleId, budget);
     }
 
@@ -53,7 +53,7 @@ public static class RecurringSagaInspection
     public static SagaInspection? InspectSaga(this DatabaseEngine engine, string principalId, QueueLaneRef lane, Guid sagaId, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var budget = new ReadExecutionBudget(engine.OperationLimitsOptions, engine.Clock, cancellationToken);
+        var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.InspectSagaRead(principalId, lane, sagaId, budget);
     }
 
@@ -104,7 +104,7 @@ public static class RecurringSagaInspection
 
     internal static RecurringScheduleInspection ProjectSchedule(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, RecurringScheduleRecord record, QueueLaneRef lane, Guid scheduleId)
     {
-        engine.ValidateScheduleRecord(record, lane, scheduleId);
+        RecurringScheduleValidation.ValidateScheduleRecord(record, lane, scheduleId);
         _ = RecurringSagaStorage.RequireCapacity(view, lane);
         var payload = engine.Authorization.Project(principal, resource.FieldPolicies, record.Definition.PayloadJson, out var payloadOmitted);
         var headers = engine.Authorization.Project(principal, resource.HeaderPolicies, record.Definition.HeadersJson, out var headerOmitted);
@@ -121,7 +121,7 @@ public static class RecurringSagaInspection
 
     internal static SagaInspection ProjectSaga(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, SagaRecord record, QueueLaneRef lane, Guid sagaId)
     {
-        engine.ValidateSagaRecord(record, lane, sagaId);
+        SagaCommands.ValidateSagaRecord(record, lane, sagaId);
         _ = RecurringSagaStorage.RequireCapacity(view, lane);
         var state = engine.Authorization.Project(principal, resource.FieldPolicies, record.StateJson, out var omitted);
         var redactedFields = FieldRedactionMetadata.Visible(engine.Authorization, principal, resource, omitted).Select(path => string.Concat(StateRedactionPrefix, path)).ToImmutableArray();

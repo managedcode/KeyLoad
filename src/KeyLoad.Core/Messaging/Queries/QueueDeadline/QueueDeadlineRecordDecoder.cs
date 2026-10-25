@@ -21,7 +21,7 @@ internal static class QueueDeadlineRecordDecoder
     private const int Initial = 0;
     private const int PointRecordCount = 1;
 
-    internal static QueueDeadlineHint? Read(DatabaseEngine database, IKeyValueView view,
+    internal static QueueDeadlineHint? Read(IKeyValueView view,
         ReadOnlySpan<byte> key, ReadOnlySpan<byte> value, DuePageState page)
     {
         var parts = KeyCodec.Decode(key);
@@ -38,7 +38,7 @@ internal static class QueueDeadlineRecordDecoder
         EngineResourceAccess.ValidatePartition(lane.Partition);
         JsonData.Identifier(queue);
         JsonData.Identifier(id);
-        var metadata = ReadMetadata(database, view, lane, id, space, value, page);
+        var metadata = ReadMetadata(view, lane, id, space, value, page);
         if (metadata.Id != id || metadata.StateVersion <= Initial || metadata.LeaseVersion < Initial)
         {
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
@@ -60,7 +60,7 @@ internal static class QueueDeadlineRecordDecoder
         return Select(lane, metadata, space, page.WakeAt);
     }
 
-    private static MessageMetadata ReadMetadata(DatabaseEngine database, IKeyValueView view, QueueLaneRef lane,
+    private static MessageMetadata ReadMetadata(IKeyValueView view, QueueLaneRef lane,
         string id, string space, ReadOnlySpan<byte> value, DuePageState page)
     {
         if (space == Metadata)
@@ -81,10 +81,6 @@ internal static class QueueDeadlineRecordDecoder
             if (!actualKey.SequenceEqual(key))
             {
                 throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
-            }
-            if (bytes.Length > database.Limits.MaxBatchBytes)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, DueWorkProtocol.RangeBytesExceeded);
             }
             metadata = OrleansSerialization.Deserialize<MessageMetadata>(bytes);
             return false;

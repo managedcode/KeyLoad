@@ -1,22 +1,18 @@
 using KeyLoad.Core;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.QueryExecution;
 
 /// <summary>Compiles only the frozen Q1.GraphPath expression into the canonical Core request.</summary>
 internal static class SqlGraphPathParser
 {
-    internal static GraphShortestPathRequest Parse(SqlGraphPathRequest request, IOptions<DatabaseLimits> limitsOptions,
+    internal static GraphShortestPathRequest Parse(SqlGraphPathRequest request,
         ReadExecutionBudget budget, int maximumParameters, int maximumLabels)
     {
-        ArgumentNullException.ThrowIfNull(limitsOptions);
-        var limits = limitsOptions.Value;
-        limits.Validate();
         ValidateEnvelope(request);
-        SqlGraphPathRequestSizer.EnsureBounded(request, limits.MaxQueryBytes, maximumParameters, budget);
+        SqlGraphPathRequestSizer.EnsureBounded(request, maximumParameters, budget);
         budget.Check();
-        var context = new ScriptDomGraphContext(request.Query, limitsOptions, budget, SqlGraphPathSyntax.ParameterDetail);
-        var arguments = ScriptDomGraphShape.Read(request.Query.Sql, limitsOptions, context, SqlGraphPathSyntax.Function);
+        var context = new ScriptDomGraphContext(request.Query, budget, SqlGraphPathSyntax.ParameterDetail);
+        var arguments = ScriptDomGraphShape.Read(request.Query.Sql, context, SqlGraphPathSyntax.Function);
         return ScriptDomGraphPath.Read(arguments, context, maximumLabels);
     }
 

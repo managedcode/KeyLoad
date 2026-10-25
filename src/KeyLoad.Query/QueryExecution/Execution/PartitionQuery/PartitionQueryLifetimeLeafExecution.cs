@@ -28,20 +28,20 @@ internal static class PartitionQueryLifetimeLeafExecution
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }
         var original = request;
-        PartitionQueryOwnedLeafValidation.Validate(original, database.Limits, engine.Execution);
+        PartitionQueryOwnedLeafValidation.Validate(original, engine.Execution);
         database.VerifyStorageOwner(actualOwner, token);
         if (original.Owner != actualOwner)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OwnerChanged);
         }
-        var budget = new ReadExecutionBudget(database.OperationLimitsOptions, clock, token);
+        var budget = new ReadExecutionBudget(clock, token);
         if (binding is not null)
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
         QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
         budget.ConstrainLifetime(originalExpiry);
-        var normalized = QueryValidation.Normalize(original.Plan.Request, database.Limits, engine.Execution);
+        var normalized = QueryValidation.Normalize(original.Plan.Request, engine.Execution);
         var grant = budget.CreateReadGrant(original.Plan.MaxReadBytes, original.Plan.MaxExaminedRecords);
         using var admission = database.AdmitQuery(token);
         var result = new PartitionQueryLeafExecutor(engine, database, budget, actualOwner, receivingLeaf: true)

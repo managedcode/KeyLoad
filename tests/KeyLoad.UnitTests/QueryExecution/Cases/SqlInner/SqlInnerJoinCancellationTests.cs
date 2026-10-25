@@ -25,7 +25,6 @@ internal sealed class SqlInnerJoinCancellationTests
     private const string CustomerPrimaryKeyColumn = "id";
     private const string CustomerId = "customer";
     private const string CustomerName = "Ada";
-    private const string DeadlineDiagnostic = "The read execution deadline is exceeded.";
     private static readonly string[] ExpectedLeftIds =
     [
         OrderId(0), OrderId(1), OrderId(10), OrderId(100), OrderId(101),
@@ -66,29 +65,6 @@ internal sealed class SqlInnerJoinCancellationTests
         await AssertHealthyJoinedRowsAsync(astHealthy);
         await SqlInnerJoinCancellationWholeState.LiteralAsync(astHealthy, ExpectedLeftIds, position);
         await SqlInnerJoinCancellationWholeState.UnchangedAsync(database, before, position, identity);
-    }
-
-    [Test]
-    public async Task AcJoinDeadlineAfterRangeProgressSettlesTheReadAndKeepsTheStoreHealthy()
-    {
-        using var database = new TestDatabase();
-        Configure(database);
-        Seed(database);
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var request = new QueryRequest(database.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: Dialect);
-        var position = database.Store.Position;
-        var baseline = database.Store.GetReadDiagnostics();
-        var clock = new ExpireAfterRangeProgressTimeProvider(database, baseline,
-            database.Database.Limits.QueryDeadlineSeconds);
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", request, clock));
-
-        await Assert.That(clock.ExpiredAfterProgress).IsTrue();
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(failure.Message).IsEqualTo(DeadlineDiagnostic);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-        var healthy = engine.Execute("root", request);
-        await AssertHealthyJoinedRowsAsync(healthy);
     }
 
     private static async Task AssertHealthyJoinedRowsAsync(QueryPage page)
@@ -136,28 +112,6 @@ internal sealed class SqlInnerJoinCancellationTests
             {
                 Interlocked.Exchange(ref observedRangeBytes, rangeBytes);
                 cancellation.Cancel();
-            }
-            return Interlocked.Increment(ref timestamp);
-        }
-    }
-
-    private sealed class ExpireAfterRangeProgressTimeProvider(TestDatabase database,
-        ZoneTreeReadSnapshot baseline, int deadlineSeconds) : TimeProvider
-    {
-        private long timestamp;
-
-        internal bool ExpiredAfterProgress
-        {
-            get; private set;
-        }
-        public override long TimestampFrequency => TimeSpan.TicksPerSecond;
-
-        public override long GetTimestamp()
-        {
-            if (database.Store.GetReadDiagnostics().RangeExaminedBytes > baseline.RangeExaminedBytes)
-            {
-                ExpiredAfterProgress = true;
-                return checked((long)(deadlineSeconds + 1) * TimestampFrequency);
             }
             return Interlocked.Increment(ref timestamp);
         }

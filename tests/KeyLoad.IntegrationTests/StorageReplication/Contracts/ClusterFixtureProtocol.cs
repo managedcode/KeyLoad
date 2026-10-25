@@ -21,7 +21,6 @@ internal static class ClusterFixtureProtocol
     internal const string SiloCountArgument = "--KeyLoad:SiloCount=3";
     internal const string ReplicaCountArgument = "--KeyLoad:ReplicaCount=";
     internal const string StorageModeArgument = "--KeyLoad:StorageMode=";
-    internal const string DatabaseLimitsSettingPrefix = "KeyLoad__DatabaseLimits__";
     internal const string BodyBytesSetting = "KeyLoad__ServerExecution__MaximumBodyBytes";
     internal const string HealthCheckLoggerCategory = "Microsoft.Extensions.Diagnostics.HealthChecks.DefaultHealthCheckService";
     internal const string ArtifactDirectory = "artifacts";

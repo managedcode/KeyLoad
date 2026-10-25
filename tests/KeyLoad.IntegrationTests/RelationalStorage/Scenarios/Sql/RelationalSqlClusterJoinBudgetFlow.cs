@@ -20,13 +20,13 @@ internal static class RelationalSqlClusterJoinBudgetFlow
     private const long SeedRevision = 1;
     private const string MissingDocument = "The SDK did not return a seeded join source.";
 
-    internal static async Task ExecuteAsync(JoinBudgetKind kind, DatabaseLimits limits, QueryExecutionOptions? queryExecution = null)
+    internal static async Task ExecuteAsync(QueryExecutionOptions queryExecution)
     {
-        var fixture = queryExecution is null ? new ClusterFixture(limits) : new ClusterFixture(limits, queryExecution);
+        var fixture = new ClusterFixture(queryExecution);
         try
         {
             await fixture.InitializeAsync();
-            await RunFixtureAsync(fixture, kind);
+            await RunFixtureAsync(fixture);
         }
         finally
         {
@@ -34,13 +34,13 @@ internal static class RelationalSqlClusterJoinBudgetFlow
         }
     }
 
-    private static async Task RunFixtureAsync(ClusterFixture fixture, JoinBudgetKind kind)
+    private static async Task RunFixtureAsync(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, NodeForSdk);
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var rejected = await PrepareAsync(sdk, kind, false, deadline.Token);
-        var healthy = await PrepareAsync(sdk, kind, true, deadline.Token);
+        var rejected = await PrepareAsync(sdk, false, deadline.Token);
+        var healthy = await PrepareAsync(sdk, true, deadline.Token);
         var before = await SnapshotAsync(sdk, rejected, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, NodeForMcp,
             fixture.AdminKey, deadline.Token);
@@ -51,12 +51,12 @@ internal static class RelationalSqlClusterJoinBudgetFlow
         await VerifyHealthyBothCallersAsync(sdk, mcp, healthy, deadline.Token);
     }
 
-    private static async Task<JoinBudgetSeed> PrepareAsync(KeyLoadClient sdk, JoinBudgetKind kind,
+    private static async Task<JoinBudgetSeed> PrepareAsync(KeyLoadClient sdk,
         bool healthy, CancellationToken token)
     {
         var partition = RelationalSqlClusterJoinBudgetData.Partition(healthy ? "healthy" : "rejected");
         var lifetimes = await RelationalSqlClusterJoinBudgetData.ConfigureAsync(sdk, partition, token);
-        return await RelationalSqlClusterJoinBudgetData.SeedAsync(sdk, partition, lifetimes, kind, healthy, token);
+        return await RelationalSqlClusterJoinBudgetData.SeedAsync(sdk, partition, lifetimes, healthy, token);
     }
 
     private static async Task RejectBothCallersAsync(KeyLoadClient sdk, McpOfficialClient mcp,

@@ -1,9 +1,6 @@
 using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Core.ResourceExecution;
-using KeyLoad.Core.Search;
 using KeyLoad.Storage;
-using KeyLoad.UnitTests.ResourceExecution;
-using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.UnitTests.Search;
@@ -11,58 +8,19 @@ namespace KeyLoad.UnitTests.Search;
 internal sealed class AnnSeedReadBudgetTests
 {
     private const string LineageKeySpace = "vector-projection-lineage";
-    [Test]
-    public async Task ActualReadBytesPassAtObservedLimitAndFailOneByteBelowWithoutMutation()
-    {
-        using var database = AnnSeedTestSupport.Create(8);
-        var measured = AnnSeedTestSupport.Capture(database);
-        var position = database.Store.Position;
-        var exactBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
-        {
-            MaxQueryReadBytes = measured.ReadBytes
-        }));
-        var exact = AnnSeedTestSupport.Capture(database, budget: exactBudget);
-        var shortBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits with
-        {
-            MaxQueryReadBytes = measured.ReadBytes - 1
-        }));
-        var failure = AnnSeedTestSupport.CaptureFailure(database, AnnSeedTestSupport.Principal, budget: shortBudget);
-
-        await Assert.That(measured.ReadBytes).IsGreaterThan(0L);
-        await Assert.That(exact.ReadBytes).IsEqualTo(measured.ReadBytes);
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-    }
 
     [Test]
     public async Task MetadataVectorAndDocumentReadsAreChargedExactlyOnce()
     {
         using var database = CreateVisibilitySource();
         var expectedBytes = MeasureSourceBytes(database);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
+        var budget = new ReadExecutionBudget();
         var seed = AnnSeedTestSupport.Capture(database, budget: budget);
 
         await Assert.That(seed.Records.Select(record => record.DocumentId).ToArray())
             .IsEquivalentTo(["visible"], CollectionOrdering.Matching);
         await Assert.That(seed.ReadBytes).IsEqualTo(expectedBytes);
         await Assert.That(budget.ReadBytes).IsEqualTo(expectedBytes);
-    }
-
-    [Test]
-    public async Task ScanLookaheadFailureNeverReturnsPartialSeed()
-    {
-        using var database = AnnSeedTestSupport.Create(3);
-        var owner = SearchReadBudgetOwner.Create(database, database.Store, database.Database.Limits with { MaxScanRecords = 2 });
-        var position = database.Store.Position;
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(database.Database.Limits));
-        var expectedBytes = MeasureSourceBytes(database, maxScanRecords: 2);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => AnnSeedCollector.Capture(owner,
-            AnnSeedTestSupport.Principal, database.Partition, AnnSeedTestSupport.Collection, AnnSeedTestSupport.Field,
-            AnnSeedTestSupport.Space(), Options.Create(new AnnSeedOptions()), budget));
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(budget.ReadBytes).IsEqualTo(expectedBytes);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
     }
 
     private static TestDatabase CreateVisibilitySource()
@@ -112,7 +70,7 @@ internal sealed class AnnSeedReadBudgetTests
             CountRead(view, KeySpace.Partition("outbox-head", database.Partition), counter);
             CountRead(view, KeySpace.Applied.ToArray(), counter);
             view.VisitRange(KeySpace.Partition("vector", database.Partition, AnnSeedTestSupport.Collection,
-                AnnSeedTestSupport.Field), maxScanRecords ?? database.Database.Limits.MaxScanRecords, (_, value) =>
+                AnnSeedTestSupport.Field), maxScanRecords ?? view.MaximumRangeRecords, (_, value) =>
                 {
                     var vector = OrleansSerialization.Deserialize<VectorRecord>(value);
                     CountRead(view, DocumentStorageKeys.RecordKey(database.Partition, AnnSeedTestSupport.Collection,
@@ -143,53 +101,4 @@ internal sealed class AnnSeedReadBudgetTests
         internal void Add(long value) => Total = checked(Total + value);
     }
 
-    [Test]
-    public async Task RepeatedCaptureUnderOneSystemBudgetStopsAtRealDeadline()
-    {
-        const int MaxCaptureCalls = 1024;
-        const long MaxCumulativeSourceBytes = 2_147_483_648;
-        var limits = new DatabaseLimits
-        {
-            QueryDeadlineSeconds = 1,
-            MaxQueryReadBytes = MaxCumulativeSourceBytes
-        };
-        using var database = AnnSeedTestSupport.Create(10_000, limits);
-        var budget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits), TimeProvider.System);
-        var started = TimeProvider.System.GetTimestamp();
-        var calls = 0;
-        var successfulReadDeltasPositive = true;
-        long failedCallBytes = 0;
-        KeyLoadException? deadline = null;
-
-        while (calls < MaxCaptureCalls && budget.ReadBytes < MaxCumulativeSourceBytes)
-        {
-            var before = budget.ReadBytes;
-            try
-            {
-                _ = AnnSeedTestSupport.Capture(database, budget: budget);
-                calls++;
-                successfulReadDeltasPositive &= budget.ReadBytes - before > 0;
-            }
-            catch (KeyLoadException failure)
-            {
-                failedCallBytes = budget.ReadBytes - before;
-                deadline = failure;
-                break;
-            }
-        }
-
-        await Assert.That(deadline).IsNotNull();
-        await Assert.That(deadline!.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(failedCallBytes).IsGreaterThan(0L);
-        await Assert.That(successfulReadDeltasPositive).IsTrue();
-        await Assert.That(calls).IsLessThan(MaxCaptureCalls);
-        await Assert.That(budget.ReadBytes).IsLessThanOrEqualTo(MaxCumulativeSourceBytes);
-        await Assert.That(TimeProvider.System.GetElapsedTime(started)).IsGreaterThanOrEqualTo(TimeSpan.FromSeconds(1));
-        var healthyBudget = new ReadExecutionBudget(UnitExecutionOptions.DatabaseLimits(limits with
-        {
-            QueryDeadlineSeconds = 30
-        }));
-        var healthy = AnnSeedTestSupport.Capture(database, budget: healthyBudget);
-        await Assert.That(healthy.Records.Length).IsEqualTo(10_000);
-    }
 }

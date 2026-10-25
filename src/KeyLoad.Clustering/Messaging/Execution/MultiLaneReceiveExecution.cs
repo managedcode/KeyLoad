@@ -10,6 +10,9 @@ namespace KeyLoad.Clustering;
 
 internal static class MultiLaneReceiveExecution
 {
+    // The encoded result travels in one grain reply; that reply ceiling, not this check, bounds its size.
+    private const int UnboundedResultBytes = int.MaxValue;
+
     internal static async Task<MultiLaneReceiveResult> ExecuteAsync(DecodedGrainRequest parent,
         Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
@@ -18,10 +21,9 @@ internal static class MultiLaneReceiveExecution
     {
         var request = GrainPayload.ReadCommand<MultiLaneReceiveRequest>(parent.Payload);
         ArgumentNullException.ThrowIfNull(binding);
-        var limits = services.GetRequiredService<IOptions<DatabaseLimits>>().Value;
         var incarnation = codec.Incarnation;
         MultiLaneReceiveAdmission.Validate(request, parent.Envelope.CommandId,
-            services.GetRequiredService<IOptions<MessagingExecutionOptions>>().Value, limits, token);
+            services.GetRequiredService<IOptions<MessagingExecutionOptions>>().Value, token);
         var outcomes = ImmutableArray.CreateBuilder<QueueLaneReceiveOutcome>(request.Requests.Length);
         var halted = false;
         KeyLoadException? stopped = null;
@@ -37,7 +39,7 @@ internal static class MultiLaneReceiveExecution
             {
                 AcceptOutcome(request.RequestId, outcomes,
                     new(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted), stopped,
-                    binding, limits.MaxBatchBytes, token);
+                    binding, UnboundedResultBytes, token);
                 continue;
             }
             var dispatched = await DispatchAsync(leaf, executeChild, services, codec, clock,
@@ -45,12 +47,12 @@ internal static class MultiLaneReceiveExecution
             stopped = dispatched.Stopped;
             var outcome = stopped is null ? Outcome(leaf, dispatched.Reply!, diagnostics, parent.Envelope.RequestId)
                 : new QueueLaneReceiveOutcome(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted);
-            AcceptOutcome(request.RequestId, outcomes, outcome, stopped, binding, limits.MaxBatchBytes, token);
+            AcceptOutcome(request.RequestId, outcomes, outcome, stopped, binding, UnboundedResultBytes, token);
             halted = stopped is not null || outcome.Status == QueueLaneReceiveStatus.Unknown;
         }
         token.ThrowIfCancellationRequested();
         var result = new MultiLaneReceiveResult(request.RequestId, outcomes.MoveToImmutable(), stopped?.Code, stopped?.Message);
-        CheckResult(result, binding, limits.MaxBatchBytes, token);
+        CheckResult(result, binding, UnboundedResultBytes, token);
         return result;
     }
 

@@ -20,7 +20,7 @@ public static class EventStreamsCommands
         const int GenerationSingleItemCount = 1;
         const int CurrentSnapshotVersionValidationBoundary = 0;
         const int VersionSingleItemCount = 1;
-        engine.ValidateSnapshotRequest(request);
+        EventStreamsCommands.ValidateSnapshotRequest(request);
         var resource = engine.Resource(tx, partition, request.StreamSet, ResourceKind.StreamSet);
         engine.Authorization.RequireReplayInput(principal, resource);
         var head = tx.GetRecord<StreamHead>(KeySpace.Partition(AggregateReplayReader.StreamHeadKeySpace, partition, request.StreamSet, request.StreamId)) ?? new StreamHead(TailRevisionEmptyCount, FirstAvailableRevisionSingleItemCount, GenerationSingleItemCount);
@@ -33,7 +33,7 @@ public static class EventStreamsCommands
         ValidateSnapshotSource(request, head);
         var stream = new StreamRef(partition, request.StreamSet, request.StreamId, head.Generation);
         var key = AggregateSnapshotPersistence.Key(stream);
-        var current = tx.ReadOwnedValue(key) is { } bytes ? AggregateSnapshotPersistence.Deserialize(bytes, engine.Limits) : null;
+        var current = tx.ReadOwnedValue(key) is { } bytes ? AggregateSnapshotPersistence.Deserialize(bytes) : null;
         if (current is not null && (current.Stream != stream || current.SourceRevision > head.TailRevision))
         {
             throw Errors.Fail(ErrorCode.Corruption, SnapshotCorruptMessage);
@@ -60,7 +60,7 @@ public static class EventStreamsCommands
         return new(SnapshotMutationKind, request.StreamSet, request.StreamId, state.SnapshotVersion);
     }
 
-    internal static void ValidateSnapshotRequest(this DatabaseEngine engine, StoreAggregateSnapshot request)
+    internal static void ValidateSnapshotRequest(StoreAggregateSnapshot request)
     {
         const int GenerationValidationBoundary = 1;
         const int SourceRevisionValidationBoundary = 0;
@@ -75,7 +75,7 @@ public static class EventStreamsCommands
             throw Errors.Fail(ErrorCode.Validation, InvalidSnapshotSourceMessage);
         }
 
-        _ = JsonData.Validate(request.StateJson, engine.Limits, requireObject: false);
+        _ = JsonData.Validate(request.StateJson, requireObject: false);
     }
 
     internal static void ValidateSnapshotSource(StoreAggregateSnapshot request, StreamHead head)

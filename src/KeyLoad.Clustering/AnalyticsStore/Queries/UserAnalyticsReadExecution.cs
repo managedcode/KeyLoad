@@ -17,7 +17,7 @@ internal static class UserAnalyticsReadExecution
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        var work = new ReadExecutionBudget(database.OperationLimitsOptions, database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(database.EvaluationClock, token);
         work.ConstrainLifetime(request.Envelope.ExpiresAt);
         work.AttachResourceLifetimeBinding(binding);
         return kind switch

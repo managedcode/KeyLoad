@@ -18,11 +18,11 @@ internal static class QueryViewExecution
         var query = request.Query;
         budget.Check();
         QueryFieldAuthorization.Bind(database, principal, resource, request);
-        var coverage = budget.CaptureResourceLifetimes(database, budget.CreateView(view), request.Partition, [resource]);
+        var coverage = budget.CaptureResourceLifetimes(budget.CreateView(view), request.Partition, [resource]);
         var paged = QueryKeysetPage.Applies(query);
         var cursor = QueryCursorExecution.Resolve(database, view, principal, resource, request, hash, clock,
             coverage.Lifetimes.Single(), paged);
-        var prepared = new PreparedQuery(query, cursor.Offset, database.Limits.MaxScanRecords);
+        var prepared = new PreparedQuery(query, cursor.Offset, PreparedQuery.CallerSizedCandidates);
         // One accepted row beyond the page proves that another page exists.
         var keyset = paged ? new QueryKeysetPage(cursor.AfterId, () => prepared.EligibleCount > query.Limit) : null;
         var accessPath = new QueryCandidateReader(database, view, principal, resource, request, budget, document =>
@@ -43,7 +43,7 @@ internal static class QueryViewExecution
         if (query.Explain)
         {
             var explain = new QueryPage([new(QueryEngine.ExplainId, InitialSequence, JsonSerializer.Serialize(new { AccessPath = accessPath,
-                AtomicPartition = request.Partition.AtomicPartitionId, ScanBudget = database.Limits.MaxScanRecords },
+                AtomicPartition = request.Partition.AtomicPartitionId },
                 JsonDefaults.Options))], null, cursor.Cut, accessPath);
             budget.CheckResult(explain);
             return explain;

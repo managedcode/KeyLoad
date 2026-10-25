@@ -50,7 +50,7 @@ internal static class UserAnalyticsProcessMutations
 
     private static Command<DatabaseCommand> Issue(PartitionHost host, OperationKind kind, object payload, Guid id, CancellationToken token)
     {
-        var work = new ReadExecutionBudget(host.Database.OperationLimitsOptions, host.Database.EvaluationClock, token);
+        var work = new ReadExecutionBudget(host.Database.EvaluationClock, token);
         return host.Database.CreateCommand(kind, id, PartitionStoreProtocol.AdministratorId,
             TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(payload), work);
     }

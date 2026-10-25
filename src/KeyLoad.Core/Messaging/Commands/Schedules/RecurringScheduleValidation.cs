@@ -5,7 +5,7 @@ namespace KeyLoad.Core;
 /// <summary>Owns the RecurringScheduleValidation operation contract.</summary>
 internal static class RecurringScheduleValidation
 {
-    internal static void ValidateScheduleRevision(this DatabaseEngine engine, long expectedRevision, RecurringScheduleRecord? existing, QueueLaneRef lane, Guid scheduleId)
+    internal static void ValidateScheduleRevision(long expectedRevision, RecurringScheduleRecord? existing, QueueLaneRef lane, Guid scheduleId)
     {
         if (expectedRevision < MessagingCommandsSchedules.RecurringScheduleCommandsInitialSequence || (existing is null ? expectedRevision != MessagingCommandsSchedules.RecurringScheduleCommandsInitialSequence : expectedRevision != existing.Revision))
         {
@@ -14,7 +14,7 @@ internal static class RecurringScheduleValidation
 
         if (existing is not null)
         {
-            engine.ValidateScheduleRecord(existing, lane, scheduleId);
+            RecurringScheduleValidation.ValidateScheduleRecord(existing, lane, scheduleId);
         }
     }
 
@@ -26,24 +26,24 @@ internal static class RecurringScheduleValidation
         }
     }
 
-    internal static RecurringScheduleRecord RequireSchedule(this DatabaseEngine engine, IKeyValueView view, QueueLaneRef lane, Guid scheduleId)
+    internal static RecurringScheduleRecord RequireSchedule(IKeyValueView view, QueueLaneRef lane, Guid scheduleId)
     {
         var record = view.GetRecord<RecurringScheduleRecord>(RecurringSagaStorage.ScheduleKey(lane, scheduleId)) ?? throw Errors.Fail(ErrorCode.NotFound, RecurringSagaProtocol.MissingSchedule);
-        engine.ValidateScheduleRecord(record, lane, scheduleId);
+        RecurringScheduleValidation.ValidateScheduleRecord(record, lane, scheduleId);
         return record;
     }
 
-    internal static void ValidateScheduleRecord(this DatabaseEngine engine, RecurringScheduleRecord record, QueueLaneRef lane, Guid scheduleId)
+    internal static void ValidateScheduleRecord(RecurringScheduleRecord record, QueueLaneRef lane, Guid scheduleId)
     {
         if (record.Lane is null || record.CreatorPrincipalId is null || record.Definition is null || record.Lane != lane || record.ScheduleId != scheduleId || record.Definition.Lane != lane || record.Definition.ScheduleId != scheduleId || record.Revision < MessagingCommandsSchedules.RecurringScheduleCommandsMinimumPositiveCount || record.Generation < MessagingCommandsSchedules.RecurringScheduleCommandsMinimumPositiveCount || record.NextOrdinal < MessagingCommandsSchedules.RecurringScheduleCommandsInitialSequence)
         {
             throw Errors.Fail(ErrorCode.Corruption, RecurringSagaProtocol.CorruptRecord);
         }
 
-        _ = engine.NormalizeScheduleDefinition(record.Definition);
+        _ = RecurringScheduleValidation.NormalizeScheduleDefinition(record.Definition);
     }
 
-    internal static RecurringScheduleDefinition NormalizeScheduleDefinition(this DatabaseEngine engine, RecurringScheduleDefinition definition)
+    internal static RecurringScheduleDefinition NormalizeScheduleDefinition(RecurringScheduleDefinition definition)
     {
         ArgumentNullException.ThrowIfNull(definition);
         if (definition.Lane is null || definition.ScheduleId == Guid.Empty || definition.FirstDueAt.Offset != TimeSpan.Zero || definition.TimeZone != RecurringSagaProtocol.UtcZone || definition.Interval.Ticks is < MessagingCommandsSchedules.MinimumIntervalTicks or > MessagingCommandsSchedules.MaximumIntervalTicks || definition.Misfire != RecurringMisfirePolicy.CatchUp || definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > RecurringSagaProtocol.MaximumMessageTimeToLiveTicks))
@@ -52,8 +52,8 @@ internal static class RecurringScheduleValidation
         }
 
         JsonData.Identifier(definition.Lane.Queue);
-        var payload = JsonData.Validate(definition.PayloadJson, engine.Limits);
-        var headers = JsonData.Validate(definition.HeadersJson, engine.Limits);
+        var payload = JsonData.Validate(definition.PayloadJson);
+        var headers = JsonData.Validate(definition.HeadersJson);
         if (definition.OrderingKey is not null)
         {
             JsonData.Identifier(definition.OrderingKey);

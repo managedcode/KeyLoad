@@ -5,16 +5,12 @@ namespace KeyLoad.Core.ResourceExecution;
 
 internal static class ResourceEffectAdmissionValidation
 {
-    internal static ResourceEffectAdmission Read(Command<DatabaseCommand> operation, DatabaseLimits limits)
+    internal static ResourceEffectAdmission Read(Command<DatabaseCommand> operation)
     {
         var payload = operation.Value!;
         if (payload.ResourceAdmission.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Unbound);
-        }
-        if (payload.ResourceAdmission.Length > limits.MaxBatchBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, ResourceEffectAdmissionProtocol.Capacity);
         }
         var value = OrleansSerialization.Deserialize<ResourceEffectAdmission>(payload.ResourceAdmission.Span);
         if (value is null || value.Version != ResourceEffectAdmissionProtocol.Version
@@ -27,20 +23,13 @@ internal static class ResourceEffectAdmissionValidation
             throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
         }
         var keys = new HashSet<ResourceLifetime>();
-        long retainedBytes = ResourceEffectAdmissionProtocol.Zero;
         foreach (var lifetime in value.Bindings)
         {
             ResourceLifetimeIdentity.Validate(lifetime);
-            var bytes = OrleansSerialization.Measure(lifetime);
-            if (bytes <= ResourceEffectAdmissionProtocol.Zero || bytes > limits.MaxBatchBytes - retainedBytes)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
-            }
             if (!keys.Add(lifetime))
             {
                 throw Errors.Fail(ErrorCode.Corruption, ResourceEffectAdmissionProtocol.Invalid);
             }
-            retainedBytes += bytes;
         }
         return value;
     }
