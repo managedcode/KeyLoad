@@ -6,20 +6,17 @@ using KeyLoad.ClusterTests.StorageReplication;
 
 namespace KeyLoad.ClusterTests.QueryExecution;
 
-internal sealed record PostgresClusterSelection(int QueryDialect)
+internal sealed record PostgresClusterSelection(int QueryDialect, bool RequireTls = true)
 {
     private const string Prefix = "KeyLoad__RuntimeSql__";
     private const string Tcp = "tcp";
     private const string True = "true";
 
-    internal void Configure(IDistributedApplicationTestingBuilder builder, string root)
+    internal void Configure(IDistributedApplicationTestingBuilder builder)
     {
-        Configure(builder, PostgresClusterCertificate.Create(root), PostgresClusterProtocol.Partition, Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
-                .Select(ClusterFixtureProtocol.NodeName));
-    }
-    internal void Configure(IDistributedApplicationTestingBuilder builder, PostgresClusterCertificate certificates,
-        PartitionRef partition, IEnumerable<string> nodes)
-    {
+        var partition = PostgresClusterProtocol.Partition;
+        var nodes = Enumerable.Range(ClusterFixtureProtocol.FirstNodeNumber, ClusterFixtureProtocol.NodeCount)
+            .Select(ClusterFixtureProtocol.NodeName);
         foreach (var name in nodes)
         {
             var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
@@ -27,7 +24,7 @@ internal sealed record PostgresClusterSelection(int QueryDialect)
             node.WithEndpoint(name: PostgresClusterProtocol.Endpoint,
                     scheme: Tcp, isProxied: false)
                 .WithEnvironment(Prefix + Port, node.GetEndpoint(PostgresClusterProtocol.Endpoint).Property(EndpointProperty.TargetPort))
-                .WithEnvironment(Prefix + CertificatePath, certificates.ServerPath)
+                .WithEnvironment(Prefix + nameof(RequireTls), RequireTls.ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment(Prefix + Dialect, QueryDialect.ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment(Prefix + FullScan, True)
                 .WithEnvironment(Prefix + DatabasePrefix + Tenant, partition.TenantId)
@@ -38,7 +35,6 @@ internal sealed record PostgresClusterSelection(int QueryDialect)
     }
 
     private const string Port = "Port";
-    private const string CertificatePath = "CertificatePath";
     private const string Dialect = "QueryDialectVersion";
     private const string FullScan = "AllowFullScan";
     private const string DatabasePrefix = "Databases__keyload__";

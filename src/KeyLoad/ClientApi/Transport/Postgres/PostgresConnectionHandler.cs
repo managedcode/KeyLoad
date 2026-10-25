@@ -11,7 +11,7 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
     public override async Task OnConnectedAsync(ConnectionContext context)
     {
         var options = configured.Value;
-        if (context.Features.Get<ITlsHandshakeFeature>() is null
+        if (options.RequireTls && context.Features.Get<ITlsHandshakeFeature>() is null
             || context.Features.Get<ServerConnectionFeature>() is null)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);

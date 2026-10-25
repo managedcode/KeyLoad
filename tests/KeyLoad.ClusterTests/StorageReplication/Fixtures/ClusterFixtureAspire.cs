@@ -26,7 +26,7 @@ internal sealed partial class ClusterFixture
     {
         ClusterFixtureComposition.ConfigureTestOverrides(builder, maximumBodyBytes, queryExecution);
         queueDeadline?.Configure(builder);
-        runtimeSql.Configure(builder, Root);
+        runtimeSql.Configure(builder);
         RemoteTransferCoordinatorFixtureConfiguration.Configure(builder, transferCoordinator);
         resourceNames = ClusterFixtureComposition.GetResourceNames(builder);
         ClusterFixtureComposition.ConfigureLogging(builder);

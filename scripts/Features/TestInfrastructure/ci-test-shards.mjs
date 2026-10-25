@@ -1,5 +1,5 @@
 import { spawn } from 'node:child_process';
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { availableParallelism } from 'node:os';
 import path from 'node:path';
 import { createInterface } from 'node:readline';
@@ -9,6 +9,7 @@ import {
   assemblyFilter, checkPartition, findShard, laneFilter, loadManifest, namespaceFilter,
 } from './ci-test-partition.mjs';
 import { checkResults } from './ci-test-results.mjs';
+import { checkCompiledInventory } from './ci-test-compiled-inventory.mjs';
 import { executionPipeDirectory } from './run-tests.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
@@ -18,6 +19,7 @@ const usage = [
   '  run <shard> [--results-directory <directory>]    run one shard (default results directory: TestResults)',
   '  verify [<results-directory>]                     exactly-once partition check, plus TRX identities when given',
   '  inventory <suite>                                source inventory with cluster use and lane assignment',
+  '  verify-compiled <suite> <discovery.json>           compare original compiled discovery with source methods',
 ].join('\n');
 
 function matrix(manifest, suiteId) {
@@ -146,6 +148,16 @@ async function main(argumentsList) {
     return runShard(manifest, rest[0], rest[2] ?? 'TestResults');
   }
   if (command === 'verify' && rest.length <= 1) return verify(manifest, rest[0]);
+  if (command === 'verify-compiled' && rest.length === 2) {
+    const partition = checkPartition(root, manifest);
+    if (partition.errors.length > 0) throw new Error(partition.errors.join('\n'));
+    const entry = partition.suites.get(rest[0]);
+    if (!entry) throw new Error(`Unknown suite: ${rest[0]}`);
+    const result = checkCompiledInventory(entry, JSON.parse(readFileSync(rest[1], 'utf8')));
+    if (result.errors.length > 0) throw new Error(result.errors.join('\n'));
+    process.stdout.write(`PASS: compiled ${rest[0]} discovery equals source inventory (${result.methods} methods, ${result.cases} cases).\n`);
+    return 0;
+  }
   if (command === 'inventory' && rest.length === 1) return inventory(manifest, rest[0]);
   process.stderr.write(`${usage}\n`);
   return 2;

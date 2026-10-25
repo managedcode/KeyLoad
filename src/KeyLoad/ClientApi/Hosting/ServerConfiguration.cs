@@ -176,12 +176,17 @@ internal static class ServerConfiguration
     {
         builder.Services.AddOptions<KestrelServerOptions>().Configure<IOptions<ServerExecutionOptions>>(
             (server, configured) => server.Limits.MaxRequestBodySize = configured.Value.MaximumBodyBytes);
-        builder.Services.AddOptions<KestrelServerOptions>().Configure<ServerConnectionRegistry>(
-            (server, connections) => server.ConfigureEndpointDefaults(listen =>
+        builder.Services.AddOptions<KestrelServerOptions>()
+            .Configure<ServerConnectionRegistry, IEnumerable<PostgresEndpointConfiguration>>(
+            (server, connections, sqlEndpoints) => server.ConfigureEndpointDefaults(listen =>
             {
                 listen.Use(next => connection => connections.RunAsync(connection, () => next(connection)));
                 ((Microsoft.AspNetCore.Connections.IMultiplexedConnectionBuilder)listen).Use(
                     next => connection => connections.RunAsync(connection, () => next(connection)));
+                foreach (var sql in sqlEndpoints)
+                {
+                    sql.ConfigureEndpoint(listen);
+                }
             }));
         builder.Services.Configure<Microsoft.AspNetCore.Routing.RouteHandlerOptions>(options => options.ThrowOnBadRequest = true);
         builder.Services.AddOptions<Microsoft.AspNetCore.Http.Json.JsonOptions>()

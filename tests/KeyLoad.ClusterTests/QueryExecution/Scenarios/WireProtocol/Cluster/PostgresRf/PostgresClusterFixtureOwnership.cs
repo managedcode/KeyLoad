@@ -6,8 +6,8 @@ internal sealed class PostgresClusterFixtureOwnership(PostgresClusterSelection? 
 {
     private const int NoFailures = 0;
 
-    internal void Configure(IDistributedApplicationTestingBuilder builder, string root)
-        => selection?.Configure(builder, root);
+    internal void Configure(IDistributedApplicationTestingBuilder builder)
+        => selection?.Configure(builder);
 
     internal static async Task<bool> ReleaseRootAsync(bool localIncomplete, List<Exception> failures,
         Func<Task> deleteOwnedRoot)

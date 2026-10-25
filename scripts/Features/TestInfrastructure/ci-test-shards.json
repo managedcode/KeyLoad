@@ -451,7 +451,10 @@
                 "InitialPrincipalEpochClusterTests",
                 "PostgresDecimalClusterWholeFlowTests",
                 "QueueDispatchCasClusterTests",
-                "RelationalSqlClusterJoinBudgetTests"
+                "RelationalSqlClusterJoinBudgetTests",
+                "SqlBetweenSymmetricClusterWholeFlowTests",
+                "SqlBooleanTruthClusterWholeFlowTests",
+                "SqlNullDistinctClusterWholeFlowTests"
               ]
             },
             {
@@ -489,14 +492,16 @@
               ]
             },
             {
-              "id": "bootstrap-files-and-transfer-coordination",
+              "id": "bootstrap-files-sql-and-transfer-coordination",
               "kind": "own-clusters",
               "classes": [
                 "CatalogBootstrapAuthorityClusterTests",
                 "FileStorageHttpTests",
                 "PostgresInt16ClusterWholeFlowTests",
                 "QueueDueDatabaseScopeClusterTests",
-                "RemoteTransferCoordinatorClusterTests"
+                "RemoteTransferCoordinatorClusterTests",
+                "SqlFetchCountClusterWholeFlowTests",
+                "SqlNullOrderingClusterWholeFlowTests"
               ]
             }
           ],

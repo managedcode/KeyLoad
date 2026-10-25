@@ -79,7 +79,7 @@ internal sealed class AnnMaintenanceState(Func<AnnGenerationOwner> createOwner)
 
     internal async Task<AnnMaintenanceCapabilityResult> BeginAsync(DatabaseEngine database, PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured,
-        MaintenanceSessionWork work)
+        MaintenanceSessionWork work, CancellationToken serviceShutdown)
     {
         lock (gate)
         {
@@ -93,7 +93,7 @@ internal sealed class AnnMaintenanceState(Func<AnnGenerationOwner> createOwner)
         try
         {
             return await AnnMaintenanceBeginning.RunAsync(database, principal, request, configured,
-                gate, () => owner, EnsureOwner, PublishSession, work);
+                gate, () => owner, EnsureOwner, PublishSession, work, serviceShutdown);
         }
         finally
         {

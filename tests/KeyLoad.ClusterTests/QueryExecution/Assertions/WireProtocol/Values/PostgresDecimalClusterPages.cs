@@ -24,7 +24,7 @@ internal static class PostgresDecimalClusterPages
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, McpCallerProtocol.Node3,
-                    state.Reader.Principal.Id, state.Reader.Secret, PostgresClusterCertificate.RootPath(fixture), token);
+                    state.Reader.Principal.Id, state.Reader.Secret, token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     foreach (var value in PostgresDecimalClusterProtocol.Thresholds)

@@ -36,7 +36,6 @@ internal static class AppHostProgram
     private const string PublicEnvironment = "KeyLoad__PublicEndpoint";
     private const string SiloAddressEnvironment = "KeyLoad__SiloAddress";
     private const string SiloPortEnvironment = "KeyLoad__SiloPort";
-    private const string ServerUrlsEnvironment = "ASPNETCORE_URLS";
     private const string LoopbackAddress = "127.0.0.1";
     private const int FirstNodeIndex = 0;
     private const int SharedVolumeCopies = 1;
@@ -133,7 +132,6 @@ internal static class AppHostProgram
             .WithEndpoint(name: SiloEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false);
         resource.WithEnvironment(ClusterEnvironment, ClusterPrefix + databaseIdentity.Incarnation.ToString(ClusterGuidFormat))
             .WithEnvironment(PublicEnvironment, resource.GetEndpoint(HttpsEndpoint))
-            .WithEnvironment(ServerUrlsEnvironment, resource.GetEndpoint(HttpsEndpoint))
             .WithEnvironment(SiloNameEnvironment, resourceName)
             .WithEnvironment(SiloCountEnvironment, siloCount.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(ReplicaCountEnvironment, replicaCount.ToString(CultureInfo.InvariantCulture))

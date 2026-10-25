@@ -97,7 +97,7 @@ export function checkResults(resultsDirectory, manifest, partition) {
         continue;
       }
       for (const method of testClass.methods) {
-        if (entry.ownerOf(testClass, method.name)?.lanePlan?.methods && !methods.has(method.name)) {
+        if (!methods.has(method.name)) {
           errors.push(`${suiteId}: ${testClass.name}.${method.name} never executed.`);
         }
       }

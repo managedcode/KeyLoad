@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 internal sealed class PostgresSessionOptions
 {
     internal const string Section = "KeyLoad:RuntimeSql";
-    private const string Invalid = "Execution SQL TLS endpoint and session limits are invalid.";
+    private const string Invalid = "Execution SQL endpoint, transport and session limits are invalid.";
     private const int MaximumPort = 65535;
     private const int MaximumSlots = 8;
     private const int MaximumStartup = 65536;
@@ -26,7 +26,7 @@ internal sealed class PostgresSessionOptions
     {
         get; set;
     }
-    public string CertificatePath { get; set; } = string.Empty;
+    public bool RequireTls { get; set; } = true;
     public int MaximumStartupBytes { get; set; } = MaximumStartup;
     public int MaximumFrameBytes { get; set; } = MaximumFrame;
     public int MaximumStatements { get; set; } = MaximumSlots;
@@ -37,7 +37,7 @@ internal sealed class PostgresSessionOptions
 
     internal void Validate()
     {
-        if (Port is < Minimum or > MaximumPort || string.IsNullOrWhiteSpace(CertificatePath)
+        if (Port is < Minimum or > MaximumPort
             || MaximumStartupBytes is < Minimum or > MaximumStartup
             || MaximumFrameBytes is < MinimumFrame or > MaximumFrame
             || MaximumStatements is < Minimum or > MaximumSlots

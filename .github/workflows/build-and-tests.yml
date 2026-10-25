@@ -30,6 +30,8 @@ jobs:
         run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs verify
       - name: Build
         run: dotnet build KeyLoad.slnx -warnaserror
+      - name: Check compiled TUnit shard inventory
+        run: node --test scripts/Features/TestInfrastructure/ci-test-inventory.test.mjs
       - name: Check compiled unit inventory and coverage selectors
         shell: pwsh
         run: |
@@ -40,8 +42,10 @@ jobs:
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: compiled-unit-discovery
-          path: tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/ci-inventory
+          name: compiled-test-discovery
+          path: |
+            tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/ci-inventory
+            tests/*/bin/Debug/net10.0/compiled-shard-inventory-*
           if-no-files-found: warn
           retention-days: 30
 
@@ -139,28 +143,23 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - name: Trust the development HTTPS certificate
-        run: |
-          export SSL_CERT_DIR="$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs"
-          echo "SSL_CERT_DIR=$SSL_CERT_DIR" >> "$GITHUB_ENV"
-          dotnet dev-certs https --trust
       - name: Build
         run: dotnet build KeyLoad.slnx -warnaserror
       - name: Install administration browser
         if: ${{ matrix.playwright }}
         shell: pwsh
         run: tests/KeyLoad.ClusterTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
-      - name: Trust development HTTPS in Chromium
+      - name: Prepare Chromium certificate store
         if: ${{ matrix.playwright }}
         run: |
-          sudo apt-get install --yes --no-install-recommends libnss3-tools
-          mkdir -p "$HOME/.local/share/pki/nssdb"
-          if [ ! -f "$HOME/.local/share/pki/nssdb/cert9.db" ]; then
-            certutil -N --empty-password -d "sql:$HOME/.local/share/pki/nssdb"
+          sudo apt-get update
+          sudo apt-get install --yes libnss3-tools
+          mkdir -p "$HOME/.pki/nssdb"
+          if [[ ! -f "$HOME/.pki/nssdb/cert9.db" ]]; then
+            certutil -N -d "sql:$HOME/.pki/nssdb" --empty-password
           fi
-          export DOTNET_DEV_CERTS_NSSDB_PATHS="$HOME/.local/share/pki/nssdb"
-          dotnet dev-certs https --trust --verbose
-          dotnet dev-certs https --check --trust --verbose
+      - name: Trust standard Aspire development certificate
+        run: dotnet dev-certs https --trust
       - name: Test Aspire topology lanes
         run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ClusterTests/bin/Debug/net10.0/ci-results"
       - name: Save test results

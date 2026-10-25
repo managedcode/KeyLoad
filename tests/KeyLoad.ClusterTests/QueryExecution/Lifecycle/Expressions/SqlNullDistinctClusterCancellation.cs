@@ -12,7 +12,7 @@ internal static class SqlNullDistinctClusterCancellation
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, global::KeyLoad.ClusterTests.ClientApi.McpCallerProtocol.Node3,
-                    state.Seed.Reader.Principal.Id, state.Seed.Reader.Secret, PostgresClusterCertificate.RootPath(fixture), token);
+                    state.Seed.Reader.Principal.Id, state.Seed.Reader.Secret, token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     using var cancelled = new CancellationTokenSource();

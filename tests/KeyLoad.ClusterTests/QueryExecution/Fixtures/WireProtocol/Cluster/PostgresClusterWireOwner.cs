@@ -40,7 +40,7 @@ internal sealed class PostgresClusterWireOwner : IAsyncDisposable
         try
         {
             var endpoint = fixture.App.GetEndpoint(McpCallerProtocol.Node3, PostgresClusterProtocol.Endpoint);
-            await owner.InitializeAsync(fixture, endpoint, token).ConfigureAwait(false);
+            await owner.InitializeAsync(endpoint, token).ConfigureAwait(false);
             return owner;
         }
         catch (Exception primary)
@@ -52,7 +52,7 @@ internal sealed class PostgresClusterWireOwner : IAsyncDisposable
         }
     }
 
-    private async Task InitializeAsync(ClusterFixture fixture, Uri endpoint, CancellationToken token)
+    private async Task InitializeAsync(Uri endpoint, CancellationToken token)
     {
         socket.ReceiveBufferSize = PostgresClusterBackpressureProtocol.ReceiveBytes;
         await global::TUnit.Assertions.Assert.That(socket.ReceiveBufferSize).IsLessThanOrEqualTo(PostgresClusterBackpressureProtocol.MaximumEffectiveReceiveBytes);
@@ -63,7 +63,9 @@ internal sealed class PostgresClusterWireOwner : IAsyncDisposable
         await network.ReadExactlyAsync(accepted, token).ConfigureAwait(false);
         await global::TUnit.Assertions.Assert.That(accepted[PostgresClusterProtocol.FirstColumn]).IsEqualTo(PostgresClusterWireFrames.SslAccepted);
         tls = new SslStream(network, leaveInnerStreamOpen: true);
-        await PostgresClusterWireTrust.AuthenticateAsync(tls, endpoint.Host, PostgresClusterCertificate.RootPath(fixture), token);
+        await tls.AuthenticateAsClientAsync(new SslClientAuthenticationOptions { TargetHost = endpoint.Host }, token);
+        await global::TUnit.Assertions.Assert.That(tls.IsAuthenticated).IsTrue();
+        await global::TUnit.Assertions.Assert.That(tls.IsEncrypted).IsTrue();
     }
 
     public async ValueTask DisposeAsync()

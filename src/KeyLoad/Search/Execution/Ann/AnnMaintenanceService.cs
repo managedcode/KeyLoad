@@ -128,7 +128,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
         }
         if (request.Kind == AnnMaintenanceCapabilityKind.Begin)
         {
-            return await state.BeginAsync(database, principal, request, configured, work);
+            return await state.BeginAsync(database, principal, request, configured, work, shutdown.Token);
         }
         var stage = state.RequireStage(principal.Id, request);
         return await stage.Owner.RunAsync(stages => AnnMaintenanceStage.Execute(database, stage.Owner,

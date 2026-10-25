@@ -13,7 +13,7 @@ internal static class AnnMaintenanceBeginning
         PrincipalRecord principal, AnnMaintenanceCapabilityRequest request, ServerRuntimeOptions configured,
         Lock originalGate, Func<AnnGenerationOwner?> existingRoot,
         Func<AnnGenerationOwner> owningRoot, Action<AnnMaintenanceSession> publishSession,
-        MaintenanceSessionWork work)
+        MaintenanceSessionWork work, CancellationToken serviceShutdown)
     {
         AnnMaintenanceMemoryLease? memory = null;
         try
@@ -34,6 +34,8 @@ internal static class AnnMaintenanceBeginning
             lock (originalGate)
             {
                 read.Check();
+                // CancelAsync marks this source before its linked callbacks finish running.
+                serviceShutdown.ThrowIfCancellationRequested();
                 actualOwner = owningRoot();
                 memory ??= actualOwner.MaintenanceMemory.Reserve();
                 _ = actualOwner.MaintenanceMemory.Remaining(captured.PeakBytesUpperBound);

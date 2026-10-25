@@ -21,7 +21,7 @@ internal sealed class PostgresClusterCaller : IAsyncDisposable
     }
 
     internal static async Task<PostgresClusterCaller> ConnectAsync(DistributedApplication app, string node,
-        string subject, string credential, string rootCertificate, CancellationToken token,
+        string subject, string credential, CancellationToken token,
         SslMode sslMode = SslMode.VerifyFull)
     {
         var endpoint = app.GetEndpoint(node, PostgresClusterProtocol.Endpoint);
@@ -33,7 +33,6 @@ internal sealed class PostgresClusterCaller : IAsyncDisposable
             Username = subject,
             Password = credential,
             SslMode = sslMode,
-            RootCertificate = rootCertificate,
             GssEncryptionMode = GssEncryptionMode.Disable,
             Pooling = false,
             ApplicationName = PostgresClusterProtocol.Application

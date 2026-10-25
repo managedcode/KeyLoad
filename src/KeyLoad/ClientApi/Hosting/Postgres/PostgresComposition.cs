@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Server.Kestrel.Core;
-using Microsoft.Extensions.Options;
-
 namespace KeyLoad.Server;
 
 [ConfigurationBinding]
@@ -17,9 +14,8 @@ internal static class PostgresComposition
             .Validate(value => { value.Validate(); return true; }).ValidateOnStart();
         services.AddSingleton<PostgresRetainedAdmission>();
         services.AddSingleton<PostgresCancellationRegistry>();
-        services.AddSingleton(provider => new PostgresServerCertificate(
-            provider.GetRequiredService<global::Microsoft.Extensions.Options.IOptions<PostgresSessionOptions>>()));
         services.AddSingleton<PostgresConnectionHandler>();
-        services.AddSingleton<IConfigureOptions<KestrelServerOptions>, PostgresEndpointConfiguration>();
+        services.AddSingleton<PostgresEndpointConfiguration>();
+        services.AddSingleton<IStartupFilter>(provider => provider.GetRequiredService<PostgresEndpointConfiguration>());
     }
 }

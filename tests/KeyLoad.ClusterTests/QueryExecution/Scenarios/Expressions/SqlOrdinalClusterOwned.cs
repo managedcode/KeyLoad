@@ -34,7 +34,7 @@ internal static class SqlOrdinalClusterOwned
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await using var wire = await PostgresClusterCaller.ConnectAsync(fixture.App, McpCallerProtocol.Node3,
-                    state.Identity.Principal.Id, state.Identity.Secret, PostgresClusterCertificate.RootPath(fixture), token);
+                    state.Identity.Principal.Id, state.Identity.Secret, token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(() => use(caller, wire), failures);
             }, failures);
             global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

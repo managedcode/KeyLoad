@@ -21,10 +21,13 @@ internal static class StrongReadSessionFailover
         {
             stopped = true;
             await fixture.KillServerAsync(selected, KillScenario, token);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture,
+                members.Where(member => member != selected).ToArray(), token);
             await ReadWhileUnavailableAsync(fixture, survivor, state, token);
             await fixture.RestartServerAsync(selected, token);
             stopped = false;
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(selected, token);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture, members, token);
             result = await operation(survivor);
         }, failures);
         using var cleanup = new CancellationTokenSource(RequestCqrsClusterProtocol.CleanupDeadline, TimeProvider.System);
