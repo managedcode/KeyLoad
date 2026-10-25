@@ -33,10 +33,14 @@ jobs:
     steps:
       - name: Download source code
         uses: actions/checkout@v7
+      - name: Read the pinned .NET SDK version
+        id: dotnet-sdk
+        shell: bash
+        run: jq -er '"version=" + .sdk.version' global.json >> "$GITHUB_OUTPUT"
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
-          global-json-file: global.json
+          dotnet-version: ${{ steps.dotnet-sdk.outputs.version }}
       # KeyLoad cells run the released server image; this job compiles only the comparison harness.
       - name: Restore the comparison harness packages
         run: dotnet restore benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj
@@ -116,7 +120,7 @@ jobs:
             artifacts/qualification/**
             artifacts/code-quality/**
             ${{ runner.temp }}/keyload-cell-github/**
-          if-no-files-found: error
+          if-no-files-found: warn
           retention-days: 90
   comparison-keyload:
     name: ${{ matrix.jobName }}

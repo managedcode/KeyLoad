@@ -11,10 +11,14 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Read the pinned .NET SDK version
+      id: dotnet-sdk
+      shell: bash
+      run: jq -er '"version=" + .sdk.version' global.json >> "$GITHUB_OUTPUT"
     - name: Set up .NET
       uses: actions/setup-dotnet@v6
       with:
-        global-json-file: global.json
+        dotnet-version: ${{ steps.dotnet-sdk.outputs.version }}
     - name: Check Docker and kernel settings
       shell: bash
       run: |
