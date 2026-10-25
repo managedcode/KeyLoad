@@ -101,10 +101,10 @@ internal sealed class OrleansSerializerAnalysis(
     private void AnalyzePersistentStateMembers(INamedTypeSymbol type)
     {
         foreach (var memberType in type.GetMembers()
-                     .Select(OrleansSerializerTypeGraph.GetMemberType)
-                     .Where(static memberType => memberType is not null))
+                     .Where(static member => member is IFieldSymbol or IPropertySymbol)
+                     .Select(OrleansSerializerTypeGraph.GetMemberType))
         {
-            AnalyzePersistentStateType(memberType!);
+            AnalyzePersistentStateType(memberType);
         }
     }
 

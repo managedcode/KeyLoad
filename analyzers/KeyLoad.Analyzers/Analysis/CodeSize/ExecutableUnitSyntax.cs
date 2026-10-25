@@ -26,20 +26,24 @@ internal static class ExecutableUnitSyntax
         SyntaxKind.AnonymousMethodExpression
     ];
 
-    internal static SyntaxNode? GetBody(SyntaxNode unit) => unit switch
+    internal static bool GetBody(SyntaxNode unit, out SyntaxNode? body)
     {
-        BaseMethodDeclarationSyntax method => method.Body ?? (SyntaxNode?)method.ExpressionBody?.Expression,
-        AccessorDeclarationSyntax accessor => accessor.Body ??
-            (SyntaxNode?)accessor.ExpressionBody?.Expression,
-        LocalFunctionStatementSyntax local => local.Body ??
-            (SyntaxNode?)local.ExpressionBody?.Expression,
-        PropertyDeclarationSyntax property => property.ExpressionBody?.Expression,
-        IndexerDeclarationSyntax indexer => indexer.ExpressionBody?.Expression,
-        SimpleLambdaExpressionSyntax lambda => lambda.Body,
-        ParenthesizedLambdaExpressionSyntax parenthesized => parenthesized.Body,
-        AnonymousMethodExpressionSyntax anonymous => anonymous.Block,
-        _ => null
-    };
+        body = unit switch
+        {
+            BaseMethodDeclarationSyntax method => method.Body ?? (SyntaxNode?)method.ExpressionBody?.Expression,
+            AccessorDeclarationSyntax accessor => accessor.Body ??
+                (SyntaxNode?)accessor.ExpressionBody?.Expression,
+            LocalFunctionStatementSyntax local => local.Body ??
+                (SyntaxNode?)local.ExpressionBody?.Expression,
+            PropertyDeclarationSyntax property => property.ExpressionBody?.Expression,
+            IndexerDeclarationSyntax indexer => indexer.ExpressionBody?.Expression,
+            SimpleLambdaExpressionSyntax lambda => lambda.Body,
+            ParenthesizedLambdaExpressionSyntax parenthesized => parenthesized.Body,
+            AnonymousMethodExpressionSyntax anonymous => anonymous.Block,
+            _ => null
+        };
+        return body is not null;
+    }
 
     internal static bool IsExecutableUnit(SyntaxNode unit) => unit switch
     {

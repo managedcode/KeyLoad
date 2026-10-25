@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -137,9 +138,7 @@ internal static class OrleansSerializerTypeGraph
             .Where(member => (member is IFieldSymbol or IPropertySymbol) &&
                              member.GetAttributes().Any(attribute =>
                                  SymbolEqualityComparer.Default.Equals(attribute.AttributeClass, idAttribute)))
-            .Select(GetMemberType)
-            .Where(static memberType => memberType is not null)
-            .Select(static memberType => memberType!);
+            .Select(GetMemberType);
 
     public static bool IsGrainInterface(
         INamedTypeSymbol type,
@@ -152,12 +151,12 @@ internal static class OrleansSerializerTypeGraph
         !type.IsStatic &&
         !type.IsImplicitlyDeclared;
 
-    public static ITypeSymbol? GetMemberType(ISymbol member) =>
+    public static ITypeSymbol GetMemberType(ISymbol member) =>
         member switch
         {
             IFieldSymbol field => field.Type,
             IPropertySymbol property => property.Type,
-            _ => null
+            _ => throw new ArgumentException("Only fields and properties have a serialized member type.", nameof(member))
         };
 
     private static bool HasGenerateSerializer(

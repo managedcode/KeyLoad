@@ -13,7 +13,7 @@ internal static class ImplementationTestOwnership
     {
         var owners = new HashSet<INamedTypeSymbol>(SymbolEqualityComparer.Default);
         var pending = new Queue<INamedTypeSymbol>();
-        var runtimeAspire = AspirePath(compilation) is not null && AspireEntry(compilation, token);
+        var runtimeAspire = AspirePath(compilation, out _) && AspireEntry(compilation, token);
         AddProcessEntry(compilation, pending, token);
         foreach (var tree in compilation.SyntaxTrees.Where(tree => ExecutionPath(tree.FilePath)))
         {
@@ -109,17 +109,20 @@ internal static class ImplementationTestOwnership
         }
     }
 
-    private static string? AspirePath(Compilation compilation) => compilation.AssemblyName switch
+    private static bool AspirePath(Compilation compilation, out string? path)
     {
-        "KeyLoad.AppHost" => ImplementationTermCatalog.AspireHostPath,
-        "KeyLoad.LoadTests.AppHost" => ImplementationTermCatalog.LoadTestsHostPath,
-        _ => null
-    };
+        path = compilation.AssemblyName switch
+        {
+            "KeyLoad.AppHost" => ImplementationTermCatalog.AspireHostPath,
+            "KeyLoad.LoadTests.AppHost" => ImplementationTermCatalog.LoadTestsHostPath,
+            _ => null
+        };
+        return path is not null;
+    }
 
     private static bool AspireEntry(Compilation compilation, CancellationToken token)
     {
-        var path = AspirePath(compilation);
-        if (path is null)
+        if (!AspirePath(compilation, out var path) || path is null)
         {
             return false;
         }

@@ -35,8 +35,7 @@ public sealed class ControlFlowNestingAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var body = ExecutableUnitSyntax.GetBody(unit);
-        if (body is null)
+        if (!ExecutableUnitSyntax.GetBody(unit, out var body) || body is null)
         {
             return;
         }

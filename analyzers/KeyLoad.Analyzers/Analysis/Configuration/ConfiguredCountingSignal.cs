@@ -75,7 +75,7 @@ internal static class ConfiguredCountingSignal
         {
             return method.DeclaringSyntaxReferences.Any(reference =>
                 reference.GetSyntax(cancellationToken) is MethodDeclarationSyntax declaration &&
-                FindReturn(declaration) is { } expression &&
+                FindReturn(declaration, out var expression) && expression is not null &&
                 compilation.GetSemanticModel(expression.SyntaxTree).GetOperation(expression, cancellationToken) is { } result &&
                 IsCapacity(compilation, result, visited, cancellationToken));
         }
@@ -85,9 +85,12 @@ internal static class ConfiguredCountingSignal
         }
     }
 
-    private static ExpressionSyntax? FindReturn(MethodDeclarationSyntax method) =>
-        method.ExpressionBody?.Expression ??
-        (method.Body?.Statements.OfType<ReturnStatementSyntax>().Take(2).ToArray() is { Length: 1 } statements ? statements[0].Expression : null);
+    private static bool FindReturn(MethodDeclarationSyntax method, out ExpressionSyntax? expression)
+    {
+        expression = method.ExpressionBody?.Expression ??
+            (method.Body?.Statements.OfType<ReturnStatementSyntax>().Take(2).ToArray() is { Length: 1 } statements ? statements[0].Expression : null);
+        return expression is not null;
+    }
 
     private static bool IsSnapshot(Compilation compilation, IOperation operation, CancellationToken cancellationToken) => operation switch
     {

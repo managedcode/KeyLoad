@@ -14,7 +14,7 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
 
     internal bool Allows(string term, string text, SyntaxNode node, CancellationToken cancellationToken)
     {
-        var symbol = ImplementationTermSymbols.Resolve(model, node, cancellationToken);
+        ImplementationTermSymbols.Resolve(model, node, cancellationToken, out var symbol);
         if (ImplementationTermSymbols.Execution(symbol) || IsVocabulary(symbol) ||
             term == ImplementationTermCatalog.DemonstrationWord && ImplementationTermSymbols.LoggingProcessor(symbol))
         {
@@ -25,7 +25,7 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
             return true;
         }
         var owner = node.AncestorsAndSelf().OfType<MemberDeclarationSyntax>().FirstOrDefault();
-        var ownerSymbol = ImplementationTermSymbols.Resolve(model, owner, cancellationToken);
+        ImplementationTermSymbols.Resolve(model, owner, cancellationToken, out var ownerSymbol);
         if (IsVocabulary(ownerSymbol))
         {
             return true;
@@ -65,7 +65,7 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
 
     private bool AllowsTestOwner(ISymbol? symbol) => ImplementationTermSymbols.TestOwner(symbol) ||
         (symbol as INamedTypeSymbol ?? symbol?.ContainingType) is { } type && testOwners.Value.Contains(type.OriginalDefinition) ||
-        ImplementationTermSymbols.ValueType(symbol) is INamedTypeSymbol value && testOwners.Value.Contains(value.OriginalDefinition);
+        ImplementationTermSymbols.ValueType(symbol, out var resolved) && resolved is INamedTypeSymbol value && testOwners.Value.Contains(value.OriginalDefinition);
 
     private bool References(MemberDeclarationSyntax? owner, string term,
         Func<ISymbol?, Compilation, bool> accepts, CancellationToken cancellationToken)
@@ -82,7 +82,8 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
         foreach (var name in owner.DescendantNodes().OfType<SimpleNameSyntax>())
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (accepts(ImplementationTermSymbols.Resolve(model, name, cancellationToken), model.Compilation))
+            ImplementationTermSymbols.Resolve(model, name, cancellationToken, out var candidate);
+            if (accepts(candidate, model.Compilation))
             {
                 references.Add(key, true);
                 return true;

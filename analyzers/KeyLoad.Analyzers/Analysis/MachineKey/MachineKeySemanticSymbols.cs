@@ -26,9 +26,9 @@ internal static class MachineKeySemanticSymbols
         bool allowFirstLogicalParameter,
         bool allowUnresolvedParameter)
     {
-        var parameter = (context.SemanticModel.GetOperation(argument, context.CancellationToken) as IArgumentOperation)
-            ?.Parameter ?? ResolveParameter(method, argument, arguments);
-        if (parameter is not null)
+        var parameter = (context.SemanticModel.GetOperation(argument, context.CancellationToken) as IArgumentOperation)?.Parameter;
+        var resolved = parameter is not null || ResolveParameter(method, argument, arguments, out parameter);
+        if (resolved && parameter is not null)
         {
             var parameterMethod = parameter.ContainingSymbol as IMethodSymbol ?? method;
             if (IsUnreducedExtensionReceiver(parameterMethod, parameter))
@@ -52,21 +52,24 @@ internal static class MachineKeySemanticSymbols
                argument.NameColon is null;
     }
 
-    private static IParameterSymbol? ResolveParameter(
+    private static bool ResolveParameter(
         IMethodSymbol? method,
         ArgumentSyntax argument,
-        SeparatedSyntaxList<ArgumentSyntax> arguments)
+        SeparatedSyntaxList<ArgumentSyntax> arguments,
+        out IParameterSymbol? resolved)
     {
+        resolved = null;
         if (method is null)
         {
-            return null;
+            return false;
         }
 
         var namedArgument = argument.NameColon?.Name.Identifier.ValueText;
         if (namedArgument is not null)
         {
-            return method.Parameters.FirstOrDefault(parameter =>
+            resolved = method.Parameters.FirstOrDefault(parameter =>
                 string.Equals(parameter.Name, namedArgument, StringComparison.Ordinal));
+            return resolved is not null;
         }
 
         var nextParameter = 0;
@@ -85,19 +88,21 @@ internal static class MachineKeySemanticSymbols
 
             if (nextParameter >= method.Parameters.Length)
             {
-                return method.Parameters.LastOrDefault(parameter => parameter.IsParams);
+                resolved = method.Parameters.LastOrDefault(parameter => parameter.IsParams);
+                return resolved is not null;
             }
 
             var parameter = method.Parameters[nextParameter];
             if (parameter.IsParams || candidate == argument)
             {
-                return parameter;
+                resolved = parameter;
+                return true;
             }
 
             nextParameter++;
         }
 
-        return null;
+        return false;
     }
 
     private static bool HasNamedArgument(

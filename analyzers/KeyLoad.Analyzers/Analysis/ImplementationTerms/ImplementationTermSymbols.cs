@@ -9,11 +9,12 @@ namespace KeyLoad.Analyzers.CodeQuality;
 
 internal static class ImplementationTermSymbols
 {
-    internal static ISymbol? Resolve(SemanticModel model, SyntaxNode? node, CancellationToken cancellationToken)
+    internal static bool Resolve(SemanticModel model, SyntaxNode? node, CancellationToken cancellationToken, out ISymbol? symbol)
     {
+        symbol = null;
         if (node is null)
         {
-            return null;
+            return false;
         }
         if (node is SimpleNameSyntax or MemberAccessExpressionSyntax)
         {
@@ -21,16 +22,22 @@ internal static class ImplementationTermSymbols
             if (info.Symbol is null && info.CandidateReason == CandidateReason.MemberGroup &&
                 info.CandidateSymbols.Length == 1 && info.CandidateSymbols[0] is IMethodSymbol method)
             {
-                return method;
+                symbol = method;
+                return true;
             }
-            return info.Symbol;
+            symbol = info.Symbol;
+            return symbol is not null;
         }
         if (node is FieldDeclarationSyntax field && field.Declaration.Variables.Count == 1)
         {
-            return model.GetDeclaredSymbol(field.Declaration.Variables[0], cancellationToken);
+            symbol = model.GetDeclaredSymbol(field.Declaration.Variables[0], cancellationToken);
+            return symbol is not null;
         }
-        return node is MemberDeclarationSyntax or VariableDeclaratorSyntax or ParameterSyntax or TypeParameterSyntax
-            ? model.GetDeclaredSymbol(node, cancellationToken) : null;
+        if (node is MemberDeclarationSyntax or VariableDeclaratorSyntax or ParameterSyntax or TypeParameterSyntax)
+        {
+            symbol = model.GetDeclaredSymbol(node, cancellationToken);
+        }
+        return symbol is not null;
     }
 
     internal static bool Execution(ISymbol? symbol) => symbol is not null &&
@@ -53,16 +60,20 @@ internal static class ImplementationTermSymbols
     internal static bool PathContains(string path, string segment) =>
         path.Replace('\\', '/').Contains(segment, StringComparison.Ordinal);
 
-    internal static ITypeSymbol? ValueType(ISymbol? symbol) => symbol switch
+    internal static bool ValueType(ISymbol? symbol, out ITypeSymbol? type)
     {
-        ILocalSymbol local => local.Type,
-        IParameterSymbol parameter => parameter.Type,
-        IFieldSymbol field => field.Type,
-        IPropertySymbol property => property.Type,
-        IMethodSymbol method => method.ReturnType,
-        ITypeSymbol type => type,
-        _ => null
-    };
+        type = symbol switch
+        {
+            ILocalSymbol local => local.Type,
+            IParameterSymbol parameter => parameter.Type,
+            IFieldSymbol field => field.Type,
+            IPropertySymbol property => property.Type,
+            IMethodSymbol method => method.ReturnType,
+            ITypeSymbol value => value,
+            _ => null
+        };
+        return type is not null;
+    }
 
     internal static bool TestOwner(ISymbol? symbol)
     {
@@ -70,7 +81,8 @@ internal static class ImplementationTermSymbols
         {
             return true;
         }
-        var owner = ValueType(symbol) ?? symbol?.ContainingType;
+        ValueType(symbol, out var value);
+        var owner = value ?? symbol?.ContainingType;
         return TypeMeans(owner as ITypeSymbol, static type =>
             HasPath(type, ImplementationTermCatalog.TestPath) && HasPath(type, ImplementationTermCatalog.TestOwnerPath),
             new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) ||
@@ -81,6 +93,7 @@ internal static class ImplementationTermSymbols
 
     internal static bool TimeSeries(ISymbol? symbol, Compilation compilation)
     {
+        ValueType(symbol, out var value);
         if (symbol is IFieldSymbol or IPropertySymbol &&
             (symbol.ContainingAssembly.Name is "KeyLoad.BenchmarkScenarios" or "KeyLoad.IntegrationTests" or "KeyLoad.UnitTests") &&
             Array.Exists(ImplementationTermCatalog.DataControlMembers, member => member == symbol.ToDisplayString()) ||
@@ -102,13 +115,13 @@ internal static class ImplementationTermSymbols
             descriptions.ToDisplayString() == ImplementationTermCatalog.DataToolDescriptionsType &&
             Array.Exists(ImplementationTermCatalog.DataToolDescriptionFields, name => name == symbol.Name) ||
             HasPath(symbol, ImplementationTermCatalog.TimeSeriesPath) ||
-            HasPath(ValueType(symbol), ImplementationTermCatalog.TimeSeriesPath) ||
+            HasPath(value, ImplementationTermCatalog.TimeSeriesPath) ||
             symbol?.ContainingType?.ToDisplayString() == ImplementationTermCatalog.SampleFieldsType ||
             symbol?.ToDisplayString() == ImplementationTermCatalog.SampleFieldsType)
         {
             return true;
         }
-        if (DataType(ValueType(symbol)) || DataType(symbol?.ContainingType))
+        if (DataType(value) || DataType(symbol?.ContainingType))
         {
             return true;
         }
@@ -116,13 +129,17 @@ internal static class ImplementationTermSymbols
             DataType(compilation.GetTypeByMetadataName(prefix + "." + symbol.Name)));
     }
 
-    internal static bool Measurement(ISymbol? symbol) =>
+    internal static bool Measurement(ISymbol? symbol)
+    {
+        ValueType(symbol, out var value);
+        return
         symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" or "KeyLoad.LoadTests.AppHost" or "KeyLoad.ComparisonHost" &&
         Array.Exists(ImplementationTermCatalog.MeasurementMembers, member => member == symbol.ToDisplayString()) ||
         symbol is IFieldSymbol { Name: ImplementationTermCatalog.MeasurementSamplesMember, ContainingType: { } owner } &&
         owner.ToDisplayString() == "KeyLoad.SiteTests.BenchmarkComparisons.SiteIsolatedFields" ||
-        TypeMeans(ValueType(symbol), MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) ||
+        TypeMeans(value, MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) ||
         TypeMeans(symbol?.ContainingType, MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
+    }
 
     private static bool MeasurementType(ITypeSymbol type) =>
         type.ContainingAssembly?.Name.StartsWith(ImplementationTermCatalog.NamespacePrefix, StringComparison.Ordinal) == true &&

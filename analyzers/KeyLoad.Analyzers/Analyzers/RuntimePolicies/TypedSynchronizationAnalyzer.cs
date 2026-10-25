@@ -36,9 +36,9 @@ public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterCompilationStartAction(static startContext =>
         {
-            var lockType = GetMetadataType(startContext.Compilation, ThreadingMetadataNames.Lock);
-            var monitorType = GetMetadataType(startContext.Compilation, ThreadingMetadataNames.Monitor);
-            var grainType = GetMetadataType(startContext.Compilation, OrleansMetadataNames.Grain);
+            GetMetadataType(startContext.Compilation, ThreadingMetadataNames.Lock, out var lockType);
+            GetMetadataType(startContext.Compilation, ThreadingMetadataNames.Monitor, out var monitorType);
+            GetMetadataType(startContext.Compilation, OrleansMetadataNames.Grain, out var grainType);
             startContext.RegisterOperationAction(
                 operationContext => AnalyzeLock(operationContext, lockType, grainType),
                 Microsoft.CodeAnalysis.OperationKind.Lock);
@@ -51,12 +51,15 @@ public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
         });
     }
 
-    private static INamedTypeSymbol? GetMetadataType(Compilation compilation, string metadataName)
+    private static bool GetMetadataType(Compilation compilation, string metadataName, out INamedTypeSymbol? type)
     {
-        var type = compilation.GetTypeByMetadataName(metadataName);
-        return type is not null && type.Locations.All(static location => location.IsInMetadata)
-            ? type
-            : null;
+        type = compilation.GetTypeByMetadataName(metadataName);
+        if (type is not null && type.Locations.All(static location => location.IsInMetadata))
+        {
+            return true;
+        }
+        type = null;
+        return false;
     }
 
     private static void AnalyzeLock(
