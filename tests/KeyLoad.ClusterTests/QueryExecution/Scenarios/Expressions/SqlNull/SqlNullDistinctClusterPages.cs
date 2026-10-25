@@ -9,29 +9,29 @@ internal static class SqlNullDistinctClusterPages
         {
             var capabilities = await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryCapabilitiesAsync(token));
             await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.Profile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.NullSynonymProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.PositiveProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.LeadingProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.HexProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.EscapeProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.DollarProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.BinaryOctalProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.UnicodeProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.NumericSeparatorProfile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.NullSynonymProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.PositiveProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.LeadingProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.HexProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.EscapeProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.DollarProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.BinaryOctalProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.UnicodeProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlNullDistinctClusterCases.NumericSeparatorProfile)).IsFalse();
             var mcp = (await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
                 await caller.Mcp.CallWithoutBodyAsync(global::KeyLoad.ClusterTests.ClientApi.McpCallerTools.QueryCapabilities, token))).Value;
             await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.Profile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.NullSynonymProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.PositiveProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.LeadingProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.HexProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.EscapeProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.DollarProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.BinaryOctalProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.UnicodeProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.NumericSeparatorProfile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsTrue();
-            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsTrue();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.NullSynonymProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.PositiveProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.LeadingProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.HexProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.EscapeProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.DollarProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.BinaryOctalProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.UnicodeProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullDistinctClusterCases.NumericSeparatorProfile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(capabilities.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsFalse();
+            await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlUnicodeIdentifierCases.Profile)).IsFalse();
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -53,7 +53,7 @@ internal static class SqlNullDistinctClusterPages
     internal static async Task CaseAsync(global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers caller, PostgresClusterCaller wire,
         SqlNullDistinctClusterCase item, long revision, CancellationToken token)
     {
-        var sql = SqlNullDistinctClusterCases.Prefix + item.Clause + SqlNullDistinctClusterCases.Tail;
+        var sql = item.Sql;
         var request = SqlNullOrderingClusterProtocol.Operation(sql);
         await SqlNullDistinctClusterImage.PageAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, request, token), item, revision);
         await SqlNullDistinctClusterImage.PageAsync(await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, request, token), item, revision);
@@ -61,8 +61,8 @@ internal static class SqlNullDistinctClusterPages
         await SqlNullDistinctClusterImage.PageAsync(await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAstAsync(ast, token)), item, revision);
         await SqlNullDistinctClusterImage.PageAsync((await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.SuccessAsync<QueryPage>(
             await caller.Mcp.CallAsync(global::KeyLoad.ClusterTests.ClientApi.McpCallerTools.QueryAst, ast, token))).Value, item, revision);
-        await SqlNullDistinctClusterImage.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), item, revision);
-        await SqlNullDistinctClusterImage.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), item, revision);
+        await SqlNullDistinctClusterImage.PageAsync(await wire.ExecuteAsync<QueryPage>(item.Command, [], prepared: true, token), item, revision);
+        await SqlNullDistinctClusterImage.PageAsync(await wire.ExecuteAsync<QueryPage>(item.Command, [], prepared: false, token), item, revision);
         if (item.Clause == SqlNullDistinctClusterCases.EscapeClause)
         {
             await SqlEscapeStringClusterParameters.RequireAsync(wire, item, revision, token);

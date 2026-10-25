@@ -1,4 +1,5 @@
 using KeyLoad.Query;
+using Npgsql;
 
 namespace KeyLoad.ClusterTests.QueryExecution;
 
@@ -12,13 +13,17 @@ internal static class SqlAllClusterPages
     internal static async Task DuplicatesAsync(global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, CancellationToken token)
     {
-        foreach (var sql in new[] { DuplicateSql, DuplicateSql.Replace(Keyword, DefaultKeyword, StringComparison.Ordinal) })
+        foreach (var command in new Func<NpgsqlCommand>[]
         {
-            var operation = SqlNullOrderingClusterProtocol.Operation(sql);
+            () => new(DuplicateSql),
+            () => new("SELECT TOP (5) score AS score FROM null_ordering WHERE score IS NULL ORDER BY label ASC")
+        })
+        {
+            var operation = SqlNullOrderingClusterProtocol.Operation(PostgresClusterCommands.Sql(command));
             await EqualAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, operation, token));
             await EqualAsync(await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, operation, token));
-            await EqualAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token));
-            await EqualAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token));
+            await EqualAsync(await wire.ExecuteAsync<QueryPage>(command, [], prepared: true, token));
+            await EqualAsync(await wire.ExecuteAsync<QueryPage>(command, [], prepared: false, token));
         }
         var ast = new AstQueryRequest(PostgresClusterState.Partition,
             new(SqlNullOrderingClusterProtocol.Collection, null, [new(ScorePath, ScoreName)],

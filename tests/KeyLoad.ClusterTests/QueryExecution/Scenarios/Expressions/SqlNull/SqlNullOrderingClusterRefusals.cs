@@ -1,6 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.ClusterTests.ClientApi;
 using KeyLoad.ClusterTests.OrleansExecution;
+using Npgsql;
 namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class SqlNullOrderingClusterRefusals
@@ -17,13 +18,13 @@ internal static class SqlNullOrderingClusterRefusals
         };
         await PersistAsync(root, denied, token);
         var image = await SqlNullOrderingClusterAssertions.ImageAsync(root, state, token);
-        await RejectAsync(fixture, state, SqlNullOrderingClusterProtocol.AscFirst,
+        await RejectAsync(fixture, state, () => new(SqlNullOrderingClusterProtocol.CurrentSql),
             ErrorCode.PermissionDenied, PostgresClusterProtocol.PermissionSqlState, token);
-        await RejectAsync(fixture, state, SqlNullOrderingClusterProtocol.Using(false, true),
+        await RejectAsync(fixture, state, () => new("SELECT ALL TOP (5) label AS label FROM null_ordering ORDER BY score ASC"),
             ErrorCode.PermissionDenied, PostgresClusterProtocol.PermissionSqlState, token);
-        await RejectAsync(fixture, state, SqlAllClusterPages.DuplicateSql,
+        await RejectAsync(fixture, state, () => new(SqlAllClusterPages.DuplicateSql),
             ErrorCode.PermissionDenied, PostgresClusterProtocol.PermissionSqlState, token);
-        await RejectAsync(fixture, state, SqlImplicitAliasClusterPages.BasicSql,
+        await RejectAsync(fixture, state, () => new(SqlImplicitAliasClusterPages.BasicSql),
             ErrorCode.PermissionDenied, PostgresClusterProtocol.PermissionSqlState, token);
         await global::TUnit.Assertions.Assert.That(await SqlNullOrderingClusterAssertions.ImageAsync(root, state, token)).IsEqualTo(image);
         await PersistAsync(root, original with
@@ -37,29 +38,40 @@ internal static class SqlNullOrderingClusterRefusals
         KeyLoadClient root, CancellationToken token)
     {
         var image = await SqlNullOrderingClusterAssertions.ImageAsync(root, state, token);
-        await RejectAsync(fixture, state, SqlNullOrderingClusterProtocol.BadSql,
+        await RejectAsync(fixture, state, () => new(SqlNullOrderingClusterProtocol.BadSql),
             ErrorCode.Validation, SqlNullOrderingClusterProtocol.ValidationSqlState, token);
         await UsingInvalidAsync(fixture, state, root, token);
-        await RejectAsync(fixture, state, "SELECT ALL ALL label FROM null_ordering LIMIT 5",
+        foreach (var command in new Func<NpgsqlCommand>[]
+        { () => new("SELECT TOP (5) label FROM null_ordering ORDER BY score NULLS FIRST"), () => new("SELECT TOP (5) label FROM null_ordering ORDER BY score NULLS LAST") })
+        {
+            await RejectAsync(fixture, state, command, ErrorCode.Validation, SqlNullOrderingClusterProtocol.ValidationSqlState, token);
+        }
+        foreach (var command in new Func<NpgsqlCommand>[]
+        { () => new("SELECT TOP (5) WITH TIES label FROM null_ordering ORDER BY score"), () => new("SELECT TOP (50) PERCENT label FROM null_ordering ORDER BY score") })
+        {
+            await RejectAsync(fixture, state, command, ErrorCode.UnsupportedCapability, PostgresClusterProtocol.UnsupportedSqlState, token);
+        }
+        await RejectAsync(fixture, state, () => new("SELECT ALL ALL TOP (5) label FROM null_ordering"),
             ErrorCode.Validation, SqlNullOrderingClusterProtocol.ValidationSqlState, token);
-        await RejectAsync(fixture, state, "SELECT score copied,label copied FROM null_ordering LIMIT 5",
+        await RejectAsync(fixture, state, () => new("SELECT TOP (5) score copied,label copied FROM null_ordering"),
             ErrorCode.Validation, SqlNullOrderingClusterProtocol.ValidationSqlState, token);
         await global::TUnit.Assertions.Assert.That(await SqlNullOrderingClusterAssertions.ImageAsync(root, state, token)).IsEqualTo(image);
         await SqlNullOrderingClusterPages.HealthyAsync(fixture, state, root, token);
     }
 
     private static async Task RejectAsync(ClusterFixture fixture, SqlNullOrderingClusterState state,
-        string sql, ErrorCode code, string sqlState, CancellationToken token)
+        Func<NpgsqlCommand> command, ErrorCode code, string sqlState, CancellationToken token)
     {
         await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,
             state.Reader.Secret, async caller =>
         {
+            var sql = PostgresClusterCommands.Sql(command);
             var request = SqlNullOrderingClusterProtocol.Operation(sql);
             var result = await caller.Sdk.ExecuteSqlAsync(request, token);
             await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
             await global::TUnit.Assertions.Assert.That(result.Value.ValueKind).IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true)).Value;
+            _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: code == ErrorCode.PermissionDenied)).Value;
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -71,16 +83,12 @@ internal static class SqlNullOrderingClusterRefusals
                         ? [new() { ParameterName = SqlNullOrderingClusterProtocol.DirectionName,
                             NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Text, Value = SqlNullOrderingClusterProtocol.DirectionValue }]
                         : [];
-                    await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, arguments, prepared: true, token), sqlState, code);
+                    await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(command, arguments, prepared: true, token), sqlState, code);
                     if (code is ErrorCode.Validation or ErrorCode.UnsupportedCapability)
                     {
-                        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(SqlNullOrderingClusterProtocol.AscFirst, [], prepared: false, token), false, true);
-                        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(SqlAllClusterPages.Explicit(SqlNullOrderingClusterProtocol.AscFirst), [], prepared: false, token), false, true);
+                        await SqlNullOrderingClusterPages.CaseAsync(caller, wire, false, true, token);
+                        await SqlAllClusterPages.DuplicatesAsync(caller, wire, token);
                         await SqlImplicitAliasClusterPages.HealthyAsync(caller, wire, token);
-                        var repaired = SqlNullOrderingClusterProtocol.Operation(SqlNullOrderingClusterProtocol.Using(false, true));
-                        await SqlNullOrderingClusterAssertions.PageAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, repaired, token), false, true);
-                        await SqlNullOrderingClusterAssertions.PageAsync(await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, repaired, token), false, true);
-                        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(repaired.Sql, [], prepared: false, token), false, true);
                     }
                 }, failures);
             }, failures);
@@ -93,17 +101,18 @@ internal static class SqlNullOrderingClusterRefusals
         KeyLoadClient root, CancellationToken token)
     {
         var image = await SqlNullOrderingClusterAssertions.ImageAsync(root, state, token);
-        foreach (var (direction, code) in new[]
+        foreach (var command in new Func<NpgsqlCommand>[]
         {
-            (" USING ", ErrorCode.Validation), (" USING '>' ", ErrorCode.Validation),
-            (" USING @direction ", ErrorCode.Validation), (" USING = ", ErrorCode.UnsupportedCapability),
-            (" USING <= ", ErrorCode.UnsupportedCapability), (" ASC USING < ", ErrorCode.UnsupportedCapability),
-            (" USING < DESC ", ErrorCode.UnsupportedCapability)
+            () => new("SELECT TOP (5) label AS label FROM null_ordering ORDER BY score USING "),
+            () => new("SELECT TOP (5) label AS label FROM null_ordering ORDER BY score USING '>' "),
+            () => new("SELECT TOP (5) label AS label FROM null_ordering ORDER BY score USING @direction "),
+            () => new("SELECT TOP (5) label AS label FROM null_ordering ORDER BY score USING = "),
+            () => new("SELECT TOP (5) label AS label FROM null_ordering ORDER BY score USING <= "),
+            () => new("SELECT TOP (5) label AS label FROM null_ordering ORDER BY score ASC USING < "),
+            () => new("SELECT TOP (5) label AS label FROM null_ordering ORDER BY score USING < DESC ")
         })
         {
-            var sql = SqlNullOrderingClusterProtocol.AscFirst.Replace(SqlNullOrderingClusterProtocol.Ascending, direction, StringComparison.Ordinal);
-            await RejectAsync(fixture, state, sql, code,
-                code == ErrorCode.Validation ? SqlNullOrderingClusterProtocol.ValidationSqlState : PostgresClusterProtocol.UnsupportedSqlState, token);
+            await RejectAsync(fixture, state, command, ErrorCode.Validation, SqlNullOrderingClusterProtocol.ValidationSqlState, token);
             await global::TUnit.Assertions.Assert.That(await SqlNullOrderingClusterAssertions.ImageAsync(root, state, token)).IsEqualTo(image);
         }
     }

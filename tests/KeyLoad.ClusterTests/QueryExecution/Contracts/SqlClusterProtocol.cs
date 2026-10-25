@@ -8,6 +8,7 @@ namespace KeyLoad.ClusterTests.QueryExecution;
 /// <summary>Canonical SQL envelopes used by real SDK and official MCP callers.</summary>
 internal static class SqlClusterProtocol
 {
+    internal const string SyntaxProfile = "TSQL.ScriptDOM180";
     internal const string ReadUnavailable = "The read response is unavailable.";
     internal const string Argument = "args";
     internal const string CallPrefix = "EXEC ";

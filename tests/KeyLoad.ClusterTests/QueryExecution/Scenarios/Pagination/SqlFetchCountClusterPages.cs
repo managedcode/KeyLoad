@@ -54,8 +54,8 @@ internal static class SqlFetchCountClusterPages
             await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, operation, token),
             await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAstAsync(ast, token)),
             (await McpCallerAssertions.SuccessAsync<QueryPage>(await caller.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token))).Value,
-            await wire.ExecuteAsync<QueryPage>(CombinedWindow, [], prepared: true, token),
-            await wire.ExecuteAsync<QueryPage>(CombinedWindow, [], prepared: false, token)
+            await wire.ExecuteAsync<QueryPage>(() => new(CombinedWindow), [], prepared: true, token),
+            await wire.ExecuteAsync<QueryPage>(() => new(CombinedWindow), [], prepared: false, token)
         };
         foreach (var page in pages)
         {

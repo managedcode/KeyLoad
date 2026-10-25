@@ -16,32 +16,25 @@ internal static class SqlNullDistinctClusterRepair
             Current = faultReceipt
         };
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, dirty, token);
-        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty,
-            SqlNullDistinctClusterCases.All[SqlNullDistinctClusterState.AgainstOne].Clause, ErrorCode.Validation, token, ast: true);
+        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, SqlNullDistinctClusterCases.All[SqlNullDistinctClusterState.AgainstOne].Command, ErrorCode.Validation, token, ast: true);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var positive = SqlNullDistinctClusterCases.All.Single(value => value.Clause == SqlNullDistinctClusterCases.PositiveClause);
-        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, positive.Clause, ErrorCode.Validation,
-            token, ast: true, astCase: positive);
+        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, positive.Command, ErrorCode.Validation, token, ast: true, astCase: positive);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var leading = SqlNullDistinctClusterCases.All.Single(value => value.Clause == SqlNullDistinctClusterCases.LeadingClause);
-        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, leading.Clause, ErrorCode.Validation,
-            token, ast: true, astCase: leading);
+        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, leading.Command, ErrorCode.Validation, token, ast: true, astCase: leading);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var hex = SqlNullDistinctClusterCases.All.Single(value => value.Clause == SqlNullDistinctClusterCases.HexClause);
-        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, hex.Clause, ErrorCode.Validation,
-            token, ast: true, astCase: hex);
+        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, hex.Command, ErrorCode.Validation, token, ast: true, astCase: hex);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var escaped = SqlNullDistinctClusterCases.All.Single(value => value.Clause == SqlNullDistinctClusterCases.EscapeClause);
-        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, escaped.Clause, ErrorCode.Validation,
-            token, ast: true, astCase: escaped);
+        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, escaped.Command, ErrorCode.Validation, token, ast: true, astCase: escaped);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var continuation = SqlNullDistinctClusterCases.All.Single(value => value.Clause == SqlNullDistinctClusterCases.ContinuationClause);
-        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, continuation.Clause, ErrorCode.Validation,
-            token, ast: true, astCase: continuation);
+        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, continuation.Command, ErrorCode.Validation, token, ast: true, astCase: continuation);
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var dollar = SqlNullDistinctClusterCases.All.Single(value => value.Clause == SqlNullDistinctClusterCases.DollarClause);
-        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, dollar.Clause, ErrorCode.Validation,
-            token, ast: true, astCase: dollar);
+        await SqlNullDistinctClusterRefusals.RejectAsync(fixture, dirty, dollar.Command, ErrorCode.Validation, token, ast: true, astCase: dollar);
         await SqlRadixIntegerClusterControls.RequireAsync(fixture, dirty, root, ErrorCode.Validation, token);
         await SqlUnicodeStringClusterControls.RequireAsync(fixture, dirty, root, ErrorCode.Validation, token);
         await SqlUnicodeIdentifierClusterControls.RequireAsync(fixture, dirty, root, ErrorCode.Validation, token);

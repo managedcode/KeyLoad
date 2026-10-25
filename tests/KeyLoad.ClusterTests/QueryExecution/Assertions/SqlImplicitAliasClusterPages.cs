@@ -1,4 +1,5 @@
 using KeyLoad.Query;
+using Npgsql;
 
 namespace KeyLoad.ClusterTests.QueryExecution;
 
@@ -7,25 +8,25 @@ internal static class SqlImplicitAliasClusterPages
     internal const string BasicSql = "SELECT TOP (5) score projected_score FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
     private const string Prefix = "SELECT TOP (5) score ";
     private const string Tail = " FROM null_ordering WHERE score IS NULL ORDER BY label ASC";
-    private static readonly (string Label, string Name, string Json)[] Cases =
+    private static readonly (Func<NpgsqlCommand> Implicit, Func<NpgsqlCommand> Explicit, string Name, string Json)[] Cases =
     [
-        ("projected_score", "projected_score", "{\"projected_score\":null}"),
-        ("\"ORDER\"", "ORDER", "{\"ORDER\":null}"),
-        ("\"FROM\"", "FROM", "{\"FROM\":null}")
+        (() => new(Prefix + "projected_score" + Tail), () => new(Prefix + ExplicitAs + "projected_score" + Tail), "projected_score", "{\"projected_score\":null}"),
+        (() => new(Prefix + "\"ORDER\"" + Tail), () => new(Prefix + ExplicitAs + "\"ORDER\"" + Tail), "ORDER", "{\"ORDER\":null}"),
+        (() => new(Prefix + "\"FROM\"" + Tail), () => new(Prefix + ExplicitAs + "\"FROM\"" + Tail), "FROM", "{\"FROM\":null}")
     ];
 
     internal static async Task HealthyAsync(global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers caller,
         PostgresClusterCaller wire, CancellationToken token)
     {
-        foreach (var (label, name, json) in Cases)
+        foreach (var (implicitCommand, explicitCommand, name, json) in Cases)
         {
-            foreach (var sql in new[] { Prefix + label + Tail, Prefix + ExplicitAs + label + Tail })
+            foreach (var command in new[] { implicitCommand, explicitCommand })
             {
-                var operation = SqlNullOrderingClusterProtocol.Operation(sql);
+                var operation = SqlNullOrderingClusterProtocol.Operation(PostgresClusterCommands.Sql(command));
                 await EqualAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, operation, token), json);
                 await EqualAsync(await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, operation, token), json);
-                await EqualAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), json);
-                await EqualAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), json);
+                await EqualAsync(await wire.ExecuteAsync<QueryPage>(command, [], prepared: true, token), json);
+                await EqualAsync(await wire.ExecuteAsync<QueryPage>(command, [], prepared: false, token), json);
             }
             var ast = new AstQueryRequest(PostgresClusterState.Partition,
                 new(SqlNullOrderingClusterProtocol.Collection, null, [new(ScorePath, name)],

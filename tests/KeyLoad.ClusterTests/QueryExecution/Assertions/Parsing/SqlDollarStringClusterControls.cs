@@ -1,3 +1,4 @@
+using Npgsql;
 namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class SqlDollarStringClusterControls
@@ -6,17 +7,23 @@ internal static class SqlDollarStringClusterControls
         global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
-        foreach (var clause in new[] { "label = $tag$unfinished", "label = $TAG$low$tag$",
-            "label = $tag-low$low$tag-low$" })
+        foreach (var command in new Func<NpgsqlCommand>[]
         {
-            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, clause, ErrorCode.Validation, token,
-                healthy: true);
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = $tag$unfinished" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = $TAG$low$tag$" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = $tag-low$low$tag-low$" + SqlNullDistinctClusterCases.Tail)
+        })
+        {
+            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, command, ErrorCode.Validation, token, healthy: true, dispatched: false);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
-        foreach (var clause in new[] { "label = $$lo$$\n$$w$$", "label = $a$low$a$ $a$other$a$" })
+        foreach (var command in new Func<NpgsqlCommand>[]
         {
-            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, clause, ErrorCode.UnsupportedCapability,
-                token, healthy: true);
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = $$lo$$\n$$w$$" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = $a$low$a$ $a$other$a$" + SqlNullDistinctClusterCases.Tail)
+        })
+        {
+            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, command, ErrorCode.Validation, token, healthy: true, dispatched: false);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
     }

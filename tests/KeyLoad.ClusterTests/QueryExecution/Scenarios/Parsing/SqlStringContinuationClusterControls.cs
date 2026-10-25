@@ -1,3 +1,4 @@
+using Npgsql;
 namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class SqlStringContinuationClusterControls
@@ -42,9 +43,9 @@ internal static class SqlStringContinuationClusterControls
         SqlNullDistinctClusterState state, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
-        foreach (var (clause, code) in Cases())
+        foreach (var (command, code) in Cases())
         {
-            var sql = SqlNullDistinctClusterCases.Prefix + clause + SqlNullDistinctClusterCases.Tail;
+            var sql = PostgresClusterCommands.Sql(command);
             var request = SqlNullOrderingClusterProtocol.Operation(sql);
             var result = await caller.Sdk.ExecuteSqlAsync(request, token);
             await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
@@ -52,8 +53,8 @@ internal static class SqlStringContinuationClusterControls
                 .IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
             _ = (await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.ErrorAsync(
-                await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true)).Value;
-            await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token),
+                await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: false)).Value;
+            await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(command, [], prepared: true, token),
                 code == ErrorCode.Validation ? SqlNullOrderingClusterProtocol.ValidationSqlState
                     : PostgresClusterProtocol.UnsupportedSqlState, code);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
@@ -63,12 +64,12 @@ internal static class SqlStringContinuationClusterControls
         }
     }
 
-    private static IEnumerable<(string Clause, ErrorCode Code)> Cases()
+    private static IEnumerable<(Func<NpgsqlCommand> Command, ErrorCode Code)> Cases()
     {
-        yield return (SameLine, ErrorCode.UnsupportedCapability);
-        yield return (BlockSeparator, ErrorCode.UnsupportedCapability);
-        yield return (PrefixedNext, ErrorCode.UnsupportedCapability);
-        yield return (OpenContinuation, ErrorCode.Validation);
-        yield return (InvalidBytes, ErrorCode.Validation);
+        yield return (() => new(SqlNullDistinctClusterCases.Prefix + SameLine + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation);
+        yield return (() => new(SqlNullDistinctClusterCases.Prefix + BlockSeparator + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation);
+        yield return (() => new(SqlNullDistinctClusterCases.Prefix + PrefixedNext + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation);
+        yield return (() => new(SqlNullDistinctClusterCases.Prefix + OpenContinuation + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation);
+        yield return (() => new(SqlNullDistinctClusterCases.Prefix + InvalidBytes + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation);
     }
 }

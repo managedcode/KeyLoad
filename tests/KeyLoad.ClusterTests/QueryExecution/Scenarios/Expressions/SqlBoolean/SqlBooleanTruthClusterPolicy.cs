@@ -14,8 +14,7 @@ internal static class SqlBooleanTruthClusterPolicy
         await SqlClusterProtocol.EqualAsync(denied, await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), denied, token)));
         var before = await SqlBooleanTruthClusterImage.ReadAsync(root, state, token);
-        await SqlBooleanTruthClusterRefusals.RejectAsync(fixture, state,
-            SqlBooleanTruthClusterCases.All[SqlBooleanTruthClusterState.AgainstOne].Clause, ErrorCode.PermissionDenied, token, ast: true);
+        await SqlBooleanTruthClusterRefusals.RejectAsync(fixture, state, SqlBooleanTruthClusterCases.All[SqlBooleanTruthClusterState.AgainstOne].Command, ErrorCode.PermissionDenied, token, ast: true);
         await SqlBooleanOperandClusterControls.RequireAsync(fixture, state, root, ErrorCode.PermissionDenied, token);
         await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         var repaired = original with

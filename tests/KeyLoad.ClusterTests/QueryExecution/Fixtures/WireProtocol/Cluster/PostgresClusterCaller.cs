@@ -54,14 +54,19 @@ internal sealed class PostgresClusterCaller : IAsyncDisposable
         }
     }
 
-    internal async Task<T> ExecuteAsync<T>(string sql, IReadOnlyList<NpgsqlParameter> parameters,
+    internal Task<T> ExecuteAsync<T>(string sql, IReadOnlyList<NpgsqlParameter> parameters,
+        bool prepared, CancellationToken token)
+        => ExecuteAsync<T>(() => PostgresClusterCommands.Create(sql, Connection), parameters, prepared, token);
+
+    internal async Task<T> ExecuteAsync<T>(Func<NpgsqlCommand> create, IReadOnlyList<NpgsqlParameter> parameters,
         bool prepared, CancellationToken token)
     {
         T? result = default;
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var command = PostgresClusterCommands.Create(sql, Connection);
+            await using var command = create();
+            command.Connection = Connection;
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 foreach (var parameter in parameters)
@@ -78,6 +83,14 @@ internal sealed class PostgresClusterCaller : IAsyncDisposable
                     result = await ReadAsync<T>(reader, token).ConfigureAwait(false);
                 }, failures).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
+            if (prepared && command.IsPrepared && Connection.State == global::System.Data.ConnectionState.Open)
+            {
+                using var cleanup = new CancellationTokenSource(
+                    global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterProtocol.CleanupDeadline,
+                    TimeProvider.System);
+                await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
+                    () => command.UnprepareAsync(cleanup.Token), failures).ConfigureAwait(false);
+            }
         }, failures).ConfigureAwait(false);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         return result!;

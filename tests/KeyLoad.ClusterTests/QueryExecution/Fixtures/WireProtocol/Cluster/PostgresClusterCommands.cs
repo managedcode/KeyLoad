@@ -16,12 +16,9 @@ internal static class PostgresClusterCommands
             PostgresClusterProtocol.CommitSql => new(PostgresClusterProtocol.CommitSql, connection),
             PostgresClusterBackpressureProtocol.Sql => new(PostgresClusterBackpressureProtocol.Sql, connection),
             UnsupportedSql => new(UnsupportedSql, connection),
-            SqlNullOrderingClusterProtocol.AscFirst => new(SqlNullOrderingClusterProtocol.AscFirst, connection),
-            SqlNullOrderingClusterProtocol.AscLast => new(SqlNullOrderingClusterProtocol.AscLast, connection),
-            SqlNullOrderingClusterProtocol.DescFirst => new(SqlNullOrderingClusterProtocol.DescFirst, connection),
-            SqlNullOrderingClusterProtocol.DescLast => new(SqlNullOrderingClusterProtocol.DescLast, connection),
+            SqlNullOrderingClusterProtocol.CurrentSql => new(SqlNullOrderingClusterProtocol.CurrentSql, connection),
             SqlNullOrderingClusterProtocol.BadSql => new(SqlNullOrderingClusterProtocol.BadSql, connection),
-            SqlFetchCountClusterProtocol.UnorderedOne => new(SqlFetchCountClusterProtocol.UnorderedOne, connection),
+            SqlFetchCountClusterProtocol.TopOne => new(SqlFetchCountClusterProtocol.TopOne, connection),
             SqlFetchCountClusterProtocol.FirstOne => new(SqlFetchCountClusterProtocol.FirstOne, connection),
             SqlFetchCountClusterProtocol.NextOne => new(SqlFetchCountClusterProtocol.NextOne, connection),
             SqlFetchCountClusterProtocol.FirstTwo => new(SqlFetchCountClusterProtocol.FirstTwo, connection),
@@ -32,6 +29,12 @@ internal static class PostgresClusterCommands
             PostgresInt16ClusterProtocol.DriverSql => new(PostgresInt16ClusterProtocol.DriverSql, connection),
             _ => throw new InvalidOperationException(InvalidCommand)
         };
+
+    internal static string Sql(Func<NpgsqlCommand> create)
+    {
+        using var command = create();
+        return command.CommandText;
+    }
 
     internal static NpgsqlCommand Plan(string sql, int index, NpgsqlConnection connection)
         => sql == PostgresClusterState.ScalarSql ? ScalarPlan((PlanSlot)index, connection)

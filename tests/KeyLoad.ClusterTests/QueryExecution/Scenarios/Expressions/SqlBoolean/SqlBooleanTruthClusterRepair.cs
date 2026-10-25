@@ -16,8 +16,7 @@ internal static class SqlBooleanTruthClusterRepair
             Current = faultReceipt
         };
         var before = await SqlBooleanTruthClusterImage.ReadAsync(root, dirty, token);
-        await SqlBooleanTruthClusterRefusals.RejectAsync(fixture, dirty,
-            SqlBooleanTruthClusterCases.All[SqlBooleanTruthClusterState.AgainstOne].Clause, ErrorCode.Validation, token, ast: true);
+        await SqlBooleanTruthClusterRefusals.RejectAsync(fixture, dirty, SqlBooleanTruthClusterCases.All[SqlBooleanTruthClusterState.AgainstOne].Command, ErrorCode.Validation, token, ast: true);
         await SqlBooleanOperandClusterControls.RequireAsync(fixture, dirty, root, ErrorCode.Validation, token);
         await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthClusterImage.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var repair = new CommandRequest(Guid.NewGuid(), PostgresClusterState.Partition,

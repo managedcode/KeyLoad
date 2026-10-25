@@ -21,14 +21,14 @@ internal static class SqlBooleanTruthClusterCancellation
                         || item.Clause == SqlBooleanTruthClusterCases.BareClause || item.Clause == SqlBooleanTruthClusterCases.NegatedBareClause))
                     {
                         var item = current;
-                        var sql = SqlBooleanTruthClusterCases.Prefix + item.Clause + SqlBooleanTruthClusterCases.Tail;
-                        var operation = SqlNullOrderingClusterProtocol.Operation(sql);
+                        var sql = item.Sql;
+                        var operation = SqlNullOrderingClusterProtocol.Operation(sql) with { Parameters = SqlBooleanTruthClusterCases.Parameters() };
                         await SqlClusterProtocol.SdkCancelledAsync(await caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
                         var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                             () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
                         await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
                         var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                            () => wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, cancelled.Token));
+                            () => wire.ExecuteAsync<QueryPage>(item.Command, SqlBooleanTruthClusterCases.WireParameters(), prepared: false, cancelled.Token));
                         await global::TUnit.Assertions.Assert.That(driver?.CancellationToken).IsEqualTo(cancelled.Token);
                         await SqlBooleanTruthClusterPages.CaseAsync(caller, wire, item, state.LowRevision, token);
                     }

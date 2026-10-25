@@ -1,3 +1,4 @@
+using Npgsql;
 namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class SqlBooleanOperandClusterControls
@@ -6,9 +7,17 @@ internal static class SqlBooleanOperandClusterControls
         global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlBooleanTruthClusterImage.ReadAsync(root, state, token);
-        foreach (var clause in new[] { "score TRUE", "score =", "1", "'true'", "@absent", "NOT" })
+        foreach (var command in new Func<NpgsqlCommand>[]
         {
-            await SqlBooleanTruthClusterRefusals.RejectAsync(fixture, state, clause, ErrorCode.Validation, token, healthy: true);
+            () => new(SqlBooleanTruthClusterCases.Prefix + "score TRUE" + SqlBooleanTruthClusterCases.Tail),
+            () => new(SqlBooleanTruthClusterCases.Prefix + "score =" + SqlBooleanTruthClusterCases.Tail),
+            () => new(SqlBooleanTruthClusterCases.Prefix + "1" + SqlBooleanTruthClusterCases.Tail),
+            () => new(SqlBooleanTruthClusterCases.Prefix + "'true'" + SqlBooleanTruthClusterCases.Tail),
+            () => new(SqlBooleanTruthClusterCases.Prefix + "@absent" + SqlBooleanTruthClusterCases.Tail),
+            () => new(SqlBooleanTruthClusterCases.Prefix + "NOT" + SqlBooleanTruthClusterCases.Tail)
+        })
+        {
+            await SqlBooleanTruthClusterRefusals.RejectAsync(fixture, state, command, ErrorCode.Validation, token, healthy: true, dispatched: false);
             await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
     }
@@ -20,7 +29,7 @@ internal static class SqlBooleanOperandClusterControls
         foreach (var item in SqlBooleanTruthClusterCases.All.Where(item => item.Clause == SqlBooleanTruthClusterCases.BareClause
             || item.Clause == SqlBooleanTruthClusterCases.NegatedBareClause))
         {
-            await SqlBooleanTruthClusterRefusals.RejectAsync(fixture, state, item.Clause, code, token, ast: true, astCase: item);
+            await SqlBooleanTruthClusterRefusals.RejectAsync(fixture, state, item.Command, code, token, ast: true, astCase: item);
             await global::TUnit.Assertions.Assert.That(await SqlBooleanTruthClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
     }

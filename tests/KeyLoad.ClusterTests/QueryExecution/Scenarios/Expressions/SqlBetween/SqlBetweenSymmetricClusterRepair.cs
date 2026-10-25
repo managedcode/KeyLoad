@@ -16,10 +16,8 @@ internal static class SqlBetweenSymmetricClusterRepair
             Current = faultReceipt
         };
         var before = await SqlBetweenSymmetricClusterImage.ReadAsync(root, dirty, token);
-        await SqlBetweenSymmetricClusterRefusals.RejectAsync(fixture, dirty,
-            SqlBetweenSymmetricClusterCases.All[SqlBetweenSymmetricClusterState.AgainstOne].Clause, ErrorCode.Validation, token, ast: true);
-        await SqlBetweenSymmetricClusterRefusals.RejectAsync(fixture, dirty,
-            SqlBetweenSymmetricClusterCases.AsymmetricFault, ErrorCode.Validation, token);
+        await SqlBetweenSymmetricClusterRefusals.RejectAsync(fixture, dirty, SqlBetweenSymmetricClusterCases.All[SqlBetweenSymmetricClusterState.AgainstOne].Command, ErrorCode.Validation, token, ast: true);
+        await SqlBetweenSymmetricClusterRefusals.RejectAsync(fixture, dirty, () => new(SqlBetweenSymmetricClusterCases.Prefix + SqlBetweenSymmetricClusterCases.AsymmetricFault + SqlBetweenSymmetricClusterCases.Tail), ErrorCode.Validation, token);
         await global::TUnit.Assertions.Assert.That(await SqlBetweenSymmetricClusterImage.ReadAsync(root, dirty, token)).IsEqualTo(before);
         var repair = new CommandRequest(Guid.NewGuid(), PostgresClusterState.Partition,
             [new PutDocument(SqlNullOrderingClusterProtocol.Collection, SqlBetweenSymmetricClusterState.Low,

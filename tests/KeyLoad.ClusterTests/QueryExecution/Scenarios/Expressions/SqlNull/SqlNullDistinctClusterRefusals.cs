@@ -1,20 +1,21 @@
+using Npgsql;
 namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class SqlNullDistinctClusterRefusals
 {
-    internal static async Task RejectAsync(ClusterFixture fixture, SqlNullDistinctClusterState state, string clause,
+    internal static async Task RejectAsync(ClusterFixture fixture, SqlNullDistinctClusterState state, Func<NpgsqlCommand> command,
         ErrorCode code, CancellationToken token, bool ast = false, bool healthy = false,
-        string? sqlOverride = null, SqlNullDistinctClusterCase? astCase = null)
+        SqlNullDistinctClusterCase? astCase = null, bool dispatched = true)
     {
         await global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, global::KeyLoad.ClusterTests.ClientApi.McpCallerProtocol.Node2, state.Seed.Reader.Secret, async caller =>
         {
-            var sql = sqlOverride ?? SqlNullDistinctClusterCases.Prefix + clause + SqlNullDistinctClusterCases.Tail;
+            var sql = PostgresClusterCommands.Sql(command);
             var request = SqlNullOrderingClusterProtocol.Operation(sql);
             var result = await caller.Sdk.ExecuteSqlAsync(request, token);
             await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
             await global::TUnit.Assertions.Assert.That(result.Value.ValueKind).IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            _ = (await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true)).Value;
+            _ = (await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched)).Value;
             if (ast)
             {
                 var operation = SqlNullDistinctClusterCases.Ast(PostgresClusterState.Partition,
@@ -32,7 +33,7 @@ internal static class SqlNullDistinctClusterRefusals
                     state.Seed.Reader.Principal.Id, state.Seed.Reader.Secret, token);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token),
+                    await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(command, [], prepared: true, token),
                         code switch
                         {
                             ErrorCode.Validation => SqlNullOrderingClusterProtocol.ValidationSqlState,
@@ -65,36 +66,94 @@ internal static class SqlNullDistinctClusterRefusals
         await SqlUnicodeStringClusterControls.InvalidAsync(fixture, state, root, token);
         await SqlUnicodeIdentifierClusterControls.InvalidAsync(fixture, state, root, token);
         await SqlNumericSeparatorClusterControls.InvalidAsync(fixture, state, root, token);
-        foreach (var clause in new[] { "score IS DISTINCT NULL", "score IS DISTINCT FROM",
-            "score IS 'DISTINCT' FROM NULL", "score IS NOT DISTINCT FROM @absent", "score IS ISNULL",
-            "score IS NOT NOTNULL", "score 'ISNULL'", "score NOT ISNULL", "score = ++1", "score = +",
-            "score = +true", "score = +@absent", "score = + 1", "score = +79228162514264337593543950336",
-            "score = .e1", "score = ..5", "score = .5e+", "score = .5.0", "score = +.x", "score = -.x",
-            "score = 0x", "score = 0xG", "score = 0x1000000000000000000000000", "score = -0x1000000000000000000000000",
-            "label = E'\\u123'", "label = E'\\U00110000'", "label = E'\\uD800'",
-            "label = E'\\uDC00'", "label = E'\\000'", "label = E'\\x00'", "label = E'\\xff'",
-            "label = E'\\xc3'", "label = E'unterminated", "label = E'\\'" })
+        foreach (var command in new Func<NpgsqlCommand>[]
         {
-            await RejectAsync(fixture, state, clause, ErrorCode.Validation, token, healthy: true);
+            () => new(SqlNullDistinctClusterCases.Prefix + "score IS DISTINCT NULL" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score IS DISTINCT FROM" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score IS 'DISTINCT' FROM NULL" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score IS ISNULL" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score IS NOT NOTNULL" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score 'ISNULL'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score NOT ISNULL" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = +*1" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = +" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = +)" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = +(@absent" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = + 1.0.0" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = +79228162514264337593543950336" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = .e1" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = ..5" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = .5e+" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = .5.0" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = +.x" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = -.x" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = 0xZ" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = 0xG" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = 79228162514264337593543950336" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score = -79228162514264337593543950336" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\u123'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\U00110000'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\uD800'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\uDC00'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\000'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\x00'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\xff'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\xc3'" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'unterminated" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "label = E'\\'" + SqlNullDistinctClusterCases.Tail)
+        })
+        {
+            await RejectAsync(fixture, state, command, ErrorCode.Validation, token, healthy: true, dispatched: false);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
         await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
-        foreach (var window in new[] { "LIMIT +1", "OFFSET +1 LIMIT 1", "FETCH FIRST +1 ROW ONLY",
-            "LIMIT .5", "OFFSET .5 LIMIT 1", "FETCH FIRST .5 ROW ONLY",
-            "LIMIT 0x1", "OFFSET 0x1 LIMIT 1", "FETCH FIRST 0x1 ROW ONLY" })
-        {
-            var sql = SqlNullDistinctClusterCases.Prefix + SqlNullDistinctClusterCases.PositiveClause
-                + " ORDER BY label ASC " + window;
-            await RejectAsync(fixture, state, SqlNullDistinctClusterCases.PositiveClause, ErrorCode.Validation, token,
-                healthy: true, sqlOverride: sql);
-            await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
-        }
-        foreach (var clause in new[] { "score = 0x1.0", "score = 0x1_0.0", "score = 0b1.0", "score = 0o1.0" })
-        {
-            await RejectAsync(fixture, state, clause, ErrorCode.UnsupportedCapability, token, healthy: true);
-            await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
-        }
+        await RejectAsync(fixture, state,
+            () => new(SqlNullDistinctClusterCases.Prefix + "score IS NOT DISTINCT FROM @absent" + SqlNullDistinctClusterCases.Tail),
+            ErrorCode.Validation, token, healthy: true, dispatched: true);
+        await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
+        await InvalidWindowsAsync(fixture, state, root, before, token);
         await SqlNullDistinctClusterPages.HealthyAsync(fixture, state, token);
+    }
+
+    private static async Task InvalidWindowsAsync(ClusterFixture fixture, SqlNullDistinctClusterState state,
+        global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers root, string before, CancellationToken token)
+    {
+        foreach (var command in new Func<NpgsqlCommand>[]
+        {
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET -1 ROWS FETCH NEXT 1 ROWS ONLY"),
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET 0 ROWS FETCH NEXT +0 ROWS ONLY"),
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET 0 ROWS FETCH NEXT -1 ROWS ONLY"),
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET .5 ROWS FETCH NEXT 1 ROWS ONLY"),
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET 0 ROWS FETCH NEXT .5 ROWS ONLY"),
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET 0 ROWS FETCH NEXT 1e0 ROWS ONLY"),
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET 0x1 ROWS FETCH NEXT 1 ROWS ONLY"),
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET 0 ROWS FETCH NEXT 0x1 ROWS ONLY"),
+            () => new(SqlNullDistinctClusterCases.WindowPrefix + SqlNullDistinctClusterCases.PositiveClause
+                + " ORDER BY label ASC " + "OFFSET 0 ROWS FETCH NEXT 0x0 ROWS ONLY")
+        })
+        {
+            await RejectAsync(fixture, state, command, ErrorCode.Validation, token, healthy: true, dispatched: false);
+            await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
+        }
+        foreach (var command in new Func<NpgsqlCommand>[]
+        {
+            () => new(SqlNullDistinctClusterCases.Prefix + "score COLLATE Latin1_General_BIN = 1" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "CAST(score AS int) = 1" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "ABS(score) = 1" + SqlNullDistinctClusterCases.Tail),
+            () => new(SqlNullDistinctClusterCases.Prefix + "score + 1 = 2" + SqlNullDistinctClusterCases.Tail)
+        })
+        {
+            await RejectAsync(fixture, state, command, ErrorCode.UnsupportedCapability, token, healthy: true, dispatched: false);
+            await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
+        }
     }
 
     private static bool IsHealthyClause(SqlNullDistinctClusterCase item)

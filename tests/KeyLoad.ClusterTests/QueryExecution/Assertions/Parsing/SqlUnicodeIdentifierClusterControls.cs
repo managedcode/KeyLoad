@@ -1,3 +1,4 @@
+using Npgsql;
 namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class SqlUnicodeIdentifierClusterControls
@@ -6,24 +7,30 @@ internal static class SqlUnicodeIdentifierClusterControls
         global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
-        foreach (var clause in new[] { "U&\"score\\D800\" = 1",
-            "U&\"score\\DC00\" = 1",
-            "U&\"score\\0000\" = 1",
-            "U&\"score\\+110000\" = 1",
-            "U&\"score\\zzzz\" = 1",
-            "U&\"score",
-            "U&\"score\" UESCAPE '0' = 1",
-            "U&\"score\" UESCAPE '!!' = 1",
-            "U&\"score\" UESCAPE '\u00e9' = 1" })
+        foreach (var (command, code) in new (Func<NpgsqlCommand>, ErrorCode)[]
         {
-            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, clause, ErrorCode.Validation, token, healthy: true);
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score\\D800\" = 1" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score\\DC00\" = 1" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score\\0000\" = 1" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score\\+110000\" = 1" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score\\zzzz\" = 1" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score\" UESCAPE '0' = 1" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score\" UESCAPE '!!' = 1" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "U&\"score\" UESCAPE '\u00e9' = 1" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation)
+        })
+        {
+            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, command, code, token, healthy: true, dispatched: false);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
-        foreach (var window in new[] { "LIMIT U&\"1\"", "OFFSET U&\"1\" LIMIT 1", "FETCH FIRST U&\"1\" ROW ONLY" })
+        foreach (var (command, code) in new (Func<NpgsqlCommand>, ErrorCode)[]
         {
-            var sql = SqlNullDistinctClusterCases.Prefix + SqlUnicodeIdentifierCases.Clause + OrderBy + window;
-            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, SqlUnicodeIdentifierCases.Clause,
-                ErrorCode.Validation, token, healthy: true, sqlOverride: sql);
+            (() => new(SqlNullDistinctClusterCases.WindowPrefix + SqlUnicodeIdentifierCases.Clause + OrderBy + "OFFSET \"1\" ROWS FETCH NEXT 1 ROWS ONLY"), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.WindowPrefix + SqlUnicodeIdentifierCases.Clause + OrderBy + "OFFSET 0 ROWS FETCH NEXT \"1\" ROW ONLY"), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.WindowPrefix + SqlUnicodeIdentifierCases.Clause + OrderBy + "OFFSET 0 ROWS FETCH NEXT N'1' ROW ONLY"), ErrorCode.Validation)
+        })
+        {
+            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, command, code, token, healthy: true, dispatched: false);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
 
@@ -38,7 +45,7 @@ internal static class SqlUnicodeIdentifierClusterControls
             SqlUnicodeIdentifierCases.WideClause, SqlUnicodeIdentifierCases.CustomClause })
         {
             var item = SqlNullDistinctClusterCases.All.Single(value => value.Clause == clause);
-            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, clause, code, token, ast: true, astCase: item);
+            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, item.Command, code, token, ast: true, astCase: item);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
     }

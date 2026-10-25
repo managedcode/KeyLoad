@@ -1,6 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.ClusterTests.ClientApi;
 using KeyLoad.ClusterTests.OrleansExecution;
+using Npgsql;
 namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class SqlNullOrderingClusterCancellation
@@ -21,17 +22,21 @@ internal static class SqlNullOrderingClusterCancellation
                 {
                     using var cancelled = new CancellationTokenSource();
                     await cancelled.CancelAsync();
-                    foreach (var sql in new[] { SqlNullOrderingClusterProtocol.AscFirst,
-                        SqlAllClusterPages.Explicit(SqlNullOrderingClusterProtocol.AscFirst), SqlImplicitAliasClusterPages.BasicSql,
-                        SqlNullOrderingClusterProtocol.Using(false, true) })
+                    foreach (var command in new Func<NpgsqlCommand>[]
                     {
-                        var operation = SqlNullOrderingClusterProtocol.Operation(sql);
+                        () => new(SqlNullOrderingClusterProtocol.CurrentSql),
+                        () => new("SELECT ALL TOP (5) label AS label FROM null_ordering ORDER BY score ASC"),
+                        () => new(SqlImplicitAliasClusterPages.BasicSql),
+                        () => new(SqlAllClusterPages.DuplicateSql)
+                    })
+                    {
+                        var operation = SqlNullOrderingClusterProtocol.Operation(PostgresClusterCommands.Sql(command));
                         await SqlClusterProtocol.SdkCancelledAsync(await caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
                         var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                             () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
                         await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
                         var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                            () => wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, cancelled.Token));
+                            () => wire.ExecuteAsync<QueryPage>(command, [], prepared: false, cancelled.Token));
                         await global::TUnit.Assertions.Assert.That(driver?.CancellationToken).IsEqualTo(cancelled.Token);
                         await global::TUnit.Assertions.Assert.That(await SqlNullOrderingClusterAssertions.ImageAsync(root, state, token)).IsEqualTo(image);
                         await SqlNullOrderingClusterPages.CaseAsync(caller, wire, false, true, token);

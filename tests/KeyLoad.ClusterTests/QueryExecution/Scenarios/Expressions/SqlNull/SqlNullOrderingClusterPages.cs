@@ -44,18 +44,16 @@ internal static class SqlNullOrderingClusterPages
         var mcp = (await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(
             await caller.Mcp.CallWithoutBodyAsync(McpCallerTools.QueryCapabilities, token))).Value;
         await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.Profile)).IsTrue();
+        await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlClusterProtocol.SyntaxProfile)).IsTrue();
         await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.Profile)).IsTrue();
-        await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.UsingProfile)).IsTrue();
-        await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.UsingProfile)).IsTrue();
+        await global::TUnit.Assertions.Assert.That(sdk.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.UsingProfile)).IsFalse();
+        await global::TUnit.Assertions.Assert.That(mcp.ReadProfiles.Contains(SqlNullOrderingClusterProtocol.UsingProfile)).IsFalse();
     }
 
     internal static async Task CaseAsync(RequestCqrsClusterCallers caller, PostgresClusterCaller wire,
         bool descending, bool first, CancellationToken token)
     {
-        var sql = SqlNullOrderingClusterProtocol.Sql(descending, first);
-        await AllAsync(caller, wire, descending, first, token);
-        await UsingAsync(caller, wire, descending, first, token);
-        var operation = SqlNullOrderingClusterProtocol.Operation(sql);
+        var operation = SqlNullOrderingClusterProtocol.AstOperation(descending, first);
         await SqlNullOrderingClusterAssertions.PageAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, operation, token), descending, first);
         await SqlNullOrderingClusterAssertions.PageAsync(await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, operation, token), descending, first);
         var ast = SqlNullOrderingClusterProtocol.Ast(descending, first);
@@ -63,32 +61,13 @@ internal static class SqlNullOrderingClusterPages
             await caller.Sdk.QueryAstAsync(ast, token)), descending, first);
         await SqlNullOrderingClusterAssertions.PageAsync((await McpCallerAssertions.SuccessAsync<QueryPage>(
             await caller.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token))).Value, descending, first);
-        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), descending, first);
-        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), descending, first);
+        foreach (var prepared in new[] { false, true })
+        {
+            await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(
+                () => new(SqlNullOrderingClusterProtocol.AstDriverSql),
+                SqlNullOrderingClusterProtocol.AstArguments(descending, first), prepared, token), descending, first);
+        }
     }
-
-    private static async Task UsingAsync(RequestCqrsClusterCallers caller, PostgresClusterCaller wire,
-        bool descending, bool first, CancellationToken token)
-    {
-        var sql = SqlNullOrderingClusterProtocol.Using(descending, first);
-        var operation = SqlNullOrderingClusterProtocol.Operation(sql);
-        await SqlNullOrderingClusterAssertions.PageAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, operation, token), descending, first);
-        await SqlNullOrderingClusterAssertions.PageAsync(await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, operation, token), descending, first);
-        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), descending, first);
-        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), descending, first);
-    }
-
-    private static async Task AllAsync(RequestCqrsClusterCallers caller, PostgresClusterCaller wire,
-        bool descending, bool first, CancellationToken token)
-    {
-        var sql = SqlAllClusterPages.Explicit(SqlNullOrderingClusterProtocol.Sql(descending, first));
-        var operation = SqlNullOrderingClusterProtocol.Operation(sql);
-        await SqlNullOrderingClusterAssertions.PageAsync(await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, operation, token), descending, first);
-        await SqlNullOrderingClusterAssertions.PageAsync(await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, operation, token), descending, first);
-        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token), descending, first);
-        await SqlNullOrderingClusterAssertions.PageAsync(await wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, token), descending, first);
-    }
-
     internal static async Task ReplayAsync(ClusterFixture fixture, SqlNullOrderingClusterState state, CancellationToken token)
     {
         await RequestCqrsClusterCallers.RunOwnedAsync(fixture.App, McpCallerProtocol.Node2,

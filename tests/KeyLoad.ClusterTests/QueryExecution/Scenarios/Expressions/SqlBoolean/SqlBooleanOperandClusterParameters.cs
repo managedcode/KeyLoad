@@ -5,8 +5,8 @@ internal static class SqlBooleanOperandClusterParameters
     private const string Flag = "flag";
     private const string Score = "/score";
     private const string Low = "low";
-    private const string Clause = "score AND @flag";
-    private const string WireClause = "score AND $1";
+    private const string Clause = "score = @truth AND @flag = @truth";
+    private const string WireClause = "score = $1 AND $2 = $1";
 
     internal static async Task RequireAsync(
         global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers caller,
@@ -16,14 +16,15 @@ internal static class SqlBooleanOperandClusterParameters
         {
             var parameters = new Dictionary<string, global::System.Text.Json.JsonElement>
             {
-                [Flag] = global::System.Text.Json.JsonSerializer.SerializeToElement(value)
+                [Flag] = global::System.Text.Json.JsonSerializer.SerializeToElement(value),
+                [SqlBooleanTruthClusterCases.TrueParameter] = global::System.Text.Json.JsonSerializer.SerializeToElement(true)
             };
             var predicate = new global::KeyLoad.Query.Logical(
                 new global::KeyLoad.Query.Comparison(new global::KeyLoad.Query.FieldOperand(Score), "=",
                     global::KeyLoad.Query.ValueOperand.Create(true)), "AND",
                 new global::KeyLoad.Query.Comparison(new global::KeyLoad.Query.ParameterOperand(Flag), "=",
                     global::KeyLoad.Query.ValueOperand.Create(true)));
-            var item = new SqlBooleanTruthClusterCase(Clause, predicate, value == true ? [Low] : []);
+            var item = new SqlBooleanTruthClusterCase(() => new(SqlBooleanTruthClusterCases.Prefix + Clause + SqlBooleanTruthClusterCases.Tail), predicate, value == true ? [Low] : []);
             var sql = SqlBooleanTruthClusterCases.Prefix + Clause + SqlBooleanTruthClusterCases.Tail;
             var request = new global::KeyLoad.QueryRequest(PostgresClusterState.Partition, sql, parameters, AllowFullScan: true);
             await SqlBooleanTruthClusterImage.PageAsync(await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
@@ -46,8 +47,8 @@ internal static class SqlBooleanOperandClusterParameters
                     Value = value.HasValue ? value.Value : global::System.DBNull.Value
                 };
                 await SqlBooleanTruthClusterImage.PageAsync(await wire.ExecuteAsync<global::KeyLoad.QueryPage>(
-                    SqlBooleanTruthClusterCases.Prefix + WireClause + SqlBooleanTruthClusterCases.Tail,
-                    [argument], prepared, token), item, revision);
+                    () => new(SqlBooleanTruthClusterCases.Prefix + WireClause + SqlBooleanTruthClusterCases.Tail),
+                    [new() { NpgsqlDbType = global::NpgsqlTypes.NpgsqlDbType.Boolean, Value = true }, argument], prepared, token), item, revision);
             }
         }
     }

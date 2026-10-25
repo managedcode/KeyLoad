@@ -1,5 +1,10 @@
 using KeyLoad.Query;
+using Npgsql;
 
 namespace KeyLoad.ClusterTests.QueryExecution;
 
-internal sealed record SqlBooleanTruthClusterCase(string Clause, Predicate Predicate, string[] Ids);
+internal sealed record SqlBooleanTruthClusterCase(Func<NpgsqlCommand> Command, Predicate Predicate, string[] Ids)
+{
+    internal string Sql => PostgresClusterCommands.Sql(Command);
+    internal string Clause => Sql[SqlBooleanTruthClusterCases.Prefix.Length..^SqlBooleanTruthClusterCases.Tail.Length];
+}

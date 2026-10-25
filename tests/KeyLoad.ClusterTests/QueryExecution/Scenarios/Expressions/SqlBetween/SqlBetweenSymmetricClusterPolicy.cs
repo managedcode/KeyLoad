@@ -14,10 +14,8 @@ internal static class SqlBetweenSymmetricClusterPolicy
         await SqlClusterProtocol.EqualAsync(denied, await global::KeyLoad.ClusterTests.ClientApi.McpCallerAssertions.SdkSuccessAsync(
             await root.Sdk.ConfigurePrincipalAsync(Guid.NewGuid(), denied, token)));
         var before = await SqlBetweenSymmetricClusterImage.ReadAsync(root, state, token);
-        await SqlBetweenSymmetricClusterRefusals.RejectAsync(fixture, state,
-            SqlBetweenSymmetricClusterCases.All[SqlBetweenSymmetricClusterState.AgainstOne].Clause, ErrorCode.PermissionDenied, token, ast: true);
-        await SqlBetweenSymmetricClusterRefusals.RejectAsync(fixture, state,
-            SqlBetweenSymmetricClusterCases.AsymmetricHealthy, ErrorCode.PermissionDenied, token);
+        await SqlBetweenSymmetricClusterRefusals.RejectAsync(fixture, state, SqlBetweenSymmetricClusterCases.All[SqlBetweenSymmetricClusterState.AgainstOne].Command, ErrorCode.PermissionDenied, token, ast: true);
+        await SqlBetweenSymmetricClusterRefusals.RejectAsync(fixture, state, () => new(SqlBetweenSymmetricClusterCases.Prefix + SqlBetweenSymmetricClusterCases.AsymmetricHealthy + SqlBetweenSymmetricClusterCases.Tail), ErrorCode.PermissionDenied, token);
         await global::TUnit.Assertions.Assert.That(await SqlBetweenSymmetricClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         var repaired = original with
         {

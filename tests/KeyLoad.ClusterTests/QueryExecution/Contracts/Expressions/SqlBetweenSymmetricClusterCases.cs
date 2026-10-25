@@ -5,10 +5,10 @@ namespace KeyLoad.ClusterTests.QueryExecution;
 internal static class SqlBetweenSymmetricClusterCases
 {
     internal const string Profile = "SQL.BetweenSymmetric";
-    internal const string AsymmetricFault = "score BETWEEN ASYMMETRIC 2 AND 1";
-    internal const string AsymmetricHealthy = "score BETWEEN ASYMMETRIC 1 AND 2";
-    internal const string Prefix = "SELECT label AS label FROM null_ordering WHERE ";
-    internal const string Tail = " ORDER BY label ASC LIMIT 5";
+    internal const string AsymmetricFault = "score BETWEEN 2 AND 1 /* original asymmetric */";
+    internal const string AsymmetricHealthy = "score BETWEEN 1 AND 2 /* original asymmetric */";
+    internal const string Prefix = "SELECT TOP (5) label AS label FROM null_ordering WHERE ";
+    internal const string Tail = " ORDER BY label ASC";
     private static readonly FieldOperand Score = new("/score");
     private static readonly FieldOperand Label = new("/label");
     private static readonly Predicate Both = Range(ValueOperand.Create(1), ValueOperand.Create(2));
@@ -18,23 +18,23 @@ internal static class SqlBetweenSymmetricClusterCases
         get;
     } =
     [
-        new("score BETWEEN SYMMETRIC 2 AND 1", Both, ["high", "low"]),
-        new("score BETWEEN SYMMETRIC 1 AND 2", Both, ["high", "low"]),
-        new("score NOT BETWEEN SYMMETRIC 2 AND 1", new Negation(Both), []),
-        new("NOT (score BETWEEN SYMMETRIC 2 AND 1)", new Negation(Both), []),
-        new("score BETWEEN SYMMETRIC 1 AND 1", Range(ValueOperand.Create(1), ValueOperand.Create(1)), ["low"]),
-        new("score NOT BETWEEN SYMMETRIC 1 AND 1", new Negation(Range(ValueOperand.Create(1), ValueOperand.Create(1))), ["high"]),
-        new("score BETWEEN 2 AND 1", Reverse, []),
-        new(AsymmetricFault, Reverse, []),
-        new(AsymmetricHealthy, Both, ["high", "low"]),
-        new("score NOT BETWEEN ASYMMETRIC 2 AND 1", new Negation(Reverse), ["high", "low"]),
-        new("score BETWEEN ASYMMETRIC 1 AND 1", Range(ValueOperand.Create(1), ValueOperand.Create(1)), ["low"]),
-        new("score NOT BETWEEN ASYMMETRIC 1 AND 1", new Negation(Range(ValueOperand.Create(1), ValueOperand.Create(1))), ["high"]),
-        new("score BETWEEN ASYMMETRIC NULL AND 2", Range(ValueOperand.Create(null), ValueOperand.Create(2)), []),
-        new("score NOT BETWEEN 2 AND 1", new Negation(Reverse), ["high", "low"]),
-        new("score BETWEEN SYMMETRIC 2 AND 1 OR label = 'missing'", new Logical(Both, "OR", new Comparison(Label, "=", ValueOperand.Create("missing"))), ["high", "low", "missing"]),
-        new("score BETWEEN SYMMETRIC NULL AND 2", new Logical(Range(ValueOperand.Create(null), ValueOperand.Create(2)), "OR", Range(ValueOperand.Create(2), ValueOperand.Create(null))), []),
-        new("score BETWEEN SYMMETRIC score AND 2", new Logical(Range(Score, ValueOperand.Create(2)), "OR", Range(ValueOperand.Create(2), Score)), ["high", "low"])
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "(score BETWEEN 2 AND 1 OR score BETWEEN 1 AND 2)" + SqlBetweenSymmetricClusterCases.Tail), Both, ["high", "low"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "(score BETWEEN 1 AND 2 OR score BETWEEN 2 AND 1)" + SqlBetweenSymmetricClusterCases.Tail), Both, ["high", "low"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "NOT (score BETWEEN 2 AND 1 OR score BETWEEN 1 AND 2)" + SqlBetweenSymmetricClusterCases.Tail), new Negation(Both), []),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "NOT (score BETWEEN 2 AND 1 OR score BETWEEN 1 AND 2) /* original NOT */" + SqlBetweenSymmetricClusterCases.Tail), new Negation(Both), []),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "(score BETWEEN 1 AND 1 OR score BETWEEN 1 AND 1)" + SqlBetweenSymmetricClusterCases.Tail), Range(ValueOperand.Create(1), ValueOperand.Create(1)), ["low"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "NOT (score BETWEEN 1 AND 1 OR score BETWEEN 1 AND 1)" + SqlBetweenSymmetricClusterCases.Tail), new Negation(Range(ValueOperand.Create(1), ValueOperand.Create(1))), ["high"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "score BETWEEN 2 AND 1" + SqlBetweenSymmetricClusterCases.Tail), Reverse, []),
+        new(() => new(Prefix + AsymmetricFault + Tail), Reverse, []),
+        new(() => new(Prefix + AsymmetricHealthy + Tail), Both, ["high", "low"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "score NOT BETWEEN 2 AND 1 /* original asymmetric */" + SqlBetweenSymmetricClusterCases.Tail), new Negation(Reverse), ["high", "low"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "score BETWEEN 1 AND 1 /* original asymmetric */" + SqlBetweenSymmetricClusterCases.Tail), Range(ValueOperand.Create(1), ValueOperand.Create(1)), ["low"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "score NOT BETWEEN 1 AND 1 /* original asymmetric */" + SqlBetweenSymmetricClusterCases.Tail), new Negation(Range(ValueOperand.Create(1), ValueOperand.Create(1))), ["high"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "score BETWEEN NULL AND 2 /* original asymmetric */" + SqlBetweenSymmetricClusterCases.Tail), Range(ValueOperand.Create(null), ValueOperand.Create(2)), []),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "score NOT BETWEEN 2 AND 1" + SqlBetweenSymmetricClusterCases.Tail), new Negation(Reverse), ["high", "low"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "(score BETWEEN 2 AND 1 OR score BETWEEN 1 AND 2) OR label = 'missing'" + SqlBetweenSymmetricClusterCases.Tail), new Logical(Both, "OR", new Comparison(Label, "=", ValueOperand.Create("missing"))), ["high", "low", "missing"]),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "(score BETWEEN NULL AND 2 OR score BETWEEN 2 AND NULL)" + SqlBetweenSymmetricClusterCases.Tail), new Logical(Range(ValueOperand.Create(null), ValueOperand.Create(2)), "OR", Range(ValueOperand.Create(2), ValueOperand.Create(null))), []),
+        new(() => new(SqlBetweenSymmetricClusterCases.Prefix + "(score BETWEEN score AND 2 OR score BETWEEN 2 AND score)" + SqlBetweenSymmetricClusterCases.Tail), new Logical(Range(Score, ValueOperand.Create(2)), "OR", Range(ValueOperand.Create(2), Score)), ["high", "low"])
     ];
     private static Logical Range(Operand lower, Operand upper) => new(
         new Comparison(Score, ">=", lower), "AND", new Comparison(Score, "<=", upper));

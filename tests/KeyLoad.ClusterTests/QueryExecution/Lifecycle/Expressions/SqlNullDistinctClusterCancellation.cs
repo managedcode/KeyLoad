@@ -35,14 +35,14 @@ internal static class SqlNullDistinctClusterCancellation
                             || item.Clause == SqlNullDistinctClusterCases.BinaryClause
                             || item.Clause == SqlNullDistinctClusterCases.OctalClause || SqlUnicodeIdentifierClusterControls.IsSelected(item)))
                     {
-                        var sql = SqlNullDistinctClusterCases.Prefix + item.Clause + SqlNullDistinctClusterCases.Tail;
+                        var sql = item.Sql;
                         var operation = SqlNullOrderingClusterProtocol.Operation(sql);
                         await SqlClusterProtocol.SdkCancelledAsync(await caller.Sdk.ExecuteSqlAsync(operation, cancelled.Token));
                         var mcp = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
                             () => caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, operation, cancelled.Token));
                         await global::TUnit.Assertions.Assert.That(mcp?.CancellationToken).IsEqualTo(cancelled.Token);
                         var driver = await global::TUnit.Assertions.Assert.ThrowsAsync<OperationCanceledException>(
-                            () => wire.ExecuteAsync<QueryPage>(sql, [], prepared: false, cancelled.Token));
+                            () => wire.ExecuteAsync<QueryPage>(item.Command, [], prepared: false, cancelled.Token));
                         await global::TUnit.Assertions.Assert.That(driver?.CancellationToken).IsEqualTo(cancelled.Token);
                         await SqlNullDistinctClusterPages.CaseAsync(caller, wire, item, state.LowRevision, token);
                     }

@@ -1,3 +1,4 @@
+using Npgsql;
 namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class SqlUnicodeStringClusterControls
@@ -6,24 +7,27 @@ internal static class SqlUnicodeStringClusterControls
         global::KeyLoad.ClusterTests.OrleansExecution.RequestCqrsClusterCallers root, CancellationToken token)
     {
         var before = await SqlNullDistinctClusterImage.ReadAsync(root, state, token);
-        foreach (var clause in new[] { "label = U&'\\123'",
-            "label = U&'\\+110000'",
-            "label = U&'\\D800'",
-            "label = U&'\\DC00'",
-            "label = U&'\\D800x\\DC00'",
-            "label = U&'\\0000'",
-            "label = U&'\\+000000'",
-            "label = U&'\\g000'",
-            "label = U&'unterminated",
-            "label = U&'low' UESCAPE",
-            "label = U&'low' UESCAPE ''",
-            "label = U&'low' UESCAPE '!!'",
-            "label = U&'low' UESCAPE '+'",
-            "label = U&'low' UESCAPE 'a'",
-            "label = U&'low' UESCAPE ' '",
-            "label = U&'low' UESCAPE 'é'" })
+        foreach (var (command, code) in new (Func<NpgsqlCommand>, ErrorCode)[]
         {
-            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, clause, ErrorCode.Validation, token, healthy: true);
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'\\123'" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'\\+110000'" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'\\D800'" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'\\DC00'" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'\\D800x\\DC00'" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'\\0000'" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'\\+000000'" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'\\g000'" + SqlNullDistinctClusterCases.Tail), ErrorCode.UnsupportedCapability),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'unterminated" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'low' UESCAPE" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'low' UESCAPE ''" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'low' UESCAPE '!!'" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'low' UESCAPE '+'" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'low' UESCAPE 'a'" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'low' UESCAPE ' '" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation),
+            (() => new(SqlNullDistinctClusterCases.Prefix + "label = U&'low' UESCAPE 'é'" + SqlNullDistinctClusterCases.Tail), ErrorCode.Validation)
+        })
+        {
+            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, command, code, token, healthy: true, dispatched: false);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
     }
@@ -36,7 +40,7 @@ internal static class SqlUnicodeStringClusterControls
         foreach (var clause in new[] { SqlNullDistinctClusterCases.UnicodeClause, SqlNullDistinctClusterCases.UnicodeCustomClause })
         {
             var item = SqlNullDistinctClusterCases.All.Single(value => value.Clause == clause);
-            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, clause, code, token, ast: true, astCase: item);
+            await SqlNullDistinctClusterRefusals.RejectAsync(fixture, state, item.Command, code, token, ast: true, astCase: item);
             await global::TUnit.Assertions.Assert.That(await SqlNullDistinctClusterImage.ReadAsync(root, state, token)).IsEqualTo(before);
         }
     }
