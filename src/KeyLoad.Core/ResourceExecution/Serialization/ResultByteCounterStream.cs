@@ -2,7 +2,7 @@ namespace KeyLoad.Core.ResourceExecution;
 
 internal sealed class ResultByteCounterStream(long maximumBytes, Action check) : Stream
 {
-    private const string ResultBytesExceeded = "The read result byte budget is exceeded.";
+    internal const string ResultBytesExceeded = "The read result byte budget is exceeded.";
     private long bytes;
 
     internal static long Measure<T>(ReadExecutionBudget budget, T result)

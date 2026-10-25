@@ -6,7 +6,8 @@ namespace KeyLoad.Core.ResourceExecution;
 internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
 {
     private const int Empty = 0;
-    private const string Capacity = "The retained resource lifetimes exceed the operation result bytes.";
+    // Retained lifetimes are part of the caller's result bytes, so the caller sees the same refusal.
+    private const string Capacity = ResultByteCounterStream.ResultBytesExceeded;
     private const int Unbounded = int.MaxValue;
     private const string Invalid = "The resource lifetime ledger input is invalid.";
     private readonly Lock gate = new();

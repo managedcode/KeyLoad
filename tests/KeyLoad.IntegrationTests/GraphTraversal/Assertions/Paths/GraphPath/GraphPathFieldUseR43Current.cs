@@ -6,8 +6,6 @@ namespace KeyLoad.IntegrationTests.GraphTraversal;
 
 internal static class GraphPathFieldUseR43Current
 {
-    private const string CanonicalFullAttributes = "{\"public\":\"visible\",\"secret\":\"graph-path-private-marker\"}";
-
     internal static async Task ObserveAsync(RequestCqrsClusterCallers admin, GraphPathFieldUseR43State state,
         CancellationToken token)
     {
@@ -20,7 +18,7 @@ internal static class GraphPathFieldUseR43Current
         }
         var request = new TraverseRequest(state.Seed.Partition, GraphPathClusterScenario.Graph, state.Source, 2, 3, 2);
         var expectedGraph = state.Seed.StoredTraversal(new([state.Middle, state.Source, state.Target],
-            [.. state.Edges.Select(edge => edge with { AttributesJson = CanonicalFullAttributes })]));
+            [.. state.Edges.Select(edge => edge with { AttributesJson = GraphPathClusterScenario.CanonicalAttributes })]));
         await SqlClusterProtocol.EqualAsync(expectedGraph, await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.TraverseAsync(request, token)));
         await SqlClusterProtocol.EqualAsync(expectedGraph, (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(

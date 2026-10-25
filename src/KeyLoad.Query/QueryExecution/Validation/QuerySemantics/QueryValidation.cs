@@ -12,7 +12,7 @@ internal static class QueryValidation
     private const int MinimumPositiveCount = 1;
     private const string QueryStructureExceedsItsBudgetDetail = "The query structure exceeds its budget.";
     private const int RootPredicateDepth = 1;
-    private const string QueryWindowIsNotRepresentableDetail = "The query offset and limit exceed the representable row positions.";
+    private const string QueryWindowIsNotRepresentableDetail = "The query offset and limit do not form a valid row window.";
     private const string ModelQuerySourceIsUnsupportedDetail = "The model query source is unsupported.";
     private const string ModelQueryRequiresExplicitFullScanConsentDetail = "A model query requires explicit full-scan consent.";
     private const string ModelQueryContinuationIsNotSupportedDetail = "Model query continuation is not supported.";
@@ -42,13 +42,14 @@ internal static class QueryValidation
         ValidateModelSource(request, query);
         if (query.Projection.IsDefault || query.Order.IsDefault
             || query.Projection.Length < MinimumPositiveCount || query.Projection.Length > execution.MaximumProjection
-            || query.Order.Length > execution.MaximumOrdering || query.Limit < MinimumPositiveCount
-            || query.Offset < EmptyElementCount
+            || query.Order.Length > execution.MaximumOrdering
             || request.Parameters?.Count > execution.MaximumParameters)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, QueryStructureExceedsItsBudgetDetail);
         }
-        if ((long)query.Offset + query.Limit > int.MaxValue)
+        // A window needs a positive limit and a nonnegative offset that ends within a 32-bit row position.
+        if (query.Limit < MinimumPositiveCount || query.Offset < EmptyElementCount
+            || (long)query.Offset + query.Limit > int.MaxValue)
         {
             throw Errors.Fail(ErrorCode.Validation, QueryWindowIsNotRepresentableDetail);
         }

@@ -29,6 +29,8 @@ internal static class GraphPathClusterScenario
     internal const string IsolatedId = "isolated";
     internal const string SecretOwner = "different-row-owner";
     internal const string PublicAttributes = "{\"secret\":\"graph-path-private-marker\",\"public\":\"visible\"}";
+    /// <summary>Stored edge attributes are canonical JSON, so a full read returns them with sorted keys.</summary>
+    internal const string CanonicalAttributes = "{\"public\":\"visible\",\"secret\":\"graph-path-private-marker\"}";
     internal const string EmptyAttributes = "{}";
 
     internal static async Task<GraphPathClusterSeed> CreateAsync(ClusterFixture fixture,

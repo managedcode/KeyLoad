@@ -33,7 +33,7 @@ internal static class SqlOffsetRefusals
             await UnchangedAsync(database.Store, before, position, identity);
         }
         var ast = SqlOffsetProtocol.Join(database.Partition);
-        foreach (var (offset, offsetCode) in new[] { (-1, ErrorCode.BudgetExceeded), (int.MaxValue, ErrorCode.Validation) })
+        foreach (var (offset, offsetCode) in new[] { (-1, ErrorCode.Validation), (int.MaxValue, ErrorCode.Validation) })
         {
             await ErrorAsync(() => engine.ExecuteAst(SqlOffsetProtocol.Root,
                 ast with

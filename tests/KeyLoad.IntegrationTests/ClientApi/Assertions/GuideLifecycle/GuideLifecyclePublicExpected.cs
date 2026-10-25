@@ -1,3 +1,5 @@
+using System.Text.Json.Nodes;
+
 namespace KeyLoad.IntegrationTests.ClientApi;
 
 internal static class GuideLifecyclePublicExpected
@@ -9,6 +11,11 @@ internal static class GuideLifecyclePublicExpected
     internal const string Description = "How to discover and safely use KeyLoad operations.";
     internal const int MaximumBytes = 8192;
     internal const string CompleteResult = "complete";
+    private const string ServerInfoKey = "io.modelcontextprotocol/serverInfo";
+    private const string ServerName = "KeyLoad";
+    private const string ServerVersion = "1.0.0";
+    private const string NameKey = "name";
+    private const string VersionKey = "version";
     internal const string Markdown = """
         # KeyLoad agent quickstart
 
@@ -36,4 +43,10 @@ internal static class GuideLifecyclePublicExpected
 
         This guide is static documentation, not a data browser or authorization grant. Confirm current tool schemas and feature support for each task.
         """;
+
+    /// <summary>MCP results carry the server identity in their metadata; each result owns its own node.</summary>
+    internal static JsonObject ServerMeta() => new()
+    {
+        [ServerInfoKey] = new JsonObject { [NameKey] = ServerName, [VersionKey] = ServerVersion }
+    };
 }

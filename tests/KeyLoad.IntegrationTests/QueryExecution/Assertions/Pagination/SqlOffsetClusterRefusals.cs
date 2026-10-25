@@ -43,11 +43,12 @@ internal static class SqlOffsetClusterRefusals
                     Offset = offset
                 }
             };
+            // A negative offset or an offset whose window passes the 32-bit row position is invalid input, as in SQL.
             var failure = await callers.Sdk.QueryAstAsync(bad, token);
             await Assert.That(failure.IsSuccess).IsFalse();
-            await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(ErrorCode.BudgetExceeded.ToString());
+            await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(ErrorCode.Validation.ToString());
             await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, bad, token),
-                ErrorCode.BudgetExceeded, dispatched: true);
+                ErrorCode.Validation, dispatched: true);
         }
     }
     internal static async Task DeniedAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state, CancellationToken token)

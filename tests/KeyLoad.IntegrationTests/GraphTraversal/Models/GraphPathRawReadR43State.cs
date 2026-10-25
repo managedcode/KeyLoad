@@ -26,7 +26,9 @@ internal sealed class GraphPathRawReadR43State(GraphPathClusterSeed seed)
         new("r43-raw-0", Source, Middle, GraphPathClusterScenario.Label, "{\"public\":\"visible\"}", 1L),
         new("r43-raw-1", Middle, Target, GraphPathClusterScenario.Label, "{\"public\":\"visible\"}", 1L)
     ];
-    internal EdgeRecord[] ProjectedEdges => Allowed ? Edges : RedactedEdges;
+    internal EdgeRecord[] ProjectedEdges => Allowed
+        ? [.. Edges.Select(edge => edge with { AttributesJson = GraphPathClusterScenario.CanonicalAttributes })]
+        : RedactedEdges;
     internal EdgeRecord[] StoredProjectedEdges => [.. ProjectedEdges.Select(Seed.StoredEdge)];
     internal CommandRequest Command { get; set; } = null!;
     internal CommitReceipt Receipt { get; set; } = null!;

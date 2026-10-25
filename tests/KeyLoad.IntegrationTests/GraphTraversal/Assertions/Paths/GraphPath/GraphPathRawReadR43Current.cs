@@ -17,7 +17,8 @@ internal static class GraphPathRawReadR43Current
                 await admin.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(vertex), token))).Value);
         }
         var request = new TraverseRequest(state.Seed.Partition, GraphPathClusterScenario.Graph, state.Source, 2, 3, 2);
-        var expectedGraph = state.Seed.StoredTraversal(new([state.Middle, state.Source, state.Target], [.. state.Edges]));
+        var expectedGraph = state.Seed.StoredTraversal(new([state.Middle, state.Source, state.Target],
+            [.. state.Edges.Select(edge => edge with { AttributesJson = GraphPathClusterScenario.CanonicalAttributes })]));
         await SqlClusterProtocol.EqualAsync(expectedGraph, await McpCallerAssertions.SdkSuccessAsync(
             await admin.Sdk.TraverseAsync(request, token)));
         await SqlClusterProtocol.EqualAsync(expectedGraph, (await McpCallerAssertions.SuccessAsync<global::KeyLoad.GraphTraversal>(
