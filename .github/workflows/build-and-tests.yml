@@ -124,7 +124,10 @@ jobs:
         with:
           global-json-file: global.json
       - name: Trust the development HTTPS certificate
-        run: dotnet dev-certs https --trust
+        run: |
+          export SSL_CERT_DIR="$HOME/.aspnet/dev-certs/trust:/usr/lib/ssl/certs"
+          echo "SSL_CERT_DIR=$SSL_CERT_DIR" >> "$GITHUB_ENV"
+          dotnet dev-certs https --trust
       - name: Build
         run: dotnet build KeyLoad.slnx -warnaserror
       - name: Install administration browser

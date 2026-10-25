@@ -105,8 +105,10 @@ internal sealed class LoggerModelControlSelectionTests
     {
         await Assert.That(node.GetProjectMetadata().ProjectPath).EndsWith("KeyLoad.csproj");
         await Assert.That(Directory.Exists(Path.Combine(root, node.Name))).IsTrue();
-        var endpoint = node.Annotations.OfType<EndpointAnnotation>().Single(value => value.Name == "http");
+        var endpoint = node.Annotations.OfType<EndpointAnnotation>().Single(value => value.Name == "https");
+        await Assert.That(endpoint.UriScheme).IsEqualTo("https");
         await Assert.That(endpoint.Port).IsNull();
+        await Assert.That(endpoint.TargetPort).IsNull();
         await Assert.That(endpoint.IsProxied).IsFalse();
     }
 
