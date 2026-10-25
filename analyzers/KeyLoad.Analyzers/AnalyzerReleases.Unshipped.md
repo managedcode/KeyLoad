@@ -22,3 +22,4 @@ KLD0036 | Design | Error | Repository code quality
 KLD0037 | Architecture | Error | Repository code quality
 KLD0038 | Architecture | Error | Repository code quality
 KLD0039 | Architecture | Error | Repository code quality
+KLD0040 | Reliability | Error | Explicit results instead of null returns

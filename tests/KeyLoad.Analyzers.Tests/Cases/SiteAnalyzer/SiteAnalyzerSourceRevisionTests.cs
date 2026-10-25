@@ -133,7 +133,5 @@ internal sealed class SiteAnalyzerSourceRevisionTests
         };
 
     private static string? ReadRevision(System.Text.Json.JsonDocument document) =>
-        document.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSourceRevision).ValueKind == System.Text.Json.JsonValueKind.Null
-            ? null
-            : document.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSourceRevision).GetString();
+        document.RootElement.GetProperty(SiteAnalyzerCoverageTokens.JsonSourceRevision).GetString();
 }

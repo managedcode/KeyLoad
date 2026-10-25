@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace KeyLoad.Analyzers.Tests.CodeQuality;
 
-/// <summary>AC-CQ-004: verifies all eighteen diagnostic contracts with real compiler fixtures.</summary>
+/// <summary>AC-CQ-004: verifies all diagnostic contracts with real compiler fixtures.</summary>
 internal sealed class DiagnosticContractTests
 {
     private const string MachineKeyId = "KLD0001";
@@ -24,10 +24,11 @@ internal sealed class DiagnosticContractTests
     private const string TypedConfigurationId = "KLD0037";
     private const string ImplementationTermId = "KLD0038";
     private const string ZoneTreeAccessId = "KLD0039";
+    private const string NullReturnId = "KLD0040";
 
-    /// <summary>Verifies all eighteen rules have unique enabled ids and expected severities.</summary>
+    /// <summary>Verifies all rules have unique enabled ids and expected severities.</summary>
     [Test]
-    public async Task AllEighteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync()
+    public async Task AllRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync()
     {
         // AC-CQ-004: public rule inventory is stable for compiler and SARIF consumers.
         var expected = new Dictionary<string, DiagnosticSeverity>(StringComparer.Ordinal)
@@ -49,7 +50,8 @@ internal sealed class DiagnosticContractTests
             [MagicRuntimeStringId] = DiagnosticSeverity.Error,
             [TypedConfigurationId] = DiagnosticSeverity.Error,
             [ImplementationTermId] = DiagnosticSeverity.Error,
-            [ZoneTreeAccessId] = DiagnosticSeverity.Error
+            [ZoneTreeAccessId] = DiagnosticSeverity.Error,
+            [NullReturnId] = DiagnosticSeverity.Error
         };
         var analyzers = typeof(LiteralMachineKeyAnalyzer).Assembly.GetTypes()
             .Where(static type => !type.IsAbstract &&

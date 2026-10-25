@@ -2,6 +2,10 @@ namespace KeyLoad.Analyzers.CodeQuality;
 
 internal static class CodeQualityDiagnosticText
 {
+    public const string NullReturnTitle = "Return explicit results instead of null";
+    public const string NullReturnMessage = "Do not return null; use ManagedCode.Communication.Result or Result<T> for an explicit outcome";
+    public const string NullReturnDescription = "Null return values are prohibited, including expression bodies and null-valued return branches. Resolved nullable contracts from another project or API are preserved for overrides, interface implementations and API callbacks.";
+
     public const string MagicRuntimeDurationTitle = "Runtime numeric literals must use named constants";
     public const string MagicRuntimeDurationMessage = "Runtime numeric literal '{0}' must use a domain-named constant or configured option";
     public const string MagicRuntimeDurationDescription = "Explicit runtime numeric literals other than zero and one require named immutable identities or typed options; metadata identifiers and named constant declarations are preserved.";

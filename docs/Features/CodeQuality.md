@@ -54,7 +54,7 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 | Requirement | Acceptance (pass condition) | Verified by |
 |---|---|---|
 | REQ-CQ-001: the repository EditorConfig is the source of truth and every project builds with strict SDK/style analysis | AC-CQ-001: `TreatWarningsAsErrors`, `CodeAnalysisTreatWarningsAsErrors`, `EnableNETAnalyzers`, `EnforceCodeStyleInBuild`, all `RunAnalyzers*` switches, `AnalysisLevel=latest-all` and XML documentation are on; the shared build properties configure these policies; every project explicitly references the analyzer, and the analyzer project checks its own compiled source | Debug solution build with `-warnaserror`; Linux CI records delivered-source qualification separately |
-| REQ-CQ-002: KeyLoad-owned Roslyn rules are editable and proven by real compilations | AC-CQ-002: compiler cases assert diagnostic ID, severity and exact span for the rules they exercise. AC-CQ-004: eighteen rules have unique enabled IDs and expected severities. Each rule selects its generated-code contract; KLD0038 and KLD0039 analyze generated code. | `DiagnosticContractTests` (`AllEighteenRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync`) and the existing compiler case folders; focused compiler execution evidence for KLD0038/KLD0039 remains open. |
+| REQ-CQ-002: KeyLoad-owned Roslyn rules are editable and proven by real compilations | AC-CQ-002: compiler cases assert diagnostic ID, severity and exact span for the rules they exercise. AC-CQ-004: nineteen rules have unique enabled IDs and expected severities. Each rule selects its generated-code contract; KLD0038, KLD0039 and KLD0040 analyze generated code. | `DiagnosticContractTests` (`AllRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync`) and the existing compiler case folders; focused compiler execution evidence for KLD0038/KLD0039 remains open. |
 | REQ-CQ-003: compiler SARIF is retained, including for failed builds | AC-CQ-003: each project writes `artifacts/code-quality/<project>/<configuration>/<framework>/diagnostics.sarif`; CI uploads `code-quality-<os>` even when the build fails, and an upload never turns a failed build green | Workflow review of `Directory.Build.targets` and the `Save build diagnostics` step (explicit review exception) |
 | REQ-CQ-004: quality gates are enforced and qualification is stated honestly | AC-CQ-005: no required gate is skipped, disabled or downgraded to pass. AC-CQ-006: documentation and status record source configuration, local checks and exact-source Linux evidence separately. AC-CQ-022: the complete solution passes the strict Release build and `dotnet format --verify-no-changes`; repairs preserve public signatures, persisted bytes, signed identities, cancellation and lifetime rules. AC-CQ-023: every source-bound method with cyclomatic complexity above 20 is reviewed and, where it helps, split along a real responsibility | Governance check `node scripts/Features/RepositoryGovernance/verify.mjs`; review of `docs/implementation/status.json`; Release build and formatter gates (AC-CQ-022) |
 | REQ-CQ-006: maintainability limits are executable | AC-CQ-008: KLD0030..KLD0033 accept the boundary and reject one past it (file 400, type 200, executable unit 64 including the 63/64/65 edge, nesting 3). AC-CQ-009: the analyzer module reaches the coverage thresholds below from the analyzer suite | `FileCodeLineCountAnalyzerTests`, `AggregateTypeCodeLineCountAnalyzerTests`, `ExecutableUnitCodeLineCountAnalyzerTests`, `ExecutableUnitSpanAndTriviaAnalyzerTests`, `ControlFlowNestingAnalyzerTests`, `ControlFlowNestingExtendedConstructTests`, `NumericAnalyzerSelfInventoryTests`, `SiteAnalyzerCoverage*Tests` |
@@ -69,6 +69,7 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 | REQ-CQ-EXECUTION-EXCEPTION-001 / AC-CQ-EXECUTION-EXCEPTION-001: exception types keep legitimate constructors | KLD0021 resolves `System.Exception` from the compilation and skips direct and indirect subclasses; a lookalike type and ordinary Orleans DTOs still report the located error | `OrleansContractConstructorTests` |
 | REQ-CQ-MULTILINE-BLOCKS-001 | AC-CQ-MULTILINE-BLOCKS-001: executable control-flow, method and lambda braces span lines (Allman) and `IDE0055` is an error. AC-CQ-MULTILINE-BLOCKS-002: the expansion preserves behaviour, so existing whole-operation tests stay green. AC-CQ-MULTILINE-BLOCKS-003: newly compact blocks fail the formatter gate | `dotnet format KeyLoad.slnx --verify-no-changes --no-restore` and the Release build |
 | REQ-CQ-ROS-001..003 | AC-CQ-ROS-001..003 below | Tool manifest and MCP session (manual evidence for installation) |
+| REQ-CQ-NULL-001: operation outcomes use explicit results | AC-CQ-NULL-001: KLD0040 rejects null return values in statements, expression bodies, local functions, lambdas, async bodies and returned conditional/switch branches, including typed nulls, null-forgiving expressions and null-valued defaults. AC-CQ-NULL-002: resolved nullable external interface, override and API callback contracts are preserved; local contracts, unrelated methods and non-nullable external contracts remain checked. | `NullReturnTests`, `ExternalNullReturnContractTests`; complete solution build remains required |
 | REQ-CQ-SIMD-PROFILE-001 / AC-CQ-SIMD-PROFILE-001 | Coverage and qualification run the normal SIMD-enabled profile only; inherited intrinsics-disabling variables are refused and no scalar profile is admitted | coverage tooling tests |
 
 ## Build policy
@@ -118,6 +119,7 @@ unique and never reused.
 | KLD0037 | Operational policy comes from centrally bound, validated `IOptions<T>`, not from raw configuration reads or constants | Error |
 | KLD0038 | Implementation terminology requires explicit owner approval; only narrowly approved runtime, domain and testing meanings are allowed | Error |
 | KLD0039 | ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics use public synchronous APIs without thread-pool dispatch | Error |
+| KLD0040 | Return explicit `ManagedCode.Communication.Result` / `Result<T>` outcomes instead of null; preserve resolved nullable contracts from another project or API | Error |
 
 Rule fixtures (all under `Cases/`): KLD0001 `LiteralMachineKey/`, KLD0013
 `Program/ProgramEndpointMappingTests`, KLD0014 `Grain/GrainInterfaceVersionTests`,
@@ -133,6 +135,15 @@ execution evidence for their rejected and permitted cases remains open.
 
 Rule behaviour follows these constraints:
 
+- KLD0040 checks explicit null-valued returns in ordinary and generated source.
+  Nullable annotations on locally owned methods do not authorize null outcomes.
+  Exceptions require a nullable contract resolved from a referenced assembly:
+  an implemented interface member, an overridden method/property, or a callback
+  passed directly to an external API parameter. The exception belongs to that
+  member or callback and does not extend to nested local functions or unrelated
+  methods. Nullable payload fields, arguments, iterator elements and arbitrary
+  values returned from other expressions are outside this rule's static scope;
+  it does not perform whole-program null-flow analysis.
 - Use `nameof` for an existing symbol. Immutable protocol, format and mathematical
   identities use meaningful feature-owned constants. Timeouts, deadlines, retries,
   capacities, buffer sizes and operation limits are options, never per-class

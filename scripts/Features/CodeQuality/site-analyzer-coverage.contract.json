@@ -11,7 +11,10 @@
     "AC-CQ-034",
     "AC-CQ-037",
     "REQ-CQ-012",
-    "AC-CQ-033"
+    "AC-CQ-033",
+    "REQ-CQ-NULL-001",
+    "AC-CQ-NULL-001",
+    "AC-CQ-NULL-002"
   ],
   "module": "KeyLoad.Analyzers",
   "collectorVersion": "18.12.0",
@@ -292,6 +295,14 @@
     {
       "path": "analyzers/KeyLoad.Analyzers/Analysis/ImplementationTerms/ImplementationTermReader.cs",
       "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/NullReturnAnalyzer.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/ExternalNullReturnContract.cs",
+      "classification": "executable"
     }
   ],
   "configuration": [
@@ -468,6 +479,13 @@
         "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/SynchronousZoneTreeAccessAnalyzer.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/RuntimeContracts/ZoneTreeDispatchAnalysis.cs",
         "analyzers/KeyLoad.Analyzers/Contracts/ZoneTreeAccessPolicy.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0040",
+      "sources": [
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/NullReturnAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/ExternalNullReturnContract.cs"
       ]
     }
   ],
