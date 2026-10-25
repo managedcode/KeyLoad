@@ -1,5 +1,18 @@
 # KeyLoad
 
+## Rule 0: Question every action
+
+Before starting and continuously throughout the work, ask yourself:
+**"Am I doing bullshit here?"**
+
+Verify the real cause, necessity, scope and ownership before each change. Use the
+existing standard framework path. Do not add infrastructure, configuration, locks
+or workarounds to compensate for an unverified diagnosis. Existing code is not
+proof that its design is correct. When evidence does not justify an approach,
+stop that approach and remove your own speculative additions. Apply this rule
+immediately, including to your previous changes, while preserving unrelated work
+and required correctness gates.
+
 ## Product and runtime
 
 KeyLoad is one database for AI agents. Documents, typed tables, graphs,
