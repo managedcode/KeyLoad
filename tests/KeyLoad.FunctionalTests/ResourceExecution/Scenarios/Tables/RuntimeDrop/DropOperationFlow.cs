@@ -13,11 +13,9 @@ internal static class DropOperationFlow
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             profile = await DropRuntimeProfile.CreateAsync(token, limits).ConfigureAwait(false);
-            using var deadline = new CancellationTokenSource(profile.Node.Timing.RestartCompletionTimeout, TimeProvider.System);
-            using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(token, deadline.Token);
-            await DropRuntimeSeed.CreateAsync(profile, lifetime.Token).ConfigureAwait(false);
-            await DropRuntimeSeed.CreateAsync(profile, lifetime.Token, DropRuntimeProtocol.OtherTable).ConfigureAwait(false);
-            await operation(profile, lifetime.Token).ConfigureAwait(false);
+            await DropRuntimeSeed.CreateAsync(profile, token).ConfigureAwait(false);
+            await DropRuntimeSeed.CreateAsync(profile, token, DropRuntimeProtocol.OtherTable).ConfigureAwait(false);
+            await operation(profile, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         if (profile is not null)
         {
