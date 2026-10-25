@@ -30,13 +30,16 @@ internal static class QueueDeadlineClusterAssertions
         var until = TimeProvider.System.GetUtcNow() + DueRecurringClusterProtocol.ProgressWindow;
         while (TimeProvider.System.GetUtcNow() < until)
         {
-            var actual = await ReadAsync(callers, lane, expected.Metadata.Id, token);
-            if (actual.Metadata.State == MessageState.Ready)
+            // The promotion can commit between the four public reads, so poll one route until Ready and only then
+            // require every route to return the same message.
+            var observed = await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(
+                new InspectMessageRequest(lane, expected.Metadata.Id), token));
+            if (observed!.Metadata.State == MessageState.Ready)
             {
-                await QueueLeaseClusterAssertions.EqualAsync(actual, expected);
+                await QueueLeaseClusterAssertions.EqualAsync(await ReadAsync(callers, lane, expected.Metadata.Id, token), expected);
                 return;
             }
-            await Assert.That(actual.Metadata.State).IsEqualTo(MessageState.Scheduled);
+            await Assert.That(observed.Metadata.State).IsEqualTo(MessageState.Scheduled);
             await Task.Delay(DueRecurringClusterProtocol.PollInterval, TimeProvider.System, token);
         }
         throw new TimeoutException("The authorized execution queue deadline did not advance within its original due progress window.");
