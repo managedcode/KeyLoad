@@ -28,7 +28,7 @@ internal sealed class DocumentPutValidationAtomicityTests
             new PutDocument(Collection, StagedId, "{\"value\":\"staged-value\"}", 0),
             new PutDocument(Collection, InvalidId, rejectedJson, 0));
 
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(expected);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, Collection, StagedId))).IsNull();
         await Assert.That(DocumentCrudFixture.ReadRecord(database,

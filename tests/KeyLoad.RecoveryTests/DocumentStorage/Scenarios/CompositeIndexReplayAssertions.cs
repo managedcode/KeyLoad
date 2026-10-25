@@ -32,7 +32,7 @@ internal static class CompositeIndexReplayAssertions
         File.WriteAllBytes(Path.Combine(directory, OriginalFile), OrleansSerialization.Serialize(original.Get<CommitReceipt>()));
         var before = CompositeIndexCrashOperations.Capture(database);
         var failure = ApplyConflict(database);
-        if (Errors.Code(failure.Problem) != ErrorCode.Conflict)
+        if (Errors.Code(failure.Problem).Value != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(Invalid);
         }

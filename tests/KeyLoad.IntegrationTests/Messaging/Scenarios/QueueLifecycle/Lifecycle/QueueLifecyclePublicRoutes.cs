@@ -30,10 +30,10 @@ internal static class QueueLifecyclePublicRoutes
         CommandRequest command, ErrorCode code, CancellationToken token)
     {
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CommitAsync(command, token), code);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token), code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token), code, dispatched: true)).Value;
         var sql = SqlClusterProtocol.Call(state.Partition, McpCallerTools.DocumentsCommit, command);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), code);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), code, dispatched: true)).Value;
     }
 
     internal static async Task ReplayAsync(RequestCqrsClusterCallers callers, QueueLifecyclePublicState state, CancellationToken token)

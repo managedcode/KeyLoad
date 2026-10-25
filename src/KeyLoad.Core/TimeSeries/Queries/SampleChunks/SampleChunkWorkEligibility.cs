@@ -4,7 +4,7 @@ namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleChunkWorkEligibility
 {
-    internal static SampleChunkWorkHint? Read(DatabaseEngine database, IKeyValueView view,
+    internal static global::ManagedCode.Communication.Result<SampleChunkWorkHint?> Read(DatabaseEngine database, IKeyValueView view,
         PartitionRef partition, string set, string series, Guid id, DateTimeOffset now,
         ReadExecutionBudget budget)
     {
@@ -12,7 +12,7 @@ internal static class SampleChunkWorkEligibility
         var state = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(partition, set, series, id));
         if (state is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<SampleChunkWorkHint?>.FailNotFound(nameof(Read));
         }
         SampleChunkWindowValidation.State(state, id, database.TimeSeriesOptions.Value.MaximumChunkWindowRecords,
             database.TimeSeriesOptions.Value.MaximumChunkCorrections);
@@ -20,14 +20,14 @@ internal static class SampleChunkWorkEligibility
         var merge = state.State == SampleChunkWindowState.Sealed && !state.CorrectionSequences.IsEmpty;
         if (!seal && !merge)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<SampleChunkWorkHint?>.FailNotFound(nameof(Read));
         }
         var principal = database.Principal(view, state.CreatorPrincipalId, now);
         database.Authorization.Require(principal, partition, set, Capability.SeriesManage | Capability.SeriesRead);
         _ = database.Resource(view, partition, set, ResourceKind.TimeSeries);
-        return new(partition, set, series, id, state.Generation, state.Revision, state.CreatorPrincipalId, seal,
+        return global::ManagedCode.Communication.Result<SampleChunkWorkHint?>.Succeed((new SampleChunkWorkHint(partition, set, series, id, state.Generation, state.Revision, state.CreatorPrincipalId, seal,
             SampleChunkJobIdentity.CommandId(partition, set, series, id, state.Generation, state.Revision, seal,
-                principal.PolicyEpoch), principal.PolicyEpoch);
+                principal.PolicyEpoch), principal.PolicyEpoch)));
     }
 
     internal static bool SameOriginal(SampleChunkWorkHint left, SampleChunkWorkHint right)

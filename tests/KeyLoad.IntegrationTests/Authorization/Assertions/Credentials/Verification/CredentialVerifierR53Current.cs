@@ -53,7 +53,7 @@ internal static class CredentialVerifierR53Current
         var refused = await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(state.Second.Scenario.Reference), token);
         await CredentialVerifierR53Refusals.PrivateAsync(System.Text.Json.JsonSerializer.Serialize(refused, JsonDefaults.Options), state, verifier);
-        await McpCallerAssertions.ErrorAsync(refused, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(refused, ErrorCode.PermissionDenied, dispatched: true)).Value;
         var expectedProblem = System.Text.Json.JsonSerializer.SerializeToElement(Errors.Problem(
             ErrorCode.PermissionDenied, CredentialVerifierR53Protocol.ScopeDeniedDetail), JsonDefaults.Options);
         var actualProblem = refused.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error);

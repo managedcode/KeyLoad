@@ -45,7 +45,7 @@ internal static class SubscriptionCachedEmptyPolicyAssertions
     private static async Task DetailAsync(global::ModelContextProtocol.Protocol.CallToolResult reply,
         string expected)
     {
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, true)).Value;
         var envelope = reply.StructuredContent ?? throw new InvalidOperationException("The original policy refusal envelope is absent.");
         var detail = expected == ScopeDenied ? ScopeDenied : expected == EpochChanged ? McpEpochDenied
             : throw new InvalidOperationException("The policy refusal oracle is not an admitted literal.");

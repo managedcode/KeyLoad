@@ -48,8 +48,8 @@ internal static class SampleRetentionClusterMutationAssertions
         var expired = AppendCommand(scenario, "new-expired-id", TimeSeriesClusterScenario.Start, 9);
         await AssertProblemAsync(await fixture.Client(TimeSeriesClusterScenario.Node1)
             .CommitAsync(expired, cancellationToken), ErrorCode.HistoryUnavailable);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            expired, cancellationToken), ErrorCode.HistoryUnavailable, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            expired, cancellationToken), ErrorCode.HistoryUnavailable, dispatched: true)).Value;
         await AppendAtFloorAsync(fixture, mcp, scenario, cutoff, cancellationToken);
     }
 
@@ -58,16 +58,16 @@ internal static class SampleRetentionClusterMutationAssertions
     {
         var command = ExpireCommand(scenario, cutoff);
         await AssertProblemAsync(await reader.CommitAsync(command, cancellationToken), ErrorCode.PermissionDenied);
-        await McpCallerAssertions.ErrorAsync(await readerMcp.CallAsync(McpCallerTools.DocumentsCommit,
-            command, cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await readerMcp.CallAsync(McpCallerTools.DocumentsCommit,
+            command, cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     private static async Task VerifyReadDeniedAsync(KeyLoadClient manager, McpOfficialClient managerMcp,
         ReadSampleRetentionRequest request, CancellationToken cancellationToken)
     {
         await AssertProblemAsync(await manager.ReadSampleRetentionAsync(request, cancellationToken), ErrorCode.PermissionDenied);
-        await McpCallerAssertions.ErrorAsync(await managerMcp.CallAsync(McpCallerTools.SeriesRetention,
-            request, cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await managerMcp.CallAsync(McpCallerTools.SeriesRetention,
+            request, cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     private static async Task AppendAtFloorAsync(ClusterFixture fixture, McpOfficialClient mcp,

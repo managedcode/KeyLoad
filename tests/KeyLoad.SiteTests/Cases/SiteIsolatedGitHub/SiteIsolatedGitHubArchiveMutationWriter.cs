@@ -27,7 +27,7 @@ internal static class SiteIsolatedGitHubArchiveMutationWriter
         }
 
         await CopyAsync(original, first, token);
-        var path = ExtraPath(mutation);
+        var path = (ExtraPath(mutation)).Value;
         if (path is not null)
         {
             var extra = archive.CreateEntry(path, CompressionLevel.NoCompression);
@@ -35,13 +35,13 @@ internal static class SiteIsolatedGitHubArchiveMutationWriter
         }
     }
 
-    private static string? ExtraPath(SiteIsolatedGitHubArchiveMutation mutation) => mutation switch
+    private static global::ManagedCode.Communication.Result<string?> ExtraPath(SiteIsolatedGitHubArchiveMutation mutation) => mutation switch
     {
-        SiteIsolatedGitHubArchiveMutation.Traversal => SiteIsolatedGitHubFields.Traversal,
-        SiteIsolatedGitHubArchiveMutation.Unexpected => SiteIsolatedGitHubFields.Unexpected,
-        SiteIsolatedGitHubArchiveMutation.Duplicate => SiteIsolatedGitHubTokens.Manifest,
-        SiteIsolatedGitHubArchiveMutation.CaseDuplicate => SiteIsolatedGitHubFields.CaseDuplicate,
-        _ => null,
+        SiteIsolatedGitHubArchiveMutation.Traversal => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(SiteIsolatedGitHubFields.Traversal))),
+        SiteIsolatedGitHubArchiveMutation.Unexpected => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(SiteIsolatedGitHubFields.Unexpected))),
+        SiteIsolatedGitHubArchiveMutation.Duplicate => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(SiteIsolatedGitHubTokens.Manifest))),
+        SiteIsolatedGitHubArchiveMutation.CaseDuplicate => global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(SiteIsolatedGitHubFields.CaseDuplicate))),
+        _ => global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ExtraPath))
     };
 
     private static async Task CopyAsync(ZipArchiveEntry original, ZipArchiveEntry target, CancellationToken token)

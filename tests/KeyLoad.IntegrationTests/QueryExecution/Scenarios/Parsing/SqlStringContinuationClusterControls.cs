@@ -51,8 +51,8 @@ internal static class SqlStringContinuationClusterControls
             await global::TUnit.Assertions.Assert.That(result.Value.ValueKind)
                 .IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(
-                await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true);
+            _ = (await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(
+                await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true)).Value;
             await PostgresClusterAssertions.ErrorAsync(wire.ExecuteAsync<QueryPage>(sql, [], prepared: true, token),
                 code == ErrorCode.Validation ? SqlNullOrderingClusterProtocol.ValidationSqlState
                     : PostgresClusterProtocol.UnsupportedSqlState, code);

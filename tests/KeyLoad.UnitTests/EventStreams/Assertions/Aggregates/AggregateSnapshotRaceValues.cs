@@ -63,12 +63,12 @@ internal static class AggregateSnapshotRaceValues
                 var actual = fixture.Database.Apply(original.Operation);
                 if (fenced)
                 {
-                    await EqualAsync(Errors.Code(actual.Problem), ErrorCode.PermissionDenied);
+                    await EqualAsync(Errors.Code(actual.Problem).Value, ErrorCode.PermissionDenied);
                     await Assert.That(actual.Problem?.Detail).IsEqualTo(rawInputDenied ? CompleteReplayInputDenied : ChangedPrincipalPolicyDenied);
 
                     await Assert.That(actual.Value).IsNull();
                 }
-                else if (Errors.Code(original.Result.Problem) is null)
+                else if (Errors.Code(original.Result.Problem).Value is null)
                 {
                     await ReplayResultAssertions.Same<CommitReceipt>(actual, original.Result);
                 }

@@ -16,7 +16,7 @@ internal sealed class RelationalResourceTests
         using var database = new TestDatabase();
         RelationalTestData.Configure(database);
         var row = RelationalTestData.Row().Replace(EmptyKey, string.Empty, StringComparison.Ordinal);
-        await Assert.That(Errors.Code(RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, row)).Problem))
+        await Assert.That(Errors.Code(RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.First, row)).Problem).Value)
             .IsEqualTo(ErrorCode.Validation);
     }
 
@@ -36,6 +36,6 @@ internal sealed class RelationalResourceTests
         second = second[..^1] + NullNote;
         database.Commit(new PutDocument(RelationalTestData.Table, RelationalTestData.First, first));
         var result = RelationalTestData.Submit(database, new PutDocument(RelationalTestData.Table, RelationalTestData.Second, second));
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(includeNull ? ErrorCode.Conflict : (ErrorCode?)null);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(includeNull ? ErrorCode.Conflict : (ErrorCode?)null);
     }
 }

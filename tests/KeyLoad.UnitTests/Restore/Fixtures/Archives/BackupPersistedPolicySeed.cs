@@ -48,16 +48,16 @@ internal static class BackupPersistedPolicySeed
         var resource = Resource(fixture.Partition);
         var creation = Create(database, OperationKind.ConfigureResource,
             new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, resource), Guid.NewGuid());
-        await Assert.That(Errors.Code(fixture.Source.SubmitIssuedEmbedded(creation, token).Problem)).IsNull();
+        await Assert.That(Errors.Code(fixture.Source.SubmitIssuedEmbedded(creation, token).Problem).Value).IsNull();
         await Assert.That(Errors.Code(Send(database, OperationKind.ConfigurePrincipal,
-            new ConfigurePrincipalRequest(Principal(fixture.Partition, false)), token).Problem)).IsNull();
+            new ConfigurePrincipalRequest(Principal(fixture.Partition, false)), token).Problem).Value).IsNull();
         await Assert.That(Send(database, OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(LiveKey), token).Get<bool>()).IsTrue();
         await Assert.That(Send(database, OperationKind.ConfigureApiKey, new ConfigureApiKeyRequest(RevokedKey), token).Get<bool>()).IsTrue();
         var id = Guid.NewGuid();
         var operation = Create(database, OperationKind.Batch, new CommandRequest(id, fixture.Partition,
             [new PutDocument(Collection, DocumentId, Json)]), id);
         var result = database.ApplyEmbedded(operation, token);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await BackupPersistedPolicyAssertions.ReceiptAsync(database, fixture.Partition, id, result.Get<CommitReceipt>());
         await BackupPersistedPolicyAssertions.CurrentAsync(fixture, database, false, token);
         await BackupPersistedPolicyAssertions.ReplayAsync(database, operation, result, token);

@@ -57,8 +57,8 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var password = await PostgresFrameReader.ReadAsync(context.Transport.Input, false,
-                Options.MaximumStartupBytes, admission, token);
+            using var password = (await PostgresFrameReader.ReadAsync(context.Transport.Input, false,
+                Options.MaximumStartupBytes, admission, token)).Value;
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 if (password?.Type != PostgresMessageProtocol.Password)

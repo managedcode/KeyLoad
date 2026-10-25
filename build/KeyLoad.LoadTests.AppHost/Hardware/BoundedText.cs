@@ -2,7 +2,7 @@ namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal static class BoundedText
 {
-    internal static async Task<string?> ReadAsync(string path, int maximum, ScaleServerResourceSampleBudget budget, CancellationToken token)
+    internal static async Task<global::ManagedCode.Communication.Result<string?>> ReadAsync(string path, int maximum, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int BoundaryValue = 1;
 
@@ -13,15 +13,15 @@ internal static class BoundedText
             var limit = Math.Min(maximum, budget.Remaining);
             if (limit < BoundaryValue || !stream.CanSeek || stream.Length > limit)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadAsync));
             }
 
-            return await ReadStreamAsync(stream, limit, budget, token);
+            return ((string?)((await ReadStreamAsync(stream, limit, budget, token)).Value)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadAsync));
         }
-        catch (IOException) { return null; }
-        catch (UnauthorizedAccessException) { return null; }
+        catch (IOException) { return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadAsync)); }
+        catch (UnauthorizedAccessException) { return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadAsync)); }
     }
-    private static async Task<string?> ReadStreamAsync(FileStream stream, int limit,
+    private static async Task<global::ManagedCode.Communication.Result<string?>> ReadStreamAsync(FileStream stream, int limit,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int TotalInitialValue = 0;
@@ -35,22 +35,22 @@ internal static class BoundedText
             {
                 if (stream.Length != total)
                 {
-                    return null;
+                    return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadStreamAsync));
                 }
 
                 budget.Charge(total);
-                return System.Text.Encoding.UTF8.GetString(buffer, IndexValue, total);
+                return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(System.Text.Encoding.UTF8.GetString(buffer, IndexValue, total))));
             }
             var count = await stream.ReadAsync(buffer.AsMemory(total, buffer.Length - total), token);
             if (count == EmptyValue)
             {
                 budget.Charge(total);
-                return System.Text.Encoding.UTF8.GetString(buffer, IndexValue, total);
+                return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(System.Text.Encoding.UTF8.GetString(buffer, IndexValue, total))));
             }
             total += count;
             if (total > limit)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadStreamAsync));
             }
         }
     }

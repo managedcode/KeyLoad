@@ -68,7 +68,7 @@ internal sealed class DatabaseCompositionReplayTests
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.NotFound);
         await Assert.That(db.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(Principal))!.PolicyEpoch))
             .IsEqualTo(epoch);
-        await Assert.That(Errors.Code(db.Database.ResolveOutcome(operation).Problem)).IsEqualTo(ErrorCode.NotFound);
+        await Assert.That(Errors.Code(db.Database.ResolveOutcome(operation).Problem).Value).IsEqualTo(ErrorCode.NotFound);
     }
 
     [Test]
@@ -139,7 +139,7 @@ internal sealed class DatabaseCompositionReplayTests
         var request = new ProcessingRequest(id, new(db.Partition, Queue), "invalid-lease", "handler", 1,
             [new QueueToGraph(Graph, Queue, Prefix)]);
         var rejected = db.Submit(OperationKind.Processing, request, id: id);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.UnsupportedCapability);
     }
 
     [Test]

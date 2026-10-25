@@ -89,8 +89,8 @@ internal static class LiveTailClusterAssertions
         await Assert.That(sdk.IsSuccess).IsFalse();
         await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(expected.ToString());
         await Assert.That(sdk.Value).IsNull();
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(FeedLiveClusterProtocol.LiveRead, request, token),
-            expected, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(FeedLiveClusterProtocol.LiveRead, request, token),
+            expected, dispatched: true)).Value;
         await LivePageClusterAssertions.DeniedSqlAsync(reader,
             SqlClusterProtocol.Call(request.Query.Partition, FeedLiveClusterProtocol.LiveRead, request), expected, token);
     }

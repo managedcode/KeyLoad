@@ -40,7 +40,7 @@ internal static class SqlParserAdmissionClusterRefusals
     }
     private static async Task McpAsync(CallToolResult reply, string credential, ErrorCode code, bool dispatched)
     {
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched)).Value;
         var detail = code == ErrorCode.PermissionDenied ? "The principal cannot perform this operation in this scope."
             : "The database operation could not be completed.";
         await Assert.That(JsonElement.DeepEquals(JsonSerializer.SerializeToElement(Errors.Problem(code, detail), JsonDefaults.Options),

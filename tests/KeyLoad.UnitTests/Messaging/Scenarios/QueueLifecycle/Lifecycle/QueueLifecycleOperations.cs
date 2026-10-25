@@ -35,7 +35,7 @@ internal static class QueueLifecycleOperations
         foreach (var (operation, result) in state.Failures)
         {
             var actual = state.SubmitOriginal(database, operation);
-            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(result.Problem));
+            await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(result.Problem).Value);
             await Assert.That(actual.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
             await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
                 .SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
@@ -73,7 +73,7 @@ internal static class QueueLifecycleOperations
     {
         await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(expected.Problem).Value);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(bool));
         await Assert.That(expected.Value?.GetType()).IsEqualTo(typeof(bool));

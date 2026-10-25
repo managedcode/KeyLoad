@@ -70,20 +70,20 @@ internal static class OutcomeStoreOracle
         {
             var partition = operation.Value!.Kind switch
             {
-                OperationKind.Batch => Partition<CommandRequest>(operation, static request => request.Partition),
-                OperationKind.Receive => Partition<ReceiveRequest>(operation, static request => request.Lane?.Partition),
-                OperationKind.Delivery => Partition<DeliveryCommand>(operation, static request => request.Lane?.Partition),
-                OperationKind.Processing => Partition<ProcessingRequest>(operation, static request => request.Lane?.Partition),
-                OperationKind.PurgeOutbox => Partition<PurgeOutboxRequest>(operation, static request => request.Partition),
-                OperationKind.ConfigureSubscription => Partition<ConfigureSubscriptionRequest>(operation, static request => request.Subscription?.Source?.Partition),
-                OperationKind.SeekSubscription => Partition<SeekSubscriptionRequest>(operation, static request => request.Subscription?.Source?.Partition),
-                OperationKind.ReceiveSubscription => Partition<ReceiveSubscriptionRequest>(operation, static request => request.Subscription?.Source?.Partition),
-                OperationKind.SubscriptionDelivery => Partition<SubscriptionDeliveryCommand>(operation, static request => request.Subscription?.Source?.Partition),
-                OperationKind.SubscriptionProcessing => Partition<SubscriptionProcessingRequest>(operation, static request => request.Subscription?.Source?.Partition),
-                OperationKind.SetSubscriptionPaused => Partition<SetSubscriptionPausedRequest>(operation, static request => request.Subscription?.Source?.Partition),
-                OperationKind.ConfigureProjectionConsumer => Partition<ConfigureProjectionConsumerRequest>(operation, static request => request.Consumer?.Partition),
-                OperationKind.CommitProjectionBatch => Partition<CommitProjectionBatchRequest>(operation, static request => request.Consumer?.Partition),
-                OperationKind.ReleaseProjectionConsumer => Partition<ReleaseProjectionConsumerRequest>(operation, static request => request.Consumer?.Partition),
+                OperationKind.Batch => (Partition<CommandRequest>(operation, static request => request.Partition)).Value,
+                OperationKind.Receive => (Partition<ReceiveRequest>(operation, static request => request.Lane?.Partition)).Value,
+                OperationKind.Delivery => (Partition<DeliveryCommand>(operation, static request => request.Lane?.Partition)).Value,
+                OperationKind.Processing => (Partition<ProcessingRequest>(operation, static request => request.Lane?.Partition)).Value,
+                OperationKind.PurgeOutbox => (Partition<PurgeOutboxRequest>(operation, static request => request.Partition)).Value,
+                OperationKind.ConfigureSubscription => (Partition<ConfigureSubscriptionRequest>(operation, static request => request.Subscription?.Source?.Partition)).Value,
+                OperationKind.SeekSubscription => (Partition<SeekSubscriptionRequest>(operation, static request => request.Subscription?.Source?.Partition)).Value,
+                OperationKind.ReceiveSubscription => (Partition<ReceiveSubscriptionRequest>(operation, static request => request.Subscription?.Source?.Partition)).Value,
+                OperationKind.SubscriptionDelivery => (Partition<SubscriptionDeliveryCommand>(operation, static request => request.Subscription?.Source?.Partition)).Value,
+                OperationKind.SubscriptionProcessing => (Partition<SubscriptionProcessingRequest>(operation, static request => request.Subscription?.Source?.Partition)).Value,
+                OperationKind.SetSubscriptionPaused => (Partition<SetSubscriptionPausedRequest>(operation, static request => request.Subscription?.Source?.Partition)).Value,
+                OperationKind.ConfigureProjectionConsumer => (Partition<ConfigureProjectionConsumerRequest>(operation, static request => request.Consumer?.Partition)).Value,
+                OperationKind.CommitProjectionBatch => (Partition<CommitProjectionBatchRequest>(operation, static request => request.Consumer?.Partition)).Value,
+                OperationKind.ReleaseProjectionConsumer => (Partition<ReleaseProjectionConsumerRequest>(operation, static request => request.Consumer?.Partition)).Value,
                 _ => null
             };
             if (Valid(partition))
@@ -120,11 +120,11 @@ internal static class OutcomeStoreOracle
         return true;
     }
 
-    private static PartitionRef? Partition<T>(Command<DatabaseCommand> operation, Func<T, PartitionRef?> select)
+    private static global::ManagedCode.Communication.Result<PartitionRef?> Partition<T>(Command<DatabaseCommand> operation, Func<T, PartitionRef?> select)
         where T : class
     {
         var request = OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
-        return request is null ? null : select(request);
+        return request is null ? global::ManagedCode.Communication.Result<PartitionRef?>.FailNotFound(nameof(Partition)) : ((PartitionRef?)(select(request))) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<PartitionRef?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<PartitionRef?>.FailNotFound(nameof(Partition));
     }
 
     private static bool IsNonNull<T>(Command<DatabaseCommand> operation) where T : class

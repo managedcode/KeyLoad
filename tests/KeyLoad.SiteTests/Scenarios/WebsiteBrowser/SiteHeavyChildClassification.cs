@@ -5,11 +5,11 @@ namespace KeyLoad.SiteTests.BenchmarkComparisons;
 internal static class SiteHeavyChildClassification
 {
     internal static bool IsProjection(JsonElement request) =>
-        ReadOperation(request) == SiteHeavyChildTokens.Produce;
+        (ReadOperation(request)).Value == SiteHeavyChildTokens.Produce;
 
     internal static bool IsArchive(JsonElement request)
     {
-        var operation = ReadOperation(request);
+        var operation = (ReadOperation(request)).Value;
         if (operation == SiteIsolatedGitHubFields.InputsOperation)
         {
             return true;
@@ -22,7 +22,7 @@ internal static class SiteHeavyChildClassification
             arguments[SiteTokens.Zero].GetString() == SiteIsolatedGitHubFields.VerifyInputs;
     }
 
-    private static string? ReadOperation(JsonElement request) =>
+    private static global::ManagedCode.Communication.Result<string?> ReadOperation(JsonElement request) =>
         request.ValueKind == JsonValueKind.Object && request.TryGetProperty(SiteHeavyChildTokens.Operation, out var operation) && operation.ValueKind == JsonValueKind.String
-            ? operation.GetString() : null;
+            ? ((string?)(operation.GetString())) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadOperation)) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadOperation));
 }

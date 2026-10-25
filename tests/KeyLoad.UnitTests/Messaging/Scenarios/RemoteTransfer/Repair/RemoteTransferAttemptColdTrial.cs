@@ -28,7 +28,7 @@ internal static class RemoteTransferAttemptColdTrial
         var sourceCapacity = fixture.SourceCapacity(fixture.SourceQueue);
         var targetCapacity = fixture.TargetCapacity(fixture.DestinationQueue);
         var failed = fixture.Apply(OperationKind.Batch, accept);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
 
         await Assert.That(failed.Value).IsNull();
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.SourceCapacity(fixture.SourceQueue), sourceCapacity);

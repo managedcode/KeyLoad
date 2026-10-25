@@ -187,7 +187,7 @@ internal sealed class ScaleServerResourceEvidenceCollector(
     private ScaleServerObservationSnapshot CaptureSnapshot()
     {
         const int EmptyValue = 0;
-        var records = _samplers.Select(sampler => sampler.ToRecord()).Where(record => record is not null)
+        var records = _samplers.Select(sampler => (sampler.ToRecord()).Value).Where(record => record is not null)
             .Select(record => record!).ToArray();
         if (records.Length != selection.NodeCount
             || records.Select(record => record.ContainerId).Distinct(StringComparer.Ordinal).Count() != records.Length

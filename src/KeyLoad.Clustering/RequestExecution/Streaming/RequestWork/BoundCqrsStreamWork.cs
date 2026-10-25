@@ -86,7 +86,7 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
             settled, null).ConfigureAwait(true);
         cleanup = DisposeCancellation(cleanup);
         var original = originalPrimary ?? originalPurpose?.OriginalFailure ?? admissionFailure;
-        var preparation = await PrepareAsync().ConfigureAwait(true);
+        var preparation = (await PrepareAsync().ConfigureAwait(true)).Value;
         cleanup = RequestWorkSettlement.Preserve(cleanup, preparation);
         if (preparation is not null)
         {
@@ -125,7 +125,7 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
         return Dispose(deadline, cleanup);
     }
 
-    private async Task<Exception?> PrepareAsync()
+    private async Task<global::ManagedCode.Communication.Result<Exception?>> PrepareAsync()
     {
         try
         {
@@ -133,15 +133,15 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
             {
                 await lease.PrepareCompletionAsync().ConfigureAwait(true);
             }
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(PrepareAsync));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
     }
 

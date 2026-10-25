@@ -16,7 +16,7 @@ internal static class EventByteBoundPublicRefusals
             EventByteBoundPublicExpected.BytesDetail), result.Problem);
         await EventByteBoundPublicCurrent.ObserveAsync(admin, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.StreamsRead, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Reader.Secret, McpEventStreamTokens.PrivateMarker);
         await EventByteBoundPublicCurrent.ObserveAsync(admin, state, token);
     }

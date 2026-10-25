@@ -106,11 +106,11 @@ internal static class FunctionalGateTopicExercise
         }, token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await ctx.Reader.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command with
+        _ = (await McpCallerAssertions.ErrorAsync(await ctx.Reader.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command with
         {
             CommandId = Guid.NewGuid()
         }, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
         await FunctionalGateQueues.EqualAsync(before, await ctx.SdkAsync(ctx.Writer.Sdk.SubscriptionStatusAsync(subscription, token)));
     }
 }

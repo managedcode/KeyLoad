@@ -32,7 +32,7 @@ internal sealed class TextProjectionState
             {
                 throw TextErrors.Busy();
             }
-            var existing = slots.FindCurrent(scope);
+            var existing = (slots.FindCurrent(scope)).Value;
             if (existing is not null)
             {
                 ReserveLease(existing);
@@ -87,7 +87,7 @@ internal sealed class TextProjectionState
             {
                 slots.ClearStaged(reservation.Slot);
             }
-            var cleanup = preserveOwner ? null : ReserveRetiredCleanup();
+            var cleanup = preserveOwner ? null : (ReserveRetiredCleanup()).Value;
             return cleanup;
         }
     }
@@ -143,7 +143,7 @@ internal sealed class TextProjectionState
                 slot.Unsettled = true;
             }
             slots.CompleteLease(slot, failure);
-            var cleanup = failure is null && work.ActiveLeases == EmptyActiveLeases ? ReserveRetiredCleanup() : null;
+            var cleanup = failure is null && work.ActiveLeases == EmptyActiveLeases ? (ReserveRetiredCleanup()).Value : null;
             return cleanup;
         }
     }
@@ -176,16 +176,16 @@ internal sealed class TextProjectionState
         work.StartLease();
     }
 
-    private TextGenerationSlot? ReserveRetiredCleanup()
+    private global::ManagedCode.Communication.Result<TextGenerationSlot?> ReserveRetiredCleanup()
     {
         const int EmptyActiveLeases = 0;
 
-        if (work.ActiveLeases != EmptyActiveLeases || slots.RetiredCandidate is not { } retired
+        if (work.ActiveLeases != EmptyActiveLeases || slots.RetiredCandidate.Value is not { } retired
             || !slots.BeginRetirement(retired))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<TextGenerationSlot?>.FailNotFound(nameof(ReserveRetiredCleanup));
         }
         work.StartCleanup();
-        return retired;
+        return global::ManagedCode.Communication.Result<TextGenerationSlot?>.Succeed(((TextGenerationSlot?)(retired)));
     }
 }

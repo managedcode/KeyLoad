@@ -13,7 +13,7 @@ internal static class TextBm25EligibilityTrial
         var noise = Mutation(flow, new PutDocument("orders", "noise", "{\"text\":\"quiet\"}"));
         var original = flow.Capture(null);
         var receipt = flow.Publish(original);
-        await Assert.That(Errors.Code(receipt.Problem)).IsNull();
+        await Assert.That(Errors.Code(receipt.Problem).Value).IsNull();
         var entry = OrleansSerialization.Serialize(flow.Owner.Entry(original.CommandId));
         var head = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span).Current;
         var raw = Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head);
@@ -43,7 +43,7 @@ internal static class TextBm25EligibilityTrial
             owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(
                 new CommandRequest(id, owner.Source.Partition, [mutation])));
         var result = owner.Submit(operation);
-        if (Errors.Code(result.Problem) is not null)
+        if (Errors.Code(result.Problem).Value is not null)
         {
             throw new InvalidOperationException("The genuine canonical mutation was not admitted.");
         }

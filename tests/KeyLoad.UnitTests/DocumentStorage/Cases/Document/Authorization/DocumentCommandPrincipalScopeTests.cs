@@ -64,8 +64,8 @@ internal sealed class DocumentCommandPrincipalScopeTests
                 Mutations = [new PutDocument(Collection, SecondDocument, ChangedSecondJson, 1)]
             },
             SecondPrincipal, commandId);
-        await Assert.That(Errors.Code(firstConflict.Problem)).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(Errors.Code(secondConflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(firstConflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(secondConflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(DocumentCommandOutcomeTestSupport.OutcomeBytes(database, FirstPrincipal, commandId)
             .AsSpan().SequenceEqual(firstOutcomeBytes)).IsTrue();
         await Assert.That(DocumentCommandOutcomeTestSupport.OutcomeBytes(database, SecondPrincipal, commandId)

@@ -24,9 +24,9 @@ internal static class AnalyticsBoundCoreRefusals
     internal static Task ResultBytesAsync(CancellationToken token)
         => AnalyticsBoundCoreOwner.RunAsync(async (fixture, owner, original) =>
         {
-            var lifetime = fixture.Store.Read(view => KeyLoad.Core.ResourceExecution.ResourceLifetimeCatalog.Read(view,
+            var lifetime = fixture.Store.Read(view => (KeyLoad.Core.ResourceExecution.ResourceLifetimeCatalog.Read(view,
                 fixture.Partition.TenantId, fixture.Partition.DatabaseId, D.Store,
-                fixture.Database.Resource(view, fixture.Partition, D.Store)))
+                fixture.Database.Resource(view, fixture.Partition, D.Store))).Value)
                 ?? throw new InvalidOperationException("The actual analytics lifetime is absent.");
             await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
                 await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>

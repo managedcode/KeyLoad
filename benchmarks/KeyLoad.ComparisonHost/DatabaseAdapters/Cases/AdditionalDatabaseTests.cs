@@ -28,7 +28,7 @@ internal sealed class AdditionalDatabaseTests
         await using var session = await documents.OpenDocumentSessionAsync(token);
         await using var independent = await documents.OpenDocumentSessionAsync(token);
         await Assert.That(session.ClientIdentity).IsNotEqualTo(independent.ClientIdentity);
-        await Assert.That(await session.ReadAsync(corpus.CreateDocument(First), token)).IsNull();
+        await Assert.That((await session.ReadAsync(corpus.CreateDocument(First), token)).Value).IsNull();
         for (var index = First; index < InitialCount; index++)
         {
             await session.ExecuteAsync(Scenario.DocumentWrite, corpus.CreateDocument(index), token);
@@ -50,14 +50,14 @@ internal sealed class AdditionalDatabaseTests
         {
             await queries.BuildSessionIndexesAsync(token);
             await session.ExecuteAsync(Scenario.DocumentDelete, corpus.CreateDocument(Deleted), token);
-            await Assert.That(await independent.ReadAsync(corpus.CreateDocument(Deleted), token)).IsNull();
+            await Assert.That((await independent.ReadAsync(corpus.CreateDocument(Deleted), token)).Value).IsNull();
         }
         await queries.QuerySessionAsync(First, Stable, Single, token);
         await VerifyReadbackAsync(session, corpus, target.Supports(Scenario.DocumentDelete), token);
     }
 
     private static async Task AssertDocumentAsync(IDocumentComparisonSession session, BenchmarkDocument expected, CancellationToken token)
-        => await Assert.That(BenchmarkDataset.SameDocument(await session.ReadAsync(expected, token), expected)).IsTrue();
+        => await Assert.That(BenchmarkDataset.SameDocument((await session.ReadAsync(expected, token)).Value, expected)).IsTrue();
 
     private static async Task VerifyReadbackAsync(IDocumentComparisonSession session, DocumentComparisonCorpus corpus,
         bool deleted, CancellationToken token)

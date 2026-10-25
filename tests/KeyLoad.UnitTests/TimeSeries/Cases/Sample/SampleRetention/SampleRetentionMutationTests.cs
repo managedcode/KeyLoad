@@ -69,8 +69,8 @@ internal sealed class SampleRetentionMutationTests
         var deniedStatus = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadSampleRetention("series-manager",
             new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)));
 
-        await Assert.That(Errors.Code(accepted.Problem)).IsNull();
-        await Assert.That(Errors.Code(forbidden.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(accepted.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(forbidden.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(status.Before).IsEqualTo(cutoff);
         await Assert.That(deniedStatus.Code).IsEqualTo(ErrorCode.PermissionDenied);
     }

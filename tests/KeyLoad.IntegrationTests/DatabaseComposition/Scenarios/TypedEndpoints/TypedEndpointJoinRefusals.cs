@@ -72,8 +72,8 @@ internal static class TypedEndpointJoinRefusals
             await Assert.That(result.IsFailed).IsTrue();
             await Assert.That(result.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
             await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
-                expected, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
+                expected, dispatched: true)).Value;
         }
         else
         {
@@ -81,8 +81,8 @@ internal static class TypedEndpointJoinRefusals
             await Assert.That(result.IsFailed).IsTrue();
             await Assert.That(result.Value).IsNull();
             await Assert.That(result.Problem!.ErrorCode).IsEqualTo(expected.ToString());
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token),
-                expected, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token),
+                expected, dispatched: true)).Value;
         }
     }
 

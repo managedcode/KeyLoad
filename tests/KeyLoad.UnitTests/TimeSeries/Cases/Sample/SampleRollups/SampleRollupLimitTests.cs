@@ -25,7 +25,7 @@ internal sealed class SampleRollupLimitTests
             UntilExclusive = SampleRollupWholeFlow.End.AddMinutes(1)
         };
         var failure = Apply(engine, db.Partition, request);
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(Errors.Code(failure.Problem).Value).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(failure.Problem?.Detail).IsEqualTo(SampleRollupProtocol.BucketBudget);
         await Assert.That(SampleRollupWholeFlow.Raw(db)).IsEqualTo(raw);
         await Assert.That(SampleRollupWholeFlow.Rollups(db)).IsEqualTo(rollups);

@@ -10,7 +10,7 @@ public static class ChangeFeedsCommands
     {
         var request = OperationProtocol.Payload<ConfigureProjectionConsumerRequest>(operation);
         OperationProtocol.RequireEnvelopeId(operation, request.CommandId);
-        var authority = engine.CaptureProjectionMaintenanceAuthority(transaction, request, operation);
+        var authority = (engine.CaptureProjectionMaintenanceAuthority(transaction, request, operation)).Value;
         return OperationProtocol.Result(engine.ConfigureProjectionConsumer(transaction, request, authority));
     }
 

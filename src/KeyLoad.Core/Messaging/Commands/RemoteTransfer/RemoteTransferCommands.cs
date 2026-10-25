@@ -45,8 +45,8 @@ public static class RemoteTransferCommands
         var reservationBytes = engine.ReceiptReservationBytes(tx, request.SourceQueue, request.TransferId, request.Destination, principal.Id, fingerprint);
         var record = new RemoteTransferIntentRecord(request.SourceQueue, request.TransferId, request.Destination, principal.Id, request.Message, fingerprint, QueueTransferState.OutputPending, intentToken, null, reservationBytes)
         {
-            Attempts = RemoteTransferAttemptStateValidation.Initial(engine.Limits.MaxQueueTransferAcceptAttempts),
-            Repairs = RemoteTransferRepairStateValidation.Initial(engine.Limits.MaxQueueTransferRepairAttempts)
+            Attempts = (RemoteTransferAttemptStateValidation.Initial(engine.Limits.MaxQueueTransferAcceptAttempts)).Value,
+            Repairs = (RemoteTransferRepairStateValidation.Initial(engine.Limits.MaxQueueTransferRepairAttempts)).Value
         };
         var recordBytes = RemoteTransferStorage.SourceAccountedBytes(record);
         var capacity = RemoteTransferStorage.SourceCapacity(tx, request.SourceQueue);

@@ -25,7 +25,7 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
         var commandId = Guid.NewGuid();
         var successful = calibration.Batch(AtomicPartitionRosterFixture.Source, commandId,
             new PutDocument(AtomicPartitionRosterFixture.Collection, DocumentId, documentJson));
-        await Assert.That(Errors.Code(successful.Problem)).IsNull();
+        await Assert.That(Errors.Code(successful.Problem).Value).IsNull();
         var mutations = ReadLatestMutations(calibration.JournalPath);
         var rosterKey = AtomicPartitionRosterKeys.Partition(AtomicPartitionRosterFixture.Source);
         await Assert.That(mutations.Count(mutation => mutation.Key.Span.SequenceEqual(rosterKey))).IsEqualTo(1);
@@ -40,8 +40,8 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
             new PutDocument(AtomicPartitionRosterFixture.Collection, DocumentId, documentJson));
         var persistedOutcome = bounded.Store.Read(view => view.GetRecord<StoredOutcome>(
             KeySpace.PartitionOutcome(AtomicPartitionRosterFixture.Source, RootPrincipalId, commandId)));
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
-        await Assert.That(Errors.Code(persistedOutcome?.Result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(persistedOutcome?.Result.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(bounded.ReadEntry(AtomicPartitionRosterFixture.Source)).IsNotNull();
         await Assert.That(bounded.Database.GetDocument(RootPrincipalId, new(AtomicPartitionRosterFixture.Source,
             AtomicPartitionRosterFixture.Collection, DocumentId))).IsNull();
@@ -49,7 +49,7 @@ internal sealed class AtomicPartitionRosterFrameBudgetTests
         bounded.Reopen();
         var replay = bounded.Batch(AtomicPartitionRosterFixture.Source, commandId,
             new PutDocument(AtomicPartitionRosterFixture.Collection, DocumentId, documentJson));
-        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(bounded.ReadEntry(AtomicPartitionRosterFixture.Source)).IsNotNull();
         await Assert.That(bounded.Database.GetDocument(RootPrincipalId, new(AtomicPartitionRosterFixture.Source,
             AtomicPartitionRosterFixture.Collection, DocumentId))).IsNull();

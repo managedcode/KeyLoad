@@ -60,7 +60,7 @@ internal static class CanonicalOutcomeReadBudgetAssertions
         await Assert.That(outcome.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
         await Assert.That(outcome.Partition).IsEqualTo(fixture.Partition);
         await Assert.That(outcome.Incarnation).IsEqualTo(fixture.Incarnation);
-        await Assert.That(Errors.Code(outcome.Result.Problem)).IsNull();
+        await Assert.That(Errors.Code(outcome.Result.Problem).Value).IsNull();
         await Assert.That(OrleansSerialization.Serialize(outcome).SequenceEqual(OrleansSerialization.Serialize(expected.Outcome))).IsTrue();
         var receipt = outcome.Result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(fixture.CommandId);

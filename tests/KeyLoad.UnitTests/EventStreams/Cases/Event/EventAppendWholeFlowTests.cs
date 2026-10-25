@@ -23,14 +23,14 @@ internal sealed class EventAppendWholeFlowTests
         })).ToArray();
         start.SetResult();
         var results = await Task.WhenAll(workers).ConfigureAwait(false);
-        var winner = await Assert.That(Enumerable.Range(0, contenders).Where(index => Errors.Code(results[index].Problem) is null)).HasSingleItem();
+        var winner = await Assert.That(Enumerable.Range(0, contenders).Where(index => Errors.Code(results[index].Problem).Value is null)).HasSingleItem();
         var winningEvent = ((AppendEvents)commands[winner].Mutations[^1]).Events.Single();
         await fixture.AssertPageAsync(EventAppendWholeFlowFixture.Data(EventAppendWholeFlowFixture.InitialId), winningEvent);
         for (var index = 0; index < contenders; index++)
         {
             if (index != winner)
             {
-                await Assert.That(Errors.Code(results[index].Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+                await Assert.That(Errors.Code(results[index].Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
                 await Assert.That(results[index].Problem?.Detail).IsEqualTo("The expected stream revision does not match.");
             }
             await fixture.AssertProducerAsync("producer-" + index.ToString(CultureInfo.InvariantCulture), index == winner);
@@ -77,7 +77,7 @@ internal sealed class EventAppendWholeFlowTests
         var command = fixture.Producer("rolled-back-producer", condition, events);
         var before = fixture.DomainBytes();
         var failed = fixture.Submit(command);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(expectedError);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(expectedError);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(expectedDetail);
         await Assert.That(fixture.DomainBytes()).IsEquivalentTo(before, CollectionOrdering.Matching);
         await fixture.AssertProducerAsync("rolled-back-producer", false);

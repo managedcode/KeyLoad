@@ -37,9 +37,9 @@ internal static class McpTransportGuard
         {
             throw InvalidTransport(McpTransportStage.LastEventHeaderPresence);
         }
-        return new(ReadRoutingHeader(headers, McpTransportProtocol.MethodHeader, bounds.MaximumTransportMethodCharacters,
-                McpTransportStage.MethodHeaderShape, McpTransportStage.MethodHeaderEncoding),
-            ReadTargetHeader(headers, bounds.MaximumTransportNameCharacters));
+        return new((ReadRoutingHeader(headers, McpTransportProtocol.MethodHeader, bounds.MaximumTransportMethodCharacters,
+                McpTransportStage.MethodHeaderShape, McpTransportStage.MethodHeaderEncoding)).Value,
+            (ReadTargetHeader(headers, bounds.MaximumTransportNameCharacters)).Value);
     }
 
     /// <summary>Compares bounded hints and version fields without changing business arguments or execution message identity.</summary>
@@ -61,7 +61,7 @@ internal static class McpTransportGuard
         if (!root.TryGetProperty(McpTransportProtocol.Parameters, out var parameters)
             || parameters.ValueKind != JsonValueKind.Object)
         {
-            if (headers.Name is not null && hasMethod && TargetField(method) is not null)
+            if (headers.Name is not null && hasMethod && (TargetField(method)).Value is not null)
             {
                 throw InvalidTransport(McpTransportStage.MissingTarget);
             }
@@ -78,7 +78,7 @@ internal static class McpTransportGuard
         }
     }
 
-    private static string? ReadRoutingHeader(IHeaderDictionary headers, string name, int maximumCharacters,
+    private static global::ManagedCode.Communication.Result<string?> ReadRoutingHeader(IHeaderDictionary headers, string name, int maximumCharacters,
         McpTransportStage shapeStage, McpTransportStage encodingStage)
     {
         const int EmptyValuesCount = 1;
@@ -90,7 +90,7 @@ internal static class McpTransportGuard
 
         if (!headers.TryGetValue(name, out var values))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadRoutingHeader));
         }
         if (values.Count != EmptyValuesCount || values[IndexEmptyCount] is not { } value)
         {
@@ -108,7 +108,7 @@ internal static class McpTransportGuard
                 throw InvalidTransport(encodingStage);
             }
         }
-        return trimmed;
+        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(trimmed)));
     }
 
     private static void CheckRevision(JsonElement fields, string name, McpTransportStage stage)
@@ -120,18 +120,18 @@ internal static class McpTransportGuard
         }
     }
 
-    private static string? ReadTargetHeader(IHeaderDictionary headers, int maximumCharacters)
+    private static global::ManagedCode.Communication.Result<string?> ReadTargetHeader(IHeaderDictionary headers, int maximumCharacters)
     {
         const int EmptyDecodedLength = 0;
         const char TabCharacter = '\t';
         const char SpaceCharacter = ' ';
         const char ReadTargetHeaderCharacterToken = '\u007F';
 
-        var encoded = ReadRoutingHeader(headers, McpTransportProtocol.NameHeader, maximumCharacters,
-            McpTransportStage.NameHeaderShape, McpTransportStage.NameHeaderEncoding);
+        var encoded = (ReadRoutingHeader(headers, McpTransportProtocol.NameHeader, maximumCharacters,
+            McpTransportStage.NameHeaderShape, McpTransportStage.NameHeaderEncoding)).Value;
         if (encoded is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadTargetHeader));
         }
         if (encoded.StartsWith(McpTransportProtocol.EncodedHeaderPrefix, StringComparison.Ordinal)
             && !encoded.EndsWith(McpTransportProtocol.EncodedHeaderSuffix, StringComparison.Ordinal))
@@ -150,12 +150,12 @@ internal static class McpTransportGuard
                 throw InvalidTransport(McpTransportStage.NameHeaderEncoding);
             }
         }
-        return decoded;
+        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(decoded)));
     }
 
     private static void CheckTarget(JsonElement parameters, JsonElement method, string expectedName)
     {
-        var name = TargetField(method);
+        var name = (TargetField(method)).Value;
         if (name is null)
         {
             return;
@@ -170,8 +170,8 @@ internal static class McpTransportGuard
         }
     }
 
-    private static string? TargetField(JsonElement method) => method.ValueEquals(RequestMethods.ResourcesRead) ? McpTransportProtocol.Uri
-        : method.ValueEquals(RequestMethods.ToolsCall) || method.ValueEquals(RequestMethods.PromptsGet) ? McpTransportProtocol.Name : null;
+    private static global::ManagedCode.Communication.Result<string?> TargetField(JsonElement method) => method.ValueEquals(RequestMethods.ResourcesRead) ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(McpTransportProtocol.Uri)))
+        : method.ValueEquals(RequestMethods.ToolsCall) || method.ValueEquals(RequestMethods.PromptsGet) ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(McpTransportProtocol.Name))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(TargetField));
 
     private static KeyLoadException InvalidTransport(McpTransportStage stage)
     {

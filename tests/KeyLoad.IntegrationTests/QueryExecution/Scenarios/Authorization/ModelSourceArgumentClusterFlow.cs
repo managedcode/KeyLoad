@@ -49,8 +49,10 @@ internal static class ModelSourceArgumentClusterFlow
             await ModelSourceArgumentClusterAssertions.PageAsync(
                 await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(healthy, token)), events), token);
         await ModelSourceArgumentClusterAssertions.ObserveAsync(sdk, mcp, scenario, async () =>
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.QueryExecute, refused, token),
-                ErrorCode.UnsupportedCapability, dispatched: true), token);
+        {
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.QueryExecute, refused, token),
+                ErrorCode.UnsupportedCapability, dispatched: true)).Value;
+        }, token);
         await ModelSourceArgumentClusterAssertions.ObserveAsync(sdk, mcp, scenario, async () =>
             await ModelSourceArgumentClusterAssertions.PageAsync((await McpCallerAssertions.SuccessAsync<QueryPage>(
                 await mcp.CallAsync(McpCallerTools.QueryExecute, healthy, token))).Value, events), token);

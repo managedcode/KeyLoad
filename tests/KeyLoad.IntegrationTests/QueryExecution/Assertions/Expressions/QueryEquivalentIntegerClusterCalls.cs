@@ -54,7 +54,7 @@ internal static class QueryEquivalentIntegerClusterCalls
                     : await reader.Mcp.CallAsync(McpCallerTools.QueryAst, route == JsonRoute ? json : builder, token);
                 if (denied)
                 {
-                    await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+                    _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
                     var expected = JsonSerializer.SerializeToElement(Errors.Problem(ErrorCode.PermissionDenied, McpDenied), JsonDefaults.Options);
                     await Assert.That(JsonElement.DeepEquals(expected, reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error))).IsTrue();
                     await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret, MaximumJson);

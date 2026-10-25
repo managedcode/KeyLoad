@@ -44,7 +44,7 @@ internal static class QueueStoredCapacityWholeFlow
     {
         var laneImage = QueueEnqueueColdAssertions.LaneBytes(cold, fixture.Partition);
         var rejected = owner.Apply(state.Enqueue);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(rejected.Value).IsNull();
         await Assert.That(owner.GetDocument(QueueEnqueueColdProtocol.Root, new(fixture.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument), cancellationToken: token)).IsNull();
         await Assert.That(QueueEnqueueColdAssertions.LaneBytes(cold, fixture.Partition)).IsEquivalentTo(laneImage, CollectionOrdering.Matching);

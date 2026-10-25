@@ -27,7 +27,7 @@ internal static partial class QueueLifecyclePublicPhase
         await Assert.That(delivery.DeliveryGeneration).IsEqualTo(QueueLifecyclePublicProtocol.Two);
         var old = new DeliveryCommand(Guid.NewGuid(), state.Lane, state.OriginalPending!.Token, DeliveryAction.Ack);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, dispatched: true)).Value;
         await CompleteAsync(callers, state, delivery, DeliveryAction.Ack, token);
         await QueueLifecyclePublicAssertions.TerminalAsync(callers, state, token);
         await BatchAsync(callers, state, [Enqueue(QueueLifecyclePublicProtocol.Healthy)], token);

@@ -10,35 +10,35 @@ public static class CommandAuthorization
     internal const string MutationCountBudgetMessage = "The mutation count exceeds its budget.";
     internal const string UnsupportedBatchMutationMessage = "This mutation is unsupported.";
     internal const string CompositionBatchRequiredMessage = "Database composition requires a standalone atomic command.";
-    internal static AtomicPartitionPlacementResolution? AuthorizeOperation(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
+    internal static global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?> AuthorizeOperation(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         RuntimeJournalIdentity.RequireOperation(principal, operation.Value!.Kind, operation.Value!.Kind == OperationKind.RuntimeJournal ? OperationProtocol.Payload<RuntimeJournalMutation>(operation) : null);
         if (operation.Value!.Kind == OperationKind.RuntimeJournal)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?>.FailNotFound(nameof(AuthorizeOperation));
         }
 
         if (operation.Value!.Kind is OperationKind.ConfigureSubscription or OperationKind.SeekSubscription or OperationKind.SetSubscriptionPaused or OperationKind.ReceiveSubscription or OperationKind.SubscriptionDelivery or OperationKind.SubscriptionProcessing)
         {
             engine.AuthorizeSubscriptionOperation(view, principal, operation);
-            return null;
+            return global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?>.FailNotFound(nameof(AuthorizeOperation));
         }
 
-        return engine.AuthorizeModelOperation(view, principal, operation);
+        return ((AtomicPartitionPlacementResolution?)((engine.AuthorizeModelOperation(view, principal, operation)).Value)) is { } outcomeValue3 ? global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?>.Succeed(outcomeValue3) : global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?>.FailNotFound(nameof(AuthorizeOperation));
     }
 
-    internal static AtomicPartitionPlacementResolution? AuthorizeModelOperation(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
+    internal static global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?> AuthorizeModelOperation(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         switch (operation.Value!.Kind)
         {
             case OperationKind.Bm25CorpusPublicationPhase:
                 engine.AuthorizeBm25CorpusPublication(view, principal, operation);
-                return null;
+                return global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?>.FailNotFound(nameof(AuthorizeModelOperation));
             case OperationKind.FileMetadata:
                 engine.AuthorizeFileMetadata(view, principal, OperationProtocol.Payload<global::KeyLoad.Core.BlobStorage.FileMetadataMutation>(operation));
-                return null;
+                return global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?>.FailNotFound(nameof(AuthorizeModelOperation));
             case OperationKind.Batch:
-                return engine.AuthorizeBatch(view, principal, OperationProtocol.Payload<CommandRequest>(operation));
+                return global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?>.Succeed(((AtomicPartitionPlacementResolution?)(engine.AuthorizeBatch(view, principal, OperationProtocol.Payload<CommandRequest>(operation)))));
             case OperationKind.Receive:
                 engine.AuthorizeQueueReceiveOperation(view, principal, OperationProtocol.Payload<ReceiveRequest>(operation));
                 break;
@@ -64,7 +64,7 @@ public static class CommandAuthorization
                 break;
         }
 
-        return null;
+        return global::ManagedCode.Communication.Result<AtomicPartitionPlacementResolution?>.FailNotFound(nameof(AuthorizeModelOperation));
     }
 
     internal static void AuthorizeQueueReceiveOperation(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ReceiveRequest receive)

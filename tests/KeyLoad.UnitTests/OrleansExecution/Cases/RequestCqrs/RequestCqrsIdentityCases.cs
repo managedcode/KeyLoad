@@ -95,8 +95,8 @@ internal static class RequestCqrsIdentityCases
         var requestId = Guid.NewGuid();
         var subject = "execution-context-subject-" + Guid.NewGuid().ToString("N");
         PersistPrincipal(fixture, subject);
-        var state = StateFor(invalid, requestId, fixture.ConnectionId);
-        var principal = PrincipalFor(invalid, subject);
+        var state = (StateFor(invalid, requestId, fixture.ConnectionId)).Value;
+        var principal = (PrincipalFor(invalid, subject)).Value;
         var priorCalls = await ProbeGrain(fixture, requestId).CapabilityCallsAsync();
         var token = IssuedRead(fixture, requestId, subject);
         using var context = RequestCqrsClientContext.Set(principal, invalid != RequestCqrsInvalidContext.MissingPrincipal,
@@ -152,31 +152,31 @@ internal static class RequestCqrsIdentityCases
     private static Task<RequestCqrsProbeResult> Probe(RequestCqrsHostedRuntimeFixture fixture, Guid requestId, GrainRequestEnvelope token)
         => ProbeGrain(fixture, requestId).ValidateAsync(token, requestId);
 
-    private static GrainRequestContextState? StateFor(RequestCqrsInvalidContext invalid, Guid requestId, Guid connectionId)
+    private static global::ManagedCode.Communication.Result<GrainRequestContextState?> StateFor(RequestCqrsInvalidContext invalid, Guid requestId, Guid connectionId)
         => invalid switch
         {
-            RequestCqrsInvalidContext.MismatchedRequest => new(Guid.NewGuid(), Guid.Empty, connectionId),
-            RequestCqrsInvalidContext.MismatchedCommand => new(requestId, Guid.NewGuid(), connectionId),
-            RequestCqrsInvalidContext.MissingState => null,
-            _ => new(requestId, Guid.Empty, connectionId)
+            RequestCqrsInvalidContext.MismatchedRequest => global::ManagedCode.Communication.Result<GrainRequestContextState?>.Succeed((GrainRequestContextState?)(new(Guid.NewGuid(), Guid.Empty, connectionId))),
+            RequestCqrsInvalidContext.MismatchedCommand => global::ManagedCode.Communication.Result<GrainRequestContextState?>.Succeed((GrainRequestContextState?)(new(requestId, Guid.NewGuid(), connectionId))),
+            RequestCqrsInvalidContext.MissingState => global::ManagedCode.Communication.Result<GrainRequestContextState?>.FailNotFound(nameof(StateFor)),
+            _ => global::ManagedCode.Communication.Result<GrainRequestContextState?>.Succeed((GrainRequestContextState?)(new(requestId, Guid.Empty, connectionId)))
         };
 
-    private static ClaimsPrincipal? PrincipalFor(RequestCqrsInvalidContext invalid, string subject)
+    private static global::ManagedCode.Communication.Result<ClaimsPrincipal?> PrincipalFor(RequestCqrsInvalidContext invalid, string subject)
         => invalid switch
         {
-            RequestCqrsInvalidContext.MissingPrincipal => null,
-            RequestCqrsInvalidContext.ForgedSubject => GrainIdentityContext.CreatePrincipal(ExtraClaimValue),
-            RequestCqrsInvalidContext.ExtraClaim => new(new ClaimsIdentity(
+            RequestCqrsInvalidContext.MissingPrincipal => global::ManagedCode.Communication.Result<ClaimsPrincipal?>.FailNotFound(nameof(PrincipalFor)),
+            RequestCqrsInvalidContext.ForgedSubject => global::ManagedCode.Communication.Result<ClaimsPrincipal?>.Succeed(((ClaimsPrincipal?)(GrainIdentityContext.CreatePrincipal(ExtraClaimValue)))),
+            RequestCqrsInvalidContext.ExtraClaim => global::ManagedCode.Communication.Result<ClaimsPrincipal?>.Succeed((ClaimsPrincipal?)(new(new ClaimsIdentity(
                 [new(ClaimTypes.NameIdentifier, subject), new(ClaimTypes.Role, ExtraClaimValue)],
-                GrainRequestStreamProtocol.AuthenticationType)),
-            RequestCqrsInvalidContext.SecondIdentity => new ClaimsPrincipal(
+                GrainRequestStreamProtocol.AuthenticationType)))),
+            RequestCqrsInvalidContext.SecondIdentity => global::ManagedCode.Communication.Result<ClaimsPrincipal?>.Succeed((ClaimsPrincipal?)(new ClaimsPrincipal(
             [
                 new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, subject)], GrainRequestStreamProtocol.AuthenticationType),
                 new ClaimsIdentity([new Claim(ClaimTypes.NameIdentifier, subject)], GrainRequestStreamProtocol.AuthenticationType)
-            ]),
-            RequestCqrsInvalidContext.WrongAuthenticationType => new(new ClaimsIdentity(
-                [new(ClaimTypes.NameIdentifier, subject)], UntrustedAuthenticationType)),
-            _ => GrainIdentityContext.CreatePrincipal(subject)
+            ]))),
+            RequestCqrsInvalidContext.WrongAuthenticationType => global::ManagedCode.Communication.Result<ClaimsPrincipal?>.Succeed((ClaimsPrincipal?)(new(new ClaimsIdentity(
+                [new(ClaimTypes.NameIdentifier, subject)], UntrustedAuthenticationType)))),
+            _ => global::ManagedCode.Communication.Result<ClaimsPrincipal?>.Succeed(((ClaimsPrincipal?)(GrainIdentityContext.CreatePrincipal(subject))))
         };
 
     private static ErrorCode ExpectedError(RequestCqrsInvalidContext invalid)

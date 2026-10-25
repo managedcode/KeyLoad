@@ -39,7 +39,7 @@ internal static class RequestCqrsAnnPinnedLifetimeFlow
         AnnMaintenanceRequest request, CancellationToken token)
     {
         var database = fixture.Database.Database;
-        var runtime = fixture.RuntimeAnnMaintenance ?? throw new InvalidOperationException();
+        var runtime = fixture.RuntimeAnnMaintenance.Value ?? throw new InvalidOperationException();
         var budget = new ReadExecutionBudget(database.EvaluationClock, token);
         return database.WithQueryView(RequestCqrsAnnTestData.Principal, request.Consumer.Partition, request.Collection,
             (view, principal, resource) =>
@@ -109,7 +109,7 @@ internal static class RequestCqrsAnnPinnedLifetimeFlow
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var cut = fixture.Database.Store.Position;
         var files = AnnFixtureFileSnapshot.Capture(fixture.Database.Directory);
-        var execution = fixture.RuntimeAnnMaintenance ?? throw new InvalidOperationException();
+        var execution = fixture.RuntimeAnnMaintenance.Value ?? throw new InvalidOperationException();
         var search = new SearchEngine(fixture.Database.Database,
             Microsoft.Extensions.Options.Options.Create(new QueryExecutionOptions { EnableApproximateSearch = true }), null, execution);
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => search.ApproximateSearchAsync(

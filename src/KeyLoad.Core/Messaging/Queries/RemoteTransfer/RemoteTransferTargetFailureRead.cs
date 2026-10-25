@@ -17,7 +17,7 @@ public static class RemoteTransferTargetFailureRead
             throw Errors.Fail(ErrorCode.TokenInvalidated, RemoteTransferAttemptProtocol.Invalid);
         }
 
-        var receipt = engine.InspectQueueTransferReceipt(view, principal.Id, request.Destination, request.Source, request.TransferId);
+        var receipt = (engine.InspectQueueTransferReceipt(view, principal.Id, request.Destination, request.Source, request.TransferId)).Value;
         if (receipt is not null)
         {
             return new(null, null, receipt);

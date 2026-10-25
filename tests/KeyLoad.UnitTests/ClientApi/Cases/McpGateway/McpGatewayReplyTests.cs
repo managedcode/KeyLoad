@@ -40,13 +40,13 @@ internal sealed class McpGatewayReplyTests
             McpResult = expected,
             Outcome = global::ManagedCode.MCPGateway.McpGatewayInvocationOutcome.ToolError
         };
-        var actual = McpGatewayResult.GetOriginal(gatewayResult);
+        var actual = (McpGatewayResult.GetOriginal(gatewayResult)).Value;
         await Assert.That(ReferenceEquals(actual, expected)).IsTrue();
         await Assert.That(actual!.IsError).IsTrue();
-        await Assert.That(McpGatewayResult.GetOriginal(gatewayResult with
+        await Assert.That((McpGatewayResult.GetOriginal(gatewayResult with
         {
             IsSuccess = false
-        })).IsNull();
+        })).Value).IsNull();
     }
 
     [Test]

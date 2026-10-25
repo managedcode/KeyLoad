@@ -19,7 +19,7 @@ internal static class QueueReadyAuthorityRefusalAssertions
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(OrleansSerialization.Serialize(fixture.Store.Identity)).IsEquivalentTo(identity, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         var result = fixture.Database.ResolveOutcome(original);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.RecoveryRequired);
 
         await Assert.That(result.Value).IsNull();
         var outcome = fixture.Store.Read(view => view.GetRecord<StoredOutcome>(

@@ -91,9 +91,9 @@ internal sealed class IsolatedOwnedWork : IAsyncDisposable
         await registered;
         try
         {
-            var runnerFailure = await RuntimeComparisonFailure.ObserveAsync(StopRunnerAsync());
-            var captureFailure = await RuntimeComparisonFailure.ObserveAsync(DisposeCaptureCoreAsync());
-            var combined = RuntimeComparisonFailure.Combine(runnerFailure, captureFailure is null ? [] : [captureFailure]);
+            var runnerFailure = (await RuntimeComparisonFailure.ObserveAsync(StopRunnerAsync())).Value;
+            var captureFailure = (await RuntimeComparisonFailure.ObserveAsync(DisposeCaptureCoreAsync())).Value;
+            var combined = (RuntimeComparisonFailure.Combine(runnerFailure, captureFailure is null ? [] : [captureFailure])).Value;
             if (combined is not null)
             {
                 ExceptionDispatchInfo.Capture(combined).Throw();

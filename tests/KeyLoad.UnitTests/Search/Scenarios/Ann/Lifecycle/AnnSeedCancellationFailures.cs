@@ -35,7 +35,7 @@ internal static class AnnSeedCancellationFailures
         {
             return;
         }
-        var fatal = FindFatal(failures);
+        var fatal = (FindFatal(failures)).Value;
         if (failures.Count == 1)
         {
             ExceptionDispatchInfo.Capture(fatal ?? failures[0]).Throw();
@@ -51,17 +51,17 @@ internal static class AnnSeedCancellationFailures
         throw new AggregateException(FailureMessage, failures);
     }
 
-    private static Exception? FindFatal(List<Exception> failures)
+    private static global::ManagedCode.Communication.Result<Exception?> FindFatal(List<Exception> failures)
     {
         foreach (var failure in failures)
         {
             var fatal = CqrsRuntimeFailures.FindFatal(failure);
             if (fatal is not null)
             {
-                return fatal;
+                return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(fatal)));
             }
         }
-        return null;
+        return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(FindFatal));
     }
 
     private static int FindFatalOwner(List<Exception> failures)

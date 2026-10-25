@@ -41,13 +41,13 @@ internal static class McpAnalyticsDropDiscoveryAuthorization
         await Assert.That(read.IsFailed).IsTrue();
         await Assert.That(read.Value).IsNull();
         await Assert.That(read.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(AnalyticsStoreProtocol.ReadTool,
-            P.Read(state.Partition), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(AnalyticsStoreProtocol.ReadTool,
+            P.Read(state.Partition), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         var aggregate = await reader.Sdk.AggregateAnalyticsAsync(P.Query(state.Partition), token);
         await Assert.That(aggregate.IsFailed).IsTrue();
         await Assert.That(aggregate.Value).IsNull();
         await Assert.That(aggregate.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(AnalyticsStoreProtocol.AggregateTool,
-            P.Query(state.Partition), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(AnalyticsStoreProtocol.AggregateTool,
+            P.Query(state.Partition), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 }

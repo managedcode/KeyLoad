@@ -43,8 +43,8 @@ internal static class QueueEmptyHistoryPublicAssertions
         {
             state.ChangedProblem = problem;
         }
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-            McpCallerTools.MessagesReceive, changed, token), ErrorCode.Conflict, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+            McpCallerTools.MessagesReceive, changed, token), ErrorCode.Conflict, true)).Value;
     }
 
     internal static Task MessageAsync(RequestCqrsClusterCallers callers, QueueEmptyHistoryPublicState state,

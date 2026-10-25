@@ -53,7 +53,7 @@ internal static class PostgresQueueOperations
             claim.CommandText = ClaimSql;
             claim.Parameters.AddWithValue(lease);
             claim.Parameters.AddWithValue(leaseDuration);
-            message = await ReadClaimAsync(claim, cancellationToken);
+            message = (await ReadClaimAsync(claim, cancellationToken)).Value;
             if (message is null)
             {
                 await Task.Delay(claimPollInterval, timeProvider, cancellationToken);
@@ -63,7 +63,7 @@ internal static class PostgresQueueOperations
         return (message, timeProvider.GetTimestamp());
     }
 
-    private static async Task<FoundDocument?> ReadClaimAsync(NpgsqlCommand command,
+    private static async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadClaimAsync(NpgsqlCommand command,
         CancellationToken cancellationToken)
     {
         const int FirstColumnIndex = 0;
@@ -72,10 +72,10 @@ internal static class PostgresQueueOperations
         await using var reader = await command.ExecuteReaderAsync(cancellationToken);
         if (!await reader.ReadAsync(cancellationToken))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadClaimAsync));
         }
 
-        return new(reader.GetString(FirstColumnIndex), reader.GetString(SecondColumnIndex));
+        return global::ManagedCode.Communication.Result<FoundDocument?>.Succeed((FoundDocument?)(new(reader.GetString(FirstColumnIndex), reader.GetString(SecondColumnIndex))));
     }
 
     private static async Task AcknowledgeAsync(NpgsqlConnection connection, FoundDocument message, Guid lease,

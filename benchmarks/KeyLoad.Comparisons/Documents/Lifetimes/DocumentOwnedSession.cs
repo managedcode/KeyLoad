@@ -10,7 +10,7 @@ internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clie
     public Guid ClientIdentity { get; } = clientIdentity;
     public bool SingleOperationTiming => singleOperationTiming;
     public Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token) => executeOperation is null ? session.ExecuteAsync(scenario, document, token) : executeOperation(scenario, document, token);
-    public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken token) => session.ReadAsync(document, token);
+    public Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken token) => session.ReadAsync(document, token);
     public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken token) => session.ReadEventAsync(document, token);
     public IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken token) => session.ReadCorpusAsync(token);
     public IAsyncEnumerable<FoundDocument> ReadDocumentsAsync(CancellationToken token) => readback(token);
@@ -26,9 +26,9 @@ internal sealed class DocumentOwnedSession(IComparisonSession session, Guid clie
     }
     private async Task DisposeOriginalAsync()
     {
-        var sessionFailure = await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false);
-        var clientFailure = await RuntimeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
-        var combined = RuntimeComparisonFailure.Combine(sessionFailure, clientFailure is null ? [] : [clientFailure]);
+        var sessionFailure = (await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false)).Value;
+        var clientFailure = (await RuntimeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false)).Value;
+        var combined = (RuntimeComparisonFailure.Combine(sessionFailure, clientFailure is null ? [] : [clientFailure])).Value;
         if (combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();

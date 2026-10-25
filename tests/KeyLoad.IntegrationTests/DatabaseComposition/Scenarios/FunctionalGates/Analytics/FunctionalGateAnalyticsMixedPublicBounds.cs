@@ -17,14 +17,14 @@ internal static class FunctionalGateAnalyticsMixedPublicBounds
             P.MaximumVertices, P.MaximumEdges - P.Created, [state.Label]);
         await SdkAsync(await context.Reader.Sdk.TraverseAsync(request, token));
         await HealthyAsync(context, state, original, receipt, before, token);
-        await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
-            McpCallerTools.GraphTraverse, request, token), ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
+            McpCallerTools.GraphTraverse, request, token), ErrorCode.BudgetExceeded, dispatched: true)).Value;
         await HealthyAsync(context, state, original, receipt, before, token);
         var sql = SqlClusterProtocol.Call(context.Partition, McpCallerTools.GraphTraverse, request);
         await SqlSdkAsync(await context.Reader.Sdk.ExecuteSqlAsync(sql, token));
         await HealthyAsync(context, state, original, receipt, before, token);
-        await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
-            SqlOperationProtocol.ToolName, sql, token), ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
+            SqlOperationProtocol.ToolName, sql, token), ErrorCode.BudgetExceeded, dispatched: true)).Value;
         await HealthyAsync(context, state, original, receipt, before, token);
     }
 

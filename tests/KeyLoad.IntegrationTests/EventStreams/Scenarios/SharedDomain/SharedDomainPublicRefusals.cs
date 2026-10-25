@@ -37,8 +37,8 @@ internal static class SharedDomainPublicRefusals
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await official.CallAsync(McpCallerTools.DocumentsCommit, command, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await official.CallAsync(McpCallerTools.DocumentsCommit, command, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     internal static async Task BindingAsync(ClusterFixture fixture, SharedDomainPublicState state, CancellationToken token)
@@ -63,8 +63,8 @@ internal static class SharedDomainPublicRefusals
                 await Assert.That(result.Problem.Detail).IsEqualTo(BindingDetail);
                 var arguments = McpOfficialClient.Arguments(request);
                 arguments[McpCallerProtocol.CommandId] = id;
-                await McpCallerAssertions.ErrorAsync(await official.Client.InvokeKeyLoadToolAsync(
-                    McpCallerTools.ResourcesConfigure, arguments, cancellationToken: token), ErrorCode.UnsupportedCapability, dispatched: true);
+                _ = (await McpCallerAssertions.ErrorAsync(await official.Client.InvokeKeyLoadToolAsync(
+                    McpCallerTools.ResourcesConfigure, arguments, cancellationToken: token), ErrorCode.UnsupportedCapability, dispatched: true)).Value;
             }
         }, token);
         await SharedDomainPublicModels.AllAsync(fixture, state, token);

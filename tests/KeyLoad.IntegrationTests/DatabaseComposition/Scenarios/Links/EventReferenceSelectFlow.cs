@@ -60,7 +60,7 @@ internal static class EventReferenceSelectFlow
         await Assert.That(result.IsSuccess).IsFalse();
         await Assert.That(result.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
-            code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
+            code, dispatched: true)).Value;
     }
 }

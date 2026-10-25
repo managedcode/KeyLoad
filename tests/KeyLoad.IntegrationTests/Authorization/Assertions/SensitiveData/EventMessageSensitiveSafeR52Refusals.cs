@@ -45,7 +45,7 @@ internal static class EventMessageSensitiveSafeR52Refusals
             return;
         }
         var reply = await caller.Mcp.CallAsync(tool, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         await McpProblemAsync(reply, code, state);
     }
 

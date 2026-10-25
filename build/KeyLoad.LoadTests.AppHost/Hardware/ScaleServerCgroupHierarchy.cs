@@ -19,23 +19,23 @@ internal static class ScaleServerCgroupHierarchy
     internal static async Task<bool> IsSupportedRootAsync(string root, ScaleServerResourceSampleBudget budget,
         CancellationToken token)
     {
-        var mounts = await BoundedText.ReadAsync(MountInfoPath, budget.Settings.MaxFileBytes, budget, token);
-        var controllers = await BoundedText.ReadAsync(Path.Combine(root, ControllerFile),
-            budget.Settings.MaxFileBytes, budget, token);
+        var mounts = (await BoundedText.ReadAsync(MountInfoPath, budget.Settings.MaxFileBytes, budget, token)).Value;
+        var controllers = (await BoundedText.ReadAsync(Path.Combine(root, ControllerFile),
+            budget.Settings.MaxFileBytes, budget, token)).Value;
         return mounts is not null && controllers is not null && IsRootMount(mounts, root)
             && HasRequiredControllers(controllers);
     }
 
-    internal static string? ReadRootLimit(string path)
+    internal static global::ManagedCode.Communication.Result<string?> ReadRootLimit(string path)
     {
         try
         {
             using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-            return null;
+            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadRootLimit));
         }
-        catch (FileNotFoundException) { return UnlimitedCgroupValue; }
-        catch (IOException) { return null; }
-        catch (UnauthorizedAccessException) { return null; }
+        catch (FileNotFoundException) { return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(UnlimitedCgroupValue))); }
+        catch (IOException) { return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadRootLimit)); }
+        catch (UnauthorizedAccessException) { return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadRootLimit)); }
     }
 
     private static bool IsRootMount(string mountInfo, string root)
@@ -66,8 +66,8 @@ internal static class ScaleServerCgroupHierarchy
                 continue;
             }
 
-            var mountRoot = DecodePath(before[ElementIndex]);
-            var mountPoint = DecodePath(before[IsRootMountElementIndex]);
+            var mountRoot = (DecodePath(before[ElementIndex])).Value;
+            var mountPoint = (DecodePath(before[IsRootMountElementIndex])).Value;
             if (mountRoot is null || mountPoint is null)
             {
                 return false;
@@ -88,7 +88,7 @@ internal static class ScaleServerCgroupHierarchy
         return count == SingleRootMountCount;
     }
 
-    private static string? DecodePath(string value)
+    private static global::ManagedCode.Communication.Result<string?> DecodePath(string value)
     {
         const int IndexInitialValue = 0;
         const char BackslashCharacter = '\\';
@@ -107,13 +107,13 @@ internal static class ScaleServerCgroupHierarchy
             }
             if (index + Step >= value.Length || !TryOctal(value.AsSpan(index + DecodePathStep, LengthValue), out var code))
             {
-                return null;
+                return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(DecodePath));
             }
 
             decoded.Append((char)code);
             index += StructuralValue;
         }
-        return decoded.ToString();
+        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(decoded.ToString())));
     }
 
     private static bool TryOctal(ReadOnlySpan<char> digits, out int value)

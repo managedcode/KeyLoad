@@ -71,8 +71,8 @@ internal static class StreamCatchupClusterAssertions
         await Assert.That(sdk.IsSuccess).IsFalse();
         await Assert.That(sdk.Value).IsNull();
         await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.StreamsRead,
-            request, token), ErrorCode.TokenInvalidated, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.StreamsRead,
+            request, token), ErrorCode.TokenInvalidated, dispatched: true)).Value;
         await LivePageClusterAssertions.DeniedSqlAsync(callers,
             SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.StreamsRead, request), ErrorCode.TokenInvalidated, token);
         await ContinuationAsync(callers, scenario, tail, token);

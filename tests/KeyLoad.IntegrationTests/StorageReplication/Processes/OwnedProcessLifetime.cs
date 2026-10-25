@@ -140,7 +140,7 @@ internal static partial class OwnedProcessLifetime
         {
             return;
         }
-        var captured = await OwnedProcessFailureObserver.CaptureAsync(task).ConfigureAwait(false);
+        var captured = (await OwnedProcessFailureObserver.CaptureAsync(task).ConfigureAwait(false)).Value;
         IEnumerable<Exception> errors = captured is AggregateException aggregate
             ? aggregate.InnerExceptions : captured is null ? [] : new[] { captured };
         foreach (var error in errors)

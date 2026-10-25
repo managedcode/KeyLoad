@@ -9,7 +9,7 @@ internal static class RemoteTransferAttemptCeilingContinuation
     {
         var state = RemoteTransferAttemptCold.State(fixture, transfer.TransferId);
         var refused = fixture.Apply(OperationKind.Batch, advance);
-        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
 
         await Assert.That(refused.Value).IsNull();
         var refusedBytes = RemoteTransferAttemptCold.Outcome(fixture, advance.CommandId, fixture.SourcePartition);

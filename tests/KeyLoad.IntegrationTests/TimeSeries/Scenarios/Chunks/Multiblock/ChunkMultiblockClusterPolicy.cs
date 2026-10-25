@@ -57,7 +57,7 @@ internal static class ChunkMultiblockClusterPolicy
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var result = await reader.Mcp.CallAsync(SampleChunkProtocol.ReadTool, ChunkMultiblockClusterPages.Request(state), token);
-            await McpCallerAssertions.ErrorAsync(result, ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(result, ErrorCode.PermissionDenied, dispatched: true)).Value;
             await Assert.That(result.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(ScopeDenied);
         }, failures);

@@ -29,7 +29,7 @@ internal static class QueueVisibilityBoundaryAssertions
             var id = Guid.NewGuid();
             var command = new DeliveryCommand(id, lane, original.Token, action, LeaseSeconds: 1);
             var result = QueueVisibilityBoundaryWholeFlow.Submit(owner, OperationKind.Delivery, command, id, time, outcomes);
-            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
+            await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(expected);
             await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
 
             await Assert.That(result.Value).IsNull();
@@ -44,7 +44,7 @@ internal static class QueueVisibilityBoundaryAssertions
         var cut = Capture(store);
         foreach (var original in outcomes)
         {
-            if (original.Operation.Value!.Kind == OperationKind.Receive && Errors.Code(original.Result.Problem) is null)
+            if (original.Operation.Value!.Kind == OperationKind.Receive && Errors.Code(original.Result.Problem).Value is null)
             {
                 var request = OrleansSerialization.Deserialize<ReceiveRequest>(original.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
                     ?? throw new InvalidOperationException("The original Receive request is absent.");
@@ -55,11 +55,11 @@ internal static class QueueVisibilityBoundaryAssertions
                 continue;
             }
             var actual = owner.Apply(original.Operation);
-            if (Errors.Code(original.Result.Problem) is not null)
+            if (Errors.Code(original.Result.Problem).Value is not null)
             {
                 await Assert.That(OrleansSerialization.Serialize(actual))
                     .IsEquivalentTo(OrleansSerialization.Serialize(original.Result), CollectionOrdering.Matching);
-                await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(original.Result.Problem));
+                await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(original.Result.Problem).Value);
                 await Assert.That(actual.Problem?.Detail).IsEqualTo(original.Result.Problem?.Detail);
                 await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
                     .SequenceEqual(OrleansSerialization.Serialize(original.Result))).IsTrue();

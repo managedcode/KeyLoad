@@ -73,8 +73,8 @@ internal static class QueryViewExecution
             rows.Add(projected);
         }
         var next = cursor.Offset + rows.Count;
-        var token = QueryCursorExecution.SignNext(database, cursorLifetime, principal, resource, hash,
-            cursor, next, prepared.EligibleCount, clock, paged ? lastId : null);
+        var token = (QueryCursorExecution.SignNext(database, cursorLifetime, principal, resource, hash,
+            cursor, next, prepared.EligibleCount, clock, paged ? lastId : null)).Value;
         var result = new QueryPage(rows.ToImmutableArray(), token, cursor.Cut, accessPath);
         budget.CheckResult(result);
         return result;

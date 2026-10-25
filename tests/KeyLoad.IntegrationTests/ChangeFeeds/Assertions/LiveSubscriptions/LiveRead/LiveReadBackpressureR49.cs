@@ -31,7 +31,7 @@ internal static class LiveReadBackpressureR49
         await CurrentAsync(administrator, scenario, async () =>
         {
             var reply = await reader.Mcp.CallAsync(FeedLiveClusterProtocol.LiveRead, refused, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true)).Value;
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(DetailKey).GetString()).IsEqualTo(SafeBudgetDetail);
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveClusterProtocol.Secret);

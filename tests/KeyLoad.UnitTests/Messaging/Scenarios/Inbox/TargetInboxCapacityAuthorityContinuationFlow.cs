@@ -35,7 +35,7 @@ internal static class TargetInboxCapacityAuthorityContinuationFlow
                 TargetInboxUnitProtocol.Payload, 0L)]
         };
         var failed = TargetInboxSetup.Apply(database, quota, token);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(QuotaDetail);
 
         await Assert.That(failed.Value).IsNull();

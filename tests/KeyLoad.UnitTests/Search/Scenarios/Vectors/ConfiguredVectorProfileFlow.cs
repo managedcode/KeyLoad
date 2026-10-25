@@ -68,7 +68,7 @@ internal static class ConfiguredVectorProfileFlow
         var position = database.Store.Position;
         var applied = database.Database.LastApplied;
         var rejected = database.Submit(OperationKind.Batch, command, id: command.CommandId);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(Mismatch);
 
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied + CommitAdvance);

@@ -37,7 +37,7 @@ public static class CommandExecutionIdentity
             throw Errors.Fail(ErrorCode.Validation, InvalidDatabaseCommand);
         }
 
-        _ = OrleansSerialization.Deserialize(input.Input.Span, DatabaseCommandInputTypes.OperationPayloadType(input.Kind) ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
+        _ = OrleansSerialization.Deserialize(input.Input.Span, (DatabaseCommandInputTypes.OperationPayloadType(input.Kind)).Value ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
     }
 
     internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> input, string fingerprint, ReadExecutionBudget? work, IKeyValueView? admissionView = null)

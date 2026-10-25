@@ -60,8 +60,8 @@ internal sealed class SampleRetentionClusterTests(ClusterFixture fixture)
         var denied = await reader.CommitAsync(command, deadline.Token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(
-            await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, deadline.Token), ErrorCode.PermissionDenied, true);
+        _ = (await McpCallerAssertions.ErrorAsync(
+            await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, deadline.Token), ErrorCode.PermissionDenied, true)).Value;
         await AssertStatusAsync(reader, mcp, scenario, new(null, 0, false), deadline.Token);
     }
 

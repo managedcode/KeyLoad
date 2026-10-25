@@ -25,7 +25,7 @@ internal static class GraphPathFieldUseR43Policy
             await GraphPathFieldUseR43Reads.HealthyAsync(admin, reader, state, false, token);
             var reply = sql ? await reader.Mcp.CallAsync(GraphPathClusterScenario.SqlTool, state.Sql(true), token)
                 : await reader.Mcp.CallAsync(GraphPathClusterScenario.DirectTool, state.Request(true), token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(DetailKey).GetString()).IsEqualTo(McpDetail);
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret, GraphPathClusterScenario.SecretMarker);

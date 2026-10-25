@@ -172,7 +172,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
             }, executionOptions, token: token, timeProvider: timeProvider);
     }
 
-    internal async Task<VectorReadback?> ReadAsync(string id, CancellationToken token)
+    internal async Task<global::ManagedCode.Communication.Result<VectorReadback?>> ReadAsync(string id, CancellationToken token)
     {
         using var response = await QdrantVectorHttp.SendAsync(client, HttpMethod.Post, Path + QdrantVectorProtocol.PointsPath + ReadSuffix,
             new
@@ -186,7 +186,7 @@ internal sealed class QdrantVectorOperations(HttpClient client, HttpClient[] nod
         {
             throw new ComparisonFailureException(QdrantVectorProtocol.ReadbackCount);
         }
-        return points.GetArrayLength() == QdrantVectorProtocol.EmptyCount ? null : QdrantVectorReadback.Parse(points[QdrantVectorProtocol.FirstElementIndex]);
+        return points.GetArrayLength() == QdrantVectorProtocol.EmptyCount ? global::ManagedCode.Communication.Result<VectorReadback?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<VectorReadback?>.Succeed(((VectorReadback?)(QdrantVectorReadback.Parse(points[QdrantVectorProtocol.FirstElementIndex]))));
     }
 
     public async ValueTask DisposeAsync()

@@ -35,10 +35,10 @@ internal static class RabbitQuorumProbe
         using var nodesJson = await ReadAsync(management, NodesPath, cancellationToken);
         using var overview = await ReadAsync(management, OverviewPath, cancellationToken);
         using var queueJson = await ReadAsync(management, QueuesPath + Uri.EscapeDataString(queue), cancellationToken);
-        return ReadReady(nodesJson.RootElement, overview.RootElement, queueJson.RootElement, queue, topology);
+        return (ReadReady(nodesJson.RootElement, overview.RootElement, queueJson.RootElement, queue, topology)).Value;
     }
 
-    internal static (string Version, ClusterEvidence Evidence)? ReadReady(JsonElement nodesJson, JsonElement overview,
+    internal static global::ManagedCode.Communication.Result<(string Version, ClusterEvidence Evidence)?> ReadReady(JsonElement nodesJson, JsonElement overview,
         JsonElement detail, string queue, ComparisonTopology topology)
     {
         const int SingleItemCount = 1;
@@ -58,7 +58,7 @@ internal static class RabbitQuorumProbe
         if (!IsReady(runtimeNodes, nodes, members, online, detail, version, expected) ||
             detail.GetProperty(NameField).GetString() != queue)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<(string Version, ClusterEvidence Evidence)?>.FailNotFound(nameof(ReadReady));
         }
 
         var state = expected > SingleItemCount
@@ -68,7 +68,7 @@ internal static class RabbitQuorumProbe
             [$"{ReadReadyConnectedRunningDiscNodesText}{nodes.Length}", $"{ReadReadyQuorumMembersOnlineText}{online.Length}", $"{ReadReadyQueueTypeText}{QuorumType}",
                 $"{ReadReadyRunningNodesText}{string.Join(MemberSeparator, nodes)}", $"{ReadReadyQueueMembersText}{string.Join(MemberSeparator, members)}",
                 $"{ReadReadyOnlineMembersText}{string.Join(MemberSeparator, online)}", $"{ReadReadyQuorumText}{expected / MajorityDivisor + MajorityVoteOffset}{ReadReadyOfText}{expected}"]);
-        return (version, evidence);
+        return global::ManagedCode.Communication.Result<(string Version, ClusterEvidence Evidence)?>.Succeed((((string Version, ClusterEvidence Evidence)?)((version, evidence))));
     }
 
     private static async Task<JsonDocument> ReadAsync(HttpClient client, string path, CancellationToken token)

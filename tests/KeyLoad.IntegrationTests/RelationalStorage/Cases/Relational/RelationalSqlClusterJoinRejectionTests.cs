@@ -54,8 +54,8 @@ internal sealed class RelationalSqlClusterJoinRejectionTests(ClusterFixture fixt
         await AssertSafeProblemAsync(unified.Problem, fixture.AdminKey);
         var officialQuery = await mcp.CallAsync(McpCallerTools.QueryExecute, query, deadline.Token);
         var officialSql = await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token);
-        await McpCallerAssertions.ErrorAsync(officialQuery, code, dispatched: true);
-        await McpCallerAssertions.ErrorAsync(officialSql, code, dispatched: !refusedBeforeDispatch);
+        _ = (await McpCallerAssertions.ErrorAsync(officialQuery, code, dispatched: true)).Value;
+        _ = (await McpCallerAssertions.ErrorAsync(officialSql, code, dispatched: !refusedBeforeDispatch)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(officialQuery, fixture.AdminKey, RelationalSqlClusterJoinRejectionFlow.PrivateName);
         await McpCallerAssertions.DoesNotDiscloseAsync(officialSql, fixture.AdminKey, RelationalSqlClusterJoinRejectionFlow.PrivateName);
         await RelationalSqlClusterJoinRejectionFlow.VerifyRowsAsync(sdk, scenario, seed.RightLifetime, rows, deadline.Token);

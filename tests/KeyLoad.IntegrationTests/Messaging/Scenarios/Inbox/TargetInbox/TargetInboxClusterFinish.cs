@@ -22,7 +22,7 @@ internal static class TargetInboxClusterFinish
             Effects = [new PutDocument(TargetInboxClusterProtocol.Collection, TargetInboxClusterProtocol.Changed, TargetInboxClusterProtocol.Payload)]
         };
         await TargetInboxClusterAssertions.DeniedAsync(await client.CommitInboxAsync(refused, token), ErrorCode.ResourceExhausted);
-        _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(TargetInboxClusterProtocol.Tool, refused, token), ErrorCode.ResourceExhausted, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(TargetInboxClusterProtocol.Tool, refused, token), ErrorCode.ResourceExhausted, true)).Value;
         await TargetInboxClusterAssertions.UnchangedAsync(client, state, token);
         await TargetInboxClusterReplay.ExecuteAsync(client, mcp, state, false, token);
         var stale = state.SourceAck with
@@ -30,8 +30,8 @@ internal static class TargetInboxClusterFinish
             CommandId = Guid.NewGuid()
         };
         await TargetInboxClusterAssertions.DeniedAsync(await client.CompleteAsync(stale, token), ErrorCode.StaleLease);
-        _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete,
-            stale, token), ErrorCode.StaleLease, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete,
+            stale, token), ErrorCode.StaleLease, true)).Value;
         await TargetInboxClusterAssertions.UnchangedAsync(client, state, token);
         var outputLane = new QueueLaneRef(state.Target.Partition, TargetInboxClusterProtocol.Output);
         var output = await McpCallerAssertions.SdkSuccessAsync(await client.ReceiveAsync(new(Guid.NewGuid(), outputLane), token));

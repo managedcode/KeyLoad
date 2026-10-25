@@ -12,7 +12,7 @@ internal static class CommandOutcomeApplication
 {
     internal static StoredOutcome BuildStoredOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, string fingerprint, long policyEpoch, Result<object> result, global::KeyLoad.Core.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority, CommandOutcomePartitionScope partitionScope, global::KeyLoad.Core.Search.OnlineTextOutcomeAuthority? onlineTextAuthority, global::KeyLoad.Core.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence) => new(fingerprint, engine.Store.Identity.Incarnation, policyEpoch, result, operation)
     {
-        CompositionAuthority = Errors.Code(result.Problem) is null ? compositionAuthority : null,
+        CompositionAuthority = Errors.Code(result.Problem).Value is null ? compositionAuthority : null,
         ScopeKind = partitionScope.Kind,
         Partition = partitionScope.Partition,
         CanonicalSequence = canonicalSequence,
@@ -31,7 +31,7 @@ internal static class CommandOutcomeApplication
         CommandOutcomeKeyResolver.ValidateSelectedScope(transaction, operation, selection);
         var current = engine.EvaluateCommand(operation, engine.Clock.GetUtcNow());
         var principal = engine.Principal(transaction, operation.UserId!, current.Timestamp);
-        engine.AuthorizeOperation(transaction, principal, current);
+        _ = (engine.AuthorizeOperation(transaction, principal, current)).Value;
         engine.ValidateCachedResult(transaction, principal, current, previous);
         return previous;
     }

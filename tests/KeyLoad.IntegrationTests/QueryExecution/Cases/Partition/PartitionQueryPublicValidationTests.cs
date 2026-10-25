@@ -84,7 +84,7 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(expected.ToString());
         var reply = await mcp.CallAsync(PartitionQueryClusterProtocol.ToolName, request, cancellationToken)
             .ConfigureAwait(false);
-        await McpCallerAssertions.ErrorAsync(reply, expected, dispatched: true).ConfigureAwait(false);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, expected, dispatched: true).ConfigureAwait(false)).Value;
     }
 
     private static ImmutableArray<PartitionRef> CreateTooManyPartitions(ImmutableArray<PartitionRef> known)

@@ -6,12 +6,12 @@ namespace KeyLoad.UnitTests.OrleansExecution.Helpers;
 
 internal static class PartitionRecordCancellationFailures
 {
-    internal static Exception? Single(List<Exception> failures)
+    internal static global::ManagedCode.Communication.Result<Exception?> Single(List<Exception> failures)
         => failures.Count switch
         {
-            0 => null,
-            1 => failures[0],
-            _ => new AggregateException(failures)
+            0 => global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Single)),
+            1 => global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(failures[0]))),
+            _ => global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(failures)))
         };
 
     internal static void ThrowUnexpected(List<Exception> reader, List<Exception> observer,

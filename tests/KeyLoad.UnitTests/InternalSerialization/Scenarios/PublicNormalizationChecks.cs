@@ -20,7 +20,7 @@ internal static class PublicNormalizationChecks
         await Assert.That(normalized.Value.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
         await Assert.That(normalized.Value.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
         var result = database.Database.Apply(normalized);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
         var stored = PublicNormalizationFixture.Stored(database, operation);
         var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);

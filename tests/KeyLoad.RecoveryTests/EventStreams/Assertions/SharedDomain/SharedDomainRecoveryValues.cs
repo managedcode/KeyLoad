@@ -16,7 +16,7 @@ internal static class SharedDomainRecoveryValues
 
     internal static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(expected.Problem).Value);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(expected.Value?.GetType());
         if (expected.Value is CommitReceipt expectedReceipt)
@@ -43,7 +43,7 @@ internal static class SharedDomainRecoveryValues
     internal static async Task ProducerAsync(Result<object> actual, SharedDomainScope scope, Guid id, string item,
         Guid incarnation, long position)
     {
-        await Assert.That(Errors.Code(actual.Problem)).IsNull();
+        await Assert.That(Errors.Code(actual.Problem).Value).IsNull();
         await Assert.That(actual.Problem?.Detail).IsNull();
 
         var command = SharedDomainCorpus.Producer(scope, id, item);

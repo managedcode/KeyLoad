@@ -54,7 +54,7 @@ internal static class ComparisonMutationProbe
 
     private static async Task RequireAbsentAsync(IComparisonSession reader, BenchmarkDocument input, CancellationToken token)
     {
-        if (await reader.ReadAsync(input, token) is not null)
+        if ((await reader.ReadAsync(input, token)).Value is not null)
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.ProbeMismatch);
         }
@@ -62,7 +62,7 @@ internal static class ComparisonMutationProbe
 
     private static async Task RequireExactAsync(IComparisonSession reader, BenchmarkDocument input, CancellationToken token)
     {
-        if (!BenchmarkDataset.SameDocument(await reader.ReadAsync(input, token), input))
+        if (!BenchmarkDataset.SameDocument((await reader.ReadAsync(input, token)).Value, input))
         {
             throw new ComparisonFailureException(ComparisonMutationFailures.ProbeMismatch);
         }

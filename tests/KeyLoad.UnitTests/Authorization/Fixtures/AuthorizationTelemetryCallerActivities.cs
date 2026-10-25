@@ -11,8 +11,7 @@ internal sealed class AuthorizationTelemetryCallerActivities : IDisposable
         get;
     }
     internal Activity First => activities[AuthorizationTelemetryTestProtocol.IndexCount];
-    internal Activity? Current => activities.Length > AuthorizationTelemetryTestProtocol.IndexCount
-        ? activities[^AuthorizationTelemetryTestProtocol.HealthyCount] : null;
+    internal Activity Current => activities[^AuthorizationTelemetryTestProtocol.HealthyCount];
     internal AuthorizationTelemetryCallerActivities(AuthorizationUnsafeSpanState state)
     {
         var depth = state switch

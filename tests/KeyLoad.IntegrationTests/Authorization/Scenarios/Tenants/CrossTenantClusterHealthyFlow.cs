@@ -33,7 +33,7 @@ internal static class CrossTenantClusterHealthyFlow
         await Assert.That(denied.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
         await Assert.That(denied.Problem.Detail).IsEqualTo("The command ID was already used with different content.");
         var conflict = await mcp.CallAsync(McpCallerTools.DocumentsCommit, changed, token);
-        await McpCallerAssertions.ErrorAsync(conflict, ErrorCode.Conflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(conflict, ErrorCode.Conflict, dispatched: true)).Value;
         await Assert.That(conflict.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo("The command ID was already used with different content.");
         await McpCallerAssertions.DoesNotDiscloseAsync(conflict, secret, McpDocumentProtocol.ConflictValue);

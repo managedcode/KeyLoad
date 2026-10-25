@@ -12,7 +12,7 @@ internal static class LocalInboxProcessingRecoveryReceiveFence
         var image = LocalInboxProcessingRecoveryImage.All(store);
         var position = store.Position;
         var refused = database.Apply(state.Receive);
-        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(refused.Problem?.Detail).IsEqualTo("The delivery lease is stale.");
 
         await Assert.That(refused.Value).IsNull();

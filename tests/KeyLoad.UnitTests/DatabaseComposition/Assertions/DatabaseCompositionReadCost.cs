@@ -24,7 +24,7 @@ internal static class DatabaseCompositionReadCost
                 var definitionKey = KeySpace.Resource(partition.TenantId, partition.DatabaseId, reference.Collection);
                 var definition = view.GetRecord<ResourceDefinition>(definitionKey);
                 var lifetimeKey = ResourceLifetimeCatalog.Key(partition.TenantId, partition.DatabaseId, reference.Collection);
-                var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, reference.Collection, definition)
+                var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, reference.Collection, definition)).Value
                     ?? throw new InvalidOperationException(EndpointLifetimeMissing);
                 // BindAuthorizedReadResource reads definition+life. VisibleVertex Bind and
                 // RequireStored each perform one further actual life lookup.

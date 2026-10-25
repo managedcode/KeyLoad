@@ -43,7 +43,7 @@ internal static class SubscriptionFilterProcessAssertions
         await Assert.That(JsonDefaults.Serialize(repeated).AsSpan().SequenceEqual(JsonDefaults.Serialize(first))).IsTrue();
         var old = JsonDefaults.Deserialize<string>(await File.ReadAllBytesAsync(Path.Combine(path, SubscriptionFilterCrashScenario.OldTokenFile), token));
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, old, DeliveryAction.Ack);
-        await Assert.That(Errors.Code(Submit(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, token).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(Submit(db, OperationKind.SubscriptionDelivery, ack, ack.CommandId, token).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, UpdatedGeneration, false);
         Submit(db, OperationKind.SetSubscriptionPaused, resume, resume.CommandId, token).Get<SubscriptionInfo>();
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, SubscriptionFilterCrashScenario.WindowSize);

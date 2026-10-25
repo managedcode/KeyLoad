@@ -33,7 +33,7 @@ internal static class ResourceIncarnationQueueFlow
         await ResourceIncarnationAssertions.EqualAsync(message, fixture.Database.InspectMessage("root", lane, "warm")!);
         var receive = new ReceiveRequest(Guid.NewGuid(), lane);
         var blocked = Apply(fixture.Database, OperationKind.Receive, receive, receive.RequestId);
-        await Assert.That(Errors.Code(blocked.Problem)).IsEqualTo(ErrorCode.DispatchPaused);
+        await Assert.That(Errors.Code(blocked.Problem).Value).IsEqualTo(ErrorCode.DispatchPaused);
         await ResourceIncarnationAssertions.EqualAsync(message, fixture.Database.InspectMessage("root", lane, "warm")!);
         var resume = Control(fixture.Database, lane, 2, false);
         var resumed = fixture.Database.Apply(resume);

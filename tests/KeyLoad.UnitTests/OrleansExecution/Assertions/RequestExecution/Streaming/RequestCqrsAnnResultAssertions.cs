@@ -62,7 +62,7 @@ internal static class RequestCqrsAnnResultAssertions
     internal static async Task SearchAsync(RequestCqrsHostedRuntimeFixture fixture, AnnMaintenanceRequest request,
         bool changed, CancellationToken token)
     {
-        var execution = fixture.RuntimeAnnMaintenance ?? throw new InvalidOperationException();
+        var execution = fixture.RuntimeAnnMaintenance.Value ?? throw new InvalidOperationException();
         var search = new SearchEngine(fixture.Database.Database,
             Options.Create(new QueryExecutionOptions { EnableApproximateSearch = true }), null, execution);
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);

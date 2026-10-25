@@ -20,7 +20,7 @@ internal static class TargetInboxClusterReplay
         else
         {
             await TargetInboxClusterAssertions.DeniedAsync(await client.CommitInboxAsync(state.Original, token), ErrorCode.PermissionDenied);
-            _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(TargetInboxClusterProtocol.Tool, state.Original, token), ErrorCode.PermissionDenied, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(TargetInboxClusterProtocol.Tool, state.Original, token), ErrorCode.PermissionDenied, true)).Value;
         }
         var duplicate = state.Original with
         {
@@ -48,7 +48,7 @@ internal static class TargetInboxClusterReplay
             [new PutDocument(TargetInboxClusterProtocol.Collection, TargetInboxClusterProtocol.Changed, TargetInboxClusterProtocol.Payload)]
         };
         await TargetInboxClusterAssertions.DeniedAsync(await client.CommitInboxAsync(changed, token), ErrorCode.Conflict);
-        _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(TargetInboxClusterProtocol.Tool, changed, token), ErrorCode.Conflict, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(TargetInboxClusterProtocol.Tool, changed, token), ErrorCode.Conflict, true)).Value;
         await TargetInboxClusterAssertions.UnchangedAsync(client, state, token);
     }
 }

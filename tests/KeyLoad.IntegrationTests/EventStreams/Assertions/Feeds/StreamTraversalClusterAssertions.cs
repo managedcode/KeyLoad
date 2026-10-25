@@ -48,8 +48,8 @@ internal static class StreamTraversalClusterAssertions
         await Assert.That(sdk.IsSuccess).IsFalse();
         await Assert.That(sdk.Value).IsNull();
         await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(code.ToString());
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.StreamsRead,
-            request, token), code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.StreamsRead,
+            request, token), code, dispatched: true)).Value;
         await LivePageClusterAssertions.DeniedSqlAsync(callers,
             SqlClusterProtocol.Call(scenario.Partition, McpCallerTools.StreamsRead, request), code, token);
     }

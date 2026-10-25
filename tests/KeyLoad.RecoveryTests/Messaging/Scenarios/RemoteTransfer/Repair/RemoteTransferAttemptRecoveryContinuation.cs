@@ -60,7 +60,7 @@ internal static class RemoteTransferAttemptRecoveryContinuation
     private static async Task FailureAsync(ZoneTreeStore store, DatabaseEngine database, CommandRequest request,
         byte[] original, CancellationToken token)
     {
-        await Assert.That(Errors.Code(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId), token).Problem))
+        await Assert.That(Errors.Code(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId), token).Problem).Value)
             .IsEqualTo(ErrorCode.ResourceExhausted);
         var bytes = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(request.Partition,
             CrashFixtureValues.Principal, request.CommandId)))!;

@@ -26,8 +26,8 @@ internal static class SiteCoverageRanges
         var snapshots = new List<SiteCoverageScriptSnapshot>();
         foreach (var script in scripts.EnumerateArray())
         {
-            var sourcePath = SiteCoverageSourceResolver.ResolveScriptSource(script, runtime, repository,
-                sources, browserOrigins);
+            var sourcePath = (SiteCoverageSourceResolver.ResolveScriptSource(script, runtime, repository,
+                sources, browserOrigins)).Value;
             if (sourcePath is null)
             {
                 continue;
@@ -40,7 +40,7 @@ internal static class SiteCoverageRanges
                 throw SiteCoverageJson.Invalid(SiteCoverageTokens.JsonFailure);
             }
 
-            var contextId = ReadExecutionContext(script);
+            var contextId = (ReadExecutionContext(script)).Value;
             var functions = ReadFunctions(script).Select(function => ParseFunction(function, sourcePath,
                 entry.Utf16Length)).ToArray();
             snapshots.Add(new(receiptIdentity, receiptSha256, scriptId, contextId, sourcePath, functions));
@@ -49,14 +49,14 @@ internal static class SiteCoverageRanges
         return snapshots;
     }
 
-    private static int? ReadExecutionContext(JsonElement script)
+    private static global::ManagedCode.Communication.Result<int?> ReadExecutionContext(JsonElement script)
     {
         if (!script.TryGetProperty(SiteCoverageTokens.ExecutionContextId, out var context))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(ReadExecutionContext));
         }
 
-        return context.TryGetInt32(out var value) ? value :
+        return context.TryGetInt32(out var value) ? global::ManagedCode.Communication.Result<int?>.Succeed(((int?)(value))) :
             throw SiteCoverageJson.Invalid(SiteCoverageTokens.JsonFailure);
     }
 

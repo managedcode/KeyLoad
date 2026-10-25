@@ -11,13 +11,13 @@ internal sealed class TestDatabaseOriginalResourceCommands
     private readonly Dictionary<(string Tenant, string Database, string Resource), SortedDictionary<long, Creation?>> creations = [];
     private sealed record Creation(Command<DatabaseCommand> Command, ConfigureResourceRequest Request);
 
-    internal static long? Begin(DatabaseEngine database, Command<DatabaseCommand> command)
+    internal static global::ManagedCode.Communication.Result<long?> Begin(DatabaseEngine database, Command<DatabaseCommand> command)
     {
         if (command.Value!.Kind is not (OperationKind.ConfigureResource or OperationKind.DropTable))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(Begin));
         }
-        return database.LastApplied;
+        return global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(database.LastApplied)));
     }
 
     internal void Observe(DatabaseEngine database, Command<DatabaseCommand> command, Result<object> result,

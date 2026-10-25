@@ -33,7 +33,7 @@ internal static class QueueLifecycleHistoryAssertions
             await ReceiveAsync(database, lane, observation, actual, received);
             return;
         }
-        if (Errors.Code(observation.Result.Problem) is not null)
+        if (Errors.Code(observation.Result.Problem).Value is not null)
         {
             await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
                 .SequenceEqual(OrleansSerialization.Serialize(observation.Result))).IsTrue();
@@ -63,7 +63,7 @@ internal static class QueueLifecycleHistoryAssertions
             await ReplayResultAssertions.Same<ReceiveResult>(actual, observation.Result);
             return;
         }
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(Stale);
 
         await Assert.That(actual.Value).IsNull();

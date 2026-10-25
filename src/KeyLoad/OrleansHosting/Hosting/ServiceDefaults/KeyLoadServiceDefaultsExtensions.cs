@@ -45,8 +45,8 @@ internal static class KeyLoadServiceDefaultsExtensions
         builder.Services.AddOpenTelemetry()
             .WithMetrics(metrics => metrics.AddAspNetCoreInstrumentation().AddHttpClientInstrumentation().AddRuntimeInstrumentation()
                 .AddMeter(OrleansTelemetryPolicy.OrleansMeterName, OrleansTelemetryPolicy.PrivacyMeterName, HttpTelemetryPrivacyPolicy.PrivacyMeter)
-                .AddView(OrleansTelemetryPrivacyProcessor.ConfigureMetricView)
-                .AddView(HttpTelemetryPrivacyProcessor.ConfigureMetricView)
+                .AddView((outcomeArgument0) => (OrleansTelemetryPrivacyProcessor.ConfigureMetricView(outcomeArgument0)).Value)
+                .AddView((outcomeArgument0) => (HttpTelemetryPrivacyProcessor.ConfigureMetricView(outcomeArgument0)).Value)
                 .SetExemplarFilter(ExemplarFilterType.AlwaysOff))
             .WithTracing(traces => traces.AddAspNetCoreInstrumentation(options => options.Filter = context =>
                 !context.Request.Path.StartsWithSegments(HealthRoutePrefix, StringComparison.OrdinalIgnoreCase)

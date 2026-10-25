@@ -68,7 +68,7 @@ internal sealed class RemoteTransferDestinationTests
         var rejected = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                 [new AcceptQueueTransfer(fixture.DestinationQueue, intent.IntentToken)]));
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, fixture.SourceQueue, transferId)).IsNull();
         await Assert.That(fixture.Database.InspectMessage(RemoteTransferDatabase.RootPrincipal,
@@ -94,7 +94,7 @@ internal sealed class RemoteTransferDestinationTests
         var rejected = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                 [new AcceptQueueTransfer(fixture.DestinationQueue, intent.IntentToken)]));
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, fixture.SourceQueue, transferId)).IsNull();
         await Assert.That(fixture.Database.InspectMessage(RemoteTransferDatabase.RootPrincipal,
@@ -119,7 +119,7 @@ internal sealed class RemoteTransferDestinationTests
             new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                 [new AcceptQueueTransfer(fixture.DestinationQueue, intent.IntentToken)]));
 
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
             fixture.DestinationQueue, fixture.SourceQueue, transferId)).IsNull();
         await Assert.That(fixture.Database.InspectMessage(RemoteTransferDatabase.RootPrincipal,

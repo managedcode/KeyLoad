@@ -37,7 +37,7 @@ internal static class GraphLabelFrontierPublicBounds
         await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.BudgetExceeded, detail), result.Problem);
         await GraphLabelFrontierPublicReads.MatrixAsync(admin, reader, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true)).Value;
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(DetailKey).GetString()).IsEqualTo(SafeDetail);
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingClusterScenario.PrivateMarker);

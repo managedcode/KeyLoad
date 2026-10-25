@@ -64,8 +64,8 @@ internal static class AnalyticsStoreLinks
             var definition = stored
                 ? ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, link.Collection, ResourceKind.Collection)
                 : database.Resource(view, partition, link.Collection, ResourceKind.Collection);
-            var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
-                link.Collection, definition) ?? throw Errors.Fail(ErrorCode.NotFound, Unavailable);
+            var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
+                link.Collection, definition)).Value ?? throw Errors.Fail(ErrorCode.NotFound, Unavailable);
             EntityRef bound;
             if (stored)
             {

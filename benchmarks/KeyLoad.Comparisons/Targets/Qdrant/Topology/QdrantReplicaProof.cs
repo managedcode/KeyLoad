@@ -37,7 +37,7 @@ internal static class QdrantReplicaProof
                 var proof = topology == ComparisonTopology.Standalone
                     ? await ReadStandaloneAndDelayAsync(client: clients[FirstElementIndex], collection: collection,
                         expectedPoints: expectedPoints, token: deadline.Token, pollInterval: lifecycle.HttpReadinessPollInterval, timeProvider: timeProvider)
-                    : await ReadReplicatedAsync(clients, collection, expectedPoints, required, topology, deadline.Token);
+                    : (await ReadReplicatedAsync(clients, collection, expectedPoints, required, topology, deadline.Token)).Value;
                 if (proof is not null)
                 {
                     return proof;
@@ -74,7 +74,7 @@ internal static class QdrantReplicaProof
 
     private static async Task<QdrantReplicaResult?> ReadStandaloneAndDelayAsync(HttpClient client, string collection, int expectedPoints, TimeSpan pollInterval, TimeProvider timeProvider, CancellationToken token)
     {
-        var proof = await ReadStandaloneAsync(client, collection, expectedPoints, token);
+        var proof = (await ReadStandaloneAsync(client, collection, expectedPoints, token)).Value;
         if (proof is null)
         {
             await Task.Delay(pollInterval, timeProvider, token);
@@ -83,7 +83,7 @@ internal static class QdrantReplicaProof
         return proof;
     }
 
-    private static async Task<QdrantReplicaResult?> ReadStandaloneAsync(HttpClient client, string collection,
+    private static async Task<global::ManagedCode.Communication.Result<QdrantReplicaResult?>> ReadStandaloneAsync(HttpClient client, string collection,
         int expectedPoints, CancellationToken token)
     {
         const string RootHttpPath = "/";
@@ -95,16 +95,16 @@ internal static class QdrantReplicaProof
         QdrantNodeProof.VerifySingleNode(cluster);
         if (cluster.RootElement.GetProperty(ResultField).GetProperty(StatusField).GetString() == DisabledState)
         {
-            return QdrantNodeProof.ReadDisabled(root.RootElement, cluster.RootElement, collectionInfo.RootElement, expectedPoints);
+            return ((QdrantReplicaResult?)((QdrantNodeProof.ReadDisabled(root.RootElement, cluster.RootElement, collectionInfo.RootElement, expectedPoints)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<QdrantReplicaResult?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<QdrantReplicaResult?>.FailNotFound(nameof(ReadStandaloneAsync));
         }
         using var local = await GetJsonAsync(client, CollectionsPath + collection + CollectionClusterSuffix, token);
         var proof = QdrantNodeProof.ReadNode(root.RootElement, cluster.RootElement, collectionInfo.RootElement,
             local.RootElement, expectedPoints, ComparisonTopology.Standalone);
         return QdrantNodeProof.Ready([proof], ComparisonTopology.Standalone, SingleItemCount)
-            ? BuildResult([proof], expectedPoints, SingleItemCount) : null;
+            ? global::ManagedCode.Communication.Result<QdrantReplicaResult?>.Succeed(((QdrantReplicaResult?)(BuildResult([proof], expectedPoints, SingleItemCount)))) : global::ManagedCode.Communication.Result<QdrantReplicaResult?>.FailNotFound(nameof(ReadStandaloneAsync));
     }
 
-    private static async Task<QdrantReplicaResult?> ReadReplicatedAsync(HttpClient[] clients, string collection,
+    private static async Task<global::ManagedCode.Communication.Result<QdrantReplicaResult?>> ReadReplicatedAsync(HttpClient[] clients, string collection,
         int expectedPoints, int requiredNodes, ComparisonTopology topology, CancellationToken token)
     {
         var proofs = new List<(string Version, string Peer, string[] Peers, int Copies, int Shard)>();
@@ -115,9 +115,9 @@ internal static class QdrantReplicaProof
 
         if (!QdrantNodeProof.Ready(proofs, topology, requiredNodes))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<QdrantReplicaResult?>.FailNotFound(nameof(ReadReplicatedAsync));
         }
-        return BuildResult(proofs, expectedPoints, requiredNodes);
+        return global::ManagedCode.Communication.Result<QdrantReplicaResult?>.Succeed(((QdrantReplicaResult?)(BuildResult(proofs, expectedPoints, requiredNodes))));
     }
 
     private static QdrantReplicaResult BuildResult(

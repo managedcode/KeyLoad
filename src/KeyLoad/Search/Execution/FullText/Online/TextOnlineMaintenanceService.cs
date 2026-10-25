@@ -146,7 +146,7 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
 
     public OnlineTextPublicationWork? TryRequireCheckpointWork(CommitProjectionBatchRequest request,
         string principalId, DateTimeOffset originalExpiry)
-        => sessions.TryMatchCheckpoint(request, principalId, originalExpiry);
+        => (sessions.TryMatchCheckpoint(request, principalId, originalExpiry)).Value;
 
     public ValueTask DisposeAsync()
     {
@@ -161,5 +161,5 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
 
     internal TextSelectedProjectionLease? AcquireCurrent(KeyLoad.Storage.IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, SearchRequest request, ReadExecutionBudget budget)
-        => catalog.AcquireCurrent(view, principal, resource, request, budget);
+        => (catalog.AcquireCurrent(view, principal, resource, request, budget)).Value;
 }

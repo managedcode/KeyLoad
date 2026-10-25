@@ -59,7 +59,7 @@ internal static class GraphReferenceLifetimeRefusals
         var outcome = profile.Source.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(
             DropRuntimeProtocol.Partition, PartitionStoreProtocol.AdministratorId, command.CommandId)));
         await Assert.That(outcome).IsNotNull();
-        await Assert.That(Errors.Code(outcome!.Result.Problem)).IsEqualTo(ErrorCode.OwnershipLost);
+        await Assert.That(Errors.Code(outcome!.Result.Problem).Value).IsEqualTo(ErrorCode.OwnershipLost);
         var committed = QueueWholeFlowStorage.Bytes(profile.Source.Store);
         var replay = await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, payload, token);

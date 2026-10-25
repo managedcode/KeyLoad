@@ -87,7 +87,7 @@ internal sealed class JournalPrincipalPolicyTests
 
         var principalResult = Apply(database.Database, OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(attemptedPrincipal), RootPrincipalId);
-        await Assert.That(Errors.Code(principalResult.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(principalResult.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
 
         var after = ReadPrincipal(database)!;
         await Assert.That(after.TenantId).IsEqualTo(before.TenantId);
@@ -104,7 +104,7 @@ internal sealed class JournalPrincipalPolicyTests
         var keyResult = Apply(database.Database, OperationKind.ConfigureApiKey,
             new ConfigureApiKeyRequest(new ApiKeyRecord(ForbiddenCredentialId,
                 RuntimeJournalIdentity.ProtectedPrincipalId, ValidVerifier)), RootPrincipalId);
-        await Assert.That(Errors.Code(keyResult.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(keyResult.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         var credential = database.Database.Store.Read(view => view.GetRecord<ApiKeyRecord>(KeySpace.ApiKey(ForbiddenCredentialId)));
         await Assert.That(credential).IsNull();
     }

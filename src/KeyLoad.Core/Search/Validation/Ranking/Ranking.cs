@@ -16,7 +16,7 @@ public static class Ranking
 
         var phase = OperationProtocol.Payload<Bm25CorpusPublicationPhaseCommand>(operation);
         engine.RequireBm25Subject(view, administrator, phase, operation.Timestamp);
-        if (Errors.Code(previous.Result.Problem) is not null)
+        if (Errors.Code(previous.Result.Problem).Value is not null)
         {
             return;
         }

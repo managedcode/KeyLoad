@@ -8,27 +8,6 @@ namespace KeyLoad.InternalSerialization;
 // Inspect the selected library's actual generated surrogates; do not mirror their wire contracts.
 internal static class CommunicationContracts
 {
-    internal static Type? Surrogate(Type type)
-    {
-        if (type == typeof(Command<DatabaseCommand>))
-        {
-            return typeof(CommandTSurrogate<DatabaseCommand>);
-        }
-        if (type == typeof(Result<object>))
-        {
-            return typeof(ResultTSurrogate<object>);
-        }
-        if (type == typeof(Problem))
-        {
-            return typeof(ProblemSurrogate);
-        }
-        return type == typeof(CommandMetadata) ? typeof(CommandMetadataSurrogate) : null;
-    }
-
-    internal static bool IsSurrogate(Type type)
-        => type == typeof(CommandTSurrogate<DatabaseCommand>) || type == typeof(ResultTSurrogate<object>)
-            || type == typeof(ProblemSurrogate) || type == typeof(CommandMetadataSurrogate);
-
     internal static bool TryProject(object value, out object? surrogate)
     {
         surrogate = value switch
@@ -50,7 +29,7 @@ internal static class CommunicationContracts
         }
         if (result.IsFailed)
         {
-            _ = Errors.Code(result.Problem);
+            _ = Errors.Code(result.Problem).Value;
         }
         return new ResultTSurrogateConverter<object>().ConvertToSurrogate(result);
     }

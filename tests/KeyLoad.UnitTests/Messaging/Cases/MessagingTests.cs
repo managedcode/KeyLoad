@@ -27,7 +27,7 @@ internal sealed class MessagingTests
         {
             CommandId = changedId,
             Effects = [new PutDocument("orders", "o2", "{}", 0)]
-        }, id: changedId).Problem)).IsEqualTo(ErrorCode.Conflict);
+        }, id: changedId).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o2"))).IsNull();
     }
     [Test]
@@ -47,7 +47,7 @@ internal sealed class MessagingTests
         var r2 = Guid.NewGuid();
         var second = await Assert.That(db.Submit(OperationKind.Receive, new ReceiveRequest(r2, lane, LeaseSeconds: 1), id: r2, time: now.AddSeconds(2)).Get<ReceiveResult>().Deliveries).HasSingleItem();
         var ackId = Guid.NewGuid();
-        await Assert.That(Errors.Code(db.Submit(OperationKind.Delivery, new DeliveryCommand(ackId, lane, first.Token, DeliveryAction.Ack), id: ackId, time: now.AddSeconds(2)).Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.Delivery, new DeliveryCommand(ackId, lane, first.Token, DeliveryAction.Ack), id: ackId, time: now.AddSeconds(2)).Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(second.LeaseVersion).IsEqualTo(first.LeaseVersion + 1);
         var r3 = Guid.NewGuid();
         await Assert.That(db.Submit(OperationKind.Receive, new ReceiveRequest(r3, lane, LeaseSeconds: 1), id: r3, time: now.AddSeconds(4)).Get<ReceiveResult>().Deliveries).IsEmpty();
@@ -66,7 +66,7 @@ internal sealed class MessagingTests
         db.Commit(new EnqueueMessage("jobs", "first", "{}"));
         var id = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition,
-            [new PutDocument("orders", "o1", "{}"), new EnqueueMessage("jobs", "second", "{}")]), id: id).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            [new PutDocument("orders", "o1", "{}"), new EnqueueMessage("jobs", "second", "{}")]), id: id).Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))).IsNull();
     }
     [Test]
@@ -85,7 +85,7 @@ internal sealed class MessagingTests
         var failedId = Guid.NewGuid();
         var failed = db.Submit(OperationKind.Processing, new ProcessingRequest(failedId, lane, delivery.Token, "worker", 1,
             [new EnqueueMessage("jobs", "rolled-back", "{}"), new PutDocument("orders", "missing", "{}", 9)]), id: failedId);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(db.Database.InspectMessage("root", lane, "input")!.Metadata.State).IsEqualTo(MessageState.Leased);
         await Assert.That(db.Database.InspectMessage("root", lane, "rolled-back")).IsNull();
         var id = Guid.NewGuid();

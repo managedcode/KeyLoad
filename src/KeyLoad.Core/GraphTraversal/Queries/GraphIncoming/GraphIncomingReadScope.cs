@@ -31,7 +31,7 @@ internal static class GraphIncomingReadScope
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, graph), grant);
         var metadata = budget.CreateView(view, grant);
-        var lifetime = ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, graph, resource);
+        var lifetime = (ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, graph, resource)).Value;
         if (resource is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, MissingResource);
@@ -54,7 +54,7 @@ internal static class GraphIncomingReadScope
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection), grant);
         var metadata = budget.CreateView(view, grant);
-        var lifetime = ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, collection, resource);
+        var lifetime = (ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, collection, resource)).Value;
         if (resource is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, MissingResource);

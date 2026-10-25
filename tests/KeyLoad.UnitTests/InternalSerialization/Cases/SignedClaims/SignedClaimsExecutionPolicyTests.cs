@@ -20,7 +20,7 @@ internal sealed class SignedClaimsExecutionPolicyTests
         var lower = SignedClaimsExecutionPolicyFlow.Borrow(database, shortOptions);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => lower.Verify<DeliveryClaims>(delivery.Token));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(Errors.Code(SignedClaimsExecutionPolicyFlow.Acknowledge(lower, lane, delivery).Problem))
+        await Assert.That(Errors.Code(SignedClaimsExecutionPolicyFlow.Acknowledge(lower, lane, delivery).Problem).Value)
             .IsEqualTo(ErrorCode.TokenInvalidated);
         var after = SignedClaimsExecutionPolicyFlow.CaptureLease(database, delivery);
         for (var index = 0; index < before.Length; index++)

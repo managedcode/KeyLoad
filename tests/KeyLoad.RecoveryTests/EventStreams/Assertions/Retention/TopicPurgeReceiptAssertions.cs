@@ -14,7 +14,7 @@ internal static class TopicPurgeReceiptAssertions
     internal static async Task VerifyAsync(IAtomicStore store, Command<DatabaseCommand> operation, Result<object> outcome, long position, bool pinned)
     {
         await Assert.That(store.Position).IsEqualTo(position);
-        await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(pinned ? ErrorCode.ResourceExhausted : (ErrorCode?)null);
+        await Assert.That(Errors.Code(outcome.Problem).Value).IsEqualTo(pinned ? ErrorCode.ResourceExhausted : (ErrorCode?)null);
         var stored = OutcomeStoreOracle.ReadStored(store, operation)!;
         if (pinned)
         {

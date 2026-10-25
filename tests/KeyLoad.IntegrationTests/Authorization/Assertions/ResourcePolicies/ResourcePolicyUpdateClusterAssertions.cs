@@ -46,9 +46,9 @@ internal static class ResourcePolicyUpdateClusterAssertions
         await Assert.That(document.Value.RedactedFields).Contains(ResourcePolicyUpdateClusterProtocol.SecretPath);
         await Assert.That(document.Value.Json.Contains(ResourcePolicyUpdateClusterProtocol.SecretValue,
             StringComparison.Ordinal)).IsFalse();
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.QueryAst,
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.QueryAst,
             ResourcePolicyUpdateClusterScenario.SecretQuery(scenario.Partition), cancellationToken),
-            ErrorCode.PermissionDenied, dispatched: true);
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     internal static async Task AssertPolicyAllowedAsyncFromInitialAsync(ClusterFixture fixture,

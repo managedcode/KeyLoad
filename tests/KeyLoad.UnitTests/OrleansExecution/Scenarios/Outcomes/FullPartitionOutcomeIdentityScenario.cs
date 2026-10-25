@@ -70,8 +70,8 @@ internal static class FullPartitionOutcomeIdentityScenario
     {
         var firstResult = database.Database.Apply(firstOperation);
         var secondResult = database.Database.Apply(secondOperation);
-        await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
-        await Assert.That(Errors.Code(secondResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(firstResult.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(secondResult.Problem).Value).IsNull();
         var firstReceipt = OrleansSerialization.Serialize(firstResult.Get<CommitReceipt>());
         var secondReceipt = OrleansSerialization.Serialize(secondResult.Get<CommitReceipt>());
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(database.Store, firstPartition,
@@ -93,8 +93,8 @@ internal static class FullPartitionOutcomeIdentityScenario
             ChangedFirstJson));
         var changedSecond = database.Database.Apply(ChangedOperation(database.Database, secondOperation, secondPartition, SecondResource,
             ChangedSecondJson));
-        await Assert.That(Errors.Code(changedFirst.Problem)).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(Errors.Code(changedSecond.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changedFirst.Problem).Value).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changedSecond.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(database.Store, firstPartition,
             firstOperation.CommandId, firstReceipt);
         await FullPartitionOutcomeIdentityAssertions.AssertStoredOutcomeAsync(database.Store, secondPartition,

@@ -27,7 +27,7 @@ public static class SiloLocalOperation
     internal static bool IsSiloLocalProjection(this DatabaseEngine engine, IKeyValueView view, Command<DatabaseCommand> operation)
     {
         var principal = engine.Principal(view, operation.UserId!, engine.Clock.GetUtcNow());
-        engine.AuthorizeOperation(view, principal, operation);
+        _ = (engine.AuthorizeOperation(view, principal, operation)).Value;
         return operation.Value!.Kind == OperationKind.CommitProjectionBatch ? IsSiloLocalCheckpoint(view, OperationProtocol.Payload<CommitProjectionBatchRequest>(operation)) : IsSiloLocalConsumer(ProjectionConsumerIdentity.ProjectionConsumer(view, OperationProtocol.Payload<ReleaseProjectionConsumerRequest>(operation).Consumer).Definition);
     }
 

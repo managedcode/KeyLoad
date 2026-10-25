@@ -44,8 +44,8 @@ internal sealed class KeyLoadClientTransport
                 .ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                var problem = await BoundedProblemReader.ReadAsync(response.Content, JsonDefaults.Options,
-                    execution.Value.MaximumProblemBodyBytes, cancellationToken).ConfigureAwait(false);
+                var problem = (await BoundedProblemReader.ReadAsync(response.Content, JsonDefaults.Options,
+                    execution.Value.MaximumProblemBodyBytes, cancellationToken).ConfigureAwait(false)).Value;
                 return Result.Fail(problem ?? Errors.Problem(ErrorCode.UnknownWriteOutcome,
                     ClientTransportMessages.ServerResponseUnavailable));
             }
@@ -83,8 +83,8 @@ internal sealed class KeyLoadClientTransport
                 .ConfigureAwait(false);
             if (!response.IsSuccessStatusCode)
             {
-                var problem = await BoundedProblemReader.ReadAsync(response.Content, JsonDefaults.Options,
-                    execution.Value.MaximumProblemBodyBytes, cancellationToken).ConfigureAwait(false);
+                var problem = (await BoundedProblemReader.ReadAsync(response.Content, JsonDefaults.Options,
+                    execution.Value.MaximumProblemBodyBytes, cancellationToken).ConfigureAwait(false)).Value;
                 return problem ?? Errors.Problem(write ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost,
                     ClientTransportMessages.ServerResponseUnavailable);
             }

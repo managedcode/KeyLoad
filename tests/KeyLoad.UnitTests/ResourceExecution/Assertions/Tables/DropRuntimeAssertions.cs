@@ -69,7 +69,7 @@ internal static class DropRuntimeAssertions
             await SameAsync(Filter(before[index].Rows, allowed), Filter(after[index].Rows, allowed));
             var outcome = profile.Hosts.Nodes[index].Database.Store.Read(view => view.GetRecord<StoredOutcome>(key));
             await Assert.That(outcome).IsNotNull();
-            await Assert.That(Errors.Code(outcome!.Result.Problem)).IsEqualTo((ErrorCode?)error);
+            await Assert.That(Errors.Code(outcome!.Result.Problem).Value).IsEqualTo((ErrorCode?)error);
             await Assert.That(outcome.Result.Value).IsNull();
             await Assert.That(outcome.PreparedCommand.CommandId).IsEqualTo(commandId);
             await Assert.That(outcome.CanonicalSequence).IsEqualTo(before[index].Applied + DropRuntimeProtocol.NextCommit);
@@ -94,7 +94,7 @@ internal static class DropRuntimeAssertions
             await Assert.That(outcome.PreparedCommand.UserId).IsEqualTo(PartitionStoreProtocol.AdministratorId);
             await Assert.That(outcome.PreparedCommand.Value!.Kind).IsEqualTo(OperationKind.DropTable);
             await Assert.That(outcome.PreparedCommand.Value.Input.Span.SequenceEqual(OrleansSerialization.Serialize(request))).IsTrue();
-            await Assert.That(Errors.Code(outcome.Result.Problem)).IsEqualTo(error);
+            await Assert.That(Errors.Code(outcome.Result.Problem).Value).IsEqualTo(error);
             if (original is not null)
             {
                 await Assert.That(bytes.SequenceEqual(original)).IsTrue();

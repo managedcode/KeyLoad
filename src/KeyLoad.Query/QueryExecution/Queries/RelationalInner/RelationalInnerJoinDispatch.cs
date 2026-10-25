@@ -16,7 +16,7 @@ internal static class RelationalInnerJoinDispatch
                 if (request.Query.InnerJoin is not { } join)
                 {
                     var page = owner.ExecuteView(view, principal, leftResource, request, hash, budget, clock);
-                    observation = owner.CaptureQueryReadCut(principal, leftResource, request, hash, page, budget);
+                    observation = (owner.CaptureQueryReadCut(principal, leftResource, request, hash, page, budget)).Value;
                     return page;
                 }
                 database.Authorization.Require(principal, request.Partition, join.Collection,

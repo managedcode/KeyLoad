@@ -6,19 +6,19 @@ namespace KeyLoad.Clustering;
 /// <summary>Reuses Core admission at the actual command owner without another physical catalog.</summary>
 internal static class CommandWorkAdmission
 {
-    internal static Command<DatabaseCommand>? Bind(DatabaseEngine database, DecodedGrainRequest request, PrincipalRecord principal,
+    internal static global::ManagedCode.Communication.Result<Command<DatabaseCommand>?> Bind(DatabaseEngine database, DecodedGrainRequest request, PrincipalRecord principal,
         TimeProvider clock, CapabilityWorkLifetime? work, ReadExecutionBudget budget, Command<DatabaseCommand>? originalIntent = null)
     {
         if (work is null)
         {
-            return null; // Direct component execution has no hosted resource-lifetime binding.
+            return global::ManagedCode.Communication.Result<Command<DatabaseCommand>?>.FailNotFound(nameof(Bind)); // Direct component execution has no hosted resource-lifetime binding.
         }
         var kind = request.Envelope.CommandKind
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         if (kind == OperationKind.DropTable || CommandResultBinding.IsResourceFreeCommandWork(kind))
         {
             work.Bind([]); // Dropping a resource cannot retain its closing lifetime.
-            return null;
+            return global::ManagedCode.Communication.Result<Command<DatabaseCommand>?>.FailNotFound(nameof(Bind));
         }
         var operation = originalIntent ?? (CarriesVerifiedOperation(kind)
             ? database.OwnCommand(GrainPayload.Read<Command<DatabaseCommand>>(request.Payload))
@@ -28,7 +28,7 @@ internal static class CommandWorkAdmission
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
         database.ValidateResourceEffectSubmission(operation, clock.GetUtcNow(), work, budget);
-        return operation;
+        return global::ManagedCode.Communication.Result<Command<DatabaseCommand>?>.Succeed(((Command<DatabaseCommand>?)(operation)));
     }
 
     internal static CommandWorkProof Capture(DecodedGrainRequest request,

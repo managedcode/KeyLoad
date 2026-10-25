@@ -36,13 +36,13 @@ internal sealed class JsonTextSubscriptionReplayTests
         await Assert.That(deliveries.Select(delivery => delivery.Event.Data.EventId))
             .IsEquivalentTo(new[] { FirstEventId, SecondEventId, ThirdEventId }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original);
-        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
 
         var ack = Guid.NewGuid();
         db.Submit(OperationKind.SubscriptionDelivery,
             new SubscriptionDeliveryCommand(ack, subscription, deliveries[0].Token, DeliveryAction.Ack),
             id: ack, time: now).Get<CommitReceipt>();
-        await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id, time: now).Problem))
+        await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id, time: now).Problem).Value)
             .IsEqualTo(ErrorCode.StaleLease);
     }
 
@@ -66,7 +66,7 @@ internal sealed class JsonTextSubscriptionReplayTests
             new SeekSubscriptionRequest(seek, subscription, 1, SubscriptionStart.FromBeginning),
             id: seek, time: now.AddSeconds(1)).Get<SubscriptionInfo>();
         await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id,
-            time: now.AddSeconds(1)).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+            time: now.AddSeconds(1)).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
     }
 
     private static SubscriptionRef Configure(TestDatabase db)

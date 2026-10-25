@@ -111,7 +111,7 @@ internal static class SourceManifestChildSettlement
         {
             await retained.SettleAsync(process, options, timeProvider, failures).ConfigureAwait(false);
         }
-        return await retained.JoinedAsync(process, pending, failures, caller.Token).ConfigureAwait(false);
+        return (await retained.JoinedAsync(process, pending, failures, caller.Token).ConfigureAwait(false)).Value;
     }
 
     private static async Task<bool> InterruptAfterReadinessAsync(SourceManifestChildOriginals retained,

@@ -58,7 +58,7 @@ internal static class AnalyticsCommandIdentityFlow
             var changed = Issue(owner, D.Request(owner.Source, id, delete, true, changed: true));
             await Assert.That(changed.Value!.Fingerprint == originalIdentity).IsFalse();
             var refused = owner.Submit(changed);
-            await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.Conflict);
+            await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.Conflict);
             await Assert.That(refused.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");
 
             await Assert.That(refused.Value).IsNull();

@@ -24,5 +24,8 @@ public static class OnlineTextPublicationCommands
         return OperationProtocol.Result(command.Result);
     }
 
-    internal static OnlineTextOutcomeAuthority? CaptureOnlineTextOutcomeAuthority(Command<DatabaseCommand> operation) => operation.Value!.Kind == OperationKind.OnlineTextPublicationPhase ? OnlineTextPublicationValidation.Authority(operation.UserId!, OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(operation)) : null;
+    internal static global::ManagedCode.Communication.Result<OnlineTextOutcomeAuthority?> CaptureOnlineTextOutcomeAuthority(Command<DatabaseCommand> operation)
+        => operation.Value!.Kind == OperationKind.OnlineTextPublicationPhase
+            ? global::ManagedCode.Communication.Result<OnlineTextOutcomeAuthority?>.Succeed(OnlineTextPublicationValidation.Authority(operation.UserId!, OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(operation)))
+            : global::ManagedCode.Communication.Result<OnlineTextOutcomeAuthority?>.FailNotFound(nameof(CaptureOnlineTextOutcomeAuthority));
 }

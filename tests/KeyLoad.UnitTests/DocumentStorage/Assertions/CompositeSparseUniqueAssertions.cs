@@ -43,7 +43,7 @@ internal static class CompositeSparseUniqueAssertions
     {
         var before = CaptureDomain(db);
         var result = Submit(db, new PutDocument(Collection, id, json, 0));
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(included ? ErrorCode.Conflict : (ErrorCode?)null);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(included ? ErrorCode.Conflict : (ErrorCode?)null);
         if (included)
         {
             await Assert.That(CaptureDomain(db).AsSpan().SequenceEqual(before)).IsTrue();

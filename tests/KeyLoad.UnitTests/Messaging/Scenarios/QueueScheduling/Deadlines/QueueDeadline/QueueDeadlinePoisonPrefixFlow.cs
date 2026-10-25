@@ -141,7 +141,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
                 var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation,
                     lane.Partition.AtomicPartitionId, checked(database.LastApplied + QueueDeadlinePoisonPrefixProtocol.First)), [new(QueueDeadlineProtocol.ReceiptKind, lane.Queue, hint.Mutation.MessageId, hint.Mutation.ExpectedStateVersion + QueueDeadlinePoisonPrefixProtocol.First)], DurabilityProfile.ProcessDurable, 1);
                 var result = database.Apply(operation);
-                await Assert.That(Errors.Code(result.Problem)).IsNull();
+                await Assert.That(Errors.Code(result.Problem).Value).IsNull();
 
                 await Assert.That(OrleansSerialization.Serialize(result.Get<CommitReceipt>()).SequenceEqual(
                     OrleansSerialization.Serialize(expected))).IsTrue();

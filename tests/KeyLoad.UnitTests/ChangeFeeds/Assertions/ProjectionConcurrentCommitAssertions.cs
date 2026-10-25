@@ -16,15 +16,15 @@ internal static class ProjectionConcurrentCommitAssertions
         bool winnerIsFirst;
         if (changed)
         {
-            await Assert.That((Errors.Code(a.Problem) is null) != (Errors.Code(b.Problem) is null)).IsTrue();
-            winnerIsFirst = Errors.Code(a.Problem) is null;
+            await Assert.That((Errors.Code(a.Problem).Value is null) != (Errors.Code(b.Problem).Value is null)).IsTrue();
+            winnerIsFirst = Errors.Code(a.Problem).Value is null;
             await ProjectionConsumerIdentityAssertions.ExactAsync(winnerIsFirst ? b : a,
                 Result<object>.Fail(Errors.Problem(ErrorCode.Conflict, ConflictDetail)));
         }
         else
         {
-            await Assert.That(Errors.Code(a.Problem)).IsNull();
-            await Assert.That(Errors.Code(b.Problem)).IsNull();
+            await Assert.That(Errors.Code(a.Problem).Value).IsNull();
+            await Assert.That(Errors.Code(b.Problem).Value).IsNull();
             await Assert.That(a.Get<ProjectionBatchResult>().AlreadyProcessed != b.Get<ProjectionBatchResult>().AlreadyProcessed).IsTrue();
             winnerIsFirst = !a.Get<ProjectionBatchResult>().AlreadyProcessed;
         }

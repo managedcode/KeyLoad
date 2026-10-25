@@ -27,9 +27,9 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
         switch (scenario)
         {
             case Scenario.PointRead:
-                return new(Document: await ReadAsync(document, cancellationToken));
+                return new(Document: (await ReadAsync(document, cancellationToken)).Value);
             case Scenario.StreamRead:
-                return new(Event: await KeyLoadEventOperations.ReadAsync(client, partition, document, cancellationToken));
+                return new(Event: (await KeyLoadEventOperations.ReadAsync(client, partition, document, cancellationToken)).Value);
             case Scenario.StreamAppend:
                 await KeyLoadEventOperations.AppendAsync(client, partition, document, expectedCopies, cancellationToken);
                 return new();
@@ -90,15 +90,15 @@ internal sealed class KeyLoadComparisonSession(KeyLoadClient client, PartitionRe
 
     private sealed record CorpusQueryMarker;
 
-    public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         var found = KeyLoadClientResults.Success(await client.GetAsync(
             new(partition, ComparisonIdentities.DocumentsCollection, document.Id), cancellationToken)).Document;
-        return found is null ? null : new(found.Reference.Id, found.Json);
+        return found is null ? global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<FoundDocument?>.Succeed((FoundDocument?)(new(found.Reference.Id, found.Json)));
     }
 
-    public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
-        => KeyLoadEventOperations.ReadAsync(client, partition, document, cancellationToken);
+    public async Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+        => (await KeyLoadEventOperations.ReadAsync(client, partition, document, cancellationToken)).Value;
 
     private async Task<OperationResult> SearchVectorAsync(BenchmarkDocument document,
         CancellationToken cancellationToken)

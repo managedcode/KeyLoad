@@ -58,7 +58,7 @@ internal static class EventAppendRecoveryOracle
                 EventAppendCrashContract.ChangedJson, 0)]
         };
         var conflict = database.Apply(database.CreateCommand(original.Value!.Kind, original.CommandId, original.UserId!, new DateTimeOffset(original.Timestamp), JsonSerializer.Serialize(changedRequest, JsonDefaults.Options)));
-        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(conflict.Problem?.Detail).IsEqualTo(ContentConflict);
         await Assert.That(store.Position).IsEqualTo(stablePosition);
         await EventAppendStateAssertions.SameBytesAsync(stable, store);

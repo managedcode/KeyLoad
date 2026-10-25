@@ -25,7 +25,7 @@ internal static class CanonicalConnectionDispatch
                         connection.Token);
                     var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
                     connection.Token.ThrowIfCancellationRequested();
-                    result = PublicReadResponse.Create(operation.ReadKind, operation.CommandKind, value);
+                    result = (PublicReadResponse.Create(operation.ReadKind, operation.CommandKind, value)).Value;
                 }, failures);
             }, failures);
         }, failures);

@@ -55,7 +55,7 @@ internal sealed class McpDocumentParityTests(ClusterFixture fixture)
             fixture.AdminKey, deadline.Token);
         var changed = scenario.Command(command.CommandId, McpDocumentProtocol.ConflictingJson);
         var rejected = await session.CallAsync(McpCallerTools.DocumentsCommit, changed, deadline.Token);
-        var rejectedId = await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.Conflict, dispatched: true);
+        var rejectedId = (await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.Conflict, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(rejected, fixture.AdminKey, McpDocumentProtocol.ConflictValue);
         var httpRejected = await sdk.CommitAsync(changed, deadline.Token);
         await Assert.That(httpRejected.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));

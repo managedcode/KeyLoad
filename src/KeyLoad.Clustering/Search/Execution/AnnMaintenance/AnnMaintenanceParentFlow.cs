@@ -71,7 +71,7 @@ internal static class AnnMaintenanceParentFlow
 
     private static async Task<ProjectionConsumerInfo> ConfigureOriginalAsync(AnnMaintenanceChildCalls children, AnnMaintenanceRequest request, CancellationToken token)
     {
-        var initial = await AnnMaintenanceInitialEnrollment.ReadAsync(children, request, token).ConfigureAwait(true);
+        var initial = (await AnnMaintenanceInitialEnrollment.ReadAsync(children, request, token).ConfigureAwait(true)).Value;
         var configureId = AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Configure, EmptySequence);
         var configured = await children.CommandAsync<ConfigureProjectionConsumerRequest, ProjectionConsumerInfo>(OperationKind.ConfigureProjectionConsumer,
             new(configureId, request.Consumer, new(request.IndexGeneration, [], [.. MutationKinds])

@@ -54,7 +54,7 @@ internal static class DocumentSessionReadClusterAuthorization
         await Assert.That(denied.Value).IsNull();
         await Assert.That(denied.Problem?.StatusCode).IsEqualTo(Errors.Status(ErrorCode.PermissionDenied));
         var official = await mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, minimum), token);
-        await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(official, identity.Secret, FirstJson);
         var call = SqlClusterProtocol.Call(reference.Partition, McpCallerTools.DocumentsGet,
             new GetDocumentRequest(reference, minimum));
@@ -64,7 +64,7 @@ internal static class DocumentSessionReadClusterAuthorization
         await Assert.That(sql.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await Assert.That(sql.Problem?.StatusCode).IsEqualTo(Errors.Status(ErrorCode.PermissionDenied));
         var sqlOfficial = await mcp.CallAsync(SqlOperationProtocol.ToolName, call, token);
-        await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, identity.Secret, FirstJson);
         var unchanged = await PublicReadAssertions.DocumentAsync(await admin.GetAsync(reference, minimum, token));
         var expected = new DocumentResult(stored, First, FirstJson, false, []);

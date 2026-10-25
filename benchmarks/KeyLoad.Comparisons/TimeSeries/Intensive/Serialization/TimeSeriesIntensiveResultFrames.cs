@@ -24,11 +24,11 @@ internal static class TimeSeriesIntensiveResultFrames
     {
         frame.Field(TimeSeriesIntensiveFrameLabels.Count, aggregate.Count);
         frame.Field(TimeSeriesIntensiveFrameLabels.SumBits, BitConverter.DoubleToInt64Bits(aggregate.Sum));
-        frame.Optional(TimeSeriesIntensiveFrameLabels.MinimumBits, Bits(aggregate.Minimum));
-        frame.Optional(TimeSeriesIntensiveFrameLabels.MaximumBits, Bits(aggregate.Maximum));
-        frame.Optional(TimeSeriesIntensiveFrameLabels.AverageBits, Bits(aggregate.Average));
+        frame.Optional(TimeSeriesIntensiveFrameLabels.MinimumBits, (Bits(aggregate.Minimum)).Value);
+        frame.Optional(TimeSeriesIntensiveFrameLabels.MaximumBits, (Bits(aggregate.Maximum)).Value);
+        frame.Optional(TimeSeriesIntensiveFrameLabels.AverageBits, (Bits(aggregate.Average)).Value);
     }
 
-    private static long? Bits(double? value) => value.HasValue ? BitConverter.DoubleToInt64Bits(value.Value) : null;
+    private static global::ManagedCode.Communication.Result<long?> Bits(double? value) => value.HasValue ? global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(BitConverter.DoubleToInt64Bits(value.Value)))) : global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(Bits));
 
 }

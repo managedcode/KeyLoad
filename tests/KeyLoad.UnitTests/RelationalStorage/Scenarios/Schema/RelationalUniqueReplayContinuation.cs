@@ -36,7 +36,7 @@ internal static class RelationalUniqueReplayContinuation
         var issued = db.Database.EvaluationClock.GetUtcNow();
         var failed = Request(db, id, ConflictingThird);
         var failure = db.Submit(OperationKind.Batch, failed, id: id, time: issued);
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failure.Problem).Value).IsEqualTo(ErrorCode.Conflict);
 
         await Assert.That(failure.Value).IsNull();
         await RowsAsync(db, db.Store, db.Database, InitialSecond, InitialRevision, false);

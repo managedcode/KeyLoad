@@ -149,7 +149,7 @@ public static class ChangeFeedsExecutionChangeFeeds
         var bytes = BytesInitialValue;
         foreach (var entry in ProjectionOutbox.ReadOutboxRange(view, request.Partition, after, head.Tail, request.Limit))
         {
-            var visible = engine.VisibleChange(view, principal, resource, request.Partition, entry);
+            var visible = (engine.VisibleChange(view, principal, resource, request.Partition, entry)).Value;
             var change = visible is null ? null : project(resource, visible);
             if (change is null)
             {
@@ -177,11 +177,11 @@ public static class ChangeFeedsExecutionChangeFeeds
         return new(changes.ToImmutableArray(), engine.ChangeCursor(view, principal, resource, request.Partition, through), through, head.Tail, head.FirstAvailable, through < head.Tail, engine.Store.Position);
     }
 
-    internal static AuthorizedDocumentChange? VisibleChange(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, OutboxEntry entry)
+    internal static global::ManagedCode.Communication.Result<AuthorizedDocumentChange?> VisibleChange(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, PartitionRef partition, OutboxEntry entry)
     {
         if (entry.Receipt.Resource != resource.Name || entry.After is not { } after)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<AuthorizedDocumentChange?>.FailNotFound(nameof(VisibleChange));
         }
 
         if (after.Reference.Partition != partition || after.Reference.Collection != resource.Name || after.Reference.Id != entry.Receipt.Id || entry.Before is { } beforeIdentity && beforeIdentity.Reference != after.Reference)
@@ -200,10 +200,10 @@ public static class ChangeFeedsExecutionChangeFeeds
         // Historical grants and current row visibility both constrain a historical projection.
         if (current is null || !engine.Authorization.CanReadRow(principal, current.Access) || !engine.Authorization.CanReadRow(principal, after.Access))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<AuthorizedDocumentChange?>.FailNotFound(nameof(VisibleChange));
         }
 
         var before = entry.Before is { Deleted: false } old && engine.Authorization.CanReadRow(principal, old.Access) ? old : null;
-        return new(entry.Sequence, entry.Commit, entry.CommittedAt, before, after);
+        return global::ManagedCode.Communication.Result<AuthorizedDocumentChange?>.Succeed(((AuthorizedDocumentChange?)(new(entry.Sequence, entry.Commit, entry.CommittedAt, before, after))));
     }
 }

@@ -63,10 +63,10 @@ internal sealed class DocumentCrudRevisionTests
             new PatchDocument(Collection, "missing", [new("/value", PatchKind.Set, "1")], 1));
         var missingDelete = DocumentCrudFixture.Submit(database, new DeleteDocument(Collection, "missing", 1));
 
-        await Assert.That(Errors.Code(invalidJson.Problem)).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(Errors.Code(stalePatch.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
-        await Assert.That(Errors.Code(missingPatch.Problem)).IsEqualTo(ErrorCode.NotFound);
-        await Assert.That(Errors.Code(missingDelete.Problem)).IsEqualTo(ErrorCode.NotFound);
+        await Assert.That(Errors.Code(invalidJson.Problem).Value).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(stalePatch.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(missingPatch.Problem).Value).IsEqualTo(ErrorCode.NotFound);
+        await Assert.That(Errors.Code(missingDelete.Problem).Value).IsEqualTo(ErrorCode.NotFound);
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)).IsEqualTo(initial);
 
         database.Commit(new DeleteDocument(Collection, DocumentId, FirstRevision));
@@ -75,8 +75,8 @@ internal sealed class DocumentCrudRevisionTests
             new PatchDocument(Collection, DocumentId, [new("/value", PatchKind.Set, "1")], SingleDeleteRevision));
         var deleteTombstone = DocumentCrudFixture.Submit(database,
             new DeleteDocument(Collection, DocumentId, SingleDeleteRevision));
-        await Assert.That(Errors.Code(patchTombstone.Problem)).IsEqualTo(ErrorCode.NotFound);
-        await Assert.That(Errors.Code(deleteTombstone.Problem)).IsEqualTo(ErrorCode.NotFound);
+        await Assert.That(Errors.Code(patchTombstone.Problem).Value).IsEqualTo(ErrorCode.NotFound);
+        await Assert.That(Errors.Code(deleteTombstone.Problem).Value).IsEqualTo(ErrorCode.NotFound);
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)).IsEqualTo(tombstone);
 
         DocumentCrudFixture.ConfigureAuthority(database, "event-owned", DocumentAuthority.EventStream);
@@ -86,9 +86,9 @@ internal sealed class DocumentCrudRevisionTests
             new PatchDocument("event-owned", DocumentId, [new("/value", PatchKind.Set, "1")], 1));
         var eventDelete = DocumentCrudFixture.Submit(database,
             new DeleteDocument("event-owned", DocumentId, 1));
-        await Assert.That(Errors.Code(eventPut.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(eventPatch.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(eventDelete.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(eventPut.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(eventPatch.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(eventDelete.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, "event-owned", DocumentId))).IsNull();
     }

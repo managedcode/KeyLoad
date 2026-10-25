@@ -112,8 +112,8 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
     /// <inheritdoc />
     public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
     {
-        var owned = await RequestWorkSettlement.JoinAsync(DisposeAsync().AsTask()).ConfigureAwait(true);
-        var execution = await RequestWorkSettlement.JoinAsync(base.OnDeactivateAsync(reason, cancellationToken)).ConfigureAwait(true);
+        var owned = (await RequestWorkSettlement.JoinAsync(DisposeAsync().AsTask()).ConfigureAwait(true)).Value;
+        var execution = (await RequestWorkSettlement.JoinAsync(base.OnDeactivateAsync(reason, cancellationToken)).ConfigureAwait(true)).Value;
         RequestWorkSettlement.Rethrow(RequestWorkSettlement.Preserve(owned, execution));
     }
 

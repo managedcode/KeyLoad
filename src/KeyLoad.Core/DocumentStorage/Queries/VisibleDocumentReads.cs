@@ -19,7 +19,7 @@ internal static class VisibleDocumentReads
         budget.Check();
         var metadata = budget.CreateView(view);
         var definition = ResourceDefinitionBinding.BindResourceDefinition(metadata, partition, collection, ResourceKind.Collection);
-        var lifetime = ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, collection, definition)
+        var lifetime = (ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, collection, definition)).Value
             ?? throw Errors.Fail(ErrorCode.NotFound, CollectionMissing);
         _ = budget.VisitAll(view, DocumentStorageKeys.Prefix(partition, collection), (key, value) =>
             {

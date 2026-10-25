@@ -14,7 +14,7 @@ internal static class LocalProcessingLateR53Failures
 
     internal static async Task McpAsync(ModelContextProtocol.Protocol.CallToolResult reply, ErrorCode code)
     {
-        await McpCallerAssertions.ErrorAsync(reply, code, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, true)).Value;
         var envelope = reply.StructuredContent ?? throw new InvalidOperationException(LocalProcessingLateR53Protocol.Missing);
         await Assert.That(envelope.GetProperty(McpCallerProtocol.Error).GetProperty(McpCallerProtocol.ProblemDetail).GetString())
             .IsEqualTo(code == ErrorCode.PermissionDenied ? LocalProcessingLateR53Protocol.SafePermission : LocalProcessingLateR53Protocol.SafeGeneric);

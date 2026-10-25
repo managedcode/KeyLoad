@@ -39,7 +39,7 @@ internal sealed class AnnProjectionPinRetentionTests
             sourceTail, LaterValues);
 
         var released = AnnProjectionPinTestSupport.Release(database, consumer);
-        await Assert.That(Errors.Code(released.Problem)).IsNull();
+        await Assert.That(Errors.Code(released.Problem).Value).IsNull();
         await AnnProjectionPinRetentionAssertions.AssertReleasedTokenAsync(database,
             consumer, later, seedTail);
         await AnnProjectionPinRetentionAssertions.AssertReleasedIdentityCannotBeReusedAsync(

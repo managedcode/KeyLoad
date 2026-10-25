@@ -25,7 +25,7 @@ internal static class SafeProjectorOperationClusterErrors
     internal static async Task McpAsync(CallToolResult actual, ErrorCode code,
         SafeProjectorOperationClusterState state)
     {
-        await McpCallerAssertions.ErrorAsync(actual, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(actual, code, dispatched: true)).Value;
         var envelope = actual.StructuredContent ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult);
         var problem = envelope.GetProperty(McpCallerProtocol.Error).Deserialize<Problem>(JsonDefaults.Options)
             ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult);

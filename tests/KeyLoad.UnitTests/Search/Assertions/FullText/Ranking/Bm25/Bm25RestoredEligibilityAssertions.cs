@@ -29,9 +29,9 @@ internal static class Bm25RestoredEligibilityAssertions
 
     internal static DistributedTextStatistics? Current(EventingArtifactFixture fixture, string subject)
         => fixture.Database.WithQueryView(subject, fixture.Source.Partition, Bm25PortableFamilyBackupSeed.Collection,
-            (view, principal, resource) => fixture.Database.ReadBm25CorpusCurrent(view, principal, resource,
+            (view, principal, resource) => (fixture.Database.ReadBm25CorpusCurrent(view, principal, resource,
                 fixture.Source.Partition, Bm25PortableFamilyBackupSeed.Collection, Bm25PortableFamilyBackupSeed.Field,
-                TextProjectionProtocol.TokenizerVersion, ["needle"], fixture.Source.CreateReadWork(Token)));
+                TextProjectionProtocol.TokenizerVersion, ["needle"], fixture.Source.CreateReadWork(Token))).Value);
 
     private static CancellationToken Token => TestContext.Current!.Execution.CancellationToken;
 

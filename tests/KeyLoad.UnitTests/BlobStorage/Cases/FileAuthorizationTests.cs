@@ -62,9 +62,9 @@ internal sealed class FileAuthorizationTests
         var first = Request(database);
         _ = Apply(database, first).Get<FileUpload>();
         var second = Request(database) with { Address = first.Address with { Path = OtherPath } };
-        await Assert.That(Errors.Code(Apply(database, second).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(Apply(database, second).Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         _ = Apply(database, first with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Abort }).Get<FileUpload>();
-        await Assert.That(Errors.Code(Apply(database, second with { CommandId = Guid.NewGuid() }).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(Apply(database, second with { CommandId = Guid.NewGuid() }).Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         _ = Apply(database, first with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Reclaim }).Get<bool>();
         _ = Apply(database, second with { CommandId = Guid.NewGuid() }).Get<FileUpload>();
     }

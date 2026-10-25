@@ -82,7 +82,7 @@ internal static class CommandObservedPolicyFlow
             await gate.Arrived.Task.WaitAsync(token);
             await scenario.Fixture.Database.Coordinator.ReadBarrierAsync(token);
             var retained = CommandObservedPolicyAssertions.Outcome(scenario, request.RequestId);
-            await Assert.That(Errors.Code(retained.Problem)).IsNull();
+            await Assert.That(Errors.Code(retained.Problem).Value).IsNull();
             var initial = retained.Get<ReceiveResult>();
             var retainedBytes = CommandObservedPolicyAssertions.OutcomeBytes(scenario, request.RequestId);
             var payloadBytes = CommandObservedPolicyAssertions.RuntimePayloadBytes(scenario, initial);

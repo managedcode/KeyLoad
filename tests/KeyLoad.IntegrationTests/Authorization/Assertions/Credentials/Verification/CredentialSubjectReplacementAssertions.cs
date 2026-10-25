@@ -31,7 +31,7 @@ internal static class CredentialSubjectReplacementAssertions
         await SqlClusterProtocol.EqualAsync(before, await ImageAsync(root, state, token));
         var official = await session.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(denied.Scenario.Reference), token);
-        await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(official, state.First.Identity.Secret, McpDocumentProtocol.PrivateValue);
         await McpCallerAssertions.DoesNotDiscloseAsync(official, state.Second.Identity.Secret, McpDocumentProtocol.PrivateValue);
         await SqlClusterProtocol.EqualAsync(before, await ImageAsync(root, state, token));

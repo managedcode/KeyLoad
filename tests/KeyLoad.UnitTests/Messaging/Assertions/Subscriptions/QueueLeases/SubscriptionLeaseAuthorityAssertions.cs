@@ -45,7 +45,7 @@ internal static class SubscriptionLeaseAuthorityAssertions
     internal static async Task ReceiptAsync(Result<object> result, SubscriptionDeliveryCommand command,
         long position, long leaseVersion)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo(new MutationReceipt[]
@@ -90,7 +90,7 @@ internal static class SubscriptionLeaseAuthorityAssertions
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(claim);
-        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(replay.Problem?.Detail).IsEqualTo("The subscription delivery lease is stale.");
 
         await Assert.That(replay.Value).IsNull();

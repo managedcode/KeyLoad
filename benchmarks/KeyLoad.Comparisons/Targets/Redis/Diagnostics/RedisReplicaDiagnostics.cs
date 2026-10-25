@@ -54,14 +54,14 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
         const int MissingItemIndex = -1;
 
         var infoHost = info.GetValueOrDefault(RedisProtocol.MasterHostField);
-        var roleHost = RoleText(role, RedisProtocol.RoleHostIndex);
+        var roleHost = (RoleText(role, RedisProtocol.RoleHostIndex)).Value;
         var projection = new RedisReplicaDiagnostic(
-            FailedPredicate(replicationId, info, role).ToString(), Host(primary), Port(primary), Host(replica), Port(replica),
-            KnownRole(info.GetValueOrDefault(RedisProtocol.RoleField)), KnownLink(info.GetValueOrDefault(RedisProtocol.LinkField)),
-            KnownHost(infoHost, primary, replica), ValidPort(RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField)), role.Length,
-            KnownRole(RoleText(role, RedisProtocol.RoleNameIndex)), KnownHost(roleHost, primary, replica),
-            ValidPort(int.TryParse(RoleText(role, RedisProtocol.RolePortIndex), out var port) ? port : MissingItemIndex),
-            KnownStates.Contains(RoleText(role, RoleStateIndex), StringComparer.Ordinal) ? RoleText(role, RoleStateIndex) : null,
+            FailedPredicate(replicationId, info, role).ToString(), (Host(primary)).Value, (Port(primary)).Value, (Host(replica)).Value, (Port(replica)).Value,
+            (KnownRole(info.GetValueOrDefault(RedisProtocol.RoleField))).Value, (KnownLink(info.GetValueOrDefault(RedisProtocol.LinkField))).Value,
+            (KnownHost(infoHost, primary, replica)).Value, (ValidPort(RedisProtocol.ParseInteger(info, RedisProtocol.MasterPortField))).Value, role.Length,
+            (KnownRole((RoleText(role, RedisProtocol.RoleNameIndex)).Value)).Value, (KnownHost(roleHost, primary, replica)).Value,
+            (ValidPort(int.TryParse((RoleText(role, RedisProtocol.RolePortIndex)).Value, out var port) ? port : MissingItemIndex)).Value,
+            KnownStates.Contains((RoleText(role, RoleStateIndex)).Value, StringComparer.Ordinal) ? (RoleText(role, RoleStateIndex)).Value : null,
             ReplicationIdAgreement(replicationId, info));
         var json = JsonSerializer.Serialize(projection);
         return json.Length <= settings.RedisReplicaMaximumCharacters ? json : Overflow;
@@ -113,23 +113,23 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
         return ReplicationIdAgreement(replicationId, info) ? RedisReplicaFailedPredicate.None : RedisReplicaFailedPredicate.ReplicationIdentity;
     }
 
-    private static string? RoleText(RedisResult[] role, int index)
-        => index < role.Length && !role[index].IsNull && role[index].Length < NoItems ? role[index].ToString() : null;
+    private static global::ManagedCode.Communication.Result<string?> RoleText(RedisResult[] role, int index)
+        => index < role.Length && !role[index].IsNull && role[index].Length < NoItems ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(role[index].ToString()))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(RoleText));
 
-    private static string? KnownRole(string? value)
-        => value is RedisProtocol.MasterRole or RedisProtocol.ReplicaRole ? value : null;
+    private static global::ManagedCode.Communication.Result<string?> KnownRole(string? value)
+        => value is RedisProtocol.MasterRole or RedisProtocol.ReplicaRole ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(value))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownRole));
 
-    private static string? KnownLink(string? value)
-        => value is RedisProtocol.LinkUp or LinkDown ? value : null;
+    private static global::ManagedCode.Communication.Result<string?> KnownLink(string? value)
+        => value is RedisProtocol.LinkUp or LinkDown ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(value))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownLink));
 
-    private static string? KnownHost(string? value, EndPoint primary, EndPoint replica)
+    private static global::ManagedCode.Communication.Result<string?> KnownHost(string? value, EndPoint primary, EndPoint replica)
     {
         if (!ValidHost(value))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownHost));
         }
-        return StringComparer.OrdinalIgnoreCase.Equals(value, Host(primary)) || StringComparer.OrdinalIgnoreCase.Equals(value, Host(replica)) ||
-            KnownHosts.Contains(value, StringComparer.OrdinalIgnoreCase) || IPAddress.TryParse(value, out _) ? value : null;
+        return StringComparer.OrdinalIgnoreCase.Equals(value, (Host(primary)).Value) || StringComparer.OrdinalIgnoreCase.Equals(value, (Host(replica)).Value) ||
+            KnownHosts.Contains(value, StringComparer.OrdinalIgnoreCase) || IPAddress.TryParse(value, out _) ? ((string?)(value)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownHost)) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(KnownHost));
     }
 
     private static bool ValidHost(string? value)
@@ -149,7 +149,7 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
         return value.All(static character => char.IsAsciiLetterOrDigit(character) || character is VersionSeparator or IdentitySeparator);
     }
 
-    private static string? Host(EndPoint endpoint)
+    private static global::ManagedCode.Communication.Result<string?> Host(EndPoint endpoint)
     {
         var host = endpoint switch
         {
@@ -157,16 +157,16 @@ internal sealed class RedisReplicaDiagnostics(IOptions<ComparisonDiagnosticOptio
             IPEndPoint ip => ip.Address.ToString(),
             _ => null
         };
-        return ValidHost(host) ? host : null;
+        return ValidHost(host) ? ((string?)(host)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Host)) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Host));
     }
 
-    private static int? Port(EndPoint endpoint)
+    private static global::ManagedCode.Communication.Result<int?> Port(EndPoint endpoint)
         => endpoint switch
         {
-            DnsEndPoint dns => ValidPort(dns.Port),
-            IPEndPoint ip => ValidPort(ip.Port),
-            _ => null
+            DnsEndPoint dns => ((int?)((ValidPort(dns.Port)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<int?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(Port)),
+            IPEndPoint ip => ((int?)((ValidPort(ip.Port)).Value)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<int?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(Port)),
+            _ => global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(Port))
         };
 
-    private static int? ValidPort(int value) => value is >= MinimumPort and <= MaximumPort ? value : null;
+    private static global::ManagedCode.Communication.Result<int?> ValidPort(int value) => value is >= MinimumPort and <= MaximumPort ? global::ManagedCode.Communication.Result<int?>.Succeed(((int?)(value))) : global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(ValidPort));
 }

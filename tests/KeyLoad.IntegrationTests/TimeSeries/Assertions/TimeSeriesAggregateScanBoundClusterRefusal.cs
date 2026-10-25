@@ -15,8 +15,8 @@ internal static class TimeSeriesAggregateScanBoundClusterRefusal
         await Assert.That(denied.Value).IsNull();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.BudgetExceeded));
         await current();
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SeriesAggregate,
-            state.Aggregate(1), token), ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SeriesAggregate,
+            state.Aggregate(1), token), ErrorCode.BudgetExceeded, dispatched: true)).Value;
         await current();
         SampleRecord[] first = [TimeSeriesAggregateScanBoundClusterAssertions.Expected(
             state.FreshCommand is not null, TimeSeriesClusterScenario.ProjectedTags)[0]];

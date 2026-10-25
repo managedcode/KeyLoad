@@ -22,7 +22,7 @@ internal static class MixedEventingRetentionBackupTopic
             [new PurgeTopic(state.Topic.Resource, MixedEventingRetentionBackupProtocol.PurgePosition)]);
         var before = MixedEventingRetentionBackupOracle.Rows(owner.Store, owner.Partition, includeOutcomes: false);
         var result = owner.Submit(OperationKind.Batch, refused, id: refused.CommandId);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
 
         await Assert.That(result.Value).IsNull();
         await Assert.That(MixedEventingRetentionBackupOracle.Rows(owner.Store, owner.Partition, includeOutcomes: false))

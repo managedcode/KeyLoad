@@ -62,7 +62,7 @@ internal static class CompositionSqlColdAuthority
         await Assert.That(sdk.IsFailed).IsTrue();
         await Assert.That(sdk.Value).IsNull();
         await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         var sql = SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command) with
         {
             CommandId = command.CommandId
@@ -70,6 +70,6 @@ internal static class CompositionSqlColdAuthority
         var q1 = await callers.Sdk.ExecuteSqlAsync(sql, token);
         await Assert.That(q1.IsFailed).IsTrue();
         await Assert.That(q1.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 }

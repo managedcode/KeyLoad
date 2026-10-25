@@ -64,7 +64,7 @@ internal sealed class CachePolicyEpochState(CachePolicyEpochOwner owner)
     {
         var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal, default,
             System.Text.Json.JsonSerializer.Serialize(payload, JsonDefaults.Options));
-        var before = TestDatabaseOriginalResourceCommands.Begin(Database, operation);
+        var before = (TestDatabaseOriginalResourceCommands.Begin(Database, operation)).Value;
         var result = Database.ApplyEmbedded(operation, token);
         originalResources.Observe(Database, operation, result, before);
         return result;

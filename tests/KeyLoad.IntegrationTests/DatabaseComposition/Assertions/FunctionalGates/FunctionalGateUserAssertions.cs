@@ -24,8 +24,8 @@ internal static class FunctionalGateUserAssertions
         await Assert.That(sdk.Value).IsNull();
         await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString())
             .Because(sdk.Problem.Detail ?? string.Empty);
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(reference), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet,
+            new GetDocumentRequest(reference), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     internal static async Task RefusedWriteAsync(RequestCqrsClusterCallers caller, CommandRequest command,
@@ -37,7 +37,7 @@ internal static class FunctionalGateUserAssertions
         await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString())
             .Because(sdk.Problem.Detail ?? string.Empty);
         var mcp = await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-        await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true)).Value;
         if (detail is not null)
         {
             await Assert.That(sdk.Problem!.Detail).IsEqualTo(detail);
@@ -54,7 +54,7 @@ internal static class FunctionalGateUserAssertions
         await Assert.That(sdk.Value).IsNull();
         await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.RevisionConflict.ToString());
         await Assert.That(sdk.Problem.Detail).IsEqualTo("The expected revision does not match.");
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            command, token), ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            command, token), ErrorCode.RevisionConflict, dispatched: true)).Value;
     }
 }

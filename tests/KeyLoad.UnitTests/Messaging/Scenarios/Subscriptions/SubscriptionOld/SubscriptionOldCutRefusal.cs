@@ -17,7 +17,7 @@ internal static class SubscriptionOldCutRefusal
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var result = database.Apply(operation);
-            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+            await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
 
             await Assert.That(result.Value).IsNull();
             if (detail is not null)

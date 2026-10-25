@@ -21,7 +21,7 @@ internal sealed class OperationOwnershipTests
         Array.Clear(callerBytes);
         var first = database.Database.Apply(verified);
         var replay = database.Database.Apply(database.Database.OwnCommand(verified));
-        await Assert.That(Errors.Code(first.Problem)).IsNull();
+        await Assert.That(Errors.Code(first.Problem).Value).IsNull();
         await Assert.That(first.Get<CommitReceipt>().Token).IsEqualTo(replay.Get<CommitReceipt>().Token);
         var entity = database.Database.GetDocument(AuthorityFixture.Root,
             new(database.Partition, AuthorityFixture.Collection, AuthorityFixture.Entity))!;

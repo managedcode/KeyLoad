@@ -120,7 +120,7 @@ internal static class AnnOriginalOperationExecution
             if (result is not null)
             {
                 RequirePublished(stages, owner, request, result, current, seeds, retained, read);
-                settlement = stages.OriginalSettlementIntent(request);
+                settlement = (stages.OriginalSettlementIntent(request)).Value;
                 if (configuredCurrent.InitialAnnMaintenance is { } initial
                     && AnnOriginalResults.SameRequest(initial, request) && settlement is null)
                 {
@@ -133,11 +133,11 @@ internal static class AnnOriginalOperationExecution
             RequirePublished(stages, owner, request, originalResult, current, seeds, retained, read);
             read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(request));
             read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(originalResult));
-            settlement = stages.OriginalSettlementIntent(request)
-                ?? database.CreateAnnInitialSettlementIntent(fresh, request, originalResult,
+            settlement = (stages.OriginalSettlementIntent(request)).Value
+                ?? (database.CreateAnnInitialSettlementIntent(fresh, request, originalResult,
                     AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Completed,
                         originalResult.Checkpoint?.Checkpoint ?? originalResult.Source?.ThroughSequence
-                            ?? throw Errors.Fail(ErrorCode.Corruption, AnnProtocol.Corrupt)));
+                            ?? throw Errors.Fail(ErrorCode.Corruption, AnnProtocol.Corrupt)))).Value;
             stages.SettleOriginal(fresh, request, originalResult, current, settlement);
             result = originalResult;
         }

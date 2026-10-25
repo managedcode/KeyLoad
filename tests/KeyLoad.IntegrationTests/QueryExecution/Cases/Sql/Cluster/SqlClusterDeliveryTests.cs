@@ -49,8 +49,8 @@ internal sealed class SqlClusterDeliveryTests(ClusterFixture fixture)
         var rejected = await sdk.ExecuteSqlAsync(sql, cancellationToken);
         await Assert.That(rejected.IsSuccess).IsFalse();
         await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellationToken),
-            ErrorCode.TokenInvalidated, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellationToken),
+            ErrorCode.TokenInvalidated, dispatched: true)).Value;
         await SqlClusterProtocol.EqualAsync(leased, await PublicReadAssertions.MessageAsync(
             await sdk.InspectAsync(scenario.Inspect, cancellationToken)));
         await SqlClusterProtocol.EqualAsync(leased, (await SqlClusterProtocol.McpAsync<MessageInspectionResult>(mcp,
@@ -71,8 +71,8 @@ internal sealed class SqlClusterDeliveryTests(ClusterFixture fixture)
         var rejected = await foreignSdk.ExecuteSqlAsync(sql, cancellationToken);
         await Assert.That(rejected.IsSuccess).IsFalse();
         await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
-        await McpCallerAssertions.ErrorAsync(await foreignMcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellationToken),
-            ErrorCode.TokenInvalidated, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await foreignMcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellationToken),
+            ErrorCode.TokenInvalidated, dispatched: true)).Value;
         await SqlClusterProtocol.EqualAsync(leased, await PublicReadAssertions.MessageAsync(
             await administrator.InspectAsync(scenario.Inspect, cancellationToken)));
     }

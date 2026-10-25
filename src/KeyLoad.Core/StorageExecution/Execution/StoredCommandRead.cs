@@ -13,14 +13,14 @@ public static class StoredCommandRead
     /// <summary>Reads the exact original command for a freshly authorized retry of the same identity and content.</summary>
     /// <param name = "operation">Server-bound retry with the same stable command identity and original fingerprint.</param>
     /// <param name = "cancellationToken">Bounds the synchronous retained lookup.</param>
-    /// <returns>The owned original command and its actual sequence, or null if it was never committed here.</returns>
+    /// <returns>The owned original command and its actual sequence, or a not-found result if it was never committed here.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    public static StoredCommand? ReadStoredCommand(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+    public static global::ManagedCode.Communication.Result<StoredCommand?> ReadStoredCommand(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(engine);
         var original = engine.OwnCommand(operation);
-        return engine.Store.Read<StoredCommand?>(view =>
+        return engine.Store.Read<global::ManagedCode.Communication.Result<StoredCommand?>>(view =>
         {
             cancellationToken.ThrowIfCancellationRequested();
             var scope = CommandOutcomePartitionIdentity.Resolve(original);
@@ -28,15 +28,15 @@ public static class StoredCommandRead
             {
                 // A new command is authorized when it is applied, so a denial persists its outcome exactly once and a
                 // retry after a policy change replays that denial instead of running as a new command.
-                return null;
+                return global::ManagedCode.Communication.Result<StoredCommand?>.FailNotFound(nameof(ReadStoredCommand));
             }
 
             var principal = engine.Principal(view, original.UserId!, engine.Clock.GetUtcNow());
-            engine.AuthorizeOperation(view, principal, original);
+            _ = (engine.AuthorizeOperation(view, principal, original)).Value;
             var selected = CommandOutcomeKeyResolver.Select(view, original.UserId!, original.CommandId, scope);
             if (selected.Outcome is not { } outcome)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<StoredCommand?>.FailNotFound(nameof(ReadStoredCommand));
             }
 
             engine.ValidateStoredSubmissionIdentity(view, original, selected, outcome);
@@ -49,7 +49,7 @@ public static class StoredCommandRead
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            return new StoredCommand(outcome.CanonicalSequence, retained);
+            return global::ManagedCode.Communication.Result<StoredCommand?>.Succeed(new StoredCommand(outcome.CanonicalSequence, retained));
         });
     }
 

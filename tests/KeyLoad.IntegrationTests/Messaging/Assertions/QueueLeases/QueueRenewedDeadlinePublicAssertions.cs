@@ -35,7 +35,7 @@ internal static class QueueRenewedDeadlinePublicAssertions
         await Assert.That(failure.Problem!.ErrorCode).IsEqualTo(code.ToString());
         await Assert.That(failure.Problem.Detail).IsEqualTo(detail);
         var reply = await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, true)).Value;
         var envelope = reply.StructuredContent
             ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult);
         var problem = envelope.GetProperty(McpCallerProtocol.Error);
@@ -76,8 +76,8 @@ internal static class QueueRenewedDeadlinePublicAssertions
         var original = state.Original;
         await QueueLeaseClusterAssertions.DeniedAsync(
             await callers.Sdk.ReceiveAsync(original.Request, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-            McpCallerTools.MessagesReceive, original.Request, token), ErrorCode.StaleLease, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+            McpCallerTools.MessagesReceive, original.Request, token), ErrorCode.StaleLease, true)).Value;
         await QueueLeaseClusterAssertions.ReplayedAsync(callers.Sdk, callers.Mcp,
             original.Renew, original.RenewReceipt, token);
         await QueueLeaseClusterAssertions.ReplayedAsync(callers.Sdk, callers.Mcp, state.Ack, state.AckReceipt, token);

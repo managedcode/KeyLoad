@@ -12,8 +12,8 @@ internal static class DueWorkRecordDecoder
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
         => kind switch
         {
-            DueWorkKind.Schedule => ReadSchedule(key, value, wakeAt),
-            DueWorkKind.Saga => ReadSaga(key, value, wakeAt),
+            DueWorkKind.Schedule => (ReadSchedule(key, value, wakeAt)).Value,
+            DueWorkKind.Saga => (ReadSaga(key, value, wakeAt)).Value,
             _ => throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord)
         };
 
@@ -33,7 +33,7 @@ internal static class DueWorkRecordDecoder
     internal static ErrorCode SafeError(ErrorCode code)
         => code is ErrorCode.Validation or ErrorCode.ResourceExhausted ? ErrorCode.Corruption : code;
 
-    private static DueWorkHint? ReadSchedule(ReadOnlySpan<byte> key,
+    private static global::ManagedCode.Communication.Result<DueWorkHint?> ReadSchedule(ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
     {
         var record = OrleansSerialization.Deserialize<RecurringScheduleRecord>(value);
@@ -42,23 +42,23 @@ internal static class DueWorkRecordDecoder
         ValidateOccurrenceExpiry(record.Definition, dueAt);
         if (record.Cancelled)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<DueWorkHint?>.FailNotFound(nameof(ReadSchedule));
         }
-        return dueAt <= wakeAt
-            ? new(DueWorkKind.Schedule, record.Lane, record.ScheduleId, record.CreatorPrincipalId,
+        return (dueAt <= wakeAt
+            ? new DueWorkHint(DueWorkKind.Schedule, record.Lane, record.ScheduleId, record.CreatorPrincipalId,
                 record.Revision, record.Generation, record.NextOrdinal, dueAt)
-            : null;
+            : null) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<DueWorkHint?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<DueWorkHint?>.FailNotFound(nameof(ReadSchedule));
     }
 
-    private static DueWorkHint? ReadSaga(ReadOnlySpan<byte> key,
+    private static global::ManagedCode.Communication.Result<DueWorkHint?> ReadSaga(ReadOnlySpan<byte> key,
         ReadOnlySpan<byte> value, DateTimeOffset wakeAt)
     {
         var record = OrleansSerialization.Deserialize<SagaRecord>(value);
         ValidateSaga(key, record);
-        return record.Phase == SagaPhase.Waiting && record.Deadline is { } dueAt && dueAt <= wakeAt
-            ? new(DueWorkKind.Saga, record.Lane, record.SagaId, record.CreatorPrincipalId,
+        return (record.Phase == SagaPhase.Waiting && record.Deadline is { } dueAt && dueAt <= wakeAt
+            ? new DueWorkHint(DueWorkKind.Saga, record.Lane, record.SagaId, record.CreatorPrincipalId,
                 record.Revision, InitialSequence, InitialSequence, dueAt)
-            : null;
+            : null) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<DueWorkHint?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<DueWorkHint?>.FailNotFound(nameof(ReadSaga));
     }
 
     private static void ValidateSchedule(ReadOnlySpan<byte> key,

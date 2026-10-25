@@ -9,7 +9,7 @@ internal static class AtomicPartitionScopeLifecycleReplay
         foreach (var (request, original) in state.Originals)
         {
             var replay = AtomicPartitionScopeLifecycleCommands.Apply(database, request, token);
-            if (Errors.Code(original.Problem) is null)
+            if (Errors.Code(original.Problem).Value is null)
             {
                 await ReplayResultAssertions.Same<CommitReceipt>(replay, original);
             }

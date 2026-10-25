@@ -26,7 +26,7 @@ internal static class EventAppendCollectionAssertions
         await Assert.That(original.UserId).IsEqualTo(EventAppendCrashContract.Principal);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
         await Assert.That(stored.Incarnation).IsEqualTo(store.Identity.Incarnation);
-        await Assert.That(Errors.Code(stored.Result.Problem)).IsNull();
+        await Assert.That(Errors.Code(stored.Result.Problem).Value).IsNull();
         await Assert.That(JsonDefaults.Serialize(stored.Result.Get<ResourceDefinition>()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(definition))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(OrleansSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span))

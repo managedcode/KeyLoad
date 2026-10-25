@@ -7,13 +7,13 @@ namespace KeyLoad.Core;
 /// <summary>Executes SearchQueriesOnlineText operations against the caller's database context.</summary>
 public static class SearchQueriesOnlineText
 {
-    internal static OnlineTextCurrentPublication? ReadOnlineTextCurrentPublication(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
+    internal static global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?> ReadOnlineTextCurrentPublication(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
     {
         engine.RequireOnlineTextOriginalAuthority(view, principal, request);
         var current = view.GetRecord<OnlineTextCurrentPublication>(OnlineTextPublicationKeys.Current(request));
         if (current is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.FailNotFound(nameof(ReadOnlineTextCurrentPublication));
         }
 
         budget.ChargeBytes(OrleansSerialization.Measure(current));
@@ -27,7 +27,7 @@ public static class SearchQueriesOnlineText
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var stored = CommandOutcomeKeyResolver.Select(view, principal.Id, current.CommandId, scope).Outcome ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         engine.ValidateOnlineTextStoredOutcome(view, principal, originalRequest, stored, budget);
-        if (Errors.Code(stored.Result.Problem) is not null || stored.OnlineTextAuthority is null || current.ParentFingerprint != stored.OnlineTextAuthority.ParentFingerprint)
+        if (Errors.Code(stored.Result.Problem).Value is not null || stored.OnlineTextAuthority is null || current.ParentFingerprint != stored.OnlineTextAuthority.ParentFingerprint)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         }
@@ -40,6 +40,6 @@ public static class SearchQueriesOnlineText
         }
 
         budget.Check();
-        return current;
+        return global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.Succeed(((OnlineTextCurrentPublication?)(current)));
     }
 }

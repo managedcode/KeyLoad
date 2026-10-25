@@ -18,8 +18,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         {
             ValidateRoute(request, actorKey, cancellationToken);
             stage = GrainFailureStage.CapabilityExecution;
-            await using var work = CapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
-                RequestWorkKind.CommandCapability, cancellationToken);
+            await using var work = (CapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
+                RequestWorkKind.CommandCapability, cancellationToken)).Value;
             coreEntered = true;
             return await ExecuteCoreAsync(request, work, context,
                 work?.Token ?? cancellationToken).ConfigureAwait(true);
@@ -55,7 +55,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             await CommandCapabilityAuthorization.ObserveAndValidateAsync(database, clock, settings,
                 codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken).ConfigureAwait(true);
-            var original = CommandWorkAdmission.Bind(database, request, principal, clock, work, budget);
+            var original = (CommandWorkAdmission.Bind(database, request, principal, clock, work, budget)).Value;
             var result = await SubmitCommandAsync(kind, request, principal, budget, operationToken).ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken).ConfigureAwait(true);
@@ -121,8 +121,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
 
     private Task<Result<object>> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken cancellationToken)
-        => GrainOnlineTextCheckpointCommand.TrySubmit(database, coordinator, request, principal,
-            onlineText, clock, cancellationToken)
+        => (GrainOnlineTextCheckpointCommand.TrySubmit(database, coordinator, request, principal,
+            onlineText, clock, cancellationToken)).Value
             ?? coordinator.RuntimeSubmitAsync(OperationKind.CommitProjectionBatch, request.Envelope.CommandId,
                 principal.Id, request.Payload, cancellationToken: cancellationToken);
 

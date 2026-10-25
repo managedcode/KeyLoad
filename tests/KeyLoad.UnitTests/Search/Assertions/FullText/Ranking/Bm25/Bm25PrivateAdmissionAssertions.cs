@@ -11,7 +11,7 @@ internal static class Bm25PrivateAdmissionAssertions
         Bm25CorpusPublicationPhaseCommand phase, Result<object> result, PrincipalRecord subject, long totalLength,
         (CommitToken Token, long Applied) expected)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(phase.CommandId);
         await Assert.That(receipt.Token.Incarnation).IsEqualTo(database.Store.Identity.Incarnation);

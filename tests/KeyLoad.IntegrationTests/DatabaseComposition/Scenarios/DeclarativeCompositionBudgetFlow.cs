@@ -39,8 +39,8 @@ internal static class DeclarativeCompositionBudgetFlow
             var refused = await sdk.ExecuteSqlAsync(refusedSql, token);
             await Assert.That(refused.IsFailed).IsTrue();
             await Assert.That(refused.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.BudgetExceeded));
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, refusedSql, token),
-                ErrorCode.BudgetExceeded, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, refusedSql, token),
+                ErrorCode.BudgetExceeded, dispatched: true)).Value;
             await Assert.That((await GraphAsync(sdk, scenario, token)).Edges).IsEmpty();
             await SqlClusterProtocol.EqualAsync(beforeFirst, await MessageAsync(sdk, scenario.Partition, First, token));
             await SqlClusterProtocol.EqualAsync(beforeSecond, await MessageAsync(sdk, scenario.Partition, Second, token));
@@ -85,8 +85,8 @@ internal static class DeclarativeCompositionBudgetFlow
         var refused = await callers.Sdk.ExecuteSqlAsync(limited, token);
         await Assert.That(refused.IsFailed).IsTrue();
         await Assert.That(refused.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.BudgetExceeded));
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, limited, token),
-            ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, limited, token),
+            ErrorCode.BudgetExceeded, dispatched: true)).Value;
         await SqlClusterProtocol.EqualAsync(state.Graph, await GraphAsync(callers.Sdk, scenario, token));
         await SqlClusterProtocol.EqualAsync(state.First, await MessageAsync(callers.Sdk, scenario.Partition, First, token));
         await SqlClusterProtocol.EqualAsync(state.Second, await MessageAsync(callers.Sdk, scenario.Partition, Second, token));

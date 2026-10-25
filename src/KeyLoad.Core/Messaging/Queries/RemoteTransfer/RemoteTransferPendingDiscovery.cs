@@ -72,7 +72,7 @@ internal static class RemoteTransferPendingDiscovery
                 return false;
             }
             last = ImmutableArray.CreateRange(DueWorkRecordDecoder.CopyKey(key));
-            hint = database.ReadTransferCoordinationHint(budget.View(view), key, value, subject);
+            hint = (database.ReadTransferCoordinationHint(budget.View(view), key, value, subject)).Value;
             reachedTail = key.SequenceEqual(upper.AsSpan());
             return hint is null && !reachedTail;
         }, cursor.LastKey?.ToArray(), observer: budget.Observe, cancellationToken: token);

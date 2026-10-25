@@ -15,11 +15,11 @@ internal static class CapabilityWorkSettlement
         var failures = default(CapabilityCleanupFailures);
         Capture(telemetry, ref failures);
         Capture(activation, ref failures);
-        var preparation = await PrepareAsync(lifetime).ConfigureAwait(true);
+        var preparation = (await PrepareAsync(lifetime).ConfigureAwait(true)).Value;
         var lease = preparation is null ? lifetime?.CaptureAsyncRelease(ref failures) : null;
         var retainedCleanup = preparation is null ? lifetime?.ReleaseOwnedRetention() : null;
         var cleanup = RequestWorkSettlement.Preserve(preparation,
-            RequestWorkSettlement.Preserve(Cleanup(failures), retainedCleanup));
+            RequestWorkSettlement.Preserve((Cleanup(failures)).Value, retainedCleanup));
         var terminal = cleanup;
         if (lease is not null)
         {
@@ -45,7 +45,7 @@ internal static class CapabilityWorkSettlement
         }
     }
 
-    private static async Task<Exception?> PrepareAsync(CapabilityWorkLifetime? lifetime)
+    private static async Task<global::ManagedCode.Communication.Result<Exception?>> PrepareAsync(CapabilityWorkLifetime? lifetime)
     {
         try
         {
@@ -53,27 +53,27 @@ internal static class CapabilityWorkSettlement
             {
                 await lifetime.PrepareOwnedReleaseAsync().ConfigureAwait(true);
             }
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(PrepareAsync));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
     }
 
-    private static Exception? Cleanup(CapabilityCleanupFailures failures)
+    private static global::ManagedCode.Communication.Result<Exception?> Cleanup(CapabilityCleanupFailures failures)
     {
         if (failures.Count == NoFailures)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Cleanup));
         }
         var errors = new List<Exception>();
         failures.AppendDistinct(null, errors);
-        return errors.Count == OneFailure ? errors[FirstFailure] : new AggregateException(errors);
+        return errors.Count == OneFailure ? global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(errors[FirstFailure]))) : global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(errors)));
     }
 
     internal static void Capture(Action? operation, ref CapabilityCleanupFailures failures)

@@ -39,9 +39,9 @@ internal sealed class DocumentFieldMutationAuthorizationTests
             new PatchDocument(Collection, DocumentId, [new(SecretPath, PatchKind.Set, "\"denied\"")], FirstRevision));
         var missingUse = DocumentCrudFixture.Submit(database, WriteOnly,
             new PatchDocument(Collection, DocumentId, [new(SecretPath, PatchKind.Set, "\"denied\"")], FirstRevision));
-        await Assert.That(Errors.Code(deniedPut.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(deniedPatch.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(missingUse.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedPut.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedPatch.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(missingUse.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)).IsEqualTo(before);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, Collection, OtherDocumentId))).IsNull();
@@ -50,14 +50,14 @@ internal sealed class DocumentFieldMutationAuthorizationTests
 
         var authorizedCreate = DocumentCrudFixture.Submit(database, FullFieldAccess,
             new PutDocument(Collection, OtherDocumentId, "{\"secret\":\"created\"}", 0));
-        await Assert.That(Errors.Code(authorizedCreate.Problem)).IsNull();
+        await Assert.That(Errors.Code(authorizedCreate.Problem).Value).IsNull();
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, Collection, OtherDocumentId))!.Revision).IsEqualTo(FirstRevision);
         await DocumentCrudFixture.AssertIndexedIds(database, "secret", SecretIndexName, "created", [OtherDocumentId]);
 
         var authorizedPatch = DocumentCrudFixture.Submit(database, FullFieldAccess,
             new PatchDocument(Collection, DocumentId, [new(SecretPath, PatchKind.Set, "\"after\"")], FirstRevision));
-        await Assert.That(Errors.Code(authorizedPatch.Problem)).IsNull();
+        await Assert.That(Errors.Code(authorizedPatch.Problem).Value).IsNull();
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)!.Revision).IsEqualTo(SecondRevision);
         await DocumentCrudFixture.AssertIndexedIds(database, "secret", SecretIndexName, "before", []);
         await DocumentCrudFixture.AssertIndexedIds(database, "secret", SecretIndexName, "after", [DocumentId]);

@@ -24,7 +24,7 @@ public static class RemoteTransferRepairFailureRead
 
         if (request.RepairStage == QueueTransferRepairStage.Accept)
         {
-            var receipt = engine.InspectQueueTransferReceipt(view, principal.Id, request.Destination, request.Source, request.TransferId);
+            var receipt = (engine.InspectQueueTransferReceipt(view, principal.Id, request.Destination, request.Source, request.TransferId)).Value;
             if (receipt is not null)
             {
                 return new(null, null, receipt);
@@ -40,7 +40,7 @@ public static class RemoteTransferRepairFailureRead
             throw Errors.Fail(ErrorCode.Conflict, RemoteTransferRepairProtocol.Invalid);
         }
 
-        if (Errors.Code(outcome.Result.Problem) != ErrorCode.PermissionDenied || outcome.Result.Value is not null)
+        if (Errors.Code(outcome.Result.Problem).Value != ErrorCode.PermissionDenied || outcome.Result.Value is not null)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferRepairProtocol.Unavailable);
         }

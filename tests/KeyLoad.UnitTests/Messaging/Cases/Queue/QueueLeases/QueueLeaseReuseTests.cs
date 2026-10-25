@@ -36,7 +36,7 @@ internal sealed class QueueLeaseReuseTests
         var foreignId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Delivery,
             new DeliveryCommand(foreignId, lane, first.Token, DeliveryAction.Ack),
-            principal: Worker, id: foreignId, time: now).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+            principal: Worker, id: foreignId, time: now).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await QueueLifecycleImage.SameAsync(db.Store, lane, beforeForeign);
         var renewId = Guid.NewGuid();
         db.Submit(OperationKind.Delivery,
@@ -46,7 +46,7 @@ internal sealed class QueueLeaseReuseTests
         var expiredId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Delivery,
             new DeliveryCommand(expiredId, lane, first.Token, DeliveryAction.Ack),
-            id: expiredId, time: now.AddSeconds(2)).Problem)).IsEqualTo(ErrorCode.LeaseExpired);
+            id: expiredId, time: now.AddSeconds(2)).Problem).Value).IsEqualTo(ErrorCode.LeaseExpired);
 
         var secondId = Guid.NewGuid();
         var second = await Assert.That(db.Submit(OperationKind.Receive,
@@ -56,7 +56,7 @@ internal sealed class QueueLeaseReuseTests
         var staleId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Delivery,
             new DeliveryCommand(staleId, lane, first.Token, DeliveryAction.Ack),
-            id: staleId, time: now.AddSeconds(3)).Problem)).IsEqualTo(ErrorCode.StaleLease);
+            id: staleId, time: now.AddSeconds(3)).Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         var ackId = Guid.NewGuid();
         db.Submit(OperationKind.Delivery,
             new DeliveryCommand(ackId, lane, second.Token, DeliveryAction.Ack),
@@ -86,7 +86,7 @@ internal sealed class QueueLeaseReuseTests
         var failedId = Guid.NewGuid();
         var failed = new ProcessingRequest(failedId, lane, delivery.Token, Handler, 1,
             [new EnqueueMessage(QueueName, "rolled-back", "{}"), new PutDocument("orders", "missing", "{}", 9)]);
-        await Assert.That(Errors.Code(db.Submit(OperationKind.Processing, failed, id: failedId).Problem))
+        await Assert.That(Errors.Code(db.Submit(OperationKind.Processing, failed, id: failedId).Problem).Value)
             .IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(db.Database.InspectMessage(Root, lane, MessageId)!.Metadata.State).IsEqualTo(MessageState.Leased);
         await Assert.That(db.Database.InspectMessage(Root, lane, "rolled-back")).IsNull();
@@ -115,17 +115,17 @@ internal sealed class QueueLeaseReuseTests
         var lane = new QueueLaneRef(db.Partition, "unconfigured");
         var deliveryId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Delivery,
-            new DeliveryCommand(deliveryId, lane, "invalid", DeliveryAction.Ack), id: deliveryId).Problem))
+            new DeliveryCommand(deliveryId, lane, "invalid", DeliveryAction.Ack), id: deliveryId).Problem).Value)
             .IsEqualTo(ErrorCode.NotFound);
         var processingId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Processing,
-            new ProcessingRequest(processingId, lane, "invalid", Handler, 1, []), id: processingId).Problem))
+            new ProcessingRequest(processingId, lane, "invalid", Handler, 1, []), id: processingId).Problem).Value)
             .IsEqualTo(ErrorCode.NotFound);
         db.Configure(lane.Queue, ResourceKind.WorkQueue);
         var before = QueueLifecycleImage.Capture(db.Store, lane);
         var invalidTokenId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Processing,
-            new ProcessingRequest(invalidTokenId, lane, "invalid", Handler, 1, []), id: invalidTokenId).Problem))
+            new ProcessingRequest(invalidTokenId, lane, "invalid", Handler, 1, []), id: invalidTokenId).Problem).Value)
             .IsEqualTo(ErrorCode.TokenInvalidated);
         await QueueLifecycleImage.SameAsync(db.Store, lane, before);
     }

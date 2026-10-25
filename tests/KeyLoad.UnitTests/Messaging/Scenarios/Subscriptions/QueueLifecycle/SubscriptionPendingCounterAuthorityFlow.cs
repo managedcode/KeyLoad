@@ -89,7 +89,7 @@ internal static class SubscriptionPendingCounterAuthorityFlow
         var stablePosition = cold.Position;
         var stale = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription,
             originalRequest, originalRequest.RequestId, due);
-        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(stale.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(stale.Problem?.Detail).IsEqualTo(StaleDetail);
 
         await Assert.That(stale.Value).IsNull();

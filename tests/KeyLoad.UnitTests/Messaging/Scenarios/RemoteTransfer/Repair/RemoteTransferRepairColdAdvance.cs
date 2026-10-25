@@ -30,7 +30,7 @@ internal static class RemoteTransferRepairColdAdvance
         await Assert.That(fixture.Store.Position).IsEqualTo(before);
         await RefuseMalformedWitnessAsync(fixture, command);
         var result = RemoteTransferRepairCold.Apply(fixture, command);
-        if (Errors.Code(result.Problem) is null)
+        if (Errors.Code(result.Problem).Value is null)
         {
             await RefuseChangedAndStaleAsync(fixture, command);
         }
@@ -44,7 +44,7 @@ internal static class RemoteTransferRepairColdAdvance
         var capacity = fixture.SourceCapacity(fixture.SourceQueue);
         var malformed = new CommandRequest(Guid.NewGuid(), command.Partition, [mutation with
             { FailureWitness = mutation.FailureWitness + RemoteTransferRepairColdProtocol.MalformedWitnessSuffix }]);
-        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, malformed).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, malformed).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairCold.State(fixture, mutation.TransferId), state);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.SourceCapacity(fixture.SourceQueue), capacity);
     }
@@ -59,12 +59,12 @@ internal static class RemoteTransferRepairColdAdvance
             Mutations = [original with
             { Stage = original.Stage == QueueTransferRepairStage.Accept ? QueueTransferRepairStage.Complete : QueueTransferRepairStage.Accept }]
         };
-        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, changed).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, changed).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         var stale = command with
         {
             CommandId = Guid.NewGuid()
         };
-        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, stale).Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(RemoteTransferRepairCold.Apply(fixture, stale).Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(RemoteTransferRepairCold.State(fixture, original.TransferId), state);
         await RemoteTransferCoordinationColdAssertions.EqualAsync(fixture.SourceCapacity(fixture.SourceQueue), capacity);
     }

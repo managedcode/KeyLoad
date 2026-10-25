@@ -34,7 +34,7 @@ internal sealed class RelationalSqlClusterAuthorizationTests(ClusterFixture fixt
         await Assert.That((await sdk.ExecuteSqlAsync(sql, deadline.Token)).Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await Assert.That((await sdk.CommitAsync(command, deadline.Token)).Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var denied = await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token);
-        await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(denied, identity.Secret, RelationalSqlClusterTokens.FirstRow);
         var after = await SqlClusterProtocol.McpAsync<QueryPage>(mcp, select, deadline.Token);
         await SqlClusterProtocol.EqualAsync(read.Rows, after.Rows);

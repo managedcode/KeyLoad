@@ -16,7 +16,7 @@ public static class QueueDispatch
         JsonData.Identifier(request.Queue);
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Queue);
         var current = transaction.GetRecord<ResourceDefinition>(key);
-        _ = ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Queue, current);
+        _ = (ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Queue, current)).Value;
         var replacement = QueueDispatchStateUpdates.Apply(current, request.ExpectedSchemaVersion, request.Paused);
         ResourceExecutionCommands.ValidateResource(new(request.TenantId, request.DatabaseId, replacement));
         transaction.PutRecord(key, replacement);

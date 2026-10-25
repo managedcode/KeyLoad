@@ -65,7 +65,7 @@ internal sealed class McpOutputSchemaTests
                 .GetProperty(McpSchemaInspector.Properties).GetProperty(McpSchemaInspector.Result);
             var expected = descriptor.Name is SqlOperationProtocol.ToolName or McpCatalogExpectations.CredentialsConfigure;
             await Assert.That(McpSchemaInspector.HasType(result, McpSchemaInspector.Null)).IsEqualTo(expected);
-            var field = NullableDomainField(descriptor.Name);
+            var field = (NullableDomainField(descriptor.Name)).Value;
             if (field is null)
             {
                 continue;
@@ -109,7 +109,7 @@ internal sealed class McpOutputSchemaTests
         var credential = global::KeyLoad.Core.AuthorizationExecution.Credential("status-execution-key", "root", "status-execution-secret");
         var request = new ConfigureApiKeyRequest(credential);
         var original = database.Submit(OperationKind.ConfigureApiKey, request, id: commandId);
-        await Assert.That(Errors.Code(original.Problem)).IsNull();
+        await Assert.That(Errors.Code(original.Problem).Value).IsNull();
         await Assert.That(original.Problem?.Detail).IsNull();
         await Assert.That(original.Get<bool>()).IsTrue();
         var originalResult = OrleansSerialization.Serialize(original);
@@ -119,7 +119,7 @@ internal sealed class McpOutputSchemaTests
         var key = database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.ApiKey(credential.Id)));
         await Assert.That(outcome).IsNotNull();
         await Assert.That(key).IsNotNull();
-        await Assert.That(PublicReadResponse.Create(null, OperationKind.ConfigureApiKey, original.Value)).IsNull();
+        await Assert.That((PublicReadResponse.Create(null, OperationKind.ConfigureApiKey, original.Value)).Value).IsNull();
         var replay = database.Submit(OperationKind.ConfigureApiKey, request, id: commandId);
         await Assert.That(replay.Get<bool>()).IsTrue();
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(originalResult)).IsTrue();
@@ -129,21 +129,21 @@ internal sealed class McpOutputSchemaTests
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.ApiKey(credential.Id)))!
             .SequenceEqual(key!)).IsTrue();
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
-            PublicReadResponse.Create(null, OperationKind.ConfigureApiKey, false));
+{ _ = (PublicReadResponse.Create(null, OperationKind.ConfigureApiKey, false)).Value; });
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(global::KeyLoad.Core.KeySpace.ApiKey(credential.Id)))!
             .SequenceEqual(key!)).IsTrue();
     }
 
-    private static string? NullableDomainField(string operationName) => operationName switch
+    private static global::ManagedCode.Communication.Result<string?> NullableDomainField(string operationName) => operationName switch
     {
-        McpCatalogExpectations.DocumentsGet => "document",
-        McpCatalogExpectations.MessagesInspect => "message",
-        McpCatalogExpectations.QueueTransferInspect => "transfer",
-        McpCatalogExpectations.QueueTransferReceipt => "receipt",
-        McpCatalogExpectations.ScheduleInspect => "schedule",
-        McpCatalogExpectations.SagaInspect => "saga",
-        _ => null
+        McpCatalogExpectations.DocumentsGet => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("document")),
+        McpCatalogExpectations.MessagesInspect => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("message")),
+        McpCatalogExpectations.QueueTransferInspect => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("transfer")),
+        McpCatalogExpectations.QueueTransferReceipt => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("receipt")),
+        McpCatalogExpectations.ScheduleInspect => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("schedule")),
+        McpCatalogExpectations.SagaInspect => global::ManagedCode.Communication.Result<string?>.Succeed((string?)("saga")),
+        _ => global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(NullableDomainField))
     };
 
     private static (JsonElement Root, JsonElement Node) ResultSchema(string operationName)

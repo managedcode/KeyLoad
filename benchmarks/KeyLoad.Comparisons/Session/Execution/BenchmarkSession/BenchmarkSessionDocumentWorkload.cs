@@ -29,7 +29,7 @@ internal sealed class BenchmarkSessionDocumentWorkload(BenchmarkSessionContext c
             await execution.InitializeDocumentsAsync(new(new DocumentComparisonCorpus(BenchmarkSessionLimits.NoObservedItems, context.Options.Concurrency), false,
                 checked(context.Options.Records + context.Options.Operations)), token).ConfigureAwait(false);
             var lane = await context.Measurement.MeasureBatchesAsync(BenchmarkSessionProtocol.Create, context.Options.Records, context.Options.Concurrency,
-                batch, (client, first, length, cancellation) => ((IDocumentComparisonSession)client).CreateDocumentsAsync(
+                batch, (client, first, length, cancellation) => ((IDocumentComparisonSession)(client ?? throw new InvalidOperationException(BenchmarkSessionProtocol.DocumentSessionRequired))).CreateDocumentsAsync(
                     [.. Enumerable.Range(first, length).Select(context.Corpus.CreateDocument)], cancellation), token).ConfigureAwait(false);
             retained = [lane];
             if (lane.Measurement.Failures != BenchmarkSessionLimits.NoObservedItems || lane.Measurement.Attempts != context.Options.Records)

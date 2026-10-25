@@ -39,7 +39,7 @@ public static class GraphMutations
             GraphMutations.ValidateCanonicalEdge(previous, partition, edge.EdgeId);
         }
 
-        var ownerVersion = CurrentOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, previous);
+        var ownerVersion = (CurrentOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, previous)).Value;
         DocumentStorageExecutionDocuments.CheckRevision(ownerVersion?.Revision ?? previous?.Revision ?? AbsentRevision, edge.ExpectedRevision);
         var nextRevision = NextRevision(ownerVersion?.Revision ?? previous?.Revision ?? AbsentRevision);
         var record = new EdgeRecord(edge.EdgeId, from, to, edge.Label, JsonData.Validate(edge.AttributesJson), nextRevision);
@@ -62,7 +62,7 @@ public static class GraphMutations
         GraphMutations.ValidateCanonicalEdge(previous, partition, edge.EdgeId);
         engine.VisibleVertex(tx, principal, previous.From);
         engine.VisibleVertex(tx, principal, previous.To);
-        var ownerVersion = CurrentOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, previous);
+        var ownerVersion = (CurrentOwnerVersion(tx, partition, edge.Graph, edge.EdgeId, previous)).Value;
         var currentRevision = ownerVersion?.Revision ?? previous.Revision;
         DocumentStorageExecutionDocuments.CheckRevision(currentRevision, edge.ExpectedRevision);
         var nextRevision = NextRevision(currentRevision);
@@ -103,12 +103,12 @@ public static class GraphMutations
         }
     }
 
-    internal static GraphEdgeOwnerVersion? CurrentOwnerVersion(IKeyValueView view, PartitionRef partition, string graph, string edgeId, EdgeRecord? edge)
+    internal static global::ManagedCode.Communication.Result<GraphEdgeOwnerVersion?> CurrentOwnerVersion(IKeyValueView view, PartitionRef partition, string graph, string edgeId, EdgeRecord? edge)
     {
         var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersion>(view, GraphCrossPartitionKeys.OwnerVersion(partition, graph, edgeId));
         if (owner is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<GraphEdgeOwnerVersion?>.FailNotFound(nameof(CurrentOwnerVersion));
         }
 
         GraphCrossPartitionValidation.ValidateOwnerVersion(owner);
@@ -117,7 +117,7 @@ public static class GraphMutations
             throw Errors.Fail(ErrorCode.Corruption, GraphOwnerVersionMismatch);
         }
 
-        return owner;
+        return global::ManagedCode.Communication.Result<GraphEdgeOwnerVersion?>.Succeed(((GraphEdgeOwnerVersion?)(owner)));
     }
 
     internal static long NextRevision(long revision)

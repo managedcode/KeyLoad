@@ -11,7 +11,7 @@ internal static class ResourceIncarnationRefusals
             SchemaVersion = 3
         }, 1);
         var failure = fixture.Database.Apply(stale);
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(failure.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         state.Outcomes.Add((stale, failure));
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);
         await ResourceIncarnationAssertions.RowAsync(fixture.Database, fixture.Partition, state.Lifetime, 2);
@@ -20,13 +20,13 @@ internal static class ResourceIncarnationRefusals
             ResourceIncarnationLiteral.CreationJson(state.Original).Replace(
                 ResourceIncarnationLiteral.Table, "identity-collision", StringComparison.Ordinal));
         var conflict = fixture.Database.Apply(collision);
-        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(fixture.Store.Read(view => view.ReadOwnedValue(ResourceIncarnationLiteral.LifetimeKey(
             fixture.Partition, "identity-collision")))).IsNull();
         var duplicate = fixture.Database.CreateCommand(state.Original.Value.Kind, Guid.NewGuid(), state.Original.UserId!,
             fixture.Database.EvaluationClock.GetUtcNow(), ResourceIncarnationLiteral.CreationJson(state.Original));
         var duplicateResult = fixture.Database.ApplyEmbedded(duplicate, token);
-        await Assert.That(Errors.Code(duplicateResult.Problem)).IsEqualTo(state.Original.Value.Kind == OperationKind.CreateTable
+        await Assert.That(Errors.Code(duplicateResult.Problem).Value).IsEqualTo(state.Original.Value.Kind == OperationKind.CreateTable
             ? ErrorCode.Conflict : ErrorCode.UnsupportedCapability);
         state.Outcomes.Add((duplicate, duplicateResult));
         await PrincipalAsync(fixture, state, token);
@@ -61,7 +61,7 @@ internal static class ResourceIncarnationRefusals
         var original = fixture.Database.CreateCommand(state.Original.Value!.Kind, state.Original.CommandId, principal.Id,
             fixture.Database.EvaluationClock.GetUtcNow(), ResourceIncarnationLiteral.CreationJson(state.Original));
         var result = fixture.Database.ApplyEmbedded(original, token);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(state.Original.Value.Kind == OperationKind.CreateTable
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(state.Original.Value.Kind == OperationKind.CreateTable
             ? ErrorCode.Conflict : ErrorCode.UnsupportedCapability);
         state.Outcomes.Add((original, result));
         await ResourceIncarnationAssertions.PreserveAsync(fixture.Store, fixture.Partition, state);

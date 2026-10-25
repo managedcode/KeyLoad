@@ -12,7 +12,7 @@ internal static class CompositionPrefixPrepareRefusals
         var before = CompositionPrefixPrepareAssertions.ModelImage(owner);
         var charged = command.Work.ReadBytes;
         var result = owner.Submit(command.Original);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
         await Assert.That(result.Value).IsNull();
 
@@ -47,7 +47,7 @@ internal static class CompositionPrefixPrepareRefusals
         var denied = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()], D.Reader);
         var image = CompositionPrefixPrepareAssertions.ModelImage(owner);
         var outcome = owner.Submit(denied.Original);
-        await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(outcome.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(outcome.Problem?.Detail).IsEqualTo("The principal cannot perform this operation in this scope.");
         denied = denied with
         {
@@ -57,7 +57,7 @@ internal static class CompositionPrefixPrepareRefusals
         owner.Commands.Add(denied);
         var bounded = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()]);
         var overflow = owner.Submit(bounded.Original);
-        await Assert.That(Errors.Code(overflow.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(Errors.Code(overflow.Problem).Value).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(overflow.Problem?.Detail).IsEqualTo(D.SourceOverflow);
         owner.Commands.Add(bounded with
         {

@@ -41,7 +41,7 @@ internal static class TimeSeriesChunkQualificationClusterRefusals
     }
     private static async Task ProblemAsync(CallToolResult reply, string credential, ErrorCode code, string detail)
     {
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         await Assert.That(JsonElement.DeepEquals(JsonSerializer.SerializeToElement(Errors.Problem(code, detail), JsonDefaults.Options),
             reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, "alpha");

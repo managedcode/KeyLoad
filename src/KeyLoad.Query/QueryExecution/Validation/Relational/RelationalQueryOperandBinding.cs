@@ -51,5 +51,5 @@ internal sealed class RelationalQueryOperandBinding(Dictionary<string, Relationa
         }
     }
 
-    private static Type? Scalar(JsonElement value) => JsonData.Scalar(value, ReadOnlySpan<string>.Empty)?.GetType();
+    private static Type? Scalar(JsonElement value) => (JsonData.Scalar(value, ReadOnlySpan<string>.Empty)).Value.Value?.GetType();
 }

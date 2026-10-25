@@ -11,7 +11,7 @@ internal static class RowRevisionInferenceAssertions
     {
 
         await Assert.That(actual.Value).IsNull();
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(code);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(detail);
     }
 

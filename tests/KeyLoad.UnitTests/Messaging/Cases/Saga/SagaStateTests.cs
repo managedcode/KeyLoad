@@ -35,13 +35,13 @@ internal sealed class SagaStateTests
 
         var revived = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new CompareExchangeSaga(fixture.Queue, sagaId, 3, SagaPhase.Waiting, WaitingState)]));
-        await Assert.That(Errors.Code(revived.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(revived.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         var directTimeout = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new CompareExchangeSaga(fixture.Queue, Guid.NewGuid(), 0, SagaPhase.TimedOut, WaitingState)]));
-        await Assert.That(Errors.Code(directTimeout.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(directTimeout.Problem).Value).IsEqualTo(ErrorCode.Validation);
         var malformedState = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new CompareExchangeSaga(fixture.Queue, Guid.NewGuid(), 0, SagaPhase.Waiting, "{\"broken\":")]));
-        await Assert.That(Errors.Code(malformedState.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(malformedState.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, sagaId)!.Revision).IsEqualTo(3);
     }
@@ -67,7 +67,7 @@ internal sealed class SagaStateTests
         var before = fixture.Database.GetOutboxStatus(RecurringSagaDatabase.RootPrincipal, fixture.Partition).Head.Tail;
         var rejected = fixture.Apply(OperationKind.Batch,
             new CommandRequest(commandId, fixture.Partition, [mutation]), id: commandId);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal, fixture.Queue, sagaId)).IsNull();
         await Assert.That(fixture.Database.GetOutboxStatus(RecurringSagaDatabase.RootPrincipal, fixture.Partition).Head.Tail)
             .IsEqualTo(before);

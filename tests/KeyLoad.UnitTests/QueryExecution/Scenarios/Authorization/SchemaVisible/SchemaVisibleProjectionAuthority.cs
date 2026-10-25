@@ -48,7 +48,7 @@ internal static class SchemaVisibleProjectionAuthority
             var request = new ConfigureResourceRequest(Tenant, Database, invalid) { ExpectedSchemaVersion = resource.SchemaVersion };
             var domainBefore = DomainImage(fixture);
             var result = fixture.Submit(OperationKind.ConfigureResource, request, id: id);
-            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Validation);
             await Assert.That(result.Problem?.Detail).IsEqualTo(InvalidIdentifier);
             await Assert.That(result.Value is null).IsTrue();
             var error = Assert.ThrowsExactly<KeyLoadException>(() => result.Get<ResourceDefinition>());

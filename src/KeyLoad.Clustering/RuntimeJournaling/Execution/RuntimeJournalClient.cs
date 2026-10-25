@@ -56,7 +56,7 @@ internal sealed class RuntimeJournalClient(
             reply = await SendCommandAsync(payload, commandId, cancellationToken);
         }
 
-        return Decode<RuntimeJournalMutationResult>(reply, allowNull: false)
+        return (Decode<RuntimeJournalMutationResult>(reply, allowNull: false)).Value
             ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
     }
 
@@ -86,7 +86,7 @@ internal sealed class RuntimeJournalClient(
             GrainRequestStreamConsumer.DrainAsync(
                 createStream: streamToken => actor.ExecuteStreamAsync(issued, streamToken), serializer: chunkSerializer, requestId: requestId,
                 clock: clock, cancellationToken: token, options: routingOptions));
-        return Decode<T>(reply, allowNull);
+        return (Decode<T>(reply, allowNull)).Value;
     }
 
     private async Task<GrainOperationReply> SendCommandAsync(ReadOnlyMemory<byte> payload, Guid commandId,
@@ -124,7 +124,7 @@ internal sealed class RuntimeJournalClient(
         return codecFactory();
     }
 
-    private static T? Decode<T>(GrainOperationReply reply, bool allowNull = false) where T : class
+    private static global::ManagedCode.Communication.Result<T?> Decode<T>(GrainOperationReply reply, bool allowNull = false) where T : class
     {
         if (reply.Error is { } error)
         {
@@ -134,10 +134,10 @@ internal sealed class RuntimeJournalClient(
         var value = GrainPayload.Read<GrainValue>(reply.Payload).Value;
         if (value is null && allowNull)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<T?>.FailNotFound(nameof(Decode));
         }
 
-        return value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
+        return global::ManagedCode.Communication.Result<T?>.Succeed(((T?)(value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply))));
     }
 
     private static IOptions<RuntimeJournalOptions> ValidateOptions(IOptions<RuntimeJournalOptions> configuredOptions)

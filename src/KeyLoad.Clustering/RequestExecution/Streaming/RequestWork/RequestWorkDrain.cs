@@ -9,7 +9,7 @@ internal static class RequestWorkDrain
         Task<RequestWorkOriginalSettlement>[] frames)
     {
         await start;
-        var failure = await RequestWorkSettlement.CancelAsync(shutdown);
+        var failure = (await RequestWorkSettlement.CancelAsync(shutdown)).Value;
         foreach (var frame in frames)
         {
             failure = RequestWorkSettlement.Preserve(failure, await ObserveFrameAsync(frame));

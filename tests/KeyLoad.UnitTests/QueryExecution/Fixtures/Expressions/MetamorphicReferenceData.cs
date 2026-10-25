@@ -32,7 +32,7 @@ internal static class MetamorphicReferenceData
             var id = "m" + index.ToString("D2", CultureInfo.InvariantCulture);
             var status = value % 3 == 0 ? "закрито" : Wanted;
             var missing = value % 5 == 0;
-            var score = Score(value);
+            var score = (Score(value)).Value;
             var body = new JsonObject
             {
                 [StatusProperty] = status,
@@ -48,12 +48,12 @@ internal static class MetamorphicReferenceData
         }
         return result.ToImmutable();
     }
-    private static decimal? Score(int value) => value switch
+    private static global::ManagedCode.Communication.Result<decimal?> Score(int value) => value switch
     {
-        var candidate when candidate % 5 is 0 or 1 => null,
-        47 => decimal.MaxValue,
-        42 => decimal.MinValue,
-        _ => value % 7 - 3
+        var candidate when candidate % 5 is 0 or 1 => global::ManagedCode.Communication.Result<decimal?>.FailNotFound(nameof(Score)),
+        47 => global::ManagedCode.Communication.Result<decimal?>.Succeed(((decimal?)(decimal.MaxValue))),
+        42 => global::ManagedCode.Communication.Result<decimal?>.Succeed(((decimal?)(decimal.MinValue))),
+        _ => global::ManagedCode.Communication.Result<decimal?>.Succeed(((decimal?)(value % 7 - 3)))
     };
     internal static ImmutableArray<MetamorphicReferenceRow> Reference(ImmutableArray<MetamorphicReferenceRow> rows, bool descending, int offset)
     {

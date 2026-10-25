@@ -37,7 +37,7 @@ internal static class BoundCqrsStreamLifetime
                 }
                 yield return step.Item!;
             }
-            primary ??= admission.CompletionFailure(work.Token);
+            primary ??= (admission.CompletionFailure(work.Token)).Value;
         }
         finally
         {

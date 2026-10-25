@@ -35,8 +35,8 @@ internal sealed class McpConcurrentIdentityTests(ClusterFixture fixture)
             secondClient.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(first.Reference), deadline.Token));
         var firstRead = await PublicReadAssertions.RequiredDocumentAsync(calls[0]);
         var secondRead = await PublicReadAssertions.RequiredDocumentAsync(calls[1]);
-        var firstDenied = await McpCallerAssertions.ErrorAsync(calls[FirstDenial], ErrorCode.PermissionDenied, dispatched: true);
-        var secondDenied = await McpCallerAssertions.ErrorAsync(calls[SecondDenial], ErrorCode.PermissionDenied, dispatched: true);
+        var firstDenied = (await McpCallerAssertions.ErrorAsync(calls[FirstDenial], ErrorCode.PermissionDenied, dispatched: true)).Value;
+        var secondDenied = (await McpCallerAssertions.ErrorAsync(calls[SecondDenial], ErrorCode.PermissionDenied, dispatched: true)).Value;
         await global::KeyLoad.IntegrationTests.Authorization.ConcurrentPrincipalAuthorityAssertions.LiteralAsync(first, firstRead.Value);
         await global::KeyLoad.IntegrationTests.Authorization.ConcurrentPrincipalAuthorityAssertions.LiteralAsync(second, secondRead.Value);
         await Assert.That(firstRead.Value.Reference).IsEqualTo(first.StoredReference);

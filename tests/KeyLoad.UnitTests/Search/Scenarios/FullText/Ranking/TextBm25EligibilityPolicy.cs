@@ -43,7 +43,7 @@ internal static class TextBm25EligibilityPolicy
         await Bm25ColdInvalidationAssertions.PhaseDeniedAsync(flow, original);
         var fresh = flow.Capture(original.CommandId);
         var result = flow.Publish(fresh);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((fresh).Value!.Input.Span);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(3L);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(2);

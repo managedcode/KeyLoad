@@ -12,7 +12,7 @@ internal static class ScaleServerHostCpuParser
     private const string PhysicalIdField = "physical id";
     private const string CoreIdField = "core id";
 
-    internal static (string Vendor, int Family, int Model, int Stepping)? ParseCpu(string text)
+    internal static global::ManagedCode.Communication.Result<(string Vendor, int Family, int Model, int Stepping)?> ParseCpu(string text)
     {
         const char LineFeedCharacter = '\n';
         const char ColonCharacter = ':';
@@ -49,14 +49,14 @@ internal static class ScaleServerHostCpuParser
             };
             if (!accepted)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<(string Vendor, int Family, int Model, int Stepping)?>.FailNotFound(nameof(ParseCpu));
             }
         }
 
         return vendor is null || !int.TryParse(family, NumberStyles.None, CultureInfo.InvariantCulture, out var familyValue)
             || !int.TryParse(model, NumberStyles.None, CultureInfo.InvariantCulture, out var modelValue)
             || !int.TryParse(stepping, NumberStyles.None, CultureInfo.InvariantCulture, out var steppingValue)
-            ? null : (vendor, familyValue, modelValue, steppingValue);
+            ? global::ManagedCode.Communication.Result<(string Vendor, int Family, int Model, int Stepping)?>.FailNotFound(nameof(ParseCpu)) : global::ManagedCode.Communication.Result<(string Vendor, int Family, int Model, int Stepping)?>.Succeed((((string Vendor, int Family, int Model, int Stepping)?)((vendor, familyValue, modelValue, steppingValue))));
     }
 
     private static bool SetConsistent(ref string? current, string value)
@@ -70,7 +70,7 @@ internal static class ScaleServerHostCpuParser
         return true;
     }
 
-    internal static string? ReadValue(string text, string name)
+    internal static global::ManagedCode.Communication.Result<string?> ReadValue(string text, string name)
     {
         const char LineFeedCharacter = '\n';
         const char ColonCharacter = ':';
@@ -83,11 +83,11 @@ internal static class ScaleServerHostCpuParser
             var separator = line.IndexOf(ColonCharacter, StringComparison.Ordinal);
             if (separator > BoundaryValue && line[..separator].Trim().Equals(name, StringComparison.Ordinal))
             {
-                return line[(separator + SecondIndex)..].Trim().Split(SpaceCharacter, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
+                return ((string?)(line[(separator + SecondIndex)..].Trim().Split(SpaceCharacter, StringSplitOptions.RemoveEmptyEntries).FirstOrDefault())) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadValue));
             }
         }
 
-        return null;
+        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadValue));
     }
 
     internal static int CountOnline(string text)

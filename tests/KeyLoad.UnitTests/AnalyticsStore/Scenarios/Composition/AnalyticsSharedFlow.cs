@@ -40,7 +40,7 @@ internal static class AnalyticsSharedFlow
         var failed = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [P.Upsert(upsert.Events.Single().Links, 1), new PutDocument(P.Documents, P.Effect, P.Json, 0)]);
         var result = fixture.Submit(OperationKind.Batch, failed, id: failed.CommandId);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
 
         await Assert.That(result.Value).IsNull();

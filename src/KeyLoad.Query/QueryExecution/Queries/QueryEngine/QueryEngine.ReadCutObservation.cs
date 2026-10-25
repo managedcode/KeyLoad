@@ -7,10 +7,10 @@ public sealed partial class QueryEngine
 {
     private readonly IQueryReadCutObserver? readCutObserver;
 
-    internal QueryReadCutObservation? CaptureQueryReadCut(PrincipalRecord principal, ResourceDefinition resource,
+    internal global::ManagedCode.Communication.Result<QueryReadCutObservation?> CaptureQueryReadCut(PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, QueryPage page, ReadExecutionBudget budget)
-        => readCutObserver is null || request.Query.Explain ? null
-            : QueryReadCutObservationDispatch.Capture(database, principal, resource, request, hash, page, budget);
+        => readCutObserver is null || request.Query.Explain ? global::ManagedCode.Communication.Result<QueryReadCutObservation?>.FailNotFound(nameof(CaptureQueryReadCut))
+            : global::ManagedCode.Communication.Result<QueryReadCutObservation?>.Succeed(((QueryReadCutObservation?)(QueryReadCutObservationDispatch.Capture(database, principal, resource, request, hash, page, budget))));
 
     internal void PublishQueryReadCut(QueryReadCutObservation? observation, ReadExecutionBudget budget)
         => QueryReadCutObservationDispatch.Observe(readCutObserver, observation, budget);

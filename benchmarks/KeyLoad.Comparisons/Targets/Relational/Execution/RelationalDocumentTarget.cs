@@ -95,7 +95,7 @@ internal sealed class RelationalDocumentTarget(Func<DbConnection> admin, Func<Db
         await using var command = Command(connection, RelationalDocumentCommand.Query);
         RelationalDocumentSession.Bind(command, expected);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-        var found = await RelationalDocumentSession.ReadOneAsync(reader, cancellationToken).ConfigureAwait(false);
+        var found = (await RelationalDocumentSession.ReadOneAsync(reader, cancellationToken).ConfigureAwait(false)).Value;
         BenchmarkSessionQueryContract.Require(found, expected);
     }
 

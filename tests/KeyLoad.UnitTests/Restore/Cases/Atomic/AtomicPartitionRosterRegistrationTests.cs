@@ -27,7 +27,7 @@ internal sealed class AtomicPartitionRosterRegistrationTests
         var unknown = fixture.Submit(OperationKind.Batch, invalidRequest, unknownCommandId);
         var unknownOutcome = fixture.Store.Read(view => view.GetRecord<StoredOutcome>(
             KeySpace.UnknownOutcome(RootPrincipalId, unknownCommandId)));
-        await Assert.That(Errors.Code(unknown.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(unknown.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(unknownOutcome?.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Unknown);
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Source)).IsNull();
         var commandId = Guid.NewGuid();
@@ -35,7 +35,7 @@ internal sealed class AtomicPartitionRosterRegistrationTests
         var firstSeenIndex = checked(fixture.Database.LastApplied + 1);
         var source = fixture.Batch(AtomicPartitionRosterFixture.Source, commandId, firstSeenIndex,
             new PutDocument(AtomicPartitionRosterFixture.Collection, DocumentId, DocumentJson));
-        await Assert.That(Errors.Code(source.Problem)).IsNull();
+        await Assert.That(Errors.Code(source.Problem).Value).IsNull();
         var firstSource = fixture.ReadEntry(AtomicPartitionRosterFixture.Source)!;
         var firstTarget = fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)!;
         var targetFollowUp = fixture.Batch(AtomicPartitionRosterFixture.Destination,
@@ -43,14 +43,14 @@ internal sealed class AtomicPartitionRosterRegistrationTests
         await Assert.That(firstSource.FirstSeenStorePosition).IsEqualTo(NoStorePosition);
         await Assert.That(firstSource.FirstSeenAppliedIndex).IsEqualTo(firstSeenIndex);
         await Assert.That(firstTarget.FirstSeenStorePosition).IsGreaterThan(NoStorePosition);
-        await Assert.That(Errors.Code(targetFollowUp.Problem)).IsNull();
+        await Assert.That(Errors.Code(targetFollowUp.Problem).Value).IsNull();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(firstTarget);
 
         fixture.Reopen();
         var retry = fixture.Batch(AtomicPartitionRosterFixture.Source, commandId, firstSeenIndex,
             new PutDocument(AtomicPartitionRosterFixture.Collection, DocumentId, DocumentJson));
         var reopened = fixture.ReadEntry(AtomicPartitionRosterFixture.Source);
-        await Assert.That(Errors.Code(retry.Problem)).IsNull();
+        await Assert.That(Errors.Code(retry.Problem).Value).IsNull();
         await Assert.That(reopened).IsEqualTo(firstSource);
         var document = fixture.Store.Read(view => view.GetRecord<DocumentRecord>(
             KeySpace.Partition(PartitionRecordFamilies.Document, AtomicPartitionRosterFixture.Source,
@@ -79,8 +79,8 @@ internal sealed class AtomicPartitionRosterRegistrationTests
         var secondEntry = second.ReadEntry(AtomicPartitionRosterFixture.Source)!;
 
         await Assert.That(firstPosition).IsNotEqualTo(secondPosition);
-        await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
-        await Assert.That(Errors.Code(secondResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(firstResult.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(secondResult.Problem).Value).IsNull();
         await Assert.That(firstEntry.FirstSeenStorePosition).IsEqualTo(NoStorePosition);
         await Assert.That(secondEntry.FirstSeenStorePosition).IsEqualTo(NoStorePosition);
         await Assert.That(firstEntry.FirstSeenAppliedIndex).IsEqualTo(firstSeenIndex);
@@ -89,7 +89,7 @@ internal sealed class AtomicPartitionRosterRegistrationTests
             .SequenceEqual(second.ReadEntryBytes(AtomicPartitionRosterFixture.Source)!)).IsTrue();
         var localFollowUp = first.Batch(AtomicPartitionRosterFixture.Source,
             new PutDocument(AtomicPartitionRosterFixture.Collection, ExistingDocumentId, DocumentJson));
-        await Assert.That(Errors.Code(localFollowUp.Problem)).IsNull();
+        await Assert.That(Errors.Code(localFollowUp.Problem).Value).IsNull();
         await Assert.That(first.ReadEntryBytes(AtomicPartitionRosterFixture.Source)!.AsSpan()
             .SequenceEqual(second.ReadEntryBytes(AtomicPartitionRosterFixture.Source)!)).IsTrue();
     }
@@ -112,8 +112,8 @@ internal sealed class AtomicPartitionRosterRegistrationTests
         var unknownResult = fixture.Batch(unknownPartition,
             new PutDocument("unknown-tenant-collection", DocumentId, DocumentJson));
 
-        await Assert.That(Errors.Code(globalResult.Problem)).IsNull();
-        await Assert.That(Errors.Code(unknownResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(globalResult.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(unknownResult.Problem).Value).IsNull();
         await Assert.That(fixture.ReadEntry(globalPartition)).IsNotNull();
         await Assert.That(fixture.ReadEntry(unknownPartition)).IsNotNull();
     }
@@ -134,7 +134,7 @@ internal sealed class AtomicPartitionRosterRegistrationTests
         var document = fixture.Store.Read(view => view.GetRecord<DocumentRecord>(
             KeySpace.Partition(PartitionRecordFamilies.Document, AtomicPartitionRosterFixture.Source,
                 AtomicPartitionRosterFixture.Collection, DocumentId)));
-        await Assert.That(Errors.Code(rejected.Problem)).IsNotNull();
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsNotNull();
         await Assert.That(entry).IsNotNull();
         await Assert.That(document).IsNull();
 

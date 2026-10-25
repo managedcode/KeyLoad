@@ -60,8 +60,8 @@ internal static class GraphSearchExpansion
         }
         var resource = budget.ReadRecord<ResourceDefinition>(view,
                 KeySpace.Resource(reference.Partition.TenantId, reference.Partition.DatabaseId, reference.Collection));
-        _ = ResourceLifetimeCatalog.Read(budget.CreateView(view), reference.Partition.TenantId,
-            reference.Partition.DatabaseId, reference.Collection, resource);
+        _ = (ResourceLifetimeCatalog.Read(budget.CreateView(view), reference.Partition.TenantId,
+            reference.Partition.DatabaseId, reference.Collection, resource)).Value;
         if (resource is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, ResourceMissing);

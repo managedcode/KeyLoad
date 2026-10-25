@@ -8,20 +8,20 @@ internal static class SqlCreateTableHot
         var command = SqlCreateTableLiteral.Compile(fixture.Partition, originalId, token);
         var issued = fixture.Database.EvaluationClock.GetUtcNow();
         var original = SqlCreateTableLiteral.Apply(fixture.Database, command, issued, principal.Id);
-        await Assert.That(Errors.Code(original.Problem)).IsNull();
+        await Assert.That(Errors.Code(original.Problem).Value).IsNull();
         await SqlCreateTableAssertions.SameAsync(SqlCreateTableLiteral.Definition(fixture.Partition), original.Get<ResourceDefinition>());
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
         await SqlCreateTableAssertions.SameAsync(original, SqlCreateTableLiteral.Apply(fixture.Database, command, issued, principal.Id));
         await SqlCreateTableAssertions.UnchangedAsync(fixture.Store, image, cut);
         var conflicting = SqlCreateTableLiteral.Compile(fixture.Partition, command.CommandId, SqlCreateTableLiteral.ChangedSql, token);
-        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, conflicting, issued, principal.Id).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, conflicting, issued, principal.Id).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await SqlCreateTableAssertions.SameAsync(original, SqlCreateTableLiteral.Apply(fixture.Database, command, issued, principal.Id));
         await SqlCreateTableAssertions.UnchangedAsync(fixture.Store, image, cut);
         var duplicate = SqlCreateTableLiteral.Compile(fixture.Partition, Guid.NewGuid(), token);
         var duplicateAt = fixture.Database.EvaluationClock.GetUtcNow();
         var failed = SqlCreateTableLiteral.Apply(fixture.Database, duplicate, duplicateAt, principal.Id);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.Conflict);
 
         await Assert.That(failed.Value).IsNull();
         image = QueueWholeFlowStorage.Bytes(fixture.Store);
@@ -30,7 +30,7 @@ internal static class SqlCreateTableHot
         await SqlCreateTableAssertions.UnchangedAsync(fixture.Store, image, cut);
         var outbox = fixture.Database.GetOutboxStatus(SqlCreateTableLiteral.Root, fixture.Partition);
         var invalid = RelationalTestData.Submit(fixture, new PutDocument(SqlCreateTableLiteral.Table, SqlCreateTableLiteral.One, SqlCreateTableLiteral.InvalidRow));
-        await Assert.That(Errors.Code(invalid.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(invalid.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.Database.GetDocument(SqlCreateTableLiteral.Root,
             new(fixture.Partition, SqlCreateTableLiteral.Table, SqlCreateTableLiteral.One), cancellationToken: token)).IsNull();
         await SqlCreateTableAssertions.SameAsync(outbox, fixture.Database.GetOutboxStatus(SqlCreateTableLiteral.Root, fixture.Partition));

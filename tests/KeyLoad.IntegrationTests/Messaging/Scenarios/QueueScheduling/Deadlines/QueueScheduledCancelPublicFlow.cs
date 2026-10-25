@@ -127,8 +127,8 @@ internal static class QueueScheduledCancelPublicFlow
                 new("Ack", state.Owner.Lane.Queue, delivery.Id, 3L) }, CollectionOrdering.Matching);
         }
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, request, token),
-            ErrorCode.StaleLease, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive, request, token),
+            ErrorCode.StaleLease, true)).Value;
     }
 
     private static async Task FinalAsync(RequestCqrsClusterCallers callers, QueueScheduledCancelPublicState state,

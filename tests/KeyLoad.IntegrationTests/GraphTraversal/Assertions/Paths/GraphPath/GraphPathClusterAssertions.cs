@@ -42,8 +42,8 @@ internal static class GraphPathClusterAssertions
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(expected.ToString());
     }
 
-    internal static Task<Guid?> AssertMcpErrorAsync(CallToolResult result, ErrorCode expected)
-        => McpCallerAssertions.ErrorAsync(result, expected, dispatched: true);
+    internal static async Task<Guid?> AssertMcpErrorAsync(CallToolResult result, ErrorCode expected)
+        => (await McpCallerAssertions.ErrorAsync(result, expected, dispatched: true)).Value;
 
     internal static async Task AssertNoPathAsync(GraphShortestPathResult result)
     {

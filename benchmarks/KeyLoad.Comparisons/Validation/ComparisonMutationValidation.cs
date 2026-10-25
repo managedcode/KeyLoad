@@ -51,7 +51,7 @@ internal static class ComparisonMutationValidation
         {
             using var deadline = ComparisonDeadline.Create(dataset.Options.TimeoutSeconds, cancellationToken: token, timeProvider: timeProvider);
             var sentinel = dataset.Documents[FirstElementIndex];
-            if (!BenchmarkDataset.SameDocument(await reader.ReadAsync(sentinel, deadline.Token), sentinel))
+            if (!BenchmarkDataset.SameDocument((await reader.ReadAsync(sentinel, deadline.Token)).Value, sentinel))
             {
                 throw new ComparisonFailureException(SentinelChanged);
             }

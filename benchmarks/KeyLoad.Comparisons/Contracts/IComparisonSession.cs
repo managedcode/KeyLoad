@@ -14,8 +14,8 @@ public interface IComparisonSession : IAsyncDisposable
     /// <summary>Reads the specified document from the target.</summary>
     /// <param name="document">The document whose identifier is read.</param>
     /// <param name="cancellationToken">A token used to cancel the read.</param>
-    /// <returns>A task whose result is the found document, or <see langword="null"/> when it is absent.</returns>
-    Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken);
+    /// <returns>A task containing the found document or an explicit not-found result.</returns>
+    Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken);
     /// <summary>Reads the event associated with the specified document.</summary>
     /// <param name="document">The document identifying the event to read.</param>
     /// <param name="cancellationToken">A token used to cancel the read.</param>

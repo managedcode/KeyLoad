@@ -64,14 +64,14 @@ internal static class QueueLeasedCancelPublicAssertions
         var original = await callers.Sdk.ReceiveAsync(state.Claim, token);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(original, ErrorCode.StaleLease);
         await Assert.That(original.Value).IsNull();
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive,
-            state.Claim, token), ErrorCode.StaleLease, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive,
+            state.Claim, token), ErrorCode.StaleLease, true)).Value;
         foreach (var action in new[] { DeliveryAction.Ack, DeliveryAction.Nack, DeliveryAction.Renew })
         {
             var command = new DeliveryCommand(Guid.NewGuid(), state.Owner.Lane, state.Claimed.Deliveries.Single().Token, action);
             await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(command, token), ErrorCode.StaleLease);
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete,
-                command, token), ErrorCode.StaleLease, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete,
+                command, token), ErrorCode.StaleLease, true)).Value;
         }
     }
 

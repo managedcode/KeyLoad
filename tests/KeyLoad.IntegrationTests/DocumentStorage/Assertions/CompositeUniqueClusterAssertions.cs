@@ -70,7 +70,7 @@ internal static class CompositeUniqueClusterAssertions
         var direct = await sdk.CommitAsync(command, token);
         await RejectAsync(direct, code);
         var official = await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-        await McpCallerAssertions.ErrorAsync(official, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, code, dispatched: true)).Value;
         await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(Detail(code));
         await McpCallerAssertions.DoesNotDiscloseAsync(official, secret, CompositeUniqueClusterScenario.ConflictJson);

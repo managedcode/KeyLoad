@@ -7,28 +7,28 @@ namespace KeyLoad.Core;
 /// <summary>Executes RemoteTransferFailureCapture operations against the caller's database context.</summary>
 public static class RemoteTransferFailureCapture
 {
-    internal static RemoteTransferAcceptFailureAuthority? CaptureRemoteTransferFailureAuthority(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
+    internal static global::ManagedCode.Communication.Result<RemoteTransferAcceptFailureAuthority?> CaptureRemoteTransferFailureAuthority(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation)
     {
         if (engine.Limits.MaxQueueTransferAcceptAttempts is null || operation.Value!.Kind != OperationKind.Batch)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<RemoteTransferAcceptFailureAuthority?>.FailNotFound(nameof(CaptureRemoteTransferFailureAuthority));
         }
 
         var batch = OperationProtocol.Payload<CommandRequest>(operation);
         if (batch.Mutations.Length != RemoteTransferAttemptProtocol.SingleMutation || batch.Mutations[RemoteTransferAttemptProtocol.FirstIndex] is not AcceptQueueTransfer accept)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<RemoteTransferAcceptFailureAuthority?>.FailNotFound(nameof(CaptureRemoteTransferFailureAuthority));
         }
 
         var claims = engine.AuthorizeAcceptQueueTransfer(view, principal, batch.Partition, accept);
         var existing = view.GetRecord<RemoteTransferTargetReceiptRecord>(RemoteTransferStorage.TargetReceiptKey(claims.Source, claims.TransferId, claims.Destination));
         if (existing is not null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<RemoteTransferAcceptFailureAuthority?>.FailNotFound(nameof(CaptureRemoteTransferFailureAuthority));
         }
 
-        return new(claims.Source, claims.Destination, claims.TransferId, principal.Id, claims.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(accept.IntentToken), operation.CommandId, OperationProtocol.CommandFingerprint(operation), engine.Store.Identity.Incarnation, engine.CaptureRemoteTransferDependency(view, principal, claims.Destination));
+        return global::ManagedCode.Communication.Result<RemoteTransferAcceptFailureAuthority?>.Succeed(((RemoteTransferAcceptFailureAuthority?)(new(claims.Source, claims.Destination, claims.TransferId, principal.Id, claims.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(accept.IntentToken), operation.CommandId, OperationProtocol.CommandFingerprint(operation), engine.Store.Identity.Incarnation, engine.CaptureRemoteTransferDependency(view, principal, claims.Destination)))));
     }
 
-    internal static bool HasRemoteTransferCapacityFailure(Result<object> result) => Errors.Code(result.Problem) == ErrorCode.ResourceExhausted && result.Problem?.Detail == QueueSweepTransitions.StoredQuotaExhausted;
+    internal static bool HasRemoteTransferCapacityFailure(Result<object> result) => Errors.Code(result.Problem).Value == ErrorCode.ResourceExhausted && result.Problem?.Detail == QueueSweepTransitions.StoredQuotaExhausted;
 }

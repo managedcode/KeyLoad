@@ -57,13 +57,13 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var frame = await PostgresFrameReader.ReadAsync(context.Transport.Input, true,
-                options.MaximumStartupBytes, admission, PostgresAdmissionLifetime.Require(context).Token);
+            using var frame = (await PostgresFrameReader.ReadAsync(context.Transport.Input, true,
+                options.MaximumStartupBytes, admission, PostgresAdmissionLifetime.Require(context).Token)).Value;
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 if (frame is not null)
                 {
-                    var cancel = Cancellation(frame.Payload);
+                    var cancel = (Cancellation(frame.Payload)).Value;
                     result = cancel is not null ? new(null, cancel)
                         : new(PostgresStartupDecoder.Read(frame.Payload, options), null);
                 }
@@ -74,17 +74,17 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
         return result;
     }
 
-    private static (int Id, int Secret)? Cancellation(ReadOnlySpan<byte> payload)
+    private static global::ManagedCode.Communication.Result<(int Id, int Secret)?> Cancellation(ReadOnlySpan<byte> payload)
     {
         var reader = new PostgresPayloadReader(payload);
         if (reader.Int32() != PostgresProtocol.CancelRequest)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<(int Id, int Secret)?>.FailNotFound(nameof(Cancellation));
         }
         var id = reader.Int32();
         var secret = reader.Int32();
         reader.Complete();
-        return (id, secret);
+        return global::ManagedCode.Communication.Result<(int Id, int Secret)?>.Succeed((((int Id, int Secret)?)((id, secret))));
     }
 
     private sealed record StartupRequest(PostgresStartupDecoder.Startup? Startup, (int Id, int Secret)? Cancel);

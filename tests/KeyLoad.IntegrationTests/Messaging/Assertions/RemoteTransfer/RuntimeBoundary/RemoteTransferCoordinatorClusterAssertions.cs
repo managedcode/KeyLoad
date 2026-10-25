@@ -19,8 +19,8 @@ internal static class RemoteTransferCoordinatorClusterAssertions
             RemoteTransferCoordinationProtocol.AcceptStage), seed.Scenario.DestinationPartition,
             [new AcceptQueueTransfer(seed.Scenario.DestinationQueue, intent.IntentToken)]);
         await QueueProducerClusterAssertions.DeniedAsync(await sdk.CommitAsync(command, token), ErrorCode.ResourceExhausted);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token),
-            ErrorCode.ResourceExhausted, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token),
+            ErrorCode.ResourceExhausted, dispatched: true)).Value;
         await AtomicProducerClusterRoutes.RefusedAsync(sdk, mcp, command, ErrorCode.ResourceExhausted, token);
         await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, intent, token);
         await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, null, token);

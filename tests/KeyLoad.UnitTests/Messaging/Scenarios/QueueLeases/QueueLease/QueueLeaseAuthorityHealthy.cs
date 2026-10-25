@@ -50,7 +50,7 @@ internal static class QueueLeaseAuthorityHealthy
             healthy.Producer, healthy.Producer.CommandId, new DateTimeOffset(state.Original.Timestamp)), healthy.Produced);
         await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(healthy.Ack), healthy.Acked);
         var stale = database.Apply(healthy.Claim);
-        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(stale.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
 
         await Assert.That(stale.Value).IsNull();
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(

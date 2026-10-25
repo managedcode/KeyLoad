@@ -24,13 +24,13 @@ internal sealed class FilePublicationTests
         _ = Apply(database, reserved).Get<FileUpload>();
         var objectId = Guid.NewGuid();
         var publish = reserved with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Publish, ObjectId = objectId, Sha256 = Hash };
-        await Assert.That(Errors.Code(Apply(database, publish).Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(Apply(database, publish).Problem).Value).IsEqualTo(ErrorCode.Validation);
         var stage = publish with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Stage };
         _ = Apply(database, stage).Get<FileUpload>();
         var entry = Apply(database, publish with { CommandId = Guid.NewGuid() }).Get<FileEntry>();
         await Assert.That(Read(database, reserved).Entry).IsEqualTo(entry);
         var reclaim = stage with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Reclaim };
-        await Assert.That(Errors.Code(Apply(database, reclaim).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(Apply(database, reclaim).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         _ = Apply(database, stage with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Delete }).Get<FileEntry>();
         await Assert.That(Apply(database, reclaim with { CommandId = Guid.NewGuid() }).Get<bool>()).IsTrue();
         await Assert.That(Read(database, reserved).Entry!.Deleted).IsTrue();
@@ -51,7 +51,7 @@ internal sealed class FilePublicationTests
         _ = Apply(database, second).Get<FileUpload>();
         var entry = Apply(database, first with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Publish, Sha256 = Hash }).Get<FileEntry>();
         var rejected = Apply(database, second with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Publish, Sha256 = Hash });
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(Read(database, first).Entry).IsEqualTo(entry);
     }
 
@@ -63,10 +63,10 @@ internal sealed class FilePublicationTests
         var request = Request(database, FileMetadataAction.Reserve);
         _ = Apply(database, request).Get<FileUpload>();
         var stage = request with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Stage, ObjectId = Guid.NewGuid() };
-        await Assert.That(Errors.Code(Apply(database, stage with { TransferOwner = OtherNode }).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(Apply(database, stage with { TransferOwner = OtherNode }).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         _ = Apply(database, stage with { CommandId = Guid.NewGuid() }).Get<FileUpload>();
         var abort = stage with { CommandId = Guid.NewGuid(), Action = FileMetadataAction.Abort, ObjectId = Guid.Empty };
-        await Assert.That(Errors.Code(Apply(database, abort).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(Apply(database, abort).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(Read(database, request).Upload!.Aborted).IsFalse();
         _ = Apply(database, abort with { CommandId = Guid.NewGuid(), ObjectId = stage.ObjectId }).Get<FileUpload>();
         await Assert.That(Read(database, request).Upload!.Aborted).IsTrue();
@@ -80,7 +80,7 @@ internal sealed class FilePublicationTests
         var request = Request(database, FileMetadataAction.Reserve);
         await Assert.That(Apply(database, request, OtherNode).IsFailed).IsTrue();
         var unsafePath = request with { CommandId = Guid.NewGuid(), Address = request.Address with { Path = UnsafePath } };
-        await Assert.That(Errors.Code(Apply(database, unsafePath).Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(Apply(database, unsafePath).Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(Read(database, request).Upload).IsNull();
         _ = Apply(database, request with { CommandId = Guid.NewGuid() }).Get<FileUpload>();
         await Assert.That(Read(database, request).Upload).IsNotNull();

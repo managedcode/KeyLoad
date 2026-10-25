@@ -15,11 +15,11 @@ internal sealed record KeyLoadReleaseImage(string Tag, string Digest)
 
     internal string Reference => Repository + TagSeparator + Tag + DigestSeparator + Digest;
 
-    internal static bool IsValid(string? value) => TryParse(value) is not null;
+    internal static bool IsValid(string? value) => (TryParse(value)).Value is not null;
 
-    internal static KeyLoadReleaseImage Parse(string? value) => TryParse(value) ?? throw new InvalidOperationException(Invalid);
+    internal static KeyLoadReleaseImage Parse(string? value) => (TryParse(value)).Value ?? throw new InvalidOperationException(Invalid);
 
-    private static KeyLoadReleaseImage? TryParse(string? value)
+    private static global::ManagedCode.Communication.Result<KeyLoadReleaseImage?> TryParse(string? value)
     {
         const string Prefix = Repository + TagSeparator;
         const int Missing = -1;
@@ -27,13 +27,13 @@ internal sealed record KeyLoadReleaseImage(string Tag, string Digest)
         var separator = value?.IndexOf(DigestSeparator, StringComparison.Ordinal) ?? Missing;
         if (value is null || !value.StartsWith(Prefix, StringComparison.Ordinal) || separator <= Prefix.Length)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<KeyLoadReleaseImage?>.FailNotFound(nameof(TryParse));
         }
         var tag = value[Prefix.Length..separator];
         var digest = value[(separator + DigestSeparator.Length)..];
         return tag.Length <= MaximumTagCharacters && char.IsAsciiLetterOrDigit(tag[0]) && tag.All(IsTagCharacter)
             && digest.Length == DigestCharacters && digest.All(char.IsAsciiHexDigitLower)
-            ? new(tag, digest) : null;
+            ? global::ManagedCode.Communication.Result<KeyLoadReleaseImage?>.Succeed((KeyLoadReleaseImage?)(new(tag, digest))) : global::ManagedCode.Communication.Result<KeyLoadReleaseImage?>.FailNotFound(nameof(TryParse));
     }
 
     private static bool IsTagCharacter(char value) => char.IsAsciiLetterOrDigit(value)

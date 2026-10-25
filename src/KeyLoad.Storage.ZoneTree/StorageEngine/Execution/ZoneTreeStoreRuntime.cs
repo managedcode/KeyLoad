@@ -47,7 +47,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
             else
             {
                 ZoneTreeStoreInitializer.Open(this);
-                EmbeddedPointCache = ZoneTreeStorePointCacheOpening.Open(this);
+                EmbeddedPointCache = (ZoneTreeStorePointCacheOpening.Open(this)).Value;
             }
         }
         catch (Exception failure)

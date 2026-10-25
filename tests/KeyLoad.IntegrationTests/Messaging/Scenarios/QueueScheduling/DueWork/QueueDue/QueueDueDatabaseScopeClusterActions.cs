@@ -41,7 +41,7 @@ internal static class QueueDueDatabaseScopeClusterActions
             var command = state.Allowed.Acks.Single(item => item.PolicyEpoch == 1L).Command;
             await RequireAsync(admin, state, await worker.Sdk.CompleteAsync(command, token), detail, token);
             var reply = await worker.Mcp.CallAsync(McpCallerTools.MessagesComplete, command, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
         }
         else
         {
@@ -51,7 +51,7 @@ internal static class QueueDueDatabaseScopeClusterActions
                     MessageState.Scheduled, 1L, 0L, state.Due, QueueDeadlineKind.PromoteScheduled)]);
             await RequireAsync(admin, state, await worker.Sdk.CommitAsync(command, token), detail, token);
             var reply = await worker.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
         }
         await QueueDueDatabaseScopeClusterCurrent.ObserveAsync(admin, state, token);
     }

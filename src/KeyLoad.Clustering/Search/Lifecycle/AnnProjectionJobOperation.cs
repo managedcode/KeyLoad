@@ -20,8 +20,8 @@ internal static class AnnProjectionJobOperation
         Func<CapabilityWorkLifetime, Task> execute, CancellationToken token)
     {
         var owner = services.GetRequiredService<Func<RequestWorkOwner>>()();
-        await using var lifetime = CapabilityWorkLifetime.Acquire(owner, Guid.NewGuid(),
-            RequestWorkKind.RequestProducer, token)
+        await using var lifetime = (CapabilityWorkLifetime.Acquire(owner, Guid.NewGuid(),
+            RequestWorkKind.RequestProducer, token)).Value
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
         try
         {

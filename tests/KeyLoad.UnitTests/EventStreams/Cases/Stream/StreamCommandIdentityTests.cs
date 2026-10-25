@@ -25,7 +25,7 @@ internal sealed class StreamCommandIdentityTests
 
         var result = fixture.Apply(operation);
 
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The envelope and command IDs differ.");
         await Assert.That(fixture.EventSourceHead.TailPosition).IsEqualTo(0L);
         await Assert.That(fixture.Read().Events).IsEmpty();
@@ -54,7 +54,7 @@ internal sealed class StreamCommandIdentityTests
         var duplicate = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new AppendEvents(StreamSetName, StreamId, [data], ExpectedStreamRevision.Exact(1))]);
         var duplicateResult = fixture.Apply(Operation(fixture.Database, duplicate.CommandId, duplicate));
-        await Assert.That(Errors.Code(duplicateResult.Problem)).IsEqualTo(ErrorCode.DuplicateEventId);
+        await Assert.That(Errors.Code(duplicateResult.Problem).Value).IsEqualTo(ErrorCode.DuplicateEventId);
         await Assert.That(duplicateResult.Value).IsNull();
         var changed = data with
         {
@@ -64,7 +64,7 @@ internal sealed class StreamCommandIdentityTests
         var conflict = new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new AppendEvents(StreamSetName, StreamId, [changed], ExpectedStreamRevision.Exact(1))]);
         var conflicted = fixture.Apply(Operation(fixture.Database, conflict.CommandId, conflict));
-        await Assert.That(Errors.Code(conflicted.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflicted.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(conflicted.Problem?.Detail).IsEqualTo("The event ID was reused with different content.");
         await Assert.That(conflicted.Value).IsNull();
         await Assert.That(fixture.EventSourceHead.TailPosition).IsEqualTo(1L);

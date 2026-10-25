@@ -78,10 +78,10 @@ internal sealed class TextOnlineCatalogProof : IDisposable
         try
         {
             var view = budget.CreateView(raw);
-            var current = database.ReadOnlineTextCurrentPublication(view, principal, request, budget)
+            var current = (database.ReadOnlineTextCurrentPublication(view, principal, request, budget)).Value
                 ?? throw TextErrors.Ownership();
             RequireSame(current, generation.Original, budget);
-            var original = database.ReadOnlineTextOriginalOutcome(view, principal, request, budget)
+            var original = (database.ReadOnlineTextOriginalOutcome(view, principal, request, budget)).Value
                 ?? throw TextErrors.Ownership();
             var result = original.Get<OnlineTextIndexMaintenanceResult>();
             TextOnlineCatalogSource.RequireOriginal(retained, current, result, budget, options);
@@ -137,7 +137,7 @@ internal sealed class TextOnlineCatalogProof : IDisposable
         {
             var view = budget.CreateView(raw);
             var principal = database.Principal(view, principalId, clock.GetUtcNow());
-            return database.ReadOnlineTextCurrentPublication(view, principal, request, budget)
+            return (database.ReadOnlineTextCurrentPublication(view, principal, request, budget)).Value
                 ?? throw TextErrors.Ownership();
         });
 

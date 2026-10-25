@@ -32,7 +32,7 @@ internal static class MultiLaneReceiveExecution
             token.ThrowIfCancellationRequested();
             if (!halted)
             {
-                stopped = ValidateNext(parent, incarnation, codec, clock, outcomes.Count, diagnostics);
+                stopped = (ValidateNext(parent, incarnation, codec, clock, outcomes.Count, diagnostics)).Value;
                 halted = stopped is not null;
             }
             if (halted)
@@ -91,8 +91,8 @@ internal static class MultiLaneReceiveExecution
         }
         catch (KeyLoadException error) when (!invoked && error.Code == ErrorCode.TokenInvalidated)
         {
-            var stopped = ValidateNext(parent, incarnation, codec, clock,
-                precedingOutcomes, diagnostics);
+            var stopped = (ValidateNext(parent, incarnation, codec, clock,
+                precedingOutcomes, diagnostics)).Value;
             if (stopped is null)
             {
                 throw;
@@ -157,7 +157,7 @@ internal static class MultiLaneReceiveExecution
         }
     }
 
-    private static KeyLoadException? ValidateNext(DecodedGrainRequest parent, Guid incarnation,
+    private static global::ManagedCode.Communication.Result<KeyLoadException?> ValidateNext(DecodedGrainRequest parent, Guid incarnation,
         GrainRequestCodec codec, TimeProvider clock, int precedingOutcomes, ILogger diagnostics)
     {
         var identityValidated = false;
@@ -166,7 +166,7 @@ internal static class MultiLaneReceiveExecution
             GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
             identityValidated = true;
             codec.ValidateScope(parent.Envelope);
-            return null;
+            return global::ManagedCode.Communication.Result<KeyLoadException?>.FailNotFound(nameof(ValidateNext));
         }
         catch (KeyLoadException error) when (precedingOutcomes > 0)
         {
@@ -177,7 +177,7 @@ internal static class MultiLaneReceiveExecution
                 && parent.Envelope.ExpiresAt <= clock.GetUtcNow())
             {
                 // Only the verified expired parent stopped this undispatched suffix.
-                return error;
+                return global::ManagedCode.Communication.Result<KeyLoadException?>.Succeed(((KeyLoadException?)(error)));
             }
             // Identity or other parent-scope failure cannot safely release retained payloads.
             throw Errors.Fail(ErrorCode.UnknownWriteOutcome, MultiLaneReceiveAdmission.Interrupted);

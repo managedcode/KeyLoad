@@ -25,8 +25,8 @@ internal static class RemoteTransferAttemptClusterHealthy
             await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, accept, accepted, token);
         }
         await QueueProducerClusterAssertions.DeniedAsync(await sdk.CommitAsync(failed, token), ErrorCode.ResourceExhausted);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, failed, token),
-            ErrorCode.ResourceExhausted, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, failed, token),
+            ErrorCode.ResourceExhausted, dispatched: true)).Value;
         await AtomicProducerClusterRoutes.RefusedAsync(sdk, mcp, failed, ErrorCode.ResourceExhausted, token);
         await Assert.That(receipt.Token.AtomicPartitionId).IsEqualTo(seed.Scenario.SourcePartition.AtomicPartitionId);
     }

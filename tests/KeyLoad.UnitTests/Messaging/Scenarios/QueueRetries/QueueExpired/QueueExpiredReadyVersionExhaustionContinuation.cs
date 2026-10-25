@@ -108,7 +108,7 @@ internal static class QueueExpiredReadyVersionExhaustionContinuation
             state.Producer, state.Producer.CommandId, state.Time), state.Produced);
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, original);
         var consumed = database.Apply(claim.Operation);
-        await Assert.That(Errors.Code(consumed.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(consumed.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
 
         await Assert.That(consumed.Value).IsNull();
         var retained = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(

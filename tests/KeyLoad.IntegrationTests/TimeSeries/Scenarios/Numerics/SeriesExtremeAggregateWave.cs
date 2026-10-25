@@ -70,7 +70,7 @@ internal static class SeriesExtremeAggregateWave
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var result = await official.Mcp.CallAsync(McpCallerTools.SeriesAggregate, request, token);
-            await McpCallerAssertions.ErrorAsync(result, ErrorCode.BudgetExceeded, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(result, ErrorCode.BudgetExceeded, dispatched: true)).Value;
             await SqlClusterProtocol.EqualAsync<object>(Errors.Problem(ErrorCode.BudgetExceeded, SafeBudgetDetail),
                 result.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error));
         }, failures);

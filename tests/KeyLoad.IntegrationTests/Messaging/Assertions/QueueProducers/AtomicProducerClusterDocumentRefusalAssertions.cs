@@ -38,7 +38,7 @@ internal static class AtomicProducerClusterDocumentRefusalAssertions
         object request, JsonElement? expected, CancellationToken token)
     {
         var reply = await mcp.CallAsync(tool, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, seed.Identity.Secret, QueueProducerClusterProtocol.HealthyPayload);
         var problem = reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error);
         if (expected is { } retained)

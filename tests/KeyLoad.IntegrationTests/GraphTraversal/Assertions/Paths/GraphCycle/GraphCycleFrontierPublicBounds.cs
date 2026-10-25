@@ -17,8 +17,8 @@ internal static class GraphCycleFrontierPublicBounds
             await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.BudgetExceeded.ToString());
             await Assert.That(sdk.Value).IsNull();
             await GraphCycleFrontierPublicReads.MatrixAsync(admin, reader, state, token);
-            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token),
-                ErrorCode.BudgetExceeded, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token),
+                ErrorCode.BudgetExceeded, dispatched: true)).Value;
             await GraphCycleFrontierPublicReads.MatrixAsync(admin, reader, state, token);
         }
         if (state.Hidden)
@@ -29,8 +29,8 @@ internal static class GraphCycleFrontierPublicBounds
             await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.NotFound.ToString());
             await Assert.That(sdk.Value).IsNull();
             await GraphCycleFrontierPublicReads.MatrixAsync(admin, reader, state, token);
-            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.GraphIncomingEdges, request, token),
-                ErrorCode.NotFound, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.GraphIncomingEdges, request, token),
+                ErrorCode.NotFound, dispatched: true)).Value;
             await GraphCycleFrontierPublicReads.MatrixAsync(admin, reader, state, token);
         }
     }

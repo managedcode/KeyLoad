@@ -40,7 +40,7 @@ internal static class SubscriptionIndependentCheckpointR52Refusals
 
     internal static async Task McpAsync(ModelContextProtocol.Protocol.CallToolResult reply, ErrorCode code)
     {
-        await McpCallerAssertions.ErrorAsync(reply, code, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, true)).Value;
         var envelope = reply.StructuredContent ?? throw new InvalidOperationException(SubscriptionIndependentCheckpointR52Protocol.MissingState);
         await Assert.That(envelope.GetProperty(McpCallerProtocol.Error).GetProperty(McpCallerProtocol.ProblemDetail).GetString())
             .IsEqualTo(code == ErrorCode.PermissionDenied

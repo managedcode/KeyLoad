@@ -44,7 +44,7 @@ internal sealed class TopicPublicationTests
         var shortId = Guid.NewGuid();
         var rejected = shortQuota.Submit(OperationKind.Batch, new CommandRequest(shortId, shortQuota.Partition,
             [new PublishTopic(TopicName, [.. events])]), id: shortId, time: publicationTime);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(shortQuota.Database.ReadEventSource("root", new(new(shortQuota.Partition, TopicName, EventSourceKind.Topic))).Head.TailPosition).IsEqualTo(0);
         await Assert.That(shortQuota.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, shortQuota.Partition)))).IsNull();
     }
@@ -72,7 +72,7 @@ internal sealed class TopicPublicationTests
         var staleId = Guid.NewGuid();
         await Assert.That(Errors.Code(stale.Submit(OperationKind.Batch, new CommandRequest(staleId, stale.Partition,
             [new PublishTopic(TopicName, [new("stale", EventType, "{}")])]), id: staleId,
-            time: SourceReadBusinessTime.Next(stale)).Problem))
+            time: SourceReadBusinessTime.Next(stale)).Problem).Value)
             .IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(stale.Store.Read(view => view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, stale.Partition)))).IsNull();
     }
@@ -87,7 +87,7 @@ internal sealed class TopicPublicationTests
         var duplicateId = Guid.NewGuid();
         await Assert.That(Errors.Code(duplicate.Submit(OperationKind.Batch, new CommandRequest(duplicateId, duplicate.Partition,
             [new PublishTopic(TopicName, [new("same", EventType, "{}")])]), id: duplicateId,
-            time: duplicateTime.AddTicks(1)).Problem))
+            time: duplicateTime.AddTicks(1)).Problem).Value)
             .IsEqualTo(ErrorCode.DuplicateEventId);
 
         using var paused = new TestDatabase();
@@ -95,14 +95,14 @@ internal sealed class TopicPublicationTests
         var pausedId = Guid.NewGuid();
         await Assert.That(Errors.Code(paused.Submit(OperationKind.Batch, new CommandRequest(pausedId, paused.Partition,
             [new PublishTopic(TopicName, [])]), id: pausedId,
-            time: SourceReadBusinessTime.Next(paused)).Problem)).IsEqualTo(ErrorCode.DispatchPaused);
+            time: SourceReadBusinessTime.Next(paused)).Problem).Value).IsEqualTo(ErrorCode.DispatchPaused);
 
         using var invalid = new TestDatabase();
         ConfigureTopic(invalid, long.MaxValue);
         var invalidId = Guid.NewGuid();
         await Assert.That(Errors.Code(invalid.Submit(OperationKind.Batch, new CommandRequest(invalidId, invalid.Partition,
             [new PublishTopic(TopicName, [new("", EventType, "{}")])]), id: invalidId,
-            time: SourceReadBusinessTime.Next(invalid)).Problem))
+            time: SourceReadBusinessTime.Next(invalid)).Problem).Value)
             .IsEqualTo(ErrorCode.Validation);
     }
 
@@ -119,7 +119,7 @@ internal sealed class TopicPublicationTests
         var failed = database.Submit(OperationKind.Batch, new CommandRequest(failedId, database.Partition,
             [new PutDocument(ResourceName, "rolled-back", "{}"), new PublishTopic(TopicName, [new("overflow", EventType, "{}")])]),
             id: failedId, time: publicationTime.AddMinutes(1));
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(database.Database.GetDocument("root", new(database.Partition, ResourceName, "rolled-back"))).IsNull();
         await Assert.That(database.Database.ReadEventSource("root", new(new(database.Partition, TopicName, EventSourceKind.Topic))).Head.TailPosition).IsEqualTo(1L);
         var currentSequence = database.Store.Read(view => OrleansSerialization.Deserialize<long>(view.ReadOwnedValue(KeySpace.Partition(EventSequenceSpace, database.Partition))!));

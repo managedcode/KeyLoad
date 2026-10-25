@@ -55,7 +55,7 @@ internal static class GraphSearchPathPolicyClusterCalls
         await ObserveAsync(root, state, async () =>
         {
             var reply = await caller.Mcp.CallAsync(McpCallerTools.SearchGraph, request, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.NotFound, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.NotFound, dispatched: true)).Value;
             await Assert.That(JsonElement.DeepEquals(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error),
                 JsonSerializer.SerializeToElement(Errors.Problem(ErrorCode.NotFound, P.GenericFailure), JsonDefaults.Options))).IsTrue();
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret, P.PrivateJson);

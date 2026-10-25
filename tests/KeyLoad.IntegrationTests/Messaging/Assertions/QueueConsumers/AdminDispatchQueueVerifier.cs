@@ -30,8 +30,8 @@ internal static class AdminDispatchQueueVerifier
         var denied = await sdk.ReceiveAsync(request, cancellationToken);
         await Assert.That(denied.IsFailed).IsTrue();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.DispatchPaused));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesReceive, request,
-            cancellationToken), ErrorCode.DispatchPaused, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesReceive, request,
+            cancellationToken), ErrorCode.DispatchPaused, dispatched: true)).Value;
         var after = await McpCallerAssertions.SdkSuccessAsync(await sdk.BrowseQueueAsync(new(lane), cancellationToken));
         await Assert.That(after.Counters).IsEqualTo(before.Counters);
         await Assert.That(after.Items.SequenceEqual(before.Items)).IsTrue();

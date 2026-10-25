@@ -37,7 +37,7 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
         ZoneTreeValueHeader.RequireLive(value.Span);
         var borrowed = value.Span[StorageValueHeaderBytes..];
         runtime.ReadCounters.Point(owned: true, (long)key.Length + borrowed.Length);
-        using var candidate = admission.TryPrepare(key, borrowed.Length, generation);
+        using var candidate = (admission.TryPrepare(key, borrowed.Length, generation)).Value;
         if (candidate is not null)
         {
             admission.Publish(candidate, borrowed, generation);
@@ -80,7 +80,7 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
         ZoneTreeValueHeader.RequireLive(value.Span);
         var borrowed = value.Span[StorageValueHeaderBytes..];
         runtime.ReadCounters.Point(owned: false, (long)key.Length + borrowed.Length);
-        using var candidate = admission.TryPrepare(key, borrowed.Length, generation);
+        using var candidate = (admission.TryPrepare(key, borrowed.Length, generation)).Value;
         observer?.Invoke((long)key.Length + borrowed.Length);
         if (candidate is not null)
         {

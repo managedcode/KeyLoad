@@ -46,7 +46,7 @@ internal sealed class AnalyticsEntityLinkLifetimeFixture(SafeProjectorOperationD
     {
         var partition = owner.Source.Partition;
         var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection));
-        var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, collection, definition)
+        var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, collection, definition)).Value
             ?? throw new InvalidOperationException("The execution anchor resource lifetime is absent.");
         return new EntityRef(partition, collection, D.AnchorId) { Lifetime = new(lifetime.Incarnation.Value) };
     });

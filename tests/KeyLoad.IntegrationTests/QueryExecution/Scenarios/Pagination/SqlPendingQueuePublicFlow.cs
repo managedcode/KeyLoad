@@ -73,11 +73,11 @@ internal static class SqlPendingQueuePublicFlow
         var sdk = await execute();
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(sdk, ErrorCode.PermissionDenied);
         await Assert.That(sdk.Value).IsNull();
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(tool, request, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(tool, request, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         var sql = SqlClusterProtocol.Call(state.Partition, tool, request);
         var q1 = await reader.Sdk.ExecuteSqlAsync(sql, token);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(q1, ErrorCode.PermissionDenied);
         await Assert.That(q1.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 }

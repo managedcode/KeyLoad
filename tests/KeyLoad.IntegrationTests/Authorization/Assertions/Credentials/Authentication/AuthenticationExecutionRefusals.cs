@@ -27,7 +27,7 @@ internal static class AuthenticationExecutionRefusals
         position = collector.Position;
         sent = http.Requests;
         var reply = await AuthenticationExecutionClients.ReadAsync(mcp, state, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Secret, McpDocumentProtocol.PrivateValue);
         await AuthenticationExecutionAssertions.WindowAsync(collector, position, http.Requests - sent, state.Reader.Id);
         await Assert.That(await AuthenticationExecutionValues.ImageAsync(root, state, token)).IsEqualTo(before);

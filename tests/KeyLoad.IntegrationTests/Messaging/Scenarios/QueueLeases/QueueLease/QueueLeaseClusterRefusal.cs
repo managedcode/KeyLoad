@@ -23,8 +23,8 @@ internal static class QueueLeaseClusterRefusal
                 {
                     CommandId = Guid.NewGuid()
                 };
-                await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete, other, token),
-                    ErrorCode.TokenInvalidated, dispatched: true);
+                _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete, other, token),
+                    ErrorCode.TokenInvalidated, dispatched: true)).Value;
                 await QueueLeaseClusterAssertions.EqualAsync(await QueueLeaseClusterAssertions.InspectAsync(owner, seed.Lane, token), unchanged);
             }
         }, failures).ConfigureAwait(false);
@@ -41,13 +41,13 @@ internal static class QueueLeaseClusterRefusal
             {
                 CommandId = Guid.NewGuid()
             };
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete, other, token),
-                ErrorCode.StaleLease, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesComplete, other, token),
+                ErrorCode.StaleLease, dispatched: true)).Value;
             await QueueLeaseClusterAssertions.EqualAsync(await QueueLeaseClusterAssertions.InspectAsync(sdk, original.Seed.Lane, token), unchanged);
         }
         await QueueLeaseClusterAssertions.DeniedAsync(await sdk.ReceiveAsync(original.Claim, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesReceive, original.Claim, token),
-            ErrorCode.StaleLease, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesReceive, original.Claim, token),
+            ErrorCode.StaleLease, dispatched: true)).Value;
         await QueueLeaseClusterAssertions.EqualAsync(await QueueLeaseClusterAssertions.InspectAsync(sdk, original.Seed.Lane, token), unchanged);
     }
 }

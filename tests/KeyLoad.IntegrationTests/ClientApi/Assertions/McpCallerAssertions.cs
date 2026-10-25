@@ -115,7 +115,7 @@ internal static class McpCallerAssertions
     /// <param name="expected">The required domain error.</param>
     /// <param name="dispatched">Whether a real operation grain must have started.</param>
     /// <returns>The actual operation GUID, or null before dispatch.</returns>
-    internal static async Task<Guid?> ErrorAsync(CallToolResult reply, ErrorCode expected, bool dispatched)
+    internal static async Task<global::ManagedCode.Communication.Result<Guid?>> ErrorAsync(CallToolResult reply, ErrorCode expected, bool dispatched)
     {
         await Assert.That(reply.IsError is true).IsTrue();
         var envelope = reply.StructuredContent ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult);
@@ -126,11 +126,11 @@ internal static class McpCallerAssertions
         await VerifySummaryAsync(reply);
         if (!dispatched)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Guid?>.FailNotFound(nameof(ErrorAsync));
         }
         var id = requestId.GetGuid();
         await Assert.That(id).IsNotEqualTo(Guid.Empty);
-        return id;
+        return global::ManagedCode.Communication.Result<Guid?>.Succeed(((Guid?)(id)));
     }
 
     /// <summary>Requires the exact canonical five-field safe Problem with the expected code and HTTP category.</summary>

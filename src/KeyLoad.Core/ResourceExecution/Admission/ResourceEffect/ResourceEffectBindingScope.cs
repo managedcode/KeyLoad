@@ -60,8 +60,8 @@ internal sealed class ResourceEffectBindingScope
         {
             var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(
                 lifetime.TenantId, lifetime.DatabaseId, lifetime.ResourceName));
-            var current = ResourceLifetimeCatalog.Read(view, lifetime.TenantId, lifetime.DatabaseId,
-                lifetime.ResourceName, definition);
+            var current = (ResourceLifetimeCatalog.Read(view, lifetime.TenantId, lifetime.DatabaseId,
+                lifetime.ResourceName, definition)).Value;
             if (current != lifetime)
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);

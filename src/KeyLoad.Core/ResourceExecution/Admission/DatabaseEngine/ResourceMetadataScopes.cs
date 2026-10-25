@@ -35,7 +35,7 @@ public static class ResourceMetadataScopes
     internal static void ObserveCatalogLifetime(IKeyValueView view, string tenant, string database, string name, string? domain = null)
     {
         var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(tenant, database, name));
-        var lifetime = ResourceLifetimeCatalog.Read(view, tenant, database, name, definition);
+        var lifetime = (ResourceLifetimeCatalog.Read(view, tenant, database, name, definition)).Value;
         if (lifetime is null)
         {
             if (domain is not null)

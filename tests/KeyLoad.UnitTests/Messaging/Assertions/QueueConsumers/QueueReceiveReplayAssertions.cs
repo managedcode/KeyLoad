@@ -22,7 +22,7 @@ internal static class QueueReceiveReplayAssertions
         }
         else
         {
-            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
+            await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
             await Assert.That(actual.Problem?.Detail).IsEqualTo("The delivery lease is stale.");
             await Assert.That(actual.Value).IsNull();
         }

@@ -25,7 +25,7 @@ internal static class SeriesPortableBackupAssertions
     internal static async Task ReceiptAsync(DatabaseEngine database, PartitionRef partition,
         Command<DatabaseCommand> operation, Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         var owner = database.Store.Read(view => database.ReadPlacementWitness(view, partition));

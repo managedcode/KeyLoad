@@ -56,7 +56,7 @@ internal static class QueueReferenceSelectFlow
         var result = await callers.Sdk.ExecuteSqlAsync(request, token);
         await Assert.That(result.IsSuccess).IsFalse();
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
-            code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
+            code, dispatched: true)).Value;
     }
 }

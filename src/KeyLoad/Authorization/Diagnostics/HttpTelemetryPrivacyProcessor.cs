@@ -26,7 +26,7 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
             return;
         }
         data.TraceStateString = null;
-        var linkReason = HttpTelemetryPrivacyPolicy.LinkSuppressionReason(data);
+        var linkReason = (HttpTelemetryPrivacyPolicy.LinkSuppressionReason(data)).Value;
         if (linkReason is not null)
         {
             Suppress(data, linkReason);
@@ -46,9 +46,9 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
             ? HttpTelemetryPrivacyPolicy.ServerDisplay : HttpTelemetryPrivacyPolicy.ClientDisplay;
         data.SetStatus(data.Status, null);
     }
-    internal static MetricStreamConfiguration ConfigureMetricView(Instrument instrument)
+    internal static global::ManagedCode.Communication.Result<MetricStreamConfiguration> ConfigureMetricView(Instrument instrument)
         => instrument.Meter.Name is HttpTelemetryPrivacyPolicy.ServerMeter or HttpTelemetryPrivacyPolicy.ClientMeter
-            ? new MetricStreamConfiguration { TagKeys = [] } : null!;
+            ? global::ManagedCode.Communication.Result<MetricStreamConfiguration>.Succeed((MetricStreamConfiguration)(new MetricStreamConfiguration { TagKeys = [] })) : global::ManagedCode.Communication.Result<MetricStreamConfiguration>.FailNotFound(nameof(ConfigureMetricView));
     private bool ClearBaggage(Activity data)
     {
         if (!HasBoundedAncestry(data))
@@ -96,7 +96,7 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
         }
         var method = HttpTelemetryPrivacyPolicy.NormalizeMethod(data.GetTagItem(HttpTelemetryPrivacyPolicy.MethodTag));
         var status = data.GetTagItem(HttpTelemetryPrivacyPolicy.StatusTag);
-        var protocol = HttpTelemetryPrivacyPolicy.NormalizeProtocol(data.GetTagItem(HttpTelemetryPrivacyPolicy.ProtocolTag));
+        var protocol = (HttpTelemetryPrivacyPolicy.NormalizeProtocol(data.GetTagItem(HttpTelemetryPrivacyPolicy.ProtocolTag))).Value;
         foreach (var key in keys)
         {
             data.SetTag(key, null);

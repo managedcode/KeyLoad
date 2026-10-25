@@ -9,7 +9,7 @@ internal static class AnnProjectionPinRetentionAssertions
         ImmutableArray<byte[]> retained)
     {
         var blocked = AnnProjectionPinTestSupport.Purge(database, sourceTail);
-        await Assert.That(Errors.Code(blocked.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(blocked.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         var unchanged = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, consumer.Partition);
         await Assert.That(unchanged.Head).IsEqualTo(before.Head);
         await Assert.That(unchanged.Consumers.Single().Checkpoint).IsEqualTo(checkpoint);
@@ -60,7 +60,7 @@ internal static class AnnProjectionPinRetentionAssertions
     {
         var failure = AnnProjectionPinTestSupport.CommitEmpty(database, consumer, batch,
             AnnProjectionPinTestSupport.Principal, Guid.NewGuid(), TimeProvider.System.GetUtcNow());
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(failure.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         var status = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, consumer.Partition);
         await Assert.That(status.Consumers.Single().Released).IsTrue();
         await Assert.That(status.Consumers.Single().Checkpoint).IsEqualTo(checkpoint);
@@ -74,7 +74,7 @@ internal static class AnnProjectionPinRetentionAssertions
             new ConfigureProjectionConsumerRequest(commandId, consumer,
                 new(2, [AnnProjectionPinTestSupport.Collection], [AnnProjectionPinTestSupport.VectorMutation]), sourceTail),
             id: commandId);
-        await Assert.That(Errors.Code(changed.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changed.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         var state = database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, consumer.Partition).Consumers.Single();
         await Assert.That(state.Released).IsTrue();
     }

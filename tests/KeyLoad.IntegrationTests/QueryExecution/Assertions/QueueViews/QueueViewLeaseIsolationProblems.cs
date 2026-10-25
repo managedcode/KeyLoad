@@ -23,7 +23,7 @@ internal static class QueueViewLeaseIsolationProblems
 
     internal static async Task McpAsync(CallToolResult result, QueueViewLeaseIsolationState state, ErrorCode code, bool dispatched = true)
     {
-        await McpCallerAssertions.ErrorAsync(result, code, dispatched);
+        _ = (await McpCallerAssertions.ErrorAsync(result, code, dispatched)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(result, state.Reader.Secret, SqlModelViewClusterScenario.QueueCanary);
         await McpCallerAssertions.DoesNotDiscloseAsync(result, state.Reader.Secret, SqlModelViewClusterScenario.QueueHeaderCanary);
         await McpCallerAssertions.DoesNotDiscloseAsync(result, state.Reader.Secret, state.Delivery.Token);

@@ -29,8 +29,8 @@ internal static class FoundationOtlpClusterExports
         var found = false;
         for (var attempt = 0; attempt < settings.MaximumAttempts; attempt++)
         {
-            using var snapshot = await receiver.ReadSnapshotAsync(logs ? FoundationOtlpClusterProtocol.LogPath
-                : FoundationOtlpClusterProtocol.SpanPath, node, trace, observation);
+            using var snapshot = (await receiver.ReadSnapshotAsync(logs ? FoundationOtlpClusterProtocol.LogPath
+                : FoundationOtlpClusterProtocol.SpanPath, node, trace, observation)).Value;
             if (await FoundationOtlpClusterSnapshotAssertions.HasExpectedAsync(snapshot, logs, node, trace,
                 fixture, state, receiver, options))
             {

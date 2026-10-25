@@ -5,13 +5,13 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainOnlineTextCheckpointCommand
 {
-    internal static Task<Result<object>>? TrySubmit(DatabaseEngine database, ICommitCoordinator coordinator,
+    internal static global::ManagedCode.Communication.Result<Task<Result<object>>?> TrySubmit(DatabaseEngine database, ICommitCoordinator coordinator,
         DecodedGrainRequest request, PrincipalRecord principal, IOnlineTextMaintenance? maintenance,
         TimeProvider clock, CancellationToken cancellationToken)
     {
         if (maintenance is null || request.Envelope.CommandKind != OperationKind.CommitProjectionBatch)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Task<Result<object>>?>.FailNotFound(nameof(TrySubmit));
         }
         var checkpoint = GrainPayload.ReadCommand<CommitProjectionBatchRequest>(request.Payload);
         var work = maintenance.TryRequireCheckpointWork(checkpoint, principal.Id, request.Envelope.ExpiresAt);
@@ -21,7 +21,7 @@ internal static class GrainOnlineTextCheckpointCommand
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
             }
-            return null;
+            return global::ManagedCode.Communication.Result<Task<Result<object>>?>.FailNotFound(nameof(TrySubmit));
         }
         if (request.Envelope.CommandId != checkpoint.CommandId)
         {
@@ -30,6 +30,6 @@ internal static class GrainOnlineTextCheckpointCommand
         var operation = database.CreateCommand(OperationKind.CommitProjectionBatch, checkpoint.CommandId,
             principal.Id, clock.GetUtcNow(), request.Payload);
         _ = work.AdmitOriginal(() => coordinator.SubmitVerifiedAsync(operation, cancellationToken));
-        return work.AwaitCallerAsync(cancellationToken);
+        return global::ManagedCode.Communication.Result<Task<Result<object>>?>.Succeed(((Task<Result<object>>?)(work.AwaitCallerAsync(cancellationToken))));
     }
 }

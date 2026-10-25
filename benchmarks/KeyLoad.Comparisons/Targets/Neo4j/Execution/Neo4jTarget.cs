@@ -185,14 +185,14 @@ public sealed partial class Neo4jTarget(HttpClient http, string runId, string im
             }
         }
 
-        public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+        public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         {
             const int NoItems = 0;
             const int FirstElementIndex = 0;
 
             using var response = await QueryAsync(Neo4jQueryRequests.Read(target.label), Neo4jQueryRequests.Identifier(document.Id), cancellationToken);
             var rows = DocumentNeo4jProtocol.Rows(response);
-            return rows.GetArrayLength() == NoItems ? null : new(document.Id, rows[FirstElementIndex][FirstElementIndex].GetString()!);
+            return rows.GetArrayLength() == NoItems ? global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<FoundDocument?>.Succeed((FoundDocument?)(new(document.Id, rows[FirstElementIndex][FirstElementIndex].GetString()!)));
         }
         public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
         {
@@ -202,7 +202,7 @@ public sealed partial class Neo4jTarget(HttpClient http, string runId, string im
             switch (scenario)
             {
                 case Scenario.PointRead:
-                    return new(Document: await ReadAsync(document, cancellationToken));
+                    return new(Document: (await ReadAsync(document, cancellationToken)).Value);
                 case Scenario.DocumentWrite:
                 case Scenario.DocumentUpdate:
                 case Scenario.DocumentDelete:

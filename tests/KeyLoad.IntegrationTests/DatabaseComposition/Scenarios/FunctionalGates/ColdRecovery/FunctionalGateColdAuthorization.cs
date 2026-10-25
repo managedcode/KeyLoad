@@ -45,7 +45,7 @@ internal static class FunctionalGateColdAuthorization
         var denied = await caller.Sdk.CommitAsync(command, token);
         await Assert.That(denied.IsFailed).IsTrue();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 }

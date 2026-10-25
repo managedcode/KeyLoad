@@ -45,7 +45,7 @@ internal sealed class KurrentCleanupDiagnostics(IOptions<ComparisonDiagnosticOpt
         {
             if (error is RpcException rpc)
             {
-                return (KurrentCleanupFailureReason.RuntimeRpc, RuntimeStatus(rpc));
+                return (KurrentCleanupFailureReason.RuntimeRpc, (RuntimeStatus(rpc)).Value);
             }
             if (error is OperationCanceledException)
             {
@@ -54,7 +54,7 @@ internal sealed class KurrentCleanupDiagnostics(IOptions<ComparisonDiagnosticOpt
             if (error is AccessDeniedException or NotAuthenticatedException or NotLeaderException
                 or WrongExpectedVersionException or StreamDeletedException or StreamNotFoundException)
             {
-                return (KurrentCleanupFailureReason.RuntimeFailure, error.InnerException is RpcException runtimeRpc ? RuntimeStatus(runtimeRpc) : null);
+                return (KurrentCleanupFailureReason.RuntimeFailure, error.InnerException is RpcException runtimeRpc ? (RuntimeStatus(runtimeRpc)).Value : null);
             }
             if (error.InnerException is not { } inner)
             {
@@ -65,12 +65,12 @@ internal sealed class KurrentCleanupDiagnostics(IOptions<ComparisonDiagnosticOpt
         return (KurrentCleanupFailureReason.Unknown, null);
     }
 
-    private static int? RuntimeStatus(RpcException error)
+    private static global::ManagedCode.Communication.Result<int?> RuntimeStatus(RpcException error)
     {
         const int NoObservedItems = 0;
 
         var status = (int)error.StatusCode;
-        return status is >= NoObservedItems and <= MaximumGrpcStatus ? status : null;
+        return status is >= NoObservedItems and <= MaximumGrpcStatus ? global::ManagedCode.Communication.Result<int?>.Succeed(((int?)(status))) : global::ManagedCode.Communication.Result<int?>.FailNotFound(nameof(RuntimeStatus));
     }
 
     internal void WriteFinal(KurrentCleanupDiagnostic diagnostic)

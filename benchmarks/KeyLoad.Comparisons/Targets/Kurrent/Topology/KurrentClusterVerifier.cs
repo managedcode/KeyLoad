@@ -46,7 +46,7 @@ internal static class KurrentClusterVerifier
         {
             while (true)
             {
-                var views = await TryReadReadyViewsAsync(clients, topology, limit);
+                var views = (await TryReadReadyViewsAsync(clients, topology, limit)).Value;
                 if (views is not null)
                 {
                     return views;
@@ -98,21 +98,21 @@ internal static class KurrentClusterVerifier
         return views.ToArray();
     }
 
-    private static async Task<KurrentGossipView[]?> TryReadReadyViewsAsync(HttpClient[] clients,
+    private static async Task<global::ManagedCode.Communication.Result<KurrentGossipView[]?>> TryReadReadyViewsAsync(HttpClient[] clients,
         ComparisonTopology topology, CancellationTokenSource limit)
     {
         try
         {
             var views = await ReadViewsAsync(clients, limit.Token);
-            return KurrentClusterMembers.IsReady(views, topology) ? views : null;
+            return KurrentClusterMembers.IsReady(views, topology) ? global::ManagedCode.Communication.Result<KurrentGossipView[]?>.Succeed(((KurrentGossipView[]?)(views))) : global::ManagedCode.Communication.Result<KurrentGossipView[]?>.FailNotFound(nameof(TryReadReadyViewsAsync));
         }
         catch (HttpRequestException)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<KurrentGossipView[]?>.FailNotFound(nameof(TryReadReadyViewsAsync));
         }
         catch (TaskCanceledException) when (!limit.IsCancellationRequested)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<KurrentGossipView[]?>.FailNotFound(nameof(TryReadReadyViewsAsync));
         }
     }
 

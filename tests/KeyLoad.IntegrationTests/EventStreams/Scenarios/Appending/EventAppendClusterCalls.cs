@@ -33,7 +33,7 @@ internal static class EventAppendClusterCalls
         var problem = (result.StructuredContent ?? throw new InvalidOperationException(EventAppendClusterProtocol.MissingProblem))
             .GetProperty(McpCallerProtocol.Error);
         var code = ReadCode(problem);
-        await McpCallerAssertions.ErrorAsync(result, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(result, code, dispatched: true)).Value;
         return new(null, code, problem.GetProperty(McpCallerProtocol.ProblemDetail).GetString(),
             JsonSerializer.Serialize(problem, JsonDefaults.Options));
     }

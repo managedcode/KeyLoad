@@ -22,7 +22,7 @@ internal static class QueueParkedPolicyClusterPolicy
         }
         await QueueParkedPolicyClusterAssertions.CurrentAsync(admin, worker, state, token);
         var mcp = await InvokeAsync(admin, state.RefusedPolicy, state.Replacement, token);
-        await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.Conflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.Conflict, dispatched: true)).Value;
         var error = (mcp.StructuredContent ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult)).GetProperty(McpCallerProtocol.Error).Clone();
         if (state.RefusedMcpError is { } originalError)
         {

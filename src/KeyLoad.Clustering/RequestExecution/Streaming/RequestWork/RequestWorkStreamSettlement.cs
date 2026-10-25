@@ -8,21 +8,21 @@ internal static class RequestWorkStreamSettlement
 {
     internal static async ValueTask<RequestWorkLease?> AcquireOrSettleAsync(
         RequestWorkOwner? owner, Guid requestId, Action settled)
-        => await AcquireOrSettleAwaitedAsync(owner, requestId, () => { settled(); return ValueTask.CompletedTask; }).ConfigureAwait(true);
+        => (await AcquireOrSettleAwaitedAsync(owner, requestId, () => { settled(); return ValueTask.CompletedTask; }).ConfigureAwait(true)).Value;
 
-    internal static async ValueTask<RequestWorkLease?> AcquireOrSettleAwaitedAsync(
+    internal static async ValueTask<global::ManagedCode.Communication.Result<RequestWorkLease?>> AcquireOrSettleAwaitedAsync(
         RequestWorkOwner? owner, Guid requestId, Func<ValueTask> settled)
     {
         var (lease, error) = TryAcquire(owner, requestId);
         if (error is null)
         {
-            return lease;
+            return ((RequestWorkLease?)(lease)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RequestWorkLease?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RequestWorkLease?>.FailNotFound(nameof(AcquireOrSettleAwaitedAsync));
         }
 
         var failure = await SettleAndReleaseAwaitedAsync<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>(
             null, settled, error, null).ConfigureAwait(true);
         ExceptionDispatchInfo.Capture(failure ?? error).Throw();
-        return null;
+        return global::ManagedCode.Communication.Result<RequestWorkLease?>.FailNotFound(nameof(AcquireOrSettleAwaitedAsync));
     }
 
     private static (RequestWorkLease? Lease, Exception? Error) TryAcquire(
@@ -69,7 +69,7 @@ internal static class RequestWorkStreamSettlement
             settlementError = error;
         }
 
-        var releaseFailure = Release(lease);
+        var releaseFailure = (Release(lease)).Value;
         if (settlementError is not null)
         {
             failure = RequestWorkSettlement.Preserve(primary, settlementError);
@@ -79,25 +79,25 @@ internal static class RequestWorkStreamSettlement
             : RequestWorkSettlement.Preserve(failure ?? primary, releaseFailure);
     }
 
-    private static Exception? Release(RequestWorkLease? lease)
+    private static global::ManagedCode.Communication.Result<Exception?> Release(RequestWorkLease? lease)
     {
         if (lease is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Release));
         }
 
         try
         {
             lease.Dispose();
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Release));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
     }
 }

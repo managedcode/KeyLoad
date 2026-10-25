@@ -16,8 +16,8 @@ internal static class ResourceLifetimeCoverageValidation
         var values = ImmutableArray.CreateBuilder<ResourceLifetime>(definitions.Length);
         foreach (var definition in definitions)
         {
-            values.Add(ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
-                definition.Name, definition) ?? throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority));
+            values.Add((ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
+                definition.Name, definition)).Value ?? throw Errors.Fail(ErrorCode.Corruption, ResourceLifetimeValidationMessages.MissingAuthority));
         }
         var result = new ResourceLifetimeCoverage(partition, values.MoveToImmutable());
         Require(result, partition, definitions);

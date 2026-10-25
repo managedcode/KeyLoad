@@ -50,7 +50,7 @@ internal static class TopicPurgeCrashScenario
         boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         var result = database.Apply(operation);
-        if (pinned ? Errors.Code(result.Problem) != ErrorCode.ResourceExhausted : Errors.Code(result.Problem) is not null)
+        if (pinned ? Errors.Code(result.Problem).Value != ErrorCode.ResourceExhausted : Errors.Code(result.Problem).Value is not null)
         {
             throw new InvalidOperationException(InvalidOutcome);
         }

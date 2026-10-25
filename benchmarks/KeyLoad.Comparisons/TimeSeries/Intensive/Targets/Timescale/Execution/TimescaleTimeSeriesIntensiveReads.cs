@@ -62,7 +62,7 @@ internal static class TimescaleTimeSeriesIntensiveReads
             TimescaleTimeSeriesIntensiveParameters.AddNullable(command, TimescaleTimeSeriesIntensiveProtocol.TimestampType,
                 atOrBefore?.UtcDateTime);
             var reader = operation.Own(await command.ExecuteReaderAsync(token).ConfigureAwait(false));
-            var result = await TimescaleTimeSeriesIntensiveDataReader.ReadLatestAsync(reader, token).ConfigureAwait(false);
+            var result = (await TimescaleTimeSeriesIntensiveDataReader.ReadLatestAsync(reader, token).ConfigureAwait(false)).Value;
             await operation.DisposeResourceAsync(reader).ConfigureAwait(false);
             await operation.DisposeAsync().ConfigureAwait(false);
             return result;

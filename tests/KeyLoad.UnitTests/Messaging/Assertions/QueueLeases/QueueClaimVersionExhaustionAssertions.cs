@@ -9,7 +9,7 @@ internal static class QueueClaimVersionExhaustionAssertions
 {
     internal static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(result.Problem?.Detail).IsEqualTo(QueueClaimVersionExhaustionProtocol.Detail);
 
         await Assert.That(result.Value).IsNull();

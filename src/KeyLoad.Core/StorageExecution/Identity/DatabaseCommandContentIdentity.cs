@@ -19,7 +19,7 @@ public static class DatabaseCommandContentIdentity
             throw Errors.Fail(ErrorCode.Conflict, AtomicCommandCommit.CommandContentConflictMessage);
         }
 
-        var type = DatabaseCommandInputTypes.OperationPayloadType(input.Kind) ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand);
+        var type = (DatabaseCommandInputTypes.OperationPayloadType(input.Kind)).Value ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand);
         var requested = OrleansSerialization.Deserialize(input.Input.Span, type, ValidationProfile.PublicInputElements);
         var retained = OrleansSerialization.Deserialize(admitted.Input.Span, type, ValidationProfile.PublicInputElements);
         if (JsonData.Fingerprint(requested) != JsonData.Fingerprint(retained))

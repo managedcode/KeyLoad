@@ -55,15 +55,15 @@ internal static class FunctionalGateAnalyticsPolicyReads
             await Assert.That(sdk.IsFailed).IsTrue();
             await Assert.That(sdk.Value).IsNull();
             await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-            await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
-                AnalyticsStoreProtocol.AggregateTool, request, token), ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
+                AnalyticsStoreProtocol.AggregateTool, request, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
             var sql = SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.AggregateTool, request);
             var sqlSdk = await context.Reader.Sdk.ExecuteSqlAsync(sql, token);
             await Assert.That(sqlSdk.IsFailed).IsTrue();
             await Assert.That(sqlSdk.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
             await Assert.That(sqlSdk.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-            await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
-                SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
+                SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
             await FunctionalGateAnalyticsPolicyWitness.FullAsync(context, state, token);
             await FunctionalGateAnalyticsPolicyWitness.OwnedAsync(context, state, token);
         }

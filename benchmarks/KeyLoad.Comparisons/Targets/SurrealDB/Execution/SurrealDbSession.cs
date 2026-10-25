@@ -17,7 +17,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
     private static readonly System.Text.CompositeFormat SELECTKeyPayloadNumberFROMWHERENumberORDERFormat = System.Text.CompositeFormat.Parse(SELECTKeyPayloadNumberFROMWHERENumberORDERFormatTemplate);
     private const string SELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormatTemplate = "SELECT key, payload FROM {0} WHERE embedding <|{1},COSINE|> {2} ORDER BY vector::distance::knn(), key LIMIT {3};";
     private static readonly System.Text.CompositeFormat SELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormat = System.Text.CompositeFormat.Parse(SELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormatTemplate);
-    public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         using var response = await SurrealDbSqlTransport.QueryAsync(http, string.Format(System.Globalization.CultureInfo.InvariantCulture, SELECTKeyPayloadFROMFormat, table, SurrealDbDocumentSql.Key(document.Id)), Policy, cancellationToken: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var rows = SurrealDbVectorProtocol.SingleResult(response.RootElement);
@@ -25,7 +25,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
         {
             throw new InvalidDataException(InvalidPointReadCardinality);
         }
-        return rows.GetArrayLength() == 0 ? null : Read(rows[0]);
+        return rows.GetArrayLength() == 0 ? global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<FoundDocument?>.Succeed(((FoundDocument?)(Read(rows[0]))));
     }
 
     public async IAsyncEnumerable<FoundDocument> ReadCorpusAsync([EnumeratorCancellation] CancellationToken cancellationToken)
@@ -65,7 +65,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
     {
         if (scenario == Scenario.PointRead)
         {
-            return new(Document: await ReadAsync(document, cancellationToken).ConfigureAwait(false));
+            return new(Document: (await ReadAsync(document, cancellationToken).ConfigureAwait(false)).Value);
         }
 
         if (scenario is Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete)

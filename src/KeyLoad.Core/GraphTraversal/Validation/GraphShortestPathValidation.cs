@@ -35,7 +35,7 @@ internal static class GraphShortestPathValidation
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, ForeignEndpoint);
         }
-        return Labels(request.Labels, budget, execution.MaximumLabels);
+        return (Labels(request.Labels, budget, execution.MaximumLabels)).Value;
     }
 
     private static void ValidateShape(GraphShortestPathRequest request)
@@ -102,11 +102,11 @@ internal static class GraphShortestPathValidation
         JsonData.Identifier(entity.Id);
     }
 
-    private static string[]? Labels(ImmutableArray<string>? labels, ReadExecutionBudget budget, int maximumLabels)
+    private static global::ManagedCode.Communication.Result<string[]?> Labels(ImmutableArray<string>? labels, ReadExecutionBudget budget, int maximumLabels)
     {
         if (labels is null || labels.Value.IsEmpty)
         {
-            return labels is null ? null : [];
+            return ((string[]?)(labels is null ? null : [])) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string[]?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string[]?>.FailNotFound(nameof(Labels));
         }
         if (labels.Value.Length > maximumLabels)
         {
@@ -133,7 +133,7 @@ internal static class GraphShortestPathValidation
             values[index] = label;
         }
         budget.Check();
-        return values;
+        return global::ManagedCode.Communication.Result<string[]?>.Succeed(((string[]?)(values)));
     }
 
     private static void ValidateStoredIdentifiers(EdgeRecord edge, ReadExecutionBudget budget)

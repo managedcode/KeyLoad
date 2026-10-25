@@ -56,7 +56,7 @@ internal sealed class HttpDocumentTarget(HttpClient http, HttpDocumentStore stor
     {
         var expected = BenchmarkSessionQueryContract.Expected(ordinal, stableStart, stableCount);
         using var result = await store.ReadAsync(expected.Id, expected.Number, cancellationToken).ConfigureAwait(false);
-        BenchmarkSessionQueryContract.Require(HttpDocumentSession.One(HttpDocumentStore.Documents(result)), expected);
+        BenchmarkSessionQueryContract.Require((HttpDocumentSession.One(HttpDocumentStore.Documents(result))).Value, expected);
     }
 
     public async ValueTask DisposeAsync()

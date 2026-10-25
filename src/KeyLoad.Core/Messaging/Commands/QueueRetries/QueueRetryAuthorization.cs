@@ -11,7 +11,7 @@ public static class QueueRetryAuthorization
         try
         {
             principal = engine.Principal(view, operation.UserId!, engine.Clock.GetUtcNow());
-            engine.AuthorizeOperation(view, principal, operation);
+            _ = (engine.AuthorizeOperation(view, principal, operation)).Value;
             return true;
         }
         catch (KeyLoadException failure) when (failure.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome) && (!preserveBudgetFailure || failure.Code != ErrorCode.BudgetExceeded))

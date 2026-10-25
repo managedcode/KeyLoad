@@ -20,7 +20,7 @@ public static class ResourceExecutionExecution
             try
             {
                 var principal = engine.Principal(view, normalized.UserId!, engine.Clock.GetUtcNow());
-                engine.AuthorizeOperation(view, principal, normalized);
+                _ = (engine.AuthorizeOperation(view, principal, normalized)).Value;
                 var scope = CommandOutcomePartitionIdentity.Resolve(normalized);
                 var selection = CommandOutcomeKeyResolver.Select(view, normalized.UserId!, normalized.CommandId, scope);
                 var outcome = selection.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, CommandOutcomeOperations.MissingDurableOutcomeMessage);

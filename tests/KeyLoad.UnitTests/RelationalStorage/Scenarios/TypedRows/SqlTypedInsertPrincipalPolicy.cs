@@ -13,7 +13,7 @@ internal static class SqlTypedInsertPrincipalPolicy
         };
         await ConfigureAsync(fixture, denied);
         var refused = SqlTypedInsertHot.Execute(fixture, SqlTypedInsertLiteral.Repair, token);
-        await Assert.That(Errors.Code(refused.Result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(refused.Result.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
         await FenceAsync(fixture, state, SqlTypedInsertLiteral.ScopeDenied);

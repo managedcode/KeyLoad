@@ -56,8 +56,8 @@ internal static class RemoteTransferRepairClusterHealthy
             await SqlClusterProtocol.EqualAsync(proof, original.AcceptedProof);
         }
         await QueueProducerClusterAssertions.DeniedAsync(await sdk.CommitAsync(original.Failed, token), ErrorCode.PermissionDenied);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, original.Failed, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, original.Failed, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
         await AtomicProducerClusterRoutes.RefusedAsync(sdk, mcp, original.Failed, ErrorCode.PermissionDenied, token);
         await QueueProducerClusterAssertions.DeniedAsync(await sdk.CommitAsync(seed.Create, token), ErrorCode.PermissionDenied);
     }

@@ -54,7 +54,7 @@ internal static class PolicyEpochPublicRefusals
             : route == PolicyEpochPublicProtocol.Mcp
                 ? await reader.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token)
                 : await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, ResourcePolicyUpdateClusterProtocol.SecretValue);
     }
 

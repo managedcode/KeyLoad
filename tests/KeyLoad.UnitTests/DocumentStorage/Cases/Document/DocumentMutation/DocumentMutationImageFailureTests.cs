@@ -20,7 +20,7 @@ internal sealed class DocumentMutationImageFailureTests
         db.Commit(new PutDocument(Collection, FirstId, FirstJson));
         var failed = Submit(db, new PutDocument(Collection, SecondId, FirstJson));
 
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument(RootId, new(db.Partition, Collection, SecondId))).IsNull();
         await Assert.That(db.Database.GetOutboxStatus(RootId, db.Partition).Head.Tail).IsEqualTo(1);
         db.Commit(new PutDocument(Collection, SecondId, OtherJson));
@@ -36,7 +36,7 @@ internal sealed class DocumentMutationImageFailureTests
             [new("database", Collection, Capability.DocumentsRead)], []))).Get<PrincipalRecord>();
         var denied = Submit(db, new PutDocument(Collection, FirstId, FirstJson), ReaderId);
 
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.GetOutboxStatus(RootId, db.Partition).Head.Tail).IsEqualTo(0);
         db.Commit(new PutDocument(Collection, FirstId, FirstJson));
         await Assert.That(db.Database.GetDocument(RootId, new(db.Partition, Collection, FirstId))!.Json).IsEqualTo(FirstJson);

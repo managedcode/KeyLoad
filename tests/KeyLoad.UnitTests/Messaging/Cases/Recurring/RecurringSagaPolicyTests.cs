@@ -67,7 +67,7 @@ internal sealed class RecurringSagaPolicyTests
             new CommandRequest(Guid.NewGuid(), fixture.Partition,
                 [new EmitRecurringOccurrences(fixture.Queue, scheduleId, 1)]), Caller,
             time: RecurringSagaDatabase.Epoch.AddSeconds(1));
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, scheduleId)!.NextOrdinal).IsEqualTo(0);
 
@@ -129,7 +129,7 @@ internal sealed class RecurringSagaPolicyTests
             new CommandRequest(Guid.NewGuid(), fixture.Partition,
                 [new EmitRecurringOccurrences(fixture.Queue, id, 1)]), Caller,
             time: RecurringSagaDatabase.Epoch.AddSeconds(1));
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, id)!.NextOrdinal).IsEqualTo(0);
 
@@ -158,7 +158,7 @@ internal sealed class RecurringSagaPolicyTests
         var scheduleDenied = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.Partition,
                 [new ConfigureRecurringSchedule(Definition(fixture, scheduleId), 1)]), Caller);
-        await Assert.That(Errors.Code(scheduleDenied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(scheduleDenied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, scheduleId)!.Revision).IsEqualTo(1);
 
@@ -172,7 +172,7 @@ internal sealed class RecurringSagaPolicyTests
         var sagaDenied = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.Partition,
                 [new CompareExchangeSaga(fixture.Queue, sagaId, 1, SagaPhase.Waiting, UpdatedState)]), Caller);
-        await Assert.That(Errors.Code(sagaDenied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(sagaDenied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         var retained = fixture.Database.InspectSaga(RecurringSagaDatabase.RootPrincipal, fixture.Queue, sagaId)!;
         await Assert.That(retained.Revision).IsEqualTo(1);
         await Assert.That(retained.StateJson).IsEqualTo(Payload);
@@ -198,6 +198,6 @@ internal sealed class RecurringSagaPolicyTests
     {
         var result = fixture.Apply(OperationKind.Batch,
             new CommandRequest(Guid.NewGuid(), fixture.Partition, [mutation]), principal);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
     }
 }

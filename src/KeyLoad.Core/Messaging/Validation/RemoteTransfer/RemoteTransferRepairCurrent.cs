@@ -7,7 +7,7 @@ public static class RemoteTransferRepairCurrent
 {
     internal static void RequireCurrentRemoteTransferRepair(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, RemoteTransferIntentRecord record, RemoteTransferCoordinationHint hint, RemoteTransferRepairClaims witness)
     {
-        var receipt = engine.InspectQueueTransferReceipt(view, principal.Id, record.Destination, record.Source, record.TransferId);
+        var receipt = (engine.InspectQueueTransferReceipt(view, principal.Id, record.Destination, record.Source, record.TransferId)).Value;
         if (witness.Stage == QueueTransferRepairStage.Accept && receipt is not null)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferRepairProtocol.Stale);

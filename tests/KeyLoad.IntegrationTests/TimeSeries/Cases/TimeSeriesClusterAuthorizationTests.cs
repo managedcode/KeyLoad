@@ -104,13 +104,13 @@ internal sealed class TimeSeriesClusterAuthorizationTests(ClusterFixture fixture
     {
         var inverted = scenario.Aggregate(TimeSeriesClusterScenario.Start.AddTicks(1), TimeSeriesClusterScenario.Start);
         await AssertSdkFailureAsync(await sdk.AggregateSamplesAsync(inverted, cancellationToken), ErrorCode.Validation);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SeriesAggregate,
-            inverted, cancellationToken), ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SeriesAggregate,
+            inverted, cancellationToken), ErrorCode.Validation, dispatched: true)).Value;
         var invalidWidth = scenario.Windows(TimeSeriesClusterScenario.Start,
             TimeSeriesClusterScenario.Start.Add(TimeSeriesClusterScenario.Minute), TimeSpan.Zero);
         await AssertSdkFailureAsync(await sdk.AggregateSampleWindowsAsync(invalidWidth, cancellationToken), ErrorCode.Validation);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SeriesWindows,
-            invalidWidth, cancellationToken), ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SeriesWindows,
+            invalidWidth, cancellationToken), ErrorCode.Validation, dispatched: true)).Value;
     }
 
     private static async Task VerifyBudgetFailureAndHealthyFollowupAsync(KeyLoadClient sdk, McpOfficialClient mcp,
@@ -119,8 +119,8 @@ internal sealed class TimeSeriesClusterAuthorizationTests(ClusterFixture fixture
         var capped = scenario.Aggregate(TimeSeriesClusterScenario.Start,
             maxSamples: TimeSeriesClusterScenario.OneSampleCap);
         await AssertSdkFailureAsync(await sdk.AggregateSamplesAsync(capped, cancellationToken), ErrorCode.BudgetExceeded);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SeriesAggregate,
-            capped, cancellationToken), ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SeriesAggregate,
+            capped, cancellationToken), ErrorCode.BudgetExceeded, dispatched: true)).Value;
         var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.AggregateSamplesAsync(
             scenario.Aggregate(TimeSeriesClusterScenario.Start, maxSamples: TimeSeriesClusterScenario.TwoSampleCap),
             cancellationToken));
@@ -133,8 +133,8 @@ internal sealed class TimeSeriesClusterAuthorizationTests(ClusterFixture fixture
         var request = new AggregateSamplesRequest(scenario.Partition, TimeSeriesClusterScenario.Set,
             TimeSeriesClusterScenario.OverflowSeries, TimeSeriesClusterScenario.Start);
         await AssertSdkFailureAsync(await sdk.AggregateSamplesAsync(request, cancellationToken), ErrorCode.Validation);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SeriesAggregate,
-            request, cancellationToken), ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SeriesAggregate,
+            request, cancellationToken), ErrorCode.Validation, dispatched: true)).Value;
         var persisted = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReadLatestSampleAsync(
             new(scenario.Partition, TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.OverflowSeries), cancellationToken));
         await Assert.That(persisted.Sample?.Sample.EventId).IsEqualTo(LargeSecondSampleId);

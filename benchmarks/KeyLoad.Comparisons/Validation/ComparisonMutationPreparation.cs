@@ -29,7 +29,7 @@ internal static class ComparisonMutationPreparation
                 using var deadline = ComparisonDeadline.Create(timeoutSeconds, cancellationToken: cancellationToken, timeProvider: timeProvider);
                 var initial = BenchmarkDataset.InitialMutationState(scenario, inputs[operation]);
                 await session.ExecuteAsync(Scenario.DocumentWrite, initial, deadline.Token);
-                if (!BenchmarkDataset.SameDocument(await session.ReadAsync(initial, deadline.Token), initial))
+                if (!BenchmarkDataset.SameDocument((await session.ReadAsync(initial, deadline.Token)).Value, initial))
                 {
                     throw new ComparisonFailureException(InitialStateMismatch);
                 }

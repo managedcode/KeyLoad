@@ -44,8 +44,8 @@ internal static class ZoneTreeJournalRecovery
     private static bool ReplayFrame(ZoneTreeStoreRuntime runtime, byte[] header, ref long validLength)
     {
         var journal = runtime.Journal;
-        var frame = ZoneTreeJournalFrameReader.ReadComplete(journal, header, runtime.Position,
-            runtime.Options.MaxFrameBytes, runtime.Identity.FormatVersion);
+        var frame = (ZoneTreeJournalFrameReader.ReadComplete(journal, header, runtime.Position,
+            runtime.Options.MaxFrameBytes, runtime.Identity.FormatVersion)).Value;
         if (frame is null)
         {
             journal.SetLength(validLength);

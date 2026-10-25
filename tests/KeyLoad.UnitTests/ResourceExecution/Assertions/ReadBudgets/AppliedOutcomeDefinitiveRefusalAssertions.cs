@@ -84,7 +84,7 @@ internal static class AppliedOutcomeDefinitiveRefusalAssertions
 
     private static async Task RefusalAsync(Result<object> result, ErrorCode code, string detail)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
 
         await Assert.That(result.Value).IsNull();

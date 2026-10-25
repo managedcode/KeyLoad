@@ -10,8 +10,8 @@ internal static class Bm25CorpusReuse
     {
         var resource = database.Resource(work.CreateView(view), request.Partition,
             request.Collection, ResourceKind.Collection);
-        var statistics = database.ReadBm25CorpusCurrent(view, principal, resource, request.Partition,
-            request.Collection, request.TextField!, TextProjectionProtocol.TokenizerVersion, ranker.Terms, work);
+        var statistics = (database.ReadBm25CorpusCurrent(view, principal, resource, request.Partition,
+            request.Collection, request.TextField!, TextProjectionProtocol.TokenizerVersion, ranker.Terms, work)).Value;
         return statistics is null ? ranker.Rank() : ranker.Rank(statistics);
     }
 }

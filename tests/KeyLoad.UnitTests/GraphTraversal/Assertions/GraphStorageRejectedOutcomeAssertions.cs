@@ -9,7 +9,7 @@ internal static class GraphStorageRejectedOutcomeAssertions
         ErrorCode expectedError, string expectedDetail, long previousPosition)
     {
         var rejected = GraphStorageReferenceFixture.Submit(database.Database, command);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(expectedError);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(expectedError);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(expectedDetail);
 
         await Assert.That(database.Store.Position).IsEqualTo(previousPosition + 1);

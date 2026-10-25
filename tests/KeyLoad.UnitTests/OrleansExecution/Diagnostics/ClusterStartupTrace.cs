@@ -115,7 +115,7 @@ internal sealed class ClusterStartupTrace
             events[continuationIndex] = current with
             {
                 ExceptionType = type,
-                Reason = Reason(line)
+                Reason = (Reason(line)).Value
             };
         }
     }
@@ -164,28 +164,28 @@ internal sealed class ClusterStartupTrace
         return true;
     }
 
-    private static string? Reason(string line)
+    private static global::ManagedCode.Communication.Result<string?> Reason(string line)
     {
         if (line.Contains("Address already in use", StringComparison.OrdinalIgnoreCase))
         {
-            return "AddressInUse";
+            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("AddressInUse"));
         }
         if (line.Contains("Connection refused", StringComparison.OrdinalIgnoreCase))
         {
-            return "ConnectionRefused";
+            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("ConnectionRefused"));
         }
         if (line.Contains("Permission denied", StringComparison.OrdinalIgnoreCase))
         {
-            return "PermissionDenied";
+            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("PermissionDenied"));
         }
         if (line.Contains("timed out", StringComparison.OrdinalIgnoreCase))
         {
-            return "TimedOut";
+            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("TimedOut"));
         }
         if (line.Contains("canceled", StringComparison.OrdinalIgnoreCase))
         {
-            return "Cancelled";
+            return global::ManagedCode.Communication.Result<string?>.Succeed((string?)("Cancelled"));
         }
-        return null;
+        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Reason));
     }
 }

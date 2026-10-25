@@ -134,8 +134,8 @@ internal static class TypedEndpointJoinColdFlow
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
-            ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
+            ErrorCode.Validation, dispatched: true)).Value;
         return JsonSerializer.SerializeToElement(result.Problem, JsonDefaults.Options);
     }
 }

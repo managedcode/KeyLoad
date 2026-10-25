@@ -31,7 +31,7 @@ internal sealed class ConnectionPostSubmitFailureTests
             var outcome = OutcomeStoreOracle.ReadPartition(scenario.Fixture.Database.Store,
                 command.Partition, principal.Id, command.CommandId)
                 ?? throw new InvalidOperationException(ConnectionProtocol.MissingObservation);
-            await Assert.That(Errors.Code(outcome.Problem)).IsNull();
+            await Assert.That(Errors.Code(outcome.Problem).Value).IsNull();
             var originalBytes = OrleansSerialization.Serialize(outcome);
             await ConnectionAssertions.StoredAsync(scenario, DocumentId, OriginalRevision, ConnectionProtocol.FirstJson);
             held.Release.TrySetResult();
@@ -61,8 +61,8 @@ internal sealed class ConnectionPostSubmitFailureTests
         var stored = OutcomeStoreOracle.ReadPartition(scenario.Fixture.Database.Store,
             refused.Partition, principal.Id, refused.CommandId)
             ?? throw new InvalidOperationException(ConnectionProtocol.MissingObservation);
-        await Assert.That(Errors.Code(stored.Problem)).IsNotNull();
-        await Assert.That(reply.Error).IsEqualTo(Errors.Code(stored.Problem));
+        await Assert.That(Errors.Code(stored.Problem).Value).IsNotNull();
+        await Assert.That(reply.Error).IsEqualTo(Errors.Code(stored.Problem).Value);
         await Assert.That(reply.SafeDetail).IsEqualTo(stored.Problem?.Detail);
         await ConnectionAssertions.StoredAsync(scenario, DocumentId, OriginalRevision, ConnectionProtocol.FirstJson);
     }

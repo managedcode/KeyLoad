@@ -36,10 +36,10 @@ internal sealed class DocumentRowTenantMutationAuthorizationTests
             new DeleteDocument(Collection, "alice-row", FirstRevision));
         var forgedOwner = DocumentCrudFixture.Submit(database, OwnerPrincipal,
             new PutDocument(Collection, "forged-owner", EmptyObject, 0, new(OwnerBob)));
-        await Assert.That(Errors.Code(deniedPatch.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(deniedReplacement.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(deniedDelete.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(forgedOwner.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedPatch.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedReplacement.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(deniedDelete.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(forgedOwner.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)).IsEqualTo(original);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, Collection, "forged-owner"))).IsNull();
@@ -50,17 +50,17 @@ internal sealed class DocumentRowTenantMutationAuthorizationTests
         };
         var foreignWrite = DocumentCrudFixture.SubmitAt(database, OwnerPrincipal, foreignPartition,
             new PutDocument(Collection, "forged-tenant", EmptyObject, 0));
-        await Assert.That(Errors.Code(foreignWrite.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(foreignWrite.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(foreignPartition, Collection, "forged-tenant"))).IsNull();
 
         var ownerPatch = DocumentCrudFixture.Submit(database, OwnerPrincipal,
             new PatchDocument(Collection, "alice-row", [new("/value", PatchKind.Set, "1")], FirstRevision));
-        await Assert.That(Errors.Code(ownerPatch.Problem)).IsNull();
+        await Assert.That(Errors.Code(ownerPatch.Problem).Value).IsNull();
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)!.Revision).IsEqualTo(SecondRevision);
         var ownerDelete = DocumentCrudFixture.Submit(database, OwnerPrincipal,
             new DeleteDocument(Collection, "alice-row", SecondRevision));
-        await Assert.That(Errors.Code(ownerDelete.Problem)).IsNull();
+        await Assert.That(Errors.Code(ownerDelete.Problem).Value).IsNull();
         var tombstone = DocumentCrudFixture.ReadRecord(database, reference)!;
         await Assert.That(tombstone.Revision).IsEqualTo(ThirdRevision);
         await Assert.That(tombstone.Deleted).IsTrue();

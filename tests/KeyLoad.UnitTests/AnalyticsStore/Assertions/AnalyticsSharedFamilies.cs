@@ -24,8 +24,8 @@ internal static class AnalyticsSharedFamilies
             [new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.EventId, 1)]);
         var roster = fixture.Store.Read(view => view.GetRecord<AtomicPartitionCatalogEntry>(AtomicPartitionRosterKeys.Partition(partition)));
         await AnalyticsSharedAssertions.SameAsync(new AtomicPartitionCatalogEntry(1, partition, 0, receipt.Token.Position), roster);
-        var lifetime = fixture.Store.Read(view => ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
-            P.Store, fixture.Database.Resource(view, partition, P.Store)))!;
+        var lifetime = fixture.Store.Read(view => (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
+            P.Store, fixture.Database.Resource(view, partition, P.Store))).Value)!;
         await Assert.That(lifetime.ResourceName).IsEqualTo(P.Store);
         await Assert.That(lifetime.Kind).IsEqualTo(ResourceKind.AnalyticsStore);
         await Assert.That(lifetime.Incarnation.Value).IsNotEmpty();

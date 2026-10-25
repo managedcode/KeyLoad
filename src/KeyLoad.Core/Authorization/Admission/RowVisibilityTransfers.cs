@@ -2,7 +2,7 @@ namespace KeyLoad.Core.Authorization;
 
 internal static class RowVisibilityTransfers
 {
-    internal static RowVisibilityCache? CreateOwner(ICacheMemoryBudget budget)
+    internal static global::ManagedCode.Communication.Result<RowVisibilityCache?> CreateOwner(ICacheMemoryBudget budget)
     {
         ICacheMemoryReservation? acquired = null;
         Exception? primary = null;
@@ -12,9 +12,9 @@ internal static class RowVisibilityTransfers
             {
                 if (!budget.TryReserve(RowVisibilityMemoryModel.OwnerBytes, RowVisibilityMemoryModel.MetadataOnly, out acquired))
                 {
-                    return null;
+                    return global::ManagedCode.Communication.Result<RowVisibilityCache?>.FailNotFound(nameof(CreateOwner));
                 }
-                return Owner(budget, ref acquired);
+                return (Owner(budget, ref acquired));
             }
             catch (Exception error)
             {
@@ -53,7 +53,7 @@ internal static class RowVisibilityTransfers
         return lease;
     }
 
-    internal static RowVisibilityLease? CreateLease(RowVisibilityCache owner,
+    internal static global::ManagedCode.Communication.Result<RowVisibilityLease?> CreateLease(RowVisibilityCache owner,
         ICacheMemoryBudget budget, RowVisibilityEntry entry)
     {
         ICacheMemoryReservation? acquired = null;
@@ -64,9 +64,9 @@ internal static class RowVisibilityTransfers
             {
                 if (!budget.TryReserve(RowVisibilityMemoryModel.LeaseBytes, RowVisibilityMemoryModel.MetadataOnly, out acquired))
                 {
-                    return null;
+                    return global::ManagedCode.Communication.Result<RowVisibilityLease?>.FailNotFound(nameof(CreateLease));
                 }
-                return Lease(owner, entry, ref acquired);
+                return (Lease(owner, entry, ref acquired));
             }
             catch (Exception error)
             {

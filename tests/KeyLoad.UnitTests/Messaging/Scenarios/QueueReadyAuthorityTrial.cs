@@ -172,7 +172,7 @@ internal static class QueueReadyAuthorityTrial
             }
             else
             {
-                await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.StaleLease);
+                await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
                 await Assert.That(replay.Value).IsNull();
             }
             await Assert.That(owner.LastApplied).IsEqualTo(cut.AppliedPosition);

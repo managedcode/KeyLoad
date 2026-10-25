@@ -9,12 +9,12 @@ public static class ProjectionMaintenanceConfiguration
     internal const string InvalidMaintenanceProfile = "The ANN projection maintenance profile is invalid.";
     internal const string InvalidMaintenanceAuthority = "The ANN projection maintenance authority is invalid.";
     internal static readonly string[] MaintenanceMutationKinds = [MutationDiscriminatorNames.PutDocument, MutationDiscriminatorNames.PatchDocument, MutationDiscriminatorNames.DeleteDocument, MutationDiscriminatorNames.PutVector, MutationDiscriminatorNames.ApplyVectorProjection];
-    internal static ProjectionMaintenanceAuthority? CaptureProjectionMaintenanceAuthority(this DatabaseEngine engine, global::KeyLoad.Storage.IAtomicTransaction transaction, ConfigureProjectionConsumerRequest request, Command<DatabaseCommand> operation)
+    internal static global::ManagedCode.Communication.Result<ProjectionMaintenanceAuthority?> CaptureProjectionMaintenanceAuthority(this DatabaseEngine engine, global::KeyLoad.Storage.IAtomicTransaction transaction, ConfigureProjectionConsumerRequest request, Command<DatabaseCommand> operation)
     {
         engine.RequireInitialMaintenanceReservation(transaction, request, operation);
         if (request.Definition.AnnMaintenance is not { } profile)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ProjectionMaintenanceAuthority?>.FailNotFound(nameof(CaptureProjectionMaintenanceAuthority));
         }
 
         RequireProjectionMaintenanceProfile(request.Definition, profile);
@@ -24,7 +24,7 @@ public static class ProjectionMaintenanceConfiguration
         var resource = engine.Resource(transaction, request.Consumer.Partition, profile.Collection, ResourceKind.Collection);
         engine.Authorization.RequireFieldUse(principal, resource, profile.Field);
         RequireProjectionMaintenanceResource(resource, profile);
-        return new(principal.Id, request.CommandId, engine.Store.Identity.Incarnation, principal.PolicyEpoch);
+        return global::ManagedCode.Communication.Result<ProjectionMaintenanceAuthority?>.Succeed(((ProjectionMaintenanceAuthority?)(new(principal.Id, request.CommandId, engine.Store.Identity.Incarnation, principal.PolicyEpoch))));
     }
 
     internal static void RequireInitialMaintenanceReservation(this DatabaseEngine engine, global::KeyLoad.Storage.IKeyValueView view, ConfigureProjectionConsumerRequest configure, Command<DatabaseCommand> operation)

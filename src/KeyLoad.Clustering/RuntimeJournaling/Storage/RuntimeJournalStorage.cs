@@ -28,7 +28,7 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     {
         using var lease = await state.EnterAsync(cancellationToken);
         var properties = RuntimeJournalStorageValidation.CopyProperties(metadata, state.Options.Value);
-        var observed = await state.ObserveAsync(lease.Token);
+        var observed = (await state.ObserveAsync(lease.Token)).Value;
         if (observed is not null || state.Captured is not null)
         {
             return false;
@@ -43,7 +43,7 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     public async ValueTask<IJournalMetadata?> GetMetadataAsync(CancellationToken cancellationToken = default)
     {
         using var lease = await state.EnterAsync(cancellationToken);
-        var snapshot = await state.ObserveAsync(lease.Token);
+        var snapshot = (await state.ObserveAsync(lease.Token)).Value;
         return snapshot is null ? null : operations.Metadata(snapshot);
     }
 
@@ -53,7 +53,7 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     {
         using var lease = await state.EnterAsync(cancellationToken);
         operations.EnsureAvailable();
-        var current = await state.CaptureAsync(lease.Token);
+        var current = (await state.CaptureAsync(lease.Token)).Value;
         if (current is null)
         {
             return null;
@@ -61,14 +61,14 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
 
         var properties = RuntimeJournalStorageValidation.CopyProperties(set, state.Options.Value);
         var removals = RuntimeJournalStorageValidation.CopyRemovals(remove, properties, state.Options.Value);
-        return await operations.UpdateMetadataAsync(current, properties, removals, expectedETag, lease.Token);
+        return (await operations.UpdateMetadataAsync(current, properties, removals, expectedETag, lease.Token)).Value;
     }
 
     public async ValueTask ReadAsync(IJournalStorageConsumer consumer, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(consumer);
         using var lease = await state.EnterAsync(cancellationToken);
-        var snapshot = await state.CaptureAsync(lease.Token);
+        var snapshot = (await state.CaptureAsync(lease.Token)).Value;
         if (snapshot is null)
         {
             consumer.Complete(JournalMetadata.Empty);
@@ -126,7 +126,7 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
             return;
         }
 
-        var current = await state.CaptureAsync(lease.Token);
+        var current = (await state.CaptureAsync(lease.Token)).Value;
         if (current is null)
         {
             return;

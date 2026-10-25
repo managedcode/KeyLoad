@@ -26,7 +26,7 @@ internal static class CompositionPrefixPrepareSeed
             await Assert.That(OrleansSerialization.Serialize(owner.Retained(original)).SequenceEqual(bytes)).IsTrue();
             owner.Lifetimes.Add(name, lifetime);
             await CompositionPrefixPrepareAssertions.EqualAsync(lifetime, owner.Store.Read(view =>
-                ResourceLifetimeCatalog.Read(view, request.TenantId, request.DatabaseId, name, definition)));
+                (ResourceLifetimeCatalog.Read(view, request.TenantId, request.DatabaseId, name, definition)).Value));
         }
     }
 

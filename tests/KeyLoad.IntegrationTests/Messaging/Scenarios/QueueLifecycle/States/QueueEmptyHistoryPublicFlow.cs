@@ -130,7 +130,7 @@ internal static class QueueEmptyHistoryPublicFlow
         await Assert.That(receipt.Mutations).IsEquivalentTo(new MutationReceipt[] {
             new("Ack", state.Owner.Lane.Queue, expectedId, 3L) }, CollectionOrdering.Matching);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-            McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+            McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true)).Value;
     }
 }

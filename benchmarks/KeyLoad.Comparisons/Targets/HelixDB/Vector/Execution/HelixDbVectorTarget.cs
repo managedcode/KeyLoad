@@ -112,7 +112,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
     }
 
     /// <inheritdoc/>
-    public async Task<VectorReadback?> ReadAsync(string id, CancellationToken cancellationToken)
+    public async Task<global::ManagedCode.Communication.Result<VectorReadback?>> ReadAsync(string id, CancellationToken cancellationToken)
     {
         using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbVectorAst.Read(label, id), false), false, Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
         var rows = HelixDbProtocol.Rows(response);
@@ -120,7 +120,7 @@ public sealed class HelixDbVectorTarget(HttpClient http, string image, string ru
         {
             throw new ComparisonFailureException(HelixDbTokens.TokenHelixDbInvalidRows);
         }
-        return rows.GetArrayLength() == 0 ? null : HelixDbVectorStorage.Read(rows[0]);
+        return rows.GetArrayLength() == 0 ? global::ManagedCode.Communication.Result<VectorReadback?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<VectorReadback?>.Succeed(((VectorReadback?)(HelixDbVectorStorage.Read(rows[0]))));
     }
 
     /// <inheritdoc/>

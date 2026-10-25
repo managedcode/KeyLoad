@@ -11,13 +11,13 @@ internal static class QueueLifecycleRefusals
         var image = QueueLifecycleImage.Capture(store, state.Lane);
         var full = state.Batch(database, new ParkPendingQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Pending,
             QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One));
-        await Assert.That(Errors.Code(full.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(full.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
         var rollback = state.Batch(database,
             new CancelQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Parked, QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One),
             new ParkPendingQueueMessage(state.Lane.Queue, QueueLifecycleTestProtocol.Pending, QueueLifecycleTestProtocol.Two, QueueLifecycleTestProtocol.One),
             new PutDocument(QueueLifecycleTestProtocol.Collection, "refused", QueueLifecycleTestProtocol.Payload));
-        await Assert.That(Errors.Code(rollback.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(rollback.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
         await DeniedAndCancelledAsync(database, store, state);
         await Assert.That(database.GetDocument(QueueLifecycleTestProtocol.Administrator, new(state.Partition,
@@ -31,7 +31,7 @@ internal static class QueueLifecycleRefusals
         var command = new CommandRequest(id, state.Partition, [new CancelQueueMessage(state.Lane.Queue,
             QueueLifecycleTestProtocol.Parked, QueueLifecycleTestProtocol.Three, QueueLifecycleTestProtocol.One)]);
         var denied = state.Execute(database, OperationKind.Batch, command, id, QueueLifecycleTestProtocol.DeniedAdministrator);
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
         state.CancelledCommand = command with
         {
@@ -51,7 +51,7 @@ internal static class QueueLifecycleRefusals
     {
         var image = QueueLifecycleImage.Capture(store, state.Lane);
         var stale = QueueLifecycleOperations.Complete(database, state, delivery, DeliveryAction.Ack);
-        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(stale.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await QueueLifecycleImage.SameAsync(store, state.Lane, image);
     }
 }

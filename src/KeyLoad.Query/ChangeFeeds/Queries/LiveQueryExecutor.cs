@@ -91,7 +91,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         var page = database.ReadChangeFeedView<LiveQueryChange>(view, principal,
             new(query.Partition, query.Query.Collection, claims.ChangeCursor, Limit: request.Limit,
                 MaxBytes: request.MaxBytes),
-            (schema, change) => MapChange(principal, schema, change, query, prepared, budget),
+            (schema, change) => (MapChange(principal, schema, change, query, prepared, budget)).Value,
             retained is null ? null : retained.Accept);
         var result = new LiveQueryPage(page.Changes,
             database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, page.Cursor,
@@ -101,19 +101,19 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         return result;
     }
 
-    private LiveQueryChange? MapChange(PrincipalRecord principal, ResourceDefinition schema,
+    private global::ManagedCode.Communication.Result<LiveQueryChange?> MapChange(PrincipalRecord principal, ResourceDefinition schema,
         AuthorizedDocumentChange change, AstQueryRequest query, PreparedQuery prepared, ReadExecutionBudget budget)
     {
         budget.Check();
         var matchesAfter = Matches(change.After, query, prepared);
         if (!matchesAfter && !Matches(change.Before, query, prepared))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<LiveQueryChange?>.FailNotFound(nameof(MapChange));
         }
-        return new(change.Sequence, change.Commit, matchesAfter ? LiveQueryChangeKind.Upsert : LiveQueryChangeKind.Remove,
+        return global::ManagedCode.Communication.Result<LiveQueryChange?>.Succeed((LiveQueryChange?)(new(change.Sequence, change.Commit, matchesAfter ? LiveQueryChangeKind.Upsert : LiveQueryChangeKind.Remove,
             change.After.Reference, change.After.Revision,
             matchesAfter ? queryEngine.Project(principal, schema, change.After, query.Query.Projection,
-                prepared.Paths) : null);
+                prepared.Paths) : null)));
     }
 
     private static ResourceLifetime CaptureLifetime(IKeyValueView view, AstQueryRequest query,

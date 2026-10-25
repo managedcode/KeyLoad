@@ -5,16 +5,16 @@ namespace KeyLoad.Core.ResourceExecution.Execution;
 /// <summary>Executes gate-scoped reads through the same original budget and execution observers.</summary>
 internal static class ReadExecutionBudgetStorageReads
 {
-    private static StorageReadObserver? Observer(ReadExecutionBudget budget, IKeyValueView view)
-        => view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, budget)
-            ? null : budget.ChargeReadRecord;
+    private static global::ManagedCode.Communication.Result<StorageReadObserver?> Observer(ReadExecutionBudget budget, IKeyValueView view)
+        => (view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, budget)
+            ? null : (StorageReadObserver)budget.ChargeReadRecord) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<StorageReadObserver?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<StorageReadObserver?>.FailNotFound(nameof(Observer));
 
     internal static byte[]? Read(ReadExecutionBudget budget, IKeyValueView view, byte[] key)
     {
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         byte[]? value = null;
-        view.ReadValue(key, borrowed => value = borrowed.ToArray(), Observer(budget, view));
+        view.ReadValue(key, borrowed => value = borrowed.ToArray(), (Observer(budget, view)).Value);
         budget.Check();
         return value;
     }
@@ -24,7 +24,7 @@ internal static class ReadExecutionBudgetStorageReads
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         T? record = null;
-        view.ReadValue(key, value => record = OrleansSerialization.Deserialize<T>(value), Observer(budget, view));
+        view.ReadValue(key, value => record = OrleansSerialization.Deserialize<T>(value), (Observer(budget, view)).Value);
         budget.Check();
         return record;
     }
@@ -35,7 +35,7 @@ internal static class ReadExecutionBudgetStorageReads
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         var result = view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey,
-            Observer(budget, view), budget.Cancellation);
+            (Observer(budget, view)).Value, budget.Cancellation);
         budget.Check();
         return result;
     }

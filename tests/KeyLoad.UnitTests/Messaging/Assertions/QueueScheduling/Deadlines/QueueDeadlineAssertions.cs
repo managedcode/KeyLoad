@@ -22,7 +22,7 @@ internal static class QueueDeadlineAssertions
     {
         var original = QueueRetryColdAssertions.LaneBytes(store, lane);
         var result = QueueDeadlineOperations.Batch(database, command, time);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(error);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(error);
         await Assert.That(QueueRetryColdAssertions.LaneBytes(store, lane))
             .IsEquivalentTo(original, CollectionOrdering.Matching);
     }
@@ -47,13 +47,13 @@ internal static class QueueDeadlineAssertions
         var position = store.Position;
         var applied = database.LastApplied;
         var bytes = QueueRetryColdAssertions.LaneBytes(store, lane);
-        await Assert.That(database.ReadStoredCommand(operation, CancellationToken.None)).IsNull();
+        await Assert.That(database.ReadStoredCommand(operation, CancellationToken.None).Value).IsNull();
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.Apply(altered));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(store.Position).IsEqualTo(position);
         await Assert.That(database.LastApplied).IsEqualTo(applied);
         await Assert.That(QueueRetryColdAssertions.LaneBytes(store, lane))
             .IsEquivalentTo(bytes, CollectionOrdering.Matching);
-        await Assert.That(database.ReadStoredCommand(operation, CancellationToken.None)).IsNull();
+        await Assert.That(database.ReadStoredCommand(operation, CancellationToken.None).Value).IsNull();
     }
 }

@@ -20,7 +20,7 @@ internal static class QueryCursorExecution
         var offset = request.Query.Offset;
         string? afterId = null;
         var cut = database.Store.Position;
-        var claims = ReadClaims(database, request.Cursor, lifetime);
+        var claims = (ReadClaims(database, request.Cursor, lifetime)).Value;
         var sourceEpoch = database.DocumentEpoch(view, request.Partition, request.Query.Collection);
         if (claims is not null)
         {
@@ -41,11 +41,11 @@ internal static class QueryCursorExecution
         return new(offset, cut, sourceEpoch, lifetime, afterId);
     }
 
-    private static QueryCursorClaims? ReadClaims(DatabaseEngine database, string? token, ResourceLifetime lifetime)
+    private static global::ManagedCode.Communication.Result<QueryCursorClaims?> ReadClaims(DatabaseEngine database, string? token, ResourceLifetime lifetime)
     {
         if (token is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<QueryCursorClaims?>.FailNotFound(nameof(ReadClaims));
         }
         QueryCursorClaims claims;
         try
@@ -61,18 +61,18 @@ internal static class QueryCursorExecution
         {
             throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorNoLongerHasAValidAuthorizedReadCutDetail);
         }
-        return claims;
+        return global::ManagedCode.Communication.Result<QueryCursorClaims?>.Succeed(((QueryCursorClaims?)(claims)));
     }
 
     /// <summary>Signs the next page when eligible rows remain after the next offset. For an id-ordered page the
     /// cursor carries the last emitted document id, and the next page continues after it at offset zero.</summary>
-    internal static string? SignNext(DatabaseEngine database, TimeSpan cursorLifetime,
+    internal static global::ManagedCode.Communication.Result<string?> SignNext(DatabaseEngine database, TimeSpan cursorLifetime,
         PrincipalRecord principal, ResourceDefinition resource, string hash, State cursor,
         int next, int eligibleCount, TimeProvider clock, string? afterId = null)
-        => next < eligibleCount ? database.Sign(new QueryCursorClaims(QueryCursorContract.Purpose, database.Store.Identity.Incarnation,
+        => next < eligibleCount ? global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(database.Sign(new QueryCursorClaims(QueryCursorContract.Purpose, database.Store.Identity.Incarnation,
             database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
             principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch,
             afterId is null ? next : InitialCursorOffset, clock.GetUtcNow().Add(cursorLifetime), cursor.Lifetime,
-            QueryCursorContract.CurrentVersion, afterId)) : null;
+            QueryCursorContract.CurrentVersion, afterId))))) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(SignNext));
 }
 

@@ -17,7 +17,7 @@ internal static class SampleRollupFold
                 accumulator.Add(record);
                 return true;
             }, SampleReadKeys.FromInclusive(partition, request.SeriesSet, request.SeriesId, request.From),
-            SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.UntilExclusive));
+            (SampleReadKeys.UntilExclusive(partition, request.SeriesSet, request.SeriesId, request.UntilExclusive)).Value);
         if (scan.HasMore)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, SampleAggregateReader.SampleBudgetExceeded);

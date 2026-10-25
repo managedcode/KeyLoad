@@ -66,17 +66,18 @@ internal sealed class ZoneTreePointCacheCandidate : IDisposable
         _reservation = null;
     }
 
-    internal ICacheMemoryReservation? MarkReleased()
+    internal bool TryRelease([System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out ICacheMemoryReservation? reservation)
     {
         if (_state != 0)
         {
-            return null;
+            reservation = null;
+            return false;
         }
 
         _state = ReleasedState;
         _key = null;
-        var reservation = _reservation;
+        reservation = _reservation;
         _reservation = null;
-        return reservation;
+        return reservation is not null;
     }
 }

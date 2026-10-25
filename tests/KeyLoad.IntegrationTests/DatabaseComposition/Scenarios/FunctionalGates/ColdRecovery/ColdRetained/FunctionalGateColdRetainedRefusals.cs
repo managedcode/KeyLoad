@@ -14,8 +14,8 @@ internal static class FunctionalGateColdRetainedRefusals
         await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
         await Assert.That(sdk.Problem?.StatusCode).IsEqualTo(Errors.Status(ErrorCode.PermissionDenied));
         await unchanged(context);
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            command, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            command, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await unchanged(context);
         var sql = FunctionalGateRelationalCalls.Commit(command);
         var sqlSdk = await context.Writer.Sdk.ExecuteSqlAsync(sql, token);
@@ -24,8 +24,8 @@ internal static class FunctionalGateColdRetainedRefusals
         await Assert.That(sqlSdk.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
         await Assert.That(sqlSdk.Problem?.StatusCode).IsEqualTo(Errors.Status(ErrorCode.PermissionDenied));
         await unchanged(context);
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-            sql, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(SqlOperationProtocol.ToolName,
+            sql, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await unchanged(context);
     }
 }

@@ -27,7 +27,7 @@ internal static class SubscriptionContinuationAssertions
         var expected = new ReceiveSubscriptionResult(request.RequestId, [delivery], status, token);
         await EqualAsync(actual.Get<ReceiveSubscriptionResult>(), expected);
         await EqualAsync(db.Verify<GroupClaims>(actual.Get<ReceiveSubscriptionResult>().Deliveries.Single().Token), claims);
-        await Assert.That(Errors.Code(actual.Problem)).IsNull();
+        await Assert.That(Errors.Code(actual.Problem).Value).IsNull();
         var row = store.Read(view => view.ReadOwnedValue(
             SubscriptionCheckpointAuthorityFlow.WindowKey(group, source.Position)));
         await Assert.That(row).IsNotNull();
@@ -39,7 +39,7 @@ internal static class SubscriptionContinuationAssertions
 
     internal static async Task ReceiptAsync(Result<object> actual, Guid id, CommitToken token, MutationReceipt mutation)
     {
-        await Assert.That(Errors.Code(actual.Problem)).IsNull();
+        await Assert.That(Errors.Code(actual.Problem).Value).IsNull();
         await EqualAsync(actual.Get<CommitReceipt>(), new CommitReceipt(id, token, [mutation], DurabilityProfile.ProcessDurable, 1));
     }
 
@@ -51,7 +51,7 @@ internal static class SubscriptionContinuationAssertions
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         var actual = QueueWholeFlowStorage.Apply(db, entry.Kind, entry.Request, entry.Id, time);
-        if (Errors.Code(entry.Result.Problem) is not null)
+        if (Errors.Code(entry.Result.Problem).Value is not null)
         {
             await Assert.That(actual).IsEqualTo(entry.Result);
 
@@ -157,7 +157,7 @@ internal static class SubscriptionContinuationAssertions
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         var refused = QueueWholeFlowStorage.Apply(db, entry.Kind, entry.Request, entry.Id, time);
-        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(refused.Problem?.Detail).IsEqualTo(StaleDetail);
 
         await Assert.That(refused.Value).IsNull();

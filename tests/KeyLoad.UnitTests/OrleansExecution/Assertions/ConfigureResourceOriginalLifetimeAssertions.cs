@@ -9,8 +9,8 @@ namespace KeyLoad.UnitTests.OrleansExecution;
 internal static class ConfigureResourceOriginalLifetimeAssertions
 {
     internal static ResourceLifetime Lifetime(TestDatabase fixture, ResourceDefinition definition)
-        => fixture.Store.Read(view => ResourceLifetimeCatalog.Read(view, fixture.Partition.TenantId,
-            fixture.Partition.DatabaseId, definition.Name, definition))
+        => fixture.Store.Read(view => (ResourceLifetimeCatalog.Read(view, fixture.Partition.TenantId,
+            fixture.Partition.DatabaseId, definition.Name, definition)).Value)
             ?? throw new InvalidOperationException("The configured resource has no actual persisted lifetime.");
 
     internal static byte[] Outcome(TestDatabase fixture, Command<DatabaseCommand> operation)

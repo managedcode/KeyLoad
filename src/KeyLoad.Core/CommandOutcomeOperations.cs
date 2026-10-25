@@ -50,7 +50,7 @@ public static class CommandOutcomeOperations
     internal static Result<object> ReadValidatedSubmissionOutcome(this DatabaseEngine engine, IKeyValueView view, Command<DatabaseCommand> operation, CommandOutcomeSelection? verifiedSelection = null)
     {
         var principal = engine.Principal(view, operation.UserId!, engine.Clock.GetUtcNow());
-        engine.AuthorizeOperation(view, principal, operation);
+        _ = (engine.AuthorizeOperation(view, principal, operation)).Value;
         var scope = CommandOutcomePartitionIdentity.Resolve(operation);
         var selection = verifiedSelection ?? CommandOutcomeKeyResolver.Select(view, operation.UserId!, operation.CommandId, scope);
         var outcome = selection.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, MissingDurableOutcomeMessage);
@@ -84,24 +84,24 @@ public static class CommandOutcomeOperations
         engine.ValidateOnlineTextCachedOutcome(view, principal, operation, previous);
         engine.ValidateCompositionOutcome(view, principal, operation, previous);
         engine.ReauthorizeExtendedOutcome(view, principal, operation, previous);
-        if (operation.Value!.Kind == OperationKind.Receive && Errors.Code(previous.Result.Problem) is null)
+        if (operation.Value!.Kind == OperationKind.Receive && Errors.Code(previous.Result.Problem).Value is null)
         {
             engine.ValidateCachedQueueReceive(view, principal, operation, previous.Result);
         }
 
-        if (operation.Value!.Kind == OperationKind.ReceiveSubscription && Errors.Code(previous.Result.Problem) is null)
+        if (operation.Value!.Kind == OperationKind.ReceiveSubscription && Errors.Code(previous.Result.Problem).Value is null)
         {
             engine.ValidateCachedSubscriptionReceive(view, principal, operation, previous.Result);
         }
 
-        if (operation.Value!.Kind == OperationKind.SubscriptionProcessing && Errors.Code(previous.Result.Problem) is null)
+        if (operation.Value!.Kind == OperationKind.SubscriptionProcessing && Errors.Code(previous.Result.Problem).Value is null)
         {
             var processing = OperationProtocol.Payload<SubscriptionProcessingRequest>(operation);
             engine.ValidateGroupClaims(view, principal, processing.Subscription, processing.Token, operation.Timestamp);
             engine.ReauthorizeEffects(view, principal, processing.Subscription.Source.Partition, processing.Effects);
         }
 
-        if (operation.Value!.Kind == OperationKind.CommitProjectionBatch && Errors.Code(previous.Result.Problem) is null)
+        if (operation.Value!.Kind == OperationKind.CommitProjectionBatch && Errors.Code(previous.Result.Problem).Value is null)
         {
             var projection = OperationProtocol.Payload<CommitProjectionBatchRequest>(operation);
             engine.ProjectionClaims(view, projection, operation.Timestamp, allowExpiredReceipt: true);
@@ -111,7 +111,7 @@ public static class CommandOutcomeOperations
 
     internal static void ReauthorizeExtendedOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, StoredOutcome previous)
     {
-        if (Errors.Code(previous.Result.Problem) is not null)
+        if (Errors.Code(previous.Result.Problem).Value is not null)
         {
             return;
         }

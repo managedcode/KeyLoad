@@ -30,7 +30,7 @@ internal static class SeriesPortableBackupSeed
             new ResourceDefinition(Set, ResourceKind.TimeSeries, fixture.Partition.TransactionDomainId));
         var configured = database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), Root,
             database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(resource));
-        await Assert.That(Errors.Code(database.ApplyEmbedded(configured, token).Problem)).IsNull();
+        await Assert.That(Errors.Code(database.ApplyEmbedded(configured, token).Problem).Value).IsNull();
         var appended = Batch(database, fixture.Partition,
             new AppendSamples(Set, Series, [Data(1, 0, 1), Data(2, 1, 2), Data(3, 2, 3), Data(4, 3, 4)]));
         var appendResult = database.ApplyEmbedded(appended, token);

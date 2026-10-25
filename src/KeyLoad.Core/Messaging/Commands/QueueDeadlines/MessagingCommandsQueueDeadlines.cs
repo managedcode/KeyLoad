@@ -37,7 +37,7 @@ public static class MessagingCommandsQueueDeadlines
 
     internal static MutationReceipt ExpireQueueDeadlineMessage(IAtomicTransaction tx, QueueLaneRef lane, QueuePolicy policy, MessageMetadata metadata)
     {
-        var body = StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
+        var body = (StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id))).Value ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         if (body.Body.Id != metadata.Id)
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
@@ -45,7 +45,7 @@ public static class MessagingCommandsQueueDeadlines
 
         var removal = QueueLifecycleRemovalPreparation.PrepareQueueLifecycleRemoval(tx, lane, metadata, QueueDeadLetterAuthority.RequireQueueLifecycleCounters(tx, lane), body.Bytes);
         var counters = QueueLifecycleAccounting.ReleaseQueueStored(removal.Counters, body.Bytes);
-        var order = QueueOrderMutationPreparation.PrepareQueueOrderRemoval(tx, lane, policy, body.Body, metadata);
+        var order = (QueueOrderMutationPreparation.PrepareQueueOrderRemoval(tx, lane, policy, body.Body, metadata)).Value;
         QueueDueTransitionPreparation.RequireQueueDueStateCapacity(metadata);
         QueueLifecycleRemovalApply.ApplyQueueLifecycleRemoval(tx, removal);
         QueuePreparedOrderApply.ApplyQueuePreparedOrderRemoval(tx, order);

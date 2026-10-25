@@ -46,7 +46,7 @@ internal static class SeriesPortableBackupTrial
         await SeriesPortableBackupAssertions.SourceOutcomesAsync(fixture, outcomes, originals);
         var restored = BackupPersistedPolicyAssertions.Capture(database.Store);
         var fenced = database.Apply(originals[0].Operation);
-        await Assert.That(Errors.Code(fenced.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(fenced.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(fenced.Value).IsNull();
         await BackupPersistedPolicyAssertions.UnchangedAsync(database.Store, restored);
         await SeriesPortableBackupAssertions.VisibleAsync(database, fixture.Partition, false, token);
@@ -64,7 +64,7 @@ internal static class SeriesPortableBackupTrial
             new AppendSamples(SeriesPortableBackupSeed.Set, SeriesPortableBackupSeed.Series,
                 [SeriesPortableBackupSeed.Data(6, 4, 6), SeriesPortableBackupSeed.Data(7, 1, 7)]));
         var refusal = database.ApplyEmbedded(refused, token);
-        await Assert.That(Errors.Code(refusal.Problem)).IsEqualTo(ErrorCode.HistoryUnavailable);
+        await Assert.That(Errors.Code(refusal.Problem).Value).IsEqualTo(ErrorCode.HistoryUnavailable);
         await Assert.That(SeriesPortableBackupAssertions.PhysicalRows(database, fixture.Partition))
             .IsEquivalentTo(physical, CollectionOrdering.Matching);
         await SeriesPortableBackupAssertions.VisibleAsync(database, fixture.Partition, false, token);

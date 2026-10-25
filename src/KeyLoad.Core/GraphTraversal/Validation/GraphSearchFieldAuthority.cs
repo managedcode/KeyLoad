@@ -17,7 +17,7 @@ internal static class GraphSearchFieldAuthority
         var graph = budget.ReadRecord<ResourceDefinition>(view,
             KeySpace.Resource(partition.TenantId, partition.DatabaseId, graphName));
         var metadata = budget.CreateView(view);
-        var lifetime = ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, graphName, graph);
+        var lifetime = (ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, graphName, graph)).Value;
         if (graph is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, MissingGraph);

@@ -6,7 +6,7 @@ internal static class AtomicPartitionScopeLifecycleReplies
     internal static async Task SuccessAsync(Result<object> result, CommandRequest request,
         AtomicPartitionScopeLifecycleState state, bool healthy)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Problem?.Detail).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(request.CommandId);
@@ -27,7 +27,7 @@ internal static class AtomicPartitionScopeLifecycleReplies
     }
     internal static async Task FailureAsync(Result<object> result, string detail)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
 
         await Assert.That(result.Value).IsNull();

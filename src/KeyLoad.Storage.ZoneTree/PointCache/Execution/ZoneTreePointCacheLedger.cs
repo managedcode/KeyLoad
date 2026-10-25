@@ -51,8 +51,7 @@ internal static class ZoneTreePointCacheLedger
     internal static void ReleaseCandidate(ZoneTreePointCacheState state,
         ZoneTreePointCacheCandidate candidate, bool countBypass)
     {
-        var reservation = candidate.MarkReleased();
-        if (reservation is null)
+        if (!candidate.TryRelease(out var reservation))
         {
             return;
         }

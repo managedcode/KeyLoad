@@ -75,7 +75,7 @@ internal static class FunctionalGateColdRelationalClosure
         await VerifyAsync(context, state, token);
         var official = await context.Writer.Mcp.CallAsync(SqlOperationProtocol.ToolName,
             FunctionalGateRelationalCalls.Commit(command), token);
-        await McpCallerAssertions.ErrorAsync(official, ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.Validation, dispatched: true)).Value;
         await VerifyAsync(context, state, token);
         await SqlClusterProtocol.EqualAsync(first.TableReceipt,
             await FunctionalGateRelationalCalls.SqlSdkAsync<CommitReceipt>(context, context.Writer, first.TableInsert, token));

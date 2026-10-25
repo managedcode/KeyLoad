@@ -12,18 +12,18 @@ public static class DatabaseCompositionIdentity
 {
     internal const string MissingCompositionAuthority = "The composition outcome has no saved row authority.";
     internal const string InvalidCompositionAuthority = "The composition outcome row authority is invalid.";
-    internal static CompositionOutcomeAuthority? CaptureCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, Result<object> result)
+    internal static global::ManagedCode.Communication.Result<CompositionOutcomeAuthority?> CaptureCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, Result<object> result)
     {
         const int EmptyReverseLength = 0;
-        if (Errors.Code(result.Problem) is not null || !TryCompositionInput(operation, out var partition, out var mutations))
+        if (Errors.Code(result.Problem).Value is not null || !TryCompositionInput(operation, out var partition, out var mutations))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<CompositionOutcomeAuthority?>.FailNotFound(nameof(CaptureCompositionOutcome));
         }
 
         var reverse = mutations.OfType<GraphToQueueMutation>().ToArray();
         if (!mutations.Any(mutation => mutation is QueueToGraph) && reverse.Length == EmptyReverseLength)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<CompositionOutcomeAuthority?>.FailNotFound(nameof(CaptureCompositionOutcome));
         }
 
         var receipt = result.Get<CommitReceipt>();
@@ -46,7 +46,7 @@ public static class DatabaseCompositionIdentity
             }
         }
 
-        return new(references.ToImmutable());
+        return global::ManagedCode.Communication.Result<CompositionOutcomeAuthority?>.Succeed(((CompositionOutcomeAuthority?)(new(references.ToImmutable()))));
     }
 
     internal static ImmutableArray<EntityRef> CompositionMutationReferences(Mutation effect)
@@ -86,7 +86,7 @@ public static class DatabaseCompositionIdentity
 
     internal static void ValidateCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, StoredOutcome previous)
     {
-        if (Errors.Code(previous.Result.Problem) is not null || !TryCompositionInput(operation, out var partition, out var mutations) || !mutations.Any(mutation => mutation is QueueToGraph or GraphToQueueMutation))
+        if (Errors.Code(previous.Result.Problem).Value is not null || !TryCompositionInput(operation, out var partition, out var mutations) || !mutations.Any(mutation => mutation is QueueToGraph or GraphToQueueMutation))
         {
             return;
         }

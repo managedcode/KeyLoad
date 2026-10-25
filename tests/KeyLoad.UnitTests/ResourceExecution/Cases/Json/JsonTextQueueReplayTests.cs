@@ -37,12 +37,12 @@ internal sealed class JsonTextQueueReplayTests
         await Assert.That(deliveries[0].Id).IsEqualTo(FirstMessageId);
         await Assert.That(deliveries[1].Id).IsEqualTo(SecondMessageId);
         await ReplayResultAssertions.Same<ReceiveResult>(replay, original);
-        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
 
         var ack = Guid.NewGuid();
         db.Submit(OperationKind.Delivery, new DeliveryCommand(ack, lane, deliveries[0].Token, DeliveryAction.Ack),
             id: ack, time: now).Get<CommitReceipt>();
-        await Assert.That(Errors.Code(db.Submit(OperationKind.Receive, request, id: id, time: now).Problem))
+        await Assert.That(Errors.Code(db.Submit(OperationKind.Receive, request, id: id, time: now).Problem).Value)
             .IsEqualTo(ErrorCode.StaleLease);
     }
 
@@ -71,7 +71,7 @@ internal sealed class JsonTextQueueReplayTests
             }), time: now.AddSeconds(1))
             .Get<PrincipalRecord>();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Receive, request, principal: WorkerPrincipal,
-            id: id, time: now.AddSeconds(1)).Problem)).IsEqualTo(ErrorCode.Unauthenticated);
+            id: id, time: now.AddSeconds(1)).Problem).Value).IsEqualTo(ErrorCode.Unauthenticated);
     }
 
     [Test]

@@ -17,18 +17,18 @@ internal sealed class RowVisibilityCache : IDisposable
     }
 
     internal static RowVisibilityCache? Create(ICacheMemoryBudget budget)
-        => RowVisibilityTransfers.CreateOwner(budget);
+        => (RowVisibilityTransfers.CreateOwner(budget)).Value;
 
-    internal RowVisibilityDraft? Begin(RowVisibilityScope scope)
+    internal global::ManagedCode.Communication.Result<RowVisibilityDraft?> Begin(RowVisibilityScope scope)
     {
         lock (gate)
         {
             RetireStale(scope);
-            return closed || Find(scope) is not null ? null : CreateDraft(scope);
+            return ((RowVisibilityDraft?)(closed || (Find(scope)).Value is not null ? null : (CreateDraft(scope)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RowVisibilityDraft?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RowVisibilityDraft?>.FailNotFound(nameof(Begin));
         }
     }
 
-    private RowVisibilityDraft? CreateDraft(RowVisibilityScope scope)
+    private global::ManagedCode.Communication.Result<RowVisibilityDraft?> CreateDraft(RowVisibilityScope scope)
     {
         ICacheMemoryReservation? acquired = null;
         Exception? primary = null;
@@ -38,9 +38,9 @@ internal sealed class RowVisibilityCache : IDisposable
             {
                 if (!ReserveEntry(scope, out acquired))
                 {
-                    return null;
+                    return global::ManagedCode.Communication.Result<RowVisibilityDraft?>.FailNotFound(nameof(CreateDraft));
                 }
-                return RowVisibilityTransfers.Draft(this, budget, scope, ref acquired);
+                return (RowVisibilityTransfers.Draft(this, budget, scope, ref acquired));
             }
             catch (Exception error)
             {
@@ -64,7 +64,7 @@ internal sealed class RowVisibilityCache : IDisposable
         lock (gate)
         {
             RetireStale(scope);
-            return Pin(Find(scope));
+            return (Pin((Find(scope)).Value)).Value;
         }
     }
 
@@ -80,13 +80,13 @@ internal sealed class RowVisibilityCache : IDisposable
                     found = entry;
                 }
             }
-            return Pin(found);
+            return (Pin(found)).Value;
         }
     }
 
-    private RowVisibilityLease? Pin(RowVisibilityEntry? entry)
+    private global::ManagedCode.Communication.Result<RowVisibilityLease?> Pin(RowVisibilityEntry? entry)
     {
-        return closed || entry is null ? null : RowVisibilityTransfers.CreateLease(this, budget, entry);
+        return ((RowVisibilityLease?)(closed || entry is null ? null : (RowVisibilityTransfers.CreateLease(this, budget, entry)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RowVisibilityLease?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RowVisibilityLease?>.FailNotFound(nameof(Pin));
     }
     private bool ReserveEntry(RowVisibilityScope scope, out ICacheMemoryReservation? acquired)
     {
@@ -111,7 +111,7 @@ internal sealed class RowVisibilityCache : IDisposable
     {
         lock (gate)
         {
-            if (closed || Find(entry.Scope) is not null)
+            if (closed || (Find(entry.Scope)).Value is not null)
             {
                 return false;
             }
@@ -152,16 +152,16 @@ internal sealed class RowVisibilityCache : IDisposable
         }
     }
 
-    private RowVisibilityEntry? Find(RowVisibilityScope scope)
+    private global::ManagedCode.Communication.Result<RowVisibilityEntry?> Find(RowVisibilityScope scope)
     {
         for (var entry = head; entry is not null; entry = entry.Next)
         {
             if (!entry.Retired && entry.Scope == scope)
             {
-                return entry;
+                return global::ManagedCode.Communication.Result<RowVisibilityEntry?>.Succeed(((RowVisibilityEntry?)(entry)));
             }
         }
-        return null;
+        return global::ManagedCode.Communication.Result<RowVisibilityEntry?>.FailNotFound(nameof(Find));
     }
 
     private void RetireStale(RowVisibilityScope scope)

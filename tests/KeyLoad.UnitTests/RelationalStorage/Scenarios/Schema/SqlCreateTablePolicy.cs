@@ -35,14 +35,14 @@ internal static class SqlCreateTablePolicy
         var denied = SqlCreateTableLiteral.Compile(fixture.Partition, Guid.NewGuid(), RepairSql, token);
         var issued = fixture.Database.EvaluationClock.GetUtcNow();
         var before = fixture.Database.GetOutboxStatus(SqlCreateTableLiteral.Root, fixture.Partition);
-        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, denied, issued, state.Principal.Id).Problem))
+        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, denied, issued, state.Principal.Id).Problem).Value)
             .IsEqualTo(ErrorCode.PermissionDenied);
         await SqlCreateTableAssertions.SameAsync(before, fixture.Database.GetOutboxStatus(SqlCreateTableLiteral.Root, fixture.Partition));
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);
         var cut = fixture.Store.Position;
-        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, state.Created, state.CreatedAt, state.Principal.Id).Problem))
+        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, state.Created, state.CreatedAt, state.Principal.Id).Problem).Value)
             .IsEqualTo(ErrorCode.PermissionDenied);
-        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, state.Duplicate, state.DuplicateAt, state.Principal.Id).Problem))
+        await Assert.That(Errors.Code(SqlCreateTableLiteral.Apply(fixture.Database, state.Duplicate, state.DuplicateAt, state.Principal.Id).Problem).Value)
             .IsEqualTo(ErrorCode.PermissionDenied);
         await SqlCreateTableAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlCreateTableOutcomeBytes.RequireAsync(fixture.Store, state);
@@ -63,7 +63,7 @@ internal static class SqlCreateTablePolicy
         var healthy = SqlCreateTableLiteral.Compile(fixture.Partition, Guid.NewGuid(), RepairSql, token);
         var healthyAt = fixture.Database.EvaluationClock.GetUtcNow();
         var result = SqlCreateTableLiteral.Apply(fixture.Database, healthy, healthyAt, state.Principal.Id);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await SqlCreateTableAssertions.SameAsync(SqlCreateTableLiteral.Definition(fixture.Partition) with
         {
             Name = RepairTable

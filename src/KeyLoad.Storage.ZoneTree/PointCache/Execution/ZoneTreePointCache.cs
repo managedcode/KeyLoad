@@ -41,7 +41,7 @@ internal sealed class ZoneTreePointCache : IDisposable, IZoneTreePointCacheCandi
     internal ZoneTreePointCacheCandidate? TryPrepare(ReadOnlySpan<byte> key, int valueLength,
         long generation)
     {
-        return ZoneTreePointCacheFills.TryPrepare(_state, this, key, valueLength, generation);
+        return (ZoneTreePointCacheFills.TryPrepare(_state, this, key, valueLength, generation)).Value;
     }
 
     internal void Publish(ZoneTreePointCacheCandidate candidate, ReadOnlySpan<byte> value,

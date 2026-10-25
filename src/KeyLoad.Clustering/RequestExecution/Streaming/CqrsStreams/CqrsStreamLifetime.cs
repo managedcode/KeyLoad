@@ -64,15 +64,15 @@ internal static class CqrsStreamLifetime
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(ownerRequest?.Token ?? request.Token,
             deadline.Token);
         var admission = new CqrsStreamAdmission(serializer: serializer, requestId: requestId, options: options, purpose: purpose);
-        var workLease = await RequestWorkStreamSettlement.AcquireOrSettleAwaitedAsync(owner, requestId, settled)
-            .ConfigureAwait(true);
+        var workLease = (await RequestWorkStreamSettlement.AcquireOrSettleAwaitedAsync(owner, requestId, settled)
+            .ConfigureAwait(true)).Value;
         IAsyncEnumerator<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>? enumerator = null;
         Exception? primary = null;
         try
         {
             var creation = CreateEnumerator(createStream, execution.Token);
             enumerator = creation.Enumerator;
-            primary = CreationFailure(creation);
+            primary = (CreationFailure(creation)).Value;
             while (primary is null && enumerator is not null)
             {
                 var step = await ReadNextAsync(enumerator, admission, execution.Token).ConfigureAwait(true);
@@ -85,7 +85,7 @@ internal static class CqrsStreamLifetime
                 yield return step.Item!;
             }
 
-            primary ??= admission.CompletionFailure(execution.Token);
+            primary ??= (admission.CompletionFailure(execution.Token)).Value;
         }
         finally
         {
@@ -97,9 +97,9 @@ internal static class CqrsStreamLifetime
         RequestWorkSettlement.Rethrow(primary);
     }
 
-    private static Exception? CreationFailure(CqrsEnumeratorCreation creation)
-        => creation.Error ?? (creation.Enumerator is null
-            ? Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest) : null);
+    private static global::ManagedCode.Communication.Result<Exception?> CreationFailure(CqrsEnumeratorCreation creation)
+        => ((Exception?)(creation.Error ?? (creation.Enumerator is null
+            ? Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest) : null))) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<Exception?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CreationFailure));
 
     private static CqrsEnumeratorCreation CreateEnumerator(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,

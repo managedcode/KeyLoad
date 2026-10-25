@@ -90,8 +90,8 @@ internal sealed class FilteredSearchClusterTests(ClusterFixture fixture)
         var denied = await sdk.SearchAsync(request, deadline.Token);
         await Assert.That(denied.IsFailed).IsTrue();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
-            request, deadline.Token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
+            request, deadline.Token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         var healthy = await McpCallerAssertions.SdkSuccessAsync(await sdk.SearchAsync(
             scenario.Vector(ImmutableArray.Create("a")), deadline.Token));
         await Assert.That(healthy.Select(item => item.Document.Reference.Id).ToArray()).IsEquivalentTo(["a"]);
@@ -115,8 +115,8 @@ internal sealed class FilteredSearchClusterTests(ClusterFixture fixture)
             Limit = 1_001
         };
         await AssertSdkFailureAsync(await sdk.SearchAsync(resultLimit, deadline.Token), ErrorCode.Validation);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
-            resultLimit, deadline.Token), ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
+            resultLimit, deadline.Token), ErrorCode.Validation, dispatched: true)).Value;
 
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();

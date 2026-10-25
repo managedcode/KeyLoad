@@ -62,7 +62,7 @@ internal static class TopicSqlClusterRoutes
         object payload = route == Mcp ? request : envelope;
         var reply = await callers.Mcp.CallAsync(route == Mcp ? McpCallerTools.QueryExecute : SqlOperationProtocol.ToolName,
             payload, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         await PrivacyAsync(reply);
     }
 

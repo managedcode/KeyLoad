@@ -36,7 +36,7 @@ internal static class AggregateReplayClusterAssertions
         var sdkResult = await sdk.ReadAggregateReplayAsync(request, cancellationToken);
         await Assert.That(sdkResult.Problem?.ErrorCode).IsEqualTo(expected.ToString());
         var reply = await mcp.CallAsync(McpCallerTools.StreamsReplay, request, cancellationToken);
-        await McpCallerAssertions.ErrorAsync(reply, expected, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, expected, dispatched: true)).Value;
         return reply;
     }
 

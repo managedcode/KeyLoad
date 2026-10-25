@@ -21,7 +21,7 @@ internal static class ResourceIncarnationAssertions
 
     internal static async Task ResultAsync(Result<object> expected, Result<object> actual)
     {
-        await EqualAsync(Errors.Code(expected.Problem), Errors.Code(actual.Problem));
+        await EqualAsync(Errors.Code(expected.Problem).Value, Errors.Code(actual.Problem).Value);
         await EqualAsync(expected.Problem?.Detail, actual.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(expected.Value?.GetType());
         await EqualAsync(expected.Value, actual.Value);

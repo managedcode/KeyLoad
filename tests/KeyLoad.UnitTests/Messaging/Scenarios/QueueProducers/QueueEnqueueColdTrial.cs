@@ -66,7 +66,7 @@ internal static class QueueEnqueueColdTrial
             Mutations = [new EnqueueMessage(QueueEnqueueColdProtocol.Queue,
             QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.HealthyJson)]
         };
-        await Assert.That(Errors.Code(Apply(database, changed, QueueEnqueueColdProtocol.Root, token).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(Apply(database, changed, QueueEnqueueColdProtocol.Root, token).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         var duplicate = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument, QueueEnqueueColdProtocol.HealthyJson),
                 new EnqueueMessage(QueueEnqueueColdProtocol.Queue, QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.HealthyJson)]);

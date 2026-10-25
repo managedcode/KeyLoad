@@ -15,10 +15,10 @@ internal static class ScriptDomGraphSearch
         var collection = ScriptDomGraphScalar.String(arguments[CollectionIndex], context, ValueDepth);
         var text = ScriptDomGraphChannels.Text(arguments[TextIndex], context, ValueDepth);
         var vector = ScriptDomGraphChannels.Vector(arguments[VectorIndex], context, ValueDepth);
-        var scope = ScriptDomGraphWalks.Scope(arguments[ScopeIndex], context, ValueDepth);
-        var retriever = ScriptDomGraphWalks.Retriever(arguments[RetrieverIndex], context, ValueDepth);
-        var expansion = ScriptDomGraphWalks.Expansion(arguments[ExpansionIndex], context, ValueDepth);
-        var allowed = ScriptDomGraphScalar.Strings(arguments[AllowedIndex], IdsFunction, context, ValueDepth);
+        var scope = (ScriptDomGraphWalks.Scope(arguments[ScopeIndex], context, ValueDepth)).Value;
+        var retriever = (ScriptDomGraphWalks.Retriever(arguments[RetrieverIndex], context, ValueDepth)).Value;
+        var expansion = (ScriptDomGraphWalks.Expansion(arguments[ExpansionIndex], context, ValueDepth)).Value;
+        var allowed = (ScriptDomGraphScalar.Strings(arguments[AllowedIndex], IdsFunction, context, ValueDepth)).Value;
         var limit = ScriptDomGraphScalar.Integer(arguments[LimitIndex], context, ValueDepth);
         var fusion = ScriptDomGraphScalar.Integer(arguments[FusionIndex], context, ValueDepth);
         if (scope is null && retriever is null && expansion is null)

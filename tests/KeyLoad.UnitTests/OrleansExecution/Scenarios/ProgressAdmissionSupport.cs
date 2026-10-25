@@ -59,6 +59,6 @@ internal static class ProgressAdmissionSupport
         {
             admission.Admit(frame, CancellationToken.None);
         }
-        await Assert.That(admission.CompletionFailure(CancellationToken.None)).IsNull();
+        await Assert.That((admission.CompletionFailure(CancellationToken.None)).Value).IsNull();
     }
 }

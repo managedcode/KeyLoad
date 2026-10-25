@@ -23,8 +23,8 @@ internal static class QueueTerminalPolicyClusterPolicy
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await admin.Sdk.ConfigureResourceAsync(
             state.RefusedPolicy, request, token), ErrorCode.UnsupportedCapability);
         await QueueTerminalPolicyClusterAssertions.CurrentAsync(admin, worker, state, token);
-        await McpCallerAssertions.ErrorAsync(await InvokeAsync(admin, state.RefusedPolicy, request, token),
-            ErrorCode.UnsupportedCapability, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await InvokeAsync(admin, state.RefusedPolicy, request, token),
+            ErrorCode.UnsupportedCapability, dispatched: true)).Value;
         await QueueTerminalPolicyClusterAssertions.CurrentAsync(admin, worker, state, token);
     }
 
@@ -66,8 +66,8 @@ internal static class QueueTerminalPolicyClusterPolicy
     {
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await worker.Sdk.CommitAsync(state.RefusedProducer, token), ErrorCode.Conflict);
         await QueueTerminalPolicyClusterAssertions.CurrentAsync(admin, worker, state, token);
-        await McpCallerAssertions.ErrorAsync(await worker.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            state.RefusedProducer, token), ErrorCode.Conflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await worker.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            state.RefusedProducer, token), ErrorCode.Conflict, dispatched: true)).Value;
         await QueueTerminalPolicyClusterAssertions.CurrentAsync(admin, worker, state, token);
     }
 }

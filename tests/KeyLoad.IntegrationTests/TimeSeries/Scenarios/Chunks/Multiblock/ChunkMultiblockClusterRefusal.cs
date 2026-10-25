@@ -20,7 +20,7 @@ internal static class ChunkMultiblockClusterRefusal
         await SampleChunkRetentionClusterReadOracle.EqualAsync(result.Problem!, Errors.Problem(ErrorCode.Conflict, SeriesRetentionAtomicPublicExpected.ConflictDetail));
         await ChunkMultiblockClusterCurrent.RequireAsync(administrator, reader, state, token);
         var official = await administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Conflict, token);
-        await McpCallerAssertions.ErrorAsync(official, ErrorCode.Conflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.Conflict, dispatched: true)).Value;
         await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(SeriesRetentionAtomicPublicExpected.McpDetail);
         await ChunkMultiblockClusterCurrent.RequireAsync(administrator, reader, state, token);

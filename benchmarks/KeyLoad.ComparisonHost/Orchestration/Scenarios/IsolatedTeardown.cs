@@ -85,14 +85,14 @@ internal static class IsolatedTeardown
 
     internal static async Task SettleOwnerDisposalAsync(Task original, Task disposal)
     {
-        var primary = await RuntimeComparisonFailure.ObserveAsync(original);
-        var cleanup = await RuntimeComparisonFailure.ObserveAsync(disposal);
+        var primary = (await RuntimeComparisonFailure.ObserveAsync(original)).Value;
+        var cleanup = (await RuntimeComparisonFailure.ObserveAsync(disposal)).Value;
         if (cleanup is null || ContainsAllFailures(primary, cleanup))
         {
             // A repeated await of the same execution completion must not replace its already retained teardown failure.
             return;
         }
-        var combined = RuntimeComparisonFailure.Combine(primary, [cleanup]);
+        var combined = (RuntimeComparisonFailure.Combine(primary, [cleanup])).Value;
         ExceptionDispatchInfo.Capture(combined!).Throw();
     }
 

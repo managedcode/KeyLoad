@@ -48,8 +48,8 @@ internal sealed class SagaTimeoutClusterTests(ClusterFixture fixture)
             .SequenceEqual(JsonDefaults.Serialize(created))).IsTrue();
         var staleTimeout = RecurringSagaClusterSupport.Command(Guid.NewGuid(), scenario.SourcePartition,
             new ExpireSaga(scenario.SourceQueue, sagaId, 1));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            staleTimeout, deadline.Token), ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            staleTimeout, deadline.Token), ErrorCode.RevisionConflict, dispatched: true)).Value;
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await sdk.CommitAsync(staleTimeout, deadline.Token),
             ErrorCode.RevisionConflict);
         await SagaTimeoutClusterAssertions.AssertPhaseAsync(sdk, mcp, scenario, sagaId, SagaPhase.TimedOut,

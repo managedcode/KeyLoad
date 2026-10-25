@@ -62,7 +62,7 @@ internal static class QueueLifecycleConditionTrial
             ? ErrorCode.Validation : kind == QueueLifecycleConditionRefusal.Missing ? ErrorCode.NotFound : ErrorCode.Conflict;
         var queue = QueueLifecycleImage.Capture(fixture.Store, state.Lane);
         var failed = fixture.Database.Apply(bad);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(expected);
 
         await Assert.That(failed.Value).IsNull();
         state.Failures.Add((bad, failed));

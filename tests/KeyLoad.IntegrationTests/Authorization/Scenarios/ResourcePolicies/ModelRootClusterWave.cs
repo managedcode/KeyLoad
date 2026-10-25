@@ -56,7 +56,7 @@ internal static class ModelRootClusterWave
                 }
                 else
                 {
-                    await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+                    _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
                 }
             }, token);
         }

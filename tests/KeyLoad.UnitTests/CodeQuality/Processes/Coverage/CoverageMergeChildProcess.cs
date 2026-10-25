@@ -107,7 +107,7 @@ internal static class CoverageMergeChildProcess
         var joined = Task.WhenAll(exit ?? Task.CompletedTask, output ?? Task.CompletedTask, error ?? Task.CompletedTask);
         var unsettled = await ObserveUntilDeadlineAsync(process, joined, startedAt, timeout,
             settlement, failures, deadline.Token, cancellationToken).ConfigureAwait(false);
-        var result = unsettled ? null : MakeResult(process, stdout, stderr, exit, output, error, joined);
+        var result = unsettled ? null : (MakeResult(process, stdout, stderr, exit, output, error, joined)).Value;
         return new(result, unsettled);
     }
 
@@ -166,15 +166,15 @@ internal static class CoverageMergeChildProcess
         return elapsedAfterPrimaryDeadline >= settlement ? TimeSpan.Zero : settlement - elapsedAfterPrimaryDeadline;
     }
 
-    private static Result? MakeResult(Process process, CliBackupRestoreProcessOutput stdout,
+    private static global::ManagedCode.Communication.Result<Result?> MakeResult(Process process, CliBackupRestoreProcessOutput stdout,
         CliBackupRestoreProcessOutput stderr, Task? exit, Task? output, Task? error, Task joined)
     {
         if (!joined.IsCompletedSuccessfully || exit is null || output is null || error is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Result?>.FailNotFound(nameof(MakeResult));
         }
-        return new(process.ExitCode, stdout.Text, stderr.Text, exit.IsCompleted, output.IsCompleted,
-            error.IsCompleted, Disposed: false);
+        return global::ManagedCode.Communication.Result<Result?>.Succeed((Result?)(new(process.ExitCode, stdout.Text, stderr.Text, exit.IsCompleted, output.IsCompleted,
+            error.IsCompleted, Disposed: false)));
     }
 
     private static void KillIfRunning(Process process)

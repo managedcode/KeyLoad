@@ -57,7 +57,7 @@ internal sealed class RelationalSqlClusterRowsTests(ClusterFixture fixture)
         var failed = await sdk.ExecuteSqlAsync(sql, deadline.Token);
         await Assert.That(failed.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, fixture.AdminKey, deadline.Token);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token), ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token), ErrorCode.Validation, dispatched: true)).Value;
         var after = await PublicReadAssertions.DocumentAsync(await sdk.GetAsync(scenario.First, deadline.Token));
         await SqlClusterProtocol.EqualAsync(before, after);
     }

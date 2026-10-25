@@ -42,7 +42,7 @@ internal sealed class AnnProjectionPinAuthorityTests
             .SequenceEqual(baselineEntry)).IsTrue();
 
         var cleanup = AnnProjectionPinTestSupport.Release(database, consumer);
-        await Assert.That(Errors.Code(cleanup.Problem)).IsNull();
+        await Assert.That(Errors.Code(cleanup.Problem).Value).IsNull();
         await Assert.That(database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition)
             .Consumers.Single().Released).IsTrue();
     }
@@ -55,7 +55,7 @@ internal sealed class AnnProjectionPinAuthorityTests
         var configure = database.Submit(OperationKind.ConfigureProjectionConsumer,
             new ConfigureProjectionConsumerRequest(configureId, attemptedConsumer,
                 new(1, [AnnProjectionPinTestSupport.Collection], [AnnProjectionPinTestSupport.VectorMutation]), 0), principal, configureId);
-        await Assert.That(Errors.Code(configure.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(configure.Problem).Value).IsEqualTo(expected);
         await Assert.That(AnnProjectionPinTestSupport.ReadFailure(database, consumer, principal)).IsEqualTo(expected);
 
         var commit = Assert.ThrowsExactly<KeyLoadException>(() => AnnProjectionPinTestSupport.CommitEmpty(
@@ -68,6 +68,6 @@ internal sealed class AnnProjectionPinAuthorityTests
 
         var purge = AnnProjectionPinTestSupport.Purge(database,
             database.Database.GetOutboxStatus(AnnProjectionPinTestSupport.Principal, database.Partition).Head.Tail, principal);
-        await Assert.That(Errors.Code(purge.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(purge.Problem).Value).IsEqualTo(expected);
     }
 }

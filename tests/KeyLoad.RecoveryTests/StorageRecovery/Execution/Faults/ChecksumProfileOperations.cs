@@ -30,7 +30,7 @@ internal static class ChecksumProfileOperations
         var receipt = database.Apply(operation).Get<CommitReceipt>();
         RequireReceipt(receipt, append);
         CommandIdempotencyCrashAssertions.RequireSameReceipt(database.Apply(operation).Get<CommitReceipt>(), receipt);
-        if (Errors.Code(database.Apply(CommandIdempotencyCrashData.CreateChangedOperation(database, operation)).Problem) != ErrorCode.Conflict)
+        if (Errors.Code(database.Apply(CommandIdempotencyCrashData.CreateChangedOperation(database, operation)).Problem).Value != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(ChecksumProfileProtocol.Invalid);
         }

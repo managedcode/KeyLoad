@@ -35,7 +35,7 @@ internal static class QueryOnlyEpochR46Refusals
         await PrivateAsync(JsonSerializer.Serialize(result), state.CurrentReader.Secret);
         await QueryOnlyEpochR46Current.RequireAsync(root, reader, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(QueryOnlyEpochR46Protocol.DetailKey).GetString()).IsEqualTo(code == ErrorCode.PermissionDenied
                 ? QueryOnlyEpochR46Protocol.SafeScopeDetail : QueryOnlyEpochR46Protocol.SafeCursorDetail);

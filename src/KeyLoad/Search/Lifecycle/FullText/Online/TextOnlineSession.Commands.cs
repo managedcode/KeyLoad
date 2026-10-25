@@ -17,7 +17,7 @@ internal sealed partial class TextOnlineSession
 
     internal OnlineTextPublicationWork? TryMatchCheckpoint(CommitProjectionBatchRequest command,
         string actualPrincipal, DateTimeOffset expiry)
-        => CheckpointWork?.TryMatch(command, actualPrincipal, expiry, Budget);
+        => CheckpointWork?.TryMatch(command, actualPrincipal, expiry, Budget).Value;
 
     internal async Task<ProjectionBatchResult> RequireOriginalCheckpointAsync(ProjectionBatchResult acknowledged)
         => await (CheckpointWork ?? throw TextErrors.Ownership())

@@ -73,7 +73,7 @@ internal sealed class McpOwnedDiagnosticWholeFlowTests
         var position = database.Store.Position;
         var model = await RefusalModelAsync(database, rejectedCommand, canonical, position);
         var rejected = database.Submit(OperationKind.Batch, rejectedCommand, id: rejectedCommand.CommandId);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(McpOwnedDiagnosticAssertions.VectorMismatch);
 
         await McpOwnedDiagnosticAssertions.ReplyAsync(ErrorCode.Validation, rejected.Problem?.Detail!, McpOwnedDiagnosticAssertions.VectorMismatch);

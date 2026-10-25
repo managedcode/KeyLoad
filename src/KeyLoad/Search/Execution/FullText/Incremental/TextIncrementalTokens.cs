@@ -23,7 +23,7 @@ internal static class TextIncrementalTokens
             return [];
         }
         using var json = JsonDocument.Parse(document.Json);
-        if (JsonData.Scalar(json.RootElement, JsonData.PathSegments(field)) is not string content)
+        if ((JsonData.Scalar(json.RootElement, JsonData.PathSegments(field))).Value.Value is not string content)
         {
             return [];
         }

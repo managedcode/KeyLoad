@@ -16,7 +16,7 @@ internal static class TimeSeriesResourceChunkPolicyClusterRefusal
         if (official)
         {
             var reply = await reader.Mcp.CallAsync(SampleChunkProtocol.ReadTool, request, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, TimeSeriesClusterScenario.PrivateTags, PrivateTagValue);
             return;
         }

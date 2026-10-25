@@ -126,7 +126,7 @@ internal static class DeniedCommandRepairContinuation
         var retry = database.OwnCommand(original);
         retry.Timestamp = database.EvaluationClock.GetUtcNow().UtcDateTime;
         var denied = database.Apply(retry);
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(denied.Problem?.Detail).IsEqualTo(ChangedPolicy);
 
         await Assert.That(denied.Value).IsNull();

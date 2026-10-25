@@ -18,7 +18,7 @@ internal static class SampleChunkWindowReader
         var principal = database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
         database.Authorization.Require(principal, request.Partition, request.Set, Capability.SeriesRead);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, request.Partition, request.Set, ResourceKind.TimeSeries);
-        var tag = SampleChunkTagPredicate.Prepare(database, principal, resource, request);
+        var tag = (SampleChunkTagPredicate.Prepare(database, principal, resource, request)).Value;
         var window = SampleChunkStorage.Read<SampleChunkWindow>(view, SampleChunkKeys.Window(request.Partition,
             request.Set, request.SeriesId, request.WindowId))
             ?? throw Errors.Fail(ErrorCode.NotFound, SampleChunkLifecycleProtocol.Missing);

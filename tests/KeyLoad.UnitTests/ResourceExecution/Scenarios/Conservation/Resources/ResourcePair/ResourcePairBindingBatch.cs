@@ -99,7 +99,7 @@ internal static class ResourcePairBindingBatch
         var damagedRow = ResourcePairBindingFlow.Install(state, Documents);
         var damaged = QueueWholeFlowStorage.Bytes(state.Source.Store);
         var damagedPosition = state.Source.Store.Position;
-        await Assert.That(Errors.Code(state.Source.Database.ResolveOutcome(original).Problem)).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(Errors.Code(state.Source.Database.ResolveOutcome(original).Problem).Value).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(RequiredProcessingPolicyAssertions.Outcome(state.Source.Store, state.Source.Partition,
             original.UserId!, original.CommandId).AsSpan().SequenceEqual(state.Originals.Last().Outcome)).IsTrue();
         await ResourceIncarnationAssertions.UnchangedAsync(state.Source.Store, damaged, damagedPosition);

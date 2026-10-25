@@ -16,7 +16,7 @@ internal sealed record AnalyticsStoreReadScope(PrincipalRecord Principal, Resour
         database.Authorization.Require(principal, partition, store, Capability.AnalyticsRead);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, store, ResourceKind.AnalyticsStore);
         AnalyticsStoreValidation.ValidateSchema(resource);
-        var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, store, resource)
+        var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, store, resource)).Value
             ?? throw Errors.Fail(ErrorCode.Corruption, AnalyticsStoreValidation.Invalid);
         return new(principal, resource, lifetime);
     }

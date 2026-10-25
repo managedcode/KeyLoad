@@ -12,7 +12,7 @@ internal static class TopicRetentionPostPurgeRejection
         var tail = fixture.Database.ReadEventSource("root", new(fixture.Source, AfterPosition: 2));
         var position = fixture.Store.Position;
         var failed = fixture.Submit(command, principal);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(code);
         await Assert.That(fixture.Store.Position).IsEqualTo(position + 1);
         var cut = fixture.Store.Position;
         var state = QueueWholeFlowStorage.Bytes(fixture.Store);

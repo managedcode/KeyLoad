@@ -46,7 +46,7 @@ internal static class QueryCapabilityVersionClusterRefusals
     }
     private static async Task ProblemAsync(CallToolResult reply, ErrorCode code, string detail)
     {
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         await Assert.That(JsonElement.DeepEquals(JsonSerializer.SerializeToElement(Errors.Problem(code, detail), JsonDefaults.Options),
             reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error))).IsTrue();
     }

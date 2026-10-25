@@ -38,11 +38,11 @@ internal sealed class AnnMaintenanceAdmissions
         }
     }
 
-    internal MaintenanceSessionWork? FindWork(Guid id)
+    internal global::ManagedCode.Communication.Result<MaintenanceSessionWork?> FindWork(Guid id)
     {
         lock (gate)
         {
-            return retainedWork is { } original && original.Id == id ? original.Work : null;
+            return retainedWork is { } original && original.Id == id ? global::ManagedCode.Communication.Result<MaintenanceSessionWork?>.Succeed(((MaintenanceSessionWork?)(original.Work))) : global::ManagedCode.Communication.Result<MaintenanceSessionWork?>.FailNotFound(nameof(FindWork));
         }
     }
 

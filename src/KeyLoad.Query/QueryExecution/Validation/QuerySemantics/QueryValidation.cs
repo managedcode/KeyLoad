@@ -57,7 +57,7 @@ internal static class QueryValidation
         var projection = QuerySelectionNormalization.Projection(query.Projection);
         var order = QuerySelectionNormalization.Order(query.Order);
         ValidateJoinShape(request, query, projection);
-        var join = NormalizeJoin(query.InnerJoin);
+        var join = (NormalizeJoin(query.InnerJoin)).Value;
         if (join is not null)
         {
             JsonData.Identifier(query.Alias!);
@@ -67,7 +67,7 @@ internal static class QueryValidation
         var predicates = new QueryPredicateNormalizer(execution.MaximumInValues,
             value => JsonData.Validate(value, false));
         var filter = query.Filter is null ? null : predicates.Filter(query.Filter, RootPredicateDepth);
-        var parameters = NormalizeParameters(request.Parameters, predicates);
+        var parameters = (NormalizeParameters(request.Parameters, predicates)).Value;
         if (query.ModelSource is null)
         {
             global::KeyLoad.Query.QueryExecution.EventEntityRefJoinBinding.ValidateJoinPredicate(query, filter, parameters);
@@ -123,21 +123,21 @@ internal static class QueryValidation
             query.ModelSource.Kind == ModelQuerySourceKind.Events ? InvalidEventJoinSource : InvalidQueueJoinSource);
     }
 
-    private static InnerJoinClause? NormalizeJoin(InnerJoinClause? join)
+    private static global::ManagedCode.Communication.Result<InnerJoinClause?> NormalizeJoin(InnerJoinClause? join)
     {
         if (join is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<InnerJoinClause?>.FailNotFound(nameof(NormalizeJoin));
         }
         JsonData.Identifier(join.Collection);
         JsonData.Identifier(join.Alias);
         var leftPath = CanonicalPath(join.LeftKeyPath);
         var rightPath = CanonicalPath(join.RightKeyPath);
-        return join with
+        return global::ManagedCode.Communication.Result<InnerJoinClause?>.Succeed(((InnerJoinClause?)(join with
         {
             LeftKeyPath = leftPath,
             RightKeyPath = rightPath
-        };
+        })));
     }
 
     private static string CanonicalPath(string path)
@@ -178,12 +178,12 @@ internal static class QueryValidation
         }
     }
 
-    private static Dictionary<string, JsonElement>? NormalizeParameters(Dictionary<string, JsonElement>? parameters,
-        QueryPredicateNormalizer predicates) => parameters is not { Count: > EmptyElementCount } ? null : parameters.ToDictionary(item =>
+    private static global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?> NormalizeParameters(Dictionary<string, JsonElement>? parameters,
+        QueryPredicateNormalizer predicates) => parameters is not { Count: > EmptyElementCount } ? global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.FailNotFound(nameof(NormalizeParameters)) : global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.Succeed(((Dictionary<string, JsonElement>?)(parameters.ToDictionary(item =>
     {
         JsonData.Identifier(item.Key);
         return item.Key;
-    }, item => predicates.Scalar(item.Value), StringComparer.Ordinal);
+    }, item => predicates.Scalar(item.Value), StringComparer.Ordinal))));
 
     internal static void Path(string path, bool star = false)
     {

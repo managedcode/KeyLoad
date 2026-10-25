@@ -86,15 +86,15 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
         }
         var submitted = issuerMustDeny ? original : Reissue(original);
         var result = Publish(submitted);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(result.Value).IsNull();
-        await Assert.That(Errors.Code(owner.Database.ResolveOutcome(submitted).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(owner.Database.ResolveOutcome(submitted).Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await before.RequireAsync(Bm25OriginalPhaseRecoveryState.Read(owner));
     }
 
     internal async Task RequireHealthyAsync(Command<DatabaseCommand> operation, Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(Reader.PolicyEpoch);

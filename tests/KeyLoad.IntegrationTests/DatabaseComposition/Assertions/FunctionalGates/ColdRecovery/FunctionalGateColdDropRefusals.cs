@@ -14,13 +14,13 @@ internal static class FunctionalGateColdDropRefusals
         await Assert.That(sdk.Value).IsNull();
         await ProblemAsync(sdk.Problem?.ErrorCode, sdk.Problem?.StatusCode);
         await FunctionalGateColdDropAssertions.AllAsync(context, state, token);
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            table.OriginalInsert, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            table.OriginalInsert, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await FunctionalGateColdDropAssertions.AllAsync(context, state, token);
         await SqlAsync(await context.Writer.Sdk.ExecuteSqlAsync(model.TableInsert, token));
         await FunctionalGateColdDropAssertions.AllAsync(context, state, token);
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-            model.TableInsert, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(SqlOperationProtocol.ToolName,
+            model.TableInsert, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await FunctionalGateColdDropAssertions.AllAsync(context, state, token);
     }
 

@@ -49,7 +49,7 @@ public static class MessagingQueries
         budget.Check();
         return engine.Store.Read(raw =>
         {
-            var result = engine.InspectMessageRead(budget.CreateView(raw), principalId, request.Lane, request.Id);
+            var result = (engine.InspectMessageRead(budget.CreateView(raw), principalId, request.Lane, request.Id)).Value;
             budget.CheckResult(result);
             return result;
         });

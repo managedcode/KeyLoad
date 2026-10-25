@@ -28,12 +28,12 @@ internal static class QueueDeadlineClusterPause
         await QueueDeadlineClusterCallers.UseAsync(fixture, McpCallerProtocol.Node2, identity.Secret, async worker =>
         {
             await QueueLeaseClusterAssertions.DeniedAsync(await worker.Sdk.CommitAsync(command, token), ErrorCode.DispatchPaused);
-            await McpCallerAssertions.ErrorAsync(await worker.Mcp.CallAsync(
-                McpCallerTools.DocumentsCommit, command, token), ErrorCode.DispatchPaused, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await worker.Mcp.CallAsync(
+                McpCallerTools.DocumentsCommit, command, token), ErrorCode.DispatchPaused, dispatched: true)).Value;
             var sql = SqlClusterProtocol.Call(lane.Partition, McpCallerTools.DocumentsCommit, command);
             await QueueLeaseClusterAssertions.DeniedAsync(await worker.Sdk.ExecuteSqlAsync(sql, token), ErrorCode.DispatchPaused);
-            await McpCallerAssertions.ErrorAsync(await worker.Mcp.CallAsync(
-                SqlOperationProtocol.ToolName, sql, token), ErrorCode.DispatchPaused, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await worker.Mcp.CallAsync(
+                SqlOperationProtocol.ToolName, sql, token), ErrorCode.DispatchPaused, dispatched: true)).Value;
             await QueueDeadlineClusterAssertions.RequireAsync(worker, lane, scheduled, token);
             return true;
         }, token);

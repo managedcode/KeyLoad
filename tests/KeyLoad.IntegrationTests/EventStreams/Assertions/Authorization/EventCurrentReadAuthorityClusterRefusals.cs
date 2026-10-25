@@ -26,7 +26,7 @@ internal static class EventCurrentReadAuthorityClusterRefusals
             state.Identity.Secret, McpEventStreamTokens.PrivateMarker);
         await EventCurrentReadAuthorityClusterCurrent.ObserveAsync(administrator, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.StreamsRead, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, verifiedCode, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, verifiedCode, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply,
             state.Identity.Secret, McpEventStreamTokens.PrivateMarker);
         await EventCurrentReadAuthorityClusterCurrent.ObserveAsync(administrator, state, token);

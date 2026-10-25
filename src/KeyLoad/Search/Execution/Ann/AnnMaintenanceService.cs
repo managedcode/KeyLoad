@@ -14,18 +14,18 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
     private readonly AnnMaintenanceState state = new(() => AnnOwnership.Create(directory,
         database.Store.Identity, configured.RuntimeAnn, configured.Core.PackedAnn, configured.Core.PackedAnnStorage));
 
-    public Task<AnnProjectionEnrollment?> ReadEnrollmentAsync(PrincipalRecord principal,
+    public async Task<AnnProjectionEnrollment?> ReadEnrollmentAsync(PrincipalRecord principal,
         AnnMaintenanceRequest initialRequest, CancellationToken cancellationToken)
-        => AnnEnrollmentRead.ReadAsync(database, principal, initialRequest, configured,
-            clock, admitted, state.EnsureOwner, cancellationToken);
+        => (await AnnEnrollmentRead.ReadAsync(database, principal, initialRequest, configured,
+            clock, admitted, state.EnsureOwner, cancellationToken)).Value;
 
-    public Task<AnnProjectionEnrollment?> ReadEnrollmentBoundAsync(PrincipalRecord principal,
+    public async Task<AnnProjectionEnrollment?> ReadEnrollmentBoundAsync(PrincipalRecord principal,
         AnnMaintenanceRequest initialRequest, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
         work.AttachResourceLifetimeBinding(binding);
-        return AnnEnrollmentRead.ReadAsync(database, principal, initialRequest, configured,
-            clock, admitted, state.EnsureOwner, token, work, binding);
+        return (await AnnEnrollmentRead.ReadAsync(database, principal, initialRequest, configured,
+            clock, admitted, state.EnsureOwner, token, work, binding)).Value;
     }
 
     public Task<AnnProjectionPublication> ReadPublishedBoundAsync(PrincipalRecord principal,
@@ -135,10 +135,10 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
             stages, stage.Session, principal, request, configured, token));
     }
 
-    internal AnnMaintenanceWork? ObserveWork(Guid id) => state.ObserveWork(id);
+    internal AnnMaintenanceWork? ObserveWork(Guid id) => (state.ObserveWork(id)).Value;
     public async Task AbortAsync(Guid id)
     {
-        if (admitted.FindWork(id) is { } work)
+        if ((admitted.FindWork(id)).Value is { } work)
         {
             await work.CancelAndJoinStagesAsync();
             await state.AbortAsync(id);

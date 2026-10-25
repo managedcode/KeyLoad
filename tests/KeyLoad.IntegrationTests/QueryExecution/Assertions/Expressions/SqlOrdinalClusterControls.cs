@@ -37,8 +37,8 @@ internal static class SqlOrdinalClusterControls
         var result = await callers.Sdk.QueryAstAsync(ast, token);
         await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
         await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
     private static async Task RejectAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state,
         PostgresClusterCaller wire, string sql, ErrorCode code, string sqlState, int dialect, CancellationToken token)
@@ -47,8 +47,8 @@ internal static class SqlOrdinalClusterControls
         var result = await callers.Sdk.QueryAsync(request, token);
         await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
         await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token),
-            code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token),
+            code, dispatched: true)).Value;
         if (dialect != SqlOffsetClusterProtocol.Q1)
         {
             return;

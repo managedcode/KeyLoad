@@ -32,12 +32,12 @@ internal static class AggregateSnapshotRaceCompetitors
                 ?? throw new InvalidOperationException("The snapshot competitor outcome is missing.");
             fixture.Outcomes.Add((operations[index], result, raw));
         }
-        await Assert.That(results.Count(result => Errors.Code(result.Problem) is null)).IsEqualTo(1);
-        var winner = Array.FindIndex(results, result => Errors.Code(result.Problem) is null);
+        await Assert.That(results.Count(result => Errors.Code(result.Problem).Value is null)).IsEqualTo(1);
+        var winner = Array.FindIndex(results, result => Errors.Code(result.Problem).Value is null);
         fixture.Winner = fixture.Commands[winner];
         var loser = results[1 - winner];
         await Assert.That(loser.Value).IsNull();
-        await Assert.That(Errors.Code(loser.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(loser.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(loser.Problem?.Detail).IsEqualTo("The aggregate snapshot version has changed.");
     }
 }

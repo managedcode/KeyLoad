@@ -30,6 +30,20 @@ jobs:
         run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs verify
       - name: Build
         run: dotnet build KeyLoad.slnx -warnaserror
+      - name: Check compiled unit inventory and coverage selectors
+        shell: pwsh
+        run: |
+          $evidence = Join-Path $PWD 'tests/KeyLoad.UnitTests/bin/Debug/net10.0/ci-inventory'
+          New-Item -ItemType Directory -Path $evidence -ErrorAction Stop | Out-Null
+          & ./scripts/Features/CodeQuality/functional-coverage.workflow-discovery.ps1 -Repository $PWD -EvidenceRoot $evidence
+      - name: Save compiled discovery evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiled-unit-discovery
+          path: tests/KeyLoad.UnitTests/bin/Debug/net10.0/ci-inventory
+          if-no-files-found: warn
+          retention-days: 30
 
   shards:
     name: Plan test shards

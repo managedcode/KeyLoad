@@ -24,7 +24,7 @@ internal static class ArchiveEntryHealthy
         var before = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var refused = database.Apply(original);
-        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await ArchiveEntryAssertions.ImageAsync(store, before, position);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(store, fixture.Source.Partition,
             original.CommandId, originalOutcome);
@@ -61,7 +61,7 @@ internal static class ArchiveEntryHealthy
                 var database = BackupIndexedDocumentDedupFixture.CreateDatabase(store);
                 await ArchiveEntryAssertions.ImageAsync(store, rows, position);
                 await ArchiveEntryAssertions.ContentAsync(database, fixture.Source, healthy: true, token);
-                await Assert.That(Errors.Code(database.Apply(original).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+                await Assert.That(Errors.Code(database.Apply(original).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
                 var replay = database.Apply(healthy).Get<CommitReceipt>();
                 await Assert.That(JsonDefaults.Serialize(replay).SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
                 await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(store, fixture.Source.Partition, original.CommandId, originalOutcome);

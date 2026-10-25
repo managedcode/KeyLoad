@@ -15,7 +15,7 @@ internal static class ChunkMultiblockPagedRetentionRefusal
         };
         var result = fixture.Apply(fixture.Operation(new AppendSamples(SampleChunkCanonicalFixture.Set,
             SampleChunkCanonicalFixture.Series, [changed], SampleChunkCanonicalFixture.Tags)));
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Conflict);
 
         await ChunkMultiblockPagedRetentionRows.RequireAsync(fixture, expired: true, healthy: false);
         var cut = SampleRawIntegrityAssertions.Capture(fixture.Store);

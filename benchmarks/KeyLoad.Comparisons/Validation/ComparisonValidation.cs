@@ -62,7 +62,7 @@ internal static class ComparisonValidation
     {
         if (scenario == Scenario.DocumentWrite)
         {
-            if (!BenchmarkDataset.SameDocument(await reader.ReadAsync(input, cancellationToken), input))
+            if (!BenchmarkDataset.SameDocument((await reader.ReadAsync(input, cancellationToken)).Value, input))
             {
                 throw new ComparisonFailureException(WriteMismatch);
             }
@@ -70,7 +70,7 @@ internal static class ComparisonValidation
         }
         if (ComparisonMutationPreparation.Required(scenario))
         {
-            ComparisonMutationOracle.RequireFinalState(scenario, await reader.ReadAsync(input, cancellationToken), input);
+            ComparisonMutationOracle.RequireFinalState(scenario, (await reader.ReadAsync(input, cancellationToken)).Value, input);
             return;
         }
         if (scenario == Scenario.StreamAppend)

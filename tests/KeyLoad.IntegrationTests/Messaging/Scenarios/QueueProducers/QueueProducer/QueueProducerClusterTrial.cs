@@ -16,7 +16,7 @@ internal static class QueueProducerClusterTrial
                 await fixture.InitializeAsync();
                 using var deadline = McpCallerDeadline.Create();
                 var seed = await QueueProducerClusterSetup.CreateAsync(fixture, deadline.Token);
-                var original = await QueueProducerClusterOriginalFlow.ExecuteAsync(fixture, seed, cancelAfterResponse, failures, deadline.Token);
+                var original = (await QueueProducerClusterOriginalFlow.ExecuteAsync(fixture, seed, cancelAfterResponse, failures, deadline.Token)).Value;
                 ServerFailureObserver.ThrowIfAny(failures);
                 ArgumentNullException.ThrowIfNull(original);
                 var outbox = await AtomicProducerClusterOutbox.ReadAsync(fixture, seed, deadline.Token);

@@ -69,8 +69,8 @@ internal static class EntityReferenceLifetime
     private static ResourceLifetime Read(IKeyValueView view, EntityRef reference, ResourceDefinition definition)
     {
         RequireReference(reference);
-        return ResourceLifetimeCatalog.Read(view, reference.Partition.TenantId, reference.Partition.DatabaseId,
-            reference.Collection, definition) ?? throw Errors.Fail(ErrorCode.NotFound, MissingResource);
+        return (ResourceLifetimeCatalog.Read(view, reference.Partition.TenantId, reference.Partition.DatabaseId,
+            reference.Collection, definition)).Value ?? throw Errors.Fail(ErrorCode.NotFound, MissingResource);
     }
 
     private static void RequireScope(EntityRef reference, ResourceLifetime actual)

@@ -14,8 +14,8 @@ internal static class LeftFilteredJoinRefusals
         var failure = await callers.Sdk.QueryAsync(LeftFilteredJoinProtocol.Query(state.Partition), token);
         await Assert.That(failure.IsSuccess).IsFalse();
         await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-            LeftFilteredJoinProtocol.Request(state.Partition), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName,
+            LeftFilteredJoinProtocol.Request(state.Partition), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     internal static async Task InvalidAsync(RequestCqrsClusterCallers callers, LeftFilteredJoinState state,
@@ -36,8 +36,8 @@ internal static class LeftFilteredJoinRefusals
             var failure = await callers.Sdk.ExecuteSqlAsync(input, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-                input, token), code, dispatched);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName,
+                input, token), code, dispatched)).Value;
         }
     }
 

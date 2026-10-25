@@ -2,6 +2,7 @@ namespace KeyLoad.Comparisons;
 
 internal static class BenchmarkSessionProtocol
 {
+    internal const string DocumentSessionRequired = "A document operation requires an admitted comparison session.";
     internal const string InvalidSessionSelection = "InvalidSessionSelection";
     internal const string InvalidSessionOptions = "InvalidSessionOptions";
     internal const string BenchmarkSessionClientDisposalFailed = "BenchmarkSessionClientDisposalFailed";

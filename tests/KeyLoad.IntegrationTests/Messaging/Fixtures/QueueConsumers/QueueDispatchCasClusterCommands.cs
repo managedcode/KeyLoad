@@ -46,7 +46,7 @@ internal static class QueueDispatchCasClusterCommands
             var request = state.Request(expectedVersion, paused);
             if (mcpFirst)
             {
-                await McpCallerAssertions.ErrorAsync(await McpAsync(mcp, id, request, token), code, dispatched: true);
+                _ = (await McpCallerAssertions.ErrorAsync(await McpAsync(mcp, id, request, token), code, dispatched: true)).Value;
             }
             else
             {

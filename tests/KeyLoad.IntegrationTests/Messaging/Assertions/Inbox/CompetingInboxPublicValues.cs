@@ -35,7 +35,7 @@ internal static class CompetingInboxPublicValues
     }
     internal static async Task McpFailureAsync(CompetingInboxPublicState state, CallToolResult actual, ErrorCode code)
     {
-        await McpCallerAssertions.ErrorAsync(actual, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(actual, code, dispatched: true)).Value;
         var detail = code == ErrorCode.PermissionDenied ? CompetingInboxPublicProtocol.SafeDenied : CompetingInboxPublicProtocol.SafeFailure;
         await Assert.That(JsonElement.DeepEquals(JsonSerializer.SerializeToElement(Errors.Problem(code, detail), JsonDefaults.Options),
             actual.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error))).IsTrue();

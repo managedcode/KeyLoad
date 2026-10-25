@@ -25,7 +25,7 @@ internal static class AuthenticationExecutionWriteRefusal
         sent = http.Requests;
         var reply = await mcp.InvokeKeyLoadToolAsync(McpCallerTools.DocumentsCommit,
             McpOfficialClient.Arguments(deniedCommand), token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Secret, McpDocumentProtocol.PrivateValue);
         await AuthenticationExecutionAssertions.WindowAsync(collector, position, http.Requests - sent, state.Reader.Id);
         await Assert.That(await AuthenticationExecutionValues.ImageAsync(root, state, token)).IsEqualTo(before);

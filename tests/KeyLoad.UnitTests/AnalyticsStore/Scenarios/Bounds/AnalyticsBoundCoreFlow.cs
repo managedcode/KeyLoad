@@ -18,8 +18,8 @@ internal static class AnalyticsBoundCoreFlow
                     System.Collections.Immutable.ImmutableDictionary<string, string>.Empty.Add(D.Kind, D.Alpha),
                     System.Collections.Immutable.ImmutableDictionary<string, double>.Empty.Add(D.Value, 2), null, [], 1)], false, null);
                 await O.EqualAsync(expected, fixture.Database.ReadAnalyticsEventsBound(D.Root, D.Read(fixture), work, lease));
-                var lifetime = fixture.Store.Read(view => ResourceLifetimeCatalog.Read(view, fixture.Partition.TenantId,
-                    fixture.Partition.DatabaseId, D.Store, fixture.Database.Resource(view, fixture.Partition, D.Store)))
+                var lifetime = fixture.Store.Read(view => (ResourceLifetimeCatalog.Read(view, fixture.Partition.TenantId,
+                    fixture.Partition.DatabaseId, D.Store, fixture.Database.Resource(view, fixture.Partition, D.Store))).Value)
                     ?? throw new InvalidOperationException("The actual analytics lifetime is absent.");
                 await Assert.That(lease.Dependencies.SetEquals([lifetime])).IsTrue();
                 await Assert.That(ledger.RetainedEntries).IsEqualTo(1);

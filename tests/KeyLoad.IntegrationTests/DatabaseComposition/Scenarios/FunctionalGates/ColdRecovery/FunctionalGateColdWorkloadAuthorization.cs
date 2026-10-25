@@ -39,13 +39,13 @@ internal static class FunctionalGateColdWorkloadAuthorization
         var write = await context.Writer.Sdk.CommitAsync(command, token);
         await Assert.That(write.IsFailed).IsTrue();
         await Assert.That(write.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
-            McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
+            McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         var read = await context.Reader.Sdk.GetAsync(reference, token);
         await Assert.That(read.IsFailed).IsTrue();
         await Assert.That(read.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
-            McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(
+            McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     private static async Task HealthyAsync(FunctionalGateContext context, FunctionalGateColdWorkload proof,

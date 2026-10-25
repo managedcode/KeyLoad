@@ -88,8 +88,8 @@ internal sealed class GraphSearchClusterTests(ClusterFixture fixture)
     {
         var denied = await sdk.GraphSearchAsync(request, cancellationToken);
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(GraphSearchClusterScenario.SearchGraphTool,
-            request, cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(GraphSearchClusterScenario.SearchGraphTool,
+            request, cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     private static async Task AssertEmptyAsync(KeyLoadClient sdk, McpOfficialClient mcp,

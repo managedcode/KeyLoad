@@ -24,7 +24,7 @@ internal sealed class TransactionTests
         await Assert.That(Errors.Code(db.Submit(OperationKind.Batch, command with
         {
             Mutations = [new PutDocument("orders", "o2", "{}")]
-        }, id: id).Problem)).IsEqualTo(ErrorCode.Conflict);
+        }, id: id).Problem).Value).IsEqualTo(ErrorCode.Conflict);
     }
     [Test]
     public async Task UniqueConflictRollsBackDocumentIndexEventAndEnqueue()
@@ -38,7 +38,7 @@ internal sealed class TransactionTests
         var result = db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition,
             [new AppendEvents("events", "o2", [new("e2", "Created", "{}")], ExpectedStreamRevision.NoStream),
             new EnqueueMessage("jobs", "m2", "{}"), new PutDocument("orders", "o2", "{\"number\":1}")]), id: id);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o2"))).IsNull();
         await Assert.That(db.Database.ReadStream("root", new StreamRef(db.Partition, "events", "o2")).Events).IsEmpty();
         await Assert.That(db.Database.InspectMessage("root", new(db.Partition, "jobs"), "m2")).IsNull();
@@ -55,7 +55,7 @@ internal sealed class TransactionTests
             var id = Guid.NewGuid();
             return db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [new PutDocument("orders", "o1", $"{{\"winner\":{number}}}", 1)]), id: id);
         })));
-        await Assert.That(results).HasSingleItem(r => Errors.Code(r.Problem) is null);
+        await Assert.That(results).HasSingleItem(r => Errors.Code(r.Problem).Value is null);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))!.Revision).IsEqualTo(2);
     }
     [Test]
@@ -66,7 +66,7 @@ internal sealed class TransactionTests
         db.Configure("other", ResourceKind.WorkQueue, domain: "another-domain");
         var id = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition,
-            [new PutDocument("orders", "o1", "{}"), new EnqueueMessage("other", "m1", "{}")]), id: id).Problem)).IsEqualTo(ErrorCode.Conflict);
+            [new PutDocument("orders", "o1", "{}"), new EnqueueMessage("other", "m1", "{}")]), id: id).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))).IsNull();
         await global::KeyLoad.UnitTests.OrleansExecution.AtomicPartitionScopeLifecycleTrial.RunAsync(TestContext.Current!.Execution.CancellationToken);
     }

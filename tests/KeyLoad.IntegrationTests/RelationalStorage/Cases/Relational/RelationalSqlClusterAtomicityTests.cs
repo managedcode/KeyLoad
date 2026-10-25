@@ -34,7 +34,7 @@ internal sealed class RelationalSqlClusterAtomicityTests(ClusterFixture fixture)
         var result = await sdk.ExecuteSqlAsync(sql, deadline.Token);
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(error.ToString());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, deadline.Token);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token), error, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token), error, dispatched: true)).Value;
         await VerifyRollbackAsync(sdk, mcp, scenario, invalidId, deadline.Token);
         await SqlClusterProtocol.EqualAsync(before, await McpCallerAssertions.SdkSuccessAsync(await sdk.GetAsync(scenario.First, deadline.Token)));
     }

@@ -136,7 +136,7 @@ internal static class TypedEndpointJoinReverseFlow
         await Assert.That(actual.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(actual.Problem!.ErrorCode).IsEqualTo(code.ToString());
         var official = await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
-        await McpCallerAssertions.ErrorAsync(official, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, code, dispatched: true)).Value;
         if (officialDetail is not null)
         {
             await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)

@@ -17,7 +17,7 @@ internal static class RestoreResumedTokenHealthy
                 [new(HealthyId, EventingArtifactFixture.EventType, EventingArtifactFixture.Json)]),
                 new EnqueueMessage(EventingArtifactFixture.Queue, HealthyId, EventingArtifactFixture.Json)]), id);
         var result = fixture.Database.Apply(operation);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(id);
         var bytes = EventingArtifactState.FullBytes(fixture.Database.Store);
         var cut = fixture.Database.Store.Position;

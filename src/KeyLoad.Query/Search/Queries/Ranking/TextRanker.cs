@@ -67,7 +67,7 @@ internal sealed class TextRanker
         corpusCount++;
         projection?.BeginRecord(document.Reference, document.Revision);
         using var json = JsonDocument.Parse(document.Json);
-        var value = JsonData.Scalar(json.RootElement, path);
+        var value = (JsonData.Scalar(json.RootElement, path)).Value.Value;
         var counts = new Dictionary<int, int>();
         var length = EmptyElementCount;
         if (value is string content)

@@ -37,10 +37,10 @@ internal sealed class TransactionProtocolTests
         };
         var id = Guid.NewGuid();
         var result = db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition, [mutation]), id: id);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Validation);
         var retained = OutcomeStoreOracle.ReadPartition(db.Store, db.Partition, "root", id)
             ?? throw new InvalidOperationException("The malformed command outcome is missing.");
-        await Assert.That(Errors.Code(retained.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(retained.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(0);
         db.Commit(new PutDocument("orders", "valid-after-rejection", "{}", 0));
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "valid-after-rejection"))).IsNotNull();
@@ -72,7 +72,7 @@ internal sealed class TransactionProtocolTests
                 var rejected = new CommandRequest(rejectedId, partition,
                     [new PutDocument("orders", "too-big", "{\"data\":\"" + new string('x', 2_000) + "\"}", 0)]);
                 var original = Submit(OperationKind.Batch, rejectedId, rejected);
-                await Assert.That(Errors.Code(original.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+                await Assert.That(Errors.Code(original.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
                 await Assert.That(database.LastApplied).IsEqualTo(2);
                 await Assert.That(database.GetOutboxStatus("root", partition).Head.Tail).IsEqualTo(0);
                 await Assert.That(database.GetDocument("root", new(partition, "orders", "too-big"))).IsNull();
@@ -97,7 +97,7 @@ internal sealed class TransactionProtocolTests
             var retained = OutcomeStoreOracle.ReadPartition(reopened,
                 new PartitionRef("tenant", "database", "orders", PartitionId), "root", rejectedId)
                 ?? throw new InvalidOperationException("The cold command outcome is missing.");
-            await Assert.That(Errors.Code(retained.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(Errors.Code(retained.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         }
         finally
         {

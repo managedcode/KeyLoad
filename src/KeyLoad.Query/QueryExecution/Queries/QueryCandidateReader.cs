@@ -29,7 +29,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
             Read(id);
             return PointPath;
         }
-        if (IndexPath(equality) is { } indexed)
+        if ((IndexPath(equality)).Value is { } indexed)
         {
             return indexed;
         }
@@ -52,7 +52,7 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         return FullScanPath;
     }
 
-    private string? IndexPath(Dictionary<string, object?> equality)
+    private global::ManagedCode.Communication.Result<string?> IndexPath(Dictionary<string, object?> equality)
     {
         foreach (var index in resource.Indexes.OrderByDescending(item => item.Fields.Length))
         {
@@ -79,9 +79,9 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
             }
-            return IndexPathPrefix + index.Name;
+            return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(IndexPathPrefix + index.Name)));
         }
-        return null;
+        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(IndexPath));
     }
 
     private void Candidate(ReadOnlySpan<byte> payload)

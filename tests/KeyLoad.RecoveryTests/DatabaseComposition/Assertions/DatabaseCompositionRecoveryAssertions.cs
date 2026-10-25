@@ -88,7 +88,7 @@ internal static class DatabaseCompositionRecoveryAssertions
         await Assert.That(original.CommandId).IsEqualTo(commandId);
         await Assert.That(original.UserId).IsEqualTo(DatabaseCompositionCrashScenario.Principal);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
-        await Assert.That(Errors.Code(stored.Result.Problem)).IsNull();
+        await Assert.That(Errors.Code(stored.Result.Problem).Value).IsNull();
         await Assert.That(JsonDefaults.Serialize(stored.Result.Get<ResourceDefinition>()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(definition))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(OrleansSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span))

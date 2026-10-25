@@ -53,8 +53,8 @@ internal static class TextBm25EligibilityPages
                 {
                     if (expectedHead is not null)
                     {
-                        current = owner.Database.ReadBm25CorpusCurrent(view, principal, resource, request.Partition,
-                            request.Collection, request.TextField!, TextProjectionProtocol.TokenizerVersion, ["needle"], work);
+                        current = (owner.Database.ReadBm25CorpusCurrent(view, principal, resource, request.Partition,
+                            request.Collection, request.TextField!, TextProjectionProtocol.TokenizerVersion, ["needle"], work)).Value;
                     }
                     return TextCapturedReadFactory.Capture(owner.Database, projection, view, principal, resource, request, work);
                 });

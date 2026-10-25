@@ -55,8 +55,8 @@ internal static class GraphVertexPublicAssertions
         {
             var sdk = await callers.Sdk.CommitAsync(refused.Command, token);
             await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(sdk, refused.Code);
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-                McpCallerTools.DocumentsCommit, refused.Command, token), refused.Code, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+                McpCallerTools.DocumentsCommit, refused.Command, token), refused.Code, dispatched: true)).Value;
         }
         await Assert.That(await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(
             new(state.Seed.TargetPartition, GraphIncomingClusterScenario.Collection, GraphVertexPublicState.WitnessId), token))).IsNull();

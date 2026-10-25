@@ -36,7 +36,7 @@ public static class RemoteTransferRepairHistory
         var selection = CommandOutcomeKeyResolver.Select(view, claims.PrincipalId, claims.FailedCommandId, new(CommandOutcomeScopeKind.Partition, partition));
         var outcome = selection.Outcome;
         var bytes = view.ReadOwnedValue(selection.Key);
-        if (outcome is null || bytes is null || outcome.Incarnation != claims.OwnerCut.Incarnation || outcome.PolicyEpoch != claims.OriginalPolicyEpoch || outcome.Fingerprint != claims.CommandFingerprint || Errors.Code(outcome.Result.Problem) != ErrorCode.PermissionDenied || outcome.Result.Value is not null || Convert.ToHexString(SHA256.HashData(bytes)) != claims.OutcomeDigest)
+        if (outcome is null || bytes is null || outcome.Incarnation != claims.OwnerCut.Incarnation || outcome.PolicyEpoch != claims.OriginalPolicyEpoch || outcome.Fingerprint != claims.CommandFingerprint || Errors.Code(outcome.Result.Problem).Value != ErrorCode.PermissionDenied || outcome.Result.Value is not null || Convert.ToHexString(SHA256.HashData(bytes)) != claims.OutcomeDigest)
         {
             throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
         }

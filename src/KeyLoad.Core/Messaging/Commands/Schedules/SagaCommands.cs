@@ -148,19 +148,19 @@ public static class SagaCommands
     internal static EnqueueMessage SagaTimeoutMessage(SagaRecord record, SagaTimeoutDefinition timeout, DateTimeOffset deadline)
     {
         var messageId = string.Concat(RecurringSagaProtocol.SagaTimeoutPrefix, record.SagaId.ToString(RecurringSagaProtocol.IdentifierFormat), SagaCommands.SagaCommandsReceiptIdentitySeparator, record.Revision.ToString(RecurringSagaProtocol.HexOrdinalFormat, System.Globalization.CultureInfo.InvariantCulture));
-        return new(timeout.Queue.Queue, messageId, timeout.PayloadJson, timeout.HeadersJson, ExpiresAt: SagaCommands.AddTtl(deadline, timeout.TimeToLive), OrderingKey: timeout.OrderingKey);
+        return new(timeout.Queue.Queue, messageId, timeout.PayloadJson, timeout.HeadersJson, ExpiresAt: (SagaCommands.AddTtl(deadline, timeout.TimeToLive)).Value, OrderingKey: timeout.OrderingKey);
     }
 
-    internal static DateTimeOffset? AddTtl(DateTimeOffset instant, TimeSpan? ttl)
+    internal static global::ManagedCode.Communication.Result<DateTimeOffset?> AddTtl(DateTimeOffset instant, TimeSpan? ttl)
     {
         if (ttl is not { } duration)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<DateTimeOffset?>.FailNotFound(nameof(AddTtl));
         }
 
         try
         {
-            return instant.Add(duration);
+            return global::ManagedCode.Communication.Result<DateTimeOffset?>.Succeed(((DateTimeOffset?)(instant.Add(duration))));
         }
         catch (ArgumentOutOfRangeException)
         {

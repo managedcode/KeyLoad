@@ -42,8 +42,8 @@ internal sealed class SampleRollupClusterTests(ClusterFixture fixture)
             [new("late", start.AddSeconds(15), 6)], TimeSeriesClusterScenario.PublicTags, deadline.Token);
         await Assert.That((await sdk.ReadSampleRollupAsync(request, deadline.Token)).Problem?.ErrorCode)
             .IsEqualTo(nameof(ErrorCode.HistoryUnavailable));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SampleRollupProtocol.ReadTool, request, deadline.Token),
-            ErrorCode.HistoryUnavailable, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SampleRollupProtocol.ReadTool, request, deadline.Token),
+            ErrorCode.HistoryUnavailable, dispatched: true)).Value;
         var correction = new CommandRequest(Guid.NewGuid(), scenario.Partition,
             [new RefreshSampleRollup(TimeSeriesClusterScenario.Set, TimeSeriesClusterScenario.Series, start, end, 1)]);
         var corrected = await McpCallerAssertions.SuccessAsync<CommitReceipt>(

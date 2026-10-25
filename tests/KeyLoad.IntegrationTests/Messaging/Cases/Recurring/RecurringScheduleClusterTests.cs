@@ -41,8 +41,8 @@ internal sealed class RecurringScheduleClusterTests(ClusterFixture fixture)
 
         var stale = RecurringSagaClusterSupport.Command(Guid.NewGuid(), scenario.SourcePartition,
             new ConfigureRecurringSchedule(first, 1));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, stale,
-            deadline.Token), ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, stale,
+            deadline.Token), ErrorCode.RevisionConflict, dispatched: true)).Value;
         await Assert.That(replacementFirstDueAt.AddHours(1)).IsLessThan(TimeProvider.System.GetUtcNow());
         await Assert.That(replacementFirstDueAt.AddHours(2)).IsGreaterThan(TimeProvider.System.GetUtcNow());
 

@@ -48,7 +48,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
                 .Select(value => value.Metric).Distinct(StringComparer.Ordinal).Count(), failures);
         IncludeCapturedTimestamps();
         options.Queries.MaxGroups = snapshot.Request.MaxGroups;
-        options.Queries.Timeout = AnalyticsStoreOptions.QueryTimeout(snapshot.Work.RemainingLifetime);
+        options.Queries.Timeout = (AnalyticsStoreOptions.QueryTimeout(snapshot.Work.RemainingLifetime)).Value;
     }
 
     /// <summary>Gets whether the actual execution engine has completed successful joined disposal.</summary>

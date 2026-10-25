@@ -29,12 +29,14 @@ internal static class SdkProblemBoundaryStages
         var healthy = new KeyLoadClient(server.Client, P.Secret, UnitClientOptions.Execution());
         var read = await tasks.CompleteAsync(tasks.Retain(healthy.GetAsync(state.Allowed, token)));
         await Assert.That(read.IsSuccess).IsTrue();
+        await Assert.That(Errors.Code(read.Problem).IsFailed).IsTrue();
         await SdkProblemBoundaryAssertions.EqualAsync(new DocumentReadResult(
             new(state.Allowed, P.FirstRevision, P.SeedJson, false, [])), read.Value!);
         await SdkProblemBoundaryAssertions.SameAsync(state, original);
         state.HealthyToken = ExpectedCanonicalCommit.Next(state.Execution.Fixture.Database.Database, state.Healthy.Partition);
         var committed = await tasks.CompleteAsync(tasks.Retain(healthy.CommitAsync(state.Healthy, token)));
         await Assert.That(committed.IsSuccess).IsTrue();
+        await Assert.That(Errors.Code(committed.Problem).IsFailed).IsTrue();
         state.HealthyReceipt = committed.Value ?? throw new InvalidOperationException(P.Failure);
         await SdkProblemBoundaryAssertions.ReceiptAsync(state, state.Healthy, state.HealthyReceipt, root: false);
         await SdkProblemBoundaryAssertions.CurrentAsync(state);
@@ -60,5 +62,8 @@ internal static class SdkProblemBoundaryStages
         var expected = cap == SdkProblemBoundaryScenario.ProblemBytes ? SdkProblemBoundaryScenario.ExpectedProblem
             : Errors.Problem(write ? ErrorCode.UnknownWriteOutcome : ErrorCode.OwnershipLost, P.Unavailable);
         await SdkProblemBoundaryAssertions.EqualAsync(expected, result.Problem!);
+        var code = Errors.Code(result.Problem);
+        await Assert.That(code.IsSuccess).IsTrue();
+        await Assert.That(code.Value).IsEqualTo(Errors.Code(expected).Value);
     }
 }

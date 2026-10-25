@@ -40,7 +40,7 @@ internal sealed class EventProjectionHarness : IDisposable
     {
         var requestId = id ?? Guid.NewGuid();
         var operation = Database.CreateCommand(kind, requestId, principal, TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(payload, JsonDefaults.Options));
-        var before = TestDatabaseOriginalResourceCommands.Begin(Database, operation);
+        var before = (TestDatabaseOriginalResourceCommands.Begin(Database, operation)).Value;
         var result = Database.Apply(operation);
         originalResources.Observe(Database, operation, result, before);
         return result;

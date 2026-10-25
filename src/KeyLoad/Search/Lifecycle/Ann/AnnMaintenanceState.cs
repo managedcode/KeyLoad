@@ -112,16 +112,16 @@ internal sealed class AnnMaintenanceState(Func<AnnGenerationOwner> createOwner)
         }
     }
 
-    internal AnnMaintenanceWork? ObserveWork(Guid id)
+    internal global::ManagedCode.Communication.Result<AnnMaintenanceWork?> ObserveWork(Guid id)
     {
         lock (gate)
         {
             if (closed || session?.Id != id || session.Replay is null)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<AnnMaintenanceWork?>.FailNotFound(nameof(ObserveWork));
             }
             var observed = session.Observation;
-            return new(id, session.Replay.WorkUnits, observed?.Kind, observed?.Budget.WrittenBytes ?? AnnMaintenanceWork.NoWrittenBytes);
+            return global::ManagedCode.Communication.Result<AnnMaintenanceWork?>.Succeed((AnnMaintenanceWork?)(new(id, session.Replay.WorkUnits, observed?.Kind, observed?.Budget.WrittenBytes ?? AnnMaintenanceWork.NoWrittenBytes)));
         }
     }
 

@@ -10,12 +10,12 @@ internal static class EventEntityRefJoinReference
     private const string ReferenceField = "to";
     private const string InvalidReference = "The event join reference does not match its declared partition and collection.";
 
-    internal static EntityRef? Read(JsonElement row, PartitionRef partition, string collection)
+    internal static global::ManagedCode.Communication.Result<EntityRef?> Read(JsonElement row, PartitionRef partition, string collection)
     {
         if (!row.TryGetProperty(PayloadField, out var payload) || payload.ValueKind == JsonValueKind.Null
             || !payload.TryGetProperty(ReferenceField, out var value) || value.ValueKind == JsonValueKind.Null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<EntityRef?>.FailNotFound(nameof(Read));
         }
         if (value.ValueKind != JsonValueKind.Object)
         {
@@ -38,6 +38,6 @@ internal static class EventEntityRefJoinReference
         EngineResourceAccess.ValidatePartition(reference.Partition);
         JsonData.Identifier(reference.Collection);
         JsonData.Identifier(reference.Id);
-        return reference;
+        return global::ManagedCode.Communication.Result<EntityRef?>.Succeed(((EntityRef?)(reference)));
     }
 }

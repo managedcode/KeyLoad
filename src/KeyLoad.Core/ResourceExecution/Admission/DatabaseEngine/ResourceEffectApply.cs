@@ -104,7 +104,7 @@ public static class ResourceEffectApply
     {
         try
         {
-            engine.AuthorizeOperation(view, principal, operation);
+            _ = (engine.AuthorizeOperation(view, principal, operation)).Value;
             return true;
         }
         catch (KeyLoadException denial) when (denial.Code == ErrorCode.PermissionDenied)

@@ -67,17 +67,17 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
         }
     }
 
-    public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         var json = await RuntimeJoinAsync(database.StringGetAsync(prefix + document.Id, CommandFlags.DemandMaster), cancellationToken);
-        return json.IsNull ? null : new(document.Id, json.ToString());
+        return json.IsNull ? global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync)) : global::ManagedCode.Communication.Result<FoundDocument?>.Succeed((FoundDocument?)(new(document.Id, json.ToString())));
     }
 
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken token)
     {
         if (scenario == Scenario.PointRead)
         {
-            return new(Document: await ReadAsync(document, token));
+            return new(Document: (await ReadAsync(document, token)).Value);
         }
         if (scenario is not (Scenario.DocumentWrite or Scenario.DocumentUpdate or Scenario.DocumentDelete))
         {

@@ -38,7 +38,7 @@ internal static class GrainReplyFactory
     {
         if (result.IsFailed)
         {
-            return Rejected(code: Errors.Code(result.Problem)!.Value, detail: result.Problem.Detail, options: options);
+            return Rejected(code: Errors.Code(result.Problem).Value!.Value, detail: result.Problem.Detail, options: options);
         }
 
         cancellationToken.ThrowIfCancellationRequested();

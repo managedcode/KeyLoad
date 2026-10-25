@@ -83,7 +83,7 @@ public sealed class RequestWorkOwner : IAsyncDisposable
     private async Task DisposeCoreAsync(Task start)
     {
         await start;
-        var drainFailure = await RequestWorkSettlement.JoinAsync(DrainAsync());
+        var drainFailure = (await RequestWorkSettlement.JoinAsync(DrainAsync())).Value;
         Exception? disposeFailure = null;
         try
         {

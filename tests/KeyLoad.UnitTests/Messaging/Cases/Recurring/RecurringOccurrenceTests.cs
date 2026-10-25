@@ -17,8 +17,8 @@ internal sealed class RecurringOccurrenceTests
         var firstDue = RecurringSagaDatabase.Epoch.AddSeconds(1);
         var definition = Definition(fixture, id, firstDue, TimeSpan.FromMinutes(1));
         _ = fixture.Commit(fixture.Partition, new ConfigureRecurringSchedule(definition, 0));
-        await Assert.That(Errors.Code(EmitInvalidMaximum(fixture, id, 0).Problem)).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(Errors.Code(EmitInvalidMaximum(fixture, id, CatchUpBound + 1).Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(EmitInvalidMaximum(fixture, id, 0).Problem).Value).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(EmitInvalidMaximum(fixture, id, CatchUpBound + 1).Problem).Value).IsEqualTo(ErrorCode.Validation);
 
         var early = Emit(fixture, id, 1, 1, RecurringSagaDatabase.Epoch);
         await Assert.That(early.Mutations[0].Revision).IsEqualTo(1);

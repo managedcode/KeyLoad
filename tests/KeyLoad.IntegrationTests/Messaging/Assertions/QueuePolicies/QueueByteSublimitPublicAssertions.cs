@@ -36,7 +36,7 @@ internal static class QueueByteSublimitPublicAssertions
         await Assert.That(result.Problem.Detail).IsEqualTo("The queue dead-letter sublimit is exhausted.");
         await QueueLifecyclePublicRoutes.RefusedAsync(callers, state.Owner, request, ErrorCode.ResourceExhausted, token);
         var reply = await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.ResourceExhausted, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.ResourceExhausted, true)).Value;
         var envelope = reply.StructuredContent
             ?? throw new InvalidOperationException(McpCallerProtocol.MissingStructuredResult);
         await Assert.That(envelope.GetProperty(McpCallerProtocol.Error)
@@ -62,14 +62,14 @@ internal static class QueueByteSublimitPublicAssertions
         }
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(
             await callers.Sdk.ReceiveAsync(state.Request, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-            McpCallerTools.MessagesReceive, state.Request, token), ErrorCode.StaleLease, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+            McpCallerTools.MessagesReceive, state.Request, token), ErrorCode.StaleLease, true)).Value;
         foreach (var action in new[] { DeliveryAction.Ack, DeliveryAction.Nack, DeliveryAction.Renew })
         {
             var old = new DeliveryCommand(Guid.NewGuid(), state.Owner.Lane, state.Delivery.Token, action);
             await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-                McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+                McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, true)).Value;
         }
     }
 

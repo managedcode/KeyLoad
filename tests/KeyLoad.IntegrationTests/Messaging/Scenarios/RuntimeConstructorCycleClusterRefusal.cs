@@ -31,8 +31,8 @@ internal static class RuntimeConstructorCycleClusterRefusal
             new ExpireSaga(scenario.SourceQueue, id, 1L));
         var sdkFailure = await sdk.CommitAsync(stale, token);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(sdkFailure, ErrorCode.RevisionConflict);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, stale, token),
-            ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, stale, token),
+            ErrorCode.RevisionConflict, dispatched: true)).Value;
         await RuntimeConstructorCycleClusterState.TerminalAsync(sdk, mcp, scenario, id, dueAt, token);
         await RuntimeConstructorCycleClusterReceipt.ReplayAsync(sdk, mcp, original, receipt, token);
         await RuntimeConstructorCycleClusterState.TerminalAsync(sdk, mcp, scenario, id, dueAt, token);

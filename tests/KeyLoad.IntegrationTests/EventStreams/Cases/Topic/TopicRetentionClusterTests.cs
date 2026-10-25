@@ -18,8 +18,8 @@ internal sealed class TopicRetentionClusterTests(ClusterFixture fixture)
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var scenario = await TopicRetentionClusterScenario.CreateAsync(sdk, token);
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2, fixture.AdminKey, token);
-        await McpCallerAssertions.ErrorAsync(await session.CallAsync(McpCallerTools.DocumentsCommit, scenario.Purge(), token),
-            ErrorCode.ResourceExhausted, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await session.CallAsync(McpCallerTools.DocumentsCommit, scenario.Purge(), token),
+            ErrorCode.ResourceExhausted, dispatched: true)).Value;
         await McpCallerAssertions.SdkSuccessAsync(await sdk.SeekSubscriptionAsync(
             new(Guid.NewGuid(), scenario.Subscription, 1, SubscriptionStart.FromNow), token));
         var command = scenario.Purge();
@@ -42,7 +42,7 @@ internal sealed class TopicRetentionClusterTests(ClusterFixture fixture)
         {
             var duplicate = new CommandRequest(Guid.NewGuid(), scenario.Partition,
                 [new PublishTopic("topic", [new("event1", "Created", item.Item1)])]);
-            await McpCallerAssertions.ErrorAsync(await session.CallAsync(McpCallerTools.DocumentsCommit, duplicate, token), item.Item2, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await session.CallAsync(McpCallerTools.DocumentsCommit, duplicate, token), item.Item2, dispatched: true)).Value;
         }
         await TopicRetentionClusterAssertions.RetainedAsync(scenario, sdk, session, token);
         var healthySql = scenario.HealthySql();

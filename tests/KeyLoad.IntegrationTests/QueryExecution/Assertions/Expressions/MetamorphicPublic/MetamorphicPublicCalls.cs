@@ -39,7 +39,7 @@ internal static class MetamorphicPublicCalls
         await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied,
             "The query requires a protected field-use grant."), sdk.Problem);
         var reply = await McpAsync(reader, plan, route, null, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
         var expected = JsonSerializer.SerializeToElement(Errors.Problem(ErrorCode.PermissionDenied,
             "The authenticated principal is not permitted to perform this operation."), JsonDefaults.Options);
         await Assert.That(JsonElement.DeepEquals(expected, reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error))).IsTrue();

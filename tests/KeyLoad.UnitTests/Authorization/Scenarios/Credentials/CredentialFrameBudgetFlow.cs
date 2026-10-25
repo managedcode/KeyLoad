@@ -20,9 +20,9 @@ internal static class CredentialFrameBudgetFlow
     {
         using var fixture = new TestDatabase();
         var subject = new PrincipalRecord(PrincipalId, Tenant, [], []) { PolicyEpoch = FirstEpoch };
-        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Problem)).IsNull();
+        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Problem).Value).IsNull();
         await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigureApiKey,
-            new ConfigureApiKeyRequest(AuthorizationExecution.Credential(CredentialId, PrincipalId, Secret))).Problem)).IsNull();
+            new ConfigureApiKeyRequest(AuthorizationExecution.Credential(CredentialId, PrincipalId, Secret))).Problem).Value).IsNull();
         var expected = fixture.Store.Read(view => checked(Size(view, KeySpace.ApiKey(CredentialId))
             + Size(view, KeySpace.Principal(PrincipalId))));
         var before = Image(fixture);
@@ -55,7 +55,7 @@ internal static class CredentialFrameBudgetFlow
             {
                 Revoked = true,
                 PolicyEpoch = RevokedEpoch
-            })).Problem)).IsNull();
+            })).Problem).Value).IsNull();
         var before = Image(fixture);
         var position = fixture.Store.Position;
         var revoked = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.Authenticate(Secret,
@@ -66,7 +66,7 @@ internal static class CredentialFrameBudgetFlow
             new ConfigurePrincipalRequest(subject with
             {
                 PolicyEpoch = RepairedEpoch
-            })).Problem)).IsNull();
+            })).Problem).Value).IsNull();
         before = Image(fixture);
         position = fixture.Store.Position;
         var repaired = fixture.Database.Authenticate(Secret, fixture.Database.EvaluationClock.GetUtcNow(),

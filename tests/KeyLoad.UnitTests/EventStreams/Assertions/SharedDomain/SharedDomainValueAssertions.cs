@@ -16,7 +16,7 @@ internal static class SharedDomainValueAssertions
 
     internal static async Task ReceiptAsync(Result<object> result, CommandRequest request, StoreIdentity identity, long position)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Problem?.Detail).IsNull();
 
         var mutations = request.Mutations.Select(effect => effect switch
@@ -34,7 +34,7 @@ internal static class SharedDomainValueAssertions
 
     internal static async Task ProcessingAsync(Result<object> result, ProcessingRequest request, StoreIdentity identity, long position)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Problem?.Detail).IsNull();
 
         var scope = request.Lane;
@@ -56,7 +56,7 @@ internal static class SharedDomainValueAssertions
 
     internal static async Task FailureAsync(Result<object> result, ErrorCode code, string detail)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
 
         await Assert.That(result.Value).IsNull();

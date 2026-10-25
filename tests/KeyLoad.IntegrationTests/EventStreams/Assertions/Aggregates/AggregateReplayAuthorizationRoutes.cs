@@ -83,7 +83,7 @@ internal static class AggregateReplayAuthorizationRoutes
         await Assert.That(denied.Value).IsNull();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var official = await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-        await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(official, secret, AggregateReplayClusterTokens.Secret);
         await McpCallerAssertions.DoesNotDiscloseAsync(official, secret, AggregateReplayClusterTokens.PrivateHeader);
         var sql = SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command);
@@ -91,7 +91,7 @@ internal static class AggregateReplayAuthorizationRoutes
         await Assert.That(sqlDenied.IsSuccess).IsFalse();
         await Assert.That(sqlDenied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var sqlOfficial = await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
-        await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, secret, AggregateReplayClusterTokens.Secret);
         await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, secret, AggregateReplayClusterTokens.PrivateHeader);
     }

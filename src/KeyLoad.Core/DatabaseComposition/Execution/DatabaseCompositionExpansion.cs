@@ -24,7 +24,7 @@ public static class DatabaseCompositionExpansion
     internal static List<Mutation> ExpandQueueToGraphSelection(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget, IKeyValueView authorityView)
     {
         const int ExpectedRevisionEmptyCount = 0;
-        var typedPrimaryKeys = engine.AuthorizeComposition(authorityView, principal, partition, command);
+        var typedPrimaryKeys = (engine.AuthorizeComposition(authorityView, principal, partition, command)).Value;
         var lane = new QueueLaneRef(partition, command.Queue);
         var ids = new List<(string Id, byte[] ReadyKey)>();
         var result = budget.VisitRange(tx, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.ReadyQueueSpace, lane), command.MaxMessages, (key, value) =>
@@ -61,7 +61,7 @@ public static class DatabaseCompositionExpansion
             var link = DatabaseCompositionExpansion.ReadLink(body.PayloadJson, partition);
             if (command.FromCollection is not null)
             {
-                var selected = engine.SelectTypedEndpointPair(tx, principal, command, link, budget, typedPrimaryKeys!.Value.FromPrimaryKey, typedPrimaryKeys.Value.ToPrimaryKey);
+                var selected = (engine.SelectTypedEndpointPair(tx, principal, command, link, budget, typedPrimaryKeys!.Value.FromPrimaryKey, typedPrimaryKeys.Value.ToPrimaryKey)).Value;
                 if (selected is null)
                 {
                     continue;
@@ -97,7 +97,7 @@ public static class DatabaseCompositionExpansion
 
     internal static List<Mutation> ExpandGraphToQueue(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, GraphToQueueMutation command, ReadExecutionBudget budget)
     {
-        engine.AuthorizeComposition(tx, principal, partition, command);
+        _ = (engine.AuthorizeComposition(tx, principal, partition, command)).Value;
         var resource = engine.Resource(tx, partition, command.Graph, ResourceKind.Graph);
         var start = engine.VisibleVertex(budget.CreateView(tx), principal, command.Start).Reference;
         var traversal = new GraphTraversalReader(engine, tx, principal, resource, partition, command.Graph, start, command.MaxDepth, command.MaxVertices, command.MaxEdges, null, budget).Read();

@@ -19,8 +19,8 @@ internal static class ProjectionPublicPolicy
         var deniedRead = await caller.Sdk.ReadProjectionAsync(new(state.Consumer), token);
         await global::TUnit.Assertions.Assert.That(deniedRead.IsSuccess).IsFalse();
         await global::TUnit.Assertions.Assert.That(deniedRead.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.ProjectionsRead,
-            new ReadProjectionBatchRequest(state.Consumer), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.ProjectionsRead,
+            new ReadProjectionBatchRequest(state.Consumer), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await ProjectionPublicAssertions.ExactAsync(before,
             await ProjectionPublicOperations.ImageAsync(root, state, 2L, false, false, token));
         var current = denied with

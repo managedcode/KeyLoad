@@ -48,7 +48,7 @@ internal static class EventProjectionRecoveryQueryOracle
             Mutations = [changed]
         };
         var conflict = database.Apply(database.CreateCommand(operation.Value!.Kind, operation.CommandId, operation.UserId!, new DateTimeOffset(operation.Timestamp), JsonSerializer.Serialize(changedCommand, JsonDefaults.Options)));
-        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         var durable = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         await Assert.That(durable is not null && JsonDefaults.Serialize(durable).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();

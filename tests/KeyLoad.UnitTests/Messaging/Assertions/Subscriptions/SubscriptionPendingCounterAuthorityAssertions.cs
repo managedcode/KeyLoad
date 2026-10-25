@@ -31,7 +31,7 @@ internal static class SubscriptionPendingCounterAuthorityAssertions
     {
         var expected = new CommitReceipt(request.CommandId, token, [new(nameof(DeliveryAction.Nack), request.Subscription.Source.Resource,
                 NackedPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), InitialLeaseVersion)], DurabilityProfile.ProcessDurable, 1);
-        await Assert.That(Errors.Code(actual.Problem)).IsNull();
+        await Assert.That(Errors.Code(actual.Problem).Value).IsNull();
         await Assert.That(OrleansSerialization.Serialize(actual.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }

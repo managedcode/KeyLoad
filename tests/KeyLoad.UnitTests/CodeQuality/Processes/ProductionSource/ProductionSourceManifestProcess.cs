@@ -69,8 +69,8 @@ internal static class ProductionSourceManifestProcess
         }, failures);
         if (started)
         {
-            result = await RunStartedAsync(process, options, timeProvider, failures, deadline.Token, cancellationToken)
-                .ConfigureAwait(false);
+            result = (await RunStartedAsync(process, options, timeProvider, failures, deadline.Token, cancellationToken)
+                .ConfigureAwait(false)).Value;
         }
         var disposed = false;
         ServerFailureObserver.Observe(() =>
@@ -88,7 +88,7 @@ internal static class ProductionSourceManifestProcess
             };
     }
 
-    private static async Task<ProductionSourceManifestProcessResult?> RunStartedAsync(
+    private static async Task<global::ManagedCode.Communication.Result<ProductionSourceManifestProcessResult?>> RunStartedAsync(
         Process process, TestExecutionOptions options, TimeProvider timeProvider, List<Exception> failures,
         CancellationToken deadline, CancellationToken caller)
     {
@@ -122,11 +122,11 @@ internal static class ProductionSourceManifestProcess
         await cleanup.ConfirmExitAsync(process, options.ProcessExitPollInterval).ConfigureAwait(false);
         if (!original.IsCompletedSuccessfully || exit is null || output is null || error is null || failures.Count != 0)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ProductionSourceManifestProcessResult?>.FailNotFound(nameof(RunStartedAsync));
         }
         var captured = await Task.WhenAll(output, error).ConfigureAwait(false);
-        return new(process.ExitCode, captured[0], captured[1],
-            exit.IsCompletedSuccessfully, output.IsCompletedSuccessfully, error.IsCompletedSuccessfully, false);
+        return global::ManagedCode.Communication.Result<ProductionSourceManifestProcessResult?>.Succeed((ProductionSourceManifestProcessResult?)(new(process.ExitCode, captured[0], captured[1],
+            exit.IsCompletedSuccessfully, output.IsCompletedSuccessfully, error.IsCompletedSuccessfully, false)));
     }
 
     private static async Task ObserveUntilDeadlineAsync(Task original, List<Exception> failures,

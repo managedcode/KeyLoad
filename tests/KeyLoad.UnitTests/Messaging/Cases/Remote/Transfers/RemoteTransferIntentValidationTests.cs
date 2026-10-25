@@ -26,7 +26,7 @@ internal sealed class RemoteTransferIntentValidationTests
             var result = fixture.Apply(OperationKind.Batch,
                 new CommandRequest(Guid.NewGuid(), fixture.DestinationPartition,
                     [new AcceptQueueTransfer(fixture.DestinationQueue, token)]));
-            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+            await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
             await Assert.That(fixture.Database.InspectQueueTransferReceipt(RemoteTransferDatabase.RootPrincipal,
                 fixture.DestinationQueue, fixture.SourceQueue, transferId)).IsNull();
             await Assert.That(fixture.Database.InspectMessage(RemoteTransferDatabase.RootPrincipal,

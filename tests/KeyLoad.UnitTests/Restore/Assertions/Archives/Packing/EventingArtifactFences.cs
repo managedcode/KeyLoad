@@ -13,7 +13,7 @@ internal static class EventingArtifactFences
         var database = fixture.Database;
         var before = database.Store.Position;
         var bytes = EventingArtifactState.Bytes(database.Store, fixture.Source.Partition);
-        await Assert.That(Errors.Code(database.Apply(fixture.Original).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(database.Apply(fixture.Original).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(database.Store.Position).IsEqualTo(before);
         var invalid = Assert.ThrowsExactly<KeyLoadException>(() => database.ReadEventSource(
             EventingArtifactFixture.Principal, new(fixture.Events, Cursor: fixture.Cursor)));
@@ -63,7 +63,7 @@ internal static class EventingArtifactFences
         var before = fixture.Database.Store.Position;
         var original = fixture.Operation(kind, payload, id, principal);
         var result = fixture.Database.Apply(original);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(expected);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(before + 1);
         var stored = EventingArtifactState.FullBytes(fixture.Database.Store);

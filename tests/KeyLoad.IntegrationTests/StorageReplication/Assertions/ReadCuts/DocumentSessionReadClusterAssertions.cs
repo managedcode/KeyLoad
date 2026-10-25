@@ -39,7 +39,7 @@ internal static class DocumentSessionReadClusterAssertions
             await Assert.That(sdkFailure.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
             await Assert.That(sdkFailure.Problem?.Detail).IsEqualTo(failure.Detail);
             var official = await mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, failure.Token), token);
-            await McpCallerAssertions.ErrorAsync(official, ErrorCode.TokenInvalidated, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.TokenInvalidated, dispatched: true)).Value;
             await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(failure.Detail);
             await McpCallerAssertions.DoesNotDiscloseAsync(official, credential, FirstJson);
@@ -51,7 +51,7 @@ internal static class DocumentSessionReadClusterAssertions
             await Assert.That(sql.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
             await Assert.That(sql.Problem?.Detail).IsEqualTo(failure.Detail);
             var sqlOfficial = await mcp.CallAsync(SqlOperationProtocol.ToolName, call, token);
-            await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.TokenInvalidated, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.TokenInvalidated, dispatched: true)).Value;
             await Assert.That(sqlOfficial.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(failure.Detail);
             await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, credential, FirstJson);

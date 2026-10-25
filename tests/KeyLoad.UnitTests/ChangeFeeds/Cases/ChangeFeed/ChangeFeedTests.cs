@@ -42,7 +42,7 @@ internal sealed class ChangeFeedTests
         var failedId = Guid.NewGuid();
         var failed = db.Submit(OperationKind.Batch, new CommandRequest(failedId, db.Partition,
             [new PutDocument("orders", "b", "{\"n\":2}"), new PutDocument("orders", "c", "{\"n\":1}")]), id: failedId);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(1);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "b"))).IsNull();
     }
@@ -59,7 +59,7 @@ internal sealed class ChangeFeedTests
         var failedId = Guid.NewGuid();
         var failed = db.Submit(OperationKind.CommitProjectionBatch, new CommitProjectionBatchRequest(failedId, consumer, batch.Token,
             [new PutDocument("projection", "a", "{}", 99)]), id: failedId);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Consumers.Single().Checkpoint).IsEqualTo(0);
         var completed = Complete(db, consumer, batch, new PutDocument("projection", "a", "{}", 0));
         var replay = Complete(db, consumer, batch, new PutDocument("projection", "a", "{}", 0));
@@ -69,7 +69,7 @@ internal sealed class ChangeFeedTests
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(2);
         var conflictId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.CommitProjectionBatch,
-            new CommitProjectionBatchRequest(conflictId, consumer, batch.Token, []), id: conflictId).Problem)).IsEqualTo(ErrorCode.Conflict);
+            new CommitProjectionBatchRequest(conflictId, consumer, batch.Token, []), id: conflictId).Problem).Value).IsEqualTo(ErrorCode.Conflict);
     }
     [Test]
     public async Task RetentionPinsProtectUnprocessedAndRebuildHistory()
@@ -83,7 +83,7 @@ internal sealed class ChangeFeedTests
         Configure(db, rebuild);
         Complete(db, active, db.Database.ReadProjectionBatch("root", new(active)));
         var id = Guid.NewGuid();
-        await Assert.That(Errors.Code(db.Submit(OperationKind.PurgeOutbox, new PurgeOutboxRequest(id, db.Partition, 2), id: id).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.PurgeOutbox, new PurgeOutboxRequest(id, db.Partition, 2), id: id).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         var releaseId = Guid.NewGuid();
         db.Submit(OperationKind.ReleaseProjectionConsumer, new ReleaseProjectionConsumerRequest(releaseId, rebuild, 1), id: releaseId).Get<ProjectionConsumerInfo>();
         var purgeId = Guid.NewGuid();
@@ -107,7 +107,7 @@ internal sealed class ChangeFeedTests
         db.Submit(OperationKind.CommitProjectionBatch, command, id: id).Get<ProjectionBatchResult>();
         var releaseId = Guid.NewGuid();
         db.Submit(OperationKind.ReleaseProjectionConsumer, new ReleaseProjectionConsumerRequest(releaseId, consumer, 1), id: releaseId).Get<ProjectionConsumerInfo>();
-        await Assert.That(Errors.Code(db.Submit(OperationKind.CommitProjectionBatch, command, id: id).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.CommitProjectionBatch, command, id: id).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Configure(db, consumer)).Code).IsEqualTo(ErrorCode.Conflict);
     }
     [Test]

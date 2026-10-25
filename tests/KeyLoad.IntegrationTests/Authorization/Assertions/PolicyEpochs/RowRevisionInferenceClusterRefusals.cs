@@ -20,7 +20,7 @@ internal static class RowRevisionInferenceClusterRefusals
 
     internal static async Task McpAsync(CallToolResult actual, ErrorCode code, RowRevisionInferenceClusterState state)
     {
-        await McpCallerAssertions.ErrorAsync(actual, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(actual, code, dispatched: true)).Value;
         var detail = code == ErrorCode.PermissionDenied ? P.SafeDenied : P.SafeOther;
         await SqlClusterProtocol.EqualAsync(Errors.Problem(code, detail), JsonSerializer.Deserialize<Problem>(
             actual.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error).GetRawText(), JsonDefaults.Options));

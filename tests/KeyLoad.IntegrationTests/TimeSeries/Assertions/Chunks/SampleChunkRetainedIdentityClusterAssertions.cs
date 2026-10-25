@@ -26,7 +26,7 @@ internal static class SampleChunkRetainedIdentityClusterAssertions
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             var actual = await mcp.CallAsync(McpCallerTools.DocumentsCommit, original.Request, token);
-            await McpCallerAssertions.ErrorAsync(actual, ErrorCode.Conflict, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(actual, ErrorCode.Conflict, dispatched: true)).Value;
             await SqlClusterProtocol.EqualAsync<object>(Errors.Problem(ErrorCode.Conflict, SafeDetail),
                 actual.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error));
         }, failures);

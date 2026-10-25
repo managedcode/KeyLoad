@@ -6,13 +6,13 @@ namespace KeyLoad.IntegrationTests.Messaging;
 
 internal static class QueueProducerClusterOriginalFlow
 {
-    internal static async Task<QueueProducerClusterOriginal?> ExecuteAsync(ClusterFixture fixture,
+    internal static async Task<global::ManagedCode.Communication.Result<QueueProducerClusterOriginal?>> ExecuteAsync(ClusterFixture fixture,
         QueueProducerClusterSeed seed, bool cancelAfterResponse, List<Exception> failures, CancellationToken token)
     {
         var returned = await QueueProducerClusterResponseCall.SendAsync(fixture, seed, cancelAfterResponse, failures, token);
         if (failures.Count != QueueProducerClusterProtocol.NoFailures)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<QueueProducerClusterOriginal?>.FailNotFound(nameof(ExecuteAsync));
         }
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
         var publisher = new KeyLoadClient(http, seed.Identity.Secret, IntegrationClientOptions.Execution());
@@ -40,6 +40,6 @@ internal static class QueueProducerClusterOriginalFlow
             await QueueProducerClusterAssertions.PublicImageAsync(mcp, seed, QueueProducerClusterProtocol.Original, image, token);
             result = new(seed, receipt, image);
         }, failures).ConfigureAwait(false);
-        return result;
+        return ((QueueProducerClusterOriginal?)(result)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<QueueProducerClusterOriginal?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<QueueProducerClusterOriginal?>.FailNotFound(nameof(ExecuteAsync));
     }
 }

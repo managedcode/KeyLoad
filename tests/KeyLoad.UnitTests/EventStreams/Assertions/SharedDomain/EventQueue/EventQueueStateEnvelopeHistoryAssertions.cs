@@ -57,7 +57,7 @@ internal static class EventQueueStateEnvelopeHistoryAssertions
     {
         if (expected.ConsumedReceive)
         {
-            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.StaleLease);
+            await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
             await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Operation.Value!.Kind == OperationKind.Receive ? QueueStale : SubscriptionStale);
 
             await Assert.That(actual.Value).IsNull();

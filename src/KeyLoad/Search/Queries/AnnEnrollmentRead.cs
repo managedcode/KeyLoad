@@ -10,7 +10,7 @@ internal static class AnnEnrollmentRead
 {
     private const int CaptureFrames = 2;
 
-    internal static async Task<AnnProjectionEnrollment?> ReadAsync(DatabaseEngine database,
+    internal static async Task<global::ManagedCode.Communication.Result<AnnProjectionEnrollment?>> ReadAsync(DatabaseEngine database,
         PrincipalRecord principal, AnnMaintenanceRequest original, ServerRuntimeOptions configured,
         TimeProvider clock, AnnMaintenanceAdmissions admissions,
         Func<AnnGenerationOwner> owningRoot, CancellationToken token,
@@ -31,11 +31,11 @@ internal static class AnnEnrollmentRead
                 RequireReservation(eligible, principal, original);
                 if (!eligible.InitialAnnMaintenanceSettled)
                 {
-                    return null;
+                    return global::ManagedCode.Communication.Result<AnnProjectionEnrollment?>.FailNotFound(nameof(ReadAsync));
                 }
                 var owner = owningRoot();
-                result = await owner.RunAsync(stages => ReadOwned(database, principal, original,
-                    configured, clock, owner, stages, eligible, read, binding));
+                result = await owner.RunAsync(stages => (ReadOwned(database, principal, original,
+                    configured, clock, owner, stages, eligible, read, binding)).Value);
             }
             catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -43,10 +43,10 @@ internal static class AnnEnrollmentRead
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         ServerFailureObserver.ThrowIfAny(failures);
-        return result;
+        return ((AnnProjectionEnrollment?)(result)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<AnnProjectionEnrollment?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<AnnProjectionEnrollment?>.FailNotFound(nameof(ReadAsync));
     }
 
-    private static AnnProjectionEnrollment? ReadOwned(DatabaseEngine database, PrincipalRecord principal,
+    private static global::ManagedCode.Communication.Result<AnnProjectionEnrollment?> ReadOwned(DatabaseEngine database, PrincipalRecord principal,
         AnnMaintenanceRequest original, ServerRuntimeOptions configured, TimeProvider clock,
         AnnGenerationOwner owner, AnnStageStore stages, ProjectionConsumerInfo eligible,
         ReadExecutionBudget read, IResourceLifetimeWorkBinding? binding)
@@ -58,11 +58,11 @@ internal static class AnnEnrollmentRead
             using var memory = owner.MaintenanceMemory.Reserve();
             try
             {
-                var candidate = stages.ReadEnrollment(original);
+                var candidate = (stages.ReadEnrollment(original)).Value;
                 if (candidate is null)
                 {
                     read.Check();
-                    return null;
+                    return global::ManagedCode.Communication.Result<AnnProjectionEnrollment?>.FailNotFound(nameof(ReadOwned));
                 }
                 var fresh = database.Store.Read(view => database.Principal(read.CreateView(view), principal.Id, clock.GetUtcNow()));
                 RequireReservation(eligible, fresh, original);
@@ -98,7 +98,7 @@ internal static class AnnEnrollmentRead
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         ServerFailureObserver.ThrowIfAny(failures);
-        return result;
+        return ((AnnProjectionEnrollment?)(result)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<AnnProjectionEnrollment?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<AnnProjectionEnrollment?>.FailNotFound(nameof(ReadOwned));
     }
 
     private static void RequireReservation(ProjectionConsumerInfo state, PrincipalRecord principal,

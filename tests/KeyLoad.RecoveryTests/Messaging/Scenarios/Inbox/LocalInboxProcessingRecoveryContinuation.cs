@@ -60,7 +60,7 @@ internal static class LocalInboxProcessingRecoveryContinuation
     {
         var before = LocalInboxProcessingRecoveryDomain.Read(store);
         var result = database.Apply(operation);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
         await Assert.That(result.Value).IsNull();
         await LocalInboxProcessingRecoveryDomain.SameAsync(store, before);

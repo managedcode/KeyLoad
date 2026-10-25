@@ -38,14 +38,14 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
         }
     }
 
-    public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
         => PostgresDocumentOperations.ReadAsync(connection, document, cancellationToken);
 
     public Task CreateDocumentsAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken cancellationToken)
         => PostgresDocumentOperations.CreateAsync(connection, documents, cancellationToken);
 
-    public Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
-        => PostgresStreamOperations.ReadAsync(connection, document, cancellationToken);
+    public async Task<FoundEvent?> ReadEventAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+        => (await PostgresStreamOperations.ReadAsync(connection, document, cancellationToken)).Value;
 
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document,
         CancellationToken cancellationToken)
@@ -53,7 +53,7 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
         switch (scenario)
         {
             case Scenario.PointRead:
-                return new(Document: await ReadAsync(document, cancellationToken));
+                return new(Document: (await ReadAsync(document, cancellationToken)).Value);
             case Scenario.DocumentWrite:
                 await PostgresDocumentOperations.WriteAsync(connection, document, cancellationToken);
                 return new();
@@ -75,7 +75,7 @@ internal sealed class PostgresComparisonSession(NpgsqlConnection connection, int
                 await PostgresStreamOperations.AppendAsync(connection, document, cancellationToken);
                 return new();
             case Scenario.StreamRead:
-                return new(Event: await PostgresStreamOperations.ReadAsync(connection, document, cancellationToken));
+                return new(Event: (await PostgresStreamOperations.ReadAsync(connection, document, cancellationToken)).Value);
             default:
                 throw new NotSupportedException();
         }

@@ -26,7 +26,7 @@ internal sealed class RelationalSchemaTests
                 column.Name == RelationalTestData.Name ? column with { Nullable = true } : column)])
         };
         RelationalRowValidation.ValidateSchema(changed);
-        await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, changed).Problem)).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, changed).Problem).Value).IsEqualTo(ErrorCode.UnsupportedCapability);
         var persistedAfter = database.Store.Read(view => database.Database.Resource(view, database.Partition, RelationalTestData.Table));
         await Assert.That(JsonDefaults.Serialize(persistedAfter).SequenceEqual(JsonDefaults.Serialize(persisted))).IsTrue();
     }
@@ -52,7 +52,7 @@ internal sealed class RelationalSchemaTests
         ];
         foreach (var candidate in invalid)
         {
-            await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, candidate).Problem)).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, candidate).Problem).Value).IsEqualTo(ErrorCode.Validation);
         }
         var missing = Assert.ThrowsExactly<KeyLoadException>(() => database.Store.Read(view =>
             database.Database.Resource(view, database.Partition, RelationalTestData.Table)));
@@ -89,6 +89,6 @@ internal sealed class RelationalSchemaTests
         {
             RelationalSchema = new(RelationalTestData.Key, columns)
         };
-        await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, overLimit).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(RelationalTestData.ConfigureResult(database, overLimit).Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
     }
 }

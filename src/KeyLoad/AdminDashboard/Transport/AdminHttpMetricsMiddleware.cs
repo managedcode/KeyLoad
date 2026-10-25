@@ -58,7 +58,7 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
         }
         finally
         {
-            metrics.Record(time.GetElapsedTime(started), Describe(context, faulted));
+            metrics.Record(time.GetElapsedTime(started), (Describe(context, faulted)).Value);
         }
     }
 
@@ -67,15 +67,15 @@ internal sealed class AdminHttpMetricsMiddleware(RequestDelegate next, TimeProvi
         && !path.StartsWithSegments(AdminDashboardProtocol.SnapshotPath, StringComparison.OrdinalIgnoreCase)
         && !path.Equals(new PathString(StatusPath), StringComparison.OrdinalIgnoreCase);
 
-    private static AdminHttpFailureDetail? Describe(HttpContext context, bool faulted)
+    private static global::ManagedCode.Communication.Result<AdminHttpFailureDetail?> Describe(HttpContext context, bool faulted)
     {
         var aborted = context.RequestAborted.IsCancellationRequested;
         var status = faulted && context.Response.StatusCode < ErrorStatus
             ? StatusCodes.Status500InternalServerError
             : context.Response.StatusCode;
         return faulted || aborted || status >= ErrorStatus
-            ? new AdminHttpFailureDetail(NormalizeMethod(context.Request.Method), RouteTemplate(context), status, aborted)
-            : null;
+            ? global::ManagedCode.Communication.Result<AdminHttpFailureDetail?>.Succeed((AdminHttpFailureDetail?)(new AdminHttpFailureDetail(NormalizeMethod(context.Request.Method), RouteTemplate(context), status, aborted)))
+            : global::ManagedCode.Communication.Result<AdminHttpFailureDetail?>.FailNotFound(nameof(Describe));
     }
 
     private static string NormalizeMethod(string method)

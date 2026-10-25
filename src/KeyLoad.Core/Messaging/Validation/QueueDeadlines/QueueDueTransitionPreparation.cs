@@ -11,7 +11,7 @@ public static class QueueDueTransitionPreparation
         if (metadata.ExpiresAt <= now)
         {
             var remaining = QueueLifecycleAccounting.ReleaseQueueStored(counters, bodyBytes);
-            var order = QueueOrderMutationPreparation.PrepareQueueOrderRemoval(view, lane, policy, body, metadata);
+            var order = (QueueOrderMutationPreparation.PrepareQueueOrderRemoval(view, lane, policy, body, metadata)).Value;
             RequireQueueDueStateCapacity(metadata);
             return new(metadata with { State = MessageState.Expired, ActiveOrderSequence = QueueOrderProtocol.Initial, StateVersion = checked(metadata.StateVersion + QueueSweepTransitions.QueueSweepTransitionsVersionOne), LeaseOwner = null, LeaseUntil = null }, remaining, order, null, true, null);
         }

@@ -5,13 +5,13 @@ namespace KeyLoad.Comparisons;
 internal sealed class BenchmarkSessionMeasurement(BenchmarkSessionContext context)
 {
     internal Task<BenchmarkSessionLaneReport> MeasureAsync(string id, int count, int clients,
-        Func<IComparisonSession, int, CancellationToken, Task> operation, CancellationToken token,
+        Func<IComparisonSession?, int, CancellationToken, Task> operation, CancellationToken token,
         BenchmarkSessionStartBarrier? barrier = null, bool openDocumentSessions = true)
         => MeasureBatchesAsync(id, count, clients, BenchmarkSessionLimits.SingleItemCount,
             (client, first, _, cancellation) => operation(client, first, cancellation), token, barrier, openDocumentSessions);
 
     internal async Task<BenchmarkSessionLaneReport> MeasureBatchesAsync(string id, int count, int clients, int batch,
-        Func<IComparisonSession, int, int, CancellationToken, Task> operation, CancellationToken token,
+        Func<IComparisonSession?, int, int, CancellationToken, Task> operation, CancellationToken token,
         BenchmarkSessionStartBarrier? barrier = null, bool openDocumentSessions = true)
     {
         var lease = new BenchmarkSessionClientLease(context);

@@ -34,20 +34,20 @@ internal static class KeyLoadTimeSeriesIntensiveResult
 
     private static KeyLoadTimeSeriesIntensiveProblemException Problem(Problem? problem)
     {
-        var code = ParseCode(problem?.ErrorCode);
+        var code = (ParseCode(problem?.ErrorCode)).Value;
         int? status = problem is { StatusCode: >= KeyLoadTimeSeriesIntensiveProtocol.MinimumPositiveHttpStatus }
             ? problem.StatusCode : null;
         return new(code, status);
     }
 
-    private static ErrorCode? ParseCode(string? raw)
+    private static global::ManagedCode.Communication.Result<ErrorCode?> ParseCode(string? raw)
     {
         if (raw is null || !Enum.TryParse<ErrorCode>(raw, ignoreCase: false, out var code)
             || !Enum.IsDefined(code) || !string.Equals(code.ToString(), raw, StringComparison.Ordinal))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ErrorCode?>.FailNotFound(nameof(ParseCode));
         }
 
-        return code;
+        return global::ManagedCode.Communication.Result<ErrorCode?>.Succeed(((ErrorCode?)(code)));
     }
 }

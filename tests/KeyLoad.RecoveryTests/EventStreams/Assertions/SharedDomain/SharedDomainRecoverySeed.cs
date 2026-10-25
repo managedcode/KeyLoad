@@ -68,7 +68,7 @@ internal static class SharedDomainRecoverySeed
     private static async Task AckAsync(Command<DatabaseCommand> operation, Result<object> result, SharedDomainScope scope, long position, Guid incarnation)
     {
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Delivery);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Problem?.Detail).IsNull();
 
         await SharedDomainRecoveryValues.ReceiptValueAsync(result.Get<CommitReceipt>(), new CommitReceipt(operation.CommandId, new(incarnation, scope.Partition.AtomicPartitionId, position), [new(nameof(DeliveryAction.Ack), scope.Queue!, Item, AckVersion)], DurabilityProfile.ProcessDurable, 1));

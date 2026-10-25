@@ -6,7 +6,7 @@ internal static class StorageCopyAcknowledgements
 {
     internal static bool Same(Result<object> first, Result<object> second)
         => first.IsSuccess == second.IsSuccess &&
-            (first.IsSuccess || Errors.Code(first.Problem) == Errors.Code(second.Problem));
+            (first.IsSuccess || Errors.Code(first.Problem).Value == Errors.Code(second.Problem).Value);
 
     internal static Result<object> Attach(Result<object> result, int copies)
     {

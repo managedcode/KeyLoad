@@ -17,7 +17,7 @@ public static class OnlineTextCheckpointValidation
 
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var outcome = CommandOutcomeKeyResolver.Select(view, principal.Id, acknowledged.Receipt.CommandId, scope).Outcome ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
-        if (outcome.Incarnation != engine.Store.Identity.Incarnation || outcome.PolicyEpoch != principal.PolicyEpoch || Errors.Code(outcome.Result.Problem) is not null)
+        if (outcome.Incarnation != engine.Store.Identity.Incarnation || outcome.PolicyEpoch != principal.PolicyEpoch || Errors.Code(outcome.Result.Problem).Value is not null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority);
         }

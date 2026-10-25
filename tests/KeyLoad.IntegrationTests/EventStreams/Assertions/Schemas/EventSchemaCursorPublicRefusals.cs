@@ -20,7 +20,7 @@ internal static class EventSchemaCursorPublicRefusals
                 EventSchemaCursorPublicExpected.ExpiredDetail), result.Problem);
             await EventSchemaCursorPublicCalls.HealthyAsync(admin, reader, state, token);
             var reply = await reader.Mcp.CallAsync(McpCallerTools.StreamsRead, request, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.CursorExpired, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.CursorExpired, dispatched: true)).Value;
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(DetailKey).GetString()).IsEqualTo(EventSchemaCursorPublicExpected.SafeMcpDetail);
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Reader.Secret, McpEventStreamTokens.PrivateMarker);

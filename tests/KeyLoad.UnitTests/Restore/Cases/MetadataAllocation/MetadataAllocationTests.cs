@@ -13,7 +13,7 @@ internal sealed class MetadataAllocationTests
 
         var destination = MetadataTestContract.OversizedManifestRestorePath(fixture.RestoredDirectory);
         var inputLength = new FileInfo(manifestPath).Length;
-        await AssertRejectedRestore(RejectRestore(fixture.BackupDirectory, destination),
+        await AssertRejectedRestore((RejectRestore(fixture.BackupDirectory, destination)).Value,
             MetadataTestContract.ManifestUnsupportedDetail);
         await Assert.That(Directory.Exists(destination)).IsFalse();
 
@@ -34,7 +34,7 @@ internal sealed class MetadataAllocationTests
 
         var destination = MetadataTestContract.OversizedIdentityRestorePath(fixture.RestoredDirectory);
         var inputLength = new FileInfo(identityPath).Length;
-        await AssertRejectedRestore(RejectRestore(fixture.BackupDirectory, destination),
+        await AssertRejectedRestore((RejectRestore(fixture.BackupDirectory, destination)).Value,
             MetadataTestContract.IdentityFormatUnsupportedDetail);
         await Assert.That(Directory.Exists(destination)).IsFalse();
 
@@ -45,7 +45,7 @@ internal sealed class MetadataAllocationTests
         await Assert.That(allocatedBytes).IsLessThan(inputLength / 2);
     }
 
-    private static KeyLoadException? RejectRestore(string backup, string destination)
+    private static global::ManagedCode.Communication.Result<KeyLoadException?> RejectRestore(string backup, string destination)
     {
         try
         {
@@ -53,16 +53,16 @@ internal sealed class MetadataAllocationTests
         }
         catch (KeyLoadException error)
         {
-            return error;
+            return global::ManagedCode.Communication.Result<KeyLoadException?>.Succeed(((KeyLoadException?)(error)));
         }
 
-        return null;
+        return global::ManagedCode.Communication.Result<KeyLoadException?>.FailNotFound(nameof(RejectRestore));
     }
 
     private static (KeyLoadException? Failure, long AllocatedBytes) MeasureRejectedRestore(string backup, string destination)
     {
         var start = GC.GetAllocatedBytesForCurrentThread();
-        var failure = RejectRestore(backup, destination);
+        var failure = (RejectRestore(backup, destination)).Value;
         var allocatedBytes = GC.GetAllocatedBytesForCurrentThread() - start;
 
         return (failure, allocatedBytes);

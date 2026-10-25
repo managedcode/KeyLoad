@@ -24,9 +24,9 @@ internal static class HostedRetainedOperationReadFlow
             var cut = DocumentPatchAtomicityState.Read(fixture);
             await EqualAsync(original, Read(fixture, original, token));
             var changed = Create(fixture, Last + First, original.PreparedCommand.CommandId);
-            var refusal = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Database.ReadStoredCommand(changed, token));
+            var refusal = Assert.ThrowsExactly<KeyLoadException>(() => { _ = fixture.Database.ReadStoredCommand(changed, token).Value; });
             await Assert.That(refusal.Code).IsEqualTo(ErrorCode.Conflict);
-            await Assert.That(fixture.Database.ReadStoredCommand(Create(fixture, Last + First), token)).IsNull();
+            await Assert.That(fixture.Database.ReadStoredCommand(Create(fixture, Last + First), token).Value).IsNull();
             await cut.RequireAsync(DocumentPatchAtomicityState.Read(fixture));
             foreach (var _ in Enumerable.Range(First, ColdOpens))
             {
@@ -107,7 +107,7 @@ internal static class HostedRetainedOperationReadFlow
     }
 
     private static StoredCommand Read(DocumentPatchAtomicityOwner fixture, StoredOutcome original, CancellationToken token)
-        => fixture.Database.ReadStoredCommand(original.PreparedCommand, token)
+        => fixture.Database.ReadStoredCommand(original.PreparedCommand, token).Value
             ?? throw new InvalidOperationException(MissingCommand);
 
     private static async Task EqualAsync(StoredOutcome expected, StoredCommand actual)

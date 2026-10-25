@@ -19,7 +19,7 @@ public static class RemoteTransferRepairOriginal
         Mutation mutation = stage == QueueTransferRepairStage.Accept ? new AcceptQueueTransfer(intent.Destination, request.IntentToken) : new CompleteQueueTransfer(intent.Source, intent.TransferId, request.ReceiptToken!);
         var command = new CommandRequest(request.AcceptCommandId, partition, [mutation]);
         var original = engine.CreateCommand(view, OperationKind.Batch, command.CommandId, principal.Id, engine.Clock.GetUtcNow(), OrleansSerialization.Serialize(command));
-        _ = engine.AuthorizeOperation(view, principal, original);
+        _ = (engine.AuthorizeOperation(view, principal, original)).Value;
         if (stage == QueueTransferRepairStage.Complete)
         {
             var record = view.GetRecord<RemoteTransferIntentRecord>(RemoteTransferStorage.IntentKey(intent.Source, intent.TransferId)) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Unavailable);

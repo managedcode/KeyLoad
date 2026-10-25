@@ -44,7 +44,7 @@ public static class QueueDeliveryExecution
             throw Errors.Fail(ErrorCode.LeaseExpired, QueueSweepTransitions.ExpiredDeliveryLease);
         }
 
-        var body = StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, claims.MessageId)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueSweepTransitions.MissingLeasedBody);
+        var body = (StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, claims.MessageId))).Value ?? throw Errors.Fail(ErrorCode.Corruption, QueueSweepTransitions.MissingLeasedBody);
         QueueLeases.RequireQueueLeaseAuthority(view, lane, claims.MessageId, metadata, body.Body);
         return new(claims, metadata, body.Bytes);
     }
@@ -104,10 +104,10 @@ public static class QueueDeliveryExecution
     public static MessageInspection? InspectMessage(this DatabaseEngine engine, string principalId, QueueLaneRef lane, string id)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        return engine.Store.Read(view => engine.InspectMessageRead(view, principalId, lane, id));
+        return engine.Store.Read(view => (engine.InspectMessageRead(view, principalId, lane, id)).Value);
     }
 
-    internal static MessageInspection? InspectMessageRead(this DatabaseEngine engine, IKeyValueView view, string principalId, QueueLaneRef lane, string id)
+    internal static global::ManagedCode.Communication.Result<MessageInspection?> InspectMessageRead(this DatabaseEngine engine, IKeyValueView view, string principalId, QueueLaneRef lane, string id)
     {
         var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
         engine.Authorization.Require(principal, lane.Partition, lane.Queue, Capability.QueueInspect);
@@ -120,7 +120,7 @@ public static class QueueDeliveryExecution
                 throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingMetadata);
             }
 
-            return null;
+            return global::ManagedCode.Communication.Result<MessageInspection?>.FailNotFound(nameof(InspectMessageRead));
         }
 
         var retainedDeadLetter = metadata.State is MessageState.DeadLettered or MessageState.PendingDeadLetter;
@@ -160,6 +160,6 @@ public static class QueueDeliveryExecution
             throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         }
 
-        return new MessageInspection(metadata, body is null ? null : engine.Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _), body is null ? null : engine.Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _));
+        return global::ManagedCode.Communication.Result<MessageInspection?>.Succeed(((MessageInspection?)(new MessageInspection(metadata, body is null ? null : engine.Authorization.Project(principal, resource.FieldPolicies, body.PayloadJson, out _), body is null ? null : engine.Authorization.Project(principal, resource.HeaderPolicies, body.HeadersJson, out _)))));
     }
 }

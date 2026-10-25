@@ -103,7 +103,7 @@ internal static class FunctionalGateColdConcurrent
                     try
                     {
                         await start.EnterAsync(cancellation.Token);
-                        return await ExerciseAsync(context, state, identity, index, seed, cancellation.Token);
+                        return (await ExerciseAsync(context, state, identity, index, seed, cancellation.Token)).Value;
                     }
                     catch (Exception primary)
                     {
@@ -122,19 +122,19 @@ internal static class FunctionalGateColdConcurrent
             context?.McpOperations ?? NoPublicOperations, failures.ToArray());
     }
 
-    private static async Task<FunctionalGateColdWorkload?> ExerciseAsync(FunctionalGateContext context,
+    private static async Task<global::ManagedCode.Communication.Result<FunctionalGateColdWorkload?>> ExerciseAsync(FunctionalGateContext context,
         FunctionalGateColdState state, McpPersistedIdentity identity, int index, bool seed, CancellationToken token)
     {
         if (index < PrimaryIdentities)
         {
             await FunctionalGateColdConcurrentPrimary.RunAsync(context, state, index, token);
-            return null;
+            return global::ManagedCode.Communication.Result<FunctionalGateColdWorkload?>.FailNotFound(nameof(ExerciseAsync));
         }
         var ordinal = index - PrimaryIdentities;
         if (seed)
         {
-            return await FunctionalGateColdWorkloads.SeedOneAsync(context, state, identity,
-                FunctionalGateColdWorkloadProvision.Resource(ordinal), token);
+            return global::ManagedCode.Communication.Result<FunctionalGateColdWorkload?>.Succeed(((FunctionalGateColdWorkload?)(await FunctionalGateColdWorkloads.SeedOneAsync(context, state, identity,
+                FunctionalGateColdWorkloadProvision.Resource(ordinal), token))));
         }
         var proof = state.Workloads[ordinal];
         await Assert.That(proof.Identity.Principal.Id).IsEqualTo(identity.Principal.Id);
@@ -144,7 +144,7 @@ internal static class FunctionalGateColdConcurrent
             await FunctionalGateColdReadAssertions.VerifyAsync(context, model, token);
         }
         await FunctionalGateColdRelationalClosure.VerifyAsync(context, state, token);
-        return proof;
+        return global::ManagedCode.Communication.Result<FunctionalGateColdWorkload?>.Succeed(((FunctionalGateColdWorkload?)(proof)));
     }
 
     private sealed record Result(FunctionalGateColdWorkload? Proof, long SdkOperations,

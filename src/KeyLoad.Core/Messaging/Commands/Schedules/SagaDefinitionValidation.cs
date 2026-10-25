@@ -82,6 +82,6 @@ internal static class SagaDefinitionValidation
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
         }
 
-        _ = SagaCommands.AddTtl(deadline, timeout.TimeToLive);
+        _ = (SagaCommands.AddTtl(deadline, timeout.TimeToLive)).Value;
     }
 }

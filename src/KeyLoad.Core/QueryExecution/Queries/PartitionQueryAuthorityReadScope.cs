@@ -27,7 +27,7 @@ public static class PartitionQueryAuthorityReadScope
             digest = Convert.ToHexStringLower(SHA256.HashData(bytes));
         });
         var charged = grant.CreateView(view);
-        var lifetime = ResourceLifetimeCatalog.Read(charged, partition.TenantId, partition.DatabaseId, collection, resource);
+        var lifetime = (ResourceLifetimeCatalog.Read(charged, partition.TenantId, partition.DatabaseId, collection, resource)).Value;
         if (resource is null || digest is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, EngineResourceAccess.DatabaseEngineResourceIsNotConfiguredDetail);

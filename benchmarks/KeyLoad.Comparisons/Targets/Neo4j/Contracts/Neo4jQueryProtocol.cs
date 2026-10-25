@@ -53,14 +53,14 @@ internal static class Neo4jQueryProtocol
 
     internal static void ValidateErrors(JsonElement response)
     {
-        var code = ReadFirstErrorCode(response);
+        var code = (ReadFirstErrorCode(response)).Value;
         if (code is not null)
         {
             throw new ComparisonFailureException(FailurePrefix + code);
         }
     }
 
-    internal static string RuntimeReadErrorCode(JsonElement response) => ReadFirstErrorCode(response) ?? throw Invalid();
+    internal static string RuntimeReadErrorCode(JsonElement response) => (ReadFirstErrorCode(response)).Value ?? throw Invalid();
 
     internal static void ValidateConstraintCreation(JsonElement response)
     {
@@ -101,7 +101,7 @@ internal static class Neo4jQueryProtocol
         }
     }
 
-    private static string? ReadFirstErrorCode(JsonElement response)
+    private static global::ManagedCode.Communication.Result<string?> ReadFirstErrorCode(JsonElement response)
     {
         if (!TryGetUniqueProperty(response, ErrorsProperty, out var errors, out var duplicate))
         {
@@ -110,7 +110,7 @@ internal static class Neo4jQueryProtocol
                 throw Invalid();
             }
 
-            return null;
+            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadFirstErrorCode));
         }
 
         if (errors.ValueKind != JsonValueKind.Array)
@@ -125,7 +125,7 @@ internal static class Neo4jQueryProtocol
             firstCode ??= code;
         }
 
-        return firstCode;
+        return ((string?)(firstCode)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadFirstErrorCode));
     }
 
     private static string ReadErrorCode(JsonElement error)

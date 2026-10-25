@@ -17,8 +17,10 @@ internal static class CapturedPolicyClusterRefusals
             await Assert.That(result.Value).IsNull();
         }, token);
         await CapturedPolicyClusterCurrent.BracketAsync(administrator, reader, scenario, updated, async () =>
-            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.ChangesRead,
-                feed, token), code, dispatched: true), token);
+        {
+            _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.ChangesRead,
+                feed, token), code, dispatched: true)).Value;
+        }, token);
         await CapturedPolicyClusterCurrent.BracketAsync(administrator, reader, scenario, updated, async () =>
         {
             var result = await reader.Sdk.ReadLiveQueryAsync(live, token);
@@ -27,8 +29,10 @@ internal static class CapturedPolicyClusterRefusals
             await Assert.That(result.Value).IsNull();
         }, token);
         await CapturedPolicyClusterCurrent.BracketAsync(administrator, reader, scenario, updated, async () =>
-            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.QueryLiveRead,
-                live, token), code, dispatched: true), token);
+        {
+            _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.QueryLiveRead,
+                live, token), code, dispatched: true)).Value;
+        }, token);
     }
 
     internal static async Task StartAsync(RequestCqrsClusterCallers administrator,
@@ -43,7 +47,9 @@ internal static class CapturedPolicyClusterRefusals
             await Assert.That(result.Value).IsNull();
         }, token);
         await CapturedPolicyClusterCurrent.BracketAsync(administrator, reader, scenario, false, async () =>
-            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.QueryLiveStart,
-                request, token), ErrorCode.PermissionDenied, dispatched: true), token);
+        {
+            _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.QueryLiveStart,
+                request, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
+        }, token);
     }
 }

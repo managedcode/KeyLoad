@@ -86,7 +86,7 @@ internal static class SampleChunkClusterPrivacy
         await Assert.That(failure.Value).IsNull();
         await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var official = await mcp.CallAsync(SampleChunkProtocol.ReadTool, request, token).ConfigureAwait(false);
-        await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(official, TimeSeriesClusterScenario.PrivateTags, PrivateTagValue);
         var call = SqlClusterProtocol.Call(scenario.Execution.Partition, SampleChunkProtocol.ReadTool, request);
         var sql = await sdk.ExecuteSqlAsync(call, token).ConfigureAwait(false);
@@ -94,7 +94,7 @@ internal static class SampleChunkClusterPrivacy
         await Assert.That(sql.Value.ValueKind).IsEqualTo(System.Text.Json.JsonValueKind.Undefined);
         await Assert.That(sql.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var sqlOfficial = await mcp.CallAsync(SqlOperationProtocol.ToolName, call, token).ConfigureAwait(false);
-        await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(sqlOfficial, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(sqlOfficial, TimeSeriesClusterScenario.PrivateTags, PrivateTagValue);
     }
 }

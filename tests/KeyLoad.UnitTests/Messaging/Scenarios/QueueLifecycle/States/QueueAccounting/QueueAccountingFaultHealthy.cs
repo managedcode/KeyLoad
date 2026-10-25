@@ -45,7 +45,7 @@ internal static class QueueAccountingFaultHealthy
         await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(database, OperationKind.Delivery,
             healthy.Ack, healthy.Ack.CommandId, new DateTimeOffset(state.Operation.Timestamp)), healthy.Acked);
         var stale = QueueWholeFlowStorage.Apply(database, OperationKind.Receive, healthy.Claim, healthy.Claim.RequestId, new DateTimeOffset(state.Operation.Timestamp));
-        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(stale.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
 
         await Assert.That(stale.Value).IsNull();
         var retained = database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(

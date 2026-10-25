@@ -68,7 +68,7 @@ internal static class DocumentLiveProfileClusterRefusals
     }
     private static async Task McpAsync(CallToolResult reply, ErrorCode code, string detail, string credential)
     {
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         var safe = code == ErrorCode.PermissionDenied ? detail : code == ErrorCode.BudgetExceeded
             ? "The operation exceeds the available resource capacity." : "The database operation could not be completed.";
         var expected = JsonSerializer.SerializeToElement(Errors.Problem(code, safe), JsonDefaults.Options);

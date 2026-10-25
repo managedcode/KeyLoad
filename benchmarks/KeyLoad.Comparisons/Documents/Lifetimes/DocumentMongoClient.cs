@@ -36,17 +36,17 @@ internal sealed class DocumentMongoClient : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var cleanup = new List<Exception>();
-        if (session is not null && await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false) is { } sessionFailure)
+        if (session is not null && (await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false)).Value is { } sessionFailure)
         {
             cleanup.Add(sessionFailure);
         }
 
-        if (actual is not null && await RuntimeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false) is { } clientFailure)
+        if (actual is not null && (await RuntimeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false)).Value is { } clientFailure)
         {
             cleanup.Add(clientFailure);
         }
 
-        var combined = RuntimeComparisonFailure.Combine(primary, [.. cleanup]);
+        var combined = (RuntimeComparisonFailure.Combine(primary, [.. cleanup])).Value;
         if (cleanup.Count != DocumentMeasurementValues.NoObservedItems && combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();

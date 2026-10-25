@@ -43,16 +43,16 @@ internal sealed class TextWaitClusterTests(ClusterFixture fixture)
         var problem = failure.Problem ?? throw new InvalidOperationException(PermissionCode);
         await Assert.That(problem.ErrorCode).IsEqualTo(PermissionCode);
         await Assert.That(problem.Detail).IsEqualTo(PermissionDetail);
-        await McpCallerAssertions.ErrorAsync(await deniedMcp.CallAsync(WaitForIndexProtocol.Tool, request, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await deniedMcp.CallAsync(WaitForIndexProtocol.Tool, request, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
         var sql = SqlClusterProtocol.Call(request.Partition, WaitForIndexProtocol.Tool, request);
         var sqlDenied = await denied.ExecuteSqlAsync(sql, token);
         await Assert.That(sqlDenied.IsSuccess).IsFalse();
         await Assert.That(sqlDenied.Value.ValueKind).IsEqualTo(System.Text.Json.JsonValueKind.Undefined);
         await Assert.That(sqlDenied.Problem?.ErrorCode).IsEqualTo(PermissionCode);
         await Assert.That(sqlDenied.Problem?.Detail).IsEqualTo(PermissionDetail);
-        await McpCallerAssertions.ErrorAsync(await deniedMcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await deniedMcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
         var after = await McpCallerAssertions.SdkSuccessAsync(await administrator.StatusAsync(token));
         await TextWaitClusterCutAssertions.OwnerAsync(cut, after);
         await Assert.That(after.Position).IsGreaterThanOrEqualTo(cut.Position);

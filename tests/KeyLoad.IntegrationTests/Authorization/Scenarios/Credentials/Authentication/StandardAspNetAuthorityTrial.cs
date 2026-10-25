@@ -37,12 +37,12 @@ internal static class StandardAspNetAuthorityTrial
         await Assert.That(deniedWrite.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         var officialDenied = await session.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-        await McpCallerAssertions.ErrorAsync(officialDenied, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(officialDenied, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(officialDenied, state.Identity.Secret, McpDocumentProtocol.PrivateValue);
         await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         var changed = state.Scenario.Command(command.CommandId, McpDocumentProtocol.ConflictingJson);
         var changedDenied = await session.CallAsync(McpCallerTools.DocumentsCommit, changed, token);
-        await McpCallerAssertions.ErrorAsync(changedDenied, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(changedDenied, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(changedDenied, state.Identity.Secret, McpDocumentProtocol.ConflictValue);
         await SqlClusterProtocol.EqualAsync(before, await DiscoveryAuthorityValues.ImageAsync(root, state, token));
         await DiscoveryAuthorityValues.HealthyAsync(root, reader, session, state, token);

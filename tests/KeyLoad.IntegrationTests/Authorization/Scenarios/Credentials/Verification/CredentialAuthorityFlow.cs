@@ -68,8 +68,8 @@ internal static class CredentialAuthorityFlow
                 arguments.Add(McpCallerProtocol.CommandId, state.RepairCommandId);
                 await McpCallerAssertions.StatusAsync(await administrator.Client.InvokeKeyLoadToolAsync(
                     McpCallerTools.CredentialsConfigure, arguments, token));
-                await McpCallerAssertions.ErrorAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token),
-                    ErrorCode.UnsupportedCapability, dispatched: false);
+                _ = (await McpCallerAssertions.ErrorAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token),
+                    ErrorCode.UnsupportedCapability, dispatched: false)).Value;
             }
             catch (Exception original) when (CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }
             catch (Exception original) when (!CqrsBoundaryErrors.IsNonFatal(original)) { failures.Add(original); }

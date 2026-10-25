@@ -7,7 +7,7 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class ScriptDomGraphContext(QueryRequest query, ReadExecutionBudget budget, string parameterDetail)
 {
-    private readonly Dictionary<string, JsonElement>? parameters = CopyParameters(query.Parameters, budget, parameterDetail);
+    private readonly Dictionary<string, JsonElement>? parameters = (CopyParameters(query.Parameters, budget, parameterDetail)).Value;
     internal QueryRequest Query => query;
     internal string ParameterDetail => parameterDetail;
     internal ReadExecutionBudget Budget => budget;
@@ -37,12 +37,12 @@ internal sealed class ScriptDomGraphContext(QueryRequest query, ReadExecutionBud
         }
         return value;
     }
-    private static Dictionary<string, JsonElement>? CopyParameters(Dictionary<string, JsonElement>? supplied,
+    private static global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?> CopyParameters(Dictionary<string, JsonElement>? supplied,
         ReadExecutionBudget work, string detail)
     {
         if (supplied is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.FailNotFound(nameof(CopyParameters));
         }
         var owned = new Dictionary<string, JsonElement>(supplied.Count, StringComparer.Ordinal);
         foreach (var entry in supplied)
@@ -54,7 +54,7 @@ internal sealed class ScriptDomGraphContext(QueryRequest query, ReadExecutionBud
             }
         }
         work.Check();
-        return owned;
+        return global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.Succeed(((Dictionary<string, JsonElement>?)(owned)));
     }
     private const char Prefix = '@';
     private const int PrefixLength = 1;

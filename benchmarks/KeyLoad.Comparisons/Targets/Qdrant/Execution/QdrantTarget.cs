@@ -59,7 +59,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     Task<string> IVectorComparisonTarget.ExplainAsync(ReadOnlyMemory<float> query, VectorQueryMode mode, CancellationToken token)
         => Vectors.ExplainAsync(mode, token);
     Task IVectorComparisonTarget.UpdateAsync(VectorUpdate update, CancellationToken token) => Vectors.UpdateAsync(update, token);
-    Task<VectorReadback?> IVectorComparisonTarget.ReadAsync(string id, CancellationToken token) => Vectors.ReadAsync(id, token);
+    Task<global::ManagedCode.Communication.Result<VectorReadback?>> IVectorComparisonTarget.ReadAsync(string id, CancellationToken token) => Vectors.ReadAsync(id, token);
 
     /// <summary>Creates a Qdrant vector-search target and records the HTTP clients it owns for disposal.</summary>
     /// <param name="http">The collection and query client; the target disposes it.</param>
@@ -200,7 +200,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     /// <summary>Executes exact vector queries for the Qdrant target.</summary>
     private sealed class Session(QdrantTarget target) : IComparisonSession
     {
-        public Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
+        public Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken) => throw new NotSupportedException();
 
         public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
         {

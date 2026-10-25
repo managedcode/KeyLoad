@@ -117,8 +117,8 @@ internal sealed class TextAsyncClusterTests(ClusterFixture fixture)
         var denied = await caller.SearchAsync(scenario.Text("fresh"), cancellationToken);
         await Assert.That(denied.IsFailed).IsTrue();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await callerMcp.CallAsync(McpCallerTools.SearchExecute,
-            scenario.Text("fresh"), cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callerMcp.CallAsync(McpCallerTools.SearchExecute,
+            scenario.Text("fresh"), cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     private static async Task<PrincipalRecord> RevokeAsync(PrincipalRecord persistedPrincipal,

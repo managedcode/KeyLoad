@@ -70,7 +70,7 @@ public static class MutationAuthorization
             return;
         }
 
-        engine.AuthorizeComposition(view, principal, partition, effect);
+        _ = (engine.AuthorizeComposition(view, principal, partition, effect)).Value;
         var resource = engine.ReauthorizeEffectResource(view, partition, effect);
         engine.ReauthorizeEffectDocument(view, principal, partition, effect, resource);
         engine.ReauthorizeEffectFields(principal, resource, effect);

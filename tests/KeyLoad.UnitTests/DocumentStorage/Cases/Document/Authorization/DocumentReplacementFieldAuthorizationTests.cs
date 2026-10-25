@@ -33,14 +33,14 @@ internal sealed class DocumentReplacementFieldAuthorizationTests
         var before = DocumentCrudFixture.ReadRecord(database, reference)!;
         var denied = DocumentCrudFixture.Submit(database, MissingWrite,
             new PutDocument(Collection, DocumentId, DeniedJson, FirstRevision, ExplicitReplacement: true));
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)).IsEqualTo(before);
         await DocumentCrudFixture.AssertIndexedIds(database, "secret", SecretIndexName, "before", [DocumentId]);
         await DocumentCrudFixture.AssertIndexedIds(database, "secret", SecretIndexName, "denied", []);
 
         var authorized = DocumentCrudFixture.Submit(database, FullFieldAccess,
             new PutDocument(Collection, DocumentId, ReplacedJson, FirstRevision, ExplicitReplacement: true));
-        await Assert.That(Errors.Code(authorized.Problem)).IsNull();
+        await Assert.That(Errors.Code(authorized.Problem).Value).IsNull();
         var replaced = DocumentCrudFixture.ReadRecord(database, reference)!;
         await Assert.That(replaced.Revision).IsEqualTo(ReplacedRevision);
         await Assert.That(replaced.Json).IsEqualTo(ReplacedJson);

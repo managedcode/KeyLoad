@@ -123,7 +123,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
         await EventProjectionClusterAssertions.AssertSdkFailureAsync(
             await clients.Callers[1].CommitAsync(command, cancellationToken), ErrorCode.Conflict);
         var response = await workerMcp.CallAsync(McpCallerTools.DocumentsCommit, command, cancellationToken);
-        await McpCallerAssertions.ErrorAsync(response, ErrorCode.Conflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(response, ErrorCode.Conflict, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(response, scenario.WorkerSecret,
             EventProjectionClusterScenario.Secret);
         await EventProjectionClusterAssertions.VerifyVectorBothAsync(clients.Readers[1], readerMcp,
@@ -141,8 +141,8 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
         var stale = scenario.ApplyCommand(Guid.NewGuid());
         await EventProjectionClusterAssertions.AssertSdkFailureAsync(await worker.CommitAsync(stale,
             cancellationToken), ErrorCode.RevisionConflict);
-        await McpCallerAssertions.ErrorAsync(await workerMcp.CallAsync(McpCallerTools.DocumentsCommit,
-            stale, cancellationToken), ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await workerMcp.CallAsync(McpCallerTools.DocumentsCommit,
+            stale, cancellationToken), ErrorCode.RevisionConflict, dispatched: true)).Value;
         await EventProjectionClusterAssertions.VerifyVectorBothAsync(reader, readerMcp,
             scenario, scenario.ReaderSecret, BaselineOnly(), cancellationToken);
     }
@@ -153,8 +153,8 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
     {
         await EventProjectionClusterAssertions.AssertSdkFailureAsync(await worker.CommitAsync(
             scenario.ApplyCommand(), cancellationToken), ErrorCode.PermissionDenied);
-        await McpCallerAssertions.ErrorAsync(await workerMcp.CallAsync(McpCallerTools.DocumentsCommit,
-            scenario.ApplyCommand(), cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await workerMcp.CallAsync(McpCallerTools.DocumentsCommit,
+            scenario.ApplyCommand(), cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await EventProjectionClusterAssertions.VerifyVectorBothAsync(reader, readerMcp,
             scenario, scenario.ReaderSecret, BaselineOnly(), cancellationToken);
     }

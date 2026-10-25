@@ -30,14 +30,14 @@ internal sealed class ResourcePolicyUpdateTests
         var reopened = fixture.Resource();
         var retry = fixture.Apply(operation);
 
-        await Assert.That(Errors.Code(first.Problem)).IsNull();
+        await Assert.That(Errors.Code(first.Problem).Value).IsNull();
         await Assert.That(first.Get<ResourceDefinition>().SchemaVersion).IsEqualTo(previous.SchemaVersion + 1);
         await Assert.That(JsonData.Fingerprint(storedAfterApply)).IsEqualTo(JsonData.Fingerprint(replacement));
         await Assert.That(JsonData.Fingerprint(reopened)).IsEqualTo(JsonData.Fingerprint(replacement));
         await Assert.That(resourceBytesAfter.SequenceEqual(resourceBytesBefore)).IsFalse();
         await Assert.That(documentBytesAfter.SequenceEqual(documentBytesBefore)).IsTrue();
         await Assert.That(fixture.DocumentBytes()!.SequenceEqual(documentBytesBefore)).IsTrue();
-        await Assert.That(Errors.Code(retry.Problem)).IsEqualTo(Errors.Code(first.Problem));
+        await Assert.That(Errors.Code(retry.Problem).Value).IsEqualTo(Errors.Code(first.Problem).Value);
         await Assert.That(OrleansSerialization.Serialize(retry).AsSpan().SequenceEqual(OrleansSerialization.Serialize(first))).IsTrue();
         await Assert.That(fixture.OutcomeBytes(operation.CommandId)!.SequenceEqual(receiptBytes)).IsTrue();
     }
@@ -53,7 +53,7 @@ internal sealed class ResourcePolicyUpdateTests
             FieldPolicies = [new(ResourcePolicyUpdateFixture.SecretField, Classification)]
         }));
 
-        await Assert.That(Errors.Code(identical.Problem)).IsNull();
+        await Assert.That(Errors.Code(identical.Problem).Value).IsNull();
         await Assert.That(ResourcePolicyUpdateFixture.Failure(changed).Code)
             .IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(JsonData.Fingerprint(fixture.Resource())).IsEqualTo(JsonData.Fingerprint(previous));

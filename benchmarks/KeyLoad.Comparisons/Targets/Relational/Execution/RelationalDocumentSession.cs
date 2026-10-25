@@ -19,7 +19,7 @@ internal sealed class RelationalDocumentSession(DbConnection connection, Relatio
     {
         if (scenario == Scenario.PointRead)
         {
-            return new(Document: await ReadAsync(document, cancellationToken).ConfigureAwait(false));
+            return new(Document: (await ReadAsync(document, cancellationToken).ConfigureAwait(false)).Value);
         }
         var operation = scenario switch
         {
@@ -37,12 +37,12 @@ internal sealed class RelationalDocumentSession(DbConnection connection, Relatio
         return new();
     }
 
-    public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         await using var command = sql.Command(connection, RelationalDocumentCommand.Read, policy.OperationTimeout);
         Bind(command, document);
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
-        return await ReadOneAsync(reader, cancellationToken).ConfigureAwait(false);
+        return ((FoundDocument?)((await ReadOneAsync(reader, cancellationToken).ConfigureAwait(false)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<FoundDocument?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync));
     }
 
     public IAsyncEnumerable<FoundDocument> ReadCorpusAsync(CancellationToken cancellationToken)
@@ -88,7 +88,7 @@ internal sealed class RelationalDocumentSession(DbConnection connection, Relatio
         command.Parameters.Add(parameter);
     }
 
-    internal static async Task<FoundDocument?> ReadOneAsync(DbDataReader reader, CancellationToken token)
+    internal static async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadOneAsync(DbDataReader reader, CancellationToken token)
     {
         var found = await reader.ReadAsync(token).ConfigureAwait(false)
             ? new FoundDocument(reader.GetString(IdColumn), reader.GetString(BodyColumn)) : null;
@@ -96,7 +96,7 @@ internal sealed class RelationalDocumentSession(DbConnection connection, Relatio
         {
             throw new ComparisonFailureException(UnexpectedRows);
         }
-        return found;
+        return ((FoundDocument?)(found)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<FoundDocument?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadOneAsync));
     }
 
     public ValueTask DisposeAsync() => connection.DisposeAsync();

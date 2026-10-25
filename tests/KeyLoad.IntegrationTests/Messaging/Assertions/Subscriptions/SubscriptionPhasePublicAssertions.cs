@@ -54,7 +54,7 @@ internal static class SubscriptionPhasePublicAssertions
         await Assert.That(failure.Problem!.ErrorCode).IsEqualTo(code.ToString());
         await Assert.That(failure.Value).IsNull();
         var reply = await mcp.CallAsync(McpCallerTools.SubscriptionsReceive, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, true)).Value;
         if (code == ErrorCode.DispatchPaused)
         {
             var envelope = reply.StructuredContent ?? throw new InvalidOperationException("The canonical pause envelope is absent.");

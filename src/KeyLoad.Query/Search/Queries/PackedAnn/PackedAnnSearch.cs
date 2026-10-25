@@ -31,7 +31,7 @@ internal static class PackedAnnSearch
         PackedAnnReservations.RequireScratch(initialBytes, state.Options.MaxScratchBytes);
         var copiedQuery = CopyQuery(state, query, budget);
         var similarity = PrepareSimilarity(state, copiedQuery, budget);
-        var copiedEligibility = CopyEligibility(state.Count, eligibility, words, budget, out var eligibleCount);
+        var copiedEligibility = (CopyEligibility(state.Count, eligibility, words, budget, out var eligibleCount)).Value;
         var capacity = Math.Max(MinimumNonEmptyCapacity, Math.Min(state.Count, state.Options.MaximumSearchBreadth));
         var plan = FilteredVectorPlanner.Create(state.Count, limit, eligibleCount,
             state.Options.ExactThreshold, state.Options.EfSearch, capacity, budget);
@@ -100,20 +100,20 @@ internal static class PackedAnnSearch
         return PreparedSimilarity.Create(query.AsMemory(), state.Space.Metric);
     }
 
-    private static ulong[]? CopyEligibility(int count, ReadOnlyMemory<ulong>? eligibility, int words,
+    private static global::ManagedCode.Communication.Result<ulong[]?> CopyEligibility(int count, ReadOnlyMemory<ulong>? eligibility, int words,
         AnnWorkBudget budget, out int eligibleCount)
     {
         if (eligibility is null)
         {
             eligibleCount = count;
-            return null;
+            return global::ManagedCode.Communication.Result<ulong[]?>.FailNotFound(nameof(CopyEligibility));
         }
         budget.Charge(checked((long)words * sizeof(ulong)));
         var source = eligibility.Value.Span;
         var copy = new ulong[words];
         source.CopyTo(copy);
         eligibleCount = CountEligible(count, copy, budget);
-        return copy;
+        return global::ManagedCode.Communication.Result<ulong[]?>.Succeed(((ulong[]?)(copy)));
     }
 
     private static int CountEligible(int count, ulong[] bitmap, AnnWorkBudget budget)

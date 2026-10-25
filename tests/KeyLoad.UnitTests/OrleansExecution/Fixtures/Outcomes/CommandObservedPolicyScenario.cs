@@ -75,8 +75,8 @@ internal sealed class CommandObservedPolicyScenario(bool header)
     private ResourceLifetime Lifetime()
     {
         var partition = Fixture.Database.Partition;
-        return Fixture.Database.Store.Read(view => ResourceLifetimeCatalog.Read(view,
-            partition.TenantId, partition.DatabaseId, P.Queue, Resource))
+        return Fixture.Database.Store.Read(view => (ResourceLifetimeCatalog.Read(view,
+            partition.TenantId, partition.DatabaseId, P.Queue, Resource)).Value)
             ?? throw new InvalidOperationException(P.Missing);
     }
 

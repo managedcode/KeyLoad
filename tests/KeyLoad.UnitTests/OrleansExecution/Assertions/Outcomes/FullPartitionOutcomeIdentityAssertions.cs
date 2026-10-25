@@ -47,7 +47,7 @@ internal static class FullPartitionOutcomeIdentityAssertions
 
     internal static async Task AssertReceiptAsync(Result<object> result, byte[] expected)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(OrleansSerialization.Serialize(result.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(expected)).IsTrue();
     }

@@ -31,8 +31,8 @@ internal static class QueueDispatchCasClusterFlow
             var receive = new ReceiveRequest(Guid.NewGuid(), state.Lane, QueueDispatchCasClusterProtocol.OneMessage);
             await QueueLeaseClusterAssertions.DeniedAsync(await sdk.ReceiveAsync(receive, token), ErrorCode.DispatchPaused);
             await QueueDispatchCasClusterCurrent.RunAsync(fixture, state, first + step, true, token);
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesReceive, receive, token),
-                ErrorCode.DispatchPaused, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesReceive, receive, token),
+                ErrorCode.DispatchPaused, dispatched: true)).Value;
             await QueueDispatchCasClusterCurrent.RunAsync(fixture, state, first + step, true, token);
             return true;
         }, token);

@@ -92,11 +92,11 @@ internal static class FunctionalGateQueueExercise
         }, token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await ctx.Reader.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command with
+        _ = (await McpCallerAssertions.ErrorAsync(await ctx.Reader.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command with
         {
             CommandId = Guid.NewGuid()
         }, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
         var id = ((EnqueueMessage)command.Mutations[0]).MessageId;
         var absent = await ctx.SdkAsync(ctx.Writer.Sdk.InspectAsync(new(new(ctx.Partition, command.Mutations[0].Resource), id), token));
         await FunctionalGateQueues.EqualAsync(new MessageInspectionResult(null), absent);
@@ -112,8 +112,8 @@ internal static class FunctionalGateQueueExercise
         var denied = await ctx.Writer.Sdk.CommitAsync(refused, token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await ctx.Writer.Mcp.CallAsync(McpCallerTools.DocumentsCommit, refused, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await ctx.Writer.Mcp.CallAsync(McpCallerTools.DocumentsCommit, refused, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
         await FunctionalGateQueues.EqualAsync(parked, await InspectAsync(ctx, lane, id, token));
     }
 
@@ -123,7 +123,7 @@ internal static class FunctionalGateQueueExercise
         var denied = await ctx.Writer.Sdk.CompleteAsync(command, token);
         await Assert.That(denied.IsSuccess).IsFalse();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(ErrorCode.StaleLease.ToString());
-        await McpCallerAssertions.ErrorAsync(await ctx.Writer.Mcp.CallAsync(McpCallerTools.MessagesComplete, command, token),
-            ErrorCode.StaleLease, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await ctx.Writer.Mcp.CallAsync(McpCallerTools.MessagesComplete, command, token),
+            ErrorCode.StaleLease, dispatched: true)).Value;
     }
 }

@@ -59,7 +59,7 @@ internal static class QueueLifecycleCeilingFailureAssertions
 
     private static async Task RefusalAsync(Result<object> actual)
     {
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(Exhausted);
 
         await Assert.That(actual.Value).IsNull();

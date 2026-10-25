@@ -33,7 +33,7 @@ internal static class RemoteTransferCapacityAuthorityCeiling
         var canonical = fixture.Database.LastApplied;
         var time = TimeProvider.System.GetUtcNow();
         var failed = fixture.Apply(OperationKind.Batch, request, time: time);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(CapacityFailure);
 
         await Assert.That(failed.Value).IsNull();

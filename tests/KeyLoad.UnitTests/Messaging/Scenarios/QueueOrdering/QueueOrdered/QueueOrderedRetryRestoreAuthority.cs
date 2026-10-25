@@ -43,7 +43,7 @@ internal static class QueueOrderedRetryRestoreAuthority
         state.HistoricalOutcomes.Add(id, rejectedBytes);
         await ConfigureAsync(database, state, Expected(state, QueueOrderedRetryProtocol.Three));
         await RefusedAsync(database, state, operation, image, ErrorCode.PermissionDenied);
-        foreach (var prior in original.Outcomes.Where(item => item.Operation.Value!.Kind == OperationKind.Batch && Errors.Code(item.Result.Problem) is null))
+        foreach (var prior in original.Outcomes.Where(item => item.Operation.Value!.Kind == OperationKind.Batch && Errors.Code(item.Result.Problem).Value is null))
         {
             var expected = prior.Operation.UserId == state.Principal ? ErrorCode.PermissionDenied : ErrorCode.TokenInvalidated;
             await OriginalAuthorityRefusedAsync(database, state, prior.Operation, image, expected);
@@ -100,7 +100,7 @@ internal static class QueueOrderedRetryRestoreAuthority
         var before = database.Store.Position;
         var prior = database.Store.Read(view => view.ReadOwnedValue(key));
         var result = database.Apply(operation);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(expected);
         await Assert.That(result.Value).IsNull();
 
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, image);
@@ -122,8 +122,8 @@ internal static class QueueOrderedRetryRestoreAuthority
         var before = database.Store.Position;
         var apply = database.Apply(operation);
         var resolve = database.ResolveOutcome(operation);
-        await Assert.That(Errors.Code(apply.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(Errors.Code(resolve.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(apply.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(resolve.Problem).Value).IsEqualTo(expected);
         if (expected == ErrorCode.PermissionDenied)
         {
             await Assert.That(resolve.Problem?.Detail).IsEqualTo(CommandOutcomeOperations.ChangedOutcomePrincipalPolicyMessage);
@@ -139,7 +139,7 @@ internal static class QueueOrderedRetryRestoreAuthority
         state.RestoredResourceBytes = database.Store.Read(view => view.ReadOwnedValue(
             KeySpace.Resource(state.Partition.TenantId, state.Partition.DatabaseId, state.Lane.Queue)))
             ?? throw new InvalidOperationException(HistoricalMissing);
-        foreach (var item in original.Outcomes.Where(item => Errors.Code(item.Result.Problem) is null
+        foreach (var item in original.Outcomes.Where(item => Errors.Code(item.Result.Problem).Value is null
             && item.Operation.Value!.Kind is OperationKind.Batch or OperationKind.Receive or OperationKind.Delivery))
         {
             var bytes = database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, state.Principal, item.Operation.CommandId)))

@@ -125,7 +125,7 @@ internal static class TextOnlineReplacementRollbackFlow
         {
             var principal = fixture.Database.Principal(view, TextMaintenanceTestValues.Principal,
                 fixture.Database.EvaluationClock.GetUtcNow());
-            var current = fixture.Database.ReadOnlineTextCurrentPublication(view, principal, request, budget)
+            var current = (fixture.Database.ReadOnlineTextCurrentPublication(view, principal, request, budget)).Value
                 ?? throw new InvalidOperationException("The original active online publication is absent.");
             return OrleansSerialization.Serialize(current);
         });

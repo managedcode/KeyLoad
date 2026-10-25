@@ -35,7 +35,7 @@ internal static class BackgroundStorageReadAccounting
             imported = true;
             if (response.Result.IsFailed)
             {
-                throw Errors.Fail(Errors.Code(response.Result.Problem)!.Value, response.Result.Problem!.Detail!);
+                throw Errors.Fail(Errors.Code(response.Result.Problem).Value!.Value, response.Result.Problem!.Detail!);
             }
             work.Check();
             result = ReadValue<T>(response.Result.Value, allowAbsent);
@@ -87,7 +87,7 @@ internal static class BackgroundStorageReadAccounting
         if (response is null || response.ReadBytes < default(long) || response.ExaminedRecords < default(int)
             || response.ReadBytes > bounds.MaximumReadBytes || response.ExaminedRecords > bounds.MaximumRecords
             || response.Lifetimes.IsEmpty || response.Lifetimes.Length > bounds.MaximumResultBytes
-            || response.Result.IsFailed && (Errors.Code(response.Result.Problem) is null
+            || response.Result.IsFailed && (Errors.Code(response.Result.Problem).Value is null
                 || string.IsNullOrEmpty(response.Result.Problem.Detail))
             || response.Result.IsSuccess && response.Result.Problem is not null
             || OrleansSerialization.Measure(response) > bounds.MaximumResultBytes)

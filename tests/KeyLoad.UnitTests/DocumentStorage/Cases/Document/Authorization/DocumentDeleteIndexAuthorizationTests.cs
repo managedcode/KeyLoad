@@ -32,13 +32,13 @@ internal sealed class DocumentDeleteIndexAuthorizationTests
         var before = DocumentCrudFixture.ReadRecord(database, reference)!;
         var denied = DocumentCrudFixture.Submit(database, MissingIndexUse,
             new DeleteDocument(Collection, DocumentId, FirstRevision));
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(DocumentCrudFixture.ReadRecord(database, reference)).IsEqualTo(before);
         await DocumentCrudFixture.AssertIndexedIds(database, "secret", SecretIndexName, "before", [DocumentId]);
 
         var authorized = DocumentCrudFixture.Submit(database, IndexUseWithoutFieldWrite,
             new DeleteDocument(Collection, DocumentId, FirstRevision));
-        await Assert.That(Errors.Code(authorized.Problem)).IsNull();
+        await Assert.That(Errors.Code(authorized.Problem).Value).IsNull();
         var tombstone = DocumentCrudFixture.ReadRecord(database, reference)!;
         await Assert.That(tombstone.Revision).IsEqualTo(DeletedRevision);
         await Assert.That(tombstone.Deleted).IsTrue();

@@ -186,8 +186,8 @@ internal static class QueueRenewedDeadlinePublicFlow
             QueueLeaseClusterProtocol.Healthy, "Ack", 3L);
         await QueueLeaseClusterAssertions.ReplayedAsync(callers.Sdk, callers.Mcp, ack, receipt, token);
         await QueueLeaseClusterAssertions.DeniedAsync(await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-            McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+            McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true)).Value;
         var expected = new MessageInspection(new(QueueLeaseClusterProtocol.Healthy, MessageState.Acked,
             1, 3L, 2L, null, null, LeaseVersion: 1L), null, null);
         await QueueLeaseClusterAssertions.EqualAsync(await PublicReadAssertions.MessageAsync(

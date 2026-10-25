@@ -87,7 +87,7 @@ internal static class CommandIdempotencyCrashAssertions
             }
         }
         var changed = CommandIdempotencyCrashData.CreateChangedOperation(database, operation);
-        if (Errors.Code(database.Apply(changed).Problem) != ErrorCode.Conflict)
+        if (Errors.Code(database.Apply(changed).Problem).Value != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(AssertRetriesAndConflictAssertRetriesAndConflictMessageText);
         }

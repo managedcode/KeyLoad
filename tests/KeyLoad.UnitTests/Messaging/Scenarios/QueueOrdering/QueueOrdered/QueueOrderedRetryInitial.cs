@@ -7,7 +7,7 @@ internal static class QueueOrderedRetryInitial
         token.ThrowIfCancellationRequested();
         var before = QueueOrderedRetryImage.Capture(database.Store, state.Lane);
         var missing = state.Batch(database, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.MissingKeyId, null));
-        await Assert.That(Errors.Code(missing.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(missing.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, before);
         state.Batch(database, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.First),
             QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.Second),

@@ -22,8 +22,8 @@ internal static class InboxProcessingClusterPolicy
             CommandId = Guid.NewGuid()
         };
         await InboxProcessingClusterAssertions.DeniedAsync(await client.CommitProcessingAsync(current, token), ErrorCode.PermissionDenied);
-        _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess,
-            current, token), ErrorCode.PermissionDenied, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess,
+            current, token), ErrorCode.PermissionDenied, true)).Value;
         await InboxProcessingClusterAssertions.UnchangedAsync(client, state, token);
         await MessagingClusterIdentity.UpdateAsync(fixture, principal with
         {

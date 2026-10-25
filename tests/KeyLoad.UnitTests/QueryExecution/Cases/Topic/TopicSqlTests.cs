@@ -29,7 +29,7 @@ internal sealed class TopicSqlTests
             Mutations = [new PublishTopic(TopicSqlProtocol.Topic,
             [new(TopicSqlProtocol.First, TopicSqlProtocol.Updated, TopicSqlProtocol.Payload)])]
         }, id: command.CommandId);
-        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         database.Commit(new PurgeTopic(TopicSqlProtocol.Topic, TopicSqlProtocol.FirstPosition));
         var retainedBytes = QueueWholeFlowStorage.Bytes(database.Store);
         var retainedPosition = database.Store.Position;

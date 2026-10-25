@@ -50,7 +50,7 @@ internal static class RemoteTransferRepairRecoveryContinuation
     internal static async Task FailureAsync(ZoneTreeStore store, DatabaseEngine database, CommandRequest request,
         byte[] bytes, CancellationToken token)
     {
-        await Assert.That(Errors.Code(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId), token).Problem))
+        await Assert.That(Errors.Code(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId), token).Problem).Value)
             .IsEqualTo(ErrorCode.PermissionDenied);
         var retained = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(request.Partition,
             CrashFixtureValues.Principal, request.CommandId))) ?? throw new InvalidOperationException(RemoteTransferRepairCrashProtocol.Missing);

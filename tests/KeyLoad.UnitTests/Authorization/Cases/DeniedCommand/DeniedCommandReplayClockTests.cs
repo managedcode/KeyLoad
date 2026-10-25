@@ -32,7 +32,7 @@ internal sealed class DeniedCommandReplayClockTests
         var original = fixture.Database.CreateCommand(OperationKind.SetDispatch, Guid.NewGuid(), Reader, time, JsonSerializer.Serialize(false, JsonDefaults.Options));
         var before = fixture.Store.Position;
         var first = fixture.Database.Apply(original);
-        await Assert.That(Errors.Code(first.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(first.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(first.Problem?.Detail).IsEqualTo(AdministrationRequired);
         await Assert.That(fixture.Store.Position).IsEqualTo(before + 1);
         var retained = Bytes(fixture.Store);
@@ -78,7 +78,7 @@ internal sealed class DeniedCommandReplayClockTests
         var changedTime = fixture.Database.OwnCommand(original);
         changedTime.Timestamp = original.Timestamp.AddSeconds(1);
         var failure = fixture.Database.Apply(changedTime);
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(failure.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.Problem?.Detail).IsEqualTo(ScopeDenied);
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         await Assert.That(Bytes(fixture.Store)).IsEquivalentTo(retained, CollectionOrdering.Matching);
@@ -107,7 +107,7 @@ internal sealed class DeniedCommandReplayClockTests
         var prepared = fixture.Database.PrepareStorageOperations([original], token);
         var denied = fixture.Database.ApplyStorageOperations(prepared, sequence + 1, token).Applied.Single();
 
-        await Assert.That(Errors.Code(denied.Result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Result.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(denied.Sequence).IsEqualTo(sequence + 1);
         await Assert.That(fixture.Database.LastApplied).IsEqualTo(sequence + 1);
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(reader with

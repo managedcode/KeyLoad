@@ -43,12 +43,12 @@ internal sealed class CapabilityWorkLifetime : IDisposable, IAsyncDisposable, IR
     internal void Admit(RequestWorkOwner owner, Guid requestId, RequestWorkKind kind,
         IResourceLifetimeWorkBinding? binding = null) => registration.Admit(owner, requestId, kind, binding);
 
-    internal static CapabilityWorkLifetime? Acquire(RequestWorkOwner? owner, Guid requestId,
+    internal static global::ManagedCode.Communication.Result<CapabilityWorkLifetime?> Acquire(RequestWorkOwner? owner, Guid requestId,
         RequestWorkKind kind, CancellationToken token)
     {
         if (owner is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<CapabilityWorkLifetime?>.FailNotFound(nameof(Acquire));
         }
 
         var lifetime = new CapabilityWorkLifetime(token);
@@ -82,16 +82,16 @@ internal sealed class CapabilityWorkLifetime : IDisposable, IAsyncDisposable, IR
         PhaseActive = false;
     }
 
-    internal Action? FailureTelemetry()
+    internal global::ManagedCode.Communication.Result<Action?> FailureTelemetry()
     {
         if (!PhaseActive)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Action?>.FailNotFound(nameof(FailureTelemetry));
         }
 
         return PrimaryError is { } error
-            ? () => EndFailedPhase(error)
-            : () => DatabasePhaseTelemetry.End(Phase, DatabasePhaseOutcome.Faulted, PhaseStarted);
+            ? ((Action?)(() => EndFailedPhase(error))) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<Action?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<Action?>.FailNotFound(nameof(FailureTelemetry))
+            : ((Action?)(() => DatabasePhaseTelemetry.End(Phase, DatabasePhaseOutcome.Faulted, PhaseStarted))) is { } outcomeValue3 ? global::ManagedCode.Communication.Result<Action?>.Succeed(outcomeValue3) : global::ManagedCode.Communication.Result<Action?>.FailNotFound(nameof(FailureTelemetry));
     }
 
     public void Dispose() => registration.Dispose();
@@ -160,9 +160,9 @@ internal sealed class CapabilityWorkLifetime : IDisposable, IAsyncDisposable, IR
     private void CaptureRelease(ref CapabilityCleanupFailures failures) => registration.Release(ref failures);
 
     internal RequestWorkLease? CaptureAsyncRelease(ref CapabilityCleanupFailures failures)
-        => registration.ReleaseAsyncState(ref failures);
+        => (registration.ReleaseAsyncState(ref failures)).Value;
 
     internal Task PrepareOwnedReleaseAsync() => registration.PrepareOwnedReleaseAsync();
-    internal Exception? ReleaseOwnedRetention() => registration.ReleaseOwnedRetention();
+    internal Exception? ReleaseOwnedRetention() => (registration.ReleaseOwnedRetention()).Value;
 
 }

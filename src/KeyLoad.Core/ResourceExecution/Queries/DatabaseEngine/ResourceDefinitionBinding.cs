@@ -23,7 +23,7 @@ public static class ResourceDefinitionBinding
     {
         ArgumentNullException.ThrowIfNull(view);
         var resource = view.GetRecord<ResourceDefinition>(KeySpace.Resource(tenantId, databaseId, name));
-        var lifetime = ResourceLifetimeCatalog.Read(view, tenantId, databaseId, name, resource);
+        var lifetime = (ResourceLifetimeCatalog.Read(view, tenantId, databaseId, name, resource)).Value;
         if (resource is null)
         {
             throw Errors.Fail(ErrorCode.NotFound, EngineResourceAccess.DatabaseEngineResourceIsNotConfiguredDetail);

@@ -36,8 +36,8 @@ internal static class TextNestedWildcardPublicAssertions
             await Assert.That(denied.IsFailed).IsTrue();
             await Assert.That(denied.Value).IsNull();
             await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SearchExecute,
-                state.Request(), token), ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SearchExecute,
+                state.Request(), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
             await PageAsync(administrator, state, TextNestedWildcardPublicScenario.Full, [], token);
             await OutboxAsync(administrator, state.Partition, before, token);
         }

@@ -23,7 +23,7 @@ internal static class QueueAccountingFaultAssertions
         {
             var returned = database.Apply(state.Operation);
             var counters = QueueAccountingFaultSetup.Counters(store, state.Lane);
-            var code = Errors.Code(returned.Problem) is { } error ? (int)error : NoResultError;
+            var code = Errors.Code(returned.Problem).Value is { } error ? (int)error : NoResultError;
             throw new InvalidOperationException(string.Format(CultureInfo.InvariantCulture, UnexpectedReturnCounterFormat,
                 code, counters.StoredMessages, counters.StoredBytes, counters.InFlightMessages, counters.InFlightBytes));
         });
@@ -64,7 +64,7 @@ internal static class QueueAccountingFaultAssertions
     private static async Task ResultAsync(DatabaseEngine database, QueueAccountingFaultState state,
         Result<object> result, MessageMetadata expected)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         if (state.Operation.Value!.Kind == OperationKind.Receive)
         {
             var received = result.Get<ReceiveResult>();

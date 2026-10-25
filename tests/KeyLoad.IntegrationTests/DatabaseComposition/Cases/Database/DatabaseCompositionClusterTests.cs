@@ -78,7 +78,7 @@ internal sealed class DatabaseCompositionClusterTests(ClusterFixture fixture)
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token);
         var replay = await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, deadline.Token);
-        await McpCallerAssertions.ErrorAsync(replay, ErrorCode.NotFound, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(replay, ErrorCode.NotFound, dispatched: true)).Value;
     }
 
     private static async Task VerifyForwardAsync(KeyLoadClient sdk, McpOfficialClient mcp,

@@ -21,7 +21,7 @@ internal static class QueueLeaseAuthorityRefusals
         await Assert.That(replay.Message).IsEqualTo(detail);
         await UnchangedAsync(store, position, image);
         var resolved = database.ResolveOutcome(state.Claim);
-        await Assert.That(Errors.Code(resolved.Problem)).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(Errors.Code(resolved.Problem).Value).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(resolved.Problem?.Detail).IsEqualTo(detail);
 
         await Assert.That(resolved.Value).IsNull();

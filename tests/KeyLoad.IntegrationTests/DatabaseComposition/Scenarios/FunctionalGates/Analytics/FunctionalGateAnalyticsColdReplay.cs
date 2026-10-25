@@ -35,8 +35,8 @@ internal static class FunctionalGateAnalyticsColdReplay
         await Assert.That(sdk.Value).IsNull();
         await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await FunctionalGateAnalyticsColdAssertions.VerifyAsync(context, proof, token);
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
-            McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
+            McpCallerTools.DocumentsCommit, command, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await FunctionalGateAnalyticsColdAssertions.VerifyAsync(context, proof, token);
         var sql = SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command) with
         {
@@ -47,8 +47,8 @@ internal static class FunctionalGateAnalyticsColdReplay
         await Assert.That(sqlSdk.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(sqlSdk.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await FunctionalGateAnalyticsColdAssertions.VerifyAsync(context, proof, token);
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
-            SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
+            SqlOperationProtocol.ToolName, sql, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await FunctionalGateAnalyticsColdAssertions.VerifyAsync(context, proof, token);
     }
 

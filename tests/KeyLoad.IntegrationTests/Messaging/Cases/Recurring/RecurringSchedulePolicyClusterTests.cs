@@ -41,8 +41,8 @@ internal sealed class RecurringSchedulePolicyClusterTests(ClusterFixture fixture
 
         var deniedByCreator = RecurringSagaClusterSupport.Command(Guid.NewGuid(), scenario.SourcePartition,
             new EmitRecurringOccurrences(scenario.SourceQueue, id, 1, 1));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            deniedByCreator, deadline.Token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            deniedByCreator, deadline.Token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await AssertScheduleUnchangedAsync(sdk, mcp, scenario, id, firstDueAt, caller.Secret, deadline.Token);
 
         await RevokeCallerManageAsync(fixture, caller, sdk, mcp, scenario, id, firstDueAt, deadline.Token);
@@ -66,8 +66,8 @@ internal sealed class RecurringSchedulePolicyClusterTests(ClusterFixture fixture
         await MessagingClusterIdentity.UpdateAsync(fixture, revoked, cancellationToken);
         var denied = RecurringSagaClusterSupport.Command(Guid.NewGuid(), scenario.SourcePartition,
             new EmitRecurringOccurrences(scenario.SourceQueue, id, 1, 1));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, denied,
-            cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, denied,
+            cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await AssertScheduleUnchangedAsync(sdk, mcp, scenario, id, firstDueAt, caller.Secret, cancellationToken);
 
         var restored = MessagingClusterIdentity.WithCapability(revoked, scenario.SourceQueue,

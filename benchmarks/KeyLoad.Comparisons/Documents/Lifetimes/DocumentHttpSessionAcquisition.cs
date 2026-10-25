@@ -42,17 +42,17 @@ internal sealed class DocumentHttpSessionAcquisition : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var cleanup = new List<Exception>();
-        if (session is not null && await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false) is { } sessionFailure)
+        if (session is not null && (await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false)).Value is { } sessionFailure)
         {
             cleanup.Add(sessionFailure);
         }
 
-        if (connection is not null && await RuntimeComparisonFailure.ObserveAsync(DisposeConnectionAsync()).ConfigureAwait(false) is { } clientFailure)
+        if (connection is not null && (await RuntimeComparisonFailure.ObserveAsync(DisposeConnectionAsync()).ConfigureAwait(false)).Value is { } clientFailure)
         {
             cleanup.Add(clientFailure);
         }
 
-        var combined = RuntimeComparisonFailure.Combine(primary, [.. cleanup]);
+        var combined = (RuntimeComparisonFailure.Combine(primary, [.. cleanup])).Value;
         if (cleanup.Count != DocumentMeasurementValues.NoObservedItems && combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();

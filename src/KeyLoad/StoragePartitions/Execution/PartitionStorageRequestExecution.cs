@@ -39,8 +39,8 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
     private async Task<GrainOperationReply> RunOwnedAsync(DecodedGrainRequest request, string? actorKey,
         IGrainContext context, CancellationToken token)
     {
-        var work = CapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
-            RequestWorkKind.RuntimeTransport, token)
+        var work = (CapabilityWorkLifetime.Acquire(workOwner, request.Envelope.RequestId,
+            RequestWorkKind.RuntimeTransport, token)).Value
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         var original = work.OriginalProducer;
         var sessionId = Guid.Empty;

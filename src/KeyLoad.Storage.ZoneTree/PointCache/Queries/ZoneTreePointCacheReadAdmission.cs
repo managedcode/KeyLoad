@@ -46,8 +46,8 @@ internal readonly struct ZoneTreePointCacheReadAdmission
 
     internal void Unpin(ZoneTreePointCacheEntry entry) => Cache!.Unpin(entry);
 
-    internal ZoneTreePointCacheCandidate? TryPrepare(ReadOnlySpan<byte> key, int valueLength, long generation)
-        => IsCurrent() ? Cache?.TryPrepare(key, valueLength, generation) : null;
+    internal global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?> TryPrepare(ReadOnlySpan<byte> key, int valueLength, long generation)
+        => ((ZoneTreePointCacheCandidate?)(IsCurrent() ? Cache?.TryPrepare(key, valueLength, generation) : null)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?>.FailNotFound(nameof(TryPrepare));
 
     internal void Publish(ZoneTreePointCacheCandidate candidate, ReadOnlySpan<byte> value, long generation)
     {

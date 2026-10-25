@@ -7,13 +7,11 @@ internal sealed class AdminMeasurements(IOptions<AdminConsoleOptions> execution)
 {
     private readonly AdminConsoleOptions options = execution.Value;
     private const int EmptyCount = 0;
-    private const int LatestOffset = 1;
     private const double Percent = 100;
     private AdminNodeSnapshot? previous;
     internal List<double> Rates { get; } = [];
     internal double? Latency { get; private set; }
     internal double? ErrorPercent { get; private set; }
-    internal double? Rate => Rates.Count == EmptyCount ? null : Rates[^LatestOffset];
 
     internal void Clear()
     {

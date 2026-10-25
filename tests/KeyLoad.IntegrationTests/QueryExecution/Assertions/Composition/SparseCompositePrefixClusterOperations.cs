@@ -60,7 +60,7 @@ internal static class SparseCompositePrefixClusterOperations
             var actual = await reader.Mcp.CallAsync(McpCallerTools.QueryExecute, sql, token);
             if (refusal is { } error)
             {
-                await McpCallerAssertions.ErrorAsync(actual, error, dispatched: true);
+                _ = (await McpCallerAssertions.ErrorAsync(actual, error, dispatched: true)).Value;
             }
             else
             {
@@ -95,7 +95,7 @@ internal static class SparseCompositePrefixClusterOperations
             var actual = await reader.Mcp.CallAsync(McpCallerTools.QueryAst, request, token);
             if (refusal is { } error)
             {
-                await McpCallerAssertions.ErrorAsync(actual, error, dispatched: true);
+                _ = (await McpCallerAssertions.ErrorAsync(actual, error, dispatched: true)).Value;
             }
             else
             {

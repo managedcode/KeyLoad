@@ -28,7 +28,7 @@ internal static class RestoreIdentityOverrideAssertions
         var before = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         var refused = database.Apply(state.Seed);
-        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(refused.Value).IsNull();
 
         await Assert.That(refused.Problem?.Detail).IsNotNull();
@@ -66,7 +66,7 @@ internal static class RestoreIdentityOverrideAssertions
 
     internal static async Task ReceiptAsync(Result<object> result, Guid id, string documentId)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(id);
         var expected = new MutationReceipt(RestoreIdentityOverrideState.PutDocumentKind, RestoreIdentityOverrideState.Collection, documentId, 1L);

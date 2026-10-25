@@ -37,17 +37,17 @@ internal sealed class McpGatewayCanonicalToolFunction : AIFunction
         }
 
         var result = await new McpToolDispatcher(context, state)
-            .InvokeCanonicalAsync(ToJsonArguments(arguments), cancellationToken);
+            .InvokeCanonicalAsync((ToJsonArguments(arguments)).Value, cancellationToken);
         return result;
     }
 
-    private static Dictionary<string, JsonElement>? ToJsonArguments(AIFunctionArguments arguments)
+    private static global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?> ToJsonArguments(AIFunctionArguments arguments)
     {
         const int EmptyArgumentsCount = 0;
 
         if (arguments.Count == EmptyArgumentsCount)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.FailNotFound(nameof(ToJsonArguments));
         }
 
         var values = new Dictionary<string, JsonElement>(arguments.Count, StringComparer.Ordinal);
@@ -58,6 +58,6 @@ internal sealed class McpGatewayCanonicalToolFunction : AIFunction
                 : JsonSerializer.SerializeToElement(pair.Value, pair.Value?.GetType() ?? typeof(object)));
         }
 
-        return values;
+        return global::ManagedCode.Communication.Result<Dictionary<string, JsonElement>?>.Succeed(((Dictionary<string, JsonElement>?)(values)));
     }
 }

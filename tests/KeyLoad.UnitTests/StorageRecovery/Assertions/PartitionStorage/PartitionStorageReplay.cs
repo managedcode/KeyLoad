@@ -29,7 +29,7 @@ internal static class PartitionStorageReplay
         var database = owner.Database;
         var request = database.CreateCommand(OperationKind.Batch, P.Command, P.Root,
             source.GetRequiredService<TimeProvider>().GetUtcNow(), OrleansSerialization.Serialize(P.Request()));
-        var retained = database.ReadStoredCommand(request, token) ?? throw new InvalidOperationException(Missing);
+        var retained = database.ReadStoredCommand(request, token).Value ?? throw new InvalidOperationException(Missing);
         await Assert.That(database.LastApplied).IsGreaterThanOrEqualTo(original.Receipt.Token.Position);
         await Assert.That(retained.Sequence).IsEqualTo(original.Receipt.Token.Position);
         await Assert.That(retained.Sequence).IsEqualTo(original.Outcome.CanonicalSequence);

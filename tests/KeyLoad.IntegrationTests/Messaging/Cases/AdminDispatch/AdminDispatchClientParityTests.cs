@@ -62,7 +62,7 @@ internal sealed class AdminDispatchClientParityTests(ClusterFixture fixture)
         await AssertSdkDispatchAsync(sdk, pauseId, true, cancellationToken);
         await AssertMcpDispatchAsync(mcp, pauseId, true, cancellationToken);
         var conflict = await SetMcpDispatchAsync(mcp, pauseId, false, cancellationToken);
-        await McpCallerAssertions.ErrorAsync(conflict, ErrorCode.Conflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(conflict, ErrorCode.Conflict, dispatched: true)).Value;
         await AdminDispatchQueueVerifier.AssertPausedAsync(sdk, mcp, lane, cancellationToken);
         await AssertDocumentAsync(sdk, scenario, McpDocumentProtocol.InitialJson, SeedDocumentRevision, cancellationToken);
         await AssertMcpDispatchAsync(mcp, Guid.NewGuid(), false, cancellationToken);

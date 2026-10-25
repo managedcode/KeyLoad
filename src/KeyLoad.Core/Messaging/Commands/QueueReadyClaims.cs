@@ -39,7 +39,7 @@ public static class QueueReadyClaims
         var metadataKey = MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageMetadataSpace, request.Lane, id);
         var metadata = tx.GetRecord<MessageMetadata>(metadataKey) ?? throw Errors.Fail(ErrorCode.Corruption, MissingReadyMetadata);
         var bodyKey = MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, request.Lane, id);
-        var body = StoredMessageBody.Read(tx, bodyKey) ?? throw Errors.Fail(ErrorCode.Corruption, MissingReadyBody);
+        var body = (StoredMessageBody.Read(tx, bodyKey)).Value ?? throw Errors.Fail(ErrorCode.Corruption, MissingReadyBody);
         MessagingValidation.RequireQueueReadyAuthority(request.Lane, id, key, metadata, body.Body);
         state.Counters ??= MessagingExecutionMessaging.Counters(tx, request.Lane);
         if (metadata.ExpiresAt <= now)

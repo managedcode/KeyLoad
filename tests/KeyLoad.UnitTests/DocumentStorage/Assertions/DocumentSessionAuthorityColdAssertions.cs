@@ -17,8 +17,8 @@ internal static class DocumentSessionAuthorityColdAssertions
         return fixture.Store.Read(view =>
         {
             var resource = fixture.Database.Resource(view, partition, Collection);
-            var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
-                Collection, resource) ?? throw new InvalidOperationException(Collection);
+            var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
+                Collection, resource)).Value ?? throw new InvalidOperationException(Collection);
             return new EntityRef(partition, Collection, Id) { Lifetime = new(lifetime.Incarnation.Value) };
         });
     }

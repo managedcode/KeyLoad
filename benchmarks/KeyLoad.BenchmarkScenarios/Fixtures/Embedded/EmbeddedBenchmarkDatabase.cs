@@ -106,7 +106,7 @@ internal sealed class EmbeddedBenchmarkDatabase(EmbeddedBenchmarkRuntimeOptions 
     {
         if (result.IsFailed)
         {
-            throw Errors.Fail(Errors.Code(result.Problem)!.Value, result.Problem.Detail!);
+            throw Errors.Fail(Errors.Code(result.Problem).Value!.Value, result.Problem.Detail!);
         }
     }
 }

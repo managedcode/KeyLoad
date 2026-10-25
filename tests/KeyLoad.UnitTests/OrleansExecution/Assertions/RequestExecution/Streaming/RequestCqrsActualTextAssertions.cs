@@ -23,7 +23,7 @@ internal static class RequestCqrsActualTextAssertions
     internal static async Task VerifyAsync(RequestCqrsHostedRuntimeFixture fixture,
         TextIndexMaintenanceRequest request, ResourceLifetime lifetime, bool changed, long changedRevision, CancellationToken token)
     {
-        var runtime = fixture.RuntimeMaintenance ?? throw new InvalidOperationException();
+        var runtime = fixture.RuntimeMaintenance.Value ?? throw new InvalidOperationException();
         var database = fixture.Database;
         var position = database.Store.Position;
         var bytes = QueueWholeFlowStorage.Bytes(database.Store);

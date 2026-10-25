@@ -18,7 +18,7 @@ public static class MessagingCommandsQueueRetries
             return original;
         }
 
-        if (requested is AdvanceQueueDeadline deadline && engine.ReadQueueDeadlineRetryInput(view, partition, original.Timestamp, deadline) is { } input)
+        if (requested is AdvanceQueueDeadline deadline && (engine.ReadQueueDeadlineRetryInput(view, partition, original.Timestamp, deadline)).Value is { } input)
         {
             var delay = engine.ChooseQueueRetryDelay(original, input.Lane, input.Policy, input.Metadata);
             choices.Add(new(input.Lane, input.Metadata.Id, input.Metadata.StateVersion, input.Metadata.LeaseVersion, input.Metadata.DeliveryGeneration, input.Metadata.Attempts, input.DueIndexKey, SHA256.HashData(OrleansSerialization.Serialize(input.Policy)), delay, original.Timestamp.AddMilliseconds(delay)));

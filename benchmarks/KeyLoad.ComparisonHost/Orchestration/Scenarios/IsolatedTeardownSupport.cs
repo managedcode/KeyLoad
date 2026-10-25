@@ -12,14 +12,14 @@ internal static class IsolatedTeardownSupport
     internal static async Task CollectFailureAsync(Func<Task> operation, List<Exception> failures)
     {
         var initiation = StartAsync(operation);
-        var failure = await RuntimeComparisonFailure.ObserveAsync(initiation);
+        var failure = (await RuntimeComparisonFailure.ObserveAsync(initiation)).Value;
         if (failure is not null)
         {
             AddOriginalFailures(initiation, failure, failures);
             return;
         }
         var original = await initiation;
-        failure = await RuntimeComparisonFailure.ObserveAsync(original);
+        failure = (await RuntimeComparisonFailure.ObserveAsync(original)).Value;
         if (failure is not null)
         {
             AddOriginalFailures(original, failure, failures);

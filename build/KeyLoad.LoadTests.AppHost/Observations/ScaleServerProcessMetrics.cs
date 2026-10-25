@@ -15,19 +15,19 @@ internal static class ScaleServerProcessMetrics
     {
         const char LineFeedCharacter = '\n';
 
-        var text = await BoundedText.ReadAsync($"{ProcDirectoryPrefix}{pid}{CgroupSuffix}", budget.Settings.MaxFileBytes, budget, token);
+        var text = (await BoundedText.ReadAsync($"{ProcDirectoryPrefix}{pid}{CgroupSuffix}", budget.Settings.MaxFileBytes, budget, token)).Value;
         var row = text?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UnifiedCgroupMarker, StringComparison.Ordinal));
         return row?[UnifiedCgroupMarker.Length..].Trim();
     }
 
-    internal static async Task<int[]?> ReadPidsAsync(string path, ScaleServerResourceSampleBudget budget, CancellationToken token)
+    internal static async Task<global::ManagedCode.Communication.Result<int[]?>> ReadPidsAsync(string path, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const char LineFeedCharacter = '\n';
 
-        var text = await BoundedText.ReadAsync(path, budget.Settings.MaxFileBytes, budget, token);
+        var text = (await BoundedText.ReadAsync(path, budget.Settings.MaxFileBytes, budget, token)).Value;
         if (text is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<int[]?>.FailNotFound(nameof(ReadPidsAsync));
         }
 
         var values = new List<int>();
@@ -35,19 +35,19 @@ internal static class ScaleServerProcessMetrics
         {
             if (!int.TryParse(line, NumberStyles.None, CultureInfo.InvariantCulture, out var pid))
             {
-                return null;
+                return global::ManagedCode.Communication.Result<int[]?>.FailNotFound(nameof(ReadPidsAsync));
             }
 
             values.Add(pid);
             if (values.Count > budget.Settings.MaxProcesses)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<int[]?>.FailNotFound(nameof(ReadPidsAsync));
             }
         }
-        return values.ToArray();
+        return global::ManagedCode.Communication.Result<int[]?>.Succeed(((int[]?)(values.ToArray())));
     }
 
-    internal static async Task<long?> ReadRssAsync(int[] pids, string expectedCgroup,
+    internal static async Task<global::ManagedCode.Communication.Result<long?>> ReadRssAsync(int[] pids, string expectedCgroup,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int TotalInitialValue = 0;
@@ -55,17 +55,17 @@ internal static class ScaleServerProcessMetrics
         long total = TotalInitialValue;
         foreach (var pid in pids)
         {
-            var before = await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token);
-            var status = await BoundedText.ReadAsync($"{ProcDirectoryPrefix}{pid}{ProcessStatusSuffix}", budget.Settings.MaxFileBytes, budget, token);
-            var after = await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token);
+            var before = (await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token)).Value;
+            var status = (await BoundedText.ReadAsync($"{ProcDirectoryPrefix}{pid}{ProcessStatusSuffix}", budget.Settings.MaxFileBytes, budget, token)).Value;
+            var after = (await ProcessIdentity.ReadAsync(pid, expectedCgroup, budget, token)).Value;
             if (before is null || after is null || before != after || !TryRss(status, out var rss))
             {
-                return null;
+                return global::ManagedCode.Communication.Result<long?>.FailNotFound(nameof(ReadRssAsync));
             }
 
             total = checked(total + rss);
         }
-        return total;
+        return global::ManagedCode.Communication.Result<long?>.Succeed(((long?)(total)));
     }
 
     private static bool TryRss(string? status, out long bytes)

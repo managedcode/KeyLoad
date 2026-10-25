@@ -4,7 +4,7 @@ namespace KeyLoad.Comparisons;
 
 /// <summary>Runs one lane; each request covers <paramref name="batch"/> consecutive ordinals and every ordinal keeps its own sample.</summary>
 internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext context, BenchmarkSessionClientLease lease,
-    Func<IComparisonSession, int, int, CancellationToken, Task> operation, int count, int batch, bool documentSessions)
+    Func<IComparisonSession?, int, int, CancellationToken, Task> operation, int count, int batch, bool documentSessions)
 {
     private readonly BenchmarkSessionOperationSample[] samples = new BenchmarkSessionOperationSample[count];
     private int attempts;
@@ -53,7 +53,7 @@ internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext cont
         {
             // Cancel unopened workers and join the original bounded cohort before releasing execution clients.
             start.TrySetCanceled(token);
-            _ = await RuntimeComparisonFailure.ObserveAsync(joined).ConfigureAwait(false);
+            _ = (await RuntimeComparisonFailure.ObserveAsync(joined).ConfigureAwait(false)).Value;
         }
     }
 
@@ -76,7 +76,7 @@ internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext cont
         string? failure = null;
         try
         {
-            await operation(lease.At(worker, documentSessions), first, length, deadline.Token).ConfigureAwait(false);
+            await operation((lease.At(worker, documentSessions)).Value, first, length, deadline.Token).ConfigureAwait(false);
             Interlocked.Add(ref successes, length);
             succeeded = true;
         }

@@ -19,7 +19,7 @@ public static class DropTableExecution
         JsonData.Identifier(request.ResourceName);
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.ResourceName);
         var definition = transaction.GetRecord<ResourceDefinition>(key) ?? throw Errors.Fail(ErrorCode.NotFound, TableRemovalMissing);
-        var lifetime = ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.ResourceName, definition) ?? throw Errors.Fail(ErrorCode.Corruption, TableRemovalMissing);
+        var lifetime = (ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.ResourceName, definition)).Value ?? throw Errors.Fail(ErrorCode.Corruption, TableRemovalMissing);
         if (definition.Kind != ResourceKind.Collection || definition.Authority != DocumentAuthority.Document || definition.RelationalSchema is null)
         {
             throw Errors.Fail(ErrorCode.Validation, TableRemovalKind);

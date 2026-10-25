@@ -70,8 +70,8 @@ internal sealed class DeclarativeCompositionClusterTests(ClusterFixture fixture)
             var conflict = await sdk.ExecuteSqlAsync(changed, deadline.Token);
             await Assert.That(conflict.IsFailed).IsTrue();
             await Assert.That(conflict.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, changed, deadline.Token),
-                ErrorCode.Conflict, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, changed, deadline.Token),
+                ErrorCode.Conflict, dispatched: true)).Value;
             var unchanged = await CompositionSqlColdCapture.CaptureAsync(sdk, scenario, link,
                 forward, projected, reverse, derivedReceipt, deadline.Token);
             await SqlClusterProtocol.EqualAsync(state, unchanged);
@@ -102,8 +102,8 @@ internal sealed class DeclarativeCompositionClusterTests(ClusterFixture fixture)
         var rejected = await sdk.ExecuteSqlAsync(invalid, cancellationToken);
         await Assert.That(rejected.IsFailed).IsTrue();
         await Assert.That(rejected.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, invalid, cancellationToken),
-            ErrorCode.Validation, dispatched: false);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, invalid, cancellationToken),
+            ErrorCode.Validation, dispatched: false)).Value;
         await Assert.That((await McpCallerAssertions.SdkSuccessAsync(await sdk.TraverseAsync(
             new(scenario.Partition, RelationalSqlClusterTokens.Graph, scenario.First), cancellationToken))).Edges).IsEmpty();
         await SqlClusterProtocol.EqualAsync(source, await PublicReadAssertions.MessageAsync(

@@ -74,7 +74,7 @@ internal static class SharedDomainPublicProcessing
         await Assert.That(first.Value).IsNull();
         await Assert.That(first.Problem!.ErrorCode).IsEqualTo(code.ToString());
         await Assert.That(first.Problem.Detail).IsEqualTo(detail);
-        await McpCallerAssertions.ErrorAsync(await official.CallAsync(McpCallerTools.MessagesProcess, request, token), code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await official.CallAsync(McpCallerTools.MessagesProcess, request, token), code, dispatched: true)).Value;
         var replay = await sdk.CommitProcessingAsync(request, token);
         await Assert.That(replay.IsFailed).IsTrue();
         await SharedDomainPublicValues.EqualAsync(replay.Problem, first.Problem);

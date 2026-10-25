@@ -80,8 +80,8 @@ internal static class BenchmarkSessionAspireFixture
             {
                 await work.StartSettlement();
             }
-            var qualificationFailure = await BenchmarkSessionQualifications.RunAsync(application, selection,
-                selected, evidence, exit, token);
+            var qualificationFailure = (await BenchmarkSessionQualifications.RunAsync(application, selection,
+                selected, evidence, exit, token)).Value;
             using var retention = new CancellationTokenSource(execution.Value.TeardownReceiptTimeout, TimeProvider.System);
             await BenchmarkSessionManifest.WriteAsync(evidence, selected, exit, qualificationFailure is not null, retention.Token);
             if (qualificationFailure is not null)

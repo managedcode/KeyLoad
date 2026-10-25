@@ -46,7 +46,7 @@ internal static class CanonicalOperationGateway
         {
             var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span);
             cancellationToken.ThrowIfCancellationRequested();
-            return new(requestId, McpBoundedJson.Serialize(PublicReadResponse.Create(readKind, commandKind, value.Value),
+            return new(requestId, McpBoundedJson.Serialize((PublicReadResponse.Create(readKind, commandKind, value.Value)).Value,
                 context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
         }
         catch (Exception failure) when (

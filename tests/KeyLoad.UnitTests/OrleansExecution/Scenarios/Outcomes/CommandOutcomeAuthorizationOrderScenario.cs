@@ -21,7 +21,7 @@ internal static class CommandOutcomeAuthorizationOrderScenario
         var principal = CreateWriter(database);
         var commandId = Guid.NewGuid();
         var operation = CreateWrite(database, commandId);
-        await Assert.That(Errors.Code(database.Database.Apply(operation).Problem)).IsNull();
+        await Assert.That(Errors.Code(database.Database.Apply(operation).Problem).Value).IsNull();
         var outcomeKey = CorruptCurrentPartitionOutcome(database, commandId);
         var original = database.Store.Read(view => view.ReadOwnedValue(outcomeKey)!);
         var locatorKey = KeySpace.OutcomeLocator(database.Partition, Writer, commandId);
@@ -41,7 +41,7 @@ internal static class CommandOutcomeAuthorizationOrderScenario
             locatorKey, locator, commandId);
         var healthyFollowup = CreateWrite(database, Guid.NewGuid(), HealthyFollowupDocumentId, HealthyFollowupJson);
         var followupResult = database.Database.Apply(healthyFollowup);
-        await Assert.That(Errors.Code(followupResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(followupResult.Problem).Value).IsNull();
         await Assert.That(database.Database.GetDocument(Writer, new(database.Partition,
             CommandOutcomePartitionScopeTestData.Resource, HealthyFollowupDocumentId))?.Json).IsEqualTo(HealthyFollowupJson);
     }
@@ -87,7 +87,7 @@ internal static class CommandOutcomeAuthorizationOrderScenario
         byte[] outcomeKey, byte[] original, byte[] locatorKey, byte[] locator)
     {
         var denied = database.Database.Apply(operation);
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await AssertOutcomeAndDocumentUnchangedAsync(database, outcomeKey, original, locatorKey, locator);
     }
 

@@ -66,7 +66,7 @@ public static class MessagingCommandsQueueLifecycle
         if (action == DeliveryAction.Ack)
         {
             counters = QueueLifecycleAccounting.ReleaseQueueStored(counters, bodyBytes);
-            var body = StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueSweepTransitions.MissingIndexedBody);
+            var body = (StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id))).Value ?? throw Errors.Fail(ErrorCode.Corruption, QueueSweepTransitions.MissingIndexedBody);
             QueueOrderTransitions.RemoveQueueOrder(tx, lane, policy, body.Body, metadata);
             tx.Delete(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id));
             return metadata with

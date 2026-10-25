@@ -31,7 +31,7 @@ internal static class ScopedCommandIdentityClusterAssertions
         var changed = scenario.CreateCommand(original.CommandId, original.Partition,
             original.Mutations.OfType<PutDocument>().Single().Id, changedJson);
         var mcpResult = await mcp.CallAsync(McpCallerTools.DocumentsCommit, changed, cancellationToken);
-        await McpCallerAssertions.ErrorAsync(mcpResult, ErrorCode.Conflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(mcpResult, ErrorCode.Conflict, dispatched: true)).Value;
         var sdkResult = await sdk.CommitAsync(changed, cancellationToken);
         await Assert.That(sdkResult.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Conflict));
     }

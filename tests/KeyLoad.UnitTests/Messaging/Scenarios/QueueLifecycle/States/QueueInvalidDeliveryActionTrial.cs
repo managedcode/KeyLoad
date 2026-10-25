@@ -74,7 +74,7 @@ internal static class QueueInvalidDeliveryActionTrial
 
     private static async Task RequireRefusalAsync(Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.Problem?.Detail).IsEqualTo(Detail);
 
         await Assert.That(result.Value).IsNull();

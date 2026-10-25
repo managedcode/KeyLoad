@@ -22,17 +22,17 @@ internal sealed class AtomicPartitionRosterPlacementTests
             new PutDocument(AtomicPartitionRosterFixture.Collection, VertexId, DocumentJson));
         var destinationSeed = fixture.Batch(AtomicPartitionRosterFixture.Destination,
             new PutDocument(AtomicPartitionRosterFixture.Collection, VertexId, DocumentJson));
-        await Assert.That(Errors.Code(sourceSeed.Problem)).IsNull();
-        await Assert.That(Errors.Code(destinationSeed.Problem)).IsNull();
+        await Assert.That(Errors.Code(sourceSeed.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(destinationSeed.Problem).Value).IsNull();
         var targetEntry = fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)!;
         await Assert.That(targetEntry).IsNotNull();
         var edge = fixture.Batch(AtomicPartitionRosterFixture.Source,
             new UpsertEdge(AtomicPartitionRosterFixture.Graph, EdgeId, sourceVertex, destinationVertex, EdgeLabel));
-        await Assert.That(Errors.Code(edge.Problem)).IsNull();
+        await Assert.That(Errors.Code(edge.Problem).Value).IsNull();
         var delivered = fixture.Batch(AtomicPartitionRosterFixture.Destination,
             new ApplyCrossPartitionReverseEdge(AtomicPartitionRosterFixture.Source,
                 AtomicPartitionRosterFixture.Graph, EdgeId, destinationVertex, FirstRevision));
-        await Assert.That(Errors.Code(delivered.Problem)).IsNull();
+        await Assert.That(Errors.Code(delivered.Problem).Value).IsNull();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
         var receiver = fixture.Store.Read(view => view.GetRecord<GraphCrossPartitionReceiverState>(
             GraphCrossPartitionKeys.Reverse(AtomicPartitionRosterFixture.Destination,
@@ -41,13 +41,13 @@ internal sealed class AtomicPartitionRosterPlacementTests
         var completed = fixture.Batch(AtomicPartitionRosterFixture.Source,
             new CompleteCrossPartitionReverseEdge(AtomicPartitionRosterFixture.Source,
                 AtomicPartitionRosterFixture.Graph, EdgeId, destinationVertex, FirstRevision));
-        await Assert.That(Errors.Code(completed.Problem)).IsNull();
+        await Assert.That(Errors.Code(completed.Problem).Value).IsNull();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
 
         var sourceEntry = fixture.ReadEntry(AtomicPartitionRosterFixture.Source)!;
         var delete = fixture.Batch(AtomicPartitionRosterFixture.Source,
             new DeleteEdge(AtomicPartitionRosterFixture.Graph, EdgeId, FirstRevision));
-        await Assert.That(Errors.Code(delete.Problem)).IsNull();
+        await Assert.That(Errors.Code(delete.Problem).Value).IsNull();
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Source)).IsEqualTo(sourceEntry);
         await Assert.That(fixture.ReadEntry(AtomicPartitionRosterFixture.Destination)).IsEqualTo(targetEntry);
         fixture.Reopen();

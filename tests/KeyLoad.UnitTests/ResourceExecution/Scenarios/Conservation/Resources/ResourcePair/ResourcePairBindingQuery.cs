@@ -131,7 +131,7 @@ internal static class ResourcePairBindingQuery
         PrincipalRecord principal, ResourceDefinition resource)
     {
         var reference = new EntityRef(state.Source.Partition, Documents, state.Mixed[Zero].Id);
-        var document = database.ReadVisibleDocument(view, principal, reference) ?? throw new InvalidOperationException(Invalid);
+        var document = (database.ReadVisibleDocument(view, principal, reference)).Value ?? throw new InvalidOperationException(Invalid);
         return database.Project(principal, resource, document);
     }
 }

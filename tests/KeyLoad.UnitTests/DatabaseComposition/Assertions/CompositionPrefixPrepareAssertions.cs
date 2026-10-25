@@ -17,7 +17,7 @@ internal static class CompositionPrefixPrepareAssertions
 
     internal static async Task ResultAsync(CompositionPrefixPrepareCommand command, Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(command.Error);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(command.Error);
         await Assert.That(result.Problem?.Detail).IsEqualTo(command.SafeDetail);
         if (command.Receipt is { } receipt)
         {

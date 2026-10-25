@@ -34,7 +34,7 @@ internal static class StrongReadSessionRefusals
         var reply = route == StrongReadSessionRoute.McpGet
             ? await reader.Mcp.CallAsync(McpCallerTools.DocumentsGet, request, token)
             : await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, call, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         var golden = JsonSerializer.SerializeToElement(expected, JsonDefaults.Options);
         await Assert.That(JsonElement.DeepEquals(golden, reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret, SentinelJson);

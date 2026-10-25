@@ -34,12 +34,12 @@ internal sealed class CommandOutcomePartitionScopeFailureTests
         var changedMalformed = database.Database.Apply(CommandOutcomePartitionScopeTestData.Operation(database, commandId,
             OperationKind.RuntimeJournal, malformedInput with { JournalName = "outcome-changed-bootstrap" }));
 
-        await Assert.That(Errors.Code(malformedResult.Problem)).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
-        await Assert.That(Errors.Code(secondResult.Problem)).IsNull();
-        await Assert.That(Errors.Code(unknownReplay.Problem)).IsEqualTo(Errors.Code(malformedResult.Problem));
+        await Assert.That(Errors.Code(malformedResult.Problem).Value).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(firstResult.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(secondResult.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(unknownReplay.Problem).Value).IsEqualTo(Errors.Code(malformedResult.Problem).Value);
         await Assert.That(unknownReplay.Problem?.Detail).IsEqualTo(malformedResult.Problem?.Detail);
-        await Assert.That(Errors.Code(changedMalformed.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changedMalformed.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.Store.Position).IsEqualTo(beforeRefusal);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(unknownKey)))
             .IsEquivalentTo(originalFailure, TUnit.Assertions.Enums.CollectionOrdering.Matching);

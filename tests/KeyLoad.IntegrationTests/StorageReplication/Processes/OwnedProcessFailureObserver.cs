@@ -20,12 +20,12 @@ internal static class OwnedProcessFailureObserver
         }
     }
 
-    internal static async Task<Exception?> CaptureAsync(Task original)
+    internal static async Task<global::ManagedCode.Communication.Result<Exception?>> CaptureAsync(Task original)
     {
         await original.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing);
         if (original.Exception is { } error)
         {
-            return error.InnerExceptions.Count == 1 ? error.InnerExceptions[0] : error;
+            return error.InnerExceptions.Count == 1 ? global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error.InnerExceptions[0]))) : global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
         if (original.IsCanceled)
         {
@@ -33,9 +33,9 @@ internal static class OwnedProcessFailureObserver
             {
                 await original.ConfigureAwait(false);
             }
-            catch (OperationCanceledException canceled) { return canceled; }
+            catch (OperationCanceledException canceled) { return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(canceled))); }
         }
-        return null;
+        return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CaptureAsync));
     }
 
     private static async Task InvokeAsync(Action stage)

@@ -139,7 +139,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
             }
         };
         var mcp = await session.CallAsync(McpCallerTools.StreamsRead, foreign, cancellationToken);
-        var requestId = await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true);
+        var requestId = (await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(mcp, identity.Secret, McpEventStreamTokens.PrivateMarker);
         var http = await sdk.ReadStreamAsync(foreign, cancellationToken);
         await Assert.That(http.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
@@ -153,7 +153,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
     {
         var invalid = scenario.ReadRequest(McpEventStreamTokens.InitialRevision, McpEventStreamTokens.InvalidPageLimit);
         var mcp = await session.CallAsync(McpCallerTools.StreamsRead, invalid, cancellationToken);
-        var requestId = await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.BudgetExceeded, dispatched: true);
+        var requestId = (await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.BudgetExceeded, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(mcp, identity.Secret, McpEventStreamTokens.PrivateMarker);
         var http = await sdk.ReadStreamAsync(invalid, cancellationToken);
         await Assert.That(http.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.BudgetExceeded));
@@ -168,7 +168,7 @@ internal sealed class McpEventStreamTests(ClusterFixture fixture)
         var stale = scenario.ReadRequest(McpEventStreamTokens.InitialRevision,
             McpEventStreamTokens.ExpectedEventCount, McpEventStreamTokens.StaleGeneration);
         var mcp = await session.CallAsync(McpCallerTools.StreamsRead, stale, cancellationToken);
-        var requestId = await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.TokenInvalidated, dispatched: true);
+        var requestId = (await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.TokenInvalidated, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(mcp, identity.Secret, McpEventStreamTokens.PrivateMarker);
         var http = await sdk.ReadStreamAsync(stale, cancellationToken);
         await Assert.That(http.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));

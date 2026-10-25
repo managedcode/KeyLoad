@@ -12,8 +12,8 @@ internal sealed class PostgresSslNegotiation(global::Microsoft.Extensions.Option
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var frame = await PostgresFrameReader.ReadAsync(context.Transport.Input, true,
-                Options.MaximumStartupBytes, admission, token);
+            using var frame = (await PostgresFrameReader.ReadAsync(context.Transport.Input, true,
+                Options.MaximumStartupBytes, admission, token)).Value;
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 if (frame is null || !RequireSsl(frame.Payload))

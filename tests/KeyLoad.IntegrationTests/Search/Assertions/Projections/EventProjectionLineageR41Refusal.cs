@@ -17,7 +17,7 @@ internal static class EventProjectionLineageR41Refusal
             await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.NotFound, EventProjectionLineageR41Protocol.Unavailable), result.Problem);
             await EventProjectionLineageR41Canonical.CurrentAsync(admin, reader, state, token);
             var response = await worker.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-            await McpCallerAssertions.ErrorAsync(response, ErrorCode.NotFound, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(response, ErrorCode.NotFound, dispatched: true)).Value;
             await Assert.That(response.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
              .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(EventProjectionLineageR41Protocol.McpUnavailable);
             await EventProjectionLineageR41Canonical.CurrentAsync(admin, reader, state, token);

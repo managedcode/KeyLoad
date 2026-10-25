@@ -38,7 +38,7 @@ internal sealed record TextCapturedFileRoster(string Path, TextIncrementalManife
             var view = budget.CreateView(raw);
             var principal = fixture.Database.Principal(view, TextMaintenanceTestValues.Principal,
                 fixture.Database.EvaluationClock.GetUtcNow());
-            return fixture.Database.ReadOnlineTextCurrentPublication(view, principal, request, budget)
+            return (fixture.Database.ReadOnlineTextCurrentPublication(view, principal, request, budget)).Value
                 ?? throw new InvalidOperationException("The actual current canonical online publication is absent.");
         });
         var root = System.IO.Path.Combine(fixture.Directory, TextOnlineRoot.DirectoryName);

@@ -25,7 +25,7 @@ public static class ResourceExecutionCommands
         ValidateResource(request);
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Definition.Name);
         var previous = transaction.GetRecord<ResourceDefinition>(key);
-        _ = ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Definition.Name, previous);
+        _ = (ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Definition.Name, previous)).Value;
         ResourcePolicyUpdates.Validate(previous, request.Definition, request.ExpectedSchemaVersion);
         engine.RequireQueueDeliveryPolicyChange(transaction, request, previous);
         if (previous is null)

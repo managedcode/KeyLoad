@@ -31,7 +31,7 @@ internal static class Bm25OriginalExpiryAssertions
     internal static async Task FailureAsync(Bm25OriginalPhaseRecoveryFlow flow, Command<DatabaseCommand> operation,
         Result<object> result, Bm25OriginalPhaseRecoveryState before, string[] family)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.BudgetExceeded);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(result.Problem?.Detail).IsEqualTo(Bm25CorpusProtocol.Changed);
 
         await Assert.That(result.Value).IsNull();

@@ -30,8 +30,8 @@ internal static class SqlOffsetClusterRefusals
             var failure = await callers.Sdk.QueryAsync(bad, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, bad, token),
-                code, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, bad, token),
+                code, dispatched: true)).Value;
         }
         var ast = SqlOffsetClusterProtocol.Join(state.Partition);
         foreach (var offset in new[] { -1, int.MaxValue })
@@ -47,8 +47,8 @@ internal static class SqlOffsetClusterRefusals
             var failure = await callers.Sdk.QueryAstAsync(bad, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(ErrorCode.Validation.ToString());
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, bad, token),
-                ErrorCode.Validation, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, bad, token),
+                ErrorCode.Validation, dispatched: true)).Value;
         }
     }
     internal static async Task DeniedAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state, CancellationToken token)
@@ -60,16 +60,16 @@ internal static class SqlOffsetClusterRefusals
             var failure = await callers.Sdk.QueryAsync(query, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, query, token),
-                ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, query, token),
+                ErrorCode.PermissionDenied, dispatched: true)).Value;
         }
         foreach (var query in new[] { SqlOffsetClusterProtocol.Scalar(state.Partition), SqlOffsetClusterProtocol.Join(state.Partition) })
         {
             var failure = await callers.Sdk.QueryAstAsync(query, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-            await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, query, token),
-                ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryAst, query, token),
+                ErrorCode.PermissionDenied, dispatched: true)).Value;
         }
     }
     private const string RuntimeWindow = "OFFSET 1 ROWS FETCH NEXT 1 ROWS ONLY";

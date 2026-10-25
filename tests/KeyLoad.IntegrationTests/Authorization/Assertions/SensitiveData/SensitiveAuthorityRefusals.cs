@@ -14,7 +14,7 @@ internal static class SensitiveAuthorityRefusals
     {
         var before = await SensitiveAuthorityAssertions.ImageAsync(root, scenario, patched, token);
         var mcp = await session.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-        await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(mcp, identity.Secret, McpDocumentProtocol.ConflictValue);
         await McpCallerAssertions.DoesNotDiscloseAsync(mcp, identity.Secret, McpDocumentProtocol.PrivateValue);
         var sdk = await reader.CommitAsync(command, token);

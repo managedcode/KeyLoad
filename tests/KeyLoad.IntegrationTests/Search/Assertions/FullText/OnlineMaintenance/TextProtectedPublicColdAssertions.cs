@@ -53,8 +53,8 @@ internal static class TextProtectedPublicColdAssertions
         await Assert.That(denied.IsFailed).IsTrue();
         await Assert.That(denied.Value).IsNull();
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SearchExecute, request, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SearchExecute, request, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
         await SqlClusterProtocol.EqualAsync(before, await McpCallerAssertions.SdkSuccessAsync(
             await administrator.Sdk.OutboxStatusAsync(state.Scenario.Partition, token)));
         await SqlClusterProtocol.EqualAsync(before, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(

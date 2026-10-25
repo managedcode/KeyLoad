@@ -24,8 +24,8 @@ internal static class SampleChunkWorkDiscovery
                     last = key.ToArray();
                     try
                     {
-                        var hint = SampleChunkWorkEligibility.Read(database, owned, scope.Partition, scope.Set,
-                            scope.Series, scope.Id, database.EvaluationClock.GetUtcNow(), budget);
+                        var hint = (SampleChunkWorkEligibility.Read(database, owned, scope.Partition, scope.Set,
+                            scope.Series, scope.Id, database.EvaluationClock.GetUtcNow(), budget)).Value;
                         if (hint is not null)
                         {
                             hints.Add(hint);

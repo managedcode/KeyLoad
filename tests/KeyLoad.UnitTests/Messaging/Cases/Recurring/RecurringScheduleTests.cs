@@ -22,7 +22,7 @@ internal sealed class RecurringScheduleTests
 
         var stale = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new ConfigureRecurringSchedule(definition with { PayloadJson = ReplacementPayload }, 0)]));
-        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(stale.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         var replacement = fixture.Commit(fixture.Partition,
             new ConfigureRecurringSchedule(definition with
             {
@@ -43,7 +43,7 @@ internal sealed class RecurringScheduleTests
         await Assert.That(afterCancel.NextOrdinal).IsEqualTo(0);
         var emit = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new EmitRecurringOccurrences(fixture.Queue, scheduleId, 2, 1)]));
-        await Assert.That(Errors.Code(emit.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(emit.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         var reactivated = fixture.Commit(fixture.Partition,
             new ConfigureRecurringSchedule(definition with
             {
@@ -57,7 +57,7 @@ internal sealed class RecurringScheduleTests
         await Assert.That(active.NextOrdinal).IsEqualTo(0);
         var staleGeneration = fixture.Apply(OperationKind.Batch, new CommandRequest(Guid.NewGuid(), fixture.Partition,
             [new EmitRecurringOccurrences(fixture.Queue, scheduleId, 2, 1)]));
-        await Assert.That(Errors.Code(staleGeneration.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(staleGeneration.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
     }
 
     [Test]
@@ -80,7 +80,7 @@ internal sealed class RecurringScheduleTests
         {
             var result = fixture.Apply(OperationKind.Batch,
                 new CommandRequest(Guid.NewGuid(), fixture.Partition, [new ConfigureRecurringSchedule(invalid, 0)]));
-            await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Validation);
         }
         await Assert.That(fixture.Database.InspectRecurringSchedule(RecurringSagaDatabase.RootPrincipal,
             fixture.Queue, scheduleId)).IsNull();

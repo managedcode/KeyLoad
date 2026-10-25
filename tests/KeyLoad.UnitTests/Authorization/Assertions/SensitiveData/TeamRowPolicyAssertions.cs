@@ -86,7 +86,7 @@ internal static class TeamRowPolicyAssertions
             original with { Projects = projects, PolicyEpoch = ForgedPolicyEpoch } })
         {
             var refusal = db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(candidate));
-            await Assert.That(Errors.Code(refusal.Problem)).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(Errors.Code(refusal.Problem).Value).IsEqualTo(ErrorCode.Validation);
             await Assert.That(db.Store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(bytes)).IsTrue();
         }
     }
@@ -101,13 +101,13 @@ internal static class TeamRowPolicyAssertions
                 Teams = [TeamRowPolicyFlow.ForeignTeam],
                 PolicyEpoch = ForgedPolicyEpoch
             }), principal.Id);
-        await Assert.That(Errors.Code(forged.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(forged.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Store.Read(view => view.ReadOwnedValue(key))!.AsSpan().SequenceEqual(bytes)).IsTrue();
         var command = new CommandRequest(Guid.NewGuid(), db.Partition,
             [new PutDocument(TeamRowPolicyFlow.Collection, ForgedId, TeamRowPolicyFlow.OriginalJson,
                 AbsentRevision, new(TeamId: TeamRowPolicyFlow.ForeignTeam))]);
         var refused = db.Submit(OperationKind.Batch, command, principal.Id, command.CommandId);
-        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.GetDocument(TeamRowPolicyFlow.Root, new(db.Partition, TeamRowPolicyFlow.Collection, ForgedId), cancellationToken: token)).IsNull();
         var retained = TeamRowPolicyFlow.Outcome(db.Store, command);
         await OldRefusedAsync(db.Database, db.Store, command, retained, ErrorCode.PermissionDenied, token);
@@ -143,7 +143,7 @@ internal static class TeamRowPolicyAssertions
         var image = Image(store);
         var cut = store.Position;
         var refusal = engine.ApplyEmbedded(TeamRowPolicyFlow.Operation(store, original), cancellationToken: token);
-        await Assert.That(Errors.Code(refusal.Problem)).IsEqualTo(error);
+        await Assert.That(Errors.Code(refusal.Problem).Value).IsEqualTo(error);
         await Assert.That(TeamRowPolicyFlow.Outcome(store, original).AsSpan().SequenceEqual(outcome)).IsTrue();
         await UnchangedAsync(store, image, cut);
     }

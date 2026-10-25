@@ -26,7 +26,7 @@ internal static class QueueProducerClusterPolicy
         {
             var refused = QueueProducerClusterSetup.Fresh(seed, QueueProducerClusterProtocol.Refused, QueueProducerClusterProtocol.Refused);
             await QueueProducerClusterAssertions.DeniedAsync(await publisher.CommitAsync(refused, token), ErrorCode.PermissionDenied);
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, refused, token), ErrorCode.PermissionDenied, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, refused, token), ErrorCode.PermissionDenied, true)).Value;
             await AtomicProducerClusterRoutes.RefusedAsync(publisher, mcp, refused, ErrorCode.PermissionDenied, token);
             await QueueProducerClusterAssertions.AbsentAsync(publisher, seed, QueueProducerClusterProtocol.Refused, QueueProducerClusterProtocol.Refused, token);
             await QueueProducerClusterAssertions.EqualAsync(await QueueProducerClusterAssertions.ImageAsync(publisher, seed,
@@ -36,7 +36,7 @@ internal static class QueueProducerClusterPolicy
                 PolicyEpoch = checked(demoted.PolicyEpoch + QueueProducerClusterProtocol.PolicyEpochAdvance)
             }, token);
             await QueueProducerClusterAssertions.DeniedAsync(await publisher.CommitAsync(seed.Original, token), ErrorCode.PermissionDenied);
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, seed.Original, token), ErrorCode.PermissionDenied, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, seed.Original, token), ErrorCode.PermissionDenied, true)).Value;
             await AtomicProducerClusterRoutes.RefusedAsync(publisher, mcp, seed.Original, ErrorCode.PermissionDenied, token);
             await QueueProducerClusterAssertions.EqualAsync(await QueueProducerClusterAssertions.ImageAsync(publisher, seed,
                 QueueProducerClusterProtocol.Original, token), original.Image);

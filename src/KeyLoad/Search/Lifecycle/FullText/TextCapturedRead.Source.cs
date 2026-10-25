@@ -30,7 +30,7 @@ internal sealed partial class TextCapturedRead
         }
         ServerFailureObserver.ThrowIfAny(failures);
         budget.Check();
-        var callback = TextPostingObservation.Capture();
+        var callback = (TextPostingObservation.Capture()).Value;
         if (callback is not null && OriginalProjection is IOriginalTextPostingObservation observed)
         {
             observed.ObserveOriginalPosting(callback);

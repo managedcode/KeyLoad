@@ -15,7 +15,7 @@ internal static class SampleRetentionStatusReader
         ArgumentNullException.ThrowIfNull(budget);
 
         _ = SampleReadScope.Open(database, view, principalId, request.Partition, request.Set, request.SeriesId);
-        var state = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
+        var state = (SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget)).Value;
         budget.Check();
         return state is null
             ? new(null, PurgedCountEmptyCount, false)

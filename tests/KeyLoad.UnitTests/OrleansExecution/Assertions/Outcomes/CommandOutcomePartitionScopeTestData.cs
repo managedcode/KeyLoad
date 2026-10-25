@@ -30,7 +30,7 @@ internal static class CommandOutcomePartitionScopeTestData
         var position = database.Store.Position;
         var outcome = database.Store.Read(view => view.ReadOwnedValue(outcomeKey));
         var locator = database.Store.Read(view => view.ReadOwnedValue(locatorKey));
-        await Assert.That(Errors.Code(database.Database.ResolveOutcome(operation).Problem)).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(Errors.Code(database.Database.ResolveOutcome(operation).Problem).Value).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(EqualBytes(database.Store.Read(view => view.ReadOwnedValue(outcomeKey)), outcome)).IsTrue();
         await Assert.That(EqualBytes(database.Store.Read(view => view.ReadOwnedValue(locatorKey)), locator)).IsTrue();

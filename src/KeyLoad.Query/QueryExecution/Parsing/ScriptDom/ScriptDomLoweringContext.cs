@@ -7,7 +7,7 @@ internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Opti
     ReadExecutionBudget? budget, Dictionary<string, global::System.Text.Json.JsonElement>? parameters = null,
     int? positionalParameterCount = null)
 {
-    private readonly Dictionary<string, global::System.Text.Json.JsonElement>? ownedParameters = CopyParameters(parameters, budget);
+    private readonly Dictionary<string, global::System.Text.Json.JsonElement>? ownedParameters = (CopyParameters(parameters, budget)).Value;
     internal bool UseDocumentMetadata { get; set; } = true;
     internal Dictionary<string, global::System.Text.Json.JsonElement>? Parameters => ownedParameters;
     internal int? PositionalParameterCount => positionalParameterCount;
@@ -19,12 +19,12 @@ internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Opti
         ExecutionStackGuard.Ensure();
     }
     internal void Check(int depth) => Observe(depth);
-    private static Dictionary<string, global::System.Text.Json.JsonElement>? CopyParameters(
+    private static global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?> CopyParameters(
         Dictionary<string, global::System.Text.Json.JsonElement>? supplied, ReadExecutionBudget? work)
     {
         if (supplied is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?>.FailNotFound(nameof(CopyParameters));
         }
         var owned = new Dictionary<string, global::System.Text.Json.JsonElement>(supplied.Count, StringComparer.Ordinal);
         foreach (var entry in supplied)
@@ -36,7 +36,7 @@ internal sealed class ScriptDomLoweringContext(global::Microsoft.Extensions.Opti
             }
         }
         work?.Check();
-        return owned;
+        return global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?>.Succeed(((Dictionary<string, global::System.Text.Json.JsonElement>?)(owned)));
     }
 
 }

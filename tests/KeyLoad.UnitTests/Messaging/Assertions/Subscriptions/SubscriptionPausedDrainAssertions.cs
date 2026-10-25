@@ -47,7 +47,7 @@ internal static class SubscriptionPausedDrainAssertions
         foreach (var entry in history)
         {
             var replay = db.Apply(entry.Operation);
-            if (Errors.Code(entry.Result.Problem) is not null)
+            if (Errors.Code(entry.Result.Problem).Value is not null)
             {
                 await FailureAsync(replay);
                 await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
@@ -77,7 +77,7 @@ internal static class SubscriptionPausedDrainAssertions
 
     internal static async Task ReceiptAsync(Result<object> result, SubscriptionDeliveryCommand command, long position)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(receipt.Mutations).IsEquivalentTo(
@@ -87,7 +87,7 @@ internal static class SubscriptionPausedDrainAssertions
 
     private static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.DispatchPaused);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.DispatchPaused);
         await Assert.That(result.Problem?.Detail).IsEqualTo("Subscription delivery is paused.");
 
         await Assert.That(result.Value).IsNull();

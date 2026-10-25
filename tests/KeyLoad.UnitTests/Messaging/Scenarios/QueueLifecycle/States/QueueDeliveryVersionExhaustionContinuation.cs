@@ -140,7 +140,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
             state.Data.Producer, state.Data.Producer.CommandId, state.Data.Time), state.Data.Produced);
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state.Data, failed);
         var stale = database.Apply(state.Claim);
-        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(stale.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(stale.Value).IsNull();
 
         var original = store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(

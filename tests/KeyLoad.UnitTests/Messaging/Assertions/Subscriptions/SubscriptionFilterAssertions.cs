@@ -25,12 +25,12 @@ internal static class SubscriptionFilterAssertions
         }
         var result = SubscriptionFilterColdTrial.Apply(db, OperationKind.ConfigureSubscription, request,
             request.CommandId, token);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(expected);
 
         await Assert.That(Image(store, request.Subscription.Source.Partition)).IsEquivalentTo(before, CollectionOrdering.Matching);
         var replay = SubscriptionFilterColdTrial.Apply(db, OperationKind.ConfigureSubscription, request,
             request.CommandId, token);
-        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(expected);
         await Assert.That(replay.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
     }
 

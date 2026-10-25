@@ -51,7 +51,7 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         first.Commit((tx, _) => { tx.Put(key, saved); return true; });
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, originalBytes, originalPosition + 2, identity);
         var result = Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, token);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Get<ReceiveSubscriptionResult>().Deliveries).IsEmpty();
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 0, 3, 3);
         await SubscriptionReceiveSlotAuthorityAssertions.ReplayEmptyAsync(db, first, request, result, token);

@@ -26,7 +26,7 @@ internal static class CompetingInboxAssertions
             }
             else
             {
-                await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.Conflict);
+                await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.Conflict);
                 await Assert.That(actual.Problem?.Detail).IsEqualTo("The inbox input was already completed with different effects.");
                 await Assert.That(actual.Value).IsNull();
             }
@@ -66,7 +66,7 @@ internal static class CompetingInboxAssertions
             var raw = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(state.Partition, "root", operation.CommandId)))
                 ?? throw new InvalidOperationException("The competing inbox outcome is absent.");
             var replay = database.Apply(operation);
-            if (Errors.Code(original.Problem) is null)
+            if (Errors.Code(original.Problem).Value is null)
             {
                 await ReplayResultAssertions.Same<CommitReceipt>(replay, original);
             }

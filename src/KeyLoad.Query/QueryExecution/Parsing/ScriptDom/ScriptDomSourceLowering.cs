@@ -19,7 +19,7 @@ internal static class ScriptDomSourceLowering
             {
                 throw ScriptDomErrors.Unsupported();
             }
-            return (ScriptDomNames.Object(named.SchemaObject), Alias(named.Alias), null);
+            return (ScriptDomNames.Object(named.SchemaObject), (Alias(named.Alias)).Value, null);
         }
         if (table is not Dom.SchemaObjectFunctionTableReference function)
         {
@@ -31,7 +31,7 @@ internal static class ScriptDomSourceLowering
         }
         var name = ScriptDomNames.Object(function.SchemaObject);
         var values = function.Parameters;
-        var alias = Alias(function.Alias);
+        var alias = (Alias(function.Alias)).Value;
         if (StringComparer.OrdinalIgnoreCase.Equals(name, SqlSyntax.Events) && values.Count is StreamArguments or StreamGenerationArguments)
         {
             var collection = Identifier(values[FirstIndex], context);
@@ -55,14 +55,14 @@ internal static class ScriptDomSourceLowering
         }
         throw ScriptDomErrors.Unsupported();
     }
-    private static string? Alias(Dom.Identifier? alias)
+    private static global::ManagedCode.Communication.Result<string?> Alias(Dom.Identifier? alias)
     {
         if (alias is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(Alias));
         }
         global::KeyLoad.Core.JsonData.Identifier(alias.Value);
-        return alias.Value;
+        return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(alias.Value)));
     }
     private static string Identifier(Dom.ScalarExpression expression, ScriptDomLoweringContext context)
     {

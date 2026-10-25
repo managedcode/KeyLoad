@@ -93,7 +93,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         var result = Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(tenant, DatabaseId,
                 new ResourceDefinition(name, ResourceKind.Collection, TransactionDomainId)));
-        if (Errors.Code(result.Problem) is not null)
+        if (Errors.Code(result.Problem).Value is not null)
         {
             throw new InvalidOperationException(result.Problem?.Detail ?? ConfigurationFailure);
         }
@@ -121,7 +121,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
         var original = Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), RootPrincipalId,
             Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(request, JsonDefaults.Options));
         var result = Database.Apply(original);
-        if (Errors.Code(result.Problem) is not null)
+        if (Errors.Code(result.Problem).Value is not null)
         {
             throw new InvalidOperationException(result.Problem?.Detail ?? ConfigurationFailure);
         }

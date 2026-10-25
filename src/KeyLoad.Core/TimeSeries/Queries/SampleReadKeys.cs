@@ -12,20 +12,20 @@ internal static class SampleReadKeys
         DateTimeOffset from)
         => PrefixTimestamp(partition, set, seriesId, from);
 
-    internal static byte[]? UntilExclusive(PartitionRef partition, string set, string seriesId,
+    internal static global::ManagedCode.Communication.Result<byte[]?> UntilExclusive(PartitionRef partition, string set, string seriesId,
         DateTimeOffset? untilExclusive)
-        => untilExclusive is null ? null : PrefixTimestamp(partition, set, seriesId, untilExclusive.Value);
+        => ((byte[]?)(untilExclusive is null ? null : PrefixTimestamp(partition, set, seriesId, untilExclusive.Value))) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<byte[]?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(UntilExclusive));
 
-    internal static byte[]? ThroughInclusive(PartitionRef partition, string set, string seriesId,
+    internal static global::ManagedCode.Communication.Result<byte[]?> ThroughInclusive(PartitionRef partition, string set, string seriesId,
         DateTimeOffset? atOrBefore)
     {
         if (atOrBefore is null || atOrBefore.Value.UtcTicks == DateTimeOffset.MaxValue.UtcTicks)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(ThroughInclusive));
         }
 
-        return PrefixTimestamp(partition, set, seriesId,
-            new DateTimeOffset(atOrBefore.Value.UtcTicks + NextTimestampTick, TimeSpan.Zero));
+        return global::ManagedCode.Communication.Result<byte[]?>.Succeed((PrefixTimestamp(partition, set, seriesId,
+            new DateTimeOffset(atOrBefore.Value.UtcTicks + NextTimestampTick, TimeSpan.Zero))));
     }
 
     private static byte[] PrefixTimestamp(PartitionRef partition, string set, string seriesId,

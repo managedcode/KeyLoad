@@ -76,7 +76,7 @@ internal static class MixedEventingRetentionBackupInbox
     {
         var before = fixture.Target!.Position;
         var result = fixture.Apply(fixture.Database, OperationKind.Batch, command, command.CommandId);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The principal cannot perform this operation in this scope.");
         await Assert.That(result.Value).IsNull();
         await Assert.That(fixture.Target.Position).IsEqualTo(before + 1);

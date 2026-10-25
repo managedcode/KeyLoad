@@ -11,14 +11,14 @@ internal static class ScaleServerCgroupEnvelopeReader
     private const string MemoryMaximum = "memory.max";
     private const string Unlimited = "max";
 
-    internal static async Task<ScaleServerEnvelope?> ReadFromDirectoryAsync(string current, string root,
+    internal static async Task<global::ManagedCode.Communication.Result<ScaleServerEnvelope?>> ReadFromDirectoryAsync(string current, string root,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int DepthInitialValue = 0;
 
         if (!await ScaleServerCgroupHierarchy.IsSupportedRootAsync(root, budget, token))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync));
         }
 
         decimal? cpu = null;
@@ -28,10 +28,10 @@ internal static class ScaleServerCgroupEnvelopeReader
         for (var depth = DepthInitialValue; depth < budget.Settings.MaxCgroupAncestors; depth++)
         {
             var isRoot = directory == root;
-            var inputs = await ReadAncestorInputsAsync(directory, isRoot, budget, token);
+            var inputs = (await ReadAncestorInputsAsync(directory, isRoot, budget, token)).Value;
             if (inputs is null)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync));
             }
 
             if (cpuSet is null)
@@ -42,7 +42,7 @@ internal static class ScaleServerCgroupEnvelopeReader
             if (!TryAccumulateCpuLimit(inputs.Value.Cpu, isRoot, ref cpu)
                 || !TryAccumulateMemoryLimit(inputs.Value.Memory, ref memory))
             {
-                return null;
+                return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync));
             }
 
             if (directory == root)
@@ -54,15 +54,15 @@ internal static class ScaleServerCgroupEnvelopeReader
         }
         if (directory != root)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync));
         }
 
         var cpuValue = cpu?.ToString(CultureInfo.InvariantCulture) ?? Unlimited;
         var memoryValue = memory?.ToString(CultureInfo.InvariantCulture) ?? Unlimited;
-        return cpuSet is null ? null : new ScaleServerEnvelope(cpuValue, cpuSet, memoryValue);
+        return cpuSet is null ? global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadFromDirectoryAsync)) : global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.Succeed((ScaleServerEnvelope?)(new ScaleServerEnvelope(cpuValue, cpuSet, memoryValue)));
     }
 
-    private static async Task<(string Cpu, string Memory, string CpuSet)?> ReadAncestorInputsAsync(
+    private static async Task<global::ManagedCode.Communication.Result<(string Cpu, string Memory, string CpuSet)?>> ReadAncestorInputsAsync(
         string directory, bool isRoot, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const string EffectiveCpuSetFileName = "cpuset.cpus.effective";
@@ -70,15 +70,15 @@ internal static class ScaleServerCgroupEnvelopeReader
         var cpuPath = Path.Combine(directory, CpuMaximum);
         var memoryPath = Path.Combine(directory, MemoryMaximum);
         var cpuText = isRoot
-            ? ScaleServerCgroupHierarchy.ReadRootLimit(cpuPath)
-            : await BoundedText.ReadAsync(cpuPath, budget.Settings.MaxFileBytes, budget, token);
+            ? (ScaleServerCgroupHierarchy.ReadRootLimit(cpuPath)).Value
+            : (await BoundedText.ReadAsync(cpuPath, budget.Settings.MaxFileBytes, budget, token)).Value;
         var memoryText = isRoot
-            ? ScaleServerCgroupHierarchy.ReadRootLimit(memoryPath)
-            : await BoundedText.ReadAsync(memoryPath, budget.Settings.MaxFileBytes, budget, token);
-        var setText = await BoundedText.ReadAsync(Path.Combine(directory, EffectiveCpuSetFileName),
-            budget.Settings.MaxFileBytes, budget, token);
+            ? (ScaleServerCgroupHierarchy.ReadRootLimit(memoryPath)).Value
+            : (await BoundedText.ReadAsync(memoryPath, budget.Settings.MaxFileBytes, budget, token)).Value;
+        var setText = (await BoundedText.ReadAsync(Path.Combine(directory, EffectiveCpuSetFileName),
+            budget.Settings.MaxFileBytes, budget, token)).Value;
         return cpuText is null || memoryText is null || string.IsNullOrWhiteSpace(setText)
-            ? null : (cpuText, memoryText, setText);
+            ? global::ManagedCode.Communication.Result<(string Cpu, string Memory, string CpuSet)?>.FailNotFound(nameof(ReadAncestorInputsAsync)) : global::ManagedCode.Communication.Result<(string Cpu, string Memory, string CpuSet)?>.Succeed((((string Cpu, string Memory, string CpuSet)?)((cpuText, memoryText, setText))));
     }
 
     internal static bool TryAccumulateCpuLimit(string cpuText, bool isRoot, ref decimal? cpu)

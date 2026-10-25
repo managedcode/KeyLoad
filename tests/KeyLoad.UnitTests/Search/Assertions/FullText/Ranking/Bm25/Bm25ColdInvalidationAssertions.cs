@@ -63,9 +63,9 @@ internal static class Bm25ColdInvalidationAssertions
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
         var current = owner.Database.WithQueryView(Bm25OriginalPhaseRecoveryFlow.Subject,
             owner.Source.Partition, Bm25ColdInvalidationTrial.Collection, (view, principal, resource) =>
-                owner.Database.ReadBm25CorpusCurrent(view, principal, resource, owner.Source.Partition,
+                (owner.Database.ReadBm25CorpusCurrent(view, principal, resource, owner.Source.Partition,
                     Bm25ColdInvalidationTrial.Collection, Bm25ColdInvalidationTrial.Field,
-                    TextProjectionProtocol.TokenizerVersion, ["needle"], owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token)));
+                    TextProjectionProtocol.TokenizerVersion, ["needle"], owner.Source.CreateReadWork(Bm25OriginalPhaseRecoveryFlow.Token))).Value);
         await Assert.That(current is not null).IsEqualTo(expectedCurrent);
         var rows = await new SearchEngine(owner.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(
             Bm25OriginalPhaseRecoveryFlow.Subject, new(owner.Source.Partition,

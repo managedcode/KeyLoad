@@ -96,8 +96,8 @@ internal static class DeclarativeReverseQuotaFlow
         await Assert.That(actual.IsFailed).IsTrue();
         await Assert.That(actual.Value.ValueKind).IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
         await Assert.That(actual.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.ResourceExhausted));
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
-            ErrorCode.ResourceExhausted, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
+            ErrorCode.ResourceExhausted, dispatched: true)).Value;
         return JsonSerializer.SerializeToElement(actual.Problem, JsonDefaults.Options);
     }
 }

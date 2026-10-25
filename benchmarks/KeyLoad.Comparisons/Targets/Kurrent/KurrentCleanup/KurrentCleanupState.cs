@@ -140,7 +140,7 @@ internal sealed class KurrentCleanupState(int tracked, IOptions<ComparisonLifecy
     {
         if (firstFatal is null)
         {
-            firstFatal = KurrentCleanupFatalCause.Find(error);
+            firstFatal = (KurrentCleanupFatalCause.Find(error)).Value;
         }
         var classified = diagnostics.Classify(error);
         if (primary is not null)

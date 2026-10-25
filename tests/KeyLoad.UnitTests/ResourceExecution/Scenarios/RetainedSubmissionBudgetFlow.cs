@@ -27,10 +27,10 @@ internal static class RetainedSubmissionBudgetFlow
         {
             PolicyEpoch = InitialEpoch
         };
-        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Problem)).IsNull();
+        await Assert.That(Errors.Code(fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(subject)).Problem).Value).IsNull();
         var original = Issue(fixture, DocumentId);
         var committed = fixture.SubmitIssued(original);
-        await Assert.That(Errors.Code(committed.Problem)).IsNull();
+        await Assert.That(Errors.Code(committed.Problem).Value).IsNull();
         await Assert.That(committed.Get<CommitReceipt>().CommandId).IsEqualTo(original.CommandId);
         var work = Work(fixture);
         await HealthyAsync(fixture, original, committed, work);
@@ -80,7 +80,7 @@ internal static class RetainedSubmissionBudgetFlow
             {
                 Revoked = true,
                 PolicyEpoch = RevokedEpoch
-            })).Problem)).IsNull();
+            })).Problem).Value).IsNull();
         var before = RetainedSubmissionBudgetImage.Capture(fixture);
         var previousBytes = work.ReadBytes;
         var previousRecords = work.ConstrainedRecords;

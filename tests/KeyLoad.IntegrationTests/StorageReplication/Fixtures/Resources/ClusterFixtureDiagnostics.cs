@@ -113,20 +113,20 @@ internal sealed class ClusterFixtureDiagnostics : IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         var failures = new List<Exception>();
-        var cancelFailure = await OwnedProcessFailureObserver.CaptureAsync(lifetime.CancelAsync()).ConfigureAwait(false);
+        var cancelFailure = (await OwnedProcessFailureObserver.CaptureAsync(lifetime.CancelAsync()).ConfigureAwait(false)).Value;
         if (cancelFailure is not null)
         {
             failures.Add(cancelFailure);
         }
         if (resourceCapture is not null)
         {
-            var resourceFailure = await OwnedProcessFailureObserver.CaptureAsync(resourceCapture).ConfigureAwait(false);
+            var resourceFailure = (await OwnedProcessFailureObserver.CaptureAsync(resourceCapture).ConfigureAwait(false)).Value;
             if (resourceFailure is not null)
             {
                 failures.Add(resourceFailure);
             }
         }
-        var logsFailure = await OwnedProcessFailureObserver.CaptureAsync(Task.WhenAll(logCapture.Values)).ConfigureAwait(false);
+        var logsFailure = (await OwnedProcessFailureObserver.CaptureAsync(Task.WhenAll(logCapture.Values)).ConfigureAwait(false)).Value;
         if (logsFailure is not null)
         {
             failures.Add(logsFailure);

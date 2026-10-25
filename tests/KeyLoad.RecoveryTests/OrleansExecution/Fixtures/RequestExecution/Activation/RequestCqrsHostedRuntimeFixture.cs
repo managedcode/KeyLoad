@@ -55,8 +55,12 @@ internal sealed class RequestCqrsHostedRuntimeFixture : IAsyncInitializer, IAsyn
     private PartitionHost Local => Services.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
     internal GrainRequestCodec Codec => Services.GetRequiredService<GrainRequestCodec>();
     internal RequestWorkOwner RequestWork => Services.GetRequiredService<OrleansNode>().RequestWork;
-    internal TextIncrementalMaintenanceService? RuntimeMaintenance => profile.RuntimeText ? Local.TextMaintenance : null;
-    internal AnnMaintenanceService? RuntimeAnnMaintenance => profile.RuntimeAnn ? Local.AnnMaintenance : null;
+    internal global::ManagedCode.Communication.Result<TextIncrementalMaintenanceService?> RuntimeMaintenance => profile.RuntimeText
+        ? global::ManagedCode.Communication.Result<TextIncrementalMaintenanceService?>.Succeed(Local.TextMaintenance)
+        : global::ManagedCode.Communication.Result<TextIncrementalMaintenanceService?>.FailNotFound(nameof(RuntimeMaintenance));
+    internal global::ManagedCode.Communication.Result<AnnMaintenanceService?> RuntimeAnnMaintenance => profile.RuntimeAnn
+        ? global::ManagedCode.Communication.Result<AnnMaintenanceService?>.Succeed(Local.AnnMaintenance)
+        : global::ManagedCode.Communication.Result<AnnMaintenanceService?>.FailNotFound(nameof(RuntimeAnnMaintenance));
     internal RequestCqrsHostedDatabase Database { get; private set; } = null!;
     internal bool IsDisposalJoined => disposal?.IsCompletedSuccessfully == true;
     internal bool OwnedDirectoryExists => Directory.Exists(directory);

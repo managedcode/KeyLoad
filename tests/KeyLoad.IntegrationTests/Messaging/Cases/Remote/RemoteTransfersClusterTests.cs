@@ -94,8 +94,8 @@ internal sealed class RemoteTransfersClusterTests(ClusterFixture fixture)
         var tampered = string.Concat(changed.ToString(), intent.IntentToken[1..]);
         var command = Command(Guid.NewGuid(), scenario.DestinationPartition,
             new AcceptQueueTransfer(scenario.DestinationQueue, tampered));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, command,
-            cancellationToken), ErrorCode.TokenInvalidated, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, command,
+            cancellationToken), ErrorCode.TokenInvalidated, dispatched: true)).Value;
     }
 
     private async Task<PrincipalRecord> RejectRevokedDestinationPublisherAsync(KeyLoadClient sdk, McpOfficialClient mcp,

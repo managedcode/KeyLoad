@@ -14,8 +14,8 @@ internal static class SampleChunkRetentionClusterDenialOracle
         await Assert.That(direct.IsSuccess).IsFalse();
         await Assert.That(direct.Value).IsNull();
         await Assert.That(direct.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.HistoryUnavailable));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SampleChunkProtocol.ReadTool, request, token)
-            .ConfigureAwait(false), ErrorCode.HistoryUnavailable, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SampleChunkProtocol.ReadTool, request, token)
+            .ConfigureAwait(false), ErrorCode.HistoryUnavailable, dispatched: true)).Value;
         await SqlAsync(sdk, mcp, SqlClusterProtocol.Call(request.Partition, SampleChunkProtocol.ReadTool, request), token);
     }
 
@@ -26,8 +26,8 @@ internal static class SampleChunkRetentionClusterDenialOracle
         await Assert.That(direct.IsSuccess).IsFalse();
         await Assert.That(direct.Value).IsNull();
         await Assert.That(direct.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.HistoryUnavailable));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SampleRollupProtocol.ReadTool, request, token)
-            .ConfigureAwait(false), ErrorCode.HistoryUnavailable, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SampleRollupProtocol.ReadTool, request, token)
+            .ConfigureAwait(false), ErrorCode.HistoryUnavailable, dispatched: true)).Value;
         await SqlAsync(sdk, mcp, SqlClusterProtocol.Call(request.Partition, SampleRollupProtocol.ReadTool, request), token);
     }
 
@@ -38,7 +38,7 @@ internal static class SampleChunkRetentionClusterDenialOracle
         await Assert.That(direct.IsSuccess).IsFalse();
         await Assert.That(direct.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await Assert.That(direct.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.HistoryUnavailable));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, request, token)
-            .ConfigureAwait(false), ErrorCode.HistoryUnavailable, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, request, token)
+            .ConfigureAwait(false), ErrorCode.HistoryUnavailable, dispatched: true)).Value;
     }
 }

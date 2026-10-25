@@ -72,7 +72,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         }
         finally
         {
-            await CapabilityWorkLifetime.SettleAsync(work.PrimaryError, work, work.FailureTelemetry(),
+            await CapabilityWorkLifetime.SettleAsync(work.PrimaryError, work, (work.FailureTelemetry()).Value,
                 null).ConfigureAwait(true);
         }
     }
@@ -102,7 +102,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         ValidateFreshRequest(codec, request, work.RequestId, work.Token);
         work.Stage = GrainFailureStage.CapabilityExecution;
         work.BeginPhase(DatabasePhaseKind.AuthorizedReadCapability);
-        var result = await capabilities.ReadAsync(request, work.RequestId, work, work.Token).ConfigureAwait(true);
+        var result = (await capabilities.ReadAsync(request, work.RequestId, work, work.Token).ConfigureAwait(true)).Value;
         work.CompletePhase();
         work.Stage = GrainFailureStage.ReplyEncoding;
         return GrainReplyFactory.Value(value: result, cancellationToken: work.Token, options: codec.ExecutionOptions);

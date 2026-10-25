@@ -14,8 +14,8 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
         var draining = false;
         while (true)
         {
-            using var frame = await PostgresFrameReader.ReadAsync(context.Transport.Input, false,
-                Options.MaximumFrameBytes, admission, context.ConnectionClosed);
+            using var frame = (await PostgresFrameReader.ReadAsync(context.Transport.Input, false,
+                Options.MaximumFrameBytes, admission, context.ConnectionClosed)).Value;
             if (frame is null)
             {
                 return;

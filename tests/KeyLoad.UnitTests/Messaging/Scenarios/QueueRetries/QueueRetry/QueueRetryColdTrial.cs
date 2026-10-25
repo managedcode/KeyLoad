@@ -82,7 +82,7 @@ internal static class QueueRetryColdTrial
         {
             var actual = QueueWholeFlowStorage.Apply(database, OperationKind.Batch, rejected.Command,
                 rejected.Command.CommandId, time);
-            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(rejected.Result.Problem));
+            await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(rejected.Result.Problem).Value);
             await Assert.That(actual.Problem?.Detail).IsEqualTo(rejected.Result.Problem?.Detail);
             await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
                 .SequenceEqual(OrleansSerialization.Serialize(rejected.Result))).IsTrue();

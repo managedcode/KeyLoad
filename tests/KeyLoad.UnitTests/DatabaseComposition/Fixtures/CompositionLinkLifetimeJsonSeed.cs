@@ -50,7 +50,7 @@ internal static class CompositionLinkLifetimeJsonSeed
         {
             var partition = owner.Source.Partition;
             var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, name));
-            var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, name, definition)
+            var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, name, definition)).Value
                 ?? throw new InvalidOperationException("The genuine configured endpoint has no resource lifetime.");
             return new EntityRef(partition, name, id) { Lifetime = new(lifetime.Incarnation.Value) };
         });

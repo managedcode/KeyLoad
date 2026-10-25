@@ -43,11 +43,11 @@ internal static class DueFreshAttemptAssertions
     internal static async Task AssertDeniedAsync(RecurringSagaDatabase fixture, Guid commandId,
         Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         var stored = OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, CreatorId, commandId);
         await Assert.That(stored).IsNotNull();
         var actual = stored ?? throw new InvalidOperationException("The denied recurring outcome is absent.");
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
     }
 
     internal static async Task AssertNoEffectsAsync(RecurringSagaDatabase fixture, Guid scheduleId,
@@ -68,7 +68,7 @@ internal static class DueFreshAttemptAssertions
     internal static async Task<byte[]> AssertOneEmissionAsync(RecurringSagaDatabase fixture, Guid scheduleId,
         DateTimeOffset firstDue, Result<object> result, OutboxHead expectedOutbox, byte[]? storedSnapshot = null)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.Mutations).HasSingleItem();
         await Assert.That(receipt.Mutations[0].Kind).IsEqualTo(EmitMutationKind);
@@ -147,7 +147,7 @@ internal static class DueFreshAttemptAssertions
 
     internal static async Task AssertReplayAsync(Result<object> original, Result<object> replay)
     {
-        await Assert.That(Errors.Code(replay.Problem)).IsNull();
+        await Assert.That(Errors.Code(replay.Problem).Value).IsNull();
         var first = original.Get<CommitReceipt>();
         var again = replay.Get<CommitReceipt>();
         await Assert.That(again.Token).IsEqualTo(first.Token);

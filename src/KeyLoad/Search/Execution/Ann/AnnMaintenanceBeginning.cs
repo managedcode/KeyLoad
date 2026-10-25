@@ -33,6 +33,7 @@ internal static class AnnMaintenanceBeginning
             AnnGenerationOwner actualOwner;
             lock (originalGate)
             {
+                read.Check();
                 actualOwner = owningRoot();
                 memory ??= actualOwner.MaintenanceMemory.Reserve();
                 _ = actualOwner.MaintenanceMemory.Remaining(captured.PeakBytesUpperBound);

@@ -145,12 +145,12 @@ internal sealed class ThreeWayHybridClusterTests(ClusterFixture fixture)
         await Assert.That(direct.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var directMcp = await mcp.CallAsync(ThreeWayHybridClusterScenario.SearchGraphTool,
             scenario.Request(allZero: true, expansion: false, labeled: true), cancellationToken);
-        await McpCallerAssertions.ErrorAsync(directMcp, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(directMcp, ErrorCode.PermissionDenied, dispatched: true)).Value;
         var sqlRequest = scenario.SqlRequest(allZero: true, expansion: false, labeled: true);
         var sql = await sdk.SearchSqlAsync(sqlRequest, cancellationToken);
         await Assert.That(sql.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var sqlMcp = await mcp.CallAsync(ThreeWayHybridClusterScenario.SqlGraphTool, sqlRequest, cancellationToken);
-        await McpCallerAssertions.ErrorAsync(sqlMcp, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(sqlMcp, ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     private static async Task VerifyEquivalentAsync(GraphSearchResult direct, GraphSearchResult sql,
@@ -189,13 +189,13 @@ internal sealed class ThreeWayHybridClusterTests(ClusterFixture fixture)
         };
         var sdkDirect = await sdk.GraphSearchAsync(direct, cancellationToken);
         await Assert.That(sdkDirect.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(ThreeWayHybridClusterScenario.SearchGraphTool,
-            direct, cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(ThreeWayHybridClusterScenario.SearchGraphTool,
+            direct, cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
         var sql = scenario.SqlRequest(allZero: true, expansion: false);
         var sdkSql = await sdk.SearchSqlAsync(sql, cancellationToken);
         await Assert.That(sdkSql.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(ThreeWayHybridClusterScenario.SqlGraphTool,
-            sql, cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(ThreeWayHybridClusterScenario.SqlGraphTool,
+            sql, cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     private static async Task AssertRevokedAsync(KeyLoadClient sdk, McpOfficialClient mcp,

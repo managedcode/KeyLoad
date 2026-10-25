@@ -28,7 +28,7 @@ internal static class QueryCursorRequestIdentityR47Refusals
                 await QueryCursorRequestIdentityR47Pages.ContinueAsync(root, reader, state, original, 0, token);
             }
             var reply = await reader.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.CursorExpired, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.CursorExpired, dispatched: true)).Value;
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(QueryCursorRequestIdentityR47Protocol.DetailKey).GetString())
                 .IsEqualTo(QueryCursorRequestIdentityR47Protocol.SafeCursorDetail);

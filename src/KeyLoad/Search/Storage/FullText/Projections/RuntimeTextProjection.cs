@@ -107,7 +107,7 @@ internal sealed class RuntimeTextProjection : ITextProjection
             () => state.ClearCurrent(generation), () => state.ClearFailedBuild(slot), faultObserver, physicalGate, executionOptions: executionOptions),
             failures);
         ServerFailureObserver.Observe(() => lifecycle.CheckPhysical(completed && failures.Count == NoCleanupFailures ? budget : null), failures);
-        var retired = state.CompleteLease(slot, Failure(failures));
+        var retired = state.CompleteLease(slot, (Failure(failures)).Value);
         if (retired is not null)
         {
             ServerFailureObserver.Observe(() => lifecycle.Retire(retired), failures);
@@ -122,11 +122,11 @@ internal sealed class RuntimeTextProjection : ITextProjection
 
     internal void MutatePhysical(Action mutation) => physicalGate.Run(mutation);
 
-    private static Exception? Failure(List<Exception> failures)
+    private static global::ManagedCode.Communication.Result<Exception?> Failure(List<Exception> failures)
         => failures.Count switch
         {
-            FailureEmptyCount => null,
-            FailureSingleItemCount => failures[FailureIndexEmptyCount],
-            _ => new AggregateException(failures)
+            FailureEmptyCount => global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Failure)),
+            FailureSingleItemCount => global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(failures[FailureIndexEmptyCount]))),
+            _ => global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(failures)))
         };
 }

@@ -90,7 +90,7 @@ internal static class TimeSeriesResourceTagPolicyClusterPolicy
         arguments.Add(McpCallerProtocol.CommandId, state.StaleId);
         var reply = await administrator.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.ResourcesConfigure,
             arguments, cancellationToken: token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, dispatched: true)).Value;
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(DetailProperty).GetString()).IsEqualTo(McpStaleDetail);
         await AfterAsync(reader, administrator, state, token);

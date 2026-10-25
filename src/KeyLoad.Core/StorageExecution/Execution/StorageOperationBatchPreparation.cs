@@ -41,7 +41,7 @@ public static class StorageOperationBatchPreparation
             Command<DatabaseCommand> command;
             try
             {
-                command = engine.ReadStoredCommand(operation, cancellationToken)?.Command
+                command = engine.ReadStoredCommand(operation, cancellationToken).Value?.Command
                     ?? engine.PrepareStorageOperation(operation, notBefore, cancellationToken);
             }
             catch (Exception error) when (prepared.Count > 0 && CqrsRuntimeFailures.FindFatal(error) is null)

@@ -19,7 +19,7 @@ internal static class CrossTenantClusterErrorAssertions
     }
     internal static async Task McpAsync(CallToolResult result, string secret)
     {
-        await McpCallerAssertions.ErrorAsync(result, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(result, ErrorCode.PermissionDenied, dispatched: true)).Value;
         var error = result.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error);
         await Assert.That(error.GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(Detail);
         await PrivateAsync(JsonSerializer.Serialize(result), secret);

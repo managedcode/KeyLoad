@@ -23,10 +23,10 @@ internal sealed partial class FileStorageController
     [HttpGet(ListRoute), FileStorageCapability(Capability.BlobRead)]
     public async Task<Result<BlobMetadata[]>> ListAsync([FromQuery] string? after, CancellationToken cancellationToken)
     {
-        var state = await Files.ReadAsync(string.Empty, Capability.BlobRead, Guid.Empty, cancellationToken, true, Cursors.Decode(Files, after));
+        var state = await Files.ReadAsync(string.Empty, Capability.BlobRead, Guid.Empty, cancellationToken, true, (Cursors.Decode(Files, after)).Value);
         if (state.HasMore)
         {
-            Response.Headers[FileStorageHeaders.Next] = Cursors.Encode(Files, state.NextAfter);
+            Response.Headers[FileStorageHeaders.Next] = (Cursors.Encode(Files, state.NextAfter)).Value;
         }
         return Result<BlobMetadata[]>.Succeed(state.Entries.Select(FileStorageRequest.PublicMetadata).ToArray());
     }
@@ -43,7 +43,7 @@ internal sealed partial class FileStorageController
     [HttpPost(CleanupRoute), FileStorageCapability(Capability.BlobManage)]
     public async Task<Result<int>> CleanupAsync([FromQuery] string? after, CancellationToken cancellationToken)
     {
-        var page = await Files.ReadAsync(string.Empty, Capability.BlobManage, Guid.Empty, cancellationToken, true, Cursors.Decode(Files, after));
+        var page = await Files.ReadAsync(string.Empty, Capability.BlobManage, Guid.Empty, cancellationToken, true, (Cursors.Decode(Files, after)).Value);
         var reclaimed = FileStorageProtocol.EmptyCount;
         foreach (var upload in page.Uploads)
         {
@@ -65,7 +65,7 @@ internal sealed partial class FileStorageController
         }
         if (page.HasMore)
         {
-            Response.Headers[FileStorageHeaders.Next] = Cursors.Encode(Files, page.NextAfter);
+            Response.Headers[FileStorageHeaders.Next] = (Cursors.Encode(Files, page.NextAfter)).Value;
         }
         return Result<int>.Succeed(reclaimed);
     }

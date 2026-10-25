@@ -41,7 +41,7 @@ internal static class SubscriptionFilterClusterAssertions
         var failed = await manager.ConfigureSubscriptionAsync(request, token);
         await Assert.That(failed.IsFailed).IsTrue();
         await Assert.That(failed.Problem!.ErrorCode).IsEqualTo(error.ToString());
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsConfigure, request, token), error, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsConfigure, request, token), error, true)).Value;
         await EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await manager.SubscriptionStatusAsync(request.Subscription, token)), before);
     }
 }

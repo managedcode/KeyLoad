@@ -67,7 +67,7 @@ public static class ProjectionBatchExecution
         var key = ChangeFeedsExecution.ProjectionReceiptKey(claims, request);
         var fingerprint = JsonData.Fingerprint(request.Effects);
         var completed = tx.GetRecord<ProjectionReceipt>(key);
-        var enrollment = engine.RequireAnnInitialSettlement(tx, principal, request, claims, now, completed is not null);
+        var enrollment = (engine.RequireAnnInitialSettlement(tx, principal, request, claims, now, completed is not null)).Value;
         if (completed is not null)
         {
             if (fingerprint != completed.Fingerprint)

@@ -14,7 +14,7 @@ internal static class TextRequestRefusalPublicAssertions
         await Assert.That(sdk.Value).IsNull();
         await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.Validation));
         var official = await reader.Mcp.CallAsync(McpCallerTools.SearchExecute, request, token);
-        await McpCallerAssertions.ErrorAsync(official, ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.Validation, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(official, secret, TextClusterScenario.Secret);
     }
 

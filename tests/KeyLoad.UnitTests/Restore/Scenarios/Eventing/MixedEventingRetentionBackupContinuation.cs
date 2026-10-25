@@ -11,10 +11,10 @@ internal static class MixedEventingRetentionBackupContinuation
         await EventingArtifactFences.FailedAsync(fixture, OperationKind.Delivery, oldAck, oldAck.CommandId,
             ErrorCode.TokenInvalidated, "The signed token is invalid.");
         var cut = fixture.Target!.Position;
-        await Assert.That(Errors.Code(TargetInboxSetup.Apply(fixture.Database, state.Inbox, token).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(TargetInboxSetup.Apply(fixture.Database, state.Inbox, token).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(fixture.Target.Position).IsEqualTo(cut);
         await Assert.That(Errors.Code(fixture.Database.Apply(fixture.Operation(OperationKind.Batch, state.Purge,
-            state.Purge.CommandId)).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+            state.Purge.CommandId)).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await MixedEventingRetentionBackupOracle.InitialAsync(fixture, state, fixture.Database);
         await MixedEventingRetentionBackupPrivacy.RunAsync(fixture, state, token);
         await MixedEventingRetentionBackupHeldLease.RequireNaturalExpiryAsync(fixture, state, token);

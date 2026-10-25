@@ -24,7 +24,7 @@ internal static class SharedDomainRecoveryConflict
         var rows = SharedDomainStoredImage.Capture(store);
         var position = store.Position;
         var refused = database.Apply(changed);
-        await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(refused.Problem?.Detail).IsEqualTo(Conflict);
 
         await Assert.That(refused.Value).IsNull();

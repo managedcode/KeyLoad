@@ -45,8 +45,8 @@ internal sealed class TimeSeriesIntensivePhaseExecutor(ITimeSeriesIntensiveTarge
                     break;
                 }
 
-                var attempt = await TimeSeriesIntensiveAttemptExecutor.ExecuteAsync(target, expected, phase,
-                    index, worker, concurrency, executionOptions, cellCancellation: workers.Token, timeProvider: timeProvider).ConfigureAwait(false);
+                var attempt = (await TimeSeriesIntensiveAttemptExecutor.ExecuteAsync(target, expected, phase,
+                    index, worker, concurrency, executionOptions, cellCancellation: workers.Token, timeProvider: timeProvider).ConfigureAwait(false)).Value;
                 if (!attempt.HasValue)
                 {
                     break;

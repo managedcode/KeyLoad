@@ -47,7 +47,7 @@ internal static class CompetingInboxSeed
             await ServerFailureObserver.ObserveAsync(async () => state.Results[index] = await tasks[index], failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
-        var success = state.Results.First(result => Errors.Code(result.Problem) is null).Get<CommitReceipt>();
+        var success = state.Results.First(result => Errors.Code(result.Problem).Value is null).Get<CommitReceipt>();
         state.Winner = Array.FindIndex(state.Competitors, operation => operation.CommandId == success.CommandId);
         await Assert.That(state.Winner is 0 or 1).IsTrue();
         state.Receipt = success;

@@ -39,8 +39,8 @@ internal static class GraphVertexPublicCommands
     {
         var sdk = await callers.Sdk.CommitAsync(command, token);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(sdk, error);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-            McpCallerTools.DocumentsCommit, command, token), error, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+            McpCallerTools.DocumentsCommit, command, token), error, dispatched: true)).Value;
         state.Refusals.Add((command, error));
         await GraphVertexPublicAssertions.Originals(callers, state, token);
         await GraphVertexPublicAssertions.Models(callers, state, token);

@@ -2,13 +2,13 @@ namespace KeyLoad.Comparisons.BenchmarkComparisons.TimeSeries.Intensive;
 
 internal static class TimeSeriesIntensiveResponseReader
 {
-    internal static async Task<TimeSeriesIntensiveResponse?> ReadAsync(ITimeSeriesIntensiveTarget target,
+    internal static async Task<global::ManagedCode.Communication.Result<TimeSeriesIntensiveResponse?>> ReadAsync(ITimeSeriesIntensiveTarget target,
         TimeSeriesIntensiveExpectations expected, TimeSeriesIntensivePreparedPhase phase, int index,
         TimeSeriesIntensiveCallScope call, TimeSeriesIntensiveConcurrency concurrency)
     {
         if (!call.AcceptInvocation())
         {
-            return null;
+            return global::ManagedCode.Communication.Result<TimeSeriesIntensiveResponse?>.FailNotFound(nameof(ReadAsync));
         }
 
         var range = expected.Ranges[index % TimeSeriesIntensiveProfile.RangeGroups];
@@ -18,7 +18,7 @@ internal static class TimeSeriesIntensiveResponseReader
         {
             var response = await InvokeAsync(target, expected, phase, index, range, call.Token).ConfigureAwait(false);
             call.Stop();
-            return response;
+            return global::ManagedCode.Communication.Result<TimeSeriesIntensiveResponse?>.Succeed(((TimeSeriesIntensiveResponse?)(response)));
         }
         catch (Exception)
         {

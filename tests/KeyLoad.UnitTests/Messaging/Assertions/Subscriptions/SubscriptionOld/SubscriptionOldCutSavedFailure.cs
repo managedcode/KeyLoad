@@ -59,7 +59,7 @@ internal static class SubscriptionOldCutSavedFailure
     }
     private static async Task ResultAsync(Result<object> result, ErrorCode code, string detail)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
 
         await Assert.That(result.Value).IsNull();
@@ -69,7 +69,7 @@ internal static class SubscriptionOldCutSavedFailure
         await Assert.That(actual.Fingerprint).IsEqualTo(expected.Fingerprint);
         await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(expected.PolicyEpoch);
-        await ResultAsync(actual.Result, Errors.Code(expected.Result.Problem)!.Value, expected.Result.Problem?.Detail!);
+        await ResultAsync(actual.Result, Errors.Code(expected.Result.Problem).Value!.Value, expected.Result.Problem?.Detail!);
         await Assert.That(actual.ScopeKind).IsEqualTo(expected.ScopeKind);
         await Assert.That(actual.Partition).IsEqualTo(expected.Partition);
         await Assert.That(actual.CompositionAuthority).IsNull();

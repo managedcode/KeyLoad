@@ -11,8 +11,8 @@ internal static class BackgroundStorageReadExecution
     internal static async Task<T> RunLocalAsync<T>(PartitionStorageScope storage,
         Func<CancellationToken, T> read, CancellationToken token)
     {
-        await using var lifetime = CapabilityWorkLifetime.Acquire(storage.Work, Guid.NewGuid(),
-            RequestWorkKind.RuntimeTransport, token)
+        await using var lifetime = (CapabilityWorkLifetime.Acquire(storage.Work, Guid.NewGuid(),
+            RequestWorkKind.RuntimeTransport, token)).Value
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         try
         {
@@ -37,8 +37,8 @@ internal static class BackgroundStorageReadExecution
         CancellationToken token)
     {
         Require(bounds, clock);
-        await using var lifetime = CapabilityWorkLifetime.Acquire(storage.Work, Guid.NewGuid(),
-            RequestWorkKind.RuntimeTransport, token)
+        await using var lifetime = (CapabilityWorkLifetime.Acquire(storage.Work, Guid.NewGuid(),
+            RequestWorkKind.RuntimeTransport, token)).Value
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         var work = new ReadExecutionBudget(clock, lifetime.Token);
         work.ConstrainLifetime(bounds.ExpiresAt);

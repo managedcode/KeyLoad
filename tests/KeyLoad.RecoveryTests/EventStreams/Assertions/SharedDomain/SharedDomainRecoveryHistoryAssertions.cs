@@ -19,7 +19,7 @@ internal static class SharedDomainRecoveryHistoryAssertions
             if (entry.Operation.Value!.Kind == OperationKind.Receive)
             {
                 var refused = database.ResolveOutcome(entry.Operation);
-                await Assert.That(Errors.Code(refused.Problem)).IsEqualTo(ErrorCode.StaleLease);
+                await Assert.That(Errors.Code(refused.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
                 await Assert.That(refused.Problem?.Detail).IsEqualTo(Stale);
 
                 await Assert.That(refused.Value).IsNull();

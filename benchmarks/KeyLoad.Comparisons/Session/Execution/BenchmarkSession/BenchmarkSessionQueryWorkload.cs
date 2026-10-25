@@ -59,7 +59,7 @@ internal sealed class BenchmarkSessionQueryWorkload(BenchmarkSessionContext cont
     }
 
     private async Task<BenchmarkSessionCaseReport> RunLaneAsync(string id, string name,
-        Func<IComparisonSession, int, CancellationToken, Task> operation, bool documentSessions, CancellationToken token)
+        Func<IComparisonSession?, int, CancellationToken, Task> operation, bool documentSessions, CancellationToken token)
     {
         var timer = new BenchmarkSessionTimer(context.Clock);
         try

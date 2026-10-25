@@ -11,31 +11,31 @@ public static class QueueDeadline
         var batch = OperationProtocol.Payload<CommandRequest>(operation);
         foreach (var request in batch.Mutations.OfType<AdvanceQueueDeadline>())
         {
-            if (engine.ReadQueueDeadlineRetryInput(view, batch.Partition, operation.Timestamp, request) is { } input)
+            if ((engine.ReadQueueDeadlineRetryInput(view, batch.Partition, operation.Timestamp, request)).Value is { } input)
             {
                 inputs.Add(input);
             }
         }
     }
 
-    internal static QueueRetryInput? ReadQueueDeadlineRetryInput(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, DateTimeOffset evaluatedAt, AdvanceQueueDeadline request)
+    internal static global::ManagedCode.Communication.Result<QueueRetryInput?> ReadQueueDeadlineRetryInput(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, DateTimeOffset evaluatedAt, AdvanceQueueDeadline request)
     {
         if (request.Kind != QueueDeadlineKind.ExpireLease)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<QueueRetryInput?>.FailNotFound(nameof(ReadQueueDeadlineRetryInput));
         }
 
         var lane = new QueueLaneRef(partition, request.Queue);
         var resource = engine.Resource(view, partition, request.Queue, ResourceKind.WorkQueue);
         if (resource.Paused || engine.DispatchPaused(view) || resource.QueuePolicy.RetryJitter != QueueRetryJitter.Full)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<QueueRetryInput?>.FailNotFound(nameof(ReadQueueDeadlineRetryInput));
         }
 
         var metadata = MessagingValidationQueueDeadlines.RequireQueueDeadlineState(view, lane, request, evaluatedAt);
         if (metadata.ExpiresAt <= evaluatedAt || metadata.Attempts >= resource.QueuePolicy.MaxAttempts)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<QueueRetryInput?>.FailNotFound(nameof(ReadQueueDeadlineRetryInput));
         }
 
         var key = MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.LeasedQueueSpace, lane, request.ExpectedDeadline, metadata.Id);
@@ -45,6 +45,6 @@ public static class QueueDeadline
         }
 
         QueueDueAuthority.RequireCurrentQueueDueEntry(lane, metadata, evaluatedAt, leased: true, key);
-        return new(lane, resource.QueuePolicy, metadata, key);
+        return global::ManagedCode.Communication.Result<QueueRetryInput?>.Succeed(((QueueRetryInput?)(new(lane, resource.QueuePolicy, metadata, key))));
     }
 }

@@ -106,7 +106,7 @@ public static class AtomicCommandCommit
         persistOutcome = false;
         var authorizationPending = false;
         long policyEpoch = AtomicCommandCommitInitialSequence;
-        var onlineTextAuthority = OnlineTextPublicationCommands.CaptureOnlineTextOutcomeAuthority(operation);
+        var onlineTextAuthority = (OnlineTextPublicationCommands.CaptureOnlineTextOutcomeAuthority(operation)).Value;
         global::KeyLoad.Core.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure = null;
         Result<object> result;
         global::KeyLoad.Core.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority = null;
@@ -115,7 +115,7 @@ public static class AtomicCommandCommit
             var principal = engine.Principal(transaction, operation.UserId!, engine.Clock.GetUtcNow());
             authorizationPending = true;
             policyEpoch = principal.PolicyEpoch;
-            var placement = engine.AuthorizeOperation(transaction, principal, operation);
+            var placement = (engine.AuthorizeOperation(transaction, principal, operation)).Value;
             authorizationPending = false;
             selection = CommandOutcomeKeyResolver.Select(transaction, operation.UserId!, operation.CommandId, partitionScope);
             persistOutcome = selection.Outcome is null;
@@ -133,9 +133,9 @@ public static class AtomicCommandCommit
             engine.RequireOriginalEffectAdmission(transaction, principal, operation);
             ValidateCommandClock(transaction, operation.Timestamp);
             engine.ValidateQueueRetryDecisions(transaction, principal, operation);
-            transferFailure = engine.CaptureRemoteTransferFailureAuthority(transaction, principal, operation);
+            transferFailure = (engine.CaptureRemoteTransferFailureAuthority(transaction, principal, operation)).Value;
             result = engine.Execute(transaction, principal, operation, replicationIndex > AtomicCommandCommitInitialSequence ? replicationIndex : position, placement, cancellationToken);
-            compositionAuthority = engine.CaptureCompositionOutcome(transaction, principal, operation, result);
+            compositionAuthority = (engine.CaptureCompositionOutcome(transaction, principal, operation, result)).Value;
         }
         catch (KeyLoadException exception) when (exception.Code is not (ErrorCode.Corruption or ErrorCode.FormatUnsupported or ErrorCode.RecoveryRequired or ErrorCode.UnknownWriteOutcome))
         {

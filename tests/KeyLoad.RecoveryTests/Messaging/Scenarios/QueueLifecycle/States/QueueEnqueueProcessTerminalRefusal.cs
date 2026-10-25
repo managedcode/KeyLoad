@@ -19,7 +19,7 @@ internal static class QueueEnqueueProcessTerminalRefusal
         var operation = owner.OwnCommand(CrashDatabase.Operation(owner, OperationKind.Batch, command, command.CommandId));
         var domain = Domain(store);
         var result = owner.Apply(operation);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo(QueueEnqueueCrashProtocol.ExpectedDuplicateMessageDetail);
 
         await Assert.That(result.Value).IsNull();

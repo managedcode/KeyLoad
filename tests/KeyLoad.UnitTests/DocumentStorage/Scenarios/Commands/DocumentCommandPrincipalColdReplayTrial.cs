@@ -54,8 +54,8 @@ internal static class DocumentCommandPrincipalColdReplayTrial
         var before = DocumentPatchAtomicityState.Read(owner);
         var changedFirst = Create(owner, sharedId, FirstPrincipal, FirstDocument, ChangedJson, 1);
         var changedSecond = Create(owner, sharedId, SecondPrincipal, SecondDocument, ChangedJson, 1);
-        await Assert.That(Errors.Code(owner.Submit(changedFirst).Problem)).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(Errors.Code(owner.Submit(changedSecond).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(owner.Submit(changedFirst).Problem).Value).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(owner.Submit(changedSecond).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await DocumentCommandPrincipalColdReplayAssertions.ReplayAsync(owner, first);
         await DocumentCommandPrincipalColdReplayAssertions.ReplayAsync(owner, second);
         await before.RequireAsync(DocumentPatchAtomicityState.Read(owner));

@@ -59,7 +59,7 @@ internal static class RuntimeJournalValidation
     internal static long EffectiveOwnerGeneration(IReadOnlyDictionary<string, string> before,
         IReadOnlyDictionary<string, string> after)
     {
-        var changedOwner = !string.Equals(EffectiveOwner(before), EffectiveOwner(after), StringComparison.Ordinal);
+        var changedOwner = !string.Equals((EffectiveOwner(before)).Value, (EffectiveOwner(after)).Value, StringComparison.Ordinal);
         var changedPoison = EffectivePoison(before) != EffectivePoison(after);
         return changedOwner || changedPoison
             ? RuntimeJournalProtocol.OwnerGenerationIncrement
@@ -114,9 +114,9 @@ internal static class RuntimeJournalValidation
         }
     }
 
-    private static string? EffectiveOwner(IReadOnlyDictionary<string, string> properties)
-        => properties.TryGetValue(Contracts.RuntimeJournalProtocol.OwnerProperty, out var owner)
-            && owner.Length != RuntimeJournalProtocol.EmptyCount ? owner : null;
+    private static global::ManagedCode.Communication.Result<string?> EffectiveOwner(IReadOnlyDictionary<string, string> properties)
+        => (properties.TryGetValue(Contracts.RuntimeJournalProtocol.OwnerProperty, out var owner)
+            && owner.Length != RuntimeJournalProtocol.EmptyCount ? owner : null) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<string?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(EffectiveOwner));
 
     private static bool EffectivePoison(IReadOnlyDictionary<string, string> properties)
     {

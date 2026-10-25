@@ -62,7 +62,7 @@ internal static class GraphLabelUseClusterReads
     private static async Task OfficialErrorAsync(global::ModelContextProtocol.Protocol.CallToolResult reply,
         GraphLabelUseClusterState state, ErrorCode code)
     {
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         if (code == ErrorCode.PermissionDenied)
         {
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)

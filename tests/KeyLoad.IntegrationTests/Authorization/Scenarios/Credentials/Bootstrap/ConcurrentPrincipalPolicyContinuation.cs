@@ -80,7 +80,7 @@ internal static class ConcurrentPrincipalPolicyContinuation
     {
         var actual = await client.CallAsync(McpCallerTools.DocumentsGet,
             new GetDocumentRequest(scenario.Reference), token);
-        await McpCallerAssertions.ErrorAsync(actual, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(actual, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(actual, identity.Secret, McpDocumentProtocol.PrivateValue);
     }
 

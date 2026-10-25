@@ -45,7 +45,7 @@ internal sealed class ConfiguredVectorProfileSchemaTests
         var applied = database.Database.LastApplied;
         var beforePosition = database.Store.Position;
         var original = database.Submit(OperationKind.ConfigureResource, request, id: id);
-        await Assert.That(Errors.Code(original.Problem)).IsEqualTo(expected);
+        await Assert.That(Errors.Code(original.Problem).Value).IsEqualTo(expected);
 
         await Assert.That(original.Problem?.Detail).IsEqualTo(ExpectedDetail(failure));
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied + 1);

@@ -28,16 +28,16 @@ internal static class ScaleServerHostEvidence
         }
 
         var budget = new ScaleServerResourceSampleBudget(settings, provenance, timeProvider: timeProvider);
-        var cpu = await BoundedText.ReadAsync(CpuInfo, budget.Settings.MaxHardwareBytes, budget, token);
-        var memory = await BoundedText.ReadAsync(MemoryInfo, budget.Settings.MaxFileBytes, budget, token);
-        var online = await BoundedText.ReadAsync(CpuOnline, budget.Settings.MaxFileBytes, budget, token);
+        var cpu = (await BoundedText.ReadAsync(CpuInfo, budget.Settings.MaxHardwareBytes, budget, token)).Value;
+        var memory = (await BoundedText.ReadAsync(MemoryInfo, budget.Settings.MaxFileBytes, budget, token)).Value;
+        var online = (await BoundedText.ReadAsync(CpuOnline, budget.Settings.MaxFileBytes, budget, token)).Value;
         if (cpu is null || memory is null || online is null)
         {
             return (null, null);
         }
 
-        var values = ScaleServerHostCpuParser.ParseCpu(cpu);
-        if (values is null || !long.TryParse(ScaleServerHostCpuParser.ReadValue(memory, MemTotalField), NumberStyles.None,
+        var values = (ScaleServerHostCpuParser.ParseCpu(cpu)).Value;
+        if (values is null || !long.TryParse((ScaleServerHostCpuParser.ReadValue(memory, MemTotalField)).Value, NumberStyles.None,
                 CultureInfo.InvariantCulture, out var memoryKb))
         {
             return (null, null);
@@ -51,7 +51,7 @@ internal static class ScaleServerHostEvidence
 
         var logical = ScaleServerHostCpuParser.CountOnline(online);
         var cores = ScaleServerHostCpuParser.CoreMembership(cpu);
-        var envelope = await ReadEnvelopeAsync(budget, token);
+        var envelope = (await ReadEnvelopeAsync(budget, token)).Value;
         if (logical < BoundaryValue || cores.Physical.Length < BoundaryValue || cores.Logical.Split(SeparatorCharacter).Length != logical)
         {
             return (null, envelope);
@@ -63,7 +63,7 @@ internal static class ScaleServerHostEvidence
         return (hardware, envelope);
     }
 
-    internal static async Task<ScaleServerEnvelope?> ReadCgroupEnvelopeAsync(string cgroupPath,
+    internal static async Task<global::ManagedCode.Communication.Result<ScaleServerEnvelope?>> ReadCgroupEnvelopeAsync(string cgroupPath,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
         const int EmptyValue = 0;
@@ -73,20 +73,20 @@ internal static class ScaleServerHostEvidence
 
         if (!OperatingSystem.IsLinux() || cgroupPath.Length == EmptyValue || cgroupPath[IndexValue] != SlashCharacter)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadCgroupEnvelopeAsync));
         }
 
         var root = Path.GetFullPath(UnifiedCgroupMountPath);
         var current = Path.GetFullPath(Path.Combine(root, cgroupPath.TrimStart(SlashCharacter)));
         if (current != root && !current.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadCgroupEnvelopeAsync));
         }
 
-        return await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token);
+        return ((ScaleServerEnvelope?)((await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token)).Value)) is { } outcomeValue3 ? global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.Succeed(outcomeValue3) : global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadCgroupEnvelopeAsync));
     }
 
-    private static async Task<ScaleServerEnvelope?> ReadEnvelopeAsync(ScaleServerResourceSampleBudget budget,
+    private static async Task<global::ManagedCode.Communication.Result<ScaleServerEnvelope?>> ReadEnvelopeAsync(ScaleServerResourceSampleBudget budget,
         CancellationToken token)
     {
         const string ProcessCgroupMembershipPath = "/proc/self/cgroup";
@@ -96,25 +96,25 @@ internal static class ScaleServerHostEvidence
         const char SlashCharacter = '/';
         const string CgroupHierarchyRootPath = "/sys/fs/cgroup";
 
-        var membership = await BoundedText.ReadAsync(ProcessCgroupMembershipPath, budget.Settings.MaxFileBytes, budget, token);
+        var membership = (await BoundedText.ReadAsync(ProcessCgroupMembershipPath, budget.Settings.MaxFileBytes, budget, token)).Value;
         var row = membership?.Split(LineFeedCharacter).FirstOrDefault(line => line.StartsWith(UnifiedMembershipPrefix, StringComparison.Ordinal));
         if (row is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadEnvelopeAsync));
         }
 
         if (!row.StartsWith(UnifiedAbsoluteMembershipPrefix, StringComparison.Ordinal))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadEnvelopeAsync));
         }
 
         var current = Path.GetFullPath(Path.Combine(CgroupDirectoryMountPath, row[ElementIndex..].TrimStart(SlashCharacter)));
         var root = Path.GetFullPath(CgroupHierarchyRootPath);
         if (current != root && !current.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadEnvelopeAsync));
         }
 
-        return await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token);
+        return ((ScaleServerEnvelope?)((await ScaleServerCgroupEnvelopeReader.ReadFromDirectoryAsync(current, root, budget, token)).Value)) is { } outcomeValue4 ? global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.Succeed(outcomeValue4) : global::ManagedCode.Communication.Result<ScaleServerEnvelope?>.FailNotFound(nameof(ReadEnvelopeAsync));
     }
 }

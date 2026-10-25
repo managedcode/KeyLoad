@@ -4,36 +4,36 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class ScriptDomGraphWalks
 {
-    internal static GraphScope? Scope(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
+    internal static global::ManagedCode.Communication.Result<GraphScope?> Scope(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<GraphScope?>.FailNotFound(nameof(Scope));
         }
-        return new(Walk(ScriptDomGraphShape.Call(expression, ScopeFunction, context, depth, WalkArity), context, depth));
+        return global::ManagedCode.Communication.Result<GraphScope?>.Succeed((GraphScope?)(new(Walk(ScriptDomGraphShape.Call(expression, ScopeFunction, context, depth, WalkArity), context, depth))));
     }
-    internal static GraphRetriever? Retriever(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
+    internal static global::ManagedCode.Communication.Result<GraphRetriever?> Retriever(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<GraphRetriever?>.FailNotFound(nameof(Retriever));
         }
         var arguments = ScriptDomGraphShape.Call(expression, RetrieverFunction, context, depth, RetrieverArity);
-        return new(Walk(arguments, context, depth),
-            ScriptDomGraphScalar.Weight(arguments[WeightIndex], context, depth + ChildDepth));
+        return global::ManagedCode.Communication.Result<GraphRetriever?>.Succeed((GraphRetriever?)(new(Walk(arguments, context, depth),
+            ScriptDomGraphScalar.Weight(arguments[WeightIndex], context, depth + ChildDepth))));
     }
-    internal static GraphExpansion? Expansion(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
+    internal static global::ManagedCode.Communication.Result<GraphExpansion?> Expansion(Dom.ScalarExpression expression, ScriptDomGraphContext context, int depth)
     {
         if (ScriptDomGraphShape.IsNull(expression, context, depth))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<GraphExpansion?>.FailNotFound(nameof(Expansion));
         }
         var arguments = ScriptDomGraphShape.Call(expression, ExpansionFunction, context, depth, ExpansionArity);
-        return new(ScriptDomGraphScalar.String(arguments[GraphIndex], context, depth + ChildDepth),
+        return global::ManagedCode.Communication.Result<GraphExpansion?>.Succeed((GraphExpansion?)(new(ScriptDomGraphScalar.String(arguments[GraphIndex], context, depth + ChildDepth),
             ScriptDomGraphScalar.Integer(arguments[ExpansionDepthIndex], context, depth + ChildDepth),
             ScriptDomGraphScalar.Integer(arguments[ExpansionVerticesIndex], context, depth + ChildDepth),
             ScriptDomGraphScalar.Integer(arguments[ExpansionEdgesIndex], context, depth + ChildDepth),
-            ScriptDomGraphScalar.Strings(arguments[ExpansionLabelsIndex], LabelsFunction, context, depth + ChildDepth));
+            (ScriptDomGraphScalar.Strings(arguments[ExpansionLabelsIndex], LabelsFunction, context, depth + ChildDepth)).Value)));
     }
     private static GraphWalkSpec Walk(IList<Dom.ScalarExpression> arguments, ScriptDomGraphContext context, int depth)
         => new(ScriptDomGraphScalar.String(arguments[GraphIndex], context, depth + ChildDepth),
@@ -41,7 +41,7 @@ internal static class ScriptDomGraphWalks
             ScriptDomGraphScalar.Integer(arguments[DepthIndex], context, depth + ChildDepth),
             ScriptDomGraphScalar.Integer(arguments[VerticesIndex], context, depth + ChildDepth),
             ScriptDomGraphScalar.Integer(arguments[EdgesIndex], context, depth + ChildDepth),
-            ScriptDomGraphScalar.Strings(arguments[LabelsIndex], LabelsFunction, context, depth + ChildDepth));
+            (ScriptDomGraphScalar.Strings(arguments[LabelsIndex], LabelsFunction, context, depth + ChildDepth)).Value);
     private const string ScopeFunction = "GRAPH_SCOPE";
     private const string RetrieverFunction = "GRAPH_RETRIEVER";
     private const string ExpansionFunction = "GRAPH_EXPANSION";

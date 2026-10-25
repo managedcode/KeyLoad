@@ -35,7 +35,7 @@ internal static class EventAppendDedupAssertions
             var beforePosition = database.Store.Position;
             var rejected = database.Apply(original);
             await Assert.That(database.Store.Position).IsEqualTo(beforePosition + 1);
-            await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(changed ? ErrorCode.Conflict : ErrorCode.DuplicateEventId);
+            await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(changed ? ErrorCode.Conflict : ErrorCode.DuplicateEventId);
             await Assert.That(rejected.Problem?.Detail).IsEqualTo(changed ? ConflictDetail : DuplicateDetail);
             var afterRejectionPosition = database.Store.Position;
             var rejectedBytes = EventAppendStateAssertions.Bytes(database.Store);

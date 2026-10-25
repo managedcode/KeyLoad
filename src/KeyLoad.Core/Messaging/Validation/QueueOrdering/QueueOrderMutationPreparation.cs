@@ -5,11 +5,11 @@ namespace KeyLoad.Core;
 /// <summary>Executes QueueOrderMutationPreparation operations against the caller's database context.</summary>
 public static class QueueOrderMutationPreparation
 {
-    internal static byte[]? PrepareQueueOrderRemoval(IKeyValueView view, QueueLaneRef lane, QueuePolicy policy, MessageBody body, MessageMetadata metadata)
+    internal static global::ManagedCode.Communication.Result<byte[]?> PrepareQueueOrderRemoval(IKeyValueView view, QueueLaneRef lane, QueuePolicy policy, MessageBody body, MessageMetadata metadata)
     {
         if (policy.OrderingProfile != QueueOrderingProfile.StrictPerKey)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(PrepareQueueOrderRemoval));
         }
 
         if (policy.ParkedHeadPolicy == QueueParkedHeadPolicy.Continue && metadata.State is MessageState.PendingDeadLetter or MessageState.DeadLettered)
@@ -19,10 +19,10 @@ public static class QueueOrderMutationPreparation
                 throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
             }
 
-            return null;
+            return global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(PrepareQueueOrderRemoval));
         }
 
-        return MessagingValidationQueueOrdering.RequireQueueOrderReference(view, lane, MessagingCommandsQueueOrdering.RequireQueueOrderingKey(body), metadata);
+        return global::ManagedCode.Communication.Result<byte[]?>.Succeed(((byte[]?)(MessagingValidationQueueOrdering.RequireQueueOrderReference(view, lane, MessagingCommandsQueueOrdering.RequireQueueOrderingKey(body), metadata))));
     }
 
     internal static QueueParkOrderPlan PrepareQueueParkOrder(IKeyValueView view, QueueLaneRef lane, QueuePolicy policy, MessageBody body, MessageMetadata metadata)

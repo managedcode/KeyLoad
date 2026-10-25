@@ -20,7 +20,7 @@ internal static class TextOnlineCapture
         {
             var view = budget.CreateView(raw);
             var principal = database.Principal(view, session.PrincipalId, clock.GetUtcNow());
-            return database.ReadOnlineTextPublicationHead(view, principal, request, budget);
+            return (database.ReadOnlineTextPublicationHead(view, principal, request, budget)).Value;
         });
         session.SourcePin = TextOnlineSourcePin.Capture(database, session.PrincipalId,
             new(request.Consumer, request.ConsumerGeneration, request.Collection, request.Field,

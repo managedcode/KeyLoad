@@ -13,7 +13,7 @@ internal sealed class CqrsGrainComponentConfigurator(
             return;
         }
 
-        var factory = CreateFactory(grainClass);
+        var factory = (CreateFactory(grainClass)).Value;
         if (factory is null)
         {
             return;
@@ -24,12 +24,20 @@ internal sealed class CqrsGrainComponentConfigurator(
             new DefaultGrainActivator(serviceProvider, grainClass)));
     }
 
-    private static Func<object>? CreateFactory(Type grainClass)
-        => grainClass == typeof(CqrsStreamGrain)
-            ? static () => new CqrsStreamGrain()
-            : grainClass == typeof(CqrsLeafGrain)
-                ? static () => new CqrsLeafGrain()
-                : grainClass == typeof(CqrsObservationGrain)
-                    ? static () => new CqrsObservationGrain()
-                    : null;
+    private static global::ManagedCode.Communication.Result<Func<object>?> CreateFactory(Type grainClass)
+    {
+        if (grainClass == typeof(CqrsStreamGrain))
+        {
+            return global::ManagedCode.Communication.Result<Func<object>?>.Succeed(static () => new CqrsStreamGrain());
+        }
+        if (grainClass == typeof(CqrsLeafGrain))
+        {
+            return global::ManagedCode.Communication.Result<Func<object>?>.Succeed(static () => new CqrsLeafGrain());
+        }
+        if (grainClass == typeof(CqrsObservationGrain))
+        {
+            return global::ManagedCode.Communication.Result<Func<object>?>.Succeed(static () => new CqrsObservationGrain());
+        }
+        return global::ManagedCode.Communication.Result<Func<object>?>.FailNotFound(nameof(CreateFactory));
+    }
 }

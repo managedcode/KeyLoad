@@ -27,6 +27,6 @@ internal static class RequestCqrsTextCheckpointObservation
         var applied = database.Store.Read(view => OrleansSerialization.Deserialize<long>(
             view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw new InvalidOperationException()));
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store).AsSpan().SequenceEqual(before)).IsTrue();
-        await Console.Error.WriteLineAsync($"{ObservationPrefix} hasOutcome={actual is not null} error={Errors.Code(outcome.Problem)} checkpoint={actual?.Checkpoint} applied={applied} ackPosition={actual?.Receipt.Token.Position}").ConfigureAwait(false);
+        await Console.Error.WriteLineAsync($"{ObservationPrefix} hasOutcome={actual is not null} error={Errors.Code(outcome.Problem).Value} checkpoint={actual?.Checkpoint} applied={applied} ackPosition={actual?.Receipt.Token.Position}").ConfigureAwait(false);
     }
 }

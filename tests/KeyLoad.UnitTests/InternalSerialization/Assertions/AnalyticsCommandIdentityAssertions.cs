@@ -63,7 +63,7 @@ internal static class AnalyticsCommandIdentityAssertions
     {
         var partition = owner.Source.Partition;
         var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(partition.TenantId, partition.DatabaseId, D.Collection));
-        var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, D.Collection, definition)
+        var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId, D.Collection, definition)).Value
             ?? throw new InvalidOperationException("The configured identity-test collection lifetime is missing.");
         return new EntityRef(partition, D.Collection, D.Document) { Lifetime = new(lifetime.Incarnation.Value) };
     });

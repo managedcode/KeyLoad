@@ -30,7 +30,7 @@ public static class AuthorizationCommands
                 engine.Authorization.RequireReplayInput(principal, resource);
             }
 
-            engine.AuthorizeComposition(view, principal, request.Partition, mutation);
+            _ = (engine.AuthorizeComposition(view, principal, request.Partition, mutation)).Value;
             engine.AuthorizeExtendedMutation(view, principal, request.Partition, mutation);
         }
     }

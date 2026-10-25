@@ -34,8 +34,8 @@ internal static class PartitionRecordCancellationRunner
             cancellationToken: token)), readerFailures);
         PartitionRecordCancellationFailures.ThrowUnexpected(readerFailures, observerFailures,
             [], [], token);
-        return new(page, PartitionRecordCancellationFailures.Single(readerFailures),
-            PartitionRecordCancellationFailures.Single(observerFailures), examinedBytes, token);
+        return new(page, (PartitionRecordCancellationFailures.Single(readerFailures)).Value,
+            (PartitionRecordCancellationFailures.Single(observerFailures)).Value, examinedBytes, token);
     }
 
     internal sealed record CancellationRun(PartitionRecordPage? Page, Exception? ReadFailure,

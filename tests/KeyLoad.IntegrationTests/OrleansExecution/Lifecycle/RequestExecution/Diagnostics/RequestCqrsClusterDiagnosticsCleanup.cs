@@ -41,15 +41,15 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
 
     internal bool IsJoined => subscriptions.All(subscription => subscription.IsCompleted);
     internal RequestCqrsCaptureLifecycleSnapshot ReadLifecycleSnapshot()
-        => new(StatusFor(RequestCqrsClusterProtocol.Node1), StatusFor(RequestCqrsClusterProtocol.Node2),
-            StatusFor(RequestCqrsClusterProtocol.Node3),
+        => new((StatusFor(RequestCqrsClusterProtocol.Node1)).Value, (StatusFor(RequestCqrsClusterProtocol.Node2)).Value,
+            (StatusFor(RequestCqrsClusterProtocol.Node3)).Value,
             lifetime.IsCancellationRequested, cleanupDeadline.IsCancellationRequested, forcedCancellationRequested,
             completionEvidence.Snapshot());
 
-    private TaskStatus? StatusFor(string node)
+    private global::ManagedCode.Communication.Result<TaskStatus?> StatusFor(string node)
     {
         var index = Array.FindIndex(resources, resource => string.Equals(resource.Name, node, StringComparison.Ordinal));
-        return index < 0 ? null : subscriptions[index].Status;
+        return index < 0 ? global::ManagedCode.Communication.Result<TaskStatus?>.FailNotFound(nameof(StatusFor)) : global::ManagedCode.Communication.Result<TaskStatus?>.Succeed(((TaskStatus?)(subscriptions[index].Status)));
     }
 
     internal Task CompleteAndDrainAsync(CancellationToken cancellationToken)
@@ -84,19 +84,19 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
             RequestCqrsClusterSubscriberTransitionHooks.Observe(() => subscriberTransitions?.Begin(), failures, failureObserver,
                 RequestCqrsLifecycleStage.CaptureDrain);
             RequestCqrsClusterResourceStreamCompletion.Complete(completionEvidence, logger, resources,
-                StatusFor, failures, failureObserver);
+                (outcomeArgument0) => (StatusFor(outcomeArgument0)).Value, failures, failureObserver);
             RequestCqrsClusterSubscriberTransitionHooks.Observe(() => subscriberTransitions?.Drain(false), failures, failureObserver,
                 RequestCqrsLifecycleStage.CaptureDrain);
             RequestCqrsLifecycleFailureObserver.Observe(() => completionEvidence.StartDrain(
-                cancellationToken.IsCancellationRequested, StatusFor(RequestCqrsClusterProtocol.Node1),
-                StatusFor(RequestCqrsClusterProtocol.Node2), StatusFor(RequestCqrsClusterProtocol.Node3)),
+                cancellationToken.IsCancellationRequested, (StatusFor(RequestCqrsClusterProtocol.Node1)).Value,
+                (StatusFor(RequestCqrsClusterProtocol.Node2)).Value, (StatusFor(RequestCqrsClusterProtocol.Node3)).Value),
                 failures, failureObserver, RequestCqrsLifecycleStage.CaptureDrain);
             var failuresBeforeDrain = failures.Count;
             await RequestCqrsLifecycleFailureObserver.ObserveAsync(async () =>
             {
                 await drain.WaitAsync(cancellationToken).ConfigureAwait(false);
                 completionEvidence.ReturnDrain();
-            }, failures, stage => completionEvidence.ObserveDrainFailure(stage, StatusFor,
+            }, failures, stage => completionEvidence.ObserveDrainFailure(stage, (outcomeArgument0) => (StatusFor(outcomeArgument0)).Value,
                 failureObserver, cancellationToken),
                 RequestCqrsLifecycleStage.CaptureDrain).ConfigureAwait(false);
             if (failures.Count > failuresBeforeDrain)
@@ -145,7 +145,7 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
     {
         if (drain.IsCompleted)
         {
-            completionEvidence.RecordOriginalJoin(lifetime.IsCancellationRequested, StatusFor, failures,
+            completionEvidence.RecordOriginalJoin(lifetime.IsCancellationRequested, (outcomeArgument0) => (StatusFor(outcomeArgument0)).Value, failures,
                 failureObserver, RequestCqrsLifecycleStage.CaptureDrain);
             return;
         }
@@ -157,7 +157,7 @@ internal sealed class RequestCqrsClusterDiagnosticsCleanup : IAsyncDisposable
             RequestCqrsLifecycleStage.CaptureForcedCancellation).ConfigureAwait(false);
         await ObserveCleanupAsync(() => drain, failures,
             RequestCqrsLifecycleStage.CaptureForcedJoin).ConfigureAwait(false);
-        completionEvidence.RecordOriginalJoin(lifetime.IsCancellationRequested, StatusFor, failures,
+        completionEvidence.RecordOriginalJoin(lifetime.IsCancellationRequested, (outcomeArgument0) => (StatusFor(outcomeArgument0)).Value, failures,
             failureObserver, RequestCqrsLifecycleStage.CaptureForcedJoin);
     }
 

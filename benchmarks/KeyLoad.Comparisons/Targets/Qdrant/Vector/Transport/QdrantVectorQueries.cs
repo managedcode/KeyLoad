@@ -8,7 +8,7 @@ internal static class QdrantVectorQueries
             query = query.ToArray(),
             limit = count,
             @params = Parameters(kind, mode),
-            filter = Filter(mode),
+            filter = (Filter(mode)).Value,
             with_payload = new[] { QdrantVectorProtocol.Identifier },
             with_vector = false
         };
@@ -31,14 +31,14 @@ internal static class QdrantVectorQueries
         => new
         {
             @params = Parameters(kind, mode),
-            filter = Filter(mode)
+            filter = (Filter(mode)).Value
         };
 
-    private static object? Filter(VectorQueryMode mode) => mode switch
+    private static global::ManagedCode.Communication.Result<object?> Filter(VectorQueryMode mode) => mode switch
     {
-        VectorQueryMode.Plain => null,
-        VectorQueryMode.Filtered => Match(QdrantVectorProtocol.Filtered),
-        VectorQueryMode.Mixed => Match(QdrantVectorProtocol.Mixed),
+        VectorQueryMode.Plain => global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(Filter)),
+        VectorQueryMode.Filtered => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(Match(QdrantVectorProtocol.Filtered)))),
+        VectorQueryMode.Mixed => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(Match(QdrantVectorProtocol.Mixed)))),
         _ => throw new ArgumentOutOfRangeException(nameof(mode))
     };
 

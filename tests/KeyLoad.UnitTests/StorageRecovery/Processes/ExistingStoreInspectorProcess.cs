@@ -34,13 +34,13 @@ internal static class ExistingStoreInspectorProcess
         var output = session.Stdout.Text;
         var error = session.Stderr.Text;
         var code = session.Process.ExitCode;
-        var receipt = ReadReceipt(output, error, code, canceled, session.Stdout.CharacterCount);
+        var receipt = (ReadReceipt(output, error, code, canceled, session.Stdout.CharacterCount)).Value;
         return new(session.Process.Id, code, canceled, assemblySha256, output, error, receipt,
             session.Process.HasExited, session.StdoutTask.IsCompleted, session.StderrTask.IsCompleted,
             ownerReleased, cleanupWarningExceeded);
     }
 
-    private static ExistingStoreInspectionReceipt? ReadReceipt(string output, string error, int exitCode, bool canceled, long outputCharacters)
+    private static global::ManagedCode.Communication.Result<ExistingStoreInspectionReceipt?> ReadReceipt(string output, string error, int exitCode, bool canceled, long outputCharacters)
     {
         if (canceled)
         {
@@ -48,7 +48,7 @@ internal static class ExistingStoreInspectorProcess
             {
                 throw new InvalidDataException(MissingReceiptMessage);
             }
-            return null;
+            return global::ManagedCode.Communication.Result<ExistingStoreInspectionReceipt?>.FailNotFound(nameof(ReadReceipt));
         }
         if (exitCode == ProtocolErrorExitCode)
         {
@@ -56,7 +56,7 @@ internal static class ExistingStoreInspectorProcess
             {
                 throw new InvalidDataException(MissingReceiptMessage);
             }
-            return null;
+            return global::ManagedCode.Communication.Result<ExistingStoreInspectionReceipt?>.FailNotFound(nameof(ReadReceipt));
         }
         if (output.Length == 0)
         {
@@ -70,7 +70,7 @@ internal static class ExistingStoreInspectorProcess
         {
             throw new InvalidDataException(MissingReceiptMessage);
         }
-        return JsonSerializer.Deserialize<ExistingStoreInspectionReceipt>(output, ExistingStoreInspectorProtocol.JsonOptions)
-            ?? throw new InvalidDataException(MissingReceiptMessage);
+        return global::ManagedCode.Communication.Result<ExistingStoreInspectionReceipt?>.Succeed(((ExistingStoreInspectionReceipt?)(JsonSerializer.Deserialize<ExistingStoreInspectionReceipt>(output, ExistingStoreInspectorProtocol.JsonOptions)
+            ?? throw new InvalidDataException(MissingReceiptMessage))));
     }
 }

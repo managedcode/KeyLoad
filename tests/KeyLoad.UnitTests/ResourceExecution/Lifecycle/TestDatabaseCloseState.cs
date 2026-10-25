@@ -26,7 +26,7 @@ internal sealed class TestDatabaseCloseState
             if (!deleteAttempted)
             {
                 deleteAttempted = true;
-                deleteFailure = Observe(deleteDirectory);
+                deleteFailure = (Observe(deleteDirectory)).Value;
                 deleteCompleted = true;
             }
             if (!deleteCompleted)
@@ -50,7 +50,7 @@ internal sealed class TestDatabaseCloseState
 
     internal void CompleteJoin(List<Exception> failures)
     {
-        joinFailure = Observe(() => KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures));
+        joinFailure = (Observe(() => KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures))).Value;
         joinCompleted = true;
         RequireJoined();
     }
@@ -64,20 +64,20 @@ internal sealed class TestDatabaseCloseState
         joinFailure?.Throw();
     }
 
-    private static ExceptionDispatchInfo? Observe(Action operation)
+    private static global::ManagedCode.Communication.Result<ExceptionDispatchInfo?> Observe(Action operation)
     {
         try
         {
             operation();
-            return null;
+            return global::ManagedCode.Communication.Result<ExceptionDispatchInfo?>.FailNotFound(nameof(Observe));
         }
         catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is null)
         {
-            return ExceptionDispatchInfo.Capture(failure);
+            return global::ManagedCode.Communication.Result<ExceptionDispatchInfo?>.Succeed(((ExceptionDispatchInfo?)(ExceptionDispatchInfo.Capture(failure))));
         }
         catch (Exception failure) when (ManagedCode.Communication.CQRS.CqrsRuntimeFailures.FindFatal(failure) is not null)
         {
-            return ExceptionDispatchInfo.Capture(failure);
+            return global::ManagedCode.Communication.Result<ExceptionDispatchInfo?>.Succeed(((ExceptionDispatchInfo?)(ExceptionDispatchInfo.Capture(failure))));
         }
     }
 }

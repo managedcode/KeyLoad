@@ -159,8 +159,8 @@ internal static class QueueByteSublimitPublicFlow
             new("Ack", state.Owner.Lane.Queue, QueueByteSublimitPublicAssertions.Healthy, 3L) }, CollectionOrdering.Matching);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(
             await callers.Sdk.ReceiveAsync(request, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
-            McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(
+            McpCallerTools.MessagesReceive, request, token), ErrorCode.StaleLease, true)).Value;
         await QueueLeasedCancelPublicAssertions.MessageAsync(callers, state.Owner, QueueByteSublimitPublicAssertions.Healthy,
             new(new(QueueByteSublimitPublicAssertions.Healthy, MessageState.Acked, 1, 3L, 4L, null, null,
                 LeaseVersion: 1L), null, null), token);

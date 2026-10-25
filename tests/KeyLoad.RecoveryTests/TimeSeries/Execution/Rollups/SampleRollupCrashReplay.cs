@@ -50,7 +50,7 @@ internal static class SampleRollupCrashReplay
             SampleRollupCrashContract.Set, SampleRollupCrashContract.Series, SampleRollupCrashContract.Start, SampleRollupCrashContract.End));
         Mutation changed = drop ? SampleRollupCrashContract.Drop(ChangedRevision) : SampleRollupCrashContract.Refresh(ChangedRevision);
         var failure = SampleRollupCrashOperations.Commit(database, SampleRollupCrashContract.InflightId, changed);
-        if (Errors.Code(failure.Problem) != ErrorCode.Conflict || failure.Problem?.Detail != ContentConflict || failure.Value is not null)
+        if (Errors.Code(failure.Problem).Value != ErrorCode.Conflict || failure.Problem?.Detail != ContentConflict || failure.Value is not null)
         {
             throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
         }

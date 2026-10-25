@@ -10,7 +10,7 @@ internal static class SampleLatestReader
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
         var scope = SampleReadScope.Open(database, view, principalId, request.Partition, request.Set, request.SeriesId);
-        var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
+        var retention = (SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget)).Value;
         SampleRecord? selected = null;
         budget.Check();
         view.VisitReverseRange(scope.Prefix, 1, (key, value) =>
@@ -21,8 +21,8 @@ internal static class SampleLatestReader
             return false;
         }, afterKey: retention is null ? null : SampleReadKeys.FromInclusive(request.Partition, request.Set,
             request.SeriesId, SampleRetentionStateReader.Before(retention)),
-            untilKey: SampleReadKeys.ThroughInclusive(request.Partition, request.Set, request.SeriesId,
-                request.AtOrBefore), cancellationToken: budget.Cancellation);
+            untilKey: (SampleReadKeys.ThroughInclusive(request.Partition, request.Set, request.SeriesId,
+                request.AtOrBefore)).Value, cancellationToken: budget.Cancellation);
         budget.Check();
         return new(selected);
     }

@@ -18,7 +18,7 @@ internal sealed class RuntimeJournalStorageOperations(RuntimeJournalClient clien
         return await client.MutateAsync(mutation, cancellationToken);
     }
 
-    internal async Task<IJournalMetadata?> UpdateMetadataAsync(RuntimeJournalSnapshot current,
+    internal async Task<global::ManagedCode.Communication.Result<IJournalMetadata?>> UpdateMetadataAsync(RuntimeJournalSnapshot current,
         ImmutableDictionary<string, string> properties, ImmutableArray<string> removals, string? expectedETag,
         CancellationToken cancellationToken)
     {
@@ -29,11 +29,11 @@ internal sealed class RuntimeJournalStorageOperations(RuntimeJournalClient clien
         {
             var result = await client.MutateAsync(mutation, cancellationToken);
             state.AdvanceAfterMetadataWrite(current, result.Snapshot);
-            return result.Snapshot is null ? null : Metadata(result.Snapshot);
+            return result.Snapshot is null ? global::ManagedCode.Communication.Result<IJournalMetadata?>.FailNotFound(nameof(UpdateMetadataAsync)) : global::ManagedCode.Communication.Result<IJournalMetadata?>.Succeed(((IJournalMetadata?)(Metadata(result.Snapshot))));
         }
         catch (KeyLoadException error) when (error.Code is ErrorCode.Conflict or ErrorCode.NotFound)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<IJournalMetadata?>.FailNotFound(nameof(UpdateMetadataAsync));
         }
     }
 
@@ -67,7 +67,7 @@ internal sealed class RuntimeJournalStorageOperations(RuntimeJournalClient clien
             throw Errors.Fail(ErrorCode.ResourceExhausted, RuntimeJournalStoragePolicy.InvalidLimits);
         }
 
-        var current = await state.CaptureAsync(cancellationToken);
+        var current = (await state.CaptureAsync(cancellationToken)).Value;
         if (current is null)
         {
             var created = await CreateAsync(ImmutableDictionary<string, string>.Empty, cancellationToken);

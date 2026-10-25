@@ -81,7 +81,7 @@ internal static class CliBackupRestoreProcess
             stdoutTask ?? Task.CompletedTask, stderrTask ?? Task.CompletedTask);
         await ObserveUntilDeadlineAsync(joined, failures, deadline.Token).ConfigureAwait(false);
         await SettleOriginalTasksAsync(process, joined, options, failures).ConfigureAwait(false);
-        return BuildResult(process, stdout, stderr, exitTask, stdoutTask, stderrTask, joined);
+        return (BuildResult(process, stdout, stderr, exitTask, stdoutTask, stderrTask, joined)).Value;
     }
 
     private static async Task ObserveUntilDeadlineAsync(Task joined, List<Exception> failures, CancellationToken token)
@@ -109,16 +109,16 @@ internal static class CliBackupRestoreProcess
         }
     }
 
-    private static CliBackupRestoreProcessResult? BuildResult(Process process,
+    private static global::ManagedCode.Communication.Result<CliBackupRestoreProcessResult?> BuildResult(Process process,
         CliBackupRestoreProcessOutput stdout, CliBackupRestoreProcessOutput stderr,
         Task? exitTask, Task? stdoutTask, Task? stderrTask, Task joined)
     {
         if (!joined.IsCompletedSuccessfully || exitTask is null || stdoutTask is null || stderrTask is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<CliBackupRestoreProcessResult?>.FailNotFound(nameof(BuildResult));
         }
-        return new(process.ExitCode, stdout.Text, stderr.Text, exitTask.IsCompleted,
-            stdoutTask.IsCompleted, stderrTask.IsCompleted, ProcessDisposed: false);
+        return global::ManagedCode.Communication.Result<CliBackupRestoreProcessResult?>.Succeed((CliBackupRestoreProcessResult?)(new(process.ExitCode, stdout.Text, stderr.Text, exitTask.IsCompleted,
+            stdoutTask.IsCompleted, stderrTask.IsCompleted, ProcessDisposed: false)));
     }
 
     private static ProcessStartInfo CreateStartInfo(IReadOnlyList<string> arguments,

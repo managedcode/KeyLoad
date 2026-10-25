@@ -20,7 +20,7 @@ internal static class CoberturaBranchPairAssertions
     internal static async Task AssertMatchesAsync(XmlElement root, JsonElement proof)
     {
         var observedRows = ReadBranchPairs(root);
-        var rootCounts = ReadRootBranchPairs(root);
+        var rootCounts = (ReadRootBranchPairs(root)).Value;
         var actual = proof.GetProperty(BranchPairsProperty);
         if (rootCounts is null)
         {
@@ -69,7 +69,7 @@ internal static class CoberturaBranchPairAssertions
         return new BranchPairCounts(valid, covered);
     }
 
-    private static BranchPairCounts? ReadRootBranchPairs(XmlElement root)
+    private static global::ManagedCode.Communication.Result<BranchPairCounts?> ReadRootBranchPairs(XmlElement root)
     {
         var hasValid = root.HasAttribute(BranchesValidAttribute);
         var hasCovered = root.HasAttribute(BranchesCoveredAttribute);
@@ -79,7 +79,7 @@ internal static class CoberturaBranchPairAssertions
         }
         if (!hasValid)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<BranchPairCounts?>.FailNotFound(nameof(ReadRootBranchPairs));
         }
         var valid = ParseCount(root.GetAttribute(BranchesValidAttribute));
         var covered = ParseCount(root.GetAttribute(BranchesCoveredAttribute));
@@ -87,7 +87,7 @@ internal static class CoberturaBranchPairAssertions
         {
             throw new InvalidDataException(InvalidReport);
         }
-        return new BranchPairCounts(valid, covered);
+        return global::ManagedCode.Communication.Result<BranchPairCounts?>.Succeed((BranchPairCounts?)(new BranchPairCounts(valid, covered)));
     }
 
     private static long ParseCount(string? value)

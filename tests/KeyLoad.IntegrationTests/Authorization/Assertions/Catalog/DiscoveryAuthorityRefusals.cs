@@ -16,7 +16,7 @@ internal static class DiscoveryAuthorityRefusals
     {
         var before = await DiscoveryAuthorityValues.ImageAsync(root, state, token);
         var denied = await session.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Scenario.Reference), token);
-        var deniedId = await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true);
+        var deniedId = (await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await Assert.That(deniedId).IsNotEqualTo(firstRequest);
         await McpCallerAssertions.DoesNotDiscloseAsync(denied, state.Identity.Secret, McpDocumentProtocol.PrivateValue);
         var sdkDenied = await reader.GetAsync(state.Scenario.Reference, token);

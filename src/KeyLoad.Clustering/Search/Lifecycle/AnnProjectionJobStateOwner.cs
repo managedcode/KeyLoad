@@ -12,12 +12,12 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
     private readonly IDurableValue<AnnProjectionJobState> value =
         manager.GetOrAddValue<AnnProjectionJobState>(AnnProjectionJobProtocol.StateName);
     internal bool Open { get; private set; } = true;
-    internal AnnProjectionJobState? Current => Validate(value.Value);
+    internal AnnProjectionJobState? Current => (Validate(value.Value)).Value;
 
     internal async Task WriteAsync(AnnProjectionJobState next, CancellationToken token)
     {
         RequireOpen();
-        _ = Validate(next);
+        _ = (Validate(next)).Value;
         var size = OrleansSerialization.Measure(next);
         if (size > options.MaximumJournalBytes)
         {
@@ -31,11 +31,11 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
         catch (Exception) { Open = false; throw; }
     }
 
-    private AnnProjectionJobState? Validate(AnnProjectionJobState? current)
+    private global::ManagedCode.Communication.Result<AnnProjectionJobState?> Validate(AnnProjectionJobState? current)
     {
         if (current is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.FailNotFound(nameof(Validate));
         }
         if (current.Authority is not { } authority || current.InitialRequest is not { } initial
             || string.IsNullOrWhiteSpace(authority.PrincipalId) || authority.ConfigureCommandId == Guid.Empty
@@ -68,7 +68,7 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProjectionJobProtocol.Exhausted);
         }
-        return current;
+        return global::ManagedCode.Communication.Result<AnnProjectionJobState?>.Succeed(((AnnProjectionJobState?)(current)));
     }
 
     private static void RequireRequest(AnnMaintenanceRequest initial, AnnMaintenanceRequest? request)

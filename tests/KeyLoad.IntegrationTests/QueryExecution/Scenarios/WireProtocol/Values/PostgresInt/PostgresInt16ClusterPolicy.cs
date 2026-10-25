@@ -26,14 +26,14 @@ internal static class PostgresInt16ClusterPolicy
             await global::TUnit.Assertions.Assert.That(sdk.Value.ValueKind)
                 .IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-            await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-                operation, token), ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName,
+                operation, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
             var ast = PostgresInt16ClusterProtocol.Ast(PostgresInt16ClusterProtocol.ProbeValue);
             var astSdk = await caller.Sdk.QueryAstAsync(ast, token);
             await global::TUnit.Assertions.Assert.That(astSdk.IsSuccess).IsFalse();
             await global::TUnit.Assertions.Assert.That(astSdk.Problem?.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-            await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.QueryAst,
-                ast, token), ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.QueryAst,
+                ast, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
             await WireAsync(fixture, state, token);
             return true;
         }, token);

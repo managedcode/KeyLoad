@@ -13,7 +13,7 @@ internal readonly record struct StoredMessageBody(
     private const int NoRetainedBytes = 0;
 
     /// <summary>Decodes borrowed bytes once without retaining the storage-owned span.</summary>
-    internal static StoredMessageBody? Read(IKeyValueView view, byte[] key)
+    internal static global::ManagedCode.Communication.Result<StoredMessageBody?> Read(IKeyValueView view, byte[] key)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(key);
@@ -25,8 +25,8 @@ internal readonly record struct StoredMessageBody(
             body = OrleansSerialization.Deserialize<MessageBody>(borrowed);
         }) || body is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<StoredMessageBody?>.FailNotFound(nameof(Read));
         }
-        return new(body, bytes);
+        return global::ManagedCode.Communication.Result<StoredMessageBody?>.Succeed(((StoredMessageBody?)(new(body, bytes))));
     }
 }

@@ -71,7 +71,7 @@ internal static class GraphIncomingPublicRoutes
             return;
         }
         var reply = await callers.Mcp.CallAsync(tool, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         await GraphIncomingClusterAssertions.AssertNoPrivatePayloadAsync(reply, credential);
     }
 

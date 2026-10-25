@@ -19,7 +19,7 @@ internal static class InitialPrincipalEpochClusterRefusals
             var args = McpOfficialClient.Arguments(new ConfigurePrincipalRequest(state.Refused));
             args.Add(McpCallerProtocol.CommandId, state.RefusedId);
             var reply = await root.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.PrincipalsConfigure, args, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true)).Value;
             await ProblemAsync(reply, ErrorCode.Validation, "The database operation could not be completed.");
         }, token);
     internal static async Task MissingAsync(RequestCqrsClusterCallers root, InitialPrincipalEpochClusterState state, CancellationToken token)
@@ -49,7 +49,7 @@ internal static class InitialPrincipalEpochClusterRefusals
         else
         {
             var reply = await reader.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(state.Reference), token);
-            await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
             await ProblemAsync(reply, code, "The principal cannot perform this operation in this scope.");
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.OriginalSecret, state.ReplacementSecret);
         }
@@ -74,7 +74,7 @@ internal static class InitialPrincipalEpochClusterRefusals
         var args = McpOfficialClient.Arguments(new ConfigurePrincipalRequest(forged));
         args.Add(McpCallerProtocol.CommandId, Guid.NewGuid());
         var reply = await reader.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.PrincipalsConfigure, args, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await ProblemAsync(reply, ErrorCode.PermissionDenied, "The authenticated principal is not permitted to perform this operation.");
         await InitialPrincipalEpochClusterValues.DocumentAsync(reader, state, 1L, token);
     }

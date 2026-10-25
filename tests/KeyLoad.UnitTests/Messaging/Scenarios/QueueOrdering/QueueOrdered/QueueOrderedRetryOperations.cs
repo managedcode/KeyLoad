@@ -36,9 +36,9 @@ internal static class QueueOrderedRetryOperations
     private static async Task ReplayResultAsync(DatabaseEngine database, Command<DatabaseCommand> operation, Result<object> original)
     {
         var actual = database.Apply(operation);
-        if (Errors.Code(original.Problem) is not null)
+        if (Errors.Code(original.Problem).Value is not null)
         {
-            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(original.Problem));
+            await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(original.Problem).Value);
             await Assert.That(actual.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
             await Assert.That(OrleansSerialization.Serialize(actual)).IsEquivalentTo(OrleansSerialization.Serialize(original),
                 TUnit.Assertions.Enums.CollectionOrdering.Matching);
@@ -65,7 +65,7 @@ internal static class QueueOrderedRetryOperations
     {
         await Assert.That(OrleansSerialization.Serialize(actual)).IsEquivalentTo(OrleansSerialization.Serialize(expected),
             TUnit.Assertions.Enums.CollectionOrdering.Matching);
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(expected.Problem).Value);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(bool));
         await Assert.That(expected.Value?.GetType()).IsEqualTo(typeof(bool));

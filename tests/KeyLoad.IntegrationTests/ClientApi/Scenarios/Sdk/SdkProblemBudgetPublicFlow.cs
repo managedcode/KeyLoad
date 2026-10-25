@@ -21,11 +21,11 @@ internal static class SdkProblemBudgetPublicFlow
         await SdkProblemBudgetPublicAssertions.FailureAsync(await caller.Normal.CommitAsync(state.Denied, token),
             ErrorCode.PermissionDenied, false);
         await AfterRefusalAsync(administrator, state, token);
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(state.Forbidden), token), ErrorCode.PermissionDenied, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet,
+            new GetDocumentRequest(state.Forbidden), token), ErrorCode.PermissionDenied, true)).Value;
         await AfterRefusalAsync(administrator, state, token);
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            state.Denied, token), ErrorCode.PermissionDenied, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            state.Denied, token), ErrorCode.PermissionDenied, true)).Value;
         await AfterRefusalAsync(administrator, state, token);
         await ReplaySeedAsync(administrator, state, token);
         await SdkProblemBudgetPublicAssertions.HealthyAsync(caller, state, token);

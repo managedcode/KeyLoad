@@ -58,9 +58,9 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
     public async IAsyncEnumerable<JournalCatalogEntry> ListAsync(JournalCatalogListOptions? options = null,
         [EnumeratorCancellation] CancellationToken cancellationToken = default)
     {
-        var prefix = FilterValue(options?.Prefix ?? default);
-        var minimum = FilterValue(options?.MinId ?? default);
-        var maximum = FilterValue(options?.MaxId ?? default);
+        var prefix = (FilterValue(options?.Prefix ?? default)).Value;
+        var minimum = (FilterValue(options?.MinId ?? default)).Value;
+        var maximum = (FilterValue(options?.MaxId ?? default)).Value;
         var includeMetadata = options?.IncludeMetadata ?? false;
         var catalog = await client.GetCatalogAsync(cancellationToken);
         foreach (var snapshot in catalog.Journals)
@@ -85,7 +85,7 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
             && (minimum is null || string.CompareOrdinal(name, minimum) >= RuntimeJournalStoragePolicy.EqualOrdinalComparison)
             && (maximum is null || string.CompareOrdinal(name, maximum) <= RuntimeJournalStoragePolicy.EqualOrdinalComparison);
 
-    private static string? FilterValue(JournalId id) => id.IsDefault ? null : id.Value;
+    private static global::ManagedCode.Communication.Result<string?> FilterValue(JournalId id) => id.IsDefault ? global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(FilterValue)) : global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(id.Value)));
 
     private static SemaphoreSlim[] CreateGates(int count)
     {

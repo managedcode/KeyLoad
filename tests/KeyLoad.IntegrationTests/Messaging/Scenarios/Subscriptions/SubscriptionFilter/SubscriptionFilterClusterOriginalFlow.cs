@@ -23,7 +23,7 @@ internal static class SubscriptionFilterClusterOriginalFlow
         var empty = await McpCallerAssertions.SdkSuccessAsync(await first.ReceiveSubscriptionAsync(new(Guid.NewGuid(), seed.Group), token));
         await Assert.That(empty.Deliveries).IsEmpty();
         var foreign = new SubscriptionDeliveryCommand(Guid.NewGuid(), seed.Group, ar.Deliveries.Single().Token, DeliveryAction.Ack);
-        await McpCallerAssertions.ErrorAsync(await second.CallAsync(McpCallerTools.SubscriptionsComplete, foreign, token), ErrorCode.TokenInvalidated, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await second.CallAsync(McpCallerTools.SubscriptionsComplete, foreign, token), ErrorCode.TokenInvalidated, true)).Value;
         var ackFirst = foreign with
         {
             CommandId = Guid.NewGuid()

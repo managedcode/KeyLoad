@@ -17,8 +17,8 @@ internal static class InboxProcessingClusterReplay
         else
         {
             await InboxProcessingClusterAssertions.DeniedAsync(await client.CommitProcessingAsync(state.Original, token), ErrorCode.PermissionDenied);
-            _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess,
-                state.Original, token), ErrorCode.PermissionDenied, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess,
+                state.Original, token), ErrorCode.PermissionDenied, true)).Value;
         }
         var duplicate = state.Original with
         {
@@ -33,8 +33,8 @@ internal static class InboxProcessingClusterReplay
             [new PutDocument(InboxProcessingClusterProtocol.Collection, InboxProcessingClusterProtocol.Refused, InboxProcessingClusterProtocol.Payload)]
         };
         await InboxProcessingClusterAssertions.DeniedAsync(await client.CommitProcessingAsync(changed, token), ErrorCode.Conflict);
-        _ = await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess,
-            changed, token), ErrorCode.Conflict, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.MessagesProcess,
+            changed, token), ErrorCode.Conflict, true)).Value;
         await InboxProcessingClusterAssertions.UnchangedAsync(client, state, token);
     }
 }

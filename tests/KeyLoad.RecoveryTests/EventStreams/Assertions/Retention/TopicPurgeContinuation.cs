@@ -16,7 +16,7 @@ internal static class TopicPurgeContinuation
             var position = database.Store.Position;
             var protectedBytes = TopicPurgeCrashScenario.ProtectedBytes(database.Store);
             var outcome = database.Apply(operation);
-            await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(changed ? ErrorCode.Conflict : ErrorCode.DuplicateEventId);
+            await Assert.That(Errors.Code(outcome.Problem).Value).IsEqualTo(changed ? ErrorCode.Conflict : ErrorCode.DuplicateEventId);
             await Assert.That(database.Store.Position).IsEqualTo(position + 1);
             await TopicPurgeReceiptAssertions.StableReplayAsync(database, operation, outcome);
             await Assert.That(TopicPurgeCrashScenario.ProtectedBytes(database.Store)).IsEquivalentTo(protectedBytes);

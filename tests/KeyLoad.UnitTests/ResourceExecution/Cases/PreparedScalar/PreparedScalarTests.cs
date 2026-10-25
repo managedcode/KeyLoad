@@ -20,11 +20,11 @@ internal sealed class PreparedScalarTests
         using var json = JsonDocument.Parse(DocumentJson);
         var root = json.RootElement;
 
-        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(StringPath))).IsEqualTo(Target);
-        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(NullPath))).IsNull();
-        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(NumberPath))).IsEqualTo(12.5m);
-        await Assert.That((bool)JsonData.Scalar(root, JsonData.PathSegments(BooleanPath))!).IsTrue();
-        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(MissingPath))).IsEqualTo(MissingValue.Instance);
+        await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(StringPath))).Value.Value).IsEqualTo(Target);
+        await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(NullPath))).Value.Value).IsNull();
+        await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(NumberPath))).Value.Value).IsEqualTo(12.5m);
+        await Assert.That((bool)(JsonData.Scalar(root, JsonData.PathSegments(BooleanPath))).Value.Value!).IsTrue();
+        await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(MissingPath))).Value.Value).IsEqualTo(MissingValue.Instance);
     }
 
     [Test]
@@ -35,9 +35,9 @@ internal sealed class PreparedScalarTests
         var paths = new[] { StringPath, NullPath, NumberPath, BooleanPath, MissingPath };
         foreach (var path in paths)
         {
-            await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(path))).IsEqualTo(JsonData.Scalar(root, path));
+            await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(path))).Value.Value).IsEqualTo(JsonData.Scalar(root, path));
         }
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => JsonData.Scalar(root, JsonData.PathSegments(ObjectPath)));
+        var error = Assert.ThrowsExactly<KeyLoadException>(() => { _ = (JsonData.Scalar(root, JsonData.PathSegments(ObjectPath))).Value.Value; });
         await Assert.That(error.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
     }
 }

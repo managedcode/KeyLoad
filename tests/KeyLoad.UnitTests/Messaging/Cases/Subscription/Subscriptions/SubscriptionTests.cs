@@ -93,7 +93,7 @@ internal sealed class SubscriptionTests
         var second = await Assert.That(Receive(db, subscription, lease: 1, time: time.AddSeconds(2)).Deliveries).HasSingleItem();
         var id = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.SubscriptionDelivery,
-            new SubscriptionDeliveryCommand(id, subscription, first.Token, DeliveryAction.Ack), id: id, time: time.AddSeconds(2)).Problem)).IsEqualTo(ErrorCode.StaleLease);
+            new SubscriptionDeliveryCommand(id, subscription, first.Token, DeliveryAction.Ack), id: id, time: time.AddSeconds(2)).Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(second.LeaseVersion).IsEqualTo(first.LeaseVersion + 1);
         var parked = Receive(db, subscription, lease: 1, time: time.AddSeconds(4));
         await Assert.That(parked.Deliveries).IsEmpty();
@@ -113,7 +113,7 @@ internal sealed class SubscriptionTests
         var delivery = await Assert.That(Receive(db, subscription).Deliveries).HasSingleItem();
         var failedId = Guid.NewGuid();
         var failed = new SubscriptionProcessingRequest(failedId, subscription, delivery.Token, "worker", 1, [new PutDocument("orders", "o1", "{}", 9)]);
-        await Assert.That(Errors.Code(db.Submit(OperationKind.SubscriptionProcessing, failed, id: failedId).Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.SubscriptionProcessing, failed, id: failedId).Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(0);
         var id = Guid.NewGuid();
         var request = failed with
@@ -167,10 +167,10 @@ internal sealed class SubscriptionTests
         await Assert.That(status.Paused).IsTrue();
         var ackId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.SubscriptionDelivery,
-            new SubscriptionDeliveryCommand(ackId, subscription, delivery.Token, DeliveryAction.Ack), id: ackId).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+            new SubscriptionDeliveryCommand(ackId, subscription, delivery.Token, DeliveryAction.Ack), id: ackId).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         var receiveId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription,
-            new ReceiveSubscriptionRequest(receiveId, subscription), id: receiveId).Problem)).IsEqualTo(ErrorCode.DispatchPaused);
+            new ReceiveSubscriptionRequest(receiveId, subscription), id: receiveId).Problem).Value).IsEqualTo(ErrorCode.DispatchPaused);
     }
     [Test]
     public async Task TopicQuotaFailureRollsBackTheProducerDocumentAndEventCounter()
@@ -185,7 +185,7 @@ internal sealed class SubscriptionTests
         Publish(db, 1);
         var id = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Batch, new CommandRequest(id, db.Partition,
-            [new PutDocument("orders", "o1", "{}", 0), new PublishTopic("topic", [new("overflow", "Created", "{}")])]), id: id).Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            [new PutDocument("orders", "o1", "{}", 0), new PublishTopic("topic", [new("overflow", "Created", "{}")])]), id: id).Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "o1"))).IsNull();
         await Assert.That(db.Database.ReadEventSource("root", new(Topic(db))).Head.TailPosition).IsEqualTo(1);
     }

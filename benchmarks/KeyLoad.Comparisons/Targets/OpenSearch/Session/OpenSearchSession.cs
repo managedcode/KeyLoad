@@ -58,7 +58,7 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
                 seen++;
             }
             var lastSort = hits[hits.GetArrayLength() - SingleItemCount].GetProperty(SortProperty);
-            searchAfter = lastSort.EnumerateArray().Select(ReadSortValue).ToArray();
+            searchAfter = lastSort.EnumerateArray().Select((outcomeArgument0) => (ReadSortValue(outcomeArgument0)).Value).ToArray();
         }
         if (corpusCount >= NoObservedItems && seen != corpusCount)
         {
@@ -66,34 +66,34 @@ internal sealed class OpenSearchSession(HttpClient client, string index, int top
         }
     }
 
-    private static object? ReadSortValue(JsonElement value) => value.ValueKind switch
+    private static global::ManagedCode.Communication.Result<object?> ReadSortValue(JsonElement value) => value.ValueKind switch
     {
-        JsonValueKind.String => value.GetString(),
-        JsonValueKind.Number => value.GetInt64(),
-        JsonValueKind.True => true,
-        JsonValueKind.False => false,
-        JsonValueKind.Null => null,
+        JsonValueKind.String => ((object?)(value.GetString())) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<object?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(ReadSortValue)),
+        JsonValueKind.Number => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(value.GetInt64()))),
+        JsonValueKind.True => global::ManagedCode.Communication.Result<object?>.Succeed((object?)(true)),
+        JsonValueKind.False => global::ManagedCode.Communication.Result<object?>.Succeed((object?)(false)),
+        JsonValueKind.Null => global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(ReadSortValue)),
         _ => throw new ComparisonFailureException(OpenSearchCorpusSortValueInvalidDetail)
     };
 
-    public async Task<FoundDocument?> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
+    public async Task<global::ManagedCode.Communication.Result<FoundDocument?>> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {
         using var result = await OpenSearchHttp.SendJsonAsync(client, HttpMethod.Get,
             OpenSearchNames.PathSeparator + index + OpenSearchNames.DocumentPath + Uri.EscapeDataString(document.Id) + OpenSearchNames.RealtimeQuery, null,
             cancellationToken, allowNotFound: true);
         if (!OpenSearchJson.OptionalBoolean(result.RootElement, OpenSearchNames.Found))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<FoundDocument?>.FailNotFound(nameof(ReadAsync));
         }
 
-        return OpenSearchDocument.Read(result.RootElement.GetProperty(OpenSearchNames.Source));
+        return global::ManagedCode.Communication.Result<FoundDocument?>.Succeed(((FoundDocument?)(OpenSearchDocument.Read(result.RootElement.GetProperty(OpenSearchNames.Source)))));
     }
 
     public async Task<OperationResult> ExecuteAsync(Scenario scenario, BenchmarkDocument document, CancellationToken cancellationToken)
     {
         return scenario switch
         {
-            Scenario.PointRead => new(Document: await ReadAsync(document, cancellationToken)),
+            Scenario.PointRead => new(Document: (await ReadAsync(document, cancellationToken)).Value),
             Scenario.DocumentWrite => await WriteAsync(document, cancellationToken),
             Scenario.DocumentUpdate => await UpdateAsync(document, cancellationToken),
             Scenario.DocumentDelete => await DeleteAsync(document, cancellationToken),

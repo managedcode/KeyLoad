@@ -27,7 +27,7 @@ internal static class BenchmarkSessionQualifications
     private const string Correctness = "execution-correctness";
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
-    internal static async Task<Exception?> RunAsync(DistributedApplication application,
+    internal static async Task<global::ManagedCode.Communication.Result<Exception?>> RunAsync(DistributedApplication application,
         BenchmarkSessionSelection selection, BenchmarkSessionCallerOptions selected, string evidence,
         int runtimeExit, CancellationToken token)
     {
@@ -51,9 +51,9 @@ internal static class BenchmarkSessionQualifications
         await WriteAsync(evidence, report);
         return failures.Count switch
         {
-            EmptyCount => null,
-            SingleItemCount => failures[EmptyCount],
-            _ => new AggregateException(failures)
+            EmptyCount => global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(RunAsync)),
+            SingleItemCount => global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(failures[EmptyCount]))),
+            _ => global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(failures)))
         };
     }
 

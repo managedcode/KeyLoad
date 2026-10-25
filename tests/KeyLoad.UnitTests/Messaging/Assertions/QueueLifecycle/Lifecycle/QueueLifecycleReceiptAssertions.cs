@@ -15,7 +15,7 @@ internal static class QueueLifecycleReceiptAssertions
     internal static async Task ResultAsync(DatabaseEngine database, QueueLaneRef lane,
         Func<string, EnqueueMessage> literal, QueueLifecycleObservation observation)
     {
-        if (Errors.Code(observation.Result.Problem) is not null)
+        if (Errors.Code(observation.Result.Problem).Value is not null)
         {
 
             await Assert.That(observation.Result.Value).IsNull();

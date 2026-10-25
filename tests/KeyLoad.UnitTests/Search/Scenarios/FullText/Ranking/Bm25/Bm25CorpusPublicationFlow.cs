@@ -60,8 +60,8 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
 
     internal KeyLoad.Query.QueryExecution.DistributedTextStatistics? Current(string term = Term)
         => database.Database.WithQueryView(Subject, database.Partition, Collection,
-            (view, principal, resource) => database.Database.ReadBm25CorpusCurrent(view, principal, resource,
-                database.Partition, Collection, Field, TextProjectionProtocol.TokenizerVersion, [term], database.CreateReadWork(Token)));
+            (view, principal, resource) => (database.Database.ReadBm25CorpusCurrent(view, principal, resource,
+                database.Partition, Collection, Field, TextProjectionProtocol.TokenizerVersion, [term], database.CreateReadWork(Token))).Value);
 
     internal Task<RankedDocument[]> SearchAsync()
         => new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync(Subject,

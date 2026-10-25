@@ -23,7 +23,7 @@ internal static class GraphCrossAuthorityR41Bounds
         await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.BudgetExceeded));
         await GraphCrossAuthorityR41Assertions.MatrixAsync(reader, administrator, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.GraphTraverse, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Seed.Reader.Secret, GraphIncomingClusterScenario.PrivateMarker);
         await GraphCrossAuthorityR41Assertions.MatrixAsync(reader, administrator, state, token);
     }

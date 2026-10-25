@@ -50,7 +50,7 @@ internal static class QdrantNodeProof
         }
     }
 
-    internal static QdrantReplicaResult? ReadDisabled(JsonElement root, JsonElement cluster,
+    internal static global::ManagedCode.Communication.Result<QdrantReplicaResult?> ReadDisabled(JsonElement root, JsonElement cluster,
         JsonElement collection, int expectedPoints)
     {
         const int NoItems = 0;
@@ -65,8 +65,8 @@ internal static class QdrantNodeProof
         var version = root.GetProperty(VersionField).GetString() ?? string.Empty;
         var count = collection.GetProperty(ResultField).GetProperty(PointsField).GetInt32();
         return version.Length != NoItems && count == expectedPoints
-            ? new(version, new(SingleItemCount, SingleItemCount, SingleNodeToken, [$"{ReadDisabledSeededPointsText}{count}{ReadDisabledRF1WriteConsistencyFactorText}"]))
-            : null;
+            ? global::ManagedCode.Communication.Result<QdrantReplicaResult?>.Succeed((QdrantReplicaResult?)(new(version, new(SingleItemCount, SingleItemCount, SingleNodeToken, [$"{ReadDisabledSeededPointsText}{count}{ReadDisabledRF1WriteConsistencyFactorText}"]))))
+            : global::ManagedCode.Communication.Result<QdrantReplicaResult?>.FailNotFound(nameof(ReadDisabled));
     }
 
     internal static (string Version, string Peer, string[] Peers, int Copies, int Shard) ReadNode(

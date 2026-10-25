@@ -41,7 +41,7 @@ internal sealed class SubscriptionOldCutState(PartitionRef partition)
     {
         var operation = Create(database, kind, payload, id, principal);
         var result = database.Apply(operation);
-        if (Errors.Code(result.Problem) is { } code)
+        if (Errors.Code(result.Problem).Value is { } code)
         {
             throw Errors.Fail(code, result.Problem?.Detail ?? "The owned operation failed.");
         }

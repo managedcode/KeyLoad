@@ -7,7 +7,7 @@ internal static class SampleChunkWorkRead
     {
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
-        return database.Store.Read(view => SampleChunkWorkEligibility.Read(database, budget.CreateView(view),
-            original.Partition, original.Set, original.Series, original.WindowId, database.EvaluationClock.GetUtcNow(), budget));
+        return database.Store.Read(view => (SampleChunkWorkEligibility.Read(database, budget.CreateView(view),
+            original.Partition, original.Set, original.Series, original.WindowId, database.EvaluationClock.GetUtcNow(), budget)).Value);
     }
 }

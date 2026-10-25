@@ -7,7 +7,7 @@ public static class QueueDeadLetters
 {
     internal static QueueDeadLetterAdmissionPlan PrepareQueueDeadLetterAdmission(IKeyValueView view, QueueLaneRef lane, QueuePolicy policy, MessageMetadata metadata, long bodyBytes, QueueCounters counters)
     {
-        var body = StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueSweepTransitions.MissingIndexedBody);
+        var body = (StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, metadata.Id))).Value ?? throw Errors.Fail(ErrorCode.Corruption, QueueSweepTransitions.MissingIndexedBody);
         var order = QueueOrderMutationPreparation.PrepareQueueParkOrder(view, lane, policy, body.Body, metadata);
         var fits = MessagingCommands.FitsQueueDeadLetter(policy, counters, bodyBytes);
         if (metadata.StateVersion == long.MaxValue || fits && counters.NextParkedSequence == long.MaxValue)

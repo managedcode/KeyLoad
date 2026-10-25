@@ -40,8 +40,8 @@ internal static class FunctionalGateAnalyticsMixedPublicCalls
         await Assert.That(sdk.Value).IsNull();
         await ProblemAsync(sdk.Problem?.ErrorCode, sdk.Problem?.StatusCode);
         await unchanged();
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
-            McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token), ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
+            McpCallerTools.DocumentsCommit, FunctionalGateAnalyticsIdentity.Wire(command), token), ErrorCode.RevisionConflict, dispatched: true)).Value;
         await unchanged();
         var sql = FunctionalGateRelationalCalls.Commit(command);
         var sqlSdk = await context.Writer.Sdk.ExecuteSqlAsync(sql, token);
@@ -49,8 +49,8 @@ internal static class FunctionalGateAnalyticsMixedPublicCalls
         await Assert.That(sqlSdk.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await ProblemAsync(sqlSdk.Problem?.ErrorCode, sqlSdk.Problem?.StatusCode);
         await unchanged();
-        await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
-            SqlOperationProtocol.ToolName, sql, token), ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Writer.Mcp.CallAsync(
+            SqlOperationProtocol.ToolName, sql, token), ErrorCode.RevisionConflict, dispatched: true)).Value;
         await unchanged();
     }
 

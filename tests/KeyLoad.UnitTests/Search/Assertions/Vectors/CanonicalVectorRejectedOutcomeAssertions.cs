@@ -8,7 +8,7 @@ internal static class CanonicalVectorRejectedOutcomeAssertions
         bool dimensionFailure, long previousPosition)
     {
         var rejected = database.Submit(OperationKind.Batch, command, id: command.CommandId);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(dimensionFailure ? ErrorCode.Validation : ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(dimensionFailure ? ErrorCode.Validation : ErrorCode.RevisionConflict);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(dimensionFailure
             ? "The vector dimension or values are invalid." : "The expected revision does not match.");
 

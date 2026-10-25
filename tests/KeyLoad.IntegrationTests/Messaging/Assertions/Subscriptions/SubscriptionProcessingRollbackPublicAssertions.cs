@@ -55,8 +55,8 @@ internal static class SubscriptionProcessingRollbackPublicAssertions
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value).IsNull();
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(ErrorCode.RevisionConflict.ToString());
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsProcess, request, token),
-            ErrorCode.RevisionConflict, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsProcess, request, token),
+            ErrorCode.RevisionConflict, true)).Value;
         await SubscriptionFilterClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(
             await sdk.SubscriptionStatusAsync(request.Subscription, token)), before);
         await SubscriptionFilterClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<SubscriptionInfo>(

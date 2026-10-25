@@ -26,7 +26,7 @@ internal sealed class OperationHeaderStartTests
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         await Assert.That(id).IsNotEqualTo(Guid.Empty);
         await Assert.That(body).IsEqualTo(id.ToString(OrleansNodeProtocol.GuidFormat));
-        await Assert.That(OperationHeaderTestServer.RequestIdHeader(response)).IsEqualTo(body);
+        await Assert.That((OperationHeaderTestServer.RequestIdHeader(response)).Value).IsEqualTo(body);
     }
 
     /// <summary>A response without a dispatched operation has no execution request ID header.</summary>
@@ -40,7 +40,7 @@ internal sealed class OperationHeaderStartTests
 
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         await Assert.That(body).IsEqualTo(ResponseBody);
-        await Assert.That(OperationHeaderTestServer.RequestIdHeader(response)).IsNull();
+        await Assert.That((OperationHeaderTestServer.RequestIdHeader(response)).Value).IsNull();
     }
 
     /// <summary>Publishing after execution headers start preserves the response body and does not mutate committed headers.</summary>
@@ -56,7 +56,7 @@ internal sealed class OperationHeaderStartTests
         await Assert.That(response.StatusCode).IsEqualTo(HttpStatusCode.OK);
         await Assert.That(id).IsNotEqualTo(Guid.Empty);
         await Assert.That(body).IsEqualTo(id.ToString(OrleansNodeProtocol.GuidFormat));
-        await Assert.That(OperationHeaderTestServer.RequestIdHeader(response)).IsNull();
+        await Assert.That((OperationHeaderTestServer.RequestIdHeader(response)).Value).IsNull();
     }
 
     /// <summary>Overlapping execution requests each return only their own published ID in the body and header.</summary>
@@ -71,7 +71,7 @@ internal sealed class OperationHeaderStartTests
             using var response = await server.GetAsync(
                 $"{ParallelPathPrefix}{id.ToString(OrleansNodeProtocol.GuidFormat)}", cancellationToken);
             var body = await response.Content.ReadAsStringAsync(cancellationToken);
-            return (Expected: id, response.StatusCode, Header: OperationHeaderTestServer.RequestIdHeader(response), Body: body);
+            return (Expected: id, response.StatusCode, Header: (OperationHeaderTestServer.RequestIdHeader(response)).Value, Body: body);
         }));
 
         foreach (var result in responses)

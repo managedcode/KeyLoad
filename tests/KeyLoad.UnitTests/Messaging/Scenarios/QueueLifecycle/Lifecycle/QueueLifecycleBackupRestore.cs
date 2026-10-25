@@ -32,12 +32,12 @@ internal static class QueueLifecycleBackupRestore
             await QueueLifecycleAccountingAssertions.InitialAsync(restored, original);
             var prior = original.Successes.First(item => item.Operation.Value!.Kind == OperationKind.Batch);
             var before = restored.Position;
-            await Assert.That(Errors.Code(database.Apply(prior.Operation).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+            await Assert.That(Errors.Code(database.Apply(prior.Operation).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
             await Assert.That(restored.Position).IsEqualTo(before);
             await QueueLifecycleImage.SameAsync(restored, original.Lane, image);
             var stale = QueueLifecycleOperations.Complete(database, new(original.Partition, original.Time),
                 original.OriginalPending!, DeliveryAction.Ack);
-            await Assert.That(Errors.Code(stale.Problem))
+            await Assert.That(Errors.Code(stale.Problem).Value)
                 .IsEqualTo(ErrorCode.TokenInvalidated);
             await QueueLifecycleImage.SameAsync(restored, original.Lane, image);
             var state = new QueueLifecycleTestState(original.Partition, original.Time);

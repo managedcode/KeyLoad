@@ -19,6 +19,6 @@ internal static class AtomicProducerClusterRoutes
     {
         var sql = SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command);
         await QueueProducerClusterAssertions.DeniedAsync(await sdk.ExecuteSqlAsync(sql, token), expected);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), expected, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), expected, true)).Value;
     }
 }

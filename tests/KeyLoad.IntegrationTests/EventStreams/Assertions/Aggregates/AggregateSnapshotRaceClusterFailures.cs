@@ -62,7 +62,7 @@ internal static class AggregateSnapshotRaceClusterFailures
         await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.PermissionDenied,
             "Complete replay input requires every raw-read and raw-use grant."), sdk.Problem);
         var mcp = await reader.Mcp.CallAsync(McpCallerTools.StreamsReplay, state.Scenario.ReadRequest(3), token);
-        await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(mcp, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await Assert.That(JsonElement.DeepEquals(mcp.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error),
             JsonSerializer.SerializeToElement(Errors.Problem(ErrorCode.PermissionDenied,
                 "The authenticated principal is not permitted to perform this operation."), JsonDefaults.Options))).IsTrue();

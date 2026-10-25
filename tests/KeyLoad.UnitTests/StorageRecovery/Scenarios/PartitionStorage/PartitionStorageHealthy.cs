@@ -15,7 +15,7 @@ internal static class PartitionStorageHealthy
             new(P.Collection, ResourceKind.Collection, P.Partition.TransactionDomainId));
         var configured = await owner.Coordinator.RuntimeSubmitAsync(OperationKind.ConfigureResource,
             P.Configure, P.Root, OrleansSerialization.Serialize(definition), cancellationToken: token).ConfigureAwait(false);
-        await Assert.That(Errors.Code(configured.Problem)).IsNull();
+        await Assert.That(Errors.Code(configured.Problem).Value).IsNull();
         await Assert.That(JsonDefaults.Serialize(configured.Get<ResourceDefinition>()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(definition.Definition))).IsTrue();
         await owner.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
@@ -50,7 +50,7 @@ internal static class PartitionStorageHealthy
 
     private static async Task RequireReceiptAsync(Result<object> reply, CommitReceipt expected)
     {
-        await Assert.That(Errors.Code(reply.Problem)).IsNull();
+        await Assert.That(Errors.Code(reply.Problem).Value).IsNull();
         await Assert.That(reply.Problem).IsNull();
         var actual = reply.Get<CommitReceipt>();
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))

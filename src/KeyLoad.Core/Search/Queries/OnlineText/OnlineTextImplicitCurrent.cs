@@ -5,12 +5,12 @@ namespace KeyLoad.Core;
 /// <summary>Executes OnlineTextImplicitCurrent operations against the caller's database context.</summary>
 public static class OnlineTextImplicitCurrent
 {
-    internal static OnlineTextCurrentPublication? ReadOnlineTextImplicitCurrent(this DatabaseEngine engine, IKeyValueView raw, PrincipalRecord principal, PartitionRef partition, string collection, string field, Guid nodeId, ReadExecutionBudget budget)
+    internal static global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?> ReadOnlineTextImplicitCurrent(this DatabaseEngine engine, IKeyValueView raw, PrincipalRecord principal, PartitionRef partition, string collection, string field, Guid nodeId, ReadExecutionBudget budget)
     {
         budget.Check();
         if (!principal.ClusterAdministrator)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.FailNotFound(nameof(ReadOnlineTextImplicitCurrent));
         }
 
         OnlineTextCurrentPublication? selected = null;
@@ -36,7 +36,7 @@ public static class OnlineTextImplicitCurrent
                 return true;
             }
 
-            var actual = engine.ReadOnlineTextCurrentPublication(view, principal, request, budget) ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
+            var actual = (engine.ReadOnlineTextCurrentPublication(view, principal, request, budget)).Value ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
             if (selected is not null)
             {
                 throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.InvalidPublication);
@@ -46,6 +46,6 @@ public static class OnlineTextImplicitCurrent
             return true;
         });
 
-        return selected;
+        return ((OnlineTextCurrentPublication?)(selected)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<OnlineTextCurrentPublication?>.FailNotFound(nameof(ReadOnlineTextImplicitCurrent));
     }
 }

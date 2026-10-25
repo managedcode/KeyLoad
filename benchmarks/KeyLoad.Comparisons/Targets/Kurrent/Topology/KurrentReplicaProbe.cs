@@ -15,8 +15,8 @@ internal static class KurrentReplicaProbe
         {
             while (true)
             {
-                var evidence = await TryCreateCopyEvidenceAsync(nodeClients: nodeClients, httpClients: httpClients, topology: topology,
-                    stream: stream, eventData: eventData, cut: cut, timeout: timeout, cancellationToken: limit.Token, options: options, timeProvider: timeProvider);
+                var evidence = (await TryCreateCopyEvidenceAsync(nodeClients: nodeClients, httpClients: httpClients, topology: topology,
+                    stream: stream, eventData: eventData, cut: cut, timeout: timeout, cancellationToken: limit.Token, options: options, timeProvider: timeProvider)).Value;
                 if (evidence is not null)
                 {
                     return evidence;
@@ -30,21 +30,21 @@ internal static class KurrentReplicaProbe
         }
     }
 
-    private static async Task<ClusterEvidence?> TryCreateCopyEvidenceAsync(KurrentDBClient[] nodeClients, HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData, KurrentAppendCut cut, TimeSpan timeout, IOptions<ComparisonLifecycleOptions> options, TimeProvider timeProvider, CancellationToken cancellationToken)
+    private static async Task<global::ManagedCode.Communication.Result<ClusterEvidence?>> TryCreateCopyEvidenceAsync(KurrentDBClient[] nodeClients, HttpClient[] httpClients, ComparisonTopology topology, string stream, KurrentEventData eventData, KurrentAppendCut cut, TimeSpan timeout, IOptions<ComparisonLifecycleOptions> options, TimeProvider timeProvider, CancellationToken cancellationToken)
     {
         var views = await KurrentClusterVerifier.ReadReadyViewsAsync(clients: httpClients, topology: topology, timeout: timeout,
             cancellationToken: cancellationToken, options: options, timeProvider: timeProvider);
         if (!await AllCopiesAtCutAsync(nodeClients, views, stream, eventData, cut, cancellationToken))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ClusterEvidence?>.FailNotFound(nameof(TryCreateCopyEvidenceAsync));
         }
 
         var finalViews = await KurrentClusterVerifier.ReadReadyViewsAsync(clients: httpClients, topology: topology, timeout: timeout,
             cancellationToken: cancellationToken, options: options, timeProvider: timeProvider);
         RequireSameLocalMembers(views, finalViews);
         return await AllCopiesAtCutAsync(nodeClients, finalViews, stream, eventData, cut, cancellationToken)
-            ? KurrentClusterVerifier.CreateEvidence(finalViews, topology, cut)
-            : null;
+            ? global::ManagedCode.Communication.Result<ClusterEvidence?>.Succeed(((ClusterEvidence?)(KurrentClusterVerifier.CreateEvidence(finalViews, topology, cut))))
+            : global::ManagedCode.Communication.Result<ClusterEvidence?>.FailNotFound(nameof(TryCreateCopyEvidenceAsync));
     }
 
     public static async Task RequireOriginalEventAsync(KurrentDBClient client, string stream, KurrentEventData expected,

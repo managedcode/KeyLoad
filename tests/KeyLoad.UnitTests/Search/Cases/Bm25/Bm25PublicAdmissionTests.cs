@@ -37,7 +37,7 @@ internal sealed class Bm25PublicAdmissionTests
             var envelope = codec.CreateCommand(Guid.NewGuid(), original.UserId!, OperationKind.Batch, original.CommandId, payload);
             await Assert.That(codec.Decode(envelope).Envelope.CommandKind).IsEqualTo(OperationKind.Batch);
             var result = flow.Database.SubmitIssued(original);
-            await Assert.That(Errors.Code(result.Problem)).IsNull();
+            await Assert.That(Errors.Code(result.Problem).Value).IsNull();
             await ReplayResultAssertions.SameAsync(result,
                 flow.Database.Database.ResolveOutcome(original));
             await Assert.That(flow.Database.Database.GetDocument(Bm25CorpusPublicationFlow.Root,

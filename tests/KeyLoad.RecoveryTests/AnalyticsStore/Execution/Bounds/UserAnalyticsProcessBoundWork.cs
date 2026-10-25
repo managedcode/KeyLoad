@@ -114,7 +114,7 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
             }
             failures.Add(error);
         }
-        var preparation = await PrepareAsync(lease, failures);
+        var preparation = (await PrepareAsync(lease, failures)).Value;
         if (preparation is null)
         {
             cleanup = DisposeAttachedRetention(attached, cleanup, failures);
@@ -162,22 +162,22 @@ internal sealed class UserAnalyticsProcessBoundWork : IAsyncDisposable
         return cleanup;
     }
 
-    private static async Task<Exception?> PrepareAsync(RequestWorkLease lease, List<Exception> failures)
+    private static async Task<global::ManagedCode.Communication.Result<Exception?>> PrepareAsync(RequestWorkLease lease, List<Exception> failures)
     {
         try
         {
             await lease.PrepareCompletionAsync();
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(PrepareAsync));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             failures.Add(error);
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
     }
 

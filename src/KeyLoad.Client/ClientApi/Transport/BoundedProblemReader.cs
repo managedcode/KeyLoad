@@ -6,12 +6,12 @@ namespace KeyLoad.Client.ClientApi;
 
 internal static class BoundedProblemReader
 {
-    public static async Task<Problem?> ReadAsync(HttpContent content, JsonSerializerOptions options,
+    public static async Task<global::ManagedCode.Communication.Result<Problem?>> ReadAsync(HttpContent content, JsonSerializerOptions options,
         int maximumProblemBodyBytes, CancellationToken cancellationToken)
     {
         if (content.Headers.ContentLength > maximumProblemBodyBytes)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Problem?>.FailNotFound(nameof(ReadAsync));
         }
 
         var buffer = ArrayPool<byte>.Shared.Rent(maximumProblemBodyBytes + 1);
@@ -33,16 +33,16 @@ internal static class BoundedProblemReader
 
             if (count > maximumProblemBodyBytes)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<Problem?>.FailNotFound(nameof(ReadAsync));
             }
 
             try
             {
-                return JsonSerializer.Deserialize<Problem>(buffer.AsSpan(0, count), options);
+                return ((Problem?)(JsonSerializer.Deserialize<Problem>(buffer.AsSpan(0, count), options))) is { } outcomeValue3 ? global::ManagedCode.Communication.Result<Problem?>.Succeed(outcomeValue3) : global::ManagedCode.Communication.Result<Problem?>.FailNotFound(nameof(ReadAsync));
             }
             catch (JsonException)
             {
-                return null;
+                return global::ManagedCode.Communication.Result<Problem?>.FailNotFound(nameof(ReadAsync));
             }
         }
         finally

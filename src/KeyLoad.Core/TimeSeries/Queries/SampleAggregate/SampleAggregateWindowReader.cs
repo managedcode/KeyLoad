@@ -22,7 +22,7 @@ internal static class SampleAggregateWindowReader
         ValidateWidth(request.Width);
         ValidateWindowLimit(request.MaxWindows);
         var scope = SampleReadScope.Open(database, view, principalId, request.Partition, request.Set, request.SeriesId);
-        var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
+        var retention = (SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget)).Value;
         var readFrom = retention is not null && retention.BeforeUtcTicks > request.From.UtcTicks
             ? SampleRetentionStateReader.Before(retention) : request.From;
         var endTicks = request.UntilExclusive?.UtcTicks ?? AfterMaximumUtcTicks;
@@ -44,7 +44,7 @@ internal static class SampleAggregateWindowReader
                 request.Partition, request.Set, request.SeriesId));
             return true;
         }, SampleReadKeys.FromInclusive(request.Partition, request.Set, request.SeriesId, readFrom),
-            SampleReadKeys.UntilExclusive(request.Partition, request.Set, request.SeriesId, request.UntilExclusive),
+            (SampleReadKeys.UntilExclusive(request.Partition, request.Set, request.SeriesId, request.UntilExclusive)).Value,
             cancellationToken: budget.Cancellation);
         if (scan.HasMore)
         {

@@ -23,7 +23,7 @@ internal static class SqlModelViewClusterDenialAssertions
 
     internal static async Task McpAsync(CallToolResult result, string secret, bool foreignScope = false)
     {
-        await McpCallerAssertions.ErrorAsync(result, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(result, ErrorCode.PermissionDenied, dispatched: true)).Value;
         if (foreignScope)
         {
             await Assert.That(result.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)

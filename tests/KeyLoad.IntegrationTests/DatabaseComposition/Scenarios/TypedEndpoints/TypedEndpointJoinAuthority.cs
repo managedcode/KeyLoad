@@ -71,8 +71,8 @@ internal static class TypedEndpointJoinAuthority
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Value.ValueKind).IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied)).Because(result.Problem.Detail ?? string.Empty);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
-            ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token),
+            ErrorCode.PermissionDenied, dispatched: true)).Value;
         return JsonSerializer.SerializeToElement(result.Problem, JsonDefaults.Options);
     }
 }

@@ -50,7 +50,7 @@ internal static class TenantAdmissionAssertions
     internal static async Task ReceiptAsync(Result<object> result, Command<DatabaseCommand> operation,
         string id, CommitToken expectedToken)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Problem?.Detail).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);

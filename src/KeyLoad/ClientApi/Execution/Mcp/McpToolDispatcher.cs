@@ -124,7 +124,7 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
         }
         var gateway = context.RequestServices.GetRequiredService<McpGatewayCatalogOwner>();
         var result = await gateway.InvokeAsync(request.ToolId!, request.Arguments!, cancellationToken);
-        if (McpGatewayResult.GetOriginal(result) is { } execution)
+        if ((McpGatewayResult.GetOriginal(result)).Value is { } execution)
         {
             return execution;
         }

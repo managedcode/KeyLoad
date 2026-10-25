@@ -11,7 +11,7 @@ internal static class DocumentPatchAtomicityAssertions
 
     internal static async Task FailureAsync(Result<object> result, int fault)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(fault == 0 ? ErrorCode.Validation : ErrorCode.UnsupportedCapability);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(fault == 0 ? ErrorCode.Validation : ErrorCode.UnsupportedCapability);
         await Assert.That(result.Problem?.Detail).IsEqualTo(fault == 0 ? MissingDetail : ArrayDetail);
 
         await Assert.That(result.Value).IsNull();
@@ -26,9 +26,9 @@ internal static class DocumentPatchAtomicityAssertions
         var stored = OutcomeStoreOracle.ReadPartition(owner.Store, owner.Source.Partition, Root, operation.CommandId)
             ?? throw new InvalidOperationException("The original scoped execution outcome is missing.");
         await BytesAsync(OrleansSerialization.Serialize(result), OrleansSerialization.Serialize(stored));
-        await Assert.That(Errors.Code(stored.Problem)).IsEqualTo(Errors.Code(result.Problem));
+        await Assert.That(Errors.Code(stored.Problem).Value).IsEqualTo(Errors.Code(result.Problem).Value);
         await Assert.That(stored.Problem?.Detail).IsEqualTo(result.Problem?.Detail);
-        if (Errors.Code(result.Problem) is null)
+        if (Errors.Code(result.Problem).Value is null)
         {
             await BytesAsync(OrleansSerialization.Serialize(result.Get<CommitReceipt>()), OrleansSerialization.Serialize(stored.Get<CommitReceipt>()));
         }
@@ -70,7 +70,7 @@ internal static class DocumentPatchAtomicityAssertions
     {
         var operation = original.PreparedCommand
             ?? throw new InvalidOperationException("The retained document command is missing.");
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var receipt = result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(receipt.Token.Position).IsEqualTo(original.CanonicalSequence);

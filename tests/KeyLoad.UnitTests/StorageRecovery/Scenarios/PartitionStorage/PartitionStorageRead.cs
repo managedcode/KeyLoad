@@ -36,7 +36,7 @@ internal static class PartitionStorageRead
         await Assert.That(configured).IsNotNull();
         await Assert.That(configured!.PreparedCommand.CommandId).IsEqualTo(P.Configure);
         await Assert.That(configured.PreparedCommand.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
-        await Assert.That(Errors.Code(configured.Result.Problem)).IsNull();
+        await Assert.That(Errors.Code(configured.Result.Problem).Value).IsNull();
         var definition = new ResourceDefinition(P.Collection, ResourceKind.Collection, P.Partition.TransactionDomainId);
         var expectedConfiguration = new ConfigureResourceRequest(P.Partition.TenantId, P.Partition.DatabaseId, definition);
         var originalConfiguration = OrleansSerialization.Deserialize<ConfigureResourceRequest>(configured.PreparedCommand.Value.Input.Span);

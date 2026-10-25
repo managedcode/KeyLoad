@@ -69,7 +69,7 @@ internal static class SubscriptionInboxConflictAssertions
     internal static async Task RepairedAsync(DatabaseEngine db, ZoneTreeStore store, SubscriptionRef group,
         SubscriptionProcessingRequest request, Result<object> result, Result<object> original, byte[] inbox, string[] source, TestDatabase originalOwner)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var processing = result.Get<SubscriptionProcessingResult>();
         await Assert.That(processing.AlreadyProcessed).IsTrue();
         await Assert.That(processing.OriginalEffectsToken).IsEqualTo(original.Get<SubscriptionProcessingResult>().OriginalEffectsToken);
@@ -104,7 +104,7 @@ internal static class SubscriptionInboxConflictAssertions
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(entry.Operation);
-        if (Errors.Code(entry.Result.Problem) is not null)
+        if (Errors.Code(entry.Result.Problem).Value is not null)
         {
             await FailureAsync(replay);
             await Assert.That(JsonSerializer.Serialize(replay, JsonDefaults.Options))
@@ -134,7 +134,7 @@ internal static class SubscriptionInboxConflictAssertions
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(original.Operation);
-        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(replay.Problem?.Detail).IsEqualTo("The subscription token scope or generation is invalid.");
 
         await Assert.That(replay.Value).IsNull();
@@ -147,7 +147,7 @@ internal static class SubscriptionInboxConflictAssertions
 
     private static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The subscription input was completed with different effects.");
 
         await Assert.That(result.Value).IsNull();

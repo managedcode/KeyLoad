@@ -34,11 +34,11 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
         }
     }
 
-    internal async Task<RuntimeJournalSnapshot?> CaptureAsync(CancellationToken cancellationToken)
+    internal async Task<global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>> CaptureAsync(CancellationToken cancellationToken)
     {
         if (retired)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.FailNotFound(nameof(CaptureAsync));
         }
 
         if (Captured is null)
@@ -46,19 +46,19 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
             Captured = await client.GetHeaderAsync(JournalId.Value, cancellationToken);
         }
 
-        return Captured;
+        return ((RuntimeJournalSnapshot?)(Captured)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.FailNotFound(nameof(CaptureAsync));
     }
 
-    internal async Task<RuntimeJournalSnapshot?> ObserveAsync(CancellationToken cancellationToken)
+    internal async Task<global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>> ObserveAsync(CancellationToken cancellationToken)
     {
         if (retired)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.FailNotFound(nameof(ObserveAsync));
         }
 
         var observed = await client.GetHeaderAsync(JournalId.Value, cancellationToken);
         CaptureInitial(observed);
-        return observed;
+        return ((RuntimeJournalSnapshot?)(observed)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<RuntimeJournalSnapshot?>.FailNotFound(nameof(ObserveAsync));
     }
 
     internal void CaptureInitial(RuntimeJournalSnapshot? snapshot)

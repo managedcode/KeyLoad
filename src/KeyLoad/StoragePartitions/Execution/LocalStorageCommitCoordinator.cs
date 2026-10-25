@@ -44,7 +44,7 @@ internal sealed class LocalStorageCommitCoordinator(DatabaseEngine database) : I
             var local = database.PrepareStorageOperation(owned, cancellationToken);
             return Task.FromResult(database.ApplyLocalStorageOperation(local, cancellationToken));
         }
-        var retained = database.ReadStoredCommand(owned, cancellationToken);
+        var retained = database.ReadStoredCommand(owned, cancellationToken).Value;
         var prepared = retained?.Command ?? database.PrepareStorageOperation(owned, cancellationToken);
         if (retained is null && database.LastApplied == long.MaxValue)
         {

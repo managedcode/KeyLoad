@@ -49,21 +49,23 @@ internal sealed partial class BackgroundStorageOperations
         }, cancellationToken);
     }
 
-    public Task<RemoteTransferPendingPage?> ReadQueueTransferPendingAsync(RemoteTransferPendingCursor? cursor,
+    public async Task<RemoteTransferPendingPage?> ReadQueueTransferPendingAsync(RemoteTransferPendingCursor? cursor,
         CancellationToken cancellationToken)
     {
-        return BackgroundStorageReadExecution.RunLocalAsync<RemoteTransferPendingPage?>(storage, token =>
+        var result = await BackgroundStorageReadExecution.RunLocalAsync<global::ManagedCode.Communication.Result<RemoteTransferPendingPage?>>(storage, token =>
         {
             token.ThrowIfCancellationRequested();
             return due.Value.TransferCoordinatorPrincipalId is { } subject
-                ? RemoteTransferPendingDiscovery.Read(Database, subject, cursor, token) : null;
+                ? global::ManagedCode.Communication.Result<RemoteTransferPendingPage?>.Succeed(RemoteTransferPendingDiscovery.Read(Database, subject, cursor, token))
+                : global::ManagedCode.Communication.Result<RemoteTransferPendingPage?>.FailNotFound(nameof(ReadQueueTransferPendingAsync));
 
         }, cancellationToken);
+        return result.Value;
     }
 
-    public Task<PrincipalRecord?> ReadDueCreatorAsync(DueWorkHint hint, CancellationToken cancellationToken)
+    public async Task<PrincipalRecord?> ReadDueCreatorAsync(DueWorkHint hint, CancellationToken cancellationToken)
     {
-        return BackgroundStorageReadExecution.RunLocalAsync<PrincipalRecord?>(storage, token =>
+        var result = await BackgroundStorageReadExecution.RunLocalAsync<global::ManagedCode.Communication.Result<PrincipalRecord?>>(storage, token =>
         {
             token.ThrowIfCancellationRequested();
             ArgumentNullException.ThrowIfNull(hint);
@@ -71,12 +73,15 @@ internal sealed partial class BackgroundStorageOperations
             if (hint.Kind == DueWorkKind.Saga)
             {
                 var eligible = SagaTimeoutEligibility.Read(Database, hint, clock.GetUtcNow());
-                return eligible.IsEligible ? eligible.Creator : null;
+                return eligible.IsEligible && eligible.Creator is { } creator
+                    ? global::ManagedCode.Communication.Result<PrincipalRecord?>.Succeed(creator)
+                    : global::ManagedCode.Communication.Result<PrincipalRecord?>.FailNotFound(nameof(ReadDueCreatorAsync));
             }
-            return Database.Store.Read(view =>
-                Database.Principal(view, hint.CreatorPrincipalId, clock.GetUtcNow()));
+            return global::ManagedCode.Communication.Result<PrincipalRecord?>.Succeed(Database.Store.Read(view =>
+                Database.Principal(view, hint.CreatorPrincipalId, clock.GetUtcNow())));
 
         }, cancellationToken);
+        return result.Value;
     }
 
     public Task<PrincipalRecord> ReadQueueDeadlineCreatorAsync(QueueDeadlineHint hint,

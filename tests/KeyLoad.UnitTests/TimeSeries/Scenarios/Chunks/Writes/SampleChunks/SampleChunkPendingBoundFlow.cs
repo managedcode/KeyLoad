@@ -65,7 +65,7 @@ internal static class SampleChunkPendingBoundFlow
             originals.Add((operation, actual));
             var expected = Result<object>.Fail(Errors.Problem(ErrorCode.ResourceExhausted, Exhausted));
             await Assert.That(SampleRollupWholeFlow.Outcome(actual)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
-            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
 
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>

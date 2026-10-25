@@ -37,7 +37,7 @@ internal sealed class RelationalAtomicityTests
             new EnqueueMessage(Queue, RelationalTestData.Second, RelationalTestData.EmptyJson),
             new PutDocument(RelationalTestData.Table, RelationalTestData.Second, row));
 
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(uniqueConflict ? ErrorCode.Conflict : ErrorCode.Validation);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(uniqueConflict ? ErrorCode.Conflict : ErrorCode.Validation);
         await Assert.That(database.Database.GetDocument(RelationalTestData.Root, new(database.Partition, Documents, RelationalTestData.Second))).IsNull();
         await Assert.That(database.Database.GetDocument(RelationalTestData.Root, new(database.Partition, RelationalTestData.Table, RelationalTestData.Second))).IsNull();
         await Assert.That(database.Database.ReadStream(RelationalTestData.Root, new StreamRef(database.Partition, Events, RelationalTestData.Second)).Events).IsEmpty();
@@ -57,10 +57,10 @@ internal sealed class RelationalAtomicityTests
             new PutDocument(RelationalTestData.Table, RelationalTestData.Second, RelationalTestData.Row(RelationalTestData.Second).Replace(Alpha, Beta, StringComparison.Ordinal)));
         var conflicting = RelationalTestData.Submit(database, new PatchDocument(RelationalTestData.Table, RelationalTestData.First,
             [new(RelationalTestData.NamePath, PatchKind.Set, QuotedBeta)], 1));
-        await Assert.That(Errors.Code(conflicting.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflicting.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         var stale = RelationalTestData.Submit(database, new PatchDocument(RelationalTestData.Table, RelationalTestData.First,
             [new(RelationalTestData.NamePath, PatchKind.Set, Gamma)], 0));
-        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(stale.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         database.Commit(new DeleteDocument(RelationalTestData.Table, RelationalTestData.First, 1));
         database.Commit(new PutDocument(RelationalTestData.Table, RelationalTestData.Second, RelationalTestData.Row(RelationalTestData.Second), 1));
         var rows = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Execute(RelationalTestData.Root, new(database.Partition, QueryByName));
@@ -83,7 +83,7 @@ internal sealed class RelationalAtomicityTests
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, database.Partition, [new PutDocument(RelationalTestData.Table, RelationalTestData.Second, InvalidRow)]);
         var result = engine.Apply(engine.CreateCommand(OperationKind.Batch, id, RelationalTestData.Root, TimeProvider.System.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(request, JsonDefaults.Options)));
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(engine.GetDocument(RelationalTestData.Root, new(database.Partition, RelationalTestData.Table, RelationalTestData.First))!.Revision).IsEqualTo(1);
         await Assert.That(engine.GetDocument(RelationalTestData.Root, new(database.Partition, RelationalTestData.Table, RelationalTestData.Second))).IsNull();
     }

@@ -34,7 +34,7 @@ internal static class RemoteTransferAttemptCrashScenario
         var accept = new CommandRequest(RemoteTransferAttemptIdentity.AcceptId(hint, hint.AcceptGeneration),
             Destination.Partition, [new AcceptQueueTransfer(Destination, original.IntentToken)]);
         var failed = CrashDatabase.Submit(database, OperationKind.Batch, accept, accept.CommandId);
-        if (Errors.Code(failed.Problem) != ErrorCode.ResourceExhausted)
+        if (Errors.Code(failed.Problem).Value != ErrorCode.ResourceExhausted)
         {
             throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing);
         }

@@ -2,9 +2,9 @@ namespace KeyLoad.Core.Messaging;
 
 internal static class RemoteTransferRepairStateValidation
 {
-    internal static RemoteTransferRepairState? Initial(int? ceiling)
-        => ceiling is { } cap ? new(cap, RemoteTransferRepairProtocol.InitialGeneration,
-            RemoteTransferRepairProtocol.InitialGeneration, []) : null;
+    internal static global::ManagedCode.Communication.Result<RemoteTransferRepairState?> Initial(int? ceiling)
+        => (ceiling is { } cap ? new RemoteTransferRepairState(cap, RemoteTransferRepairProtocol.InitialGeneration,
+            RemoteTransferRepairProtocol.InitialGeneration, []) : null) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RemoteTransferRepairState?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RemoteTransferRepairState?>.FailNotFound(nameof(Initial));
 
     internal static void Require(RemoteTransferRepairState? state)
     {

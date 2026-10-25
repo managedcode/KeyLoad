@@ -22,7 +22,7 @@ internal static class ScriptDomNamedParameterClusterRefusals
     }
     internal static async Task McpAsync(CallToolResult reply, string credential, bool dispatched)
     {
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched)).Value;
         await Assert.That(JsonElement.DeepEquals(JsonSerializer.SerializeToElement(
             Errors.Problem(ErrorCode.Validation, P.SafeDetail), JsonDefaults.Options),
             reply.StructuredContent!.Value.GetProperty(P.Error))).IsTrue();

@@ -37,7 +37,7 @@ internal sealed class SampleChunkMixedAtomicTests
                  fixture.WindowId, WrongWindowRevision)]);
         var failed = fixture.Owner.Submit(OperationKind.Batch, request,
             SampleChunkCanonicalFixture.Principal, request.CommandId);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
 
         await Assert.That(SampleRollupWholeFlow.Image(fixture.Owner, documentPrefix)).IsEqualTo(documents);
         await Assert.That(fixture.Raw()).IsEqualTo(raw);

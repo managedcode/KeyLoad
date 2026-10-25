@@ -65,12 +65,12 @@ internal sealed class DocumentMutationImageTests
         using var db = new TestDatabase();
         db.Configure(Collection, ResourceKind.Collection);
         var missing = Submit(db, new PatchDocument(Collection, DocumentId, [new("/value", PatchKind.Set, "1")], 1));
-        await Assert.That(Errors.Code(missing.Problem)).IsEqualTo(ErrorCode.NotFound);
+        await Assert.That(Errors.Code(missing.Problem).Value).IsEqualTo(ErrorCode.NotFound);
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(0);
 
         db.Commit(new PutDocument(Collection, DocumentId, FirstJson));
         var stale = Submit(db, new DeleteDocument(Collection, DocumentId, 0));
-        await Assert.That(Errors.Code(stale.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(stale.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, Collection, DocumentId))!.Revision).IsEqualTo(1);
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(1);
 

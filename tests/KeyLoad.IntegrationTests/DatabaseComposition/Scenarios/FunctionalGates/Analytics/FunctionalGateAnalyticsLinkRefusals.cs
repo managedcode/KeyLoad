@@ -14,8 +14,8 @@ internal static class FunctionalGateAnalyticsLinkRefusals
         await Assert.That(sdk.Value).IsNull();
         await ProblemAsync(sdk.Problem?.ErrorCode, sdk.Problem?.StatusCode);
         await unchanged();
-        await McpCallerAssertions.ErrorAsync(await context.Administrator.Mcp.CallAsync(AnalyticsStoreProtocol.ReadTool,
-            request, token), ErrorCode.OwnershipLost, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Administrator.Mcp.CallAsync(AnalyticsStoreProtocol.ReadTool,
+            request, token), ErrorCode.OwnershipLost, dispatched: true)).Value;
         await unchanged();
         await SqlAsync(context, SqlClusterProtocol.Call(context.Partition, AnalyticsStoreProtocol.ReadTool, request), unchanged, token);
     }
@@ -28,8 +28,8 @@ internal static class FunctionalGateAnalyticsLinkRefusals
         await Assert.That(sdk.Value).IsNull();
         await ProblemAsync(sdk.Problem?.ErrorCode, sdk.Problem?.StatusCode);
         await unchanged();
-        await McpCallerAssertions.ErrorAsync(await context.Administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            command, token), ErrorCode.OwnershipLost, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            command, token), ErrorCode.OwnershipLost, dispatched: true)).Value;
         await unchanged();
         await SqlAsync(context, FunctionalGateRelationalCalls.Commit(command), unchanged, token);
     }
@@ -42,8 +42,8 @@ internal static class FunctionalGateAnalyticsLinkRefusals
         await Assert.That(sdk.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await ProblemAsync(sdk.Problem?.ErrorCode, sdk.Problem?.StatusCode);
         await unchanged();
-        await McpCallerAssertions.ErrorAsync(await context.Administrator.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-            request, token), ErrorCode.OwnershipLost, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Administrator.Mcp.CallAsync(SqlOperationProtocol.ToolName,
+            request, token), ErrorCode.OwnershipLost, dispatched: true)).Value;
         await unchanged();
     }
 

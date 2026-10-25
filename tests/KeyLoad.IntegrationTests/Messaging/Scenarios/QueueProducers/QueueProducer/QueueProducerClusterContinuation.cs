@@ -31,7 +31,7 @@ internal static class QueueProducerClusterContinuation
             await QueueProducerClusterAssertions.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
                 McpCallerTools.MessagesComplete, healthy.Ack, token))).Value, healthy.AckReceipt);
             await QueueProducerClusterAssertions.DeniedAsync(await publisher.CommitAsync(seed.Original, token), ErrorCode.PermissionDenied);
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, seed.Original, token), ErrorCode.PermissionDenied, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, seed.Original, token), ErrorCode.PermissionDenied, true)).Value;
             await Assert.That(seed.Due > TimeProvider.System.GetUtcNow()).IsTrue();
             var claim = await McpCallerAssertions.SdkSuccessAsync(await publisher.ReceiveAsync(new(Guid.NewGuid(), seed.Lane), token));
             var delivery = await Assert.That(claim.Deliveries).HasSingleItem();

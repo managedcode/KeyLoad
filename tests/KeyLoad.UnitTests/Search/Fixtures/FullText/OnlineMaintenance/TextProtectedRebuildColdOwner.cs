@@ -57,7 +57,7 @@ internal sealed class TextProtectedRebuildColdOwner : IDisposable
     {
         var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), "root",
             Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
-        var before = TestDatabaseOriginalResourceCommands.Begin(Database, operation);
+        var before = (TestDatabaseOriginalResourceCommands.Begin(Database, operation)).Value;
         var result = Database.ApplyEmbedded(operation, cancellationToken: default);
         originalResources.Observe(Database, operation, result, before);
         return new(operation, result);

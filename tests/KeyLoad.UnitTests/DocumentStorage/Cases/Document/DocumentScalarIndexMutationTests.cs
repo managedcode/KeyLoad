@@ -47,7 +47,7 @@ internal sealed class DocumentScalarIndexMutationTests
         var conflict = DocumentCrudFixture.Submit(database,
             new PatchDocument(Collection, OtherDocumentId, [new(LabelPath, PatchKind.Set, "\"safe\"")], 1),
             new PatchDocument(Collection, ThirdDocumentId, [new(LabelPath, PatchKind.Set, "\"safe\"")], 1));
-        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
             new(database.Partition, Collection, OtherDocumentId))).IsEqualTo(beforeSecond);
         await Assert.That(DocumentCrudFixture.ReadRecord(database,
@@ -63,7 +63,7 @@ internal sealed class DocumentScalarIndexMutationTests
         var sameValueElsewhere = DocumentCrudFixture.SubmitAt(database,
             DocumentCrudFixture.Root, otherPartition,
             new PutDocument(Collection, DocumentId, "{\"label\":\"beta\"}", 0));
-        await Assert.That(Errors.Code(sameValueElsewhere.Problem)).IsNull();
+        await Assert.That(Errors.Code(sameValueElsewhere.Problem).Value).IsNull();
         await DocumentCrudFixture.AssertIndexedIds(database, "label", IndexName, Beta,
             [DocumentId], otherPartition);
         await DocumentCrudFixture.AssertIndexedIds(database, "label", IndexName, Beta,

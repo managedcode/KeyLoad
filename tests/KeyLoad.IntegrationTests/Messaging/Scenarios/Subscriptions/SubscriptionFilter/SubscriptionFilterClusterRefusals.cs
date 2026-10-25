@@ -55,7 +55,7 @@ internal static class SubscriptionFilterClusterRefusals
         };
         var result = await manager.ConfigureSubscriptionAsync(absent, token);
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(ErrorCode.NotFound.ToString());
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsConfigure, absent, token), ErrorCode.NotFound, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsConfigure, absent, token), ErrorCode.NotFound, true)).Value;
         await SubscriptionFilterClusterAssertions.StatusAsync(manager, mcp, seed.Group, SubscriptionFilterClusterProtocol.Initial, SubscriptionFilterClusterProtocol.Gap, true, token);
     }
 }

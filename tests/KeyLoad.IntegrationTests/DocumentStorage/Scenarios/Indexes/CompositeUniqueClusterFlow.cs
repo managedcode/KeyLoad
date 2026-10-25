@@ -93,7 +93,7 @@ internal static class CompositeUniqueClusterFlow
         var query = CompositeUniqueClusterAssertions.Query(s.Partition, "label = 'epsilon' AND rank = 5");
         await CompositeUniqueClusterAssertions.RejectAsync(await sdk.QueryAsync(query, token), ErrorCode.PermissionDenied);
         var deniedQuery = await mcp.CallAsync(McpCallerTools.QueryExecute, query, token);
-        await McpCallerAssertions.ErrorAsync(deniedQuery, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(deniedQuery, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(deniedQuery, s.Identity.Secret, CompositeUniqueClusterScenario.Epsilon);
         await CompositeUniqueClusterAssertions.RejectedCommitAsync(sdk, mcp, CompositeUniqueClusterScenario.Command(s.Partition,
             new PutDocument(CompositeUniqueClusterScenario.Collection, CompositeUniqueClusterScenario.Third, CompositeUniqueClusterScenario.ConflictJson, 1, ExplicitReplacement: true)),

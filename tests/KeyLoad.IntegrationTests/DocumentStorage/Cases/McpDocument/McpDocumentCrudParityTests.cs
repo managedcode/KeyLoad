@@ -57,7 +57,7 @@ internal sealed class McpDocumentCrudParityTests(ClusterFixture fixture)
         await CommitAndRetryAsync(sdk, mcp, scenario.ReplaceCommand(Guid.NewGuid()), sdkPrimary: true, deadline.Token);
         var staleCommand = scenario.StaleReplaceCommand(Guid.NewGuid());
         var rejected = await mcp.CallAsync(McpCallerTools.DocumentsCommit, staleCommand, deadline.Token);
-        await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.RevisionConflict, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(rejected, identity.Secret, McpDocumentCrudParityScenario.StaleJson);
         var sdkRejected = await sdk.CommitAsync(staleCommand, deadline.Token);
         await Assert.That(sdkRejected.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.RevisionConflict));

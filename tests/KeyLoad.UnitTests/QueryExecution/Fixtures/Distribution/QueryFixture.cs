@@ -97,7 +97,7 @@ internal sealed class QueryFixture(DocumentPatchAtomicityOwner source, DocumentP
         var actual = owner.Store.Read(view =>
         {
             var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(Tenant, Partition.DatabaseId, Collection));
-            return ResourceLifetimeCatalog.Read(view, Tenant, Partition.DatabaseId, Collection, definition);
+            return (ResourceLifetimeCatalog.Read(view, Tenant, Partition.DatabaseId, Collection, definition)).Value;
         });
         if (actual != expected)
         {

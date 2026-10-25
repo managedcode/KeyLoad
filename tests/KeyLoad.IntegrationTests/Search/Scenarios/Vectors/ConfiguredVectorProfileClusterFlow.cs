@@ -95,7 +95,7 @@ internal static class ConfiguredVectorProfileClusterFlow
         if (path == Mcp)
         {
             var reply = await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true)).Value;
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(Mismatch);
             return;
@@ -103,7 +103,7 @@ internal static class ConfiguredVectorProfileClusterFlow
         if (path == McpSql)
         {
             var reply = await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true)).Value;
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(Mismatch);
             return;

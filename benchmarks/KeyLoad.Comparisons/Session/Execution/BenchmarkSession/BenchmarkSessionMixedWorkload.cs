@@ -44,7 +44,7 @@ internal sealed class BenchmarkSessionMixedWorkload(BenchmarkSessionContext cont
     private async Task<ImmutableArray<BenchmarkSessionLaneReport>> MeasureStreamsAsync(CancellationToken token)
     {
         var options = context.Options;
-        var streams = new List<(string Id, Func<IComparisonSession, int, CancellationToken, Task> Operation)>
+        var streams = new List<(string Id, Func<IComparisonSession?, int, CancellationToken, Task> Operation)>
         {
             (BenchmarkSessionProtocol.Create, (client, ordinal, cancellation) => BenchmarkSessionDocumentOperation.ExecuteAsync(client, Scenario.DocumentWrite, context.Corpus.CreateDocument(options.Records + ordinal), cancellation)),
             (BenchmarkSessionProtocol.Delete, (client, ordinal, cancellation) => BenchmarkSessionDocumentOperation.ExecuteAsync(client, Scenario.DocumentDelete, context.Corpus.CreateDocument(options.Operations + ordinal), cancellation)),

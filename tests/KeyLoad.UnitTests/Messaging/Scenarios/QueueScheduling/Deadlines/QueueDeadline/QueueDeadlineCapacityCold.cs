@@ -67,7 +67,7 @@ internal static class QueueDeadlineCapacityCold
                 await Assert.That(OrleansSerialization.Serialize(retained))
                     .IsEquivalentTo(OrleansSerialization.Serialize(result), TUnit.Assertions.Enums.CollectionOrdering.Matching);
             }
-            if (Errors.Code(result.Problem) is not null)
+            if (Errors.Code(result.Problem).Value is not null)
             {
                 await Assert.That(database.Apply(operation)).IsEqualTo(result);
                 await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(store, image, position, identity);

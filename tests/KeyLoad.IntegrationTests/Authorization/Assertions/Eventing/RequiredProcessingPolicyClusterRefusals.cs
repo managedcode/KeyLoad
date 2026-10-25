@@ -58,7 +58,7 @@ internal static class RequiredProcessingPolicyClusterRefusals
     }
     private static async Task McpAsync(CallToolResult actual, RequiredProcessingPolicyClusterState state, ErrorCode code)
     {
-        await McpCallerAssertions.ErrorAsync(actual, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(actual, code, dispatched: true)).Value;
         var expected = JsonSerializer.SerializeToElement(Errors.Problem(code, "The authenticated principal is not permitted to perform this operation."), JsonDefaults.Options);
         await Assert.That(JsonElement.DeepEquals(expected, actual.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(actual, state.Key, state.Header ? "HEADER-PROCESSING-CANARY" : "BODY-PROCESSING-CANARY");

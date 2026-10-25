@@ -82,7 +82,7 @@ internal sealed class ConfiguredVectorProfileTests
             {
                 VectorProfiles = [new(ConfiguredVectorProfileFlow.Field, ConfiguredVectorProfileFlow.Space with { Model = ChangedModel })]
             }));
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.UnsupportedCapability);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(rejected.Problem?.Detail).IsEqualTo(UnsupportedDefinition);
         var restored = database.Store.Read(view => view.GetRecord<ResourceDefinition>(key))!;
         await Assert.That(OrleansSerialization.Serialize(restored).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
@@ -103,7 +103,7 @@ internal sealed class ConfiguredVectorProfileTests
         var applied = database.Database.LastApplied;
         var position = database.Store.Position;
         var error = database.Submit(OperationKind.Batch, command, principal: Reader, id: command.CommandId);
-        await Assert.That(Errors.Code(error.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(error.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(error.Problem?.Detail).IsEqualTo(Denied);
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied + 1);
         await Assert.That(database.Store.Position).IsEqualTo(position + 1);

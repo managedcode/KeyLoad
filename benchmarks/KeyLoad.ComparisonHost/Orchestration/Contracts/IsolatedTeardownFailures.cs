@@ -44,7 +44,7 @@ internal sealed class IsolatedTeardownFailures(Exception? primary)
             return;
         }
 
-        var fatal = FindFatal(failures);
+        var fatal = (FindFatal(failures)).Value;
         if (fatal is not null)
         {
             var prioritized = new List<Exception> { fatal };
@@ -66,17 +66,17 @@ internal sealed class IsolatedTeardownFailures(Exception? primary)
         return ordered;
     }
 
-    private static Exception? FindFatal(IEnumerable<Exception> failures)
+    private static global::ManagedCode.Communication.Result<Exception?> FindFatal(IEnumerable<Exception> failures)
     {
         foreach (var failure in failures)
         {
             var fatal = CqrsRuntimeFailures.FindFatal(failure);
             if (fatal is not null)
             {
-                return fatal;
+                return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(fatal)));
             }
         }
-        return null;
+        return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(FindFatal));
     }
 
     private static void AddDistinct(List<Exception> target, IEnumerable<Exception> additions)

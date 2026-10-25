@@ -35,7 +35,7 @@ internal static class SharedDomainHistoryOperations
         {
             await ReplayResultAssertions.Same<ReceiveResult>(outcome.Result, result);
         }
-        else if (Errors.Code(result.Problem) is null)
+        else if (Errors.Code(result.Problem).Value is null)
         {
             await ReplayResultAssertions.Same<CommitReceipt>(outcome.Result, result);
         }
@@ -68,7 +68,7 @@ internal static class SharedDomainHistoryOperations
             await SharedDomainValueAssertions.FailureAsync(database.ResolveOutcome(item.Operation), ErrorCode.PermissionDenied, ScopeDenied);
             return;
         }
-        if (Errors.Code(item.Result.Problem) is not null)
+        if (Errors.Code(item.Result.Problem).Value is not null)
         {
             await SameResultAsync(SharedDomainOperations.Apply(database, item.Operation, token), item.Result);
             await SameResultAsync(database.ResolveOutcome(item.Operation), item.Result);
@@ -90,7 +90,7 @@ internal static class SharedDomainHistoryOperations
 
     private static async Task SameResultAsync(Result<object> actual, Result<object> expected)
     {
-        if (Errors.Code(expected.Problem) is null)
+        if (Errors.Code(expected.Problem).Value is null)
         {
             await ReplayResultAssertions.Same<CommitReceipt>(actual, expected);
         }

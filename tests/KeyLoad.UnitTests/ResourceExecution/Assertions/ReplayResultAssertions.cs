@@ -15,7 +15,7 @@ internal static class ReplayResultAssertions
 
     internal static async Task Same<T>(Result<object> actual, Result<object> expected) where T : class
     {
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(expected.Problem).Value);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(T));
         await Assert.That(expected.Value?.GetType()).IsEqualTo(typeof(T));

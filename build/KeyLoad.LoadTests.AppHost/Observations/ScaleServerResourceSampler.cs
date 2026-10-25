@@ -51,7 +51,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         const int SecondIndex = 1;
         const int SampleAsyncElementIndex = 3;
 
-        var text = await ScaleServerResourceProcess.InspectAsync(resourceName, budget, token);
+        var text = (await ScaleServerResourceProcess.InspectAsync(resourceName, budget, token)).Value;
         if (text is null)
         {
             return InvalidateAfterStart();
@@ -92,7 +92,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
             return InvalidateAfterStart();
         }
 
-        var effectiveEnvelope = await ScaleServerHostEvidence.ReadCgroupEnvelopeAsync(_path, budget, token);
+        var effectiveEnvelope = (await ScaleServerHostEvidence.ReadCgroupEnvelopeAsync(_path, budget, token)).Value;
         if (effectiveEnvelope is null || _effectiveEnvelope is not null && _effectiveEnvelope != effectiveEnvelope)
         {
             return InvalidateAfterStart();
@@ -110,20 +110,20 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
             return InvalidateAfterStart();
         }
 
-        var pids = await ScaleServerProcessMetrics.ReadPidsAsync(Path.Combine(directory, CgroupFile), budget, token);
+        var pids = (await ScaleServerProcessMetrics.ReadPidsAsync(Path.Combine(directory, CgroupFile), budget, token)).Value;
         if (pids is null || pids.Length == NoProcesses || pids.Length > budget.Settings.MaxProcesses)
         {
             return InvalidateAfterStart();
         }
 
         Array.Sort(pids);
-        var rss = await ScaleServerProcessMetrics.ReadRssAsync(pids, _path, budget, token);
+        var rss = (await ScaleServerProcessMetrics.ReadRssAsync(pids, _path, budget, token)).Value;
         if (rss is null)
         {
             return InvalidateAfterStart();
         }
 
-        var finalPids = await ScaleServerProcessMetrics.ReadPidsAsync(Path.Combine(directory, CgroupFile), budget, token);
+        var finalPids = (await ScaleServerProcessMetrics.ReadPidsAsync(Path.Combine(directory, CgroupFile), budget, token)).Value;
         if (finalPids is null)
         {
             return InvalidateAfterStart();
@@ -144,10 +144,10 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         const int BoundaryValue = 0;
         const int NoSamples = 0;
 
-        var cpuLimit = await BoundedText.ReadAsync(Path.Combine(directory, CpuLimitFile), budget.Settings.MaxFileBytes, budget, token);
-        var memoryLimit = await BoundedText.ReadAsync(Path.Combine(directory, MemoryLimitFile), budget.Settings.MaxFileBytes, budget, token);
-        var cpuStats = await BoundedText.ReadAsync(Path.Combine(directory, CpuStatsFile), budget.Settings.MaxFileBytes, budget, token);
-        var memoryCurrent = await BoundedText.ReadAsync(Path.Combine(directory, MemoryCurrentFile), budget.Settings.MaxFileBytes, budget, token);
+        var cpuLimit = (await BoundedText.ReadAsync(Path.Combine(directory, CpuLimitFile), budget.Settings.MaxFileBytes, budget, token)).Value;
+        var memoryLimit = (await BoundedText.ReadAsync(Path.Combine(directory, MemoryLimitFile), budget.Settings.MaxFileBytes, budget, token)).Value;
+        var cpuStats = (await BoundedText.ReadAsync(Path.Combine(directory, CpuStatsFile), budget.Settings.MaxFileBytes, budget, token)).Value;
+        var memoryCurrent = (await BoundedText.ReadAsync(Path.Combine(directory, MemoryCurrentFile), budget.Settings.MaxFileBytes, budget, token)).Value;
         if (cpuLimit is null || memoryLimit is null || cpuStats is null || memoryCurrent is null)
         {
             return InvalidateAfterStart();
@@ -217,11 +217,11 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         return false;
     }
 
-    internal ScaleServerContainer? ToRecord()
+    internal global::ManagedCode.Communication.Result<ScaleServerContainer?> ToRecord()
         => _samples == 0 || _containerId is null || _imageId is null || _startedAt is null || _state is null
-            || _cpuLimit is null || _memoryLimit is null ? null
-            : new(resourceName, _containerId, _imageId, _startedAt, _state, _cpuLimit, _memoryLimit,
+            || _cpuLimit is null || _memoryLimit is null ? global::ManagedCode.Communication.Result<ScaleServerContainer?>.FailNotFound(nameof(ToRecord))
+            : global::ManagedCode.Communication.Result<ScaleServerContainer?>.Succeed((ScaleServerContainer?)(new(resourceName, _containerId, _imageId, _startedAt, _state, _cpuLimit, _memoryLimit,
                 _effectiveEnvelope!.CpuQuota, _effectiveEnvelope.CpuSet, _effectiveEnvelope.MemoryLimitBytes,
-                checked(_lastCpuUsec - _firstCpuUsec), _maxCgroupMemory, _maxRss, _samples, _mounts);
+                checked(_lastCpuUsec - _firstCpuUsec), _maxCgroupMemory, _maxRss, _samples, _mounts)));
 
 }

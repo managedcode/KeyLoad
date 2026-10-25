@@ -9,14 +9,14 @@ internal sealed partial class TextOnlineCatalogOwner
     private readonly TextSelectedReadAdmission onlineReadAdmission = new();
     internal TextSelectedReadAdmission OnlineReadAdmission => onlineReadAdmission;
 
-    internal TextSelectedProjectionLease? AcquireCurrent(IKeyValueView view, PrincipalRecord principal,
+    internal global::ManagedCode.Communication.Result<TextSelectedProjectionLease?> AcquireCurrent(IKeyValueView view, PrincipalRecord principal,
         ResourceDefinition resource, SearchRequest request, ReadExecutionBudget budget)
     {
-        var current = database.ReadOnlineTextImplicitCurrent(view, principal, request.Partition,
-            request.Collection, request.TextField ?? throw TextErrors.Mismatch(), database.Store.Identity.NodeId, budget);
+        var current = (database.ReadOnlineTextImplicitCurrent(view, principal, request.Partition,
+            request.Collection, request.TextField ?? throw TextErrors.Mismatch(), database.Store.Identity.NodeId, budget)).Value;
         if (current is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<TextSelectedProjectionLease?>.FailNotFound(nameof(AcquireCurrent));
         }
         var maintenance = new OnlineTextIndexMaintenanceRequest(current.CommandId, current.Consumer,
             current.Authority.Collection, current.Authority.Field, current.ConsumerGeneration,

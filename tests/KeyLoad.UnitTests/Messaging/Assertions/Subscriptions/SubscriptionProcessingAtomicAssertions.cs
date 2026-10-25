@@ -65,7 +65,7 @@ internal static class SubscriptionProcessingAtomicAssertions
 
     private static async Task FailureAsync(Result<object> result)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
 
         await Assert.That(result.Value).IsNull();
@@ -74,7 +74,7 @@ internal static class SubscriptionProcessingAtomicAssertions
     internal static async Task SuccessAsync(DatabaseEngine db, SubscriptionRef group,
         SubscriptionProcessingRequest request, Result<object> result, TestDatabase originalOwner)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         var processing = result.Get<SubscriptionProcessingResult>();
         await Assert.That(processing.AlreadyProcessed).IsFalse();
         await Assert.That(processing.OriginalEffectsToken).IsEqualTo(processing.Receipt.Token);

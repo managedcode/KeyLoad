@@ -40,7 +40,7 @@ internal static class SubscriptionInboxPublicAssertions
         await Assert.That(failure.Problem!.ErrorCode).IsEqualTo(ErrorCode.Conflict.ToString());
         await Assert.That(failure.Value).IsNull();
         var reply = await mcp.CallAsync(McpCallerTools.SubscriptionsProcess, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Conflict, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Conflict, true)).Value;
         var envelope = reply.StructuredContent ?? throw new InvalidOperationException("The canonical conflict envelope is absent.");
         var problem = envelope.GetProperty(McpCallerProtocol.Error);
         await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemType).GetString()).IsEqualTo("urn:keyload:error:Conflict");
@@ -61,8 +61,8 @@ internal static class SubscriptionInboxPublicAssertions
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(ErrorCode.TokenInvalidated.ToString());
         await Assert.That(result.Value).IsNull();
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsProcess,
-            state.Processing, token), ErrorCode.TokenInvalidated, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SubscriptionsProcess,
+            state.Processing, token), ErrorCode.TokenInvalidated, true)).Value;
         await SubscriptionPhasePublicAssertions.ReceiveFailureAsync(sdk, mcp, state.First, ErrorCode.TokenInvalidated, token);
         await DocumentsAsync(sdk, state.First.Subscription, token);
     }

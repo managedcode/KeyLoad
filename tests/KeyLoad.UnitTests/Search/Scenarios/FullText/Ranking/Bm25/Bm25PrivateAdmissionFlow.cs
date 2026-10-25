@@ -55,7 +55,7 @@ internal static class Bm25PrivateAdmissionFlow
         var changed = Capture(database, original.CommandId, original.CommandId, token);
         var before = CanonicalStoreCut.Read(database);
         var conflict = await SubmitAsync(database, changed, token);
-        await Assert.That(Errors.Code(conflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
 
         await Assert.That(conflict.Value).IsNull();
         await Assert.That(conflict.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");

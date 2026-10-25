@@ -32,7 +32,7 @@ public static class ResourceEffectCapture
         try
         {
             var principal = engine.Principal(view, operation.UserId!, engine.Clock.GetUtcNow());
-            engine.AuthorizeOperation(view, principal, operation);
+            _ = (engine.AuthorizeOperation(view, principal, operation)).Value;
             engine.ObserveAdditionalResourceEffects(view, principal, operation);
             if (preparation is not null)
             {

@@ -60,7 +60,7 @@ public static class QueueLifecycleCommands
         var (metadata, body) = QueueLifecycleConditions.RequireQueueLifecycleState(tx, lane, request);
         var removal = QueueLifecycleRemovalPreparation.PrepareQueueLifecycleRemoval(tx, lane, metadata, QueueDeadLetterAuthority.RequireQueueLifecycleCounters(tx, lane), body.Bytes);
         var resource = engine.Resource(tx, partition, lane.Queue, ResourceKind.WorkQueue);
-        var order = QueueOrderMutationPreparation.PrepareQueueOrderRemoval(tx, lane, resource.QueuePolicy, body.Body, metadata);
+        var order = (QueueOrderMutationPreparation.PrepareQueueOrderRemoval(tx, lane, resource.QueuePolicy, body.Body, metadata)).Value;
         var counters = QueueLifecycleAccounting.ReleaseQueueStored(removal.Counters, body.Bytes);
         QueueLifecycleIncrementCapacity.RequireQueueLifecycleIdentityCapacity(metadata);
         QueueLifecycleRemovalApply.ApplyQueueLifecycleRemoval(tx, removal);

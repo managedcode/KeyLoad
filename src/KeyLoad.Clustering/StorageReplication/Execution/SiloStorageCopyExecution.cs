@@ -128,7 +128,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     {
         var members = membership.CurrentSnapshot.Members.Values.Where(member => member.Status == SiloStatus.Active)
             .OrderBy(member => member.Name, StringComparer.Ordinal).ToArray();
-        var reads = new Task<SiloStorageCut?>[members.Length];
+        var reads = new Task<global::ManagedCode.Communication.Result<SiloStorageCut?>>[members.Length];
         for (var index = StorageCopyContract.FirstOwner; index < members.Length; index++)
         {
             reads[index] = TryReadCutAsync(members[index].SiloAddress, cancellationToken);
@@ -137,7 +137,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         var available = new List<AvailableCopy>(members.Length);
         for (var index = StorageCopyContract.FirstOwner; index < members.Length; index++)
         {
-            if (cuts[index] is { } cut)
+            if (cuts[index].Value is { } cut)
             {
                 available.Add(new(members[index].SiloAddress, members[index].Name, cut));
             }
@@ -145,23 +145,23 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         return [.. available];
     }
 
-    private async Task<SiloStorageCut?> TryReadCutAsync(SiloAddress silo, CancellationToken cancellationToken)
+    private async Task<global::ManagedCode.Communication.Result<SiloStorageCut?>> TryReadCutAsync(SiloAddress silo, CancellationToken cancellationToken)
     {
         try
         {
             var cut = await storage.On(silo).ReadCutAsync(cancellationToken).ConfigureAwait(true);
             if (cut.Incarnation == incarnation)
             {
-                return cut;
+                return global::ManagedCode.Communication.Result<SiloStorageCut?>.Succeed(((SiloStorageCut?)(cut)));
             }
             StorageCopyDiagnostics.CopyExcluded(diagnostics, silo, ErrorCode.RecoveryRequired);
-            return null;
+            return global::ManagedCode.Communication.Result<SiloStorageCut?>.FailNotFound(nameof(TryReadCutAsync));
         }
         catch (Exception error) when (!cancellationToken.IsCancellationRequested && CqrsBoundaryErrors.IsNonFatal(error))
         {
             StorageCopyDiagnostics.CopyExcluded(diagnostics, silo,
                 error is KeyLoadException failure ? failure.Code : ErrorCode.OwnershipLost);
-            return null;
+            return global::ManagedCode.Communication.Result<SiloStorageCut?>.FailNotFound(nameof(TryReadCutAsync));
         }
     }
 

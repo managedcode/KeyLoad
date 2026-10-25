@@ -61,6 +61,6 @@ internal static class ProjectionPublicAssertions
         var result = await caller.Sdk.CommitProjectionAsync(request, token);
         await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
         await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.ProjectionsCommit, request, token), code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.ProjectionsCommit, request, token), code, dispatched: true)).Value;
     }
 }

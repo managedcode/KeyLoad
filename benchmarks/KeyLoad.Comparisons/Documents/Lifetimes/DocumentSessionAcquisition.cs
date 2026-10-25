@@ -31,8 +31,8 @@ internal sealed class DocumentSessionAcquisition<TClient> : IAsyncDisposable whe
     }
     public async ValueTask DisposeAsync()
     {
-        var sessionFailure = await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false);
-        var clientFailure = await RuntimeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false);
+        var sessionFailure = (await RuntimeComparisonFailure.ObserveAsync(DisposeSessionAsync()).ConfigureAwait(false)).Value;
+        var clientFailure = (await RuntimeComparisonFailure.ObserveAsync(DisposeClientAsync()).ConfigureAwait(false)).Value;
         var cleanup = new List<Exception>();
         if (sessionFailure is not null)
         {
@@ -44,7 +44,7 @@ internal sealed class DocumentSessionAcquisition<TClient> : IAsyncDisposable whe
             cleanup.Add(clientFailure);
         }
 
-        var combined = RuntimeComparisonFailure.Combine(primaryFailure, [.. cleanup]);
+        var combined = (RuntimeComparisonFailure.Combine(primaryFailure, [.. cleanup])).Value;
         if (cleanup.Count != DocumentMeasurementValues.NoObservedItems && combined is not null)
         {
             System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();

@@ -40,7 +40,7 @@ internal static class AtomicTriadStagedClusterReplies
     {
         var reply = await caller.Mcp.CallAsync(tool, request, token);
         state.Returned.Add(commandId);
-        await McpCallerAssertions.ErrorAsync(reply, code, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret, AtomicTriadStagedClusterProtocol.SecondJson);
         await Assert.That(JsonElement.DeepEquals(reply.StructuredContent!.Value.GetProperty(AtomicTriadStagedClusterProtocol.ErrorProperty),
             JsonSerializer.SerializeToElement(Errors.Problem(code, safeDetail), JsonDefaults.Options))).IsTrue();

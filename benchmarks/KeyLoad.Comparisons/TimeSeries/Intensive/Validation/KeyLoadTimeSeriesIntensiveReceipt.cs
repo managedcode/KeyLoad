@@ -6,7 +6,7 @@ internal static class KeyLoadTimeSeriesIntensiveReceipt
         Guid expectedCommandId, Guid expectedIncarnation, string expectedPartitionId, string expectedSet,
         string expectedSeries, long? expectedRevision, int expectedCopies)
     {
-        var mutation = MatchingMutation(actual, expectedSet, expectedSeries);
+        var mutation = (MatchingMutation(actual, expectedSet, expectedSeries)).Value;
         long? observedSequence = mutation is not null
             && mutation.Revision >= KeyLoadTimeSeriesIntensiveProtocol.MinimumPositiveReceiptValue
             ? mutation.Revision : null;
@@ -22,7 +22,7 @@ internal static class KeyLoadTimeSeriesIntensiveReceipt
         return (new(actual.CommandId, mutation.Revision), actual.Token.Position);
     }
 
-    private static MutationReceipt? MatchingMutation(CommitReceipt? actual, string expectedSet,
+    private static global::ManagedCode.Communication.Result<MutationReceipt?> MatchingMutation(CommitReceipt? actual, string expectedSet,
         string expectedSeries)
     {
         const int SingleItemCount = 1;
@@ -30,13 +30,13 @@ internal static class KeyLoadTimeSeriesIntensiveReceipt
 
         if (actual is null || actual.Mutations.IsDefault || actual.Mutations.Length != SingleItemCount)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<MutationReceipt?>.FailNotFound(nameof(MatchingMutation));
         }
 
         var mutation = actual.Mutations[FirstElementIndex];
         return mutation is not null && mutation.Kind == KeyLoadTimeSeriesIntensiveProtocol.AppendSamplesKind
             && mutation.Resource == expectedSet && mutation.Id == expectedSeries
-            ? mutation : null;
+            ? global::ManagedCode.Communication.Result<MutationReceipt?>.Succeed(((MutationReceipt?)(mutation))) : global::ManagedCode.Communication.Result<MutationReceipt?>.FailNotFound(nameof(MatchingMutation));
     }
 
     private static bool ValidToken(CommitToken? token, Guid incarnation, string partitionId) =>

@@ -99,7 +99,7 @@ internal static class SafeProjectorOperationMutations
 
     internal static async Task RefusalAsync(Result<object> actual, string detail)
     {
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(StringComparer.Ordinal.Equals(actual.Problem?.Detail, detail)).IsTrue();
         await Assert.That(actual.Value is null).IsTrue();
         await Assert.That(actual.Problem?.Detail?.Contains(SafeProjectorOperationProtocol.Canary, StringComparison.Ordinal) is true).IsFalse();

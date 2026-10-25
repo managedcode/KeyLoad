@@ -10,7 +10,7 @@ internal static class QueueDeadlineSignedRetryContinuation
         var oldAck = new DeliveryCommand(Guid.NewGuid(), lane, original.Token, DeliveryAction.Ack);
         var denied = QueueDeadlineOperations.Apply(database, OperationKind.Delivery, oldAck,
             oldAck.CommandId, due, RuntimeQueueDeadlineProtocol.Worker);
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await QueueDeadlineAssertions.OriginalAsync(database, lane, scheduled);
         var command = new CommandRequest(Guid.NewGuid(), lane.Partition, [new AdvanceQueueDeadline(lane.Queue,
             scheduled.Id, scheduled.State, scheduled.StateVersion, scheduled.LeaseVersion, due,

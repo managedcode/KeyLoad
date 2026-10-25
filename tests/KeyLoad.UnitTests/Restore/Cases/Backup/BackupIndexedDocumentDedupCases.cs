@@ -94,7 +94,7 @@ internal sealed class BackupIndexedDocumentDedupCases
                 [new(BackupIndexedDocumentDedupFixture.LabelPath, PatchKind.Set, BackupIndexedDocumentDedupFixture.ReplacedLabelJson)],
                 BackupIndexedDocumentDedupFixture.FirstRevision));
         var rejected = fixture.Source.Database.Apply(conflict);
-        if (Errors.Code(rejected.Problem) != ErrorCode.Conflict)
+        if (Errors.Code(rejected.Problem).Value != ErrorCode.Conflict)
         {
             throw new InvalidOperationException("The real unique-index conflict batch was not rejected.");
         }
@@ -138,7 +138,7 @@ internal sealed class BackupIndexedDocumentDedupCases
     {
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(expectedPosition);
         var rejected = database.Apply(original);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(expectedPosition);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.TargetStore,
             fixture.Partition, SeedCommandId, originalOutcome);
@@ -151,12 +151,12 @@ internal sealed class BackupIndexedDocumentDedupCases
             new PutDocument(BackupIndexedDocumentDedupFixture.Collection, BackupIndexedDocumentDedupFixture.RestoredId,
                 BackupIndexedDocumentDedupFixture.RestoredJson, BackupIndexedDocumentDedupFixture.NoPriorRevision));
         var firstResult = database.Apply(restored);
-        await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(firstResult.Problem).Value).IsNull();
         var firstBytes = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.TargetStore,
             fixture.Partition, RootPrincipal, RestoredCommandId);
         var position = fixture.TargetStore.Position;
         var replay = database.Apply(restored);
-        await Assert.That(Errors.Code(replay.Problem)).IsNull();
+        await Assert.That(Errors.Code(replay.Problem).Value).IsNull();
         await ReplayResultAssertions.Same<CommitReceipt>(replay, firstResult);
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(position);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.TargetStore,
@@ -166,6 +166,6 @@ internal sealed class BackupIndexedDocumentDedupCases
         var healthy = fixture.Batch(database, HealthyCommandId,
             new PutDocument(BackupIndexedDocumentDedupFixture.Collection, BackupIndexedDocumentDedupFixture.HealthyId,
                 BackupIndexedDocumentDedupFixture.HealthyJson, BackupIndexedDocumentDedupFixture.NoPriorRevision));
-        await Assert.That(Errors.Code(database.Apply(healthy).Problem)).IsNull();
+        await Assert.That(Errors.Code(database.Apply(healthy).Problem).Value).IsNull();
     }
 }

@@ -38,7 +38,7 @@ internal static class EventMessageSensitivePublicRefusals
             return;
         }
         var reply = await callers.Mcp.CallAsync(tool, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         await PrivateAsync(JsonDefaults.Serialize(reply));
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Key,
             EventMessageSensitivePublicProtocol.BodyCanary);

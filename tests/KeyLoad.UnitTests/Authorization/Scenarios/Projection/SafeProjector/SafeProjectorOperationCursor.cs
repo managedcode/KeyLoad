@@ -90,8 +90,8 @@ internal static class SafeProjectorOperationCursor
                 Capability.Query | Capability.DocumentsRead);
             var resource = owner.Database.Resource(view, partition, SafeProjectorOperationProtocol.Collection,
                 ResourceKind.Collection);
-            var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
-                resource.Name, resource) ?? throw Errors.Fail(ErrorCode.Corruption, MissingCursor);
+            var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
+                resource.Name, resource)).Value ?? throw Errors.Fail(ErrorCode.Corruption, MissingCursor);
             return (owner.Store.Position, lifetime);
         });
 

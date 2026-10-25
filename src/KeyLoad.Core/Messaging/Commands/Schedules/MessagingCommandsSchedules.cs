@@ -189,20 +189,20 @@ public static class MessagingCommandsSchedules
     {
         var definition = record.Definition;
         var id = string.Concat(RecurringSagaProtocol.SchedulePrefix, record.ScheduleId.ToString(RecurringSagaProtocol.IdentifierFormat), MessagingCommandsSchedules.RecurringScheduleCommandsReceiptIdentitySeparator, record.Generation.ToString(RecurringSagaProtocol.HexOrdinalFormat, CultureInfo.InvariantCulture), MessagingCommandsSchedules.RecurringScheduleCommandsReceiptIdentitySeparator, ordinal.ToString(RecurringSagaProtocol.HexOrdinalFormat, CultureInfo.InvariantCulture));
-        var expiresAt = MessagingCommandsSchedules.OccurrenceExpiry(dueAt, definition.MessageTimeToLive);
+        var expiresAt = (MessagingCommandsSchedules.OccurrenceExpiry(dueAt, definition.MessageTimeToLive)).Value;
         return new(definition.Lane.Queue, id, definition.PayloadJson, definition.HeadersJson, dueAt, expiresAt, definition.OrderingKey);
     }
 
-    internal static DateTimeOffset? OccurrenceExpiry(DateTimeOffset dueAt, TimeSpan? timeToLive)
+    internal static global::ManagedCode.Communication.Result<DateTimeOffset?> OccurrenceExpiry(DateTimeOffset dueAt, TimeSpan? timeToLive)
     {
         if (timeToLive is not { } ttl)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<DateTimeOffset?>.FailNotFound(nameof(OccurrenceExpiry));
         }
 
         try
         {
-            return dueAt.Add(ttl);
+            return global::ManagedCode.Communication.Result<DateTimeOffset?>.Succeed(((DateTimeOffset?)(dueAt.Add(ttl))));
         }
         catch (ArgumentOutOfRangeException)
         {

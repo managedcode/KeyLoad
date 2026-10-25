@@ -9,7 +9,7 @@ internal static class OrleansTelemetryTagSanitizer
     {
         foreach (var (key, value) in activity.TagObjects.ToArray())
         {
-            var normalized = Normalize(key, value, maximumTagValueCharacters);
+            var normalized = (Normalize(key, value, maximumTagValueCharacters)).Value;
             if (normalized is null)
             {
                 activity.SetTag(key, null);
@@ -21,33 +21,33 @@ internal static class OrleansTelemetryTagSanitizer
         }
     }
 
-    private static object? Normalize(string key, object? value, int maximumTagValueCharacters)
+    private static global::ManagedCode.Communication.Result<object?> Normalize(string key, object? value, int maximumTagValueCharacters)
     {
         if (key == OrleansTelemetryPolicy.ExceptionEscapedTag && value is bool escaped)
         {
-            return escaped;
+            return global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(escaped)));
         }
 
         if (value is not string text || text.Length == 0 || text.Length > maximumTagValueCharacters)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(Normalize));
         }
 
         return key switch
         {
             OrleansTelemetryPolicy.RpcSystemTag when string.Equals(text,
-                OrleansTelemetryPolicy.RpcSystemValue, StringComparison.Ordinal) => OrleansTelemetryPolicy.RpcSystemValue,
-            OrleansTelemetryPolicy.RpcServiceTag => OrleansTelemetryPolicy.RpcServiceValue,
-            OrleansTelemetryPolicy.RpcMethodTag => NormalizeMethod(text),
-            OrleansTelemetryPolicy.GrainTypeTag => OrleansTelemetryPolicy.GrainTypeValue,
+                OrleansTelemetryPolicy.RpcSystemValue, StringComparison.Ordinal) => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(OrleansTelemetryPolicy.RpcSystemValue))),
+            OrleansTelemetryPolicy.RpcServiceTag => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(OrleansTelemetryPolicy.RpcServiceValue))),
+            OrleansTelemetryPolicy.RpcMethodTag => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(NormalizeMethod(text)))),
+            OrleansTelemetryPolicy.GrainTypeTag => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(OrleansTelemetryPolicy.GrainTypeValue))),
             OrleansTelemetryPolicy.ActivationCauseTag when string.Equals(text,
                 OrleansTelemetryPolicy.ActivationCauseNewValue, StringComparison.Ordinal)
-                => OrleansTelemetryPolicy.ActivationCauseNewValue,
+                => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(OrleansTelemetryPolicy.ActivationCauseNewValue))),
             OrleansTelemetryPolicy.ActivationCauseTag when string.Equals(text,
                 OrleansTelemetryPolicy.ActivationCauseRehydrateValue, StringComparison.Ordinal)
-                => OrleansTelemetryPolicy.ActivationCauseRehydrateValue,
-            OrleansTelemetryPolicy.ExceptionTypeTag => OrleansTelemetryPolicy.ExceptionTypeValue,
-            _ => null
+                => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(OrleansTelemetryPolicy.ActivationCauseRehydrateValue))),
+            OrleansTelemetryPolicy.ExceptionTypeTag => global::ManagedCode.Communication.Result<object?>.Succeed(((object?)(OrleansTelemetryPolicy.ExceptionTypeValue))),
+            _ => global::ManagedCode.Communication.Result<object?>.FailNotFound(nameof(Normalize))
         };
     }
 

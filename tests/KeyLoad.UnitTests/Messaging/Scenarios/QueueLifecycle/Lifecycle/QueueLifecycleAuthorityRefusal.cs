@@ -44,7 +44,7 @@ internal static class QueueLifecycleAuthorityRefusal
             store.Commit((tx, _) => { tx.Put(key, original); return true; });
             await Assert.That(QueueWholeFlowStorage.Bytes(store)).IsEquivalentTo(exact, TUnit.Assertions.Enums.CollectionOrdering.Matching);
             var repaired = state.SubmitOriginal(database, operation);
-            await Assert.That(Errors.Code(repaired.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(Errors.Code(repaired.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(repaired.Problem?.Detail).IsEqualTo("The queue dead-letter sublimit is exhausted.");
 
             await Assert.That(repaired.Value).IsNull();

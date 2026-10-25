@@ -38,7 +38,7 @@ internal static class QueueDeadlinePoisonPrefixSeed
                 ((EnqueueMessage)value).MessageId, QueueDeadlinePoisonPrefixProtocol.First)).ToImmutableArray(), DurabilityProfile.ProcessDurable, 1);
         var operation = database.PrepareQueueRetryOperation(database.OwnCommand(database.CreateCommand(OperationKind.Batch, command.CommandId, QueueDeadlinePoisonPrefixProtocol.Root, time, System.Text.Json.JsonSerializer.Serialize(command, JsonDefaults.Options))));
         var result = database.Apply(operation);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
 
         await ReplayResultAssertions.Same<CommitReceipt>(result, Result<object>.Succeed(expected));
         return (operation, result);

@@ -31,7 +31,7 @@ internal static class ConnectionAwaitedSettlementCalls
         catch (Exception error) { primary = error; throw; }
         finally
         {
-            var restoration = await RequestWorkSettlement.JoinAsync(RequireRestoredAsync(before));
+            var restoration = (await RequestWorkSettlement.JoinAsync(RequireRestoredAsync(before))).Value;
             if (restoration is not null)
             {
                 RequestWorkSettlement.Rethrow(RequestWorkSettlement.Preserve(primary, restoration));
@@ -59,7 +59,7 @@ internal static class ConnectionAwaitedSettlementCalls
         catch (Exception error) { primary = error; throw; }
         finally
         {
-            var restoration = await RequestWorkSettlement.JoinAsync(RequireRestoredAsync(before));
+            var restoration = (await RequestWorkSettlement.JoinAsync(RequireRestoredAsync(before))).Value;
             if (restoration is not null)
             {
                 RequestWorkSettlement.Rethrow(RequestWorkSettlement.Preserve(primary, restoration));
@@ -67,19 +67,19 @@ internal static class ConnectionAwaitedSettlementCalls
         }
     }
 
-    internal static async Task<Exception?> FailureAsync(Task<GrainOperationReply> original)
+    internal static async Task<global::ManagedCode.Communication.Result<Exception?>> FailureAsync(Task<GrainOperationReply> original)
     {
         try
         {
             await original;
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(FailureAsync));
         }
-        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { return error; }
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error))); }
     }
     internal static async Task JoinOriginalAsync(Task original, Exception? primary,
         bool allowCancellation = false, bool expectedFailure = false)
     {
-        var cleanup = await RequestWorkSettlement.JoinAsync(original);
+        var cleanup = (await RequestWorkSettlement.JoinAsync(original)).Value;
         if (allowCancellation && cleanup is OperationCanceledException || expectedFailure && primary is null)
         {
             cleanup = null;

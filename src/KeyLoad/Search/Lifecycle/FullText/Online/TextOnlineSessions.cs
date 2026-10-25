@@ -95,7 +95,7 @@ internal sealed class TextOnlineSessions
         }
     }
 
-    internal OnlineTextPublicationWork? TryMatchCheckpoint(CommitProjectionBatchRequest command,
+    internal global::ManagedCode.Communication.Result<OnlineTextPublicationWork?> TryMatchCheckpoint(CommitProjectionBatchRequest command,
         string principalId, DateTimeOffset originalExpiry)
     {
         lock (gate)
@@ -108,7 +108,7 @@ internal sealed class TextOnlineSessions
                     return matched;
                 }
             }
-            return null;
+            return global::ManagedCode.Communication.Result<OnlineTextPublicationWork?>.FailNotFound(nameof(TryMatchCheckpoint));
         }
     }
 

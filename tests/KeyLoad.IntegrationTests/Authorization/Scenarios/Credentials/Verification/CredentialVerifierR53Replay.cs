@@ -52,8 +52,8 @@ internal static class CredentialVerifierR53Replay
         await Assert.That(sql.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.UnsupportedCapability, UnsupportedSql), sql.Problem);
         await afterResult();
-        await McpCallerAssertions.ErrorAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token),
-            ErrorCode.UnsupportedCapability, dispatched: false);
+        _ = (await McpCallerAssertions.ErrorAsync(await administrator.CallAsync(SqlOperationProtocol.ToolName, call, token),
+            ErrorCode.UnsupportedCapability, dispatched: false)).Value;
         await afterResult();
     }
 }

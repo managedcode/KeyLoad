@@ -40,8 +40,8 @@ internal static class McpAnalyticsDropDiscoveryRetirement
         await Assert.That(old.IsFailed).IsTrue();
         await Assert.That(old.Value).IsNull();
         await Assert.That(old.Problem?.ErrorCode).IsEqualTo(ErrorCode.OwnershipLost.ToString());
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(state.OldRow), token), ErrorCode.OwnershipLost, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.DocumentsGet,
+            new GetDocumentRequest(state.OldRow), token), ErrorCode.OwnershipLost, dispatched: true)).Value;
         var name = state.OldRow with
         {
             Lifetime = null

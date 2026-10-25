@@ -52,7 +52,7 @@ internal static class SeriesRetentionAtomicPublicRefusals
         ErrorCode error, CancellationToken token)
     {
         var reply = await administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-        await McpCallerAssertions.ErrorAsync(reply, error, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, error, dispatched: true)).Value;
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(SeriesRetentionAtomicPublicExpected.McpDetail);
     }

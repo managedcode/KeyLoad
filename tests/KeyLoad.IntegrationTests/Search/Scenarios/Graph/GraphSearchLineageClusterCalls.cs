@@ -63,7 +63,7 @@ internal static class GraphSearchLineageClusterCalls
             await SqlClusterProtocol.EqualAsync((await McpCallerAssertions.SuccessAsync<GraphSearchResult>(reply)).Value, Expected(state));
             return;
         }
-        await McpCallerAssertions.ErrorAsync(reply, code, true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, true)).Value;
         await Assert.That(JsonElement.DeepEquals(reply.StructuredContent!.Value.GetProperty(GraphSearchLineageClusterProtocol.ErrorProperty),
             JsonSerializer.SerializeToElement(Errors.Problem(code, Detail(code, true)), JsonDefaults.Options))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, state.Identity.Secret, GraphSearchLineageClusterProtocol.Attributes);

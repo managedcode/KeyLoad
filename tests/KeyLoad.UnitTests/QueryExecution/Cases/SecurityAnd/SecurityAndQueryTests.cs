@@ -140,7 +140,7 @@ internal sealed class SecurityAndQueryTests
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(new("worker", "tenant", [new("database", "jobs", Capability.QueueConsume | Capability.QueueInspect)], []))).Get<PrincipalRecord>();
         var id = Guid.NewGuid();
         var lane = new QueueLaneRef(db.Partition, "jobs");
-        await Assert.That(Errors.Code(db.Submit(OperationKind.Receive, new ReceiveRequest(id, lane), "worker", id).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.Receive, new ReceiveRequest(id, lane), "worker", id).Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.InspectMessage("root", lane, "m1")!.Metadata.State).IsEqualTo(MessageState.Ready);
         await KeyLoad.UnitTests.Authorization.EventingRequiredClaimFlow.RunAllAsync(
             TestContext.Current!.Execution.CancellationToken);

@@ -48,7 +48,7 @@ internal static class CompositionReverseFinalImageAssertions
         await Assert.That(actual.Partition).IsEqualTo(owner.Source.Partition);
         await Assert.That(actual.OnlineTextAuthority).IsNull();
 
-        await Assert.That(Errors.Code(actual.Result.Problem)).IsNull();
+        await Assert.That(Errors.Code(actual.Result.Problem).Value).IsNull();
         await Assert.That(actual.Result.Problem?.Detail).IsNull();
         await Assert.That(actual.Result.Value).IsTypeOf<CommitReceipt>();
         await A.ReceiptAsync(receipt, actual.Result.Get<CommitReceipt>());

@@ -65,7 +65,7 @@ internal static class ScalarIndexCrashOperations
                 ScalarIndexCrashContract.ConflictJson, EmptyRevision),
             new PatchDocument(ScalarIndexCrashContract.Collection, ScalarIndexCrashContract.SecondId,
                 [new(ScalarIndexCrashContract.LabelPath, PatchKind.Set, JsonSerializer.Serialize(ScalarIndexCrashContract.ValueDelta))], SecondRevision));
-        if (Errors.Code(result.Problem) != ErrorCode.Conflict)
+        if (Errors.Code(result.Problem).Value != ErrorCode.Conflict)
         {
             throw new InvalidOperationException(ConflictOutcomeMessage);
         }

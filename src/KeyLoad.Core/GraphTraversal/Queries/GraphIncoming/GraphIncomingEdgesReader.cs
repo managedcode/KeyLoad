@@ -81,7 +81,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         {
             return true;
         }
-        var sourceGraph = TryRequireSourceGraphRead(state.SourcePartition);
+        var sourceGraph = (TryRequireSourceGraphRead(state.SourcePartition)).Value;
         if (sourceGraph is null)
         {
             return true;
@@ -118,15 +118,15 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         return GraphIncomingReadScope.ReadGraphResource(view, grant, partition, request.Graph, budget);
     }
 
-    private ResourceDefinition? TryRequireSourceGraphRead(PartitionRef partition)
+    private global::ManagedCode.Communication.Result<ResourceDefinition?> TryRequireSourceGraphRead(PartitionRef partition)
     {
         try
         {
-            return RequireGraphRead(partition);
+            return global::ManagedCode.Communication.Result<ResourceDefinition?>.Succeed(((ResourceDefinition?)(RequireGraphRead(partition))));
         }
         catch (KeyLoadException error) when (error.Code is ErrorCode.PermissionDenied or ErrorCode.NotFound)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<ResourceDefinition?>.FailNotFound(nameof(TryRequireSourceGraphRead));
         }
     }
 

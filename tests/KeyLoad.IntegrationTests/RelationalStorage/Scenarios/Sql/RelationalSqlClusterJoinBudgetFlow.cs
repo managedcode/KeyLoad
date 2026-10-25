@@ -67,7 +67,7 @@ internal static class RelationalSqlClusterJoinBudgetFlow
         await Assert.That(sdkFailure.IsSuccess).IsFalse();
         await Assert.That(sdkFailure.Problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.BudgetExceeded));
         var mcpFailure = await mcp.CallAsync(McpCallerTools.QueryExecute, request, token);
-        await McpCallerAssertions.ErrorAsync(mcpFailure, ErrorCode.BudgetExceeded, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(mcpFailure, ErrorCode.BudgetExceeded, dispatched: true)).Value;
     }
 
     private static async Task VerifyHealthyBothCallersAsync(KeyLoadClient sdk, McpOfficialClient mcp,

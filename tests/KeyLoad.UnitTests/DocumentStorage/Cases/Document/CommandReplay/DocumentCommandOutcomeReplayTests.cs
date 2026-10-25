@@ -20,7 +20,7 @@ internal sealed class DocumentCommandOutcomeReplayTests
             [new PutDocument(Collection, DocumentId, OriginalJson, 1)]);
         var failed = database.Submit(OperationKind.Batch, failedCommand, Writer, failedId);
 
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(RevisionConflictDetail);
         var failedOutcomeBytes = DocumentCommandOutcomeTestSupport.OutcomeBytes(database, Writer, failedId);
         var stored = OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, Writer, failedId)
@@ -43,7 +43,7 @@ internal sealed class DocumentCommandOutcomeReplayTests
         var replay = database.Submit(OperationKind.Batch, failedCommand, Writer, failedId);
         var documentAfterReplay = database.Database.GetDocument("root", new(database.Partition, Collection, DocumentId));
 
-        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+        await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(replay.Problem?.Detail).IsEqualTo(RevisionConflictDetail);
         await Assert.That(DocumentCommandOutcomeTestSupport.OutcomeBytes(database, Writer, failedId)
             .AsSpan().SequenceEqual(failedOutcomeBytes)).IsTrue();

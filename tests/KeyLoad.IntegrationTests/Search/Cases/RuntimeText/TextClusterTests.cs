@@ -98,8 +98,8 @@ internal sealed class TextClusterTests(ClusterFixture fixture)
         await AssertSdkFailureAsync(denied, ErrorCode.PermissionDenied);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             identity.Secret, cancellationToken);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
-            request, cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
+            request, cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 
     private static async Task VerifyFreshnessAsync(TextClusterScenario scenario, KeyLoadClient sdk,

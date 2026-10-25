@@ -20,7 +20,7 @@ internal static class GraphPathRebindR44Refusals
         await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.RevisionConflict, RevisionDetail), sdk.Problem);
         await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
         var reply = await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, state.Stale, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, dispatched: true)).Value;
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(DetailKey).GetString()).IsEqualTo(McpRevisionDetail);
         await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
@@ -37,8 +37,8 @@ internal static class GraphPathRebindR44Refusals
             await Assert.That(result.Value).IsNull();
             await Assert.That(result.Problem!.ErrorCode).IsEqualTo(ErrorCode.BudgetExceeded.ToString());
             await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
-            await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(GraphPathClusterScenario.DirectTool, request, token),
-                ErrorCode.BudgetExceeded, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(GraphPathClusterScenario.DirectTool, request, token),
+                ErrorCode.BudgetExceeded, dispatched: true)).Value;
             await GraphPathRebindR44Reads.MatrixAsync(admin, reader, state, token);
         }
     }

@@ -109,7 +109,7 @@ internal sealed class EventAppendWholeFlowFixture : IDisposable
         var retry = Submit(command);
         await Assert.That(OrleansSerialization.Serialize(retry))
             .IsEquivalentTo(OrleansSerialization.Serialize(original), CollectionOrdering.Matching);
-        await Assert.That(Errors.Code(retry.Problem)).IsEqualTo(Errors.Code(original.Problem));
+        await Assert.That(Errors.Code(retry.Problem).Value).IsEqualTo(Errors.Code(original.Problem).Value);
         await Assert.That(retry.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
         await Assert.That(retry.Value).IsNull();
         await Assert.That(original.Value).IsNull();

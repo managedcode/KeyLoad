@@ -54,7 +54,7 @@ internal static class ComposedProjectionLineageClusterFlow
         var actual = await callers.Sdk.ExecuteSqlAsync(request, token);
         await Assert.That(actual.IsFailed).IsTrue();
         await Assert.That(actual.Problem?.ErrorCode).IsEqualTo(code.ToString());
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
-            code, dispatched);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token),
+            code, dispatched)).Value;
     }
 }

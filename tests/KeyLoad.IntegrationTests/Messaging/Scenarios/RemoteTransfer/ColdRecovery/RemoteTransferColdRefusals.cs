@@ -49,7 +49,7 @@ internal static class RemoteTransferColdRefusals
         ErrorCode expected, CancellationToken token)
     {
         await QueueProducerClusterAssertions.DeniedAsync(await sdk.CommitAsync(command, token), expected);
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token), expected, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token), expected, true)).Value;
         await AtomicProducerClusterRoutes.RefusedAsync(sdk, mcp, command, expected, token);
     }
 

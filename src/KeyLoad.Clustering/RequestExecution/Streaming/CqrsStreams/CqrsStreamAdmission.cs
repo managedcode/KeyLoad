@@ -57,16 +57,16 @@ internal sealed class CqrsStreamAdmission(
         terminal = chunk.IsTerminal;
     }
 
-    internal Exception? CompletionFailure(CancellationToken cancellationToken)
+    internal global::ManagedCode.Communication.Result<Exception?> CompletionFailure(CancellationToken cancellationToken)
     {
         if (terminal)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(CompletionFailure));
         }
 
         return cancellationToken.IsCancellationRequested
-            ? new OperationCanceledException(cancellationToken)
-            : Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+            ? global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new OperationCanceledException(cancellationToken)))
+            : global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest))));
     }
 
     private void ValidateShape(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk, int nextCount)

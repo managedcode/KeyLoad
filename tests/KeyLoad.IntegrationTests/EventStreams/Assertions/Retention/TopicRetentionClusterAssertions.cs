@@ -23,8 +23,8 @@ internal static class TopicRetentionClusterAssertions
         var lost = await sdk.ReadEventSourceAsync(new(scenario.Source), token);
         await Assert.That(lost.IsSuccess).IsFalse();
         await Assert.That(lost.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.HistoryUnavailable));
-        await McpCallerAssertions.ErrorAsync(await session.CallAsync(McpCallerTools.EventsRead,
-            new ReadEventSourceRequest(scenario.Source), token), ErrorCode.HistoryUnavailable, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await session.CallAsync(McpCallerTools.EventsRead,
+            new ReadEventSourceRequest(scenario.Source), token), ErrorCode.HistoryUnavailable, dispatched: true)).Value;
         var group = await McpCallerAssertions.SdkSuccessAsync(await sdk.SubscriptionStatusAsync(scenario.Subscription, token));
         await Assert.That(group.Checkpoint).IsEqualTo(3L);
         await Assert.That(group.Generation).IsEqualTo(2L);

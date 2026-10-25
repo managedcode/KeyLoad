@@ -28,7 +28,7 @@ internal static class RowVisibilityFullScan
                     var scope = database.CaptureRowVisibility(principal, resource, request.Partition,
                         request.Query.Collection, epoch);
                     lease = cache.Acquire(scope);
-                    draft = BeginMissing(cache, scope, lease, partial);
+                    draft = (BeginMissing(cache, scope, lease, partial)).Value;
                 }
                 var result = ScanOriginal(database, principal, budget, lease, draft, scan, accept);
                 if (result.HasMore)
@@ -54,9 +54,9 @@ internal static class RowVisibilityFullScan
             throw;
         }
     }
-    private static RowVisibilityDraft? BeginMissing(RowVisibilityCache cache, RowVisibilityScope scope, RowVisibilityLease? lease,
+    private static global::ManagedCode.Communication.Result<RowVisibilityDraft?> BeginMissing(RowVisibilityCache cache, RowVisibilityScope scope, RowVisibilityLease? lease,
         bool partial)
-        => lease is null && !partial ? cache.Begin(scope) : null;
+        => lease is null && !partial ? ((RowVisibilityDraft?)((cache.Begin(scope)).Value)) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<RowVisibilityDraft?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<RowVisibilityDraft?>.FailNotFound(nameof(BeginMissing)) : global::ManagedCode.Communication.Result<RowVisibilityDraft?>.FailNotFound(nameof(BeginMissing));
 
     private static StorageScanResult ScanOriginal(DatabaseEngine database, PrincipalRecord principal,
         ReadExecutionBudget budget, RowVisibilityLease? lease, RowVisibilityDraft? draft,

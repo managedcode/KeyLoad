@@ -61,7 +61,7 @@ internal static class QueueRetainedInboxAuthorityAssertions
         var lane = QueueLifecycleImage.Capture(store, state.Flow.Lane);
         var before = store.Position;
         var failed = owner.Apply(operation);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.StaleLease);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.StaleLease);
         await Assert.That(failed.Problem?.Detail).IsEqualTo(StaleDelivery);
 
         await Assert.That(failed.Value).IsNull();

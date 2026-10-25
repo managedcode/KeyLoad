@@ -67,10 +67,10 @@ internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetry
         }
     }
 
-    internal static MetricStreamConfiguration ConfigureMetricView(Instrument instrument)
+    internal static global::ManagedCode.Communication.Result<MetricStreamConfiguration> ConfigureMetricView(Instrument instrument)
         => string.Equals(instrument.Meter.Name, OrleansTelemetryPolicy.OrleansMeterName, StringComparison.Ordinal)
-            ? new MetricStreamConfiguration { TagKeys = [] }
-            : null!;
+            ? global::ManagedCode.Communication.Result<MetricStreamConfiguration>.Succeed((MetricStreamConfiguration)(new MetricStreamConfiguration { TagKeys = [] }))
+            : global::ManagedCode.Communication.Result<MetricStreamConfiguration>.FailNotFound(nameof(ConfigureMetricView));
 
     private static bool IsApprovedSource(string sourceName)
         => sourceName is OrleansTelemetryPolicy.ApplicationActivitySourceName

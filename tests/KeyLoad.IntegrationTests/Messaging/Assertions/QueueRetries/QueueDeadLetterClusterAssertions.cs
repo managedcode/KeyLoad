@@ -50,8 +50,8 @@ internal static class QueueDeadLetterClusterAssertions
     internal static async Task RefusalAsync(RequestCqrsClusterCallers callers, QueueDeadLetterClusterState state, CancellationToken token)
     {
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CommitAsync(state.Refused, token), ErrorCode.ResourceExhausted);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            state.Refused, token), ErrorCode.ResourceExhausted, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            state.Refused, token), ErrorCode.ResourceExhausted, dispatched: true)).Value;
         await Assert.That(await PublicReadAssertions.DocumentAsync(await callers.Sdk.GetAsync(
             new(state.Partition, QueueDeadLetterClusterProtocol.Collection, QueueDeadLetterClusterProtocol.Refused), token))).IsNull();
         await Assert.That(await PublicReadAssertions.MessageAsync(await callers.Sdk.InspectAsync(
@@ -70,7 +70,7 @@ internal static class QueueDeadLetterClusterAssertions
             var request = new InspectMessageRequest(state.Lane, QueueDeadLetterClusterProtocol.Message);
             await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await denied.Sdk.InspectAsync(request, token), ErrorCode.PermissionDenied);
             var reply = await denied.Mcp.CallAsync(McpCallerTools.MessagesInspect, request, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, identity.Secret, QueueDeadLetterClusterProtocol.Payload);
             await McpCallerAssertions.DoesNotDiscloseAsync(reply, identity.Secret, QueueDeadLetterClusterProtocol.Headers);
         }, failures);

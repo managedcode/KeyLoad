@@ -45,7 +45,7 @@ internal static class VectorProjectionEligibility
         EntityReferenceLifetime.RequireStored(metadata, lineage.SourceDocument, sourceResource);
         if (lifetime is not null)
         {
-            var sourceDefinition = lifetime.Resolve(view, partition, sourceResource, budget);
+            var sourceDefinition = (lifetime.Resolve(view, partition, sourceResource, budget)).Value;
             if (sourceDefinition is null || !lifetime.CanSeeInput(database, sourceResource, sourceDefinition, lineage.InputField))
             {
                 return false;
@@ -82,7 +82,7 @@ internal static class VectorProjectionEligibility
         VectorProjectionLineageValidation.ValidateResource(targetResource, collection, partition);
         if (lifetime is not null)
         {
-            var definition = lifetime.Resolve(view, partition, targetResource, budget);
+            var definition = (lifetime.Resolve(view, partition, targetResource, budget)).Value;
             if (definition is null)
             {
                 return false;

@@ -40,7 +40,7 @@ internal static class LivePageClusterAssertions
         await Assert.That(sdk.IsSuccess).IsFalse();
         await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(expected.ToString());
         await Assert.That(sdk.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-            request, token), expected, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName,
+            request, token), expected, dispatched: true)).Value;
     }
 }

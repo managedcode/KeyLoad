@@ -60,7 +60,7 @@ internal static class GraphIncomingClusterAssertions
     }
 
     internal static async Task AssertMcpFailureAsync(CallToolResult result, ErrorCode expected)
-        => await McpCallerAssertions.ErrorAsync(result, expected, dispatched: true);
+        => _ = (await McpCallerAssertions.ErrorAsync(result, expected, dispatched: true)).Value;
 
     internal static async Task AssertNoPrivatePayloadAsync(CallToolResult result, string credential)
         => await McpCallerAssertions.DoesNotDiscloseAsync(result, credential,

@@ -95,7 +95,7 @@ internal static class ConnectionAwaitedSettlementFlow
             await callback.Arrived.Task.WaitAsync(token);
             await ConnectionAwaitedSettlementAssertions.ChargedAsync(scenario.Observation.Read(requestId).WorkOwner, requestId);
             callback.Release.SetResult();
-            var failure = await ConnectionAwaitedSettlementCalls.FailureAsync(original);
+            var failure = (await ConnectionAwaitedSettlementCalls.FailureAsync(original)).Value;
             await Assert.That(failure).IsNotNull();
             await Assert.That(ConnectionAwaitedSettlementAssertions.Contains(failure!, CleanupFailure)).IsTrue();
             await ConnectionAwaitedSettlementAssertions.ReleasedAsync(scenario.Observation.Read(requestId).WorkOwner, requestId, token);

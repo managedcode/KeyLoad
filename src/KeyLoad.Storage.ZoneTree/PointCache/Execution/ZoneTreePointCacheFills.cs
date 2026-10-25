@@ -6,7 +6,7 @@ internal static class ZoneTreePointCacheFills
     private const string ForeignCandidateMessage = "The fill candidate belongs to a different owner.";
     private const string ReservedLengthMismatchMessage = "The published value length must match its reserved length.";
 
-    internal static ZoneTreePointCacheCandidate? TryPrepare(ZoneTreePointCacheState state,
+    internal static global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?> TryPrepare(ZoneTreePointCacheState state,
         IZoneTreePointCacheCandidateOwner owner, ReadOnlySpan<byte> key, int valueLength, long generation)
     {
         ArgumentOutOfRangeException.ThrowIfNegative(valueLength);
@@ -18,23 +18,22 @@ internal static class ZoneTreePointCacheFills
                 || valueLength > state.Options.MaxValueBytes)
             {
                 ZoneTreePointCacheState.Increment(ref state.AdmissionBypasses);
-                return null;
+                return global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?>.FailNotFound(nameof(TryPrepare));
             }
 
             var charge = ZoneTreePointCacheLedger.EntryCharge(key.Length, valueLength);
             ICacheMemoryReservation? reservation = null;
             try
             {
-                reservation = TryReserveWithEviction(state, charge);
-                if (reservation is null)
+                if (!TryReserveWithEviction(state, charge, out reservation))
                 {
                     ZoneTreePointCacheState.Increment(ref state.AdmissionBypasses);
-                    return null;
+                    return global::ManagedCode.Communication.Result<ZoneTreePointCacheCandidate?>.FailNotFound(nameof(TryPrepare));
                 }
 
                 var candidate = CreateCandidate(state, owner, key, valueLength, generation, reservation);
                 reservation = null;
-                return candidate;
+                return (candidate);
             }
             finally
             {
@@ -78,27 +77,29 @@ internal static class ZoneTreePointCacheFills
             && candidate.Revision == state.Revision && candidate.Generation == generation;
     }
 
-    private static ICacheMemoryReservation? TryReserveWithEviction(ZoneTreePointCacheState state,
-        long charge)
+    private static bool TryReserveWithEviction(ZoneTreePointCacheState state,
+        long charge, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out ICacheMemoryReservation? reservation)
     {
         for (var attempts = 0; attempts <= state.Options.MaximumVictimAttempts; attempts++)
         {
             if (ZoneTreePointCacheLedger.HasCapacity(state, charge)
-                && state.Options.MemoryBudget.TryReserve(charge, 1, out var reservation))
+                && state.Options.MemoryBudget.TryReserve(charge, 1, out reservation))
             {
-                return reservation;
+                return reservation is not null;
             }
 
             if (attempts == state.Options.MaximumVictimAttempts
                 || !ZoneTreePointCacheRetirement.TryRetireVictim(state))
             {
-                return null;
+                reservation = null;
+                return false;
             }
 
             ZoneTreePointCacheState.Increment(ref state.EvictionAttempts);
         }
 
-        return null;
+        reservation = null;
+        return false;
     }
 
     private static ZoneTreePointCacheCandidate CreateCandidate(ZoneTreePointCacheState state,

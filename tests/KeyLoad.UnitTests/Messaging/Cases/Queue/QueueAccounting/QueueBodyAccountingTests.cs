@@ -54,7 +54,7 @@ internal sealed class QueueBodyAccountingTests
         var rejectId = Guid.NewGuid();
         var rejected = storedShort.Submit(OperationKind.Batch,
             new CommandRequest(rejectId, storedShort.Partition, [message]), id: rejectId);
-        await Assert.That(Errors.Code(rejected.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(rejected.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(Counters(storedShort).StoredMessages).IsEqualTo(0);
 
         using var flightShort = new TestDatabase();

@@ -21,7 +21,7 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         await Assert.That(System.Linq.Enumerable.Single(Receive(db, subscription).Deliveries).Event.Source.StreamId).IsEqualTo("a");
         var duplicate = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.Batch,
-            new CommandRequest(duplicate, db.Partition, [new AppendEvents("streams", "a", [new("same", "Created", "{}")], ExpectedStreamRevision.Any)]), id: duplicate).Problem)).IsEqualTo(ErrorCode.DuplicateEventId);
+            new CommandRequest(duplicate, db.Partition, [new AppendEvents("streams", "a", [new("same", "Created", "{}")], ExpectedStreamRevision.Any)]), id: duplicate).Problem).Value).IsEqualTo(ErrorCode.DuplicateEventId);
     }
     [Test]
     public async Task DeliveryStateAndAcknowledgementGapsSurviveStoreReopen()
@@ -55,7 +55,7 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         var subscription = Configure(db);
         var id = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription,
-            new ReceiveSubscriptionRequest(id, subscription), principal: "worker", id: id).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+            new ReceiveSubscriptionRequest(id, subscription), principal: "worker", id: id).Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(0);
         await Assert.That(System.Linq.Enumerable.Single(db.Database.ReadEventSource("worker", new(Topic(db))).Events).Data.PayloadJson).DoesNotContain("protected");
     }
@@ -75,10 +75,10 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         {
             PolicyEpoch = 2
         })).Get<PrincipalRecord>();
-        await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id).Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         var ack = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.SubscriptionDelivery,
-            new SubscriptionDeliveryCommand(ack, subscription, received.Deliveries[0].Token, DeliveryAction.Ack), id: ack).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+            new SubscriptionDeliveryCommand(ack, subscription, received.Deliveries[0].Token, DeliveryAction.Ack), id: ack).Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(0);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(service with
         {
@@ -87,7 +87,7 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         })).Get<PrincipalRecord>();
         var claim = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription,
-            new ReceiveSubscriptionRequest(claim, subscription), id: claim).Problem)).IsEqualTo(ErrorCode.Unauthenticated);
+            new ReceiveSubscriptionRequest(claim, subscription), id: claim).Problem).Value).IsEqualTo(ErrorCode.Unauthenticated);
     }
     [Test]
     public async Task EmptyReceiveRetryCannotReplayStatusFromBeforeASeek()
@@ -101,7 +101,7 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         var seek = Guid.NewGuid();
         db.Submit(OperationKind.SeekSubscription,
             new SeekSubscriptionRequest(seek, subscription, 1, SubscriptionStart.FromBeginning), id: seek).Get<SubscriptionInfo>();
-        await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(db.Submit(OperationKind.ReceiveSubscription, request, id: id).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
     }
     [Test]
     public async Task AnotherWorkerReusesTheInboxOnlyAfterCurrentEffectPermissionsAreChecked()
@@ -133,7 +133,7 @@ internal sealed class SubscriptionRecoveryAndPolicyTests
         var deniedLease = await Assert.That(Receive(db, subscription, time: now, principal: "worker").Deliveries).HasSingleItem();
         var deniedId = Guid.NewGuid();
         await Assert.That(Errors.Code(db.Submit(OperationKind.SubscriptionProcessing,
-            new SubscriptionProcessingRequest(deniedId, subscription, deniedLease.Token, "handler", 1, [.. effects]), id: deniedId, principal: "worker", time: now).Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+            new SubscriptionProcessingRequest(deniedId, subscription, deniedLease.Token, "handler", 1, [.. effects]), id: deniedId, principal: "worker", time: now).Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(db.Database.GetSubscription("root", subscription).Checkpoint).IsEqualTo(0);
         db.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(worker with
         {

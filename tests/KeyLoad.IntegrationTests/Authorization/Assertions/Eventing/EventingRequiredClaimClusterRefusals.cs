@@ -46,7 +46,7 @@ internal static class EventingRequiredClaimClusterRefusals
             return;
         }
         var reply = await call();
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
         var detail = code == ErrorCode.PermissionDenied ? permissionDetail ?? "The authenticated principal is not permitted to perform this operation."
             : "The database operation could not be completed.";
         var expected = JsonSerializer.SerializeToElement(Errors.Problem(code, detail), JsonDefaults.Options);

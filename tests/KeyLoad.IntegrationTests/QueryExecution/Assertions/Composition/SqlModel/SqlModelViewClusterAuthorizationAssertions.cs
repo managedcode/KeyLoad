@@ -190,7 +190,7 @@ internal static class SqlModelViewClusterAuthorizationAssertions
             McpCallerProtocol.Node3, identity.Secret, cancellationToken);
         var result = await sdk.QueryAsync(request, cancellationToken);
         await Assert.That(result.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.QueryExecute,
-            request, cancellationToken), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.QueryExecute,
+            request, cancellationToken), ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
 }

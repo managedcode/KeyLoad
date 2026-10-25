@@ -43,7 +43,7 @@ public static class MessagingQueriesRemoteTransfer
     {
         var key = RemoteTransferStorage.IntentKey(request.Source, request.TransferId);
         var bytes = view.ReadOwnedValue(key) ?? throw Errors.Fail(ErrorCode.NotFound, RemoteTransferAttemptProtocol.Unavailable);
-        var hint = engine.ReadTransferCoordinationHint(view, key, bytes, principal.Id) ?? throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferAttemptProtocol.Stale);
+        var hint = (engine.ReadTransferCoordinationHint(view, key, bytes, principal.Id)).Value ?? throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferAttemptProtocol.Stale);
         if (hint.Destination != request.Destination || hint.IntentDigest != RemoteTransferCoordinationIdentity.IntentDigest(request.IntentToken) || hint.AcceptGeneration != request.ExpectedGeneration || hint.AcceptPolicyGeneration != request.PolicyGeneration || hint.CompleteGeneration != request.CompleteGeneration || RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept) != request.AcceptCommandId)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferAttemptProtocol.Stale);

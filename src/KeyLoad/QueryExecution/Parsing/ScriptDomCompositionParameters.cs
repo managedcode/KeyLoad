@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::System.Text.Json.JsonElement>? suppliedParameters,
     int? positionalCount, Action checkBudget, CancellationToken token)
 {
-    private readonly Dictionary<string, global::System.Text.Json.JsonElement>? parameters = CopyParameters(suppliedParameters, checkBudget, token);
+    private readonly Dictionary<string, global::System.Text.Json.JsonElement>? parameters = (CopyParameters(suppliedParameters, checkBudget, token)).Value;
     private readonly HashSet<string> used = new(StringComparer.Ordinal);
     internal T Read<T>(Dom.ScalarExpression expression)
     {
@@ -64,12 +64,12 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
     }
     private const int EmptyCount = 0;
 
-    private static Dictionary<string, global::System.Text.Json.JsonElement>? CopyParameters(
+    private static global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?> CopyParameters(
         Dictionary<string, global::System.Text.Json.JsonElement>? supplied, Action checkBudget, CancellationToken token)
     {
         if (supplied is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?>.FailNotFound(nameof(CopyParameters));
         }
         var owned = new Dictionary<string, global::System.Text.Json.JsonElement>(supplied.Count, StringComparer.Ordinal);
         foreach (var entry in supplied)
@@ -83,7 +83,7 @@ internal sealed class ScriptDomCompositionParameters(Dictionary<string, global::
         }
         token.ThrowIfCancellationRequested();
         checkBudget();
-        return owned;
+        return global::ManagedCode.Communication.Result<Dictionary<string, global::System.Text.Json.JsonElement>?>.Succeed(((Dictionary<string, global::System.Text.Json.JsonElement>?)(owned)));
     }
     private string Name(Dom.ScalarExpression expression)
     {

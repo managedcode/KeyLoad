@@ -104,7 +104,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
         ArgumentNullException.ThrowIfNull(visitor);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxRecords);
         budget.Check();
-        using var linked = CreateLinkedToken(cancellationToken, out var effectiveToken);
+        using var linked = (CreateLinkedToken(cancellationToken, out var effectiveToken)).Value;
         var result = VisitRangeCore(prefix, maxRecords, visitor, afterKey, untilKey, observer, reverse, effectiveToken);
         effectiveToken.ThrowIfCancellationRequested();
         budget.Check();
@@ -137,21 +137,21 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
         }
     }
 
-    private CancellationTokenSource? CreateLinkedToken(CancellationToken viewToken, out CancellationToken effectiveToken)
+    private global::ManagedCode.Communication.Result<CancellationTokenSource?> CreateLinkedToken(CancellationToken viewToken, out CancellationToken effectiveToken)
     {
         var budgetToken = budget.Cancellation;
         if (!viewToken.CanBeCanceled || viewToken == budgetToken)
         {
             effectiveToken = budgetToken;
-            return null;
+            return global::ManagedCode.Communication.Result<CancellationTokenSource?>.FailNotFound(nameof(CreateLinkedToken));
         }
         if (!budgetToken.CanBeCanceled)
         {
             effectiveToken = viewToken;
-            return null;
+            return global::ManagedCode.Communication.Result<CancellationTokenSource?>.FailNotFound(nameof(CreateLinkedToken));
         }
         var linked = CancellationTokenSource.CreateLinkedTokenSource(budgetToken, viewToken);
         effectiveToken = linked.Token;
-        return linked;
+        return (linked);
     }
 }

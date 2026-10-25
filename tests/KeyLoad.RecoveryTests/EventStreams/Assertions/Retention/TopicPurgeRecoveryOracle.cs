@@ -64,7 +64,7 @@ internal static class TopicPurgeRecoveryOracle
         var position = database.Store.Position;
         var changed = TopicPurgeCrashContract.Purge(operation.CommandId, 3);
         var result = database.Apply(database.CreateCommand(operation.Value!.Kind, operation.CommandId, operation.UserId!, new DateTimeOffset(operation.Timestamp), JsonSerializer.Serialize(changed, JsonDefaults.Options)));
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The command ID was already used with different content.");
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await EventAppendStateAssertions.SameBytesAsync(bytes, database.Store);

@@ -18,7 +18,7 @@ internal static class RemoteTransferRepairColdContinuation
         var complete = new CommandRequest(RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Complete),
             fixture.SourcePartition, [new CompleteQueueTransfer(fixture.SourceQueue, transfer.TransferId, proof.ReceiptToken)]);
         var failed = RemoteTransferRepairCold.Apply(fixture, complete);
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
 
         await Assert.That(failed.Value).IsNull();
         var completeBytes = RemoteTransferRepairCold.Outcome(fixture, complete.CommandId, fixture.SourcePartition);
@@ -30,7 +30,7 @@ internal static class RemoteTransferRepairColdContinuation
         RemoteTransferRepairColdFailure? refused = null;
         if (ceiling == RemoteTransferRepairColdProtocol.ExhaustedCeiling)
         {
-            await Assert.That(Errors.Code(advance.Result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+            await Assert.That(Errors.Code(advance.Result.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
             await Assert.That(advance.Result.Problem?.Detail).IsEqualTo(RemoteTransferRepairProtocol.Capacity);
 
             await Assert.That(advance.Result.Value).IsNull();

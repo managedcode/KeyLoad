@@ -58,7 +58,7 @@ internal static class ModelHeadClusterRefusals
     }
     private static async Task McpAsync(CallToolResult reply, ModelHeadClusterState state, ErrorCode code, bool dispatched)
     {
-        await McpCallerAssertions.ErrorAsync(reply, code, dispatched);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched)).Value;
         var detail = code == ErrorCode.PermissionDenied ? "The principal cannot perform this operation in this scope."
             : "The database operation could not be completed.";
         var expected = JsonSerializer.SerializeToElement(Errors.Problem(code, detail), JsonDefaults.Options);

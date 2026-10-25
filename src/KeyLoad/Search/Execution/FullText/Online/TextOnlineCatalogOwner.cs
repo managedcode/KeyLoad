@@ -29,7 +29,7 @@ internal sealed partial class TextOnlineCatalogOwner(DatabaseEngine database, Te
         {
             var view = budget.CreateView(raw);
             var principal = database.Principal(view, principalId, clock.GetUtcNow());
-            return database.ReadOnlineTextCurrentPublication(view, principal, request, budget)
+            return (database.ReadOnlineTextCurrentPublication(view, principal, request, budget)).Value
                 ?? throw TextErrors.Ownership();
         });
 

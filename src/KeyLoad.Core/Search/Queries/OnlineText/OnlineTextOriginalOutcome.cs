@@ -14,21 +14,21 @@ public static class OnlineTextOriginalOutcome
     {
         var view = budget.CreateView(raw);
         var principal = engine.Principal(view, principalId, engine.EvaluationClock.GetUtcNow());
-        return engine.ReadOnlineTextOriginalOutcome(view, principal, request, budget);
+        return (engine.ReadOnlineTextOriginalOutcome(view, principal, request, budget)).Value;
     });
-    internal static Result<object>? ReadOnlineTextOriginalOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
+    internal static global::ManagedCode.Communication.Result<Result<object>?> ReadOnlineTextOriginalOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
     {
         engine.RequireOnlineTextOriginalAuthority(view, principal, request);
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var previous = CommandOutcomeKeyResolver.Select(view, principal.Id, request.CommandId, scope).Outcome;
         if (previous is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Result<object>?>.FailNotFound(nameof(ReadOnlineTextOriginalOutcome));
         }
 
         engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous, budget);
         budget.Check();
-        return previous.Result;
+        return global::ManagedCode.Communication.Result<Result<object>?>.Succeed(((Result<object>?)(previous.Result)));
     }
 
     internal static OnlineTextCurrentPublication? ReadOnlineTextOriginalPublication(this DatabaseEngine engine, string principalId, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget) => engine.Store.Read(raw =>
@@ -77,7 +77,7 @@ public static class OnlineTextOriginalOutcome
             throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.MissingAuthority);
         }
 
-        if (Errors.Code(previous.Result.Problem) is not null)
+        if (Errors.Code(previous.Result.Problem).Value is not null)
         {
             return;
         }

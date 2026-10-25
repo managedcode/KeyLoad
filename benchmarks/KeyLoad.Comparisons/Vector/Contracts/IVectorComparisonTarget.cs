@@ -54,5 +54,5 @@ public interface IVectorComparisonTarget : IAsyncDisposable
     /// <param name="id">The canonical record ID.</param>
     /// <param name="cancellationToken">Cancels the persisted read.</param>
     /// <returns>The persisted record or null if absent.</returns>
-    Task<VectorReadback?> ReadAsync(string id, CancellationToken cancellationToken);
+    Task<global::ManagedCode.Communication.Result<VectorReadback?>> ReadAsync(string id, CancellationToken cancellationToken);
 }

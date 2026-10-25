@@ -37,7 +37,7 @@ internal static class LocalInboxProcessingRecoveryImage
 
     internal static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(expected.Problem).Value);
         await Assert.That(actual.Problem?.Detail).IsEqualTo(expected.Problem?.Detail);
         await Assert.That(actual.Value?.GetType()).IsEqualTo(expected.Value?.GetType());
         await ExactAsync(actual.Value, expected.Value);

@@ -35,25 +35,25 @@ internal sealed class GrainRequestPhaseSettlement(GrainRequestCodec codec)
         var observedIdentity = identity;
         identity = null;
         var probeFailure = observedIdentity is { } value
-            ? Capture(() => codec.ObserveProducerDisposed(value, context)) : null;
-        var deactivationFailure = deactivate is null ? null : Capture(deactivate);
+            ? (Capture(() => codec.ObserveProducerDisposed(value, context))).Value : null;
+        var deactivationFailure = deactivate is null ? null : (Capture(deactivate)).Value;
         ThrowCombined(probeFailure, deactivationFailure);
     }
 
-    private static Exception? Capture(Action action)
+    private static global::ManagedCode.Communication.Result<Exception?> Capture(Action action)
     {
         try
         {
             action();
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Capture));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
     }
 

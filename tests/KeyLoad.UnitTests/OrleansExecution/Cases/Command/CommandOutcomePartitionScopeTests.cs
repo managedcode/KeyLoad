@@ -24,7 +24,7 @@ internal sealed class CommandOutcomePartitionScopeTests
         var outcome = ReadStored(database, operation);
         var replay = database.Database.Apply(operation);
 
-        await Assert.That(Errors.Code(first.Problem)).IsNull();
+        await Assert.That(Errors.Code(first.Problem).Value).IsNull();
         await Assert.That(outcome.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
         await Assert.That(outcome.Partition).IsEqualTo(database.Partition);
         await Assert.That(locator).IsNotNull();
@@ -46,7 +46,7 @@ internal sealed class CommandOutcomePartitionScopeTests
         var result = database.Database.Apply(operation);
         var outcome = ReadStored(database, operation);
 
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.NotFound);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.NotFound);
         await Assert.That(outcome.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
         await Assert.That(outcome.Partition).IsEqualTo(database.Partition);
         await Assert.That(ReadLocator(database, database.Partition, commandId)).IsNotNull();
@@ -69,21 +69,21 @@ internal sealed class CommandOutcomePartitionScopeTests
         var partition = Operation(database, commandId, OperationKind.Batch, partitionRequest);
         var partitionResult = database.Database.Apply(partition);
 
-        await Assert.That(Errors.Code(globalResult.Problem)).IsNull();
-        await Assert.That(Errors.Code(partitionResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(globalResult.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(partitionResult.Problem).Value).IsNull();
         await Assert.That(ReadStored(database, global).ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Global);
         await Assert.That(ReadStored(database, partition).ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
         await Assert.That(ReadLocator(database, database.Partition, commandId)).IsNotNull();
-        await Assert.That(Errors.Code(database.Database.Apply(global).Problem)).IsNull();
-        await Assert.That(Errors.Code(database.Database.Apply(partition).Problem)).IsNull();
+        await Assert.That(Errors.Code(database.Database.Apply(global).Problem).Value).IsNull();
+        await Assert.That(Errors.Code(database.Database.Apply(partition).Problem).Value).IsNull();
         await Assert.That(Errors.Code(database.Database.Apply(Operation(database, commandId, OperationKind.ConfigureResource,
             globalRequest with
             {
                 Definition = new ResourceDefinition("other", ResourceKind.Collection,
                 database.Partition.TransactionDomainId)
-            })).Problem)).IsEqualTo(ErrorCode.Conflict);
+            })).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(Errors.Code(database.Database.Apply(Operation(database, commandId, OperationKind.Batch,
-            new CommandRequest(commandId, database.Partition, [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, CommandOutcomePartitionScopeTestData.FirstDocument, CommandOutcomePartitionScopeTestData.SecondJson)]))).Problem)).IsEqualTo(ErrorCode.Conflict);
+            new CommandRequest(commandId, database.Partition, [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, CommandOutcomePartitionScopeTestData.FirstDocument, CommandOutcomePartitionScopeTestData.SecondJson)]))).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.Database.GetDocument("root",
             new(database.Partition, CommandOutcomePartitionScopeTestData.Resource, CommandOutcomePartitionScopeTestData.FirstDocument))!.Json).IsEqualTo(CommandOutcomePartitionScopeTestData.FirstJson);
     }
@@ -111,12 +111,12 @@ internal sealed class CommandOutcomePartitionScopeTests
         var changedSecond = Operation(database, commandId, OperationKind.Batch,
             new CommandRequest(commandId, secondPartition, [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, CommandOutcomePartitionScopeTestData.SecondDocument, CommandOutcomePartitionScopeTestData.FirstJson)]));
 
-        await Assert.That(Errors.Code(firstResult.Problem)).IsNull();
-        await Assert.That(Errors.Code(secondResult.Problem)).IsNull();
+        await Assert.That(Errors.Code(firstResult.Problem).Value).IsNull();
+        await Assert.That(Errors.Code(secondResult.Problem).Value).IsNull();
         await Assert.That(firstReplay.Get<CommitReceipt>().Token).IsEqualTo(firstResult.Get<CommitReceipt>().Token);
         await Assert.That(secondReplay.Get<CommitReceipt>().Token).IsEqualTo(secondResult.Get<CommitReceipt>().Token);
-        await Assert.That(Errors.Code(database.Database.Apply(changedFirst).Problem)).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(Errors.Code(database.Database.Apply(changedSecond).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(database.Database.Apply(changedFirst).Problem).Value).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(database.Database.Apply(changedSecond).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.Database.GetDocument("root",
             new(firstPartition, CommandOutcomePartitionScopeTestData.Resource, CommandOutcomePartitionScopeTestData.FirstDocument))!.Json).IsEqualTo(CommandOutcomePartitionScopeTestData.FirstJson);
         await Assert.That(database.Database.GetDocument("root",

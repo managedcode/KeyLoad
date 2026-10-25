@@ -31,7 +31,7 @@ internal sealed class TopicRetentionRevokedGrantTests
         var cut = fixture.Store.Position;
         var bytes = QueueWholeFlowStorage.Bytes(fixture.Store);
         var denied = fixture.Submit(command, "manager");
-        await Assert.That(Errors.Code(denied.Problem)).IsEqualTo(ErrorCode.PermissionDenied);
+        await Assert.That(Errors.Code(denied.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(fixture.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(bytes, CollectionOrdering.Matching);
         var second = fixture.Submit(command, "manager");

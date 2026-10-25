@@ -29,8 +29,8 @@ internal static class DatabaseCompositionExpectedReferences
         {
             throw new InvalidOperationException(CatalogRequired);
         }
-        var lifetime = ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
-            fresh.Collection, definition);
+        var lifetime = (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
+            fresh.Collection, definition)).Value;
         if (lifetime is null || lifetime.TenantId != partition.TenantId
             || lifetime.DatabaseId != partition.DatabaseId || lifetime.TransactionDomainId != partition.TransactionDomainId
             || lifetime.ResourceName != fresh.Collection || lifetime.Kind != ResourceKind.Collection

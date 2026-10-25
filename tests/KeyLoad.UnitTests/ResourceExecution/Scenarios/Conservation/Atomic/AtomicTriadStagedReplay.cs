@@ -61,12 +61,12 @@ internal static class AtomicTriadStagedReplay
         var actual = state.Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => OriginalBytesAsync(state, operation, bytes), failures);
-        var expected = repaired && Errors.Code(original.Problem) is not null
+        var expected = repaired && Errors.Code(original.Problem).Value is not null
             ? Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, AtomicTriadStagedProtocol.PolicyDetail)) : original;
         await ServerFailureObserver.ObserveAsync(() => AtomicTriadStagedCurrent.EqualAsync(actual, expected), failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            if (Errors.Code(actual.Problem) is not null)
+            if (Errors.Code(actual.Problem).Value is not null)
             {
                 await Assert.That(actual.Value).IsNull();
             }

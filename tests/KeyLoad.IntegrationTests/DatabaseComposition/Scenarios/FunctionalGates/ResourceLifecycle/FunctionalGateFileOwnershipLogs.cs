@@ -21,7 +21,7 @@ internal static class FunctionalGateFileOwnershipLogs
         {
             await foreach (var batch in logs.WatchAsync(resource).WithCancellation(token).ConfigureAwait(false))
             {
-                var refusal = ReadBatch(batch, secrets, output);
+                var refusal = (ReadBatch(batch, secrets, output)).Value;
                 if (refusal is not null)
                 {
                     return refusal;
@@ -36,7 +36,7 @@ internal static class FunctionalGateFileOwnershipLogs
         throw new InvalidDataException(P.Incomplete);
     }
 
-    private static string? ReadBatch(IEnumerable<LogLine> batch, string[] secrets, StringBuilder output)
+    private static global::ManagedCode.Communication.Result<string?> ReadBatch(IEnumerable<LogLine> batch, string[] secrets, StringBuilder output)
     {
         foreach (var line in batch)
         {
@@ -54,9 +54,9 @@ internal static class FunctionalGateFileOwnershipLogs
             output.Append(text).Append(P.LogLineEndingCharacter);
             if (FunctionalGateFileOwnershipAssertions.HasOriginalRefusal(output.ToString()))
             {
-                return output.ToString();
+                return global::ManagedCode.Communication.Result<string?>.Succeed(((string?)(output.ToString())));
             }
         }
-        return null;
+        return global::ManagedCode.Communication.Result<string?>.FailNotFound(nameof(ReadBatch));
     }
 }

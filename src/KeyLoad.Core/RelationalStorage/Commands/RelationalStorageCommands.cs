@@ -21,7 +21,7 @@ public static class RelationalStorageCommands
         ResourceExecutionCommands.ValidateResource(configuration);
         var key = KeySpace.Resource(request.TenantId, request.DatabaseId, request.Definition.Name);
         var previous = transaction.GetRecord<ResourceDefinition>(key);
-        _ = ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Definition.Name, previous);
+        _ = (ResourceLifetimeCatalog.Read(transaction, request.TenantId, request.DatabaseId, request.Definition.Name, previous)).Value;
         if (previous is not null)
         {
             throw Errors.Fail(ErrorCode.Conflict, TableCreationExists);

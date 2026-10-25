@@ -9,10 +9,10 @@ internal static class QueueRetryPreparedLeaseRefusal
         var before = QueueOrderedRetryImage.Capture(database.Store, state.Lane);
         var failed = database.Apply(original);
         state.Outcomes.Add((original, failed));
-        await Assert.That(Errors.Code(failed.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failed.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await QueueOrderedRetryImage.SameAsync(database.Store, state.Lane, before);
         var replay = database.Apply(original);
-        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(Errors.Code(failed.Problem));
+        await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(Errors.Code(failed.Problem).Value);
         await Assert.That(replay.Problem?.Detail).IsEqualTo(failed.Problem?.Detail);
         await Assert.That(OrleansSerialization.Serialize(replay).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(failed))).IsTrue();

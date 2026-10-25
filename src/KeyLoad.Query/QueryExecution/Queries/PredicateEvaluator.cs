@@ -28,9 +28,9 @@ public static class PredicateEvaluator
         => operand switch
         {
             FieldOperand field => FieldValue(field.Path, document, json, paths),
-            ValueOperand literal => JsonData.Scalar(literal.Value, ReadOnlySpan<string>.Empty),
+            ValueOperand literal => (JsonData.Scalar(literal.Value, ReadOnlySpan<string>.Empty)).Value.Value,
             ParameterOperand parameter when parameters?.TryGetValue(parameter.Name, out var value) == true
-                => JsonData.Scalar(value, ReadOnlySpan<string>.Empty),
+                => (JsonData.Scalar(value, ReadOnlySpan<string>.Empty)).Value.Value,
             ParameterOperand => throw Errors.Fail(ErrorCode.Validation, MissingParameter),
             _ => throw Errors.Fail(ErrorCode.Validation, OperandIsInvalidDetail)
         };
@@ -40,7 +40,7 @@ public static class PredicateEvaluator
         {
             SqlSyntax.MetadataIdPath => document.Reference.Id,
             SqlSyntax.MetadataRevisionPath => (decimal)document.Revision,
-            _ => paths is null ? JsonData.Scalar(json, path) : JsonData.Scalar(json, paths[path])
+            _ => paths is null ? JsonData.Scalar(json, path) : (JsonData.Scalar(json, paths[path])).Value.Value
         };
     /// <summary>Evaluates a typed predicate with SQL-style unknown results.</summary>
     /// <param name="predicate">Typed Q1 predicate.</param>
@@ -57,9 +57,9 @@ public static class PredicateEvaluator
         object? Get(Operand value) => Value(value, document, json, parameters, paths);
         return predicate switch
         {
-            Comparison comparison => Compare(Get(comparison.Left), comparison.Operator, Get(comparison.Right)),
-            Logical { Operator: SqlSyntax.And } logical => And(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths)),
-            Logical logical => Or(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths)),
+            Comparison comparison => (Compare(Get(comparison.Left), comparison.Operator, Get(comparison.Right))).Value,
+            Logical { Operator: SqlSyntax.And } logical => (And(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths))).Value,
+            Logical logical => (Or(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths))).Value,
             Negation negation => !Evaluate(negation.Inner, document, json, parameters, paths),
             NullTest test => (test.Missing ? Get(test.Value) is MissingValue : Get(test.Value) is null) != test.Negated,
             InPredicate list => In(Get(list.Value), list.Values.Select(Get), list.Negated),
@@ -71,7 +71,7 @@ public static class PredicateEvaluator
         bool? found = false;
         foreach (var candidate in values)
         {
-            var match = Compare(value, SqlSyntax.Equals, candidate);
+            var match = (Compare(value, SqlSyntax.Equals, candidate)).Value;
             if (match is true)
             {
                 return !negated;
@@ -83,18 +83,18 @@ public static class PredicateEvaluator
         }
         return negated ? !found : found;
     }
-    private static bool? And(bool? left, bool? right) => left == false || right == false ? false : left is null || right is null ? null : true;
-    private static bool? Or(bool? left, bool? right) => left == true || right == true ? true : left is null || right is null ? null : false;
+    private static global::ManagedCode.Communication.Result<bool?> And(bool? left, bool? right) => left == false || right == false ? global::ManagedCode.Communication.Result<bool?>.Succeed((bool?)(false)) : left is null || right is null ? global::ManagedCode.Communication.Result<bool?>.FailNotFound(nameof(And)) : global::ManagedCode.Communication.Result<bool?>.Succeed((bool?)(true));
+    private static global::ManagedCode.Communication.Result<bool?> Or(bool? left, bool? right) => left == true || right == true ? global::ManagedCode.Communication.Result<bool?>.Succeed((bool?)(true)) : left is null || right is null ? global::ManagedCode.Communication.Result<bool?>.FailNotFound(nameof(Or)) : global::ManagedCode.Communication.Result<bool?>.Succeed((bool?)(false));
     /// <summary>Compares two Q1 scalar values with type and null rules.</summary>
     /// <param name="left">Left scalar.</param>
     /// <param name="operation">Supported comparison operator.</param>
     /// <param name="right">Right scalar.</param>
     /// <returns>True, false, or unknown.</returns>
-    public static bool? Compare(object? left, string operation, object? right)
+    public static global::ManagedCode.Communication.Result<bool?> Compare(object? left, string operation, object? right)
     {
         if (left is null or MissingValue || right is null or MissingValue)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<bool?>.FailNotFound(nameof(Compare));
         }
         if (left.GetType() != right.GetType())
         {
@@ -103,12 +103,12 @@ public static class PredicateEvaluator
         var order = KeyCodec.Encode(left).AsSpan().SequenceCompareTo(KeyCodec.Encode(right));
         return operation switch
         {
-            SqlSyntax.Equals => order == 0,
-            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => order != 0,
-            SqlSyntax.Greater => order > 0,
-            SqlSyntax.GreaterOrEqual => order >= 0,
-            SqlSyntax.Less => order < 0,
-            SqlSyntax.LessOrEqual => order <= 0,
+            SqlSyntax.Equals => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order == 0))),
+            SqlSyntax.NotEquals or SqlSyntax.AlternateNotEquals => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order != 0))),
+            SqlSyntax.Greater => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order > 0))),
+            SqlSyntax.GreaterOrEqual => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order >= 0))),
+            SqlSyntax.Less => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order < 0))),
+            SqlSyntax.LessOrEqual => global::ManagedCode.Communication.Result<bool?>.Succeed(((bool?)(order <= 0))),
             _ => throw Errors.Fail(ErrorCode.Validation, ComparisonOperatorIsInvalidDetail)
         };
     }

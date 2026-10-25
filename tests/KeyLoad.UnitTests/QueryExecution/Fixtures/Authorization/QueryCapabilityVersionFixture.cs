@@ -16,8 +16,8 @@ internal sealed class QueryCapabilityVersionFixture : IDisposable
         var definition = new ResourceDefinition(QueryCapabilityVersionRequests.Collection, ResourceKind.Collection, db.Partition.TransactionDomainId);
         await RequiredProcessingPolicyAssertions.EqualAsync(definition, db.Submit(OperationKind.ConfigureResource,
             new ConfigureResourceRequest(db.Partition.TenantId, db.Partition.DatabaseId, definition)).Get<ResourceDefinition>());
-        Creation = db.Store.Read(view => ResourceLifetimeCatalog.Read(view, db.Partition.TenantId,
-            db.Partition.DatabaseId, definition.Name, definition))
+        Creation = db.Store.Read(view => (ResourceLifetimeCatalog.Read(view, db.Partition.TenantId,
+            db.Partition.DatabaseId, definition.Name, definition)).Value)
             ?? throw new InvalidOperationException("The created query resource lifetime is absent.");
         Seed = QueryCapabilityVersionRequests.Seed(db.Partition);
         var next = db.ReadCanonicalCut().AppliedPosition + 1L;

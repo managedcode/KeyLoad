@@ -21,7 +21,7 @@ internal static class EventSelectiveAppendAuthorityClusterRefusals
             state.Identity.Secret, McpEventStreamTokens.PrivateMarker);
         await EventSelectiveAppendAuthorityClusterCurrent.ObserveAsync(administrator, state, token);
         var reply = await reader.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(reply,
             state.Identity.Secret, McpEventStreamTokens.PrivateMarker);
         await EventSelectiveAppendAuthorityClusterCurrent.ObserveAsync(administrator, state, token);

@@ -74,7 +74,7 @@ internal static class SampleChunkAtomicRollbackFlow
             originals.Add((operation, actual));
             var expected = Result<object>.Fail(Errors.Problem(ErrorCode.RevisionConflict, RevisionConflict));
             await Assert.That(SampleRollupWholeFlow.Outcome(actual)).IsEqualTo(SampleRollupWholeFlow.Outcome(expected));
-            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(ErrorCode.RevisionConflict);
+            await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
 
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>

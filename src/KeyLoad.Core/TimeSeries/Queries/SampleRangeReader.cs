@@ -21,12 +21,12 @@ internal static class SampleRangeReader
         var principal = database.Principal(metadata, principalId, clock.GetUtcNow());
         database.Authorization.Require(principal, request.Partition, request.Set, Capability.SeriesRead);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(metadata, request.Partition, request.Set, ResourceKind.TimeSeries);
-        var retention = SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget);
+        var retention = (SampleRetentionStateReader.Read(view, request.Partition, request.Set, request.SeriesId, budget)).Value;
         var from = retention is not null && retention.BeforeUtcTicks > request.From.UtcTicks
             ? SampleRetentionStateReader.Before(retention) : request.From;
         var prefix = KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId);
         var after = KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId, from);
-        var until = SampleUpperBound(request);
+        var until = (SampleUpperBound(request)).Value;
         var records = new List<SampleRecord>();
         _ = budget.VisitAll(view, prefix, (key, value) =>
         {
@@ -44,8 +44,8 @@ internal static class SampleRangeReader
         return result;
     }
 
-    private static byte[]? SampleUpperBound(ReadSamplesRequest request)
-        => request.Until.UtcTicks == DateTimeOffset.MaxValue.UtcTicks ? null
+    private static global::ManagedCode.Communication.Result<byte[]?> SampleUpperBound(ReadSamplesRequest request)
+        => (request.Until.UtcTicks == DateTimeOffset.MaxValue.UtcTicks ? null
             : KeySpace.Partition(SampleReadKeySpace, request.Partition, request.Set, request.SeriesId,
-                new DateTimeOffset(request.Until.UtcTicks + NextTimestampTick, TimeSpan.Zero));
+                new DateTimeOffset(request.Until.UtcTicks + NextTimestampTick, TimeSpan.Zero))) is { } outcomeValue1 ? global::ManagedCode.Communication.Result<byte[]?>.Succeed(outcomeValue1) : global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(SampleUpperBound));
 }

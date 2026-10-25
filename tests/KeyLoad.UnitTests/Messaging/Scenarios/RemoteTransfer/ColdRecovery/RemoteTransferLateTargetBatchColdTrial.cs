@@ -26,7 +26,7 @@ internal static class RemoteTransferLateTargetBatchColdTrial
             [new AcceptQueueTransfer(fixture.DestinationQueue, pending.IntentToken),
              new EnqueueMessage(fixture.DestinationQueue.Queue, Occupied, DerivedPayload)]);
         var failure = fixture.Apply(OperationKind.Batch, failedRequest);
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failure.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         var state = new RemoteTransferLateTargetBatchState(transfer, pending, failedRequest, failure,
             RemoteTransferAttemptCold.Outcome(fixture, failedRequest.CommandId, fixture.DestinationPartition), counters);
         await RemoteTransferLateTargetBatchColdAssertions.DeniedAsync(fixture, state);

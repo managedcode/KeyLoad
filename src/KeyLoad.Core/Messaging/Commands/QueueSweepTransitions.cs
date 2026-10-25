@@ -70,7 +70,7 @@ public static class QueueSweepTransitions
         var id = OrleansSerialization.Deserialize<string>(item.Value.Span);
         var metadataKey = MessagingExecutionMessaging.QueueKey(MessageMetadataSpace, lane, id);
         var metadata = tx.GetRecord<MessageMetadata>(metadataKey) ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedMetadata);
-        var body = StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(MessageBodySpace, lane, id)) ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
+        var body = (StoredMessageBody.Read(tx, MessagingExecutionMessaging.QueueKey(MessageBodySpace, lane, id))).Value ?? throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);
         if (body.Body.Id != id)
         {
             throw Errors.Fail(ErrorCode.Corruption, MissingIndexedBody);

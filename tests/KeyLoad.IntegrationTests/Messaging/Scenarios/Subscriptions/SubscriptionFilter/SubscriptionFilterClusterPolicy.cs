@@ -30,8 +30,8 @@ internal static class SubscriptionFilterClusterPolicy
         }, token);
         var historical = await manager.CommitAsync(seed.Publish, token);
         await Assert.That(historical.Problem!.ErrorCode).IsEqualTo(ErrorCode.PermissionDenied.ToString());
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            seed.Publish, token), ErrorCode.PermissionDenied, true);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            seed.Publish, token), ErrorCode.PermissionDenied, true)).Value;
         await SubscriptionFilterClusterAssertions.HistoryAsync(manager, mcp, seed.Group.Source, original.History, token);
     }
 }

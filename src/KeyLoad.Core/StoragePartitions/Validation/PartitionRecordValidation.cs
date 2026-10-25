@@ -27,7 +27,7 @@ internal static class PartitionRecordValidation
         }
 
         var prefix = KeySpace.Partition(family, partition);
-        ownedAfterKey = ValidateContinuation(afterKey, prefix, maxExaminedBytes);
+        ownedAfterKey = (ValidateContinuation(afterKey, prefix, maxExaminedBytes)).Value;
         return prefix;
     }
 
@@ -76,12 +76,12 @@ internal static class PartitionRecordValidation
         return false;
     }
 
-    private static byte[]? ValidateContinuation(ReadOnlyMemory<byte> afterKey, byte[] prefix,
+    private static global::ManagedCode.Communication.Result<byte[]?> ValidateContinuation(ReadOnlyMemory<byte> afterKey, byte[] prefix,
         long maxExaminedBytes)
     {
         if (afterKey.IsEmpty)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<byte[]?>.FailNotFound(nameof(ValidateContinuation));
         }
 
         var continuation = afterKey.Span;
@@ -96,7 +96,7 @@ internal static class PartitionRecordValidation
         }
 
         ValidateCanonicalKey(continuation);
-        return continuation.ToArray();
+        return global::ManagedCode.Communication.Result<byte[]?>.Succeed(((byte[]?)(continuation.ToArray())));
     }
 
     private static void ValidateCanonicalKey(ReadOnlySpan<byte> continuation)

@@ -8,7 +8,7 @@ internal static class TestDatabaseConcurrentCloseAssertions
 {
     internal static async Task ReceiptAsync(Result<object> actual, CommitReceipt expected)
     {
-        await Assert.That(Errors.Code(actual.Problem)).IsNull();
+        await Assert.That(Errors.Code(actual.Problem).Value).IsNull();
         await Assert.That(actual.Problem?.Detail).IsNull();
 
         await Assert.That(actual.Value?.GetType()).IsEqualTo(typeof(CommitReceipt));

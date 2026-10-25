@@ -53,7 +53,7 @@ internal static class ComparisonSessionCleanup
             }
         }
         var failures = await JoinOriginalsAsync(closeTasks).ConfigureAwait(false);
-        _ = await RuntimeComparisonFailure.ObserveAsync(joined).ConfigureAwait(false);
+        _ = (await RuntimeComparisonFailure.ObserveAsync(joined).ConfigureAwait(false)).Value;
         return new(thresholdExpired, failures);
     }
 
@@ -75,7 +75,7 @@ internal static class ComparisonSessionCleanup
         var failures = ImmutableArray.CreateBuilder<Exception>();
         foreach (var task in tasks)
         {
-            if (await RuntimeComparisonFailure.ObserveAsync(task).ConfigureAwait(false) is { } failure)
+            if ((await RuntimeComparisonFailure.ObserveAsync(task).ConfigureAwait(false)).Value is { } failure)
             {
                 failures.Add(failure);
             }
@@ -87,7 +87,7 @@ internal static class ComparisonSessionCleanup
     {
         if (failures.Any(failure => CqrsRuntimeFailures.FindFatal(failure) is not null))
         {
-            var combined = RuntimeComparisonFailure.Combine(null, failures)!;
+            var combined = (RuntimeComparisonFailure.Combine(null, failures)).Value!;
             ExceptionDispatchInfo.Capture(combined).Throw();
         }
     }

@@ -53,8 +53,8 @@ internal static class FunctionalGateDropAssertions
         await Assert.That(sdk.Problem?.ErrorCode).IsEqualTo(ErrorCode.OwnershipLost.ToString());
         await Assert.That(sdk.Problem?.StatusCode).IsEqualTo(Errors.Status(ErrorCode.OwnershipLost));
         await unchanged();
-        await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(McpCallerTools.DocumentsGet,
-            new GetDocumentRequest(original), token), ErrorCode.OwnershipLost, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await context.Reader.Mcp.CallAsync(McpCallerTools.DocumentsGet,
+            new GetDocumentRequest(original), token), ErrorCode.OwnershipLost, dispatched: true)).Value;
         await unchanged();
     }
 }

@@ -98,7 +98,7 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
 
     internal static void RequireSuccess(Result<object> result)
     {
-        if (Errors.Code(result.Problem) is not null)
+        if (Errors.Code(result.Problem).Value is not null)
         {
             throw new InvalidOperationException("A canonical backup fixture operation was rejected.");
         }

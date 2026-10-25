@@ -94,7 +94,7 @@ internal static class SubscriptionGroupProgressAuthorityAssertions
     {
         var expected = new CommitReceipt(request.CommandId, expectedToken, [new("Ack", request.Subscription.Source.Resource,
                 eventPosition.ToString(System.Globalization.CultureInfo.InvariantCulture), 1L)], DurabilityProfile.ProcessDurable, 1);
-        await Assert.That(Errors.Code(actual.Problem)).IsNull();
+        await Assert.That(Errors.Code(actual.Problem).Value).IsNull();
         await Assert.That(OrleansSerialization.Serialize(actual.Get<CommitReceipt>()).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
     }

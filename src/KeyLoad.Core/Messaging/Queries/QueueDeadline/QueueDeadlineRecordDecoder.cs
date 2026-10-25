@@ -57,7 +57,7 @@ internal static class QueueDeadlineRecordDecoder
                 throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
             }
         }
-        return Select(lane, metadata, space, page.WakeAt);
+        return (Select(lane, metadata, space, page.WakeAt)).Value;
     }
 
     private static MessageMetadata ReadMetadata(IKeyValueView view, QueueLaneRef lane,
@@ -93,20 +93,20 @@ internal static class QueueDeadlineRecordDecoder
         return metadata ?? throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
     }
 
-    private static QueueDeadlineHint? Select(QueueLaneRef lane, MessageMetadata metadata, string space,
+    private static global::ManagedCode.Communication.Result<QueueDeadlineHint?> Select(QueueLaneRef lane, MessageMetadata metadata, string space,
         DateTimeOffset now)
     {
         if (metadata.State is not (MessageState.Scheduled or MessageState.Ready or MessageState.Leased))
         {
-            return null;
+            return global::ManagedCode.Communication.Result<QueueDeadlineHint?>.FailNotFound(nameof(Select));
         }
         if (space == Metadata)
         {
             if (metadata.ExpiresAt is { } expires && expires <= now)
             {
-                return Create(lane, metadata, QueueDeadlineKind.ExpireMessage, expires);
+                return global::ManagedCode.Communication.Result<QueueDeadlineHint?>.Succeed(((QueueDeadlineHint?)(Create(lane, metadata, QueueDeadlineKind.ExpireMessage, expires))));
             }
-            return null;
+            return global::ManagedCode.Communication.Result<QueueDeadlineHint?>.FailNotFound(nameof(Select));
         }
         var leased = space == Leased;
         var state = leased ? MessageState.Leased : MessageState.Scheduled;
@@ -115,8 +115,8 @@ internal static class QueueDeadlineRecordDecoder
         {
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
         }
-        return due <= now ? Create(lane, metadata,
-            leased ? QueueDeadlineKind.ExpireLease : QueueDeadlineKind.PromoteScheduled, due.Value) : null;
+        return (due <= now ? Create(lane, metadata,
+            leased ? QueueDeadlineKind.ExpireLease : QueueDeadlineKind.PromoteScheduled, due.Value) : null) is { } outcomeValue4 ? global::ManagedCode.Communication.Result<QueueDeadlineHint?>.Succeed(outcomeValue4) : global::ManagedCode.Communication.Result<QueueDeadlineHint?>.FailNotFound(nameof(Select));
     }
 
     private static QueueDeadlineHint Create(QueueLaneRef lane, MessageMetadata metadata,

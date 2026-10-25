@@ -5,7 +5,7 @@ namespace KeyLoad.Core.Search;
 
 internal sealed class AnnLifetimeResourceResolver(AnnReadLifetimeMetadata metadata, AnnSeedWork work, PrincipalRecord targetPrincipal)
 {
-    internal ResourceDefinition? Resolve(IKeyValueView raw, PartitionRef partition,
+    internal global::ManagedCode.Communication.Result<ResourceDefinition?> Resolve(IKeyValueView raw, PartitionRef partition,
         ResourceDefinition target, ReadExecutionBudget budget)
     {
         work.Check();
@@ -18,15 +18,15 @@ internal sealed class AnnLifetimeResourceResolver(AnnReadLifetimeMetadata metada
             {
                 if (definition.Kind != target.Kind)
                 {
-                    return null;
+                    return global::ManagedCode.Communication.Result<ResourceDefinition?>.FailNotFound(nameof(Resolve));
                 }
                 var lifetime = metadata.Coverage.Lifetimes.Single(value => value.ResourceName == definition.Name);
                 budget.CaptureAuthenticatedResourceLifetimes(view,
                     new ResourceLifetimeCoverage(partition, [lifetime]), [definition]);
-                return definition;
+                return global::ManagedCode.Communication.Result<ResourceDefinition?>.Succeed(((ResourceDefinition?)(definition)));
             }
         }
-        return null;
+        return global::ManagedCode.Communication.Result<ResourceDefinition?>.FailNotFound(nameof(Resolve));
     }
 
     internal bool CanSeeInput(DatabaseEngine database, ResourceDefinition target, ResourceDefinition source, string field)

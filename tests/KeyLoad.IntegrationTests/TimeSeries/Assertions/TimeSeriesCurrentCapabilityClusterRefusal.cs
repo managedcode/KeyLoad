@@ -18,14 +18,14 @@ internal static class TimeSeriesCurrentCapabilityClusterRefusal
         await UnchangedAsync(administrator, state, before, token);
         await DeniedAsync(await reader.Sdk.AggregateSamplesAsync(state.Aggregate(), token));
         await UnchangedAsync(administrator, state, before, token);
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SeriesRead,
-            state.Range(), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SeriesRead,
+            state.Range(), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await UnchangedAsync(administrator, state, before, token);
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SeriesLatest,
-            state.Scenario.Latest(), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SeriesLatest,
+            state.Scenario.Latest(), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await UnchangedAsync(administrator, state, before, token);
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SeriesAggregate,
-            state.Aggregate(), token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.SeriesAggregate,
+            state.Aggregate(), token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await UnchangedAsync(administrator, state, before, token);
         await CanonicalAsync(administrator, state, token);
         await SqlClusterProtocol.EqualAsync(before, await McpCallerAssertions.SdkSuccessAsync(
@@ -43,8 +43,8 @@ internal static class TimeSeriesCurrentCapabilityClusterRefusal
         await CurrentAsync(reader, administrator, state, before, token);
         await DeniedAsync(await reader.Sdk.CommitAsync(state.ReaderCommand, token));
         await CurrentAsync(reader, administrator, state, before, token);
-        await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
-            state.ReaderCommand, token), ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await reader.Mcp.CallAsync(McpCallerTools.DocumentsCommit,
+            state.ReaderCommand, token), ErrorCode.PermissionDenied, dispatched: true)).Value;
         await CurrentAsync(reader, administrator, state, before, token);
     }
 

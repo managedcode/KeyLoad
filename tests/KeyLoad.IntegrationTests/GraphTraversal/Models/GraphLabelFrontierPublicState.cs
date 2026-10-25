@@ -100,16 +100,16 @@ internal sealed class GraphLabelFrontierPublicState(GraphIncomingClusterSeed see
         return depth == 2 ? 4 : 5;
     }
     internal TraverseRequest Request(int depth, int profile, int vertices, int edges)
-        => new(Seed.TargetPartition, Seed.Graph, Start, depth, vertices, edges, Labels(profile));
-    private static ImmutableArray<string>? Labels(int profile) => profile switch
+        => new(Seed.TargetPartition, Seed.Graph, Start, depth, vertices, edges, (Labels(profile)).Value);
+    private static global::ManagedCode.Communication.Result<ImmutableArray<string>?> Labels(int profile) => profile switch
     {
-        0 => null,
-        1 => [],
-        2 => ["keep"],
-        3 => ["keep", "keep"],
-        4 => ["blocked"],
-        5 => ["unknown"],
-        6 => ["KEEP"],
+        0 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.FailNotFound(nameof(Labels)),
+        1 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)([]))),
+        2 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["keep"]))),
+        3 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["keep", "keep"]))),
+        4 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["blocked"]))),
+        5 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["unknown"]))),
+        6 => global::ManagedCode.Communication.Result<ImmutableArray<string>?>.Succeed(((ImmutableArray<string>?)(["KEEP"]))),
         _ => throw new ArgumentOutOfRangeException(nameof(profile))
     };
     private EntityRef Vertex(string id) => new(Seed.TargetPartition, GraphIncomingClusterScenario.Collection, id);

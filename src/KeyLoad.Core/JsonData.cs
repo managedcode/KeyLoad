@@ -81,13 +81,13 @@ public static class JsonData
     /// <param name="pathText">JSON pointer to a scalar, or empty text for the root.</param>
     /// <returns>An owned scalar, null, or the distinct missing-value marker.</returns>
     public static object? Scalar(JsonElement document, string pathText)
-        => Scalar(document, PathSegments(pathText));
+        => (Scalar(document, PathSegments(pathText))).Value.Value;
 
     /// <summary>Reads a scalar with path segments prepared once by the operation.</summary>
     /// <param name="document">JSON root inside its owning document lifetime.</param>
     /// <param name="pathSegments">Decoded path segments produced by <see cref="PathSegments"/>.</param>
-    /// <returns>An owned scalar, null, or the distinct missing-value marker.</returns>
-    public static object? Scalar(JsonElement document, ReadOnlySpan<string> pathSegments)
+    /// <returns>A successful scalar payload preserving JSON null and the distinct missing-value marker.</returns>
+    public static global::ManagedCode.Communication.Result<JsonScalarValue> Scalar(JsonElement document, ReadOnlySpan<string> pathSegments)
     {
         var current = document;
         foreach (var part in pathSegments)
@@ -103,18 +103,19 @@ public static class JsonData
             }
             else
             {
-                return MissingValue.Instance;
+                return global::ManagedCode.Communication.Result<JsonScalarValue>.Succeed(new JsonScalarValue(MissingValue.Instance));
             }
         }
-        return current.ValueKind switch
+        var value = current.ValueKind switch
         {
-            JsonValueKind.Null => null,
+            JsonValueKind.Null => (object?)null,
             JsonValueKind.String => current.GetString(),
             JsonValueKind.True => true,
             JsonValueKind.False => false,
             JsonValueKind.Number when current.TryGetDecimal(out var number) => number,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedScalarFieldDetail)
         };
+        return global::ManagedCode.Communication.Result<JsonScalarValue>.Succeed(new JsonScalarValue(value));
     }
 
     /// <summary>Decodes a bounded JSON pointer into owned reusable path segments.</summary>

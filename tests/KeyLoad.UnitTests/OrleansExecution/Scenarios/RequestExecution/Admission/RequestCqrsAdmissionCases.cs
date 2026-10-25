@@ -18,11 +18,11 @@ internal static class RequestCqrsAdmissionCases
         var successful = new CqrsStreamAdmission(serializer, requestId, fixture.RoutingOptions);
         successful.Admit(RequestCqrsProtocolCases.StartedChunk(requestId), CancellationToken.None);
         successful.Admit(RequestCqrsProtocolCases.CompletedChunk(new byte[SmallPayloadBytes]), CancellationToken.None);
-        await Assert.That(successful.CompletionFailure(CancellationToken.None)).IsNull();
+        await Assert.That((successful.CompletionFailure(CancellationToken.None)).Value).IsNull();
 
         var earlyFailure = new CqrsStreamAdmission(serializer, requestId, fixture.RoutingOptions);
         earlyFailure.Admit(FailedChunk(ErrorCode.PermissionDenied, sequence: 1), CancellationToken.None);
-        await Assert.That(earlyFailure.CompletionFailure(CancellationToken.None)).IsNull();
+        await Assert.That((earlyFailure.CompletionFailure(CancellationToken.None)).Value).IsNull();
         var trailing = Assert.ThrowsExactly<KeyLoadException>(() =>
             earlyFailure.Admit(RequestCqrsProtocolCases.StartedChunk(requestId), CancellationToken.None));
         await Assert.That(trailing.Code).IsEqualTo(ErrorCode.OwnershipLost);
@@ -57,12 +57,12 @@ internal static class RequestCqrsAdmissionCases
         var requestId = Guid.NewGuid();
         var admission = new CqrsStreamAdmission(ChunkSerializer(fixture), requestId, fixture.RoutingOptions);
         admission.Admit(RequestCqrsProtocolCases.StartedChunk(requestId), CancellationToken.None);
-        var missingTerminal = admission.CompletionFailure(CancellationToken.None);
+        var missingTerminal = (admission.CompletionFailure(CancellationToken.None)).Value;
         await Assert.That(missingTerminal).IsTypeOf<KeyLoadException>();
         await Assert.That(((KeyLoadException)missingTerminal!).Code).IsEqualTo(ErrorCode.OwnershipLost);
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        var cancellation = admission.CompletionFailure(cancelled.Token);
+        var cancellation = (admission.CompletionFailure(cancelled.Token)).Value;
         await Assert.That(cancellation).IsTypeOf<OperationCanceledException>();
         await Assert.That(((OperationCanceledException)cancellation!).CancellationToken).IsEqualTo(cancelled.Token);
     }

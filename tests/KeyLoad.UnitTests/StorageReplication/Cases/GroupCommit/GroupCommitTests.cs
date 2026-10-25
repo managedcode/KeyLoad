@@ -147,7 +147,7 @@ internal sealed class GroupCommitTests
         await Assert.That(batch.Applied.Length).IsEqualTo(operations.Length);
         foreach (var applied in batch.Applied)
         {
-            await Assert.That(Errors.Code(applied.Result.Problem)).IsNull();
+            await Assert.That(Errors.Code(applied.Result.Problem).Value).IsNull();
         }
         await Assert.That(GroupCommitCommands.Read(fixture, Second)!.Revision).IsEqualTo(1L);
     }

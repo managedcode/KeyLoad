@@ -49,11 +49,11 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
         await using var session = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node1,
             fixture.AdminKey, deadline.Token);
         var direct = await session.Client.CallToolAsync(McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token);
-        await McpCallerAssertions.ErrorAsync(direct, ErrorCode.UnsupportedCapability, dispatched: false);
+        _ = (await McpCallerAssertions.ErrorAsync(direct, ErrorCode.UnsupportedCapability, dispatched: false)).Value;
         foreach (var target in new[] { McpCallerProtocol.GatewayInvoke, "missing-canonical-operation" })
         {
             var recursive = await session.Client.InvokeKeyLoadToolAsync(target, cancellationToken: deadline.Token);
-            await McpCallerAssertions.ErrorAsync(recursive, ErrorCode.UnsupportedCapability, dispatched: false);
+            _ = (await McpCallerAssertions.ErrorAsync(recursive, ErrorCode.UnsupportedCapability, dispatched: false)).Value;
         }
     }
 

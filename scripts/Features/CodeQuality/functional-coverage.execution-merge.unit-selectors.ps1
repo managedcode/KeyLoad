@@ -31,7 +31,7 @@ function Get-FcExactUnitSelector([object] $Group, [object] $Inventory, [string[]
         if ($case.className -cnotin $Group.classNames) { continue }
         $denied = $false
         foreach ($method in $excluded) {
-            if ($case.methodName.StartsWith($method, [StringComparison]::Ordinal)) { $denied = $true; break }
+            if ($case.methodName.StartsWith($method, [StringComparison]::OrdinalIgnoreCase)) { $denied = $true; break }
         }
         if (-not $denied) {
             if ($case.classification -cne 'functional') { throw $script:FcContributors.Invalid }
@@ -47,6 +47,7 @@ function Get-FcExactUnitSelector([object] $Group, [object] $Inventory, [string[]
 
 
 function Get-FcConfinedClassPrefixes([string[]] $Leaves, [object] $Inventory) {
+    # TUnit tree filters ignore name casing; prefixes must use the same comparison.
     $universe = [Collections.Generic.Dictionary[string, string]]::new([StringComparer]::Ordinal)
     foreach ($case in @($Inventory.functionalCases) + @($Inventory.requiredNonContributorCases)) {
         $name = [string] $case.className
@@ -58,7 +59,7 @@ function Get-FcConfinedClassPrefixes([string[]] $Leaves, [object] $Inventory) {
     }
     $allowed = [Collections.Generic.HashSet[string]]::new([string[]] $Leaves, [StringComparer]::Ordinal)
     if ($allowed.Count -ne $Leaves.Count) { throw $script:FcContributors.Invalid }
-    $patterns = [Collections.Generic.HashSet[string]]::new([StringComparer]::Ordinal)
+    $patterns = [Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
     foreach ($leaf in $Leaves) {
         if (-not $universe.ContainsKey($leaf)) { throw $script:FcContributors.Invalid }
         $found = $false
@@ -66,7 +67,7 @@ function Get-FcConfinedClassPrefixes([string[]] $Leaves, [object] $Inventory) {
             $prefix = $leaf.Substring(0, $length)
             $confined = $true
             foreach ($other in $universe.Keys) {
-                if ($other.StartsWith($prefix, [StringComparison]::Ordinal) -and -not $allowed.Contains($other)) {
+                if ($other.StartsWith($prefix, [StringComparison]::OrdinalIgnoreCase) -and -not $allowed.Contains($other)) {
                     $confined = $false; break
                 }
             }
@@ -79,7 +80,7 @@ function Get-FcConfinedClassPrefixes([string[]] $Leaves, [object] $Inventory) {
         $redundant = $false
         foreach ($other in $patterns) {
             if ($pattern -cne $other -and $pattern.StartsWith($other.Substring(0, $other.Length - 1),
-                    [StringComparison]::Ordinal)) { $redundant = $true; break }
+                    [StringComparison]::OrdinalIgnoreCase)) { $redundant = $true; break }
         }
         if (-not $redundant) { $minimal.Add($pattern) }
     }

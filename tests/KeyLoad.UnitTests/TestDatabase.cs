@@ -68,7 +68,7 @@ internal sealed class TestDatabase : IDisposable
     {
         var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal,
             time ?? default, JsonSerializer.Serialize(payload, JsonDefaults.Options));
-        var previousCanonical = TestDatabaseOriginalResourceCommands.Begin(Database, operation);
+        var previousCanonical = (TestDatabaseOriginalResourceCommands.Begin(Database, operation)).Value;
         var result = time.HasValue ? Database.Apply(operation) : Database.ApplyEmbedded(operation, cancellationToken: default);
         originalResources.Observe(Database, operation, result, previousCanonical);
         return result;
@@ -77,7 +77,7 @@ internal sealed class TestDatabase : IDisposable
     internal Result<object> SubmitIssued(Command<DatabaseCommand> operation)
     {
         var original = Database.OwnCommand(operation);
-        var previousCanonical = TestDatabaseOriginalResourceCommands.Begin(Database, original);
+        var previousCanonical = (TestDatabaseOriginalResourceCommands.Begin(Database, original)).Value;
         var result = Database.ApplyEmbedded(original, CancellationToken.None);
         originalResources.Observe(Database, original, result, previousCanonical);
         return result;
@@ -86,7 +86,7 @@ internal sealed class TestDatabase : IDisposable
     internal Result<object> SubmitAtOriginalTime(DatabaseEngine owner, Command<DatabaseCommand> operation)
     {
         var original = owner.OwnCommand(operation);
-        var previousCanonical = TestDatabaseOriginalResourceCommands.Begin(owner, original);
+        var previousCanonical = (TestDatabaseOriginalResourceCommands.Begin(owner, original)).Value;
         var result = owner.Apply(original);
         originalResources.Observe(owner, original, result, previousCanonical);
         return result;
@@ -95,7 +95,7 @@ internal sealed class TestDatabase : IDisposable
     internal Result<object> SubmitIssuedEmbedded(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         var verified = Database.OwnCommand(operation);
-        var previousCanonical = TestDatabaseOriginalResourceCommands.Begin(Database, verified);
+        var previousCanonical = (TestDatabaseOriginalResourceCommands.Begin(Database, verified)).Value;
         var result = Database.ApplyEmbedded(verified, cancellationToken);
         originalResources.Observe(Database, verified, result, previousCanonical);
         return result;

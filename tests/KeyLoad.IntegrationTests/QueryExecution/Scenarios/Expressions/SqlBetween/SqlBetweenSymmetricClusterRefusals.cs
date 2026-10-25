@@ -13,7 +13,7 @@ internal static class SqlBetweenSymmetricClusterRefusals
             await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
             await global::TUnit.Assertions.Assert.That(result.Value.ValueKind).IsEqualTo(global::System.Text.Json.JsonValueKind.Undefined);
             await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
-            await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true);
+            _ = (await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), code, dispatched: true)).Value;
             if (ast)
             {
                 var operation = SqlBetweenSymmetricClusterCases.Ast(PostgresClusterState.Partition,
@@ -22,7 +22,7 @@ internal static class SqlBetweenSymmetricClusterRefusals
                 await global::TUnit.Assertions.Assert.That(typed.IsSuccess).IsFalse();
                 await global::TUnit.Assertions.Assert.That(typed.Value).IsNull();
                 await global::TUnit.Assertions.Assert.That(typed.Problem?.ErrorCode).IsEqualTo(code.ToString());
-                await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryAst, operation, token), code, dispatched: true);
+                _ = (await global::KeyLoad.IntegrationTests.ClientApi.McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(global::KeyLoad.IntegrationTests.ClientApi.McpCallerTools.QueryAst, operation, token), code, dispatched: true)).Value;
             }
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>

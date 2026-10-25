@@ -81,9 +81,9 @@ internal static class SafeProjectorOperationReplay
 
     private static async Task ResultAsync(Result<object> actual, Result<object> expected)
     {
-        if (Errors.Code(expected.Problem) is not null)
+        if (Errors.Code(expected.Problem).Value is not null)
         {
-            await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(Errors.Code(expected.Problem));
+            await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(Errors.Code(expected.Problem).Value);
             await Assert.That(StringComparer.Ordinal.Equals(actual.Problem?.Detail, expected.Problem?.Detail)).IsTrue();
             await Assert.That(OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
             await Assert.That(actual.Value is null).IsTrue();
@@ -108,7 +108,7 @@ internal static class SafeProjectorOperationReplay
     private static async Task SuccessAsync<T>(Result<object> actual, Result<object> expected) where T : class
     {
         await Assert.That(OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected))).IsTrue();
-        await Assert.That(Errors.Code(actual.Problem) == Errors.Code(expected.Problem)).IsTrue();
+        await Assert.That(Errors.Code(actual.Problem).Value == Errors.Code(expected.Problem).Value).IsTrue();
         await Assert.That(StringComparer.Ordinal.Equals(actual.Problem?.Detail, expected.Problem?.Detail)).IsTrue();
         await Assert.That(actual.Value?.GetType() == typeof(T)).IsTrue();
         await Assert.That(expected.Value?.GetType() == typeof(T)).IsTrue();

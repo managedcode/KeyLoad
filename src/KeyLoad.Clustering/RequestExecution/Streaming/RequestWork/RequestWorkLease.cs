@@ -71,7 +71,7 @@ internal sealed class RequestWorkLease : IDisposable, IAsyncDisposable, IRequest
         owner.Bind(this, actualLifetimes);
     }
     internal void AdmitPublication() => owner.AdmitPublication(this);
-    internal Task<Exception?> CancelAsync() => RequestWorkSettlement.CancelAsync(cancellation);
+    internal async Task<Exception?> CancelAsync() => (await RequestWorkSettlement.CancelAsync(cancellation)).Value;
 
     internal Task BeginCompletion() => publication.BeginCompletion();
     internal void RequirePublicationOpen() => publication.RequirePublicationOpen();
@@ -91,8 +91,8 @@ internal sealed class RequestWorkLease : IDisposable, IAsyncDisposable, IRequest
     {
         var failures = ImmutableArray.CreateBuilder<Exception>();
         Add(cleanupFailure, failures);
-        Add(DisposeCancellation(), failures);
-        Add(ReleaseAdmission(), failures);
+        Add((DisposeCancellation()).Value, failures);
+        Add((ReleaseAdmission()).Value, failures);
         var outcome = new RequestWorkOriginalSettlement(originalFailure, failures.ToImmutable());
         Volatile.Write(ref resultRetention, null);
         settlement.TrySetResult(outcome);
@@ -107,37 +107,37 @@ internal sealed class RequestWorkLease : IDisposable, IAsyncDisposable, IRequest
         }
     }
 
-    private Exception? DisposeCancellation()
+    private global::ManagedCode.Communication.Result<Exception?> DisposeCancellation()
     {
         try
         {
             cancellation.Dispose();
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(DisposeCancellation));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
     }
 
-    private Exception? ReleaseAdmission()
+    private global::ManagedCode.Communication.Result<Exception?> ReleaseAdmission()
     {
         try
         {
             owner.Release(this);
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(ReleaseAdmission));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
         catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return error;
+            return global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(error)));
         }
     }
 

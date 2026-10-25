@@ -42,7 +42,7 @@ internal static class SampleSequenceIntegrityRecovery
     {
         await Assert.That(OutcomeStoreOracle.ReadStored(fixture.Store, original)).IsNull();
         var outcome = fixture.Database.ResolveOutcome(original);
-        await Assert.That(Errors.Code(outcome.Problem)).IsEqualTo(ErrorCode.RecoveryRequired);
+        await Assert.That(Errors.Code(outcome.Problem).Value).IsEqualTo(ErrorCode.RecoveryRequired);
         await Assert.That(outcome.Problem?.Detail).IsEqualTo(MissingOutcome);
         await Assert.That(outcome.Value).IsNull();
         await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(image);

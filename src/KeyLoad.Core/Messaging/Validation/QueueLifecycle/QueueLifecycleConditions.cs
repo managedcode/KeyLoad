@@ -41,7 +41,7 @@ public static class QueueLifecycleConditions
             throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingReference);
         }
 
-        var body = StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, id)) ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
+        var body = (StoredMessageBody.Read(view, MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, id))).Value ?? throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);
         if (body.Body.Id != metadata.Id)
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueLifecycleProtocol.MissingBody);

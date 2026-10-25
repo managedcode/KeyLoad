@@ -13,7 +13,7 @@ internal static class SampleRetentionStateReader
     internal static byte[] Key(PartitionRef partition, string set, string seriesId)
         => KeySpace.Partition(RetentionSpace, partition, set, seriesId);
 
-    internal static SampleRetentionState? Read(IKeyValueView view, PartitionRef partition, string set,
+    internal static global::ManagedCode.Communication.Result<SampleRetentionState?> Read(IKeyValueView view, PartitionRef partition, string set,
         string seriesId, ReadExecutionBudget? budget = null)
     {
         ArgumentNullException.ThrowIfNull(view);
@@ -25,10 +25,10 @@ internal static class SampleRetentionStateReader
         budget?.Check();
         if (!found)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<SampleRetentionState?>.FailNotFound(nameof(Read));
         }
 
-        return state;
+        return ((SampleRetentionState?)(state)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<SampleRetentionState?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<SampleRetentionState?>.FailNotFound(nameof(Read));
     }
 
     internal static SampleRetentionState Decode(ReadOnlySpan<byte> value)

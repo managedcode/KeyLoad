@@ -47,7 +47,7 @@ internal static class PartitionAuthorityRefusals
             return;
         }
         var reply = await operation();
-        await McpCallerAssertions.ErrorAsync(reply, error, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, error, dispatched: true)).Value;
         await SafeAsync(JsonSerializer.Serialize(reply), key);
     }
 

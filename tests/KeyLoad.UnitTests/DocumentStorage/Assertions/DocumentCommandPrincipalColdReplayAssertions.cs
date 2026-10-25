@@ -30,7 +30,7 @@ internal static class DocumentCommandPrincipalColdReplayAssertions
         Retained original, string document, long revision)
     {
         var operation = original.Entry.PreparedCommand;
-        await Assert.That(Errors.Code(original.Result.Problem)).IsNull();
+        await Assert.That(Errors.Code(original.Result.Problem).Value).IsNull();
         var receipt = original.Result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(receipt.Token.Position).IsEqualTo(original.Entry.CanonicalSequence);

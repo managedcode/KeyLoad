@@ -138,7 +138,7 @@ internal static class ResourcePairBindingFlow
         string[] image, (long AppliedPosition, long StorePosition) cut)
     {
         var result = source.Database.ResolveOutcome(original);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(result.Value).IsNull();
         await Assert.That(source.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(
             source.Partition, original.UserId!, original.CommandId)))).IsNull();

@@ -8,7 +8,7 @@ internal static class QueueLeaseExpiryEqualityAssertions
 {
     internal static async Task RefusalAsync(Result<object> result, ErrorCode code)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
 
         await Assert.That(result.Value).IsNull();
     }

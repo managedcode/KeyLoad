@@ -16,7 +16,7 @@ internal static class SqlTypedInsertControls
         await RefusalAsync(() => SqlOperationCompiler.Compile(new(fixture.Partition, SqlTypedInsertLiteral.Repair), UnitMcpOptions.CanonicalPayloadBytes, UnitExecutionOptions.QueryExecution(), token), ErrorCode.Validation);
         await CancelAsync(fixture, token);
         var changed = SqlTypedInsertLiteral.Compile(fixture.Partition, state.Created.Command.CommandId, SqlTypedInsertLiteral.Repair, token);
-        await Assert.That(Errors.Code(SqlTypedInsertLiteral.Apply(fixture.Database, changed, state.Created.At).Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(SqlTypedInsertLiteral.Apply(fixture.Database, changed, state.Created.At).Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await SqlTypedInsertAssertions.UnchangedAsync(fixture.Store, image, cut);
         await SqlTypedInsertHot.ReplayAsync(fixture, state.Created);
         await SqlTypedInsertAssertions.ImageAsync(fixture, fixture.Store, fixture.Database, repaired: false);

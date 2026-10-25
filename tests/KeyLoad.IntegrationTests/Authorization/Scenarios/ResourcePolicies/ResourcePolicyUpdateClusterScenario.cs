@@ -115,12 +115,12 @@ internal sealed record ResourcePolicyUpdateClusterScenario(PartitionRef Partitio
         await Assert.That(sdkChanges.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
         var sdkLive = await administrator.ReadLiveQueryAsync(new(cursors.LiveRequest, cursors.SdkLive), cancellationToken);
         await Assert.That(sdkLive.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.TokenInvalidated));
-        await McpCallerAssertions.ErrorAsync(await administratorMcp.CallAsync(McpCallerTools.ChangesRead,
+        _ = (await McpCallerAssertions.ErrorAsync(await administratorMcp.CallAsync(McpCallerTools.ChangesRead,
             new ReadChangeFeedRequest(scenario.Partition, ResourcePolicyUpdateClusterProtocol.Collection,
-                cursors.McpChange), cancellationToken), ErrorCode.TokenInvalidated, dispatched: true);
-        await McpCallerAssertions.ErrorAsync(await administratorMcp.CallAsync(McpCallerTools.QueryLiveRead,
+                cursors.McpChange), cancellationToken), ErrorCode.TokenInvalidated, dispatched: true)).Value;
+        _ = (await McpCallerAssertions.ErrorAsync(await administratorMcp.CallAsync(McpCallerTools.QueryLiveRead,
             new ReadLiveQueryRequest(cursors.LiveRequest, cursors.McpLive), cancellationToken),
-            ErrorCode.TokenInvalidated, dispatched: true);
+            ErrorCode.TokenInvalidated, dispatched: true)).Value;
     }
 
     internal static async Task VerifySdkRetryCannotRestoreOldPolicyAsync(ClusterFixture fixture,

@@ -18,7 +18,7 @@ internal static class SqlLabelAuthorityRefusals
         await Assert.That(denied.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await SafeAsync(JsonSerializer.Serialize(denied, JsonDefaults.Options), key);
         var direct = await session.CallAsync(SqlGraphSearchClusterScenario.QuerySearchTool, request, token);
-        await McpCallerAssertions.ErrorAsync(direct, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(direct, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await SafeAsync(JsonSerializer.Serialize(direct), key);
         var call = SqlClusterProtocol.Call(scenario.Partition, SqlGraphSearchClusterScenario.QuerySearchTool, request);
         var q1 = await sdk.ExecuteSqlAsync(call, token);
@@ -27,7 +27,7 @@ internal static class SqlLabelAuthorityRefusals
         await Assert.That(q1.Problem?.ErrorCode).IsEqualTo(nameof(ErrorCode.PermissionDenied));
         await SafeAsync(JsonSerializer.Serialize(q1.Problem, JsonDefaults.Options), key);
         var official = await session.CallAsync(SqlOperationProtocol.ToolName, call, token);
-        await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(official, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await SafeAsync(JsonSerializer.Serialize(official), key);
     }
 

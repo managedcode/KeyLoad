@@ -65,7 +65,7 @@ internal static class ScopedSampleIdentityPublicChecks
             await CurrentAsync(administrator, state, token);
             await HealthyAsync(administrator, reader, state, token);
             var reply = await administrator.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Conflict, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Conflict, dispatched: true)).Value;
             await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
                 .GetProperty(DetailProperty).GetString()).IsEqualTo(ScopedSampleIdentityPublicExpected.McpConflictDetail);
             await CurrentAsync(administrator, state, token);

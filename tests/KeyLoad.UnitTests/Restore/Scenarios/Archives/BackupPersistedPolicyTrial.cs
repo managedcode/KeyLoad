@@ -72,7 +72,7 @@ internal static class BackupPersistedPolicyTrial
             new CommandRequest(id, fixture.Partition, [new PutDocument(BackupPersistedPolicySeed.Collection,
                 BackupPersistedPolicySeed.HealthyId, BackupPersistedPolicySeed.HealthyJson)]), id);
         var result = database.ApplyEmbedded(healthy, token);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await BackupPersistedPolicyAssertions.ReceiptAsync(database, fixture.Partition, id, result.Get<CommitReceipt>());
         await HealthyDocumentAsync(fixture, database, token);
         await BackupPersistedPolicyAssertions.ReplayAsync(database, healthy, result, token);
@@ -105,7 +105,7 @@ internal static class BackupPersistedPolicyTrial
         token.ThrowIfCancellationRequested();
         var cut = BackupPersistedPolicyAssertions.Capture(fixture.TargetStore);
         var authority = database.Apply(operation);
-        await Assert.That(Errors.Code(authority.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(authority.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(authority.Value).IsNull();
         var originalToken = result.Get<CommitReceipt>().Token;
         var owner = database.Store.Read(view => database.ReadPlacementWitness(view, fixture.Partition));

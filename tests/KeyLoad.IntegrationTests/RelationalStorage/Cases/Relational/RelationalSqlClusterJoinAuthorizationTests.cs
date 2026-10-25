@@ -126,10 +126,10 @@ internal sealed class RelationalSqlClusterJoinAuthorizationTests(ClusterFixture 
         await Assert.That((await sdk.ExecuteSqlAsync(sql, cancellationToken)).Problem?.ErrorCode)
             .IsEqualTo(nameof(ErrorCode.PermissionDenied));
         var queryError = await mcp.CallAsync(McpCallerTools.QueryExecute, query, cancellationToken);
-        await McpCallerAssertions.ErrorAsync(queryError, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(queryError, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(queryError, secret, PrivateCustomer);
         var sqlError = await mcp.CallAsync(SqlOperationProtocol.ToolName, sql, cancellationToken);
-        await McpCallerAssertions.ErrorAsync(sqlError, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(sqlError, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(sqlError, secret, PrivateCustomer);
     }
 

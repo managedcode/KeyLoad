@@ -50,7 +50,7 @@ internal static class SubscriptionNackGapPublicAssertions
             await SubscriptionFilterClusterAssertions.EqualAsync(repeated.Problem, failure.Problem);
             await Assert.That(repeated.Value).IsNull();
             var reply = await mcp.CallAsync(McpCallerTools.SubscriptionsComplete, request, token);
-            await McpCallerAssertions.ErrorAsync(reply, ErrorCode.StaleLease, true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.StaleLease, true)).Value;
             var envelope = reply.StructuredContent ?? throw new InvalidOperationException("The stale lease envelope is absent.");
             await Assert.That(envelope.GetProperty(McpCallerProtocol.Error).GetProperty(McpCallerProtocol.ProblemDetail).GetString())
                 .IsEqualTo("The database operation could not be completed.");

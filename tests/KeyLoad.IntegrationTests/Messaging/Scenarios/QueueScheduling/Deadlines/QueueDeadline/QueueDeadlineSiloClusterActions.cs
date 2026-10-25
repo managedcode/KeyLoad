@@ -45,7 +45,7 @@ internal static class QueueDeadlineSiloClusterActions
             QueueDeadlineSiloClusterProtocol.StaleDetail), result.Problem);
         await QueueDeadlineSiloClusterCurrent.ObserveAsync(admin, state, token);
         var reply = await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, dispatched: true)).Value;
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(QueueDeadlineSiloClusterProtocol.DetailKey).GetString())
             .IsEqualTo(QueueDeadlineSiloClusterProtocol.SafeStaleDetail);

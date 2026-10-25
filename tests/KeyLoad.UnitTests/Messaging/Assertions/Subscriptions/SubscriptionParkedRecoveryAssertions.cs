@@ -29,7 +29,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         var before = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, operation.CommandId);
         var position = store.Position;
         var failure = db.Apply(operation);
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(failure.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(failure.Problem?.Detail).IsEqualTo("A parked subscription requires an explicit seek or new group before resuming.");
 
         await Assert.That(failure.Value).IsNull();
@@ -54,9 +54,9 @@ internal static class SubscriptionParkedRecoveryAssertions
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         var replay = db.Apply(operation);
-        if (Errors.Code(original.Problem) is not null)
+        if (Errors.Code(original.Problem).Value is not null)
         {
-            await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(Errors.Code(original.Problem));
+            await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(Errors.Code(original.Problem).Value);
             await Assert.That(replay.Problem?.Detail).IsEqualTo(original.Problem?.Detail);
 
             await Assert.That(replay.Value).IsNull();
@@ -98,7 +98,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         var before = SubscriptionProcessingAtomicAssertions.DomainImage(store, group, command.CommandId);
         var position = store.Position;
         var failure = db.Apply(operation);
-        await Assert.That(Errors.Code(failure.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(failure.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(failure.Problem?.Detail).IsEqualTo("The subscription token scope or generation is invalid.");
 
         await Assert.That(failure.Value).IsNull();
@@ -112,7 +112,7 @@ internal static class SubscriptionParkedRecoveryAssertions
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         var result = db.Apply(operation);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The cached receive belongs to an earlier subscription generation.");
 
         await Assert.That(result.Value).IsNull();

@@ -17,7 +17,7 @@ internal static class SubscriptionLeaseVersionExhaustionAssertions
         var position = store.Position;
         var canonical = db.LastApplied;
         var result = QueueWholeFlowStorage.Apply(db, OperationKind.ReceiveSubscription, request, request.RequestId, due);
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
 
         await Assert.That(result.Value).IsNull();

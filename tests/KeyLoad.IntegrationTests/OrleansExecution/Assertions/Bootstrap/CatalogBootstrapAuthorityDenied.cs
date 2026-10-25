@@ -21,7 +21,7 @@ internal static class CatalogBootstrapAuthorityDenied
         if (variant == P.PrincipalDemoted)
         {
             var reply = await original.Mcp.CallAsync(McpCallerTools.DocumentsGet, new GetDocumentRequest(reference), token);
-            await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(reply, code, dispatched: true)).Value;
             await SqlClusterProtocol.EqualAsync(JsonSerializer.SerializeToElement(Errors.Problem(code, P.ScopeDenied), JsonDefaults.Options), reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error));
         }
         else
@@ -82,7 +82,7 @@ internal static class CatalogBootstrapAuthorityDenied
         var args = McpOfficialClient.Arguments(new ConfigurePrincipalRequest(target));
         args.Add(McpCallerProtocol.CommandId, state.ReaderDeniedCommandId);
         var reply = await reader.Mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.PrincipalsConfigure, args, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await SqlClusterProtocol.EqualAsync(JsonSerializer.SerializeToElement(Errors.Problem(ErrorCode.PermissionDenied, P.McpDenied), JsonDefaults.Options), reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error));
     }
 }

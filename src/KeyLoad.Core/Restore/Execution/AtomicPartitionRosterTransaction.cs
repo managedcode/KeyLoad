@@ -46,14 +46,14 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
     public void Put(byte[] key, byte[] value)
     {
-        var candidate = PrepareCandidate(key);
+        var candidate = (PrepareCandidate(key)).Value;
         inner.Put(key, value);
         RetainCandidate(candidate);
     }
 
     public void Delete(byte[] key)
     {
-        var candidate = PrepareCandidate(key);
+        var candidate = (PrepareCandidate(key)).Value;
         inner.Delete(key);
         RetainCandidate(candidate);
     }
@@ -112,18 +112,18 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
         }
     }
 
-    private Candidate? PrepareCandidate(byte[] key)
+    private global::ManagedCode.Communication.Result<Candidate?> PrepareCandidate(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
         if (!AtomicPartitionRosterKeyValidation.TryReadCandidate(key, out var partition)
             || partition is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Candidate?>.FailNotFound(nameof(PrepareCandidate));
         }
 
         var rosterKey = AtomicPartitionRosterKeys.Partition(partition);
         var retained = candidates.ContainsKey(partition);
-        return retained ? null : new(partition, rosterKey);
+        return ((Candidate?)(retained ? null : new(partition, rosterKey))) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<Candidate?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<Candidate?>.FailNotFound(nameof(PrepareCandidate));
     }
 
     private void RetainCandidate(Candidate? candidate)

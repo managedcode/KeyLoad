@@ -81,8 +81,8 @@ internal static class DeclarativeReverseQuotaTrial
             await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, ack, token))).Value);
         await global::KeyLoad.IntegrationTests.Messaging.SagaTimeoutClusterAssertions.AssertSdkErrorAsync(
             await callers.Sdk.ReceiveAsync(originalRequest, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive,
-            originalRequest, token), ErrorCode.StaleLease, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesReceive,
+            originalRequest, token), ErrorCode.StaleLease, dispatched: true)).Value;
         await MessageAsync(callers, lane, new(new(HolderId, MessageState.Acked, 1, 3L, 1L, null, null,
             LeaseVersion: 1L), null, null), token);
     }

@@ -47,7 +47,7 @@ internal sealed class ResourceProtocolFailureTests
         var replay = database.Database.Apply(operation);
 
         await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-        await Assert.That(Errors.Code(replay.Problem)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(Errors.Code(replay.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(database.Database.LastApplied).IsEqualTo(applied + 1);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store).SequenceEqual(image)).IsTrue();

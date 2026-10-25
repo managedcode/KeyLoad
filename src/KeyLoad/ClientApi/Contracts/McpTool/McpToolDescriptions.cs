@@ -125,7 +125,7 @@ internal static class McpToolDescriptions
     };
 
     private static string? ModelDescription(string name)
-        => AnalyticsStoreMcpDescriptions.Find(name);
+        => (AnalyticsStoreMcpDescriptions.Find(name)).Value;
 
     private static string AdminDescription(string name) => name switch
     {

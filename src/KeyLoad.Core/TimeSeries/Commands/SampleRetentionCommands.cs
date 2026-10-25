@@ -14,7 +14,7 @@ public static class SampleRetentionCommands
         const string ExpireKindText = "expireSamples";
         var before = engine.ValidateRetention(tx, principal, partition, request, now);
         var stateKey = SampleRetentionStateReader.Key(partition, request.SeriesSet, request.SeriesId);
-        var previous = SampleRetentionStateReader.Read(tx, partition, request.SeriesSet, request.SeriesId);
+        var previous = (SampleRetentionStateReader.Read(tx, partition, request.SeriesSet, request.SeriesId)).Value;
         if (previous is not null && before.UtcTicks < previous.BeforeUtcTicks)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RetentionCutoffMovedBackwards);

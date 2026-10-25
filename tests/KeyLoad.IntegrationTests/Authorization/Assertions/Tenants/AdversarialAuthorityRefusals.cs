@@ -16,7 +16,7 @@ internal static class AdversarialAuthorityRefusals
         var before = await AdversarialAuthorityAssertions.ImageAsync(root, state, token);
         var request = new GetDocumentRequest(state.Foreign.Scenario.Reference);
         var denied = await session.CallAsync(McpCallerTools.DocumentsGet, request, token);
-        await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(denied, ErrorCode.PermissionDenied, dispatched: true)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(denied, state.Identity.Secret, McpDocumentProtocol.PrivateValue);
         await SdkAsync(await reader.GetAsync(state.Foreign.Scenario.Reference, token), state, ErrorCode.PermissionDenied);
         var forged = McpOfficialClient.Arguments(request);
@@ -24,7 +24,7 @@ internal static class AdversarialAuthorityRefusals
         forged.Add(McpCallerProtocol.Roles, new[] { McpCallerProtocol.AdministratorRole });
         var rejected = await session.Client.InvokeKeyLoadToolAsync(McpCallerTools.DocumentsGet, forged,
             cancellationToken: token);
-        await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.Validation, dispatched: false);
+        _ = (await McpCallerAssertions.ErrorAsync(rejected, ErrorCode.Validation, dispatched: false)).Value;
         await McpCallerAssertions.DoesNotDiscloseAsync(rejected, state.Identity.Secret, McpDocumentProtocol.PrivateValue);
         await SqlClusterProtocol.EqualAsync(before, await AdversarialAuthorityAssertions.ImageAsync(root, state, token));
     }
@@ -42,7 +42,7 @@ internal static class AdversarialAuthorityRefusals
         {
             var denied = await session.CallAsync(McpCallerTools.DocumentsGet,
                 new GetDocumentRequest(state.Owned.Scenario.Reference), token);
-            await McpCallerAssertions.ErrorAsync(denied, expected, dispatched: true);
+            _ = (await McpCallerAssertions.ErrorAsync(denied, expected, dispatched: true)).Value;
             await McpCallerAssertions.DoesNotDiscloseAsync(denied, state.Identity.Secret, McpDocumentProtocol.PrivateValue);
         }
         await SqlClusterProtocol.EqualAsync(before, await AdversarialAuthorityAssertions.ImageAsync(root, state, token));

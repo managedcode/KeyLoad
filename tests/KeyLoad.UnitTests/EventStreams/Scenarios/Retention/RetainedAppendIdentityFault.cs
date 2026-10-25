@@ -21,7 +21,7 @@ internal sealed class RetainedAppendIdentityFault(RetainedAppendIdentityFixture 
         var record = OrleansSerialization.Deserialize<EventRecord>(original);
         var identity = new EventIdentity(kind == "foreign-locator" ? RetainedAppendIdentityFixture.Foreign
             : RetainedAppendIdentityFixture.Target, 1, 1);
-        var damaged = SelectRecord(record);
+        var damaged = (SelectRecord(record)).Value;
         store.Commit((tx, _) =>
         {
             if (damaged is not null)
@@ -32,22 +32,22 @@ internal sealed class RetainedAppendIdentityFault(RetainedAppendIdentityFixture 
             return true;
         });
     }
-    private EventRecord? SelectRecord(EventRecord record) => kind switch
+    private global::ManagedCode.Communication.Result<EventRecord?> SelectRecord(EventRecord record) => kind switch
     {
-        "foreign-locator" or "event-id" => null,
-        "foreign-record" => record with
+        "foreign-locator" or "event-id" => global::ManagedCode.Communication.Result<EventRecord?>.FailNotFound(nameof(SelectRecord)),
+        "foreign-record" => global::ManagedCode.Communication.Result<EventRecord?>.Succeed(((EventRecord?)(record with
         {
             Stream = fixture.Stream with
             {
                 StreamId = RetainedAppendIdentityFixture.Foreign
             },
             Data = RetainedAppendIdentityFixture.Data(RetainedAppendIdentityFixture.Candidate)
-        },
-        "record-revision" => record with
+        }))),
+        "record-revision" => global::ManagedCode.Communication.Result<EventRecord?>.Succeed(((EventRecord?)(record with
         {
             Revision = 99,
             Data = RetainedAppendIdentityFixture.Data(RetainedAppendIdentityFixture.Candidate)
-        },
+        }))),
         _ => throw new InvalidOperationException("The retained identity fault selection is invalid.")
     };
 

@@ -26,11 +26,11 @@ internal static class SubscriptionCurrentEventIdentityTrial
         var duplicateId = Guid.NewGuid();
         var duplicate = database.Apply(database.CreateCommand(OperationKind.Batch, duplicateId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(duplicateId, db.Partition,
                 [new AppendEvents("streams", "a", [new("same", "Created", "{}")], ExpectedStreamRevision.Any)]), JsonDefaults.Options)));
-        await Assert.That(Errors.Code(duplicate.Problem)).IsEqualTo(ErrorCode.DuplicateEventId);
+        await Assert.That(Errors.Code(duplicate.Problem).Value).IsEqualTo(ErrorCode.DuplicateEventId);
         var changedId = Guid.NewGuid();
         var changed = database.Apply(database.CreateCommand(OperationKind.Batch, changedId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(changedId, db.Partition,
                 [new AppendEvents("streams", "a", [new("same", "Created", "{\"different\":true}")], ExpectedStreamRevision.Any)]), JsonDefaults.Options)));
-        await Assert.That(Errors.Code(changed.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(changed.Problem).Value).IsEqualTo(ErrorCode.Conflict);
 
         var retained = database.ReadEventSource("root", new ReadEventSourceRequest(stream));
         await Assert.That(retained.Head.TailPosition).IsEqualTo(1);
@@ -50,7 +50,7 @@ internal static class SubscriptionCurrentEventIdentityTrial
         var topicConflictId = Guid.NewGuid();
         var topicConflict = database.Apply(database.CreateCommand(OperationKind.Batch, topicConflictId, "root", database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(new CommandRequest(topicConflictId, db.Partition,
                 [new PublishTopic("topic", [new("same", "Other", "{}")])]), JsonDefaults.Options)));
-        await Assert.That(Errors.Code(topicConflict.Problem)).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(Errors.Code(topicConflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
         await Assert.That(database.ReadEventSource("root", new ReadEventSourceRequest(Topic(db))).Head.TailPosition).IsEqualTo(1);
         await Assert.That(database.ReadEventSource("root", new ReadEventSourceRequest(
             new EventSourceRef(db.Partition, "streams", EventSourceKind.Stream, "b"))).Events.Length).IsEqualTo(1);

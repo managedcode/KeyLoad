@@ -23,7 +23,7 @@ internal static class QueueProducerClusterRefusals
             };
             await QueueProducerClusterAssertions.DeniedAsync(await publisher.CommitAsync(changed, token), ErrorCode.Conflict);
             await QueueProducerClusterLiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, changed, token), ErrorCode.Conflict, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, changed, token), ErrorCode.Conflict, true)).Value;
             await QueueProducerClusterLiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await QueueProducerClusterAssertions.EqualAsync(await QueueProducerClusterAssertions.ImageAsync(publisher, seed,
                 QueueProducerClusterProtocol.Original, token), original.Image);
@@ -31,7 +31,7 @@ internal static class QueueProducerClusterRefusals
             var duplicate = QueueProducerClusterSetup.Fresh(seed, QueueProducerClusterProtocol.Refused, QueueProducerClusterProtocol.Original);
             await QueueProducerClusterAssertions.DeniedAsync(await publisher.CommitAsync(duplicate, token), ErrorCode.Conflict);
             await QueueProducerClusterLiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, duplicate, token), ErrorCode.Conflict, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, duplicate, token), ErrorCode.Conflict, true)).Value;
             await QueueProducerClusterLiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await QueueProducerClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await publisher.GetAsync(
                 QueueProducerClusterAssertions.Document(seed, QueueProducerClusterProtocol.Refused), token)), new DocumentReadResult(null));
@@ -40,7 +40,7 @@ internal static class QueueProducerClusterRefusals
             await AtomicProducerClusterEventAssertions.AbsentAsync(publisher, seed, QueueProducerClusterProtocol.Refused, token);
             await AtomicProducerClusterRoutes.RefusedAsync(publisher, mcp, duplicate, ErrorCode.Conflict, token);
             var quota = QueueProducerClusterSetup.Fresh(seed, QueueProducerClusterProtocol.Refused, QueueProducerClusterProtocol.Refused);
-            await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, quota, token), ErrorCode.ResourceExhausted, true);
+            _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.DocumentsCommit, quota, token), ErrorCode.ResourceExhausted, true)).Value;
             await QueueProducerClusterLiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);
             await QueueProducerClusterAssertions.DeniedAsync(await publisher.CommitAsync(quota, token), ErrorCode.ResourceExhausted);
             await QueueProducerClusterLiteralAssertions.UnchangedAsync(publisher, seed, original.Image, token);

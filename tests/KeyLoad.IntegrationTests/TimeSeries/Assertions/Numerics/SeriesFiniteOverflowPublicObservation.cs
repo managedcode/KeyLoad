@@ -25,7 +25,7 @@ internal static class SeriesFiniteOverflowPublicObservation
         object request, CancellationToken token)
     {
         var reply = await reader.Mcp.CallAsync(tool, request, token);
-        await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.Validation, dispatched: true)).Value;
         await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
             .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(SeriesFiniteOverflowPublicExpected.McpOverflowDetail);
     }

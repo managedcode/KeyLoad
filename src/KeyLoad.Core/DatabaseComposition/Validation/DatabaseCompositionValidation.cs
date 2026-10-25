@@ -15,7 +15,7 @@ public static class DatabaseCompositionValidation
         }
 
         var definition = engine.Resource(chargedView, incoming.Partition, incoming.Collection, ResourceKind.Collection);
-        var actual = ResourceLifetimeCatalog.Read(chargedView, incoming.Partition.TenantId, incoming.Partition.DatabaseId, incoming.Collection, definition) ?? throw Errors.Fail(ErrorCode.NotFound, CompositionEndpointUnavailable);
+        var actual = (ResourceLifetimeCatalog.Read(chargedView, incoming.Partition.TenantId, incoming.Partition.DatabaseId, incoming.Collection, definition)).Value ?? throw Errors.Fail(ErrorCode.NotFound, CompositionEndpointUnavailable);
         var bound = EntityReferenceLifetime.Bind(incoming, actual);
         EntityReferenceLifetime.RequireDocument(visible, actual);
         if (visible.Reference != bound)

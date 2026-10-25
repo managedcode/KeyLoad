@@ -36,10 +36,10 @@ internal static class QueueOrderedRetryPublicContinuation
     {
         var old = new DeliveryCommand(Guid.NewGuid(), state.Caller.Lane, state.Original!.Token, DeliveryAction.Ack);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.CompleteAsync(old, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.MessagesComplete, old, token), ErrorCode.StaleLease, dispatched: true)).Value;
         var sql = SqlClusterProtocol.Call(state.Caller.Partition, McpCallerTools.MessagesComplete, old);
         await SagaTimeoutClusterAssertions.AssertSdkErrorAsync(await callers.Sdk.ExecuteSqlAsync(sql, token), ErrorCode.StaleLease);
-        await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.StaleLease, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token), ErrorCode.StaleLease, dispatched: true)).Value;
         await QueueLifecyclePublicAssertions.LiteralAsync(callers, state.Caller, QueueOrderedRetryPublicProtocol.First,
             new(QueueOrderedRetryPublicProtocol.First, MessageState.Ready, QueueOrderedRetryPublicProtocol.Initial,
                 QueueOrderedRetryPublicProtocol.Eight, QueueOrderedRetryPublicProtocol.Four, null, null,

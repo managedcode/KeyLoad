@@ -9,10 +9,10 @@ internal static class SubscriptionFilterContinuation
     {
         var ack = new SubscriptionDeliveryCommand(Guid.NewGuid(), group, old.Deliveries[1].Token, DeliveryAction.Ack);
         await Assert.That(Errors.Code(SubscriptionFilterColdTrial.Apply(db, OperationKind.SubscriptionDelivery, ack,
-            ack.CommandId, token).Problem)).IsEqualTo(ErrorCode.TokenInvalidated);
+            ack.CommandId, token).Problem).Value).IsEqualTo(ErrorCode.TokenInvalidated);
         var paused = new ReceiveSubscriptionRequest(Guid.NewGuid(), group);
         await Assert.That(Errors.Code(SubscriptionFilterColdTrial.Apply(db, OperationKind.ReceiveSubscription, paused,
-            paused.RequestId, token).Problem)).IsEqualTo(ErrorCode.DispatchPaused);
+            paused.RequestId, token).Problem).Value).IsEqualTo(ErrorCode.DispatchPaused);
         var resume = new SetSubscriptionPausedRequest(Guid.NewGuid(), group, SubscriptionFilterProtocol.NextGeneration, false);
         SubscriptionFilterColdTrial.Apply(db, OperationKind.SetSubscriptionPaused, resume, resume.CommandId, token).Get<SubscriptionInfo>();
         var receive = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, SubscriptionFilterProtocol.WindowSize);

@@ -31,7 +31,7 @@ internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, Tex
         var generation = slot.Generation;
         if (generation is null)
         {
-            return DeleteBuilding(slot);
+            return (DeleteBuilding(slot)).Value;
         }
         var failures = new List<Exception>();
         var canDelete = true;
@@ -55,14 +55,14 @@ internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, Tex
                 slot.SharedReservation?.CompleteAfterJoinedCleanup();
             }
         }
-        return Failure(failures);
+        return (Failure(failures)).Value;
     }
 
-    private Exception? DeleteBuilding(TextGenerationSlot slot)
+    private global::ManagedCode.Communication.Result<Exception?> DeleteBuilding(TextGenerationSlot slot)
     {
         if (slot.Leaf is null)
         {
-            return null;
+            return global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(DeleteBuilding));
         }
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => physicalGate.Run(() => TextFiles.DeleteBuildingGeneration(
@@ -71,14 +71,14 @@ internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, Tex
         {
             slot.SharedReservation?.CompleteAfterJoinedCleanup();
         }
-        return Failure(failures);
+        return ((Exception?)((Failure(failures)).Value)) is { } outcomeValue2 ? global::ManagedCode.Communication.Result<Exception?>.Succeed(outcomeValue2) : global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(DeleteBuilding));
     }
 
-    private static Exception? Failure(List<Exception> failures)
+    private static global::ManagedCode.Communication.Result<Exception?> Failure(List<Exception> failures)
         => failures.Count switch
         {
-            0 => null,
-            1 => failures[0],
-            _ => new AggregateException(failures)
+            0 => global::ManagedCode.Communication.Result<Exception?>.FailNotFound(nameof(Failure)),
+            1 => global::ManagedCode.Communication.Result<Exception?>.Succeed(((Exception?)(failures[0]))),
+            _ => global::ManagedCode.Communication.Result<Exception?>.Succeed((Exception?)(new AggregateException(failures)))
         };
 }

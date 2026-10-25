@@ -72,14 +72,14 @@ internal static class QueueEnqueueColdAssertions
         ErrorCode code, string[] originalImage, CancellationToken token)
     {
         var actual = QueueEnqueueColdTrial.Apply(database, command, principal, token);
-        await Assert.That(Errors.Code(actual.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(actual.Problem).Value).IsEqualTo(code);
         await Assert.That(actual.Value).IsNull();
         await Assert.That(LaneBytes((ZoneTreeStore)database.Store, command.Partition)).IsEquivalentTo(originalImage, CollectionOrdering.Matching);
         await Assert.That(database.GetDocument(QueueEnqueueColdProtocol.Root,
             new(command.Partition, QueueEnqueueColdProtocol.Collection, QueueEnqueueColdProtocol.RefusedDocument), cancellationToken: token)).IsNull();
         var outcome = database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.PartitionOutcome(command.Partition, principal, command.CommandId)));
         await Assert.That(outcome).IsNotNull();
-        await Assert.That(Errors.Code(outcome!.Result.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(outcome!.Result.Problem).Value).IsEqualTo(code);
 
     }
 

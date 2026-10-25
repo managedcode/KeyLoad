@@ -29,7 +29,7 @@ internal sealed class PublicCommandTransportTests
         await Assert.That(result.SafeDetail).IsEqualTo(PublicNormalizationFixture.Detail(shape));
         var stored = PublicNormalizationFixture.Stored(database, operation);
         var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);
-        await Assert.That(Errors.Code(stored.Result.Problem)).IsEqualTo(result.Error);
+        await Assert.That(Errors.Code(stored.Result.Problem).Value).IsEqualTo(result.Error);
         await Assert.That(stored.Result.Problem?.Detail).IsEqualTo(result.SafeDetail);
         var retry = codec.Decode(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
             operation.Value.Kind, operation.CommandId, decoded.Payload));

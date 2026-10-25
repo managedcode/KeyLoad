@@ -42,10 +42,10 @@ internal static class CapabilityOutputClusterPages
         await Assert.That(ast.Value).IsNull();
         await Assert.That(sql.Problem?.ErrorCode).IsEqualTo(code.ToString());
         await Assert.That(ast.Problem?.ErrorCode).IsEqualTo(code.ToString());
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.QueryExecute,
-            CapabilityOutputClusterProtocol.Sql(compact, version), token), code, dispatched: true);
-        await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.QueryAst,
-            CapabilityOutputClusterProtocol.Ast(compact, version), token), code, dispatched: true);
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.QueryExecute,
+            CapabilityOutputClusterProtocol.Sql(compact, version), token), code, dispatched: true)).Value;
+        _ = (await McpCallerAssertions.ErrorAsync(await caller.Mcp.CallAsync(McpCallerTools.QueryAst,
+            CapabilityOutputClusterProtocol.Ast(compact, version), token), code, dispatched: true)).Value;
     }
 
     internal static async Task HealthyAsync(RequestCqrsClusterCallers caller, int version, int bytes, CancellationToken token)

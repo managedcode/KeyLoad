@@ -97,7 +97,7 @@ internal sealed class SqlClusterBetweenTests(ClusterFixture fixture)
         var result = await sdk.ExecuteSqlAsync(request, cancellationToken);
         await Assert.That(result.IsFailed).IsTrue();
         await Assert.That(result.Problem!.ErrorCode).IsEqualTo(error.ToString());
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, request, cancellationToken),
-            error, dispatched);
+        _ = (await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(SqlOperationProtocol.ToolName, request, cancellationToken),
+            error, dispatched)).Value;
     }
 }

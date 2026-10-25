@@ -46,7 +46,7 @@ internal static class Bm25ColdInvalidationTrial
         var request = new CommandRequest(id, owner.Source.Partition, [mutation]);
         var operation = Issue(flow, OperationKind.Batch, id, request);
         var result = owner.Submit(operation);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(id);
         var entry = OrleansSerialization.Serialize(owner.Entry(id));
         var before = Bm25OriginalPhaseRecoveryState.Read(owner);
@@ -101,7 +101,7 @@ internal static class Bm25ColdInvalidationTrial
         await Bm25ColdInvalidationAssertions.PhaseDeniedAsync(flow, original);
         var fresh = flow.Capture(original.CommandId);
         var result = flow.Publish(fresh);
-        await Assert.That(Errors.Code(result.Problem)).IsNull();
+        await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(fresh.CommandId);
         var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((fresh).Value!.Input.Span);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(4L);

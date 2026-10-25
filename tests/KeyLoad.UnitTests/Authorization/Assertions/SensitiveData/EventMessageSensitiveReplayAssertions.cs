@@ -7,7 +7,7 @@ internal static class EventMessageSensitiveReplayAssertions
 {
     internal static async Task DeniedAsync(Result<object> result, ErrorCode code)
     {
-        await Assert.That(Errors.Code(result.Problem)).IsEqualTo(code);
+        await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
         await Assert.That(result.Value).IsNull();
 
         await Assert.That(result.Problem?.Detail).DoesNotContain("SENSITIVE_BODY__CANARY");
