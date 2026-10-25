@@ -32,7 +32,7 @@ internal static class QueueDeadlineCoordination
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
         }
-        var commandId = DueDispatchCommandIdentity.ForDeadline(hint);
+        var commandId = DueDispatchCommandIdentity.ForDeadline(hint, principal);
         var body = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [hint.Mutation]));
         var reply = await dispatch(principal, commandId, body, lifetime.Token).ConfigureAwait(true);
         return new(reply.Error);

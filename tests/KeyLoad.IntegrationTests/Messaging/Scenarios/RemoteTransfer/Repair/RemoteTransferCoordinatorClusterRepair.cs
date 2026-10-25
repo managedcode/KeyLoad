@@ -17,7 +17,24 @@ internal static class RemoteTransferCoordinatorClusterRepair
         var original = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
             McpCallerTools.MessagesComplete, ack, token))).Value;
         await QueueProducerClusterAssertions.EqualAsync(await McpCallerAssertions.SdkSuccessAsync(await sdk.CompleteAsync(ack, token)), original);
-        _ = await RemoteTransferColdStages.AcceptAsync(sdk, mcp, seed, intent, seed.Accept(intent),
-            RemoteTransferCoordinatorClusterProtocol.RepairedReady, token);
+        var command = seed.Accept(intent);
+        var accepted = (await McpCallerAssertions.SuccessAsync<CommitReceipt>(await mcp.CallAsync(
+            McpCallerTools.DocumentsCommit, command, token))).Value;
+        await RemoteTransferColdAssertions.ReceiptLiteralAsync(accepted, command, seed.Scenario.DestinationQueue,
+            seed.TransferId, RemoteTransferColdProtocol.AcceptKind, accepted.Token.Position);
+        await QueueProducerClusterAssertions.ReplayAsync(sdk, mcp, command, accepted, token);
+        var proof = await PublicReadAssertions.ReceiptAsync(await sdk.InspectQueueTransferReceiptAsync(seed.ReceiptRequest, token))
+            ?? throw new InvalidOperationException(RemoteTransferCoordinatorClusterProtocol.Missing);
+        await Assert.That(proof.TargetCommit).IsEqualTo(accepted.Token);
+        await RemoteTransferColdAssertions.ReceiptAsync(sdk, mcp, seed, proof, token);
+        await RemoteTransferColdAssertions.MessageAsync(sdk, mcp, seed,
+            RemoteTransferColdAssertions.Ready(seed, RemoteTransferCoordinatorClusterProtocol.RepairedReady), token);
+        var delivered = await RemoteTransferCoordinatorClusterWait.DeliveredAsync(sdk, seed, token);
+        await RemoteTransferColdAssertions.SourceAsync(sdk, mcp, seed, intent with
+        {
+            State = QueueTransferState.Delivered,
+            ReceiptToken = proof.ReceiptToken
+        }, token);
+        await Assert.That(delivered.ReceiptToken).IsEqualTo(proof.ReceiptToken);
     }
 }

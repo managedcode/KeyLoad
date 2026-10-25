@@ -21,7 +21,7 @@ internal sealed class ClusterTelemetryResourceTests
     private const string RemovedMembershipConnection = "ConnectionStrings__OrleansMembership";
     private const string SigningKey = "KeyLoad__SigningKey";
     private const string AdminKey = "KeyLoad__AdminKey";
-    private const string HttpEndpoint = "http";
+    private const string HttpEndpoint = "https";
     private const int SecretBytes = 32;
     private const string Endpoint = "OTEL_EXPORTER_OTLP_ENDPOINT";
     private const string Protocol = "OTEL_EXPORTER_OTLP_PROTOCOL";

@@ -13,7 +13,7 @@ internal static class ClusterFixtureProtocol
     internal const string Node3Name = "node3";
     internal const string GuidFormat = "N";
     internal const string CoverageDirectoryName = "coverage";
-    internal const string HttpEndpointName = "http";
+    internal const string HttpEndpointName = "https";
     internal const string RootDirectoryPrefix = "keyload-cluster-";
     internal const string SolutionFileName = "KeyLoad.slnx";
     internal const string DataRootArgument = "--KeyLoad:DataRoot=";

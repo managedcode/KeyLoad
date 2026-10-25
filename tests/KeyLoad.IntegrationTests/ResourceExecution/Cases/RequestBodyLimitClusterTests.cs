@@ -20,7 +20,7 @@ internal sealed class RequestBodyLimitClusterTests
         try
         {
             await fixture.InitializeAsync();
-            using var http = fixture.App.CreateHttpClient("node1", "http");
+            using var http = fixture.App.CreateHttpClient("node1", "https");
             foreach (var chunked in new[] { false, true })
             {
                 var id = Guid.NewGuid();

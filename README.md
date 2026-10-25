@@ -259,7 +259,8 @@ still serve earlier committed data after Orleans membership settles.
 
 Both values are read at startup; there is no live resizing or data movement.
 Node data remains in `data/cluster/`; development credentials live in AppHost user secrets.
-HTTP ports start at `5101`; keep the data directory between restarts.
+Aspire allocates HTTPS, silo and membership ports; copy a node's HTTPS URL from
+the Aspire dashboard into `KEYLOAD_ENDPOINT`. Keep the data directory between restarts.
 Stop owned resources with `aspire stop --non-interactive`.
 
 For one shared volume, configure the same storage path on all silos. The execution
@@ -276,11 +277,11 @@ shared filesystem locking and flush behavior still need deployment qualification
 
 Export the `Parameters:admin-key` value from AppHost user secrets as `KEYLOAD_API_KEY` before running the CLI or the examples below.
 
-- Open the [admin console](http://localhost:5101/admin).
+- Open `/admin` on the node's discovered HTTPS URL.
 - Or check the cluster from the CLI:
 
 ```bash
-dotnet run --project src/KeyLoad.Cli --no-build -- status http://localhost:5101
+dotnet run --project src/KeyLoad.Cli --no-build -- status "$KEYLOAD_ENDPOINT"
 ```
 
 ## Use it
@@ -295,7 +296,8 @@ using KeyLoad.Client;
 
 var apiKey = Environment.GetEnvironmentVariable("KEYLOAD_API_KEY")
     ?? throw new InvalidOperationException("Set KEYLOAD_API_KEY.");
-using var http = new HttpClient { BaseAddress = new Uri("http://localhost:5101") };
+using var http = new HttpClient { BaseAddress = new Uri(Environment.GetEnvironmentVariable("KEYLOAD_ENDPOINT")
+    ?? throw new InvalidOperationException("Set KEYLOAD_ENDPOINT to the Aspire HTTPS URL.")) };
 var client = new KeyLoadClient(http, apiKey);
 
 // tenant, database, transaction domain, partition key
@@ -351,7 +353,7 @@ Every node serves [MCP](https://modelcontextprotocol.io/) at `/mcp`. Its compact
   "mcpServers": {
     "keyload": {
       "type": "http",
-      "url": "http://localhost:5101/mcp",
+      "url": "${KEYLOAD_ENDPOINT}/mcp",
       "headers": { "Authorization": "Bearer ${KEYLOAD_API_KEY}" }
     }
   }

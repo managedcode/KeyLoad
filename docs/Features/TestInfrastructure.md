@@ -322,9 +322,12 @@ REQ/AC-TEST-001: the full Unit model/disposal flow asserts every Aspire-owned en
 
 REQ-TEST-001/011/015 and their existing ACs preserve the genuine configured-node model construction, complete endpoint assertions and joined model disposal. In ExactSelectionBuildsTheOwnedClusterModelAndSettlesDisposal the pre-DCP http2.Port is 8081, not null. No deployment port configuration changes are authorized by this test correction.
 
-Pinned Aspire.Hosting 13.6.1's EndpointAnnotation retains an omitted backing port and exposes targetPort as Port for an unproxied endpoint unless the port was explicitly set to null. Existing ClusterConnectionEndpointResources.Apply supplies targetPort8081, name http2, isProxiedfalse and no port argument through WithHttpEndpoint. Therefore the constructed model's public Port property is8081; this is not proof of an explicitly fixed container host binding.
-
-The pinned DcpExecutor allocation checks container SpecifiedPort for a fixed public port. The omitted backing port requires allocation for a proxyless container; EnsureProxylessEndpointPort assigns the real allocated public port while retaining container target8081. The cluster resources omit this http2 backing port. Model verification thus compares http2.Port to its independent Http2TargetPort constant before DCP, preserving exact names/order/scheme/target/internal/unproxied assertions, all other endpoint values, actual Aspire Build and original application/root cleanup. It does not claim actual distinct allocated endpoints, readiness, successful connection or cluster execution; those remain authentic Aspire runtime gates.
+The primary project AppHost uses one HTTPS endpoint per node. Aspire allocates
+its port and the silo/membership ports in ordinary and ephemeral composition.
+HTTP/1.1 and HTTP/2 share TLS negotiation on that endpoint. Integration clients,
+readiness checks and the CLI use the discovered HTTPS address. CI establishes
+trust in the .NET development certificate before starting the real topology;
+certificate verification stays enabled.
 
 ### Cold restart of every stopped node before readiness
 

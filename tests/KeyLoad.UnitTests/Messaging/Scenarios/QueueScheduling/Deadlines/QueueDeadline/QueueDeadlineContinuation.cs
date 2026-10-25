@@ -1,3 +1,5 @@
+using KeyLoad.Clustering;
+using KeyLoad.Core.Messaging;
 using KeyLoad.Storage.ZoneTree;
 using KeyLoad.UnitTests.ResourceExecution;
 using ManagedCode.Communication;
@@ -13,13 +15,18 @@ internal static class QueueDeadlineContinuation
     {
         QueueDeadlineOperations.ConfigureWorker(database, lane.Partition, due, Capability.QueueInspect,
             RuntimeQueueDeadlineProtocol.Second);
+        var hint = new QueueDeadlineHint(lane, (AdvanceQueueDeadline)command.Mutations.Single());
+        command = command with { CommandId = AttemptId(database, hint, due) };
         await QueueDeadlineAssertions.RefusedAsync(database, first, lane, command, due, ErrorCode.PermissionDenied);
+        var deniedId = command.CommandId;
         QueueDeadlineOperations.ConfigureWorker(database, lane.Partition, due,
             Capability.QueueConsume | Capability.QueueInspect | Capability.QueueAck, RuntimeQueueDeadlineProtocol.Third);
         command = command with
         {
-            CommandId = Guid.NewGuid()
+            CommandId = AttemptId(database, hint, due)
         };
+        await Assert.That(command.CommandId).IsNotEqualTo(deniedId);
+        await Assert.That(AttemptId(database, hint, due)).IsEqualTo(command.CommandId);
         var result = QueueDeadlineOperations.Batch(database, command, due);
         var receipt = result.Get<CommitReceipt>();
         var expectedReceipt = new MutationReceipt(KeyLoad.Core.Messaging.QueueDeadlineProtocol.ReceiptKind, lane.Queue,
@@ -51,4 +58,8 @@ internal static class QueueDeadlineContinuation
         await QueueDeadlineHealthy.RunAsync(cold, lane, due,
             kind == QueueDeadlineKind.ExpireLease ? RuntimeQueueDeadlineProtocol.Second : RuntimeQueueDeadlineProtocol.First);
     }
+
+    private static Guid AttemptId(DatabaseEngine database, QueueDeadlineHint hint, DateTimeOffset due)
+        => DueDispatchCommandIdentity.ForDeadline(hint, database.Store.Read(view =>
+            database.Principal(view, RuntimeQueueDeadlineProtocol.Worker, due)));
 }

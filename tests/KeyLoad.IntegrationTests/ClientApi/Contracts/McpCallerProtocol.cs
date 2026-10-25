@@ -20,7 +20,7 @@ internal static class McpCallerProtocol
     internal const string Matches = "matches";
     internal const string Tool = "tool";
     internal const string MissingDiscoveredTool = "The execution graph did not return the exact canonical tool.";
-    internal const string HttpEndpoint = "http";
+    internal const string HttpEndpoint = "https";
     internal const string Endpoint = "/mcp";
     internal const string ProtocolVersion = "2026-07-28";
     internal const string UnsupportedProtocolVersion = "2025-11-25";

@@ -26,10 +26,8 @@ internal sealed class LoggerModelControlSelectionTests
     private const string InvalidSelectionMessage = "The C1 logger model control selection is invalid.";
     private const string EphemeralSetting = "KeyLoad:Ephemeral";
     private const string DataRootSetting = "KeyLoad:DataRoot";
-    private const string FirstPublicPortSetting = "KeyLoad:FirstPublicPort";
     private const string ContainerUserSetting = "KeyLoad:ContainerUser";
     private const string ContainerUser = "1000:1000";
-    private const string FirstPublicPort = "5411";
     private const string ImageSetting = "KeyLoad:ContainerImages:Server";
     private const string ImageReference = ImageRepository + ":" + ImageTag + "@sha256:" + ImageDigest;
     private const string ImageRepository = "ghcr.io/managedcode/keyload";
@@ -132,7 +130,7 @@ internal sealed class LoggerModelControlSelectionTests
         var arguments = new List<string>
         {
             Argument(LoggerModelControlSetting, TrueValue), Argument(EphemeralSetting, TrueValue),
-            Argument(DataRootSetting, root), Argument(FirstPublicPortSetting, FirstPublicPort),
+            Argument(DataRootSetting, root),
             Argument(ContainerUserSetting, ContainerUser)
         };
         if (includeImage)

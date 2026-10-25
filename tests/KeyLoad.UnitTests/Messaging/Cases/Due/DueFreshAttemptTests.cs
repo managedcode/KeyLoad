@@ -1,3 +1,6 @@
+using KeyLoad.Clustering;
+using KeyLoad.Core.Messaging;
+
 namespace KeyLoad.UnitTests.Messaging;
 
 internal sealed class DueFreshAttemptTests
@@ -27,7 +30,8 @@ internal sealed class DueFreshAttemptTests
             fixture.Partition).Head;
 
         await RevokeCreatorAsync(fixture, creator);
-        var originalId = Guid.NewGuid();
+        var hint = new DueWorkHint(DueWorkKind.Schedule, fixture.Queue, scheduleId, CreatorId, 1, 1, 0, firstDue);
+        var originalId = DueDispatchCommandIdentity.ForDue(hint, fixture.Principal(CreatorId));
         await Assert.That(originalId).IsNotEqualTo(Guid.Empty);
         var original = DueFreshAttemptAssertions.Emit(fixture, scheduleId, originalId);
         var denial = DueFreshAttemptAssertions.Apply(fixture, original, originalId,
@@ -44,7 +48,8 @@ internal sealed class DueFreshAttemptTests
         await DueFreshAttemptAssertions.AssertNoEffectsAsync(fixture, scheduleId, scheduleBytes,
             emptyCounters, outbox);
 
-        var freshId = Guid.NewGuid();
+        var freshId = DueDispatchCommandIdentity.ForDue(hint, restored);
+        await Assert.That(DueDispatchCommandIdentity.ForDue(hint, restored)).IsEqualTo(freshId);
         await Assert.That(freshId).IsNotEqualTo(Guid.Empty);
         await Assert.That(freshId).IsNotEqualTo(originalId);
         var fresh = DueFreshAttemptAssertions.Emit(fixture, scheduleId, freshId);

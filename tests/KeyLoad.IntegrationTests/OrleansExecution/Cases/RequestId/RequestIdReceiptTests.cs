@@ -18,9 +18,12 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
         using var recorder = new RequestIdResponseRecorder();
         using var http = new HttpClient(recorder, disposeHandler: false)
         {
-            BaseAddress = fixture.App.GetEndpoint("node1", "http"),
-            Timeout = TimeSpan.FromSeconds(30)
+            BaseAddress = fixture.App.GetEndpoint("node1", "https"),
+            Timeout = TimeSpan.FromSeconds(30),
+            DefaultRequestVersion = System.Net.HttpVersion.Version20,
+            DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact
         };
+        await Assert.That(http.BaseAddress!.Scheme).IsEqualTo(Uri.UriSchemeHttps);
         var client = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         var partition = new PartitionRef($"integration-{Guid.NewGuid():N}", "database", "request-routing", Guid.NewGuid().ToString("N"));
         await ConfigureResourceAsync(client, partition, timeout.Token);
@@ -89,6 +92,7 @@ internal sealed class RequestIdReceiptTests(ClusterFixture fixture)
         await Assert.That(allIds.Distinct().Count()).IsEqualTo(allIds.Length);
         await Assert.That(allIds.All(IsNonEmptyGuidN)).IsTrue();
         await Assert.That(recorder.Snapshot().All(receipt => (int)receipt.StatusCode is >= 200 and < 300)).IsTrue();
+        await Assert.That(recorder.Snapshot().All(receipt => receipt.Version == System.Net.HttpVersion.Version20)).IsTrue();
     }
 
     private static string ReadSingleRequestId(RequestIdReceipt receipt)

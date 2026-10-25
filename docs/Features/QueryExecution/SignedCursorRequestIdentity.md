@@ -15,7 +15,7 @@ For EACH SDK and official MCP changed-OFFSET refusal, assert the exact CursorExp
 Replay the complete original eight-mutation seed command through EACH public client; compare every field of its original receipt and immediately verify full current state and fresh signed pages before another replay. No raw store/journal invariance or physical-cut/logical-commit inequality is claimed.
 
 ## AC-CURSOR-IDENTITY-004
-Join all original/new caller owners before EACH of two genuine all-three Aspire cluster cold cycles. Reopen fresh callers, reject old owner/read-generation cursors, verify fresh full literal pages and all original receipt replays. The unchanged original flow already owns two cold cycles: the strengthened complete Case therefore adds two, totaling four. Its original McpCallerDeadline and Test/Args identity are preserved.
+Join all original/new caller owners before EACH of two genuine all-three Aspire cluster cold cycles. Reopen fresh callers, repeat the changed-OFFSET refusal for the original signed cursors, verify fresh full literal pages and all original receipt replays. A same-volume restart preserves the physical owner identity and read generation unless storage replacement changes it; restart alone does not imply cursor expiry. The unchanged original flow already owns two cold cycles: the strengthened complete Case therefore adds two, totaling four. Its original McpCallerDeadline and Test/Args identity are preserved.
 
 ```mermaid
 flowchart LR
@@ -25,7 +25,7 @@ flowchart LR
  X --> V[Original OFFSET1 continues c then d]
  V --> R[Full seed receipt replay and current state]
  R --> K1[Join callers and all-three cold1]
- K1 --> F1[Old cursor refusal and fresh pages]
+ K1 --> F1[Changed-OFFSET refusal and fresh pages]
  F1 --> K2[Join callers and all-three cold2]
  K2 --> F2[Fresh pages and original receipts]
 ```

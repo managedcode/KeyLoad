@@ -24,7 +24,7 @@ flowchart LR
 - Lifetime. Disconnect uses Kestrel `ConnectionClosed`; `RequestAborted` belongs to one operation. Host shutdown closes connection admission and joins connections before the silo and storage stop. Reconnect obtains a new grain. Silo loss discards the disposable grain; command-receipt retry and uncertain writes keep their existing semantics.
 - Background work (timers, durable jobs, provider work) uses one bounded execution owner per silo service, never a grain per operation.
 - Errors. `KeyLoadException` is serialized ly (`[GenerateSerializer]`, alias `keyload.error`, Code id 0, StatusCode id 1) so domain codes survive Orleans RPC.
-- Transport. HTTP/1.1 runs sequential requests per connection. Overlapping calls on one connection use the dedicated HTTP/2 listener (`ServerExecutionOptions.EnableHttp2`, `Http2Port` default 8081); the AppHost exposes it on every node and clients use the Aspire-discovered endpoint. The SDK copies the supplied `HttpClient` request version and version policy into every request.
+- Transport. The AppHost exposes one HTTPS endpoint per node and Aspire allocates every public and Orleans port. TLS negotiates HTTP/1.1 or HTTP/2 on that endpoint; overlapping calls on one connection use HTTP/2. Clients use the Aspire-discovered HTTPS address. There is no separate cleartext HTTP/2 listener or application-selected port range. The SDK copies the supplied `HttpClient` request version and version policy into every request.
 - Current MCP transport is stateless; this decision does not deliver SQL session interoperability.
 
 ## Verification

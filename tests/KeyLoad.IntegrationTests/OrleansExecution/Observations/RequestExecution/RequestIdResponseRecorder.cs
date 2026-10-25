@@ -4,7 +4,7 @@ internal sealed class RequestIdResponseRecorder : DelegatingHandler
 {
     internal RequestIdResponseRecorder()
     {
-        InnerHandler = new SocketsHttpHandler();
+        InnerHandler = new SocketsHttpHandler { MaxConnectionsPerServer = 1 };
     }
 
     private const int MaximumReceipts = 64;
@@ -40,7 +40,7 @@ internal sealed class RequestIdResponseRecorder : DelegatingHandler
         var values = response.Headers.TryGetValues("X-KeyLoad-Request-Id", out var headerValues)
             ? headerValues.ToArray()
             : [];
-        var receipt = new RequestIdReceipt(request.RequestUri?.AbsolutePath ?? "", response.StatusCode, values);
+        var receipt = new RequestIdReceipt(request.RequestUri?.AbsolutePath ?? "", response.StatusCode, values, response.Version);
         lock (gate)
         {
             if (receipts.Count == MaximumReceipts)

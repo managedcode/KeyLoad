@@ -12,7 +12,7 @@ internal static class QueryCursorRequestIdentityR47Refusals
     {
         foreach (var original in state.OriginalPages)
         {
-            var request = (afterCold ? state.OriginalRequest : state.ChangedRequest) with
+            var request = state.ChangedRequest with
             {
                 Cursor = original.Cursor
             };

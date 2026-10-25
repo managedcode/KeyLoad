@@ -58,7 +58,6 @@ internal static class ServerConfiguration
         var node = ServerNodeOptionsComposition.Read(builder.Configuration);
         var address = await OrleansNodeAddressResolver.ResolveAsync(node.Value, startupCancellation);
         builder.Services.AddSingleton<IOptions<NodeOptions>>(node);
-        ServerConnectionTransportComposition.Configure(builder);
         ConfigureTransportOptions(builder);
         Register(builder.Services);
         PostgresComposition.Register(builder.Services, builder.Configuration);

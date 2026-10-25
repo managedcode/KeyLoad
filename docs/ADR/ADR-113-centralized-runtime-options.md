@@ -113,15 +113,12 @@ ceilings and rejects different policies within a comparable cohort.
 This metadata schema change does not change persisted database formats or qualify
 new performance measurements.
 
-cluster published host ports consume `ClusterDeploymentOptions.FirstPublicPort`,
-centrally bound from `KeyLoad:FirstPublicPort` with the preserved default5101.
-Validate the complete range for the configured node count against execution `IPEndPoint` bounds
-before profile-directory or Aspire-resource creation. Ordinary composition uses
-the captured value plus node index; ephemeral composition still delegates port
-assignment to Aspire. Internal container HTTP/silo ports remain frozen image
-identities. `ClusterPublishedPortPolicyTests` verifies binding, every
-actual endpoint annotation, snapshot lifetime, the inclusive upper range and
-rejection before resource/file ownership (AC-CQ-034/035).
+Cluster HTTPS, silo and membership endpoints receive ports allocated by Aspire.
+KeyLoad does not select a first public port or maintain a port range.
+`ClusterPublishedPortPolicyTests` checks both ordinary and ephemeral project
+composition: the sole HTTPS endpoint and every Orleans endpoint leave host and
+target ports unset before Aspire allocation (AC-CQ-034/035). Container target
+ports belong to their separate published-image contract.
 
 Verification order is a real full Release build, scoped formatting and a
 final full build, then Aspire-owned analyzers/unit/scalar/recovery/cluster plus the

@@ -10,10 +10,9 @@ namespace KeyLoad.Server;
 /// <summary>Owns the local authenticated HTTP transport for one administration circuit.</summary>
 /// <param name="server">The actual local listener.</param>
 /// <param name="options">Validated SDK transport bounds.</param>
-/// <param name="execution">The dedicated execution HTTP/2 listener settings.</param>
 /// <param name="sql">The dedicated SQL wire listener settings, when configured.</param>
 internal sealed class AdminConsoleConnection(IServer server, IOptions<KeyLoadClientExecutionOptions> options,
-    IOptions<ServerExecutionOptions> execution, IOptions<PostgresSessionOptions> sql) : IDisposable
+    IOptions<PostgresSessionOptions> sql) : IDisposable
 {
     private readonly HttpClient http = new(new HttpClientHandler { AllowAutoRedirect = false, CheckCertificateRevocationList = true })
     {
@@ -40,8 +39,7 @@ internal sealed class AdminConsoleConnection(IServer server, IOptions<KeyLoadCli
     private bool IsHttpListener(string address)
     {
         var port = new UriBuilder(address).Port;
-        return (!execution.Value.EnableHttp2 || port != execution.Value.Http2Port)
-            && port != sql.Value.Port;
+        return port != sql.Value.Port;
     }
 
     internal void Disconnect()

@@ -24250,9 +24250,9 @@
       "methodName": "PersistedDenialRemainsTerminalButFreshAuthorizedAttemptEmitsOnce",
       "instanceName": "PersistedDenialRemainsTerminalButFreshAuthorizedAttemptEmitsOnce",
       "sourcePath": "tests/KeyLoad.UnitTests/Messaging/Cases/Due/DueFreshAttemptTests.cs",
-      "sourceSha256": "604c80d561de44cb83885fa3ae1ebabc5328c926ffdc12e8f399fb300cb47aeb",
-      "lineNumber": 14,
-      "endLineNumber": 67,
+      "sourceSha256": "d70d27f4a1bfb1b870011da708a680eedcff1e35d5384fb57e56cedc171e0466",
+      "lineNumber": 17,
+      "endLineNumber": 72,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -58101,7 +58101,7 @@
       "methodName": "ActualClusterModelKeepsOptionalRoutingAndPrivacyAfterAllCallbacks",
       "instanceName": "ActualClusterModelKeepsOptionalRoutingAndPrivacyAfterAllCallbacks(Development, False)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/ClusterTelemetry/ClusterTelemetryResourceTests.cs",
-      "sourceSha256": "5292e36b4a192353ff8a44581da29b7ab8b16048db5a6204fd23dea88115f3a1",
+      "sourceSha256": "96d2477c1abfd12b16ba7fa76f7be0dda1d49bb6ce97c9d19831cde333e36233",
       "lineNumber": 34,
       "endLineNumber": 73,
       "classification": "required-non-contributor",
@@ -58125,7 +58125,7 @@
       "methodName": "ActualClusterModelKeepsOptionalRoutingAndPrivacyAfterAllCallbacks",
       "instanceName": "ActualClusterModelKeepsOptionalRoutingAndPrivacyAfterAllCallbacks(Development, True)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/ClusterTelemetry/ClusterTelemetryResourceTests.cs",
-      "sourceSha256": "5292e36b4a192353ff8a44581da29b7ab8b16048db5a6204fd23dea88115f3a1",
+      "sourceSha256": "96d2477c1abfd12b16ba7fa76f7be0dda1d49bb6ce97c9d19831cde333e36233",
       "lineNumber": 34,
       "endLineNumber": 73,
       "classification": "required-non-contributor",
@@ -58149,7 +58149,7 @@
       "methodName": "ActualClusterModelKeepsOptionalRoutingAndPrivacyAfterAllCallbacks",
       "instanceName": "ActualClusterModelKeepsOptionalRoutingAndPrivacyAfterAllCallbacks(Production, False)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/ClusterTelemetry/ClusterTelemetryResourceTests.cs",
-      "sourceSha256": "5292e36b4a192353ff8a44581da29b7ab8b16048db5a6204fd23dea88115f3a1",
+      "sourceSha256": "96d2477c1abfd12b16ba7fa76f7be0dda1d49bb6ce97c9d19831cde333e36233",
       "lineNumber": 34,
       "endLineNumber": 73,
       "classification": "required-non-contributor",
@@ -58173,7 +58173,7 @@
       "methodName": "ActualClusterModelKeepsOptionalRoutingAndPrivacyAfterAllCallbacks",
       "instanceName": "ActualClusterModelKeepsOptionalRoutingAndPrivacyAfterAllCallbacks(Production, True)",
       "sourcePath": "tests/KeyLoad.UnitTests/OrleansExecution/Cases/ClusterTelemetry/ClusterTelemetryResourceTests.cs",
-      "sourceSha256": "5292e36b4a192353ff8a44581da29b7ab8b16048db5a6204fd23dea88115f3a1",
+      "sourceSha256": "96d2477c1abfd12b16ba7fa76f7be0dda1d49bb6ce97c9d19831cde333e36233",
       "lineNumber": 34,
       "endLineNumber": 73,
       "classification": "required-non-contributor",
@@ -64742,9 +64742,9 @@
       "methodName": "ExactSelectionBuildsTheOwnedClusterModelAndSettlesDisposal",
       "instanceName": "ExactSelectionBuildsTheOwnedClusterModelAndSettlesDisposal",
       "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/RuntimeLogger/LoggerModelControlSelectionTests.cs",
-      "sourceSha256": "e9a1545f3339ace9499ff7c022e46d511964640d5ae14f8b2d13a4302cca0b32",
-      "lineNumber": 46,
-      "endLineNumber": 77,
+      "sourceSha256": "af387bec0a3503e2e315af534439eb8b45e81e8800305056d1a1a97e649e0c96",
+      "lineNumber": 44,
+      "endLineNumber": 75,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -64762,9 +64762,9 @@
       "methodName": "InvalidControlAndWorkloadSelectionsRejectBeforeResourcesOrFiles",
       "instanceName": "InvalidControlAndWorkloadSelectionsRejectBeforeResourcesOrFiles",
       "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/RuntimeLogger/LoggerModelControlSelectionTests.cs",
-      "sourceSha256": "e9a1545f3339ace9499ff7c022e46d511964640d5ae14f8b2d13a4302cca0b32",
-      "lineNumber": 79,
-      "endLineNumber": 88,
+      "sourceSha256": "af387bec0a3503e2e315af534439eb8b45e81e8800305056d1a1a97e649e0c96",
+      "lineNumber": 77,
+      "endLineNumber": 86,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -64779,12 +64779,12 @@
     {
       "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
       "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "CentralSnapshotControlsEveryActualClusterEndpoint",
-      "instanceName": "CentralSnapshotControlsEveryActualClusterEndpoint(1, False)",
+      "methodName": "AspireAllocatesEveryHttpsAndOrleansEndpoint",
+      "instanceName": "AspireAllocatesEveryHttpsAndOrleansEndpoint(False)",
       "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 13,
-      "endLineNumber": 49,
+      "sourceSha256": "09e55b83aed9c15fb126d9fc93ce3f66cb46f648b56347d8ada3197f4ca140f3",
+      "lineNumber": 10,
+      "endLineNumber": 50,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -64795,17 +64795,17 @@
         "AC-CQ-035"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
+      "reviewBasis": "Required control for the current Aspire-owned HTTPS/silo/membership endpoint model in ordinary and ephemeral execution. Fixed public-port ranges and the separate cleartext HTTP/2 listener were removed by owner instruction; canonical database operation coverage is not claimed."
     },
     {
       "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
       "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "CentralSnapshotControlsEveryActualClusterEndpoint",
-      "instanceName": "CentralSnapshotControlsEveryActualClusterEndpoint(5301, False)",
+      "methodName": "AspireAllocatesEveryHttpsAndOrleansEndpoint",
+      "instanceName": "AspireAllocatesEveryHttpsAndOrleansEndpoint(True)",
       "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 13,
-      "endLineNumber": 49,
+      "sourceSha256": "09e55b83aed9c15fb126d9fc93ce3f66cb46f648b56347d8ada3197f4ca140f3",
+      "lineNumber": 10,
+      "endLineNumber": 50,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -64816,175 +64816,7 @@
         "AC-CQ-035"
       ],
       "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
-    },
-    {
-      "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "CentralSnapshotControlsEveryActualClusterEndpoint",
-      "instanceName": "CentralSnapshotControlsEveryActualClusterEndpoint(5301, True)",
-      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 13,
-      "endLineNumber": 49,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CQ-013"
-      ],
-      "acceptance": [
-        "AC-CQ-034",
-        "AC-CQ-035"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
-    },
-    {
-      "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "CentralSnapshotControlsEveryActualClusterEndpoint",
-      "instanceName": "CentralSnapshotControlsEveryActualClusterEndpoint(65533, False)",
-      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 13,
-      "endLineNumber": 49,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CQ-013"
-      ],
-      "acceptance": [
-        "AC-CQ-034",
-        "AC-CQ-035"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
-    },
-    {
-      "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources",
-      "instanceName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources(-1)",
-      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 51,
-      "endLineNumber": 67,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CQ-013"
-      ],
-      "acceptance": [
-        "AC-CQ-034",
-        "AC-CQ-035"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
-    },
-    {
-      "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources",
-      "instanceName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources(0)",
-      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 51,
-      "endLineNumber": 67,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CQ-013"
-      ],
-      "acceptance": [
-        "AC-CQ-034",
-        "AC-CQ-035"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
-    },
-    {
-      "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources",
-      "instanceName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources(2147483647)",
-      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 51,
-      "endLineNumber": 67,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CQ-013"
-      ],
-      "acceptance": [
-        "AC-CQ-034",
-        "AC-CQ-035"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
-    },
-    {
-      "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources",
-      "instanceName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources(65534)",
-      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 51,
-      "endLineNumber": 67,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CQ-013"
-      ],
-      "acceptance": [
-        "AC-CQ-034",
-        "AC-CQ-035"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
-    },
-    {
-      "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources",
-      "instanceName": "InvalidFullClusterRangeRejectsBeforeFilesOrResources(65535)",
-      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 51,
-      "endLineNumber": 67,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CQ-013"
-      ],
-      "acceptance": [
-        "AC-CQ-034",
-        "AC-CQ-035"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
-    },
-    {
-      "className": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "reportClassName": "KeyLoad.UnitTests.TestInfrastructure.ClusterPublishedPortPolicyTests",
-      "methodName": "UnconfiguredCentralPolicyPreservesTheExistingPublishedPort",
-      "instanceName": "UnconfiguredCentralPolicyPreservesTheExistingPublishedPort",
-      "sourcePath": "tests/KeyLoad.UnitTests/TestInfrastructure/Cases/ClusterPublished/ClusterPublishedPortPolicyTests.cs",
-      "sourceSha256": "1a3dc7c5945a118c6c804faf155e300d8125d9e2d338e355e0ab9bea517bd427",
-      "lineNumber": 69,
-      "endLineNumber": 74,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-CQ-013"
-      ],
-      "acceptance": [
-        "AC-CQ-034",
-        "AC-CQ-035"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
+      "reviewBasis": "Required control for the current Aspire-owned HTTPS/silo/membership endpoint model in ordinary and ephemeral execution. Fixed public-port ranges and the separate cleartext HTTP/2 listener were removed by owner instruction; canonical database operation coverage is not claimed."
     },
     {
       "className": "KeyLoad.UnitTests.TestInfrastructure.FixtureLifetimeTests",

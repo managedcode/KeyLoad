@@ -1,11 +1,9 @@
 using System.Globalization;
-using System.Net;
 using System.Security.Cryptography;
 using KeyLoad.AppHost.StorageRecovery;
 using KeyLoad.AppHost.TestInfrastructure;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.AppHost.Hosting;
 
@@ -23,7 +21,7 @@ internal static class AppHostProgram
     private const string StorageModeEnvironment = "KeyLoad__StorageMode";
     private const string SharedDirectory = "shared";
     private const string SiloNameEnvironment = "KeyLoad__SiloName";
-    private const string HttpEndpoint = "http";
+    private const string HttpsEndpoint = "https";
     private const string SiloEndpoint = "silo";
     private const string TcpScheme = "tcp";
     private const string ReadyPath = "/health/ready";
@@ -41,7 +39,6 @@ internal static class AppHostProgram
     private const string ServerUrlsEnvironment = "ASPNETCORE_URLS";
     private const string LoopbackAddress = "127.0.0.1";
     private const int FirstNodeIndex = 0;
-    private const int LastNodeOffset = 1;
     private const int SharedVolumeCopies = 1;
 
     private static async Task<int> Main(string[] args)
@@ -86,11 +83,6 @@ internal static class AppHostProgram
         var nodeNames = ClusterTopologyNodeNames.Read(benchmarkNodeCount, functionalNodeCount, ephemeral,
             options.Cluster.Value.SiloCount);
         var replicas = benchmarkNodeCount ?? options.Cluster.Value.ReplicaCount;
-        if (!ephemeral && (long)options.Cluster.Value.FirstPublicPort + nodeNames.Length - LastNodeOffset > IPEndPoint.MaxPort)
-        {
-            throw new OptionsValidationException(Options.DefaultName, typeof(ClusterDeploymentOptions),
-                [ClusterDeploymentOptions.ValidationMessage]);
-        }
         if (replicas > nodeNames.Length
             || (options.Cluster.Value.StorageMode == StorageAccessMode.SharedVolume && replicas != SharedVolumeCopies))
         {
@@ -105,11 +97,11 @@ internal static class AppHostProgram
         for (var index = FirstNodeIndex; index < nodes.Length; index++)
         {
             nodes[index] = AddNode(builder, databaseIdentity, root, ephemeral, nodeNames.Length,
-                replicas, identity, nodeNames[index], index);
+                replicas, identity, nodeNames[index]);
         }
         var contenders = ExclusiveOwnerContentionResources.Add(options.Control.Value.ExclusiveOwnerContention,
             nodes[FirstNodeIndex], resourceName => AddNode(builder, databaseIdentity, root, true,
-                nodeNames.Length, replicas, identity, ExclusiveOwnerContentionResources.OwnerName, FirstNodeIndex,
+                nodeNames.Length, replicas, identity, ExclusiveOwnerContentionResources.OwnerName,
                 resourceName));
         var membershipSecret = builder.AddParameter(MembershipParameter,
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(MembershipSecretBytes)), secret: true);
@@ -130,19 +122,18 @@ internal static class AppHostProgram
         ClusterIdentity databaseIdentity, string root, bool ephemeral, int siloCount, int replicaCount,
         (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Admin,
             IResourceBuilder<ParameterResource> Incarnation) identity,
-        string ownerName, int index, string? resourceName = null)
+        string ownerName, string? resourceName = null)
     {
         resourceName ??= ownerName;
         var options = AppHostOptionsRegistration.Get(builder).Cluster.Value;
         var directory = Path.Combine(root, options.StorageMode == StorageAccessMode.SharedVolume ? SharedDirectory : ownerName);
         Directory.CreateDirectory(directory);
-        var port = ephemeral ? (int?)null : options.FirstPublicPort + index;
         var resource = builder.AddProject<Projects.KeyLoad>(resourceName, launchProfileName: null)
-            .WithHttpEndpoint(port: port, name: HttpEndpoint, isProxied: false)
+            .WithHttpsEndpoint(name: HttpsEndpoint, isProxied: false)
             .WithEndpoint(name: SiloEndpoint, scheme: TcpScheme, isExternal: false, isProxied: false);
         resource.WithEnvironment(ClusterEnvironment, ClusterPrefix + databaseIdentity.Incarnation.ToString(ClusterGuidFormat))
-            .WithEnvironment(PublicEnvironment, resource.GetEndpoint(HttpEndpoint))
-            .WithEnvironment(ServerUrlsEnvironment, resource.GetEndpoint(HttpEndpoint))
+            .WithEnvironment(PublicEnvironment, resource.GetEndpoint(HttpsEndpoint))
+            .WithEnvironment(ServerUrlsEnvironment, resource.GetEndpoint(HttpsEndpoint))
             .WithEnvironment(SiloNameEnvironment, resourceName)
             .WithEnvironment(SiloCountEnvironment, siloCount.ToString(CultureInfo.InvariantCulture))
             .WithEnvironment(ReplicaCountEnvironment, replicaCount.ToString(CultureInfo.InvariantCulture))
@@ -155,8 +146,7 @@ internal static class AppHostProgram
             .WithEnvironment(IncarnationEnvironment, identity.Incarnation)
             .WithEnvironment(SigningEnvironment, identity.Signing)
             .WithEnvironment(AdminEnvironment, identity.Admin)
-            .WithHttpHealthCheck(ReadyPath, endpointName: HttpEndpoint);
-        KeyLoad.AppHost.ClientApi.ClusterConnectionEndpointResources.Apply(resource);
+            .WithHttpHealthCheck(ReadyPath, endpointName: HttpsEndpoint);
         ClusterResourceSettings.Apply(builder, resource);
         ProcessKillCommand.Apply(builder, resource, ephemeral);
         return resource;
