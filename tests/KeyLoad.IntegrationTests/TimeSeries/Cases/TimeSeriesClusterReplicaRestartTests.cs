@@ -68,11 +68,8 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
 
             await fixture.RestartServerAsync(stoppedNode, deadline.Token);
             restarted = true;
-            await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-            {
-                var status = await clients[selectedIndex].StatusAsync(deadline.Token);
-                return status.IsSuccess && status.Value.RoutingReady;
-            }, deadline.Token);
+            // A write needs every copy, and a read can route through any node, so every node must report all silos.
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(clients, deadline.Token);
             await Assert.That(Directory.Exists(Path.Combine(fixture.Root, stoppedNode))).IsTrue();
             var committed = ClusterReplicationTestSupport.Success(await clients[survivorIndex].CommitAsync(command, deadline.Token));
             await Assert.That(committed.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);

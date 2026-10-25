@@ -22,20 +22,22 @@ internal static class LeftFilteredJoinRefusals
         CancellationToken token)
     {
         var request = LeftFilteredJoinProtocol.Request(state.Partition);
-        foreach (var (input, code) in new[]
+        // The unified SQL tool compiles the text before dispatch, so the unsupported predicate is refused there without a
+        // request ID; the argument refusals need the stored model and are dispatched.
+        foreach (var (input, code, dispatched) in new[]
         {
-            (request with { Parameters = null }, ErrorCode.Validation),
+            (request with { Parameters = null }, ErrorCode.Validation, true),
             (request with { Sql = LeftFilteredJoinProtocol.Prefix + "WHERE r.name = @minimum "
-                + LeftFilteredJoinProtocol.Order }, ErrorCode.UnsupportedCapability),
+                + LeftFilteredJoinProtocol.Order }, ErrorCode.UnsupportedCapability, false),
             (request with { Parameters = new() { [MinimumFieldKey] = System.Text.Json.JsonSerializer.SerializeToElement("wrong") } },
-                ErrorCode.Validation)
+                ErrorCode.Validation, true)
         })
         {
             var failure = await callers.Sdk.ExecuteSqlAsync(input, token);
             await Assert.That(failure.IsSuccess).IsFalse();
             await Assert.That(failure.Problem?.ErrorCode).IsEqualTo(code.ToString());
             await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName,
-                input, token), code, dispatched: true);
+                input, token), code, dispatched);
         }
     }
 

@@ -27,8 +27,11 @@ internal static class ModelRootCluster
         {
             var stream = new StreamRef(state.Partition, state.Resource, ModelRootClusterState.Item);
             var request = new ReadStreamRequest(stream);
-            var recordedAt = JsonNode.Parse(state.Original.Json)![ModelRootClusterState.RecordedAtField]!.GetValue<DateTimeOffset>();
-            var expected = new EventRecord(stream, 1L, 1L,
+            var original = JsonNode.Parse(state.Original.Json)!;
+            var recordedAt = original[ModelRootClusterState.RecordedAtField]!.GetValue<DateTimeOffset>();
+            // The event sequence counts every event in the partition, so it is the one the original row reported.
+            var sequence = original[ModelRootClusterState.EventSequenceField]!.GetValue<long>();
+            var expected = new EventRecord(stream, 1L, sequence,
                 new(ModelRootClusterState.Item, ModelRootClusterState.Type, Body(state, read, false), Body(state, read, true)), recordedAt);
             await ModelRootClusterWave.ObserveAsync(root, state, async () => await StreamAsync(
                 await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.ReadStreamAsync(request, token)), expected), token);
