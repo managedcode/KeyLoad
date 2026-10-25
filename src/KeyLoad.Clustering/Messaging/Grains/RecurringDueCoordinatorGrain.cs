@@ -41,7 +41,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         }
 
         var creator = principal ?? throw Errors.Fail(ErrorCode.Corruption, DueCoordinatorFields.InvalidHint);
-        var commandId = DueDispatchCommandIdentity.ForDue(hint);
+        var commandId = Guid.NewGuid();
         var mutation = RecurringDueCommand.Create(hint);
         var payload = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [mutation]));
         var result = await DispatchWithOneUncertaintyRetry(creator, commandId, payload, token).ConfigureAwait(true);
@@ -96,7 +96,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
     private Task<GrainOperationReply> DispatchTimeoutAsync(DueWorkHint hint,
         PrincipalRecord principal, CancellationToken cancellationToken)
     {
-        var commandId = DueDispatchCommandIdentity.ForDue(hint);
+        var commandId = Guid.NewGuid();
         var payload = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition,
             [new ExpireSaga(hint.Lane, hint.Id, hint.Revision)]));
         return DispatchWithOneUncertaintyRetry(principal, commandId, payload, cancellationToken);

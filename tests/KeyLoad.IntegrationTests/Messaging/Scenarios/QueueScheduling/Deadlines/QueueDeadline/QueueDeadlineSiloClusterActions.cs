@@ -25,6 +25,7 @@ internal static class QueueDeadlineSiloClusterActions
             state.Original = QueueDeadlineSiloClusterExpected.Scheduled(state.Due);
         }
         state.Producers.Add((command, receipt));
+        await QueueDeadlineSiloClusterCurrent.OutboxAdvancedAsync(admin, state, token);
         await QueueDeadlineSiloClusterCurrent.ObserveAsync(admin, state, token);
         await QueueDeadlineSiloClusterExpected.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value, receipt);

@@ -47,6 +47,8 @@ internal sealed class GraphSearchClusterSiloRestartTests(ClusterFixture fixture)
             restarted = true;
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
+            // A write requires every configured copy, so every node must report the rejoined silo active first.
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(clients.Administrators, cancellationToken);
             var receipt = await WriteAndReadOnSurvivorAsync(scenario, clients, survivor, addition, cancellationToken);
             await VerifyClusterCatchupAsync(scenario, clients, addition, receipt, cancellationToken);
         }

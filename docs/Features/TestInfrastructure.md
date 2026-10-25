@@ -107,7 +107,7 @@ REQ/AC-TEST-015 requires the local-image lifetime helpers to await already compl
 
 Local image cleanup joins in TestSuiteApplication only after actual AppHost stop and producer/runner settlement, under a separate45-second cleanup token, before output settlement and application disposal. Preparation output is included only for explicit local mode. Default GitHub image selection and the full replicated-cluster gates remain mandatory.
 
-REQ/AC-TEST-010 also requires bounded GitHub job time. Build and Tests splits the suites into the sharded jobs described in [CI shards and lanes](#ci-shards-and-lanes): each unit shard and the analyzers-and-recovery job has 30 minutes, each Aspire topology shard 35 minutes with a 25-minute deadline per lane process, and the Build job 30 minutes. No individual suite deadline, required check, artifact or failure predicate is removed. A failed, timed out or cancelled suite, lane or shard remains failed/unqualified, and an unfinished shard cannot qualify the run.
+REQ/AC-TEST-010 also requires bounded GitHub job time. Build and Tests splits the suites into the sharded jobs described in [CI shards and lanes](#ci-shards-and-lanes): each unit shard and the analyzers-and-recovery job has 30 minutes, each Aspire topology shard 55 minutes with a 45-minute deadline per lane process, and the Build job 30 minutes. No individual suite deadline, required check, artifact or failure predicate is removed. A failed, timed out or cancelled suite, lane or shard remains failed/unqualified, and an unfinished shard cannot qualify the run.
 
 AC-TEST-010 requires original per-suite MTP/TRX evidence from every required CI suite. Its Aspire caller explicitly enables `KeyLoadTests:ReportTrx=true`; an omitted report setting, absent report, cancelled suite or failed runner cannot establish qualification. A missing full-suite TRX receipt is an evidence gap, never a pass.
 
@@ -154,7 +154,7 @@ Whole regression: existing ImagesProduceClosedManifestAndRejectTamperingWithoutR
 | Build | governance, website source inventory, static shard partition check, `dotnet build KeyLoad.slnx -warnaserror` | none |
 | Units U1–U4 | the namespaces listed for the shard | one process per namespace, `/KeyLoad.UnitTests/<namespace>/*/*`, `--maximum-parallel-tests` = processor count |
 | Analyzers and process recovery | shards AN then RC | `/KeyLoad.Analyzers.Tests/*/*/*` and `/KeyLoad.RecoveryTests/*/*/*` |
-| Aspire topology I01–I12 | two lanes per runner | each lane is its own `dotnet test` process, `--maximum-parallel-tests 1 --timeout 25m`, class or method alternation under `/KeyLoad.IntegrationTests/*/` |
+| Aspire topology I01–I12 | two lanes per runner | each lane is its own `dotnet test` process, `--maximum-parallel-tests 1 --timeout 45m`, class or method alternation under `/KeyLoad.IntegrationTests/*/` |
 | Verify test partition | every shard's TRX artifact | `ci-test-shards.mjs verify TestResults` |
 
 Every test job runs `dotnet build KeyLoad.slnx -warnaserror` in the default Debug configuration, because tests read compiled outputs of projects their test project does not reference: ProductionSourceManifestOperationTests reads the image of every solution project, and ColdBootstrapSdkTests launches `src/KeyLoad.Cli/bin/Debug/net10.0/KeyLoad.Cli.dll`. Each job then writes TRX reports to `TestResults/<suite>/<shard>/<lane or namespace>` and uploads them as `test-results-<suite>-<shard>` even when tests fail. The filters pin the assembly segment, so the process recovery tests that the unit host also registers run once, in RC.

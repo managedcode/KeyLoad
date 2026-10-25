@@ -24,6 +24,9 @@ internal static class PartitionQueryClusterSiloRestart
             await fixture.KillServerAsync(selectedSilo, PartitionQueryClusterProtocol.NodeFailureScenario,
                 cancellationToken).ConfigureAwait(false);
             stopped = true;
+            // Reads reach the surviving copies once Orleans membership on every survivor removed the killed silo.
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture,
+                [McpCallerProtocol.Node1, McpCallerProtocol.Node2], cancellationToken).ConfigureAwait(false);
             using (var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1))
             {
                 var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());

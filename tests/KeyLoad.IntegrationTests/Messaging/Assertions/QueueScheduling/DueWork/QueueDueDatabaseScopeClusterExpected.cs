@@ -36,4 +36,18 @@ internal static class QueueDueDatabaseScopeClusterExpected
         await EqualAsync((await PublicReadAssertions.MessageAsync(await admin.Mcp.CallAsync(
             McpCallerTools.MessagesInspect, request, token))).Value, expected);
     }
+
+    /// <summary>One committed queue mutation appends exactly one partition-local outbox entry with its effect.</summary>
+    internal static async Task OutboxAdvancedAsync(RequestCqrsClusterCallers admin,
+        QueueDueDatabaseScopeClusterLane lane, CancellationToken token)
+    {
+        var previous = lane.Outbox;
+        var actual = await McpCallerAssertions.SdkSuccessAsync(await admin.Sdk.OutboxStatusAsync(lane.Lane.Partition, token));
+        await Assert.That(actual.Head.Tail).IsEqualTo(previous.Head.Tail + 1L);
+        await Assert.That(actual.Head.FirstAvailable).IsEqualTo(previous.Head.FirstAvailable);
+        await Assert.That(actual.Head.StoredRecords).IsEqualTo(previous.Head.StoredRecords + 1L);
+        await Assert.That(actual.Head.StoredBytes).IsGreaterThan(previous.Head.StoredBytes);
+        await EqualAsync(actual.Consumers, previous.Consumers);
+        lane.Outbox = actual;
+    }
 }

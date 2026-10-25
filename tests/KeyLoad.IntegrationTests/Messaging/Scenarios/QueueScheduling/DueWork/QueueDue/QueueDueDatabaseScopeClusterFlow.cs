@@ -83,6 +83,7 @@ internal static class QueueDueDatabaseScopeClusterFlow
         var ready = QueueDueDatabaseScopeClusterExpected.Ready(lane, false);
         await QueueDeadlineClusterAssertions.WaitReadyAsync(admin, lane.Lane, ready, token);
         lane.Message = ready;
+        await QueueDueDatabaseScopeClusterExpected.OutboxAdvancedAsync(admin, lane, token);
         await QueueDueDatabaseScopeClusterCurrent.ObserveAsync(admin, state, token);
     }
 

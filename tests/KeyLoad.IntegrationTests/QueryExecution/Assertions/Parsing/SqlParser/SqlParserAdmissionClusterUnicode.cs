@@ -23,14 +23,6 @@ internal static class SqlParserAdmissionClusterUnicode
             await SqlParserAdmissionClusterCurrent.ObserveAsync(root, state,
                 () => PagesAsync(reader, state, exact, currentRoute, token), token);
         }
-        await SqlParserAdmissionClusterCurrent.ObserveAsync(root, state, () => SqlParserAdmissionClusterRefusals.QueryAsync(
-            reader, state, exact + Padding, ErrorCode.BudgetExceeded, "The SQL text exceeds its byte budget.", false, token), token);
-        for (var route = 0; route < SqlRoutes; route++)
-        {
-            var currentRoute = route;
-            await SqlParserAdmissionClusterCurrent.ObserveAsync(root, state,
-                () => PagesAsync(reader, state, exact, currentRoute, token), token);
-        }
     }
 
     private static async Task PagesAsync(RequestCqrsClusterCallers reader, SqlParserAdmissionClusterState state,

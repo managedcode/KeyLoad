@@ -22,8 +22,7 @@ internal static class SqlParserAdmissionClusterRefusals
         var unified = await reader.Sdk.ExecuteSqlAsync(envelope, token);
         await Assert.That(unified.IsFailed).IsTrue();
         await Assert.That(unified.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
-        var unifiedDetail = detail == "The SQL text exceeds its byte budget." ? "The unified SQL text exceeds its byte budget." : detail;
-        await SqlClusterProtocol.EqualAsync(Errors.Problem(code, unifiedDetail), unified.Problem);
+        await SqlClusterProtocol.EqualAsync(Errors.Problem(code, detail), unified.Problem);
         await McpAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, envelope, token), state.Original.Identity.Secret, code, unifiedDispatched);
     }
     internal static async Task InsertAsync(RequestCqrsClusterCallers root, SqlParserAdmissionClusterState state, CancellationToken token)
@@ -43,7 +42,7 @@ internal static class SqlParserAdmissionClusterRefusals
     {
         await McpCallerAssertions.ErrorAsync(reply, code, dispatched);
         var detail = code == ErrorCode.PermissionDenied ? "The principal cannot perform this operation in this scope."
-            : code == ErrorCode.BudgetExceeded ? "The operation exceeds the available resource capacity." : "The database operation could not be completed.";
+            : "The database operation could not be completed.";
         await Assert.That(JsonElement.DeepEquals(JsonSerializer.SerializeToElement(Errors.Problem(code, detail), JsonDefaults.Options),
             reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error))).IsTrue();
         await McpCallerAssertions.DoesNotDiscloseAsync(reply, credential, SqlParserAdmissionClusterState.Secret);

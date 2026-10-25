@@ -18,7 +18,8 @@ internal static class AtomicProducerClusterDocumentRefusalAssertions
         await Assert.That(reply.Problem!.Type).IsEqualTo(problem.GetProperty(McpCallerProtocol.ProblemType).GetString());
         await Assert.That(reply.Problem.Title).IsEqualTo(problem.GetProperty(McpCallerProtocol.ProblemTitle).GetString());
         await Assert.That(reply.Problem.StatusCode).IsEqualTo(problem.GetProperty(McpCallerProtocol.ProblemStatus).GetInt32());
-        await Assert.That(reply.Problem.Detail).IsEqualTo(problem.GetProperty(McpCallerProtocol.ProblemDetail).GetString());
+        await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemDetail).GetString())
+            .IsEqualTo(QueueProducerClusterProtocol.McpRevisionRefusalDetail);
         await Assert.That(reply.Problem.ErrorCode).IsEqualTo(problem.GetProperty(McpCallerProtocol.ProblemCode).GetString());
         await ImageAsync(sdk, mcp, original, token);
         var sql = SqlClusterProtocol.Call(command.Partition, McpCallerTools.DocumentsCommit, command);

@@ -9,7 +9,7 @@ internal sealed class PostgresServerCertificate : IDisposable
     {
         var settings = options.Value;
         settings.Validate();
-        Value = X509CertificateLoader.LoadPkcs12FromFile(settings.CertificatePath, null, X509KeyStorageFlags.EphemeralKeySet);
+        Value = X509CertificateLoader.LoadPkcs12FromFile(settings.CertificatePath, null, KeyStorage);
         if (!Value.HasPrivateKey)
         {
             var failures = new List<Exception>
@@ -26,5 +26,11 @@ internal sealed class PostgresServerCertificate : IDisposable
         get;
     }
     public void Dispose() => Value.Dispose();
+
+    // macOS cannot hold a PKCS#12 private key as an ephemeral key set; there the key lives in a temporary keychain
+    // that the certificate removes on disposal.
+    private static X509KeyStorageFlags KeyStorage => OperatingSystem.IsMacOS()
+        ? X509KeyStorageFlags.DefaultKeySet
+        : X509KeyStorageFlags.EphemeralKeySet;
     private const string CertificateInvalid = "Execution SQL requires an owned TLS certificate with a private key.";
 }

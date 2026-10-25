@@ -28,24 +28,27 @@ internal static class SparseCompositePrefixClusterCurrent
     }
     private static async Task DocumentsAsync(RequestCqrsClusterCallers root, SparseCompositePrefixClusterState state, CancellationToken token)
     {
+        // The fourteen source reads are independent at one read cut, so they are issued together and every one is joined.
+        var reads = new[] { SparseCompositePrefixClusterData.Only, SparseCompositePrefixClusterData.WithStatusIndex }
+            .SelectMany(collection => SparseCompositePrefixClusterData.Rows.Select(row => DocumentAsync(root, state, collection, row, token)))
+            .ToArray();
         var failures = new List<Exception>();
-        foreach (var collection in new[] { SparseCompositePrefixClusterData.Only, SparseCompositePrefixClusterData.WithStatusIndex })
+        foreach (var read in reads)
         {
-            foreach (var row in SparseCompositePrefixClusterData.Rows)
-            {
-                await ServerFailureObserver.ObserveAsync(async () =>
-                {
-                    var reference = new EntityRef(state.Partition, collection, row.Id);
-                    var expected = new DocumentResult(state.Stored(collection, row.Id), 1L, row.Json, false, []);
-                    await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(
-                        await root.Sdk.GetAsync(reference, state.Receipt.Token, token)));
-                    await SqlClusterProtocol.EqualAsync(new DocumentReadResult(expected),
-                        (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(await root.Mcp.CallAsync(
-                            McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, state.Receipt.Token), token))).Value);
-                }, failures);
-            }
+            await ServerFailureObserver.ObserveAsync(() => read, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
+    }
+    private static async Task DocumentAsync(RequestCqrsClusterCallers root, SparseCompositePrefixClusterState state,
+        string collection, (string Id, string Json) row, CancellationToken token)
+    {
+        var reference = new EntityRef(state.Partition, collection, row.Id);
+        var expected = new DocumentResult(state.Stored(collection, row.Id), 1L, row.Json, false, []);
+        await SqlClusterProtocol.EqualAsync(expected, await PublicReadAssertions.DocumentAsync(
+            await root.Sdk.GetAsync(reference, state.Receipt.Token, token)));
+        await SqlClusterProtocol.EqualAsync(new DocumentReadResult(expected),
+            (await McpCallerAssertions.SuccessAsync<DocumentReadResult>(await root.Mcp.CallAsync(
+                McpCallerTools.DocumentsGet, new GetDocumentRequest(reference, state.Receipt.Token), token))).Value);
     }
     internal static async Task PageAsync(QueryPage actual, int shape, string path)
     {

@@ -7,13 +7,13 @@ using KeyLoad.Query;
 
 namespace KeyLoad.IntegrationTests.QueryExecution;
 
-/// <summary>AC-PQUERY-001 and AC-PQUERY-005 reject bounded-shape, byte-limit and caller-cancellation cases.</summary>
+/// <summary>AC-PQUERY-001 and AC-PQUERY-005 reject bounded-shape and caller-cancellation cases and accept large parameters.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = PublicQueryStorageSelection.Key)]
 [NotInParallel]
 internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture)
 {
     private const int InvalidVersion = 2;
-    private const int OversizedValueChars = 70_000;
+    private const int LargeValueChars = 70_000;
 
     [Test]
     public async Task AcPquery001InvalidVersionAndLeafOverflowAreValidationWithHealthyFollowup()
@@ -49,17 +49,16 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
     }
 
     [Test]
-    public async Task AcPquery005OversizedRequestAndCancelledSdkAndMcpCallsHaveHealthyFollowups()
+    public async Task AcPquery005LargeParameterCompletesAndCancelledSdkAndMcpCallsHaveHealthyFollowups()
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await PartitionQueryClusterScenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        var oversized = CreateOversizedRequest(scenario);
+        var large = CreateLargeParameterRequest(scenario);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token).ConfigureAwait(false);
-        await AssertFailureAsync(sdk, mcp, oversized, ErrorCode.BudgetExceeded, deadline.Token)
-            .ConfigureAwait(false);
+        await AssertEmptyCompletePageAsync(sdk, mcp, large, deadline.Token).ConfigureAwait(false);
         await AssertHealthySdkAsync(sdk, scenario, deadline.Token).ConfigureAwait(false);
 
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);
@@ -92,9 +91,22 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         => known.AddRange(Enumerable.Range(0, PartitionQueryClusterProtocol.MaxPartitions - known.Length + 1)
             .Select(index => known[0] with { PartitionKey = "overflow-" + index.ToString(System.Globalization.CultureInfo.InvariantCulture) }));
 
-    private static PartitionQueryRequest CreateOversizedRequest(PartitionQueryClusterScenario scenario)
+    private static async Task AssertEmptyCompletePageAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+        PartitionQueryRequest request, CancellationToken cancellationToken)
     {
-        var largeText = new string('x', OversizedValueChars);
+        var page = await McpCallerAssertions.SdkSuccessAsync(await sdk.PartitionQueryAsync(request, cancellationToken)
+            .ConfigureAwait(false)).ConfigureAwait(false);
+        await Assert.That(page!.Complete).IsTrue();
+        await Assert.That(page.Rows).IsEmpty();
+        var receipt = await McpCallerAssertions.SuccessAsync<PartitionQueryPage>(await mcp.CallAsync(
+            PartitionQueryClusterProtocol.ToolName, request, cancellationToken).ConfigureAwait(false)).ConfigureAwait(false);
+        await Assert.That(receipt.Value.Complete).IsTrue();
+        await Assert.That(receipt.Value.Rows).IsEmpty();
+    }
+
+    private static PartitionQueryRequest CreateLargeParameterRequest(PartitionQueryClusterScenario scenario)
+    {
+        var largeText = new string('x', LargeValueChars);
         var parameters = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
             [PartitionQueryClusterProtocol.ValueAlias] = JsonSerializer.SerializeToElement(largeText, JsonDefaults.Options)

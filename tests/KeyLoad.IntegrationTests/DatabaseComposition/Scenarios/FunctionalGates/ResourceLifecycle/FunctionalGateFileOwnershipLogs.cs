@@ -14,9 +14,12 @@ internal static class FunctionalGateFileOwnershipLogs
         string[] secrets = [profile.AdminKey, profile.SigningKey];
         var output = new StringBuilder();
         var logs = fixture.App.Services.GetRequiredService<ResourceLoggerService>();
+        // DCP writes each project log under its suffixed instance name; the resource overload resolves that name.
+        var resource = fixture.App.Services.GetRequiredService<DistributedApplicationModel>().Resources
+            .OfType<ProjectResource>().Single(value => value.Name == name);
         try
         {
-            await foreach (var batch in logs.WatchAsync(name).WithCancellation(token).ConfigureAwait(false))
+            await foreach (var batch in logs.WatchAsync(resource).WithCancellation(token).ConfigureAwait(false))
             {
                 var refusal = ReadBatch(batch, secrets, output);
                 if (refusal is not null)

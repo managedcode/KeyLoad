@@ -12,10 +12,11 @@ internal static class SqlParserAdmissionClusterWave
         await ScriptDomNamedParameterClusterWrites.RunAsync(root, state, token);
         await SqlParserAdmissionClusterUnicode.RunAsync(root, reader, state, token);
         await SqlParserAdmissionClusterNumericControls.RunAsync(reader, state, token);
+        // The unified SQL tool compiles the text before dispatch, so its malformed and unsupported refusals carry no request ID.
         foreach (var (sql, code, detail) in SqlParserAdmissionClusterInputs.Corpus())
         {
             await SqlParserAdmissionClusterCurrent.ObserveAsync(root, state,
-                () => SqlParserAdmissionClusterRefusals.QueryAsync(reader, state, sql, code, detail, code == ErrorCode.UnsupportedCapability, token), token);
+                () => SqlParserAdmissionClusterRefusals.QueryAsync(reader, state, sql, code, detail, false, token), token);
             await SqlParserAdmissionClusterReads.HealthyAsync(reader, state, token);
         }
         await SqlParserAdmissionClusterCurrent.ObserveAsync(root, state,

@@ -8,7 +8,7 @@ namespace KeyLoad.IntegrationTests.QueryExecution;
 
 internal sealed record PostgresClusterSelection(int QueryDialect)
 {
-    private const string Prefix = "KeyLoad__Sql__";
+    private const string Prefix = "KeyLoad__RuntimeSql__";
     private const string Tcp = "tcp";
     private const string True = "true";
 

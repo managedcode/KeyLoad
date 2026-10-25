@@ -12,6 +12,7 @@ internal static class TypedEndpointJoinReverseFlow
     private const string ChangedPrefix = "typed-reverse-conflict-";
     private const string RepairedPrefix = "typed-reverse-repaired-";
     private const string EpochChanged = "The principal policy changed since this command was evaluated.";
+    private const string OfficialDenied = "The authenticated principal is not permitted to perform this operation.";
     private const long EpochStep = 1;
 
     internal static Task<TypedEndpointJoinState> WarmAsync(ClusterFixture fixture,
@@ -121,13 +122,13 @@ internal static class TypedEndpointJoinReverseFlow
     internal static async Task<JsonElement> FencedAsync(RequestCqrsClusterCallers callers,
         CommandRequest command, CancellationToken token)
     {
-        var problem = await RefusedAsync(callers, command, ErrorCode.PermissionDenied, token, EpochChanged);
+        var problem = await RefusedAsync(callers, command, ErrorCode.PermissionDenied, token, OfficialDenied);
         await Assert.That(problem.GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(EpochChanged);
         return problem;
     }
 
     internal static async Task<JsonElement> RefusedAsync(RequestCqrsClusterCallers callers,
-        CommandRequest command, ErrorCode code, CancellationToken token, string? expectedDetail = null)
+        CommandRequest command, ErrorCode code, CancellationToken token, string? officialDetail = null)
     {
         var sql = DeclarativeCompositionSql.Reverse(command, (GraphToQueueMutation)command.Mutations[0]);
         var actual = await callers.Sdk.ExecuteSqlAsync(sql, token);
@@ -136,10 +137,10 @@ internal static class TypedEndpointJoinReverseFlow
         await Assert.That(actual.Problem!.ErrorCode).IsEqualTo(code.ToString());
         var official = await callers.Mcp.CallAsync(SqlOperationProtocol.ToolName, sql, token);
         await McpCallerAssertions.ErrorAsync(official, code, dispatched: true);
-        if (expectedDetail is not null)
+        if (officialDetail is not null)
         {
             await Assert.That(official.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
-                .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(expectedDetail);
+                .GetProperty(McpCallerProtocol.ProblemDetail).GetString()).IsEqualTo(officialDetail);
         }
         return JsonSerializer.SerializeToElement(actual.Problem, JsonDefaults.Options);
     }

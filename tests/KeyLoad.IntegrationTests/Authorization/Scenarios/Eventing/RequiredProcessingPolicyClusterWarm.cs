@@ -17,8 +17,10 @@ internal static class RequiredProcessingPolicyClusterWarm
             await RequiredProcessingPolicyClusterRefusals.AllAsync(reader, state, state.Refused, RequiredProcessingPolicyClusterState.Denied, token);
         }, token);
         await RequiredProcessingPolicyClusterSetup.PolicyAsync(root, state, RequiredProcessingPolicyClusterState.Before, token);
-        state.Original = state.Refused;
-        await Assert.That(state.Original.CommandId).IsEqualTo(state.Refused.CommandId);
+        await RequiredProcessingPolicyClusterValues.ObserveAsync(root, state, 0, () => RequiredProcessingPolicyClusterRefusals.AllAsync(
+            reader, state, state.Refused, RequiredProcessingPolicyClusterState.Denied, token), token);
+        state.Original = state.Processing(first, "first");
+        await Assert.That(state.Original.CommandId).IsNotEqualTo(state.Refused.CommandId);
         state.OriginalReceipt = await RequiredProcessingPolicyClusterRoutes.CompleteAsync(reader, state, state.Original, "first", token);
         await RequiredProcessingPolicyClusterSetup.PolicyAsync(root, state, RequiredProcessingPolicyClusterState.After, token);
         await RequiredProcessingPolicyClusterValues.ObserveAsync(root, state, 1, () => RequiredProcessingPolicyClusterRefusals.AllAsync(

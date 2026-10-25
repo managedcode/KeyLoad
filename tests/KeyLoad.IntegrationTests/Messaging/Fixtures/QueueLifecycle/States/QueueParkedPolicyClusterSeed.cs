@@ -30,7 +30,7 @@ internal static class QueueParkedPolicyClusterSeed
         var identity = await MessagingClusterIdentity.CreateAsync(fixture, partition.TenantId,
             [new(partition.DatabaseId, QueueParkedPolicyClusterProtocol.Queue, Capability.QueuePublish | Capability.QueueConsume |
                 Capability.QueueAck | Capability.QueueInspect | Capability.QueueCancel),
-             new(partition.DatabaseId, QueueParkedPolicyClusterProtocol.Collection, Capability.DocumentsRead)], [], false, token);
+             new(partition.DatabaseId, QueueParkedPolicyClusterProtocol.Collection, Capability.DocumentsRead)], [], true, token);
         var state = new QueueParkedPolicyClusterState(partition, definition, identity);
         state.Configurations.Add((id, request, configured));
         return state;

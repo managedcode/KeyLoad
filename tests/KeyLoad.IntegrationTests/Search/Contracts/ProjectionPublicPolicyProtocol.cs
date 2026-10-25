@@ -3,7 +3,7 @@ namespace KeyLoad.IntegrationTests.Search;
 internal static class ProjectionPublicPolicyProtocol
 {
     internal const string ColdScenario = "projection-public-policy-cold";
-    internal const string ModelSql = """SELECT * FROM "event-projection-cluster" ORDER BY id LIMIT 3""";
+    internal const string ModelSql = """SELECT TOP (3) * FROM "event-projection-cluster" ORDER BY id""";
     internal const string Scan = "bounded-full-scan";
     internal const string BaselineJson = """{"kind":"baseline"}""";
     internal const string DerivedJson = """{"kind":"derived"}""";

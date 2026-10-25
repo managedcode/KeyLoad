@@ -10,6 +10,8 @@ namespace KeyLoad.IntegrationTests.StorageReplication;
 
 internal static class DocumentSessionReadClusterFlow
 {
+    private static readonly string[] Nodes = [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3];
+
     internal static async Task RunAsync(ClusterFixture fixture)
     {
         using var deadline = McpCallerDeadline.Create();
@@ -32,8 +34,8 @@ internal static class DocumentSessionReadClusterFlow
             var selected = McpCallerProtocol.Node3;
             stopped.Add(selected);
             await fixture.KillServerAsync(selected, KillScenario, deadline.Token);
-            var survivors = new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 }
-                .Where(node => node != selected).ToArray();
+            var survivors = Nodes.Where(node => node != selected).ToArray();
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture, survivors, deadline.Token);
             await VerifySurvivorsAsync(fixture, survivors, partition, ResourceCreationLifetime.Create(creationId, creation),
                 command, receipt, identity, stopped, deadline.Token);
         }, failures).ConfigureAwait(false);
@@ -66,12 +68,7 @@ internal static class DocumentSessionReadClusterFlow
         var stored = reference with { Lifetime = lifetime };
         await DocumentSessionReadClusterAssertions.HealthyAsync(sdk, mcp, reference, stored, receipt.Token, FirstJson, First, token);
         await DocumentSessionReadClusterAssertions.RejectedAsync(sdk, mcp, reference, stored, receipt.Token, identity.Secret, token);
-        foreach (var node in stopped.ToArray())
-        {
-            await fixture.RestartServerAsync(node, token);
-            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, token);
-            stopped.Remove(node);
-        }
+        await RestartAsync(fixture, stopped, token);
         await DocumentSessionReadClusterAuthorization.VerifyAsync(admin, sdk, mcp, reference, stored, receipt.Token, identity, token);
         var nextCommand = new CommandRequest(Guid.NewGuid(), partition,
             [new PutDocument(Collection, DocumentId, SecondJson, First, ExplicitReplacement: true)]);
@@ -81,24 +78,34 @@ internal static class DocumentSessionReadClusterFlow
         await Assert.That(next.Token.Incarnation).IsEqualTo(receipt.Token.Incarnation);
         await Assert.That(next.Token.AtomicPartitionId).IsEqualTo(receipt.Token.AtomicPartitionId);
         await DocumentSessionReadClusterAssertions.HealthyAsync(sdk, mcp, reference, stored, receipt.Token, SecondJson, Second, token);
+        // Only one of the three silos stops, so the remaining majority can remove it from the membership.
         stopped.Add(survivors[First]);
         await fixture.KillServerAsync(survivors[First], KillScenario, token);
-        stopped.Add(McpCallerProtocol.Node3);
-        await fixture.KillServerAsync(McpCallerProtocol.Node3, KillScenario, token);
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture,
+            Nodes.Where(node => node != survivors[First]).ToArray(), token);
         await DocumentSessionReadClusterAssertions.HealthyAsync(sdk, mcp, reference, stored, next.Token, SecondJson, Second, token);
         var unavailableReplay = await admin.CommitAsync(nextCommand, token);
         await Assert.That(unavailableReplay.IsFailed).IsTrue();
         await Assert.That(unavailableReplay.Value).IsNull();
         await Assert.That(unavailableReplay.Problem?.ErrorCode is nameof(ErrorCode.OwnershipLost)
             or nameof(ErrorCode.UnknownWriteOutcome)).IsTrue();
-        foreach (var node in stopped.ToArray())
-        {
-            await fixture.RestartServerAsync(node, token);
-            stopped.Remove(node);
-        }
+        await RestartAsync(fixture, stopped, token);
         await using var restoredAdminMcp = await McpOfficialClient.ConnectAsync(fixture, survivors[Zero], fixture.AdminKey, token);
         await DocumentSessionReceiptAssertions.ReplayedAsync(admin, restoredAdminMcp, command, receipt, token);
         await DocumentSessionReceiptAssertions.ReplayedAsync(admin, restoredAdminMcp, nextCommand, next, token);
         await DocumentSessionReadClusterAssertions.HealthyAsync(sdk, mcp, reference, stored, receipt.Token, SecondJson, Second, token);
+    }
+
+    /// <summary>Restarts every stopped node and waits until all nodes report each other active, because a write requires
+    /// every configured copy.</summary>
+    private static async Task RestartAsync(ClusterFixture fixture, HashSet<string> stopped, CancellationToken token)
+    {
+        foreach (var node in stopped.ToArray())
+        {
+            await fixture.RestartServerAsync(node, token);
+            await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, token);
+            stopped.Remove(node);
+        }
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture, Nodes, token);
     }
 }

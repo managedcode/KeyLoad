@@ -110,7 +110,7 @@ jobs:
     name: Aspire topology ${{ matrix.shard }}
     needs: shards
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 55
     strategy:
       fail-fast: false
       matrix: ${{ fromJSON(needs.shards.outputs.integration) }}

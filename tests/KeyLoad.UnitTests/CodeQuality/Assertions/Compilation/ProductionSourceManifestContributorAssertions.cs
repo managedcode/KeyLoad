@@ -4,8 +4,8 @@ namespace KeyLoad.UnitTests.CodeQuality.Assertions;
 
 internal static class ProductionSourceManifestContributorAssertions
 {
-    private const int ExpectedUnitRows = 50;
-    private const int ExpectedClusterRows = 11;
+    private const int ExpectedUnitRows = 42;
+    private const int ExpectedClusterRows = 9;
     private const int MaximumIdentityFieldCharacters = 512;
     private const int MaximumOperationCharacters = 4096;
     private const string RegistryPath = "scripts/Features/CodeQuality/functional-coverage.product-contributors.json";

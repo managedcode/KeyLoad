@@ -5,7 +5,7 @@ internal sealed class QueueDueDatabaseScopeClusterLane(QueueLaneRef lane, string
 {
     internal QueueLaneRef Lane { get; } = lane;
     internal string Payload { get; } = payload;
-    internal OutboxStatus Outbox { get; } = outbox;
+    internal OutboxStatus Outbox { get; set; } = outbox;
     internal MessageInspection? Message
     {
         get; set;

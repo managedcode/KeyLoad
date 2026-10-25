@@ -88,7 +88,7 @@
       "assembly": "KeyLoad.IntegrationTests",
       "partition": "class",
       "parallelism": 1,
-      "timeoutMinutes": 25,
+      "timeoutMinutes": 45,
       "lanesPerRunner": 2,
       "excludedCategories": [
         "HeavyLoad"

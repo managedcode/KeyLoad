@@ -6,7 +6,7 @@ internal sealed class QueueDeadlineSiloClusterState(QueueLaneRef lane, Messaging
     internal QueueLaneRef Lane { get; } = lane;
     internal MessagingClusterIdentity Identity { get; } = identity;
     internal DateTimeOffset Due { get; } = due;
-    internal OutboxStatus Baseline { get; } = baseline;
+    internal OutboxStatus Baseline { get; set; } = baseline;
     internal MessageInspection? Original
     {
         get; set;

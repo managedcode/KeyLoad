@@ -40,6 +40,8 @@ internal static class QueueDeadlineSiloClusterContinuation
             var ready = QueueDeadlineSiloClusterExpected.Ready(false);
             await QueueDeadlineClusterAssertions.WaitReadyAsync(admin, state.Lane, ready, token);
             state.Original = ready;
+            // The background promotion is one committed AdvanceQueueDeadline mutation, so it appends one outbox entry.
+            await QueueDeadlineSiloClusterCurrent.OutboxAdvancedAsync(admin, state, token);
             await QueueDeadlineSiloClusterCurrent.ObserveAsync(admin, state, token);
             await QueueDeadlineSiloClusterActions.StaleAsync(admin, state, token);
             await QueueDeadlineSiloClusterActions.ReplayAsync(admin, worker, state, token);

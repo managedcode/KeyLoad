@@ -18,7 +18,7 @@ Build and Tests is a set of parallel jobs driven by one checked-in manifest, `sc
 - **Units:** four shards. Each runs one process per namespace with the assembly-pinned filter `/KeyLoad.UnitTests/<namespace>/*/*` at processor-count parallelism.
 - **Analyzers and process recovery:** one job with filters `/KeyLoad.Analyzers.Tests/*/*/*` and `/KeyLoad.RecoveryTests/*/*/*`.
 - **Aspire topology:** twelve shards of two lanes each.
-  - A lane is its own `dotnet test` process with `--maximum-parallel-tests 1` and a 25-minute deadline, so a runner holds at most two clusters.
+  - A lane is its own `dotnet test` process with `--maximum-parallel-tests 1` and a 45-minute deadline, so a runner holds at most two clusters. Measured lanes take 20–25 minutes, so the deadline sits well above a complete lane.
   - Lanes are typed: one keyed shared cluster, own clusters, other keyed clusters, or one long functional gate method.
   - Every lane process owns its own keyed shared cluster, so a test that kills, restarts or cold-reopens nodes cannot affect another lane.
 - **Verify test partition:** reads every shard's TRX artifact and proves that each test ran exactly once, in its assigned shard and lane.

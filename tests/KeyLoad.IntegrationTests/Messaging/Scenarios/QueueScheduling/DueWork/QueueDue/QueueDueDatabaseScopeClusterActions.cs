@@ -25,6 +25,7 @@ internal static class QueueDueDatabaseScopeClusterActions
             lane.Message = QueueDueDatabaseScopeClusterExpected.Scheduled(lane, state.Due);
         }
         lane.Seeds.Add((command, receipt));
+        await QueueDueDatabaseScopeClusterExpected.OutboxAdvancedAsync(admin, lane, token);
         await QueueDueDatabaseScopeClusterCurrent.ObserveAsync(admin, state, token);
         await QueueDueDatabaseScopeClusterExpected.EqualAsync((await McpCallerAssertions.SuccessAsync<CommitReceipt>(
             await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token))).Value, receipt);

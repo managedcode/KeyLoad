@@ -39,6 +39,7 @@ internal static class QueueProducerClusterProtocol
     internal const long InitialRevision = 1;
     internal const long AbsentDocumentRevision = 0;
     internal const string DocumentRevisionRefusalDetail = "The expected revision does not match.";
+    internal const string McpRevisionRefusalDetail = "The database operation could not be completed.";
     internal const int OriginalMutationCount = 4;
     internal const int InitialAttempts = 0;
     internal const long UnclaimedLeaseVersion = 0;

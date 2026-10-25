@@ -50,8 +50,8 @@ internal static class ProjectionPublicHealthy
         await global::TUnit.Assertions.Assert.That(status.Head.StoredBytes).IsGreaterThan(0L);
         await ProjectionPublicAssertions.ExactAsync(new OutboxHead(4L, 3L, 2L, status.Head.StoredBytes), status.Head);
         await ProjectionPublicAssertions.ExactAsync(global::System.Collections.Immutable.ImmutableArray.Create(
-            new ProjectionConsumerInfo(state.Consumer, state.Definition, 2L, true),
-            new ProjectionConsumerInfo(consumer, definition, 4L, false)), status.Consumers);
+            new ProjectionConsumerInfo(consumer, definition, 4L, false),
+            new ProjectionConsumerInfo(state.Consumer, state.Definition, 2L, true)), status.Consumers);
         await ProjectionPublicAssertions.ExactAsync(status, (await McpCallerAssertions.SuccessAsync<OutboxStatus>(
             await root.Mcp.CallAsync(McpCallerTools.OutboxStatus, new GetOutboxStatusRequest(state.Partition), token))).Value);
         var document = new GetDocumentRequest(new(state.Partition, ProjectionPublicProtocol.Target, "healthy"), completed.Receipt.Token);

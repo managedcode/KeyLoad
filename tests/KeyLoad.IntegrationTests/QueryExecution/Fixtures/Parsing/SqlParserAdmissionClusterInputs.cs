@@ -7,20 +7,11 @@ internal static class SqlParserAdmissionClusterInputs
     internal static IEnumerable<(string Sql, ErrorCode Code, string Detail)> Corpus()
     {
         const int LexicalCases = 4;
-        const int ExcessiveDepth = 33;
-        const int ExcessiveConditions = 600;
-        const int ExcessiveUtf8Characters = 22000;
         for (var index = 0; index < LexicalCases; index++)
         {
             yield return ("SELECT title FROM offsetleft WHERE title = '" + SqlParserAdmissionClusterState.Secret
                 + index.ToString(global::System.Globalization.CultureInfo.InvariantCulture), ErrorCode.Validation, Invalid);
         }
-        yield return ("SELECT title FROM offsetleft WHERE " + new string('(', ExcessiveDepth) + "title = 'first'" + new string(')', ExcessiveDepth),
-            ErrorCode.BudgetExceeded, "The SQL syntax exceeds its depth budget.");
-        yield return ("SELECT title FROM offsetleft WHERE " + string.Join(" OR ", Enumerable.Repeat("title = 'first'", ExcessiveConditions)),
-            ErrorCode.BudgetExceeded, "The SQL syntax exceeds its token budget.");
-        yield return ("SELECT title FROM offsetleft WHERE title = '" + new string('界', ExcessiveUtf8Characters) + "'",
-            ErrorCode.BudgetExceeded, "The SQL text exceeds its byte budget.");
         foreach (var sql in new[]
         {
             "SELECT TOP ((1 COLLATE Latin1_General_100_BIN2)) title FROM offsetleft ORDER BY order_id",

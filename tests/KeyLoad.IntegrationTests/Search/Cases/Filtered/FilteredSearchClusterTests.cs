@@ -15,6 +15,7 @@ internal sealed class FilteredSearchClusterTests(ClusterFixture fixture)
     private const double FirstSingleScore = 1d / 61d;
     private const double SecondSingleScore = 1d / 62d;
     private const double FirstHybridScore = 2d / 61d;
+    private const int LargeAllowlistCount = 10_001;
 
     [Test]
     public async Task AcFilter001NullEmptyDuplicatesUnknownIdsAndBranchRanksMatchIndependentOracle()
@@ -97,7 +98,7 @@ internal sealed class FilteredSearchClusterTests(ClusterFixture fixture)
     }
 
     [Test]
-    public async Task AcFilter003OversizedAllowlistAndCancellationFailWithoutPartialResults()
+    public async Task AcFilter003LargeAllowlistSucceedsWhileResultLimitAndCancellationFailWithoutPartialResults()
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await FilteredSearchClusterScenario.CreateAsync(fixture, deadline.Token);
@@ -106,14 +107,9 @@ internal sealed class FilteredSearchClusterTests(ClusterFixture fixture)
         var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             identity.Secret, deadline.Token);
-        var oversized = Enumerable.Range(0, 10_001).Select(index => "record-" + index.ToString(
-            System.Globalization.CultureInfo.InvariantCulture)).ToImmutableArray();
-        var request = scenario.Vector(oversized);
-        var rejected = await sdk.SearchAsync(request, deadline.Token);
-        await Assert.That(rejected.IsFailed).IsTrue();
-        await Assert.That(rejected.Problem?.ErrorCode).IsEqualTo(ErrorCode.BudgetExceeded.ToString());
-        await McpCallerAssertions.ErrorAsync(await mcp.CallAsync(McpCallerTools.SearchExecute,
-            request, deadline.Token), ErrorCode.BudgetExceeded, dispatched: true);
+        var large = Enumerable.Range(0, LargeAllowlistCount).Select(index => "record-" + index.ToString(
+            System.Globalization.CultureInfo.InvariantCulture)).Append("a").ToImmutableArray();
+        await VerifyBothAsync(sdk, mcp, scenario.Vector(large), [("a", FirstSingleScore)], deadline.Token);
         var resultLimit = scenario.Vector(ImmutableArray.Create("a")) with
         {
             Limit = 1_001

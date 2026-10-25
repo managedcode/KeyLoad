@@ -10,19 +10,13 @@ internal static class GraphSearchClusterSurvivorReadiness
         string[] nodes, int stopped, CancellationToken token)
     {
         var survivors = Enumerable.Range(0, nodes.Length).Where(index => index != stopped).ToArray();
+        // NodeStatus.SiloCount is the active Orleans membership: the stopped silo must leave it on every survivor.
+        var statuses = await ClusterMembershipReadiness.WaitForActiveSilosAsync(
+            [.. survivors.Select(index => administrators[index])], token);
+        await Assert.That(statuses.All(status => status.ReplicaCount == nodes.Length)).IsTrue();
         var selected = -1;
         await ClusterReplicationTestSupport.EventuallyAsync(async () =>
         {
-            var statuses = new List<NodeStatus>();
-            foreach (var index in survivors)
-            {
-                statuses.Add(await McpCallerAssertions.SdkSuccessAsync(await administrators[index].StatusAsync(token)));
-            }
-            if (statuses.Any(status => !status.RoutingReady || status.SiloCount != nodes.Length
-                || status.ReplicaCount != nodes.Length))
-            {
-                return false;
-            }
             var selectedIndex = survivors[0];
             var probe = await administrators[selectedIndex].GetAsync(
                 new(scenario.Partition, GraphSearchClusterScenario.Projects, GraphSearchClusterScenario.SecondSeed), token);

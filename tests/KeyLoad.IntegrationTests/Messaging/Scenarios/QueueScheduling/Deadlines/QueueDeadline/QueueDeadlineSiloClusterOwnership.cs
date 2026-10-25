@@ -1,4 +1,5 @@
 using KeyLoad.IntegrationTests.ClientApi;
+using KeyLoad.IntegrationTests.StorageReplication;
 
 namespace KeyLoad.IntegrationTests.Messaging;
 
@@ -14,7 +15,9 @@ internal sealed class QueueDeadlineSiloClusterOwnership(QueueDeadlineSiloCluster
         var captured = new List<QueueDeadlineSiloClusterObservation>();
         foreach (var name in QueueLeaseClusterProtocol.Nodes)
         {
-            captured.Add(await ReadAsync(fixture, name, token));
+            var observation = await ReadAsync(fixture, name, token);
+            await Assert.That(observation.Status.SiloCount).IsEqualTo(QueueLeaseClusterProtocol.Nodes.Count);
+            captured.Add(observation);
         }
         await Assert.That(captured.Select(node => node.Status.NodeId).Distinct(StringComparer.Ordinal).Count())
             .IsEqualTo(QueueLeaseClusterProtocol.Nodes.Count);
@@ -24,29 +27,23 @@ internal sealed class QueueDeadlineSiloClusterOwnership(QueueDeadlineSiloCluster
         return new(selected, remaining);
     }
 
+    /// <summary>Requires every survivor to report exactly the surviving silos once Orleans membership removed the killed one.</summary>
     internal async Task RequireAvailableSilosAsync(ClusterFixture fixture, CancellationToken token)
     {
-        var until = TimeProvider.System.GetUtcNow() + DueRecurringClusterProtocol.ProgressWindow;
-        while (TimeProvider.System.GetUtcNow() < until)
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture, survivors, token);
+        foreach (var node in survivors)
         {
-            var current = new List<QueueDeadlineSiloClusterObservation>();
-            foreach (var node in survivors)
-            {
-                current.Add(await ReadAsync(fixture, node, token));
-            }
-            if (current.All(node => node.Status.RoutingReady && node.ActiveSilos.ToHashSet(StringComparer.Ordinal)
-                .SetEquals(survivors)))
-            {
-                return;
-            }
-            await Task.Delay(DueRecurringClusterProtocol.PollInterval, TimeProvider.System, token);
+            var current = await ReadAsync(fixture, node, token);
+            await Assert.That(current.Status.SiloCount).IsEqualTo(survivors.Length);
+            await Assert.That(current.ActiveSilos.ToHashSet(StringComparer.Ordinal).SetEquals(survivors)).IsTrue();
         }
-        throw new TimeoutException("Execution Orleans membership did not observe the available silos before the deadline.");
     }
 
     internal async Task RequireRejoinedAsync(ClusterFixture fixture, CancellationToken token)
     {
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture, QueueLeaseClusterProtocol.Nodes, token);
         var restored = await ReadAsync(fixture, OriginalSiloNode, token);
+        await Assert.That(restored.Status.SiloCount).IsEqualTo(QueueLeaseClusterProtocol.Nodes.Count);
         await Assert.That(restored.SiloName).IsEqualTo(original.SiloName);
         await Assert.That(restored.Status.NodeId).IsEqualTo(original.Status.NodeId);
         await Assert.That(restored.Status.Incarnation).IsEqualTo(original.Status.Incarnation);
@@ -63,7 +60,6 @@ internal sealed class QueueDeadlineSiloClusterOwnership(QueueDeadlineSiloCluster
             var snapshot = (await McpCallerAssertions.SuccessAsync<AdminNodeSnapshot>(
                 await admin.Mcp.CallWithoutBodyAsync(AdminDashboardProtocol.SnapshotTool, token))).Value;
             await Assert.That(status.RoutingReady).IsTrue();
-            await Assert.That(status.SiloCount).IsEqualTo(QueueLeaseClusterProtocol.Nodes.Count);
             await Assert.That(status.ReplicaCount).IsEqualTo(QueueLeaseClusterProtocol.Nodes.Count);
             await Assert.That(snapshot.Node.NodeId).IsEqualTo(status.NodeId);
             await Assert.That(snapshot.Node.Incarnation).IsEqualTo(status.Incarnation);
