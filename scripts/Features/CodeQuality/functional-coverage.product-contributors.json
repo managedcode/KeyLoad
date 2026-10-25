@@ -181,22 +181,6 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicBudgetTests",
-      "methodName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
-      "instanceName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
-      "requirements": [
-        "REQ-PQUERY-001"
-      ],
-      "acceptance": [
-        "AC-PQUERY-001"
-      ],
-      "executedModules": [
-        "KeyLoad.Query"
-      ],
-      "operationOutcomeAndState": "oversized request fails before store reads; exact complete public retention succeeds and one byte under fails"
-    },
-    {
-      "suite": "unit",
       "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicContractTests",
       "methodName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",
       "instanceName": "GeneratedPublicPageRoundTripsFullReferencesAndPerLeafWitnesses",

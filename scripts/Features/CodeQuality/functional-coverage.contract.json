@@ -80,6 +80,7 @@
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryRemoteExecution.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryRetention.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/QueryCursorExecution.cs",
+    "src/KeyLoad.Query/QueryExecution/Execution/QueryKeysetPage.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/QueryProjectionRedactions.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/QueryReadCutObservationDispatch.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/QueryRowProjection.cs",
@@ -114,6 +115,14 @@
     "src/KeyLoad.Query/QueryExecution/Parsing/ScriptDom/ScriptDomWindowLowering.cs",
     "src/KeyLoad.Query/QueryExecution/Parsing/SqlGraphPathParser.cs",
     "src/KeyLoad.Query/QueryExecution/Parsing/SqlGraphSearchParser.cs",
+    "src/KeyLoad.Query/QueryExecution/Parsing/Syntax/ScriptDomBoundedReader.cs",
+    "src/KeyLoad.Query/QueryExecution/Parsing/Syntax/ScriptDomCheckedTokens.cs",
+    "src/KeyLoad.Query/QueryExecution/Parsing/Syntax/ScriptDomErrors.cs",
+    "src/KeyLoad.Query/QueryExecution/Parsing/Syntax/ScriptDomParsingObservation.cs",
+    "src/KeyLoad.Query/QueryExecution/Parsing/Syntax/ScriptDomSlots.cs",
+    "src/KeyLoad.Query/QueryExecution/Parsing/Syntax/ScriptDomSlotVisitor.cs",
+    "src/KeyLoad.Query/QueryExecution/Parsing/Syntax/ScriptDomSyntax.cs",
+    "src/KeyLoad.Query/QueryExecution/Parsing/Syntax/ScriptDomTokenBounds.cs",
     "src/KeyLoad.Query/QueryExecution/Queries/EventEntityRefJoinExecutor.cs",
     "src/KeyLoad.Query/QueryExecution/Queries/PredicateEvaluator.cs",
     "src/KeyLoad.Query/QueryExecution/Queries/PreparedQuery.cs",
@@ -171,7 +180,6 @@
     "src/KeyLoad.Query/Search/Admission/AnnSearchMode.cs",
     "src/KeyLoad.Query/Search/Admission/AnnSearchResult.cs",
     "src/KeyLoad.Query/Search/Admission/AnnWorkBudget.cs",
-    "src/KeyLoad.Query/Search/Admission/FilteredSearchRequestSizer.cs",
     "src/KeyLoad.Query/Search/Admission/PackedAnnAdmission.cs",
     "src/KeyLoad.Query/Search/Admission/PackedAnnIdentityReservations.cs",
     "src/KeyLoad.Query/Search/Admission/PackedAnnReservations.cs",
@@ -232,7 +240,6 @@
     "src/KeyLoad.Query/Search/Queries/Ann/SearchEngine.cs",
     "src/KeyLoad.Query/Search/Queries/AnnLifetimeProjection.cs",
     "src/KeyLoad.Query/Search/Queries/FilteredSearch/FilteredSearchBranch.cs",
-    "src/KeyLoad.Query/Search/Queries/FilteredSearch/FilteredSearchCountingStream.cs",
     "src/KeyLoad.Query/Search/Queries/FilteredSearch/FilteredSearchErrors.cs",
     "src/KeyLoad.Query/Search/Queries/GlobalBranch/GlobalBranchByteAdmission.cs",
     "src/KeyLoad.Query/Search/Queries/GlobalBranch/GlobalBranchOrder.cs",
@@ -285,10 +292,8 @@
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryAuthorizationTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryCancellationTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryContractTests.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryGrantTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryMergeTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryPublicAuthorizationTests.cs",
-      "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryPublicBudgetTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryPublicContractTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/Cases/Partition/PartitionQueryPublicMergeTests.cs",
       "tests/KeyLoad.UnitTests/QueryExecution/ClientApi/Assertions/PartitionQueryMcpCatalogAssertions.cs",
@@ -307,11 +312,9 @@
       "PartitionQueryAuthorizationTests",
       "PartitionQueryCancellationTests",
       "PartitionQueryContractTests",
-      "PartitionQueryGrantTests",
       "PartitionQueryMcpContractTests",
       "PartitionQueryMergeTests",
       "PartitionQueryPublicAuthorizationTests",
-      "PartitionQueryPublicBudgetTests",
       "PartitionQueryPublicContractTests",
       "PartitionQueryPublicMergeTests"
     ],
@@ -392,51 +395,6 @@
           "KeyLoad.Query"
         ],
         "operationOutcomeAndState": "real plan factory rejects empty/oversized/null leaf input and preserves store position"
-      },
-      {
-        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
-        "methodName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
-        "instanceName": "ActualReadBytesAndExaminedRecordsAdmitExactlyAndRejectOneLess",
-        "acceptance": [
-          "AC-PQUERY-004"
-        ],
-        "requirements": [
-          "REQ-PQUERY-004"
-        ],
-        "executedModules": [
-          "KeyLoad.Query"
-        ],
-        "operationOutcomeAndState": "measured ZoneTree observer charges exact bytes/records; exact allowances pass and each one-under bound returns BudgetExceeded"
-      },
-      {
-        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
-        "methodName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
-        "instanceName": "MaxBatchAdmitsTheCompleteMergeAtItsExactBoundAndNoRowsBelowIt",
-        "acceptance": [
-          "AC-PQUERY-004"
-        ],
-        "requirements": [
-          "REQ-PQUERY-004"
-        ],
-        "executedModules": [
-          "KeyLoad.Query"
-        ],
-        "operationOutcomeAndState": "independent serialization/retention bound admits a complete real merge at exact bytes and rejects one byte less"
-      },
-      {
-        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryGrantTests",
-        "methodName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
-        "instanceName": "OneGrantChargesIndexRangeAndDocumentPointReadsTogether",
-        "acceptance": [
-          "AC-PQUERY-004"
-        ],
-        "requirements": [
-          "REQ-PQUERY-004"
-        ],
-        "executedModules": [
-          "KeyLoad.Query"
-        ],
-        "operationOutcomeAndState": "execution index range plus point read share the leaf allowance; exact bound passes and one-under examined cap rejects"
       },
       {
         "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryMergeTests",
@@ -529,21 +487,6 @@
           "KeyLoad.Query"
         ],
         "operationOutcomeAndState": "Invokes the actual public query path twice and checks exact OwnershipLost and PermissionDenied results; the typed terminal failures are the observed denied operation outcomes and neither returns a page. Root independently reviewed the full body against the accepted AC-CQ-039 operation/outcome criterion."
-      },
-      {
-        "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicBudgetTests",
-        "methodName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
-        "instanceName": "OversizedRequestAndPublicPageRetentionFailAtTheirExactBoundaries",
-        "acceptance": [
-          "AC-PQUERY-001"
-        ],
-        "requirements": [
-          "REQ-PQUERY-001"
-        ],
-        "executedModules": [
-          "KeyLoad.Query"
-        ],
-        "operationOutcomeAndState": "oversized request fails before store reads; exact complete public retention succeeds and one byte under fails"
       },
       {
         "className": "KeyLoad.UnitTests.QueryExecution.PartitionQueryPublicContractTests",

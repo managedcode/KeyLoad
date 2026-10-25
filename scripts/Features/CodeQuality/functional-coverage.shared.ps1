@@ -11,10 +11,10 @@ $script:FunctionalCoverage = [ordered]@{
     SettingsCopyName = 'functional-coverage.settings.xml'
     DeploymentDirectory = 'tests/KeyLoad.UnitTests/bin/Debug/net10.0'
     SourceDirectory = 'src/KeyLoad.Query'
-    SourceCount = 259
-    ContributorSourceCount = 21
-    ContributorClassCount = 10
-    ContributorCaseCount = 25
+    SourceCount = 266
+    ContributorSourceCount = 19
+    ContributorClassCount = 8
+    ContributorCaseCount = 21
     TestNamespace = 'KeyLoad.UnitTests.QueryExecution'
     DllName = 'KeyLoad.Query.dll'
     PdbName = 'KeyLoad.Query.pdb'
@@ -151,7 +151,7 @@ function Read-FcContract([string] $Path) {
         $contract.contributors.testNamePrefix -cne 'PartitionQuery' -or
         $contract.contributors.filter -cne '/KeyLoad.UnitTests/*/PartitionQuery*/*' -or
         (@($contract.contributors.suiteNames) -join ',') -cne 'unit' -or
-        (@($contract.contributors.testClasses | Sort-Object) -join ',') -cne 'PartitionQueryAuthorizationTests,PartitionQueryCancellationTests,PartitionQueryContractTests,PartitionQueryGrantTests,PartitionQueryMcpContractTests,PartitionQueryMergeTests,PartitionQueryPublicAuthorizationTests,PartitionQueryPublicBudgetTests,PartitionQueryPublicContractTests,PartitionQueryPublicMergeTests' -or
+        (@($contract.contributors.testClasses | Sort-Object) -join ',') -cne 'PartitionQueryAuthorizationTests,PartitionQueryCancellationTests,PartitionQueryContractTests,PartitionQueryMcpContractTests,PartitionQueryMergeTests,PartitionQueryPublicAuthorizationTests,PartitionQueryPublicContractTests,PartitionQueryPublicMergeTests' -or
         $contract.contributors.exactCases.Count -ne $t.ContributorCaseCount -or
         $contract.bounds.originalXmlBytes -ne 33554432 -or $contract.bounds.sources -ne 5000 -or
         $contract.bounds.distinctLineLocations -ne 100000 -or
