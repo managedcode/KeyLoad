@@ -26,7 +26,7 @@ internal static class AdditionalDatabaseResources
     {
         if (target is not (BenchmarkAdditionalTargets.Timescale or BenchmarkAdditionalTargets.SqlServer
             or BenchmarkAdditionalTargets.MySql or BenchmarkAdditionalTargets.ClickHouse or BenchmarkAdditionalTargets.InfluxDb
-            or NativeDatabaseTests.Redis or NativeDatabaseTests.OpenSearch or NativeDatabaseTests.HelixDb))
+            or NativeDatabaseTests.Redis or NativeDatabaseTests.OpenSearch or NativeDatabaseTests.HelixDb or NativeDatabaseTests.MongoDb))
         {
             throw new InvalidOperationException(Invalid);
         }
@@ -41,14 +41,16 @@ internal static class AdditionalDatabaseResources
         var resources = application.Services.GetRequiredService<DistributedApplicationModel>().Resources
             .OfType<ContainerResource>().Select(resource => resource.Name).ToArray();
         await using var capture = new ComparisonTestLogCapture(application, ExecutionPolicyFixture.Harness(), resources);
+        var observations = new NativeDatabaseResourceObservation(application, root, token);
         try
         {
-            await RunNativeAsync(application, target, verify, token);
+            await RunNativeAsync(application, target, verify, observations, token);
         }
         catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
         {
             failures.Add(failure);
         }
+        await SettleAsync(observations.CompleteAsync, failures);
         await SettleAsync(capture.StopAsync, failures);
         await SettleAsync(() => capture.WriteResourcesToAsync(root), failures);
         await SettleAsync(() => capture.DisposeAsync().AsTask(), failures);
@@ -62,7 +64,7 @@ internal static class AdditionalDatabaseResources
     private const int NoFailures = 0;
 
     private static async Task RunNativeAsync(DistributedApplication application, string target,
-        Func<IComparisonTarget, CancellationToken, Task> verify, CancellationToken token)
+        Func<IComparisonTarget, CancellationToken, Task> verify, NativeDatabaseResourceObservation observations, CancellationToken token)
     {
         var settings = application.Services.GetRequiredService<LoadTestClientSettings>();
         await application.StartAsync(token);
@@ -70,6 +72,7 @@ internal static class AdditionalDatabaseResources
         {
             await application.ResourceNotifications.WaitForResourceHealthyAsync(resource, WaitBehavior.StopOnResourceUnavailable, token);
         }
+        await observations.VerifyReadyAsync(token);
         var values = await settings.ResolveAsync(token);
         using var configuration = new ConfigurationManager();
         configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, ComparisonExecutionRegistration.ConfigurationPath), optional: false);
@@ -89,6 +92,10 @@ internal static class AdditionalDatabaseResources
         if (target == NativeDatabaseTests.Redis)
         {
             return NativeDatabaseTargets.Redis(values, runId, options, configuration);
+        }
+        if (target == NativeDatabaseTests.MongoDb)
+        {
+            return NativeDatabaseTargets.Mongo(values, runId, options, configuration);
         }
         if (target is BenchmarkAdditionalTargets.Timescale or BenchmarkAdditionalTargets.SqlServer or BenchmarkAdditionalTargets.MySql)
         {

@@ -21,4 +21,11 @@ internal static class NativeDatabaseTargets
             options, ComparisonExecutionRegistration.ReadDiagnostics(configuration), Topology(values),
             [.. values.Where(pair => pair.Key.StartsWith(Replica, StringComparison.Ordinal)).OrderBy(pair => pair.Key, StringComparer.Ordinal)
                 .Select(pair => pair.Value)]);
+
+    internal static IComparisonTarget Mongo(IReadOnlyDictionary<string, string> values, string runId,
+        IOptions<ComparisonExecutionOptions> options, IConfiguration configuration)
+        => new MongoTarget(values[Connection],
+            [.. values.Where(pair => pair.Key.StartsWith(Endpoint, StringComparison.Ordinal)).OrderBy(pair => pair.Key, StringComparer.Ordinal)
+                .Select(pair => new Uri(pair.Value))], runId, values[Image], Topology(values),
+            ComparisonExecutionRegistration.ReadLifecycle(configuration), options);
 }

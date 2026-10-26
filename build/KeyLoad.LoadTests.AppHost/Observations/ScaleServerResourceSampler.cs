@@ -1,6 +1,6 @@
 namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
-internal sealed class ScaleServerResourceSampler(string resourceName, string[] expectedMountTargets)
+internal sealed class ScaleServerResourceSampler(string resourceName, string containerIdentity, string[] expectedMountTargets)
 {
     private const int ContainerImageFieldIndex = 4;
     private const int ContainerIncarnationFieldIndex = 5;
@@ -34,6 +34,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
 
     internal string ResourceName => resourceName;
     internal bool Invalidated => _invalid;
+    internal int SampleCount => _samples;
     internal bool StorageUnavailable
     {
         get; private set;
@@ -51,14 +52,15 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         const int SecondIndex = 1;
         const int SampleAsyncElementIndex = 3;
 
-        var text = (await ScaleServerResourceProcess.InspectAsync(resourceName, budget, token)).Value;
+        var text = (await ScaleServerResourceProcess.InspectAsync(containerIdentity, budget, token)).Value;
         if (text is null)
         {
             return InvalidateAfterStart();
         }
 
         var fields = text.Split(SeparatorCharacter, StringSplitOptions.None);
-        if (fields.Length != InspectFieldCount || !int.TryParse(fields[ElementIndex], out var initPid) || initPid <= BoundaryValue)
+        if (fields.Length != InspectFieldCount || fields[FirstIndex] != containerIdentity
+            || !int.TryParse(fields[ElementIndex], out var initPid) || initPid <= BoundaryValue)
         {
             return InvalidateAfterStart();
         }
@@ -144,6 +146,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         const int BoundaryValue = 0;
         const int NoSamples = 0;
 
+        var mountsObserved = await ObserveMountsAsync(mountDescriptor, budget, token);
         var cpuLimit = (await BoundedText.ReadAsync(Path.Combine(directory, CpuLimitFile), budget.Settings.MaxFileBytes, budget, token)).Value;
         var memoryLimit = (await BoundedText.ReadAsync(Path.Combine(directory, MemoryLimitFile), budget.Settings.MaxFileBytes, budget, token)).Value;
         var cpuStats = (await BoundedText.ReadAsync(Path.Combine(directory, CpuStatsFile), budget.Settings.MaxFileBytes, budget, token)).Value;
@@ -177,12 +180,8 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
         _memoryLimit = nextMemoryLimit;
         _maxRss = Math.Max(_maxRss, rss);
         _maxCgroupMemory = Math.Max(_maxCgroupMemory, currentMemory);
-        if (!await ObserveMountsAsync(mountDescriptor, budget, token))
-        {
-            return InvalidateAfterStart();
-        }
         _samples++;
-        return _mounts.Length > BoundaryValue || InvalidateAfterStart();
+        return mountsObserved;
     }
 
     private async Task<bool> ObserveMountsAsync(string mountDescriptor,
@@ -199,7 +198,7 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string[] e
             StorageUnavailable = true;
             return false;
         }
-        if (_mounts.Length != expectedMountTargets.Length)
+        if (_mounts.Length == 0 || expectedMountTargets.Any(target => !_mounts.Any(mount => mount.ContainerPath == target)))
         {
             StorageUnavailable = true;
             return false;

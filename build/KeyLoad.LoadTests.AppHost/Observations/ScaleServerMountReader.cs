@@ -1,48 +1,33 @@
-using System.Text.Json;
+using System.Globalization;
 
 namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal static class ScaleServerMountReader
 {
-    private const string FormatArgument = "--format";
-    private const string TargetArgument = "--target";
-    private const string OutputArgument = "--output";
-    private const string FilesystemSizeField = "size";
-    private const string FilesystemAvailableField = "avail";
-
-    private const string TargetField = "target";
-    private const string Docker = "docker";
-    private const string Findmnt = "findmnt";
-    private const string UnixPrefix = "unix://";
-    private const string MountSeparator = ";";
-    private const string FieldSeparator = "~";
-    private const string ContextFormat = "{{.Endpoints.docker.Host}}";
-    private const string FindmntOutput = "TARGET,FSTYPE,SIZE,AVAIL";
+    private const string Docker = "docker", Stat = "stat", Sudo = "sudo", NonInteractive = "--non-interactive";
+    private const string Context = "context", Inspect = "inspect", Format = "--format";
+    private const string ContextFormat = "{{.Endpoints.docker.Host}}", UnixPrefix = "unix://";
+    private const string FileSystem = "--file-system", StatFormat = "%T|%S|%b|%a", EndOptions = "--";
+    private const char MountSeparator = ';', FieldSeparator = '~', StatSeparator = '|';
+    private const int First = 0, Source = 0, Target = 1, MountType = 2, MountFields = 3;
+    private const int StatFields = 4, BlockSize = 1, Blocks = 2, AvailableBlocks = 3;
 
     internal static async Task<ScaleServerMount[]> ReadAsync(string text, string[] expectedTargets,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        const int EmptyLength = 0;
-
         token.ThrowIfCancellationRequested();
         var expected = new HashSet<string>(expectedTargets, StringComparer.Ordinal);
-        if (expected.Count != expectedTargets.Length || expectedTargets.Length > budget.Settings.MaxMounts)
+        if (expected.Count != expectedTargets.Length || expectedTargets.Length > budget.Settings.MaxMounts
+            || expected.Count == First)
         {
             return [];
         }
-
-        if (expected.Count == EmptyLength)
-        {
-            return [];
-        }
-
         try
         {
             if (!await IsLocalDockerAsync(budget, token))
             {
                 return [];
             }
-
             return await ReadMountedFilesystemsAsync(text, expected, budget, token);
         }
         catch (OperationCanceledException) { throw; }
@@ -54,146 +39,55 @@ internal static class ScaleServerMountReader
         catch (OverflowException) { return []; }
     }
 
-    private static async Task<ScaleServerMount[]> ReadMountedFilesystemsAsync(string text, HashSet<string> expected,
-        ScaleServerResourceSampleBudget budget, CancellationToken token)
+    private static async Task<ScaleServerMount[]> ReadMountedFilesystemsAsync(string text,
+        HashSet<string> expected, ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        const int EmptyLength = 0;
-        const int MountFieldCount = 3;
-        const int FirstIndex = 0;
-        const int ElementIndex = 2;
-        const int SecondIndex = 1;
-
         var observed = new HashSet<string>(StringComparer.Ordinal);
         var mounts = new List<ScaleServerMount>();
         foreach (var row in text.Split(MountSeparator, StringSplitOptions.RemoveEmptyEntries))
         {
             var fields = row.Split(FieldSeparator, StringSplitOptions.None);
-            if (fields.Length != MountFieldCount || !Path.IsPathFullyQualified(fields[FirstIndex]) || fields[ElementIndex].Length == EmptyLength
-                || mounts.Count >= budget.Settings.MaxMounts || !expected.Contains(fields[SecondIndex])
-                || !observed.Add(fields[SecondIndex]))
+            if (fields.Length != MountFields || !Path.IsPathFullyQualified(fields[Source])
+                || !Path.IsPathFullyQualified(fields[Target]) || string.IsNullOrWhiteSpace(fields[MountType])
+                || mounts.Count >= budget.Settings.MaxMounts || !observed.Add(fields[Target]))
             {
                 return [];
             }
-
-            var mount = (await ReadActualMountAsync(fields[FirstIndex], fields[SecondIndex], fields[ElementIndex], budget, token)).Value;
-            if (mount is null)
+            var output = await ScaleServerResourceProcess.RunAsync(Sudo,
+                [NonInteractive, EndOptions, Stat, FileSystem, Format, StatFormat, EndOptions, fields[Source]], budget, token);
+            if (output is null || !TryReadMount(fields[Target], fields[MountType], output, out var mount))
             {
                 return [];
             }
-
-            mounts.Add(mount);
+            mounts.Add(mount!);
         }
-        return observed.SetEquals(expected) ? mounts.ToArray() : [];
+        return expected.IsSubsetOf(observed) ? mounts.ToArray() : [];
+    }
+
+    private static bool TryReadMount(string target, string mountType, string output, out ScaleServerMount? mount)
+    {
+        mount = null;
+        var fields = output.Trim().Split(StatSeparator, StringSplitOptions.None);
+        if (fields.Length != StatFields || string.IsNullOrWhiteSpace(fields[First])
+            || !long.TryParse(fields[BlockSize], NumberStyles.None, CultureInfo.InvariantCulture, out var blockSize)
+            || !long.TryParse(fields[Blocks], NumberStyles.None, CultureInfo.InvariantCulture, out var blocks)
+            || !long.TryParse(fields[AvailableBlocks], NumberStyles.None, CultureInfo.InvariantCulture, out var available)
+            || blockSize <= First || blocks <= First || available < First || available > blocks)
+        {
+            return false;
+        }
+        mount = new(target, mountType, fields[First], checked(blockSize * blocks), checked(blockSize * available));
+        return true;
     }
 
     private static async Task<bool> IsLocalDockerAsync(ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
-        const string ArgumentsText = "context";
-        const string IsLocalDockerAsyncArgumentsText = "inspect";
-
         if (budget.Provenance.DockerHost is not null || budget.Provenance.DockerContext is not null)
         {
             return false;
         }
-
         var endpoint = await ScaleServerResourceProcess.RunAsync(Docker,
-            [ArgumentsText, IsLocalDockerAsyncArgumentsText, FormatArgument, ContextFormat], budget, token, budget.Settings.MaxOutputBytes);
+            [Context, Inspect, Format, ContextFormat], budget, token);
         return endpoint?.Trim().StartsWith(UnixPrefix, StringComparison.Ordinal) == true;
-    }
-
-    private static async Task<(bool HasValue, ScaleServerMount? Value)> ReadActualMountAsync(string source, string containerPath,
-        string mountType, ScaleServerResourceSampleBudget budget, CancellationToken token)
-    {
-        const string ArgumentsText = "--json";
-        const string ReadActualMountAsyncArgumentsText = "--bytes";
-
-        string canonicalSource;
-        try
-        {
-            canonicalSource = Path.GetFullPath(source);
-        }
-        catch (ArgumentException) { return (false, default(ScaleServerMount?)); }
-        if (!Directory.Exists(canonicalSource) && !File.Exists(canonicalSource))
-        {
-            return (false, default(ScaleServerMount?));
-        }
-
-        var json = await ScaleServerResourceProcess.RunAsync(Findmnt,
-            [ArgumentsText, ReadActualMountAsyncArgumentsText, TargetArgument, canonicalSource, OutputArgument, FindmntOutput], budget, token,
-            budget.Settings.MaxOutputBytes);
-        if (json is null)
-        {
-            return (false, default(ScaleServerMount?));
-        }
-
-        return ((ScaleServerMount?)((ReadMountDescriptor(canonicalSource, containerPath, mountType, json)).Value)) is { } outcomeValue4 ? (true, outcomeValue4) : (false, default(ScaleServerMount?));
-    }
-
-    private static (bool HasValue, ScaleServerMount? Value) ReadMountDescriptor(string canonicalSource, string containerPath,
-        string mountType, string json)
-    {
-        const string PropertyNameText = "filesystems";
-        const int SingleFilesystemCount = 1;
-        const int IndexValue = 0;
-        const string ReadActualMountAsyncPropertyNameText = "fstype";
-        const int BoundaryValue = 0;
-
-        try
-        {
-            using var document = JsonDocument.Parse(json);
-            if (!document.RootElement.TryGetProperty(PropertyNameText, out var rows)
-                || rows.ValueKind != JsonValueKind.Array || rows.GetArrayLength() != SingleFilesystemCount)
-            {
-                return (false, default(ScaleServerMount?));
-            }
-
-            var row = rows[IndexValue];
-            if (!HasExactMountFields(row))
-            {
-                return (false, default(ScaleServerMount?));
-            }
-
-            var target = Path.GetFullPath(row.GetProperty(TargetField).GetString() ?? string.Empty);
-            var fileSystem = row.GetProperty(ReadActualMountAsyncPropertyNameText).GetString();
-            var capacity = ReadNonnegative(row.GetProperty(FilesystemSizeField));
-            var available = ReadNonnegative(row.GetProperty(FilesystemAvailableField));
-            if (!IsPathWithin(canonicalSource, target) || string.IsNullOrWhiteSpace(fileSystem)
-                || capacity <= BoundaryValue || available < BoundaryValue || available > capacity)
-            {
-                return (false, default(ScaleServerMount?));
-            }
-
-            return (true, (ScaleServerMount?)(new ScaleServerMount(containerPath, mountType, fileSystem, capacity, available)));
-        }
-        catch (JsonException) { return (false, default(ScaleServerMount?)); }
-        catch (ArgumentException) { return (false, default(ScaleServerMount?)); }
-        catch (InvalidOperationException) { return (false, default(ScaleServerMount?)); }
-        catch (FormatException) { return (false, default(ScaleServerMount?)); }
-        catch (OverflowException) { return (false, default(ScaleServerMount?)); }
-    }
-
-    private static bool HasExactMountFields(JsonElement value)
-    {
-        const string OtherText = "avail";
-        const string HasExactMountFieldsOtherText = "fstype";
-
-        if (value.ValueKind != JsonValueKind.Object)
-        {
-            return false;
-        }
-
-        var names = value.EnumerateObject().Select(item => item.Name).Order(StringComparer.Ordinal).ToArray();
-        return names.SequenceEqual([OtherText, HasExactMountFieldsOtherText, FilesystemSizeField, TargetField], StringComparer.Ordinal);
-    }
-
-    private static long ReadNonnegative(JsonElement value)
-        => value.ValueKind == JsonValueKind.Number && value.TryGetInt64(out var number) && number >= 0
-            ? number : throw new FormatException();
-
-    private static bool IsPathWithin(string path, string directory)
-    {
-        var root = Path.GetPathRoot(directory);
-        var prefix = directory == root ? directory : directory + Path.DirectorySeparatorChar;
-        return path == directory || path.StartsWith(prefix, StringComparison.Ordinal);
     }
 }

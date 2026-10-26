@@ -148,9 +148,13 @@ matrix, restarts or separate benchmark scenario.
   run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
   part of operation latency.
   Preparation also runs the real external adapter cases in `NativeDatabaseTests`:
-  OpenSearch at one/three nodes, three-node Redis and one-node HelixDB, with sixteen
+  OpenSearch at one/three nodes, three-node Redis and one-node HelixDB/MongoDB, with sixteen
   independently owned clients, complete body readback and healthy continuation.
   These bounded checks retain original TRX files and do not qualify public figures.
+  They resolve actual container IDs through Aspire notifications after readiness and
+  verify their actual writable-mount mappings. Linux additionally
+  requires the original CPU/RSS and complete resource qualification; desktop checks
+  cannot substitute for that Linux gate.
 - Ingestion at 1/10/500 clients, the minimum measured operation counts, recall,
   replicated acknowledgement, resource bounds and all required workload families are
   kept. The number of jobs is not the number of measured scenarios.
@@ -173,6 +177,14 @@ indexes are still available, then drops the empty indexes under the document cle
 deadline. Terminal client diagnostics retain a bounded suffix so a late disposal
 failure remains observable after a long measured session. Cleanup failures still
 fail the session and cannot produce a successful original result.
+
+Resource observation never requires a custom container-name annotation. Every
+configured writable mount must be observed, and image-created writable mounts are
+also bounded, inspected and retained. Filesystem type and block capacity come from
+the daemon-reported local mount source through a bounded, noninteractive, read-only
+`sudo stat --file-system` command on the Linux runner. This does not require a utility
+inside each database image. A missing storage observation remains unqualified; it does not
+erase separately captured CPU/RSS evidence or authorize public measurements.
 
 Local execution retains the actual client binary/source/process identity with no
 invented GitHub provenance; every database server, KeyLoad included, is identified

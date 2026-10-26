@@ -45,6 +45,7 @@ internal static class BenchmarkSessionResources
         builder.Services.AddSingleton(client);
         var context = new IsolatedResourceContext(builder, selection, client, Path.GetFullPath(root));
         builder.Services.AddSingleton(serviceProvider => new ScaleServerResourceEvidenceCollector(selection, output,
+            serviceProvider.GetRequiredService<ResourceNotificationService>(),
             applicationStopping: serviceProvider.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping,
             executionOptions: runtime.ServerResources, provenanceOptions: runtime.Provenance,
             provider: serviceProvider.GetRequiredService<TimeProvider>(), sessionId: sessionId));

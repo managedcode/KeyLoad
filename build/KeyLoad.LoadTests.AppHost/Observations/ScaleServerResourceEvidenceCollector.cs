@@ -4,7 +4,7 @@ using Microsoft.Extensions.Options;
 namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal sealed class ScaleServerResourceEvidenceCollector(
-    BenchmarkSessionSelection selection, string output,
+    BenchmarkSessionSelection selection, string output, ResourceNotificationService notifications,
     IOptions<ScaleServerResourceOptions> executionOptions, IOptions<BenchmarkProvenanceOptions> provenanceOptions,
     string sessionId, TimeProvider? provider, CancellationToken applicationStopping) : IAsyncDisposable
 {
@@ -17,6 +17,8 @@ internal sealed class ScaleServerResourceEvidenceCollector(
     private readonly ScaleServerResourceEvidenceCompletion _completion = new(executionOptions, provider);
     private readonly HashSet<string> _missing = new(StringComparer.Ordinal);
     private ScaleServerResourceSampler[] _samplers = [];
+    private ContainerResource[] _resources = [];
+    private readonly TaskCompletionSource<bool> _initialSamples = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private ScaleServerHardware? _hardware;
     private ScaleServerEnvelope? _envelope;
     private Task? _observation;
@@ -25,7 +27,6 @@ internal sealed class ScaleServerResourceEvidenceCollector(
     {
         const string MessageText = "Server resource observation already started.";
         const int Step = 1;
-        const int EmptyValue = 0;
 
         if (_observation is not null)
         {
@@ -40,15 +41,18 @@ internal sealed class ScaleServerResourceEvidenceCollector(
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
         }
 
+        _resources = execution.Take(ScaleServerResourceBounds.MaxContainers).ToArray();
+        _observation = ObserveAsync(readiness, cancellationToken);
+        return _observation;
+    }
+
+    private void ResolveSamplers()
+    {
+        const int Step = 1, EmptyValue = 0;
         var samplers = new List<ScaleServerResourceSampler>();
-        foreach (var resource in execution.Take(ScaleServerResourceBounds.MaxContainers))
+        foreach (var resource in _resources)
         {
-            var annotation = resource.Annotations.OfType<ContainerNameAnnotation>().SingleOrDefault();
-            if (annotation is null)
-            {
-                _missing.Add(ScaleServerResourceBounds.SamplingMissing);
-                continue;
-            }
+            var identity = ScaleServerResourceIdentity.Read(notifications, resource);
             var mountTargets = resource.Annotations.OfType<ContainerMountAnnotation>()
                 .Where(mount => !mount.IsReadOnly).Take(_settings.MaxMounts + Step)
                 .Select(mount => mount.Target).ToArray();
@@ -57,12 +61,20 @@ internal sealed class ScaleServerResourceEvidenceCollector(
                 _missing.Add(ScaleServerResourceBounds.StorageMissing);
             }
 
-            samplers.Add(new ScaleServerResourceSampler(annotation.Name,
+            samplers.Add(new ScaleServerResourceSampler(resource.Name, identity,
                 mountTargets.Length <= _settings.MaxMounts ? mountTargets : []));
         }
         _samplers = samplers.ToArray();
-        _observation = ObserveAsync(readiness, cancellationToken);
-        return _observation;
+    }
+
+    internal async Task WaitForInitialSamplesAsync(CancellationToken token)
+    {
+        const string Unavailable = "ServerResourceInitialObservationsUnavailable";
+        await Task.WhenAny(_initialSamples.Task, _observation ?? throw new InvalidOperationException(Unavailable)).WaitAsync(token);
+        if (!_initialSamples.Task.IsCompletedSuccessfully || !await _initialSamples.Task)
+        {
+            throw new InvalidDataException(Unavailable);
+        }
     }
 
     internal Task CompleteAsync(Task observation)
@@ -101,6 +113,8 @@ internal sealed class ScaleServerResourceEvidenceCollector(
     private async Task ObserveOwnedAsync(Func<CancellationToken, Task> readiness, CancellationToken token)
     {
         const int EmptyValue = 0;
+        await readiness(token);
+        ResolveSamplers();
         if (!OperatingSystem.IsLinux())
         {
             _missing.Add(ScaleServerResourceBounds.HardwareMissing);
@@ -108,7 +122,6 @@ internal sealed class ScaleServerResourceEvidenceCollector(
             _missing.Add(ScaleServerResourceBounds.SamplingMissing);
             return;
         }
-        await readiness(token);
         foreach (var sampler in _samplers)
         {
             sampler.MarkReadyBoundary();
@@ -149,6 +162,15 @@ internal sealed class ScaleServerResourceEvidenceCollector(
                     _missing.Add(ScaleServerResourceBounds.StorageMissing);
                 }
             }
+            if (_samplers.Length == selection.NodeCount
+                && _samplers.All(sampler => sampler.SampleCount >= ScaleServerResourceBounds.MinimumSamples))
+            {
+                _initialSamples.TrySetResult(true);
+            }
+            else if (_samplers.Any(sampler => sampler.Invalidated))
+            {
+                _initialSamples.TrySetResult(false);
+            }
             if (timeProvider.GetElapsedTime(timer) >= _settings.MaximumObservation)
             {
                 _missing.Add(ScaleServerResourceBounds.SamplingMissing);
@@ -179,29 +201,11 @@ internal sealed class ScaleServerResourceEvidenceCollector(
 
     private Task WriteAsync(CancellationToken token)
     {
-        var observations = CaptureSnapshot();
+        var observations = ReadObservations();
         return BenchmarkSessionResourceEvidenceWriter.WriteAsync(sessionId, selection, output, observations,
             executionOptions, provenanceOptions, token);
     }
 
-    private ScaleServerObservationSnapshot CaptureSnapshot()
-    {
-        const int EmptyValue = 0;
-        var records = _samplers.Select(sampler => (sampler.ToRecord()).Value).Where(record => record is not null)
-            .Select(record => record!).ToArray();
-        if (records.Length != selection.NodeCount
-            || records.Select(record => record.ContainerId).Distinct(StringComparer.Ordinal).Count() != records.Length
-            || _samplers.Any(sampler => sampler.Invalidated)
-            || records.Any(record => record.SampleCount < ScaleServerResourceBounds.MinimumSamples))
-        {
-            _missing.Add(ScaleServerResourceBounds.SamplingMissing);
-        }
-        if (records.Any(record => record.WritableMounts.Length == EmptyValue)
-            || _samplers.Any(sampler => sampler.StorageUnavailable))
-        {
-            _missing.Add(ScaleServerResourceBounds.StorageMissing);
-        }
-        return new(_hardware, _envelope, records, [.. _missing.Order(StringComparer.Ordinal)],
-            _missing.Count == EmptyValue, ScaleServerObservationPolicySnapshot.Capture(executionOptions));
-    }
+    internal ScaleServerObservationSnapshot ReadObservations()
+        => ScaleServerObservationCapture.Capture(selection, _hardware, _envelope, _samplers, _missing, executionOptions);
 }
