@@ -27,6 +27,7 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
             var large = error.StatusCode == StatusCodes.Status413PayloadTooLarge;
             await WriteAsync(context, large ? ErrorCode.ResourceExhausted : ErrorCode.Validation,
                 large ? ServerProtocol.BodyExceeded : ServerProtocol.InvalidJson);
+            await context.Response.CompleteAsync();
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {

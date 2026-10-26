@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using KeyLoad.AppHost.TestInfrastructure;
 
 namespace KeyLoad.FunctionalTests.TestInfrastructure;
 
@@ -19,6 +20,7 @@ internal static class TestSelectionProcess
             start.ArgumentList.Add(argument);
         }
         using var process = new Process { StartInfo = start };
+        start.Environment[ProjectLaunchMetadata.ConfigurationEnvironmentVariable] = ProjectLaunchMetadata.Configuration;
         using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(15), TimeProvider.System);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, TestContext.Current!.Execution.CancellationToken);
         if (!process.Start())

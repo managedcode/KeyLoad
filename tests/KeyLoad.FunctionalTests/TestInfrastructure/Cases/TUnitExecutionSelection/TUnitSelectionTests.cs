@@ -1,4 +1,5 @@
 using System.Text.Json;
+using KeyLoad.AppHost.TestInfrastructure;
 
 namespace KeyLoad.FunctionalTests.TestInfrastructure;
 
@@ -35,7 +36,7 @@ internal sealed class TUnitSelectionTests
         var args = selected.GetProperty(ArgumentsProperty).EnumerateArray().Select(value => value.GetString()).ToArray();
         var environment = selected.GetProperty(EnvironmentProperty);
         await Assert.That(Path.IsPathFullyQualified(args[0]!)).IsTrue();
-        await Assert.That(args[0]).EndsWith(Path.Combine("tests", project, "bin", "Debug", "net10.0", project + ".dll"));
+        await Assert.That(args[0]).EndsWith(Path.Combine("tests", project, "bin", ProjectLaunchMetadata.Configuration, "net10.0", project + ".dll"));
         await Assert.That(args).DoesNotContain("--project");
         await Assert.That(args).DoesNotContain("--no-build");
         await Assert.That(args).DoesNotContain("--no-restore");
@@ -54,10 +55,10 @@ internal sealed class TUnitSelectionTests
         await Assert.That(environment.TryGetProperty(IntrinsicEnvironment, out _)).IsFalse();
         foreach (var key in new[] { "TMPDIR", "TMP", "TEMP" })
         {
-            await Assert.That(environment.GetProperty(key).GetString()).EndsWith(Path.Combine("tests", "bin", "Debug", "ipc"));
+            await Assert.That(environment.GetProperty(key).GetString()).EndsWith(Path.Combine("tests", "bin", ProjectLaunchMetadata.Configuration, "ipc"));
         }
         await Assert.That(environment.GetProperty(PipeDirectoryEnvironment).GetString())
-            .EndsWith(Path.Combine("tests", "bin", "Debug", "ipc"));
+            .EndsWith(Path.Combine("tests", "bin", ProjectLaunchMetadata.Configuration, "ipc"));
     }
 
     private static async Task AssertDefaultSelectionAsync(JsonElement selection, string expected, string suite)

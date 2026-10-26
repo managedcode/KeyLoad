@@ -4,7 +4,8 @@ internal static class TestSelectionProgram
 {
     internal const string Source = """
             import { pathToFileURL, fileURLToPath } from 'node:url';
-            const { runtimeSelection, executionPipeDirectory } = await import(pathToFileURL(process.argv[1]));
+            const { runtimeSelection, executionPipeDirectory, executionBuildConfiguration } = await import(pathToFileURL(process.argv[1]));
+            const configuration = executionBuildConfiguration();
             const suite = process.argv[2];
             const { checkPartition, loadManifest } = await import(new URL('./ci-test-partition.mjs', pathToFileURL(process.argv[1])));
             const repository = fileURLToPath(new URL('../../../', pathToFileURL(process.argv[1])));
@@ -19,9 +20,12 @@ internal static class TestSelectionProgram
               }
             }
             if (process.platform !== 'win32') {
-              const directory = executionPipeDirectory('/home/runner/work/KeyLoad/KeyLoad/w');
-              if (Buffer.byteLength(directory + '/MONITORTOHOST_' + '0'.repeat(32)) > 103) {
-                throw new Error('The website monitor socket exceeds its Unix path bound.');
+              for (const [root, selected] of [['/home/runner/work/KeyLoad/KeyLoad/w', 'Debug'],
+                ['/home/runner/work/KeyLoad/KeyLoad', 'Release']]) {
+                const directory = executionPipeDirectory(root, selected);
+                if (Buffer.byteLength(directory + '/MONITORTOHOST_' + '0'.repeat(32)) > 103) {
+                  throw new Error('The selected monitor socket exceeds its Unix path bound.');
+                }
               }
               for (const root of ['/home/runner/work/KeyLoad/KeyLoad/website', '/' + 'é'.repeat(30)]) {
                 let rejected = false; try { executionPipeDirectory(root); } catch { rejected = true; }
@@ -53,7 +57,7 @@ internal static class TestSelectionProgram
             const selectedArgs = Object.freeze(['--KeyLoadTests:Suite='+suite, '--KeyLoadTests:Filter=/*/*/ActualCase/*',
               '--KeyLoadTests:ReportTrx=true', '--KeyLoadTests:CoverageSettings=settings.xml',
               '--KeyLoadTests:CoverageOutput=coverage.xml']);
-            const inherited = Object.freeze({ GITHUB_SHA: 'original-revision',
+            const inherited = Object.freeze({ GITHUB_SHA: 'original-revision', KEYLOAD_TEST_CONFIGURATION: configuration,
               TMPDIR: 'inherited-scratch', TESTINGPLATFORM_PIPE_DIRECTORY: 'inherited-pipes' });
             const originalArgs = JSON.stringify(selectedArgs);
             const selected = runtimeSelection(selectedArgs, inherited);

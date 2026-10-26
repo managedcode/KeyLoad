@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using KeyLoad.Client;
 using KeyLoad.ClusterTests.ClientApi;
+using KeyLoad.ClusterTests.StorageReplication;
 
 namespace KeyLoad.ClusterTests.TimeSeries;
 
@@ -46,8 +47,10 @@ internal sealed record TimeSeriesClusterScenario(PartitionRef Partition)
         {
             FieldPolicies = [new(SecretField, SecretClassification, SecretGrant)]
         };
-        var configured = await administrator.ConfigureResourceAsync(Guid.NewGuid(),
-            new(partition.TenantId, partition.DatabaseId, definition), cancellationToken);
+        var commandId = Guid.NewGuid();
+        var configured = await ClusterReplicationTestSupport.RetryDuringSiloRecoveryAsync(
+            () => administrator.ConfigureResourceAsync(commandId,
+                new(partition.TenantId, partition.DatabaseId, definition), cancellationToken), cancellationToken);
         await McpCallerAssertions.SdkSuccessAsync(configured);
         return new(partition);
     }

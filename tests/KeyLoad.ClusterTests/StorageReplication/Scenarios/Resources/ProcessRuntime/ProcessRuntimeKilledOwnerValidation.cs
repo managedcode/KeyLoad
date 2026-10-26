@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using System.Diagnostics;
 using Aspire.Hosting;
 using KeyLoad.Diagnostics.ResourceExecution;
@@ -50,7 +51,14 @@ internal static class ProcessRuntimeKilledOwnerValidation
         try
         {
             using var process = Process.GetProcessById(processId);
-            return !process.HasExited && process.StartTime.ToUniversalTime().Ticks == startedAt;
+            try
+            {
+                return !process.HasExited && process.StartTime.ToUniversalTime().Ticks == startedAt;
+            }
+            catch (Win32Exception) when (process.HasExited)
+            {
+                return false;
+            }
         }
         catch (ArgumentException)
         {
