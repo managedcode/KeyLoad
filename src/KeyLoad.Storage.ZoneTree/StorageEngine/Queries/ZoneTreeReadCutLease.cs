@@ -1,4 +1,3 @@
-using System.Runtime.ExceptionServices;
 using ZoneTree;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
@@ -155,13 +154,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         => state.MarkIteratorDisposed(iterator);
     internal void CancelLifetime() => cancellation.Cancel();
     internal void CompleteDisposal(List<Exception> failures)
-    {
-        var failure = state.CompleteDisposeAttempt(failures);
-        if (failure is not null)
-        {
-            ExceptionDispatchInfo.Capture(failure).Throw();
-        }
-    }
+        => state.CompleteDisposeAttempt(failures).GetAwaiter().GetResult();
 
     private void ReleaseSlot() => release(this);
 

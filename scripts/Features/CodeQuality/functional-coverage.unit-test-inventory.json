@@ -50059,7 +50059,7 @@
       "methodName": "ExpiredLeaseReleasesItsSlotAndPreservesOriginalCommittedBytes",
       "instanceName": "ExpiredLeaseReleasesItsSlotAndPreservesOriginalCommittedBytes",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/RuntimeRead/ReadCutClockTests.cs",
-      "sourceSha256": "5dd057bf509276fde5644c040dd5875efc874efbcaa1f8392f6fd66fafc13103",
+      "sourceSha256": "6e1116b3746088a8fa4b1f9a4ade7c764548548b6918ad580229b9df6049f288",
       "lineNumber": 13,
       "endLineNumber": 55,
       "classification": "functional",
@@ -50072,6 +50072,24 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.ReadCutClockTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.ReadCutClockTests",
+      "methodName": "HandledDisposalFailureDoesNotLeaveAnUnobservedTask",
+      "instanceName": "HandledDisposalFailureDoesNotLeaveAnUnobservedTask",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/RuntimeRead/ReadCutClockTests.cs",
+      "sourceSha256": "6e1116b3746088a8fa4b1f9a4ade7c764548548b6918ad580229b9df6049f288",
+      "lineNumber": 57,
+      "endLineNumber": 83,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CUT-003"
+      ],
+      "acceptance": [
+        "AC-CUT-003"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.StorageRecovery.ReadCutConsistencyTests",
       "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.ReadCutConsistencyTests",
       "methodName": "AcCut001SnapshotKeepsExactOldCutAcrossCanonicalChanges",
@@ -50080,6 +50098,24 @@
       "sourceSha256": "5c3e8f41d570f48c4dd41f004d02be22b373853560a5aba02f64ddaea0933cc8",
       "lineNumber": 17,
       "endLineNumber": 47,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CUT-001"
+      ],
+      "acceptance": [
+        "AC-CUT-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.ReadCutLeafBoundaryTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.ReadCutLeafBoundaryTests",
+      "methodName": "CapturedPrefixesKeepEveryRecordAcrossFrozenLeafBoundaries",
+      "instanceName": "CapturedPrefixesKeepEveryRecordAcrossFrozenLeafBoundaries",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/RuntimeRead/ReadCutLeafBoundaryTests.cs",
+      "sourceSha256": "2cead3a1a09cc2248bd821a7c65afa400cb452221c677f85f8863c973d2014bb",
+      "lineNumber": 10,
+      "endLineNumber": 48,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -69253,6 +69289,7 @@
         "KeyLoad.FunctionalTests.StorageRecovery.PreparationOwnershipTests|PreparationEscapesAndForeignThreadsRefuseBeforeCallback|PreparationEscapesAndForeignThreadsRefuseBeforeCallback",
         "KeyLoad.FunctionalTests.StorageRecovery.ReadCutCleanupTests|AcCut003CleanupRetainsEmptyAndNestedAggregateFailures|AcCut003CleanupRetainsEmptyAndNestedAggregateFailures",
         "KeyLoad.FunctionalTests.StorageRecovery.ReadCutClockTests|ExpiredLeaseReleasesItsSlotAndPreservesOriginalCommittedBytes|ExpiredLeaseReleasesItsSlotAndPreservesOriginalCommittedBytes",
+        "KeyLoad.FunctionalTests.StorageRecovery.ReadCutClockTests|HandledDisposalFailureDoesNotLeaveAnUnobservedTask|HandledDisposalFailureDoesNotLeaveAnUnobservedTask",
         "KeyLoad.FunctionalTests.StorageRecovery.ReverseRangeResourceTests|AcRangeRev003CancellationAndObserverOrVisitorFaultReleaseCursorsAndStoreGate|AcRangeRev003CancellationAndObserverOrVisitorFaultReleaseCursorsAndStoreGate",
         "KeyLoad.FunctionalTests.StorageRecovery.ReverseRangeResourceTests|AcRangeRev003InvalidCapsFailWithoutChangingCommittedData|AcRangeRev003InvalidCapsFailWithoutChangingCommittedData",
         "KeyLoad.FunctionalTests.StorageRecovery.ReverseRangeResourceTests|AcRangeRev003ObserverChargesDescendingEntriesAndLiveLookahead|AcRangeRev003ObserverChargesDescendingEntriesAndLiveLookahead",
@@ -69443,6 +69480,7 @@
         "KeyLoad.FunctionalTests.StorageRecovery.PartitionRootAdmissionTests",
         "KeyLoad.FunctionalTests.StorageRecovery.PartitionStorageTests",
         "KeyLoad.FunctionalTests.StorageRecovery.PreparedTransactionTests",
+        "KeyLoad.FunctionalTests.StorageRecovery.ReadCutLeafBoundaryTests",
         "KeyLoad.FunctionalTests.StorageRecovery.ReadCutLifetimeTests",
         "KeyLoad.FunctionalTests.StorageRecovery.ValueHeaderRefusalTests",
         "KeyLoad.FunctionalTests.StorageRecovery.WriteThroughJournalTests",
@@ -69952,6 +69990,7 @@
         "KeyLoad.FunctionalTests.StorageRecovery.PreparedTransactionTests|AcPsw002RepeatedValidationReplacementDeletionResetAndCallerBuffersKeepFinalFrame|AcPsw002RepeatedValidationReplacementDeletionResetAndCallerBuffersKeepFinalFrame",
         "KeyLoad.FunctionalTests.StorageRecovery.PreparedTransactionTests|AcPsw003RejectedOversizedStageRetainsValidatedSetForCommit|AcPsw003RejectedOversizedStageRetainsValidatedSetForCommit",
         "KeyLoad.FunctionalTests.StorageRecovery.PreparedTransactionTests|AcPsw003ResetToEmptyWritesNoFrameAndDoesNotAdvancePosition|AcPsw003ResetToEmptyWritesNoFrameAndDoesNotAdvancePosition",
+        "KeyLoad.FunctionalTests.StorageRecovery.ReadCutLeafBoundaryTests|CapturedPrefixesKeepEveryRecordAcrossFrozenLeafBoundaries|CapturedPrefixesKeepEveryRecordAcrossFrozenLeafBoundaries",
         "KeyLoad.FunctionalTests.StorageRecovery.ReadCutLifetimeTests|AcCut003ConcurrentTraversalFailsWithoutAdvancingTheSharedIterator|AcCut003ConcurrentTraversalFailsWithoutAdvancingTheSharedIterator",
         "KeyLoad.FunctionalTests.StorageRecovery.ReadCutLifetimeTests|AcCut003ReentrantStoreDisposalFailsWithoutClosingTheRuntime|AcCut003ReentrantStoreDisposalFailsWithoutClosingTheRuntime",
         "KeyLoad.FunctionalTests.StorageRecovery.ReadCutLifetimeTests|AcCut003RejectsConcurrentAndReentrantUseButAllowsFollowingLease|AcCut003RejectsConcurrentAndReentrantUseButAllowsFollowingLease",

@@ -11,8 +11,8 @@ internal sealed class AnnMaintenanceStreamShape(Guid requestId)
     internal void Admit(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk, int count)
     {
         if (chunk.Kind != CqrsStreamChunkKind.Progress || chunk.Sequence != count
-            || chunk.ProgressResult is not { IsSuccess: true, Value: not null } result
-            || result.Problem is not null || result.Value is not { } progress
+            || chunk.ProgressResult is not { IsSuccess: true, Value: var progress } result
+            || result.Problem is not null
             || progress.RequestId != requestId || progress.TextPhase is not null
             || progress.OnlineTextPhase is not null
             || progress.AnnPhase is not { } next || chunk.Final is not null || chunk.EventId is not null

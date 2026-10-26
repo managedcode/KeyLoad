@@ -75,9 +75,9 @@ verification. Earlier raw-part tests do not qualify the replacement.
 ## Current source state
 
 The custom raw-part engine, public binary protocol, exclusive serializers and
-consumer IStorage adapter are removed. The published 10.1.5 native server and
-filesystem provider are composed directly. KeyLoad adds metadata-only reservation,
-staging, revision publication, tombstoning and protected reclamation through its
+consumer IStorage adapter are removed. The published native server and filesystem
+provider pinned in `Directory.Packages.props` are composed directly. KeyLoad adds
+metadata-only reservation, staging, revision publication, tombstoning and protected reclamation through its
 existing authorized Orleans command/read path. The HTTP resource filter admits
 scope before provider creation; metadata operations enforce fresh persisted
 capability, row policy and resource lifetime checks.

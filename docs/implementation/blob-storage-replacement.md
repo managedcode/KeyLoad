@@ -43,41 +43,34 @@ raw-part BlobStorage evidence does not qualify the replacement.
 - Storage dependency: five original-failure cases reproduced; all nine focused
   tests and all 790 non-stress cases pass. Final coverage is 85.41% line / 72.16%
   branch across all 19 packages. Restore, format, format verification and a
-  warnings-as-errors solution build passed. Owner approved exactly 10.1.5;
+  warnings-as-errors solution build passed for the original 10.1.5 repair;
   commit `06154822dec61b586d8549fd3633dd618b25ff55` is pushed and its
   [Release workflow](https://github.com/managedcode/Storage/actions/runs/39242642161)
   completed successfully, including Browser Stress, production coverage, NuGet
   publication and every-package source-commit verification. Server and FileSystem
-  10.1.5 public nupkg source commits were independently verified; KeyLoad central
-  references are updated once to those published versions. Consumer restore and the complete Debug solution build with warnings as errors
-  pass (0 warnings / 0 errors). Focused consumer checks are recorded below.
+  10.1.5 public nupkg source commits were independently verified. This is the
+  original dependency release evidence. Current consumer package versions are
+  pinned in `Directory.Packages.props`; the approved package refresh selects
+  published Server and FileSystem 10.1.6.
 - Native controller/provider composition, metadata-only publication and fresh
   scope/row authorization are implemented. Server Debug build passes with zero
   warnings/errors. Nine file tests pass for metadata publication, quota/row authorization, native
-  MVC route discovery and physical identity isolation. Actual Aspire HTTP
-  acceptance is blocked by the independently reproduced text receipt startup
-  failure recorded below.
+  MVC route discovery and physical identity isolation. The current local
+  three-node whole-model test exercises native HTTP uploads, exact downloads
+  and denied writes through the real Aspire composition.
 
 ## Current KeyLoad checks
 
-Public-feed restore, the complete Debug solution build with warnings as errors,
-repository governance and scoped format/format verification pass. A subsequent
-UnitTests project build also passes with the source-identity gate enabled.
+The approved package refresh restores from the public feed and builds the complete
+Debug solution with warnings as errors. The local
+`ThreeNodeClusterRunsSameEveryModelScenarioThroughSdkMcpAndSql` case passes with
+three persisted copies, including native file uploads, exact-byte downloads and
+rejected unauthorized writes. Focused storage, text and CQRS checks also pass.
 
-Focused TUnit checks on the final assembly:
-
-- KeyLoadClientNullReadTests: 2 pass, including rejection and healthy continuation
-  after all seven remaining nullable-read routes.
-- McpOutputSchemaTests: 5 pass.
-- ResourcePolicyUpdateRejectionTests: 6 pass.
-- ContractFamilyTests: 13 pass.
-- ResourcePairBindingWholeFlowTests: all 4 fail at complete DocumentResult equality
-  in the initial healthy mixed-model step, before resource-pair fault injection.
-  Assertions are retained; this is an open gate, not a passing whole-operation claim.
-
-The new routes are composed in source. These focused checks do not establish
-complete file API acceptance: physical recovery, cancellation/endurance, payload
-backup consistency and deployed shared-provider cluster qualification remain open.
+These checks do not establish complete file API acceptance. Physical recovery,
+cancellation/endurance, payload backup consistency and deployed shared-provider
+cluster qualification remain separate open gates. Linux checks must qualify the
+exact committed source and its selected packages.
 
 ## Connected metadata and authorization checkpoint
 
@@ -103,12 +96,7 @@ Current local evidence:
   shutdown stack within the existing diagnostic limits and secret redaction.
 - Repository governance and changed dashboard JavaScript syntax: pass.
 
-The actual Aspire HTTP scenario is present and runs the native AppHost with
-Azurite. It fails before any file operation: the node cannot open the fresh text
-projection receipt. The same failure is independently reproduced by existing
-`TextOnlineWholeOperationTests.OrderedPublicationPreservesFullOriginalReceiptAndSameViewBilingualReads`:
-`TextEnvelopeCodec.Decode` -> `TextRootFiles.VerifyReceipt` reports
-`The execution text projection is corrupt.` No assertion or startup protection
-is weakened. HTTP upload/download, ranges and revocation are therefore unqualified
-until this startup blocker is resolved. This checkpoint does not close physical
-restore, cancellation/endurance, shared-provider multi-silo or Linux delivery gates.
+The earlier text receipt startup failure no longer blocks the local whole-model
+Aspire scenario. Its successful native file operations establish that scenario's
+scope only; range, cancellation, physical restore and deployed shared-provider
+acceptance require their own original execution evidence.

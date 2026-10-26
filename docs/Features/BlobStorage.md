@@ -63,8 +63,8 @@ Every participating silo must see the same configured physical object namespace;
 independent local directories do not implement shared file storage.
 
 The server composes the published ManagedCode.Storage.Server and FileSystem
-10.1.5 packages. `FileStorageController` inherits the native server controller
-and delegates form, stream and chunk transfers to the library. The selected
+packages pinned in `Directory.Packages.props`. `FileStorageController` inherits
+the native server controller and delegates form, stream and chunk transfers to the library. The selected
 filesystem provider is scoped to the complete partition, resource and incarnation.
 The physical key is a server-created immutable identifier; public metadata keeps
 the original logical name and excludes provider paths.

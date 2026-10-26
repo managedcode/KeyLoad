@@ -70,9 +70,9 @@ internal static class KeyLoadFailureDiagnostics
             try
             {
                 var result = await client.OutboxStatusAsync(partition, deadline.Token).ConfigureAwait(false);
-                if (result.IsSuccess && result.Value is { } status)
+                if (result.IsSuccess)
                 {
-                    line = diagnostics.Format(failed, status);
+                    line = diagnostics.Format(failed, result.Value);
                 }
             }
             catch (Exception error) when (IsRecoverableObservationFailure(error))

@@ -53,4 +53,47 @@ internal sealed class ReadCutClockTests
         await Assert.That(result.Records).IsEqualTo(1);
         await Assert.That(actual).IsEquivalentTo(ReadCutFixture.Value(Value));
     }
+
+    [Test]
+    public async Task HandledDisposalFailureDoesNotLeaveAnUnobservedTask()
+    {
+        KeyLoadException? original = null;
+        var unobserved = 0;
+        void Observe(object? sender, UnobservedTaskExceptionEventArgs arguments)
+        {
+            if (arguments.Exception.InnerExceptions.Any(error => ReferenceEquals(error, original)))
+            {
+                Interlocked.Increment(ref unobserved);
+            }
+        }
+        TaskScheduler.UnobservedTaskException += Observe;
+        try
+        {
+            original = DisposeExpiredReadCut();
+            await Assert.That(original.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            await Assert.That(Volatile.Read(ref unobserved)).IsEqualTo(0);
+        }
+        finally
+        {
+            TaskScheduler.UnobservedTaskException -= Observe;
+        }
+    }
+
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static KeyLoadException DisposeExpiredReadCut()
+    {
+        var clock = new ReadCutAdvancingClock();
+        using var fixture = new ReadCutFixture(clock);
+        fixture.Store.Commit((transaction, _) =>
+        {
+            transaction.Put(ReadCutFixture.Key(Entity), ReadCutFixture.Value(Value));
+            return true;
+        });
+        using var lease = fixture.Capture(ReadCutFixture.Limits(1, 1024, Lifetime));
+        clock.Advance(Lifetime.Add(TimeSpan.FromTicks(1)));
+        return Assert.ThrowsExactly<KeyLoadException>(lease.Dispose);
+    }
 }

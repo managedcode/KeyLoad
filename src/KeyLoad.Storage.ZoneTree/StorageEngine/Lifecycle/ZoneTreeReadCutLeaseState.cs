@@ -163,7 +163,7 @@ internal sealed class ZoneTreeReadCutLeaseState
         }
     }
 
-    internal Exception? CompleteDisposeAttempt(List<Exception> failures)
+    internal Task CompleteDisposeAttempt(List<Exception> failures)
     {
         lock (sync)
         {
@@ -183,16 +183,17 @@ internal sealed class ZoneTreeReadCutLeaseState
                 _ => new AggregateException(errors)
             };
 
+            var completion = disposeFinished!;
             if (failure is null)
             {
-                disposeFinished!.TrySetResult();
+                completion.TrySetResult();
             }
             else
             {
-                disposeFinished!.TrySetException(failure);
+                completion.TrySetException(failure);
             }
             disposing = false;
-            return failure;
+            return completion.Task;
         }
     }
 

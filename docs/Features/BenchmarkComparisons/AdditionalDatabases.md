@@ -77,8 +77,8 @@ Publisher sources:
   and [SQL query API](https://docs.influxdata.com/influxdb3/core/api/query-data/).
 - [SQL Server container platform requirements](https://learn.microsoft.com/en-us/sql/linux/sql-server-linux-docker-container-deployment?view=sql-server-ver17).
 
-The owner separately approved pinning `System.Security.Cryptography.Pkcs` 10.0.13
-in the benchmark project after restore selected vulnerable transitive version
+The benchmark project explicitly references `System.Security.Cryptography.Pkcs`
+at its approved central pin after restore selected vulnerable transitive version
 9.0.18 and failed NU1902/NU1903. This explicit reference keeps the selected SqlClient
 dependency graph on the fixed Microsoft MIT package. Audit and warning gates stay
 enabled.
