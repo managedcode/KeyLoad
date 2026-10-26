@@ -453,8 +453,7 @@
                 "QueueDispatchCasClusterTests",
                 "RelationalSqlClusterJoinBudgetTests",
                 "SqlBetweenSymmetricClusterWholeFlowTests",
-                "SqlBooleanTruthClusterWholeFlowTests",
-                "SqlNullDistinctClusterWholeFlowTests"
+                "SqlBooleanTruthClusterWholeFlowTests"
               ]
             },
             {
@@ -475,6 +474,19 @@
             }
           ],
           "name": "Bootstrap and authorized traversal"
+        },
+        {
+          "id": "cluster-sql-null-comparisons-and-cold-recovery",
+          "lanes": [
+            {
+              "id": "sql-null-comparisons-and-cold-recovery",
+              "kind": "own-clusters",
+              "classes": [
+                "SqlNullDistinctClusterWholeFlowTests"
+              ]
+            }
+          ],
+          "name": "SQL null comparisons and cold recovery"
         },
         {
           "id": "cluster-queues-and-restart-recovery",
