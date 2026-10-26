@@ -59,6 +59,26 @@ internal sealed class LiteralMachineKeyAttributeContractTests
         await Assert.That(findings).IsEmpty();
     }
 
+    [Test]
+    public async Task NamespaceAliasAttributeDiagnosesLiteralAndAllowsConstantAsync()
+    {
+        const string literalName = "\"aliased-json-name\"";
+        const string source = """
+            using Json = System.Text.Json.Serialization;
+            internal sealed class Contract
+            {
+                private const string MemberName = "constant-json-name";
+                [Json::JsonPropertyName("aliased-json-name")]
+                public string LiteralMember { get; init; } = string.Empty;
+                [Json::JsonPropertyName(MemberName)]
+                public string ConstantMember { get; init; } = string.Empty;
+            }
+            """;
+
+        var findings = await AnalyzerFixture.AnalyzeAsync(new LiteralMachineKeyAnalyzer(), source);
+        await AssertFindingsAtTokensAsync(findings, source, literalName);
+    }
+
     private static async Task AssertFindingsAtTokensAsync(
         ImmutableArray<Diagnostic> findings,
         string source,

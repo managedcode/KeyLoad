@@ -40,6 +40,31 @@ internal sealed class OrleansGenerateSerializerTests
             source, "MissingPayload");
     }
 
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task ArrayPayloadsInGrainParametersAndResultsRequireSerializerAsync(bool hasSerializer)
+    {
+        var source = $$"""
+            {{(hasSerializer ? "[Orleans.GenerateSerializer]" : string.Empty)}}
+            public sealed record Payload(string Value);
+            public interface IExampleGrain : Orleans.IGrainWithStringKey
+            {
+                System.Threading.Tasks.Task<Payload[]> ExchangeAsync(
+                    System.Collections.Generic.List<Payload[]> values);
+            }
+            """;
+        var findings = await AnalyzerFixture.AnalyzeAsync(new OrleansGenerateSerializerAnalyzer(), source);
+        if (hasSerializer)
+        {
+            await Assert.That(findings).IsEmpty();
+        }
+        else
+        {
+            await AnalyzerFixture.AssertFindingAsync(findings, Id, DiagnosticSeverity.Error, source, "Payload");
+        }
+    }
+
     /// <summary>Verifies persistent state without serializer reports located error.</summary>
     [Test]
     public async Task PersistentStateWithoutSerializerReportsLocatedErrorAsync()

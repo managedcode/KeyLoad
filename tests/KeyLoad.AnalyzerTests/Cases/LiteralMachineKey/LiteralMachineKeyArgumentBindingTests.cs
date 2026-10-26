@@ -121,6 +121,25 @@ internal sealed class LiteralMachineKeyArgumentBindingTests
     }
 
     [Test]
+    public async Task DynamicMutationRequiresAnExplicitKeyParameterAsync()
+    {
+        const string namedKey = "\"named-key\"";
+        const string source = """
+            internal static class Subject
+            {
+                internal static void Change(dynamic values)
+                {
+                    values.Add("positional-value");
+                    values.Remove(value: "named-value");
+                    values.Add(key: "named-key", value: "human-value");
+                }
+            }
+            """;
+        var findings = await AnalyzerFixture.AnalyzeAsync(new LiteralMachineKeyAnalyzer(), source);
+        await AssertFindingsAtTokensAsync(findings, source, namedKey);
+    }
+
+    [Test]
     public async Task ReducedAndStaticEndpointExtensionsBindNamesAndExpandedTagsAsync()
     {
         const string reducedName = "\"reduced-name\"";
