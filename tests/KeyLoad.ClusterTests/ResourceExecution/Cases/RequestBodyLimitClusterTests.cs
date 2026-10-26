@@ -38,6 +38,8 @@ internal sealed class RequestBodyLimitClusterTests
                 }
                 using var rejected = await http.SendAsync(request, timeout.Token);
                 await Assert.That(rejected.StatusCode).IsEqualTo(System.Net.HttpStatusCode.TooManyRequests);
+                await Assert.That(rejected.Headers.TransferEncodingChunked is true).IsFalse();
+                await Assert.That(rejected.Content.Headers.Contains("Content-Length")).IsTrue();
                 var problem = await rejected.Content.ReadFromJsonAsync<ManagedCode.Communication.Problem>(JsonDefaults.Options, timeout.Token);
                 await Assert.That(problem!.ErrorCode).IsEqualTo(nameof(ErrorCode.ResourceExhausted));
                 using var control = new HttpRequestMessage(HttpMethod.Post, "/admin/dispatch?paused=false");

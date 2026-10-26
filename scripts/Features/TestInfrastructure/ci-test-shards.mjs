@@ -47,10 +47,16 @@ function dotnetArguments(suite, run) {
 
 function startRun(suite, run, environment, children) {
   mkdirSync(run.directory, { recursive: true });
+  let processEnvironment = environment;
+  if (suite.partition === 'class') {
+    const diagnosticsDirectory = path.join(run.directory, 'dcp-diagnostics');
+    mkdirSync(diagnosticsDirectory, { recursive: true });
+    processEnvironment = { ...environment, DCP_DIAGNOSTICS_LOG_FOLDER: diagnosticsDirectory, DCP_DIAGNOSTICS_LOG_LEVEL: 'info' };
+  }
   const started = Date.now();
   const args = dotnetArguments(suite, run);
   process.stdout.write(`[${run.label}] dotnet ${args.join(' ')}\n`);
-  const child = spawn('dotnet', args, { cwd: root, env: environment, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn('dotnet', args, { cwd: root, env: processEnvironment, stdio: ['ignore', 'pipe', 'pipe'] });
   children.add(child);
   for (const [stream, target] of [[child.stdout, process.stdout], [child.stderr, process.stderr]]) {
     createInterface({ input: stream }).on('line', line => target.write(`[${run.label}] ${line}\n`));

@@ -27,7 +27,6 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
             var large = error.StatusCode == StatusCodes.Status413PayloadTooLarge;
             await WriteAsync(context, large ? ErrorCode.ResourceExhausted : ErrorCode.Validation,
                 large ? ServerProtocol.BodyExceeded : ServerProtocol.InvalidJson);
-            await context.Response.CompleteAsync();
         }
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
@@ -42,9 +41,11 @@ internal sealed class ServerErrorMiddleware(RequestDelegate next, ILogger<Server
 
     internal static async Task WriteAsync(HttpContext context, ErrorCode code, string safeDetail)
     {
+        var payload = JsonSerializer.SerializeToUtf8Bytes(Errors.Problem(code, safeDetail), JsonDefaults.Options);
         context.Response.StatusCode = Errors.Status(code);
-        context.Response.ContentLength = null;
-        await context.Response.WriteAsJsonAsync(Errors.Problem(code, safeDetail), JsonDefaults.Options,
-            context.RequestAborted);
+        context.Response.ContentType = ServerProtocol.JsonContentType;
+        context.Response.ContentLength = payload.Length;
+        await context.Response.Body.WriteAsync(payload, context.RequestAborted);
+        await context.Response.CompleteAsync();
     }
 }
