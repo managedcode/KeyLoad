@@ -6,7 +6,7 @@ internal sealed class SiteIsolatedValidationTests
 {
     /// <summary>AC-ISO-008: these corrupt authentic copies are parser rejection inputs, never measurement evidence.</summary>
     [Test]
-    [Arguments("missing")]
+    [Arguments("empty")]
     [Arguments("duplicate")]
     [Arguments("foreign")]
     [Arguments(SiteIsolatedFields.Cohort)]
@@ -15,7 +15,7 @@ internal sealed class SiteIsolatedValidationTests
     [Arguments(SiteIsolatedFields.Job)]
     [Arguments("copies")]
     [Arguments("failed")]
-    public async Task AC_ISO_008_BrowserRejectsIncompleteOrInconsistentProjection(string corruption)
+    public async Task AC_ISO_008_BrowserRejectsEmptyOrInconsistentProjection(string corruption)
     {
         var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -32,6 +32,50 @@ internal sealed class SiteIsolatedValidationTests
             projection = path,
         }, token);
         await Assert.That(response.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsFalse();
+    }
+
+    [Test]
+    public async Task AC_ISO_008_BrowserAcceptsPartialProjectionAndKeepsAbsentRowsEmpty()
+    {
+        var fixture = await SiteIsolatedFixture.ReadAsync();
+        var token = TestContext.Current!.Execution.CancellationToken;
+        var original = await File.ReadAllBytesAsync(fixture.Projection, token);
+        var value = JsonNode.Parse(original)!.AsObject();
+        var workers = value[SiteIsolatedFields.Workers]!.AsArray();
+        while (workers.Count > 1)
+        {
+            workers.RemoveAt(workers.Count - 1);
+        }
+
+        await using var temporary = SiteTempDirectory.Create();
+        var projection = Path.Combine(temporary.Path, "partial-projection.json");
+        var output = Path.Combine(temporary.Path, "partial-rows.json");
+        await File.WriteAllTextAsync(projection, value.ToJsonString(), token);
+        var accepted = await SiteIsolatedNodeProcess.RunAsync(fixture.Inputs.Site, new
+        {
+            operation = "validate",
+            repository = fixture.Inputs.Site.Repository,
+            catalog = fixture.Catalog,
+            projection,
+        }, token);
+        await Assert.That(accepted.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
+        await Assert.That(accepted.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(1);
+        var selection = new SiteIsolatedSelection("sequential-read",
+            workers[0]![SiteIsolatedFields.NodeCount]!.GetValue<int>(), "session", "throughput", "all");
+        var rows = await SiteIsolatedNodeProcess.RunAsync(fixture.Inputs.Site, new
+        {
+            operation = "rowsBatch",
+            repository = fixture.Inputs.Site.Repository,
+            projection,
+            selections = new[] { selection },
+            output,
+        }, token);
+        await Assert.That(rows.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
+        using var observed = System.Text.Json.JsonDocument.Parse(await File.ReadAllBytesAsync(output, token));
+        using var expected = System.Text.Json.JsonDocument.Parse(value.ToJsonString());
+        await SiteIsolatedArithmeticTests.AssertRows(observed.RootElement[0].GetProperty(SiteIsolatedFields.Rows).EnumerateArray().ToArray(),
+            SiteIsolatedOracle.Rows(expected.RootElement, selection));
+        await Assert.That((await File.ReadAllBytesAsync(fixture.Projection, token)).SequenceEqual(original)).IsTrue();
     }
 
     /// <summary>AC-ISO-008: catalog cannot redirect measurements or conflate website and measured source.</summary>
@@ -94,11 +138,11 @@ internal sealed class SiteIsolatedValidationTests
     {
         switch (corruption)
         {
-            case "missing":
-                workers.RemoveAt(0);
+            case "empty":
+                workers.Clear();
                 break;
             case "duplicate":
-                workers[1] = workers[0]!.DeepClone();
+                workers.Add(workers[0]!.DeepClone());
                 break;
             case "foreign":
                 worker[SiteIsolatedFields.Target] = "foreign";

@@ -13,7 +13,7 @@ internal sealed class SiteIsolatedBrowserTests
         using var projection = JsonDocument.Parse(await File.ReadAllBytesAsync(fixture.Projection, token));
         await using var browser = await SiteIsolatedBrowserStartup.StartAsync(fixture, token);
         await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
-        await AssertAccessibilityAsync(browser.Chrome.Cdp, token);
+        await AssertAccessibilityAsync(browser.Chrome.Cdp, projection.RootElement, token);
         await SiteIsolatedBrowserKeyboardAssertions.AssertNodeSelectionAsync(browser.Chrome.Cdp, projection.RootElement, token);
         foreach (var scenario in SiteIsolatedOracle.Cases)
         {
@@ -45,7 +45,7 @@ internal sealed class SiteIsolatedBrowserTests
         }
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "metric", "throughput", token);
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "repetition", "session", token);
-        foreach (var target in projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
+        foreach (var target in projection.GetProperty(SiteIsolatedFields.Plan).GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
             .Select(worker => worker.GetProperty(SiteIsolatedFields.Target).GetString()!).Distinct(StringComparer.Ordinal))
         {
             await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "target", target, token);
@@ -53,7 +53,7 @@ internal sealed class SiteIsolatedBrowserTests
         }
     }
 
-    private static async Task AssertAccessibilityAsync(SiteBrowserCdpClient cdp, CancellationToken token)
+    private static async Task AssertAccessibilityAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
     {
         const string script = """
             (()=>({labels:['scenario','node-count','target','metric','repetition'].every(id=>
@@ -69,7 +69,9 @@ internal sealed class SiteIsolatedBrowserTests
         await Assert.That(value.GetProperty(SiteIsolatedFields.Status).GetString()).IsEqualTo("polite");
         await Assert.That(value.GetProperty(SiteIsolatedFields.Alert).GetString()).IsEqualTo("alert");
         await Assert.That(value.GetProperty(SiteIsolatedFields.Caption).GetBoolean()).IsTrue();
-        await Assert.That(value.GetProperty(SiteIsolatedFields.Provenance).GetInt32()).IsEqualTo(11);
+        var available = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
+            .Count(worker => worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3);
+        await Assert.That(value.GetProperty(SiteIsolatedFields.Provenance).GetInt32()).IsEqualTo(available);
         await Assert.That(value.GetProperty(SiteIsolatedFields.Samples).GetInt32()).IsEqualTo(0);
     }
 }

@@ -3,7 +3,7 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 internal sealed class SiteIsolatedGitHubProofTests
 {
     [Test]
-    public async Task AC_ISO_007_CurrentSessionFilesBindAll22WorkersAndOriginalProcesses()
+    public async Task AC_ISO_007_CurrentSessionFilesBindEverySelectedWorkerAndOriginalProcesses()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
