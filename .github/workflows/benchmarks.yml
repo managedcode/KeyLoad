@@ -110,6 +110,11 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
+      - name: Test external database bulk operations and joined cleanup
+        if: (github.event_name == 'push' || inputs.mode == 'full')
+        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --maximum-parallel-tests 1 --minimum-expected-tests 4 --treenode-filter '/*/*/NativeDatabaseTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/NativeAdapters" --report-trx --timeout 20m
+      - name: Test bounded terminal execution diagnostics
+        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --minimum-expected-tests 1 --treenode-filter '/*/*/ComparisonHostCaptureTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/TerminalDiagnostics" --report-trx
       - name: Save original preparation diagnostics
         if: always()
         uses: actions/upload-artifact@v7
@@ -117,6 +122,8 @@ jobs:
           name: comparison-runtime-qualification
           path: |
             TestResults/**
+            benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/**
+            benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/database-adapters/**/*.log
             artifacts/qualification/**
             artifacts/code-quality/**
             ${{ runner.temp }}/keyload-cell-github/**

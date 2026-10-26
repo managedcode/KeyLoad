@@ -2,7 +2,7 @@ using System.Runtime.CompilerServices;
 
 namespace KeyLoad.Comparisons.Targets;
 
-internal sealed class HttpDocumentSession(HttpDocumentStore store) : IDocumentComparisonSession
+internal sealed class HttpDocumentSession(HttpDocumentStore store) : IDocumentComparisonSession, IDocumentBulkSession
 {
     private const int EmptyCount = 0, SingleCount = 1;
     private const string ExtraRows = "HttpDocumentDatabaseExtraRows";

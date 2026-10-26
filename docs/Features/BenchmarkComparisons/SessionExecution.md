@@ -77,6 +77,10 @@ fixtures.
    and is acknowledged when its batch is, so load latency percentiles describe batch
    acknowledgement times. Mixed creates, updates, deletes, reads and queries stay one
    record per request.
+   OpenSearch uses 1,000-record requests so coordinating and replica work from all
+   sixteen clients fit the selected small-heap topology. Redis retains 10,000-command
+   pipelines and verifies local and replica fsync receipts on each original write
+   connection; its command timeout allows the configured server receipt wait to finish.
 3. Run separate TUnit operation tests on the loaded database. In the mixed test, a
    shared start launches parallel bounded client streams: add 100,000 new records,
    delete 100,000 selected base records, update 100,000 other records, and run reads
@@ -143,6 +147,10 @@ matrix, restarts or separate benchmark scenario.
 - Contract tests, the actual matrix-to-C# selection and startup verification
   run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
   part of operation latency.
+  Preparation also runs the real external adapter cases in `NativeDatabaseTests`:
+  OpenSearch at one/three nodes, three-node Redis and one-node HelixDB, with sixteen
+  independently owned clients, complete body readback and healthy continuation.
+  These bounded checks retain original TRX files and do not qualify public figures.
 - Ingestion at 1/10/500 clients, the minimum measured operation counts, recall,
   replicated acknowledgement, resource bounds and all required workload families are
   kept. The number of jobs is not the number of measured scenarios.
@@ -158,6 +166,13 @@ client remains outside the resource graph. Only run-owned Docker resources are
 removed; image user defaults and anonymous session volumes own every database's
 files, KeyLoad included. The manual Release workflow alone publishes the KeyLoad
 server image with SDK `PublishContainer`.
+
+The Redis topology probe removes its transient key before document readback.
+HelixDB closes a namespace through bounded, acknowledged deletion pages while its
+indexes are still available, then drops the empty indexes under the document cleanup
+deadline. Terminal client diagnostics retain a bounded suffix so a late disposal
+failure remains observable after a long measured session. Cleanup failures still
+fail the session and cannot produce a successful original result.
 
 Local execution retains the actual client binary/source/process identity with no
 invented GitHub provenance; every database server, KeyLoad included, is identified

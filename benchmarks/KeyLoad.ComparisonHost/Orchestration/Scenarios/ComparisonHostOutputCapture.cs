@@ -2,7 +2,7 @@ using System.Text;
 
 namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
-/// <summary>Retains a bounded prefix while joining the complete original redirected stream.</summary>
+/// <summary>Retains bounded terminal diagnostics while joining the complete original redirected stream.</summary>
 internal static class ComparisonHostOutputCapture
 {
     private const int MaximumCapturedCharacters = 32_768;
@@ -16,10 +16,10 @@ internal static class ComparisonHostOutputCapture
         int count;
         while ((count = await reader.ReadAsync(buffer.AsMemory(), cancellationToken)) > 0)
         {
-            var remaining = MaximumCapturedCharacters - text.Length;
-            if (remaining > 0)
+            text.Append(buffer, 0, count);
+            if (text.Length > MaximumCapturedCharacters)
             {
-                text.Append(buffer, 0, Math.Min(count, remaining));
+                text.Remove(0, text.Length - MaximumCapturedCharacters);
             }
         }
         return text.ToString();

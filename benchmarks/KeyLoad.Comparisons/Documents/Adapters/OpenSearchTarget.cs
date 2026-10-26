@@ -2,8 +2,9 @@ namespace KeyLoad.Comparisons.Targets;
 
 public sealed partial class OpenSearchTarget
 {
-    // OpenSearch tuning starts bulk requests at 5-15 MiB; 5,000 1 KiB documents are about 5.5 MiB (https://docs.opensearch.org/latest/tuning-your-cluster/performance/).
-    private const int BulkRequestDocuments = 5_000;
+    // Sixteen clients retain concurrent coordinating, primary and replica work. Keep each request near 1 MiB
+    // so the selected small-heap topology admits the whole cohort without indexing-pressure rejections.
+    private const int BulkRequestDocuments = 1_000;
     /// <inheritdoc/>
     public int IngestionBatchRecords => BulkRequestDocuments;
     /// <inheritdoc/>

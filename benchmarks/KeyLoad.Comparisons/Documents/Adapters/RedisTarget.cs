@@ -21,7 +21,7 @@ public sealed partial class RedisTarget
     /// <inheritdoc/>
     public Task<IDocumentComparisonSession> OpenDocumentSessionAsync(CancellationToken token)
         => DocumentSessionAcquisition<ConnectionMultiplexer>.OpenAsync(
-            _ => ConnectionMultiplexer.ConnectAsync(RedisReplicaProof.CreateOptions(connectionSettings)), AdmitDocumentConnectionAsync,
+            _ => ConnectionMultiplexer.ConnectAsync(WriteSettings()), AdmitDocumentConnectionAsync,
             actual => new RedisComparisonSession(actual, prefix, configuredTopology,
                 -DocumentMeasurementValues.SingleItemCount, lifecycleOptions, executionOptions, joinOriginalOperations: true),
             token, (actual, cancellation) => documentNamespace!.ReadAsync(actual, cancellation));

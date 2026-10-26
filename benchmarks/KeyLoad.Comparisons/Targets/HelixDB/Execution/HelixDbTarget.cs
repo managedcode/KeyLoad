@@ -74,7 +74,8 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
         {
             if (ownsData)
             {
-                using var timeout = new CancellationTokenSource(Policy.CleanupTimeout, timeProvider);
+                using var timeout = new CancellationTokenSource(Policy.DocumentCleanupTimeout, timeProvider);
+                await HelixDbDocumentCleanup.RunAsync(http, label, Policy, timeProvider, timeout.Token).ConfigureAwait(false);
                 if (ownsEqualityIndex)
                 {
                     await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbTokens.TokenId, range: false), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
@@ -88,10 +89,6 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
                 {
                     await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbTokens.TokenNumber, range: true), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
                 }
-                using var response = await HelixDbProtocol.QueryAsync(http, HelixDbProtocol.Batch(HelixDbProtocol.Node(HelixDbTokens.TokenDrop, new()
-                {
-                    [HelixDbTokens.TokenInput] = HelixDbProtocol.Nodes(label)
-                }), true), true, Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
             }
         }
         finally

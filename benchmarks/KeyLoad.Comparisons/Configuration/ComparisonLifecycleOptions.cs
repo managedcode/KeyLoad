@@ -19,7 +19,7 @@ public sealed class ComparisonLifecycleOptions
     private const int ClaimPollMilliseconds = 1;
     private const int QueueLeaseSeconds = 30;
     private const int DiagnosticSeconds = 2;
-    private const int ReceiptSeconds = 3;
+    private const int ReceiptSeconds = 30;
     private const int ProbeExpiryMinutes = 2;
     private const int Neo4jCleanupSeconds = 600;
     private const int MongoCleanupSeconds = 15;

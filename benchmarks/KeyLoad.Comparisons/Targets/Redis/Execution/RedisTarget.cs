@@ -78,7 +78,7 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
                 ReadContract = PrimaryKeyReadsS1SeedsDocumentKeysOnlyToken
             };
         }
-        var settings = RedisReplicaProof.CreateOptions(connectionSettings);
+        var settings = WriteSettings();
         if (settings.EndPoints.Count != SingleItemCount)
         {
             throw new ComparisonFailureException(RedisProtocol.PrimaryEndpointError);
@@ -111,6 +111,7 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
         var evidence = await RedisReplicaProof.VerifyAsync(primary: connection, replicaStrings: replicaEndpoints,
             topology: configuredTopology, primaryIdentity: primaryIdentity, probeKey: probeKey,
             payload: dataset.CreateDocument(FirstElementIndex).Json, token: cancellationToken, lifecycleOptions: lifecycleOptions, diagnosticOptions: diagnostics, timeProvider: timeProvider);
+        await database.KeyDeleteAsync(probeKey, CommandFlags.DemandMaster).WaitAsync(cancellationToken);
         Profile = Profile with
         {
             Version = primaryIdentity.Version,
@@ -132,7 +133,7 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
     {
         const int SingleItemCount = 1;
 
-        var settings = RedisReplicaProof.CreateOptions(connectionSettings);
+        var settings = WriteSettings();
         if (settings.EndPoints.Count != SingleItemCount)
         {
             throw new ComparisonFailureException(RedisProtocol.PrimaryEndpointError);
@@ -145,6 +146,14 @@ public sealed partial class RedisTarget(string connectionString, string runId, s
         }
         catch (Exception) { await workerConnection.DisposeAsync(); throw; }
         return new RedisComparisonSession(workerConnection, prefix, configuredTopology, corpusCount, lifecycleOptions, executionOptions);
+    }
+
+    private ConfigurationOptions WriteSettings()
+    {
+        var settings = RedisReplicaProof.CreateOptions(connectionSettings);
+        // A blocking fsync receipt can use its full server deadline before the transport observes the response.
+        settings.AsyncTimeout = checked(settings.AsyncTimeout + (int)Math.Ceiling(lifecycleOptions.Value.RedisReceiptTimeout.TotalMilliseconds));
+        return settings;
     }
 
     /// <summary>Closes and disposes the target-owned Redis connection.</summary>

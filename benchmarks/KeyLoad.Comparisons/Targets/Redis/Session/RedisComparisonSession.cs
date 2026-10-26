@@ -14,6 +14,7 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
     private const string WriteConnectionReplaced = "RedisWriteConnectionReplaced";
     private const string ReceiptConnectionReplaced = "RedisReceiptConnectionReplaced";
     private const string WaitAofFailed = "RedisWaitAofFailed";
+    private const string ReceiptSeparator = ":";
     private const int RequiredLocalFsync = 1;
     private const int RequiredReplicaFsync = 1;
     private readonly ComparisonExecutionOptions execution = ComparisonExecutionOptions.Require(runtimeExecutionOptions).Value;
@@ -154,9 +155,15 @@ internal sealed class RedisComparisonSession(ConnectionMultiplexer connection, s
         var timeoutMilliseconds = checked((int)Math.Ceiling(lifecycleOptions.Value.RedisReceiptTimeout.TotalMilliseconds));
         var arguments = new object[] { RequiredLocalFsync, RequiredReplicaFsync, timeoutMilliseconds };
         var reply = (RedisResult[])(await RuntimeJoinAsync(database.ExecuteAsync(WaitAofCommand, arguments, CommandFlags.DemandMaster), token))!;
-        if (reply.Length != FsyncReceiptFieldCount || (long)reply[FirstElementIndex] < RequiredLocalFsync || (long)reply[SingleItemCount] < RequiredReplicaFsync)
+        if (reply.Length != FsyncReceiptFieldCount)
         {
             throw new ComparisonFailureException(WaitAofFailed);
+        }
+        var local = (long)reply[FirstElementIndex];
+        var replicas = (long)reply[SingleItemCount];
+        if (local < RequiredLocalFsync || replicas < RequiredReplicaFsync)
+        {
+            throw new ComparisonFailureException(FormattableString.Invariant($"{WaitAofFailed}{ReceiptSeparator}{local}{ReceiptSeparator}{replicas}"));
         }
         if (await ReadClientIdAsync(token) != before)
         {

@@ -29,10 +29,7 @@ internal sealed class AdditionalDatabaseTests
         await using var independent = await documents.OpenDocumentSessionAsync(token);
         await Assert.That(session.ClientIdentity).IsNotEqualTo(independent.ClientIdentity);
         await Assert.That((await session.ReadAsync(corpus.CreateDocument(First), token)).Value).IsNull();
-        for (var index = First; index < InitialCount; index++)
-        {
-            await session.ExecuteAsync(Scenario.DocumentWrite, corpus.CreateDocument(index), token);
-        }
+        await session.CreateDocumentsAsync([.. Enumerable.Range(First, InitialCount).Select(corpus.CreateDocument)], token);
         await AssertDocumentAsync(independent, corpus.CreateDocument(First), token);
         await session.ExecuteAsync(Scenario.DocumentUpdate, corpus.Replacement(First), token);
         await AssertDocumentAsync(independent, corpus.Replacement(First), token);

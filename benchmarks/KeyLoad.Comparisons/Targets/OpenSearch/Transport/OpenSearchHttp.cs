@@ -12,6 +12,7 @@ internal static class OpenSearchHttp
     internal static readonly JsonSerializerOptions JsonOptions = new(JsonSerializerDefaults.Web);
     private const string JsonMediaType = "application/json";
     private const string NdjsonMediaType = "application/x-ndjson";
+    private const string HttpFailure = "OpenSearchHttpStatus";
 
     internal static Task<JsonDocument> SendJsonAsync(HttpClient client, HttpMethod method, string path, object? body,
         CancellationToken cancellationToken, bool allowNotFound = false)
@@ -49,9 +50,9 @@ internal static class OpenSearchHttp
             return JsonDocument.Parse(OpenSearchNames.EmptyObjectJson);
         }
 
-        if (mutation is null)
+        if (mutation is null && !response.IsSuccessStatusCode)
         {
-            response.EnsureSuccessStatusCode();
+            throw new ComparisonFailureException(HttpFailure + (int)response.StatusCode);
         }
         var json = await ReadJsonAsync(response.Content, policy, cancellationToken);
         try
