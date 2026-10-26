@@ -18,9 +18,10 @@ internal sealed class ConnectionGraphPolicyTests
     {
         return ConnectionScenario.RunAsync(async scenario =>
         {
-            using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+            using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
             var token = timeout.Token;
             await scenario.InitializeAsync(token);
+            timeout.CancelAfter(scenario.Timing.CompletionTimeout);
             await Assert.That(scenario.Fixture.Hosts.Nodes.Length)
                 .IsEqualTo(ConnectionServerEvidence.RuntimeExpectedFiles);
             foreach (var node in scenario.Fixture.Hosts.Nodes)

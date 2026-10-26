@@ -13,9 +13,10 @@ internal static class MultiLaneConnectionOwnerTrial
 
     internal static Task RunAsync() => ConnectionScenario.RunAsync(async scenario =>
     {
-        using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+        using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
         var token = timeout.Token;
         await scenario.InitializeAsync(token);
+        timeout.CancelAfter(scenario.Timing.CompletionTimeout);
         var lanes = MultiLaneReceiveFlow.Seed(scenario.Fixture, LaneCount);
         var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
             [new(Guid.NewGuid(), lanes[0]), new(Guid.NewGuid(), lanes[1])]);

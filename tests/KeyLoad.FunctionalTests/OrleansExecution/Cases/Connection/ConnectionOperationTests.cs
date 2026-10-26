@@ -7,9 +7,10 @@ internal sealed class ConnectionOperationTests
     {
         return ConnectionScenario.RunAsync(async scenario =>
         {
-            using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+            using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
             var token = timeout.Token;
             await scenario.InitializeAsync(token);
+            timeout.CancelAfter(scenario.Timing.CompletionTimeout);
             var principal = scenario.Principal();
             var createId = Guid.NewGuid();
             var command = scenario.Command(nameof(AcCrs050SignedCreateReadUpdateAndReplayReuseOneActualActivation));
@@ -48,9 +49,10 @@ internal sealed class ConnectionOperationTests
     {
         return ConnectionScenario.RunAsync(async scenario =>
         {
-            using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+            using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
             var token = timeout.Token;
             await scenario.InitializeAsync(token);
+            timeout.CancelAfter(scenario.Timing.CompletionTimeout);
             var first = scenario.Principal();
             var second = scenario.Principal();
             var firstId = Guid.NewGuid();

@@ -8,13 +8,14 @@ internal sealed class ConnectionAwaitedSettlementTests
         ConnectionAwaitedSettlementObservation? observer = null;
         return ConnectionScenario.RunAsync(async scenario =>
         {
-            using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+            using var deadline = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
             using var parent = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
                 TestContext.Current!.Execution.CancellationToken);
             var token = parent.Token;
             try
             {
                 await scenario.InitializeAsync(token);
+                deadline.CancelAfter(scenario.Timing.CompletionTimeout);
                 var firstPrincipal = scenario.Principal();
                 var nextPrincipal = scenario.Principal();
                 await Assert.That(firstPrincipal.Id).IsNotEqualTo(nextPrincipal.Id);

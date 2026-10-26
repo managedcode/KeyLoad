@@ -77,11 +77,12 @@ internal sealed class CredentialStatusFlow : IAsyncDisposable
     private async Task RunOwnedAsync()
     {
         scenario = new ConnectionScenario();
-        using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+        using var deadline = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
             TestContext.Current!.Execution.CancellationToken);
         var token = linked.Token;
         await scenario.InitializeAsync(token);
+        deadline.CancelAfter(scenario.Timing.CompletionTimeout);
         state = await CredentialStatusSeed.CreateAsync(scenario);
         var endpoint = new CredentialStatusEndpoint(state);
         transportUncertain = true;

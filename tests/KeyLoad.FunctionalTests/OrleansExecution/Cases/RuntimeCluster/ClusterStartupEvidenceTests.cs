@@ -39,8 +39,9 @@ internal sealed class ClusterStartupEvidenceTests
         {
             await ConnectionScenario.RunAsync(async scenario =>
             {
-                using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+                using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
                 await scenario.InitializeAsync(timeout.Token);
+                timeout.CancelAfter(scenario.Timing.CompletionTimeout);
                 clusterId = scenario.Fixture.Evidence.ClusterId;
                 var principal = scenario.Principal();
                 using var cancelled = new CancellationTokenSource();
@@ -79,9 +80,10 @@ internal sealed class ClusterStartupEvidenceTests
         ConnectionServerRuntime? runtime = null;
         await ConnectionScenario.RunAsync(async scenario =>
         {
-            using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
+            using var timeout = new CancellationTokenSource(scenario.Timing.StartupTimeout, TimeProvider.System);
             var token = timeout.Token;
             await scenario.InitializeAsync(token);
+            timeout.CancelAfter(scenario.Timing.CompletionTimeout);
             clusterId = scenario.Fixture.Evidence.ClusterId;
             runtime = scenario.Fixture;
             var principal = scenario.Principal();
