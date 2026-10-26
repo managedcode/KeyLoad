@@ -11,10 +11,10 @@ internal static class SiteSessionPreparationArchives
     private const string Runtime = "github/runtime/";
 
     internal static async Task VerifyAsync(string capture, JsonObject metadata,
-        SiteIsolatedGitHubArchiveEntry[] provider, CancellationToken token)
+        SiteIsolatedGitHubArchiveFile[] provider, CancellationToken token)
     {
-        var runtime = provider.Where(item => item.File.Path.StartsWith(Runtime, StringComparison.Ordinal))
-            .ToDictionary(item => item.File.Path[Runtime.Length..], item => item.File.Sha256, StringComparer.Ordinal);
+        var runtime = provider.Where(item => item.Path.StartsWith(Runtime, StringComparison.Ordinal))
+            .ToDictionary(item => item.Path[Runtime.Length..], item => item.Sha256, StringComparer.Ordinal);
         await VerifyArchiveAsync(capture, metadata[SiteIsolatedFields.RuntimeIdentity]!.AsObject(), runtime, SmallArchiveBytes, token);
     }
 

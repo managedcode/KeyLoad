@@ -43,7 +43,7 @@ internal static class SiteIsolatedNodeProgram
               const rows = selectedIsolatedRows(projection, selection.scenario, selection.nodeCount,
                 selection.repetition, selection.metric, selection.target);
               selections.push({ selection, rows: rows.map(({ worker, ...row }) => ({ ...row,
-                workerId: worker.id, jobId: worker.job.id, artifactId: worker.artifact.id })) });
+                workerId: worker?.id ?? row.id, jobId: worker?.job.id ?? null, artifactId: worker?.artifact.id ?? null })) });
             }
             await writeFile(request.output, JSON.stringify(selections), { flag: 'wx' });
             result = selections.length;

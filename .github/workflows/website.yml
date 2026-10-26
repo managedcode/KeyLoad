@@ -75,7 +75,7 @@ jobs:
               (.event == "push" or .event == "workflow_dispatch") and
               (.head_sha | test("^[a-f0-9]{40}$"))' <<< "$benchmark_metadata" > /dev/null
             if [[ "$(jq -r .status <<< "$benchmark_metadata")" == completed ]]; then
-              jq -e '.conclusion == "success"' <<< "$benchmark_metadata" > /dev/null
+              jq -e '.conclusion == "success" or .conclusion == "failure"' <<< "$benchmark_metadata" > /dev/null
               exit 0
             fi
             benchmark_poll=$((benchmark_poll + 1))

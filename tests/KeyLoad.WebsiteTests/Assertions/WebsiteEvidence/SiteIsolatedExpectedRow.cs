@@ -1,4 +1,4 @@
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
 internal sealed record SiteIsolatedExpectedRow(string Name, string Status, double? Value, int NodeCount,
-    string WorkerId, long JobId, long ArtifactId);
+    string WorkerId, long? JobId, long? ArtifactId);

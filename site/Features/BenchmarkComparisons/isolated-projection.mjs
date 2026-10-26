@@ -10,8 +10,8 @@ import { readOriginalSession } from '../../../scripts/Features/BenchmarkComparis
 export async function produceIsolatedProjection({ input }) {
   const aggregate = validateSessionAggregate(parseBytes(await readBytes(join(input, 'aggregate.json'), SESSION.aggregateBytes)));
   const resources = [];
-  for (const [index, row] of sessionRows().entries()) {
-    const worker = aggregate.workers[index];
+  for (const worker of aggregate.workers) {
+    const row = sessionRows().find(candidate => candidate.id === worker.id);
     const original = await readOriginalSession(join(input, 'workers', row.id), row, aggregate.cohort, worker);
     if (original.resourceProof !== null) resources.push({nodeCount:row.nodeCount,proof:original.resourceProof});
     const compact = original.reports.map(report => ({ ...report,

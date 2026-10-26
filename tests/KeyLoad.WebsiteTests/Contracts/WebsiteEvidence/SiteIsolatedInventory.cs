@@ -1,11 +1,7 @@
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
-/// <summary>Current authenticated comparison inventory only.</summary>
+/// <summary>Current planned comparison inventory; measured sessions are counted from original receipts.</summary>
 internal static class SiteIsolatedInventory
 {
-    private const int CurrentControlWorkers = 22;
-
     internal static int Workers() => SiteIsolatedGitHubTokens.WorkerCount;
-
-    internal static int ControlWorkers() => CurrentControlWorkers;
 }

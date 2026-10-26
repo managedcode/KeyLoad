@@ -3,6 +3,8 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 /// <summary>Exact machine-readable fields in isolated evidence and browser contracts.</summary>
 internal static class SiteIsolatedFields
 {
+    internal const string Plan = "plan";
+    internal const string WorkerCount = "workerCount";
     internal const string Artifact = "artifact";
     internal const string Attempt = "attempt";
     internal const string Cases = "cases";
@@ -75,8 +77,6 @@ internal static class SiteIsolatedFields
     internal const string Detail = "detail";
     internal const string Worker = "worker";
     internal const string Ms = "Ms";
-    internal const string AggregateJob = "aggregateJob";
-    internal const string AggregateJobId = "aggregateJobId";
     internal const string Archive = "archive";
     internal const string Bytes = "bytes";
     internal const string CaseId = "caseId";

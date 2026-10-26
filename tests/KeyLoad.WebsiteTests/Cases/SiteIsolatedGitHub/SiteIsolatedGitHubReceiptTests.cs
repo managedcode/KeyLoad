@@ -12,7 +12,7 @@ internal sealed class SiteIsolatedGitHubReceiptTests
         var result = await ProbeAsync(inputs.Metadata, token);
         await Assert.That(result).IsTrue();
         await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedInventory.Workers());
+            .IsEqualTo(inputs.Metadata[SiteIsolatedGitHubTokens.WorkerArchives]!.AsArray().Count);
         var actualSite = SiteTestInputs.Read();
         await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Source]![SiteIsolatedGitHubTokens.Website]!.GetValue<string>())
             .IsEqualTo(actualSite.SiteRevision);
@@ -28,7 +28,7 @@ internal sealed class SiteIsolatedGitHubReceiptTests
             value => value[SiteIsolatedGitHubTokens.Extra] = true,
             value => value[SiteIsolatedGitHubTokens.SchemaVersion] = SiteIsolatedGitHubTokens.Zero,
             value => value[SiteIsolatedGitHubTokens.Source]![SiteIsolatedGitHubTokens.Measured] = SiteIsolatedGitHubTokens.WrongSha,
-            value => value[SiteIsolatedGitHubTokens.Artifacts]![SiteIsolatedGitHubTokens.SuiteKey]![SiteIsolatedGitHubTokens.Expired] = true,
+            value => value[SiteIsolatedGitHubTokens.Workers]![0]![SiteIsolatedFields.Artifact]![SiteIsolatedGitHubTokens.Expired] = true,
             value => value[SiteIsolatedGitHubTokens.Workers]!.AsArray().RemoveAt(SiteIsolatedGitHubTokens.Zero),
             value => value[SiteIsolatedGitHubTokens.Workers]!.AsArray().Add(value[SiteIsolatedGitHubTokens.Workers]![SiteIsolatedGitHubTokens.Zero]!.DeepClone()),
             value => value[SiteIsolatedGitHubTokens.PublishEligible] = value[SiteIsolatedGitHubTokens.Mode]!.GetValue<string>() != SiteIsolatedGitHubTokens.Publish,
@@ -42,33 +42,33 @@ internal sealed class SiteIsolatedGitHubReceiptTests
     }
 
     [Test]
-    public async Task AC_BC_FAIL_019_ActualSourceRequiresItsExactAggregateStepContract()
+    public async Task AC_BC_FAIL_019_ActualSourceRequiresItsExactPreparationStepContract()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
         var original = inputs.Metadata.DeepClone();
         var copy = inputs.Metadata.DeepClone().AsObject();
         await Assert.That(await ProbeAsync(copy, token)).IsTrue();
-        var steps = copy[SiteIsolatedGitHubTokens.AggregateJob]![SiteIsolatedGitHubFields.Steps]!.AsArray();
-        await Assert.That(steps.Count).IsEqualTo(3);
-        steps.Insert(3, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Unexpected stage one", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
-        steps.Insert(4, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Unexpected stage two", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
+        var steps = copy[SiteIsolatedGitHubFields.Preparation]![SiteIsolatedGitHubFields.Job]![SiteIsolatedGitHubFields.Steps]!.AsArray();
+        await Assert.That(steps.Count).IsEqualTo(6);
+        steps.Insert(6, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Unexpected stage one", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
+        steps.Insert(7, new JsonObject { [SiteIsolatedGitHubFields.Name] = "Unexpected stage two", [SiteIsolatedGitHubTokens.Conclusion] = "success" });
         await Assert.That(await ProbeAsync(copy, token)).IsFalse();
         await Assert.That(JsonNode.DeepEquals(inputs.Metadata, original)).IsTrue();
     }
 
-    /// <summary>AC-BC-FAIL-003: a controlled receipt keeps the actual worker identity and permits only workload failure.</summary>
+    /// <summary>AC-BC-FAIL-003: a controlled receipt rejects a failed workload while preserving its actual identity.</summary>
     [Test]
-    public async Task AC_BC_FAIL_003_ReceiptAcceptsFailedWorkloadWithSuccessfulResultUpload()
+    public async Task AC_BC_FAIL_003_ReceiptRejectsFailedWorkloadWithSuccessfulResultUpload()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
         var copy = FailedWorkerReceipt(inputs.Metadata);
-        await Assert.That(await ProbeAsync(copy, token)).IsTrue();
+        await Assert.That(await ProbeAsync(copy, token)).IsFalse();
         await Assert.That(JsonNode.DeepEquals(copy[SiteIsolatedGitHubFields.Preparation],
             inputs.Metadata[SiteIsolatedGitHubFields.Preparation])).IsTrue();
         await Assert.That(copy[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedInventory.Workers());
+            .IsEqualTo(inputs.Metadata[SiteIsolatedGitHubTokens.WorkerArchives]!.AsArray().Count);
     }
 
     /// <summary>AC-BC-FAIL-003: failure cannot be relabelled successful and failed uploads or execution runtime preparation checks remain rejected.</summary>

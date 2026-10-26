@@ -1,5 +1,5 @@
 import { metrics } from './measurements.mjs';
-import { SESSION, SESSION_TARGETS, requireSession, sessionUnavailableTopology } from '../../../scripts/Features/BenchmarkComparisons/session-contract.mjs';
+import { SESSION, SESSION_TARGETS, requireSession, sessionRows, sessionUnavailableTopology } from '../../../scripts/Features/BenchmarkComparisons/session-contract.mjs';
 
 function qualified(worker) {
   const profile = worker.session.targetProfile;
@@ -25,8 +25,12 @@ export function selectedIsolatedRows(projection, scenario, nodeCount, repetition
   const [caseId, laneId] = scenario.split('/');
   requireSession(SESSION.caseIds.includes(caseId) && (laneId === undefined || caseId === 'mixed' && ['create', 'delete', 'update', 'read', 'search'].includes(laneId)) && SESSION.nodes.includes(nodeCount) && Object.hasOwn(metrics, metric)
     && (target === 'all' || SESSION_TARGETS.some(item => item.name === target)) && repetition === 'session');
-  return projection.workers.filter(worker => worker.nodeCount === nodeCount && (target === 'all' || worker.target === target))
-    .map(worker => {
+  return sessionRows().filter(row => row.nodeCount === nodeCount && (target === 'all' || row.target === target))
+    .map(row => {
+      const worker = projection.workers.find(candidate => candidate.id === row.id);
+      if (worker === undefined) return { id: row.id, name: row.target, status: 'missing', value: null,
+        min: null, max: null, attempts: null, successes: null, failures: null, throughput: null,
+        p50: null, p95: null, p99: null, detail: 'No verified original result for this session.', nodeCount, worker: null };
       const report = worker.reports.find(item => item.caseId === caseId);
       requireSession(report !== undefined);
       const selected = laneId === undefined ? report.lanes.length === 1 ? report.lanes[0] : null
@@ -35,7 +39,7 @@ export function selectedIsolatedRows(projection, scenario, nodeCount, repetition
       // Concurrent mixed lanes are separate streams, never averaged into a fictitious request distribution.
       const value = report.status !== 'measured' || !qualified(worker) ? null : metric === 'duration'
         ? selected?.measurement.elapsedSeconds ?? report.elapsedSeconds : measurement ? metrics[metric].read(measurement) : null;
-      return { name: worker.target, status: report.status === 'notQualified' || report.status === 'measured' && !qualified(worker) ? 'failed' : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status,
+      return { id: worker.id, name: worker.target, status: report.status === 'notQualified' || report.status === 'measured' && !qualified(worker) ? 'failed' : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status,
         value: Number.isFinite(value) ? value : null, min: Number.isFinite(value) ? value : null,
         max: Number.isFinite(value) ? value : null, attempts: measurement?.attempts ?? null,
         successes: measurement?.successes ?? null, failures: measurement?.failures ?? null,

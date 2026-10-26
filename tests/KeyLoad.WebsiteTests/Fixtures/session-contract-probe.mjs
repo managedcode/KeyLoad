@@ -172,7 +172,7 @@ if (scenario === 'plan') {
     id:cohort.runId,run_attempt:cohort.attempt};
   validateSessionProducer(run,workflow,'publish');
   validateSessionProducer({...run,conclusion:'failure'},workflow,'validate');
-  reject(()=>validateSessionProducer({...run,conclusion:'failure'},workflow,'publish'));
+  validateSessionProducer({...run,conclusion:'failure'},workflow,'publish');
   reject(()=>validateSessionProducer({...run,conclusion:'cancelled'},workflow,'validate'));
   const value={workers:contract.sessionRows().map(row=>{
     const unavailable=['Qdrant','RabbitMQ','KurrentDB'].includes(row.target);
@@ -184,7 +184,8 @@ if (scenario === 'plan') {
       reports:contract.SESSION.caseIds.map(caseId=>({caseId,status:unavailable?'unavailable':'measured'}))};
   })};
   requirePublishableSessionMeasurements(value);accepted=true;
-  for(const change of [v=>v.workers.pop(),v=>v.workers[0].job.conclusion='failure',
+  const partial=clone(value);partial.workers.pop();requirePublishableSessionMeasurements(partial);
+  for(const change of [v=>v.workers=[],v=>v.workers[0].job.conclusion='failure',
     v=>v.workers[0].qualification.status='failed',v=>v.workers[0].execution[0].outcome='Failed',
     v=>v.workers[0].reports[0].status='failed',v=>v.workers[0].reports[0].status='notQualified',
     v=>v.workers[0].resourceQualified=false]) {
@@ -271,11 +272,13 @@ if (scenario === 'plan') {
     artifacts:rows.map((row,index) => artifact(index+100,row.artifactName))};
   capture.jobs.push(job(99,contract.SESSION.prepareJob,contract.SESSION.prepareSteps));
   capture.artifacts.push(artifact(201,'comparison-compiled-test-bundle'),artifact(202,'comparison-compiled-runtime-identity'));
-  accepted = selection.selectSessionEvidence(capture,cohort).workers.length === 32;
-  for (const change of [value => value.jobs.shift(),value => value.jobs[0].head_sha='c'.repeat(40),
-    value => value.jobs[0].run_attempt=1,value => value.artifacts[0].expired=true,
-    value => value.artifacts.push(value.artifacts[0]),value => value.artifacts[0].workflow_run.id++,
-    value => value.jobs[0].steps[1].conclusion='failure']) {
+  accepted = selection.selectSessionEvidence(capture,cohort).workers.length === 31;
+  const partial=clone(capture);partial.jobs.splice(1,1);
+  accepted=accepted&&selection.selectSessionEvidence(partial,cohort).workers.length===30;
+  for (const change of [value => value.jobs[1].head_sha='c'.repeat(40),
+    value => value.jobs[1].run_attempt=1,value => value.artifacts[1].expired=true,
+    value => value.artifacts.push(value.artifacts[0]),value => value.artifacts[1].workflow_run.id++,
+    value => value.jobs[1].steps[1].conclusion='failure']) {
     const altered=clone(capture);change(altered);reject(() => selection.selectSessionEvidence(altered,cohort));
   }
 } else throw new Error('Unknown session contract scenario.');

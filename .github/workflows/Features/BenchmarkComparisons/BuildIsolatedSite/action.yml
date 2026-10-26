@@ -1,5 +1,5 @@
 name: Build the qualified current comparison website
-description: Preserve original complete-cohort authority through the bounded final Pages build.
+description: Preserve original successful-session authority through the bounded final Pages build.
 runs:
   using: composite
   steps:

@@ -6,23 +6,26 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedGitHubArchiveTests
 {
-
     [Test]
     public async Task AC_ISO_007_CurrentSessionArchivesContainEverySelectedOriginalFileWithOriginalHashes()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
         var receipt = JsonNode.Parse(await File.ReadAllBytesAsync(inputs.Receipt, token))!.AsObject();
-        await AssertArchiveAsync(inputs, receipt, SiteIsolatedGitHubTokens.Suite, false, token);
-        await AssertArchiveAsync(inputs, receipt, SiteIsolatedGitHubTokens.Provider, true, token);
-        await Assert.That(inputs.Metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray().Count)
-            .IsEqualTo(SiteIsolatedGitHubTokens.WorkerCount);
-        var files = receipt[SiteIsolatedGitHubTokens.InputFiles]!.AsArray();
-        await Assert.That(files.Count).IsEqualTo(SiteIsolatedGitHubArchivePaths.ExpectedSuite(inputs.Metadata).Count + SiteIsolatedGitHubArchivePaths.ExpectedProvider().Count);
-        await Assert.That(files.Count(file => file![SiteIsolatedGitHubTokens.Path]!.GetValue<string>()
-            .StartsWith("input/provider/", StringComparison.Ordinal))).IsEqualTo(SiteIsolatedGitHubArchivePaths.ExpectedProvider().Count);
-        await Assert.That(files.Count(file => file![SiteIsolatedGitHubTokens.Path]!.GetValue<string>()
-            .StartsWith("input/aggregate/", StringComparison.Ordinal))).IsEqualTo(SiteIsolatedGitHubArchivePaths.ExpectedSuite(inputs.Metadata).Count);
+        var workers = inputs.Metadata[SiteIsolatedGitHubTokens.Workers]!.AsArray();
+        await Assert.That(workers.Count > 0 && workers.Count <= SiteIsolatedInventory.Workers()).IsTrue();
+        foreach (var archive in inputs.Metadata[SiteIsolatedGitHubTokens.WorkerArchives]!.AsArray())
+        {
+            var id = archive![SiteIsolatedGitHubTokens.Id]!.GetValue<string>();
+            var prefix = "input/aggregate/workers/" + id + "/";
+            await AssertArchiveAsync(inputs, receipt, archive[SiteIsolatedGitHubTokens.Path]!.GetValue<string>(), prefix, token);
+        }
+
+        var runtime = inputs.Metadata[SiteIsolatedFields.RuntimeIdentity]![SiteIsolatedFields.Archive]!;
+        await AssertArchiveAsync(inputs, receipt, runtime[SiteIsolatedGitHubTokens.Path]!.GetValue<string>(),
+            "input/provider/github/runtime/", token);
+        await Assert.That(receipt[SiteIsolatedGitHubTokens.InputFiles]!.AsArray().Count)
+            .IsEqualTo(inputs.Metadata[SiteIsolatedGitHubTokens.InputFiles]!.AsArray().Count);
     }
 
     [Test]
@@ -36,25 +39,22 @@ internal sealed class SiteIsolatedGitHubArchiveTests
     }
 
     private static async Task AssertArchiveAsync(SiteIsolatedGitHubInputs inputs, JsonObject receipt,
-        string name, bool provider, CancellationToken token)
+        string relative, string prefix, CancellationToken token)
     {
-        await using var stream = File.OpenRead(Path.Combine(inputs.Capture, SiteIsolatedGitHubTokens.Archives, name));
+        await using var stream = File.OpenRead(Path.Combine(inputs.Capture, relative));
         using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
-        var expected = provider ? SiteIsolatedGitHubArchivePaths.ExpectedProvider() :
-            SiteIsolatedGitHubArchivePaths.ExpectedSuite(inputs.Metadata);
-        var selected = await SiteIsolatedGitHubArchivePreflight.InspectAsync(archive, expected, provider, token,
-            SiteIsolatedGitHubArchivePaths.CellIds(inputs.Metadata));
-        await Assert.That(selected.Length).IsEqualTo(expected.Count);
-        var prefix = string.Join(SiteIsolatedGitHubTokens.Slash, SiteIsolatedGitHubTokens.Input,
-            provider ? SiteIsolatedGitHubTokens.ProviderDirectory : SiteIsolatedGitHubTokens.Aggregate) + SiteIsolatedGitHubTokens.Slash;
-        foreach (var entry in selected)
+        var selected = receipt[SiteIsolatedGitHubTokens.InputFiles]!.AsArray().Where(file =>
+            file![SiteIsolatedGitHubTokens.Path]!.GetValue<string>().StartsWith(prefix, StringComparison.Ordinal)).ToArray();
+        await Assert.That(selected.Length > 0).IsTrue();
+        foreach (var file in selected)
         {
-            await using var content = await entry.Entry.OpenAsync(token);
+            var path = file![SiteIsolatedGitHubTokens.Path]!.GetValue<string>();
+            var entry = archive.GetEntry(path[prefix.Length..]);
+            await Assert.That(entry is not null).IsTrue();
+            await using var content = await entry!.OpenAsync(token);
             var independentHash = Convert.ToHexStringLower(await SHA256.HashDataAsync(content, token));
-            var file = receipt[SiteIsolatedGitHubTokens.InputFiles]!.AsArray().Single(value =>
-                value![SiteIsolatedGitHubTokens.Path]!.GetValue<string>() == prefix + entry.File.Path)!;
             await Assert.That(file[SiteIsolatedGitHubTokens.Sha256]!.GetValue<string>()).IsEqualTo(independentHash);
-            await Assert.That(file[SiteIsolatedGitHubTokens.Bytes]!.GetValue<long>()).IsEqualTo(entry.Entry.Length);
+            await Assert.That(file[SiteIsolatedGitHubTokens.Bytes]!.GetValue<long>()).IsEqualTo(entry.Length);
         }
     }
 }

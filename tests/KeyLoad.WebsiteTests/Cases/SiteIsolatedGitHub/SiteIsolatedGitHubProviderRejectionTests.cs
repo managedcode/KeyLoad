@@ -1,38 +1,41 @@
-using System.IO.Compression;
-
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedGitHubProviderRejectionTests
 {
     [Test]
-    public async Task AC_ISO_007_ProviderInventoryRejectsAnUnknownCellBeforeOwnedOutput()
+    [Arguments("extra", SiteIsolatedGitHubTokens.Incomplete)]
+    [Arguments("missing", SiteIsolatedGitHubTokens.Incomplete)]
+    [Arguments("link", SiteIsolatedGitHubTokens.InvalidPath)]
+    public async Task AC_ISO_007_PreparedProviderRejectsChangedInventoryBeforeOwnedOutput(string corruption, string expected)
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
         await using var temporary = SiteTempDirectory.Create();
-        var path = Path.Combine(temporary.Path, SiteIsolatedGitHubFields.ControlledArchive);
-        await WriteCorruptProviderAsync(inputs, path, token);
-        await using var stream = File.OpenRead(path);
-        using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
-        var error = await Assert.ThrowsExactlyAsync<InvalidDataException>(() =>
-            SiteIsolatedGitHubArchivePreflight.InspectAsync(archive,
-                SiteIsolatedGitHubArchivePaths.ExpectedProvider(), provider: true, token,
-                SiteIsolatedGitHubArchivePaths.CellIds(inputs.Metadata)));
-        await Assert.That(error!.Message).IsEqualTo(SiteIsolatedGitHubTokens.InvalidPath);
-        await Assert.That(Directory.Exists(temporary.Output)).IsFalse();
-    }
+        var capture = Path.Combine(temporary.Path, SiteIsolatedGitHubFields.Capture);
+        var clone = await SiteIsolatedGitHubScope.RunAsync("clone", new { input = inputs.Capture, output = capture }, token);
+        await Assert.That(clone.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
+        var input = Path.Combine(capture, SiteIsolatedGitHubTokens.Input);
+        var prepared = Path.Combine(capture, SiteIsolatedGitHubArchiveReader.PreparedInput);
+        Directory.Move(input, prepared);
+        var relative = Path.Combine(SiteIsolatedGitHubTokens.ProviderDirectory, SiteIsolatedGitHubTokens.Proof);
+        var target = Path.Combine(prepared, relative);
+        if (corruption == "extra")
+        {
+            await File.WriteAllTextAsync(target + ".unexpected", "unexpected", token);
+        }
+        else
+        {
+            File.Delete(target);
+            if (corruption == "link")
+            {
+                File.CreateSymbolicLink(target, Path.Combine(inputs.Capture, SiteIsolatedGitHubTokens.Input, relative));
+            }
+        }
 
-    private static async Task WriteCorruptProviderAsync(SiteIsolatedGitHubInputs inputs,
-        string path, CancellationToken token)
-    {
-        await using var input = File.OpenRead(Path.Combine(inputs.Capture,
-            SiteIsolatedGitHubTokens.Archives, SiteIsolatedGitHubTokens.Provider));
-        using var source = new ZipArchive(input, ZipArchiveMode.Read, leaveOpen: true);
-        await using var output = new FileStream(path, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
-        using var destination = new ZipArchive(output, ZipArchiveMode.Create, leaveOpen: true);
-        await using var original = await source.GetEntry(SiteIsolatedGitHubTokens.Proof)!.OpenAsync(token);
-        await using var corrupt = await destination.CreateEntry(SiteIsolatedGitHubFields.UnknownCellInventory,
-            CompressionLevel.NoCompression).OpenAsync(token);
-        await original.CopyToAsync(corrupt, token);
+        var error = await Assert.ThrowsExactlyAsync<InvalidDataException>(() =>
+            SiteIsolatedGitHubArchiveReader.VerifyPreparedAsync(capture, SiteIsolatedGitHubArchiveReader.ReadFiles(inputs.Metadata), token));
+        await Assert.That(error!.Message).IsEqualTo(expected);
+        await Assert.That(Directory.Exists(input)).IsFalse();
+        await SiteIsolatedGitHubArchiveReader.VerifyArchiveHashesAsync(inputs.Capture, inputs.Metadata, token);
     }
 }

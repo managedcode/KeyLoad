@@ -17,7 +17,7 @@ internal sealed class SiteIsolatedProjectionTests
         var manifest = JsonNode.Parse(await File.ReadAllBytesAsync(
             Path.Combine(fixture.Inputs.Aggregate, "aggregate.json"), token))!.AsObject();
         var workers = projection[SiteIsolatedFields.Workers]!.AsArray();
-        await Assert.That(workers.Count).IsEqualTo(SiteIsolatedInventory.ControlWorkers());
+        await Assert.That(workers.Count).IsEqualTo(manifest[SiteIsolatedFields.Workers]!.AsArray().Count);
         foreach (var worker in workers)
         {
             var id = worker![SiteIsolatedFields.Id]!.GetValue<string>();
@@ -56,7 +56,7 @@ internal sealed class SiteIsolatedProjectionTests
             projection = fixture.Projection,
         }, TestContext.Current!.Execution.CancellationToken);
         await Assert.That(response.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
-        await Assert.That(response.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(SiteIsolatedInventory.ControlWorkers());
+        await Assert.That(response.GetProperty(SiteIsolatedFields.Result).GetInt32()).IsEqualTo(fixture.WorkerCount);
     }
     private static JsonObject Compact(JsonElement report)
     {

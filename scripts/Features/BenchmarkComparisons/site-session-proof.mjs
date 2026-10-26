@@ -25,21 +25,18 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   const receipt = validateSessionSiteReceipt(await readJson(receiptPath, SESSION.aggregateBytes));
   requireSession(receipt.state === 'archive_verified');
   await verifyFiles(input, receipt.metadataFiles);
-  await verifyFiles(input, Object.values(receipt.archives));
   await verifyFiles(input, receipt.workerArchives);
   await verifyFiles(input, [receipt.runtimeIdentity.archive]);
   await verifyFiles(input, receipt.inputFiles);
   const metadata = validateSessionSiteReceipt(await readJson(path.join(input, 'metadata-proof.json')));
-  requireSession(isDeepStrictEqual({ ...receipt, state: 'metadata_verified', archives: null, inputFiles: null }, metadata));
+  requireSession(isDeepStrictEqual({ ...receipt, state: 'metadata_verified' }, metadata));
   const directory = path.join(input, 'metadata', String(receipt.run.id));
   const workflow = await readJson(path.join(input, 'metadata', 'workflow.json'));
   const capture = { run: await readJson(path.join(directory, 'run-attempt.json')),
     jobs: flattenPages(await readJson(path.join(directory, 'jobs-pages.json')), 'jobs'),
     artifacts: flattenPages(await readJson(path.join(directory, 'artifacts-pages.json')), 'artifacts') };
   const selected = selectSessionSiteProducer(capture, workflow, receipt.mode);
-  requireSession(selected !== null && selected.job.id === receipt.aggregateJob.id
-    && selected.suite.id === receipt.artifacts.suite.id && selected.provider.id === receipt.artifacts.provider.id
-    && selected.suite.digest === receipt.artifacts.suite.digest && selected.provider.digest === receipt.artifacts.provider.digest);
+  requireSession(selected !== null && selected.execution.workers.length === receipt.workers.length);
   const aggregateFile = path.join(input, 'input', 'aggregate', 'aggregate.json');
   const aggregate = validateSessionAggregate(await readJson(aggregateFile, SESSION.aggregateBytes));
   if (receipt.mode === 'publish') requirePublishableSessionMeasurements(aggregate);
@@ -73,9 +70,7 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   return { workers: aggregate.workers.length, files: receipt.inputFiles.length };
 }
 function identity(receipt) {
-  return { source: receipt.source, cohort: receipt.cohort, aggregateJobId: receipt.aggregateJob?.id ?? receipt.aggregateJobId,
-    suiteArtifactId: receipt.artifacts?.suite.id ?? receipt.suiteArtifactId,
-    providerArtifactId: receipt.artifacts?.provider.id ?? receipt.providerArtifactId,
+  return { source: receipt.source, cohort: receipt.cohort,
     preparation: receipt.preparation?.job ? {jobId:receipt.preparation.job.id,runtimeArtifactId:receipt.runtimeIdentity.artifact.id,
       runtimeDigest:receipt.runtimeIdentity.artifact.digest,compiledArtifactId:receipt.preparation.compiledArtifact.id,
       compiledDigest:receipt.preparation.compiledArtifact.digest} : receipt.preparation,
@@ -94,8 +89,7 @@ export async function verifySessionSiteFreshness({ before, after }) {
   validateSessionSiteReceipt(previous);
   requireSession(current.schemaVersion === SESSION.schema && current.state === 'selection_verified'
     && previous.state === 'archive_verified' && previous.publishEligible
-    && exactSession(current, ['schemaVersion','state','source','cohort','aggregateJobId','suiteArtifactId',
-      'providerArtifactId','preparation','workers','metadataFiles'])
+    && exactSession(current, ['schemaVersion','state','source','cohort','preparation','workers','metadataFiles'])
     && Array.isArray(current.metadataFiles) && current.metadataFiles.every(file => file.path?.startsWith('metadata/'))
     && isDeepStrictEqual(identity(previous), identity(current)));
   await verifyFiles(path.dirname(after), current.metadataFiles);

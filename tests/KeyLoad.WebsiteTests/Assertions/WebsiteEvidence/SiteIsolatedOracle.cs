@@ -13,10 +13,14 @@ internal static class SiteIsolatedOracle
 
     public static SiteIsolatedExpectedRow[] Rows(JsonElement projection, SiteIsolatedSelection selection)
     {
-        var rows = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
-            .Where(worker => worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == selection.NodeCount
-                && (selection.Target == "all" || selection.Target == worker.GetProperty(SiteIsolatedFields.Target).GetString()))
-            .Select(worker => Row(worker, selection));
+        var workers = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
+            .ToDictionary(worker => worker.GetProperty(SiteIsolatedFields.Id).GetString()!, StringComparer.Ordinal);
+        var rows = projection.GetProperty(SiteIsolatedFields.Plan).GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
+            .Where(planned => planned.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == selection.NodeCount
+                && (selection.Target == "all" || selection.Target == planned.GetProperty(SiteIsolatedFields.Target).GetString()))
+            .Select(planned => workers.TryGetValue(planned.GetProperty(SiteIsolatedFields.Id).GetString()!, out var worker)
+                ? Row(worker, selection) : new SiteIsolatedExpectedRow(planned.GetProperty(SiteIsolatedFields.Target).GetString()!,
+                    "missing", null, selection.NodeCount, planned.GetProperty(SiteIsolatedFields.Id).GetString()!, null, null));
         return selection.Metric == "throughput" ? rows.OrderBy(row => row.Value is null).ThenByDescending(row => row.Value).ToArray()
             : rows.OrderBy(row => row.Value is null).ThenBy(row => row.Value).ToArray();
     }
@@ -41,7 +45,8 @@ internal static class SiteIsolatedOracle
 
     private static bool TopologyUnavailable(JsonElement worker)
         => worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3
-            && new[] { "Neo4j", "SurrealDB", "HelixDB" }.Contains(worker.GetProperty(SiteIsolatedFields.Target).GetString(), StringComparer.Ordinal)
+            && new[] { "Neo4j", "SurrealDB", "HelixDB", "TimescaleDB", "SQL Server", "MySQL", "ClickHouse", "InfluxDB" }
+                .Contains(worker.GetProperty(SiteIsolatedFields.Target).GetString(), StringComparer.Ordinal)
             && worker.GetProperty(SiteIsolatedFields.Session).GetProperty(Images).GetProperty(Server).ValueKind == JsonValueKind.Null;
 
     private static bool Qualified(JsonElement worker, JsonElement profile)

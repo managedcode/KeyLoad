@@ -105,7 +105,8 @@ async function authenticateProof(input, proof) {
 export async function aggregateSessions({ input, output }) {
   const proof = await readJson(path.join(input, 'proof.json'));
   const runtimeIdentity = await authenticateProof(input, proof);
-  const rows = sessionRows();
+  const rows = proof.workers.map(worker => sessionRows().find(row => row.id === worker.id));
+  require(rows.length > 0 && rows.every(row => row !== undefined));
   const inventory = await readdir(path.join(input, 'workers'), { withFileTypes: true });
   require(inventory.length === rows.length && inventory.every(entry => entry.isDirectory() && !entry.isSymbolicLink()
     && rows.some(row => row.id === entry.name)));

@@ -14,14 +14,14 @@ internal static class SiteSessionOriginalArchives
     private const long MaximumOriginalBytes = 1_073_741_824;
 
     internal static async Task VerifyAsync(string capture, JsonObject metadata,
-        SiteIsolatedGitHubArchiveEntry[] suite, CancellationToken token)
+        SiteIsolatedGitHubArchiveFile[] suite, CancellationToken token)
     {
         var expected = metadata[ExpectedFiles]!.AsArray().ToDictionary(
             item => item![SiteIsolatedGitHubTokens.Path]!.GetValue<string>(),
             item => item![SiteIsolatedGitHubTokens.Sha256]!.GetValue<string>(), StringComparer.Ordinal);
         foreach (var file in suite)
         {
-            if (!expected.TryGetValue(file.File.Path, out var hash) || hash != file.File.Sha256)
+            if (!expected.TryGetValue(file.Path, out var hash) || hash != file.Sha256)
             {
                 throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);
             }
@@ -47,7 +47,7 @@ internal static class SiteSessionOriginalArchives
         }
     }
 
-    private static async Task VerifyWorkerAsync(string target, Dictionary<string, string> expected, CancellationToken token)
+    internal static async Task VerifyWorkerAsync(string target, Dictionary<string, string> expected, CancellationToken token)
     {
         await using var source = File.OpenRead(target);
         using var archive = new ZipArchive(source, ZipArchiveMode.Read, leaveOpen: true);

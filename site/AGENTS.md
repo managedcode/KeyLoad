@@ -4,7 +4,7 @@
 
 - Owns the static Pages website that presents benchmark comparisons using verified GitHub Actions reports.
 - HTML/modules/styles entry: `Features/BenchmarkComparisons/`; thin builder: `scripts/build.mjs`; real qualification: `tests/KeyLoad.WebsiteTests` through the unified Aspire AppHost.
-- The site MUST display only the complete authenticated current Benchmarks cohort, preserve exact original source/run/attempt/artifact links and pass all publication gates. No fabricated, local-only, durability or production-readiness claims.
+- The site displays verified successful sessions from one authenticated completed Benchmarks run/attempt/source, including a run whose overall conclusion is failure. Preserve the complete planned row inventory; failed or missing sessions have null metrics displayed as an em dash. Every included session retains its complete original TRX, runtime, resource, correctness and artifact proof, and every publication gate remains required. No fabricated, local-only, durability or production-readiness claims.
 - Do not introduce a backend, credentials, or a second source of truth for benchmark measurements.
 - Preserve the official Three.js 0.186.1 vendor files byte-for-byte against their local manifest and license. `.gitattributes` excludes only upstream `space-before-tab` findings for those exact two files so generic diff checks do not require mutating vendor bytes; authored site files retain normal whitespace checks.
 - Use the installed Orleans skill for Orleans decisions and the relevant installed skill for formatting, Aspire or diagnostics. Follow the owner's explicit installation and dependency scope.

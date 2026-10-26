@@ -24,14 +24,14 @@ internal static class SiteIsolatedBrowserLayoutAssertions
           return{documentContained:document.documentElement.scrollWidth<=width,
             wrapperContained:rect.width>0&&rect.left>=0&&rect.right<=width,
             rows:rows.length,rowsVisible:rows.every(row=>visible(row)&&row.cells[2].textContent.trim().length>0),
-            workersVisible:workers.length===9&&workers.every(e=>visible(e.querySelector('dl'))),
+            workerCount:workers.length,workersVisible:workers.every(e=>visible(e.querySelector('dl'))),
             focused:document.activeElement===wrapper,
             accessible:wrapper.tabIndex===0&&wrapper.getAttribute('role')==='region'&&/scroll/i.test(wrapper.getAttribute('aria-label')??''),
             scrollable:['auto','scroll'].includes(getComputedStyle(wrapper).overflowX)&&wrapper.scrollWidth>wrapper.clientWidth};
         })()
         """;
 
-    /// <summary>AC-ISO-009/011R: genuine Chrome retains nine execution rows and long provenance at every supported viewport.</summary>
+    /// <summary>AC-ISO-009/011R: genuine Chrome retains every planned row and available provenance at every supported viewport.</summary>
     public static async Task AssertAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
     {
         await cdp.EvaluateAsync(OpenWorkers, false, token);
@@ -44,7 +44,12 @@ internal static class SiteIsolatedBrowserLayoutAssertions
             {
                 await Assert.That(snapshot.GetProperty(field).GetBoolean()).IsTrue();
             }
-            await Assert.That(snapshot.GetProperty(SiteIsolatedFields.Rows).GetInt32()).IsEqualTo(9);
+            var planned = projection.GetProperty(SiteIsolatedFields.Plan).GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
+                .Count(row => row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3);
+            var available = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
+                .Count(row => row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3);
+            await Assert.That(snapshot.GetProperty(SiteIsolatedFields.Rows).GetInt32()).IsEqualTo(planned);
+            await Assert.That(snapshot.GetProperty(SiteIsolatedFields.WorkerCount).GetInt32()).IsEqualTo(available);
             await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection,
                 new("sequential-read", 3, "session", "throughput", "all"), token);
             if (width <= SiteBrowserUiTokens.ViewportMobileWidth)

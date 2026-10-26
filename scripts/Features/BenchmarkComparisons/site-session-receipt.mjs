@@ -2,8 +2,8 @@ import { SESSION, exactSession as exact, requireSession as require, sessionHash,
   sessionRows, sessionPositive, sessionCount, validateSessionCohort } from './session-contract.mjs';
 
 const common = ['schemaVersion', 'state', 'mode', 'publishEligible', 'source', 'producer', 'metadataFiles'];
-const selected = ['repository', 'workflow', 'run', 'cohort', 'aggregateJob', 'artifacts', 'workers', 'preparation', 'runtimeIdentity',
-  'suiteFiles', 'workerArchives', 'archives', 'inputFiles'];
+const selected = ['repository', 'workflow', 'run', 'cohort', 'workers', 'preparation', 'runtimeIdentity',
+  'suiteFiles', 'workerArchives', 'inputFiles'];
 export function validateSessionSiteReceipt(value) {
   require(value?.schemaVersion === SESSION.schema && ['publish', 'validate'].includes(value.mode)
     && value.publishEligible === (value.mode === 'publish') && Array.isArray(value.metadataFiles) && value.metadataFiles.length > 0);
@@ -13,38 +13,42 @@ export function validateSessionSiteReceipt(value) {
     && Object.values(value.source).every(hash => /^[a-f0-9]{40}$/.test(hash ?? '')));
   validateFiles(value.metadataFiles, true);
   if (absent) { require(value.producer === null); return value; }
-  require(['metadata_verified', 'archive_verified'].includes(value.state));
+  require(['metadata_verified', 'archive_verified'].includes(value.state) && value.producer === null);
   validateSessionCohort(value.cohort);
   require(value.source.measured === value.cohort.sourceRevision && value.run?.id === value.cohort.runId
     && value.run.attempt === value.cohort.attempt
     && value.run.url === `https://github.com/${SESSION.repository}/actions/runs/${value.cohort.runId}`
     && value.repository?.id === 477801965 && value.repository.fullName === SESSION.repository
     && value.workflow?.path === '.github/workflows/benchmarks.yml' && sessionPositive(value.workflow.id));
-  require(Array.isArray(value.workers) && value.workers.length === SESSION.workers
-    && Array.isArray(value.workerArchives) && value.workerArchives.length === SESSION.workers);
-  for (const artifact of Object.values(value.artifacts)) validateArtifactIdentity(artifact);
-  validateJobProof(value.aggregateJob, value.cohort, ['Check complete session accounting', 'Save combined benchmark results', 'Save GitHub result verification'], false);
+  require(Array.isArray(value.workers) && value.workers.length > 0 && value.workers.length <= SESSION.workers
+    && Array.isArray(value.workerArchives) && value.workerArchives.length === value.workers.length);
   require(exact(value.preparation, ['job', 'compiledArtifact']) && value.preparation.job?.name === SESSION.prepareJob
     && value.preparation.compiledArtifact?.name === 'comparison-compiled-test-bundle');
   for (const artifact of [value.preparation.compiledArtifact, value.runtimeIdentity.artifact]) validateArtifactIdentity(artifact);
   validateJobProof(value.preparation.job, value.cohort, SESSION.prepareSteps, false);
   const seenJobs = new Set(), seenArtifacts = new Set();
-  for (const [index, row] of sessionRows().entries()) {
-    const worker = value.workers[index];
-    require(worker?.id === row.id && worker.target === row.target && worker.nodeCount === row.nodeCount
+  const rows = sessionRows();
+  let previous = -1;
+  for (const [index, worker] of value.workers.entries()) {
+    const ordinal = rows.findIndex(row => row.id === worker.id);
+    require(ordinal > previous);
+    previous = ordinal;
+    const row = rows[ordinal];
+    require(exact(worker, ['id', 'target', 'nodeCount', 'job', 'artifact', 'sessionSha256'])
+      && sessionHash(worker.sessionSha256) && worker.target === row.target && worker.nodeCount === row.nodeCount
       && worker.job?.name === row.jobName && worker.artifact?.name === row.artifactName
       && sessionPositive(worker.job.id) && sessionPositive(worker.artifact.id)
       && !seenJobs.has(worker.job.id) && !seenArtifacts.has(worker.artifact.id));
-    validateJobProof(worker.job, value.cohort, SESSION.workerSteps, true);
+    validateJobProof(worker.job, value.cohort, SESSION.workerSteps, false);
     validateArtifactIdentity(worker.artifact);
     seenJobs.add(worker.job.id); seenArtifacts.add(worker.artifact.id);
     const archive = value.workerArchives[index];
     require(exact(archive, ['id', 'path', 'sha256', 'bytes']) && archive.id === row.id
-      && archive.path === `archives/${row.artifactName}.zip` && sessionHash(archive.sha256)
+      && archive.path === `archives/${row.id}.zip` && sessionHash(archive.sha256)
       && `sha256:${archive.sha256}` === worker.artifact.digest && sessionPositive(archive.bytes)
       && archive.bytes === worker.artifact.sizeInBytes);
   }
-  require(Array.isArray(value.suiteFiles) && value.suiteFiles.length >= SESSION.workers * (SESSION.caseIds.length + 2) + 1);
+  require(Array.isArray(value.suiteFiles) && value.suiteFiles.length >= value.workers.length * (SESSION.caseIds.length + 2) + 1);
   const paths = new Set();
   for (const file of value.suiteFiles) {
     require(exact(file, ['path', 'sha256']) && sessionPath(file.path) && sessionHash(file.sha256) && !paths.has(file.path));
@@ -58,14 +62,10 @@ export function validateSessionSiteReceipt(value) {
     && sessionPositive(value.runtimeIdentity.archive.bytes)
     && value.runtimeIdentity.archive.bytes === value.runtimeIdentity.artifact.sizeInBytes
     && 'sha256:' + value.runtimeIdentity.archive.sha256 === value.runtimeIdentity.artifact.digest);
-  if (value.state === 'metadata_verified') require(value.archives === null && value.inputFiles === null);
-  else {
-    require(exact(value.archives, ['suite', 'provider']) && Array.isArray(value.inputFiles));
-    validateFiles(Object.values(value.archives), false);
-    validateFiles(value.inputFiles, false);
-    for (const file of value.suiteFiles) require(value.inputFiles.some(input => input.path === 'input/aggregate/' + file.path
-      && input.sha256 === file.sha256));
-  }
+  require(Array.isArray(value.inputFiles));
+  validateFiles(value.inputFiles, false);
+  for (const file of value.suiteFiles) require(value.inputFiles.some(input => input.path === 'input/aggregate/' + file.path
+    && input.sha256 === file.sha256));
   return value;
 }
 function validateFiles(files, metadata) {

@@ -465,6 +465,13 @@ The comparison suite uses native clients and isolated nonproduction database dep
 
 Active scale: **100,000 and 1,000,000 records**, at **1 or 3 nodes** where supported. The current cohort contains 16 systems and 32 topology rows. The [five added targets](docs/Features/BenchmarkComparisons/AdditionalDatabases.md) currently implement one-node document sessions; their three-node deployments and separate time-series/analytics qualification remain open. SQL Server uses Developer edition for nonproduction benchmarks. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
 
+The website can show independently verified successful sessions from a completed
+benchmark run whose overall result failed. It keeps every planned row and shows
+`—` for missing or failed sessions, including KeyLoad when no qualified result is
+available. Each displayed number still requires complete original GitHub artifacts,
+TRX outcomes, source/runtime/resource identities and correctness checks from one
+run and attempt. Website browser, coverage and Pages qualification remain separate.
+
 ---
 
 <p align="center">Developed by <a href="https://www.managed-code.com/">Managed Code</a></p>

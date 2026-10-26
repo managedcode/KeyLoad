@@ -38,8 +38,7 @@ internal static class SiteIsolatedBrowserAssertions
             await Assert.That(row.GetProperty(SiteIsolatedFields.WorkerId).GetString()).IsEqualTo(oracle.WorkerId);
             await Assert.That(row.GetProperty(SiteIsolatedFields.Status).GetString()).IsEqualTo(Status(oracle.Status));
             var links = row.GetProperty(SiteIsolatedFields.Links).EnumerateArray().Select(item => item.GetString()).ToArray();
-            await Assert.That(links[0]).IsEqualTo(run + "/job/" + oracle.JobId.ToString(CultureInfo.InvariantCulture));
-            await Assert.That(links[1]).IsEqualTo(run + "/artifacts/" + oracle.ArtifactId.ToString(CultureInfo.InvariantCulture));
+            await AssertLinksAsync(links, run, oracle);
             await AssertValueAsync(row, oracle.Value);
         }
     }
@@ -49,12 +48,27 @@ internal static class SiteIsolatedBrowserAssertions
         if (expected is null)
         {
             await Assert.That(row.GetProperty(SiteIsolatedFields.Value).ValueKind).IsEqualTo(JsonValueKind.Null);
-            await Assert.That(row.GetProperty(SiteIsolatedFields.Display).GetString()).IsEqualTo("Unavailable");
+            await Assert.That(row.GetProperty(SiteIsolatedFields.Display).GetString()).IsEqualTo("—");
         }
         else
         {
             await Assert.That(row.GetProperty(SiteIsolatedFields.Value).GetDouble()).IsEqualTo(expected.Value).Within(0.000001);
             await Assert.That(row.GetProperty(SiteIsolatedFields.Display).GetString()!.StartsWith(Display(expected.Value), StringComparison.Ordinal)).IsTrue();
+        }
+    }
+
+    private static async Task AssertLinksAsync(string?[] links, string run, SiteIsolatedExpectedRow row)
+    {
+        if (row.JobId is null)
+        {
+            await Assert.That(links).HasSingleItem();
+            await Assert.That(links[0]).IsEqualTo(run);
+        }
+        else
+        {
+            await Assert.That(links.Length).IsEqualTo(2);
+            await Assert.That(links[0]).IsEqualTo(run + "/job/" + row.JobId.Value.ToString(CultureInfo.InvariantCulture));
+            await Assert.That(links[1]).IsEqualTo(run + "/artifacts/" + row.ArtifactId!.Value.ToString(CultureInfo.InvariantCulture));
         }
     }
 
@@ -71,6 +85,7 @@ internal static class SiteIsolatedBrowserAssertions
         "unsupported" => "Unsupported scenario",
         "unsupportedTopology" => "Unsupported execution topology",
         "failed" => "Benchmark failed · no data",
+        "missing" => "No verified result",
         _ => throw new ArgumentOutOfRangeException(nameof(value)),
     };
 }

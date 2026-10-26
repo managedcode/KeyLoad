@@ -1,12 +1,9 @@
-using System.IO.Compression;
-
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
 internal sealed class SiteIsolatedGitHubArchiveRejectionTests
 {
     [Test]
     [Arguments(SiteIsolatedGitHubArchiveMutation.Traversal, SiteIsolatedGitHubTokens.InvalidPath)]
-    [Arguments(SiteIsolatedGitHubArchiveMutation.Unexpected, SiteIsolatedGitHubTokens.InvalidPath)]
     [Arguments(SiteIsolatedGitHubArchiveMutation.Duplicate, SiteIsolatedGitHubTokens.Duplicate)]
     [Arguments(SiteIsolatedGitHubArchiveMutation.CaseDuplicate, SiteIsolatedGitHubTokens.Duplicate)]
     [Arguments(SiteIsolatedGitHubArchiveMutation.Symlink, SiteIsolatedGitHubTokens.InvalidPath)]
@@ -20,11 +17,9 @@ internal sealed class SiteIsolatedGitHubArchiveRejectionTests
         await using var temporary = SiteTempDirectory.Create();
         var corrupt = Path.Combine(temporary.Path, SiteIsolatedGitHubFields.ControlledArchive);
         await SiteIsolatedGitHubArchiveMutationWriter.CreateAsync(inputs, corrupt, mutation, token);
-        await using var stream = File.OpenRead(corrupt);
-        using var archive = new ZipArchive(stream, ZipArchiveMode.Read, leaveOpen: true);
         var error = await Assert.ThrowsExactlyAsync<InvalidDataException>(() =>
-            SiteIsolatedGitHubArchivePreflight.InspectAsync(archive,
-                SiteIsolatedGitHubArchivePaths.ExpectedSuite(inputs.Metadata), provider: false, token));
+            SiteSessionOriginalArchives.VerifyWorkerAsync(corrupt,
+                SiteIsolatedGitHubArchivePaths.ExpectedWorker(inputs.Metadata), token));
         await Assert.That(error!.Message).IsEqualTo(expected);
         await Assert.That(Directory.Exists(temporary.Output)).IsFalse();
     }

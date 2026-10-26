@@ -9,27 +9,10 @@ internal static class SiteIsolatedGitHubEntryOperations
         long maximum, CancellationToken token)
     {
         await using var stream = await entry.OpenAsync(token);
-        return await TransferAsync(stream, null, entry.FullName, entry.Length, maximum, token);
+        return await TransferAsync(stream, entry.FullName, entry.Length, maximum, token);
     }
 
-    public static async Task<SiteIsolatedGitHubArchiveFile> ExtractAsync(SiteIsolatedGitHubArchiveEntry entry,
-        string stage, string prefix, CancellationToken token)
-    {
-        var relative = prefix + SiteIsolatedGitHubTokens.Slash + entry.File.Path;
-        var target = SiteIsolatedGitHubFileOperations.FixedTarget(stage, relative);
-        Directory.CreateDirectory(Path.GetDirectoryName(target)!);
-        await using var source = await entry.Entry.OpenAsync(token);
-        await using var destination = new FileStream(target, FileMode.CreateNew, FileAccess.Write, FileShare.None);
-        var actual = await TransferAsync(source, destination, relative, entry.File.Bytes, entry.File.Bytes, token);
-        if (actual.Sha256 != entry.File.Sha256)
-        {
-            throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);
-        }
-
-        return actual;
-    }
-
-    private static async Task<SiteIsolatedGitHubArchiveFile> TransferAsync(Stream source, Stream? destination,
+    private static async Task<SiteIsolatedGitHubArchiveFile> TransferAsync(Stream source,
         string relative, long declared, long maximum, CancellationToken token)
     {
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
@@ -50,10 +33,7 @@ internal static class SiteIsolatedGitHubEntryOperations
             }
 
             hash.AppendData(buffer.AsSpan(SiteIsolatedGitHubTokens.Zero, read));
-            if (destination is not null)
-            {
-                await destination.WriteAsync(buffer.AsMemory(SiteIsolatedGitHubTokens.Zero, read), token);
-            }
+
         }
 
         if (count != declared)

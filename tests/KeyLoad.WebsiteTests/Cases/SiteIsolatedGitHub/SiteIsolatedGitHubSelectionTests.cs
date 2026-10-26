@@ -3,7 +3,7 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 internal sealed class SiteIsolatedGitHubSelectionTests
 {
     [Test]
-    public async Task AC_ISO_009_SelectsActualSuccessfulAggregateWithoutRequiringOverallCiSuccess()
+    public async Task AC_ISO_009_SelectsActualSuccessfulSessionsWithoutRequiringOverallCiSuccess()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);
@@ -14,34 +14,34 @@ internal sealed class SiteIsolatedGitHubSelectionTests
             .IsEqualTo(SiteIsolatedGitHubFields.Selected);
         await Assert.That(selected.GetProperty(SiteIsolatedGitHubSelectionFields.RunId).GetInt64())
             .IsEqualTo(scope.Inputs.Metadata[SiteIsolatedGitHubTokens.Run]![SiteIsolatedGitHubTokens.Id]!.GetValue<long>());
-        await Assert.That(selected.GetProperty(SiteIsolatedGitHubSelectionFields.AggregateJobId).GetInt64())
-            .IsEqualTo(scope.Inputs.Metadata[SiteIsolatedGitHubTokens.AggregateJob]![SiteIsolatedGitHubTokens.Id]!.GetValue<long>());
+        await Assert.That(selected.GetProperty(SiteIsolatedGitHubSelectionFields.PreparationJobId).GetInt64())
+            .IsEqualTo(scope.Inputs.Metadata[SiteIsolatedGitHubFields.Preparation]![SiteIsolatedGitHubFields.Job]![SiteIsolatedGitHubTokens.Id]!.GetValue<long>());
     }
 
     [Test]
-    public async Task AC_ISO_009_SuccessfulAggregateRejectsMissingMandatoryStep()
+    public async Task AC_ISO_009_SuccessfulPreparationRejectsMissingMandatoryStep()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);
-        var id = scope.Inputs.Metadata[SiteIsolatedGitHubTokens.AggregateJob]![SiteIsolatedGitHubTokens.Id]!.GetValue<long>();
+        var id = scope.Inputs.Metadata[SiteIsolatedGitHubFields.Preparation]![SiteIsolatedGitHubFields.Job]![SiteIsolatedGitHubTokens.Id]!.GetValue<long>();
         await SiteIsolatedGitHubScope.MutateAsync(scope.SelectedJobsPath, pages =>
         {
             var job = pages.SelectMany(page => page![SiteIsolatedGitHubSelectionFields.Jobs]!.AsArray())
                 .Single(value => value![SiteIsolatedGitHubTokens.Id]!.GetValue<long>() == id)!;
             var steps = job[SiteIsolatedGitHubFields.Steps]!.AsArray();
-            var required = "Check complete session accounting";
+            var required = "Build the comparison harness";
             steps.Remove(steps.Single(step => step![SiteIsolatedGitHubFields.Name]!.GetValue<string>() == required));
         }, token);
         await Assert.That((await scope.SelectAsync(token)).GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsFalse();
     }
 
     [Test]
-    public async Task AC_ISO_007_CurrentCompositeJobAndRuntimeProofRejectsExpiredSuiteArtifact()
+    public async Task AC_ISO_007_CurrentSessionAndRuntimeProofRejectsExpiredWorkerArtifact()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);
         await Assert.That((await scope.ProveAsync(token)).GetProperty(SiteIsolatedGitHubFields.Ok).GetBoolean()).IsTrue();
-        var id = scope.Inputs.Metadata[SiteIsolatedGitHubTokens.Artifacts]![SiteIsolatedGitHubTokens.SuiteKey]![SiteIsolatedGitHubTokens.Id]!.GetValue<long>();
+        var id = scope.Inputs.Metadata[SiteIsolatedGitHubTokens.Workers]![0]![SiteIsolatedFields.Artifact]![SiteIsolatedGitHubTokens.Id]!.GetValue<long>();
         await SiteIsolatedGitHubScope.MutateAsync(scope.ArtifactsPath, pages =>
         {
             var artifact = pages.SelectMany(page => page![SiteIsolatedGitHubTokens.Artifacts]!.AsArray())

@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using System.Text.Json.Nodes;
 
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
@@ -72,15 +71,6 @@ internal static class SiteIsolatedGitHubFileOperations
         }
 
         return new(relative, count, Convert.ToHexStringLower(hash.GetHashAndReset()));
-    }
-
-    public static void RequireArtifactIdentity(SiteIsolatedGitHubArchiveFile actual, JsonNode artifact)
-    {
-        if (actual.Bytes != artifact[SiteIsolatedGitHubTokens.SizeInBytes]!.GetValue<long>() ||
-            SiteIsolatedGitHubTokens.DigestPrefix + actual.Sha256 != artifact[SiteIsolatedGitHubTokens.Digest]!.GetValue<string>())
-        {
-            throw new InvalidDataException(SiteIsolatedGitHubTokens.Changed);
-        }
     }
 
     public static string FixedTarget(string root, string relative)

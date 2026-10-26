@@ -412,22 +412,23 @@ or comparative performance qualification.
 
 ## Failed-cell publication contract
 
-The failed-cell disposition is active under ADR-080: every planned cell is accounted
-for in the same authenticated run/attempt/source. Successful independent cells remain
-measured; terminal failed workloads have `disposition: failed`,
-`reason: Benchmark failed; no measurement data is available.`, `report: null`, and the
-original failed job/step conclusions. No metric, winner or zero is inferred. Missing,
-skipped, mixed, expired or unauthenticated evidence remains a publication failure.
-Workflows and triggers are defined in ADR-062, ADR-064 and ADR-112: optional
-publication uses the newest ready current producer, or emits no figures when none is
-ready, and has no `workflow_run` executor.
+The Website accounts for every planned database/topology row from one authenticated
+completed run/attempt/source. Independently successful complete sessions retain
+measured values; failed, skipped and missing sessions show an em dash and no numeric
+value. The original run remains linked. Every admitted session still requires its
+complete original TRX, qualification, runtime/resource identities, hashes and
+correctness evidence. Selected corrupt, expired, foreign or mixed evidence is
+rejected. Workflows and triggers are defined in ADR-062, ADR-064 and ADR-112:
+Website intake reads original successful worker/runtime artifacts directly, even
+when the overall run or combined-results job failed. With no eligible sessions it
+publishes content without figures. There is no `workflow_run` executor.
 
 | Requirement | Acceptance | Verification |
 |---|---|---|
 | REQ-BC-FAIL-001 independent workloads finish | AC-BC-FAIL-001 failed matrices do not skip aggregate; no fail-fast or arbitrary parallel cap | actual GitHub job outcomes and complete aggregate accounting; source presence checks are not acceptance evidence |
 | REQ-BC-FAIL-002 explicit unavailable cells | AC-BC-FAIL-002 workload failure produces a bounded null-report envelope before artifact upload; original job failure remains visible | real Node/files TUnit tests, actual failed-job artifact |
-| REQ-BC-FAIL-003 authenticated partial results | AC-BC-FAIL-003 failed job accepted only with failed workload, successful result upload and matching failed envelope; missing/malformed/expired/mixed evidence rejected | producer/aggregate/site negative and positive TUnit regressions |
-| REQ-BC-FAIL-004 honest site | AC-BC-FAIL-004 successful competitors retain values; failed cells have no numeric values and expose actual job link | independent numeric oracle, projection validation and real Chrome |
+| REQ-BC-FAIL-003 authenticated partial results | AC-BC-FAIL-003 a completed failed run may supply independently successful complete worker sessions; failed/missing workers supply null values, while selected malformed/expired/mixed evidence is rejected | producer/aggregate/site negative and positive TUnit regressions |
+| REQ-BC-FAIL-004 honest site | AC-BC-FAIL-004 successful competitors retain values; absent sessions have no numeric values, display an em dash and link the actual run | independent numeric oracle, projection validation and real Chrome |
 | REQ-BC-FAIL-005 repair shared preparation | AC-BC-FAIL-005 diagnose exact failed logs, repair benchmark setup/build invocation, retain isolated topology and Aspire ownership; bounded transient GET retries cover HTTP 503 as well as 403/429, and a failed shared setup finalizes a null-report envelope | exact failed-source log, focused regression, delivered-source GitHub rerun |
 | REQ-BC-FAIL-007 Kurrent writer starts after membership | AC-BC-FAIL-007 verify all execution1/3-member views before constructing the SDK writer; retain DNS seeds, TLS verification, leader preference, NoStream semantics, acknowledgements, replica-copy oracle and cleanup | `IsolatedKurrentDiscoverySettingsTests`:3 actual SDK/resource-model cases; genuine Aspire-owned StreamAppend preflights for1/3 nodes |
 | REQ-BC-FAIL-008 explicit cancellation stops owned work | AC-BC-FAIL-008 workload, finalization and result upload use `!cancelled()` so ordinary failure still finalizes while cancellation stops execution/publication; `always()` cleanup retains bounded diagnostics and safely removes owned registries whose setup was cancelled | canceled-job/producer rejection operation regressions and actual GitHub lifecycle; no source-text substitute |
@@ -442,7 +443,7 @@ ready, and has no `workflow_run` executor.
 | REQ-BC-FAIL-017 database-only benchmark graph | AC-BC-FAIL-017 Benchmarks owns preparation, database comparisons, authenticated result validation and JSON aggregation. It has no browser/site qualification, coverage or Pages dependency; its final bounded job dispatches the separate Website workflow after dependencies settle. Independent cells finish and failed workloads retain null data. | actual completed planned cells/aggregate JSON and original GitHub job graph; source-only workflow tests are not evidence |
 | REQ-BC-FAIL-018 independent automatic website | AC-BC-FAIL-018 Website runs independently on trusted own-main push/manual and on the final bounded Benchmarks dispatch. It consumes authenticated ready metrics when available or qualifies content without figures; website qualification/deployment does not affect Benchmarks results. | Website workflow and optional producer-selection TUnit cases; genuine standalone Website/Pages evidence |
 | REQ-BC-FAIL-019 authenticate the bounded producer wait | AC-BC-FAIL-019 Website accepts the optional benchmark run ID only from its trusted manual/final-dispatch input, validates the actual own-repository main Benchmarks run identity, and waits within the frozen bound for completion. The wait target does not select metric authority; Website separately selects and revalidates the newest ready producer. | Actual Website input/context/selection rejection tests and final-dispatch plus standalone Website workflow evidence |
-| REQ-BC-FAIL-020 newest ready optional metrics | AC-BC-FAIL-020 select the newest ready completed own-main producer with a successful authenticated aggregate and valid current archive/proof inventory. Failed, cancelled, pending or incomplete producers supply no measurements; if no current producer is ready, publish without figures. Corrupt, expired or missing evidence for a selected ready producer fails closed without an older fallback; recheck the selected tuple before deploy. | Real producer-selection positive/negative TUnit cases, Website capture and freshness/provider join |
+| REQ-BC-FAIL-020 newest ready optional metrics | AC-BC-FAIL-020 select the newest ready completed own-main producer with successful original session artifacts and valid archive/proof inventory, even when the overall run failed. Cancelled/pending producers and failed/incomplete sessions supply no figures; if no session is eligible, publish without figures. Corrupt, expired or missing evidence for a selected ready producer fails closed without an older fallback; recheck the selected tuple before deploy. | Real producer-selection positive/negative TUnit cases, Website capture and freshness/provider join |
 | REQ-BC-FAIL-021 independent Website lifecycle | AC-BC-FAIL-021 Website qualification and deployment retain separate serialized job groups with cancellation disabled; content-only and measured modes both revalidate current source and the selected producer tuple before publication. Build and Tests remains independent. | Actual Website job graph, source/tuple freshness cases and provider receipts |
 
 OpenSearch note for AC-BC-FAIL-010: pinned OpenSearch 3.6.0 / k-NN 3.6.0.0 registers

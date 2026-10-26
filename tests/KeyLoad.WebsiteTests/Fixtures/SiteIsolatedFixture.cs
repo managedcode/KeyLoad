@@ -4,7 +4,7 @@ using System.Text.Json.Nodes;
 
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
-internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Root, string Catalog, string Projection)
+internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Root, string Catalog, string Projection, int WorkerCount)
 {
     private static readonly Lazy<Task<SiteIsolatedFixture>> Current = new(CreateAsync);
     public static Task<SiteIsolatedFixture> ReadAsync() => Current.Value;
@@ -29,7 +29,7 @@ internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Roo
             input = inputs.Aggregate,
             output = projectionPath,
         }, token);
-        if (!result.GetProperty(SiteIsolatedFields.Ok).GetBoolean() || result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Workers).GetInt32() != SiteIsolatedInventory.ControlWorkers())
+        if (!result.GetProperty(SiteIsolatedFields.Ok).GetBoolean())
         {
             throw new InvalidOperationException(SiteIsolatedInputs.MissingEvidence);
         }
@@ -37,10 +37,15 @@ internal sealed record SiteIsolatedFixture(SiteIsolatedInputs Inputs, string Roo
         var aggregate = await File.ReadAllBytesAsync(Path.Combine(inputs.Aggregate, "aggregate.json"), token);
         await File.WriteAllBytesAsync(Path.Combine(root, "isolated", "aggregate.json"), aggregate, token);
         var manifest = JsonNode.Parse(aggregate)!.AsObject();
+        var count = manifest[SiteIsolatedFields.Workers]!.AsArray().Count;
+        if (result.GetProperty(SiteIsolatedFields.Result).GetProperty(SiteIsolatedFields.Workers).GetInt32() != count)
+        {
+            throw new InvalidOperationException(SiteIsolatedInputs.MissingEvidence);
+        }
         var catalog = CreateCatalog(inputs, manifest, aggregate, await File.ReadAllBytesAsync(projectionPath, token));
         var catalogPath = Path.Combine(root, "catalog.json");
         await File.WriteAllBytesAsync(catalogPath, JsonSerializer.SerializeToUtf8Bytes(catalog), token);
-        return new(inputs, root, catalogPath, projectionPath);
+        return new(inputs, root, catalogPath, projectionPath, count);
     }
 
     private static object CreateCatalog(SiteIsolatedInputs inputs, JsonObject manifest, byte[] aggregate, byte[] projection)

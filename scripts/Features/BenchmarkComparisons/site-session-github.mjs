@@ -1,17 +1,17 @@
 import path from 'node:path';
-import { readdir } from 'node:fs/promises';
+import { link, readdir } from 'node:fs/promises';
 import { createDirectory } from './files.mjs';
-import { captureApi, downloadArtifact } from './isolated-github-api.mjs';
+import { captureApi } from './isolated-github-api.mjs';
 import { initializeTransport } from './isolated-github-transport.mjs';
-import { inspectZip, extractEntry } from './isolated-github-zip.mjs';
-import { validateDownloadedArchive } from './isolated-github-stream.mjs';
-import { readJson, writeJson, hashRegularFile } from './isolated-github-files.mjs';
+import { writeJson, hashRegularFile } from './isolated-github-files.mjs';
 import { GH } from './isolated-github-contract.mjs';
-import { flattenPages, projectArtifact, projectJob } from './isolated-github-validation.mjs';
+import { projectArtifact, projectJob } from './isolated-github-validation.mjs';
 import { SESSION, requireSession, sessionPositive, sessionPath } from './session-contract.mjs';
-import { validateSessionAggregate } from './session-aggregate-contract.mjs';
+import { aggregateSessions } from './session-aggregate.mjs';
+import { collectSessionWorker } from './session-github-collect.mjs';
+import { collectSessionRuntimeIdentity, readSessionRuntimeIdentity } from './session-runtime-identity.mjs';
 import { sessionSiteContext, parseSessionSiteArguments } from './site-session-context.mjs';
-import { SESSION_SITE, selectSessionSiteProducer, requirePublishableSessionMeasurements } from './site-session-selection.mjs';
+import { selectSessionSiteProducer, requirePublishableSessionMeasurements } from './site-session-selection.mjs';
 import { validateSessionSiteReceipt, sessionSuiteFiles } from './site-session-receipt.mjs';
 
 async function capturePages(route, directory, key, context) {
@@ -31,7 +31,7 @@ async function capturePages(route, directory, key, context) {
   await writeJson(path.join(directory, `${key}-pages.json`), pages);
   return records;
 }
-async function snapshotFiles(input) {
+async function snapshotFiles(input, base = 'metadata', published = base) {
   const files = [];
   async function visit(relative, depth) {
     requireSession(depth <= 8);
@@ -39,10 +39,11 @@ async function snapshotFiles(input) {
       const name = relative + '/' + entry.name;
       requireSession(sessionPath(name) && !entry.isSymbolicLink() && files.length < 10000);
       if (entry.isDirectory()) await visit(name, depth + 1);
-      else files.push({ path: name, ...await hashRegularFile(path.join(input, name), SESSION.runtimeBytesCore, true) });
+      else files.push({ path: published + name.slice(base.length), ...await hashRegularFile(path.join(input, name), SESSION.reportBytes, true) });
     }
   }
-  await visit('metadata', 0);
+  await visit(base, 0);
+  requireSession(files.reduce((sum, file) => sum + file.bytes, 0) <= SESSION.allArchiveBytes);
   return files.sort((left, right) => left.path.localeCompare(right.path));
 }
 async function captureSelection(input, context) {
@@ -52,7 +53,7 @@ async function captureSelection(input, context) {
   const runs = context.requestedRun === null
     ? await capturePages(`${GH.api}/workflows/benchmarks.yml/runs?branch=main&status=completed`, metadata, 'workflow_runs', context)
     : [await captureApi(`${GH.api}/runs/${context.requestedRun}`, path.join(metadata, 'requested-run.json'), false, context)];
-  const candidates = runs.filter(run => context.mode === 'publish' ? run.conclusion === 'success' : ['success', 'failure'].includes(run.conclusion))
+  const candidates = runs.filter(run => ['success', 'failure'].includes(run.conclusion))
     .sort((left, right) => right.run_number - left.run_number);
   for (const summary of candidates) {
     const directory = await createDirectory(path.join(metadata, String(summary.id)));
@@ -68,12 +69,6 @@ async function captureSelection(input, context) {
   }
   requireSession(context.optional);
   return null;
-}
-async function downloadOriginal(artifact, input, name, maximum, context) {
-  const archive = path.join(input, 'archives', name);
-  await downloadArtifact(artifact, archive, maximum, context);
-  await validateDownloadedArchive(archive, artifact, maximum);
-  return { path: 'archives/' + name, ...await hashRegularFile(archive, maximum) };
 }
 export async function captureSessionSite({ environment = process.env, args, download = true }) {
   const values = parseSessionSiteArguments(args,
@@ -93,8 +88,7 @@ export async function captureSessionSite({ environment = process.env, args, down
   }
   if (!download) {
     const fresh = { schemaVersion: SESSION.schema, state: 'selection_verified', source: { ...context.source, measured: selected.cohort.sourceRevision },
-      cohort: selected.cohort, aggregateJobId: selected.job.id, suiteArtifactId: selected.suite.id,
-      providerArtifactId: selected.provider.id,
+      cohort: selected.cohort,
       preparation: {jobId:selected.execution.preparation.id,runtimeArtifactId:selected.execution.runtimeArtifact.id,
         runtimeDigest:selected.execution.runtimeArtifact.digest,compiledArtifactId:selected.execution.compiledArtifact.id,
         compiledDigest:selected.execution.compiledArtifact.digest},
@@ -103,26 +97,35 @@ export async function captureSessionSite({ environment = process.env, args, down
     await writeJson(path.join(input, 'metadata-proof.json'), fresh);
     return fresh;
   }
-  await createDirectory(path.join(input, 'archives'));
-  const suite = await downloadOriginal(selected.suite, input, SESSION.aggregateArtifact + '.zip', SESSION_SITE.suiteBytes, context);
-  await downloadOriginal(selected.provider, input, SESSION_SITE.provider + '.zip', SESSION_SITE.providerBytes, context);
-  const runtimeArchive = await downloadOriginal(selected.execution.runtimeArtifact, input,
-    'comparison-compiled-runtime-identity.zip', 134_217_728, context);
-  await inspectZip(path.join(input, suite.path), ['aggregate.json'], path.join(metadata, 'suite-inventory.txt'), context);
-  const aggregateRaw = await extractEntry(path.join(input, suite.path), 'aggregate.json',
-    path.join(metadata, 'aggregate-original.json'), SESSION.aggregateBytes, context);
-  const aggregate = validateSessionAggregate(await readJson(path.join(metadata, 'aggregate-original.json'), SESSION.aggregateBytes));
-  if (context.mode === 'publish') requirePublishableSessionMeasurements(aggregate);
-  requireSession(JSON.stringify(aggregate.cohort) === JSON.stringify(selected.cohort));
+  context.cohort = selected.cohort;
+  const github = await createDirectory(path.join(input, 'github'));
+  for (const name of ['archives', 'workers']) await createDirectory(path.join(input, name));
+  await link(path.join(metadata, 'workflow.json'), path.join(github, 'workflow.json'));
+  for (const name of ['run-attempt.json', 'jobs-pages.json', 'artifacts-pages.json'])
+    await link(path.join(selected.directory, name), path.join(github, name));
+  const runtimeIdentity = await collectSessionRuntimeIdentity(input, selected.execution.runtimeArtifact, context);
+  const identity = await readSessionRuntimeIdentity(path.join(github, 'runtime'), selected.cohort);
+  const workers = [];
+  for (const worker of selected.execution.workers)
+    workers.push(await collectSessionWorker(input, worker, context, identity));
+  const preparation = { job: projectJob(selected.execution.preparation, selected.cohort, SESSION.prepareSteps),
+    compiledArtifact: projectArtifact(selected.execution.compiledArtifact), runtimeIdentity };
+  await writeJson(path.join(input, 'proof.json'), { schemaVersion: SESSION.schema, cohort: selected.cohort, workers, preparation });
+  const prepared = await createDirectory(path.join(input, 'prepared-input'));
+  const aggregate = requirePublishableSessionMeasurements(await aggregateSessions({ input, output: path.join(prepared, 'aggregate') }));
+  const aggregateRaw = await hashRegularFile(path.join(prepared, 'aggregate', 'aggregate.json'), SESSION.aggregateBytes);
+  const provider = await createDirectory(path.join(prepared, 'provider'));
+  const providerGithub = await createDirectory(path.join(provider, 'github'));
+  await createDirectory(path.join(providerGithub, 'runtime'));
+  for (const relative of ['proof.json', ...['workflow.json', 'run-attempt.json', 'jobs-pages.json', 'artifacts-pages.json']
+    .map(name => 'github/' + name), ...runtimeIdentity.files.map(file => file.path)]) {
+    const target = path.join(provider, relative);
+    await link(path.join(input, relative), target);
+  }
   const workerArchives = [];
-  const workers = selected.execution.workers.map(({ row, job, artifact }) => ({ id: row.id, target: row.target, nodeCount: row.nodeCount,
-    job: projectJob(job, selected.cohort, SESSION.workerSteps), artifact: projectArtifact(artifact) }));
-  for (const [index, worker] of selected.execution.workers.entries()) {
-    const original = await downloadOriginal(worker.artifact, input, worker.row.artifactName + '.zip', SESSION.archiveBytes, context);
-    workerArchives.push({ id: worker.row.id, ...original });
-    const measured = aggregate.workers[index];
-    requireSession(measured.job.id === worker.job.id && measured.artifact.id === worker.artifact.id
-      && measured.artifact.digest === worker.artifact.digest);
+  for (const worker of workers) {
+    const relative = `archives/${worker.id}.zip`;
+    workerArchives.push({ id: worker.id, path: relative, ...await hashRegularFile(path.join(input, relative), SESSION.archiveBytes) });
   }
   const receipt = validateSessionSiteReceipt({ schemaVersion: SESSION.schema, state: 'metadata_verified', mode: context.mode,
     publishEligible: context.mode === 'publish', source: { ...context.source, measured: selected.cohort.sourceRevision }, producer: null,
@@ -130,13 +133,12 @@ export async function captureSessionSite({ environment = process.env, args, down
     workflow: { id: selected.workflow.id, path: GH.workflowPath },
     run: { id: selected.run.id, number: selected.run.run_number, attempt: selected.run.run_attempt,
       url: `https://github.com/${SESSION.repository}/actions/runs/${selected.run.id}` }, cohort: selected.cohort,
-    aggregateJob: projectJob(selected.job, selected.cohort, SESSION_SITE.aggregateSteps),
-    artifacts: { suite: projectArtifact(selected.suite), provider: projectArtifact(selected.provider) }, workers,
+    workers,
     preparation: { job: projectJob(selected.execution.preparation, selected.cohort, SESSION.prepareSteps),
       compiledArtifact: projectArtifact(selected.execution.compiledArtifact) },
-    runtimeIdentity: { artifact: projectArtifact(selected.execution.runtimeArtifact), archive: runtimeArchive },
+    runtimeIdentity: { artifact: runtimeIdentity.artifact, archive: runtimeIdentity.archive },
     suiteFiles: sessionSuiteFiles(aggregate, aggregateRaw.sha256), workerArchives,
-    archives: null, inputFiles: null, metadataFiles: await snapshotFiles(input) });
+    inputFiles: await snapshotFiles(input, 'prepared-input', 'input'), metadataFiles: await snapshotFiles(input) });
   await writeJson(path.join(input, 'metadata-proof.json'), receipt);
   return receipt;
 }

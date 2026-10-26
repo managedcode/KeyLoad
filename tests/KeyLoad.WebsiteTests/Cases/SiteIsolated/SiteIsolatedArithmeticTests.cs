@@ -61,8 +61,8 @@ internal sealed class SiteIsolatedArithmeticTests
             await Assert.That(row.GetProperty(SiteIsolatedFields.Status).GetString()).IsEqualTo(oracle.Status);
             await Assert.That(row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32()).IsEqualTo(oracle.NodeCount);
             await Assert.That(row.GetProperty(SiteIsolatedFields.WorkerId).GetString()).IsEqualTo(oracle.WorkerId);
-            await Assert.That(row.GetProperty(SiteIsolatedFields.JobId).GetInt64()).IsEqualTo(oracle.JobId);
-            await Assert.That(row.GetProperty(SiteIsolatedFields.ArtifactId).GetInt64()).IsEqualTo(oracle.ArtifactId);
+            await AssertIdentity(row.GetProperty(SiteIsolatedFields.JobId), oracle.JobId);
+            await AssertIdentity(row.GetProperty(SiteIsolatedFields.ArtifactId), oracle.ArtifactId);
             if (oracle.Value is null)
             {
                 await Assert.That(row.GetProperty(SiteIsolatedFields.Value).ValueKind).IsEqualTo(JsonValueKind.Null);
@@ -71,6 +71,18 @@ internal sealed class SiteIsolatedArithmeticTests
             {
                 await Assert.That(row.GetProperty(SiteIsolatedFields.Value).GetDouble()).IsEqualTo(oracle.Value.Value).Within(0.000001);
             }
+        }
+    }
+
+    private static async Task AssertIdentity(JsonElement actual, long? expected)
+    {
+        if (expected is null)
+        {
+            await Assert.That(actual.ValueKind).IsEqualTo(JsonValueKind.Null);
+        }
+        else
+        {
+            await Assert.That(actual.GetInt64()).IsEqualTo(expected.Value);
         }
     }
 }

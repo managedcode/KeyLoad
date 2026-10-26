@@ -8,12 +8,11 @@ internal static class SiteIsolatedGitHubTokens
     public const string Metadata = "metadata-proof.json";
     public const string Receipt = "archive-receipt.json";
     public const string Archives = "archives";
-    public const string Suite = "comparison-session-suite.zip";
-    public const string Provider = "comparison-session-provider-evidence.zip";
     public const string Input = "input";
     public const string Aggregate = "aggregate";
     public const string Manifest = "aggregate.json";
     public const string Workers = "workers";
+    public const string WorkerArchives = "workerArchives";
     public const string Raw = "session.json";
     public const string Proof = "proof.json";
     public const string ProviderDirectory = "provider";
@@ -54,14 +53,11 @@ internal static class SiteIsolatedGitHubTokens
     public const string Bytes = "bytes";
     public const string Sha256 = "sha256";
     public const string Artifacts = "artifacts";
-    public const string SuiteKey = "suite";
-    public const string ProviderKey = "provider";
     public const string SizeInBytes = "sizeInBytes";
     public const string Digest = "digest";
     public const string DigestPrefix = "sha256:";
     public const string InputFiles = "inputFiles";
     public const string FileCountField = "files";
-    public const string AggregateJob = "aggregateJob";
     public const string Conclusion = "conclusion";
     public const string Mode = "mode";
     public const string PublishEligible = "publishEligible";
@@ -70,7 +66,7 @@ internal static class SiteIsolatedGitHubTokens
     public const string SourceRevision = "sourceRevision";
     public const string Extra = "controlledExtra";
     public const string WrongSha = "0000000000000000000000000000000000000000";
-    public const int WorkerCount = 22;
+    public const int WorkerCount = 32;
     public const int Zero = 0;
     public const int One = 1;
     public const int BufferBytes = 65_536;
@@ -80,9 +76,7 @@ internal static class SiteIsolatedGitHubTokens
     public const long JsonBytes = 33_554_432;
     public const long MetadataBytes = 16_777_216;
     public const long RawBytes = 268_435_456;
-    public const long ProviderBytes = 134_217_728;
     public const long TotalRawBytes = 17_179_869_184;
-    public const long SuiteBytes = 12_884_901_888;
     public const long DiskReserveBytes = 1_073_741_824;
     public const int UnixShift = 16;
     public const int UnixMask = 0xF000;

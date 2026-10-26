@@ -10,13 +10,13 @@ internal static class SiteIsolatedGitHubArchiveMutationWriter
     public static async Task CreateAsync(SiteIsolatedGitHubInputs inputs, string output,
         SiteIsolatedGitHubArchiveMutation mutation, CancellationToken token)
     {
-        await using var sourceStream = File.OpenRead(Path.Combine(inputs.Capture,
-            SiteIsolatedGitHubTokens.Archives, SiteIsolatedGitHubTokens.Suite));
+        var relative = inputs.Metadata[SiteIsolatedGitHubTokens.WorkerArchives]!.AsArray()[0]![SiteIsolatedGitHubTokens.Path]!.GetValue<string>();
+        await using var sourceStream = File.OpenRead(Path.Combine(inputs.Capture, relative));
         using var source = new ZipArchive(sourceStream, ZipArchiveMode.Read, leaveOpen: true);
         await using var destination = new FileStream(output, FileMode.CreateNew, FileAccess.ReadWrite, FileShare.None);
         using var archive = new ZipArchive(destination, ZipArchiveMode.Create, leaveOpen: true);
-        var original = source.GetEntry(SiteIsolatedGitHubTokens.Manifest)!;
-        var first = archive.CreateEntry(SiteIsolatedGitHubTokens.Manifest, CompressionLevel.NoCompression);
+        var original = source.GetEntry(SiteIsolatedGitHubTokens.Raw)!;
+        var first = archive.CreateEntry(SiteIsolatedGitHubTokens.Raw, CompressionLevel.NoCompression);
         if (mutation == SiteIsolatedGitHubArchiveMutation.Symlink)
         {
             first.ExternalAttributes = SymbolicLinkAttributes;
@@ -38,9 +38,8 @@ internal static class SiteIsolatedGitHubArchiveMutationWriter
     private static (bool HasValue, string? Value) ExtraPath(SiteIsolatedGitHubArchiveMutation mutation) => mutation switch
     {
         SiteIsolatedGitHubArchiveMutation.Traversal => (true, ((string?)(SiteIsolatedGitHubFields.Traversal))),
-        SiteIsolatedGitHubArchiveMutation.Unexpected => (true, ((string?)(SiteIsolatedGitHubFields.Unexpected))),
-        SiteIsolatedGitHubArchiveMutation.Duplicate => (true, ((string?)(SiteIsolatedGitHubTokens.Manifest))),
-        SiteIsolatedGitHubArchiveMutation.CaseDuplicate => (true, ((string?)(SiteIsolatedGitHubFields.CaseDuplicate))),
+        SiteIsolatedGitHubArchiveMutation.Duplicate => (true, ((string?)(SiteIsolatedGitHubTokens.Raw))),
+        SiteIsolatedGitHubArchiveMutation.CaseDuplicate => (true, ((string?)(SiteIsolatedGitHubTokens.Raw.ToUpperInvariant()))),
         _ => (false, default(string?))
     };
 

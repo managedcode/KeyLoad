@@ -39,7 +39,7 @@ internal sealed class SiteVendorTestScope : IAsyncDisposable
             await CopyTreeAsync(Path.Combine(inputs.Repository, SiteVendorTokens.AggregateScriptDirectory),
                 Path.Combine(scope.Inputs.Repository, SiteVendorTokens.AggregateScriptDirectory), token);
             var isolatedInputs = new SiteIsolatedInputs(scope.Inputs, scope.Inputs.Aggregate);
-            scope.FixtureState = new SiteIsolatedFixture(isolatedInputs, fixture.Root, fixture.Catalog, fixture.Projection);
+            scope.FixtureState = new SiteIsolatedFixture(isolatedInputs, fixture.Root, fixture.Catalog, fixture.Projection, fixture.WorkerCount);
             return scope;
         }
         catch (Exception)

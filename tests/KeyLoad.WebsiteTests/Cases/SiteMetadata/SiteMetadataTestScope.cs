@@ -43,7 +43,7 @@ internal sealed class SiteMetadataTestScope : IAsyncDisposable
             }
             var isolatedInputs = new SiteIsolatedInputs(new SiteTestInputs(path, Path.GetDirectoryName(aggregate)!,
                 inputs.EvidenceRun, inputs.MeasuredRevision, inputs.SiteRevision), Path.GetDirectoryName(aggregate)!);
-            var fixture = new SiteIsolatedFixture(isolatedInputs, sourceFixture.Root, sourceFixture.Catalog, sourceFixture.Projection);
+            var fixture = new SiteIsolatedFixture(isolatedInputs, sourceFixture.Root, sourceFixture.Catalog, sourceFixture.Projection, sourceFixture.WorkerCount);
             return new(path, fixture);
         }
         catch (Exception)

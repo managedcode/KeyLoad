@@ -17,7 +17,7 @@ export function validateIsolatedCatalog(value) {
 }
 export function validateIsolatedProjection(value, catalog) {
   validateIsolatedCatalog(catalog);
-  requireSession(exactSession(value, ['schemaVersion', 'cohort', 'plan', 'images', 'preparation', 'workers',
+  requireSession(exactSession(value, ['schemaVersion', 'cohort', 'plan', 'preparation', 'workers',
     'profile', 'options', 'datasetSha256']) && value.profile === SESSION.profile && value.datasetSha256 === null
     && exactSession(value.options, ['operations', 'concurrency', 'payloadBytes']) && value.options.operations === SESSION.operations
     && value.options.concurrency === SESSION.concurrency && value.options.payloadBytes === 'not recorded');

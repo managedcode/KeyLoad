@@ -8,13 +8,18 @@ export function validateSessionAggregate(value) {
   validateSessionCohort(value.cohort);
   validateSessionPlan(value.plan);
   require(exact(value.preparation, ['job', 'compiledArtifact', 'runtimeIdentity'])
-    && Array.isArray(value.workers) && value.workers.length === SESSION.workers);
+    && Array.isArray(value.workers) && value.workers.length > 0 && value.workers.length <= SESSION.workers);
   const jobs = new Set(), artifacts = new Set(), sessions = new Set();
-  for (const [index, worker] of value.workers.entries()) {
-    const row = sessionRows()[index];
+  const rows = sessionRows();
+  let previous = -1;
+  for (const worker of value.workers) {
+    const index = rows.findIndex(row => row.id === worker.id);
+    require(index > previous);
+    previous = index;
+    const row = rows[index];
     require(exact(worker, ['id', 'target', 'nodeCount', 'job', 'artifact', 'sessionSha256', 'session', 'reports', 'execution', 'qualification', 'resourceQualified', 'stateSha256'])
       && worker.id === row.id && worker.target === row.target && worker.nodeCount === row.nodeCount
-      && ['success', 'failure'].includes(worker.job?.conclusion) && worker.artifact?.expired === false
+      && worker.job?.conclusion === 'success' && worker.artifact?.expired === false
       && /^sha256:[a-f0-9]{64}$/.test(worker.artifact?.digest ?? '')
       && worker.job?.name === row.jobName && worker.artifact?.name === row.artifactName
       && sessionHash(worker.stateSha256) && typeof worker.resourceQualified === 'boolean' && sessionHash(worker.sessionSha256) && !jobs.has(worker.job.id) && !artifacts.has(worker.artifact.id));

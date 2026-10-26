@@ -1,30 +1,31 @@
 import { RUNTIME_IDENTITY } from './session-runtime-identity.mjs';
 import { timestamp } from './isolated-github-contract.mjs';
-import { uniqueNamed, validateArtifact, validateCompletedJob, validateSuccessfulJob } from './isolated-github-validation.mjs';
+import { uniqueNamed, validateArtifact, validateSuccessfulJob } from './isolated-github-validation.mjs';
 import { SESSION, requireSession, sessionRows, validateSessionCohort } from './session-contract.mjs';
 
-export function validateSessionJob(job, cohort, row) {
-  return validateCompletedJob(job, cohort, row.jobName, SESSION.workerSteps, ['success', 'failure']);
-}
 export function selectSessionEvidence(capture, cohort) {
   validateSessionCohort(cohort);
   const { jobs, artifacts, run } = capture;
   const rows = sessionRows();
   requireSession(Array.isArray(jobs) && Array.isArray(artifacts)
-    && jobs.filter(job => job.name?.includes(' / Session / ')).length === SESSION.workers
-    && artifacts.filter(artifact => rows.some(row => row.artifactName === artifact.name)).length === SESSION.workers
+    && jobs.filter(job => job.name?.includes(' / Session / ')).every(job => rows.some(row => row.jobName === job.name))
     && !artifacts.some(artifact => /^comparison-(?:worker|open-loop-worker|document-worker)-/.test(artifact.name ?? ''))
     && artifacts.filter(artifact => artifact.name?.startsWith(SESSION.artifactPrefix))
       .every(artifact => rows.some(row => row.artifactName === artifact.name)
         || [SESSION.aggregateArtifact,'comparison-session-provider-evidence'].includes(artifact.name)));
-  const selected = rows.map(row => {
-    const job = validateSessionJob(uniqueNamed(jobs, row.jobName), cohort, row);
+  const selected = rows.flatMap(row => {
+    const namedJobs = jobs.filter(job => job.name === row.jobName);
+    const namedArtifacts = artifacts.filter(artifact => artifact.name === row.artifactName);
+    requireSession(namedJobs.length <= 1 && namedArtifacts.length <= 1);
+    if (namedJobs.length === 0 || namedJobs[0].status !== 'completed'
+      || namedJobs[0].conclusion !== 'success' || namedArtifacts.length === 0) return [];
+    const job = validateSuccessfulJob(namedJobs[0], cohort, row.jobName, SESSION.workerSteps);
     requireSession(timestamp(job.started_at) >= timestamp(run.run_started_at));
     const artifact = validateArtifact(uniqueNamed(artifacts, row.artifactName), run, job, row.artifactName, SESSION.archiveBytes);
-    return { row, job, artifact };
+    return [{ row, job, artifact }];
   });
-  requireSession(new Set(selected.map(item => item.job.id)).size === SESSION.workers
-    && new Set(selected.map(item => item.artifact.id)).size === SESSION.workers
+  requireSession(new Set(selected.map(item => item.job.id)).size === selected.length
+    && new Set(selected.map(item => item.artifact.id)).size === selected.length
     && selected.reduce((sum, item) => sum + item.artifact.size_in_bytes, 0) <= SESSION.allArchiveBytes);
   const preparation = validateSuccessfulJob(uniqueNamed(jobs, SESSION.prepareJob), cohort, SESSION.prepareJob,
     SESSION.prepareSteps);

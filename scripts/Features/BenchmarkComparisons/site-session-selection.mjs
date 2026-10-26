@@ -1,12 +1,9 @@
 import { GH } from './isolated-github-contract.mjs';
-import { uniqueNamed, validateArtifact, validateSuccessfulJob } from './isolated-github-validation.mjs';
-import { SESSION, requireSession, validateSessionCohort } from './session-contract.mjs';
+import { SESSION, requireSession, sessionRows, validateSessionCohort } from './session-contract.mjs';
 import { selectSessionEvidence } from './session-github-selection.mjs';
 
-export const SESSION_SITE = Object.freeze({ provider: 'comparison-session-provider-evidence', suiteBytes: 18_253_611_008,
-  providerBytes: 134_217_728, aggregateSteps: ['Check complete session accounting', 'Save combined benchmark results', 'Save GitHub result verification'] });
 export function validateSessionProducer(run, workflow, mode = 'validate') {
-  requireSession(['publish', 'validate'].includes(mode) && (mode !== 'publish' || run?.conclusion === 'success'));
+  requireSession(['publish', 'validate'].includes(mode));
   requireSession(workflow?.path === GH.workflowPath && workflow.name === SESSION.workflow && workflow.state === 'active'
     && Number.isSafeInteger(workflow.id) && workflow.id > 0 && run?.workflow_id === workflow.id
     && run.path === GH.workflowPath && run.name === SESSION.workflow && run.head_branch === 'main'
@@ -18,26 +15,17 @@ export function validateSessionProducer(run, workflow, mode = 'validate') {
 }
 export function selectSessionSiteProducer(capture, workflow, mode = 'validate') {
   const cohort = validateSessionProducer(capture.run, workflow, mode);
-  const named = capture.jobs.filter(job => job.name === SESSION.aggregateJob);
-  requireSession(named.length <= 1);
-  if (named.length === 0 || named[0].status !== 'completed' || named[0].conclusion !== 'success') {
-    requireSession(!capture.artifacts.some(artifact => artifact.name === SESSION.aggregateArtifact));
-    return null;
-  }
-  // An older producer with no session schema is not a supported fallback input.
-  if (!capture.artifacts.some(artifact => artifact.name === SESSION.aggregateArtifact)) return null;
-  const job = validateSuccessfulJob(uniqueNamed(capture.jobs, SESSION.aggregateJob), cohort,
-    SESSION.aggregateJob, SESSION_SITE.aggregateSteps);
-  const suite = validateArtifact(uniqueNamed(capture.artifacts, SESSION.aggregateArtifact), capture.run,
-    job, SESSION.aggregateArtifact, SESSION_SITE.suiteBytes);
-  const provider = validateArtifact(uniqueNamed(capture.artifacts, SESSION_SITE.provider), capture.run,
-    job, SESSION_SITE.provider, SESSION_SITE.providerBytes);
-  return { cohort, job, suite, provider, execution: selectSessionEvidence(capture, cohort) };
+  const available = sessionRows().some(row => capture.jobs.some(job => job.name === row.jobName
+    && job.status === 'completed' && job.conclusion === 'success')
+    && capture.artifacts.some(artifact => artifact.name === row.artifactName));
+  if (!available) return null;
+  const execution = selectSessionEvidence(capture, cohort);
+  return execution.workers.length === 0 ? null : { cohort, execution };
 }
 
-// Called after complete aggregate validation; failed originals remain reviewable in validate mode only.
+// Every included session remains complete; missing or failed workers have no measurements.
 export function requirePublishableSessionMeasurements(aggregate) {
-  requireSession(Array.isArray(aggregate.workers) && aggregate.workers.length === SESSION.workers);
+  requireSession(Array.isArray(aggregate.workers) && aggregate.workers.length > 0 && aggregate.workers.length <= SESSION.workers);
   for (const worker of aggregate.workers) {
     requireSession(worker.job.conclusion === 'success' && ['success','unavailable'].includes(worker.session.outcome)
       && ['passed','notApplicable'].includes(worker.qualification.status)

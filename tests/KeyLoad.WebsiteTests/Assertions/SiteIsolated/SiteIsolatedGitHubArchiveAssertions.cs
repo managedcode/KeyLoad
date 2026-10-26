@@ -6,9 +6,10 @@ internal static class SiteIsolatedGitHubArchiveAssertions
 {
     public static void RequireAvailableDisk(JsonObject metadata, string parent)
     {
-        var artifacts = metadata[SiteIsolatedGitHubTokens.Artifacts]!;
-        var required = checked(artifacts[SiteIsolatedGitHubTokens.SuiteKey]![SiteIsolatedGitHubTokens.SizeInBytes]!.GetValue<long>() +
-            artifacts[SiteIsolatedGitHubTokens.ProviderKey]![SiteIsolatedGitHubTokens.SizeInBytes]!.GetValue<long>() +
+        var required = checked(metadata[SiteIsolatedGitHubTokens.InputFiles]!.AsArray()
+            .Sum(file => file![SiteIsolatedGitHubTokens.Bytes]!.GetValue<long>()) +
+            metadata[SiteIsolatedGitHubTokens.WorkerArchives]!.AsArray()
+            .Sum(file => file![SiteIsolatedGitHubTokens.Bytes]!.GetValue<long>()) +
             SiteIsolatedGitHubTokens.DiskReserveBytes);
         var drive = DriveInfo.GetDrives().Where(value => parent.StartsWith(
                 value.Name.EndsWith(Path.DirectorySeparatorChar) ? value.Name : value.Name + Path.DirectorySeparatorChar,
@@ -27,16 +28,15 @@ internal static class SiteIsolatedGitHubArchiveAssertions
         {
             await Assert.That(JsonNode.DeepEquals(original[SiteIsolatedFields.Cohort], actual[SiteIsolatedFields.Cohort])).IsTrue();
             await Assert.That(JsonNode.DeepEquals(original[SiteIsolatedFields.Source], actual[SiteIsolatedFields.Source])).IsTrue();
-            await Assert.That(actual[SiteIsolatedFields.AggregateJobId]!.GetValue<long>()).IsEqualTo(original[SiteIsolatedFields.AggregateJob]![SiteIsolatedFields.Id]!.GetValue<long>());
-            await Assert.That(actual[SiteIsolatedFields.Workers]!.AsArray().Count).IsEqualTo(22);
+            await Assert.That(actual[SiteIsolatedFields.Workers]!.AsArray().Count).IsEqualTo(original[SiteIsolatedFields.Workers]!.AsArray().Count);
             return;
         }
 
         string[] fields =
         [
             SiteIsolatedGitHubTokens.Source, SiteIsolatedGitHubFields.Repository, SiteIsolatedGitHubFields.WorkflowKey,
-            SiteIsolatedGitHubTokens.Run, SiteIsolatedGitHubTokens.Cohort, SiteIsolatedGitHubTokens.AggregateJob,
-            SiteIsolatedGitHubTokens.Artifacts, SiteIsolatedGitHubTokens.Workers, SiteIsolatedGitHubFields.Preparation,
+            SiteIsolatedGitHubTokens.Run, SiteIsolatedGitHubTokens.Cohort,
+            SiteIsolatedGitHubTokens.Workers, SiteIsolatedGitHubFields.Preparation,
             SiteIsolatedFields.RuntimeIdentity,
         ];
         foreach (var field in fields)
@@ -49,11 +49,6 @@ internal static class SiteIsolatedGitHubArchiveAssertions
     public static async Task VerifyAsync(JsonObject original, string capture, CancellationToken token)
     {
         await VerifyMetadataAsync(original, capture, token);
-        await SiteIsolatedGitHubArchiveReader.VerifyArchiveAsync(Path.Combine(capture,
-                SiteIsolatedGitHubTokens.Archives, SiteIsolatedGitHubTokens.Suite), SiteIsolatedGitHubTokens.Suite,
-            original, SiteIsolatedGitHubTokens.SuiteKey, SiteIsolatedGitHubTokens.SuiteBytes, token);
-        await SiteIsolatedGitHubArchiveReader.VerifyArchiveAsync(Path.Combine(capture,
-                SiteIsolatedGitHubTokens.Archives, SiteIsolatedGitHubTokens.Provider), SiteIsolatedGitHubTokens.Provider,
-            original, SiteIsolatedGitHubTokens.ProviderKey, SiteIsolatedGitHubTokens.ProviderBytes, token);
+        await SiteIsolatedGitHubArchiveReader.VerifyArchiveHashesAsync(capture, original, token);
     }
 }

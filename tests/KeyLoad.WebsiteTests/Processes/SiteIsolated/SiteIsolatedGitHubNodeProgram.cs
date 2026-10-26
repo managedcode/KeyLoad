@@ -14,7 +14,7 @@ internal static class SiteIsolatedGitHubNodeProgram
           const receipt = JSON.parse(await readFile(path.join(actual, 'archive-receipt.json'), 'utf8'));
           (await load('receipt')).validateSiteIsolatedReceipt(receipt);
           await mkdir(output, {recursive:false});
-          const files = [...receipt.metadataFiles,...Object.values(receipt.archives),...receipt.inputFiles,
+          const files = [...receipt.metadataFiles,...receipt.inputFiles,
             ...receipt.workerArchives,receipt.runtimeIdentity.archive];
           for (const file of files) {
             const source = path.join(actual,file.path), target = path.join(output,file.path);
@@ -50,7 +50,8 @@ internal static class SiteIsolatedGitHubNodeProgram
             const artifacts = flattenPages(await json(path.join(directory, 'artifacts-pages.json')), 'artifacts');
             const selected = module.selectSessionSiteProducer({run,jobs,artifacts},workflow);
             if (selected === null) throw new Error('No current session producer.');
-            result = {state:'selected',runId:run.id,attempt:run.run_attempt,aggregateJobId:selected.job.id};
+            result = {state:'selected',runId:run.id,attempt:run.run_attempt,preparationJobId:selected.execution.preparation.id,
+              workers:selected.execution.workers.length};
           }
           else if (request.operation === 'inputs') result = await (await load('cli')).runSiteIsolatedGitHub([
             'verify-inputs','--input='+request.arguments.input,'--receipt='+request.arguments.receipt]);

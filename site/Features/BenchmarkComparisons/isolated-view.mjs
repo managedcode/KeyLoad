@@ -2,7 +2,7 @@ import { metrics } from './measurements.mjs';
 import { ISOLATED, artifactUrl, runUrl } from './isolated-contracts.mjs';
 
 const STATUS = Object.freeze({ measured: 'Measured', unsupported: 'Unsupported scenario',
-  unsupportedTopology: 'Unsupported execution topology', failed: 'Benchmark failed · no data' });
+  unsupportedTopology: 'Unsupported execution topology', failed: 'Benchmark failed · no data', missing: 'No verified result' });
 const HEADINGS = Object.freeze(['Engine', 'Execution nodes', 'Status', 'Selected metric', 'Attempts', 'Successes', 'Failures', 'GitHub run']);
 const FORMAT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
 
@@ -19,7 +19,7 @@ function link(document, text, href) {
   return node;
 }
 
-const display = (value, metric) => Number.isFinite(value) ? FORMAT.format(value) + ' ' + metric.unit : 'Unavailable';
+const display = (value, metric) => Number.isFinite(value) ? FORMAT.format(value) + ' ' + metric.unit : '—';
 
 function renderChart(document, rows, metric) {
   const list = element(document, 'ul');
@@ -42,6 +42,10 @@ function renderChart(document, rows, metric) {
 
 function renderEvidence(document, worker, cohort) {
   const cell = element(document, 'td');
+  if (worker === null) {
+    cell.append(link(document, 'Benchmark run · no verified session result', runUrl(cohort)));
+    return cell;
+  }
   cell.append(link(document, worker.job.conclusion === 'failure' ? 'Failed benchmark job' : 'Session worker job', worker.job.url), element(document, 'br'),
     link(document, 'GitHub artifact', artifactUrl(cohort, worker.artifact)), element(document, 'br'),
     element(document, 'small', 'GitHub download/access required; subject to artifact retention.'));
@@ -62,10 +66,10 @@ function renderTable(document, rows, metric, cohort) {
   const body = element(document, 'tbody');
   for (const row of rows) {
     const tr = element(document, 'tr');
-    tr.dataset.workerId = row.worker.id;
+    tr.dataset.workerId = row.id;
     tr.dataset.value = row.value === null ? '' : String(row.value);
     for (const value of [row.name, row.nodeCount, STATUS[row.status], display(row.value, metric), row.attempts, row.successes, row.failures]) {
-      tr.append(element(document, 'td', value === null ? 'Unavailable' : String(value)));
+      tr.append(element(document, 'td', value === null ? '—' : String(value)));
     }
     tr.append(renderEvidence(document, row.worker, cohort));
     body.append(tr);
@@ -116,6 +120,8 @@ export function renderIsolatedView(container, catalog, projection, rows, selecti
     element(document, 'p', selection.scenario + ' · ' + (selection.repetition === 'session' ? 'Original execution test result from the shared session' :
       'Unrecognized session selection') + ' · ' + metric.direction),
     element(document, 'p', 'Derived compact projection; raw samples remain in the linked GitHub artifacts. Process CPU, allocation and peak RAM are observed over the selected lane interval, including concurrent lanes; they are not exclusive operation costs and must not be summed. Server resource observations cover the session lifetime.'),
+    element(document, 'p', `Verified sessions: ${projection.workers.length} of ${projection.plan.workers.length}. ` +
+      'Sessions without verified results are shown as — and have no numeric rank.'),
     element(document, 'p', `Profile ${projection.profile}; operations ${projection.options.operations}; concurrency ${projection.options.concurrency}; ` +
       `payload ${projection.options.payloadBytes} bytes; ${projection.datasetSha256 === null ? 'corpus unavailable' : 'corpus SHA256 ' + projection.datasetSha256}.`),
     link(document, 'Measured source ' + catalog.measuredSourceRevision, `https://github.com/${catalog.cohort.repository}/tree/${catalog.measuredSourceRevision}`),
@@ -123,6 +129,6 @@ export function renderIsolatedView(container, catalog, projection, rows, selecti
       `https://github.com/${catalog.cohort.repository}/tree/${catalog.siteSourceRevision}`), element(document, 'br'),
     link(document, 'Isolated cohort run · attempt ' + catalog.cohort.attempt, runUrl(catalog.cohort)));
   fragment.append(renderChart(document, rows, metric), renderTable(document, rows, metric, catalog.cohort));
-  for (const row of rows) fragment.append(renderWorker(document, row.worker));
+  for (const row of rows) if (row.worker !== null) fragment.append(renderWorker(document, row.worker));
   container.replaceChildren(fragment);
 }

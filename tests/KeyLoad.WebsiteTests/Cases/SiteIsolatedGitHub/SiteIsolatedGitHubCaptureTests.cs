@@ -7,7 +7,7 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 internal sealed class SiteIsolatedGitHubCaptureTests
 {
     [Test]
-    public async Task AC_ISO_009_ActualPagesProviderCapturesTwoImmutableArchivesMatchingPreparedAuthority()
+    public async Task AC_ISO_009_ActualPagesProviderCapturesOriginalSessionArchivesMatchingPreparedAuthority()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         var inputs = await SiteIsolatedGitHubInputs.ReadAsync(token);
