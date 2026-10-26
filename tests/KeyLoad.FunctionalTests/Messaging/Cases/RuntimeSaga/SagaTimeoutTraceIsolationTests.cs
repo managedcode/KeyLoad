@@ -17,7 +17,7 @@ internal sealed class SagaTimeoutTraceIsolationTests(SagaTimeoutFixture fixture)
     public async Task ScheduleDoesNotPersistAmbientCallerTraceState()
     {
         var saga = SagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId);
-        var dueTime = TimeProvider.System.GetUtcNow().Add(fixture.TestProfile.HeldJobDelay);
+        var dueTime = saga.Hint.DueAt;
         using var caller = new Activity(CallerActivityName);
         caller.SetIdFormat(ActivityIdFormat.W3C);
         caller.TraceStateString = SensitiveTraceState;
@@ -28,6 +28,8 @@ internal sealed class SagaTimeoutTraceIsolationTests(SagaTimeoutFixture fixture)
         await AssertIsolatedTraceAsync(scheduled, caller.TraceId.ToString(), saga.Hint);
         var shards = await fixture.JobHarness.CaptureOwnedShardsAsync(dueTime, CancellationToken.None);
         await fixture.JobHarness.WaitUntilSettledAsync(shards, CancellationToken.None);
+        var actual = fixture.Database.Database.InspectSaga(SagaPrincipalId, saga.Lane, saga.Id);
+        await Assert.That(actual!.Phase).IsEqualTo(SagaPhase.TimedOut);
     }
 
     private static async Task AssertIsolatedTraceAsync(DurableJob job, string callerTraceId, DueWorkHint hint)

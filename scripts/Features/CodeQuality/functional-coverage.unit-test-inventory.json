@@ -24886,9 +24886,9 @@
       "methodName": "ScheduleDoesNotPersistAmbientCallerTraceState",
       "instanceName": "ScheduleDoesNotPersistAmbientCallerTraceState",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Messaging/Cases/RuntimeSaga/SagaTimeoutTraceIsolationTests.cs",
-      "sourceSha256": "81e0b44adadc5f827e94bb25a1769b854df91f40d5173e9e2331d1a7a91610d5",
+      "sourceSha256": "3ec76f59f1e53428e0324fcd43515e7290c0fa6ff82d1a22b3b692f05efb92d7",
       "lineNumber": 16,
-      "endLineNumber": 31,
+      "endLineNumber": 33,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
