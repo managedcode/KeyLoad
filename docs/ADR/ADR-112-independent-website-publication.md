@@ -29,8 +29,9 @@ the shared collector and aggregator; a combined-results artifact is not required
 Each included session retains the full original TRX, source/runtime/resource and
 correctness contract. Every planned database/topology row remains visible; missing
 or failed sessions have null metrics displayed as an em dash. Authentic sessions
-with incomplete resource observations also show an em dash and a resource-evidence
-label; every numeric value still requires resourceQualified=true. Selected corrupt,
+with incomplete server resource observations retain their recorded operation
+measurements, labelled Measured · incomplete telemetry. Preserve resourceQualified=false;
+missing resource metrics remain an em dash and server resource comparability is unverified. Selected corrupt,
 expired, foreign or mixed evidence is rejected. A cancelled or in-progress producer
 supplies no figures. If no producer has eligible sessions, emit no metrics and a
 static empty state with benchmarks:null in the publication receipt.

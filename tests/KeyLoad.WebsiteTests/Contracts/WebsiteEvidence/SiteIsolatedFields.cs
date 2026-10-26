@@ -47,9 +47,6 @@ internal static class SiteIsolatedFields
     internal const string JobId = "jobId";
     internal const string ArtifactId = "artifactId";
     internal const string Value = "value";
-    internal const string Min = "min";
-    internal const string Max = "max";
-    internal const string Successes = "successes";
     internal const string Links = "links";
     internal const string Hosts = "hosts";
     internal const string Text = "text";

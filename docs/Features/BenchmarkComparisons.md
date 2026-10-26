@@ -417,9 +417,10 @@ completed run/attempt/source. Independently successful complete sessions retain
 measured values; failed, skipped and missing sessions show an em dash and no numeric
 value. The original run remains linked. Every admitted session still requires its
 complete original TRX, qualification, runtime/resource identities, hashes and
-correctness evidence. Incomplete resource evidence remains visible as metadata with
-null numeric fields; it does not block other sessions, and displayed figures still
-require resourceQualified=true. Selected corrupt, expired, foreign or mixed evidence is
+correctness evidence. Incomplete server resource telemetry does not hide recorded
+operation measurements. Preserve resourceQualified=false and label these rows
+Measured · incomplete telemetry. Missing resource observations remain an em dash;
+server resource comparability remains unverified. Selected corrupt, expired, foreign or mixed evidence is
 rejected. Workflows and triggers are defined in ADR-062, ADR-064 and ADR-112:
 Website intake reads original successful worker/runtime artifacts directly, even
 when the overall run or combined-results job failed. With no eligible sessions it

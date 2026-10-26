@@ -3,7 +3,7 @@ import { ISOLATED, artifactUrl, runUrl } from './isolated-contracts.mjs';
 
 const STATUS = Object.freeze({ measured: 'Measured', unsupported: 'Unsupported scenario',
   unsupportedTopology: 'Unsupported execution topology', failed: 'Benchmark failed · no data', missing: 'No verified result',
-  resourceIncomplete: 'Resource evidence incomplete' });
+  resourceIncomplete: 'Measured · incomplete telemetry' });
 const HEADINGS = Object.freeze(['Engine', 'Execution nodes', 'Status', 'Selected metric', 'Attempts', 'Successes', 'Failures', 'GitHub run']);
 const FORMAT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
 
@@ -122,7 +122,7 @@ export function renderIsolatedView(container, catalog, projection, rows, selecti
       'Unrecognized session selection') + ' · ' + metric.direction),
     element(document, 'p', 'Derived compact projection; raw samples remain in the linked GitHub artifacts. Process CPU, allocation and peak RAM are observed over the selected lane interval, including concurrent lanes; they are not exclusive operation costs and must not be summed. Server resource observations cover the session lifetime.'),
     element(document, 'p', `Verified original sessions: ${projection.workers.length} of ${projection.plan.workers.length}. ` +
-      'Missing sessions and incomplete resource evidence are shown as —. Numeric values require qualified resource evidence.'),
+      'Recorded operation measurements remain available when server resource telemetry is incomplete; those sessions are labelled. Missing sessions and unrecorded metrics are shown as —.'),
     element(document, 'p', `Profile ${projection.profile}; operations ${projection.options.operations}; concurrency ${projection.options.concurrency}; ` +
       `payload ${projection.options.payloadBytes} bytes; ${projection.datasetSha256 === null ? 'corpus unavailable' : 'corpus SHA256 ' + projection.datasetSha256}.`),
     link(document, 'Measured source ' + catalog.measuredSourceRevision, `https://github.com/${catalog.cohort.repository}/tree/${catalog.measuredSourceRevision}`),

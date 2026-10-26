@@ -1,22 +1,28 @@
 import { metrics } from './measurements.mjs';
 import { SESSION, SESSION_TARGETS, requireSession, sessionRows, sessionUnavailableTopology } from '../../../scripts/Features/BenchmarkComparisons/session-contract.mjs';
 
-function qualified(worker) {
+function verifiedExecution(worker) {
   const profile = worker.session.targetProfile;
-  return worker.resourceQualified && worker.qualification.status !== 'failed' && profile !== null
+  return worker.qualification.status !== 'failed' && profile !== null
     && [profile.version,profile.topology,profile.cluster.state].every(value => !/unverified|unobserved|unknown|not recorded/i.test(value));
 }
 const topologyUnavailable = worker => worker.session.images.server === null && sessionUnavailableTopology(worker.session);
 const notRecorded = 'Not recorded in session manifest';
+function disposition(worker, report) {
+  if (report.status === 'notQualified' || report.status === 'measured' && !verifiedExecution(worker)) return 'failed';
+  if (report.status === 'measured' && !worker.resourceQualified) return 'resourceIncomplete';
+  return report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status;
+}
 function viewWorker(worker, report) {
   const profile = worker.session.targetProfile;
   const runtime = worker.session.runtime;
   const target = profile ?? { name: worker.target, version: notRecorded, image: notRecorded,
     topology: topologyUnavailable(worker) ? 'Execution topology unavailable' : 'Execution profile not observed for this workload', cluster: { dataCopies: notRecorded, observations: [] },
     writeAcknowledgement: notRecorded, readContract: notRecorded, transport: notRecorded, authorization: notRecorded };
-  const unqualified = report.status === 'measured' && !qualified(worker);
-  return { ...worker, rawSha256: worker.sessionSha256, disposition: report.status === 'notQualified' ? 'failed' : unqualified ? 'resourceIncomplete'
-    : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status, reason: unqualified ? worker.qualification.status === 'failed' ? worker.session.reason : 'Execution profile or session resource qualification incomplete.' : report.detail,
+  const status = disposition(worker, report);
+  return { ...worker, rawSha256: worker.sessionSha256, disposition: status,
+    reason: status === 'resourceIncomplete' ? 'Server resource telemetry is incomplete. Recorded operation measurements remain available.'
+      : worker.qualification.status === 'failed' ? worker.session.reason : report.detail,
     report: { hostOs: runtime.operatingSystem, architecture: runtime.architecture, logicalProcessors: runtime.logicalProcessors,
       runtime: runtime.framework, storage: runtime.storage, client: worker.session.processes.client,
       serverImage: worker.session.images.server ?? notRecorded, targets: [target] } };
@@ -35,11 +41,11 @@ export function selectedIsolatedRows(projection, scenario, nodeCount, repetition
       requireSession(report !== undefined);
       const selected = laneId === undefined ? report.lanes.length === 1 ? report.lanes[0] : null
         : report.lanes.find(lane => lane.id === laneId);
-      const measurement = report.status === 'measured' && qualified(worker) ? selected?.measurement ?? null : null;
+      const measurement = report.status === 'measured' && verifiedExecution(worker) ? selected?.measurement ?? null : null;
       // Concurrent mixed lanes are separate streams, never averaged into a fictitious request distribution.
-      const value = report.status !== 'measured' || !qualified(worker) ? null : metric === 'duration'
+      const value = report.status !== 'measured' || !verifiedExecution(worker) ? null : metric === 'duration'
         ? selected?.measurement.elapsedSeconds ?? report.elapsedSeconds : measurement ? metrics[metric].read(measurement) : null;
-      return { id: worker.id, name: worker.target, status: report.status === 'notQualified' ? 'failed' : report.status === 'measured' && !qualified(worker) ? 'resourceIncomplete' : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status,
+      return { id: worker.id, name: worker.target, status: disposition(worker, report),
         value: Number.isFinite(value) ? value : null, min: Number.isFinite(value) ? value : null,
         max: Number.isFinite(value) ? value : null, attempts: measurement?.attempts ?? null,
         successes: measurement?.successes ?? null, failures: measurement?.failures ?? null,

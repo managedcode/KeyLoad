@@ -46,7 +46,8 @@ internal static class SiteIsolatedOracle
         => status switch
         {
             "notQualified" => "failed",
-            "measured" when !qualified => "resourceIncomplete",
+            "measured" when !qualified => "failed",
+            "measured" when !worker.GetProperty(SiteIsolatedFields.ResourceQualified).GetBoolean() => "resourceIncomplete",
             "unavailable" when TopologyUnavailable(worker) => "unsupportedTopology",
             "unavailable" => "unsupported",
             _ => status,
@@ -59,8 +60,7 @@ internal static class SiteIsolatedOracle
             && worker.GetProperty(SiteIsolatedFields.Session).GetProperty(Images).GetProperty(Server).ValueKind == JsonValueKind.Null;
 
     private static bool Qualified(JsonElement worker, JsonElement profile)
-        => worker.GetProperty(SiteIsolatedFields.ResourceQualified).GetBoolean()
-            && worker.GetProperty(SiteIsolatedFields.Qualification).GetProperty(SiteIsolatedFields.Status).GetString() != "failed"
+        => worker.GetProperty(SiteIsolatedFields.Qualification).GetProperty(SiteIsolatedFields.Status).GetString() != "failed"
             && profile.ValueKind != JsonValueKind.Null
             && !new[] { profile.GetProperty(SiteIsolatedFields.Version).GetString()!,
                 profile.GetProperty(SiteIsolatedFields.Topology).GetString()!,

@@ -51,7 +51,7 @@ internal sealed class SiteIsolatedArithmeticTests
     }
 
     [Test]
-    public async Task AC_ISO_009_UnqualifiedResourcesNeverBecomeNumericFigures()
+    public async Task AC_ISO_009_IncompleteTelemetryPreservesOriginalMeasurements()
     {
         var fixture = await SiteIsolatedFixture.ReadAsync();
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -79,16 +79,14 @@ internal sealed class SiteIsolatedArithmeticTests
         }, token);
         await Assert.That(response.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
         using var observations = JsonDocument.Parse(await File.ReadAllBytesAsync(output, token));
-        foreach (var observation in observations.RootElement.EnumerateArray())
+        using var expectedProjection = JsonDocument.Parse(projection.ToJsonString());
+        var values = observations.RootElement.EnumerateArray().ToArray();
+        await Assert.That(values.Length).IsEqualTo(selections.Length);
+        for (var index = 0; index < values.Length; index++)
         {
-            foreach (var row in observation.GetProperty(SiteIsolatedFields.Rows).EnumerateArray())
-            {
-                foreach (var field in new[] { SiteIsolatedFields.Value, SiteIsolatedFields.Min, SiteIsolatedFields.Max,
-                    SiteIsolatedFields.Attempts, SiteIsolatedFields.Successes, SiteIsolatedFields.Failures })
-                {
-                    await Assert.That(row.GetProperty(field).ValueKind).IsEqualTo(JsonValueKind.Null);
-                }
-            }
+            var actual = values[index].GetProperty(SiteIsolatedFields.Rows).EnumerateArray().ToArray();
+            var expected = SiteIsolatedOracle.Rows(expectedProjection.RootElement, selections[index]);
+            await AssertRows(actual, expected);
         }
 
         await Assert.That((await File.ReadAllBytesAsync(fixture.Projection, token)).SequenceEqual(original)).IsTrue();

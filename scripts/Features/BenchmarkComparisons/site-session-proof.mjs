@@ -25,7 +25,7 @@ export async function verifySessionSiteInputs({ input, receipt: receiptPath }) {
   const receipt = validateSessionSiteReceipt(await readJson(receiptPath, SESSION.aggregateBytes));
   requireSession(receipt.state === 'archive_verified');
   await verifyFiles(input, receipt.metadataFiles);
-  await verifyFiles(input, receipt.workerArchives);
+  await verifyFiles(input, receipt.workerArchives.map(({id,...file}) => file));
   await verifyFiles(input, [receipt.runtimeIdentity.archive]);
   await verifyFiles(input, receipt.inputFiles);
   const metadata = validateSessionSiteReceipt(await readJson(path.join(input, 'metadata-proof.json')));
