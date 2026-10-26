@@ -35,7 +35,7 @@ export function requirePublishableSessionMeasurements(aggregate) {
         && ['measured','unavailable'].includes(report.status)));
     if (worker.reports.some(report => report.status === 'measured')) {
       const profile = worker.session.targetProfile;
-      requireSession(worker.resourceQualified && profile !== null
+      requireSession(typeof worker.resourceQualified === 'boolean' && profile !== null
         && [profile.version,profile.topology,profile.cluster.state].every(value =>
           typeof value === 'string' && !/unverified|unobserved|unknown|not recorded/i.test(value)));
     }

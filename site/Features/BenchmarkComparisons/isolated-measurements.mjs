@@ -15,7 +15,7 @@ function viewWorker(worker, report) {
     topology: topologyUnavailable(worker) ? 'Execution topology unavailable' : 'Execution profile not observed for this workload', cluster: { dataCopies: notRecorded, observations: [] },
     writeAcknowledgement: notRecorded, readContract: notRecorded, transport: notRecorded, authorization: notRecorded };
   const unqualified = report.status === 'measured' && !qualified(worker);
-  return { ...worker, rawSha256: worker.sessionSha256, disposition: report.status === 'notQualified' || unqualified ? 'failed'
+  return { ...worker, rawSha256: worker.sessionSha256, disposition: report.status === 'notQualified' ? 'failed' : unqualified ? 'resourceIncomplete'
     : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status, reason: unqualified ? worker.qualification.status === 'failed' ? worker.session.reason : 'Execution profile or session resource qualification incomplete.' : report.detail,
     report: { hostOs: runtime.operatingSystem, architecture: runtime.architecture, logicalProcessors: runtime.logicalProcessors,
       runtime: runtime.framework, storage: runtime.storage, client: worker.session.processes.client,
@@ -39,7 +39,7 @@ export function selectedIsolatedRows(projection, scenario, nodeCount, repetition
       // Concurrent mixed lanes are separate streams, never averaged into a fictitious request distribution.
       const value = report.status !== 'measured' || !qualified(worker) ? null : metric === 'duration'
         ? selected?.measurement.elapsedSeconds ?? report.elapsedSeconds : measurement ? metrics[metric].read(measurement) : null;
-      return { id: worker.id, name: worker.target, status: report.status === 'notQualified' || report.status === 'measured' && !qualified(worker) ? 'failed' : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status,
+      return { id: worker.id, name: worker.target, status: report.status === 'notQualified' ? 'failed' : report.status === 'measured' && !qualified(worker) ? 'resourceIncomplete' : report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status,
         value: Number.isFinite(value) ? value : null, min: Number.isFinite(value) ? value : null,
         max: Number.isFinite(value) ? value : null, attempts: measurement?.attempts ?? null,
         successes: measurement?.successes ?? null, failures: measurement?.failures ?? null,

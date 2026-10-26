@@ -185,10 +185,11 @@ if (scenario === 'plan') {
   })};
   requirePublishableSessionMeasurements(value);accepted=true;
   const partial=clone(value);partial.workers.pop();requirePublishableSessionMeasurements(partial);
+  const unqualified=clone(value);unqualified.workers[0].resourceQualified=false;requirePublishableSessionMeasurements(unqualified);
   for(const change of [v=>v.workers=[],v=>v.workers[0].job.conclusion='failure',
     v=>v.workers[0].qualification.status='failed',v=>v.workers[0].execution[0].outcome='Failed',
     v=>v.workers[0].reports[0].status='failed',v=>v.workers[0].reports[0].status='notQualified',
-    v=>v.workers[0].resourceQualified=false]) {
+    v=>v.workers[0].resourceQualified='unknown']) {
     const altered=clone(value);change(altered);reject(()=>requirePublishableSessionMeasurements(altered));
   }
   const measured=clone(value);measured.workers[0].resourceQualified=true;

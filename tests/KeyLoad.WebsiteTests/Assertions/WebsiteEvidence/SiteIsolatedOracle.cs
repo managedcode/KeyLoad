@@ -35,13 +35,22 @@ internal static class SiteIsolatedOracle
         var qualified = Qualified(worker, profile);
         var lane = (SelectedLane(report, parts)).Value;
         var value = (Value(report, lane, status, qualified, selection.Metric)).Value;
-        var displayedStatus = status == "notQualified" || status == "measured" && !qualified ? "failed"
-            : status == "unavailable" ? TopologyUnavailable(worker) ? "unsupportedTopology" : "unsupported" : status;
+        var displayedStatus = DisplayedStatus(worker, status, qualified);
         return new(worker.GetProperty(SiteIsolatedFields.Target).GetString()!, displayedStatus, value,
             selection.NodeCount, worker.GetProperty(SiteIsolatedFields.Id).GetString()!,
             worker.GetProperty(SiteIsolatedFields.Job).GetProperty(SiteIsolatedFields.Id).GetInt64(),
             worker.GetProperty(SiteIsolatedFields.Artifact).GetProperty(SiteIsolatedFields.Id).GetInt64());
     }
+
+    private static string DisplayedStatus(JsonElement worker, string status, bool qualified)
+        => status switch
+        {
+            "notQualified" => "failed",
+            "measured" when !qualified => "resourceIncomplete",
+            "unavailable" when TopologyUnavailable(worker) => "unsupportedTopology",
+            "unavailable" => "unsupported",
+            _ => status,
+        };
 
     private static bool TopologyUnavailable(JsonElement worker)
         => worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3

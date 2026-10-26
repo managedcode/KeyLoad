@@ -50,6 +50,50 @@ internal sealed class SiteIsolatedArithmeticTests
                 select new SiteIsolatedSelection(scenario, nodes, repetition, metric, target)).ToArray();
     }
 
+    [Test]
+    public async Task AC_ISO_009_UnqualifiedResourcesNeverBecomeNumericFigures()
+    {
+        var fixture = await SiteIsolatedFixture.ReadAsync();
+        var token = TestContext.Current!.Execution.CancellationToken;
+        var original = await File.ReadAllBytesAsync(fixture.Projection, token);
+        var projection = System.Text.Json.Nodes.JsonNode.Parse(original)!.AsObject();
+        foreach (var worker in projection[SiteIsolatedFields.Workers]!.AsArray())
+        {
+            worker![SiteIsolatedFields.ResourceQualified] = false;
+        }
+
+        await using var temporary = SiteTempDirectory.Create();
+        var input = Path.Combine(temporary.Path, "unqualified-projection.json");
+        var output = Path.Combine(temporary.Path, "unqualified-rows.json");
+        await File.WriteAllTextAsync(input, projection.ToJsonString(), token);
+        var selections = (from nodes in new[] { 1, 3 }
+                          from metric in new[] { "throughput", "duration", "cpu", "rss" }
+                          select new SiteIsolatedSelection("sequential-read", nodes, "session", metric, "all")).ToArray();
+        var response = await SiteIsolatedNodeProcess.RunAsync(fixture.Inputs.Site, new
+        {
+            operation = "rowsBatch",
+            repository = fixture.Inputs.Site.Repository,
+            projection = input,
+            selections,
+            output,
+        }, token);
+        await Assert.That(response.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
+        using var observations = JsonDocument.Parse(await File.ReadAllBytesAsync(output, token));
+        foreach (var observation in observations.RootElement.EnumerateArray())
+        {
+            foreach (var row in observation.GetProperty(SiteIsolatedFields.Rows).EnumerateArray())
+            {
+                foreach (var field in new[] { SiteIsolatedFields.Value, SiteIsolatedFields.Min, SiteIsolatedFields.Max,
+                    SiteIsolatedFields.Attempts, SiteIsolatedFields.Successes, SiteIsolatedFields.Failures })
+                {
+                    await Assert.That(row.GetProperty(field).ValueKind).IsEqualTo(JsonValueKind.Null);
+                }
+            }
+        }
+
+        await Assert.That((await File.ReadAllBytesAsync(fixture.Projection, token)).SequenceEqual(original)).IsTrue();
+    }
+
     internal static async Task AssertRows(JsonElement[] actual, SiteIsolatedExpectedRow[] expected)
     {
         await Assert.That(actual.Length).IsEqualTo(expected.Length);

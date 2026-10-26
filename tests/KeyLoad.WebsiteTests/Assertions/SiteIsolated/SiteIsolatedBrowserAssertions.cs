@@ -86,6 +86,7 @@ internal static class SiteIsolatedBrowserAssertions
         "unsupportedTopology" => "Unsupported execution topology",
         "failed" => "Benchmark failed · no data",
         "missing" => "No verified result",
+        "resourceIncomplete" => "Resource evidence incomplete",
         _ => throw new ArgumentOutOfRangeException(nameof(value)),
     };
 }
