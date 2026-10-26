@@ -38,6 +38,7 @@ internal sealed class NativeDatabaseResourceObservation
     {
         if (OperatingSystem.IsLinux())
         {
+            await CaptureHostMountsAsync(token);
             await collector.WaitForInitialSamplesAsync(token);
         }
         foreach (var resource in resources)
@@ -63,6 +64,18 @@ internal sealed class NativeDatabaseResourceObservation
             }
             targets.Add(new(resource.Name, identity, actual, mounts));
         }
+    }
+
+    private async Task CaptureHostMountsAsync(CancellationToken token)
+    {
+        const string MountInfoFile = "host-mountinfo.txt";
+        var settings = app.Services.GetRequiredService<IOptions<ScaleServerResourceOptions>>();
+        var budget = new ScaleServerResourceSampleBudget(settings,
+            app.Services.GetRequiredService<IOptions<BenchmarkProvenanceOptions>>(), timeProvider: TimeProvider.System);
+        var mounts = (await BoundedText.ReadAsync(ScaleServerCgroupHierarchy.MountInfoPath,
+            settings.Value.MaxHardwareBytes, budget, token)).Value;
+        await Assert.That(mounts).IsNotNull();
+        await File.WriteAllTextAsync(Path.Combine(root, MountInfoFile), mounts!, token);
     }
 
     internal async Task CompleteAsync()

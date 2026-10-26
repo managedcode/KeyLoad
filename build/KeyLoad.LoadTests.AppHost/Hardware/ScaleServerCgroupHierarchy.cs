@@ -8,7 +8,7 @@ internal static class ScaleServerCgroupHierarchy
 
     private const string MountInfoSeparator = " - ";
 
-    private const string MountInfoPath = "/proc/self/mountinfo";
+    internal const string MountInfoPath = "/proc/self/mountinfo";
     private const string ControllerFile = "cgroup.controllers";
     private const string CpuController = "cpu";
     private const string MemoryController = "memory";
@@ -19,7 +19,7 @@ internal static class ScaleServerCgroupHierarchy
     internal static async Task<bool> IsSupportedRootAsync(string root, ScaleServerResourceSampleBudget budget,
         CancellationToken token)
     {
-        var mounts = (await BoundedText.ReadAsync(MountInfoPath, budget.Settings.MaxFileBytes, budget, token)).Value;
+        var mounts = (await BoundedText.ReadAsync(MountInfoPath, budget.Settings.MaxHardwareBytes, budget, token)).Value;
         var controllers = (await BoundedText.ReadAsync(Path.Combine(root, ControllerFile),
             budget.Settings.MaxFileBytes, budget, token)).Value;
         return mounts is not null && controllers is not null && IsRootMount(mounts, root)

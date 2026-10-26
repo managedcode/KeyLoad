@@ -125,6 +125,7 @@ jobs:
             benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/**
             benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/database-adapters/**/*.log
             benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/database-adapters/**/resource-observations.json
+            benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/database-adapters/**/host-mountinfo.txt
             artifacts/qualification/**
             artifacts/code-quality/**
             ${{ runner.temp }}/keyload-cell-github/**

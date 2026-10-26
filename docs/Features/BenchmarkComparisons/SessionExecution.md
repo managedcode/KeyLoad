@@ -185,6 +185,10 @@ the daemon-reported local mount source through a bounded, noninteractive, read-o
 `sudo stat --file-system` command on the Linux runner. This does not require a utility
 inside each database image. A missing storage observation remains unqualified; it does not
 erase separately captured CPU/RSS evidence or authorize public measurements.
+The host mount inventory uses the existing bounded hardware-metadata budget rather
+than the smaller per-control-file limit. Native Linux artifacts retain the original
+`/proc/self/mountinfo` alongside the resource snapshot, so the actual mount table and
+its byte size remain reviewable when several database containers are running.
 
 Local execution retains the actual client binary/source/process identity with no
 invented GitHub provenance; every database server, KeyLoad included, is identified
