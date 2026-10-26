@@ -26,7 +26,7 @@ $script:Psm = [ordered]@{
     MaximumPathCharacters = 4096
     InvalidRoot = 'The production identity root is absent, linked or unsupported.'
     InvalidInventory = 'The production project inventory is unsafe, oversized or ambiguous.'
-    InvalidArtifact = 'An actual Debug project DLL or PDB is absent or unsupported.'
+    InvalidArtifact = 'An actual selected project DLL or PDB is absent or unsupported.'
     BindingProjectLabel = 'project='
     BindingMissingCountLabel = '; missingSourceCount='
     BindingMissingPathsLabel = '; firstMissingSourcePaths='
@@ -167,8 +167,8 @@ function Get-PsmProjectTargetFramework([string] $Root, [string] $Tree, [string] 
 function Get-PsmProjectIdentity([string] $Root, [string] $ProjectName, [bool] $IsTest) {
     $tree = Get-FcProjectSourceDirectory $ProjectName $IsTest
     $framework = Get-PsmProjectTargetFramework $Root $tree $ProjectName
-    $dll = $tree + '/bin/Debug/' + $framework + '/' + $ProjectName + '.dll'
-    $pdb = $tree + '/bin/Debug/' + $framework + '/' + $ProjectName + '.pdb'
+    $dll = $tree + '/bin/' + (Get-FcBuildConfiguration) + '/' + $framework + '/' + $ProjectName + '.dll'
+    $pdb = $tree + '/bin/' + (Get-FcBuildConfiguration) + '/' + $framework + '/' + $ProjectName + '.pdb'
     $sources = @(Get-PsmCompiledSources $Root $ProjectName $IsTest $dll)
     Assert-PsmSourceTree $Root $ProjectName $IsTest $sources
     $central = @(Get-PsmCentralInputs $Root $ProjectName $IsTest)

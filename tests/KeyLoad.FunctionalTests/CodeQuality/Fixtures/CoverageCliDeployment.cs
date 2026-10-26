@@ -1,9 +1,12 @@
+using KeyLoad.AppHost.TestInfrastructure;
+
 namespace KeyLoad.FunctionalTests.CodeQuality;
 
 internal static class CoverageCliDeployment
 {
     private const string SolutionFile = "KeyLoad.slnx";
-    internal const string CliOutputRelativePath = "src/KeyLoad.Cli/bin/Debug/net10.0";
+    internal static string CliOutputRelativePath => Path.Combine("src", "KeyLoad.Cli", "bin",
+        ProjectLaunchMetadata.Configuration, "net10.0");
 
     internal static string CliOutput => Path.Combine(RepositoryRoot, CliOutputRelativePath);
     internal static string RepositoryRoot { get; } = FindRepositoryRoot();

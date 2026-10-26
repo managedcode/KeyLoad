@@ -219,10 +219,11 @@ Use .NET 10 and centrally pinned packages. Do not generate or commit
 `packages.lock.json`. Ignore build outputs, local databases and test artifacts.
 Every `dotnet build` invocation uses `-warnaserror`; preserve compiler and analyzer
 severity. No suppressions, disabled analyzers or reduced gates to obtain green.
-Local development, normal Aspire startup and functional tests use the SDK's
+Local development, normal Aspire startup and local functional tests use the SDK's
 default Debug configuration. Do not force Release or build both configurations
-for development checks. Keep compiled source identities and test artifact paths
-aligned with the selected configuration.
+for development checks. Functional GitHub Actions qualification builds and tests Release explicitly.
+Keep compiled source identities, process launches, test artifact paths and framework
+IPC aligned with the selected configuration; never qualify a different build's DLLs.
 
 All test-owned temporary files, directories, storage and logs live below the
 executing test assembly's `AppContext.BaseDirectory`, beside its binaries in

@@ -49,7 +49,7 @@ function Get-FcObservedUnitImages([object] $Observation, [string] $Root) {
         throw $script:FcContributors.Invalid
     }
     foreach ($name in @('dll','pdb')) {
-        $expected = 'tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/KeyLoad.FunctionalTests.' + $name
+        $expected = 'tests/KeyLoad.FunctionalTests/bin/' + (Get-FcBuildConfiguration) + '/net10.0/KeyLoad.FunctionalTests.' + $name
         if ($image[$name] -cne $expected -or $image[$name + 'Sha256'] -cnotmatch '\A[0-9a-f]{64}\z') {
             throw $script:FcContributors.Invalid
         }

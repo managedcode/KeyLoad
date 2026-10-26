@@ -10,7 +10,7 @@ import {
 } from './ci-test-partition.mjs';
 import { checkResults } from './ci-test-results.mjs';
 import { checkCompiledInventory } from './ci-test-compiled-inventory.mjs';
-import { executionPipeDirectory } from './run-tests.mjs';
+import { executionBuildConfiguration, executionPipeDirectory } from './run-tests.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const usage = [
@@ -32,7 +32,7 @@ function matrix(manifest, suiteId) {
 }
 
 function testEnvironment() {
-  // Same framework IPC location as run-tests.mjs: Aspire DCP and MTP sockets stay below tests/bin/Debug/ipc.
+  // Share the selected configuration and bounded framework IPC directory with the direct runner.
   const pipes = executionPipeDirectory(root);
   mkdirSync(pipes, { recursive: true });
   return { ...process.env, TMPDIR: pipes, TMP: pipes, TEMP: pipes, TESTINGPLATFORM_PIPE_DIRECTORY: pipes };
@@ -40,7 +40,7 @@ function testEnvironment() {
 
 function dotnetArguments(suite, run) {
   const parallelism = run.parallelism === 'processors' ? availableParallelism() : run.parallelism;
-  return ['test', '--project', suite.project, '--no-build', '--output', 'Detailed', '--treenode-filter', run.filter,
+  return ['test', '--project', suite.project, '--configuration', executionBuildConfiguration(), '--no-build', '--output', 'Detailed', '--treenode-filter', run.filter,
     ...(parallelism ? ['--maximum-parallel-tests', String(parallelism)] : []),
     '--timeout', `${suite.timeoutMinutes}m`, '--report-trx', '--results-directory', run.directory];
 }

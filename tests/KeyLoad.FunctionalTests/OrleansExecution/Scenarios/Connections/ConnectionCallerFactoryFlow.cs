@@ -13,11 +13,11 @@ internal static class ConnectionCallerFactoryFlow
 
     private static async Task ExecuteAsync(ConnectionScenario scenario)
     {
+        var caller = TestContext.Current!.Execution.CancellationToken;
+        await scenario.InitializeAsync(caller);
         using var deadline = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
-            TestContext.Current!.Execution.CancellationToken);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, caller);
         var token = linked.Token;
-        await scenario.InitializeAsync(token);
         var state = new ConnectionIdentityCollisionState(scenario, scenario.Principal(), scenario.Principal(),
             scenario.Command(D.Document, D.OriginalJson, D.AbsentRevision),
             scenario.Command(N.SecondDocument, N.SecondJson, D.AbsentRevision), Guid.NewGuid());

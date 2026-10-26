@@ -1,3 +1,12 @@
+function Get-FcBuildConfiguration {
+    $configuration = [Environment]::GetEnvironmentVariable('KEYLOAD_TEST_CONFIGURATION')
+    if ($null -eq $configuration) { return 'Debug' }
+    if ($configuration -cnotin @('Debug', 'Release')) {
+        throw 'Execution build configuration must be Debug or Release.'
+    }
+    $configuration
+}
+
 $script:FunctionalCoverage = [ordered]@{
     SchemaVersion = 2
     CollectorVersion = '18.12.0'
@@ -9,7 +18,7 @@ $script:FunctionalCoverage = [ordered]@{
     ReportJsonName = 'functional-coverage.report.json'
     ReportMarkdownName = 'functional-coverage.report.md'
     SettingsCopyName = 'functional-coverage.settings.xml'
-    DeploymentDirectory = 'tests/KeyLoad.FunctionalTests/bin/Debug/net10.0'
+    DeploymentDirectory = 'tests/KeyLoad.FunctionalTests/bin/' + (Get-FcBuildConfiguration) + '/net10.0'
     SourceDirectory = 'src/KeyLoad.Query'
     SourceCount = 266
     ContributorSourceCount = 19
@@ -32,7 +41,7 @@ $script:FunctionalCoverage = [ordered]@{
     ErrorStale = 'Prepare refuses existing functional-coverage evidence.'
     ErrorContract = 'The frozen functional coverage contract is invalid.'
     ErrorInventory = 'KeyLoad.Query source inventory differs from the frozen contract.'
-    ErrorDeployment = 'Debug test deployment must contain the Query DLL and matching PDB.'
+    ErrorDeployment = 'Selected test deployment must contain the Query DLL and matching PDB.'
     ErrorManifest = 'Prepared functional coverage manifest is missing, stale, or invalid.'
     ErrorCoverage = 'A required execution Cobertura report is missing or malformed.'
     ErrorTrx = 'PartitionQuery TRX cases differ from the exact admitted class, method, or instance inventory.'
@@ -138,6 +147,10 @@ function Get-FcSourceInventory([string] $Root, [object] $Contract) {
 function Read-FcContract([string] $Path) {
     $contract = Get-Content -LiteralPath $Path -Raw | ConvertFrom-Json -AsHashtable
     $t = $script:FunctionalCoverage
+    if ($contract.deploymentDirectory -cne 'tests/KeyLoad.FunctionalTests/bin/{configuration}/net10.0') {
+        throw $t.ErrorContract
+    }
+    $contract.deploymentDirectory = $contract.deploymentDirectory.Replace('{configuration}', (Get-FcBuildConfiguration))
     if ($contract.schemaVersion -ne $t.SchemaVersion -or $contract.module -cne $t.Module -or
         $contract.moduleFile -cne $t.ModuleFile -or $contract.collector.version -cne $t.CollectorVersion -or
         $contract.collector.package -cne 'Microsoft.Testing.Extensions.CodeCoverage' -or

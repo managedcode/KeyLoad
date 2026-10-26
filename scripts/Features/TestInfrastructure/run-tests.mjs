@@ -26,8 +26,15 @@ const mapped = new Map([
   ['CoverageFormat', '--coverage-output-format'], ['Execution:MaximumParallelTests', '--maximum-parallel-tests']
 ]);
 // Selection only: workloads and Aspire resource lifetimes belong to the C# TUnit tests.
-export function executionPipeDirectory(repository) {
-  const directory = path.resolve(repository, 'tests', 'bin', 'Debug', 'ipc');
+export function executionBuildConfiguration(environment = process.env) {
+  const configuration = environment.KEYLOAD_TEST_CONFIGURATION ?? 'Debug';
+  if (!['Debug', 'Release'].includes(configuration)) throw new Error('Execution build configuration must be Debug or Release.');
+  return configuration;
+}
+
+export function executionPipeDirectory(repository, configuration = executionBuildConfiguration()) {
+  executionBuildConfiguration({ KEYLOAD_TEST_CONFIGURATION: configuration });
+  const directory = path.resolve(repository, 'tests', 'bin', configuration, 'ipc');
   if (process.platform !== 'win32' && Buffer.byteLength(directory, 'utf8') > maximumUnixPipeDirectoryBytes) {
     throw new Error('Execution test IPC output path is too long for Unix domain sockets.');
   }
@@ -65,13 +72,14 @@ export function runtimeSelection(input, inherited = process.env) {
   }
   if (suite === 'cluster' && !values.has('Filter')) values.set('Filter', ordinaryClusterFilter);
   if (suite === 'functional' && !values.has('Filter')) values.set('Filter', ordinaryFunctionalFilter);
-  const environment = { ...inherited };
-  const output = path.resolve(root, 'tests', project, 'bin', 'Debug', 'net10.0');
+  const configuration = executionBuildConfiguration(inherited);
+  const environment = { ...inherited, KEYLOAD_TEST_CONFIGURATION: configuration };
+  const output = path.resolve(root, 'tests', project, 'bin', configuration, 'net10.0');
   // Aspire DCP binds Unix sockets below the temp directory; the short shared ipc folder keeps them within the platform bound.
   for (const key of ['TMPDIR', 'TMP', 'TEMP']) {
-    environment[key] = executionPipeDirectory(root);
+    environment[key] = executionPipeDirectory(root, configuration);
   }
-  environment.TESTINGPLATFORM_PIPE_DIRECTORY = executionPipeDirectory(root);
+  environment.TESTINGPLATFORM_PIPE_DIRECTORY = executionPipeDirectory(root, configuration);
   for (const key of ['KeyLoadTests__Suite', 'KeyLoadTests__HeavyLoad__Enabled']) delete environment[key];
   const args = [path.join(output, `${project}.dll`),
     '--output', 'Detailed', '--github-reporter-style', 'full', '--maximum-parallel-tests', String(parallel),

@@ -2,7 +2,7 @@
 
 ## Purpose, entry points and ownership
 
-Owns the four delivery workflows: `build-and-tests.yml`, `benchmarks.yml`, `website.yml` and `release.yml`. Build and Tests owns functional qualification; Benchmarks owns isolated database measurements and authenticated aggregation; Website owns independent site qualification and Pages publication; Release owns explicitly authorized packaging and publication. Preserve pinned actions, source identities, original artifacts, needs-gated publication and least-privilege permissions.
+Owns the four delivery workflows: `build-and-tests.yml`, `benchmarks.yml`, `website.yml` and `release.yml`. Build and Tests owns Release functional qualification; Benchmarks owns isolated database measurements and authenticated aggregation; Website owns independent site qualification and Pages publication; Release owns explicitly authorized packaging and publication. Preserve pinned actions, source identities, original artifacts, needs-gated publication and least-privilege permissions.
 
 ## Boundaries and protected risks
 

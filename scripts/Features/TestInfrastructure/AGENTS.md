@@ -3,6 +3,7 @@
 ## Purpose, entry points and ownership
 
 - Owns `run-tests.mjs`, the bounded argument selector for the TUnit entry.
+- `KEYLOAD_TEST_CONFIGURATION` selects Debug or Release consistently for binaries and framework IPC. Local execution defaults to Debug; functional CI selects Release explicitly.
 - C# test fixtures own Aspire startup, readiness, discovered endpoints and joined teardown.
 - `KeyLoad.AppHost` starts KeyLoad project processes with the published in-memory RapidMembership provider.
 - `KeyLoad.LoadTests.AppHost` owns selected comparison infrastructure. Client code executes workloads and measurements outside the resource graph.

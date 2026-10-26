@@ -21,10 +21,10 @@ internal static class CallLocalIdentityRestorationFlow
     private static async Task ExerciseAsync(ConnectionScenario scenario, bool firstPresentNull,
         CancellationToken cancellationToken)
     {
+        await scenario.InitializeAsync(cancellationToken);
         using var timeout = new CancellationTokenSource(scenario.Timing.CompletionTimeout, TimeProvider.System);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(timeout.Token, cancellationToken);
         var token = linked.Token;
-        await scenario.InitializeAsync(token);
         var first = scenario.Principal();
         var second = scenario.Principal();
         await Assert.That(first.Id).IsNotEqualTo(second.Id);

@@ -31,6 +31,8 @@ internal static class ProductionSourceManifestProcessStart
         start.ArgumentList.Add(root);
         start.ArgumentList.Add("-EvidenceRoot");
         start.ArgumentList.Add(evidenceRoot);
+        start.Environment[KeyLoad.AppHost.TestInfrastructure.ProjectLaunchMetadata.ConfigurationEnvironmentVariable]
+            = KeyLoad.AppHost.TestInfrastructure.ProjectLaunchMetadata.Configuration;
         return start;
     }
 

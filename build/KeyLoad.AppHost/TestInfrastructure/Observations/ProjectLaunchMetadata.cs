@@ -8,6 +8,7 @@ namespace KeyLoad.AppHost.TestInfrastructure;
 /// <summary>Reads the same execution SDK run properties used by Aspire's project launch.</summary>
 internal static class ProjectLaunchMetadata
 {
+    internal const string ConfigurationEnvironmentVariable = "KEYLOAD_TEST_CONFIGURATION";
     private const string MissingConfiguration = "The AppHost build configuration is absent.";
     private const string MissingMetadata = "The execution SDK project launch metadata is absent.";
     private const string InvalidAssemblyPath = "The execution SDK managed entry assembly is not absolute.";
@@ -19,14 +20,16 @@ internal static class ProjectLaunchMetadata
     private const string ConfigurationArgumentPrefix = "-property:Configuration=";
     private const string DotnetCommand = "dotnet";
 
+    internal static string Configuration { get; } = typeof(ProjectLaunchMetadata).Assembly
+        .GetCustomAttribute<AssemblyConfigurationAttribute>()?.Configuration
+        ?? throw new InvalidDataException(MissingConfiguration);
+
     internal static async Task<(string Assembly, string Executable)> ReadAsync(string project, string directory,
         string dotnet, IOptions<TestExecutionOptions> options, CancellationToken token)
     {
-        var configuration = typeof(ProjectLaunchMetadata).Assembly.GetCustomAttribute<AssemblyConfigurationAttribute>()
-            ?.Configuration ?? throw new InvalidDataException(MissingConfiguration);
         var start = new ProcessStartInfo(dotnet) { WorkingDirectory = directory };
         foreach (var argument in new[] { MsBuildCommand, project, NoLogoArgument, RunMetadataTarget,
-            RunMetadataProperties, ConfigurationArgumentPrefix + configuration })
+            RunMetadataProperties, ConfigurationArgumentPrefix + Configuration })
         {
             start.ArgumentList.Add(argument);
         }

@@ -7,11 +7,11 @@ internal static class ConnectionFixtureConcurrencyFlow
 
     internal static async Task RunAsync(ConnectionScenario left, ConnectionScenario right)
     {
+        var caller = TestContext.Current!.Execution.CancellationToken;
+        await Task.WhenAll(left.InitializeAsync(caller), right.InitializeAsync(caller));
         using var deadline = new CancellationTokenSource(left.Timing.CompletionTimeout, TimeProvider.System);
-        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token,
-            TestContext.Current!.Execution.CancellationToken);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token, caller);
         var token = cancellation.Token;
-        await Task.WhenAll(left.InitializeAsync(token), right.InitializeAsync(token));
         await Assert.That(left.Fixture.Database.Directory).IsNotEqualTo(right.Fixture.Database.Directory);
         await Assert.That(left.Fixture.ConnectionId).IsNotEqualTo(right.Fixture.ConnectionId);
         await Assert.That(ReferenceEquals(left.Fixture.RequestWork, right.Fixture.RequestWork)).IsFalse();

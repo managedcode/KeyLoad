@@ -16,7 +16,7 @@ internal sealed class SagaTimeoutTraceIsolationTests(SagaTimeoutFixture fixture)
     [Test]
     public async Task ScheduleDoesNotPersistAmbientCallerTraceState()
     {
-        var saga = SagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId, deadlineInFuture: true);
+        var saga = SagaTimeoutTestData.CreateWaitingSaga(fixture, SagaPrincipalId);
         var dueTime = TimeProvider.System.GetUtcNow().Add(fixture.TestProfile.HeldJobDelay);
         using var caller = new Activity(CallerActivityName);
         caller.SetIdFormat(ActivityIdFormat.W3C);

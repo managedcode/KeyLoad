@@ -51,7 +51,7 @@ internal static class SubscriptionGroupSiloRestartFlow
                 var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
                 var result = await sdk.StatusAsync(token);
                 if (result.IsFailed || result.Value is not { RoutingReady: true } status ||
-                    status.SiloCount != SubscriptionFilterClusterProtocol.Nodes.Length)
+                    status.SiloCount != survivors.Length)
                 {
                     return false;
                 }

@@ -5,6 +5,8 @@ on:
   pull_request:
   workflow_dispatch:
   workflow_call:
+env:
+  KEYLOAD_TEST_CONFIGURATION: Release
 permissions:
   contents: read
 # Shards and lanes come from scripts/Features/TestInfrastructure/ci-test-shards.json (ADR-148).
@@ -12,7 +14,7 @@ permissions:
 # the cold bootstrap topology test launches src/KeyLoad.Cli, which the test projects do not reference.
 jobs:
   build:
-    name: Strict Debug build and compiled test inventory
+    name: Strict Release build and compiled test inventory
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -29,13 +31,13 @@ jobs:
       - name: Check test shard partition
         run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs verify
       - name: Build
-        run: dotnet build KeyLoad.slnx -warnaserror
+        run: dotnet build KeyLoad.slnx --configuration "$KEYLOAD_TEST_CONFIGURATION" -warnaserror
       - name: Check compiled TUnit shard inventory
         run: node --test scripts/Features/TestInfrastructure/ci-test-inventory.test.mjs
       - name: Check compiled unit inventory and coverage selectors
         shell: pwsh
         run: |
-          $evidence = Join-Path $PWD 'tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/ci-inventory'
+          $evidence = Join-Path $PWD 'tests/KeyLoad.FunctionalTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-inventory'
           New-Item -ItemType Directory -Path $evidence -ErrorAction Stop | Out-Null
           & ./scripts/Features/CodeQuality/functional-coverage.workflow-discovery.ps1 -Repository $PWD -EvidenceRoot $evidence
       - name: Save compiled discovery evidence
@@ -44,8 +46,8 @@ jobs:
         with:
           name: compiled-test-discovery
           path: |
-            tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/ci-inventory
-            tests/*/bin/Debug/net10.0/compiled-shard-inventory-*
+            tests/KeyLoad.FunctionalTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-inventory
+            tests/*/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/compiled-shard-inventory-*
           if-no-files-found: warn
           retention-days: 30
 
@@ -83,15 +85,15 @@ jobs:
         with:
           global-json-file: global.json
       - name: Build
-        run: dotnet build KeyLoad.slnx -warnaserror
+        run: dotnet build KeyLoad.slnx --configuration "$KEYLOAD_TEST_CONFIGURATION" -warnaserror
       - name: Test functional operations
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/ci-results"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.FunctionalTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results"
       - name: Save test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-functional-${{ matrix.shard }}
-          path: tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/ci-results
+          path: tests/KeyLoad.FunctionalTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results
           if-no-files-found: warn
           retention-days: 30
           overwrite: true
@@ -108,20 +110,20 @@ jobs:
         with:
           global-json-file: global.json
       - name: Build
-        run: dotnet build KeyLoad.slnx -warnaserror
+        run: dotnet build KeyLoad.slnx --configuration "$KEYLOAD_TEST_CONFIGURATION" -warnaserror
       - name: Test code analyzers
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run compiler-analyzers --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0/ci-results"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run compiler-analyzers --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.AnalyzerTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results"
       - name: Test process recovery
         if: ${{ !cancelled() }}
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run process-crash-recovery --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ProcessRecoveryTests/bin/Debug/net10.0/ci-results"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run process-crash-recovery --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ProcessRecoveryTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results"
       - name: Save test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-analyzers-recovery
           path: |
-            tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0/ci-results
-            tests/KeyLoad.ProcessRecoveryTests/bin/Debug/net10.0/ci-results
+            tests/KeyLoad.AnalyzerTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results
+            tests/KeyLoad.ProcessRecoveryTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results
           if-no-files-found: warn
           retention-days: 30
           overwrite: true
@@ -144,11 +146,11 @@ jobs:
         with:
           global-json-file: global.json
       - name: Build
-        run: dotnet build KeyLoad.slnx -warnaserror
+        run: dotnet build KeyLoad.slnx --configuration "$KEYLOAD_TEST_CONFIGURATION" -warnaserror
       - name: Install administration browser
         if: ${{ matrix.playwright }}
         shell: pwsh
-        run: tests/KeyLoad.ClusterTests/bin/Debug/net10.0/playwright.ps1 install --with-deps chromium
+        run: tests/KeyLoad.ClusterTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/playwright.ps1 install --with-deps chromium
       - name: Prepare Chromium certificate store
         if: ${{ matrix.playwright }}
         run: |
@@ -164,15 +166,15 @@ jobs:
           echo "SSL_CERT_DIR=$SSL_CERT_DIR" >> "$GITHUB_ENV"
           dotnet dev-certs https --trust
       - name: Test Aspire topology lanes
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ClusterTests/bin/Debug/net10.0/ci-results"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ClusterTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results"
       - name: Save test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: test-results-cluster-${{ matrix.shard }}
           path: |
-            tests/KeyLoad.ClusterTests/bin/Debug/net10.0/ci-results
-            tests/KeyLoad.ClusterTests/bin/Debug/net10.0/aspire-diagnostics-*.log
+            tests/KeyLoad.ClusterTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results
+            tests/KeyLoad.ClusterTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/aspire-diagnostics-*.log
           if-no-files-found: warn
           retention-days: 30
           overwrite: true

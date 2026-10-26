@@ -7,14 +7,15 @@ import test from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { checkCompiledInventory } from './ci-test-compiled-inventory.mjs';
 import { checkPartition, loadManifest } from './ci-test-partition.mjs';
+import { executionBuildConfiguration, executionPipeDirectory, runtimeSelection } from './run-tests.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../..');
 const partition = checkPartition(root, loadManifest(root));
 assert.deepEqual(partition.errors, []);
 function discover(entry) {
-  const binaryDirectory = path.join(root, path.dirname(entry.suite.project), 'bin/Debug/net10.0');
+  const binaryDirectory = path.join(root, path.dirname(entry.suite.project), 'bin', executionBuildConfiguration(), 'net10.0');
   const evidence = path.join(binaryDirectory, `compiled-shard-inventory-${randomUUID()}`);
-  const ipc = path.join(root, 'tests/bin/Debug/ipc');
+  const ipc = executionPipeDirectory(root);
   const categories = (entry.suite.excludedCategories ?? []).map(category => `[Category!=${category}]`).join('');
   mkdirSync(evidence, { recursive: true });
   mkdirSync(ipc, { recursive: true });
@@ -66,4 +67,34 @@ test('compiled verification rejects a source method that TUnit did not discover'
     item.type.typeName !== missing.typeName || item.type.methodName !== missing.methodName) };
   const result = checkCompiledInventory(entry, incomplete);
   assert.ok(result.errors.some(error => error.startsWith('Source test method is absent from compiled discovery:')));
+});
+
+
+test('selected build owns its binary and IPC paths or refuses an oversized Unix socket directory', () => {
+  for (const configuration of ['Debug', 'Release']) {
+    const expectedIpc = path.join(root, 'tests/bin', configuration, 'ipc');
+    if (process.platform !== 'win32' && Buffer.byteLength(expectedIpc, 'utf8') > 56) {
+      assert.throws(() => runtimeSelection(['--KeyLoadTests:Suite=functional'],
+        { KEYLOAD_TEST_CONFIGURATION: configuration }), /IPC output path is too long/u);
+      continue;
+    }
+    const selection = runtimeSelection(['--KeyLoadTests:Suite=functional'], { KEYLOAD_TEST_CONFIGURATION: configuration });
+    assert.equal(selection.args[0], path.join(root, 'tests/KeyLoad.FunctionalTests/bin', configuration,
+      'net10.0/KeyLoad.FunctionalTests.dll'));
+    assert.equal(selection.environment.TESTINGPLATFORM_PIPE_DIRECTORY,
+      path.join(root, 'tests/bin', configuration, 'ipc'));
+    assert.equal(selection.environment.TMPDIR, selection.environment.TESTINGPLATFORM_PIPE_DIRECTORY);
+    assert.equal(selection.environment.KEYLOAD_TEST_CONFIGURATION, configuration);
+  }
+});
+
+test('local execution keeps the SDK default configuration', () => {
+  assert.equal(executionBuildConfiguration({}), 'Debug');
+});
+
+test('unsupported execution configuration is refused before selecting binaries', () => {
+  for (const configuration of ['', 'release', '../Release', 'Shipping']) {
+    assert.throws(() => runtimeSelection(['--KeyLoadTests:Suite=cluster'],
+      { KEYLOAD_TEST_CONFIGURATION: configuration }), /configuration must be Debug or Release/u);
+  }
 });

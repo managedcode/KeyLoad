@@ -9,7 +9,7 @@ namespace KeyLoad.FunctionalTests.CodeQuality.Helpers;
 
 internal sealed class CompilationIdentityPackageRootFixture : IAsyncDisposable
 {
-    internal const string Configuration = "Debug";
+    internal static string Configuration => ProjectLaunchMetadata.Configuration;
     internal const string ProjectRelativePath = "tests/KeyLoad.FunctionalTests/KeyLoad.FunctionalTests.csproj";
     internal const string SourceRelativePath = "tests/KeyLoad.FunctionalTests/Owned.cs";
     internal const string ProducerRelativePath = "build/CodeQuality/FunctionalCompilationIdentity.targets";

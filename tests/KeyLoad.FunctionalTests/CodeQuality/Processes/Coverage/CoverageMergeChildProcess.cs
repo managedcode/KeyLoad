@@ -35,6 +35,8 @@ internal static class CoverageMergeChildProcess
         };
         start.Environment[TelemetryVariable] = EnabledValue;
         start.Environment[OptionsEnvironment] = JsonSerializer.Serialize(coverage);
+        start.Environment[KeyLoad.AppHost.TestInfrastructure.ProjectLaunchMetadata.ConfigurationEnvironmentVariable]
+            = KeyLoad.AppHost.TestInfrastructure.ProjectLaunchMetadata.Configuration;
         return start;
     }
 

@@ -14,7 +14,7 @@ Build and Tests ran every suite one after another in one job on a 4-vCPU ubuntu-
 
 Build and Tests is a set of parallel jobs driven by one checked-in manifest, `scripts/Features/TestInfrastructure/ci-test-shards.json`, and its runner `ci-test-shards.mjs`:
 
-- **Build:** governance and website inventory checks, the static shard partition check and `dotnet build KeyLoad.slnx -warnaserror`.
+- **Build:** governance and website inventory checks, the static shard partition check and `dotnet build KeyLoad.slnx --configuration Release -warnaserror`.
 - **Units:** four shards. Each runs one process per namespace with the assembly-pinned filter `/KeyLoad.FunctionalTests/<namespace>/*/*` at processor-count parallelism.
 - **Analyzers and process recovery:** one job with filters `/KeyLoad.AnalyzerTests/*/*/*` and `/KeyLoad.ProcessRecoveryTests/*/*/*`.
 - **Aspire topology:** twelve shards of two lanes each.
@@ -23,7 +23,12 @@ Build and Tests is a set of parallel jobs driven by one checked-in manifest, `sc
   - Every lane process owns its own keyed shared cluster, so a test that kills, restarts or cold-reopens nodes cannot affect another lane.
 - **Verify test partition:** reads every shard's TRX artifact and proves that each test ran exactly once, in its assigned shard and lane.
 
-Each test job builds the whole solution with `-warnaserror` in Debug and uploads its TRX reports even when tests fail. A single-project build is not enough: unit CodeQuality checks read the compiled image of every solution project, and the cold bootstrap topology test launches the KeyLoad CLI, which no test project references. The Release workflow calls Build and Tests through `workflow_call` and gates every publishing job on it.
+Each test job builds the whole solution with `-warnaserror` in Release and uploads its TRX reports even when tests fail. A single-project build is not enough: unit CodeQuality checks read the compiled image of every solution project, and the cold bootstrap topology test launches the KeyLoad CLI, which no test project references. The Release workflow calls Build and Tests through `workflow_call` and gates every publishing job on it.
+
+Local development stays on the SDK default Debug configuration. CI sets
+`KEYLOAD_TEST_CONFIGURATION=Release`; runner selection, framework IPC, child
+process metadata, compiled discovery and DLL/PDB/source checks all use that same
+configuration. Uploads retain the original artifacts from the executed build.
 
 Partition correctness is checked twice:
 

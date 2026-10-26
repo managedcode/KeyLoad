@@ -640,7 +640,7 @@
       }
     ]
   },
-  "deploymentDirectory": "tests/KeyLoad.FunctionalTests/bin/Debug/net10.0",
+  "deploymentDirectory": "tests/KeyLoad.FunctionalTests/bin/{configuration}/net10.0",
   "deploymentFiles": [
     "KeyLoad.Query.dll",
     "KeyLoad.Query.pdb"
