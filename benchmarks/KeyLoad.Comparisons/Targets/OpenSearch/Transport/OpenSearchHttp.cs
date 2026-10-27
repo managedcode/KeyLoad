@@ -52,7 +52,13 @@ internal static class OpenSearchHttp
 
         if (mutation is null && !response.IsSuccessStatusCode)
         {
-            throw new ComparisonFailureException(HttpFailure + (int)response.StatusCode);
+            var failure = HttpFailure + (int)response.StatusCode;
+            if (policy is not null)
+            {
+                using var error = await ReadJsonAsync(response.Content, policy, cancellationToken);
+                failure += ReadFailureKind(error.RootElement);
+            }
+            throw new ComparisonFailureException(failure);
         }
         var json = await ReadJsonAsync(response.Content, policy, cancellationToken);
         try
@@ -68,6 +74,21 @@ internal static class OpenSearchHttp
             json.Dispose();
             throw;
         }
+    }
+
+    private static string ReadFailureKind(JsonElement response)
+    {
+        const string FailureKindSeparator = ".";
+        const char TypeWordSeparator = '_';
+        const int MaximumTypeLength = 128;
+        if (response.ValueKind == JsonValueKind.Object && response.TryGetProperty(OpenSearchNames.Error, out var error)
+            && error.ValueKind == JsonValueKind.Object && error.TryGetProperty(OpenSearchNames.ErrorType, out var kind)
+            && kind.ValueKind == JsonValueKind.String && kind.GetString() is { Length: > 0 and <= MaximumTypeLength } text
+            && text.All(character => char.IsAsciiLetterOrDigit(character) || character == TypeWordSeparator))
+        {
+            return FailureKindSeparator + text;
+        }
+        return string.Empty;
     }
 
     private static async Task<JsonDocument> ReadJsonAsync(HttpContent content, ComparisonExecutionOptions? policy, CancellationToken cancellationToken)

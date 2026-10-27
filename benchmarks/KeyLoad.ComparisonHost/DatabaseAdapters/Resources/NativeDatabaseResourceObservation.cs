@@ -31,7 +31,7 @@ internal sealed class NativeDatabaseResourceObservation
             .OfType<ContainerResource>().Where(resource => settings.Resources.Contains(resource.Name))];
         collector = app.Services.GetRequiredService<ScaleServerResourceEvidenceCollector>();
         observation = collector.StartAsync(resources,
-            ready => ScaleServerResourceReadiness.WaitAsync(app, resources, ready), token);
+            ready => BenchmarkSessionClientRuntime.WaitForReadinessAsync(app, ready), token);
     }
 
     internal async Task VerifyReadyAsync(CancellationToken token)
@@ -56,6 +56,7 @@ internal sealed class NativeDatabaseResourceObservation
             await Assert.That(actual.Length).IsGreaterThan(0);
             await Assert.That(actual.Length).IsLessThanOrEqualTo(budget.Settings.MaxMounts);
             await Assert.That(actual.Distinct(StringComparer.Ordinal).Count()).IsEqualTo(actual.Length);
+            await VerifyMountIdentityAsync(descriptor);
             ScaleServerMount[] mounts = [];
             if (OperatingSystem.IsLinux())
             {
@@ -63,6 +64,25 @@ internal sealed class NativeDatabaseResourceObservation
                 await Assert.That(mounts.Length).IsEqualTo(actual.Length);
             }
             targets.Add(new(resource.Name, identity, actual, mounts));
+        }
+    }
+
+    private static async Task VerifyMountIdentityAsync(string descriptor)
+    {
+        const string Changed = "-changed";
+        const int First = 0, Fields = 3;
+        var rows = descriptor.Split(MountSeparator, StringSplitOptions.RemoveEmptyEntries);
+        var identity = ScaleServerMountReader.NormalizeDescriptor(descriptor);
+        var reordered = string.Join(MountSeparator, rows.Reverse());
+        await Assert.That(ScaleServerMountReader.NormalizeDescriptor(reordered)).IsEqualTo(identity);
+        for (var field = First; field < Fields; field++)
+        {
+            var changed = rows.ToArray();
+            var values = changed[First].Split(MountFieldSeparator);
+            values[field] += Changed;
+            changed[First] = string.Join(MountFieldSeparator, values);
+            await Assert.That(ScaleServerMountReader.NormalizeDescriptor(string.Join(MountSeparator, changed)))
+                .IsNotEqualTo(identity);
         }
     }
 

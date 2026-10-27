@@ -12,6 +12,10 @@ internal static class ScaleServerMountReader
     private const int First = 0, Source = 0, Target = 1, MountType = 2, MountFields = 3;
     private const int StatFields = 4, BlockSize = 1, Blocks = 2, AvailableBlocks = 3;
 
+    internal static string NormalizeDescriptor(string text)
+        => string.Join(MountSeparator, text.Split(MountSeparator, StringSplitOptions.RemoveEmptyEntries)
+            .Order(StringComparer.Ordinal));
+
     internal static async Task<ScaleServerMount[]> ReadAsync(string text, string[] expectedTargets,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {

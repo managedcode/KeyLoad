@@ -6,7 +6,6 @@ using Aspire.Hosting.Testing;
 using KeyLoad.ComparisonHost.BenchmarkOrchestration;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
-using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -66,12 +65,8 @@ internal static class AdditionalDatabaseResources
     private static async Task RunNativeAsync(DistributedApplication application, string target,
         Func<IComparisonTarget, CancellationToken, Task> verify, NativeDatabaseResourceObservation observations, CancellationToken token)
     {
-        var settings = application.Services.GetRequiredService<LoadTestClientSettings>();
         await application.StartAsync(token);
-        foreach (var resource in settings.Resources)
-        {
-            await application.ResourceNotifications.WaitForResourceHealthyAsync(resource, WaitBehavior.StopOnResourceUnavailable, token);
-        }
+        var settings = await BenchmarkSessionClientRuntime.WaitForReadinessAsync(application, token);
         await observations.VerifyReadyAsync(token);
         var values = await settings.ResolveAsync(token);
         using var configuration = new ConfigurationManager();

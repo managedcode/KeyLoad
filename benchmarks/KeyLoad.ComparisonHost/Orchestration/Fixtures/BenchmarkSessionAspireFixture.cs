@@ -69,7 +69,7 @@ internal static class BenchmarkSessionAspireFixture
                 item.Target == selected.Target && item.NodeCounts.Contains(selected.NodeCount)))
             {
                 work.Observation = work.Collector.StartAsync(containers,
-                    readinessToken => ScaleServerResourceReadiness.WaitAsync(application, containers, readinessToken), token);
+                    readinessToken => BenchmarkSessionClientRuntime.WaitForReadinessAsync(application, readinessToken), token);
             }
             else
             {

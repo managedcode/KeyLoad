@@ -2,8 +2,7 @@ namespace KeyLoad.Comparisons.Targets;
 
 public sealed partial class OpenSearchTarget
 {
-    // Sixteen clients retain concurrent coordinating, primary and replica work. Keep each request near 1 MiB
-    // so the selected small-heap topology admits the whole cohort without indexing-pressure rejections.
+    // Bound each bulk request independently of the total corpus and the number of active clients.
     private const int BulkRequestDocuments = 1_000;
     /// <inheritdoc/>
     public int IngestionBatchRecords => BulkRequestDocuments;

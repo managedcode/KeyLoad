@@ -187,13 +187,14 @@ internal sealed class ScaleServerResourceSampler(string resourceName, string con
     private async Task<bool> ObserveMountsAsync(string mountDescriptor,
         ScaleServerResourceSampleBudget budget, CancellationToken token)
     {
+        var identity = ScaleServerMountReader.NormalizeDescriptor(mountDescriptor);
         if (!_mountsObserved)
         {
             _mounts = await ScaleServerMountReader.ReadAsync(mountDescriptor, expectedMountTargets, budget, token);
-            _mountDescriptor = mountDescriptor;
+            _mountDescriptor = identity;
             _mountsObserved = true;
         }
-        else if (!string.Equals(_mountDescriptor, mountDescriptor, StringComparison.Ordinal))
+        else if (!string.Equals(_mountDescriptor, identity, StringComparison.Ordinal))
         {
             StorageUnavailable = true;
             return false;

@@ -15,8 +15,17 @@ internal static class BenchmarkSessionClientRuntime
 
     internal static async Task<int> RunAsync(DistributedApplication application, string evidence, CancellationToken token)
     {
-        var settings = application.Services.GetRequiredService<LoadTestClientSettings>();
         await application.StartAsync(token);
+        var settings = await WaitForReadinessAsync(application, token);
+        var environment = (await settings.ResolveAsync(token)).ToDictionary(StringComparer.Ordinal);
+        var policy = application.Services.GetRequiredService<IOptions<TestExecutionOptions>>();
+        return await IsolatedClientExecution.RunAsync(application, settings.Resources,
+            lifetime => BenchmarkSessionClientProcess.RunAsync(environment, evidence, policy, lifetime), token);
+    }
+
+    internal static async Task<LoadTestClientSettings> WaitForReadinessAsync(DistributedApplication application, CancellationToken token)
+    {
+        var settings = application.Services.GetRequiredService<LoadTestClientSettings>();
         foreach (var resource in settings.Resources)
         {
             await application.ResourceNotifications.WaitForResourceHealthyAsync(resource, WaitBehavior.StopOnResourceUnavailable, token);
@@ -30,9 +39,6 @@ internal static class BenchmarkSessionClientRuntime
                 throw new InvalidOperationException(TheSelectedDatabaseBootstrapProcessFailedMessage);
             }
         }
-        var environment = (await settings.ResolveAsync(token)).ToDictionary(StringComparer.Ordinal);
-        var policy = application.Services.GetRequiredService<IOptions<TestExecutionOptions>>();
-        return await IsolatedClientExecution.RunAsync(application, settings.Resources,
-            lifetime => BenchmarkSessionClientProcess.RunAsync(environment, evidence, policy, lifetime), token);
+        return settings;
     }
 }

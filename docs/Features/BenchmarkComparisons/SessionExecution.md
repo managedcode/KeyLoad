@@ -148,13 +148,19 @@ matrix, restarts or separate benchmark scenario.
   run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
   part of operation latency.
   Preparation also runs the real external adapter cases in `NativeDatabaseTests`:
-  OpenSearch at one/three nodes, three-node Redis and one-node HelixDB/MongoDB, with sixteen
+  OpenSearch/MongoDB at one/three nodes, three-node Redis and one-node HelixDB, with sixteen
   independently owned clients, complete body readback and healthy continuation.
   These bounded checks retain original TRX files and do not qualify public figures.
   They resolve actual container IDs through Aspire notifications after readiness and
   verify their actual writable-mount mappings. Linux additionally
   requires the original CPU/RSS and complete resource qualification; desktop checks
   cannot substitute for that Linux gate.
+  OpenSearch controls cover one million actual documents per topology. All native
+  clients and resource observation wait for the same Aspire health and bootstrap
+  completion contract used by the full workload client.
+  Manual `mode=contracts` uses its own concurrency group for the same native and
+  harness controls, retaining test diagnostics. Workload fan-out, session measurements
+  and Website dispatch belong to `mode=full` and push runs.
 - Ingestion at 1/10/500 clients, the minimum measured operation counts, recall,
   replicated acknowledgement, resource bounds and all required workload families are
   kept. The number of jobs is not the number of measured scenarios.
@@ -183,8 +189,12 @@ configured writable mount must be observed, and image-created writable mounts ar
 also bounded, inspected and retained. Filesystem type and block capacity come from
 the daemon-reported local mount source through a bounded, noninteractive, read-only
 `sudo stat --file-system` command on the Linux runner. This does not require a utility
-inside each database image. A missing storage observation remains unqualified; it does not
-erase separately captured CPU/RSS evidence or authorize public measurements.
+inside each database image. A missing storage observation remains unqualified and
+does not erase separately captured CPU/RSS evidence. The website may display approved
+original timings with an explicit label for incomplete telemetry; absent resource
+metrics stay unavailable. Native Linux controls still require complete resource proof.
+Writable-mount identity includes source, target and type independently of Docker's
+list order. An actual identity change still invalidates the storage evidence.
 The host mount inventory uses the existing bounded hardware-metadata budget rather
 than the smaller per-control-file limit. Native Linux artifacts retain the original
 `/proc/self/mountinfo` alongside the resource snapshot, so the actual mount table and

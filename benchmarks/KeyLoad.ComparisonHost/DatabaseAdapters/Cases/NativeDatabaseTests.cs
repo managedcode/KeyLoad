@@ -7,13 +7,17 @@ namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 internal sealed class NativeDatabaseTests
 {
     internal const string Redis = "Redis", OpenSearch = "OpenSearch", HelixDb = "HelixDB", MongoDb = "MongoDB";
-    private const int Empty = 0, Clients = 16, First = 0, Updated = 1, Deleted = 2, Single = 1;
-    private const int RedisRecords = 800_000, OpenSearchRecords = 80_000;
+    private const int Empty = 0, Clients = 16, First = 0, Updated = 1, Deleted = 2, Single = 1, ReplicaNodes = 3;
+    private const int RedisRecords = 800_000, OpenSearchRecords = 1_000_000;
     private const string BodyMismatch = "NativeDatabaseBulkReadbackMismatch";
 
     [Test, Arguments(OpenSearch, 1), Arguments(OpenSearch, 3), Arguments(Redis, 3), Arguments(HelixDb, 1), Arguments(MongoDb, 1)]
     public Task NativeBulkPreservesBodiesAndIndependentClients(string target, int nodes)
         => AdditionalDatabaseResources.RunAsync(target, VerifyAsync, TestContext.Current!.Execution.CancellationToken, nodes);
+
+    [Test]
+    public Task MongoReplicaSetReadinessPrecedesIndependentBulkClients()
+        => AdditionalDatabaseResources.RunAsync(MongoDb, VerifyAsync, TestContext.Current!.Execution.CancellationToken, ReplicaNodes);
 
     private static async Task VerifyAsync(IComparisonTarget target, CancellationToken token)
     {
