@@ -19,6 +19,11 @@ internal sealed class NativeDatabaseTests
     public Task MongoReplicaSetReadinessPrecedesIndependentBulkClients()
         => AdditionalDatabaseResources.RunAsync(MongoDb, VerifyAsync, TestContext.Current!.Execution.CancellationToken, ReplicaNodes);
 
+    [Test]
+    public Task InfluxBulkReadbackPreservesCompleteBodiesAndHealthyContinuation()
+        => AdditionalDatabaseResources.RunAsync(BenchmarkAdditionalTargets.InfluxDb, InfluxDocumentReadback.VerifyAsync,
+            TestContext.Current!.Execution.CancellationToken);
+
     private static async Task VerifyAsync(IComparisonTarget target, CancellationToken token)
     {
         var documents = (IDocumentComparisonTarget)target;
@@ -60,7 +65,7 @@ internal sealed class NativeDatabaseTests
             corpus.CreateDocument(count))).IsTrue();
     }
 
-    private static async Task CreateBatchesAsync(IDocumentComparisonTarget target, DocumentComparisonCorpus corpus,
+    internal static async Task CreateBatchesAsync(IDocumentComparisonTarget target, DocumentComparisonCorpus corpus,
         int count, CancellationToken token)
     {
         var sessions = new List<IDocumentComparisonSession>();
@@ -79,7 +84,7 @@ internal sealed class NativeDatabaseTests
                 for (var first = worker * batch; first < count; first += Clients * batch)
                 {
                     using var deadline = ComparisonDeadline.Create(BenchmarkSessionLimits.TimeoutSeconds, TimeProvider.System, token);
-                    await session.CreateDocumentsAsync([.. Enumerable.Range(first, batch).Select(corpus.CreateDocument)], deadline.Token);
+                    await session.CreateDocumentsAsync([.. Enumerable.Range(first, Math.Min(batch, count - first)).Select(corpus.CreateDocument)], deadline.Token);
                 }
             }).ToArray();
             start.SetResult();

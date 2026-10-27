@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Security.Cryptography;
 using KeyLoad.Comparisons;
 
@@ -51,9 +52,12 @@ internal static class AdditionalHttpResources
         const string Mount = "/var/lib/influxdb3", Ready = "/health";
         const string Serve = "serve", NodeId = "--node-id=benchmark", Store = "--object-store=file";
         const string Directory = "--data-dir=" + Mount, Bind = "--http-bind=0.0.0.0:8181", Auth = "--without-auth";
+        const string QueryMemory = "--exec-mem-pool-size=", Percent = "%";
+        var deployment = LoadTestsOptionsRegistration.Get(context.Builder).Deployment.Value;
+        var queryMemory = QueryMemory + deployment.InfluxQueryMemoryPercent.ToString(CultureInfo.InvariantCulture) + Percent;
         var node = context.Builder.AddContainer(Influx, BenchmarkAdditionalImages.InfluxImage, BenchmarkAdditionalImages.InfluxTag)
             .WithImageSHA256(BenchmarkAdditionalImages.InfluxDigest[BenchmarkAdditionalImages.DigestPrefixLength..])
-            .WithArgs(Serve, NodeId, Store, Directory, Bind, Auth).WithVolume(target: Mount)
+            .WithArgs(Serve, NodeId, Store, Directory, Bind, Auth, queryMemory).WithVolume(target: Mount)
             .WithHttpEndpoint(targetPort: InfluxPort, name: Http).WithHttpHealthCheck(Ready);
         context.BindEndpoint(EndpointIndex, node, Http);
         context.BindImage(Docker + BenchmarkAdditionalImages.InfluxImage + Separator + BenchmarkAdditionalImages.InfluxTag + DigestSeparator + BenchmarkAdditionalImages.InfluxDigest);

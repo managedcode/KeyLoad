@@ -77,7 +77,7 @@ fixtures.
    and is acknowledged when its batch is, so load latency percentiles describe batch
    acknowledgement times. Mixed creates, updates, deletes, reads and queries stay one
    record per request.
-   OpenSearch uses 1,000-record requests so coordinating and replica work from all
+   OpenSearch uses 500-record requests so coordinating and replica work from all
    sixteen clients fit the selected small-heap topology. Redis retains 10,000-command
    pipelines and verifies local and replica fsync receipts on each original write
    connection; its command timeout allows the configured server receipt wait to finish.
@@ -157,14 +157,18 @@ matrix, restarts or separate benchmark scenario.
   cannot substitute for that Linux gate.
   OpenSearch controls cover one million actual documents per topology. The HelixDB
   and ClickHouse controls also load one million documents and build the session indexes before
-  mutations and complete readback. The seven-control run has a 40-minute timeout;
+  mutations and complete readback. InfluxDB's million-record control verifies its
+  native JSONL readback, an update, cancellation during streaming and healthy
+  continuation. The eight-control run has a 40-minute timeout;
   each operation keeps its 30-second deadline and document cleanup keeps its
   20-minute deadline. All native
   clients and resource observation wait for the same Aspire health and bootstrap
   completion contract used by the full workload client.
-  Manual `mode=contracts` uses its own concurrency group for the same native and
-  harness controls, retaining test diagnostics. Workload fan-out, session measurements
+  Manual `mode=contracts` runs the same native and harness controls, retaining test
+  diagnostics. Workload fan-out, session measurements
   and Website dispatch belong to `mode=full` and push runs.
+  A newer run of the same branch cancels the superseded run instead of waiting
+  behind its measurements, including when changing between contract-only and full runs.
 - Ingestion at 1/10/500 clients, the minimum measured operation counts, recall,
   replicated acknowledgement, resource bounds and all required workload families are
   kept. The number of jobs is not the number of measured scenarios.

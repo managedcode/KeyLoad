@@ -50,23 +50,15 @@ internal sealed class HttpDocumentSession(HttpDocumentStore store) : IDocumentCo
     {
         const string InvalidOrder = "HttpDocumentDatabaseReadbackOrderRejected";
         var after = string.Empty;
-        while (true)
+        await foreach (var row in store.ReadDocumentsAsync(cancellationToken).ConfigureAwait(false))
         {
-            using var result = await store.PageAsync(after, cancellationToken).ConfigureAwait(false);
-            var rows = HttpDocumentStore.Documents(result);
-            if (rows.Length == EmptyCount)
+            cancellationToken.ThrowIfCancellationRequested();
+            if (string.CompareOrdinal(row.Id, after) <= EmptyCount)
             {
-                yield break;
+                throw new ComparisonFailureException(InvalidOrder);
             }
-            foreach (var row in rows)
-            {
-                if (string.CompareOrdinal(row.Id, after) <= EmptyCount)
-                {
-                    throw new ComparisonFailureException(InvalidOrder);
-                }
-                after = row.Id;
-                yield return row;
-            }
+            after = row.Id;
+            yield return row;
         }
     }
 

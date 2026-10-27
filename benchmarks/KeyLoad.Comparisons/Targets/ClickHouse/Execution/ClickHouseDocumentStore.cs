@@ -99,7 +99,9 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
         return QueryAsync(Select + Table + Predicate + (number.HasValue ? NumericPredicate : string.Empty) + Limit + JsonFormat, parameters, token);
     }
 
-    internal override Task<JsonDocument> PageAsync(string after, CancellationToken token)
+    internal override IAsyncEnumerable<FoundDocument> ReadDocumentsAsync(CancellationToken token) => ReadPagesAsync(PageAsync, token);
+
+    private Task<JsonDocument> PageAsync(string after, CancellationToken token)
         => QueryAsync(Select + Table + Page + Policy.ReadbackBatchCapacity.ToString(CultureInfo.InvariantCulture) + JsonFormat,
             new Dictionary<string, string>(StringComparer.Ordinal) { [After] = after }, token);
 

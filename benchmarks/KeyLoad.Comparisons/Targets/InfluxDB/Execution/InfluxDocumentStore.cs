@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Net.Http.Json;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -25,8 +26,8 @@ internal sealed class InfluxDocumentStore(HttpClient http, string name, IOptions
     private const string Select = "SELECT id,body FROM documents WHERE id=$id";
     private const string NumericPredicate = " AND number>=$number AND number<$number+1";
     private const string Limit = " ORDER BY id LIMIT 2";
-    private const string Page = "SELECT id,body FROM documents WHERE id>$after ORDER BY id LIMIT ";
-    private const string Id = "id", Number = "number", After = "after", Json = "json";
+    private const string Readback = "SELECT id,body FROM documents ORDER BY id";
+    private const string Id = "id", Number = "number", Json = "json", JsonLines = "jsonl";
     private const string LinePrefix = "documents,id=";
     private const string BodyField = " body=\"", NumberField = "\",number=", IntegerSuffix = "i ";
     private const string Backslash = "\\", EscapedBackslash = "\\\\", Quote = "\"", EscapedQuote = "\\\"";
@@ -131,9 +132,15 @@ internal sealed class InfluxDocumentStore(HttpClient http, string name, IOptions
         return QueryAsync(Select + (number.HasValue ? NumericPredicate : string.Empty) + Limit, parameters, token);
     }
 
-    internal override Task<JsonDocument> PageAsync(string after, CancellationToken token)
-        => QueryAsync(Page + Policy.ReadbackBatchCapacity.ToString(CultureInfo.InvariantCulture),
-            new Dictionary<string, object>(StringComparer.Ordinal) { [After] = after }, token);
+    internal override async IAsyncEnumerable<FoundDocument> ReadDocumentsAsync([EnumeratorCancellation] CancellationToken token)
+    {
+        using var request = new HttpRequestMessage(HttpMethod.Post, Query)
+        { Content = JsonContent.Create(new { db = Name, q = Readback, format = JsonLines }) };
+        await foreach (var row in InfluxDocumentStream.ReadAsync(Http, request, Policy, token).ConfigureAwait(false))
+        {
+            yield return row;
+        }
+    }
 
     internal override Task IndexAsync(CancellationToken token)
     {

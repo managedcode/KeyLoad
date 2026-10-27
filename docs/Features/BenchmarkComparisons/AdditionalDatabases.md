@@ -26,6 +26,24 @@ operations in each applicable lane. Complete ordered readback verifies actual
 identities and bodies. InfluxDB's final readback verifies the unchanged corpus
 after its supported operations; it does not invent a mixed mutation result.
 
+InfluxDB complete readback executes one ordered SQL query and consumes its native
+streaming JSONL response. It does not repeat the query for every 256 records.
+The framework pipe reader retains bounded buffers; `MaxResponseBytes` bounds each
+JSON row, and the frozen corpus identity capacity bounds the total row count.
+The existing operation deadline bounds response headers and each read's idle wait;
+caller cancellation also stops buffered delivery. The independent ordered oracle
+still checks every identity, full body and digest. The native million-record
+control also exercises an update, cancellation during readback and a healthy write
+and read afterward. The vendor documents
+[JSONL as its streaming HTTP query format](https://docs.influxdata.com/influxdb3/core/query-data/execute-queries/influxdb-v3-api/).
+
+The typed deployment policy assigns InfluxDB's query execution pool 70% of the
+existing available memory, following the vendor's
+[mixed-workload recommendation](https://docs.influxdata.com/influxdb3/core/admin/performance-tuning/).
+This changes the engine's internal pool ceiling, not the runner's CPU or RAM.
+The native million-record check retains failures from sorting or deduplication;
+query memory errors remain failures.
+
 ## Deployment and qualification limits
 
 The added native deployments currently implement one node. TimescaleDB, SQL Server,

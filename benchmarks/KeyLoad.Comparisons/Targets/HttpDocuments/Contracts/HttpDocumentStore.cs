@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Net.Http.Headers;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Options;
@@ -25,7 +26,7 @@ internal abstract class HttpDocumentStore(HttpClient http, string name, IOptions
     internal abstract int BatchRecords { get; }
     internal abstract Task CreateAsync(IReadOnlyList<BenchmarkDocument> documents, CancellationToken token);
     internal abstract Task<JsonDocument> ReadAsync(string id, int? number, CancellationToken token);
-    internal abstract Task<JsonDocument> PageAsync(string after, CancellationToken token);
+    internal abstract IAsyncEnumerable<FoundDocument> ReadDocumentsAsync(CancellationToken token);
     internal abstract Task IndexAsync(CancellationToken token);
 
     internal static FoundDocument[] Documents(JsonDocument document)
@@ -35,6 +36,26 @@ internal abstract class HttpDocumentStore(HttpClient http, string name, IOptions
             ? document.RootElement : document.RootElement.GetProperty(Data);
         return rows.EnumerateArray().Select(row => new FoundDocument(
             row.GetProperty(Id).GetString()!, row.GetProperty(Body).GetString()!)).ToArray();
+    }
+
+    protected static async IAsyncEnumerable<FoundDocument> ReadPagesAsync(Func<string, CancellationToken, Task<JsonDocument>> page,
+        [EnumeratorCancellation] CancellationToken token)
+    {
+        var after = string.Empty;
+        while (true)
+        {
+            using var result = await page(after, token).ConfigureAwait(false);
+            var rows = Documents(result);
+            if (rows.Length == 0)
+            {
+                yield break;
+            }
+            foreach (var row in rows)
+            {
+                after = row.Id;
+                yield return row;
+            }
+        }
     }
 
     // Encodes each newline-terminated row straight to UTF-8, so a batch never holds a UTF-16 copy of its whole body.
