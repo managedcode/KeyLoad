@@ -23,6 +23,8 @@ runs:
       shell: bash
       run: |
         docker version
+        uname -a
+        docker info --format 'Docker kernel: {{.KernelVersion}}'
         sudo sysctl -w vm.max_map_count=262144
     - name: Verify this GitHub session job
       shell: bash

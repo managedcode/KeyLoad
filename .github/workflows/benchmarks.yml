@@ -19,7 +19,7 @@ jobs:
   comparison-runtime:
     name: Prepare comparison runtime
     if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 150
     permissions: {contents: read, actions: read, packages: read}
     outputs:
@@ -71,7 +71,10 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Check Docker
-        run: docker version
+        run: |
+          docker version
+          uname -a
+          docker info --format 'Docker kernel: {{.KernelVersion}}'
       - name: Resolve the latest released KeyLoad server image to one digest
         id: keyload-image
         if: (github.event_name == 'push' || inputs.mode == 'full')
@@ -137,7 +140,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     permissions: {contents: read, actions: read, packages: read}
     strategy:
@@ -190,7 +193,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -201,7 +204,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -212,7 +215,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -223,7 +226,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -234,7 +237,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -245,7 +248,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -256,7 +259,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -267,7 +270,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -278,7 +281,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -289,7 +292,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -300,7 +303,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -311,7 +314,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -322,7 +325,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -333,7 +336,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -344,7 +347,7 @@ jobs:
     name: ${{ matrix.jobName }}
     if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 240
     strategy:
       fail-fast: false
@@ -355,7 +358,7 @@ jobs:
     name: Combine benchmark results
     needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb]
     if: ${{ always() && !cancelled() && (github.event_name == 'push' || inputs.mode == 'full') && needs.comparison-runtime.result == 'success' }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 150
     env:
       GH_TOKEN: ${{ github.token }}
@@ -392,7 +395,7 @@ jobs:
       (github.event_name == 'push' || inputs.mode == 'full') &&
       github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
       github.ref == 'refs/heads/main'
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     timeout-minutes: 5
     permissions: {actions: write}
     env:

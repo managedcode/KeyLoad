@@ -158,7 +158,8 @@ matrix, restarts or separate benchmark scenario.
   OpenSearch controls cover one million actual documents per topology. The HelixDB
   and ClickHouse controls also load one million documents and build the session indexes before
   mutations and complete readback. InfluxDB's million-record control verifies its
-  native JSONL readback, an update, cancellation during streaming and healthy
+  native JSONL readback, an update, sixteen concurrent point readers, cancellation
+  during streaming and healthy
   continuation. The eight-control run has a 40-minute timeout;
   each operation keeps its 30-second deadline and document cleanup keeps its
   20-minute deadline. All native

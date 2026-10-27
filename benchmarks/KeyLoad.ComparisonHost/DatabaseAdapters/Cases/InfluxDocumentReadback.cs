@@ -19,6 +19,7 @@ internal static class InfluxDocumentReadback
             .Select(index => index == Updated ? corpus.Replacement(index) : corpus.CreateDocument(index));
         var observed = await DocumentComparisonOracle.VerifyAsync(independent.ReadDocumentsAsync(token), expected, token);
         await Assert.That(observed.Records).IsEqualTo(Records);
+        await ReadConcurrentlyAsync(documents, corpus, token);
         using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
         await using (var cursor = independent.ReadDocumentsAsync(cancelled.Token).GetAsyncEnumerator(cancelled.Token))
         {
@@ -29,5 +30,22 @@ internal static class InfluxDocumentReadback
         await session.CreateDocumentsAsync([corpus.CreateDocument(Records)], token);
         await Assert.That(BenchmarkDataset.SameDocument((await independent.ReadAsync(corpus.CreateDocument(Records), token)).Value,
             corpus.CreateDocument(Records))).IsTrue();
+    }
+
+    private static async Task ReadConcurrentlyAsync(IDocumentComparisonTarget target, DocumentComparisonCorpus corpus,
+        CancellationToken token)
+    {
+        const int StableStart = 200_000;
+        var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var clients = Enumerable.Range(Empty, Clients).Select(async client =>
+        {
+            await using var session = await target.OpenDocumentSessionAsync(token);
+            await start.Task;
+            var document = corpus.CreateDocument(StableStart + client);
+            var observed = await session.ReadAsync(document, token);
+            await Assert.That(BenchmarkDataset.SameDocument(observed.Value, document)).IsTrue();
+        }).ToArray();
+        start.SetResult();
+        await Task.WhenAll(clients);
     }
 }

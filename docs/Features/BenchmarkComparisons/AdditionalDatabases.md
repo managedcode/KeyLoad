@@ -33,8 +33,9 @@ JSON row, and the frozen corpus identity capacity bounds the total row count.
 The existing operation deadline bounds response headers and each read's idle wait;
 caller cancellation also stops buffered delivery. The independent ordered oracle
 still checks every identity, full body and digest. The native million-record
-control also exercises an update, cancellation during readback and a healthy write
-and read afterward. The vendor documents
+control also exercises an update, sixteen independent concurrent point reads after
+the complete readback, cancellation during readback and a healthy write and read
+afterward. The vendor documents
 [JSONL as its streaming HTTP query format](https://docs.influxdata.com/influxdb3/core/query-data/execute-queries/influxdb-v3-api/).
 
 The typed deployment policy assigns InfluxDB's query execution pool 70% of the
@@ -43,6 +44,15 @@ existing available memory, following the vendor's
 This changes the engine's internal pool ceiling, not the runner's CPU or RAM.
 The native million-record check retains failures from sorting or deduplication;
 query memory errors remain failures.
+
+InfluxDB snapshots each completed WAL file through its native
+[`wal-files-per-snapshot` setting](https://docs.influxdata.com/influxdb3/core/reference/config-options/#wal-files-per-snapshot).
+The default 600-file interval otherwise leaves this short million-record load in
+the mutable buffer: the pinned engine materializes that buffer while planning
+each query, so sixteen point reads can simultaneously copy the complete corpus.
+Native snapshots make Parquet available during the load and bound this planning
+pressure. The line protocol, `no_sync=false` acknowledgement, independent clients,
+operation deadlines and complete result checks stay the same.
 
 ## Deployment and qualification limits
 
@@ -57,6 +67,15 @@ replicas.
 Aspire owns the official pinned container images, anonymous session volumes,
 readiness and joined cleanup. Native SQL readiness opens a real provider
 connection and executes `SELECT 1`; HTTP targets use their server health endpoints.
+The complete Benchmarks workflow uses the Ubuntu 22.04 runner family so preparation
+and every worker share one declared OS baseline. Its published kernel is 6.8;
+MongoDB's native startup guard rejects kernels 6.19 through 7.0.13 because of its
+TCMalloc dependency. Preparation and worker logs record the actual host and Docker
+kernels. The pinned MongoDB image and its startup guard are unchanged. Actual
+kernel, CPU and memory evidence still determines resource equivalence; a common
+runner label alone does not qualify figures. See the
+[runner image inventory](https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2204-Readme.md)
+and [MongoDB's kernel requirement](https://www.mongodb.com/docs/manual/release-notes/8.0/).
 SQL Server uses Developer edition for nonproduction benchmarks and requires the
 Linux x86-64 runner. Its local execution on ARM is not qualified.
 

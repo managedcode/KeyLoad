@@ -53,11 +53,13 @@ internal static class AdditionalHttpResources
         const string Serve = "serve", NodeId = "--node-id=benchmark", Store = "--object-store=file";
         const string Directory = "--data-dir=" + Mount, Bind = "--http-bind=0.0.0.0:8181", Auth = "--without-auth";
         const string QueryMemory = "--exec-mem-pool-size=", Percent = "%";
+        const string SnapshotFiles = "--wal-files-per-snapshot=";
         var deployment = LoadTestsOptionsRegistration.Get(context.Builder).Deployment.Value;
         var queryMemory = QueryMemory + deployment.InfluxQueryMemoryPercent.ToString(CultureInfo.InvariantCulture) + Percent;
+        var snapshotFiles = SnapshotFiles + deployment.InfluxWalFilesPerSnapshot.ToString(CultureInfo.InvariantCulture);
         var node = context.Builder.AddContainer(Influx, BenchmarkAdditionalImages.InfluxImage, BenchmarkAdditionalImages.InfluxTag)
             .WithImageSHA256(BenchmarkAdditionalImages.InfluxDigest[BenchmarkAdditionalImages.DigestPrefixLength..])
-            .WithArgs(Serve, NodeId, Store, Directory, Bind, Auth, queryMemory).WithVolume(target: Mount)
+            .WithArgs(Serve, NodeId, Store, Directory, Bind, Auth, queryMemory, snapshotFiles).WithVolume(target: Mount)
             .WithHttpEndpoint(targetPort: InfluxPort, name: Http).WithHttpHealthCheck(Ready);
         context.BindEndpoint(EndpointIndex, node, Http);
         context.BindImage(Docker + BenchmarkAdditionalImages.InfluxImage + Separator + BenchmarkAdditionalImages.InfluxTag + DigestSeparator + BenchmarkAdditionalImages.InfluxDigest);

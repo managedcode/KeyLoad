@@ -10,6 +10,8 @@ internal sealed record BenchmarkDeploymentOptions
     private const int DefaultNeo4jPageCache = 256;
     private const int DefaultOpenSearchHeap = 1024;
     private const int DefaultInfluxQueryMemoryPercent = 70;
+    private const int DefaultInfluxWalFilesPerSnapshot = 1;
+    private const int MaximumInfluxWalFilesPerSnapshot = 600;
     private const int MaximumQueryMemoryPercent = 90;
     private const int DefaultPostgresSlotRetention = 512;
     private const int DefaultDocumentPostgresConnections = 512;
@@ -24,12 +26,14 @@ internal sealed record BenchmarkDeploymentOptions
     public int Neo4jPageCacheMegabytes { get; init; } = DefaultNeo4jPageCache;
     public int OpenSearchHeapMegabytes { get; init; } = DefaultOpenSearchHeap;
     public int InfluxQueryMemoryPercent { get; init; } = DefaultInfluxQueryMemoryPercent;
+    public int InfluxWalFilesPerSnapshot { get; init; } = DefaultInfluxWalFilesPerSnapshot;
     public int PostgresSlotWalRetentionMegabytes { get; init; } = DefaultPostgresSlotRetention;
     public int DocumentPostgresMaximumConnections { get; init; } = DefaultDocumentPostgresConnections;
     internal bool IsValid() => DocumentPostgresMaximumConnections is >= MinimumDocumentPostgresConnections and <= MaximumDocumentPostgresConnections
         && ValidMemory(Neo4jInitialHeapMegabytes) && ValidMemory(Neo4jMaximumHeapMegabytes)
         && Neo4jInitialHeapMegabytes <= Neo4jMaximumHeapMegabytes && ValidMemory(Neo4jPageCacheMegabytes)
         && ValidMemory(OpenSearchHeapMegabytes) && InfluxQueryMemoryPercent is >= 1 and <= MaximumQueryMemoryPercent
+        && InfluxWalFilesPerSnapshot is >= 1 and <= MaximumInfluxWalFilesPerSnapshot
         && PostgresSlotWalRetentionMegabytes is >= 1 and <= MaximumWalMegabytes;
     private static bool ValidMemory(int value) => value is >= 1 and <= MaximumMemoryMegabytes;
 }
