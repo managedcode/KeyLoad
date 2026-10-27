@@ -63,6 +63,10 @@ internal static class McpCallerAssertions
             ReadResponseUnavailable => "ReadTransport",
             ServerResponseUnavailable => "ServerTransport",
             GrainRoutingProtocol.InvalidRequest => "RuntimeEnvelope",
+            StorageCopyContract.RecoveryRequired => "StorageCopyRecovery",
+            StorageCopyContract.DifferentOutcomes => "StorageCopyOutcomeAgreement",
+            StorageCopyContract.WriteUncertain => "StorageCopyAcknowledgement",
+            StorageCopyContract.OwnersUnavailable => "StorageCopyAvailability",
             _ => "ServerOrUnknown"
         };
         return "The canonical SDK outcome reported " + ClosedErrorCode(problem?.ErrorCode)
