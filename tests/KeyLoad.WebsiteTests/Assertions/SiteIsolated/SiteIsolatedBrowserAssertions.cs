@@ -50,17 +50,19 @@ internal static class SiteIsolatedBrowserAssertions
                 .IsEqualTo(string.Join('|', SiteIsolatedExpectedValues.TableColumns));
             foreach (var cell in values)
             {
-                await AssertValueAsync(cell, expected.Value(target, cell.GetProperty(SiteIsolatedFields.Test).GetString()!, nodes));
+                var test = cell.GetProperty(SiteIsolatedFields.Test).GetString()!;
+                await AssertValueAsync(cell, test, expected.Value(target, test, nodes));
             }
         }
     }
 
-    private static async Task AssertValueAsync(JsonElement cell, double? expected)
+    private static async Task AssertValueAsync(JsonElement cell, string test, double? expected)
     {
         var value = cell.GetProperty(SiteIsolatedFields.Value);
         await Assert.That(SiteIsolatedExpectedValues.Format(value.ValueKind == JsonValueKind.Null ? null : value.GetDouble()))
             .IsEqualTo(SiteIsolatedExpectedValues.Format(expected));
-        await Assert.That(cell.GetProperty(SiteIsolatedFields.Display).GetString()).IsEqualTo(expected is null ? NoData : Display(expected.Value));
+        await Assert.That(cell.GetProperty(SiteIsolatedFields.Display).GetString())
+            .IsEqualTo(expected is null ? NoData : Display(expected.Value, test));
     }
 
     private static async Task AssertLinksAsync(string?[] links, string run, SiteIsolatedExpectedRow row)
@@ -78,11 +80,14 @@ internal static class SiteIsolatedBrowserAssertions
         }
     }
 
-    private static string Display(double value)
+    // Time tests keep milliseconds; rates show whole operations per second from 100 up, otherwise two decimals.
+    private static string Display(double value, string test)
     {
         var exact = decimal.Parse(value.ToString("R", CultureInfo.InvariantCulture), NumberStyles.Float,
             CultureInfo.InvariantCulture);
-        return decimal.Round(exact, 3, MidpointRounding.AwayFromZero).ToString("#,##0.###", CultureInfo.GetCultureInfo("en"));
+        var digits = SiteIsolatedExpectedValues.Metric(test) == "duration" && test != SiteIsolatedExpectedValues.Mixed ? 3
+            : exact >= 100 ? 0 : 2;
+        return decimal.Round(exact, digits, MidpointRounding.AwayFromZero).ToString("#,##0.###", CultureInfo.GetCultureInfo("en"));
     }
 
     private static string Status(string value) => value switch

@@ -1,13 +1,17 @@
 import { selectedIsolatedRows } from './isolated-measurements.mjs';
 import { ENGINE_TYPES, GENERAL, TESTS, artifactUrl, runUrl } from './isolated-contracts.mjs';
-import { NODES, change, compact, diverge, el, engineName, friendly, latency, logScale, nodesLabel, pair, ticks } from './isolated-charts.mjs';
+import { NODES, change, compact, el, engineName, friendly, latency, logScale, nodesLabel, pair, retained, ticks } from './isolated-charts.mjs';
 
 const STATUS = Object.freeze({ measured: 'Measured', unsupported: 'Unsupported scenario',
   unsupportedTopology: 'Unsupported execution topology', failed: 'Benchmark failed · no data', missing: 'No verified result',
   resourceIncomplete: 'Measured · incomplete telemetry' });
 const REASONS = Object.freeze({ unsupportedTopology: 'single-node only', unsupported: 'not in this workload',
   failed: 'no result in this run', missing: 'no result in this run' });
-const EXACT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
+// Table cells round for reading: whole operations per second from 100 up, milliseconds for time tests.
+const FINE = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
+const RATE = new Intl.NumberFormat('en', { maximumFractionDigits: 2 });
+const WHOLE = new Intl.NumberFormat('en', { maximumFractionDigits: 0 });
+const tableValue = (column, value) => (column.seconds ? FINE : value >= 100 ? WHOLE : RATE).format(value);
 const COLUMNS = [...TESTS.slice(0, 5), { id: 'mixed', label: 'Mixed total' }, ...TESTS.slice(5)];
 const reason = row => REASONS[row.status] ?? 'not recorded';
 
@@ -142,15 +146,19 @@ function cost(document, model) {
   const both = engine => GENERAL.some(({ id }) => model.cell(engine, id, 1).value > 0 && model.cell(engine, id, 3).value !== null);
   const engines = model.engines.filter(both);
   if (engines.length === 0) return null;
+  const ratio = (engine, id) => (model.cell(engine, id, 3).value ?? 0) / (model.cell(engine, id, 1).value || Infinity);
+  const scale = Math.max(1, ...engines.flatMap(engine => GENERAL.map(({ id }) => ratio(engine, id))));
   const section = panel(document, 'bench-cost', 'What three nodes cost',
-    'Throughput change from 1 node to 3 replicated nodes. Data copies and write acknowledgement differ by engine.');
+    '3 replicated nodes against 1 node. Data copies and write acknowledgement differ by engine.');
+  const legend = section.querySelector('.bench-panel-head').appendChild(el(document, 'p', 'keep-legend'));
+  legend.append(el(document, 'i', 'keep-bar'), '3-node throughput', el(document, 'i', 'keep-tick'), '1-node throughput');
   const head = section.appendChild(el(document, 'div', 'cost-row cost-head'));
   head.append(el(document, 'span', null, 'Database'), ...GENERAL.map(column => el(document, 'span', null, column.label)));
   for (const engine of engines) {
     const row = section.appendChild(el(document, 'div', 'cost-row'));
     row.append(engineName(document, engine));
     for (const { id, key } of GENERAL) {
-      row.appendChild(diverge(document, model.cell(engine, id, 1).value, model.cell(engine, id, 3).value)).dataset.metric = key;
+      row.appendChild(retained(document, model.cell(engine, id, 1).value, model.cell(engine, id, 3).value, scale)).dataset.metric = key;
     }
   }
   return section;
@@ -201,23 +209,42 @@ function cards(document, model, type) {
   return section;
 }
 
+// The mixed lanes share one group heading so the table stays narrow enough to read.
+function tableHead(document, table) {
+  const head = table.appendChild(el(document, 'thead'));
+  const [top, lanes] = [head.appendChild(el(document, 'tr')), head.appendChild(el(document, 'tr'))];
+  const heading = (row, text, className, span) => {
+    const cell = row.appendChild(el(document, 'th', className, text));
+    cell.scope = span?.colSpan ? 'colgroup' : 'col';
+    Object.assign(cell, span);
+  };
+  heading(top, 'Engine', 'pin', { rowSpan: 2 });
+  for (const text of ['Nodes', 'Status']) heading(top, text, null, { rowSpan: 2 });
+  const mixed = COLUMNS.filter(column => column.id.startsWith('mixed'));
+  for (const column of COLUMNS) {
+    if (column === mixed[0]) heading(top, 'Mixed test', 'num group', { colSpan: mixed.length });
+    if (mixed.includes(column)) heading(lanes, column.label.replace('Mixed ', ''), 'num');
+    else heading(top, column.label, 'num', { rowSpan: 2 });
+  }
+  heading(top, 'GitHub run', null, { rowSpan: 2 });
+}
+
 function table(document, model, type, cohort) {
   const node = el(document, 'table');
   node.append(el(document, 'caption', null, 'Recorded values per session · operations per second, time tests in seconds'));
-  const header = node.appendChild(el(document, 'thead')).appendChild(el(document, 'tr'));
-  for (const heading of ['Engine', 'Nodes', 'Status', ...COLUMNS.map(column => column.label), 'GitHub run'])
-    header.appendChild(el(document, 'th', null, heading)).scope = 'col';
+  tableHead(document, node);
   const body = node.appendChild(el(document, 'tbody'));
   for (const engine of model.engines.filter(name => type === 'all' || ENGINE_TYPES[name] === type)) for (const nodes of NODES) {
     const session = model.cell(engine, 'load-million', nodes);
     const tr = body.appendChild(el(document, 'tr'));
     tr.dataset.workerId = session.id;
-    tr.append(el(document, 'td', null, engine), el(document, 'td', null, String(nodes)), el(document, 'td', null, STATUS[session.status]));
-    for (const { id } of COLUMNS) {
-      const value = model.cell(engine, id, nodes).value;
-      const td = tr.appendChild(el(document, 'td', null, value === null ? 'No data' : EXACT.format(value)));
-      td.dataset.test = id;
+    tr.append(el(document, 'td', 'pin', engine), el(document, 'td', null, String(nodes)), el(document, 'td', null, STATUS[session.status]));
+    for (const column of COLUMNS) {
+      const value = model.cell(engine, column.id, nodes).value;
+      const td = tr.appendChild(el(document, 'td', null, value === null ? 'No data' : tableValue(column, value)));
+      td.dataset.test = column.id;
       td.dataset.value = value === null ? '' : String(value);
+      if (value !== null) td.title = 'Recorded ' + value + (column.seconds ? ' s' : ' operations per second');
     }
     const links = tr.appendChild(el(document, 'td', 'table-links'));
     if (session.worker === null) links.append(link(document, 'Benchmark run', runUrl(cohort)));

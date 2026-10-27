@@ -13,7 +13,7 @@ export function el(document, tag, className, text) {
   return node;
 }
 
-// Chart labels round for reading; the results table keeps the recorded precision.
+// Chart labels round for reading; the results table keeps each exact recorded value in its cell title.
 export function friendly(value, unit) {
   if (unit === 'ms') return value >= 1000 ? ONE.format(value / 1000) + ' s'
     : (value >= 10 ? INTEGER : value >= 1 ? ONE : TWO).format(value) + ' ms';
@@ -79,15 +79,17 @@ export function latency(document, entries, scale) {
   return track;
 }
 
-export function diverge(document, one, three) {
-  const cell = el(document, 'span', 'diverge');
+// 3-node throughput as a share of the 1-node run on one panel-wide scale; the tick marks 1-node speed.
+export function retained(document, one, three, scale) {
+  const cell = el(document, 'span', 'keep');
   if (!(one > 0) || three === null) {
     cell.append(el(document, 'small', 'no-data', 'No data'));
     return cell;
   }
-  const ratio = (three - one) / one;
-  const track = cell.appendChild(el(document, 'span', 'diverge-track'));
-  track.appendChild(el(document, 'i', ratio < 0 ? 'down' : 'up')).style.setProperty('--size', percent(Math.abs(ratio) / 2));
+  cell.title = `3 nodes run at ${INTEGER.format(three / one * 100)}% of 1-node throughput`;
   cell.append(el(document, 'b', null, change(one, three)));
+  const track = cell.appendChild(el(document, 'span', 'keep-track'));
+  track.style.setProperty('--base', percent(1 / scale));
+  track.appendChild(el(document, 'i')).style.setProperty('--size', percent(three / one / scale));
   return cell;
 }
