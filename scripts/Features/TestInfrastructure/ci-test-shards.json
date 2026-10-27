@@ -19,7 +19,7 @@
       "sources": "tests/KeyLoad.FunctionalTests",
       "assembly": "KeyLoad.FunctionalTests",
       "partition": "namespace",
-      "parallelism": 4,
+      "parallelism": 10,
       "timeoutMinutes": 20,
       "shards": [
         {
@@ -87,6 +87,98 @@
         "HeavyLoad"
       ],
       "shards": [
+        {
+          "id": "cluster-composite-prefix-cold-recovery",
+          "name": "Composite prefixes and cold recovery",
+          "lanes": [
+            {
+              "id": "composite-prefix-public-adapters",
+              "kind": "shared-exclusive",
+              "classes": [
+                "SparseCompositePrefixClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cluster-subscription-policy-and-cold-cuts",
+          "name": "Subscription policy and cold cuts",
+          "lanes": [
+            {
+              "id": "subscription-policy-and-cold-cuts",
+              "kind": "own-clusters",
+              "classes": [
+                "SubscriptionPhasePublicColdTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cluster-query-revision-and-index-plans",
+          "name": "Query revisions and index plans",
+          "lanes": [
+            {
+              "id": "metadata-revision-and-index-plans",
+              "kind": "own-clusters",
+              "classes": [
+                "QueryRuleOptimizationClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cluster-graph-frontiers-and-vertex-policy",
+          "name": "Graph frontiers and vertex policy",
+          "lanes": [
+            {
+              "id": "graph-frontiers-and-vertex-policy",
+              "kind": "shared-exclusive",
+              "classes": [
+                "GraphLabelFrontierPublicTests",
+                "GraphVertexPublicWholeFlowTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cluster-sql-json-and-csharp-equivalence",
+          "name": "SQL JSON and CSharp equivalence",
+          "lanes": [
+            {
+              "id": "sql-json-and-csharp-equivalence",
+              "kind": "own-clusters",
+              "classes": [
+                "MetamorphicPublicClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cluster-ordered-queue-retry-and-cold-cuts",
+          "name": "Ordered queue retry and cold cuts",
+          "lanes": [
+            {
+              "id": "ordered-queue-retry-and-cold-cuts",
+              "kind": "shared-exclusive",
+              "classes": [
+                "QueueOrderedRetryPublicClusterTests"
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cluster-file-ownership-and-cold-recovery",
+          "name": "File ownership and cold recovery",
+          "lanes": [
+            {
+              "id": "file-ownership-and-cold-recovery",
+              "kind": "own-clusters",
+              "classes": [
+                "FunctionalFileOwnershipClusterTests"
+              ]
+            }
+          ]
+        },
         {
           "id": "cluster-public-apis-and-administration",
           "playwright": true,
@@ -227,7 +319,6 @@
               "classes": [
                 "AtomicTriadStagedClusterTests",
                 "AuthenticationExecutionTests",
-                "QueryRuleOptimizationClusterTests",
                 "QueueDeadlineSiloClusterTests",
                 "StrongReadSessionAbsenceClusterTests"
               ]
@@ -286,7 +377,6 @@
               "kind": "own-clusters",
               "classes": [
                 "GraphLabelUseClusterTests",
-                "MetamorphicPublicClusterTests",
                 "QueueWorkerProcessClusterTests",
                 "RequiredProcessingPolicyClusterTests",
                 "SqlParserAdmissionClusterWholeFlowTests"
@@ -300,8 +390,6 @@
                 "AggregateReplayClusterSiloRestartTests",
                 "EventCurrentReadAuthorityClusterTests",
                 "EventProjectionClusterTests",
-                "GraphLabelFrontierPublicTests",
-                "GraphVertexPublicWholeFlowTests",
                 "GuideLifecyclePublicTests",
                 "PartitionQueryPublicSiloRestartTests",
                 "RecurringDueClusterTests",
@@ -328,8 +416,7 @@
               "classes": [
                 "ModelHeadAuthorityClusterTests",
                 "RemoteTransferRepairClusterTests",
-                "RequestBodyLimitClusterTests",
-                "SubscriptionPhasePublicColdTests"
+                "RequestBodyLimitClusterTests"
               ]
             },
             {
@@ -345,7 +432,6 @@
                 "LeftFilteredJoinClusterTests",
                 "QueueDeadLetterPublicClusterTests",
                 "RecurringScheduleClusterTests",
-                "SparseCompositePrefixClusterTests",
                 "SqlModelViewClusterParityTests",
                 "TimeSeriesCurrentCapabilityClusterTests"
               ]
@@ -369,7 +455,6 @@
               "kind": "own-clusters",
               "classes": [
                 "CompetingInboxPublicTests",
-                "FunctionalFileOwnershipClusterTests",
                 "RemoteTransferAttemptClusterTests",
                 "ResourcePolicyUpdateClusterTests"
               ]
@@ -431,7 +516,6 @@
                 "DeclarativeCompositionClusterTests",
                 "DocumentSessionReadClusterTests",
                 "GraphPathClusterSiloRestartTests",
-                "QueueOrderedRetryPublicClusterTests",
                 "SqlGraphSearchClusterTests",
                 "StreamCatchupColdClusterTests",
                 "TimeSeriesAggregateScanBoundClusterTests"
