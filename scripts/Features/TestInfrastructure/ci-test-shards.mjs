@@ -50,8 +50,15 @@ function startRun(suite, run, environment, children) {
   let processEnvironment = environment;
   if (suite.partition === 'class') {
     const diagnosticsDirectory = path.join(run.directory, 'dcp-diagnostics');
+    const stateDirectory = path.join(run.directory, 'dcp-state');
     mkdirSync(diagnosticsDirectory, { recursive: true });
-    processEnvironment = { ...environment, DCP_DIAGNOSTICS_LOG_FOLDER: diagnosticsDirectory, DCP_DIAGNOSTICS_LOG_LEVEL: 'info' };
+    mkdirSync(stateDirectory, { recursive: true, mode: 0o700 });
+    processEnvironment = {
+      ...environment,
+      DCP_STATE_STORE_PATH: path.join(stateDirectory, 'state.sqlite3'),
+      DCP_DIAGNOSTICS_LOG_FOLDER: diagnosticsDirectory,
+      DCP_DIAGNOSTICS_LOG_LEVEL: 'info',
+    };
   }
   const started = Date.now();
   const args = dotnetArguments(suite, run);
