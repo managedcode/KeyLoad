@@ -152,7 +152,7 @@ Whole regression: existing ImagesProduceClosedManifestAndRejectTamperingWithoutR
 | Job | Contents | Filter and concurrency |
 |---|---|---|
 | Build | governance, website source inventory, static shard partition check, `dotnet build KeyLoad.slnx -warnaserror` | none |
-| Named functional operation groups | the namespaces listed for the shard | one process per namespace selected by its descriptive group ID, `/KeyLoad.FunctionalTests/<namespace>/*/*`, `--maximum-parallel-tests` = processor count |
+| Named functional operation groups | the namespaces listed for the shard | one process per namespace selected by its descriptive group ID, `/KeyLoad.FunctionalTests/<namespace>/*/*`, `--maximum-parallel-tests 4` on local and CI runners |
 | Analyzers and process recovery | shards AN then RC | `/KeyLoad.AnalyzerTests/*/*/*` and `/KeyLoad.ProcessRecoveryTests/*/*/*` |
 | Named cluster capability groups | two lanes per runner | each lane is its own `dotnet test` process, `--maximum-parallel-tests 1 --timeout 45m`, class or method alternation under `/KeyLoad.ClusterTests/*/` |
 | Verify test partition | every shard's TRX artifact | `ci-test-shards.mjs verify TestResults` |

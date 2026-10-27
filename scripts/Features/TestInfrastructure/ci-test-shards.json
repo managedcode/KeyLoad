@@ -19,7 +19,7 @@
       "sources": "tests/KeyLoad.FunctionalTests",
       "assembly": "KeyLoad.FunctionalTests",
       "partition": "namespace",
-      "parallelism": "processors",
+      "parallelism": 4,
       "timeoutMinutes": 20,
       "shards": [
         {

@@ -82,7 +82,8 @@ internal sealed class OrleansRuntimeTelemetrySentinel : IDisposable
 
     private void ObserveInjection(Activity activity)
     {
-        if (Interlocked.CompareExchange(ref injected, 1, 0) != 0)
+        if (activity.TraceId != callerTraceId || activity.ParentSpanId != callerSpanId
+            || Interlocked.CompareExchange(ref injected, 1, 0) != 0)
         {
             return;
         }

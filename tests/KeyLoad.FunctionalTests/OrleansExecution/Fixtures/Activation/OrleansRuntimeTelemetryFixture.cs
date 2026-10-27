@@ -84,6 +84,7 @@ internal sealed class OrleansRuntimeTelemetryFixture : IAsyncDisposable
     {
         var remoteParent = new ActivityContext(ActivityTraceId.CreateRandom(), ActivitySpanId.CreateRandom(),
             ActivityTraceFlags.Recorded, isRemote: true);
+        Activities.IncludeTrace(remoteParent.TraceId);
         return parentSource.StartActivity(OrleansRuntimeTelemetryTokens.ParentOperation,
             ActivityKind.Internal, remoteParent);
     }

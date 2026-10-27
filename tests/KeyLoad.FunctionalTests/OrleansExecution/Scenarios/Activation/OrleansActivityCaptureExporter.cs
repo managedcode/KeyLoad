@@ -8,10 +8,23 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
 {
     private readonly System.Threading.Lock gate = new();
     private readonly List<OrleansActivityCapture> records = [];
+    private readonly HashSet<ActivityTraceId> ownedTraces = [];
     private IOptions<OrleansTelemetryCaptureOptions>? configuredOptions;
 
     internal void Configure(IOptions<OrleansTelemetryCaptureOptions> options)
         => configuredOptions = options;
+
+    internal void IncludeTrace(ActivityTraceId traceId)
+    {
+        lock (gate)
+        {
+            if (ownedTraces.Count >= CaptureLimit)
+            {
+                throw new InvalidOperationException("The telemetry capture trace bound is exhausted.");
+            }
+            ownedTraces.Add(traceId);
+        }
+    }
 
     internal bool WasTruncated
     {
@@ -40,6 +53,10 @@ internal sealed class OrleansActivityCaptureExporter : BaseExporter<Activity>
         {
             foreach (var activity in batch)
             {
+                if (!ownedTraces.Contains(activity.TraceId))
+                {
+                    continue;
+                }
                 if (records.Count >= CaptureLimit)
                 {
                     WasTruncated = true;

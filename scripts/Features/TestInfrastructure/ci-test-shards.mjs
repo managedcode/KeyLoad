@@ -1,6 +1,5 @@
 import { spawn } from 'node:child_process';
 import { mkdirSync, readFileSync } from 'node:fs';
-import { availableParallelism } from 'node:os';
 import path from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
@@ -39,7 +38,7 @@ function testEnvironment() {
 }
 
 function dotnetArguments(suite, run) {
-  const parallelism = run.parallelism === 'processors' ? availableParallelism() : run.parallelism;
+  const parallelism = run.parallelism;
   return ['test', '--project', suite.project, '--configuration', executionBuildConfiguration(), '--no-build', '--output', 'Detailed', '--treenode-filter', run.filter,
     ...(parallelism ? ['--maximum-parallel-tests', String(parallelism)] : []),
     '--timeout', `${suite.timeoutMinutes}m`, '--report-trx', '--results-directory', run.directory];

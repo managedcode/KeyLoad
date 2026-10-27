@@ -32,12 +32,9 @@ internal static class OrleansRuntimeTelemetryWorkflows
         await Assert.That(concurrent[0].Parent.TraceId).IsNotEqualTo(concurrent[1].Parent.TraceId);
         parentage.AddRange(concurrent.Select(static operation => operation.Parent));
         await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(callerActivity);
-        await FailRevokedWriteAsync(fixture, first);
+        await FailRevokedWriteAsync(fixture, telemetry, first);
         await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(callerActivity);
-        for (var flushIndex = 0; flushIndex <= telemetry.CaptureOptions.MaximumRecords; flushIndex++)
-        {
-            telemetry.Flush();
-        }
+        telemetry.Flush();
 
         var traces = telemetry.Activities.Snapshot();
         var metrics = telemetry.Metrics.Snapshot();
@@ -137,8 +134,11 @@ internal static class OrleansRuntimeTelemetryWorkflows
         return (reply, operationParent);
     }
 
-    private static async Task FailRevokedWriteAsync(RequestCqrsHostedRuntimeFixture fixture, PrincipalRecord principal)
+    private static async Task FailRevokedWriteAsync(RequestCqrsHostedRuntimeFixture fixture,
+        OrleansRuntimeTelemetryFixture telemetry, PrincipalRecord principal)
     {
+        using var parent = telemetry.StartParentActivity()
+            ?? throw new InvalidOperationException("The telemetry provider did not create the refused operation parent activity.");
         var documentId = NewDocumentId();
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();

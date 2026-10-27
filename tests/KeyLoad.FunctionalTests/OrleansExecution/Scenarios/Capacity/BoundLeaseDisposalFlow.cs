@@ -18,10 +18,10 @@ internal static class BoundLeaseDisposalFlow
             await using var other = new RequestCqrsHostedRuntimeFixture();
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                bound = new CancellationTokenSource(new RuntimeTestOptions().StartupTimeout, TimeProvider.System);
+                await fixture.InitializeAsync(token);
+                await other.InitializeAsync(token);
+                bound = new CancellationTokenSource(new RuntimeTestOptions().CompletionTimeout, TimeProvider.System);
                 linked = CancellationTokenSource.CreateLinkedTokenSource(token, bound.Token);
-                await fixture.InitializeAsync(linked.Token);
-                await other.InitializeAsync(linked.Token);
                 var state = await BoundLeaseSeed.CreateAsync(fixture, other, linked.Token);
                 var operation = session.Initialize(state, linked.Token);
                 await BoundLeaseDisposalOperation.ExecuteAsync(state, operation, original, cleanup, completionFirst);
