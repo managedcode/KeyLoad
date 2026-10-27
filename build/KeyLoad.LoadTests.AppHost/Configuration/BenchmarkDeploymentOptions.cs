@@ -8,7 +8,7 @@ internal sealed record BenchmarkDeploymentOptions
     private const int DefaultNeo4jInitialHeap = 256;
     private const int DefaultNeo4jMaximumHeap = 512;
     private const int DefaultNeo4jPageCache = 256;
-    private const int DefaultOpenSearchHeap = 512;
+    private const int DefaultOpenSearchHeap = 1024;
     private const int DefaultPostgresSlotRetention = 512;
     private const int DefaultDocumentPostgresConnections = 512;
     private const int MinimumDocumentPostgresConnections = 512;

@@ -182,6 +182,12 @@ files, KeyLoad included. The manual Release workflow alone publishes the KeyLoad
 server image with SDK `PublishContainer`.
 
 The Redis topology probe removes its transient key before document readback.
+OpenSearch uses a 1 GiB JVM heap per node, matching the pinned server's default.
+This setting applies to both topologies within the recorded host
+resource envelope; the 500-document request bound, sixteen clients, persisted-copy
+acknowledgements and full workload remain unchanged. OpenSearch documents its
+[default heap and memory sizing](https://docs.opensearch.org/latest/install-and-configure/install-opensearch/index/).
+
 The HelixDB document target owns its HTTP clients within one dedicated Aspire
 session. That session owns the private server and its anonymous writable volume.
 After the complete workload and final-state oracle, the target closes its clients;
