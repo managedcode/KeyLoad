@@ -181,9 +181,9 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .chip small { min-width: 1.3rem; padding: .05rem .38rem; border-radius: 999px; background: var(--kl-surface-3); font: 650 .68rem/1.4 var(--kl-font-mono); text-align: center; }
 .chip input:checked + span small { background: rgba(255, 255, 255, .16); }
 .measurement-workspace { min-width: 0; padding: clamp(1rem, 2.4vw, 2rem); }
-#isolated-results { display: grid; gap: clamp(2.2rem, 4vw, 3.2rem); min-width: 0; }
+#isolated-results { position: relative; display: grid; gap: clamp(2.2rem, 4vw, 3.2rem); min-width: 0; }
 .empty-state { margin: 0; color: var(--kl-muted); font-size: .9rem; }
-.bench-legend { display: flex; align-items: center; gap: .45rem; margin: 0 0 -1.4rem; color: var(--kl-muted); font-size: .8rem; }
+.bench-legend { position: absolute; top: .45rem; right: 0; display: flex; align-items: center; gap: .45rem; margin: 0; color: var(--kl-muted); font-size: .8rem; }
 .bench-legend i { width: 1.4rem; height: 8px; border-radius: 0 3px 3px 0; }
 .bench-legend i + * , .bench-legend i:not(:first-child) { margin-left: .5rem; }
 .n1 i, .bench-legend .n1 { background: var(--kl-graphite-3); }
@@ -202,17 +202,23 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .pair-line b { font-size: .82rem; font-variant-numeric: tabular-nums; font-weight: 650; }
 .pair-line.n3 b { color: var(--kl-accent-ink); }
 .pair-line small:not(.no-data) { color: var(--kl-muted); font-size: .7rem; font-variant-numeric: tabular-nums; }
-.ov-head, .ov-row, .cost-row { display: grid; grid-template-columns: minmax(9rem, 12.5rem) repeat(4, minmax(0, 1fr)); align-items: center; gap: 1.1rem; }
-.ov-head { padding-bottom: .55rem; border-bottom: 1px solid var(--kl-line-strong); }
+.ov-head, .ov-row, .cost-row { display: grid; grid-template-columns: minmax(11rem, 14.5rem) repeat(4, minmax(0, 1fr)); align-items: center; gap: 1.1rem; }
+.ov-row .engine-name strong { white-space: normal; }
+.ov-head { padding: 0 .4rem .55rem; border-bottom: 1px solid var(--kl-line-strong); }
+.ov-head > span { padding-left: 1.7rem; }
 .ov-head > span, .cost-head span { color: var(--kl-muted); font: 600 .66rem/1.3 var(--kl-font-mono); letter-spacing: .06em; text-transform: uppercase; }
 .ov-head button { display: grid; justify-items: start; gap: .15rem; padding: 0; border: 0; background: none; color: var(--kl-ink); font: 650 .9rem/1.2 var(--kl-font-sans); text-align: left; cursor: pointer; }
 .ov-head button small { color: var(--kl-muted); font-size: .7rem; font-weight: 450; }
 .ov-head button::after { content: "↓"; color: var(--kl-faint); font-size: .8rem; }
 .ov-head button.is-sorted::after { color: var(--kl-ink); }
 .ov-head button:hover small { color: var(--kl-ink-2); }
-.ov-list { margin: 0; padding: 0; list-style: none; }
-.ov-row { padding: .75rem 0; border-bottom: 1px solid var(--kl-line); }
-.ov-name { display: grid; justify-items: start; gap: .25rem; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ov-list { margin: 0; padding: 0; list-style: none; counter-reset: rank; }
+.ov-row { padding: .75rem .4rem; border-bottom: 1px solid var(--kl-line); transition: background-color .2s var(--kl-ease); }
+.ov-row:hover { background-color: rgba(255, 255, 255, .7); }
+.ov-name { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); justify-items: start; gap: .25rem 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.ov-name > * { grid-column: 2; }
+.ov-name::before { counter-increment: rank; content: counter(rank, decimal-leading-zero); grid-row: 1 / span 2; padding-top: .15rem; color: var(--kl-faint); font: 600 .74rem/1 var(--kl-font-mono); }
+.ov-row:has(.ov-empty) .ov-name::before { content: "–"; counter-increment: none; }
 .ov-name > .no-data { font-size: .68rem; line-height: 1.3; }
 .ov-name:hover strong { text-decoration: underline; text-underline-offset: .2em; }
 .ov-empty { grid-column: 2 / -1; margin: 0; }
@@ -348,6 +354,7 @@ td[data-value=""] { color: var(--kl-faint); }
 
 @media (max-width: 760px) {
   .bench-controls fieldset { padding-left: 0; }
+  .bench-legend { position: static; margin-bottom: -1.2rem; }
   .bench-controls legend { position: static; margin-bottom: .45rem; }
   .chip-row { flex-wrap: nowrap; margin-inline: calc(-1 * clamp(1rem, 2.4vw, 2rem)); padding: 0 clamp(1rem, 2.4vw, 2rem) .2rem; overflow-x: auto; scrollbar-width: none; }
   .chip-row::-webkit-scrollbar { display: none; }
