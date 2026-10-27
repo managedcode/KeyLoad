@@ -12,6 +12,7 @@ internal sealed class SiteSessionContractCoverageTests
     private const string Fixture = "tests/KeyLoad.WebsiteTests/Fixtures/session-contract-probe.mjs";
 
     [Test]
+    [Arguments("json")]
     [Arguments("plan")]
     [Arguments("reports")]
     [Arguments("selection")]

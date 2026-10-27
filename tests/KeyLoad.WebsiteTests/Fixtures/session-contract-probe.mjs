@@ -22,7 +22,34 @@ const keyLoadImage = 'ghcr.io/managedcode/keyload:latest@sha256:' + '5'.repeat(6
 const cohort = { sourceRevision: 'a'.repeat(40), runId: 12345, attempt: 2,
   repository: contract.SESSION.repository, ref: contract.SESSION.ref,
   workflow: contract.SESSION.workflow, profile: contract.SESSION.profile };
-if (scenario === 'plan') {
+if (scenario === 'json') {
+  const { parseBytes } = await import(new URL('aggregate-json.mjs', base));
+  const { isDeepStrictEqual } = await import('node:util');
+  const valid = [
+    '0', '-0', '1.2e+3', 'true', 'false', 'null',
+    '{"plain":1,"nested":{"plain":2},"array":[{"plain":3},{"plain":4}]}',
+    String.raw`{"\u0061":1,"b\\c":2,"quote\"key":3}`,
+    '{"🙂":1,"é":2,"text":"{}[],:"}',
+    '['.repeat(64) + '0' + ']'.repeat(64),
+    '{"x":'.repeat(64) + '0' + '}'.repeat(64),
+  ];
+  for (let escapes = 1; escapes <= 8; escapes++) {
+    const key = JSON.stringify('\\'.repeat(escapes) + '"{}[],:');
+    valid.push('{' + key + ':["\\\\","\\""]}');
+    reject(() => parseBytes(Buffer.from('{' + key + ':0,' + key + ':1}')));
+  }
+  accepted = valid.every(source => isDeepStrictEqual(parseBytes(Buffer.from(source)), JSON.parse(source)));
+  for (const source of ['{"plain":1,"plain":2}', '{"":{"x":1,"x":2}}', '[{"x":1,"x":2}]',
+    String.raw`{"a":1,"\u0061":2}`, String.raw`{"\u0061":1,"a":2}`,
+    String.raw`{"b\\c":1,"b\u005cc":2}`, String.raw`{"\ud83d\ude42":1,"🙂":2}`,
+    String.raw`{"\u0000":1,"\u0000":2}`, '{"":1,"":2}', '{"x":NaN}', '{"x":1,}',
+    '{"x":1}true', String.raw`{"x":"\q"}`,
+    '['.repeat(65) + '0' + ']'.repeat(65), '{"x":'.repeat(65) + '0' + '}'.repeat(65),
+    '"' + '\\"'.repeat(10000), '{"x":"unterminated}', '{"x":"unescaped\ncontrol"}'])
+    reject(() => parseBytes(Buffer.from(source)));
+  reject(() => parseBytes(Buffer.from([0xff])));
+  accepted = accepted && isDeepStrictEqual(parseBytes(Buffer.from(valid[0])), JSON.parse(valid[0]));
+} else if (scenario === 'plan') {
   const plan = planner.createSessionPlan();
   planner.validateSessionPlan(plan);
   const matrices = planner.sessionMatrices();
