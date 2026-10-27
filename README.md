@@ -145,7 +145,7 @@ flowchart LR
     G -->|"GraphToQueueMutation"| A[["Queue: actions"]]
 ```
 
-The current composition API uses .NET `CommitAsync`, SQL `EXEC keyload_documents_commit @arguments` or the official MCP server.
+The current composition API uses .NET `CommitAsync`, SQL `EXEC keyload_documents_commit @arguments` or the official MCP server. KeyLoad is a development preview.
 
 | Boundary | Current contract |
 |---|---|

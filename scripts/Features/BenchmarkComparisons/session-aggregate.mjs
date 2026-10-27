@@ -102,7 +102,8 @@ async function authenticateProof(input, proof) {
     runtime.files.map(file => ({...file,entry:path.basename(file.path),maximum:67_108_864})), 134_217_728);
   return identity;
 }
-export async function aggregateSessions({ input, output }) {
+export async function aggregateSessions({ input, output, resourcePolicy }) {
+  require(['comparison', 'recorded'].includes(resourcePolicy));
   const proof = await readJson(path.join(input, 'proof.json'));
   const runtimeIdentity = await authenticateProof(input, proof);
   const rows = proof.workers.map(worker => sessionRows().find(row => row.id === worker.id));
@@ -126,7 +127,7 @@ export async function aggregateSessions({ input, output }) {
     workers.push({ ...metadata, session: original.session, reports: original.reports.map(compactCase), execution: original.execution, qualification: original.qualification, resourceQualified: original.resources?.observations.qualified ?? false, stateSha256: original.stateSha256 });
     originals.push(original.session);
   }
-  requireComparableSessionResources(comparableResources);
+  if (resourcePolicy === 'comparison') requireComparableSessionResources(comparableResources);
   const aggregate = validateSessionAggregate({ schemaVersion: SESSION.schema, cohort: proof.cohort, plan: createSessionPlan(),
     preparation: proof.preparation, workers });
   await createDirectory(output);

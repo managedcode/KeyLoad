@@ -31,7 +31,8 @@ correctness contract. Every planned database/topology row remains visible; missi
 or failed sessions have null metrics displayed as an em dash. Authentic sessions
 with incomplete server resource observations retain their recorded operation
 measurements, labelled Measured · incomplete telemetry. Preserve resourceQualified=false;
-missing resource metrics remain an em dash and server resource comparability is unverified. Selected corrupt,
+missing resource metrics remain an em dash and server resource comparability is unverified.
+Website recorded-operation aggregation validates each original resource report but does not require identical hosted-runner hardware. Native benchmark aggregation retains its strict comparison policy. Selected corrupt,
 expired, foreign or mixed evidence is rejected. A cancelled or in-progress producer
 supplies no figures. If no producer has eligible sessions, emit no metrics and a
 static empty state with benchmarks:null in the publication receipt.

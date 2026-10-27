@@ -112,7 +112,8 @@ export async function captureSessionSite({ environment = process.env, args, down
     compiledArtifact: projectArtifact(selected.execution.compiledArtifact), runtimeIdentity };
   await writeJson(path.join(input, 'proof.json'), { schemaVersion: SESSION.schema, cohort: selected.cohort, workers, preparation });
   const prepared = await createDirectory(path.join(input, 'prepared-input'));
-  const aggregate = requirePublishableSessionMeasurements(await aggregateSessions({ input, output: path.join(prepared, 'aggregate') }));
+  const aggregate = requirePublishableSessionMeasurements(await aggregateSessions({ input,
+    output: path.join(prepared, 'aggregate'), resourcePolicy: 'recorded' }));
   const aggregateRaw = await hashRegularFile(path.join(prepared, 'aggregate', 'aggregate.json'), SESSION.aggregateBytes);
   const provider = await createDirectory(path.join(prepared, 'provider'));
   const providerGithub = await createDirectory(path.join(provider, 'github'));

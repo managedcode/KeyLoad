@@ -16,7 +16,7 @@ entities and writing a knowledge graph, and graph-driven queue workflows.
 Extend ADR-054's invocation stage with two typed atomic composing mutations:
 QueueToGraph and GraphToQueue. They run inside the existing CommandRequest apply
 transaction and expand to existing primitive mutations, receipts and outbox.
-SQL `CALL keyload_documents_commit(@arguments)` reaches the same operation through
+SQL `EXEC keyload_documents_commit @arguments` reaches the same operation through
 the sole catalog and request envelope gateway. Full declarative model sources,
 joins and data-modifying SQL remain mandatory under ADR-065; this is a delivered
 stage only after actual tests, never the completed full SQL product.

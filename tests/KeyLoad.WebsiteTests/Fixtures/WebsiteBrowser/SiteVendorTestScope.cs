@@ -34,7 +34,6 @@ internal sealed class SiteVendorTestScope : IAsyncDisposable
             scope.CreateTemporary();
             await CopyFeatureAsync(inputs, scope.FeatureSource, token);
             await CopyFileAsync(inputs, scope.Inputs.Repository, SiteVendorTokens.BuildEntry, token);
-            await CopyFileAsync(inputs, scope.Inputs.Repository, SiteMetadataTokens.ComparisonContractPath, token);
             await CopyRootAssetsAsync(inputs, scope.Inputs.Repository, token);
             await CopyTreeAsync(Path.Combine(inputs.Repository, SiteVendorTokens.AggregateScriptDirectory),
                 Path.Combine(scope.Inputs.Repository, SiteVendorTokens.AggregateScriptDirectory), token);

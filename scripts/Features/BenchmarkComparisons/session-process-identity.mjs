@@ -1,11 +1,12 @@
-import path from 'node:path';
 import { exactSession as exact, requireSession as require, sessionHash, sessionPositive, sessionText } from './session-contract.mjs';
 
 const binaryFields = ['executablePath', 'executableSha256', 'assemblyPath', 'assemblySha256', 'pdbPath',
   'pdbSha256', 'sourceCount', 'sourceCompositionSha256'];
 const processFields = ['name', 'processId', 'startedAtUtc', 'aspireStartedAtUtc',
   'aspireProcessId', 'aspireProcessStartedAtUtc', 'binary'];
-const absolute = value => sessionText(value) && path.isAbsolute(value) && path.normalize(value) === value;
+// Published session identities retain canonical POSIX paths from the original Linux execution.
+const absolute = value => sessionText(value) && /^\/(?!\/)(?:[^/]+\/)*[^/]*$/u.test(value)
+  && !value.split('/').some(segment => segment === '.' || segment === '..');
 const utc = value => typeof value === 'string' && /Z$/u.test(value) && Number.isFinite(Date.parse(value)) && Date.parse(value) > 0;
 
 function validateProcess(value, role, expectedName, runtimeIdentity = null) {
@@ -21,8 +22,9 @@ function validateProcess(value, role, expectedName, runtimeIdentity = null) {
     && binary.pdbPath === binary.assemblyPath.slice(0, -4) + '.pdb' && binary.assemblyPath.endsWith('.dll'));
   if (runtimeIdentity !== null) {
     const expected = runtimeIdentity.descriptor.assemblies.find(item => item.role === role);
-    require(expected !== undefined && binary.assemblyPath === path.join(runtimeIdentity.descriptor.workspace, expected.path)
-      && binary.pdbPath === path.join(runtimeIdentity.descriptor.workspace, expected.pdbPath)
+    const workspace = runtimeIdentity.descriptor.workspace.replace(/\/$/u, '');
+    require(expected !== undefined && binary.assemblyPath === workspace + '/' + expected.path
+      && binary.pdbPath === workspace + '/' + expected.pdbPath
       && binary.assemblySha256 === expected.sha256 && binary.pdbSha256 === expected.pdbSha256);
   }
   return value;

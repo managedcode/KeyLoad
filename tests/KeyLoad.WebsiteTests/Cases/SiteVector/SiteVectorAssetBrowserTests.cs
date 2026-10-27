@@ -18,7 +18,7 @@ internal sealed class SiteVectorAssetBrowserTests
         await browser.Chrome.NavigateAsync(SiteBrowserTokens.BlankUrl, token);
         var missingModule = Path.Combine(SiteAssetTokens.EmittedFeatureRelativePath,
             SiteAssetTokens.ThreeVendorRelativePath, SiteAssetTokens.WebGpuVendorModule);
-        File.Delete(Path.Combine(temporary.Output, missingModule));
+        File.Delete(Path.Combine(browser.Output, missingModule));
         await cdp.CommandAsync(SiteVectorAssetTokens.DisableCacheMethod, new Dictionary<string, object?>
         {
             [SiteVectorAssetTokens.CacheDisabledField] = true,

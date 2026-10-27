@@ -5,6 +5,7 @@ internal static class SiteMetadataTokens
     internal const string CanonicalUrl = "https://www.keyload.cloud/";
     internal const string SocialImageUrl = "https://www.keyload.cloud/og-image.png";
     internal const string ConsoleAssetsPath = "src/KeyLoad/AdminDashboard/Assets";
+    internal const string ConsoleDocumentPath = "src/KeyLoad/AdminDashboard/Components/AdminApp.razor";
     internal const string ConsoleIconsDirectory = "Icons";
     internal const string FaviconSvgPath = "site/favicon.svg";
     internal const string FeaturePath = "site/Features/BenchmarkComparisons";
@@ -18,7 +19,6 @@ internal static class SiteMetadataTokens
     internal const string ConsoleCanonicalMarkup = "rel=\"canonical\"";
     internal const string ConsoleOgMarkup = "property=\"og:";
     internal const string AggregateDirectoryPath = "scripts/Features/BenchmarkComparisons";
-    internal const string ComparisonContractPath = "benchmarks/KeyLoad.Comparisons/isolated-contract.json";
     internal const string OutputName = "output";
     internal const string SourceCardSvg = "assets/og-image.svg";
     internal const string SourceCardPng = "assets/og-image.png";

@@ -32,7 +32,7 @@ internal sealed class SiteMetadataTests
         var consoleRoot = Path.Combine(inputs.Repository, SiteMetadataTokens.ConsoleAssetsPath);
         var consoleIcons = Path.Combine(consoleRoot, SiteMetadataTokens.ConsoleIconsDirectory);
         var siteRoot = Path.Combine(inputs.Repository, SiteAssetTokens.SiteRootDirectory);
-        var consoleHtml = await File.ReadAllTextAsync(Path.Combine(consoleRoot, SiteMetadataTokens.HtmlFile), token);
+        var consoleHtml = await File.ReadAllTextAsync(Path.Combine(inputs.Repository, SiteMetadataTokens.ConsoleDocumentPath), token);
         await Assert.That(consoleHtml).Contains(SiteMetadataTokens.ConsoleNoIndex);
         await Assert.That(consoleHtml).Contains(SiteMetadataTokens.ThemeColor);
         await Assert.That(consoleHtml.Contains(SiteMetadataTokens.ConsoleCanonicalMarkup, StringComparison.OrdinalIgnoreCase)).IsFalse();

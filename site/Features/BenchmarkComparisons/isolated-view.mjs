@@ -123,6 +123,7 @@ export function renderIsolatedView(container, catalog, projection, rows, selecti
     element(document, 'p', 'Derived compact projection; raw samples remain in the linked GitHub artifacts. Process CPU, allocation and peak RAM are observed over the selected lane interval, including concurrent lanes; they are not exclusive operation costs and must not be summed. Server resource observations cover the session lifetime.'),
     element(document, 'p', `Verified original sessions: ${projection.workers.length} of ${projection.plan.workers.length}. ` +
       'Recorded operation measurements remain available when server resource telemetry is incomplete; those sessions are labelled. Missing sessions and unrecorded metrics are shown as —.'),
+    element(document, 'p', 'Each session used its own runner. Hardware and resource limits may differ between engines; these timings do not establish a controlled hardware comparison.'),
     element(document, 'p', `Profile ${projection.profile}; operations ${projection.options.operations}; concurrency ${projection.options.concurrency}; ` +
       `payload ${projection.options.payloadBytes} bytes; ${projection.datasetSha256 === null ? 'corpus unavailable' : 'corpus SHA256 ' + projection.datasetSha256}.`),
     link(document, 'Measured source ' + catalog.measuredSourceRevision, `https://github.com/${catalog.cohort.repository}/tree/${catalog.measuredSourceRevision}`),

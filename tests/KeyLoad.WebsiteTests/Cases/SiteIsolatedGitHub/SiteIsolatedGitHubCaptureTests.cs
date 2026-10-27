@@ -43,6 +43,19 @@ internal sealed class SiteIsolatedGitHubCaptureTests
         await Assert.That(File.Exists(Path.Combine(capture, SiteIsolatedGitHubTokens.Metadata))).IsTrue();
         await Assert.That(Directory.Exists(Path.Combine(capture, SiteIsolatedGitHubTokens.Archives))).IsFalse();
         await SiteIsolatedGitHubArchiveAssertions.VerifyMetadataAsync(inputs.Metadata, capture, token);
+        var freshness = await SiteIsolatedGitHubNodeProcess.RunAsync(repository, new
+        {
+            operation = SiteIsolatedGitHubFields.FreshOperation,
+            repository,
+            arguments = new
+            {
+                before = inputs.Receipt,
+                after = Path.Combine(capture, SiteIsolatedGitHubTokens.Metadata)
+            },
+        }, token);
+        await Assert.That(freshness.GetProperty(SiteIsolatedFields.Ok).GetBoolean()).IsTrue();
+        await Assert.That(freshness.GetProperty(SiteIsolatedFields.Result)
+            .GetProperty(SiteIsolatedGitHubFields.Fresh).GetBoolean()).IsTrue();
     }
 
     private static void AddArguments(System.Diagnostics.ProcessStartInfo start,

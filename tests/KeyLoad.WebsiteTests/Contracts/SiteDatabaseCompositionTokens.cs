@@ -22,19 +22,19 @@ internal static class SiteDatabaseCompositionTokens
     internal const string QueuedActions = "enqueue actions";
     internal const string QueueMutation = "QueueToGraph";
     internal const string GraphMutation = "GraphToQueueMutation";
-    internal const string CanonicalCall = "CALL keyload_documents_commit(@arguments)";
+    internal const string CanonicalExecution = "EXEC keyload_documents_commit @arguments";
     internal const string SdkCommit = "CommitAsync";
     internal const string OfficialMcp = "official MCP";
     internal const string AtomicScope = "same atomic partition and transaction domain";
     internal const string LeaseBoundary = "does not lease or ACK";
-    internal const string BlobsSameDatabase = "blobs remain part of the same database";
+    internal const string PhysicalFileOwner = "ManagedCode.Storage owns physical files";
     internal const string FullSqlPending = "Full declarative SQL";
-    internal const string ClientPending = "execution SQL-client protocol";
+    internal const string ClientPending = "SQL-client protocol";
     internal const string CrossPartitionPending = "cross-partition composition";
     internal const string CurrentApi = "current composition API";
     internal const string Preview = "development preview";
     internal const string AtomicRollback = "succeeds or rolls back together";
-    internal const string BlobBoundary = "separate upload and publication operations";
+    internal const string MetadataFileOwner = "ZoneTree stores authorized metadata and object references";
     internal const string PendingFeatures = "still in development";
     internal const string PendingQualification = "remain under qualification";
     internal const string FeaturePath = "docs/Features/DatabaseComposition.md";
@@ -49,7 +49,7 @@ internal static class SiteDatabaseCompositionTokens
 
     // README and landing state the same current stage, atomic scope and readiness contracts.
     internal static readonly string[] StageContracts =
-        [CanonicalCall, SdkCommit, OfficialMcp, CurrentApi, Preview, AtomicScope, AtomicRollback,
-            LeaseBoundary, BlobsSameDatabase, BlobBoundary, FullSqlPending, ClientPending,
+        [CanonicalExecution, SdkCommit, OfficialMcp, CurrentApi, Preview, AtomicScope, AtomicRollback,
+            LeaseBoundary, PhysicalFileOwner, MetadataFileOwner, FullSqlPending, ClientPending,
             CrossPartitionPending, PendingFeatures, PendingQualification];
 }

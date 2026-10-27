@@ -9,7 +9,7 @@ try {
     args.set(match[1], path.resolve(match[2]));
   }
   requireSession(args.size === 2);
-  const result = await aggregateSessions(Object.fromEntries(args));
+  const result = await aggregateSessions({ ...Object.fromEntries(args), resourcePolicy: 'comparison' });
   process.stdout.write(JSON.stringify({ schemaVersion: result.schemaVersion, workers: result.workers.length }) + '\n');
 } catch {
   process.stderr.write(SESSION.failure + '\n');

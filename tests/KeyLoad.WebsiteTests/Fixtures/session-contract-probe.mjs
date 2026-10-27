@@ -164,7 +164,7 @@ if (scenario === 'plan') {
   reports.validateSessionProfileAccounting(failure,failed,execution,qualification);
   reject(()=>reports.validateSessionProfileAccounting(failure,failed,execution,{...qualification,runtimeExitCode:0,status:'passed'}));
 } else if (scenario === 'publication') {
-  const {validateSessionProducer,requirePublishableSessionMeasurements} = await import(new URL('site-session-selection.mjs',base));
+  const {validateSessionProducer,selectSessionSiteProducer,requirePublishableSessionMeasurements} = await import(new URL('site-session-selection.mjs',base));
   const workflow={id:10,path:'.github/workflows/benchmarks.yml',name:contract.SESSION.workflow,state:'active'};
   const repository={id:477801965,full_name:cohort.repository};
   const run={workflow_id:10,path:workflow.path,name:workflow.name,head_branch:'main',event:'push',
@@ -173,6 +173,8 @@ if (scenario === 'plan') {
   validateSessionProducer(run,workflow,'publish');
   validateSessionProducer({...run,conclusion:'failure'},workflow,'validate');
   validateSessionProducer({...run,conclusion:'failure'},workflow,'publish');
+  if(selectSessionSiteProducer({run,jobs:[],artifacts:[]},workflow,'publish')!==null)
+    throw new Error('A contracts-only run must not supply session measurements.');
   reject(()=>validateSessionProducer({...run,conclusion:'cancelled'},workflow,'validate'));
   const value={workers:contract.sessionRows().map(row=>{
     const unavailable=['Qdrant','RabbitMQ','KurrentDB'].includes(row.target);
@@ -217,6 +219,21 @@ if (scenario === 'plan') {
     ['GITHUB_WORKFLOW_SHA','b'.repeat(40)],['GITHUB_JOB','foreign']]) reject(()=>sessionSiteContext({...env,[key]:value},args,'linux'));
   reject(()=>sessionSiteContext(env,args,'darwin'));
 } else if (scenario === 'runtime') {
+  const { posix } = await import('node:path');
+  const { validateSessionProcesses } = await import(new URL('session-process-identity.mjs',base));
+  for(const candidate of ['/usr/bin/dotnet','/','/workspace/','/workspace//dotnet','/workspace/./dotnet',
+    '/workspace/../dotnet','dotnet','C:\\dotnet','/workspace/space name/dotnet','/workspace/λ/dotnet']) {
+    const value=processes();value.client.binary.executablePath=candidate;
+    const canonical=contract.sessionText(candidate)&&posix.isAbsolute(candidate)&&posix.normalize(candidate)===candidate;
+    if(canonical) validateSessionProcesses(value); else reject(()=>validateSessionProcesses(value));
+  }
+  for(const workspace of ['/','/workspace','/workspace/']) {
+    const value=processes();
+    value.client.binary.assemblyPath=posix.join(workspace,'runtime.dll');
+    value.client.binary.pdbPath=posix.join(workspace,'runtime.pdb');
+    validateSessionProcesses(value,{descriptor:{workspace,assemblies:[{role:'comparison-client',path:'runtime.dll',
+      pdbPath:'runtime.pdb',sha256:binary.assemblySha256,pdbSha256:binary.pdbSha256}]}});
+  }
   const { validateSessionRuntimeImport } = await import(new URL('session-runtime-identity.mjs',base));
   const { runtimeBundle } = await import(new URL('compiled-test-bundle-contract.mjs',base));
   const value={schemaVersion:1,kind:'keyload-benchmark-runtime-import',sourceRevision:cohort.sourceRevision,
