@@ -3,13 +3,12 @@ import { SELECTORS } from './contracts.mjs';
 import { SCENE, SCENE_TEXT, createSceneGraph } from './scene-geometry.mjs';
 import { createSceneLifecycle } from './scene-lifecycle.mjs';
 
-export async function mountClusterScene({ host, motionButton }) {
+export async function mountClusterScene({ host }) {
   if (!host) throw new TypeError(SCENE_TEXT.missingHost);
   const poster = host.querySelector(SELECTORS.poster);
   const statusElement = host.querySelector(SELECTORS.sceneStatus);
   return createSceneLifecycle({
     host,
-    motionButton,
     poster,
     statusElement,
     rendererFactory: () => new THREE.WebGPURenderer({ ...SCENE.renderer }),

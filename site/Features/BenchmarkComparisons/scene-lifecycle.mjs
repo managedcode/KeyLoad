@@ -3,9 +3,9 @@ import { createSceneObservers } from './scene-observers.mjs';
 
 let rendererGate = Promise.resolve();
 
-export function createSceneLifecycle({ host, motionButton, poster, statusElement, rendererFactory, sceneFactory }) {
+export function createSceneLifecycle({ host, poster, statusElement, rendererFactory, sceneFactory }) {
   const { state, observers } = createSceneObservers({
-    host, motionButton, poster, statusElement, rendererFactory, sceneFactory,
+    host, poster, statusElement, rendererFactory, sceneFactory,
   });
   const actions = createActions(state, observers);
   state.observers = observers;
@@ -165,9 +165,12 @@ function renderFrame(state, time) {
 
 function updateSceneMotion(state, time) {
   const root = state.graph.root;
-  const targetYaw = state.motionEnabled ? state.pointerX * SCENE.world.pointerYaw : SCENE.math.zero;
-  const targetPitch = state.motionEnabled ? state.pointerY * SCENE.world.pointerPitch : SCENE.math.zero;
   const elapsed = state.lastFrameAt === SCENE.math.zero ? SCENE.limits.settleMilliseconds : time - state.lastFrameAt;
+  // A slow idle sway keeps the composition alive; the pointer adds parallax on top of it.
+  const sway = state.motionEnabled ? Math.sin((state.spinMilliseconds ?? SCENE.math.zero)
+    / SCENE.world.millisecondsPerSecond * SCENE.world.swaySpeed) * SCENE.world.swayYaw : SCENE.math.zero;
+  const targetYaw = state.motionEnabled ? sway + state.pointerX * SCENE.world.pointerYaw : SCENE.math.zero;
+  const targetPitch = state.motionEnabled ? state.pointerY * SCENE.world.pointerPitch : SCENE.math.zero;
   const fraction = Math.min(SCENE.math.one, elapsed / SCENE.world.smoothingDivisor);
   root.rotation.y += (targetYaw - root.rotation.y) * fraction;
   root.rotation.x += (targetPitch - root.rotation.x) * fraction;
@@ -232,7 +235,7 @@ function pauseScene(state) {
   }
 }
 
-/** The scene moves as soon as it is ready unless the visitor prefers reduced motion. */
+/** The scene moves as soon as it is ready; a reduced-motion preference is the visitor's stop control. */
 function startMotionOnce(state) {
   if (state.motionStarted) return;
   state.motionStarted = true;
@@ -244,7 +247,7 @@ function setMotionEnabled(state, enabled) {
   const next = Boolean(enabled) && state.rendererReady && motionAllowed(state);
   if (next === state.motionEnabled) return;
   state.motionEnabled = next;
-  state.motionButton?.setAttribute(SCENE.attributes.ariaPressed, String(state.motionEnabled));
+  state.host.dataset[SCENE.dataset.motion] = next ? SCENE.motion.playing : SCENE.motion.still;
   configureMotionControl(state);
   if (!state.motionEnabled) {
     state.pointerX = SCENE.math.zero;
@@ -259,15 +262,9 @@ function setMotionEnabled(state, enabled) {
 }
 
 function configureMotionControl(state) {
-  const restricted = !motionAllowed(state);
-  const unavailable = restricted || state.terminal;
-  if (state.motionButton) state.motionButton.disabled = !state.rendererReady || unavailable;
-  if (state.motionButton) {
-    state.motionButton.textContent = unavailable ? SCENE_TEXT.motionUnavailable
-      : state.motionEnabled ? SCENE_TEXT.disableMotion : SCENE_TEXT.enableMotion;
-    state.motionButton.setAttribute(SCENE.attributes.ariaPressed, String(state.motionEnabled));
-  }
-  if (restricted && state.motionEnabled) setMotionEnabled(state, false);
+  const allowed = motionAllowed(state);
+  if (!allowed && state.motionEnabled) setMotionEnabled(state, false);
+  else if (allowed && state.motionStarted && !state.motionEnabled) setMotionEnabled(state, true);
 }
 
 function motionAllowed(state) {
@@ -298,6 +295,7 @@ function failScene(state, status, message) {
   state.failed = true;
   state.terminal = true;
   state.motionEnabled = false;
+  state.host.dataset[SCENE.dataset.motion] = SCENE.motion.still;
   cancelFrame(state);
   writeStatus(state, status, message);
   state.host.dataset[SCENE.dataset.frame] = SCENE.frame.error;
@@ -318,7 +316,7 @@ function disposeScene(state, observers) {
   writeStatus(state, SCENE.state.disposed, SCENE_TEXT.disposed);
   state.host.dataset[SCENE.dataset.frame] = SCENE.frame.idle;
   state.host.classList.remove(SCENE.classes.host);
-  restoreMotionControl(state);
+  delete state.host.dataset[SCENE.dataset.motion];
 }
 
 function releaseResources(state) {
@@ -336,12 +334,4 @@ function queueRendererDisposal(state) {
   const release = rendererGate.then(() => renderer.dispose());
   rendererGate = release.catch(() => {});
   void rendererGate.then(() => { if (state.renderer === renderer) state.renderer = null; });
-}
-
-function restoreMotionControl(state) {
-  if (!state.motionButton) return;
-  state.motionButton.disabled = state.originalButtonDisabled;
-  if (state.originalPressed === null) state.motionButton.removeAttribute(SCENE.attributes.ariaPressed);
-  else state.motionButton.setAttribute(SCENE.attributes.ariaPressed, state.originalPressed);
-  if (state.originalButtonText !== null) state.motionButton.textContent = state.originalButtonText;
 }

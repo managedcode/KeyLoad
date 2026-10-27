@@ -3,7 +3,7 @@ export const SCENE = Object.freeze({
     settleMilliseconds: 500, settleRenderMilliseconds: 450, maxSpinStepMilliseconds: 50 }),
   world: Object.freeze({ coreSize: 0.8, coreY: 2.0, cameraFov: 32, cameraNear: 0.1, cameraFar: 60,
     cameraX: 0, cameraY: 4.5, cameraZ: 11.5, cameraLookY: 0.15, cameraAspect: 1,
-    pointerYaw: 0.065, pointerPitch: 0.025, smoothingDivisor: 115, millisecondsPerSecond: 1000 }),
+    pointerYaw: 0.16, pointerPitch: 0.06, swayYaw: 0.12, swaySpeed: 0.35, smoothingDivisor: 115, millisecondsPerSecond: 1000 }),
   colors: Object.freeze({ sky: 0xf7f3ed }),
   math: Object.freeze({ zero: 0, half: 0.5, one: 1, two: 2, negativeOne: -1, epsilon: 0.001 }),
   state: Object.freeze({ poster: 'poster', loading: 'loading', ready: 'ready', paused: 'paused', zeroSize: 'zero-size',
@@ -14,11 +14,12 @@ export const SCENE = Object.freeze({
   types: Object.freeze({ function: 'function' }),
   visibility: Object.freeze({ visible: 'visible' }),
   dataset: Object.freeze({ state: 'sceneState', backend: 'graphicsBackend', pixels: 'bufferPixels', calls: 'drawCalls',
-    renderCalls: 'renderCalls', triangles: 'triangles', frame: 'frameState' }),
-  events: Object.freeze({ pointerMove: 'pointermove', click: 'click', resize: 'resize', pageHide: 'pagehide',
+    renderCalls: 'renderCalls', triangles: 'triangles', frame: 'frameState', motion: 'sceneMotion' }),
+  motion: Object.freeze({ playing: 'playing', still: 'still' }),
+  events: Object.freeze({ pointerMove: 'pointermove', resize: 'resize', pageHide: 'pagehide',
     pageShow: 'pageshow', visibility: 'visibilitychange', mediaChange: 'change' }),
   classes: Object.freeze({ host: 'cluster-scene-host', canvas: 'cluster-scene-canvas' }),
-  attributes: Object.freeze({ ariaHidden: 'aria-hidden', ariaPressed: 'aria-pressed', style: 'style' }),
+  attributes: Object.freeze({ ariaHidden: 'aria-hidden', style: 'style' }),
   observers: Object.freeze({ rootMargin: '80px', eventOptions: Object.freeze({ passive: true }) }),
   media: Object.freeze({ reducedMotion: '(prefers-reduced-motion: reduce)', coarsePointer: '(pointer: coarse)' }),
 });
@@ -34,9 +35,6 @@ export const SCENE_TEXT = Object.freeze({
   unsupported: 'This browser cannot start the 3D illustration.',
   disposed: 'Illustration stopped.',
   missingHost: 'A cluster scene host element is required.',
-  enableMotion: 'Play motion',
-  disableMotion: 'Pause motion',
-  motionUnavailable: 'Motion off',
 });
 
 // Positions and proportions measured from the selected original product artwork.
@@ -45,7 +43,7 @@ const PLATFORMS = Object.freeze([
   [-3.25, -0.79, 2.69], [3.4, -0.79, 2.81], [-1.75, -0.79, 4.13], [1.85, -0.79, 4.19],
 ]);
 const PALETTE = Object.freeze({ silver: 0xe4deda, edge: 0xc1b8b5, paper: 0xf5efe6,
-  glass: 0xe7dfe9, lilac: 0xb4a3e4, peach: 0xf3bf9d, ink: 0xc0b4b1, white: 0xfff9f0 });
+  glass: 0xe7dfe9, lilac: 0xb4a3e4, peach: 0xf3bf9d, ink: 0xc0b4b1, white: 0xfff9f0, packet: 0x8b7bf3 });
 const CORE_ANCHOR = 8, AGENT_ANCHOR = 9;
 
 export function createSceneGraph(THREE) {
@@ -103,7 +101,7 @@ export function createSceneGraph(THREE) {
   for (const geometry of new Set(Object.values(shapes))) geometry.dispose();
   const cables = createCables(THREE, own, root);
   const animate = seconds => {
-    anchors[AGENT_ANCHOR].y = 1.6 + Math.sin(seconds * 0.8) * 0.018;
+    anchors[AGENT_ANCHOR].y = 1.6 + Math.sin(seconds * 1.1) * 0.07;
     cables.animate(seconds);
   };
   const resize = aspect => {
@@ -353,13 +351,13 @@ function createCables(THREE, own, root) {
     createSurface(THREE, own, root, anchors, pieces, material);
     pieces.forEach(piece => piece.geometry.dispose());
   }
-  const packets = own(new THREE.InstancedMesh(own(new THREE.SphereGeometry(0.028, 12, 8)),
-    own(new THREE.MeshBasicNodeMaterial({ color: PALETTE.white, transparent: true, opacity: 0.85 })), curves.length));
+  const packets = own(new THREE.InstancedMesh(own(new THREE.SphereGeometry(0.06, 12, 8)),
+    own(new THREE.MeshBasicNodeMaterial({ color: PALETTE.packet, transparent: true, opacity: 0.95 })), curves.length));
   const matrix = new THREE.Matrix4(), point = new THREE.Vector3();
   root.add(packets);
   return { count: curves.length, animate: seconds => {
     curves.forEach((curve, index) => {
-      curve.getPoint((seconds * 0.17 + index / curves.length) % 1, point);
+      curve.getPoint((seconds * 0.24 + index / curves.length) % 1, point);
       packets.setMatrixAt(index, matrix.makeTranslation(point.x, point.y, point.z));
     });
     packets.instanceMatrix.needsUpdate = true;

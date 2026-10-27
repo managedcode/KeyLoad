@@ -24,12 +24,11 @@ function stop() {
 
 async function startScene(token) {
   const host = document.getElementById(IDS.scene);
-  const motionButton = document.getElementById(IDS.motion);
   if (!host || token !== generation) return;
   try {
     const { mountClusterScene } = await import(SCENE.module);
     if (token !== generation) return;
-    const instance = await mountClusterScene({ host, motionButton });
+    const instance = await mountClusterScene({ host });
     if (token !== generation) instance.dispose();
     else scene = instance;
   } catch {
@@ -39,7 +38,6 @@ async function startScene(token) {
     host.querySelector(SELECTORS.poster)?.removeAttribute(SCENE.hidden);
     const status = host.querySelector(SELECTORS.sceneStatus);
     if (status) status.textContent = SCENE.unavailable;
-    if (motionButton) motionButton.disabled = true;
   }
 }
 

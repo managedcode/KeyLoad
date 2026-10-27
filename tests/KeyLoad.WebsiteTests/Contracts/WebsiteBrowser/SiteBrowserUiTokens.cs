@@ -5,7 +5,6 @@ internal static class SiteBrowserUiTokens
     public const string SelectorResultPanel = "#results-panel";
     public const string SelectorScene = "#cluster-scene";
     public const string SelectorSceneStatus = "[data-scene-status]";
-    public const string SelectorMotion = "#scene-motion";
     public const string SceneStateAttribute = "data-scene-state";
     public const string BackendAttribute = "data-graphics-backend";
     public const string FrameAttribute = "data-frame-state";
@@ -54,10 +53,7 @@ internal static class SiteBrowserUiTokens
     public const string OverflowScript = "document.documentElement.scrollWidth>window.innerWidth";
     public const string SceneScrollScript = "document.querySelector('#cluster-scene')?.scrollIntoView({block:'center',behavior:'instant'})";
     public const string SceneSnapshotScript = "({backend:document.querySelector('#cluster-scene')?.getAttribute('data-graphics-backend'),status:document.querySelector('" + SelectorSceneStatus + "')?.textContent,frame:document.querySelector('#cluster-scene')?.getAttribute('data-frame-state'),canvasCount:document.querySelectorAll('#cluster-scene canvas').length,bufferPixels:Number(document.querySelector('#cluster-scene')?.getAttribute('data-buffer-pixels')??0),drawCalls:Number(document.querySelector('#cluster-scene')?.getAttribute('data-draw-calls')??0),triangles:Number(document.querySelector('#cluster-scene')?.getAttribute('data-triangles')??0)})";
-    public const string MotionEnableScript = "(()=>{const e=document.querySelector('#scene-motion');if(!e||e.disabled)return false;if(e.getAttribute('aria-pressed')!=='true')e.click();return e.getAttribute('aria-pressed')==='true'})()";
-    public const string MotionDisableScript = "(()=>{const e=document.querySelector('#scene-motion');if(!e||e.disabled)return false;if(e.getAttribute('aria-pressed')==='true')e.click();return e.getAttribute('aria-pressed')==='false'})()";
-    public const string MotionAvailableScript = "document.querySelector('#scene-motion')?.disabled===false";
-    public const string MotionPlayingScript = "document.querySelector('#scene-motion')?.getAttribute('aria-pressed')==='true'";
+    public const string MotionPlayingScript = "document.querySelector('#cluster-scene')?.dataset.sceneMotion==='playing'";
     public const string ReducedMotionScript = "matchMedia('(prefers-reduced-motion: reduce)').matches";
     public const string TableScrollLabelScript = "document.querySelector('.table-scroll')?.getAttribute('aria-label')";
     public const string ScrollLabelToken = "scroll";
@@ -78,7 +74,7 @@ internal static class SiteBrowserUiTokens
         })()
         """;
     public const string ScenePausedScript = "document.querySelector('#cluster-scene')?.getAttribute('data-frame-state')==='paused'";
-    public const string MotionDisabledScript = "document.querySelector('#scene-motion')?.disabled===true";
+    public const string MotionDisabledScript = "document.querySelector('#cluster-scene')?.dataset.sceneMotion!=='playing'";
     public const string SceneGeometrySnapshotScript = "(()=>{const host=document.querySelector('#cluster-scene');const canvas=host?.querySelector('canvas');return{canvasCount:host?.querySelectorAll('canvas').length??0,canvasWidth:canvas?.width??0,canvasHeight:canvas?.height??0,pixelRatio:host&&canvas?Math.max(canvas.width/host.clientWidth,canvas.height/host.clientHeight):0,frame:host?.getAttribute('data-frame-state'),bufferPixels:Number(host?.getAttribute('data-buffer-pixels')??0),drawCalls:Number(host?.getAttribute('data-draw-calls')??0),renderCalls:Number(host?.getAttribute('data-render-calls')??0),triangles:Number(host?.getAttribute('data-triangles')??0)}})()";
     public const string SceneCenterScript = "(()=>{const r=document.querySelector('#cluster-scene').getBoundingClientRect();return{x:r.left+r.width/4,y:r.top+r.height/4}})()";
     public const string GeometryStableScript = "(()=>{const host=document.querySelector('#cluster-scene');return host?.getAttribute('data-frame-state')==='rendered'&&host?.querySelector('canvas')!==null})()";

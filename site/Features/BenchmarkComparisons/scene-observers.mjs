@@ -1,7 +1,7 @@
 import { SCENE, SCENE_TEXT } from './scene-geometry.mjs';
 
-export function createSceneObservers({ host, motionButton, poster, statusElement, rendererFactory, sceneFactory }) {
-  const state = createState(host, motionButton, poster, statusElement);
+export function createSceneObservers({ host, poster, statusElement, rendererFactory, sceneFactory }) {
+  const state = createState(host, poster, statusElement);
   const observers = {
     actions: null,
     rendererFactory,
@@ -13,20 +13,17 @@ export function createSceneObservers({ host, motionButton, poster, statusElement
   return { state, observers };
 }
 
-function createState(host, motionButton, poster, statusElement) {
+function createState(host, poster, statusElement) {
   const reducedMotion = globalThis.matchMedia?.(SCENE.media.reducedMotion) ?? null;
   const coarsePointer = globalThis.matchMedia?.(SCENE.media.coarsePointer) ?? null;
   return {
-    host, motionButton, poster, statusElement, reducedMotion, coarsePointer,
+    host, poster, statusElement, reducedMotion, coarsePointer,
     renderer: null, graph: null, resizeObserver: null, intersectionObserver: null, animationFrame: SCENE.math.zero,
     initializationPending: false, rendererDisposalQueued: false, initialized: false, terminal: false,
     disposed: false, failed: false, visible: false, pageActive: true, rendererReady: false,
     motionEnabled: false, pointerX: SCENE.math.zero, pointerY: SCENE.math.zero,
     lastPointerAt: SCENE.math.zero, lastFrameAt: SCENE.math.zero,
     width: SCENE.math.zero, height: SCENE.math.zero, canvasAttached: false, status: SCENE.state.poster,
-    originalButtonDisabled: motionButton?.disabled ?? false,
-    originalPressed: motionButton?.getAttribute(SCENE.attributes.ariaPressed) ?? null,
-    originalButtonText: motionButton?.textContent ?? null,
     originalPosterHidden: poster?.hidden ?? false,
   };
 }
@@ -78,15 +75,13 @@ function addLifecycleListeners(state, observers, callbacks) {
   };
   const mediaChange = () => { callbacks.configureMotionControl(); refresh(); };
   state.host.addEventListener(SCENE.events.pointerMove, pointerMove, SCENE.observers.eventOptions);
-  const toggleMotion = () => observers.actions?.setMotionEnabled(!state.motionEnabled);
-  state.motionButton?.addEventListener(SCENE.events.click, toggleMotion);
   window.addEventListener(SCENE.events.resize, refresh, SCENE.observers.eventOptions);
   window.addEventListener(SCENE.events.pageHide, pageHide);
   window.addEventListener(SCENE.events.pageShow, pageShow);
   document.addEventListener(SCENE.events.visibility, visibility);
   state.reducedMotion?.addEventListener(SCENE.events.mediaChange, mediaChange);
   state.coarsePointer?.addEventListener(SCENE.events.mediaChange, mediaChange);
-  state.listeners = { pointerMove, toggleMotion, refresh, pageHide, pageShow, visibility, mediaChange };
+  state.listeners = { pointerMove, refresh, pageHide, pageShow, visibility, mediaChange };
 }
 
 function intersectsViewport(rectangle) {
@@ -104,7 +99,6 @@ function stopObservers(state) {
   const listeners = state.listeners;
   if (!listeners) return;
   state.host.removeEventListener(SCENE.events.pointerMove, listeners.pointerMove);
-  state.motionButton?.removeEventListener(SCENE.events.click, listeners.toggleMotion);
   window.removeEventListener(SCENE.events.resize, listeners.refresh);
   window.removeEventListener(SCENE.events.pageHide, listeners.pageHide);
   window.removeEventListener(SCENE.events.pageShow, listeners.pageShow);

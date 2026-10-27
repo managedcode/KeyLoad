@@ -65,7 +65,6 @@ internal static class SiteBrowserVisualAssertions
         await AssertRendererState(cdp, cancellationToken);
         await SiteBrowserVectorAssetAssertions.AssertReadyMarkAsync(cdp, cancellationToken);
         await AssertMotionPlaysThenSettles(chrome, cancellationToken);
-        await AssertReducedMotion(cdp, rendererReady: true, cancellationToken);
         await SiteBrowserVectorAssetAssertions.AssertRetinaResizeAsync(cdp, cancellationToken);
         await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneScrollAwayScript, false, cancellationToken);
         var paused = await cdp.WaitForExpressionAsync(SiteBrowserUiTokens.ScenePausedScript, cancellationToken);
@@ -120,8 +119,8 @@ internal static class SiteBrowserVisualAssertions
     }
 
     /// <summary>
-    /// AC-BC-012 as revised by the owner (2026-10-02): the scene moves as soon as it is ready at a constant draw budget,
-    /// follows the pointer, and stops rendering once motion is paused.
+    /// AC-BC-012 as revised by the owner (2026-10-27): the scene moves as soon as it is ready at a constant draw budget,
+    /// follows the pointer without a pause button, and stops rendering once the visitor prefers reduced motion.
     /// </summary>
     private static async Task AssertMotionPlaysThenSettles(SiteBrowserChrome chrome, CancellationToken cancellationToken)
     {
@@ -149,8 +148,8 @@ internal static class SiteBrowserVisualAssertions
             .IsEqualTo(moving.GetProperty(SiteBrowserUiTokens.DrawCallsField).GetInt32());
         await Assert.That(later.GetProperty(SiteBrowserUiTokens.TrianglesField).GetInt32())
             .IsEqualTo(moving.GetProperty(SiteBrowserUiTokens.TrianglesField).GetInt32());
-        var paused = await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionDisableScript, false, cancellationToken);
-        await Assert.That(paused.GetBoolean()).IsTrue();
+        await EmulateReducedMotionAsync(cdp, cancellationToken);
+        await Assert.That(await cdp.WaitForExpressionAsync(SiteBrowserUiTokens.MotionDisabledScript, cancellationToken)).IsTrue();
         await Task.Delay(SiteExecutionConfiguration.Options.Value.SceneSettleWait, TimeProvider.System, cancellationToken);
         var settled = await cdp.EvaluateAsync(SiteBrowserUiTokens.SceneGeometrySnapshotScript, false, cancellationToken);
         var metrics = settled.GetRawText();
@@ -161,21 +160,8 @@ internal static class SiteBrowserVisualAssertions
             .IsEqualTo(settled.GetProperty(SiteBrowserUiTokens.RenderCallsField).GetInt32());
     }
 
-    private static async Task AssertReducedMotion(SiteBrowserCdpClient cdp, bool rendererReady,
-        CancellationToken cancellationToken)
+    private static async Task EmulateReducedMotionAsync(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)
     {
-        if (rendererReady)
-        {
-            var available = await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionAvailableScript, false, cancellationToken);
-            if (available.GetBoolean())
-            {
-                await Assert.That((await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionEnableScript, false,
-                    cancellationToken)).GetBoolean()).IsTrue();
-                await Assert.That((await cdp.EvaluateAsync(SiteBrowserUiTokens.MotionDisableScript, false,
-                    cancellationToken)).GetBoolean()).IsTrue();
-            }
-        }
-
         await cdp.CommandAsync(SiteBrowserTokens.SetEmulatedMedia, new Dictionary<string, object?>
         {
             [SiteBrowserTokens.FeaturesField] = new[]
@@ -189,10 +175,5 @@ internal static class SiteBrowserVisualAssertions
         }, cancellationToken);
         var reduced = await cdp.EvaluateAsync(SiteBrowserUiTokens.ReducedMotionScript, false, cancellationToken);
         await Assert.That(reduced.GetBoolean()).IsTrue();
-        if (rendererReady)
-        {
-            var disabled = await cdp.WaitForExpressionAsync(SiteBrowserUiTokens.MotionDisabledScript, cancellationToken);
-            await Assert.That(disabled).IsTrue();
-        }
     }
 }

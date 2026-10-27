@@ -74,9 +74,8 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .scene-caption-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .85rem .6rem .25rem; }
 .scene-caption-row figcaption { display: grid; color: var(--kl-muted); font-size: .84rem; }
 .caption-kicker { color: var(--kl-ink); font-weight: 650; }
-.motion-button, .retry-button { flex: none; min-height: 36px; padding: 0 1rem; border: 1px solid var(--kl-line-strong); border-radius: 999px; background: rgba(255, 255, 255, .7); color: var(--kl-ink); font-size: .82rem; font-weight: 600; white-space: nowrap; cursor: pointer; }
-.motion-button:hover:enabled, .retry-button:hover { background: #fff; }
-.motion-button:disabled { opacity: .5; cursor: default; }
+.retry-button { flex: none; min-height: 36px; padding: 0 1rem; border: 1px solid var(--kl-line-strong); border-radius: 999px; background: rgba(255, 255, 255, .7); color: var(--kl-ink); font-size: .82rem; font-weight: 600; white-space: nowrap; cursor: pointer; }
+.retry-button:hover { background: #fff; }
 
 .hero-facts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--kl-line-strong); }
 .hero-facts li { display: grid; align-content: start; gap: .35rem; padding: 1.2rem 1.4rem 0 0; }
@@ -125,7 +124,12 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .thesis-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: .9rem; }
 .thesis-card { min-width: 0; padding: clamp(1.3rem, 3vw, 2rem); border: 1px solid var(--kl-stroke); border-radius: var(--kl-radius-xl); background: var(--kl-sheen), var(--kl-surface); box-shadow: var(--kl-shadow); backdrop-filter: var(--kl-glass); }
 .thesis-card h3 { margin: 0 0 1.2rem; font-size: 1.35rem; }
-.thesis-card > p { margin: 1.2rem 0 0; color: var(--kl-muted); font-size: .92rem; }
+.thesis-card { display: flex; flex-direction: column; }
+.thesis-card .thesis-stack { flex: 1; grid-auto-rows: 1fr; }
+.thesis-stack li { grid-template-columns: 1.7rem minmax(0, 1fr); align-content: center !important; padding-left: .85rem !important; }
+.thesis-stack li > * { grid-column: 2; }
+.thesis-stack li::before { position: static !important; grid-row: 1 / span 2; align-self: start; padding-top: .3rem; }
+.thesis-card > p { margin: auto 0 0; padding-top: 1.2rem; color: var(--kl-muted); font-size: .92rem; }
 .thesis-stack { counter-reset: requirement; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; margin: 0; padding: 0; list-style: none; }
 .thesis-stack li { display: grid; align-content: start; gap: .1rem; min-width: 0; padding: .65rem .85rem; position: relative; padding-left: 2.5rem; border: 1px solid var(--kl-line); border-radius: var(--kl-radius); background: rgba(255, 255, 255, .5); color: var(--kl-muted); font: .72rem/1.4 var(--kl-font-mono); }
 .thesis-stack li::before { counter-increment: requirement; content: counter(requirement, decimal-leading-zero); position: absolute; left: .8rem; top: .85rem; color: #8c6f9c; font: .6rem/1.3 var(--kl-font-mono); }
@@ -137,7 +141,10 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .thesis-points { display: grid; gap: 1.15rem; margin: 0; padding: 0; list-style: none; }
 .thesis-points li { display: grid; gap: .2rem; padding-left: 1rem; border-left: 2px solid transparent; border-image: linear-gradient(180deg, var(--kl-peach), var(--kl-lilac), var(--kl-periwinkle)) 1; color: var(--kl-on-graphite-muted); font-size: .92rem; }
 .thesis-points b { color: #fff; font: 700 1.05rem/1.3 var(--kl-font-display); letter-spacing: -.015em; }
-.thesis-future { max-width: 56rem; margin: 2rem auto 0; color: var(--kl-ink-2); font-size: 1.15rem; line-height: 1.65; text-wrap: pretty; }
+.thesis-points { margin-bottom: 1.8rem !important; }
+.thesis-future { margin-top: auto; padding-top: 1.4rem; border-top: 1px solid var(--kl-graphite-line); }
+.thesis-future-lead { margin: 0 0 .55rem; background: var(--kl-iris); -webkit-background-clip: text; background-clip: text; color: transparent; font: 760 clamp(1.6rem, 2.8vw, 2.2rem)/1.1 var(--kl-font-display); letter-spacing: -.035em; }
+.thesis-future p:last-child { margin: 0; color: var(--kl-on-graphite-muted); font-size: .95rem; line-height: 1.6; }
 .why-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; }
 .why-grid .shape-no { margin-top: 0; color: var(--kl-ink-2); }
 .why-grid .shape-link { margin-top: auto; padding-top: .5rem; }

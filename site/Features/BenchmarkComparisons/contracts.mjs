@@ -1,4 +1,4 @@
-export const IDS = Object.freeze({ benchmarks: 'benchmarks', scene: 'cluster-scene', motion: 'scene-motion', menu: 'site-menu' });
+export const IDS = Object.freeze({ benchmarks: 'benchmarks', scene: 'cluster-scene', menu: 'site-menu' });
 
 export const SELECTORS = Object.freeze({ command: '.command-box code', copy: '#copy-command',
   poster: '.cluster-poster', sceneStatus: '[data-scene-status]', menuLink: 'a[href]', menuOpen: ':popover-open' });
