@@ -44,5 +44,7 @@ internal enum GrainFailureCauseKind
     /// <summary>An operation targets different physical storage files.</summary>
     PhysicalStorageOwner,
     /// <summary>An entity reference differs from the authenticated resource lifetime.</summary>
-    EntityResourceLifetime
+    EntityResourceLifetime,
+    /// <summary>An asynchronous operation exceeded its deadline.</summary>
+    Deadline
 }

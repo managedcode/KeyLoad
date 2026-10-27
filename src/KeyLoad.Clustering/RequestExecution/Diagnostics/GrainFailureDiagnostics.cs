@@ -112,6 +112,7 @@ internal static partial class GrainFailureDiagnostics
             NotSupportedException => GrainFailureCauseKind.Unsupported,
             SerializationException => GrainFailureCauseKind.Serialization,
             IOException => GrainFailureCauseKind.StorageIo,
+            TimeoutException => GrainFailureCauseKind.Deadline,
             _ => GrainFailureCauseKind.Other
         };
     }

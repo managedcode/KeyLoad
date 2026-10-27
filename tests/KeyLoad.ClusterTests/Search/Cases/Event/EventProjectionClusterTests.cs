@@ -43,9 +43,14 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
     public async Task AcLineage002SourceHiddenFromPersistedReaderCannotProduceVisibleDerivedVector()
     {
         using var deadline = McpCallerDeadline.Create();
-        var scenario = await EventProjectionClusterScenario.CreateAsync(fixture, deadline.Token);
-        var warm = await HiddenReaderWarmAsync(scenario, deadline.Token);
-        await ProjectionPublicPolicyFlow.RunAsync(fixture, scenario, warm.Reader, warm.Original, deadline.Token);
+        await VerifyFreshReaderAuthorizationAsync(deadline.Token);
+    }
+
+    private async Task VerifyFreshReaderAuthorizationAsync(CancellationToken cancellationToken)
+    {
+        var scenario = await EventProjectionClusterScenario.CreateAsync(fixture, cancellationToken);
+        var warm = await HiddenReaderWarmAsync(scenario, cancellationToken);
+        await ProjectionPublicPolicyFlow.RunAsync(fixture, scenario, warm.Reader, warm.Original, cancellationToken);
     }
 
     private async Task<(CommitReceipt Original, McpPersistedIdentity Reader)> HiddenReaderWarmAsync(
@@ -94,6 +99,7 @@ internal sealed class EventProjectionClusterTests(ClusterFixture fixture)
         await EventProjectionClusterAssertions.AssertReceiptAsync(original, scenario);
         await new EventProjectionClusterSiloRestart(fixture).RunAsync(scenario, clients, original, nodes,
             deadline.Token);
+        await VerifyFreshReaderAuthorizationAsync(deadline.Token);
     }
 
     private static async Task VerifyOfficialReplayAsync(McpOfficialClient workerMcp,

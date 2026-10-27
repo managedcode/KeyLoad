@@ -82,7 +82,8 @@ internal sealed class GrainFailureCauseDiagnosticsTests
         yield return (new NotSupportedException(MessageCanary), GrainFailureCauseKind.Unsupported);
         yield return (new SerializationException(MessageCanary), GrainFailureCauseKind.Serialization);
         yield return (new IOException(MessageCanary), GrainFailureCauseKind.StorageIo);
-        yield return (new TimeoutException(MessageCanary), GrainFailureCauseKind.Other);
+        yield return (new TimeoutException(MessageCanary), GrainFailureCauseKind.Deadline);
+        yield return (new DivideByZeroException(MessageCanary), GrainFailureCauseKind.Other);
     }
 
     private static NullReferenceException CaptureRuntimeReference()
