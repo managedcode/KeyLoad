@@ -14,8 +14,7 @@ internal static class SiteExecutionConfiguration
             policy.BrowserStartupTimeout, policy.NavigationPollDelay, policy.NoScriptPoll,
             policy.SceneIdleWait, policy.SceneSettleWait, policy.ChildDeadline, policy.ChildPoll,
             policy.ChildQueueDeadline, policy.CleanupTimeout, policy.NodeTimeout,
-            policy.StaticHostTimeout, policy.AdmissionDeadline, policy.GitHubDeadline,
-            policy.IsolatedProcessDeadline];
+            policy.StaticHostTimeout, policy.AdmissionDeadline, policy.GitHubDeadline];
         foreach (var duration in durations)
         {
             ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(duration, TimeSpan.Zero);

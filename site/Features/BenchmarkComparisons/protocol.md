@@ -44,7 +44,7 @@ CPU, allocation and peak RSS are process observations over the lane interval; ov
 
 ## TUnit, builder and coverage
 
-All tests are TUnit. `SessionCohortContractTests` and `SiteSessionContractCoverageTests` execute the single controlled `session-contract-probe.mjs`, which imports the actual production modules. Nine scenarios cover plan, reports, selection, environment, qualification, runtime, site-context, publication and profile-accounting. They verify positive inputs and specific identity/accounting/admission mutations; their values never enter published artifacts. Node children have bounded concurrent stdout/stderr, a deadline and joined ownership; Website children inherit the real `NODE_V8_COVERAGE`.
+All tests are TUnit. `SessionCohortContractTests` and `SiteSessionContractCoverageTests` execute the single controlled `session-contract-probe.mjs`, which imports the actual production modules. Nine scenarios cover plan, reports, selection, environment, qualification, runtime, site-context, publication and profile-accounting. They verify positive inputs and specific identity/accounting/admission mutations; their values never enter published artifacts. Node children have bounded concurrent stdout/stderr, caller cancellation instead of a fixed deadline, and joined ownership; Website children inherit the real `NODE_V8_COVERAGE`.
 
 An independent C# oracle computes the expected per-case/lane values from authenticated originals. Real Chrome/CDP sessions load builder-emitted assets through a confined ephemeral HTTP listener and verify controls, keyboard/accessibility, raw hash rejection, cancellation and stale generations. Scene regressions and coverage converter regressions are retained.
 

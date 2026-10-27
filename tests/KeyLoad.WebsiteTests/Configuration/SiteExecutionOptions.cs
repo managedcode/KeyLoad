@@ -18,7 +18,6 @@ internal sealed class SiteExecutionOptions
     public TimeSpan StaticHostTimeout { get; set; } = TimeSpan.FromSeconds(5);
     public TimeSpan AdmissionDeadline { get; set; } = TimeSpan.FromMinutes(20);
     public TimeSpan GitHubDeadline { get; set; } = TimeSpan.FromMinutes(120);
-    public TimeSpan IsolatedProcessDeadline { get; set; } = TimeSpan.FromSeconds(300);
     public int BrowserSessionCapacity { get; set; } = 1;
     public int MaximumQueued { get; set; } = 64;
     public int HeavyChildCapacity { get; set; } = 2;

@@ -43,13 +43,12 @@ internal static class SiteIsolatedNodeProcess
         }
         lease?.MarkStarted(process);
 
-        using var deadlineTimeout = new CancellationTokenSource(SiteExecutionConfiguration.Options.Value.IsolatedProcessDeadline, TimeProvider.System);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadlineTimeout.Token);
-        var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, ProbeFailure, deadline.Token);
-        var stderr = SiteProcessOutput.ReadAsync(process.StandardError, ProbeFailure, deadline.Token);
+        // Real projection work is bounded by the caller's cancellation, not by an invented fixed deadline.
+        var stdout = SiteProcessOutput.ReadAsync(process.StandardOutput, ProbeFailure, cancellationToken);
+        var stderr = SiteProcessOutput.ReadAsync(process.StandardError, ProbeFailure, cancellationToken);
         try
         {
-            var exit = process.WaitForExitAsync(deadline.Token);
+            var exit = process.WaitForExitAsync(cancellationToken);
             var first = await Task.WhenAny(exit, stdout, stderr).ConfigureAwait(false);
             await first.ConfigureAwait(false);
             await exit.ConfigureAwait(false);

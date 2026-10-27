@@ -9,9 +9,9 @@ internal static class SiteIsolatedGitHubProcess
 
     public static Task<SiteProcessResult> RunProbeAsync(ProcessStartInfo start, CancellationToken token,
         SiteHeavyChildAdmission? admission = null) =>
-        RunAsync(start, SiteExecutionConfiguration.Options.Value.IsolatedProcessDeadline, admission, token);
+        RunAsync(start, bound: null, admission, token);
 
-    private static async Task<SiteProcessResult> RunAsync(ProcessStartInfo start, TimeSpan bound,
+    private static async Task<SiteProcessResult> RunAsync(ProcessStartInfo start, TimeSpan? bound,
         SiteHeavyChildAdmission? admission, CancellationToken token)
     {
         using var lease = admission is null ? null : await admission.AcquireAsync(token);
@@ -23,8 +23,9 @@ internal static class SiteIsolatedGitHubProcess
         }
         lease?.MarkStarted(process);
 
-        using var deadlineTimeout = new CancellationTokenSource(bound, TimeProvider.System);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout.Token);
+        // Probes run until they exit or the caller cancels; only remote GitHub captures keep their transport bound.
+        using var deadlineTimeout = bound is null ? null : new CancellationTokenSource(bound.Value, TimeProvider.System);
+        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(token, deadlineTimeout?.Token ?? CancellationToken.None);
         var stdout = SiteIsolatedGitHubProcessOutput.ReadAsync(process.StandardOutput,
             SiteIsolatedGitHubProcessOutput.MaximumOutputCharacters, deadline.Token);
         var stderr = SiteIsolatedGitHubProcessOutput.ReadAsync(process.StandardError,
