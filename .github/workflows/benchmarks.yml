@@ -12,7 +12,7 @@ on:
 permissions: {contents: read, actions: read}
 concurrency:
   group: keyload-benchmarks-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/artifacts/benchmark-runtime/packages
 jobs:
@@ -177,7 +177,7 @@ jobs:
           KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
         run: node scripts/Features/BenchmarkComparisons/session-finalize.mjs
       - name: Save benchmark results
-        if: ${{ !cancelled() }}
+        if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
           name: ${{ matrix.artifactName }}

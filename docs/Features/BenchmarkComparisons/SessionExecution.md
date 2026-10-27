@@ -174,8 +174,13 @@ matrix, restarts or separate benchmark scenario.
   other databases, workload fan-out or public figures. This focused check does not
   qualify the full eight-control gate or complete session suite; those gates stay
   unchanged for `mode=contracts`, `mode=full` and push runs.
-  A newer run of the same branch cancels the superseded run instead of waiting
-  behind its measurements, including when changing between manual modes and full runs.
+  All modes share one branch concurrency group. A manual dispatch cancels the
+  superseded run, including when changing between manual modes and full runs.
+  Automatic push runs preserve the active cohort and queue the newest pending
+  revision, so another change cannot discard hours of unfinished measurements.
+  Intentional replacement after a repair cancels the obsolete run first.
+  Workers retain partial original reports and logs on cancellation; those artifacts
+  remain incomplete evidence and cannot authorize publication.
 - Ingestion at 1/10/500 clients, the minimum measured operation counts, recall,
   replicated acknowledgement, resource bounds and all required workload families are
   kept. The number of jobs is not the number of measured scenarios.
@@ -250,9 +255,10 @@ its byte size remain reviewable when several database containers are running.
 
 Local execution retains the actual client binary/source/process identity with no
 invented GitHub provenance; every database server, KeyLoad included, is identified
-by its image reference and digest. Session and aggregation jobs declare the
-explicit `ubuntu-24.04` runner: the `ubuntu-latest` image moved to Ubuntu 26.04 with a
-7.0 kernel that the pinned MongoDB server refuses to start on. It cannot authorize public figures. External
+by its image reference and digest. Preparation, session and aggregation jobs use
+the common runner family documented in
+[Additional Databases](AdditionalDatabases.md#deployment-and-qualification-limits).
+Local execution cannot authorize public figures. External
 advertised-endpoint reachability remains open until actual execution proves it;
 measured workload reports do not close that independent gate.
 
