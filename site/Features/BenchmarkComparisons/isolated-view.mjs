@@ -68,9 +68,34 @@ function button(document, className, data, value) {
   return node;
 }
 
+// Each family card names the highest 1-node result of this run and doubles as the sort control for the list.
+function leaders(document, model, sort) {
+  const grid = el(document, 'div', 'leaders');
+  for (const column of GENERAL) {
+    const ranked = model.engines.map(engine => [engine, model.cell(engine, column.id, 1).value])
+      .filter(([, value]) => value !== null).sort((left, right) => right[1] - left[1]).slice(0, 5);
+    const card = grid.appendChild(button(document, 'leader' + (column.key === sort ? ' is-sorted' : ''), 'sort', column.key));
+    card.append(el(document, 'span', 'leader-label', column.label), el(document, 'small', null, column.hint));
+    if (ranked.length === 0) {
+      card.append(el(document, 'span', 'no-data', 'No data'));
+      continue;
+    }
+    card.append(el(document, 'strong', null, compact(ranked[0][1])), el(document, 'span', 'leader-top', ranked[0][0] + ' · ops/s, 1 node'));
+    const bars = card.appendChild(el(document, 'span', 'leader-bars'));
+    for (const [engine, value] of ranked) {
+      const row = bars.appendChild(el(document, 'span'));
+      row.append(el(document, 'small', null, engine));
+      row.appendChild(el(document, 'i')).style.setProperty('--size', (value / ranked[0][1] * 100).toFixed(1) + '%');
+      row.append(el(document, 'b', null, compact(value)));
+    }
+  }
+  return grid;
+}
+
 function overview(document, model, sort) {
   const section = panel(document, 'bench-overview', 'All databases',
-    'Operations per second. Top bar 1 node, lower bar 3 nodes with the change against 1 node. Click a column to sort.');
+    'Operations per second. Top bar 1 node, lower bar 3 nodes with the change against 1 node. Click a card or column to sort.');
+  section.append(leaders(document, model, sort));
   const head = section.appendChild(el(document, 'div', 'ov-head'));
   head.append(el(document, 'span', null, 'Database'));
   for (const column of GENERAL) {
@@ -93,13 +118,14 @@ function overview(document, model, sort) {
   return section;
 }
 
-function latencyPanel(document, model, id, title) {
+function latencyPanel(document, model, id, key, title) {
   const engines = model.engines.filter(engine => model.cell(engine, id, 1).p50 !== null || model.cell(engine, id, 3).p50 !== null)
     .sort((left, right) => (model.cell(left, id, 1).p50 ?? Infinity) - (model.cell(right, id, 1).p50 ?? Infinity));
   if (engines.length === 0) return null;
   const entries = engine => NODES.map(nodes => ({ nodes, ...model.cell(engine, id, nodes) }));
   const scale = logScale(engines.flatMap(engine => entries(engine).flatMap(entry => [entry.p50, entry.p99])));
   const section = panel(document, 'bench-latency', title, 'Per request on a log scale: dot p50, ring p95, line end p99. Values show p50.');
+  section.dataset.metric = key;
   section.append(ticks(document, scale, ''));
   const list = section.appendChild(el(document, 'ul', 'lat-list'));
   for (const engine of engines) {
@@ -158,7 +184,11 @@ function card(document, model, engine) {
   const scale = logScale(timed.flatMap(test => entries(test.id).flatMap(entry => [entry.p50, entry.p99])));
   node.append(ticks(document, scale, 'Latency per request'));
   const lat = node.appendChild(el(document, 'ul', 'db-lat'));
-  for (const test of timed) lat.appendChild(el(document, 'li')).append(el(document, 'span', null, test.label), latency(document, entries(test.id), scale));
+  for (const test of timed) {
+    const item = lat.appendChild(el(document, 'li'));
+    item.dataset.test = test.id;
+    item.append(el(document, 'span', null, test.label), latency(document, entries(test.id), scale));
+  }
   return node;
 }
 
@@ -241,8 +271,8 @@ export function renderIsolatedView(container, catalog, model, selection) {
   const legend = el(document, 'p', 'bench-legend');
   legend.append(el(document, 'i', 'n1'), '1 node', el(document, 'i', 'n3'), '3 nodes');
   const duo = el(document, 'div', 'bench-duo');
-  duo.append(...[latencyPanel(document, model, 'random-read', 'Read latency'),
-    latencyPanel(document, model, 'search', 'Search latency')].filter(Boolean));
+  duo.append(...[latencyPanel(document, model, 'random-read', 'read', 'Read latency'),
+    latencyPanel(document, model, 'search', 'search', 'Search latency')].filter(Boolean));
   const parts = selection.type === 'all' ? [overview(document, model, selection.sort), duo, cost(document, model)]
     : [cards(document, model, selection.type)];
   container.replaceChildren(legend, ...parts.filter(Boolean), footer(document, catalog, model, selection.type));
