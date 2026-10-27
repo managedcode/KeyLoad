@@ -20,7 +20,7 @@ internal sealed class BenchmarkSessionDocumentWorkload(BenchmarkSessionContext c
         ImmutableArray<BenchmarkSessionLaneReport> retained = [];
         try
         {
-            // Every client loads through the database's own bulk API at the vendor's recommended size; each still gets requests.
+            // Every client loads through the database's native bulk API under the adapter's per-request bound.
             var batch = execution.IngestionBatchRecords;
             if (batch < BenchmarkSessionLimits.SingleItemCount || batch > context.Options.Records / context.Options.Concurrency)
             {

@@ -3,7 +3,7 @@ namespace KeyLoad.Comparisons.Targets;
 public sealed partial class OpenSearchTarget
 {
     // Bound each bulk request independently of the total corpus and the number of active clients.
-    private const int BulkRequestDocuments = 1_000;
+    private const int BulkRequestDocuments = 500;
     /// <inheritdoc/>
     public int IngestionBatchRecords => BulkRequestDocuments;
     /// <inheritdoc/>
