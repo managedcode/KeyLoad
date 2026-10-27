@@ -6,6 +6,7 @@ using Aspire.Hosting.Testing;
 using KeyLoad.ComparisonHost.BenchmarkOrchestration;
 using KeyLoad.Comparisons;
 using KeyLoad.Comparisons.Targets;
+using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,13 +38,14 @@ internal static class AdditionalDatabaseResources
         await using var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_LoadTests_AppHost>(arguments, token);
         await using var application = await builder.BuildAsync(token);
         var failures = new List<Exception>();
-        var resources = application.Services.GetRequiredService<DistributedApplicationModel>().Resources
-            .OfType<ContainerResource>().Select(resource => resource.Name).ToArray();
+        var containers = application.Services.GetRequiredService<DistributedApplicationModel>().Resources
+            .OfType<ContainerResource>().ToArray();
+        var resources = containers.Select(resource => resource.Name).ToArray();
         await using var capture = new ComparisonTestLogCapture(application, ExecutionPolicyFixture.Harness(), resources);
         var observations = new NativeDatabaseResourceObservation(application, root, token);
         try
         {
-            await RunNativeAsync(application, target, verify, observations, token);
+            await RunNativeAsync(application, target, verify, observations, failures, token);
         }
         catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
         {
@@ -53,8 +55,13 @@ internal static class AdditionalDatabaseResources
         await SettleAsync(capture.StopAsync, failures);
         await SettleAsync(() => capture.WriteResourcesToAsync(root), failures);
         await SettleAsync(() => capture.DisposeAsync().AsTask(), failures);
+        var beforeStop = failures.Count;
         await SettleAsync(() => application.StopAsync(CancellationToken.None), failures);
         await SettleAsync(() => application.DisposeAsync().AsTask(), failures);
+        if (failures.Count == beforeStop)
+        {
+            await SettleAsync(() => IsolatedDataCleanup.DeleteAsync(IsolatedResourceContext.ExecutionDirectory(root), containers), failures);
+        }
         if (failures.Count > NoFailures)
         {
             throw new AggregateException(failures);
@@ -63,7 +70,8 @@ internal static class AdditionalDatabaseResources
     private const int NoFailures = 0;
 
     private static async Task RunNativeAsync(DistributedApplication application, string target,
-        Func<IComparisonTarget, CancellationToken, Task> verify, NativeDatabaseResourceObservation observations, CancellationToken token)
+        Func<IComparisonTarget, CancellationToken, Task> verify, NativeDatabaseResourceObservation observations,
+        List<Exception> failures, CancellationToken token)
     {
         await application.StartAsync(token);
         var settings = await BenchmarkSessionClientRuntime.WaitForReadinessAsync(application, token);
@@ -73,7 +81,7 @@ internal static class AdditionalDatabaseResources
         configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, ComparisonExecutionRegistration.ConfigurationPath), optional: false);
         var policy = ComparisonExecutionRegistration.Read(configuration);
         await using var database = Create(target, values, policy, configuration);
-        await verify(database, token);
+        await SettleAsync(() => verify(database, token), failures);
     }
 
     private const string Image = "Benchmarks__Execution__Image", Connection = "Benchmarks__Execution__ConnectionString";

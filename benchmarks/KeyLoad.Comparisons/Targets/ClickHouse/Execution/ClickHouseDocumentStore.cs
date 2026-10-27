@@ -9,7 +9,7 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
     : HttpDocumentStore(http, name, options)
 {
     private const string TargetName = "ClickHouse";
-    private const string Ack = "MergeTree; async_insert=1 with wait_for_async_insert=1; fsync_after_insert=1; synchronous mutations";
+    private const string Ack = "MergeTree; async_insert=1 with wait_for_async_insert=1; fsync_after_insert=1; fsync_part_directory=1; synchronous patch-part UPDATE/DELETE";
     private const string Auth = "isolated database; password-authenticated default user";
     private const string TableSuffix = ".documents";
     private const string JsonFormat = " FORMAT JSON";
@@ -20,17 +20,19 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
     private const string Version = "SELECT version() AS version FORMAT JSON";
     private const string Create = "CREATE DATABASE ";
     private const string CreateTable = "CREATE TABLE ";
-    private const string Columns = " (id String,body String,number UInt32) ENGINE=MergeTree ORDER BY id SETTINGS fsync_after_insert=1,fsync_part_directory=1";
+    private const string Columns = " (id String,body String,number UInt32) ENGINE=MergeTree ORDER BY id SETTINGS fsync_after_insert=1,fsync_part_directory=1,enable_block_number_column=1,enable_block_offset_column=1";
     private const string Drop = "DROP DATABASE ";
     private const string Insert = "INSERT INTO ";
     private const string Values = " FORMAT JSONEachRow\n";
-    private const string Update = "ALTER TABLE ";
-    private const string UpdateBody = " UPDATE body={body:String} WHERE id={id:String}";
-    private const string Delete = " DELETE WHERE id={id:String}";
+    private const string Alter = "ALTER TABLE ";
+    private const string Update = "UPDATE ";
+    private const string UpdateBody = " SET body={body:String} WHERE id={id:String}";
+    private const string Delete = "DELETE FROM ";
     private const string Page = " WHERE id>{after:String} ORDER BY id LIMIT ";
     private const string Index = " ADD INDEX session_number_idx number TYPE minmax GRANULARITY 1";
     private const string Materialize = " MATERIALIZE INDEX session_number_idx";
-    private const string Settings = "?wait_end_of_query=1&mutations_sync=2&async_insert=1&wait_for_async_insert=1&async_insert_busy_timeout_ms=";
+    private const string Settings = "?wait_end_of_query=1&mutations_sync=2&lightweight_deletes_sync=2&lightweight_delete_mode=lightweight_update_force"
+        + "&apply_patch_parts=1&update_sequential_consistency=1&async_insert=1&wait_for_async_insert=1&async_insert_busy_timeout_ms=";
     private const string ParameterPrefix = "&param_", Equal = "=";
     private const string Media = "text/plain";
     private const string Id = "id", Number = "number", Body = "body", After = "after", Data = "data", VersionField = "version";
@@ -70,7 +72,7 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
         {
             Scenario.DocumentWrite => Insert + Table + Values + Row(document),
             Scenario.DocumentUpdate => Update + Table + UpdateBody,
-            Scenario.DocumentDelete => Update + Table + Delete,
+            Scenario.DocumentDelete => Delete + Table + Predicate,
             _ => throw new NotSupportedException()
         };
         return ExecuteAsync(query, scenario == Scenario.DocumentWrite ? null : parameters, token);
@@ -103,8 +105,8 @@ internal sealed class ClickHouseDocumentStore(HttpClient http, string name, IOpt
 
     internal override async Task IndexAsync(CancellationToken token)
     {
-        await ExecuteAsync(Update + Table + Index, null, token, indexing: true).ConfigureAwait(false);
-        await ExecuteAsync(Update + Table + Materialize, null, token, indexing: true).ConfigureAwait(false);
+        await ExecuteAsync(Alter + Table + Index, null, token, indexing: true).ConfigureAwait(false);
+        await ExecuteAsync(Alter + Table + Materialize, null, token, indexing: true).ConfigureAwait(false);
     }
 
     private async Task ExecuteAsync(string sql, Dictionary<string, string>? parameters, CancellationToken token, bool indexing = false)

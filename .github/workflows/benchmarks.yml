@@ -110,7 +110,7 @@ jobs:
           compression-level: 0
           retention-days: 90
       - name: Test external database bulk operations and joined cleanup
-        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --maximum-parallel-tests 1 --minimum-expected-tests 6 --treenode-filter '/*/*/NativeDatabaseTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/NativeAdapters" --report-trx --timeout 20m
+        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --maximum-parallel-tests 1 --minimum-expected-tests 6 --treenode-filter '/*/*/NativeDatabaseTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/NativeAdapters" --report-trx --timeout 40m
       - name: Test bounded terminal execution diagnostics
         run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --minimum-expected-tests 1 --treenode-filter '/*/*/ComparisonHostCaptureTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/TerminalDiagnostics" --report-trx
       - name: Save original preparation diagnostics

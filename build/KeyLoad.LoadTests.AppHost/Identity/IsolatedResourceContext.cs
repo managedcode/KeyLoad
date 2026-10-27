@@ -13,7 +13,7 @@ internal sealed record IsolatedResourceContext(IDistributedApplicationBuilder Bu
 
     internal string DataDirectory(string name)
     {
-        var path = Path.Combine(Root, RuntimeDirectoryCore, name);
+        var path = Path.Combine(ExecutionDirectory(Root), name);
         Directory.CreateDirectory(path);
         if (!OperatingSystem.IsWindows())
         {
@@ -21,6 +21,8 @@ internal sealed record IsolatedResourceContext(IDistributedApplicationBuilder Bu
         }
         return path;
     }
+
+    internal static string ExecutionDirectory(string root) => Path.Combine(root, RuntimeDirectoryCore);
 
     internal void BindEndpoint<T>(int index, IResourceBuilder<T> node, string endpointName)
         where T : IResourceWithEndpoints

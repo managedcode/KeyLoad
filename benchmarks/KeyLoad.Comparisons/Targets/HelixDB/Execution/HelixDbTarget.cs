@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Comparisons.Targets;
 /// <summary>Compares HelixDB execution document and directed graph operations on one persisted writer.</summary>
+/// <remarks>The isolated Aspire session owns server storage; this target owns its HTTP clients.</remarks>
 /// <param name = "http">Owned execution HTTP client.</param>
 /// <param name = "runId">Unique execution label scope.</param>
 /// <param name = "executionOptions">The required validated operational limits.</param>
@@ -23,9 +24,6 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
     private readonly string label = HelixDbTokens.TokenKeyLoadDoc + Guid.Parse(runId).ToString(HelixDbTokens.TokenN);
     private int count;
     private int depth;
-    private bool ownsData;
-    private bool ownsEqualityIndex;
-    private bool ownsRangeIndex;
     /// <inheritdoc/>
     public TargetProfile Profile
     {
@@ -45,14 +43,11 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
         health.EnsureSuccessStatusCode();
         count = dataset.Documents.Count;
         depth = dataset.Settings.GraphDepth;
-        ownsData = true;
         var documentTiming = (dataset as DocumentComparisonCorpus)?.InitializationTiming;
         using (documentTiming?.MeasureIndex())
         {
             await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbTokens.TokenId, range: false), Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
-            ownsEqualityIndex = true;
             await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbTokens.TokenNumber, range: true), Policy, token: cancellationToken, timeProvider: timeProvider).ConfigureAwait(false);
-            ownsRangeIndex = true;
         }
         using (documentTiming?.MeasureLoad())
         {
@@ -68,32 +63,9 @@ public sealed partial class HelixDbTarget(HttpClient http, string runId, string 
     }
 
     /// <inheritdoc/>
-    public async ValueTask DisposeAsync()
+    public ValueTask DisposeAsync()
     {
-        try
-        {
-            if (ownsData)
-            {
-                using var timeout = new CancellationTokenSource(Policy.DocumentCleanupTimeout, timeProvider);
-                await HelixDbDocumentCleanup.RunAsync(http, label, Policy, timeProvider, timeout.Token).ConfigureAwait(false);
-                if (ownsEqualityIndex)
-                {
-                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbTokens.TokenId, range: false), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
-                }
-                if (ownsSessionNumberEqualityIndex)
-                {
-                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbTokens.TokenNumber, range: false),
-                        Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
-                }
-                if (ownsRangeIndex)
-                {
-                    await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.DropIndex(label, HelixDbTokens.TokenNumber, range: true), Policy, token: timeout.Token, timeProvider: timeProvider).ConfigureAwait(false);
-                }
-            }
-        }
-        finally
-        {
-            http.Dispose();
-        }
+        http.Dispose();
+        return ValueTask.CompletedTask;
     }
 }

@@ -155,7 +155,11 @@ matrix, restarts or separate benchmark scenario.
   verify their actual writable-mount mappings. Linux additionally
   requires the original CPU/RSS and complete resource qualification; desktop checks
   cannot substitute for that Linux gate.
-  OpenSearch controls cover one million actual documents per topology. All native
+  OpenSearch controls cover one million actual documents per topology. The HelixDB
+  control also loads one million documents and builds the session indexes before
+  mutations and complete readback. The six-control run has a 40-minute timeout;
+  each operation keeps its 30-second deadline and document cleanup keeps its
+  20-minute deadline. All native
   clients and resource observation wait for the same Aspire health and bootstrap
   completion contract used by the full workload client.
   Manual `mode=contracts` uses its own concurrency group for the same native and
@@ -178,9 +182,27 @@ files, KeyLoad included. The manual Release workflow alone publishes the KeyLoad
 server image with SDK `PublishContainer`.
 
 The Redis topology probe removes its transient key before document readback.
-HelixDB closes a namespace through bounded, acknowledged deletion pages while its
-indexes are still available, then drops the empty indexes under the document cleanup
-deadline. Terminal client diagnostics retain a bounded suffix so a late disposal
+The HelixDB document target owns its HTTP clients within one dedicated Aspire
+session. That session owns the private server and its anonymous writable volume.
+After the complete workload and final-state oracle, the target closes its clients;
+Aspire joins server shutdown and removes the session storage. Native controls use
+the same joined lifecycle and validate anonymous-volume ownership before removing
+their host data directory. Original resource identities and logs remain available.
+Measured document deletes still use the real native mutation path.
+
+ClickHouse uses native patch-part `UPDATE` and `DELETE FROM` operations over the
+same MergeTree table, with block-number/offset columns enabled. Deletes require
+`lightweight_update_force`, so unsupported patch deletion is an error. The same
+fsync settings cover inserted data and patch parts; returned writes remain visible
+to independent clients. Physical payload removal occurs during later merges;
+crash and power-loss qualification remain separate. The pinned 26.9.25.15
+[patch writer](https://github.com/ClickHouse/ClickHouse/blob/235315b9148f8d60b261c10a616b0a186f4db758/src/Storages/MergeTree/MergeTreeDataWriter.cpp#L775)
+uses the shared fsync path, and its
+[delete-mode setting](https://github.com/ClickHouse/ClickHouse/blob/235315b9148f8d60b261c10a616b0a186f4db758/src/Core/Settings.cpp#L5170)
+defines the required mode. The workload retains its original corpus, operation
+counts, concurrency and 140-minute execution deadline.
+
+Terminal client diagnostics retain a bounded suffix so a late disposal
 failure remains observable after a long measured session. Cleanup failures still
 fail the session and cannot produce a successful original result.
 

@@ -8,7 +8,7 @@ internal sealed class NativeDatabaseTests
 {
     internal const string Redis = "Redis", OpenSearch = "OpenSearch", HelixDb = "HelixDB", MongoDb = "MongoDB";
     private const int Empty = 0, Clients = 16, First = 0, Updated = 1, Deleted = 2, Single = 1, ReplicaNodes = 3;
-    private const int RedisRecords = 800_000, OpenSearchRecords = 1_000_000;
+    private const int RedisRecords = 800_000, MillionRecords = 1_000_000;
     private const string BodyMismatch = "NativeDatabaseBulkReadbackMismatch";
 
     [Test, Arguments(OpenSearch, 1), Arguments(OpenSearch, 3), Arguments(Redis, 3), Arguments(HelixDb, 1), Arguments(MongoDb, 1)]
@@ -26,7 +26,7 @@ internal sealed class NativeDatabaseTests
         var count = target.Profile.Name switch
         {
             Redis => RedisRecords,
-            OpenSearch => OpenSearchRecords,
+            OpenSearch or HelixDb => MillionRecords,
             _ => documents.IngestionBatchRecords * Clients
         };
         await documents.InitializeDocumentsAsync(new(corpus, false, count + Single), token);
@@ -34,6 +34,10 @@ internal sealed class NativeDatabaseTests
         await using var independent = await documents.OpenDocumentSessionAsync(token);
         await Assert.That(session.ClientIdentity).IsNotEqualTo(independent.ClientIdentity);
         await CreateBatchesAsync(documents, corpus, count, token);
+        if (target.Profile.Name == HelixDb)
+        {
+            await ((IBenchmarkSessionQueries)target).BuildSessionIndexesAsync(token);
+        }
         await session.ExecuteAsync(Scenario.DocumentUpdate, corpus.Replacement(Updated), token);
         await session.ExecuteAsync(Scenario.DocumentDelete, corpus.CreateDocument(Deleted), token);
         var observed = Empty;

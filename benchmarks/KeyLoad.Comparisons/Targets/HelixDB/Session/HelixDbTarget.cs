@@ -7,13 +7,11 @@ public sealed partial class HelixDbTarget : IBenchmarkSessionQueries
     private const int SessionCandidateLimit = 2;
     private const string SessionCardinalityMismatch = "SessionQueryCardinalityMismatch";
 
-    private bool ownsSessionNumberEqualityIndex;
     /// <inheritdoc/>
     public async Task BuildSessionIndexesAsync(CancellationToken cancellationToken)
     {
         await HelixDbIndexLifecycle.ExecuteAsync(http, HelixDbDocumentAst.Index(label, HelixDbTokens.TokenNumber, range: false),
             Policy, timeProvider, cancellationToken).ConfigureAwait(false);
-        ownsSessionNumberEqualityIndex = true;
     }
 
     /// <inheritdoc/>
