@@ -21,7 +21,6 @@ internal sealed class SiteExecutionOptions
     public TimeSpan IsolatedProcessDeadline { get; set; } = TimeSpan.FromSeconds(300);
     public int BrowserSessionCapacity { get; set; } = 1;
     public int MaximumQueued { get; set; } = 64;
-    // Heavy Node children are single-threaded; one admitted child per logical processor keeps every core busy.
-    public int HeavyChildCapacity { get; set; } = Environment.ProcessorCount;
+    public int HeavyChildCapacity { get; set; } = 2;
     public int ProcessOutputBufferCharacters { get; set; } = 4096;
 }
