@@ -27,7 +27,20 @@ internal sealed class SagaTimeoutTraceIsolationTests(SagaTimeoutFixture fixture)
 
         await AssertIsolatedTraceAsync(scheduled, caller.TraceId.ToString(), saga.Hint);
         var shards = await fixture.JobHarness.CaptureOwnedShardsAsync(dueTime, CancellationToken.None);
-        await fixture.JobHarness.WaitUntilSettledAsync(shards, CancellationToken.None);
+        try
+        {
+            await fixture.JobHarness.WaitUntilSettledAsync(shards, CancellationToken.None);
+        }
+        catch (TimeoutException failure)
+        {
+            var current = fixture.Database.Database.InspectSaga(SagaPrincipalId, saga.Lane, saga.Id);
+            var counts = new List<string>();
+            foreach (var shard in shards)
+            {
+                counts.Add($"{shard.Id}: {await shard.GetJobCountAsync()} jobs, scheduled={shard.Id == scheduled.ShardId}");
+            }
+            throw new TimeoutException($"{failure.Message} Saga phase: {current?.Phase}; {string.Join("; ", counts)}", failure);
+        }
         var actual = fixture.Database.Database.InspectSaga(SagaPrincipalId, saga.Lane, saga.Id);
         await Assert.That(actual!.Phase).IsEqualTo(SagaPhase.TimedOut);
     }

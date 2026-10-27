@@ -24886,9 +24886,9 @@
       "methodName": "ScheduleDoesNotPersistAmbientCallerTraceState",
       "instanceName": "ScheduleDoesNotPersistAmbientCallerTraceState",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Messaging/Cases/RuntimeSaga/SagaTimeoutTraceIsolationTests.cs",
-      "sourceSha256": "3ec76f59f1e53428e0324fcd43515e7290c0fa6ff82d1a22b3b692f05efb92d7",
+      "sourceSha256": "b0b76b525c2c79d26d9a83845fc2fd61e08f5f814d1aacc1acec9ba28d09857a",
       "lineNumber": 16,
-      "endLineNumber": 33,
+      "endLineNumber": 46,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -66259,12 +66259,52 @@
       ],
       "nonContributorReason": "required-control",
       "reviewBasis": "Executes the actual governance CLI against owned positive and negative source cases; it controls test path ownership and does not execute a database operation."
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.OrleansExecution.OrleansTelemetryCaptureIsolationTests",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.OrleansTelemetryCaptureIsolationTests",
+      "methodName": "AnOwnedTraceStillReportsExhaustedCaptureCapacity",
+      "instanceName": "AnOwnedTraceStillReportsExhaustedCaptureCapacity",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/Orleans/OrleansTelemetryCaptureIsolationTests.cs",
+      "sourceSha256": "77e4e35c0925c875b094b32a10025eafc0edf12582c8bb6c6e0fd8a4d24bf85e",
+      "lineNumber": 30,
+      "endLineNumber": 42,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-ORL-012"
+      ],
+      "acceptance": [
+        "AC-ORL-012"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Real OpenTelemetry provider/exporter capture isolation and exhaustion control. Required ordinary test; no database operation or distributed telemetry acceptance is claimed."
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.OrleansExecution.OrleansTelemetryCaptureIsolationTests",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.OrleansTelemetryCaptureIsolationTests",
+      "methodName": "UnrelatedTracesLeaveCapacityForTheCompleteOwnedTrace",
+      "instanceName": "UnrelatedTracesLeaveCapacityForTheCompleteOwnedTrace",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/Orleans/OrleansTelemetryCaptureIsolationTests.cs",
+      "sourceSha256": "77e4e35c0925c875b094b32a10025eafc0edf12582c8bb6c6e0fd8a4d24bf85e",
+      "lineNumber": 11,
+      "endLineNumber": 28,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-ORL-012"
+      ],
+      "acceptance": [
+        "AC-ORL-012"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Real OpenTelemetry provider/exporter capture isolation and exhaustion control. Required ordinary test; no database operation or distributed telemetry acceptance is claimed."
     }
   ],
   "coverageGroups": [
     {
       "groupId": "unit-functional-01",
-      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayS*)|(AnalyticsComp*)|(AnnLifetimeD*)|(AnnPublicR*)|(AnnSeedC*)|(AnnSeedF*)|(AnnWaitA*)|(AtomicPartitionRosterB*)|(Bi*)|(Bm25OriginalP*)|(Bm25R*)|(CacheReadPermitC*)|(ChunkC*)|(ChunkManifestT*)|(ChunkW*)|(CliBackupJ*)|(CliBackupRestoreL*)|(Compe*)|(CompositionL*)|(CompositionP*)|(Conf*)|(ConnectionFi*)|(Cont*)|(CqrsT*)|(CredentialF*)|(CurrentA*)|(CurrentJ*)|(CurrentW*)|(DatabaseCompositionF*)|(Dec*)|(Disp*)|(DistributedSearchD*)|(DocumentE*)|(DocumentMutationImageT*)|(DropL*)|(DueF*)|(EventAppendC*)|(EventFeedPubSubA*)|(EventProjectionI*)|(EventQ*)|(FeedV*)|(Fie*)|(GlobalBranchWindowMergeB*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphIncomingV*)|(GraphSearchI*)|(GraphShortestPathC*)|(Ho*)|(HybridE*)|(Ini*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(LiveQ*)|(Man*)|(McpAuthenticationE*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpP*)|(McpRes*)|(MetadataB*)|(Metam*)|(MultiLaneC*)|(OperationH*)|(OrleansT*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(Partia*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(PartitionStoragePu*)|(ProjectionPr*)|(ProjectionR*)|(PublicN*)|(QueueA*)|(QueueEn*)|(QueueLifecycleC*)|(QueueLifecycleN*)|(QueueLifecycleP*)|(QueueO*)|(ReadB*)|(ReadCutCa*)|(ReadD*)|(ReadExecutionBudgetGrantC*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RelationalQ*)|(RemoteTransferL*)|(RemoteTransferRec*)|(RemoteTransferRet*)|(RequestCqrsF*)|(ResourcePa*)|(ResourcePolicyUpdateV*)|(RowRevisionI*)|(RuntimeJournalL*)|(SagaS*)|(SagaTimeoutR*)|(SagaTimeoutTe*)|(SampleAggregateT*)|(SampleChunkCod*)|(SampleChunkPar*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(SdkPr*)|(Secu*)|(SqlBetweenB*)|(SqlBo*)|(SqlCr*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageR*)|(StoreO*)|(StreamTe*)|(SubscriptionLeaseV*)|(TargetInboxA*)|(TargetInboxCap*)|(TextBi*)|(TextBm25E*)|(TextOnlineW*)|(TextProjectionA*)|(TextProjectionO*)|(TextProjectionRem*)|(TextProv*)|(TextWaitF*)|(TextWaitObserve*)|(TimeP*)|(TimeSeriesR*)|(TopicSqlR*)|(TransactionP*)|(Un*)|(ValueO*)|(VectorR*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcChunk002UnpairedCodeUnitsUseExactUtf16Encoding*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafPayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayS*)|(AnalyticsComp*)|(AnnLifetimeD*)|(AnnPublicR*)|(AnnSeedC*)|(AnnSeedF*)|(AnnWaitA*)|(AtomicPartitionRosterB*)|(Bi*)|(Bm25OriginalP*)|(Bm25R*)|(CacheReadPermitC*)|(ChunkC*)|(ChunkManifestT*)|(ChunkW*)|(CliBackupJ*)|(CliBackupRestoreL*)|(Compe*)|(CompositionL*)|(CompositionP*)|(Conf*)|(ConnectionFi*)|(Cont*)|(CqrsT*)|(CredentialF*)|(CurrentA*)|(CurrentJ*)|(CurrentW*)|(DatabaseCompositionF*)|(Dec*)|(Disp*)|(DistributedSearchD*)|(DocumentE*)|(DocumentMutationImageT*)|(DropL*)|(DueF*)|(EventAppendC*)|(EventFeedPubSubA*)|(EventProjectionI*)|(EventQ*)|(FeedV*)|(Fie*)|(GlobalBranchWindowMergeB*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphIncomingV*)|(GraphSearchI*)|(GraphShortestPathC*)|(Ho*)|(HybridE*)|(Ini*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(LiveQ*)|(Man*)|(McpAuthenticationE*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpP*)|(McpRes*)|(MetadataB*)|(Metam*)|(MultiLaneC*)|(OperationH*)|(OrleansTelemetryA*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(Partia*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(PartitionStoragePu*)|(ProjectionPr*)|(ProjectionR*)|(PublicN*)|(QueueA*)|(QueueEn*)|(QueueLifecycleC*)|(QueueLifecycleN*)|(QueueLifecycleP*)|(QueueO*)|(ReadB*)|(ReadCutCa*)|(ReadD*)|(ReadExecutionBudgetGrantC*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RelationalQ*)|(RemoteTransferL*)|(RemoteTransferRec*)|(RemoteTransferRet*)|(RequestCqrsF*)|(ResourcePa*)|(ResourcePolicyUpdateV*)|(RowRevisionI*)|(RuntimeJournalL*)|(SagaS*)|(SagaTimeoutR*)|(SagaTimeoutTe*)|(SampleAggregateT*)|(SampleChunkCod*)|(SampleChunkPar*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(SdkPr*)|(Secu*)|(SqlBetweenB*)|(SqlBo*)|(SqlCr*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageR*)|(StoreO*)|(StreamTe*)|(SubscriptionLeaseV*)|(TargetInboxA*)|(TargetInboxCap*)|(TextBi*)|(TextBm25E*)|(TextOnlineW*)|(TextProjectionA*)|(TextProjectionO*)|(TextProjectionRem*)|(TextProv*)|(TextWaitF*)|(TextWaitObserve*)|(TimeP*)|(TimeSeriesR*)|(TopicSqlR*)|(TransactionP*)|(Un*)|(ValueO*)|(VectorR*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcChunk002UnpairedCodeUnitsUseExactUtf16Encoding*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafPayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsCompositionTests",
         "KeyLoad.FunctionalTests.Authorization.CredentialFrameBudgetTests",

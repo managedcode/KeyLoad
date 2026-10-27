@@ -1,6 +1,5 @@
 using KeyLoad.ClusterTests.ClientApi;
 using KeyLoad.ClusterTests.OrleansExecution;
-using KeyLoad.ClusterTests.QueryExecution;
 
 namespace KeyLoad.ClusterTests.Messaging;
 
@@ -41,8 +40,10 @@ internal static class QueueDeadlineSiloClusterActions
         var result = await admin.Sdk.CommitAsync(command, token);
         await Assert.That(result.IsSuccess).IsFalse();
         await Assert.That(result.Value).IsNull();
-        await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.RevisionConflict,
-            QueueDeadlineSiloClusterProtocol.StaleDetail), result.Problem);
+        var expected = Errors.Problem(ErrorCode.RevisionConflict, QueueDeadlineSiloClusterProtocol.StaleDetail);
+        var actual = JsonDefaults.Serialize(result.Problem);
+        await Assert.That(actual.AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue()
+            .Because(System.Text.Encoding.UTF8.GetString(actual));
         await QueueDeadlineSiloClusterCurrent.ObserveAsync(admin, state, token);
         var reply = await admin.Mcp.CallAsync(McpCallerTools.DocumentsCommit, command, token);
         _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.RevisionConflict, dispatched: true)).Value;

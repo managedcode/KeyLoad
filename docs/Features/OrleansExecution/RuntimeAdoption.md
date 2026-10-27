@@ -102,10 +102,17 @@ principal, raw routing ID, private exception text or exemplar attribute escapes.
 Concurrent principals keep distinct request contexts. Immutable privacy sentinels
 in an actual operation span prove fail-closed suppression while the operation
 keeps its correct outcome. Capture is bounded and every provider is flushed and
-joined. `OrleansRuntimeTelemetryTests` on `RequestCqrsClusterFixture` own the
+joined. `OrleansRuntimeTelemetryTests` on `RequestCqrsHostedRuntimeFixture` own the
 cases; no synthetic exported span, raw-tag export, relaxed assertion, new
 provider or higher limit is permitted. SDK/MCP cluster qualification remains
 mandatory.
+
+The activity capture registers each original operation trace before starting its
+parent and retains every exported span in that trace within the existing bound.
+The sentinel targets that caller's direct application span. Process-wide metrics
+retain the whole-operation test's `NotInParallel` ownership. Separate required
+capture controls prove unrelated trace isolation and visible capacity exhaustion;
+they are not whole-operation coverage contributors.
 
 ## Verification and rollout
 
