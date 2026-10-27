@@ -167,8 +167,14 @@ matrix, restarts or separate benchmark scenario.
   Manual `mode=contracts` runs the same native and harness controls, retaining test
   diagnostics. Workload fan-out, session measurements
   and Website dispatch belong to `mode=full` and push runs.
+  Manual `mode=influxdb-readback` runs only the existing InfluxDB million-record
+  native case and terminal diagnostic control, with a five-minute bound on that
+  native case. It retains original Linux resource and test evidence without the
+  other databases, workload fan-out or public figures. This focused check does not
+  qualify the full eight-control gate or complete session suite; those gates stay
+  unchanged for `mode=contracts`, `mode=full` and push runs.
   A newer run of the same branch cancels the superseded run instead of waiting
-  behind its measurements, including when changing between contract-only and full runs.
+  behind its measurements, including when changing between manual modes and full runs.
 - Ingestion at 1/10/500 clients, the minimum measured operation counts, recall,
   replicated acknowledgement, resource bounds and all required workload families are
   kept. The number of jobs is not the number of measured scenarios.
