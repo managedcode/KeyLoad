@@ -1,4 +1,3 @@
-using KeyLoad.FunctionalTests.TestInfrastructure;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
@@ -6,7 +5,7 @@ namespace KeyLoad.FunctionalTests.OrleansExecution;
 internal sealed class ConnectionFailureTests
 {
     [Test]
-    [NotInParallel(LoggingEventSourceIsolation.Key)]
+    [NotInParallel]
     public Task AcCrs052FailureAndRevocationLeaveNoEffectsAndFollowingCallSucceeds()
     {
         return ConnectionScenario.RunAsync(async scenario =>

@@ -1,13 +1,12 @@
 using System.Runtime.Serialization;
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.FunctionalTests.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
 /// <summary>Exercises the real reply mapper and execution logging boundary without exposing exception content.</summary>
-[NotInParallel(LoggingEventSourceIsolation.Key)]
+[NotInParallel]
 internal sealed class GrainFailureCauseDiagnosticsTests
 {
     private const string MessageCanary = "private-cause-constructor-canary";

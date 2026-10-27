@@ -1,4 +1,3 @@
-using KeyLoad.FunctionalTests.TestInfrastructure;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
@@ -6,7 +5,7 @@ using ModelContextProtocol.Protocol;
 namespace KeyLoad.FunctionalTests.ClientApi;
 
 /// <summary>AC-CLIENT-008: execution captures remain enabled across real provider/listener disposal and recreation.</summary>
-[NotInParallel(LoggingEventSourceIsolation.Key)]
+[NotInParallel]
 internal sealed class McpTransportCaptureLifecycleTests
 {
     private const int CaptureLifetimes = 2;

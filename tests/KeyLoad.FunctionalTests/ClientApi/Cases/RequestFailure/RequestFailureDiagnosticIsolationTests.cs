@@ -1,6 +1,5 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using KeyLoad.FunctionalTests.TestInfrastructure;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -8,7 +7,7 @@ using Microsoft.Extensions.Logging;
 namespace KeyLoad.FunctionalTests.ClientApi;
 
 /// <summary>Actual execution listener reconfiguration cannot revoke or contaminate the owned diagnostic.</summary>
-[NotInParallel(LoggingEventSourceIsolation.Key)]
+[NotInParallel]
 internal sealed class RequestFailureDiagnosticIsolationTests
 {
     private const string PrivateMessage = "private-failure-message-canary";

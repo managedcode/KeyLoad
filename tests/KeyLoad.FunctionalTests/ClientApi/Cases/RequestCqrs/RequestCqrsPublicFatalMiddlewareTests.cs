@@ -1,7 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.ExceptionServices;
 using KeyLoad.Clustering;
-using KeyLoad.FunctionalTests.TestInfrastructure;
 using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
 using Microsoft.AspNetCore.Http;
@@ -10,7 +9,7 @@ using Microsoft.Extensions.Logging;
 namespace KeyLoad.FunctionalTests.ClientApi;
 
 /// <summary>AC-CRS-003/004: the actual outer HTTP boundary preserves execution fatal exceptions.</summary>
-[NotInParallel(LoggingEventSourceIsolation.Key)]
+[NotInParallel]
 internal sealed class RequestCqrsPublicFatalMiddlewareTests
 {
     private const int DeepAggregateLayers = 256;

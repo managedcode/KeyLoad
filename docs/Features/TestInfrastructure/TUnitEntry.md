@@ -14,6 +14,16 @@ The AppHost owns container lifecycle and bounded fault commands. Unit and proces
 cases start only the resources they require. Complete source/image/DLL/PDB
 identity and original reports bind a run to the tested implementation.
 
+Functional namespaces admit ten concurrent tests. Tests that reconfigure the
+process-wide Microsoft logging EventSource use TUnit's unkeyed
+`[NotInParallel]` boundary for their whole listener lifetime. A shared constraint
+key only excludes other captures; it still permits concurrent host startup.
+Listener reconfiguration can then hold the EventSource lock while refreshing a
+LoggerFactory whose logger creation holds its own lock and initializes an EventSource,
+forming a lock cycle. Isolate these global-state tests from every other case in
+their process; retain ten-way admission for independent cases and all original
+privacy, cancellation, failure and healthy-follow-up assertions.
+
 ```mermaid
 flowchart LR
     Build[Debug build with warnings as errors] --> Execution[TUnit process]

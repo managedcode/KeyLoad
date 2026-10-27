@@ -1,4 +1,3 @@
-using KeyLoad.FunctionalTests.TestInfrastructure;
 using KeyLoad.Server;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -7,7 +6,7 @@ using ModelContextProtocol.Protocol;
 namespace KeyLoad.FunctionalTests.ClientApi;
 
 /// <summary>AC-CLIENT-008: real guard rejections carry only closed, private diagnostic metadata.</summary>
-[NotInParallel(LoggingEventSourceIsolation.Key)]
+[NotInParallel]
 internal sealed class McpTransportDiagnosticsTests
 {
     private const string MethodCanary = "private-method-canary";

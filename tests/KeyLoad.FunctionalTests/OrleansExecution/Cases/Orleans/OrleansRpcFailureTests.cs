@@ -1,13 +1,12 @@
 using System.Text.Json;
 using KeyLoad.Clustering;
-using KeyLoad.FunctionalTests.TestInfrastructure;
 using KeyLoad.Server;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
 /// <summary>AC-CRS-005 and AC-ROUTE-009: interrupted request streams preserve outcome uncertainty and privacy.</summary>
-[NotInParallel(LoggingEventSourceIsolation.Key)]
+[NotInParallel]
 internal sealed class OrleansRpcFailureTests
 {
     private const string PrivateCanary = "private-rpc-identity-envelope-endpoint-canary";

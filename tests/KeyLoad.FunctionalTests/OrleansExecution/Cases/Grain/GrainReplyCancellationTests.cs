@@ -1,11 +1,10 @@
 using KeyLoad.Clustering;
-using KeyLoad.FunctionalTests.TestInfrastructure;
 using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
 /// <summary>AC-AISQL-013/AC-ROUTE-010: actor replies distinguish incoming cancellation from execution interruption.</summary>
-[NotInParallel(LoggingEventSourceIsolation.Key)]
+[NotInParallel]
 internal sealed class GrainReplyCancellationTests
 {
     private const string PrivateCanary = "private-cancellation-exception-canary";
