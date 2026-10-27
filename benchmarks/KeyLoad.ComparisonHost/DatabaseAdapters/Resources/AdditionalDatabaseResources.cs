@@ -52,6 +52,8 @@ internal static class AdditionalDatabaseResources
             failures.Add(failure);
         }
         await SettleAsync(observations.CompleteAsync, failures);
+        using var stop = new CancellationTokenSource(ExecutionPolicyFixture.Harness().Value.OriginalTaskSettlementTimeout, TimeProvider.System);
+        await SettleAsync(() => IsolatedResourceShutdown.StopAsync(application, containers, stop.Token), failures);
         await SettleAsync(capture.StopAsync, failures);
         await SettleAsync(() => capture.WriteResourcesToAsync(root), failures);
         await SettleAsync(() => capture.DisposeAsync().AsTask(), failures);

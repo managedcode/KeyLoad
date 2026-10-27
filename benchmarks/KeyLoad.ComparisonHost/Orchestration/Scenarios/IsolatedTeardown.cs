@@ -22,6 +22,7 @@ internal static class IsolatedTeardown
     private const string ServerResourceValue = "server-resource";
     private const string ServerResourceTaskOwnershipWasIncompleteMessage = "Server resource task ownership was incomplete.";
     private const string StopStage = "stop";
+    private const string ResourcesStopStage = "resources-stop";
     private const string SessionStateJsonFileName = "session-state.json";
     private const string SessionJsonFileName = "session.json";
     private const string SessionResourceEvidenceJsonFileName = "session-resource-evidence.json";
@@ -54,6 +55,7 @@ internal static class IsolatedTeardown
         var runnerSettled = await IsolatedOriginalTaskSettlement.RunAsync(
             work.StopRunnerAsync, ExecutionRunnerValue, failures, options);
         var collectorSettled = await SettleCollectorAsync(work, failures, options);
+        var resourcesStopped = await StopResourcesAsync(app, containers, failures, options);
         var captureSettled = capture is null || await IsolatedOriginalTaskSettlement.RunAsync(
             capture.StopAsync, LogsCloseValue, failures, options);
         if (capture is not null)
@@ -72,7 +74,7 @@ internal static class IsolatedTeardown
         var reportsRetained = stopped && applicationDisposed
             && await IsolatedOriginalTaskSettlement.RunAsync(() => RetainReportsAsync(output, evidence),
                 ExecutionTrxRetainValue, failures, options);
-        if (runnerSettled && collectorSettled && captureSettled && captureDisposed && stopped && applicationDisposed && reportsRetained)
+        if (runnerSettled && collectorSettled && resourcesStopped && captureSettled && captureDisposed && stopped && applicationDisposed && reportsRetained)
         {
             await IsolatedOriginalTaskSettlement.RunAsync(
                 () => IsolatedDataCleanup.DeleteAsync(root, containers), DataStage, failures, options);
@@ -128,6 +130,15 @@ internal static class IsolatedTeardown
         using var cancellation = new CancellationTokenSource();
         return await IsolatedOriginalTaskSettlement.RunAsync(
             () => app.StopAsync(cancellation.Token), StopStage, failures, options, cancellation.CancelAsync);
+    }
+
+    private static async Task<bool> StopResourcesAsync(DistributedApplication app, ContainerResource[] containers,
+        IsolatedTeardownFailures failures, IOptions<ComparisonHarnessOptions> options)
+    {
+        using var cancellation = new CancellationTokenSource();
+        return await IsolatedOriginalTaskSettlement.RunAsync(
+            () => IsolatedResourceShutdown.StopAsync(app, containers, cancellation.Token), ResourcesStopStage,
+            failures, options, cancellation.CancelAsync);
     }
 
     private static Task RetainReportsAsync(string output, string evidence)

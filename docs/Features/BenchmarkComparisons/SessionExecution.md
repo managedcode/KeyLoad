@@ -148,7 +148,7 @@ matrix, restarts or separate benchmark scenario.
   run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
   part of operation latency.
   Preparation also runs the real external adapter cases in `NativeDatabaseTests`:
-  OpenSearch/MongoDB at one/three nodes, three-node Redis and one-node HelixDB, with sixteen
+  OpenSearch/MongoDB at one/three nodes, three-node Redis and one-node HelixDB/ClickHouse, with sixteen
   independently owned clients, complete body readback and healthy continuation.
   These bounded checks retain original TRX files and do not qualify public figures.
   They resolve actual container IDs through Aspire notifications after readiness and
@@ -156,8 +156,8 @@ matrix, restarts or separate benchmark scenario.
   requires the original CPU/RSS and complete resource qualification; desktop checks
   cannot substitute for that Linux gate.
   OpenSearch controls cover one million actual documents per topology. The HelixDB
-  control also loads one million documents and builds the session indexes before
-  mutations and complete readback. The six-control run has a 40-minute timeout;
+  and ClickHouse controls also load one million documents and build the session indexes before
+  mutations and complete readback. The seven-control run has a 40-minute timeout;
   each operation keeps its 30-second deadline and document cleanup keeps its
   20-minute deadline. All native
   clients and resource observation wait for the same Aspire health and bootstrap
@@ -195,6 +195,13 @@ Aspire joins server shutdown and removes the session storage. Native controls us
 the same joined lifecycle and validate anonymous-volume ownership before removing
 their host data directory. Original resource identities and logs remain available.
 Measured document deletes still use the real native mutation path.
+
+After the workload and resource observers settle, the client requests each created
+container's registered Aspire stop command and awaits its actual exit notification.
+Resource logs remain open until these exits are observed. Application disposal
+then removes the stopped session containers and anonymous volumes. Each shutdown
+stage retains its 30-second deadline; a rejected command, missing exit, timeout or
+disposal failure still fails the original session.
 
 ClickHouse uses native patch-part `UPDATE` and `DELETE FROM` operations over the
 same MergeTree table, with block-number/offset columns enabled. Deletes require

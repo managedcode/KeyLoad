@@ -11,7 +11,7 @@ internal sealed class NativeDatabaseTests
     private const int RedisRecords = 800_000, MillionRecords = 1_000_000;
     private const string BodyMismatch = "NativeDatabaseBulkReadbackMismatch";
 
-    [Test, Arguments(OpenSearch, 1), Arguments(OpenSearch, 3), Arguments(Redis, 3), Arguments(HelixDb, 1), Arguments(MongoDb, 1)]
+    [Test, Arguments(OpenSearch, 1), Arguments(OpenSearch, 3), Arguments(Redis, 3), Arguments(HelixDb, 1), Arguments(MongoDb, 1), Arguments(BenchmarkAdditionalTargets.ClickHouse, 1)]
     public Task NativeBulkPreservesBodiesAndIndependentClients(string target, int nodes)
         => AdditionalDatabaseResources.RunAsync(target, VerifyAsync, TestContext.Current!.Execution.CancellationToken, nodes);
 
@@ -26,7 +26,7 @@ internal sealed class NativeDatabaseTests
         var count = target.Profile.Name switch
         {
             Redis => RedisRecords,
-            OpenSearch or HelixDb => MillionRecords,
+            OpenSearch or HelixDb or BenchmarkAdditionalTargets.ClickHouse => MillionRecords,
             _ => documents.IngestionBatchRecords * Clients
         };
         await documents.InitializeDocumentsAsync(new(corpus, false, count + Single), token);
@@ -34,7 +34,7 @@ internal sealed class NativeDatabaseTests
         await using var independent = await documents.OpenDocumentSessionAsync(token);
         await Assert.That(session.ClientIdentity).IsNotEqualTo(independent.ClientIdentity);
         await CreateBatchesAsync(documents, corpus, count, token);
-        if (target.Profile.Name == HelixDb)
+        if (target.Profile.Name is HelixDb or BenchmarkAdditionalTargets.ClickHouse)
         {
             await ((IBenchmarkSessionQueries)target).BuildSessionIndexesAsync(token);
         }
