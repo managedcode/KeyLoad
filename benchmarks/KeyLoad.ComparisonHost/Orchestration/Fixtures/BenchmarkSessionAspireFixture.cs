@@ -7,7 +7,9 @@ using KeyLoad.Comparisons;
 using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 
@@ -56,7 +58,8 @@ internal static class BenchmarkSessionAspireFixture
         var containers = application.Services.GetRequiredService<DistributedApplicationModel>()
             .Resources.OfType<ContainerResource>().ToArray();
         var execution = ExecutionPolicyFixture.Harness();
-        var work = new IsolatedOwnedWork(execution);
+        var shutdown = application.Services.GetRequiredService<IOptions<HostOptions>>().Value.ShutdownTimeout;
+        var work = new IsolatedOwnedWork(execution, shutdown);
         Exception? primary = null;
         try
         {

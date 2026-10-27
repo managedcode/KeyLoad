@@ -39,12 +39,16 @@ internal sealed class IsolatedOwnedWork : IAsyncDisposable
     private Task? runnerStop;
     private Task? disposing;
 
-    internal IsolatedOwnedWork(IOptions<ComparisonHarnessOptions> executionOptions)
+    internal IsolatedOwnedWork(IOptions<ComparisonHarnessOptions> executionOptions, TimeSpan hostShutdownTimeout)
     {
         ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentOutOfRangeException.ThrowIfLessThan(hostShutdownTimeout, TimeSpan.Zero);
         executionOptions.Value.Validate();
         ExecutionOptions = executionOptions;
+        HostShutdownTimeout = hostShutdownTimeout;
     }
+
+    internal TimeSpan HostShutdownTimeout { get; }
 
     internal IOptions<ComparisonHarnessOptions> ExecutionOptions
     {

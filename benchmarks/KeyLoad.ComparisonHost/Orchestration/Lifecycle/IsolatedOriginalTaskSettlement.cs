@@ -5,8 +5,11 @@ namespace KeyLoad.ComparisonHost.BenchmarkOrchestration;
 internal static class IsolatedOriginalTaskSettlement
 {
     internal static async Task<bool> RunAsync(Func<Task> start, string stage,
-        IsolatedTeardownFailures failures, IOptions<ComparisonHarnessOptions> options, Func<Task>? escalate = null)
+        IsolatedTeardownFailures failures, IOptions<ComparisonHarnessOptions> options, Func<Task>? escalate = null,
+        TimeSpan shutdownAllowance = default)
     {
+        ArgumentOutOfRangeException.ThrowIfLessThan(shutdownAllowance, TimeSpan.Zero);
+        var settlementTimeout = shutdownAllowance + options.Value.OriginalTaskSettlementTimeout;
         var initiation = StartAsync(start);
         Task original;
         try
@@ -18,7 +21,7 @@ internal static class IsolatedOriginalTaskSettlement
             Record(initiation, failure, stage, failures);
             return false;
         }
-        return await JoinAsync(original, stage, failures, options, escalate);
+        return await JoinAsync(original, stage, failures, options, escalate, settlementTimeout);
     }
 
     private static async Task<Task> StartAsync(Func<Task> start)
@@ -28,9 +31,10 @@ internal static class IsolatedOriginalTaskSettlement
     }
 
     private static async Task<bool> JoinAsync(Task original, string stage,
-        IsolatedTeardownFailures failures, IOptions<ComparisonHarnessOptions> options, Func<Task>? escalate)
+        IsolatedTeardownFailures failures, IOptions<ComparisonHarnessOptions> options, Func<Task>? escalate,
+        TimeSpan settlementTimeout)
     {
-        var wait = original.WaitAsync(options.Value.OriginalTaskSettlementTimeout, TimeProvider.System);
+        var wait = original.WaitAsync(settlementTimeout, TimeProvider.System);
         try
         {
             await wait;

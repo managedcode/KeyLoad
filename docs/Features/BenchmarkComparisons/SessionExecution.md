@@ -196,11 +196,13 @@ the same joined lifecycle and validate anonymous-volume ownership before removin
 their host data directory. Original resource identities and logs remain available.
 Measured document deletes still use the real native mutation path.
 
-After the workload and resource observers settle, the client requests each created
-container's registered Aspire stop command and awaits its actual exit notification.
-Resource logs remain open until these exits are observed. Application disposal
-then removes the stopped session containers and anonymous volumes. Each shutdown
-stage retains its 30-second deadline; a rejected command, missing exit, timeout or
+After the workload, resource observers and captured logs settle, the fixture owns
+and awaits the original Aspire testing application's `DisposeAsync` task. The
+testing factory owns host shutdown, session containers and anonymous volumes.
+Its configured `HostOptions.ShutdownTimeout` remains unchanged. The outer disposal
+join allows that host-shutdown budget plus the existing 30-second original-task
+settlement budget; other teardown stages retain their 30-second deadlines. The
+original disposal task remains joined after a threshold, and any timeout or
 disposal failure still fails the original session.
 
 ClickHouse uses native patch-part `UPDATE` and `DELETE FROM` operations over the
