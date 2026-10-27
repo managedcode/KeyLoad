@@ -8,7 +8,7 @@ internal static class SiteBuildArtifacts
     private static readonly string[] FeatureAssets =
     [
         "isolated-contracts.mjs", "isolated-http.mjs", "isolated-loader.mjs", "isolated-measurements.mjs",
-        "isolated-view.mjs", "isolated-controls.mjs", "isolated-lab.mjs", SiteAssetTokens.ContractsModule,
+        "isolated-charts.mjs", "isolated-view.mjs", "isolated-controls.mjs", "isolated-lab.mjs", SiteAssetTokens.ContractsModule,
         SiteAssetTokens.BootstrapModule, SiteAssetTokens.MeasurementModule, SiteAssetTokens.LoaderModule,
         SiteAssetTokens.SceneModule, SiteAssetTokens.GeometryModule, SiteAssetTokens.LifecycleModule,
         SiteAssetTokens.ObserversModule, SiteAssetTokens.Stylesheet, SiteAssetTokens.BrandStylesheet,

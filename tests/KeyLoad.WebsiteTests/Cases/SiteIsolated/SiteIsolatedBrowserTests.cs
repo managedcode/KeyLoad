@@ -15,17 +15,20 @@ internal sealed class SiteIsolatedBrowserTests
         await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
         await AssertAccessibilityAsync(browser.Chrome.Cdp, projection.RootElement, token);
         await SiteIsolatedBrowserKeyboardAssertions.AssertNodeSelectionAsync(browser.Chrome.Cdp, projection.RootElement, token);
-        foreach (var scenario in SiteIsolatedOracle.Cases)
+        // The whole mixed case has no single request stream; the page offers its five concurrent lanes instead.
+        foreach (var scenario in SiteIsolatedOracle.Cases.Where(item => item != "mixed"))
         {
             await SiteIsolatedBrowserAssertions.SelectAsync(browser.Chrome.Cdp, "scenario", scenario, token);
+            var metric = scenario is "index" or "verify-final" ? "duration" : "throughput";
             foreach (var nodes in new[] { 1, 3 })
             {
                 await SiteIsolatedBrowserAssertions.SelectAsync(browser.Chrome.Cdp, "node-count", nodes, token);
                 await SiteIsolatedBrowserAssertions.AssertRowsAsync(browser.Chrome.Cdp, projection.RootElement,
-                    new(scenario, nodes, "session", "throughput", "all"), token);
+                    new(scenario, nodes, "session", metric, "all"), token);
             }
         }
         await AssertIndividualSelectionsAsync(browser.Chrome.Cdp, projection.RootElement, token);
+        await AssertMatrixSelectionAsync(browser.Chrome.Cdp, projection.RootElement, token);
         await SiteIsolatedBrowserFailureAssertions.AssertRetryAndClearingAsync(browser, token);
         await browser.CompleteAsync(token);
     }
@@ -34,34 +37,45 @@ internal sealed class SiteIsolatedBrowserTests
     {
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "scenario", "mixed/search", token);
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "node-count", 3, token);
-        foreach (var repetition in new object[] { "session" })
+        foreach (var metric in new[] { "throughput", "p50", "p95", "p99", "errors", "duration" })
         {
-            await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "repetition", repetition, token);
-            foreach (var metric in new[] { "throughput", "p50", "p95", "p99", "errors", "cpu", "alloc", "rss", "duration" })
-            {
-                await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "metric", metric, token);
-                await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("mixed/search", 3, repetition, metric, "all"), token);
-            }
+            await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "metric", metric, token);
+            await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("mixed/search", 3, "session", metric, "all"), token);
         }
         await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "metric", "throughput", token);
-        await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "repetition", "session", token);
-        foreach (var target in projection.GetProperty(SiteIsolatedFields.Plan).GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
-            .Select(worker => worker.GetProperty(SiteIsolatedFields.Target).GetString()!).Distinct(StringComparer.Ordinal))
+        await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "node-count", 1, token);
+        const string types = "Array.from(document.querySelectorAll('#isolated-type .chip:not([hidden]) input')).map(input=>input.value)";
+        var offered = (await cdp.EvaluateAsync(types, false, token)).EnumerateArray().Select(item => item.GetString()!).ToArray();
+        await Assert.That(offered.First()).IsEqualTo("all");
+        foreach (var type in offered.Skip(1).Append("all"))
         {
-            await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "target", target, token);
-            await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("mixed/search", 3, "session", "throughput", target), token);
+            await SiteIsolatedBrowserAssertions.SelectAsync(cdp, "type", type, token);
+            await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("mixed/search", 1, "session", "throughput", type), token);
         }
+    }
+
+    private static async Task AssertMatrixSelectionAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
+    {
+        const string click = """
+            (()=>{const button=document.querySelector('#isolated-results .matrix button[data-scenario="random-read"]');
+              if(!button)return false;button.click();
+              return document.querySelector('#isolated-scenario input:checked').value==='random-read';})()
+            """;
+        await SiteBrowserAssertions.EvaluateSuccess(cdp, click, token);
+        await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("random-read", 1, "session", "throughput", "all"), token);
     }
 
     private static async Task AssertAccessibilityAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
     {
         const string script = """
-            (()=>({labels:['scenario','node-count','target','metric','repetition'].every(id=>
-              document.querySelector('label[for="isolated-'+id+'"]')),
+            (()=>({labels:['scenario','node-count','metric','type'].every(id=>{
+                const group=document.querySelector('#isolated-'+id);
+                return group.matches('fieldset')&&group.querySelector(':scope > legend').textContent.trim().length>0&&
+                  group.querySelectorAll('input[type="radio"][name="isolated-'+id+'"]').length>0;}),
               status:document.querySelector('#isolated-announcement').getAttribute('aria-live'),
               alert:document.querySelector('#isolated-error').getAttribute('role'),
-              caption:!!document.querySelector('#isolated-results table caption'),
-              provenance:document.querySelectorAll('#isolated-results details').length,
+              caption:!!document.querySelector('#isolated-results .isolated-table-scroll table caption'),
+              provenance:document.querySelectorAll('#isolated-results .setup-card').length,
               samples:document.querySelectorAll('#isolated-results a[download]').length}))()
             """;
         var value = await cdp.EvaluateAsync(script, false, token);
@@ -69,9 +83,12 @@ internal sealed class SiteIsolatedBrowserTests
         await Assert.That(value.GetProperty(SiteIsolatedFields.Status).GetString()).IsEqualTo("polite");
         await Assert.That(value.GetProperty(SiteIsolatedFields.Alert).GetString()).IsEqualTo("alert");
         await Assert.That(value.GetProperty(SiteIsolatedFields.Caption).GetBoolean()).IsTrue();
-        var available = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
-            .Count(worker => worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3);
-        await Assert.That(value.GetProperty(SiteIsolatedFields.Provenance).GetInt32()).IsEqualTo(available);
+        await Assert.That(value.GetProperty(SiteIsolatedFields.Provenance).GetInt32()).IsEqualTo(ProfiledWorkers(projection, 1));
         await Assert.That(value.GetProperty(SiteIsolatedFields.Samples).GetInt32()).IsEqualTo(0);
     }
+
+    internal static int ProfiledWorkers(JsonElement projection, int nodeCount)
+        => projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
+            .Count(worker => worker.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == nodeCount
+                && worker.GetProperty(SiteIsolatedFields.Session).GetProperty(SiteIsolatedFields.TargetProfile).ValueKind != JsonValueKind.Null);
 }

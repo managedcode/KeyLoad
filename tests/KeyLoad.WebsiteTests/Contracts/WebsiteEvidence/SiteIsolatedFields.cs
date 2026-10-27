@@ -40,6 +40,7 @@ internal static class SiteIsolatedFields
     internal const string UsefulOperationsPerSecond = "usefulOperationsPerSecond";
     internal const string Workers = "workers";
     internal const string Rows = "rows";
+    internal const string Ranked = "ranked";
     internal const string Scenario = "scenario";
     internal const string Name = "name";
     internal const string NodeCount = "nodeCount";

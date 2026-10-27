@@ -12,26 +12,26 @@ internal static class SiteIsolatedBrowserLayoutAssertions
     private const string AccessibleField = "accessible";
     private const string ScrollableField = "scrollable";
     private const string VirtualKeyField = "windowsVirtualKeyCode";
-    private const string OpenWorkers = "(()=>{document.querySelectorAll('#isolated-results .isolated-worker').forEach(e=>e.open=true);return true;})()";
+    private const string OpenWorkers = "(()=>{document.querySelectorAll('#isolated-results .bench-details').forEach(e=>e.open=true);return true;})()";
     private const string Snapshot = """
         (()=>{
           const wrapper=document.querySelector('#isolated-results .isolated-table-scroll');
           const rect=wrapper.getBoundingClientRect();const width=document.documentElement.clientWidth;
           const visible=e=>getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden'&&e.getBoundingClientRect().height>0;
           const rows=Array.from(wrapper.querySelectorAll('tbody tr'));
-          const workers=Array.from(document.querySelectorAll('#isolated-results .isolated-worker[open]'));
+          const workers=Array.from(document.querySelectorAll('#isolated-results .bench-details[open] .setup-card'));
           wrapper.focus();
           return{documentContained:document.documentElement.scrollWidth<=width,
             wrapperContained:rect.width>0&&rect.left>=0&&rect.right<=width,
             rows:rows.length,rowsVisible:rows.every(row=>visible(row)&&row.cells[2].textContent.trim().length>0),
-            workerCount:workers.length,workersVisible:workers.every(e=>visible(e.querySelector('dl'))),
+            workerCount:workers.length,workersVisible:workers.every(visible),
             focused:document.activeElement===wrapper,
             accessible:wrapper.tabIndex===0&&wrapper.getAttribute('role')==='region'&&/scroll/i.test(wrapper.getAttribute('aria-label')??''),
             scrollable:['auto','scroll'].includes(getComputedStyle(wrapper).overflowX)&&wrapper.scrollWidth>wrapper.clientWidth};
         })()
         """;
 
-    /// <summary>AC-ISO-009/011R: genuine Chrome retains every planned row and available provenance at every supported viewport.</summary>
+    /// <summary>AC-ISO-009/011R: genuine Chrome retains every planned row and engine setup at every supported viewport.</summary>
     public static async Task AssertAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
     {
         await cdp.EvaluateAsync(OpenWorkers, false, token);
@@ -45,13 +45,12 @@ internal static class SiteIsolatedBrowserLayoutAssertions
                 await Assert.That(snapshot.GetProperty(field).GetBoolean()).IsTrue();
             }
             var planned = projection.GetProperty(SiteIsolatedFields.Plan).GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
-                .Count(row => row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3);
-            var available = projection.GetProperty(SiteIsolatedFields.Workers).EnumerateArray()
-                .Count(row => row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 3);
+                .Count(row => row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32() == 1);
             await Assert.That(snapshot.GetProperty(SiteIsolatedFields.Rows).GetInt32()).IsEqualTo(planned);
-            await Assert.That(snapshot.GetProperty(SiteIsolatedFields.WorkerCount).GetInt32()).IsEqualTo(available);
+            await Assert.That(snapshot.GetProperty(SiteIsolatedFields.WorkerCount).GetInt32())
+                .IsEqualTo(SiteIsolatedBrowserTests.ProfiledWorkers(projection, 1));
             await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection,
-                new("sequential-read", 3, "session", "throughput", "all"), token);
+                new("sequential-read", 1, "session", "throughput", "all"), token);
             if (width <= SiteBrowserUiTokens.ViewportMobileWidth)
             {
                 await Assert.That(snapshot.GetProperty(ScrollableField).GetBoolean()).IsTrue();

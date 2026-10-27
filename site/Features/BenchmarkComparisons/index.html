@@ -269,21 +269,20 @@
 
     <section id="benchmarks" class="benchmark-section" aria-labelledby="benchmark-title" data-isolated-catalog="data/isolated-catalog.json">
       <header class="section-head">
-        <div><p class="eyebrow">topology comparisons</p><h2 id="benchmark-title">Performance with 1 and 3 nodes.</h2></div>
-        <p class="section-intro">Each database and topology has its own Linux runner. Separate TUnit tests use one live database session; the initial million-record load is measured separately, with no warmup or reset.</p>
+        <div><p class="eyebrow">Benchmarks</p><h2 id="benchmark-title">Every engine.<br>The same workload.</h2></div>
+        <p class="section-intro">One million documents per engine, then 100,000 timed operations per test from 16 concurrent clients. Each database runs alone on its own GitHub Actions runner, on one or three nodes.</p>
       </header>
-      <div class="qualification-note"><span class="qualification-mark" aria-hidden="true">i</span><p><strong>Early development.</strong> Cluster qualification is in progress. These measurements describe the recorded run conditions; they do not establish production readiness, a winner or power-loss durability.</p></div>
       <noscript><p>Enable JavaScript to explore the measurements. The original aggregate and authenticated GitHub run remain available:</p><!-- KEYLOAD_ISOLATED_EVIDENCE --></noscript>
       <div class="instrument">
-        <div class="instrument-controls" role="group" aria-label="measurement controls">
-          <label class="control" for="isolated-scenario">Scenario<select id="isolated-scenario"></select></label>
-          <label class="control" for="isolated-node-count">Nodes<select id="isolated-node-count"></select></label>
-          <label class="control" for="isolated-target">Engine<select id="isolated-target"></select></label>
-          <label class="control" for="isolated-metric">Metric<select id="isolated-metric"></select></label>
-          <label class="control" for="isolated-repetition">Repetition<select id="isolated-repetition"></select></label>
+        <div id="isolated-summary" class="bench-kpis"></div>
+        <div class="bench-controls" role="group" aria-label="Benchmark view">
+          <fieldset id="isolated-node-count" class="bench-seg"><legend>Cluster</legend></fieldset>
+          <fieldset id="isolated-metric" class="bench-chips"><legend>Rank by</legend></fieldset>
+          <fieldset id="isolated-type" class="bench-chips"><legend>Database type</legend></fieldset>
+          <fieldset id="isolated-scenario" class="bench-chips"><legend>Test</legend></fieldset>
         </div>
         <div class="measurement-workspace">
-          <div id="isolated-results" aria-live="polite"><p class="empty-state">Loading qualified measurements…</p></div>
+          <div id="isolated-results" aria-live="polite"><p class="empty-state">Loading benchmark results…</p></div>
           <p id="isolated-error" class="load-error" role="alert" hidden></p>
           <button id="isolated-retry" class="retry-button" type="button" hidden>Retry measurements</button>
           <p id="isolated-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>

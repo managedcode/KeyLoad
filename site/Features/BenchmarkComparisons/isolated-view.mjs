@@ -1,136 +1,211 @@
 import { metrics } from './measurements.mjs';
-import { ISOLATED, artifactUrl, runUrl } from './isolated-contracts.mjs';
+import { selectedIsolatedRows } from './isolated-measurements.mjs';
+import { ENGINE_TYPES, SCENARIOS, TYPE_ORDER, artifactUrl, durationOnly, runUrl, scenarioTitle } from './isolated-contracts.mjs';
+import { compact, el, engineName, friendly, matrix, rankChart, scaling } from './isolated-charts.mjs';
 
 const STATUS = Object.freeze({ measured: 'Measured', unsupported: 'Unsupported scenario',
   unsupportedTopology: 'Unsupported execution topology', failed: 'Benchmark failed · no data', missing: 'No verified result',
   resourceIncomplete: 'Measured · incomplete telemetry' });
-const HEADINGS = Object.freeze(['Engine', 'Execution nodes', 'Status', 'Selected metric', 'Attempts', 'Successes', 'Failures', 'GitHub run']);
-const FORMAT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
+const ABSENT = Object.freeze({ unsupportedTopology: 'Single-node only', unsupported: 'Not part of this test',
+  failed: 'No result in this run', missing: 'No result in this run', measured: 'No value for this metric',
+  resourceIncomplete: 'No value for this metric' });
+const HEADINGS = Object.freeze(['Engine', 'Nodes', 'Status', 'Selected metric', 'p50', 'p99', 'Attempts', 'Failures', 'GitHub run']);
+const EXACT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
+const OVERVIEW = SCENARIOS.filter(item => item.value !== 'verify-final');
 
-function element(document, tag, text) {
-  const node = document.createElement(tag);
-  if (text !== undefined) node.textContent = text;
-  return node;
-}
+const nodesLabel = count => count + (count === 1 ? ' node' : ' nodes');
+const inType = type => name => type === 'all' || ENGINE_TYPES[name] === type;
+const metricFor = scenario => durationOnly(scenario) ? 'duration' : 'throughput';
+const rowsFor = (projection, scenario, nodeCount, metric = metricFor(scenario)) =>
+  selectedIsolatedRows(projection, scenario, nodeCount, 'session', metric, 'all');
 
 function link(document, text, href) {
-  const node = element(document, 'a', text);
+  const node = el(document, 'a', null, text);
   node.href = href;
   node.rel = 'noopener noreferrer';
   return node;
 }
 
-const display = (value, metric) => Number.isFinite(value) ? FORMAT.format(value) + ' ' + metric.unit : '—';
+function panel(document, className, title, subtitle) {
+  const section = el(document, 'section', 'bench-panel ' + className);
+  const head = section.appendChild(el(document, 'header', 'bench-panel-head'));
+  head.append(el(document, 'h3', null, title), el(document, 'p', null, subtitle));
+  return section;
+}
 
-function renderChart(document, rows, metric) {
-  const list = element(document, 'ul');
-  list.className = 'isolated-chart';
-  list.setAttribute('aria-label', metric.title + ' by engine at the selected execution node count');
-  const maximum = Math.max(1, ...rows.map(row => row.value).filter(Number.isFinite));
-  for (const row of rows) {
-    const item = element(document, 'li', row.name + ' · ' + display(row.value, metric));
-    if (Number.isFinite(row.value)) {
-      const progress = element(document, 'progress');
-      progress.max = maximum;
-      progress.value = row.value;
-      progress.setAttribute('aria-label', row.name + ' · ' + display(row.value, metric));
-      item.append(progress);
+function absent(document, rows, cohort) {
+  const groups = new Map();
+  for (const row of rows) groups.set(ABSENT[row.status], [...groups.get(ABSENT[row.status]) ?? [], row]);
+  const list = el(document, 'dl', 'bench-absent');
+  for (const [label, members] of groups) {
+    list.append(el(document, 'dt', null, label));
+    const names = list.appendChild(el(document, 'dd'));
+    for (const row of members) {
+      const reason = row.worker?.reason ?? row.detail ?? 'No verified original result for this session.';
+      const chip = row.status === 'failed' || row.status === 'missing'
+        ? link(document, row.name, row.worker?.job.url ?? runUrl(cohort)) : el(document, 'span', null, row.name);
+      chip.title = reason;
+      names.append(chip);
     }
-    list.append(item);
   }
   return list;
 }
 
-function renderEvidence(document, worker, cohort) {
-  const cell = element(document, 'td');
-  if (worker === null) {
-    cell.append(link(document, 'Benchmark run · no verified session result', runUrl(cohort)));
-    return cell;
-  }
-  cell.append(link(document, worker.job.conclusion === 'failure' ? 'Failed benchmark job' : 'Session worker job', worker.job.url), element(document, 'br'),
-    link(document, 'GitHub artifact', artifactUrl(cohort, worker.artifact)), element(document, 'br'),
-    element(document, 'small', 'GitHub download/access required; subject to artifact retention.'));
+function board(document, rows, metric, selection, cohort) {
+  const ranked = rows.filter(row => row.value !== null);
+  const section = panel(document, 'bench-board', scenarioTitle(selection.scenario),
+    `${metric.title} · ${metric.direction.toLowerCase()} · ${nodesLabel(selection.nodeCount)}`);
+  section.append(ranked.length > 0 ? rankChart(document, ranked, metric)
+    : el(document, 'p', 'empty-state', 'No engine in this selection recorded this test.'));
+  const missing = rows.filter(row => row.value === null);
+  if (missing.length > 0) section.append(absent(document, missing, cohort));
+  return section;
+}
+
+function overview(document, projection, selection) {
+  const columns = OVERVIEW.map(item => {
+    const metric = metrics[metricFor(item.value)];
+    const values = new Map(rowsFor(projection, item.value, selection.nodeCount).map(row => [row.id, row.value]));
+    const recorded = [...values.values()].filter(Number.isFinite);
+    return { ...item, values, title: scenarioTitle(item.value), unit: metric.unit, higher: metric.higher === true,
+      group: item.mixed ? 'mixed' : null, best: metric.higher ? Math.max(...recorded) : Math.min(...recorded) };
+  });
+  const engines = rowsFor(projection, 'load-million', selection.nodeCount).filter(row => inType(selection.type)(row.name))
+    .map(row => ({ name: row.name, values: columns.map(column => column.values.get(row.id) ?? null) }))
+    .filter(row => row.values.some(Number.isFinite));
+  if (engines.length === 0) return null;
+  const groups = TYPE_ORDER.map(type => ({ type, rows: engines.filter(row => ENGINE_TYPES[row.name] === type)
+    .sort((left, right) => left.name.localeCompare(right.name)) })).filter(group => group.rows.length > 0);
+  const section = panel(document, 'bench-overview', 'Every test at a glance',
+    'Throughput in operations per second; index build in seconds. Darker cells are closer to the fastest engine in that column.');
+  const scroll = section.appendChild(el(document, 'div', 'table-scroll matrix-scroll'));
+  scroll.tabIndex = 0;
+  scroll.setAttribute('role', 'region');
+  scroll.setAttribute('aria-label', 'Results by test; scroll this region horizontally on narrow screens');
+  scroll.append(matrix(document, { caption: `All tests · ${nodesLabel(selection.nodeCount)}`, columns, groups,
+    selected: selection.scenario }));
+  const legend = section.appendChild(el(document, 'p', 'heat-legend', 'Slower'));
+  for (let step = 0; step < 5; step += 1) legend.append(el(document, 'i', 'heat-' + step));
+  legend.append('Fastest');
+  return section;
+}
+
+function topology(document, projection, selection, metric) {
+  const three = new Map(selectedIsolatedRows(projection, selection.scenario, 3, 'session', selection.metric, 'all')
+    .map(row => [row.name, row.value]));
+  const pairs = selectedIsolatedRows(projection, selection.scenario, 1, 'session', selection.metric, 'all')
+    .filter(row => inType(selection.type)(row.name) && row.value > 0 && Number.isFinite(three.get(row.name)))
+    .map(row => ({ name: row.name, one: row.value, three: three.get(row.name) }));
+  if (pairs.length === 0) return null;
+  const section = panel(document, 'bench-scale', '1 node → 3 nodes',
+    `${scenarioTitle(selection.scenario)} · ${metric.title.toLowerCase()} for engines measured in both topologies.`);
+  const legend = section.appendChild(el(document, 'p', 'scale-legend'));
+  legend.append(el(document, 'i', 'scale-dot dot-one'), '1 node', el(document, 'i', 'scale-dot dot-three'), '3 nodes');
+  section.append(scaling(document, pairs, metric));
+  return section;
+}
+
+function evidenceCell(document, row, cohort) {
+  const cell = el(document, 'td', 'table-links');
+  if (row.worker === null) cell.append(link(document, 'Benchmark run', runUrl(cohort)));
+  else cell.append(link(document, row.worker.job.conclusion === 'failure' ? 'Failed job' : 'Job', row.worker.job.url),
+    link(document, 'Artifact', artifactUrl(cohort, row.worker.artifact)));
   return cell;
 }
 
-function renderTable(document, rows, metric, cohort) {
-  const table = element(document, 'table');
-  table.append(element(document, 'caption', metric.title + ' · ' + metric.direction + ' · one execution node count'));
-  const head = element(document, 'thead');
-  const header = element(document, 'tr');
-  for (const heading of HEADINGS) {
-    const cell = element(document, 'th', heading);
-    cell.scope = 'col';
-    header.append(cell);
-  }
-  head.append(header);
-  const body = element(document, 'tbody');
+function table(document, rows, metric, selection, cohort) {
+  const node = el(document, 'table');
+  node.append(el(document, 'caption', null, `${metric.title} · ${metric.direction} · ${nodesLabel(selection.nodeCount)}`));
+  const header = node.appendChild(el(document, 'thead')).appendChild(el(document, 'tr'));
+  for (const heading of HEADINGS) header.appendChild(el(document, 'th', null, heading)).scope = 'col';
+  const body = node.appendChild(el(document, 'tbody'));
   for (const row of rows) {
-    const tr = element(document, 'tr');
+    const tr = body.appendChild(el(document, 'tr'));
     tr.dataset.workerId = row.id;
     tr.dataset.value = row.value === null ? '' : String(row.value);
-    for (const value of [row.name, row.nodeCount, STATUS[row.status], display(row.value, metric), row.attempts, row.successes, row.failures]) {
-      tr.append(element(document, 'td', value === null ? '—' : String(value)));
-    }
-    tr.append(renderEvidence(document, row.worker, cohort));
-    body.append(tr);
+    const value = row.value === null ? '—' : EXACT.format(row.value) + ' ' + metric.unit;
+    for (const text of [row.name, row.nodeCount, STATUS[row.status], value, friendly(row.p50, 'ms'), friendly(row.p99, 'ms'),
+      row.attempts === null ? null : EXACT.format(row.attempts), row.failures === null ? null : EXACT.format(row.failures)])
+      tr.append(el(document, 'td', null, text === null ? '—' : String(text)));
+    tr.append(evidenceCell(document, row, cohort));
   }
-  table.append(head, body);
-  const wrapper = element(document, 'div');
-  wrapper.className = 'table-scroll isolated-table-scroll';
-  wrapper.tabIndex = 0;
-  wrapper.setAttribute('role', 'region');
-  wrapper.setAttribute('aria-label', metric.title + ' results table; scroll this region horizontally on narrow screens');
-  wrapper.append(table);
-  return wrapper;
+  const scroll = el(document, 'div', 'table-scroll isolated-table-scroll');
+  scroll.tabIndex = 0;
+  scroll.setAttribute('role', 'region');
+  scroll.setAttribute('aria-label', metric.title + ' results table; scroll this region horizontally on narrow screens');
+  scroll.append(node);
+  return scroll;
 }
 
-function renderWorker(document, worker) {
-  const details = element(document, 'details');
-  details.className = 'isolated-worker';
-  details.dataset.workerId = worker.id;
-  details.append(element(document, 'summary', worker.target + ' · ' + worker.nodeCount + ' execution nodes · worker provenance'));
-  const fields = [['Worker', worker.id], ['Raw envelope SHA256', worker.rawSha256], ['Artifact ID', worker.artifact.id],
-    ['Artifact name', worker.artifact.name], ['Artifact digest', worker.artifact.digest], ['Session outcome', worker.session.outcome]];
-  if (worker.session.reason !== null) fields.push(['Session reason', worker.session.reason]);
-  if (worker.reason !== null) fields.push(['Workload result detail', worker.reason]);
-  if (worker.report === null) fields.push([worker.disposition === ISOLATED.failed ? 'Benchmark result' : 'Topology limitation', worker.reason]);
-  else {
-    const report = worker.report;
-    const target = report.targets[0];
-    fields.push(['Host OS', report.hostOs], ['Architecture', report.architecture], ['Logical processors', report.logicalProcessors],
-      ['Runtime', report.runtime], ['Storage', report.storage],
-      ['Workload client PID', report.client.processId], ['Workload client DLL SHA-256', report.client.binary.assemblySha256],
-      ['Workload client PDB SHA-256', report.client.binary.pdbSha256],
-      ['Server version', target.version], ['Execution topology', target.topology],
-      ['Data copies', target.cluster.dataCopies], ['Write acknowledgement', target.writeAcknowledgement],
-      ['Read contract', target.readContract], ['Transport', target.transport], ['Authorization', target.authorization],
-      ['Execution observations', target.cluster.observations.join('; ')], ['Server image', report.serverImage]);
+function setup(document, rows) {
+  const grid = el(document, 'div', 'bench-setup');
+  for (const row of rows) {
+    if (row.worker?.session.targetProfile == null) continue;
+    const target = row.worker.report.targets[0];
+    const card = grid.appendChild(el(document, 'dl', 'setup-card'));
+    card.dataset.workerId = row.id;
+    card.append(engineName(document, row.name, 'div'));
+    for (const [name, value] of [['Version', target.version], ['Topology', target.topology],
+      ['Data copies', target.cluster.dataCopies], ['Write acknowledgement', target.writeAcknowledgement]]) {
+      card.append(el(document, 'dt', null, name), el(document, 'dd', null, String(value)));
+    }
   }
-  const list = element(document, 'dl');
-  for (const [name, value] of fields) list.append(element(document, 'dt', name), element(document, 'dd', String(value)));
-  details.append(list);
-  return details;
+  return grid;
+}
+
+function footer(document, catalog, projection, rows, metric, selection) {
+  const cohort = catalog.cohort;
+  const section = el(document, 'footer', 'bench-foot');
+  const runtimes = [...new Set(projection.workers.map(({ session: { runtime } }) =>
+    `${runtime.operatingSystem} · ${runtime.logicalProcessors} vCPU · ${runtime.framework}`))];
+  const meta = section.appendChild(el(document, 'p', 'bench-meta'));
+  meta.append(link(document, `GitHub Actions run ${cohort.runId}`, runUrl(cohort)),
+    el(document, 'span', null, `${projection.workers.length} of ${projection.plan.workers.length} jobs completed`),
+    link(document, 'Source ' + catalog.measuredSourceRevision.slice(0, 7),
+      `https://github.com/${cohort.repository}/tree/${catalog.measuredSourceRevision}`),
+    ...runtimes.map(text => el(document, 'span', null, text)));
+  section.append(el(document, 'p', 'bench-note', 'Every job ran alone on its own GitHub-hosted runner, so hardware can ' +
+    'differ between engines. Figures describe this run, not production readiness.'));
+  const details = section.appendChild(el(document, 'details', 'bench-details'));
+  details.append(el(document, 'summary', null, 'Results table, engine setup and GitHub artifacts'),
+    table(document, rows, metric, selection, cohort), setup(document, rows));
+  return section;
+}
+
+export function renderIsolatedSummary(container, projection) {
+  const document = container.ownerDocument;
+  const engines = new Set();
+  let operations = 0;
+  for (const item of SCENARIOS) for (const nodeCount of [1, 3]) for (const row of rowsFor(projection, item.value, nodeCount)) {
+    if (row.value === null) continue;
+    engines.add(row.name);
+    operations += row.attempts ?? 0;
+  }
+  const records = Math.max(0, ...projection.workers.map(worker => worker.reports[0].expectedRecords));
+  container.replaceChildren(...[[String(engines.size), 'databases measured'], [compact(operations, 'ops/s'), 'operations timed'],
+    [compact(records, 'ops/s'), 'documents per engine'], [String(projection.options.concurrency), 'concurrent clients']]
+    .map(([value, label]) => {
+      const tile = el(document, 'div', 'kpi');
+      tile.append(el(document, 'strong', null, value), el(document, 'span', null, label));
+      return tile;
+    }));
+  return engines;
+}
+
+export function renderNodeCounts(fieldset, projection, selection) {
+  for (const input of fieldset.querySelectorAll('input')) {
+    const count = rowsFor(projection, selection.scenario, Number(input.value), selection.metric)
+      .filter(row => row.value !== null && inType(selection.type)(row.name)).length;
+    const label = input.nextElementSibling;
+    label.replaceChildren(nodesLabel(Number(input.value)), el(fieldset.ownerDocument, 'small', null, String(count)));
+  }
 }
 
 export function renderIsolatedView(container, catalog, projection, rows, selection) {
   const document = container.ownerDocument;
   const metric = metrics[selection.metric];
-  const fragment = document.createDocumentFragment();
-  fragment.append(element(document, 'h3', metric.title + ' · ' + selection.nodeCount + ' execution nodes'),
-    element(document, 'p', selection.scenario + ' · ' + (selection.repetition === 'session' ? 'Original execution test result from the shared session' :
-      'Unrecognized session selection') + ' · ' + metric.direction),
-    element(document, 'p', 'Derived compact projection; raw samples remain in the linked GitHub artifacts. Process CPU, allocation and peak RAM are observed over the selected lane interval, including concurrent lanes; they are not exclusive operation costs and must not be summed. Server resource observations cover the session lifetime.'),
-    element(document, 'p', `Verified original sessions: ${projection.workers.length} of ${projection.plan.workers.length}. ` +
-      'Recorded operation measurements remain available when server resource telemetry is incomplete; those sessions are labelled. Missing sessions and unrecorded metrics are shown as —.'),
-    element(document, 'p', 'Each session used its own runner. Hardware and resource limits may differ between engines; these timings do not establish a controlled hardware comparison.'),
-    element(document, 'p', `Profile ${projection.profile}; operations ${projection.options.operations}; concurrency ${projection.options.concurrency}; ` +
-      `payload ${projection.options.payloadBytes} bytes; ${projection.datasetSha256 === null ? 'corpus unavailable' : 'corpus SHA256 ' + projection.datasetSha256}.`),
-    link(document, 'Measured source ' + catalog.measuredSourceRevision, `https://github.com/${catalog.cohort.repository}/tree/${catalog.measuredSourceRevision}`),
-    element(document, 'br'), link(document, 'Website source ' + catalog.siteSourceRevision,
-      `https://github.com/${catalog.cohort.repository}/tree/${catalog.siteSourceRevision}`), element(document, 'br'),
-    link(document, 'Isolated cohort run · attempt ' + catalog.cohort.attempt, runUrl(catalog.cohort)));
-  fragment.append(renderChart(document, rows, metric), renderTable(document, rows, metric, catalog.cohort));
-  for (const row of rows) if (row.worker !== null) fragment.append(renderWorker(document, row.worker));
-  container.replaceChildren(fragment);
+  const visible = rows.filter(row => inType(selection.type)(row.name));
+  container.replaceChildren(...[board(document, visible, metric, selection, catalog.cohort), overview(document, projection, selection),
+    topology(document, projection, selection, metric), footer(document, catalog, projection, visible, metric, selection)]
+    .filter(Boolean));
 }

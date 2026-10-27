@@ -34,11 +34,13 @@ When no new ready authentic session producer exists, the optional Website publis
 
 ## Projection, browser and resource values
 
-`isolated-projection.mjs` verifies the original session bundle; `isolated-loader.mjs` verifies the hash-bound catalog/projection and bounded HTTP reads. Controls select a case or a single mixed lane, node count 1/3, database, metric and the single original session result. There is no median across repetitions and no pooling across node counts. Mixed streams are not averaged into an artificial overall latency distribution. Unavailable never becomes a numeric zero.
+`isolated-projection.mjs` verifies the original session bundle; `isolated-loader.mjs` verifies the hash-bound catalog/projection and bounded HTTP reads. Radio controls select the node count 1/3, a ranking metric, a database family and a case or a single mixed lane; index build and full readback rank by elapsed time only. Every view reads the single original session result. There is no median across repetitions and no pooling across node counts. Mixed streams are not averaged into an artificial overall latency distribution. Unavailable never becomes a numeric zero: the ranking lists only engines with a recorded value and names the others under their actual disposition (single-node topology, outside the test, no result in this run).
+
+The page derives four headline counts, a ranked bar chart with per-request p50/p95/p99 on a log scale, a family-grouped matrix of every case shaded relative to the fastest engine in each column, and a 1-node to 3-node comparison for engines recorded in both topologies. Family labels are presentation only. A collapsed results table keeps the complete planned row inventory with exact recorded values, job and artifact links, and each profiled engine's version, topology, data copies and write acknowledgement. Client process CPU, allocation and RSS remain in the projection and original artifacts; they are not ranking metrics because they describe the benchmark client, not the database.
 
 CPU, allocation and peak RSS are process observations over the lane interval; overlapping lanes share one process. Normalizing CPU/allocation by the attempt count of the selected lane does not make them exclusive operation-family costs, and such values must not be summed. The server resource sidecar describes the lifetime of the whole session; intake does not attribute it to an arbitrary individual case.
 
-`isolated-lab.mjs` owns the single visible benchmark surface, cancellation/generations, accessible controls, rows and disposal. `bootstrap.mjs` retains the independent lazy scene lifecycle, reduced motion, fallback and joined cleanup. Official Three.js bytes, license and manifest are not changed.
+`isolated-lab.mjs` owns the single visible benchmark surface, cancellation/generations, accessible controls and disposal; `isolated-view.mjs` composes the sections and `isolated-charts.mjs` renders the chart primitives. `bootstrap.mjs` retains the independent lazy scene lifecycle, reduced motion, fallback and joined cleanup. Official Three.js bytes, license and manifest are not changed.
 
 ## TUnit, builder and coverage
 

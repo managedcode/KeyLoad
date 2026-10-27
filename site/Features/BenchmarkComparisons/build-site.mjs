@@ -15,7 +15,8 @@ export const BUILD = Object.freeze({
   sessionAssets: ['session-contract.mjs', 'session-plan-contract.mjs', 'session-process-identity.mjs',
     'session-report-validation.mjs', 'session-aggregate-contract.mjs'],
   measuredAssets: ['isolated-contracts.mjs', 'isolated-http.mjs', 'isolated-loader.mjs', 'isolated-measurements.mjs',
-    'isolated-view.mjs', 'isolated-controls.mjs', 'isolated-lab.mjs', 'measurements.mjs', 'measurement-loader.mjs'],
+    'isolated-charts.mjs', 'isolated-view.mjs', 'isolated-controls.mjs', 'isolated-lab.mjs', 'measurements.mjs',
+    'measurement-loader.mjs'],
   commonAssets: ['contracts.mjs', 'bootstrap.mjs', 'cluster-scene.mjs', 'scene-geometry.mjs',
     'scene-lifecycle.mjs', 'scene-observers.mjs', 'styles.css', 'brand.css', 'tokens.css', 'scene.css',
     'assets/agent-context.png'],
@@ -154,9 +155,8 @@ async function emitContentHtml(output, siteRevision) {
   html = html.replaceAll(BUILD.documentationBlob, `/blob/${siteRevision}/docs`)
     .replaceAll(BUILD.documentationTree, `/tree/${siteRevision}/docs`);
   html = replaceRequired(html, ' data-isolated-catalog="data/isolated-catalog.json"', '');
-  html = replaceRequired(html, '<p class="section-intro">Each database and topology has its own Linux runner. Separate TUnit tests use one live database session; the initial million-record load is measured separately, with no warmup or reset.</p>',
+  html = replaceRequired(html, '<p class="section-intro">One million documents per engine, then 100,000 timed operations per test from 16 concurrent clients. Each database runs alone on its own GitHub Actions runner, on one or three nodes.</p>',
     '<p class="section-intro">Verified execution comparison results will appear here after a completed benchmark run.</p>');
-  html = replaceRequired(html, '<div class="qualification-note"><span class="qualification-mark" aria-hidden="true">i</span><p><strong>Early development.</strong> Cluster qualification is in progress. These measurements describe the recorded run conditions; they do not establish production readiness, a winner or power-loss durability.</p></div>', '');
   html = replaceRequired(html, '<noscript><p>Enable JavaScript to explore the measurements. The original aggregate and authenticated GitHub run remain available:</p><!-- KEYLOAD_ISOLATED_EVIDENCE --></noscript>', '');
   const instrument = /      <div class="instrument">[\s\S]*?      <\/div>\n    <\/section>/;
   if (!instrument.test(html)) throw new Error(ERRORS.html);

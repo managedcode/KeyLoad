@@ -4,7 +4,7 @@ internal static class SiteIsolatedBrowserFailureAssertions
 {
     private const string Failed = "!document.querySelector('#isolated-error').hidden && !document.querySelector('#isolated-retry').hidden";
     private const string Cleared = """
-        (()=>({rows:document.querySelectorAll('#isolated-results tbody tr').length,
+        (()=>({rows:document.querySelectorAll('#isolated-results tbody tr').length+document.querySelectorAll('#isolated-summary .kpi').length,
           links:document.querySelectorAll('#isolated-results a').length,
           hosts:document.querySelectorAll('#isolated-results details').length,
           text:document.querySelector('#isolated-results').textContent,

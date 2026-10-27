@@ -11,7 +11,7 @@ const entries = [
   'scripts/Features/BenchmarkComparisons/session-source-closure.mjs',
   ...['bootstrap', 'cluster-scene', 'scene-geometry', 'scene-lifecycle', 'scene-observers',
     'contracts', 'build-site', 'measured-build', 'isolated-contracts', 'isolated-http', 'isolated-loader',
-    'isolated-projection', 'isolated-measurements', 'isolated-controls', 'isolated-lab', 'isolated-view',
+    'isolated-projection', 'isolated-measurements', 'isolated-controls', 'isolated-lab', 'isolated-view', 'isolated-charts',
     'measurements', 'measurement-loader'].map(name => feature + name + '.mjs'),
 ];
 // Only literal relative imports are executable dependencies. Platform built-ins carry no repository source.

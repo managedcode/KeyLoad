@@ -1,6 +1,9 @@
 import { metrics } from './measurements.mjs';
-import { DOM, assertIsolated } from './isolated-contracts.mjs';
-import { SESSION, SESSION_TARGETS } from '../../../scripts/Features/BenchmarkComparisons/session-contract.mjs';
+import { DOM, ENGINE_TYPES, SCENARIOS, TYPE_ORDER, assertIsolated, durationOnly } from './isolated-contracts.mjs';
+import { SESSION } from '../../../scripts/Features/BenchmarkComparisons/session-contract.mjs';
+
+const METRIC_LABELS = Object.freeze({ throughput: 'Throughput', p50: 'p50 latency', p95: 'p95 latency',
+  p99: 'p99 latency', duration: 'Duration', errors: 'Errors' });
 
 export function isolatedElements(root) {
   const elements = Object.fromEntries(Object.entries(DOM).map(([key, id]) => [key, root.querySelector('#' + id)]));
@@ -8,34 +11,59 @@ export function isolatedElements(root) {
   return elements;
 }
 
-function options(select, entries, initial) {
-  const fragment = select.ownerDocument.createDocumentFragment();
-  for (const [value, label] of entries) {
-    const option = select.ownerDocument.createElement('option');
-    option.value = String(value);
-    option.textContent = label;
-    fragment.append(option);
+function chips(fieldset, entries, initial) {
+  const document = fieldset.ownerDocument;
+  fieldset.querySelector('.chip-row')?.remove();
+  const row = fieldset.appendChild(document.createElement('span'));
+  row.className = 'chip-row';
+  // A labelled group wraps as one unit so its chips never split across lines.
+  let parent = row;
+  for (const [value, label, group] of entries) {
+    if (group) {
+      parent = row.appendChild(document.createElement('span'));
+      parent.className = 'chip-set';
+      parent.appendChild(document.createElement('span')).textContent = group;
+    }
+    const chip = document.createElement('label');
+    const input = document.createElement('input');
+    const text = document.createElement('span');
+    chip.className = 'chip';
+    input.type = 'radio';
+    input.name = fieldset.id;
+    input.value = String(value);
+    input.checked = String(value) === String(initial);
+    text.textContent = label;
+    chip.append(input, text);
+    parent.append(chip);
   }
-  select.replaceChildren(fragment);
-  select.value = String(initial);
 }
 
 export function initializeIsolatedControls(elements) {
-  options(elements.scenario, [...SESSION.caseIds, ...['create', 'delete', 'update', 'read', 'search'].map(lane => 'mixed/' + lane)]
-    .map(value => [value, value]), 'sequential-read');
-  options(elements.nodes, SESSION.nodes.map(value => [value, value + ' execution nodes']), 3);
-  options(elements.target, [['all', 'All engines'], ...SESSION_TARGETS.map(value => [value.name, value.name])], 'all');
-  options(elements.metric, Object.entries(metrics).filter(([, metric]) => !metric.queue).map(([value, metric]) => [value, metric.title]), 'throughput');
-  options(elements.repetition, [['session', 'Original session result']], 'session');
+  chips(elements.nodes, SESSION.nodes.map(value => [value, value + (value === 1 ? ' node' : ' nodes')]), 1);
+  chips(elements.scenario, SCENARIOS.map((item, index) => [item.value, item.label,
+    item.mixed && !SCENARIOS[index - 1].mixed ? 'Mixed workload' : null]), 'sequential-read');
+  chips(elements.metric, Object.keys(METRIC_LABELS).filter(key => Object.hasOwn(metrics, key))
+    .map(key => [key, METRIC_LABELS[key]]), 'throughput');
+  chips(elements.type, [['all', 'All types'], ...TYPE_ORDER.map(type => [type, type])], 'all');
   elements.announcement.setAttribute('role', 'status');
   elements.announcement.setAttribute('aria-live', 'polite');
   elements.error.setAttribute('role', 'alert');
   elements.retry.type = 'button';
 }
 
-export function readIsolatedSelection(elements) {
-  return { scenario: elements.scenario.value, nodeCount: Number(elements.nodes.value), target: elements.target.value,
-    metric: elements.metric.value, repetition: elements.repetition.value };
+// Families without any measured engine stay out of the filter; the board still names those engines and why.
+export function limitIsolatedTypes(fieldset, engines) {
+  for (const input of fieldset.querySelectorAll('input')) {
+    input.parentElement.hidden = input.value !== 'all' && ![...engines].some(name => ENGINE_TYPES[name] === input.value);
+  }
 }
 
-export const controlElements = elements => [elements.scenario, elements.nodes, elements.target, elements.metric, elements.repetition];
+const checked = fieldset => fieldset.querySelector('input:checked').value;
+
+export function readIsolatedSelection(elements) {
+  const scenario = checked(elements.scenario);
+  return { scenario, nodeCount: Number(checked(elements.nodes)), type: checked(elements.type),
+    metric: durationOnly(scenario) ? 'duration' : checked(elements.metric), repetition: 'session' };
+}
+
+export const controlElements = elements => [elements.scenario, elements.nodes, elements.metric, elements.type];

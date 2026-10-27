@@ -41,6 +41,7 @@ site/Features/BenchmarkComparisons/bootstrap.mjs
 site/Features/BenchmarkComparisons/build-site.mjs
 site/Features/BenchmarkComparisons/cluster-scene.mjs
 site/Features/BenchmarkComparisons/contracts.mjs
+site/Features/BenchmarkComparisons/isolated-charts.mjs
 site/Features/BenchmarkComparisons/isolated-contracts.mjs
 site/Features/BenchmarkComparisons/isolated-controls.mjs
 site/Features/BenchmarkComparisons/isolated-http.mjs

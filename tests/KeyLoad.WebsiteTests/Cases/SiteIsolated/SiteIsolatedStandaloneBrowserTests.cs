@@ -14,7 +14,7 @@ internal sealed class SiteIsolatedStandaloneBrowserTests
         await using var browser = await SiteIsolatedBrowserStartup.StartAsync(fixture, token);
         await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
         await SiteIsolatedBrowserAssertions.AssertRowsAsync(browser.Chrome.Cdp, projection.RootElement,
-            new("sequential-read", 3, "session", "throughput", "all"), token);
+            new("sequential-read", 1, "session", "throughput", "all"), token);
         await SiteIsolatedBrowserLayoutAssertions.AssertAsync(browser.Chrome.Cdp, projection.RootElement, token);
         var hidden = await browser.Chrome.Cdp.EvaluateAsync("document.querySelector('#benchmarks').hidden", false, token);
         await Assert.That(hidden.GetBoolean()).IsFalse();
