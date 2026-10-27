@@ -23,7 +23,10 @@ internal static class SiteVectorAssetTokens
               rect.left >= bounds.left && rect.right <= bounds.right && rect.top >= bounds.top && rect.bottom <= bounds.bottom,
             bufferPixels: Number(host?.dataset.bufferPixels ?? 0), drawCalls: Number(host?.dataset.drawCalls ?? 0),
             triangles: Number(host?.dataset.triangles ?? 0),
-            pixelRatio: host && canvas ? Math.max(canvas.width / host.clientWidth, canvas.height / host.clientHeight) : 0 };
+            viewportWidth: window.innerWidth, deviceRatio: window.devicePixelRatio,
+            canvasAspect: rect?.width > 0 && rect?.height > 0 ? rect.width / rect.height : 0,
+            cameraAspect: Number(host?.dataset.scenePose?.split(',')[0] ?? 0),
+            pixelRatio: rect?.width > 0 && rect?.height > 0 ? Math.max(canvas.width / rect.width, canvas.height / rect.height) : 0 };
         })()
         """;
     public const string PosterStateScript = """
@@ -55,6 +58,10 @@ internal static class SiteVectorAssetTokens
     public const string MarkCountField = "markCount";
     public const string WidthField = "width";
     public const string HeightField = "height";
+    public const string ViewportWidthField = "viewportWidth";
+    public const string DeviceRatioField = "deviceRatio";
+    public const string CanvasAspectField = "canvasAspect";
+    public const string CameraAspectField = "cameraAspect";
     public const string HiddenVisibility = "hidden";
     public const int RetinaScale = 2;
 }

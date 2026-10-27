@@ -1,4 +1,5 @@
 import { IDS, SELECTORS, CONFIG, TEXT } from './contracts.mjs';
+import { SCENE as RENDERER } from './scene-geometry.mjs';
 
 const EVENTS = Object.freeze({ hide: 'pagehide', show: 'pageshow', click: 'click', change: 'change' });
 const SCENE = Object.freeze({ module: './cluster-scene.mjs', unavailable: 'Static architectural illustration', delay: 100,
@@ -33,6 +34,8 @@ async function startScene(token) {
     else scene = instance;
   } catch {
     if (token !== generation) return;
+    host.dataset[RENDERER.dataset.state] = RENDERER.state.error;
+    host.dataset[RENDERER.dataset.frame] = RENDERER.frame.error;
     host.querySelector(SELECTORS.poster)?.removeAttribute(SCENE.hidden);
     const status = host.querySelector(SELECTORS.sceneStatus);
     if (status) status.textContent = SCENE.unavailable;

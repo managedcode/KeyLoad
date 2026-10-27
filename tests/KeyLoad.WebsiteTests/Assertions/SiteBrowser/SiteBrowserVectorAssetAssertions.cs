@@ -78,7 +78,6 @@ internal static class SiteBrowserVectorAssetAssertions
 
     public static async Task AssertRetinaResizeAsync(SiteBrowserCdpClient cdp, CancellationToken cancellationToken)
     {
-        var previous = await ReadMarkAsync(cdp, cancellationToken);
         foreach (var width in SiteBrowserUiTokens.ViewportWidths)
         {
             await cdp.CommandAsync(SiteBrowserTokens.SetDeviceMetrics, new Dictionary<string, object?>
@@ -93,9 +92,9 @@ internal static class SiteBrowserVectorAssetAssertions
             await Task.Delay(SiteExecutionConfiguration.Options.Value.SceneSettleWait, TimeProvider.System, cancellationToken);
             await AssertReadyMarkAsync(cdp, cancellationToken);
             var current = await ReadMarkAsync(cdp, cancellationToken);
-            await Assert.That(current.GetProperty(SiteVectorAssetTokens.WidthField).GetDouble())
-                .IsNotEqualTo(previous.GetProperty(SiteVectorAssetTokens.WidthField).GetDouble());
-            previous = current;
+            await Assert.That(current.GetProperty(SiteVectorAssetTokens.ViewportWidthField).GetInt32()).IsEqualTo(width);
+            await Assert.That(current.GetProperty(SiteVectorAssetTokens.DeviceRatioField).GetDouble())
+                .IsEqualTo(SiteVectorAssetTokens.RetinaScale);
         }
     }
 
@@ -108,6 +107,8 @@ internal static class SiteBrowserVectorAssetAssertions
             .IsBetween(SiteTokens.One, SiteBrowserUiTokens.RendererPixelLimit);
         await Assert.That(state.GetProperty(SiteBrowserUiTokens.PixelRatioField).GetDouble())
             .IsLessThanOrEqualTo(SiteBrowserUiTokens.RendererPixelRatioLimit);
+        await Assert.That(Math.Abs(state.GetProperty(SiteVectorAssetTokens.CameraAspectField).GetDouble()
+            - state.GetProperty(SiteVectorAssetTokens.CanvasAspectField).GetDouble())).IsLessThanOrEqualTo(0.000000001);
         await Assert.That(state.GetProperty(SiteBrowserUiTokens.TrianglesField).GetInt32())
             .IsBetween(SiteTokens.One, SiteBrowserUiTokens.RendererTriangleLimit);
         await Assert.That(state.GetProperty(SiteBrowserUiTokens.DrawCallsField).GetInt32())

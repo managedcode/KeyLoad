@@ -145,6 +145,7 @@ internal sealed class SiteContentBrowserTests
             await Assert.That(snapshot.GetProperty(SiteBrowserUiTokens.CanvasCountField).GetInt32())
                 .IsEqualTo(SiteBrowserTokens.One);
             await SiteBrowserVectorAssetAssertions.AssertReadyMarkAsync(cdp, token);
+            await SiteBrowserVectorAssetAssertions.AssertRetinaResizeAsync(cdp, token);
         }
         else
         {
