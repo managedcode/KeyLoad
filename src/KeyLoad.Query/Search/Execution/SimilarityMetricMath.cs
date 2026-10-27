@@ -41,7 +41,7 @@ internal static class SimilarityMetricMath
 
     internal static void ValidateMetric(DistanceMetric metric)
     {
-        if (!Enum.IsDefined(metric))
+        if (metric is not (DistanceMetric.Cosine or DistanceMetric.Euclidean or DistanceMetric.DotProduct))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidMetric);
         }

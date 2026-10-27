@@ -120,7 +120,11 @@ internal sealed class McpOfficialClient : IAsyncDisposable
         try
         {
             runtimeObservation.Start();
-            client = await McpClient.CreateAsync(transport, new McpClientOptions { ProtocolVersion = protocolVersion },
+            client = await McpClient.CreateAsync(transport, new McpClientOptions
+            {
+                ProtocolVersion = protocolVersion,
+                DiscoverProbeTimeout = Timeout.InfiniteTimeSpan
+            },
                 loggerFactory: runtimeObservation, cancellationToken: cancellationToken).ConfigureAwait(false);
             runtimeObservation.ThrowIfAny();
         }

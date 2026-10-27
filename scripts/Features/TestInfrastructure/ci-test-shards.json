@@ -88,98 +88,6 @@
       ],
       "shards": [
         {
-          "id": "cluster-composite-prefix-cold-recovery",
-          "name": "Composite prefixes and cold recovery",
-          "lanes": [
-            {
-              "id": "composite-prefix-public-adapters",
-              "kind": "shared-exclusive",
-              "classes": [
-                "SparseCompositePrefixClusterTests"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cluster-subscription-policy-and-cold-cuts",
-          "name": "Subscription policy and cold cuts",
-          "lanes": [
-            {
-              "id": "subscription-policy-and-cold-cuts",
-              "kind": "own-clusters",
-              "classes": [
-                "SubscriptionPhasePublicColdTests"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cluster-query-revision-and-index-plans",
-          "name": "Query revisions and index plans",
-          "lanes": [
-            {
-              "id": "metadata-revision-and-index-plans",
-              "kind": "own-clusters",
-              "classes": [
-                "QueryRuleOptimizationClusterTests"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cluster-graph-frontiers-and-vertex-policy",
-          "name": "Graph frontiers and vertex policy",
-          "lanes": [
-            {
-              "id": "graph-frontiers-and-vertex-policy",
-              "kind": "shared-exclusive",
-              "classes": [
-                "GraphLabelFrontierPublicTests",
-                "GraphVertexPublicWholeFlowTests"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cluster-sql-json-and-csharp-equivalence",
-          "name": "SQL JSON and CSharp equivalence",
-          "lanes": [
-            {
-              "id": "sql-json-and-csharp-equivalence",
-              "kind": "own-clusters",
-              "classes": [
-                "MetamorphicPublicClusterTests"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cluster-ordered-queue-retry-and-cold-cuts",
-          "name": "Ordered queue retry and cold cuts",
-          "lanes": [
-            {
-              "id": "ordered-queue-retry-and-cold-cuts",
-              "kind": "shared-exclusive",
-              "classes": [
-                "QueueOrderedRetryPublicClusterTests"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "cluster-file-ownership-and-cold-recovery",
-          "name": "File ownership and cold recovery",
-          "lanes": [
-            {
-              "id": "file-ownership-and-cold-recovery",
-              "kind": "own-clusters",
-              "classes": [
-                "FunctionalFileOwnershipClusterTests"
-              ]
-            }
-          ]
-        },
-        {
           "id": "cluster-public-apis-and-administration",
           "playwright": true,
           "lanes": [
@@ -268,10 +176,14 @@
           "id": "cluster-queue-workers-and-single-node-recovery",
           "lanes": [
             {
-              "id": "queue-worker-sdk",
+              "id": "queue-workers-transfer-and-query-admission",
               "kind": "own-clusters",
               "classes": [
-                "QueueWorkerSdkClusterTests"
+                "CapabilityOutputClusterTests",
+                "QueryEquivalentIntegerClusterTests",
+                "QueueWorkerSdkClusterTests",
+                "RemoteTransferCoordinatorClusterTests",
+                "SqlParserAdmissionClusterWholeFlowTests"
               ]
             },
             {
@@ -286,15 +198,15 @@
           "name": "Queue workers and single-node recovery"
         },
         {
-          "id": "cluster-capabilities-and-single-node-models",
+          "id": "cluster-capabilities-revisions-and-single-node-models",
           "lanes": [
             {
-              "id": "capabilities-leases-and-subscriptions",
+              "id": "capabilities-revisions-and-leases",
               "kind": "own-clusters",
               "classes": [
-                "CapabilityOutputClusterTests",
-                "GraphSearchPathPolicyClusterTests",
                 "QueueLeaseFencingClusterTests",
+                "RequiredProcessingPolicyClusterTests",
+                "RowRevisionInferenceClusterTests",
                 "SharedDomainPublicClusterTests",
                 "SubscriptionFilterGenerationClusterTests"
               ]
@@ -308,29 +220,30 @@
               ]
             }
           ],
-          "name": "Capabilities and single-node data models"
+          "name": "Capabilities, row revisions and single-node models"
         },
         {
           "id": "cluster-atomic-processing-and-deadlines",
           "lanes": [
             {
-              "id": "atomic-session-and-authorization-operations",
+              "id": "revision-plans-atomic-session-and-deadlines",
               "kind": "own-clusters",
               "classes": [
                 "AtomicTriadStagedClusterTests",
                 "AuthenticationExecutionTests",
-                "QueueDeadlineSiloClusterTests",
-                "StrongReadSessionAbsenceClusterTests"
+                "QueryRuleOptimizationClusterTests",
+                "QueueDeadlineSiloClusterTests"
               ]
             },
             {
-              "id": "inbox-deadline-and-lease-operations",
+              "id": "transfer-attempts-and-inbox-processing",
               "kind": "own-clusters",
               "classes": [
-                "InboxProcessingPublicColdTests",
-                "QueueDeadlineAutonomousClusterTests",
+                "PostgresInt16ClusterWholeFlowTests",
                 "QueueProducerAtomicClusterTests",
-                "QueueViewLeaseIsolationTests"
+                "QueueViewLeaseIsolationTests",
+                "QueueWorkerProcessClusterTests",
+                "RemoteTransferAttemptClusterTests"
               ]
             }
           ],
@@ -340,12 +253,12 @@
           "id": "cluster-query-cursors-and-resource-bounds",
           "lanes": [
             {
-              "id": "graph-claims-and-time-series-chunks",
+              "id": "graph-lineage-resource-policy-and-time-series-chunks",
               "kind": "own-clusters",
               "classes": [
-                "EventingRequiredClaimClusterTests",
                 "GraphSearchLineageClusterTests",
-                "QueryEquivalentIntegerClusterTests",
+                "ModelHeadAuthorityClusterTests",
+                "ResourcePolicyUpdateClusterTests",
                 "TargetInboxPublicColdTests",
                 "TimeSeriesChunkQualificationClusterTests"
               ]
@@ -354,16 +267,20 @@
               "id": "cursors-authorization-and-read-bounds",
               "kind": "shared-exclusive",
               "classes": [
-                "CredentialSubjectReplacementClusterTests",
-                "EventByteBoundPublicTests",
+                "AdminBackupClientParityTests",
+                "AggregateReplayClusterSiloRestartTests",
+                "AspireProcessFaultCommandTests",
                 "GraphCycleFrontierPublicTests",
                 "GraphPathClusterParityTests",
                 "GraphSearchClusterSiloRestartTests",
+                "GraphVertexPublicWholeFlowTests",
                 "SafeProjectorOperationClusterTests",
                 "SeriesFiniteOverflowPublicTests",
                 "SqlModelViewClusterValidationTests",
-                "SqlOffsetClusterWholeFlowTests",
-                "TimeSeriesClusterReadTests"
+                "TextWaitClusterTests",
+                "TimeSeriesClusterReadTests",
+                "TimeSeriesCurrentCapabilityClusterTests",
+                "TopicRetentionClusterTests"
               ]
             }
           ],
@@ -373,71 +290,65 @@
           "id": "cluster-query-policy-and-background-work",
           "lanes": [
             {
-              "id": "query-generation-and-processing-policy",
+              "id": "query-equivalence-and-processing-policy",
               "kind": "own-clusters",
               "classes": [
+                "EventingRequiredClaimClusterTests",
                 "GraphLabelUseClusterTests",
-                "QueueWorkerProcessClusterTests",
-                "RequiredProcessingPolicyClusterTests",
-                "SqlParserAdmissionClusterWholeFlowTests"
+                "MetamorphicPublicClusterTests",
+                "SqlBetweenSymmetricClusterWholeFlowTests",
+                "StrongReadSessionAbsenceClusterTests"
               ]
             },
             {
               "id": "events-scheduling-and-derived-reads",
               "kind": "shared-exclusive",
               "classes": [
-                "AdminBackupClientParityTests",
-                "AggregateReplayClusterSiloRestartTests",
-                "EventCurrentReadAuthorityClusterTests",
-                "EventProjectionClusterTests",
+                "FeedLiveClusterTests",
+                "GraphLabelFrontierPublicTests",
                 "GuideLifecyclePublicTests",
+                "McpPersistedAuthorizationTests",
                 "PartitionQueryPublicSiloRestartTests",
+                "QueueDeadLetterPublicClusterTests",
                 "RecurringDueClusterTests",
                 "RecurringSchedulePolicyClusterTests",
-                "SagaDueClusterTests",
-                "SagaTimeoutClusterTests",
                 "ScopedCommandIdentityClusterTests",
                 "ScopedSampleIdentityPublicTests",
                 "TextAsyncClusterTests",
-                "TextWaitClusterTests",
-                "TopicRetentionClusterTests",
-                "TopicSqlClusterTests"
+                "TopicSqlClusterTests",
+                "TypedEndpointJoinClusterTests"
               ]
             }
           ],
           "name": "Query policy and background work"
         },
         {
-          "id": "cluster-model-authority-and-transfer-repair",
+          "id": "cluster-model-authority-and-subscription-policy",
           "lanes": [
             {
-              "id": "model-authority-and-transfer-policy",
+              "id": "subscription-policy-and-inbox-processing",
               "kind": "own-clusters",
               "classes": [
-                "ModelHeadAuthorityClusterTests",
-                "RemoteTransferRepairClusterTests",
-                "RequestBodyLimitClusterTests"
+                "GraphSearchPathPolicyClusterTests",
+                "InboxProcessingPublicColdTests",
+                "SubscriptionPhasePublicColdTests"
               ]
             },
             {
-              "id": "administration-and-model-execution",
+              "id": "composite-prefix-and-projection-authority",
               "kind": "shared-exclusive",
               "classes": [
                 "AdminDashboardClusterTests",
                 "AdminDispatchClientParityTests",
                 "AggregateReplayClusterTests",
-                "ClusterTests",
                 "EventReferenceSelectClusterTests",
-                "EventSelectiveAppendAuthorityClusterTests",
-                "LeftFilteredJoinClusterTests",
-                "QueueDeadLetterPublicClusterTests",
                 "RecurringScheduleClusterTests",
-                "SqlModelViewClusterParityTests",
-                "TimeSeriesCurrentCapabilityClusterTests"
+                "SparseCompositePrefixClusterTests",
+                "SqlModelViewClusterParityTests"
               ]
             }
           ],
-          "name": "Model authority and transfer repair"
+          "name": "Model authority and subscription policy"
         },
         {
           "id": "cluster-replicated-models-and-file-ownership",
@@ -451,12 +362,13 @@
               ]
             },
             {
-              "id": "file-ownership-and-transfer-attempts",
+              "id": "file-ownership-and-atomic-admission",
               "kind": "own-clusters",
               "classes": [
-                "CompetingInboxPublicTests",
-                "RemoteTransferAttemptClusterTests",
-                "ResourcePolicyUpdateClusterTests"
+                "FunctionalFileOwnershipClusterTests",
+                "QueueDispatchCasClusterTests",
+                "RequestBodyLimitClusterTests",
+                "SqlFetchCountClusterWholeFlowTests"
               ]
             }
           ],
@@ -478,14 +390,16 @@
               "kind": "shared-exclusive",
               "classes": [
                 "AggregateSnapshotRaceClusterWholeFlowTests",
-                "AspireProcessFaultCommandTests",
+                "CapturedPolicyClusterTests",
                 "ComposedProjectionLineageClusterTests",
-                "DatabaseCompositionClusterTests",
+                "CredentialSubjectReplacementClusterTests",
+                "EventCurrentReadAuthorityClusterTests",
+                "EventSelectiveAppendAuthorityClusterTests",
                 "GraphIncomingClusterTests",
+                "GraphPathClusterAuthorizationTests",
+                "GraphPathClusterSiloRestartTests",
                 "McpCredentialLifecycleTests",
                 "McpFieldAuthorizationTests",
-                "McpPersistedAuthorizationTests",
-                "QueueReferenceSelectClusterTests",
                 "TimeSeriesClusterReplicaRestartTests"
               ]
             }
@@ -500,11 +414,11 @@
               "id": "live-documents-and-transfer-stages",
               "kind": "own-clusters",
               "classes": [
+                "CompetingInboxPublicTests",
                 "DocumentLiveProfileClusterTests",
                 "FoundationOtlpClusterTests",
                 "QueryCapabilityVersionClusterWholeFlowTests",
-                "RemoteTransferThreeStageColdTests",
-                "RowRevisionInferenceClusterTests"
+                "RemoteTransferThreeStageColdTests"
               ]
             },
             {
@@ -512,10 +426,13 @@
               "kind": "shared-exclusive",
               "classes": [
                 "AdminDashboardBrowserTests",
-                "CapturedPolicyClusterTests",
+                "DatabaseCompositionClusterTests",
                 "DeclarativeCompositionClusterTests",
                 "DocumentSessionReadClusterTests",
-                "GraphPathClusterSiloRestartTests",
+                "QueueOrderedRetryPublicClusterTests",
+                "QueueParkedPolicyClusterTests",
+                "QueueReferenceSelectClusterTests",
+                "QueueTerminalPolicyClusterTests",
                 "SqlGraphSearchClusterTests",
                 "StreamCatchupColdClusterTests",
                 "TimeSeriesAggregateScanBoundClusterTests"
@@ -528,15 +445,14 @@
           "id": "cluster-bootstrap-and-authorized-traversal",
           "lanes": [
             {
-              "id": "bootstrap-epochs-and-sql-budgets",
+              "id": "bootstrap-epochs-transfer-repair-and-sql-budgets",
               "kind": "own-clusters",
               "classes": [
                 "ColdBootstrapSdkTests",
                 "InitialPrincipalEpochClusterTests",
                 "PostgresDecimalClusterWholeFlowTests",
-                "QueueDispatchCasClusterTests",
                 "RelationalSqlClusterJoinBudgetTests",
-                "SqlBetweenSymmetricClusterWholeFlowTests",
+                "RemoteTransferRepairClusterTests",
                 "SqlBooleanTruthClusterWholeFlowTests"
               ]
             },
@@ -544,16 +460,17 @@
               "id": "authorized-traversal-and-retention",
               "kind": "shared-exclusive",
               "classes": [
+                "ClusterTests",
+                "DeclarativeCompositionReverseQuotaClusterTests",
+                "EventByteBoundPublicTests",
                 "EventMessageSensitivePublicClusterTests",
                 "EventSchemaCursorPublicTests",
-                "FeedLiveClusterTests",
                 "GraphIncomingClusterSiloRestartTests",
-                "GraphPathClusterAuthorizationTests",
-                "QueueParkedPolicyClusterTests",
+                "SagaTimeoutClusterTests",
                 "SeriesRetentionAtomicPublicTests",
+                "SqlOffsetClusterWholeFlowTests",
                 "TextClusterSiloRestartTests",
-                "TimeSeriesResourceTagPolicyClusterTests",
-                "TypedEndpointJoinClusterTests"
+                "TimeSeriesResourceTagPolicyClusterTests"
               ]
             }
           ],
@@ -576,27 +493,26 @@
           "id": "cluster-queues-and-restart-recovery",
           "lanes": [
             {
-              "id": "queue-state-and-restart-recovery",
+              "id": "queue-and-projection-restart-recovery",
               "kind": "shared-exclusive",
               "classes": [
-                "DeclarativeCompositionReverseQuotaClusterTests",
+                "EventProjectionClusterTests",
+                "LeftFilteredJoinClusterTests",
                 "ProjectionPublicColdTests",
                 "QueueLifecyclePublicClusterTests",
-                "QueueTerminalPolicyClusterTests",
+                "SagaDueClusterTests",
                 "SampleRetentionClusterRecoveryTests",
                 "StreamTraversalColdClusterTests"
               ]
             },
             {
-              "id": "bootstrap-files-sql-and-transfer-coordination",
+              "id": "catalog-bootstrap-and-queue-deadlines",
               "kind": "own-clusters",
               "classes": [
                 "CatalogBootstrapAuthorityClusterTests",
                 "FileStorageHttpTests",
-                "PostgresInt16ClusterWholeFlowTests",
+                "QueueDeadlineAutonomousClusterTests",
                 "QueueDueDatabaseScopeClusterTests",
-                "RemoteTransferCoordinatorClusterTests",
-                "SqlFetchCountClusterWholeFlowTests",
                 "SqlNullOrderingClusterWholeFlowTests"
               ]
             }

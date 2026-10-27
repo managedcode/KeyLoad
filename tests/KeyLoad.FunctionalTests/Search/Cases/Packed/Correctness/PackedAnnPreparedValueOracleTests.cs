@@ -79,6 +79,9 @@ internal sealed class PackedAnnPreparedValueOracleTests
             _ = PackedAnnPreparedValueTestSupport.RunScoringLoop(packed, metric, 2);
             _ = PackedAnnPreparedValueTestSupport.RunScoringLoop(packed, metric, 2);
             var expected = PackedAnnPreparedValueTestSupport.RunScoringLoop(packed, metric, 8);
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
             var before = GC.GetAllocatedBytesForCurrentThread();
             var measured = PackedAnnPreparedValueTestSupport.RunScoringLoop(packed, metric, 8);
             var allocated = GC.GetAllocatedBytesForCurrentThread() - before;

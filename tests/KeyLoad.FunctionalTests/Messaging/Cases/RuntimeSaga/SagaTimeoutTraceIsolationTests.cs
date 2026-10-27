@@ -26,7 +26,8 @@ internal sealed class SagaTimeoutTraceIsolationTests(SagaTimeoutFixture fixture)
         caller.Stop();
 
         await AssertIsolatedTraceAsync(scheduled, caller.TraceId.ToString(), saga.Hint);
-        var shards = await fixture.JobHarness.CaptureOwnedShardsAsync(dueTime, CancellationToken.None);
+        var shards = (await fixture.JobHarness.CaptureOwnedShardsAsync(dueTime, CancellationToken.None))
+            .Where(shard => shard.Id == scheduled.ShardId).ToArray();
         try
         {
             await fixture.JobHarness.WaitUntilSettledAsync(shards, CancellationToken.None);

@@ -30,9 +30,11 @@ flowchart LR
 
 The implementation paths are `tests/KeyLoad.FunctionalTests/OrleansExecution/{Cases,Fixtures,Helpers}/` and the existing `tests/KeyLoad.FunctionalTests/Messaging/Cases/MultiLane/MultiLaneReceiveWholeFlowTests.cs`. Changes comprise the shared-session key, guarded attribute changes and the genuine two-fixture whole operation case. Frontend, public SDK/MCP operations and server database execution are N/A: this work changes test scheduling and adds original-fixture evidence.
 
-The named functional shard runner uses four concurrent test slots on local and CI
+The named functional shard runner uses ten concurrent test slots on local and CI
 runners. This resource bound is declared in `ci-test-shards.json`; the Aspire-owned
 TUnit entry retains its separately validated ordinary maximum of 50. Host startup
 and operation phases retain their own deadlines, including flows owning two hosts.
 
 Qualification: the focused cases and the ordinary cohort must run with maximum 50 through the TUnit entry; the solution build, process recovery and Aspire replicated-cluster .NET SDK/official MCP gates remain mandatory and are not proven by this document.
+
+The saga schedule trace-isolation case waits for the exact shard identified by its returned durable job. Capturing locally owned shards can also return shards from earlier operations in the shared silo; their counts do not describe this operation. The case preserves its original settlement deadline and complete trace/metadata checks, and still verifies the persisted saga reaches `TimedOut`; a shard already removed after completion is not required to remain alive.
