@@ -26,7 +26,6 @@ internal static class SiteIsolatedFields
     internal const string P99Ms = "p99Ms";
     internal const string Path = "path";
     internal const string Projection = "projection";
-    internal const string Provenance = "provenance";
     internal const string RawLocation = "rawLocation";
     internal const string Report = "report";
     internal const string Result = "result";
@@ -40,7 +39,12 @@ internal static class SiteIsolatedFields
     internal const string UsefulOperationsPerSecond = "usefulOperationsPerSecond";
     internal const string Workers = "workers";
     internal const string Rows = "rows";
-    internal const string Ranked = "ranked";
+    internal const string Successes = "successes";
+    internal const string Values = "values";
+    internal const string Test = "test";
+    internal const string Lines = "lines";
+    internal const string Empty = "empty";
+    internal const string Overview = "overview";
     internal const string Scenario = "scenario";
     internal const string Name = "name";
     internal const string NodeCount = "nodeCount";

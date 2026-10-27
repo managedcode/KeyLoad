@@ -13,9 +13,9 @@ internal sealed class SiteIsolatedStandaloneBrowserTests
         using var projection = JsonDocument.Parse(await File.ReadAllBytesAsync(fixture.Projection, token));
         await using var browser = await SiteIsolatedBrowserStartup.StartAsync(fixture, token);
         await SiteIsolatedBrowserAssertions.WaitAsync(browser.Chrome.Cdp, token);
-        await SiteIsolatedBrowserAssertions.AssertRowsAsync(browser.Chrome.Cdp, projection.RootElement,
-            new("sequential-read", 1, "session", "throughput", "all"), token);
-        await SiteIsolatedBrowserLayoutAssertions.AssertAsync(browser.Chrome.Cdp, projection.RootElement, token);
+        var expected = new SiteIsolatedExpectedValues(projection.RootElement);
+        await SiteIsolatedBrowserAssertions.AssertTableAsync(browser.Chrome.Cdp, expected, SiteIsolatedExpectedValues.All, token);
+        await SiteIsolatedBrowserLayoutAssertions.AssertAsync(browser.Chrome.Cdp, expected, token);
         var hidden = await browser.Chrome.Cdp.EvaluateAsync("document.querySelector('#benchmarks').hidden", false, token);
         await Assert.That(hidden.GetBoolean()).IsFalse();
         const string resources = "performance.getEntriesByType('resource').map(entry=>entry.name)";

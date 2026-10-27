@@ -7,82 +7,60 @@ internal static class SiteIsolatedBrowserAssertions
 {
     private const string Rows = "#isolated-results .isolated-table-scroll tbody tr";
     private const string Ready = "document.querySelectorAll('" + Rows + "').length>0 && document.querySelector('#isolated-error').hidden";
+    private const string NoData = "No data";
     private const string Snapshot = """
-        (()=>({rows:Array.from(document.querySelectorAll('#isolated-results .isolated-table-scroll tbody tr')).map(row=>({
+        (()=>Array.from(document.querySelectorAll('#isolated-results .isolated-table-scroll tbody tr')).map(row=>({
           name:row.cells[0].textContent,nodeCount:Number(row.cells[1].textContent),status:row.cells[2].textContent,
-          value:row.dataset.value===''?null:Number(row.dataset.value),workerId:row.dataset.workerId,
-          display:row.cells[3].textContent,links:Array.from(row.querySelectorAll('a')).map(a=>a.href)
-        })),ranked:Array.from(document.querySelectorAll('#isolated-results .rank-row')).map(row=>row.dataset.workerId)}))()
+          workerId:row.dataset.workerId,links:Array.from(row.querySelectorAll('a')).map(a=>a.href),
+          values:Array.from(row.querySelectorAll('td[data-test]')).map(cell=>({test:cell.dataset.test,
+            value:cell.dataset.value===''?null:Number(cell.dataset.value),display:cell.textContent}))})))()
         """;
-    private static readonly (string Family, string[] Engines)[] EngineFamilies =
-    [
-        ("Multi-model", ["KeyLoad", "SurrealDB"]),
-        ("Relational", ["PostgreSQL + pgvector", "SQL Server", "MySQL"]),
-        ("Document", ["MongoDB"]),
-        ("Key-value", ["Redis"]),
-        ("Search", ["OpenSearch"]),
-        ("Graph", ["Neo4j", "HelixDB"]),
-        ("Time series", ["TimescaleDB", "InfluxDB"]),
-        ("Analytics", ["ClickHouse"]),
-        ("Vector", ["Qdrant"]),
-        ("Queue", ["RabbitMQ"]),
-        ("Event store", ["KurrentDB"]),
-    ];
 
     public static async Task WaitAsync(SiteBrowserCdpClient cdp, CancellationToken token)
         => await Assert.That(await cdp.WaitForExpressionAsync(Ready, token)).IsTrue();
 
-    public static Task SelectAsync(SiteBrowserCdpClient cdp, string id, object value, CancellationToken token)
+    public static Task SelectTypeAsync(SiteBrowserCdpClient cdp, string family, CancellationToken token)
     {
-        var expression = "(()=>{const e=Array.from(document.querySelectorAll(" + JsonSerializer.Serialize("#isolated-" + id + " input") +
-            ")).find(input=>input.value===" + JsonSerializer.Serialize(Convert.ToString(value, CultureInfo.InvariantCulture)) +
-            ");if(!e)return false;e.click();return e.checked;})()";
+        var expression = "(()=>{const e=Array.from(document.querySelectorAll('#isolated-type input')).find(input=>input.value===" +
+            JsonSerializer.Serialize(family) + ");if(!e)return false;e.click();return e.checked;})()";
         return SiteBrowserAssertions.EvaluateSuccess(cdp, expression, token);
     }
 
-    /// <summary>The selection target is a database family or <c>all</c>; expected rows come from the independent oracle.</summary>
-    public static async Task AssertRowsAsync(SiteBrowserCdpClient cdp, JsonElement projection,
-        SiteIsolatedSelection selection, CancellationToken token)
+    /// <summary>The results table keeps every planned session of the selected family with exact recorded values and links.</summary>
+    public static async Task AssertTableAsync(SiteBrowserCdpClient cdp, SiteIsolatedExpectedValues expected, string family,
+        CancellationToken token)
     {
-        var snapshot = await cdp.EvaluateAsync(Snapshot, false, token);
-        var rows = snapshot.GetProperty(SiteIsolatedFields.Rows).EnumerateArray().ToArray();
-        var expected = SiteIsolatedOracle.Rows(projection, selection with { Target = "all" })
-            .Where(row => selection.Target == "all" || FamilyOf(row.Name) == selection.Target).ToArray();
-        await Assert.That(rows.Length).IsEqualTo(expected.Length);
-        var ranked = snapshot.GetProperty(SiteIsolatedFields.Ranked).EnumerateArray().Select(item => item.GetString());
-        await Assert.That(string.Join('|', ranked))
-            .IsEqualTo(string.Join('|', expected.Where(row => row.Value is not null).Select(row => row.WorkerId)));
-        var cohort = projection.GetProperty(SiteIsolatedFields.Cohort);
+        var rows = (await cdp.EvaluateAsync(Snapshot, false, token)).EnumerateArray().ToArray();
+        var planned = expected.Planned(family);
+        await Assert.That(rows.Length).IsEqualTo(planned.Length);
+        var cohort = expected.Projection.GetProperty(SiteIsolatedFields.Cohort);
         var run = SiteTokens.EvidenceBase + cohort.GetProperty(SiteIsolatedFields.RunId).GetInt64().ToString(CultureInfo.InvariantCulture);
         for (var index = 0; index < rows.Length; index++)
         {
             var row = rows[index];
-            var oracle = expected[index];
-            await Assert.That(row.GetProperty(SiteIsolatedFields.Name).GetString()).IsEqualTo(oracle.Name);
-            await Assert.That(row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32()).IsEqualTo(oracle.NodeCount);
-            await Assert.That(row.GetProperty(SiteIsolatedFields.WorkerId).GetString()).IsEqualTo(oracle.WorkerId);
-            await Assert.That(row.GetProperty(SiteIsolatedFields.Status).GetString()).IsEqualTo(Status(oracle.Status));
-            var links = row.GetProperty(SiteIsolatedFields.Links).EnumerateArray().Select(item => item.GetString()).ToArray();
-            await AssertLinksAsync(links, run, oracle);
-            await AssertValueAsync(row, oracle.Value);
+            var (id, target, nodes) = planned[index];
+            var session = expected.Row(target, "load-million", nodes);
+            await Assert.That(row.GetProperty(SiteIsolatedFields.Name).GetString()).IsEqualTo(target);
+            await Assert.That(row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32()).IsEqualTo(nodes);
+            await Assert.That(row.GetProperty(SiteIsolatedFields.WorkerId).GetString()).IsEqualTo(id);
+            await Assert.That(row.GetProperty(SiteIsolatedFields.Status).GetString()).IsEqualTo(Status(session.Status));
+            await AssertLinksAsync([.. row.GetProperty(SiteIsolatedFields.Links).EnumerateArray().Select(item => item.GetString())], run, session);
+            var values = row.GetProperty(SiteIsolatedFields.Values).EnumerateArray().ToArray();
+            await Assert.That(string.Join('|', values.Select(cell => cell.GetProperty(SiteIsolatedFields.Test).GetString())))
+                .IsEqualTo(string.Join('|', SiteIsolatedExpectedValues.TableColumns));
+            foreach (var cell in values)
+            {
+                await AssertValueAsync(cell, expected.Value(target, cell.GetProperty(SiteIsolatedFields.Test).GetString()!, nodes));
+            }
         }
     }
 
-    private static string FamilyOf(string engine)
-        => EngineFamilies.Single(item => item.Engines.Contains(engine, StringComparer.Ordinal)).Family;
-
-    private static async Task AssertValueAsync(JsonElement row, double? expected)
+    private static async Task AssertValueAsync(JsonElement cell, double? expected)
     {
-        if (expected is null)
-        {
-            await Assert.That(row.GetProperty(SiteIsolatedFields.Value).ValueKind).IsEqualTo(JsonValueKind.Null);
-            await Assert.That(row.GetProperty(SiteIsolatedFields.Display).GetString()).IsEqualTo("—");
-        }
-        else
-        {
-            await Assert.That(row.GetProperty(SiteIsolatedFields.Value).GetDouble()).IsEqualTo(expected.Value).Within(0.000001);
-            await Assert.That(row.GetProperty(SiteIsolatedFields.Display).GetString()!.StartsWith(Display(expected.Value), StringComparison.Ordinal)).IsTrue();
-        }
+        var value = cell.GetProperty(SiteIsolatedFields.Value);
+        await Assert.That(SiteIsolatedExpectedValues.Format(value.ValueKind == JsonValueKind.Null ? null : value.GetDouble()))
+            .IsEqualTo(SiteIsolatedExpectedValues.Format(expected));
+        await Assert.That(cell.GetProperty(SiteIsolatedFields.Display).GetString()).IsEqualTo(expected is null ? NoData : Display(expected.Value));
     }
 
     private static async Task AssertLinksAsync(string?[] links, string run, SiteIsolatedExpectedRow row)

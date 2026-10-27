@@ -1,5 +1,3 @@
-using System.Text.Json;
-
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
 internal static class SiteIsolatedBrowserKeyboardAssertions
@@ -7,25 +5,27 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
     private const string VirtualKeyField = "windowsVirtualKeyCode";
     private const string ArrowRightKey = "ArrowRight";
     private const string ArrowLeftKey = "ArrowLeft";
-    private const string Focus = "(()=>{const e=document.querySelector('#isolated-node-count input:checked');e.focus();" +
-        "return document.activeElement===e&&e.value==='1';})()";
+    private const string Focus = "(()=>{const e=document.querySelector('#isolated-type input:checked');e.focus();" +
+        "return document.activeElement===e&&e.value==='all';})()";
 
-    /// <summary>The cluster radio group follows native arrow-key selection and re-renders the owned rows.</summary>
-    public static async Task AssertNodeSelectionAsync(SiteBrowserCdpClient cdp, JsonElement projection, CancellationToken token)
+    /// <summary>The family radio group follows native arrow-key selection and re-renders the owned view.</summary>
+    public static async Task AssertTypeSelectionAsync(SiteBrowserCdpClient cdp, SiteIsolatedExpectedValues expected, CancellationToken token)
     {
+        var next = SiteIsolatedExpectedValues.Families.First();
         await Assert.That((await cdp.EvaluateAsync(Focus, false, token)).GetBoolean()).IsTrue();
         await KeyAsync(cdp, ArrowRightKey, 39, token);
-        await AssertSelectedAsync(cdp, projection, 3, token);
+        await AssertSelectedAsync(cdp, next, token);
+        await SiteIsolatedBrowserChartAssertions.AssertCardsAsync(cdp, expected, next, token);
         await KeyAsync(cdp, ArrowLeftKey, 37, token);
-        await AssertSelectedAsync(cdp, projection, 1, token);
+        await AssertSelectedAsync(cdp, SiteIsolatedExpectedValues.All, token);
+        await SiteIsolatedBrowserChartAssertions.AssertOverviewAsync(cdp, expected, SiteIsolatedExpectedValues.Mixed, token);
     }
 
-    private static async Task AssertSelectedAsync(SiteBrowserCdpClient cdp, JsonElement projection, int nodes, CancellationToken token)
+    private static async Task AssertSelectedAsync(SiteBrowserCdpClient cdp, string family, CancellationToken token)
     {
-        var selected = "(()=>{const e=document.querySelector('#isolated-node-count input:checked');" +
-            "return e.value==='" + nodes + "'&&document.activeElement===e;})()";
+        var selected = "(()=>{const e=document.querySelector('#isolated-type input:checked');" +
+            "return e.value===" + System.Text.Json.JsonSerializer.Serialize(family) + "&&document.activeElement===e;})()";
         await Assert.That(await cdp.WaitForExpressionAsync(selected, token)).IsTrue();
-        await SiteIsolatedBrowserAssertions.AssertRowsAsync(cdp, projection, new("sequential-read", nodes, "session", "throughput", "all"), token);
     }
 
     private static async Task KeyAsync(SiteBrowserCdpClient cdp, string key, int virtualKey, CancellationToken token)

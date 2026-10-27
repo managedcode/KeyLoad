@@ -1,23 +1,58 @@
-import { metrics } from './measurements.mjs';
 import { selectedIsolatedRows } from './isolated-measurements.mjs';
-import { ENGINE_TYPES, SCENARIOS, TYPE_ORDER, artifactUrl, durationOnly, runUrl, scenarioTitle } from './isolated-contracts.mjs';
-import { compact, el, engineName, friendly, matrix, rankChart, scaling } from './isolated-charts.mjs';
+import { ENGINE_TYPES, GENERAL, TESTS, artifactUrl, runUrl } from './isolated-contracts.mjs';
+import { NODES, change, compact, diverge, el, engineName, friendly, latency, logScale, nodesLabel, pair, ticks } from './isolated-charts.mjs';
 
 const STATUS = Object.freeze({ measured: 'Measured', unsupported: 'Unsupported scenario',
   unsupportedTopology: 'Unsupported execution topology', failed: 'Benchmark failed · no data', missing: 'No verified result',
   resourceIncomplete: 'Measured · incomplete telemetry' });
-const ABSENT = Object.freeze({ unsupportedTopology: 'Single-node only', unsupported: 'Not part of this test',
-  failed: 'No result in this run', missing: 'No result in this run', measured: 'No value for this metric',
-  resourceIncomplete: 'No value for this metric' });
-const HEADINGS = Object.freeze(['Engine', 'Nodes', 'Status', 'Selected metric', 'p50', 'p99', 'Attempts', 'Failures', 'GitHub run']);
+const REASONS = Object.freeze({ unsupportedTopology: 'single-node only', unsupported: 'not in this workload',
+  failed: 'no result in this run', missing: 'no result in this run' });
 const EXACT = new Intl.NumberFormat('en', { maximumFractionDigits: 3 });
-const OVERVIEW = SCENARIOS.filter(item => item.value !== 'verify-final');
+const COLUMNS = [...TESTS.slice(0, 5), { id: 'mixed', label: 'Mixed total' }, ...TESTS.slice(5)];
+const reason = row => REASONS[row.status] ?? 'not recorded';
 
-const nodesLabel = count => count + (count === 1 ? ' node' : ' nodes');
-const inType = type => name => type === 'all' || ENGINE_TYPES[name] === type;
-const metricFor = scenario => durationOnly(scenario) ? 'duration' : 'throughput';
-const rowsFor = (projection, scenario, nodeCount, metric = metricFor(scenario)) =>
-  selectedIsolatedRows(projection, scenario, nodeCount, 'session', metric, 'all');
+export function isolatedModel(projection) {
+  const cells = new Map();
+  const rows = (id, nodeCount, metric) => selectedIsolatedRows(projection, id, nodeCount, 'session', metric, 'all');
+  for (const nodeCount of NODES) {
+    for (const test of TESTS) for (const row of rows(test.id, nodeCount, test.seconds ? 'duration' : 'throughput'))
+      cells.set(`${row.name}|${test.id}|${nodeCount}`, row);
+    // Whole-test rate: successful operations of all five concurrent lanes over the mixed test's elapsed time.
+    for (const row of rows('mixed', nodeCount, 'duration')) cells.set(`${row.name}|mixed|${nodeCount}`, { ...row,
+      value: row.value === null ? null : row.worker.reports.find(report => report.caseId === 'mixed').lanes
+        .reduce((sum, lane) => sum + lane.measurement.successes, 0) / row.value });
+  }
+  const engines = [...new Set(projection.plan.workers.map(worker => worker.target))];
+  const cell = (engine, id, nodeCount) => cells.get(`${engine}|${id}|${nodeCount}`);
+  const best = new Map(COLUMNS.map(({ id, seconds }) => {
+    const values = engines.flatMap(engine => NODES.map(nodeCount => cell(engine, id, nodeCount).value)).filter(Number.isFinite);
+    return [id, seconds ? Math.min(...values) : Math.max(...values)];
+  }));
+  const recorded = (engine, nodeCount) => COLUMNS.some(({ id }) => cell(engine, id, nodeCount).value !== null);
+  const measured = engine => NODES.some(nodeCount => recorded(engine, nodeCount));
+  // A topology without any recorded test is stated once beside the engine instead of under every bar.
+  const nodes = engine => NODES.filter(nodeCount => nodeCount === 1 || recorded(engine, nodeCount));
+  return { projection, engines, cell, best, measured, nodes };
+}
+
+// Bars compare with the fastest engine of the whole run; a negative change always means slower on 3 nodes.
+function items(model, engine, { id, seconds }) {
+  const one = model.cell(engine, id, 1).value;
+  return model.nodes(engine).map(nodes => {
+    const row = model.cell(engine, id, nodes);
+    const value = row.value;
+    const text = value === null ? '' : seconds ? friendly(value, 's') : compact(value);
+    return { nodes, value, text, reason: reason(row), title: value === null ? 'No data' : text + (seconds ? '' : ' ops/s'),
+      ratio: value === null ? 0 : seconds ? model.best.get(id) / value : value / model.best.get(id),
+      note: nodes === 3 && value !== null && one !== null ? seconds ? change(value, one) : change(one, value) : null };
+  });
+}
+
+function panel(document, className, title, subtitle) {
+  const section = el(document, 'section', 'bench-panel ' + className);
+  section.appendChild(el(document, 'header', 'bench-panel-head')).append(el(document, 'h3', null, title), el(document, 'p', null, subtitle));
+  return section;
+}
 
 function link(document, text, href) {
   const node = el(document, 'a', null, text);
@@ -26,186 +61,189 @@ function link(document, text, href) {
   return node;
 }
 
-function panel(document, className, title, subtitle) {
-  const section = el(document, 'section', 'bench-panel ' + className);
-  const head = section.appendChild(el(document, 'header', 'bench-panel-head'));
-  head.append(el(document, 'h3', null, title), el(document, 'p', null, subtitle));
+function button(document, className, data, value) {
+  const node = el(document, 'button', className);
+  node.type = 'button';
+  node.dataset[data] = value;
+  return node;
+}
+
+function overview(document, model, sort) {
+  const section = panel(document, 'bench-overview', 'All databases',
+    'Operations per second. Top bar 1 node, lower bar 3 nodes with the change against 1 node. Click a column to sort.');
+  const head = section.appendChild(el(document, 'div', 'ov-head'));
+  head.append(el(document, 'span', null, 'Database'));
+  for (const column of GENERAL) {
+    head.appendChild(button(document, column.key === sort ? 'is-sorted' : null, 'sort', column.key))
+      .append(column.label, el(document, 'small', null, column.hint));
+  }
+  const id = GENERAL.find(column => column.key === sort).id;
+  const rank = engine => model.cell(engine, id, 1).value ?? (model.measured(engine) ? -1 : -2);
+  const list = section.appendChild(el(document, 'ol', 'ov-list'));
+  for (const engine of [...model.engines].sort((left, right) => rank(right) - rank(left))) {
+    const row = list.appendChild(el(document, 'li', 'ov-row' + (engine === 'KeyLoad' ? ' is-keyload' : '')));
+    row.dataset.target = engine;
+    const name = row.appendChild(button(document, 'ov-name', 'type', ENGINE_TYPES[engine]));
+    name.append(engineName(document, engine));
+    if (model.measured(engine) && model.nodes(engine).length === 1)
+      name.append(el(document, 'small', 'no-data', '3 nodes: no data · ' + reason(model.cell(engine, 'load-million', 3))));
+    if (!model.measured(engine)) row.append(el(document, 'p', 'no-data ov-empty', 'No data · ' + reason(model.cell(engine, 'load-million', 1))));
+    else for (const column of GENERAL) row.appendChild(pair(document, items(model, engine, column))).dataset.metric = column.key;
+  }
   return section;
 }
 
-function absent(document, rows, cohort) {
-  const groups = new Map();
-  for (const row of rows) groups.set(ABSENT[row.status], [...groups.get(ABSENT[row.status]) ?? [], row]);
-  const list = el(document, 'dl', 'bench-absent');
-  for (const [label, members] of groups) {
-    list.append(el(document, 'dt', null, label));
-    const names = list.appendChild(el(document, 'dd'));
-    for (const row of members) {
-      const reason = row.worker?.reason ?? row.detail ?? 'No verified original result for this session.';
-      const chip = row.status === 'failed' || row.status === 'missing'
-        ? link(document, row.name, row.worker?.job.url ?? runUrl(cohort)) : el(document, 'span', null, row.name);
-      chip.title = reason;
-      names.append(chip);
+function latencyPanel(document, model, id, title) {
+  const engines = model.engines.filter(engine => model.cell(engine, id, 1).p50 !== null || model.cell(engine, id, 3).p50 !== null)
+    .sort((left, right) => (model.cell(left, id, 1).p50 ?? Infinity) - (model.cell(right, id, 1).p50 ?? Infinity));
+  if (engines.length === 0) return null;
+  const entries = engine => NODES.map(nodes => ({ nodes, ...model.cell(engine, id, nodes) }));
+  const scale = logScale(engines.flatMap(engine => entries(engine).flatMap(entry => [entry.p50, entry.p99])));
+  const section = panel(document, 'bench-latency', title, 'Per request on a log scale: dot p50, ring p95, line end p99. Values show p50.');
+  section.append(ticks(document, scale, ''));
+  const list = section.appendChild(el(document, 'ul', 'lat-list'));
+  for (const engine of engines) {
+    const item = list.appendChild(el(document, 'li'));
+    item.dataset.target = engine;
+    const values = el(document, 'span', 'lat-values');
+    for (const entry of entries(engine)) if (entry.p50 !== null) values.append(el(document, 'small', 'n' + entry.nodes, friendly(entry.p50, 'ms')));
+    item.append(engineName(document, engine), latency(document, entries(engine), scale), values);
+  }
+  return section;
+}
+
+function cost(document, model) {
+  const both = engine => GENERAL.some(({ id }) => model.cell(engine, id, 1).value > 0 && model.cell(engine, id, 3).value !== null);
+  const engines = model.engines.filter(both);
+  if (engines.length === 0) return null;
+  const section = panel(document, 'bench-cost', 'What three nodes cost',
+    'Throughput change from 1 node to 3 replicated nodes. Data copies and write acknowledgement differ by engine.');
+  const head = section.appendChild(el(document, 'div', 'cost-row cost-head'));
+  head.append(el(document, 'span', null, 'Database'), ...GENERAL.map(column => el(document, 'span', null, column.label)));
+  for (const engine of engines) {
+    const row = section.appendChild(el(document, 'div', 'cost-row'));
+    row.append(engineName(document, engine));
+    for (const { id, key } of GENERAL) {
+      row.appendChild(diverge(document, model.cell(engine, id, 1).value, model.cell(engine, id, 3).value)).dataset.metric = key;
     }
   }
-  return list;
-}
-
-function board(document, rows, metric, selection, cohort) {
-  const ranked = rows.filter(row => row.value !== null);
-  const section = panel(document, 'bench-board', scenarioTitle(selection.scenario),
-    `${metric.title} · ${metric.direction.toLowerCase()} · ${nodesLabel(selection.nodeCount)}`);
-  section.append(ranked.length > 0 ? rankChart(document, ranked, metric)
-    : el(document, 'p', 'empty-state', 'No engine in this selection recorded this test.'));
-  const missing = rows.filter(row => row.value === null);
-  if (missing.length > 0) section.append(absent(document, missing, cohort));
   return section;
 }
 
-function overview(document, projection, selection) {
-  const columns = OVERVIEW.map(item => {
-    const metric = metrics[metricFor(item.value)];
-    const values = new Map(rowsFor(projection, item.value, selection.nodeCount).map(row => [row.id, row.value]));
-    const recorded = [...values.values()].filter(Number.isFinite);
-    return { ...item, values, title: scenarioTitle(item.value), unit: metric.unit, higher: metric.higher === true,
-      group: item.mixed ? 'mixed' : null, best: metric.higher ? Math.max(...recorded) : Math.min(...recorded) };
-  });
-  const engines = rowsFor(projection, 'load-million', selection.nodeCount).filter(row => inType(selection.type)(row.name))
-    .map(row => ({ name: row.name, values: columns.map(column => column.values.get(row.id) ?? null) }))
-    .filter(row => row.values.some(Number.isFinite));
-  if (engines.length === 0) return null;
-  const groups = TYPE_ORDER.map(type => ({ type, rows: engines.filter(row => ENGINE_TYPES[row.name] === type)
-    .sort((left, right) => left.name.localeCompare(right.name)) })).filter(group => group.rows.length > 0);
-  const section = panel(document, 'bench-overview', 'Every test at a glance',
-    'Throughput in operations per second; index build in seconds. Darker cells are closer to the fastest engine in that column.');
-  const scroll = section.appendChild(el(document, 'div', 'table-scroll matrix-scroll'));
-  scroll.tabIndex = 0;
-  scroll.setAttribute('role', 'region');
-  scroll.setAttribute('aria-label', 'Results by test; scroll this region horizontally on narrow screens');
-  scroll.append(matrix(document, { caption: `All tests · ${nodesLabel(selection.nodeCount)}`, columns, groups,
-    selected: selection.scenario }));
-  const legend = section.appendChild(el(document, 'p', 'heat-legend', 'Slower'));
-  for (let step = 0; step < 5; step += 1) legend.append(el(document, 'i', 'heat-' + step));
-  legend.append('Fastest');
+function card(document, model, engine) {
+  const node = el(document, 'article', 'db-card');
+  node.dataset.target = engine;
+  const head = node.appendChild(el(document, 'header'));
+  head.append(engineName(document, engine, 'h4'));
+  const profiles = NODES.map(nodes => model.cell(engine, 'load-million', nodes).worker?.session.targetProfile ?? null);
+  const facts = head.appendChild(el(document, 'dl', 'db-facts'));
+  const fact = (name, value) => facts.append(el(document, 'dt', null, name), el(document, 'dd', null, String(value)));
+  if (profiles[0]) fact('Version', profiles[0].version);
+  NODES.forEach((nodes, index) => fact(nodesLabel(nodes),
+    profiles[index]?.topology ?? 'No data · ' + reason(model.cell(engine, 'load-million', nodes))));
+  if (profiles[0]) fact('Writes', profiles[0].writeAcknowledgement);
+  if (!model.measured(engine)) {
+    node.append(el(document, 'p', 'no-data db-empty', 'No data in this run'));
+    return node;
+  }
+  const tests = node.appendChild(el(document, 'ul', 'db-tests'));
+  for (const test of TESTS) {
+    const item = tests.appendChild(el(document, 'li'));
+    item.dataset.test = test.id;
+    item.append(el(document, 'span', null, test.label + (test.seconds ? ' · s' : '')), pair(document, items(model, engine, test)));
+  }
+  const timed = TESTS.filter(test => !test.seconds && NODES.some(nodes => model.cell(engine, test.id, nodes).p50 !== null));
+  if (timed.length === 0) return node;
+  const entries = id => NODES.map(nodes => ({ nodes, ...model.cell(engine, id, nodes) }));
+  const scale = logScale(timed.flatMap(test => entries(test.id).flatMap(entry => [entry.p50, entry.p99])));
+  node.append(ticks(document, scale, 'Latency per request'));
+  const lat = node.appendChild(el(document, 'ul', 'db-lat'));
+  for (const test of timed) lat.appendChild(el(document, 'li')).append(el(document, 'span', null, test.label), latency(document, entries(test.id), scale));
+  return node;
+}
+
+function cards(document, model, type) {
+  const engines = model.engines.filter(engine => ENGINE_TYPES[engine] === type);
+  const section = panel(document, 'bench-cards', type, `Every test on 1 and 3 nodes. Bars compare with the fastest engine ` +
+    'in each test across the whole run; time tests show seconds and longer bars are faster.');
+  const grid = section.appendChild(el(document, 'div', 'card-grid'));
+  for (const engine of engines) grid.append(card(document, model, engine));
   return section;
 }
 
-function topology(document, projection, selection, metric) {
-  const three = new Map(selectedIsolatedRows(projection, selection.scenario, 3, 'session', selection.metric, 'all')
-    .map(row => [row.name, row.value]));
-  const pairs = selectedIsolatedRows(projection, selection.scenario, 1, 'session', selection.metric, 'all')
-    .filter(row => inType(selection.type)(row.name) && row.value > 0 && Number.isFinite(three.get(row.name)))
-    .map(row => ({ name: row.name, one: row.value, three: three.get(row.name) }));
-  if (pairs.length === 0) return null;
-  const section = panel(document, 'bench-scale', '1 node → 3 nodes',
-    `${scenarioTitle(selection.scenario)} · ${metric.title.toLowerCase()} for engines measured in both topologies.`);
-  const legend = section.appendChild(el(document, 'p', 'scale-legend'));
-  legend.append(el(document, 'i', 'scale-dot dot-one'), '1 node', el(document, 'i', 'scale-dot dot-three'), '3 nodes');
-  section.append(scaling(document, pairs, metric));
-  return section;
-}
-
-function evidenceCell(document, row, cohort) {
-  const cell = el(document, 'td', 'table-links');
-  if (row.worker === null) cell.append(link(document, 'Benchmark run', runUrl(cohort)));
-  else cell.append(link(document, row.worker.job.conclusion === 'failure' ? 'Failed job' : 'Job', row.worker.job.url),
-    link(document, 'Artifact', artifactUrl(cohort, row.worker.artifact)));
-  return cell;
-}
-
-function table(document, rows, metric, selection, cohort) {
+function table(document, model, type, cohort) {
   const node = el(document, 'table');
-  node.append(el(document, 'caption', null, `${metric.title} · ${metric.direction} · ${nodesLabel(selection.nodeCount)}`));
+  node.append(el(document, 'caption', null, 'Recorded values per session · operations per second, time tests in seconds'));
   const header = node.appendChild(el(document, 'thead')).appendChild(el(document, 'tr'));
-  for (const heading of HEADINGS) header.appendChild(el(document, 'th', null, heading)).scope = 'col';
+  for (const heading of ['Engine', 'Nodes', 'Status', ...COLUMNS.map(column => column.label), 'GitHub run'])
+    header.appendChild(el(document, 'th', null, heading)).scope = 'col';
   const body = node.appendChild(el(document, 'tbody'));
-  for (const row of rows) {
+  for (const engine of model.engines.filter(name => type === 'all' || ENGINE_TYPES[name] === type)) for (const nodes of NODES) {
+    const session = model.cell(engine, 'load-million', nodes);
     const tr = body.appendChild(el(document, 'tr'));
-    tr.dataset.workerId = row.id;
-    tr.dataset.value = row.value === null ? '' : String(row.value);
-    const value = row.value === null ? '—' : EXACT.format(row.value) + ' ' + metric.unit;
-    for (const text of [row.name, row.nodeCount, STATUS[row.status], value, friendly(row.p50, 'ms'), friendly(row.p99, 'ms'),
-      row.attempts === null ? null : EXACT.format(row.attempts), row.failures === null ? null : EXACT.format(row.failures)])
-      tr.append(el(document, 'td', null, text === null ? '—' : String(text)));
-    tr.append(evidenceCell(document, row, cohort));
+    tr.dataset.workerId = session.id;
+    tr.append(el(document, 'td', null, engine), el(document, 'td', null, String(nodes)), el(document, 'td', null, STATUS[session.status]));
+    for (const { id } of COLUMNS) {
+      const value = model.cell(engine, id, nodes).value;
+      const td = tr.appendChild(el(document, 'td', null, value === null ? 'No data' : EXACT.format(value)));
+      td.dataset.test = id;
+      td.dataset.value = value === null ? '' : String(value);
+    }
+    const links = tr.appendChild(el(document, 'td', 'table-links'));
+    if (session.worker === null) links.append(link(document, 'Benchmark run', runUrl(cohort)));
+    else links.append(link(document, session.worker.job.conclusion === 'failure' ? 'Failed job' : 'Job', session.worker.job.url),
+      link(document, 'Artifact', artifactUrl(cohort, session.worker.artifact)));
   }
   const scroll = el(document, 'div', 'table-scroll isolated-table-scroll');
   scroll.tabIndex = 0;
   scroll.setAttribute('role', 'region');
-  scroll.setAttribute('aria-label', metric.title + ' results table; scroll this region horizontally on narrow screens');
+  scroll.setAttribute('aria-label', 'Results table; scroll this region horizontally on narrow screens');
   scroll.append(node);
   return scroll;
 }
 
-function setup(document, rows) {
-  const grid = el(document, 'div', 'bench-setup');
-  for (const row of rows) {
-    if (row.worker?.session.targetProfile == null) continue;
-    const target = row.worker.report.targets[0];
-    const card = grid.appendChild(el(document, 'dl', 'setup-card'));
-    card.dataset.workerId = row.id;
-    card.append(engineName(document, row.name, 'div'));
-    for (const [name, value] of [['Version', target.version], ['Topology', target.topology],
-      ['Data copies', target.cluster.dataCopies], ['Write acknowledgement', target.writeAcknowledgement]]) {
-      card.append(el(document, 'dt', null, name), el(document, 'dd', null, String(value)));
-    }
-  }
-  return grid;
-}
-
-function footer(document, catalog, projection, rows, metric, selection) {
-  const cohort = catalog.cohort;
+function footer(document, catalog, model, type) {
+  const { cohort, measuredSourceRevision: revision } = catalog;
+  const { projection } = model;
   const section = el(document, 'footer', 'bench-foot');
   const runtimes = [...new Set(projection.workers.map(({ session: { runtime } }) =>
     `${runtime.operatingSystem} · ${runtime.logicalProcessors} vCPU · ${runtime.framework}`))];
-  const meta = section.appendChild(el(document, 'p', 'bench-meta'));
-  meta.append(link(document, `GitHub Actions run ${cohort.runId}`, runUrl(cohort)),
+  section.appendChild(el(document, 'p', 'bench-meta')).append(link(document, `GitHub Actions run ${cohort.runId}`, runUrl(cohort)),
     el(document, 'span', null, `${projection.workers.length} of ${projection.plan.workers.length} jobs completed`),
-    link(document, 'Source ' + catalog.measuredSourceRevision.slice(0, 7),
-      `https://github.com/${cohort.repository}/tree/${catalog.measuredSourceRevision}`),
+    link(document, 'Source ' + revision.slice(0, 7), `https://github.com/${cohort.repository}/tree/${revision}`),
     ...runtimes.map(text => el(document, 'span', null, text)));
   section.append(el(document, 'p', 'bench-note', 'Every job ran alone on its own GitHub-hosted runner, so hardware can ' +
     'differ between engines. Figures describe this run, not production readiness.'));
   const details = section.appendChild(el(document, 'details', 'bench-details'));
-  details.append(el(document, 'summary', null, 'Results table, engine setup and GitHub artifacts'),
-    table(document, rows, metric, selection, cohort), setup(document, rows));
+  details.append(el(document, 'summary', null, 'All recorded values, GitHub jobs and artifacts'), table(document, model, type, cohort));
   return section;
 }
 
-export function renderIsolatedSummary(container, projection) {
+export function renderIsolatedSummary(container, model) {
   const document = container.ownerDocument;
-  const engines = new Set();
   let operations = 0;
-  for (const item of SCENARIOS) for (const nodeCount of [1, 3]) for (const row of rowsFor(projection, item.value, nodeCount)) {
-    if (row.value === null) continue;
-    engines.add(row.name);
-    operations += row.attempts ?? 0;
+  for (const engine of model.engines) for (const test of TESTS) for (const nodes of NODES) {
+    const row = model.cell(engine, test.id, nodes);
+    if (row.value !== null) operations += row.attempts ?? 0;
   }
-  const records = Math.max(0, ...projection.workers.map(worker => worker.reports[0].expectedRecords));
-  container.replaceChildren(...[[String(engines.size), 'databases measured'], [compact(operations, 'ops/s'), 'operations timed'],
-    [compact(records, 'ops/s'), 'documents per engine'], [String(projection.options.concurrency), 'concurrent clients']]
-    .map(([value, label]) => {
-      const tile = el(document, 'div', 'kpi');
-      tile.append(el(document, 'strong', null, value), el(document, 'span', null, label));
-      return tile;
-    }));
-  return engines;
+  const records = Math.max(0, ...model.projection.workers.map(worker => worker.reports[0].expectedRecords));
+  container.replaceChildren(...[[String(model.engines.filter(model.measured).length), 'databases measured'],
+    [compact(operations), 'operations timed'], [compact(records), 'documents per engine'],
+    [String(model.projection.options.concurrency), 'concurrent clients']].map(([value, label]) => {
+    const tile = el(document, 'div', 'kpi');
+    tile.append(el(document, 'strong', null, value), el(document, 'span', null, label));
+    return tile;
+  }));
 }
 
-export function renderNodeCounts(fieldset, projection, selection) {
-  for (const input of fieldset.querySelectorAll('input')) {
-    const count = rowsFor(projection, selection.scenario, Number(input.value), selection.metric)
-      .filter(row => row.value !== null && inType(selection.type)(row.name)).length;
-    const label = input.nextElementSibling;
-    label.replaceChildren(nodesLabel(Number(input.value)), el(fieldset.ownerDocument, 'small', null, String(count)));
-  }
-}
-
-export function renderIsolatedView(container, catalog, projection, rows, selection) {
+export function renderIsolatedView(container, catalog, model, selection) {
   const document = container.ownerDocument;
-  const metric = metrics[selection.metric];
-  const visible = rows.filter(row => inType(selection.type)(row.name));
-  container.replaceChildren(...[board(document, visible, metric, selection, catalog.cohort), overview(document, projection, selection),
-    topology(document, projection, selection, metric), footer(document, catalog, projection, visible, metric, selection)]
-    .filter(Boolean));
+  const legend = el(document, 'p', 'bench-legend');
+  legend.append(el(document, 'i', 'n1'), '1 node', el(document, 'i', 'n3'), '3 nodes');
+  const duo = el(document, 'div', 'bench-duo');
+  duo.append(...[latencyPanel(document, model, 'random-read', 'Read latency'),
+    latencyPanel(document, model, 'search', 'Search latency')].filter(Boolean));
+  const parts = selection.type === 'all' ? [overview(document, model, selection.sort), duo, cost(document, model)]
+    : [cards(document, model, selection.type)];
+  container.replaceChildren(legend, ...parts.filter(Boolean), footer(document, catalog, model, selection.type));
 }
