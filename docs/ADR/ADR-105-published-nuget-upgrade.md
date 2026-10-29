@@ -1,9 +1,8 @@
 # ADR-105: Published NuGet dependency refresh
 
-Status: Accepted; integrated build and runtime qualification pending.
-Date: 2026-10-05.
-Feature: [RepositoryGovernance](../Features/RepositoryGovernance.md),
-REQ-NUGET-001..003 / AC-NUGET-001..003.
+Status: Accepted; local dependency integration checked. Complete delivered-source qualification remains open.
+Date: 2026-10-29.
+Feature: [RepositoryGovernance](../Features/RepositoryGovernance.md).
 
 ## Context and decision
 
@@ -13,12 +12,16 @@ the configured NuGet.org feed. Use the newest published stable release. Cartogra
 and Cartograph.Catalog have only their existing 0.1.0-alpha release; keep that
 published version. Do not introduce previews into stable package families.
 
-The feed audit selects 17 upgrades: the three ManagedCode.Communication packages
-10.3.1, ManagedCode.TimeSeries 10.1.1, ManagedCode.Storage.FileSystem 10.1.0,
-ManagedCode.Orleans.Graph 10.4.2, ManagedCode.Orleans.Identity.Core 10.4.0,
-the five Microsoft.Orleans packages 10.4.0, both Microsoft.CodeAnalysis packages
-5.9.0, TUnit 1.72.16, StackExchange.Redis 3.3.1 and KurrentDB.Client 1.4.1.
-All remaining central pins and Aspire.AppHost.Sdk are already current.
+The 2026-10-29 feed audit selects Orleans 10.4.1, with Journaling and Durable
+Jobs at 10.4.1-alpha.1, ManagedCode.Storage.Server/FileSystem 10.1.7 and
+TUnit/TUnit.Aspire 1.76.45. The existing transitive Orleans.Client and
+Orleans.Reminders dependencies are centrally pinned to 10.4.1 so the runtime
+family remains aligned. The remaining central pins, Aspire.AppHost.Sdk and the
+existing local tools are already current.
+RapidMembership 10.4.6 is rebuilt against Orleans 10.4.1 in its owning repository.
+Its release and all three public NuGet package source commits were verified
+before consumer adoption; package publication and runtime qualification remain
+separate gates.
 
 Retain central version management, dependency APIs, .NET 10/C# 14,
 warnings-as-errors and SDK-owned Roslyn compiler assets for analyzer tests.
@@ -26,13 +29,10 @@ Keep all Orleans packages and Roslyn peer packages aligned. Update active
 version assertions and development-capture metadata with the selected packages;
 retain immutable historical measurements and source receipts.
 
-The first upgraded restore exposed NU1608: the existing transitive
-Microsoft.CodeAnalysis.Workspaces.Common 5.0.0 requires Common exactly 5.0.0.
-Add its published 5.9.0 central peer pin alongside Common/CSharp 5.9.0. This
-aligns the existing dependency closure; it adds no new provider or compiler host
-and preserves all diagnostics. The 2026-10-05 feed-audit snapshot covered 45
-central entries before later pins were added. It is not a current inventory
-count or a refreshed feed-availability claim.
+Microsoft.CodeAnalysis.Workspaces.Common stays pinned alongside Common/CSharp
+at 5.9.0 to preserve their exact peer constraints and avoid NU1608. These pins
+align the existing dependency closure; they add no new provider or compiler host
+and preserve all diagnostics.
 
 Updating only patches would leave requested published minor/major upgrades undone.
 Floating versions would undermine reproducibility. Local replacement packages,
@@ -44,7 +44,7 @@ delivery contract before consumer adoption.
 flowchart LR
     Feed[Published NuGet versions] --> Pins[Central aligned pins]
     Pins --> Restore[Restore real dependency closure]
-    Restore --> Build[Release build and formatter]
+    Restore --> Build[Debug build and formatter]
     Build --> Tests[Aspire owned suites]
     Tests --> Receipt[Actual outcomes and open gates]
 ```
@@ -52,9 +52,9 @@ flowchart LR
 ## Implementation contract
 
 1. Audit current policies, the dirty manifest and all feed versions; identify active version checks and protected historical records. Reviewed exact paths join the change.
-2. Directory.Packages.props, this ADR, its index, RepositoryGovernance requirements and the refresh receipt carry the change. Update only selected version values, preserving concurrent package additions, together with the necessary TimeSeries comparison assertions and Orleans development-capture metadata under their existing BenchmarkComparisons slices.
-3. Restore, solution Release build, governance, formatter and Aspire-owned analyzers/unit/recovery/cluster suites; retain original failures and artifacts. Scope comparison regressions to changed version assertions through the same AppHost. Local evidence cannot qualify Linux GitHub runtime, public performance, endurance or power-loss durability.
-4. Inspect the combined diff, repeat the canonical Release build after final edits and formatting, record exact outcomes, and commit only this refresh stage when verified. Unrelated unfinished work remains with its author.
+2. Directory.Packages.props owns the selected versions. Update active version assertions, Orleans development-capture metadata and current documentation while preserving concurrent package additions and immutable historical evidence.
+3. Restore, solution Debug build, governance, formatter and Aspire-owned analyzers/unit/recovery/cluster suites; retain original failures and artifacts. Scope comparison checks to changed version assertions through the same AppHost. Linux GitHub qualification uses Release and remains distinct from local checks, public performance, endurance and power-loss durability.
+4. Inspect the combined diff, complete the canonical Debug build after final edits and formatting, record exact outcomes, and commit only this refresh stage when verified. Unrelated unfinished work remains with its author.
 
 ## Rollout, rollback and failure contracts
 

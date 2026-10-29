@@ -4,14 +4,14 @@ Status: Accepted. Current owner direction: 2026-10-19.
 
 ## Decision
 
-The official Orleans 10.4.0 generated serializer owns binary encoding, decoding,
+The official Orleans 10.4.1 generated serializer owns binary encoding, decoding,
 type metadata, object references, collections and field evolution. KeyLoad has no
 custom field codec, binary grammar, assembly-name selector, per-assembly service
 provider cache, wire walker or replacement JSON DOM serialization model.
 
 The shared serialization entry uses one standard `AddSerializer` registration
 and native pooled sessions. `JsonElement` alone uses the official
-`Microsoft.Orleans.Serialization.SystemTextJson` 10.4.0 codec; other attributed
+`Microsoft.Orleans.Serialization.SystemTextJson` 10.4.1 codec; other attributed
 contracts use generated binary codecs. This is an explicit type registration,
 not a general-purpose JSON serializer selection rule.
 

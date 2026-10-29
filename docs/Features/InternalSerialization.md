@@ -1,6 +1,6 @@
 # InternalSerialization
 
-The official Orleans 10.4.0 generated serializer encodes owned internal DTOs.
+The official Orleans 10.4.1 generated serializer encodes owned internal DTOs.
 [ADR-060](../ADR/ADR-060-internal-serialization.md) defines the current contract.
 Public HTTP/MCP JSON, exact user content, sortable keys, opaque ZoneTree bytes,
 canonical hashes and blob payloads retain their concrete owning boundaries.

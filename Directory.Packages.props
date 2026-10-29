@@ -14,8 +14,8 @@
     <PackageVersion Include="ManagedCode.Communication.AspNetCore" Version="10.3.20" />
     <PackageVersion Include="ManagedCode.Communication.Orleans" Version="10.3.20" />
     <PackageVersion Include="ManagedCode.TimeSeries" Version="10.1.2" />
-    <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.6" />
-    <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.6" />
+    <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.7" />
+    <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.7" />
     <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.8" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.2" />
     <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.2" />
@@ -31,16 +31,18 @@
     <PackageVersion Include="System.IO.Hashing" Version="10.0.14" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.3.0" />
     <PackageVersion Include="ModelContextProtocol.Core" Version="2.3.0" />
-    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.0" />
-    <PackageVersion Include="ManagedCode.Orleans.RapidMembership" Version="10.4.5" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.4.0" />
-    <PackageVersion Include="Microsoft.Orleans.Journaling" Version="10.4.0-alpha.1" />
-    <PackageVersion Include="Microsoft.Orleans.DurableJobs" Version="10.4.0-alpha.1" />
-    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.4.0" />
-    <PackageVersion Include="Microsoft.Orleans.Serialization" Version="10.4.0" />
-    <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="10.4.0" />
-    <PackageVersion Include="Microsoft.Orleans.CodeGenerator" Version="10.4.0" />
-    <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="10.4.0" />
+    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.Client" Version="10.4.1" />
+    <PackageVersion Include="ManagedCode.Orleans.RapidMembership" Version="10.4.6" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.Reminders" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.Journaling" Version="10.4.1-alpha.1" />
+    <PackageVersion Include="Microsoft.Orleans.DurableJobs" Version="10.4.1-alpha.1" />
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.Serialization" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.CodeGenerator" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="10.4.1" />
     <!-- Orleans' existing Roslyn dependency; analyzer tests select SDK compiler assets. -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.9.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
@@ -58,8 +60,8 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.20.1" />
-    <PackageVersion Include="TUnit" Version="1.76.28" />
-    <PackageVersion Include="TUnit.Aspire" Version="1.76.28" />
+    <PackageVersion Include="TUnit" Version="1.76.45" />
+    <PackageVersion Include="TUnit.Aspire" Version="1.76.45" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="5.0.1" />
     <!-- One Microsoft engine: MTP collects test processes; the same-version CLI collects owned CLUSTER containers. -->

@@ -51,7 +51,7 @@ raw-part BlobStorage evidence does not qualify the replacement.
   10.1.5 public nupkg source commits were independently verified. This is the
   original dependency release evidence. Current consumer package versions are
   pinned in `Directory.Packages.props`; the approved package refresh selects
-  published Server and FileSystem 10.1.6.
+  published Server and FileSystem 10.1.7.
 - Native controller/provider composition, metadata-only publication and fresh
   scope/row authorization are implemented. Server Debug build passes with zero
   warnings/errors. Nine file tests pass for metadata publication, quota/row authorization, native

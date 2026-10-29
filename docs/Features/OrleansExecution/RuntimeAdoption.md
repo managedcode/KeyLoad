@@ -75,7 +75,7 @@ observability, not performance or durability claims.
 telemetry details:
 
 - Streamed requests: the test client registers AddActivityPropagation
-  alongside the silo. The pinned 10.4.0 filter tags methods as interface/method
+  alongside the silo. The reviewed 10.4.0 filter tags methods as interface/method
   and routes IAsyncEnumerableGrainExtension calls to the Application source.
   Only `Orleans.Runtime.IAsyncEnumerableGrainExtension/StartEnumeration<T>` maps
   to the existing `request.execute` value; MoveNext, DisposeAsync and unknown

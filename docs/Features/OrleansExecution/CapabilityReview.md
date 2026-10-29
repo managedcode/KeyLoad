@@ -23,9 +23,10 @@ The review covers the capability families in the
 [official documentation index](https://learn.microsoft.com/en-us/dotnet/orleans/),
 the [overview](https://learn.microsoft.com/en-us/dotnet/orleans/overview), linked
 Learn topics, and APIs/source at
-[v10.4.0](https://github.com/dotnet/orleans/releases/tag/v10.4.0), matching the
-central package manifest. It does not claim every tutorial or historical
-deployment example was read line by line.
+[v10.4.0](https://github.com/dotnet/orleans/releases/tag/v10.4.0). The current
+central packages use [10.4.1](https://github.com/dotnet/orleans/releases/tag/v10.4.1),
+with Journaling and Durable Jobs at 10.4.1-alpha.1. Updating packages does not
+qualify the runtime criteria below or repeat every original source review.
 
 `Source-present` means code or registration exists, not that its runtime gates
 passed. `Candidate` means useful after an owning contract and real-operation
@@ -51,7 +52,7 @@ architecture judgments; no measured speed or memory benefit is inferred.
 | Activation state and caches — [lifecycle](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grain-lifecycle) | Candidate: bounded validated caches rebuilt after migration. | Read-cut/policy-epoch identity, byte budget, invalidation and restart tests; never write or credential authority. |
 | `IPersistentState<T>` — [persistence](https://learn.microsoft.com/en-us/dotnet/orleans/grains/grain-persistence/) | Candidate: bounded snapshots through a ZoneTree adapter; no product grain uses it. | ETag CAS and uncertain-write recovery; never two writable copies of canonical state. |
 | Transactions — [transactions](https://learn.microsoft.com/en-us/dotnet/orleans/grains/transactions) | Candidate: short multi-grain transactions or a cross-partition SQL stage; current atomic batches are same-partition. | ZoneTree calls do not enlist automatically; an adapter must persist prepare/commit/abort to ReplicaCount copies with acknowledgement from every configured copy and define read visibility before any ACID claim. |
-| JournaledGrain and Orleans.Journaling — [journaling](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Journaling/README.md) | Source-present under RuntimeJournal: the ZoneTree-backed journal provider used by Durable Jobs (10.4.0-alpha.1). Defer whole-history LogStorage. | binary format, ETag fencing, replay/compaction/corruption tests; recovery journals stay distinct. |
+| JournaledGrain and Orleans.Journaling — [journaling](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Journaling/README.md) | Source-present under RuntimeJournal: the ZoneTree-backed journal provider used by Durable Jobs (10.4.1-alpha.1). Defer whole-history LogStorage. | binary format, ETag fencing, replay/compaction/corruption tests; recovery journals stay distinct. |
 | Durable Jobs — [README](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.DurableJobs/README.md) | Source-present: job handlers for due, ANN projection and time-series chunk work; persisted, at-least-once. | Idempotent effects, occurrence fences, missed-due restart and cancel/dispatch-race tests; a running attempt may finish after cancellation. |
 | Grain timers and reminders — [timers](https://learn.microsoft.com/en-us/dotnet/orleans/grains/timers-and-reminders) | Selected: the timer flush of StatelessWorker batches (not yet in source). Candidate: reminders for rare reconciliation; no provider today. | Bounded callback, joined disposal and a typed interval; a timer stops with its activation and never holds a durable schedule. |
 

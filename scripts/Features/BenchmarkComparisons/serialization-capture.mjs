@@ -5,7 +5,7 @@ import { collectFacts, fileFact, hashObject, readBounded } from './serialization
 import { command, sourceFacts } from './serialization-process.mjs';
 
 const packageVersions = Object.freeze({ BenchmarkDotNet: '0.15.8',
-  'Microsoft.Orleans.Serialization': '10.4.0', 'Microsoft.Orleans.CodeGenerator': '10.4.0' });
+  'Microsoft.Orleans.Serialization': '10.4.1', 'Microsoft.Orleans.CodeGenerator': '10.4.1' });
 const assemblies = ['KeyLoad.Benchmarks.dll', 'KeyLoad.BenchmarkScenarios.dll', 'KeyLoad.Abstractions.dll',
   'BenchmarkDotNet.dll', 'Orleans.Serialization.dll'];
 const environmentKeys = ['DOTNET_EnableHWIntrinsic', 'DOTNET_TieredPGO', 'DOTNET_TieredCompilation',

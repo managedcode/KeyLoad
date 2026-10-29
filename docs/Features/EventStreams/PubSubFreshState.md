@@ -4,7 +4,7 @@ This bounded corrective stage belongs to `EventStreams`: product ownership is `s
 
 ## Confirmed source defect and contract
 
-The original missing-row read and clear operations reset `ETag` and `RecordExists` while retaining the caller's previous `State`. A reused grain-state wrapper can therefore carry cleared subscription state into the next operation. The centrally pinned Orleans 10.4.0 [MemoryGrainStorage](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Persistence.Memory/Storage/MemoryStorage.cs) creates new state on both operations with its execution `IActivatorProvider.GetActivator<T>().Create()`; the [StateStorageBridge](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Runtime/Storage/StateStorageBridge.cs) delegates state reads and clears to the selected provider. The KeyLoad provider must follow that state contract without a custom constructor, null/default fallback or reflection.
+The original missing-row read and clear operations reset `ETag` and `RecordExists` while retaining the caller's previous `State`. A reused grain-state wrapper can therefore carry cleared subscription state into the next operation. The reviewed Orleans 10.4.0 [MemoryGrainStorage](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Persistence.Memory/Storage/MemoryStorage.cs) creates new state on both operations with its execution `IActivatorProvider.GetActivator<T>().Create()`; the [StateStorageBridge](https://github.com/dotnet/orleans/blob/v10.4.0/src/Orleans.Runtime/Storage/StateStorageBridge.cs) delegates state reads and clears to the selected provider. The KeyLoad provider must follow that state contract without a custom constructor, null/default fallback or reflection.
 
 ## Requirements and acceptance criteria
 
