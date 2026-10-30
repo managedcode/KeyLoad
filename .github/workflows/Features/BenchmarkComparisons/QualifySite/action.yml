@@ -156,7 +156,7 @@ runs:
       env:
         NODE_V8_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage/node
       run: |
-        site_args=(--KeyLoadTests:Suite=website --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests")
+        site_args=(--KeyLoadTests:Suite=website --KeyLoadTests:TimeoutMinutes=120 --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests")
         if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
           site_args+=('--KeyLoadTests:Filter=/*/*/SiteContent*/*')
         else
