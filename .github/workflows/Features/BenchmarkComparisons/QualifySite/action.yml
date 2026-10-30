@@ -1,5 +1,10 @@
 name: Qualify the current benchmark website
 description: Preserve every original archive, browser, TUnit and coverage gate.
+inputs:
+  benchmark_run_id:
+    description: Authenticated completed benchmark run selected by the final producer dispatch
+    required: false
+    default: ''
 outputs:
   mode:
     value: ${{ steps.source.outputs.mode }}
@@ -30,6 +35,7 @@ runs:
       id: source
       env:
         CONTROL_REVISION: ${{ github.workflow_sha }}
+        BENCHMARK_RUN_ID: ${{ inputs.benchmark_run_id }}
       shell: bash
       run: |
         mode=publish
@@ -43,6 +49,10 @@ runs:
         printf 'KEYLOAD_SITE_SOURCE_REVISION=%s\n' "$revision" >> "$GITHUB_ENV"
         printf 'KEYLOAD_SITE_CONTROL_REVISION=%s\n' "$CONTROL_REVISION" >> "$GITHUB_ENV"
         isolated_args=("--input=$KEYLOAD_SITE_ISOLATED_CAPTURE" "--mode=$mode" "--site-revision=$revision" "--workflow-revision=$CONTROL_REVISION" "--optional=true")
+        if [[ -n "$BENCHMARK_RUN_ID" ]]; then
+          [[ "$BENCHMARK_RUN_ID" =~ ^[1-9][0-9]*$ && ${#BENCHMARK_RUN_ID} -le 20 ]]
+          isolated_args+=("--requested-run=$BENCHMARK_RUN_ID")
+        fi
         node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture "${isolated_args[@]}" > "$EVIDENCE_DIR/isolated-capture-envelope.json"
         jq -e '.ok == true' "$EVIDENCE_DIR/isolated-capture-envelope.json" > /dev/null
         isolated_proof="$KEYLOAD_SITE_ISOLATED_CAPTURE/metadata-proof.json"

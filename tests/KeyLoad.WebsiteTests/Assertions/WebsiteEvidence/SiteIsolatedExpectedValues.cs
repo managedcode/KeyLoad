@@ -9,12 +9,14 @@ internal sealed class SiteIsolatedExpectedValues
     internal const string All = "all";
     internal const string Mixed = "mixed";
     internal static readonly string[] Tests = ["load-million", "index", "sequential-read", "random-read", "search",
-        "mixed/create", "mixed/delete", "mixed/update", "mixed/read", "mixed/search", "verify-final"];
+        "mixed/create", "mixed/delete", "mixed/update", "mixed/read", "mixed/search", "verify-final",
+        "model-prepare", "vector-exact", "queue-cycle", "stream-append", "stream-read", "stream-mixed/stream-append", "stream-mixed/stream-read"];
     internal static readonly string[] Columns = [.. Tests, Mixed];
     internal static readonly string[] TableColumns = [.. Tests[..5], Mixed, .. Tests[5..]];
     internal static readonly int[] Nodes = [1, 3];
     internal static readonly (string Key, string Test)[] General =
-        [("write", "load-million"), ("read", "random-read"), ("search", "search"), (Mixed, Mixed)];
+        [("write", "load-million"), ("read", "random-read"), ("search", "search"), (Mixed, Mixed),
+            ("vector", "vector-exact"), ("queue", "queue-cycle"), ("append", "stream-append"), ("events", "stream-read")];
     private static readonly (string Family, string[] Engines)[] EngineFamilies =
     [
         ("Multi-model", ["KeyLoad", "SurrealDB"]),
@@ -46,7 +48,7 @@ internal sealed class SiteIsolatedExpectedValues
 
     public JsonElement Projection { get; }
 
-    public static string Metric(string test) => test is "index" or "verify-final" or Mixed ? "duration" : "throughput";
+    public static string Metric(string test) => test is "index" or "verify-final" or "model-prepare" or Mixed ? "duration" : "throughput";
 
     public static string FamilyOf(string engine)
         => EngineFamilies.Single(item => item.Engines.Contains(engine, StringComparer.Ordinal)).Family;

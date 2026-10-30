@@ -4,7 +4,7 @@ namespace KeyLoad.Comparisons;
 
 /// <summary>Runs one lane; each request covers <paramref name="batch"/> consecutive ordinals and every ordinal keeps its own sample.</summary>
 internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext context, BenchmarkSessionClientLease lease,
-    Func<IComparisonSession?, int, int, CancellationToken, Task> operation, int count, int batch, bool documentSessions)
+    Func<IComparisonSession?, int, int, CancellationToken, Task> operation, int count, int batch)
 {
     private readonly BenchmarkSessionOperationSample[] samples = new BenchmarkSessionOperationSample[count];
     private int attempts;
@@ -76,7 +76,7 @@ internal sealed class BenchmarkSessionLaneExecution(BenchmarkSessionContext cont
         string? failure = null;
         try
         {
-            await operation((lease.At(worker, documentSessions)).Value, first, length, deadline.Token).ConfigureAwait(false);
+            await operation((lease.At(worker)).Value, first, length, deadline.Token).ConfigureAwait(false);
             Interlocked.Add(ref successes, length);
             succeeded = true;
         }

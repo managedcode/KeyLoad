@@ -9,7 +9,9 @@ internal static class SiteIsolatedOracle
     private const string Images = "images";
     private const string Server = "server";
     internal static readonly string[] Cases = ["load-million", "index", "sequential-read", "random-read", "search", "mixed", "verify-final",
-        "mixed/create", "mixed/delete", "mixed/update", "mixed/read", "mixed/search"];
+        "mixed/create", "mixed/delete", "mixed/update", "mixed/read", "mixed/search",
+        "model-prepare", "vector-exact", "queue-cycle", "stream-append", "stream-read", "stream-mixed",
+        "stream-mixed/stream-append", "stream-mixed/stream-read"];
 
     public static SiteIsolatedExpectedRow[] Rows(JsonElement projection, SiteIsolatedSelection selection)
     {

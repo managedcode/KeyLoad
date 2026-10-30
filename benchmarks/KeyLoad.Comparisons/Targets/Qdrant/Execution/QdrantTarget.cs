@@ -113,22 +113,22 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
     public async Task InitializeAsync(IComparisonCorpus corpus, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(corpus);
-        if (corpus is not BenchmarkDataset dataset)
+        if (corpus is not BenchmarkDataset && corpus is not BenchmarkSessionModelCorpus)
         {
             throw new NotSupportedException(QdrantControlProtocol.UnsupportedDocumentCorpus);
         }
-        topK = dataset.Options.TopK;
+        topK = corpus.Settings.TopK;
         QdrantReplicaProof.ValidateClients(nodeClients, topology);
         collectionCreationAttempted = true;
         using (var create = await client.PutAsJsonAsync(QdrantVectorProtocol.CollectionPrefix + collection,
-            QdrantPolicy.CreateCollection(dataset.Options.Dimensions, topology), cancellationToken))
+            QdrantPolicy.CreateCollection(corpus.Settings.Dimensions, topology), cancellationToken))
         {
             create.EnsureSuccessStatusCode();
         }
 
-        await SeedAsync(dataset, cancellationToken);
+        await SeedAsync(corpus, cancellationToken);
         var proof = await QdrantReplicaProof.VerifyAsync(clients: nodeClients, collection: collection,
-            expectedPoints: dataset.Documents.Length, topology: topology, cancellationToken: cancellationToken,
+            expectedPoints: corpus.Documents.Count, topology: topology, cancellationToken: cancellationToken,
             lifecycleOptions: lifecycleOptions, timeProvider: timeProvider);
         Profile = Profile with
         {
@@ -141,7 +141,7 @@ public sealed class QdrantTarget : IComparisonTarget, IVectorComparisonTarget
         };
     }
 
-    private async Task SeedAsync(BenchmarkDataset dataset, CancellationToken cancellationToken)
+    private async Task SeedAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         foreach (var batch in dataset.Documents.Chunk(executionOptions.Value.WriteBatchCapacity))
         {

@@ -15,7 +15,7 @@ internal static class SiteIsolatedBrowserKeyboardAssertions
         await Assert.That((await cdp.EvaluateAsync(Focus, false, token)).GetBoolean()).IsTrue();
         await KeyAsync(cdp, ArrowRightKey, 39, token);
         await AssertSelectedAsync(cdp, next, token);
-        await SiteIsolatedBrowserChartAssertions.AssertCardsAsync(cdp, expected, next, token);
+        await SiteIsolatedBrowserChartAssertions.AssertFamilyTableAsync(cdp, expected, next, token);
         await KeyAsync(cdp, ArrowLeftKey, 37, token);
         await AssertSelectedAsync(cdp, SiteIsolatedExpectedValues.All, token);
         await SiteIsolatedBrowserChartAssertions.AssertOverviewAsync(cdp, expected, SiteIsolatedExpectedValues.Mixed, token);

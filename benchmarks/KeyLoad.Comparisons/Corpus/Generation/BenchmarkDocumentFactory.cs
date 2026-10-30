@@ -8,7 +8,7 @@ internal static class BenchmarkDocumentFactory
 {
     private const string DocumentNumberFormat = "D9";
 
-    internal static BenchmarkDocument Create(ComparisonOptions options, int number)
+    internal static BenchmarkDocument Create(IComparisonSettings options, int number)
     {
         const int FinalXorShift = 5;
 

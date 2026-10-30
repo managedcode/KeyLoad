@@ -16,9 +16,22 @@ concurrency:
 env:
   NUGET_PACKAGES: ${{ github.workspace }}/artifacts/benchmark-runtime/packages
 jobs:
+  publish-image:
+    name: Qualify and publish this source's server image
+    if: >-
+      github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' &&
+      (github.event_name == 'push' || inputs.mode == 'full')
+    permissions: {contents: read, actions: read, packages: write}
+    uses: ./.github/workflows/release.yml
+    with:
+      server_image_only: true
   comparison-runtime:
     name: Prepare comparison runtime
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
+    needs: publish-image
+    if: >-
+      !cancelled() && github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main' &&
+      (needs.publish-image.result == 'success' ||
+      github.event_name == 'workflow_dispatch' && inputs.mode != 'full')
     runs-on: ubuntu-22.04
     timeout-minutes: 150
     permissions: {contents: read, actions: read, packages: read}
@@ -75,20 +88,16 @@ jobs:
           docker version
           uname -a
           docker info --format 'Docker kernel: {{.KernelVersion}}'
-      - name: Resolve the latest released KeyLoad server image to one digest
+      - name: Verify the published source-bound KeyLoad server image
         id: keyload-image
         if: (github.event_name == 'push' || inputs.mode == 'full')
         env:
-          REGISTRY_TOKEN: ${{ github.token }}
-          KEYLOAD_IMAGE_REPOSITORY: ghcr.io/managedcode/keyload
+          KEYLOAD_IMAGE: ${{ needs.publish-image.outputs.server_image }}
         run: |
-          printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          digest=$(docker buildx imagetools inspect "$KEYLOAD_IMAGE_REPOSITORY:latest" --format '{{json .Manifest}}' | jq -er '.digest')
-          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
-          reference="$KEYLOAD_IMAGE_REPOSITORY:latest@$digest"
-          printf 'reference=%s\n' "$reference" >> "$GITHUB_OUTPUT"
-          printf 'KeyLoad cells use %s\n' "$reference" >> "$GITHUB_STEP_SUMMARY"
-          docker logout ghcr.io
+          [[ "$GITHUB_SHA" =~ ^[0-9a-f]{40}$ ]]
+          [[ "$KEYLOAD_IMAGE" =~ ^ghcr\.io/managedcode/keyload:$GITHUB_SHA@sha256:[0-9a-f]{64}$ ]]
+          printf 'reference=%s\n' "$KEYLOAD_IMAGE" >> "$GITHUB_OUTPUT"
+          printf 'KeyLoad cells use this run source: %s\n' "$KEYLOAD_IMAGE" >> "$GITHUB_STEP_SUMMARY"
       - name: Pack the compiled benchmark runtime
         if: (github.event_name == 'push' || inputs.mode == 'full')
         run: node scripts/Features/BenchmarkComparisons/compiled-test-bundle.mjs --pack
@@ -118,6 +127,9 @@ jobs:
       - name: Test InfluxDB million-record readback and joined cleanup
         if: github.event_name == 'workflow_dispatch' && inputs.mode == 'influxdb-readback'
         run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --maximum-parallel-tests 1 --minimum-expected-tests 1 --treenode-filter '/*/*/NativeDatabaseTests/InfluxBulkReadbackPreservesCompleteBodiesAndHealthyContinuation' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/NativeAdapters" --report-trx --timeout 5m
+      - name: Test vector queue and event session operations on real databases
+        if: (github.event_name == 'push' || inputs.mode == 'contracts' || inputs.mode == 'full')
+        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --maximum-parallel-tests 1 --minimum-expected-tests 8 --treenode-filter '/*/*/ModelDatabaseTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/ModelAdapters" --report-trx --timeout 20m
       - name: Test bounded terminal execution diagnostics
         run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --minimum-expected-tests 1 --treenode-filter '/*/*/ComparisonHostCaptureTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/TerminalDiagnostics" --report-trx
       - name: Save original preparation diagnostics

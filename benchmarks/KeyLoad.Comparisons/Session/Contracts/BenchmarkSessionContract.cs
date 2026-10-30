@@ -7,9 +7,9 @@ public static class BenchmarkSessionContract
 {
     /// <summary>The current source-bound session evidence profile.</summary>
     public const string Profile = "session";
-    private const string KeyLoad = "KeyLoad", PostgreSql = "PostgreSQL + pgvector", Qdrant = "Qdrant";
-    private const string RabbitMq = "RabbitMQ", Redis = "Redis", Neo4j = "Neo4j", Mongo = "MongoDB";
-    private const string OpenSearch = "OpenSearch", Kurrent = "KurrentDB", Surreal = "SurrealDB", Helix = "HelixDB";
+    internal const string KeyLoad = "KeyLoad", PostgreSql = "PostgreSQL + pgvector", Qdrant = "Qdrant";
+    internal const string RabbitMq = "RabbitMQ", Redis = "Redis", Neo4j = "Neo4j", Mongo = "MongoDB";
+    internal const string OpenSearch = "OpenSearch", Kurrent = "KurrentDB", Surreal = "SurrealDB", Helix = "HelixDB";
     private const string Neo4jUnavailable = "Neo4j Community does not provide execution clustering; Enterprise licensing is excluded.";
     private const string SurrealUnavailable = "SurrealDB Community's experimental TiKV clustering is outside the qualified execution topology; only the persistent standalone server is measured.";
     private const string HelixUnavailable = "The self-hosted HelixDB server is standalone; managed cloud high availability is outside this execution comparison.";

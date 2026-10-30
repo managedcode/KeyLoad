@@ -23,6 +23,9 @@ internal static class IsolatedKurrentSettings
     private const string Disabled = "false";
     private const string PortSeparator = ":";
     private const string RuntimeHostSuffix = ".dev.internal";
+    private const string ClientHost = "KURRENTDB_ADVERTISE_HOST_TO_CLIENT_AS";
+    private const string ClientPort = "KURRENTDB_ADVERTISE_NODE_PORT_TO_CLIENT_AS";
+    private const string HttpEndpoint = "http";
 
     internal static string RuntimeHost(string name) => name + RuntimeHostSuffix;
 
@@ -37,6 +40,13 @@ internal static class IsolatedKurrentSettings
             .WithEnvironment(NodeAdvertise, RuntimeHost(name)).WithEnvironment(ReplicationAdvertise, RuntimeHost(name))
             .WithEnvironment(Insecure, Enabled).WithEnvironment(DiscoverDns, Disabled)
             .WithEnvironment(Database, Data);
+        var endpoint = node.GetEndpoint(HttpEndpoint);
+        node.WithEnvironment(environment =>
+        {
+            // Client discovery runs on the host; internal peer discovery keeps the container aliases above.
+            environment.EnvironmentVariables[ClientHost] = endpoint.Host;
+            environment.EnvironmentVariables[ClientPort] = endpoint.Port.ToString(CultureInfo.InvariantCulture);
+        });
         if (names.Length > BoundaryValue)
         {
             node.WithEnvironment(GossipSeeds, string.Join(SeparatorCharacter, names.Where(peer => peer != name)

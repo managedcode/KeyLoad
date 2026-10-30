@@ -11,7 +11,7 @@ internal static class KeyLoadEventOperations
     private const string CardinalityFailure = "KeyLoadStreamCardinality";
     internal const string WrongWriteProfile = "WrongWriteProfile";
 
-    internal static async Task SeedAsync(KeyLoadClient client, PartitionRef partition, BenchmarkDataset dataset,
+    internal static async Task SeedAsync(KeyLoadClient client, PartitionRef partition, IComparisonCorpus dataset,
         int expectedCopies, CancellationToken cancellationToken)
     {
         foreach (var document in dataset.Documents)

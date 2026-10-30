@@ -24,7 +24,7 @@ internal static class SiteIsolatedBrowserLayoutAssertions
           return{documentContained:document.documentElement.scrollWidth<=width,
             wrapperContained:rect.width>0&&rect.left>=0&&rect.right<=width,
             rows:rows.length,rowsVisible:rows.every(row=>visible(row)&&row.cells[2].textContent.trim().length>0),
-            workerCount:workers.length,workersVisible:workers.every(e=>visible(e)&&e.getBoundingClientRect().right<=width),
+            workerCount:workers.length,workersVisible:workers.every(e=>visible(e)&&e.closest('.comparison-scroll')?.getBoundingClientRect().right<=width),
             focused:document.activeElement===wrapper,
             accessible:wrapper.tabIndex===0&&wrapper.getAttribute('role')==='region'&&/scroll/i.test(wrapper.getAttribute('aria-label')??''),
             scrollable:['auto','scroll'].includes(getComputedStyle(wrapper).overflowX)&&wrapper.scrollWidth>wrapper.clientWidth,

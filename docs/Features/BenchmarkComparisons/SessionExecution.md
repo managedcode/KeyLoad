@@ -18,7 +18,8 @@ the initial million is a separate measurement result.** Operation type and opera
 count do not create jobs.
 
 The 16 databases give **32 measurement jobs**. One shared preparation, one aggregation
-and a separate Website dispatch give **35 jobs in the comparison flow**. Benchmarks
+and a separate Website dispatch give **35 measurement-flow jobs**. The prerequisite
+canonical Release call retains its separate functional qualification and image publication jobs. Benchmarks
 compiles no KeyLoad server and runs no source-built KeyLoad job: every database cell,
 KeyLoad included, starts its Docker image through the same procedure, and the KeyLoad
 1-node and 3-node session cells are the KeyLoad ingestion measurement. Real execution
@@ -51,7 +52,8 @@ flowchart LR
     LoadMillion --> Reads[Separate read search index and query tests]
     Reads --> Mixed[Concurrent add delete update read and search tests]
     Mixed --> Verify[Verify final records and results]
-    Verify --> Results[Save results and finish the job]
+    Verify --> Models[Prepare models and run vector queue event cases]
+    Models --> Results[Save results and finish the job]
     Results --> Aggregate[Complete accounting and evidence check]
     Aggregate --> Dispatch[Separate Website dispatch]
 ```
@@ -71,6 +73,71 @@ mixed create/delete/read/search and final-state verification. The supported oper
 inventory is the same for all adapters; an unavailable capability is marked
 explicitly. Several tests in a job do not mean several databases or infrastructure
 fixtures.
+
+## Vector, queue and event operations
+
+The current session retains thirteen original TUnit outcomes: the seven document
+cases, explicit model preparation, exact vector queries, queue cycles, event
+appends, event reads and concurrent event append/read. The same live Aspire
+topology serves all cases. Adapters that also mutate documents use a second owner
+with a distinct run-owned namespace for model data; document mutation/readback
+cannot change its vector or event oracle. Specialized adapters reuse their sole
+owner. Each namespace is initialized once, without a reset between its
+cases. Native preparation time is reported separately from request latency.
+
+The model corpus generates 1,000,000 deterministic 1,024-byte inputs and 32-dimensional
+vectors lazily. The scalar exact oracle retains only sixteen query inputs and
+their top-k results. Every vector response verifies ordered identities and complete
+JSON bodies. Qdrant and KeyLoad execute the same exact cosine query; this case is
+not ANN or a proof of recall for an approximate index.
+
+Each applicable measured lane performs 100,000 operations with sixteen total
+clients. Queue cycles retain confirmed publish, receive and manual acknowledgement
+phase measurements, verify complete bodies and account for each message exactly
+once across concurrent consumers. A queue cycle leaves no retained corpus: its
+initial/expected queue depth is zero rather than an invented million records.
+Event append verification reads every acknowledged new event after the timed lane,
+checking its deterministic identity, first revision and complete body. Event reads
+verify seeded events. Mixed events overlap two eight-client lanes, with disjoint
+append identities and stable seeded reads. Their distributions stay separate.
+Event counts retain the actual progression: 1,000,000 before append, 1,100,000
+after append and during the read case, and 1,200,000 after mixed events.
+
+Qdrant must measure preparation and exact vectors; RabbitMQ preparation and queue
+cycles; KurrentDB preparation, append/read and mixed events. KeyLoad and PostgreSQL
+must measure all six model cases. MongoDB retains the same event cases;
+OpenSearch and SurrealDB retain exact vector cases where their current adapters
+advertise them. Document-only adapters create no unused model client owner. A required case reported as unavailable fails its
+original TUnit assertion. Unsupported unrelated models remain explicit unavailable
+cells; these specialized systems cannot publish an all-unavailable session.
+KurrentDB advertises its Aspire-allocated host endpoint to clients using the official
+`AdvertiseHostToClientAs` and `AdvertiseNodePortToClientAs` settings, while internal
+peer discovery retains container aliases. The writer uses the discovered external
+seed endpoints; direct-node readers retain redirect and endpoint-identity guards.
+See the [KurrentDB 26.1 networking contract](https://docs.kurrent.io/server/v26.1/configuration/networking).
+
+Native one/three-node controls exercise real databases, cancellation and
+healthy continuation; they do not qualify public figures. Full 100k/1m scale,
+1/10/500-client ingestion, ANN, filtered/mixed vector, fault/endurance and matched
+hardware requirements retain their distinct open qualification gates.
+
+Every website category uses the same comparison table with engines in rows,
+operation families in columns and paired one/three-node observations in each cell.
+Vector, queue and event-store views place their relevant columns first while
+retaining the same complete column inventory.
+The exhaustive table retains every case and original GitHub links. Category views
+have no separate engine cards or incompatible per-engine axes. The document query
+column describes ID and numeric-range predicates; it does not claim secondary-index
+performance for KeyLoad's point-access query path.
+
+Full Benchmarks calls the canonical Release workflow before preparing measurements.
+Release runs all its current Build and Tests gates, publishes the same source commit
+and returns its immutable image digest. Worker admission rejects `latest` and a
+KeyLoad image tagged with another source commit. The completed benchmark run then
+dispatches Website with its run ID. Qualification and predeploy recheck capture
+that exact authenticated run, rather than substituting another producer. Website
+no longer publishes a separate push-time
+snapshot before these measurements. Manual content publication remains independent.
 
 ## Shared execution plan
 
@@ -150,7 +217,7 @@ matrix, restarts or separate benchmark scenario.
   once. The immutable runtime bundle retains source, DLL/PDB, package assets and
   Aspire tool identities; workers validate and import it without a repeated
   solution restore/build. The same preparation job resolves the Release-published
-  `ghcr.io/managedcode/keyload:latest` image to one digest; both KeyLoad workers
+  `ghcr.io/managedcode/keyload:<source-commit>` image to the digest returned by Release; both KeyLoad workers
   pull that digest and run their nodes as containers, and the other databases use
   their pinned images. Benchmarks never builds or publishes a KeyLoad or
   workload-client container.
@@ -204,7 +271,7 @@ selected load infrastructure. It awaits readiness, exposes discovered endpoints 
 `KeyLoad.ComparisonHost`, and joins cleanup after the client-owned workload. The
 client remains outside the resource graph. Only run-owned Docker resources are
 removed; image user defaults and anonymous session volumes own every database's
-files, KeyLoad included. The manual Release workflow alone publishes the KeyLoad
+files, KeyLoad included. The canonical Release workflow alone publishes the KeyLoad
 server image with SDK `PublishContainer`.
 
 The Redis topology probe removes its transient key before document readback.

@@ -10,13 +10,6 @@ internal static class SiteIsolatedBrowserChartAssertions
           lines:Array.from(row.querySelectorAll('.pair[data-metric] .pair-line')).map(line=>
             line.parentElement.dataset.metric+':'+(line.classList.contains('n3')?3:1)+':'+(line.dataset.value===''?'null':line.dataset.value))})))()
         """;
-    private const string Cards = """
-        (()=>Array.from(document.querySelectorAll('#isolated-results .db-card')).map(card=>({target:card.dataset.target,
-          empty:!!card.querySelector('.db-empty'),
-          lines:Array.from(card.querySelectorAll('li[data-test] .pair-line')).map(line=>
-            line.closest('li').dataset.test+':'+(line.classList.contains('n3')?3:1)+':'+(line.dataset.value===''?'null':line.dataset.value))})))()
-        """;
-
     public static Task SortAsync(SiteBrowserCdpClient cdp, string key, CancellationToken token)
         => SiteBrowserAssertions.EvaluateSuccess(cdp, "(()=>{const b=document.querySelector('#isolated-results [data-sort=\"" + key +
             "\"]');if(!b)return false;b.click();return document.querySelector('#isolated-results [data-sort=\"" + key + "\"]').classList.contains('is-sorted');})()", token);
@@ -34,31 +27,36 @@ internal static class SiteIsolatedBrowserChartAssertions
         foreach (var row in rows)
         {
             var target = row.GetProperty(SiteIsolatedFields.Target).GetString()!;
-            var lines = expected.Measured(target)
-                ? SiteIsolatedExpectedValues.General.SelectMany(metric => expected.Shown(target).Select(nodes =>
-                    $"{metric.Key}:{nodes}:{SiteIsolatedExpectedValues.Format(expected.Value(target, metric.Test, nodes))}"))
-                : [];
+            var lines = SiteIsolatedExpectedValues.General.SelectMany(metric => expected.Shown(target).Select(nodes =>
+                    $"{metric.Key}:{nodes}:{SiteIsolatedExpectedValues.Format(expected.Value(target, metric.Test, nodes))}"));
             await AssertLinesAsync(row, lines);
         }
     }
 
-    /// <summary>A family view shows one card per planned engine with every test; engines without results say so.</summary>
-    public static async Task AssertCardsAsync(SiteBrowserCdpClient cdp, SiteIsolatedExpectedValues expected, string family,
+    /// <summary>Every family uses the same comparison table, columns and per-node measurements.</summary>
+    public static async Task AssertFamilyTableAsync(SiteBrowserCdpClient cdp, SiteIsolatedExpectedValues expected, string family,
         CancellationToken token)
     {
-        var cards = (await cdp.EvaluateAsync(Cards, false, token)).EnumerateArray().ToArray();
+        var rows = (await cdp.EvaluateAsync(Overview, false, token)).EnumerateArray().ToArray();
         var targets = expected.Targets(family);
-        await Assert.That(string.Join('|', cards.Select(card => card.GetProperty(SiteIsolatedFields.Target).GetString())))
-            .IsEqualTo(string.Join('|', targets));
-        foreach (var card in cards)
+        await Assert.That(rows.Length).IsEqualTo(targets.Length);
+        await SiteBrowserAssertions.EvaluateSuccess(cdp,
+            "document.querySelectorAll('#isolated-results .db-card').length===0&&document.querySelectorAll('#isolated-results [role=table]').length===1", token);
+        string[] leading = family switch
         {
-            var target = card.GetProperty(SiteIsolatedFields.Target).GetString()!;
-            await Assert.That(card.GetProperty(SiteIsolatedFields.Empty).GetBoolean()).IsEqualTo(!expected.Measured(target));
-            var lines = expected.Measured(target)
-                ? SiteIsolatedExpectedValues.Tests.SelectMany(test => expected.Shown(target).Select(nodes =>
-                    $"{test}:{nodes}:{SiteIsolatedExpectedValues.Format(expected.Value(target, test, nodes))}"))
-                : [];
-            await AssertLinesAsync(card, lines);
+            "Vector" => ["vector"],
+            "Queue" => ["queue"],
+            "Event store" => ["append", "events"],
+            _ => []
+        };
+        var metrics = SiteIsolatedExpectedValues.General.OrderBy(metric => leading.Contains(metric.Key, StringComparer.Ordinal) ? 0 : 1);
+        foreach (var row in rows)
+        {
+            var target = row.GetProperty(SiteIsolatedFields.Target).GetString()!;
+            await Assert.That(targets.Contains(target, StringComparer.Ordinal)).IsTrue();
+            var lines = metrics.SelectMany(metric => expected.Shown(target).Select(nodes =>
+                $"{metric.Key}:{nodes}:{SiteIsolatedExpectedValues.Format(expected.Value(target, metric.Test, nodes))}"));
+            await AssertLinesAsync(row, lines);
         }
     }
 

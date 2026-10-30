@@ -18,7 +18,7 @@ const binary = { executablePath: '/usr/share/dotnet/dotnet', executableSha256: '
 const processes = () => ({ client: { name: 'comparison-client', processId: 500,
   startedAtUtc: '2026-10-09T10:02:00Z', aspireStartedAtUtc: null,
   aspireProcessId: null, aspireProcessStartedAtUtc: null, binary } });
-const keyLoadImage = 'ghcr.io/managedcode/keyload:latest@sha256:' + '5'.repeat(64);
+const keyLoadImage = 'ghcr.io/managedcode/keyload:' + 'a'.repeat(40) + '@sha256:' + '5'.repeat(64);
 const cohort = { sourceRevision: 'a'.repeat(40), runId: 12345, attempt: 2,
   repository: contract.SESSION.repository, ref: contract.SESSION.ref,
   workflow: contract.SESSION.workflow, profile: contract.SESSION.profile };
@@ -81,23 +81,50 @@ if (scenario === 'json') {
     const altered = clone(report); change(altered); reject(() => reports.validateSessionCase(altered, report.caseId));
   }
   const execution = '<TestRun>' + contract.SESSION.caseIds.map(id => ({'load-million':'LoadMillion',index:'BuildIndexes',
-    'sequential-read':'SequentialRead','random-read':'RandomRead',search:'Search',mixed:'Mixed','verify-final':'VerifyFinalState'})[id])
+    'sequential-read':'SequentialRead','random-read':'RandomRead',search:'Search',mixed:'Mixed','verify-final':'VerifyFinalState','model-prepare':'PrepareModels','vector-exact':'VectorExact','queue-cycle':'QueueCycle',
+    'stream-append':'StreamAppend','stream-read':'StreamRead','stream-mixed':'StreamMixed'})[id])
     .map(name => `<UnitTestResult testName="${name}" outcome="Passed"/>`).join('') + '</TestRun>';
   const cases = contract.SESSION.caseIds.map(caseId => ({caseId,status:'measured'}));
   reports.validateSessionResults(execution,cases);
   reject(() => reports.validateSessionResults(execution.replace('LoadMillion','Other'),cases));
   reject(() => reports.validateSessionResults(execution.replace('outcome="Passed"','outcome="Failed"'),cases));
+} else if (scenario === 'models') {
+  const count=contract.SESSION.operations;
+  const phases={p50Ms:1,p95Ms:1,p99Ms:1};
+  const lane=(id,clients=16)=>({id,measurement:{attempts:count,successes:count,failures:0,elapsedSeconds:1,
+    usefulOperationsPerSecond:count,latency:{...phases},uniqueCompletedMessages:id==='queue-cycle'?count:0,
+    enqueue:id==='queue-cycle'?{...phases}:null,receive:id==='queue-cycle'?{...phases}:null,
+    ack:id==='queue-cycle'?{...phases}:null,clientResources:null},firstStartedMs:0,lastCompletedMs:1000,
+    samples:Array.from({length:count},(_,operation)=>({operation,worker:operation%clients,startedMs:0,
+      completedMs:1,success:true,error:null}))});
+  const record=id=>({caseId:id,status:'measured',detail:null,
+    initialRecords:id==='queue-cycle'?0:contract.SESSION.records+(['stream-read','stream-mixed'].includes(id)?count:0),
+    expectedRecords:id==='queue-cycle'?0:contract.SESSION.records+(['stream-append','stream-read'].includes(id)?count:id==='stream-mixed'?2*count:0),
+    verifiedRecords:count,lanes:id==='stream-mixed'?[lane('stream-append',8),lane('stream-read',8)]:[lane(id)],elapsedSeconds:1});
+  for(const id of ['vector-exact','queue-cycle','stream-append','stream-read','stream-mixed']) {
+    const report=record(id);reports.validateSessionCase(report,id);accepted=true;
+    for(const change of [v=>v.verifiedRecords--,v=>v.expectedRecords++,v=>v.lanes[0].id='other',
+      v=>v.lanes[0].samples[0].worker=16,v=>v.lanes[0].measurement.failures++]) {
+      const altered=clone(report);change(altered);reject(()=>reports.validateSessionCase(altered,id));
+    }
+  }
+  for(const change of [v=>v.lanes[0].measurement.uniqueCompletedMessages--,v=>v.lanes[0].measurement.ack=null]) {
+    const report=record('queue-cycle');change(report);reject(()=>reports.validateSessionCase(report,'queue-cycle'));
+  }
+  const mixed=record('stream-mixed');mixed.lanes[1].firstStartedMs=1000;
+  reject(()=>reports.validateSessionCase(mixed,'stream-mixed'));
 } else if (scenario === 'profile-accounting') {
   const hash='1'.repeat(64),server='sha256:'+'2'.repeat(64);
   const methods={'load-million':'LoadMillion',index:'BuildIndexes','sequential-read':'SequentialRead',
-    'random-read':'RandomRead',search:'Search',mixed:'Mixed','verify-final':'VerifyFinalState'};
+    'random-read':'RandomRead',search:'Search',mixed:'Mixed','verify-final':'VerifyFinalState','model-prepare':'PrepareModels','vector-exact':'VectorExact','queue-cycle':'QueueCycle',
+    'stream-append':'StreamAppend','stream-read':'StreamRead','stream-mixed':'StreamMixed'};
   const originalReports=contract.SESSION.caseIds.map(caseId=>({caseId,status:'unavailable',
     detail:"Outside this target's shared contract.",initialRecords:caseId==='load-million'?0:contract.SESSION.records,
     expectedRecords:contract.SESSION.records,verifiedRecords:0,lanes:[],elapsedSeconds:0}));
   const runtimeXml=outcome=>'<TestRun>'+contract.SESSION.caseIds.map(id=>
     `<UnitTestResult testName="${methods[id]}" outcome="${outcome}"/>`).join('')+'</TestRun>';
   const selected=contract.sessionRows().filter(row=>['Qdrant','RabbitMQ','KurrentDB'].includes(row.target));
-  let capabilitySession;
+  let sessionWithoutProfile;
   for(const row of selected) {
     const session={schemaVersion:contract.SESSION.schema,sessionId:row.id,target:row.target,nodeCount:row.nodeCount,
       ...cohort,jobId:10,images:{server},processes:processes(),targetProfile:null,
@@ -107,28 +134,15 @@ if (scenario === 'json') {
       runtimeReport:{path:'RuntimeTestResults/original.trx',sha256:hash},outerRuntime:{path:'runtime-import.json',sha256:hash},
       qualificationReport:{path:'session-qualification.json',sha256:hash},
       resourceReport:{path:'session-resource-evidence.json',sha256:hash},
-      outcome:'unavailable',reason:contract.SESSION.capabilitiesUnavailable};
+      outcome:'success',reason:null};
     delete session.profile;
-    capabilitySession=clone(session);
+    sessionWithoutProfile=clone(session);
     const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:row.nodeCount,runtimeExitCode:0,
       status:'passed',reason:null,steps:[{id:'execution-correctness',status:'passed',failureType:null}]};
     const execution=reports.validateSessionResults(runtimeXml('Passed'),originalReports);
     originalReports.forEach(report=>reports.validateSessionCase(report,report.caseId));
-    reports.validateSessionEnvelope(session,row,cohort,10);
-    reports.validateSessionQualification(qualification,session,execution);
-    reports.validateSessionProfileAccounting(session,originalReports,execution,qualification);accepted=true;
-    reject(()=>reports.validateSessionProfileAccounting(session,originalReports.slice(1),execution,qualification));
-    reject(()=>reports.validateSessionProfileAccounting(session,originalReports,
-      execution.map((test,index)=>index===0?{...test,outcome:'Failed'}:test),qualification));
-    for(const change of [v=>v.images.server=null,v=>v.resourceReport=null,
-      v=>v.reason=contract.SESSION.topologyUnavailable,v=>v.targetProfile={name:row.target,version:'unverified',
-        topology:'unverified execution topology',writeAcknowledgement:'execution',readContract:'execution',transport:'execution',
-        authorization:'execution',image:null,cluster:null}]) {
-      const altered=clone(session);change(altered);reject(()=>reports.validateSessionEnvelope(altered,row,cohort,10));
-    }
-    const measured=clone(originalReports);measured[1]={...measured[1],status:'measured',detail:null,elapsedSeconds:1};
-    reports.validateSessionCase(measured[1],'index');
-    reject(()=>reports.validateSessionProfileAccounting(session,measured,execution,qualification));
+    reject(()=>reports.validateSessionEnvelope(session,row,cohort,10));
+    reject(()=>reports.validateSessionProfileAccounting(session,originalReports,execution,qualification));
     const altered=clone(originalReports);altered[0].detail='AdapterSessionQueryLifecycleUnavailable';
     reject(()=>reports.validateSessionProfileAccounting(session,altered,execution,qualification));
   }
@@ -137,8 +151,8 @@ if (scenario === 'json') {
     ['SurrealDB',"SurrealDB Community's experimental TiKV clustering is outside the qualified execution topology; only the persistent standalone server is measured."],
     ['HelixDB',"The self-hosted HelixDB server is standalone; managed cloud high availability is outside this execution comparison."]]) {
     const row=contract.sessionRows().find(row=>row.target===target&&row.nodeCount===3);
-    const session={...capabilitySession,sessionId:row.id,target,nodeCount:3,images:{server:null},
-      resourceReport:null,reason:contract.SESSION.topologyUnavailable};
+    const session={...sessionWithoutProfile,sessionId:row.id,target,nodeCount:3,images:{server:null},
+      resourceReport:null,outcome:'unavailable',reason:contract.SESSION.topologyUnavailable};
     const cases=originalReports.map(report=>({...report,detail}));
     const execution=reports.validateSessionResults(runtimeXml('Passed'),cases);
     const qualification={schemaVersion:1,sessionId:row.id,target,nodeCount:3,runtimeExitCode:0,
@@ -161,7 +175,7 @@ if (scenario === 'json') {
     reject(()=>reports.validateSessionProfileAccounting(cleanupFailure,cases,execution,{...failedExit,runtimeExitCode:0}));
 
   }
-  const qualifierFailure={...capabilitySession,outcome:'failure',reason:'SessionQualificationFailed'};
+  const qualifierFailure={...sessionWithoutProfile,outcome:'failure',reason:'SessionQualificationFailed'};
   const failedQualifier={schemaVersion:1,sessionId:qualifierFailure.sessionId,target:qualifierFailure.target,
     nodeCount:qualifierFailure.nodeCount,runtimeExitCode:0,status:'failed',reason:'SessionQualificationFailed',
     steps:[{id:'execution-correctness',status:'failed',failureType:'ComparisonFailureException'}]};
@@ -170,7 +184,7 @@ if (scenario === 'json') {
   reports.validateSessionQualification(failedQualifier,qualifierFailure,passed);
   reports.validateSessionProfileAccounting(qualifierFailure,originalReports,passed,failedQualifier);
   const row=contract.sessionRows().find(row=>row.target==='KeyLoad'&&row.nodeCount===1);
-  const failure={...capabilitySession,sessionId:row.id,target:row.target,nodeCount:1,targetProfile:null,images:{server:keyLoadImage},
+  const failure={...sessionWithoutProfile,sessionId:row.id,target:row.target,nodeCount:1,targetProfile:null,images:{server:keyLoadImage},
     processes:processes(),outcome:'failure',reason:'SessionTestFailure'};
   const failed=originalReports.map(report=>({...report,status:'failed',detail:'InitializationFailed'}));
   failed[0].elapsedSeconds=1;
@@ -181,6 +195,9 @@ if (scenario === 'json') {
       latency:{p50Ms:1,p95Ms:1,p99Ms:1},uniqueCompletedMessages:0,enqueue:null,receive:null,ack:null,clientResources:null}}];
   failed.forEach(report=>reports.validateSessionCase(report,report.caseId));
   reports.validateSessionEnvelope(failure,row,cohort,10);
+  for(const tag of ['latest','b'.repeat(40)]) {
+    reject(()=>reports.validateSessionEnvelope({...failure,images:{server:'ghcr.io/managedcode/keyload:'+tag+'@sha256:'+'5'.repeat(64)}},row,cohort,10));
+  }
   for(const image of [null,server,'docker.io/library/keyload:latest@sha256:'+'5'.repeat(64)])
     reject(()=>reports.validateSessionEnvelope({...failure,images:{server:image}},row,cohort,10));
   reject(()=>reports.validateSessionEnvelope({...failure,resourceReport:null},row,cohort,10));
@@ -188,7 +205,7 @@ if (scenario === 'json') {
   const qualification={schemaVersion:1,sessionId:row.id,target:row.target,nodeCount:1,runtimeExitCode:1,
     status:'notExecuted',reason:'ClientFailed',steps:[]};
   reports.validateSessionQualification(qualification,failure,execution);
-  reports.validateSessionProfileAccounting(failure,failed,execution,qualification);
+  reports.validateSessionProfileAccounting(failure,failed,execution,qualification);accepted=true;
   reject(()=>reports.validateSessionProfileAccounting(failure,failed,execution,{...qualification,runtimeExitCode:0,status:'passed'}));
 } else if (scenario === 'publication') {
   const {validateSessionProducer,selectSessionSiteProducer,requirePublishableSessionMeasurements} = await import(new URL('site-session-selection.mjs',base));
@@ -203,15 +220,13 @@ if (scenario === 'json') {
   if(selectSessionSiteProducer({run,jobs:[],artifacts:[]},workflow,'publish')!==null)
     throw new Error('A contracts-only run must not supply session measurements.');
   reject(()=>validateSessionProducer({...run,conclusion:'cancelled'},workflow,'validate'));
-  const value={workers:contract.sessionRows().map(row=>{
-    const unavailable=['Qdrant','RabbitMQ','KurrentDB'].includes(row.target);
-    return {job:{conclusion:'success'},session:{outcome:unavailable?'unavailable':'success',
-      reason:unavailable?contract.SESSION.capabilitiesUnavailable:null,
-      targetProfile:unavailable?null:{version:'1.0',topology:'execution cluster',cluster:{state:'healthy'}}},
-      qualification:{status:'passed'},resourceQualified:!unavailable,
-      execution:contract.SESSION.caseIds.map(()=>({outcome:'Passed'})),
-      reports:contract.SESSION.caseIds.map(caseId=>({caseId,status:unavailable?'unavailable':'measured'}))};
-  })};
+  const value={workers:contract.sessionRows().map(()=>({
+    job:{conclusion:'success'},session:{outcome:'success',reason:null,
+      targetProfile:{version:'1.0',topology:'execution cluster',cluster:{state:'healthy'}}},
+    qualification:{status:'passed'},resourceQualified:true,
+    execution:contract.SESSION.caseIds.map(()=>({outcome:'Passed'})),
+    reports:contract.SESSION.caseIds.map(caseId=>({caseId,status:'measured'}))
+  }))};
   requirePublishableSessionMeasurements(value);accepted=true;
   const partial=clone(value);partial.workers.pop();requirePublishableSessionMeasurements(partial);
   const unqualified=clone(value);unqualified.workers[0].resourceQualified=false;requirePublishableSessionMeasurements(unqualified);
@@ -232,18 +247,19 @@ if (scenario === 'json') {
   const revision='a'.repeat(40),repository=contract.SESSION.repository;
   const env={GITHUB_ACTIONS:'true',RUNNER_OS:'Linux',GITHUB_REPOSITORY:repository,GH_REPO:repository,
     GITHUB_REPOSITORY_ID:'477801965',GITHUB_WORKFLOW:'Website',GITHUB_REF:contract.SESSION.ref,GITHUB_JOB:'qualify',
-    GITHUB_EVENT_NAME:'push',GITHUB_WORKFLOW_REF:repository+'/.github/workflows/website.yml@'+contract.SESSION.ref,
+    GITHUB_EVENT_NAME:'workflow_dispatch',GITHUB_WORKFLOW_REF:repository+'/.github/workflows/website.yml@'+contract.SESSION.ref,
     GITHUB_WORKFLOW_SHA:revision,GITHUB_SHA:revision,GITHUB_RUN_ID:'1',GITHUB_RUN_ATTEMPT:'1',GH_TOKEN:'controlled-test-token',
     GITHUB_WORKSPACE:process.cwd()};
   const args={input:process.cwd(),mode:'publish',optional:'true','site-revision':revision,'workflow-revision':revision};
   accepted=sessionSiteContext(env,args,'linux').optional;
   sessionSiteContext(env,{...args,mode:'validate',optional:undefined,'requested-run':'123'},'linux');
-  for(const change of [v=>v.mode='validate',v=>v['requested-run']='123',v=>v.optional='false',
+  sessionSiteContext(env,{...args,'requested-run':'123'},'linux');
+  for(const change of [v=>v.mode='validate',v=>v['requested-run']='0',v=>v.optional='false',
     v=>v['site-revision']='bad',v=>v.input='relative']) {
     const altered={...args};change(altered);reject(()=>sessionSiteContext(env,altered,'linux'));
   }
   for(const [key,value] of [['GITHUB_REPOSITORY_ID','1'],['GITHUB_WORKFLOW','Other'],['RUNNER_OS','Windows'],
-    ['GITHUB_WORKFLOW_SHA','b'.repeat(40)],['GITHUB_JOB','foreign']]) reject(()=>sessionSiteContext({...env,[key]:value},args,'linux'));
+    ['GITHUB_WORKFLOW_SHA','b'.repeat(40)],['GITHUB_JOB','foreign'],['GITHUB_EVENT_NAME','push']]) reject(()=>sessionSiteContext({...env,[key]:value},args,'linux'));
   reject(()=>sessionSiteContext(env,args,'darwin'));
 } else if (scenario === 'runtime') {
   const { posix } = await import('node:path');

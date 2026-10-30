@@ -3,7 +3,8 @@ export const SESSION = Object.freeze({
   schema: 'session', profile: 'session', repository: 'managedcode/KeyLoad',
   ref: 'refs/heads/main', workflow: 'Benchmarks', workers: 32,
   records: 1_000_000, operations: 100_000, concurrency: 16, warmup: 0,
-  caseIds: Object.freeze(['load-million', 'index', 'sequential-read', 'random-read', 'search', 'mixed', 'verify-final']),
+  caseIds: Object.freeze(['load-million', 'index', 'sequential-read', 'random-read', 'search', 'mixed', 'verify-final',
+    'model-prepare', 'vector-exact', 'queue-cycle', 'stream-append', 'stream-read', 'stream-mixed']),
   nodes: Object.freeze([1, 3]), artifactPrefix: 'comparison-session-', aggregateArtifact: 'comparison-session-suite',
   aggregateJob: 'Combine benchmark results', prepareJob: 'Prepare comparison runtime',
   prepareSteps: Object.freeze(['Build the comparison harness', 'Check repository rules',
@@ -12,7 +13,7 @@ export const SESSION = Object.freeze({
   workerSteps: Object.freeze(['Run database workload', 'Save benchmark results']),
   reportBytes: 268_435_456, runtimeBytesCore: 16_777_216, sessionBytes: 4_194_304,
   aggregateBytes: 33_554_432, archiveBytes: 536_870_912, allArchiveBytes: 17_179_869_184,
-  capabilitiesUnavailable: 'SessionCapabilitiesUnavailable', topologyUnavailable: 'RuntimeTopologyUnavailable',
+  topologyUnavailable: 'RuntimeTopologyUnavailable',
   unavailableTopologyTargets: Object.freeze(['Neo4j','SurrealDB','HelixDB','TimescaleDB','SQL Server','MySQL','ClickHouse','InfluxDB']),
   failure: 'Benchmark session evidence rejected.',
 });

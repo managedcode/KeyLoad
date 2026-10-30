@@ -20,7 +20,6 @@ internal static class IsolatedKurrentResources
     private const int DigestPrefixLength = 7;
     private const int Port = 2113;
     private const string Connection = "ConnectionString";
-    private const string NodePort = ":2113";
     private const string ConnectionPrefix = "esdb://";
     private const string ConnectionOptions = "?tls=false&nodePreference=leader";
     private const string InvalidSelection = "IsolatedKurrentSelectionInvalid";
@@ -29,7 +28,7 @@ internal static class IsolatedKurrentResources
     {
         const int StartValue = 1;
         const int IndexInitialValue = 0;
-        const char SeparatorCharacter = ',';
+        const string Separator = ",";
 
         ArgumentNullException.ThrowIfNull(context);
         context.Selection.Validate();
@@ -40,6 +39,8 @@ internal static class IsolatedKurrentResources
         var cell = Guid.NewGuid().ToString(GuidFormat);
         var names = Enumerable.Range(StartValue, context.Selection.NodeCount)
             .Select(index => NodePrefix + index.ToString(CultureInfo.InvariantCulture)).ToArray();
+        var connection = new ReferenceExpressionBuilder();
+        connection.AppendLiteral(ConnectionPrefix);
         for (var index = IndexInitialValue; index < names.Length; index++)
         {
             var name = names[index];
@@ -48,9 +49,14 @@ internal static class IsolatedKurrentResources
                 .WithHttpEndpoint(targetPort: Port, name: Http).WithHttpHealthCheck(HealthPath);
             IsolatedKurrentSettings.Configure(node, name, names);
             context.BindEndpoint(index, node, Http);
+            if (index > IndexInitialValue)
+            {
+                connection.AppendLiteral(Separator);
+            }
+            connection.Append($"{node.GetEndpoint(Http).Property(EndpointProperty.HostAndPort)}");
         }
-        context.BindSetting(Connection, ConnectionPrefix +
-            string.Join(SeparatorCharacter, names.Select(name => IsolatedKurrentSettings.RuntimeHost(name) + NodePort)) + ConnectionOptions);
+        connection.AppendLiteral(ConnectionOptions);
+        context.BindSetting(Connection, connection.Build());
         context.BindImage(Registry + Image + TagSeparator + Tag + DigestSeparator + BenchmarkResources.KurrentDigest);
     }
 }

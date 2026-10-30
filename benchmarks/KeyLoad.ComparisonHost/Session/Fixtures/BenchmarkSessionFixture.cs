@@ -17,7 +17,6 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
     private const string Success = "success";
     private const string Failure = "failure";
     private const string TopologyUnavailable = "RuntimeTopologyUnavailable";
-    private const string CapabilitiesUnavailable = "SessionCapabilitiesUnavailable";
     internal const string LoadCase = "load-million";
     internal const string IndexCase = "index";
     internal const string SequentialReadCase = "sequential-read";
@@ -26,7 +25,9 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
     internal const string MixedCase = "mixed";
     internal const string VerifyCase = "verify-final";
     private static readonly string[] CaseIds =
-        [LoadCase, IndexCase, SequentialReadCase, RandomReadCase, SearchCase, MixedCase, VerifyCase];
+        [LoadCase, IndexCase, SequentialReadCase, RandomReadCase, SearchCase, MixedCase, VerifyCase,
+            BenchmarkSessionModelCases.Prepare, BenchmarkSessionModelCases.Vector, BenchmarkSessionModelCases.Queue, BenchmarkSessionModelCases.Append,
+            BenchmarkSessionModelCases.Read, BenchmarkSessionModelCases.Mixed];
     private readonly List<BenchmarkSessionArtifact> artifacts = [];
     private readonly Dictionary<string, string> outcomes = new(StringComparer.Ordinal);
     private IDisposable? configuration;
@@ -108,6 +109,10 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         }
         await RetainAsync(report);
         await Assert.That(report.CaseId).IsEqualTo(id);
+        if (input.Execution.UnsupportedReason is null && BenchmarkSessionModelCases.Required(input.Execution.Selection.Target, id))
+        {
+            await Assert.That(report.Status).IsEqualTo(Measured).Because(report.Detail ?? id);
+        }
         await Assert.That(report.Status is Measured or Unavailable).IsTrue().Because(report.Detail ?? id);
     }
 
@@ -134,12 +139,10 @@ internal sealed class BenchmarkSessionFixture : IAsyncInitializer, IAsyncDisposa
         }
         var worker = input.Execution.Worker;
         var unavailable = input.Execution.UnsupportedReason;
-        var capabilitiesUnavailable = unavailable is null && outcomes.Count == CaseIds.Length
-            && outcomes.Values.All(status => status == Unavailable);
-        var reason = unavailable is not null ? TopologyUnavailable : capabilitiesUnavailable ? CapabilitiesUnavailable : null;
+        var reason = unavailable is not null ? TopologyUnavailable : null;
         var outcome = reason is not null ? Unavailable : outcomes.Values.Any(status => status == Failed) ? Failure : Success;
         var profile = owner?.ObservedProfile;
-        if (capabilitiesUnavailable || !outcomes.ContainsValue(Measured)
+        if (!outcomes.ContainsValue(Measured)
             && profile is not { Cluster: not null })
         {
             profile = null;

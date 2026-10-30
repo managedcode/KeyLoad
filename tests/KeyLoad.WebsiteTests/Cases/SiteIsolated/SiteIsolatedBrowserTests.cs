@@ -28,7 +28,7 @@ internal sealed class SiteIsolatedBrowserTests
         foreach (var family in SiteIsolatedExpectedValues.Families)
         {
             await SiteIsolatedBrowserAssertions.SelectTypeAsync(cdp, family, token);
-            await SiteIsolatedBrowserChartAssertions.AssertCardsAsync(cdp, expected, family, token);
+            await SiteIsolatedBrowserChartAssertions.AssertFamilyTableAsync(cdp, expected, family, token);
             await SiteIsolatedBrowserAssertions.AssertTableAsync(cdp, expected, family, token);
         }
         await SiteIsolatedBrowserAssertions.SelectTypeAsync(cdp, SiteIsolatedExpectedValues.All, token);
@@ -45,7 +45,7 @@ internal sealed class SiteIsolatedBrowserTests
             JsonSerializer.Serialize(target) + ")?.querySelector('.ov-name');if(!b)return false;b.click();" +
             "return document.querySelector('#isolated-type input:checked').value===" + JsonSerializer.Serialize(family) + ";})()";
         await SiteBrowserAssertions.EvaluateSuccess(cdp, click, token);
-        await SiteIsolatedBrowserChartAssertions.AssertCardsAsync(cdp, expected, family, token);
+        await SiteIsolatedBrowserChartAssertions.AssertFamilyTableAsync(cdp, expected, family, token);
     }
 
     private static async Task AssertAccessibilityAsync(SiteBrowserCdpClient cdp, SiteIsolatedExpectedValues expected, CancellationToken token)

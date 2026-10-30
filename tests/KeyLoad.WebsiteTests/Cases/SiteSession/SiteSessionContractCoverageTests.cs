@@ -15,6 +15,7 @@ internal sealed class SiteSessionContractCoverageTests
     [Arguments("json")]
     [Arguments("plan")]
     [Arguments("reports")]
+    [Arguments("models")]
     [Arguments("selection")]
     [Arguments("environment")]
     [Arguments("qualification")]
@@ -24,7 +25,7 @@ internal sealed class SiteSessionContractCoverageTests
     [Arguments("profile-accounting")]
     public async Task CurrentSessionContractsRejectAlteredIdentityAccountingAndAdmission(string scenario)
     {
-        var inputs = SiteTestInputs.Read();
+        var inputs = SiteContentInputs.FromEnvironment();
         var start = new ProcessStartInfo(SiteTokens.NodeExecutable)
         {
             WorkingDirectory = inputs.Repository,

@@ -6,13 +6,13 @@ internal sealed class BenchmarkSessionMeasurement(BenchmarkSessionContext contex
 {
     internal Task<BenchmarkSessionLaneReport> MeasureAsync(string id, int count, int clients,
         Func<IComparisonSession?, int, CancellationToken, Task> operation, CancellationToken token,
-        BenchmarkSessionStartBarrier? barrier = null, bool openDocumentSessions = true)
+        BenchmarkSessionStartBarrier? barrier = null, bool openDocumentSessions = true, bool openNativeSessions = false)
         => MeasureBatchesAsync(id, count, clients, BenchmarkSessionLimits.SingleItemCount,
-            (client, first, _, cancellation) => operation(client, first, cancellation), token, barrier, openDocumentSessions);
+            (client, first, _, cancellation) => operation(client, first, cancellation), token, barrier, openDocumentSessions, openNativeSessions);
 
     internal async Task<BenchmarkSessionLaneReport> MeasureBatchesAsync(string id, int count, int clients, int batch,
         Func<IComparisonSession?, int, int, CancellationToken, Task> operation, CancellationToken token,
-        BenchmarkSessionStartBarrier? barrier = null, bool openDocumentSessions = true)
+        BenchmarkSessionStartBarrier? barrier = null, bool openDocumentSessions = true, bool openNativeSessions = false)
     {
         var lease = new BenchmarkSessionClientLease(context);
         BenchmarkSessionLaneReport? result = null;
@@ -20,8 +20,8 @@ internal sealed class BenchmarkSessionMeasurement(BenchmarkSessionContext contex
         ImmutableArray<Exception> cleanup = [];
         try
         {
-            await lease.OpenAsync(clients, openDocumentSessions, token).ConfigureAwait(false);
-            var execution = new BenchmarkSessionLaneExecution(context, lease, operation, count, batch, openDocumentSessions);
+            await lease.OpenAsync(clients, openDocumentSessions, openNativeSessions, token).ConfigureAwait(false);
+            var execution = new BenchmarkSessionLaneExecution(context, lease, operation, count, batch);
             result = await execution.RunAsync(id, clients, barrier, token).ConfigureAwait(false);
         }
         catch (Exception error) when (BenchmarkSessionFailure.IsNonfatal(error))

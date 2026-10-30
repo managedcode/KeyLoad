@@ -19,11 +19,15 @@ export const TESTS = Object.freeze([
   ['load-million', 'Load 1M'], ['index', 'Index build'], ['sequential-read', 'Sequential read'], ['random-read', 'Random read'],
   ['search', 'Search'], ['mixed/create', 'Mixed create'], ['mixed/delete', 'Mixed delete'], ['mixed/update', 'Mixed update'],
   ['mixed/read', 'Mixed read'], ['mixed/search', 'Mixed search'], ['verify-final', 'Full readback'],
-].map(([id, label]) => Object.freeze({ id, label, seconds: id === 'index' || id === 'verify-final' })));
+  ['model-prepare', 'Model setup'], ['vector-exact', 'Vector exact'], ['queue-cycle', 'Queue cycle'], ['stream-append', 'Event append'],
+  ['stream-read', 'Event read'], ['stream-mixed/stream-append', 'Mixed event append'], ['stream-mixed/stream-read', 'Mixed event read'],
+].map(([id, label]) => Object.freeze({ id, label, seconds: ['index', 'verify-final', 'model-prepare'].includes(id) })));
 // The overview reads one test per operation family; mixed spans all five concurrent lanes of the mixed test.
 export const GENERAL = Object.freeze([
   ['write', 'Write', 'load-million', 'Bulk insert, 1M documents'], ['read', 'Read', 'random-read', 'Random key lookups'],
-  ['search', 'Search', 'search', 'Indexed search queries'], ['mixed', 'Mixed', 'mixed', '500k mixed operations, 16 clients'],
+  ['search', 'Search', 'search', 'ID and numeric-range predicates'], ['mixed', 'Mixed', 'mixed', '500k mixed operations, 16 clients'],
+  ['vector', 'Vector', 'vector-exact', 'Exact cosine top-k'], ['queue', 'Queue', 'queue-cycle', 'Publish, receive and manual ACK'],
+  ['append', 'Event append', 'stream-append', 'Append and verify persisted events'], ['events', 'Event read', 'stream-read', 'Read event identity, revision and body'],
 ].map(([key, label, id, hint]) => Object.freeze({ key, label, id, hint })));
 export function assertIsolated(condition) {
   if (!condition) {

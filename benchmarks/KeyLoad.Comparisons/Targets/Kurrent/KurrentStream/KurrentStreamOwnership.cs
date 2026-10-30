@@ -8,10 +8,13 @@ internal sealed class KurrentStreamOwnership
     private readonly Dictionary<string, KurrentStreamOwnershipEntry> entries = new(StringComparer.Ordinal);
 
     internal KurrentStreamOwnership(IOptions<ComparisonOptions> workloadOptions)
+        : this(Validated(workloadOptions))
     {
-        ArgumentNullException.ThrowIfNull(workloadOptions);
-        var options = workloadOptions.Value;
-        options.Validate();
+    }
+
+    internal KurrentStreamOwnership(IComparisonSettings options)
+    {
+        ArgumentNullException.ThrowIfNull(options);
         Capacity = checked(options.Documents + options.Repetitions * options.Operations
             + KurrentConstants.OwnershipProbeCount);
     }
@@ -19,6 +22,13 @@ internal sealed class KurrentStreamOwnership
     internal int Capacity
     {
         get;
+    }
+
+    private static ComparisonOptions Validated(IOptions<ComparisonOptions> workloadOptions)
+    {
+        var options = workloadOptions?.Value ?? throw new ArgumentNullException(nameof(workloadOptions));
+        options.Validate();
+        return options;
     }
     internal int Count
     {

@@ -1,24 +1,5 @@
 name: Website
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'site/**'
-      - 'tests/KeyLoad.WebsiteTests/**'
-      - 'scripts/Features/BenchmarkComparisons/site-*'
-      - 'scripts/Features/BenchmarkComparisons/composite-site-*'
-      - 'scripts/Features/BenchmarkComparisons/isolated-github-stream.mjs'
-      - 'scripts/Features/BenchmarkComparisons/isolated-github-transport.mjs'
-      - '.github/workflows/website.yml'
-      - '.github/workflows/Features/BenchmarkComparisons/QualifySite/**'
-      - '.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite/**'
-      - '.github/workflows/Features/BenchmarkComparisons/DeploySite/**'
-      - 'scripts/Features/TestInfrastructure/run-tests.mjs'
-      - '.editorconfig'
-      - 'Directory.Build.props'
-      - 'Directory.Build.targets'
-      - 'Directory.Packages.props'
-      - 'global.json'
   workflow_dispatch:
     inputs:
       benchmark_run_id:
@@ -37,7 +18,7 @@ jobs:
     if: >-
       github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
       github.ref == 'refs/heads/main' &&
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+      github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 180
     permissions: {contents: read, actions: read}
@@ -95,6 +76,8 @@ jobs:
       - name: Run website checks
         id: qualification
         uses: ./control/.github/workflows/Features/BenchmarkComparisons/QualifySite
+        with:
+          benchmark_run_id: ${{ inputs.benchmark_run_id }}
   deploy:
     name: Publish website
     concurrency:
@@ -122,3 +105,5 @@ jobs:
       - name: Publish website
         id: publication
         uses: ./control/.github/workflows/Features/BenchmarkComparisons/DeploySite
+        with:
+          benchmark_run_id: ${{ inputs.benchmark_run_id }}

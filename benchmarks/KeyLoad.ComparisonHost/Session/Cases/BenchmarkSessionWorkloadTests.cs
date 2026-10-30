@@ -1,3 +1,5 @@
+using KeyLoad.Comparisons;
+
 namespace KeyLoad.ComparisonHost.BenchmarkComparisons;
 
 /// <summary>Records distinct execution outcomes while every test uses the same live database.</summary>
@@ -31,5 +33,26 @@ internal sealed class BenchmarkSessionWorkloadTests(BenchmarkSessionFixture fixt
 
     [Test, DependsOn(nameof(Mixed), ProceedOnFailure = true)]
     public Task VerifyFinalState() => fixture.RunAsync(BenchmarkSessionFixture.VerifyCase, static (session, token) => session.VerifyAsync(token),
+        TestContext.Current!.Execution.CancellationToken);
+
+    [Test, DependsOn(nameof(VerifyFinalState), ProceedOnFailure = true)]
+    public Task PrepareModels() => ModelAsync(BenchmarkSessionModelCases.Prepare);
+
+    [Test, DependsOn(nameof(PrepareModels), ProceedOnFailure = true)]
+    public Task VectorExact() => ModelAsync(BenchmarkSessionModelCases.Vector);
+
+    [Test, DependsOn(nameof(VectorExact), ProceedOnFailure = true)]
+    public Task QueueCycle() => ModelAsync(BenchmarkSessionModelCases.Queue);
+
+    [Test, DependsOn(nameof(QueueCycle), ProceedOnFailure = true)]
+    public Task StreamAppend() => ModelAsync(BenchmarkSessionModelCases.Append);
+
+    [Test, DependsOn(nameof(StreamAppend), ProceedOnFailure = true)]
+    public Task StreamRead() => ModelAsync(BenchmarkSessionModelCases.Read);
+
+    [Test, DependsOn(nameof(StreamRead), ProceedOnFailure = true)]
+    public Task StreamMixed() => ModelAsync(BenchmarkSessionModelCases.Mixed);
+
+    private Task ModelAsync(string id) => fixture.RunAsync(id, (session, token) => session.ModelAsync(id, token),
         TestContext.Current!.Execution.CancellationToken);
 }

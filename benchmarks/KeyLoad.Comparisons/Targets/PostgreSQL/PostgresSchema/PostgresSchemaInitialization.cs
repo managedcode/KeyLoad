@@ -31,9 +31,9 @@ internal static class PostgresSchemaInitialization
             await PostgresDocumentOperations.SeedAsync(connection, dataset, cancellationToken);
         }
 
-        if (dataset is BenchmarkDataset control)
+        if (dataset is BenchmarkDataset or BenchmarkSessionModelCorpus)
         {
-            await PostgresStreamOperations.SeedAsync(connection, control, cancellationToken);
+            await PostgresStreamOperations.SeedAsync(connection, dataset, cancellationToken);
             await CopyEdgesAsync(connection, dataset, cancellationToken);
         }
         // Execution planner/index statistics readiness follows the actual corpus load.

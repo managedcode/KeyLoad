@@ -28,7 +28,7 @@ and exact final-state oracles. The canonical inventory and unsupported execution
 capabilities are explicit; a document-only implementation does not qualify the
 complete database/model comparison requirement.
 
-One preparation job builds the solution and compiled runtime bundle. Workers
+One preparation job builds the comparison harness and compiled client runtime bundle. Workers
 import and hash-check same-source/run/attempt DLLs/PDBs, NuGet assets and required
 Aspire tools without their own restore/build. The primary KeyLoad AppHost contains
 server project processes with in-memory RapidMembership for development and functional tests.
@@ -59,7 +59,8 @@ identity or resource observation may stand in for a server process.
 ## Consequences and qualification
 
 The measurement matrix is 16 databases × two topologies = 32 jobs. Shared
-preparation, aggregation and Website dispatch make 35 comparison-flow jobs.
+preparation, aggregation and Website dispatch make 35 measurement-flow jobs;
+full Benchmarks first calls the canonical Release functional/image publication gates.
 Benchmarks runs no source-built KeyLoad job; the KeyLoad cells start the released
 image like every other database's. A job failure may
 leave later prerequisites failed; original case outcomes must show this honestly.

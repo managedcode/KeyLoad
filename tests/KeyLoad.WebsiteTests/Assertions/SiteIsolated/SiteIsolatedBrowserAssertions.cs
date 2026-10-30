@@ -39,7 +39,9 @@ internal static class SiteIsolatedBrowserAssertions
         {
             var row = rows[index];
             var (id, target, nodes) = planned[index];
-            var session = expected.Row(target, "load-million", nodes);
+            var statusTest = SiteIsolatedExpectedValues.TableColumns.FirstOrDefault(test => expected.Value(target, test, nodes) is not null)
+                ?? "load-million";
+            var session = expected.Row(target, statusTest, nodes);
             await Assert.That(row.GetProperty(SiteIsolatedFields.Name).GetString()).IsEqualTo(target);
             await Assert.That(row.GetProperty(SiteIsolatedFields.NodeCount).GetInt32()).IsEqualTo(nodes);
             await Assert.That(row.GetProperty(SiteIsolatedFields.WorkerId).GetString()).IsEqualTo(id);

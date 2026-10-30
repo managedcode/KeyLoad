@@ -71,6 +71,7 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
     public async Task InitializeAsync(IComparisonCorpus dataset, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(dataset);
+        ownsDocumentNamespace = true;
         var status = KeyLoadClientResults.Success(await client.StatusAsync(cancellationToken), InitializeAsyncStatusText);
         if (status.SiloCount != expectedNodeCount || status.ReplicaCount != expectedNodeCount ||
             status.Durability != DurabilityProfile.ProcessDurable)
@@ -89,9 +90,9 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
         }
 
         await SeedGraphAsync(dataset, scaled, cancellationToken);
-        if (!scaled && dataset is BenchmarkDataset control)
+        if (!scaled && dataset is BenchmarkDataset or BenchmarkSessionModelCorpus)
         {
-            await KeyLoadEventOperations.SeedAsync(client, partition, control, expectedNodeCount, cancellationToken);
+            await KeyLoadEventOperations.SeedAsync(client, partition, dataset, expectedNodeCount, cancellationToken);
         }
         await ObserveCopiesAsync(cancellationToken);
     }
@@ -156,11 +157,14 @@ public sealed partial class KeyLoadTarget(HttpClient http, string apiKey, string
         }
     }
     /// <summary>Opens a session that executes supported operations through the SDK client.</summary>
-    /// <param name="cancellationToken">A token accepted for the common target contract; this implementation creates the session without I/O.</param>
+    /// <param name="cancellationToken">Cancels admission of this independently owned SDK client.</param>
     /// <returns>A comparison session bound to this target and its benchmark partition.</returns>
-    public Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
-        => Task.FromResult<IComparisonSession>(new KeyLoadComparisonSession(client, partition, space, topK,
-            graphDepth, graphVertices, graphEdges, expectedCorpusCount, expectedNodeCount, lifecycleOptions, runtimeExecutionOptions, translationOptions, provider: timeProvider));
+    public async Task<IComparisonSession> OpenSessionAsync(CancellationToken cancellationToken)
+        => await DocumentHttpSessionAcquisition.OpenAsync(http, runtimeExecutionOptions,
+            async (owned, token) => { _ = KeyLoadClientResults.Success(await new KeyLoadClient(owned, credential, clientOptions).StatusAsync(token), InitializeAsyncStatusText); },
+            owned => new KeyLoadComparisonSession(new KeyLoadClient(owned, credential, clientOptions), partition, space, topK,
+                graphDepth, graphVertices, graphEdges, expectedCorpusCount, expectedNodeCount, lifecycleOptions,
+                runtimeExecutionOptions, translationOptions, provider: timeProvider), cancellationToken).ConfigureAwait(false);
     /// <summary>Disposes the distinct HTTP clients owned by this target.</summary>
     /// <returns>A value task that completes after client disposal.</returns>
     public async ValueTask DisposeAsync()

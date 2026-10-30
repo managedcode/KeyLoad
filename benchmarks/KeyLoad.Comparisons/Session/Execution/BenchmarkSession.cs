@@ -8,6 +8,7 @@ public sealed class BenchmarkSession
     private readonly BenchmarkSessionDocumentWorkload documents;
     private readonly BenchmarkSessionQueryWorkload queries;
     private readonly BenchmarkSessionMixedWorkload mixed;
+    private readonly BenchmarkSessionModelWorkload models;
     private int active;
 
     /// <summary>Creates the frozen production session over the execution target and its validated operational policy.</summary>
@@ -18,12 +19,14 @@ public sealed class BenchmarkSession
     }
 
     internal BenchmarkSession(IComparisonTarget target, IOptions<ComparisonExecutionOptions> executionOptions,
-        BenchmarkSessionOptions options, bool development, TimeProvider? provider = null, Action<DocumentComparisonProgress>? progress = null)
+        BenchmarkSessionOptions options, bool development, TimeProvider? provider = null, Action<DocumentComparisonProgress>? progress = null,
+        IComparisonTarget? modelTarget = null)
     {
         var context = new BenchmarkSessionContext(target, executionOptions, options, development, provider, progress);
         documents = new(context);
         queries = new(context);
         mixed = new(context);
+        models = new(new(modelTarget ?? target, executionOptions, options, development, provider, progress));
     }
 
     /// <summary>Measures the initial retained million and verifies every actual record.</summary>
@@ -42,6 +45,10 @@ public sealed class BenchmarkSession
     public Task<BenchmarkSessionCaseReport> MixedAsync(CancellationToken cancellationToken) => ExecuteAsync(mixed.RunAsync, cancellationToken);
     /// <summary>Verifies every retained key, complete value and required execution replica copy.</summary>
     public Task<BenchmarkSessionCaseReport> VerifyAsync(CancellationToken cancellationToken) => ExecuteAsync(documents.VerifyAsync, cancellationToken);
+
+    /// <summary>Measures one supported vector, queue or event operation over the same living server topology.</summary>
+    internal Task<BenchmarkSessionCaseReport> ModelAsync(string caseId, CancellationToken cancellationToken)
+        => ExecuteAsync(token => models.RunAsync(caseId, token), cancellationToken);
 
     private async Task<BenchmarkSessionCaseReport> ExecuteAsync(Func<CancellationToken, Task<BenchmarkSessionCaseReport>> operation, CancellationToken token)
     {

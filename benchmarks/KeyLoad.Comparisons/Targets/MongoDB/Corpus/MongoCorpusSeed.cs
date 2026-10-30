@@ -13,7 +13,7 @@ internal static class MongoCorpusSeed
     {
         var batchSize = ComparisonExecutionOptions.Require(executionOptions).Value.MongoSeedBatchSize;
         await InsertBatchesAsync(dataset.Documents.Select(MongoSchema.Document), documents, batchSize, cancellationToken);
-        if (dataset is BenchmarkDataset)
+        if (dataset is BenchmarkDataset or BenchmarkSessionModelCorpus)
         {
             await InsertBatchesAsync(dataset.Edges.Select(CreateEdge), edges, batchSize, cancellationToken);
             var streamEvents = dataset.Documents.Select(document => MongoSchema.Event(streamName(document),

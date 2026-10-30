@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Xml.Linq;
+using KeyLoad.Comparisons;
 using KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 using SessionFields = KeyLoad.ComparisonHost.BenchmarkOrchestration.BenchmarkSessionEvidenceKeys;
 
@@ -25,6 +26,8 @@ internal static class BenchmarkSessionManifest
     private const string ExecutionSearchValue = "Search";
     private const string ExecutionMixedValue = "Mixed";
     private const string VerifyFinalStateValue = "VerifyFinalState";
+    private const string PrepareModelsValue = "PrepareModels", VectorExactValue = "VectorExact", QueueCycleValue = "QueueCycle";
+    private const string StreamAppendValue = "StreamAppend", StreamReadValue = "StreamRead", StreamMixedValue = "StreamMixed";
     private const string FailureOutcome = "failure";
     private const string QualificationFailedReason = "SessionQualificationFailed";
     private const int EmptyCount = 0;
@@ -48,9 +51,12 @@ internal static class BenchmarkSessionManifest
     private const long MaximumReportBytes = 256 * 1024 * 1024;
     private const string Invalid = "BenchmarkSessionOriginalEvidenceInvalid";
     private static readonly string[] CaseIds =
-        [LoadMillionValue, IndexValue, SequentialReadValue, RandomReadValue, SearchValue, MixedValue, VerifyFinalValue];
+        [LoadMillionValue, IndexValue, SequentialReadValue, RandomReadValue, SearchValue, MixedValue, VerifyFinalValue,
+            BenchmarkSessionModelCases.Prepare, BenchmarkSessionModelCases.Vector, BenchmarkSessionModelCases.Queue, BenchmarkSessionModelCases.Append,
+            BenchmarkSessionModelCases.Read, BenchmarkSessionModelCases.Mixed];
     private static readonly string[] RuntimeNames =
-        [ExecutionLoadMillionValue, BuildIndexesValue, ExecutionSequentialReadValue, ExecutionRandomReadValue, ExecutionSearchValue, ExecutionMixedValue, VerifyFinalStateValue];
+        [ExecutionLoadMillionValue, BuildIndexesValue, ExecutionSequentialReadValue, ExecutionRandomReadValue, ExecutionSearchValue, ExecutionMixedValue, VerifyFinalStateValue,
+            PrepareModelsValue, VectorExactValue, QueueCycleValue, StreamAppendValue, StreamReadValue, StreamMixedValue];
 
     internal static async Task WriteAsync(string root, BenchmarkSessionCallerOptions selected, int exit, bool qualificationFailed, CancellationToken token)
     {

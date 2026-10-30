@@ -4,7 +4,7 @@
 
 - Own build infrastructure. The two Aspire entry points are KeyLoad.AppHost/KeyLoad.AppHost.csproj and KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj; CodeQuality/FunctionalCompilationIdentity.targets captures actual compiled source identities.
 - The primary host contains KeyLoad server projects with the published in-memory RapidMembership provider. The load-test host owns only the selected database infrastructure and exposes actual endpoints to a separately owned workload client.
-- Ordinary build/start/test execution never builds or runs KeyLoad server or workload Docker images. The manual Release workflow publishes the server image with execution .NET SDK PublishContainer to `ghcr.io/managedcode/keyload`; benchmark KeyLoad cells run that released image pinned to one resolved digest and never build it. Preserve session-owned cleanup without touching unrelated Docker resources.
+- Ordinary build/start/test execution never builds or runs KeyLoad server or workload Docker images. The canonical Release workflow publishes the server image with execution .NET SDK PublishContainer to `ghcr.io/managedcode/keyload`; benchmark KeyLoad cells run that released image pinned to one resolved digest and never build it. Preserve session-owned cleanup without touching unrelated Docker resources.
 - Own Aspire composition and MSBuild identity capture, not runtime database implementations.
 - Keep existing namespaces, diagnostics, persistence identities and behavior stable. Follow root AGENTS.md and project-local policies.
 - Preserve unrelated working-tree changes, warning enforcement, source identities, real cluster topology and honest qualification evidence.

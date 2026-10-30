@@ -16,7 +16,8 @@ three nodes. Different databases/topologies never share a runner, containers,
 volumes or measurement session. One Aspire-owned deployment lives for the entire
 job. Many separate real TUnit tests share its fixture; only one workload
 test executes at a time, with the declared concurrent clients inside that test.
-The common preparation builds the runner and images once; each worker imports
+The prerequisite canonical Release qualifies and publishes the same-source KeyLoad image;
+the common preparation builds the runner once; each worker imports
 and verifies the same-source binaries, tools and image identities.
 
 ```mermaid
@@ -26,7 +27,8 @@ flowchart LR
     Index --> Operations[Separate read search and query tests]
     Operations --> Mixed[Concurrent create delete update read search]
     Mixed --> Verify[Full final content and replica verification]
-    Verify --> Original[Original per-test reports samples and TRX]
+    Verify --> Models[Prepare model corpus then vector queue and event tests]
+    Models --> Original[Original per-test reports samples and TRX]
     Original --> Aggregate[Authenticate all database and topology jobs]
 ```
 
@@ -46,7 +48,7 @@ completion. No extra read is silently included in a measured write. A execution
 batch acknowledgement records its real batch size and duration; it cannot be
 expanded into invented per-record latency samples.
 
-## Shared live document schedule
+## Shared live operation schedule
 
 The deterministic corpus, seed, payload, key groups, query predicates, requested
 counts and client limits are identical across applicable adapters. The initial
@@ -64,6 +66,10 @@ batching/pipelining contract is part of the shared case.
 | Search/query | 100,000 equivalent predicates with bounded results and exact content oracles. Range/complex-query expansion remains separately tracked. |
 | Mixed | Concurrent lanes: 100,000 creates, 100,000 deletes, 100,000 updates, 100,000 reads and 100,000 search requests. Each lane retains its actual outcomes and timestamps. |
 | Final verification | Exactly 900,000 retained original keys plus 100,000 new keys; correct replacements and absence of deleted keys, with actual replica proofs. |
+| Model setup | Separately timed native provisioning and acknowledged lazy corpus preparation, once per model namespace. |
+| Exact vectors | 100,000 exact cosine top-k queries over 1,000,000 32-dimensional vectors; ordered IDs and complete JSON bodies checked against a bounded independent oracle. |
+| Queue | 100,000 confirmed publish/receive/manual ACK cycles; complete bodies, unique delivery accounting and separate phase latency. The queue ends empty. |
+| Events | Separate 100,000 append and read lanes, plus overlapping eight-client append/read streams; deterministic IDs, revision and complete persisted bodies. |
 
 Delete, update and stable-read key groups are disjoint. Creates use new keys.
 The mixed test starts admitted clients through a common barrier and proves
@@ -78,15 +84,15 @@ merely to schedule the work.
 The full product comparison still requires vectors/search accuracy,
 graphs, queues, event streams, time series, ordered/range and complex queries,
 plus ingestion at 1/10/500 clients. These run as additional real cases on the same
-database/topology infrastructure. A seven-case document session does not qualify
-that complete inventory. Unsupported functionality is distinguished from
+database/topology infrastructure. The thirteen-case session includes exact vectors, queues and events but does not qualify
+the complete inventory. Unsupported functionality is distinguished from
 an unimplemented adapter or failed prerequisite; implementation gaps must not be
 reported as absence.
 
 Every family uses the same canonical scenario, corpus/seed, operation order,
 counts, metric/filter, accuracy target, resource limits and effective durability
 contract across applicable databases. Vector indexes retain exact/HNSW/IVFFlat,
-filtered/concurrent-update and recall requirements where ly supported.
+filtered/concurrent-update and recall requirements where supported.
 batching, index build and accuracy are declared explicitly. Closed-loop
 request timings do not prove scheduled-arrival/open-loop or endurance behavior.
 
@@ -125,7 +131,7 @@ they retain real failed prerequisite outcomes rather than invented measurements.
 No automatic measurement retry repairs the statistics. No skipped, missing,
 corrupt or mixed-cohort original is accepted as a complete session.
 
-Aggregation authenticates all 22 database/topology jobs, their exact planned
+Aggregation authenticates all 32 database/topology jobs, their exact planned
 cases, original reports and TRX, same-source images, compiled-runtime
 identity/import receipts and statistics. Actual failed cases retain null metrics
 and original provenance. Website independently qualifies its source, archives,

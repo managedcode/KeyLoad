@@ -21,7 +21,7 @@ internal static class BenchmarkSessionClientProcess
         string evidence, IOptions<TestExecutionOptions> execution, CancellationToken token)
     {
         const string ResultsDirectory = "RuntimeTestResults";
-        const string MinimumTests = "7";
+        const string MinimumTests = "13";
         var info = ComparisonHostLaunchSettings.Create([], environment);
         foreach (var argument in new[] { ReportTrxArgument, ResultsDirectoryArgument,
             Path.Combine(evidence, ResultsDirectory), MinimumExpectedTestsArgument, MinimumTests })

@@ -21,8 +21,14 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
     private readonly List<HttpClient> unownedClients = [];
     private readonly List<SocketsHttpHandler> clientHandlers = [];
     private IComparisonTarget? target;
+    private IsolatedHostTargetOwner? modelOwner;
 
-    internal TargetProfile? ObservedProfile => target?.Profile;
+    internal TargetProfile? ObservedProfile => modelOwner?.ObservedProfile is { Cluster: not null } models
+        ? target?.Profile is { Cluster: not null } documents
+            ? documents with { ReadContract = documents.ReadContract + ModelReadContractSeparator + models.ReadContract }
+            : models
+        : target?.Profile;
+    private const string ModelReadContractSeparator = "; model namespace: ";
 
     internal IComparisonTarget Create(IsolatedHostSettings settings)
     {
@@ -33,7 +39,13 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
     internal BenchmarkSession CreateSession(IsolatedHostSettings settings, Action<DocumentComparisonProgress> progress)
     {
         InitializeTarget(settings);
-        return new(target!, execution, new BenchmarkSessionOptions(), Clock, progress);
+        var models = target!;
+        if (models.Supports(Scenario.DocumentWrite) && new[] { Scenario.VectorExact, Scenario.QueueCycle, Scenario.StreamAppend }.Any(models.Supports))
+        {
+            modelOwner = new(executionOptions, diagnosticOptions, lifecycleOptions, clientOptions, translationOptions, Clock);
+            models = modelOwner.Create(settings with { RunId = Guid.NewGuid().ToString("N") });
+        }
+        return new(target!, execution, new BenchmarkSessionOptions(), false, Clock, progress, models);
     }
 
     private void InitializeTarget(IsolatedHostSettings settings)
@@ -58,7 +70,7 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
             IsolatedHostConstants.Neo4j => new Neo4jTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireImage(execution), lifecycleOptions, executionOptions, provider: Clock),
             IsolatedHostConstants.Mongo => new MongoTarget(execution.Connection!, execution.Endpoints, settings.RunId, RequireImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
             IsolatedHostConstants.OpenSearch => new OpenSearchTarget(CreateClient(execution, PrimaryEndpointIndex), settings.RunId, RequireImage(execution), topology, lifecycleOptions, executionOptions, provider: Clock),
-            IsolatedHostConstants.Kurrent => new KurrentTarget(execution.Connection!, CreateClients(execution), settings.RunId, RequireImage(execution), topology, lifecycleOptions, diagnostics, provider: Clock),
+            IsolatedHostConstants.Kurrent => new KurrentTarget(execution.Connection!, CreateClients(execution, allowRedirects: false), settings.RunId, RequireImage(execution), topology, lifecycleOptions, diagnostics, provider: Clock),
             BenchmarkAdditionalTargets.Timescale or BenchmarkAdditionalTargets.SqlServer or BenchmarkAdditionalTargets.MySql
                 => RelationalComparisonTargets.Create(settings.Selection.Target, execution.Connection!, settings.RunId, RequireImage(execution), executionOptions),
             BenchmarkAdditionalTargets.ClickHouse or BenchmarkAdditionalTargets.InfluxDb
@@ -88,22 +100,23 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
         return new(clients[ClientsFirstIndex], settings.RunId, RequireImage(execution), executionOptions, lifecycleOptions, settings.Selection.Topology, clients, provider: Clock);
     }
 
-    private HttpClient[] CreateClients(RuntimeIsolatedHostSettings execution)
+    private HttpClient[] CreateClients(RuntimeIsolatedHostSettings execution, bool allowRedirects = true)
     {
         const int FirstEntryIndex = 0;
 
         var clients = new HttpClient[execution.Endpoints.Length];
         for (var index = FirstEntryIndex; index < clients.Length; index++)
         {
-            clients[index] = CreateClient(execution, index);
+            clients[index] = CreateClient(execution, index, allowRedirects);
         }
         return clients;
     }
 
-    private HttpClient CreateClient(RuntimeIsolatedHostSettings execution, int index)
+    private HttpClient CreateClient(RuntimeIsolatedHostSettings execution, int index, bool allowRedirects = true)
     {
         var handler = new SocketsHttpHandler
         {
+            AllowAutoRedirect = allowRedirects,
             MaxResponseHeadersLength = this.execution.Value.DocumentClientMaxResponseHeadersKilobytes
         };
         clientHandlers.Add(handler);
@@ -129,13 +142,12 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
     public async ValueTask DisposeAsync()
     {
         var ownedTarget = target;
+        var ownedModels = modelOwner;
         target = null;
+        modelOwner = null;
         try
         {
-            if (ownedTarget is not null)
-            {
-                await DisposeTargetAsync(ownedTarget);
-            }
+            await DisposeOwnersAsync(ownedModels, ownedTarget);
         }
         finally
         {
@@ -149,6 +161,19 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
                 handler.Dispose();
             }
             clientHandlers.Clear();
+        }
+    }
+
+    private async Task DisposeOwnersAsync(IsolatedHostTargetOwner? models, IComparisonTarget? documents)
+    {
+        var modelFailure = models is null ? null
+            : (await RuntimeComparisonFailure.ObserveAsync(models.DisposeAsync().AsTask())).Value;
+        var documentFailure = documents is null ? null
+            : (await RuntimeComparisonFailure.ObserveAsync(DisposeTargetAsync(documents))).Value;
+        var combined = RuntimeComparisonFailure.Combine(modelFailure, documentFailure is null ? [] : [documentFailure]).Value;
+        if (combined is not null)
+        {
+            System.Runtime.ExceptionServices.ExceptionDispatchInfo.Capture(combined).Throw();
         }
     }
 

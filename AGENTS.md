@@ -267,10 +267,10 @@ selected database infrastructure, waits for readiness and exposes endpoints;
 client code owns load execution and measurements. Each AppHost removes its own
 session containers and volumes on joined teardown after success, failure or
 cancellation. Preserve unrelated Docker resources. Normal builds and functional
-tests never publish or build a KeyLoad server image. The manual Release workflow
+tests never publish or build a KeyLoad server image. The canonical Release workflow
 publishes the server image with execution .NET SDK `PublishContainer` to
 `ghcr.io/managedcode/keyload` under the commit SHA and `latest` tags; maintain no
-product Dockerfile. Benchmarks resolves the latest released image to one digest per
+product Dockerfile. Benchmarks resolves the source-matched Release image to one digest per
 run and runs the KeyLoad cells as Aspire containers from that digest.
 
 Complete solution build, unit tests, real process recovery, actual Aspire cluster

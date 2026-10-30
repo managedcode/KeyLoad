@@ -6,23 +6,25 @@ Feature: BenchmarkComparisons, REQ/AC-BC-WEB-001..007.
 ## Decision and trust boundary
 
 Website/website.yml owns website source qualification and Pages publication.
-Its executor accepts trusted own-main push and workflow_dispatch. Build and Tests
+Its executor accepts trusted own-main workflow_dispatch, either manual or from the final Benchmarks trigger. Build and Tests
 retains every build/analyzer/unit/scalar/recovery/cluster gate independently.
 Benchmarks owns measurements and the final settled aggregate. Its final
 website-trigger job dispatches Website on main after all dependencies settle,
 including a run with failed or skipped database/aggregation jobs. Cancellation
 still stops dispatch. Exact trusted repository/event admission is required.
 Only that job has actions:write; database jobs remain read-only.
-Trigger failure is visible. Website's push trigger is filtered to `site/**`, its
-site tests, site-specific scripts/composites and shared build inputs; there
-is no `workflow_run` subscription, alternate executor or measurement bypass.
+Trigger failure is visible. Website has no independent push trigger: a full
+source change first qualifies/publishes the same-source KeyLoad image and runs
+Benchmarks, then dispatches Website with that run ID. Manual content publication
+remains available. There is no `workflow_run` subscription, alternate executor or
+measurement bypass.
 
 Optional benchmark_run_id authenticates the original own-repository main run,
 Benchmarks workflow name/path, event and source, then waits at most five minutes
-for completion and accepts terminal `success` or `failure` before qualification. It does not select authoritative metrics or bypass freshness.
+for completion and accepts terminal `success` or `failure` before qualification. When supplied, the same authenticated run is the sole capture candidate in both qualification and predeploy recheck. Its original archive, source and freshness checks remain mandatory.
 Empty input skips waiting. Invalid metadata, API failure and timeout fail closed.
 
-Select the newest authenticated completed own-main producer with original
+With no requested run, select the newest authenticated completed own-main producer with original
 successful session jobs and artifacts. Its overall conclusion may be success or
 failure. Website collects and validates those original worker/runtime ZIPs through
 the shared collector and aggregator; a combined-results artifact is not required.
@@ -52,7 +54,7 @@ Pages/OIDC writes are confined to the needs-gated deploy job.
 
 ```mermaid
 flowchart TD
-    Push[Website source or manual dispatch] --> Website[Independent Website executor]
+    Push[Manual Website dispatch] --> Website[Independent Website executor]
     Benchmarks[Settled Benchmarks run] --> Trigger[Trusted final Website dispatch]
     Trigger --> Website
     Website --> Select[Authenticated current producer or explicit absence]
@@ -79,7 +81,7 @@ until actual measured and content-only qualification, freshness and Pages proof 
 
 ## Trigger scope, navigation and diagnostics requirements
 
-REQ/AC-BC-WEB-008: Website's push trigger and Benchmarks' final dispatch follow the decision above. Verification: push path matches and dependency outcome rejection are source checks; GitHub scheduling, dispatch after a failed producer and acceptance only of its independently verified successful sessions in actual Linux execution are required provider evidence, not claims from static inspection. Independent site changes can still publish without benchmark figures when no authenticated producer is ready. Rollback preserves the independent Website executor and all source/metric/coverage/browser/freshness/permission checks.
+REQ/AC-BC-WEB-008: Website's manual entry and Benchmarks' final dispatch follow the decision above. Verification: source/event admission and dependency outcome rejection are source checks; GitHub scheduling, dispatch after a failed producer and acceptance only of its independently verified successful sessions in actual Linux execution are required provider evidence, not claims from static inspection. Independent site changes can still publish without benchmark figures when no authenticated producer is ready. Rollback preserves the independent Website executor and all source/metric/coverage/browser/freshness/permission checks.
 
 REQ/AC-BC-WEB-003: the menu action and restored fragment finish their actual CSS-adjusted target scroll, clamped to the document's real scroll range, before subsequent hero navigation. The actual Chrome/CDP caller clicks the observed visible menu toggle and link centers through mouse press/release rather than DOM `.click()`. Test helpers own bounded observation of location and geometry; they cannot force renderer state or focus, accept paused output, increase timeouts or lower coverage. Popover closure, repeated opening/viewport closure, scene lifecycle and joined child cleanup remain mandatory. `SiteContentBrowserTests` retains the full action chain with genuine pointer inputs; failure diagnostics additionally retain active-element tag/id and real scroll bounds, never credentials or user payload. No new dependency or provider boundary.
 

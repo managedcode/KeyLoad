@@ -26,7 +26,8 @@ internal static class AdditionalDatabaseResources
     {
         if (target is not (BenchmarkAdditionalTargets.Timescale or BenchmarkAdditionalTargets.SqlServer
             or BenchmarkAdditionalTargets.MySql or BenchmarkAdditionalTargets.ClickHouse or BenchmarkAdditionalTargets.InfluxDb
-            or NativeDatabaseTests.Redis or NativeDatabaseTests.OpenSearch or NativeDatabaseTests.HelixDb or NativeDatabaseTests.MongoDb))
+            or NativeDatabaseTests.Redis or NativeDatabaseTests.OpenSearch or NativeDatabaseTests.HelixDb or NativeDatabaseTests.MongoDb
+            or IsolatedHostConstants.Qdrant or IsolatedHostConstants.Rabbit or IsolatedHostConstants.Kurrent))
         {
             throw new InvalidOperationException(Invalid);
         }
@@ -79,7 +80,8 @@ internal static class AdditionalDatabaseResources
         using var configuration = new ConfigurationManager();
         configuration.AddJsonFile(Path.Combine(AppContext.BaseDirectory, ComparisonExecutionRegistration.ConfigurationPath), optional: false);
         var policy = ComparisonExecutionRegistration.Read(configuration);
-        await using var database = Create(target, values, policy, configuration);
+        using var models = new ModelDatabaseTargets();
+        await using var database = Create(target, values, policy, configuration, models);
         await SettleAsync(() => verify(database, token), failures);
     }
 
@@ -88,9 +90,13 @@ internal static class AdditionalDatabaseResources
     private const string Basic = "Basic", Separator = ":";
 
     private static IComparisonTarget Create(string target, IReadOnlyDictionary<string, string> values,
-        Microsoft.Extensions.Options.IOptions<ComparisonExecutionOptions> options, IConfiguration configuration)
+        Microsoft.Extensions.Options.IOptions<ComparisonExecutionOptions> options, IConfiguration configuration, ModelDatabaseTargets models)
     {
         var runId = Guid.NewGuid().ToString(Format);
+        if (target is IsolatedHostConstants.Qdrant or IsolatedHostConstants.Rabbit or IsolatedHostConstants.Kurrent)
+        {
+            return models.Create(target, values, runId, options, configuration);
+        }
         if (target == NativeDatabaseTests.Redis)
         {
             return NativeDatabaseTargets.Redis(values, runId, options, configuration);

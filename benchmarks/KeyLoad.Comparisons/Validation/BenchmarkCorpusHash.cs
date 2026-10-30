@@ -1,5 +1,4 @@
 using System.Buffers.Binary;
-using System.Collections.Immutable;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -8,7 +7,7 @@ namespace KeyLoad.Comparisons;
 
 internal static class BenchmarkCorpusHash
 {
-    internal static string Compute(ImmutableArray<BenchmarkDocument> documents, ImmutableArray<BenchmarkEdge> edges)
+    internal static string Compute(IEnumerable<BenchmarkDocument> documents, IEnumerable<BenchmarkEdge> edges)
     {
         const int EncodedLengthBytes = 4;
 

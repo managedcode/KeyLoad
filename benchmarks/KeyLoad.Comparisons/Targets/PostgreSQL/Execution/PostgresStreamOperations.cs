@@ -9,7 +9,7 @@ internal static class PostgresStreamOperations
     private const string ReadEventSql = "SELECT event_id,revision,body::text FROM events WHERE stream_id=$1 LIMIT 2";
     private const string CardinalityFailure = "PostgresStreamCardinality";
 
-    internal static async Task SeedAsync(NpgsqlConnection connection, BenchmarkDataset dataset,
+    internal static async Task SeedAsync(NpgsqlConnection connection, IComparisonCorpus dataset,
         CancellationToken cancellationToken)
     {
         foreach (var document in dataset.Documents)

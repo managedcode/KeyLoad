@@ -29,7 +29,9 @@ function viewWorker(worker, report) {
 }
 export function selectedIsolatedRows(projection, scenario, nodeCount, repetition, metric, target) {
   const [caseId, laneId] = scenario.split('/');
-  requireSession(SESSION.caseIds.includes(caseId) && (laneId === undefined || caseId === 'mixed' && ['create', 'delete', 'update', 'read', 'search'].includes(laneId)) && SESSION.nodes.includes(nodeCount) && Object.hasOwn(metrics, metric)
+  requireSession(SESSION.caseIds.includes(caseId) && (laneId === undefined
+    || caseId === 'mixed' && ['create', 'delete', 'update', 'read', 'search'].includes(laneId)
+    || caseId === 'stream-mixed' && ['stream-append', 'stream-read'].includes(laneId)) && SESSION.nodes.includes(nodeCount) && Object.hasOwn(metrics, metric)
     && (target === 'all' || SESSION_TARGETS.some(item => item.name === target)) && repetition === 'session');
   return sessionRows().filter(row => row.nodeCount === nodeCount && (target === 'all' || row.target === target))
     .map(row => {

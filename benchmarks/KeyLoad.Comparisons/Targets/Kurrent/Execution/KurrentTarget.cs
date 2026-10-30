@@ -70,7 +70,7 @@ public sealed class KurrentTarget : IComparisonTarget
         const string ThisTargetDoesNotSupportTheBoundedScaledDocumentCorpusDetail = "This target does not support the bounded scaled document corpus.";
 
         ArgumentNullException.ThrowIfNull(corpus);
-        if (corpus is not BenchmarkDataset dataset)
+        if (corpus is not BenchmarkDataset && corpus is not BenchmarkSessionModelCorpus)
         {
             throw new NotSupportedException(ThisTargetDoesNotSupportTheBoundedScaledDocumentCorpusDetail);
         }
@@ -80,9 +80,9 @@ public sealed class KurrentTarget : IComparisonTarget
         }
         try
         {
-            ownership = new KurrentStreamOwnership(dataset.ExecutionOptions);
+            ownership = new KurrentStreamOwnership(corpus.Settings);
             setupStage = KurrentSetupStage.MemberVerification;
-            var timeout = TimeSpan.FromSeconds(dataset.Options.TimeoutSeconds);
+            var timeout = TimeSpan.FromSeconds(corpus.Settings.TimeoutSeconds);
             var proof = await KurrentClusterVerifier.VerifyAsync(connectionString: connectionString, httpClients: nodeHttpClients,
                 topology: topology, timeout: timeout, cancellationToken: cancellationToken, options: lifecycleOptions, timeProvider: timeProvider);
             nodeClients = proof.NodeClients;
@@ -96,7 +96,7 @@ public sealed class KurrentTarget : IComparisonTarget
             await VerifyNoStreamConflictAsync(cancellationToken);
 
             setupStage = KurrentSetupStage.CorpusSeeding;
-            foreach (var document in dataset.Documents)
+            foreach (var document in corpus.Documents)
             {
                 var stream = StreamName(document);
                 await KurrentOwnedStreamAppend.AppendAsync(RequireWriter(), ownership, stream, CreateEvent(document), cancellationToken);
