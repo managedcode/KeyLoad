@@ -24,7 +24,6 @@ internal static class CapturedReadScopeScenario
     internal const string HealthyValue = "healthy-value";
     internal const int MaximumRecords = 16;
     internal const long MaximumBytes = 65_536;
-    internal const int RuntimeHeaderBytes = 1;
     private const string RecordSeparator = "=";
     private const string AdmissionExceeded = "The captured test operation exceeded its retained admission.";
 

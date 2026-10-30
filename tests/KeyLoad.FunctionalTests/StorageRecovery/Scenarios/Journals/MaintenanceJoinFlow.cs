@@ -30,8 +30,8 @@ internal static class MaintenanceJoinFlow
                 var image = MaintenanceState.Image(store);
                 var position = store.Position;
                 var identity = store.Identity.Incarnation;
-                runtime.Tree.Maintenance.OnDiskSegmentCreated += barrier.DiskCreated;
-                runtime.Tree.Maintenance.OnMergeOperationEnded += barrier.MergeEnded;
+                runtime.Tree.Maintenance.ZoneTree.Maintenance.OnDiskSegmentCreated += barrier.DiskCreated;
+                runtime.Tree.Maintenance.ZoneTree.Maintenance.OnMergeOperationEnded += barrier.MergeEnded;
                 runtime.Maintainer.ThresholdForMergeOperationStart = int.MaxValue;
                 runtime.Maintainer.MaximumReadOnlySegmentCount = int.MaxValue;
                 runtime.Maintainer.EvictToDisk();

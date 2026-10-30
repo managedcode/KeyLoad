@@ -13,6 +13,13 @@ stop that approach and remove your own speculative additions. Apply this rule
 immediately, including to your previous changes, while preserving unrelated work
 and required correctness gates.
 
+KeyLoad is under development. Replace superseded implementations completely when
+adopting an approved new design. Remove their exclusive helpers, contracts, tests
+and documentation together. Keep one current implementation; do not preserve old
+formats, backward compatibility routes or conversion mechanisms. The native
+ZoneTree MVCC storage adoption uses the current data epoch across storage and
+internal request purposes.
+
 ## Product and runtime
 
 KeyLoad is one database for AI agents. Documents, typed tables, graphs,

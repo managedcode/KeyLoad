@@ -1,4 +1,5 @@
 using System.Buffers.Binary;
+using ZoneTree.Transactional;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -36,9 +37,23 @@ internal static class ZoneTreeJournalRecovery
             return 0;
         }
 
-        var checkpoint = ZoneTreeCheckpointReader.Read(runtime.Journal, runtime.Options, runtime.Apply);
+        using var transaction = runtime.Tree.BeginTransaction();
+        RemoveCheckpointBaseline(runtime, transaction);
+        var checkpoint = ZoneTreeCheckpointReader.Read(runtime.Journal, runtime.Options,
+            mutation => runtime.Apply(transaction, mutation));
+        transaction.Commit();
         runtime.SetPosition(checkpoint.Position);
         return runtime.Journal.Position;
+    }
+
+    private static void RemoveCheckpointBaseline(ZoneTreeStoreRuntime runtime,
+        ITransaction<Memory<byte>, Memory<byte>> transaction)
+    {
+        using var snapshot = new ZoneTreeSnapshotCursor(runtime.Tree);
+        while (snapshot.Iterator.Next())
+        {
+            transaction.Delete(snapshot.Iterator.CurrentKey);
+        }
     }
 
     private static bool ReplayFrame(ZoneTreeStoreRuntime runtime, byte[] header, ref long validLength)
@@ -53,11 +68,13 @@ internal static class ZoneTreeJournalRecovery
         }
         var (payload, sequence, _) = frame.Value;
 
+        using var transaction = runtime.Tree.BeginTransaction();
         foreach (var mutation in ZoneTreeJournalCodec.Deserialize(payload))
         {
-            runtime.Apply(mutation);
+            runtime.Apply(transaction, mutation);
         }
 
+        transaction.Commit();
         runtime.SetPosition(sequence);
         validLength = journal.Position;
         return true;

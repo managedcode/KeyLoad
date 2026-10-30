@@ -56,7 +56,7 @@ internal sealed class CapturedReadScopeTests
         var position = fixture.Store.Position;
         var key = ReadCutFixture.Key(Point);
         var value = ReadCutFixture.Value(OldPoint);
-        var exactBytes = key.Length * 2L + value.Length + RuntimeHeaderBytes;
+        var exactBytes = key.Length * 2L + value.Length;
         using (var rejected = fixture.Capture(ReadCutFixture.Limits(MaximumRecords, exactBytes - 1)))
         {
             var delivered = 0;

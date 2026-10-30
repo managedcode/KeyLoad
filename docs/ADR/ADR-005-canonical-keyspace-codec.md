@@ -38,7 +38,7 @@ flowchart LR
 This decision adds REQ-KEYCODEC-001..004 and AC-KEYCODEC-001..004 in
 [StorageRecovery](../Features/StorageRecovery.md). This freezes validation of
 the existing format; every byte emitted for a supported valid existing key
-remains unchanged. Identity digests, aliases/Ids, current data epoch7, journals,
+remains unchanged. Identity digests, aliases/Ids, current data epoch8, journals,
 cluster and public wire DTOs remain unchanged. Unsupported data epochs fail closed.
 
 The v1 type order is missing10, null11, bool20, int64/normalized int30, decimal31,

@@ -1,11 +1,9 @@
-using ZoneTree;
-using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
+using ZoneTree.Transactional;
 
 namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeReadCutLease : IDisposable
 {
-    private const string InvalidValueHeaderMessage = "A execution read-cut contains an invalid value header.";
     private readonly Action<ZoneTreeReadCutLease> release;
     private readonly CancellationTokenSource cancellation;
     private readonly ZoneTreeReadCutWork work;
@@ -21,7 +19,7 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
 
     internal ZoneTreeReadCut Cut => state.Cut;
     internal CancellationToken CancellationToken => cancellation.Token;
-    internal void Attach(IZoneTreeIterator<Memory<byte>, Memory<byte>> acquired, ZoneTreeReadCut snapshotCut)
+    internal void Attach(ZoneTreeSnapshotCursor acquired, ZoneTreeReadCut snapshotCut)
         => state.Attach(acquired, snapshotCut);
     internal void FinishCapture() => state.FinishCapture();
     internal void CheckAfterCapture() => work.Check(CancellationToken);
@@ -99,17 +97,13 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         }
     }
 
-    private void ReadExactValue(IZoneTreeIterator<Memory<byte>, Memory<byte>> source,
+    private void ReadExactValue(ITransactionIterator<Memory<byte>, Memory<byte>> source,
         StorageValueReader reader, Action<long, int> admitBeforeRead)
     {
         var raw = source.CurrentValue;
         work.ChargeRecord(source.CurrentKey.Length, raw.Length, CancellationToken);
-        if (raw.IsEmpty || raw.Span[0] != LiveValueMarker)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage);
-        }
         admitBeforeRead((long)source.CurrentKey.Length + raw.Length, 1);
-        reader(raw.Span[StorageValueHeaderBytes..]);
+        reader(raw.Span);
         work.Check(CancellationToken);
     }
 
@@ -149,16 +143,16 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
         CompleteDisposal(failures);
     }
 
-    internal IZoneTreeIterator<Memory<byte>, Memory<byte>>? CurrentIterator() => state.CurrentIterator();
-    internal bool MarkIteratorDisposed(IZoneTreeIterator<Memory<byte>, Memory<byte>> iterator)
-        => state.MarkIteratorDisposed(iterator);
+    internal ZoneTreeSnapshotCursor? CurrentSnapshot() => state.CurrentSnapshot();
+    internal bool MarkSnapshotDisposed(ZoneTreeSnapshotCursor snapshot)
+        => state.MarkSnapshotDisposed(snapshot);
     internal void CancelLifetime() => cancellation.Cancel();
     internal void CompleteDisposal(List<Exception> failures)
         => state.CompleteDisposeAttempt(failures).GetAwaiter().GetResult();
 
     private void ReleaseSlot() => release(this);
 
-    private ZoneTreeReadCutVisitResult Visit(IZoneTreeIterator<Memory<byte>, Memory<byte>> source,
+    private ZoneTreeReadCutVisitResult Visit(ITransactionIterator<Memory<byte>, Memory<byte>> source,
         byte[] prefix, ZoneTreeReadCutVisitor visitor, Action<long, int>? admitBeforeCopy, bool copyBytes)
     {
         while (true)
@@ -181,15 +175,11 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
 
             var rawValue = source.CurrentValue;
             work.ChargeRecord(key.Length, rawValue.Length, CancellationToken);
-            if (rawValue.IsEmpty || rawValue.Span[0] != LiveValueMarker)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, InvalidValueHeaderMessage);
-            }
             admitBeforeCopy?.Invoke((long)key.Length + rawValue.Length, 1);
 
             var keepGoing = copyBytes
-                ? visitor(key.ToArray(), rawValue.Span[StorageValueHeaderBytes..].ToArray())
-                : visitor(key.Span, rawValue.Span[StorageValueHeaderBytes..]);
+                ? visitor(key.ToArray(), rawValue.ToArray())
+                : visitor(key.Span, rawValue.Span);
             work.Check(CancellationToken);
             if (!keepGoing)
             {

@@ -8,6 +8,48 @@ namespace KeyLoad.FunctionalTests;
 internal sealed class CheckpointTests
 {
     [Test]
+    public async Task DiskDeletionAndCompactionKeepExactRowsAcrossTwoReopens()
+    {
+        using var files = new WalFileFixture();
+        var options = new ZoneTreeStoreOptions(files.DirectoryPath);
+        byte[] deleted = [0x10];
+        byte[] retained = [0x20];
+        byte[] healthy = [0x30];
+        byte[] value = [0x00, 0xFF, 0x80];
+        StoreIdentity identity;
+        using (var store = new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+        {
+            store.Commit((tx, _) => { tx.Put(deleted, value); tx.Put(retained, value); return true; });
+            PersistToDisk(store);
+            store.Commit((tx, _) => { tx.Delete(deleted); return true; });
+            var cut = store.Compact();
+            await Assert.That(cut.Position).IsEqualTo(2L);
+            await Assert.That(cut.RecordCount).IsEqualTo(1L);
+            identity = store.Identity;
+        }
+        using (var reopened = new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+        {
+            await WalFileFixture.AssertPreservedIdentity(identity, reopened.Identity);
+            await Assert.That(reopened.Position).IsEqualTo(2L);
+            await Assert.That(reopened.Read(view => view.ReadOwnedValue(deleted))).IsNull();
+            await Assert.That(reopened.Read(view => view.ReadOwnedValue(retained))!.SequenceEqual(value)).IsTrue();
+            reopened.Commit((tx, _) => { tx.Put(healthy, []); return true; });
+        }
+        using var final = new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        await WalFileFixture.AssertPreservedIdentity(identity, final.Identity);
+        await Assert.That(final.Position).IsEqualTo(3L);
+        await Assert.That(final.Read(view => view.ReadOwnedValue(deleted))).IsNull();
+        await Assert.That(final.Read(view => view.ReadOwnedValue(retained))!.SequenceEqual(value)).IsTrue();
+        await Assert.That(final.Read(view => view.ReadOwnedValue(healthy))).IsEmpty();
+    }
+
+    private static void PersistToDisk(ZoneTreeStore store)
+    {
+        store.Maintenance.Maintainer.EvictToDisk();
+        store.Maintenance.Maintainer.WaitForBackgroundThreads();
+    }
+
+    [Test]
     public async Task CompactionPreservesLogicalPositionAndDropsSupersededPayloads()
     {
         var root = Path.Combine(AppContext.BaseDirectory, "keyload-compact-" + Guid.NewGuid().ToString("N"));

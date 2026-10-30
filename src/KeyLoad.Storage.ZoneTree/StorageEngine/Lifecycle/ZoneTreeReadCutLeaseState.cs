@@ -1,4 +1,4 @@
-using ZoneTree;
+using ZoneTree.Transactional;
 
 namespace KeyLoad.Storage.ZoneTree;
 
@@ -14,7 +14,7 @@ internal sealed class ZoneTreeReadCutLeaseState
     private const string ReentrantDisposalMessage = "A execution read-cut lease cannot be disposed from its visitor.";
     private readonly Lock sync = new();
     private readonly TaskCompletionSource captureFinished = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    private IZoneTreeIterator<Memory<byte>, Memory<byte>>? iterator;
+    private ZoneTreeSnapshotCursor? snapshot;
     private ZoneTreeReadCut? cut;
     private TaskCompletionSource? traversalFinished;
     private TaskCompletionSource? disposeFinished;
@@ -36,22 +36,22 @@ internal sealed class ZoneTreeReadCutLeaseState
         }
     }
 
-    internal void Attach(IZoneTreeIterator<Memory<byte>, Memory<byte>> acquired, ZoneTreeReadCut snapshotCut)
+    internal void Attach(ZoneTreeSnapshotCursor acquired, ZoneTreeReadCut snapshotCut)
     {
         lock (sync)
         {
-            iterator = acquired;
+            snapshot = acquired;
             cut = snapshotCut;
         }
     }
 
     internal void FinishCapture() => captureFinished.TrySetResult();
 
-    internal IZoneTreeIterator<Memory<byte>, Memory<byte>> BeginTraversal()
+    internal ITransactionIterator<Memory<byte>, Memory<byte>> BeginTraversal()
     {
         lock (sync)
         {
-            if (closing || disposing || cut is null || iterator is null)
+            if (closing || disposing || cut is null || snapshot is null)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, ClosedMessage);
             }
@@ -63,7 +63,7 @@ internal sealed class ZoneTreeReadCutLeaseState
             traversing = true;
             traversalThread = Environment.CurrentManagedThreadId;
             traversalFinished = new(TaskCreationOptions.RunContinuationsAsynchronously);
-            return iterator;
+            return snapshot.Iterator;
         }
     }
 
@@ -133,23 +133,23 @@ internal sealed class ZoneTreeReadCutLeaseState
         }
     }
 
-    internal IZoneTreeIterator<Memory<byte>, Memory<byte>>? CurrentIterator()
+    internal ZoneTreeSnapshotCursor? CurrentSnapshot()
     {
         lock (sync)
         {
-            return iterator;
+            return snapshot;
         }
     }
 
-    internal bool MarkIteratorDisposed(IZoneTreeIterator<Memory<byte>, Memory<byte>> acquired)
+    internal bool MarkSnapshotDisposed(ZoneTreeSnapshotCursor acquired)
     {
         lock (sync)
         {
-            if (!ReferenceEquals(iterator, acquired))
+            if (!ReferenceEquals(snapshot, acquired))
             {
                 return false;
             }
-            iterator = null;
+            snapshot = null;
             cut = null;
             return true;
         }

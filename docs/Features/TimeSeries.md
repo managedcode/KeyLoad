@@ -123,7 +123,7 @@ flowchart LR
 [ADR-079](../ADR/ADR-079-lossless-series-chunk-codecs.md) freezes a private,
 bounded generated-Orleans codec candidate before canonical storage integration.
 Current per-sample ZoneTree rows, ID receipts, sequences, retention floors and
-identity epoch7 remains unchanged. No conversion or rewrite of an earlier canonical
+identity epoch8 remains unchanged. No conversion or rewrite of an earlier canonical
 sample representation is supported. Codec qualification does not complete chunk acceptance: correction generations and process/cluster recovery still need their separate
 current-format contract and original evidence.
 

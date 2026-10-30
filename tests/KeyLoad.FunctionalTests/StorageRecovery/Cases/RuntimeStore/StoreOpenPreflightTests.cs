@@ -11,7 +11,7 @@ internal sealed class StoreOpenPreflightTests
     private const int LengthMismatchDecrement = 1;
     private const int IncompleteHeaderBytes = 7;
     private const int ChangedByte = 1;
-    private const int CurrentIdentityVersion = 7;
+    private const int CurrentIdentityVersion = 8;
     private const ulong UnsupportedCheckpointMagic = ulong.MaxValue;
     private const ulong UnsupportedJournalMagic = ulong.MaxValue;
     private const string MissingReceipt = "The execution preflight inspector did not return a receipt.";

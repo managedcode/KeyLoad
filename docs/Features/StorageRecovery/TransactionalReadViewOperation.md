@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart LR
- Seed[Real indexed document command] --> Snapshot[Capture Snapshot iterator under original read gate]
+ Seed[Real indexed document command] --> Snapshot[Capture native MVCC snapshot under the read gate]
  Snapshot --> Hold[Off-gate scan pauses after first copied row]
  Hold --> Writer[Concurrent atomic overwrite/delete/insert]
  Writer --> Current[Writer finishes; fresh point and index reads see full new cut]

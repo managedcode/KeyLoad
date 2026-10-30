@@ -11,12 +11,9 @@ internal static class ZoneTreePersistenceFormat
     internal const int SequenceOffset = 12;
     internal const int ChecksumOffset = 20;
     internal const int ChecksumLength = 32;
-    internal const int CurrentDataEpoch = 7;
+    internal const int CurrentDataEpoch = 8;
     internal const int BackupManifestVersion = 2;
     internal const int SigningKeyBytes = 32;
-    internal const int StorageValueHeaderBytes = 1;
-    internal const byte DeletedValueMarker = 0;
-    internal const byte LiveValueMarker = 1;
     internal const string OwnerLockFileName = "owner.lock";
     internal const string IdentityFileName = "identity.json";
     internal const string JournalFileName = "commands.wal";

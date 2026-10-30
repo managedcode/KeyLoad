@@ -88,7 +88,7 @@ internal static class CurrentArchiveCancellationHealthy
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await Assert.That(store.Identity.FormatVersion).IsEqualTo(7);
+            await Assert.That(store.Identity.FormatVersion).IsEqualTo(8);
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {

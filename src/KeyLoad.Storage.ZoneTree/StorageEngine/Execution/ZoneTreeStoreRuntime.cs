@@ -3,6 +3,7 @@ using System.Runtime.InteropServices;
 using KeyLoad.Diagnostics.ResourceExecution;
 using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using ZoneTree;
+using ZoneTree.Transactional;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -70,7 +71,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
     internal ZoneTreeReadCutLifecycle RuntimeReadCuts { get; } = new();
     internal FileStream Ownership { get; set; } = null!;
     internal FileStream Journal { get; set; } = null!;
-    internal IZoneTree<Memory<byte>, Memory<byte>> Tree { get; set; } = null!;
+    internal ITransactionalZoneTree<Memory<byte>, Memory<byte>> Tree { get; set; } = null!;
     internal ZoneTreeMaintenanceLifetime? Maintenance
     {
         get; set;
@@ -115,7 +116,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
         }
     }
 
-    internal void Apply(StorageMutation mutation)
+    internal void Apply(ITransaction<Memory<byte>, Memory<byte>> transaction, StorageMutation mutation)
     {
         var started = DatabasePhaseTelemetry.Begin();
         try
@@ -124,15 +125,12 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
             var key = MemoryMarshal.AsMemory(mutation.Key);
             if (mutation.Value is null)
             {
-                Tree.ForceDelete(key);
+                transaction.Delete(key);
             }
             else
             {
-                var logicalValue = mutation.Value.Value;
-                var value = new byte[logicalValue.Length + StorageValueHeaderBytes];
-                value[0] = LiveValueMarker;
-                logicalValue.Span.CopyTo(value.AsSpan(StorageValueHeaderBytes));
-                Tree.Upsert(key, value);
+                var value = MemoryMarshal.AsMemory(mutation.Value.Value);
+                transaction.Upsert(key, value);
             }
         }
         catch (Exception)

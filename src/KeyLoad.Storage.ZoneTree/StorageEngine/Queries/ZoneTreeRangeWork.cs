@@ -16,16 +16,16 @@ internal sealed class ZoneTreeRangeWork(ZoneTreeReadCounters counters, StorageRe
     internal void ChargeBaseline(long bytes) => Charge(bytes, true, false);
     internal void ChargeStaged(long bytes, bool tombstone) => Charge(bytes, false, tombstone);
 
-    private void Charge(long bytes, bool hasMarker, bool tombstone)
+    private void Charge(long bytes, bool baseline, bool tombstone)
     {
-        counters.RangeEntry(bytes, baseline: hasMarker, tombstone);
+        counters.RangeEntry(bytes, baseline: baseline, tombstone);
         Check();
         if (++examinedEntries > maximumRecords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedRangeRecordsMessage);
         }
 
-        var providerCharge = bytes + (hasMarker ? StorageValueHeaderBytes : 0);
+        var providerCharge = bytes;
         if (providerCharge > maximumWorkBytes - providerBytes)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ExhaustedRangeBytesMessage);

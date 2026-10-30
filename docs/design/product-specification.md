@@ -126,13 +126,13 @@ Separate projects: full PostgreSQL SQL/wire compatibility, Cypher/SPARQL compati
 
 ### ZoneTree
 
-ZoneTree provides ordered persistent key-value storage, seek/range iterators, optimistic multi-key transactions, serializers, comparers, WAL and compaction. The repository states an MIT license. This is enough to build a local storage adapter; KeyLoad designs the document model and the distributed guarantees. [S1][S2]
+ZoneTree provides ordered persistent key-value storage, seek/range iterators, native MVCC multi-key transactions with consistent snapshots, serializers, comparers, WAL and compaction. The repository states an MIT license. This is enough to build a local storage adapter; KeyLoad designs the document model and the distributed guarantees. [S1][S2]
 
 `AsyncCompressed` is the default WAL. The documentation describes `SyncCompressed` as having a separate tail writer with a default interval of 500 ms. `Sync` has a synchronous stream write path; full power-loss durability depends on the flush contract and the storage stack. A configuration named Sync is not by itself proof of a durable ACK. [S3]
 
-The built-in live backup covers non-transactional trees. For transactional trees the documentation explicitly requires a separate strategy. KeyLoad uses a closed, consistent backup of all data, transaction-log and metadata files. [S4]
+KeyLoad backs up a consistent cut of its durable command journal and identity under a verified manifest. Restore reconstructs the native MVCC tree through ordered replay. [S4]
 
-`IteratorType.Snapshot` switches the mutable segment and reads a frozen read-only cut. `NoRefresh` may see later changes in the current mutable segment. A Snapshot iterator can cause extra segment moves, so its cost is part of the benchmark. Alignment of snapshot reads with transaction visibility is verified separately. [S5]
+`BeginReadOnlyTransaction()` retains a native MVCC snapshot for point and range reads. The KeyLoad read-cut owner holds both that transaction and its iterator until joined disposal. Snapshot retention and traversal costs require their own measurements. [S5]
 
 ### Orleans
 
@@ -1831,7 +1831,7 @@ The sources describe public capabilities; production qualification uses separate
 
 [S4] ZoneTree production checklist: https://github.com/ZoneTree/ZoneTree/blob/main/docs/operations/production-checklist.md
 
-[S5] ZoneTree iteration and range scans: https://github.com/ZoneTree/ZoneTree/blob/main/docs/usage/iteration-and-range-scans.md
+[S5] ZoneTree native snapshot contract: https://github.com/ZoneTree/ZoneTree/blob/release-v2.0.6/src/ZoneTree/Transactional/IReadTransaction.cs
 
 [S6] Microsoft Learn, grain directory: https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory
 

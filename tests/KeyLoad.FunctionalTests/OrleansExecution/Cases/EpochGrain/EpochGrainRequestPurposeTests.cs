@@ -7,7 +7,7 @@ internal sealed class EpochGrainRequestPurposeTests
     private const string UnsupportedPurposeOne = "unsupported-grain-purpose-one";
     private const string UnsupportedPurposeTwo = "unsupported-grain-purpose-two";
     private const string UnsupportedPurposeThree = "unsupported-grain-purpose-three";
-    private const string CurrentPurpose = "keyload-grain-request-data-epoch7-rpc3";
+    private const string CurrentPurpose = "keyload-grain-request-data-epoch8-rpc3";
     private const string PrincipalId = "root";
     private const int NoDtoMarker = 0;
 

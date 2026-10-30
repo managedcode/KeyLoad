@@ -2,8 +2,8 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainContracts
 {
-    internal const string RequestPurpose = "keyload-grain-request-data-epoch7-rpc3";
-    internal const string RuntimeJournalPurpose = "keyload-runtime-journal-data-epoch7";
+    internal const string RequestPurpose = "keyload-grain-request-data-epoch8-rpc3";
+    internal const string RuntimeJournalPurpose = "keyload-runtime-journal-data-epoch8";
     internal const string EnvelopeAlias = "keyload.request.envelope";
     internal const string ValueAlias = "keyload.request.value";
     internal const string CommandObservationAdmissionAlias = "keyload.execution-command-observation-admission";

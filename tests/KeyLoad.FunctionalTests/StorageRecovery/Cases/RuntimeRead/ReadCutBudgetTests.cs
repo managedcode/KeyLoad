@@ -108,5 +108,5 @@ internal sealed class ReadCutBudgetTests
     }
 
     private static long RowBytes(string key, string value)
-        => ReadCutFixture.Key(key).Length + ReadCutFixture.Value(value).Length + 1L;
+        => ReadCutFixture.Key(key).Length + ReadCutFixture.Value(value).Length;
 }

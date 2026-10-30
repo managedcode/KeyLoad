@@ -1,6 +1,5 @@
 using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Core.Search;
-using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.FunctionalTests.Search;
 
@@ -36,8 +35,7 @@ internal sealed record TextOnlineSeedFixture(TextSeedPin Pin, DocumentRecord[] E
         var first = OrleansSerialization.Serialize(Expected[0]).LongLength;
         var second = OrleansSerialization.Serialize(Expected[1]).LongLength;
         return checked(DocumentStorageKeys.RecordKey(Expected[0].Reference).LongLength + first
-            + ZoneTreePersistenceFormat.StorageValueHeaderBytes + first + IntPtr.Size
-            + DocumentStorageKeys.RecordKey(Expected[1].Reference).LongLength + second
-            + ZoneTreePersistenceFormat.StorageValueHeaderBytes);
+            + first + IntPtr.Size
+            + DocumentStorageKeys.RecordKey(Expected[1].Reference).LongLength + second);
     }
 }

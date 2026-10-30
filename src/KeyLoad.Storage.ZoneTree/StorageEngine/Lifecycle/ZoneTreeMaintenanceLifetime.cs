@@ -2,6 +2,8 @@ using System.Runtime.ExceptionServices;
 using Microsoft.Extensions.Options;
 using ZoneTree;
 using ZoneTree.Core;
+using StorageKey = ZoneTree.Transactional.Versioning.VersionedKey<System.Memory<byte>>;
+using StorageValue = ZoneTree.Transactional.Versioning.VersionedValue<System.Memory<byte>>;
 
 namespace KeyLoad.Storage.ZoneTree;
 
@@ -10,14 +12,14 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
 {
     private const long TimestampEpoch = 0;
     private readonly Lock disposalGate = new();
-    private readonly IZoneTreeMaintenance<Memory<byte>, Memory<byte>> maintenance;
+    private readonly IZoneTreeMaintenance<StorageKey, StorageValue> maintenance;
     private readonly ZoneTreeStorageExecutionOptions execution;
     private readonly TimeProvider clock;
     private bool disposed;
     private ExceptionDispatchInfo? originalSweepFailure;
     private ExceptionDispatchInfo? originalDisposalFailure;
 
-    internal ZoneTreeMaintenanceLifetime(IZoneTree<Memory<byte>, Memory<byte>> tree,
+    internal ZoneTreeMaintenanceLifetime(ITransactionalZoneTree<Memory<byte>, Memory<byte>> tree,
         IOptions<ZoneTreeStorageExecutionOptions> options, TimeProvider clock,
         Action<ZoneTreeMaintenanceSweep>? swept = null)
     {
@@ -27,9 +29,10 @@ internal sealed class ZoneTreeMaintenanceLifetime : IDisposable
         execution = options.Value with { };
         execution.Validate();
         this.clock = clock;
-        maintenance = tree.Maintenance;
+        var storage = tree.Maintenance.ZoneTree;
+        maintenance = storage.Maintenance;
         Swept = swept;
-        Maintainer = new ZoneTreeMaintainer<Memory<byte>, Memory<byte>>(tree,
+        Maintainer = new ZoneTreeMaintainer<StorageKey, StorageValue>(storage,
             startJobForCleaningInactiveBlockCaches: false)
         {
             BlockCacheLifeTime = execution.BlockCacheLifetime

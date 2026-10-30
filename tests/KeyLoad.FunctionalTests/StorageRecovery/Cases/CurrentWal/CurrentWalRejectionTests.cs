@@ -7,7 +7,7 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 internal sealed class CurrentWalRejectionTests
 {
     private const int ChangedByte = 1;
-    private const int UnsupportedIdentityVersion = 8;
+    private const int UnsupportedIdentityVersion = 9;
 
     [Test]
     public async Task UnsupportedIdentityVersionFailsBeforeJournalMutation()

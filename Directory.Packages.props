@@ -7,7 +7,7 @@
   <ItemGroup>
     <PackageVersion Include="Cartograph" Version="0.1.0-alpha" />
     <PackageVersion Include="Cartograph.Catalog" Version="0.1.0-alpha" />
-    <PackageVersion Include="ZoneTree" Version="2.0.5" />
+    <PackageVersion Include="ZoneTree" Version="2.0.6" />
     <PackageVersion Include="ZoneTree.Analytics" Version="1.0.2" />
     <PackageVersion Include="ZoneTree.FullTextSearch" Version="1.1.0" />
     <PackageVersion Include="ManagedCode.Communication" Version="10.3.20" />
@@ -18,7 +18,7 @@
     <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.7" />
     <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.8" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.2" />
-    <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.2" />
+    <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.3" />
     <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.18" />
     <!-- Central transitive dependency used by Aspire and StreamJsonRpc. -->
     <PackageVersion Include="MessagePack" Version="3.1.12" />
@@ -31,18 +31,18 @@
     <PackageVersion Include="System.IO.Hashing" Version="10.0.14" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.3.0" />
     <PackageVersion Include="ModelContextProtocol.Core" Version="2.3.0" />
-    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Orleans.Client" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.2" />
+    <PackageVersion Include="Microsoft.Orleans.Client" Version="10.4.2" />
     <PackageVersion Include="ManagedCode.Orleans.RapidMembership" Version="10.4.6" />
-    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Orleans.Reminders" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Orleans.Journaling" Version="10.4.1-alpha.1" />
-    <PackageVersion Include="Microsoft.Orleans.DurableJobs" Version="10.4.1-alpha.1" />
-    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Orleans.Serialization" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Orleans.CodeGenerator" Version="10.4.1" />
-    <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="10.4.1" />
+    <PackageVersion Include="Microsoft.Orleans.Streaming" Version="10.4.2" />
+    <PackageVersion Include="Microsoft.Orleans.Reminders" Version="10.4.2" />
+    <PackageVersion Include="Microsoft.Orleans.Journaling" Version="10.4.2-alpha.1" />
+    <PackageVersion Include="Microsoft.Orleans.DurableJobs" Version="10.4.2-alpha.1" />
+    <PackageVersion Include="Microsoft.Orleans.Sdk" Version="10.4.2" />
+    <PackageVersion Include="Microsoft.Orleans.Serialization" Version="10.4.2" />
+    <PackageVersion Include="Microsoft.Orleans.Serialization.SystemTextJson" Version="10.4.2" />
+    <PackageVersion Include="Microsoft.Orleans.CodeGenerator" Version="10.4.2" />
+    <PackageVersion Include="Microsoft.Orleans.TestingHost" Version="10.4.2" />
     <!-- Orleans' existing Roslyn dependency; analyzer tests select SDK compiler assets. -->
     <PackageVersion Include="Microsoft.CodeAnalysis.Common" Version="5.9.0" />
     <PackageVersion Include="Microsoft.CodeAnalysis.CSharp" Version="5.9.0" />
@@ -72,7 +72,7 @@
     <PackageVersion Include="MySqlConnector" Version="2.6.2" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
-    <PackageVersion Include="StackExchange.Redis" Version="3.4.20" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.4.29" />
     <PackageVersion Include="MongoDB.Driver" Version="3.13.0" />
     <PackageVersion Include="KurrentDB.Client" Version="1.6.1" />
   </ItemGroup>

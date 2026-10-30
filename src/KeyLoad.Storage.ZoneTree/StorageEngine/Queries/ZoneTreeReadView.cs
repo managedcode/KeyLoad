@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
 
@@ -26,7 +25,8 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
         }
 
         Memory<byte> memory = key;
-        var found = runtime.Tree.TryGet(memory, out var value);
+        using var snapshot = runtime.Tree.BeginReadOnlyTransaction();
+        var found = snapshot.TryGet(memory, out var value);
         admission.RecordLookup(found);
         if (!found)
         {
@@ -34,8 +34,7 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
             return null;
         }
 
-        ZoneTreeValueHeader.RequireLive(value.Span);
-        var borrowed = value.Span[StorageValueHeaderBytes..];
+        var borrowed = value.Span;
         runtime.ReadCounters.Point(owned: true, (long)key.Length + borrowed.Length);
         using var candidate = (admission.TryPrepare(key, borrowed.Length, generation)).Value;
         if (candidate is not null)
@@ -68,7 +67,8 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
         }
 
         Memory<byte> memory = key;
-        var found = runtime.Tree.TryGet(memory, out var value);
+        using var snapshot = runtime.Tree.BeginReadOnlyTransaction();
+        var found = snapshot.TryGet(memory, out var value);
         admission.RecordLookup(found);
         if (!found)
         {
@@ -77,8 +77,7 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
             return false;
         }
 
-        ZoneTreeValueHeader.RequireLive(value.Span);
-        var borrowed = value.Span[StorageValueHeaderBytes..];
+        var borrowed = value.Span;
         runtime.ReadCounters.Point(owned: false, (long)key.Length + borrowed.Length);
         using var candidate = (admission.TryPrepare(key, borrowed.Length, generation)).Value;
         observer?.Invoke((long)key.Length + borrowed.Length);

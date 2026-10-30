@@ -1,23 +1,23 @@
 using ZoneTree;
-using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
+using ZoneTree.Transactional;
 
 namespace KeyLoad.Storage.ZoneTree;
 
 internal sealed class ZoneTreeBaselineCursor : IDisposable
 {
-    private readonly IZoneTreeIterator<Memory<byte>, Memory<byte>> iterator;
+    private readonly ZoneTreeSnapshotCursor snapshot;
+    private readonly ITransactionIterator<Memory<byte>, Memory<byte>> iterator;
     private readonly byte[] prefix;
     private readonly byte[]? afterKey;
     private readonly byte[]? untilKey;
     private readonly ZoneTreeRangeWork work;
     private readonly bool reverse;
 
-    internal ZoneTreeBaselineCursor(IZoneTree<Memory<byte>, Memory<byte>> tree, byte[] lower, byte[]? upper,
+    internal ZoneTreeBaselineCursor(ITransactionalZoneTree<Memory<byte>, Memory<byte>> tree, byte[] lower, byte[]? upper,
         byte[] prefix, byte[]? afterKey, byte[]? untilKey, ZoneTreeRangeWork work, bool reverse)
     {
-        var acquired = reverse
-            ? tree.CreateReverseIterator(IteratorType.NoRefresh)
-            : tree.CreateIterator(IteratorType.NoRefresh);
+        snapshot = new(tree, reverse);
+        var acquired = snapshot.Iterator;
         try
         {
             if (reverse)
@@ -32,9 +32,16 @@ internal sealed class ZoneTreeBaselineCursor : IDisposable
                 acquired.Seek(lower);
             }
         }
-        catch (Exception)
+        catch (Exception original)
         {
-            acquired.Dispose();
+            try
+            {
+                snapshot.Dispose();
+            }
+            catch (Exception cleanup)
+            {
+                throw new AggregateException(original, cleanup);
+            }
             throw;
         }
         iterator = acquired;
@@ -75,12 +82,11 @@ internal sealed class ZoneTreeBaselineCursor : IDisposable
             }
 
             Key = key;
-            ZoneTreeValueHeader.RequireLive(iterator.CurrentValue.Span);
-            Value = iterator.CurrentValue[StorageValueHeaderBytes..];
+            Value = iterator.CurrentValue;
             work.ChargeBaseline((long)key.Length + Value.Length);
             return true;
         }
     }
 
-    public void Dispose() => iterator.Dispose();
+    public void Dispose() => snapshot.Dispose();
 }

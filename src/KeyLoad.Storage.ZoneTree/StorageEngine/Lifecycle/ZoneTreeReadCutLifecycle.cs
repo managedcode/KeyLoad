@@ -1,5 +1,4 @@
 using System.Runtime.ExceptionServices;
-using ZoneTree;
 
 namespace KeyLoad.Storage.ZoneTree;
 
@@ -39,9 +38,8 @@ internal sealed class ZoneTreeReadCutLifecycle
             var identity = runtime.Identity;
             var cut = new ZoneTreeReadCut(identity.FormatVersion, identity.KeyCodecVersion, identity.NodeId,
                 identity.Incarnation, identity.Durability, identity.DispatchPaused, identity.ReadGeneration, runtime.Position);
-            var iterator = runtime.Tree.CreateIterator(IteratorType.Snapshot, includeDeletedRecords: false,
-                contributeToTheBlockCache: false);
-            lease.Attach(iterator, cut);
+            var snapshot = new ZoneTreeSnapshotCursor(runtime.Tree);
+            lease.Attach(snapshot, cut);
             lease.FinishCapture();
             lease.CheckAfterCapture();
             return lease;

@@ -1,10 +1,8 @@
-using ZoneTree;
-
 namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreeReadCutDisposal
 {
-    private const string IteratorOwnershipChangedMessage = "The execution read-cut iterator owner changed during disposal.";
+    private const string SnapshotOwnershipChangedMessage = "The execution read-cut snapshot owner changed during disposal.";
     internal static bool RuntimeSettle(ZoneTreeReadCutLease lease, Task capture, Task? traversal,
         List<Exception> failures)
     {
@@ -15,22 +13,22 @@ internal static class ZoneTreeReadCutDisposal
             ZoneTreeReadCutCleanup.Capture(() => traversal.GetAwaiter().GetResult(), failures);
         }
 
-        var iterator = lease.CurrentIterator();
-        return iterator is null || TryDispose(lease, iterator, failures);
+        var snapshot = lease.CurrentSnapshot();
+        return snapshot is null || TryDispose(lease, snapshot, failures);
     }
 
     private static bool TryDispose(ZoneTreeReadCutLease lease,
-        IZoneTreeIterator<Memory<byte>, Memory<byte>> iterator, List<Exception> failures)
+        ZoneTreeSnapshotCursor snapshot, List<Exception> failures)
     {
         var before = failures.Count;
-        ZoneTreeReadCutCleanup.Capture(iterator.Dispose, failures);
+        ZoneTreeReadCutCleanup.Capture(snapshot.Dispose, failures);
         if (failures.Count != before)
         {
             return false;
         }
-        if (!lease.MarkIteratorDisposed(iterator))
+        if (!lease.MarkSnapshotDisposed(snapshot))
         {
-            failures.Add(new InvalidOperationException(IteratorOwnershipChangedMessage));
+            failures.Add(new InvalidOperationException(SnapshotOwnershipChangedMessage));
             return false;
         }
         return true;

@@ -1,4 +1,3 @@
-using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
 
 namespace KeyLoad.Storage.ZoneTree;
 
@@ -22,15 +21,15 @@ internal static class ZoneTreePreparationReads
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(reader);
         Memory<byte> memory = key;
-        var found = runtime.Tree.TryGet(memory, out var value);
+        using var snapshot = runtime.Tree.BeginReadOnlyTransaction();
+        var found = snapshot.TryGet(memory, out var value);
         if (!found)
         {
             runtime.ReadCounters.Point(owned, key.Length);
             observer?.Invoke(key.Length);
             return false;
         }
-        ZoneTreeValueHeader.RequireLive(value.Span);
-        var bytes = value.Span[StorageValueHeaderBytes..];
+        var bytes = value.Span;
         var length = (long)key.Length + bytes.Length;
         runtime.ReadCounters.Point(owned, length);
         observer?.Invoke(length);

@@ -19,7 +19,7 @@ internal sealed class ZoneTreeStorageExecutionOptionsTests
         var settings = new ZoneTreeStorageExecutionOptions
         {
             MaximumRangeRecords = 3,
-            MaximumRangeWorkBytes = 6,
+            MaximumRangeWorkBytes = 5,
             MaximumReadCutRecords = 2,
             MaximumReadCutExaminedBytes = 32,
             MaximumReadCutElapsed = TimeSpan.FromSeconds(1)

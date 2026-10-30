@@ -1,5 +1,7 @@
 using ZoneTree;
 using ZoneTree.Segments;
+using StorageKey = ZoneTree.Transactional.Versioning.VersionedKey<System.Memory<byte>>;
+using StorageValue = ZoneTree.Transactional.Versioning.VersionedValue<System.Memory<byte>>;
 
 namespace KeyLoad.FunctionalTests.StorageRecovery;
 
@@ -14,8 +16,8 @@ internal sealed class MaintenanceBarrier : IDisposable
         get; private set;
     }
 
-    internal void DiskCreated(IZoneTreeMaintenance<Memory<byte>, Memory<byte>> _,
-        IDiskSegment<Memory<byte>, Memory<byte>> segment, bool bottom)
+    internal void DiskCreated(IZoneTreeMaintenance<StorageKey, StorageValue> _,
+        IDiskSegment<StorageKey, StorageValue> segment, bool bottom)
     {
         if (bottom || segment.Length == 0)
         {
@@ -28,7 +30,7 @@ internal sealed class MaintenanceBarrier : IDisposable
         }
     }
 
-    internal void MergeEnded(IZoneTreeMaintenance<Memory<byte>, Memory<byte>> _, MergeResult result)
+    internal void MergeEnded(IZoneTreeMaintenance<StorageKey, StorageValue> _, MergeResult result)
         => Ended.TrySetResult(result);
 
     internal void Release() => release.Set();

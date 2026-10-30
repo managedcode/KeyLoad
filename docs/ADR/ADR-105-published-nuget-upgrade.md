@@ -1,7 +1,7 @@
 # ADR-105: Published NuGet dependency refresh
 
 Status: Accepted; local dependency integration checked. Complete delivered-source qualification remains open.
-Date: 2026-10-29.
+Date: 2026-10-30.
 Feature: [RepositoryGovernance](../Features/RepositoryGovernance.md).
 
 ## Context and decision
@@ -12,10 +12,10 @@ the configured NuGet.org feed. Use the newest published stable release. Cartogra
 and Cartograph.Catalog have only their existing 0.1.0-alpha release; keep that
 published version. Do not introduce previews into stable package families.
 
-The 2026-10-29 feed audit selects Orleans 10.4.1, with Journaling and Durable
-Jobs at 10.4.1-alpha.1, ManagedCode.Storage.Server/FileSystem 10.1.7 and
+The 2026-10-30 feed audit selects ZoneTree 2.0.6 and Orleans 10.4.2, with Journaling and Durable
+Jobs at 10.4.2-alpha.1, ManagedCode.Storage.Server/FileSystem 10.1.7 and
 TUnit/TUnit.Aspire 1.76.45. The existing transitive Orleans.Client and
-Orleans.Reminders dependencies are centrally pinned to 10.4.1 so the runtime
+Orleans.Reminders dependencies are centrally pinned to 10.4.2 so the runtime
 family remains aligned. The remaining central pins, Aspire.AppHost.Sdk and the
 existing local tools are already current.
 RapidMembership 10.4.6 is rebuilt against Orleans 10.4.1 in its owning repository.
@@ -58,9 +58,10 @@ flowchart LR
 
 ## Rollout, rollback and failure contracts
 
-No KeyLoad schema, serializer aliases/field IDs, protocol, persisted authority,
-cluster membership or node-local ownership changes are selected. The existing
-recovery/serialization tests must detect dependency incompatibility. No compatibility or performance claim follows from version alignment or compilation.
+Serializer aliases/field IDs, cluster membership and node-local ownership stay
+with their current owners. The native MVCC storage format and data epoch are
+specified in [NativeMvcc](../Features/StorageRecovery/NativeMvcc.md). The existing
+recovery/serialization tests must detect dependency integration defects. No compatibility or performance claim follows from version alignment or compilation.
 Restore failure, downgrade, analyzer failure, runtime regression or missing
 infrastructure leaves qualification open. A reproducible dependency defect must
 be repaired at its actual owner; never suppress diagnostics to complete refresh.

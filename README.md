@@ -185,7 +185,7 @@ for ownership, distributed queries and open qualification gates.
 |---|---|
 | [.NET 10](https://github.com/dotnet/runtime) | C# end to end, pooled buffers, `Span<T>` and SIMD intrinsics; speedups need measurements |
 | [Orleans](https://github.com/dotnet/orleans) | The whole cluster: membership, routing, placement, migration, communication, data copies through grain calls and generated binary serialization |
-| [ZoneTree](https://github.com/ZoneTree/ZoneTree) | Embedded ordered storage and a write-ahead log for every model; data stays on its node |
+| [ZoneTree](https://github.com/ZoneTree/ZoneTree) | Native MVCC transactions and consistent snapshots over each node's ordered data |
 | [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) | full-text indexing on the same storage foundation |
 | [Aspire](https://github.com/dotnet/aspire) | Owns server startup, required infrastructure, readiness and cleanup |
 

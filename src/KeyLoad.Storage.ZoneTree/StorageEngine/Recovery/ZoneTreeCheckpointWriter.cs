@@ -46,7 +46,7 @@ internal static class ZoneTreeCheckpointWriter
         StoreIdentity identity,
         long position,
         long appliedPosition,
-        IZoneTree<Memory<byte>, Memory<byte>> tree)
+        ITransactionalZoneTree<Memory<byte>, Memory<byte>> tree)
     {
         var budget = new ZoneTreeCheckpointBudget(options, TimeProvider.System, CancellationToken.None);
         var metadata = new ZoneTreeCheckpointMetadata(KeyCodec.Version,
@@ -77,19 +77,18 @@ internal static class ZoneTreeCheckpointWriter
         FileStream output,
         ZoneTreeStoreOptions options,
         long position,
-        IZoneTree<Memory<byte>, Memory<byte>> tree,
+        ITransactionalZoneTree<Memory<byte>, Memory<byte>> tree,
         IncrementalHash digest, ZoneTreeCheckpointBudget budget)
     {
         var batch = new List<StorageMutation>();
         long batchBytes = 0;
         long records = 0;
-        using (var iterator = tree.CreateIterator(IteratorType.NoRefresh))
+        using var snapshot = tree.BeginReadOnlyTransaction();
+        using (var iterator = snapshot.CreateIterator())
         {
             while (iterator.Next())
             {
-                ZoneTreeValueHeader.RequireLive(iterator.CurrentValue.Span);
-                var item = new StorageMutation(iterator.CurrentKey.ToArray(), iterator.CurrentValue.Span[
-                    ZoneTreePersistenceFormat.StorageValueHeaderBytes..].ToArray());
+                var item = new StorageMutation(iterator.CurrentKey.ToArray(), iterator.CurrentValue.ToArray());
                 budget.Charge(checked((long)item.Key.Length + item.Value!.Value.Length));
                 batch.Add(item);
                 batchBytes += item.Key.Length + item.Value!.Value.Length;

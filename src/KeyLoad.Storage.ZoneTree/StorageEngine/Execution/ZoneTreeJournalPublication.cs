@@ -35,12 +35,14 @@ internal static class ZoneTreeJournalPublication
         ZoneTreePhaseGate.EnterApply(runtime);
         try
         {
+            using var transaction = runtime.Tree.BeginTransaction();
             for (var i = FirstMutationIndex; i < changes.Length; i++)
             {
-                runtime.Apply(changes[i]);
+                runtime.Apply(transaction, changes[i]);
                 runtime.Options.FaultObserver?.Invoke(CommitStage.MutationApplied, nextPosition, i);
             }
 
+            transaction.Commit();
             runtime.SetPosition(nextPosition);
             runtime.Options.FaultObserver?.Invoke(CommitStage.ApplyCompleted, nextPosition, changes.Length);
         }
