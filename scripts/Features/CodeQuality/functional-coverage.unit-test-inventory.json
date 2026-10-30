@@ -56879,6 +56879,240 @@
       "acceptance": [
         "AC-BACKUP-002"
       ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetDeletedRangesTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetDeletedRangesTests",
+      "methodName": "AcQuery009PagesCrossDeletedRangesWithoutLosingLiveRows",
+      "instanceName": "AcQuery009PagesCrossDeletedRangesWithoutLosingLiveRows(0)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/RuntimeQuery/QueryKeysetDeletedRangesTests.cs",
+      "sourceSha256": "90063eab77727732426329bfb4b4f2bacc3463c0d3b238fa315d2e6bd7d79b64",
+      "lineNumber": 23,
+      "endLineNumber": 49,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetDeletedRangesTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetDeletedRangesTests",
+      "methodName": "AcQuery009PagesCrossDeletedRangesWithoutLosingLiveRows",
+      "instanceName": "AcQuery009PagesCrossDeletedRangesWithoutLosingLiveRows(5)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/RuntimeQuery/QueryKeysetDeletedRangesTests.cs",
+      "sourceSha256": "90063eab77727732426329bfb4b4f2bacc3463c0d3b238fa315d2e6bd7d79b64",
+      "lineNumber": 23,
+      "endLineNumber": 49,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling",
+      "instanceName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling(0)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 12,
+      "endLineNumber": 38,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling",
+      "instanceName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling(1)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 12,
+      "endLineNumber": 38,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling",
+      "instanceName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling(3)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 12,
+      "endLineNumber": 38,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling",
+      "instanceName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling(4)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 12,
+      "endLineNumber": 38,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling",
+      "instanceName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling(6)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 12,
+      "endLineNumber": 38,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling",
+      "instanceName": "AcQuery009CompletePagesRespectThePhysicalRecordCeiling(7)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 12,
+      "endLineNumber": 38,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal",
+      "instanceName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(1)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 40,
+      "endLineNumber": 62,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal",
+      "instanceName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(3)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 40,
+      "endLineNumber": 62,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal",
+      "instanceName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(4)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 40,
+      "endLineNumber": 62,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal",
+      "instanceName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(6)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 40,
+      "endLineNumber": 62,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
+      "methodName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal",
+      "instanceName": "AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(7)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/ScopedRange/StorageRangePagingTests.cs",
+      "sourceSha256": "6506a201d5bfc1ed358415229944e7da4d601ce3d383e74ac7fcc58621df47b1",
+      "lineNumber": 40,
+      "endLineNumber": 62,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-QUERY-009"
+      ]
     }
   ],
   "requiredNonContributorCases": [
@@ -66304,7 +66538,7 @@
   "coverageGroups": [
     {
       "groupId": "unit-functional-01",
-      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayS*)|(AnalyticsComp*)|(AnnLifetimeD*)|(AnnPublicR*)|(AnnSeedC*)|(AnnSeedF*)|(AnnWaitA*)|(AtomicPartitionRosterB*)|(Bi*)|(Bm25OriginalP*)|(Bm25R*)|(CacheReadPermitC*)|(ChunkC*)|(ChunkManifestT*)|(ChunkW*)|(CliBackupJ*)|(CliBackupRestoreL*)|(Compe*)|(CompositionL*)|(CompositionP*)|(Conf*)|(ConnectionFi*)|(Cont*)|(CqrsT*)|(CredentialF*)|(CurrentA*)|(CurrentJ*)|(CurrentW*)|(DatabaseCompositionF*)|(Dec*)|(Disp*)|(DistributedSearchD*)|(DocumentE*)|(DocumentMutationImageT*)|(DropL*)|(DueF*)|(EventAppendC*)|(EventFeedPubSubA*)|(EventProjectionI*)|(EventQ*)|(FeedV*)|(Fie*)|(GlobalBranchWindowMergeB*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphIncomingV*)|(GraphSearchI*)|(GraphShortestPathC*)|(Ho*)|(HybridE*)|(Ini*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(LiveQ*)|(Man*)|(McpAuthenticationE*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpP*)|(McpRes*)|(MetadataB*)|(Metam*)|(MultiLaneC*)|(OperationH*)|(OrleansTelemetryA*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(Partia*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(PartitionStoragePu*)|(ProjectionPr*)|(ProjectionR*)|(PublicN*)|(QueueA*)|(QueueEn*)|(QueueLifecycleC*)|(QueueLifecycleN*)|(QueueLifecycleP*)|(QueueO*)|(ReadB*)|(ReadCutCa*)|(ReadD*)|(ReadExecutionBudgetGrantC*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RelationalQ*)|(RemoteTransferL*)|(RemoteTransferRec*)|(RemoteTransferRet*)|(RequestCqrsF*)|(ResourcePa*)|(ResourcePolicyUpdateV*)|(RowRevisionI*)|(RuntimeJournalL*)|(SagaS*)|(SagaTimeoutR*)|(SagaTimeoutTe*)|(SampleAggregateT*)|(SampleChunkCod*)|(SampleChunkPar*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(SdkPr*)|(Secu*)|(SqlBetweenB*)|(SqlBo*)|(SqlCr*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageR*)|(StoreO*)|(StreamTe*)|(SubscriptionLeaseV*)|(TargetInboxA*)|(TargetInboxCap*)|(TextBi*)|(TextBm25E*)|(TextOnlineW*)|(TextProjectionA*)|(TextProjectionO*)|(TextProjectionRem*)|(TextProv*)|(TextWaitF*)|(TextWaitObserve*)|(TimeP*)|(TimeSeriesR*)|(TopicSqlR*)|(TransactionP*)|(Un*)|(ValueO*)|(VectorR*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcChunk002UnpairedCodeUnitsUseExactUtf16Encoding*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafPayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayS*)|(AnalyticsComp*)|(AnnLifetimeD*)|(AnnPublicR*)|(AnnSeedC*)|(AnnSeedF*)|(AnnWaitA*)|(AtomicPartitionRosterB*)|(Bi*)|(Bm25OriginalP*)|(Bm25R*)|(CacheReadPermitC*)|(ChunkC*)|(ChunkManifestT*)|(ChunkW*)|(CliBackupJ*)|(CliBackupRestoreL*)|(Compe*)|(CompositionL*)|(CompositionP*)|(Conf*)|(ConnectionFi*)|(Cont*)|(CqrsT*)|(CredentialF*)|(CurrentA*)|(CurrentJ*)|(CurrentW*)|(DatabaseCompositionF*)|(Dec*)|(Disp*)|(DistributedSearchD*)|(DocumentE*)|(DocumentMutationImageT*)|(DropL*)|(DueF*)|(EventAppendC*)|(EventFeedPubSubA*)|(EventProjectionI*)|(EventQ*)|(FeedV*)|(Fie*)|(GlobalBranchWindowMergeB*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphIncomingV*)|(GraphSearchI*)|(GraphShortestPathC*)|(Ho*)|(HybridE*)|(Ini*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(LiveQ*)|(Man*)|(McpAuthenticationE*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpP*)|(McpRes*)|(MetadataB*)|(Metam*)|(MultiLaneC*)|(OperationH*)|(OrleansTelemetryA*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(Partia*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(PartitionStoragePu*)|(ProjectionPr*)|(ProjectionR*)|(PublicN*)|(QueueA*)|(QueueEn*)|(QueueLifecycleC*)|(QueueLifecycleN*)|(QueueLifecycleP*)|(QueueO*)|(ReadB*)|(ReadCutCa*)|(ReadD*)|(ReadExecutionBudgetGrantC*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RelationalQ*)|(RemoteTransferL*)|(RemoteTransferRec*)|(RemoteTransferRet*)|(RequestCqrsF*)|(ResourcePa*)|(ResourcePolicyUpdateV*)|(RowRevisionI*)|(RuntimeJournalL*)|(SagaS*)|(SagaTimeoutR*)|(SagaTimeoutTe*)|(SampleAggregateT*)|(SampleChunkCod*)|(SampleChunkPar*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(SdkPr*)|(Secu*)|(SqlBetweenB*)|(SqlBo*)|(SqlCr*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageRe*)|(StoreO*)|(StreamTe*)|(SubscriptionLeaseV*)|(TargetInboxA*)|(TargetInboxCap*)|(TextBi*)|(TextBm25E*)|(TextOnlineW*)|(TextProjectionA*)|(TextProjectionO*)|(TextProjectionRem*)|(TextProv*)|(TextWaitF*)|(TextWaitObserve*)|(TimeP*)|(TimeSeriesR*)|(TopicSqlR*)|(TransactionP*)|(Un*)|(ValueO*)|(VectorR*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcChunk002UnpairedCodeUnitsUseExactUtf16Encoding*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafPayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsCompositionTests",
         "KeyLoad.FunctionalTests.Authorization.CredentialFrameBudgetTests",
@@ -67829,7 +68063,7 @@
     },
     {
       "groupId": "unit-functional-03",
-      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayT*)|(AnalyticsBoundR*)|(AnalyticsM*)|(AnnC*)|(AnnE*)|(AnnLa*)|(AnnLin*)|(AnnO*)|(AnnPa*)|(AnnPe*)|(AnnProjectionPinA*)|(AnnPublicM*)|(AnnPublicO*)|(AnnPublicPe*)|(AnnPublicPi*)|(AnnPublicS*)|(AnnPublicW*)|(AnnSeedH*)|(AnnSeedO*)|(AnnSo*)|(AnnWaitPr*)|(Ap*)|(AtomicPartitionRosterV*)|(Autho*)|(Bm25Col*)|(Bm25CorpusP*)|(Bm25OriginalE*)|(CacheReadPermitE*)|(CapturedReadSc*)|(CliBackupRestoreM*)|(CliBackupRestoreU*)|(CommandOutcomeS*)|(Composite*)|(CompositionB*)|(CompositionR*)|(ConnectionFa*)|(DatabaseCompositionS*)|(Den*)|(DistributedSearchS*)|(DocumentMutationImageR*)|(DocumentSc*)|(DueA*)|(EventM*)|(EventProjectionP*)|(Eventi*)|(FilteredSearchP*)|(Fr*)|(Ful*)|(GlobalBranchWindowMergeV*)|(GraphCrossPartitionRea*)|(GraphL*)|(GraphRea*)|(GraphSearchB*)|(GraphShortestPathT*)|(GraphSt*)|(GraphTraversalF*)|(GraphTraversalI*)|(GraphV*)|(ImmutableQ*)|(ImmutableV*)|(Ind*)|(JournalO*)|(JournalPrincipalP*)|(JsonE*)|(JsonTextS*)|(KeyCodecE*)|(McpAuthenticationT*)|(McpCommandC*)|(McpGatewayR*)|(McpM*)|(McpO*)|(McpRea*)|(McpSco*)|(McpTransportD*)|(MetadataFormatT*)|(Mis*)|(MultiLaneR*)|(OrleansR*)|(OrleansWalR*)|(OutboxH*)|(PackedAnnB*)|(PackedAnnOwnedSimilarityG*)|(PackedAnnS*)|(PackedB*)|(PartitionH*)|(PartitionQueryA*)|(PartitionQueryM*)|(PartitionQueryPublicM*)|(PartitionRecordI*)|(PartitionStoragePre*)|(ProjectionPa*)|(QueryAdapterC*)|(QueryCa*)|(QueryO*)|(QueueC*)|(QueueDeadlineP*)|(QueueLe*)|(QueueLo*)|(ReadCutR*)|(ReadExecutionBudgetSe*)|(ReadExecutionT*)|(ReadOnlyCollectionW*)|(ReadOnlyCor*)|(Ready*)|(RecurringS*)|(RelationalR*)|(RemotePartitionP*)|(RemoteTransferA*)|(RemoteTransferRepairA*)|(RequestCqrsAnnM*)|(ResourceIncarnationW*)|(ResourceLifetimeL*)|(ResourcePolicyUpdateT*)|(ResourcePr*)|(RestoreI*)|(RetainedS*)|(RuntimeJournalQ*)|(SagaTimeoutTr*)|(SampleAggregateA*)|(SampleChunkG*)|(SampleChunkMin*)|(SampleChunkR*)|(SampleChunkStoreO*)|(SampleL*)|(SampleRetentionA*)|(SampleRollupI*)|(SampleRollupP*)|(Sc*)|(SdkR*)|(SearchRea*)|(SearchW*)|(Sig*)|(SourceR*)|(SqlBetweenT*)|(SqlE*)|(SqlGraphPathR*)|(SqlGraphSearchR*)|(SqlInnerJoinL*)|(SqlInnerJoinP*)|(SqlLef*)|(SqlModelViewR*)|(SqlNullD*)|(StorageO*)|(StoreL*)|(StreamTr*)|(SubscriptionR*)|(SubscriptionT*)|(TargetInboxCan*)|(TextIncrementalC*)|(TextIncrementalI*)|(TextIncrementalL*)|(TextOnlineS*)|(TextOr*)|(TextProjectionB*)|(TextProjectionP*)|(TextS*)|(TextWaitT*)|(Tom*)|(TopicP*)|(TopicRetentionR*)|(TypedQueueGraphR*)|(Us*)|(VectorM*)|(Vi*)|(ZoneTreeCoordinatedPointCacheD*)|(ZoneTreePointCacheOwnerG*)|(ZoneTreePointCacheR*)/(*)&(!AcCrs060ExceptionSerializationPreservesDomainFailureAndCause*)&(!AcMcp007AbsentReadsAndDynamicSqlAllowRootResultNull*)&(!AcMcp007EveryOutputHasDisjointSuccessAndSafeFailureObjects*)&(!AcMcp007RepresentativeCanonicalResultTypesRemainDescribed*)&(!AcMcp007SafeErrorSchemaMatchesTheActualManagedCodeProblemConverter*)&(!KnownMethodCategoryIsClosed*)&(!PrincipalReadContractMatchesCurrentGeneratedIdsAndBoundedPublicPropertyNames*)&(!SeedSurfaceContainsOnlyOwnedScopeCutAndVectorValues*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayT*)|(AnalyticsBoundR*)|(AnalyticsM*)|(AnnC*)|(AnnE*)|(AnnLa*)|(AnnLin*)|(AnnO*)|(AnnPa*)|(AnnPe*)|(AnnProjectionPinA*)|(AnnPublicM*)|(AnnPublicO*)|(AnnPublicPe*)|(AnnPublicPi*)|(AnnPublicS*)|(AnnPublicW*)|(AnnSeedH*)|(AnnSeedO*)|(AnnSo*)|(AnnWaitPr*)|(Ap*)|(AtomicPartitionRosterV*)|(Autho*)|(Bm25Col*)|(Bm25CorpusP*)|(Bm25OriginalE*)|(CacheReadPermitE*)|(CapturedReadSc*)|(CliBackupRestoreM*)|(CliBackupRestoreU*)|(CommandOutcomeS*)|(Composite*)|(CompositionB*)|(CompositionR*)|(ConnectionFa*)|(DatabaseCompositionS*)|(Den*)|(DistributedSearchS*)|(DocumentMutationImageR*)|(DocumentSc*)|(DueA*)|(EventM*)|(EventProjectionP*)|(Eventi*)|(FilteredSearchP*)|(Fr*)|(Ful*)|(GlobalBranchWindowMergeV*)|(GraphCrossPartitionRea*)|(GraphL*)|(GraphRea*)|(GraphSearchB*)|(GraphShortestPathT*)|(GraphSt*)|(GraphTraversalF*)|(GraphTraversalI*)|(GraphV*)|(ImmutableQ*)|(ImmutableV*)|(Ind*)|(JournalO*)|(JournalPrincipalP*)|(JsonE*)|(JsonTextS*)|(KeyCodecE*)|(McpAuthenticationT*)|(McpCommandC*)|(McpGatewayR*)|(McpM*)|(McpO*)|(McpRea*)|(McpSco*)|(McpTransportD*)|(MetadataFormatT*)|(Mis*)|(MultiLaneR*)|(OrleansR*)|(OrleansWalR*)|(OutboxH*)|(PackedAnnB*)|(PackedAnnOwnedSimilarityG*)|(PackedAnnS*)|(PackedB*)|(PartitionH*)|(PartitionQueryA*)|(PartitionQueryM*)|(PartitionQueryPublicM*)|(PartitionRecordI*)|(PartitionStoragePre*)|(ProjectionPa*)|(QueryAdapterC*)|(QueryCa*)|(QueryO*)|(QueueC*)|(QueueDeadlineP*)|(QueueLe*)|(QueueLo*)|(ReadCutR*)|(ReadExecutionBudgetSe*)|(ReadExecutionT*)|(ReadOnlyCollectionW*)|(ReadOnlyCor*)|(Ready*)|(RecurringS*)|(RelationalR*)|(RemotePartitionP*)|(RemoteTransferA*)|(RemoteTransferRepairA*)|(RequestCqrsAnnM*)|(ResourceIncarnationW*)|(ResourceLifetimeL*)|(ResourcePolicyUpdateT*)|(ResourcePr*)|(RestoreI*)|(RetainedS*)|(RuntimeJournalQ*)|(SagaTimeoutTr*)|(SampleAggregateA*)|(SampleChunkG*)|(SampleChunkMin*)|(SampleChunkR*)|(SampleChunkStoreO*)|(SampleL*)|(SampleRetentionA*)|(SampleRollupI*)|(SampleRollupP*)|(Sc*)|(SdkR*)|(SearchRea*)|(SearchW*)|(Sig*)|(SourceR*)|(SqlBetweenT*)|(SqlE*)|(SqlGraphPathR*)|(SqlGraphSearchR*)|(SqlInnerJoinL*)|(SqlInnerJoinP*)|(SqlLef*)|(SqlModelViewR*)|(SqlNullD*)|(StorageO*)|(StorageRa*)|(StoreL*)|(StreamTr*)|(SubscriptionR*)|(SubscriptionT*)|(TargetInboxCan*)|(TextIncrementalC*)|(TextIncrementalI*)|(TextIncrementalL*)|(TextOnlineS*)|(TextOr*)|(TextProjectionB*)|(TextProjectionP*)|(TextS*)|(TextWaitT*)|(Tom*)|(TopicP*)|(TopicRetentionR*)|(TypedQueueGraphR*)|(Us*)|(VectorM*)|(Vi*)|(ZoneTreeCoordinatedPointCacheD*)|(ZoneTreePointCacheOwnerG*)|(ZoneTreePointCacheR*)/(*)&(!AcCrs060ExceptionSerializationPreservesDomainFailureAndCause*)&(!AcMcp007AbsentReadsAndDynamicSqlAllowRootResultNull*)&(!AcMcp007EveryOutputHasDisjointSuccessAndSafeFailureObjects*)&(!AcMcp007RepresentativeCanonicalResultTypesRemainDescribed*)&(!AcMcp007SafeErrorSchemaMatchesTheActualManagedCodeProblemConverter*)&(!KnownMethodCategoryIsClosed*)&(!PrincipalReadContractMatchesCurrentGeneratedIdsAndBoundedPublicPropertyNames*)&(!SeedSurfaceContainsOnlyOwnedScopeCutAndVectorValues*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundReadBudgetTests",
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsMapColdTests",
@@ -68014,6 +68248,7 @@
         "KeyLoad.FunctionalTests.StorageRecovery.ScopedRangeTests",
         "KeyLoad.FunctionalTests.StorageRecovery.ScopedReadTests",
         "KeyLoad.FunctionalTests.StorageRecovery.StorageOwnerProcessTests",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests",
         "KeyLoad.FunctionalTests.StorageRecovery.StoreLifetimeTests",
         "KeyLoad.FunctionalTests.StorageRecovery.TombstoneValueTests",
         "KeyLoad.FunctionalTests.StorageRecovery.UserAnalyticsHostLifecycleTests",
@@ -68609,6 +68844,17 @@
         "KeyLoad.FunctionalTests.StorageRecovery.ScopedReadTests|AcRoc003StoreIdentityDoesNotAliasCallerSigningKeyAndReopensWithOriginalBytes|AcRoc003StoreIdentityDoesNotAliasCallerSigningKeyAndReopensWithOriginalBytes",
         "KeyLoad.FunctionalTests.StorageRecovery.ScopedReadTests|AcRoc004ScopedPointChargesBeforeBorrowAndKeepsOwnedRead|AcRoc004ScopedPointChargesBeforeBorrowAndKeepsOwnedRead",
         "KeyLoad.FunctionalTests.StorageRecovery.StorageOwnerProcessTests|AcStorageOwner001SeparateProcessCannotOpenLiveOwnerAndHealthyReopenPreservesUpdatedState|AcStorageOwner001SeparateProcessCannotOpenLiveOwnerAndHealthyReopenPreservesUpdatedState",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009CompletePagesRespectThePhysicalRecordCeiling|AcQuery009CompletePagesRespectThePhysicalRecordCeiling(0)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009CompletePagesRespectThePhysicalRecordCeiling|AcQuery009CompletePagesRespectThePhysicalRecordCeiling(1)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009CompletePagesRespectThePhysicalRecordCeiling|AcQuery009CompletePagesRespectThePhysicalRecordCeiling(3)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009CompletePagesRespectThePhysicalRecordCeiling|AcQuery009CompletePagesRespectThePhysicalRecordCeiling(4)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009CompletePagesRespectThePhysicalRecordCeiling|AcQuery009CompletePagesRespectThePhysicalRecordCeiling(6)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009CompletePagesRespectThePhysicalRecordCeiling|AcQuery009CompletePagesRespectThePhysicalRecordCeiling(7)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(1)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(3)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(4)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(6)",
+        "KeyLoad.FunctionalTests.StorageRecovery.StorageRangePagingTests|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal|AcQuery009ReaderStopAtOrBetweenPageBoundariesIsTerminal(7)",
         "KeyLoad.FunctionalTests.StorageRecovery.StoreLifetimeTests|AcSq001FacadeImplementsStoreAndViewAndReadReceivesTheSameFacade|AcSq001FacadeImplementsStoreAndViewAndReadReceivesTheSameFacade",
         "KeyLoad.FunctionalTests.StorageRecovery.StoreLifetimeTests|AcSq002CorruptCurrentJournalLengthReleasesOwnershipForRepairedReopen|AcSq002CorruptCurrentJournalLengthReleasesOwnershipForRepairedReopen",
         "KeyLoad.FunctionalTests.StorageRecovery.StoreLifetimeTests|AcSq002ExclusiveOwnerLockAndDoubleDisposeAllowIdentityPreservingReopen|AcSq002ExclusiveOwnerLockAndDoubleDisposeAllowIdentityPreservingReopen",
@@ -69466,6 +69712,7 @@
         "KeyLoad.FunctionalTests.QueryExecution.EqualityAccessPathTests",
         "KeyLoad.FunctionalTests.QueryExecution.ModelHeadAuthorityWholeFlowTests",
         "KeyLoad.FunctionalTests.QueryExecution.Q2CapabilityWholeFlowTests",
+        "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetDeletedRangesTests",
         "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetPagingTests",
         "KeyLoad.FunctionalTests.QueryExecution.QueueViewLeaseIsolationTests",
         "KeyLoad.FunctionalTests.QueryExecution.SqlClientPreCancellationTests",
@@ -69882,6 +70129,8 @@
         "KeyLoad.FunctionalTests.QueryExecution.Q2CapabilityWholeFlowTests|RoundtrippedUnsupportedProfileDoesNoReadAndFollowingAst2Completes|RoundtrippedUnsupportedProfileDoesNoReadAndFollowingAst2Completes(explain)",
         "KeyLoad.FunctionalTests.QueryExecution.Q2CapabilityWholeFlowTests|RoundtrippedUnsupportedProfileDoesNoReadAndFollowingAst2Completes|RoundtrippedUnsupportedProfileDoesNoReadAndFollowingAst2Completes(filter)",
         "KeyLoad.FunctionalTests.QueryExecution.Q2CapabilityWholeFlowTests|RoundtrippedUnsupportedProfileDoesNoReadAndFollowingAst2Completes|RoundtrippedUnsupportedProfileDoesNoReadAndFollowingAst2Completes(self)",
+        "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetDeletedRangesTests|AcQuery009PagesCrossDeletedRangesWithoutLosingLiveRows|AcQuery009PagesCrossDeletedRangesWithoutLosingLiveRows(0)",
+        "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetDeletedRangesTests|AcQuery009PagesCrossDeletedRangesWithoutLosingLiveRows|AcQuery009PagesCrossDeletedRangesWithoutLosingLiveRows(5)",
         "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetPagingTests|AcQuery009FullScansServeEveryDocumentInIdOrderedPages|AcQuery009FullScansServeEveryDocumentInIdOrderedPages",
         "KeyLoad.FunctionalTests.QueryExecution.QueryKeysetPagingTests|AcQuery009IdOrderedPagesReadEveryDocumentOnce|AcQuery009IdOrderedPagesReadEveryDocumentOnce",
         "KeyLoad.FunctionalTests.QueryExecution.QueueViewLeaseIsolationTests|ActiveLeaseViewsArePureMaskedCurrentAuthorityAndOriginalHistorySurvivesRenewAckHealthyAndTwoCold|ActiveLeaseViewsArePureMaskedCurrentAuthorityAndOriginalHistorySurvivesRenewAckHealthyAndTwoCold",

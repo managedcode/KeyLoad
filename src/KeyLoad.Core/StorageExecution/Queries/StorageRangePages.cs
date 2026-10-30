@@ -33,17 +33,21 @@ internal static class StorageRangePages
         {
             var delivered = 0;
             byte[]? last = null;
+            var stoppedByVisitor = false;
             var page = visit(pageRecords, (key, value) =>
             {
+                stoppedByVisitor = !visitor(key, value);
                 if (++delivered == pageRecords)
                 {
                     last = key.ToArray();
+                    // Continue from this key without spending the physical page's budget on lookahead.
+                    return false;
                 }
-                return visitor(key, value);
+                return !stoppedByVisitor;
             }, after);
             records = checked(records + page.Records);
             bytes = checked(bytes + page.ReadBytes);
-            if (page.StoppedByVisitor || !page.HasMore || last is null)
+            if (stoppedByVisitor || last is null)
             {
                 return new(records, page.HasMore, page.StoppedByVisitor, bytes);
             }
