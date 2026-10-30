@@ -43,6 +43,17 @@ internal sealed class GrainRequestIdentityScope : IDisposable
                 services.GetService<ILocalSiloDetails>()?.SiloAddress), null, cancellationToken);
     }
 
+    internal static GrainRequestIdentityScope ForPlacement(IServiceProvider services, GrainRequestEnvelope request,
+        SiloAddress owner, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(owner);
+        GrainIdentityContext.Validate(request, request.RequestId);
+        var state = RequestContext.Get(GrainRequestStreamProtocol.ContextKey) as GrainRequestContextState
+            ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
+        var claims = RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS) as ClaimsPrincipal;
+        return new(services, claims, state, owner, cancellationToken);
+    }
+
     private GrainRequestIdentityScope(IServiceProvider runtimeServices, ClaimsPrincipal? claims,
         GrainRequestContextState state, global::Orleans.Runtime.SiloAddress? placement,
         CancellationToken cancellationToken)

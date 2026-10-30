@@ -57,10 +57,18 @@ internal static class JobGraphRegistration
     {
         Add<IConnectionGrain, IDatabaseCommitGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
             nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
-        Add<ICommandPartitionGrain, IDatabaseCommitGrain>(graph, nameof(ICommandPartitionGrain.ExecuteAsync),
-            nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
-        Add<IConnectionGrain, ICommandPartitionGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
-            nameof(ICommandPartitionGrain.ExecuteAsync));
+        Add<IConnectionGrain, IRequestExecutionGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
+            nameof(IRequestExecutionGrain.ExecuteAsync));
+        Add<IPartitionQueryGrain, IRequestExecutionGrain>(graph, nameof(IPartitionQueryGrain.ExecuteAsync),
+            nameof(IRequestExecutionGrain.ExecuteAsync));
+        Add<IRequestExecutionGrain, IDatabaseCommitGrain>(graph, nameof(IRequestExecutionGrain.ExecuteAsync),
+            nameof(IDatabaseCommitGrain.ReadCutAsync), nameof(IDatabaseCommitGrain.ApplyAsync),
+            nameof(IDatabaseCommitGrain.ExecuteSharedAsync));
+        foreach (var target in new[] { nameof(IPartitionQueryGrain.ResolveOwnerAsync), nameof(IPartitionQueryGrain.ExecuteAsync) })
+        {
+            graph.AddTransition(typeof(IRequestExecutionGrain).FullName!, typeof(IPartitionQueryGrain).FullName!,
+                new GrainTransition(nameof(IRequestExecutionGrain.ExecuteAsync), target, IsReentrant: true));
+        }
         AddSharedQueries(graph);
     }
 

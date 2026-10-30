@@ -60,14 +60,15 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         }
     }
 
-    internal PartitionHost Borrow()
-    {
-        lock (lifecycle)
-        {
-            ObjectDisposedException.ThrowIf(stopping, this);
-            return published && session is not null ? session.Host : throw new InvalidOperationException(Unpublished);
-        }
-    }
+    internal PartitionHost Borrow() => Session.Host;
+
+    /// <inheritdoc />
+    public Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, string? actorKey,
+        IGrainContext context, CancellationToken cancellationToken)
+        => options.Node.Value.StorageMode == StorageAccessMode.SharedVolume
+            ? grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(envelope.Incarnation))
+                .ExecuteSharedAsync(envelope, actorKey, cancellationToken)
+            : Session.ExecuteAsync(envelope, actorKey, context, cancellationToken);
 
     internal Task OpenAsync(IGrainContext context)
     {

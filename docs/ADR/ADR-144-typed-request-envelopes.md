@@ -42,9 +42,10 @@ applied.
 
 ## Consequences
 
-- `IConnectionGrain`, `ICommandPartitionGrain`, `IPartitionQueryGrain`, the silo
-  storage services and the background worker interfaces carry
-  `GrainRequestEnvelope` parameters. Their interface versions increased once.
+- `IConnectionGrain`, `IRequestExecutionGrain`, `IPartitionQueryGrain` and the
+  background worker interfaces carry `GrainRequestEnvelope` parameters. Physical
+  storage services expose typed copy and maintenance operations; request execution
+  borrows the local physical owner through DI.
 - The string token bounds (`GrainRequestTokenBounds`, the connection-close token
   character limit) and the `KLT2.` prefix for grain requests are removed.
 - Scope tests mutate the typed envelope directly instead of re-signing a token;

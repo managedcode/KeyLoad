@@ -38,7 +38,7 @@ internal sealed class ConnectionGraphPolicyTests
     private static async Task PolicyAsync(GrainTransitionManager manager)
     {
         var connection = typeof(IConnectionGrain).FullName!;
-        var partition = typeof(ICommandPartitionGrain).FullName!;
+        var request = typeof(IRequestExecutionGrain).FullName!;
         var commit = typeof(IDatabaseCommitGrain).FullName!;
         var service = typeof(PartitionStorageGrainService).FullName!;
         var execute = nameof(IConnectionGrain.ExecuteStreamAsync);
@@ -47,14 +47,16 @@ internal sealed class ConnectionGraphPolicyTests
         await Assert.That(manager.IsTransitionAllowed(Transition(connection, nameof(IConnectionGrain.CloseAsync),
             commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsFalse();
         await Assert.That(manager.IsTransitionAllowed(Transition(connection, execute,
-            partition, nameof(ICommandPartitionGrain.ExecuteAsync)))).IsTrue();
-        await Assert.That(manager.IsTransitionAllowed(Transition(partition, nameof(ICommandPartitionGrain.ExecuteAsync),
-            commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsTrue();
+            request, nameof(IRequestExecutionGrain.ExecuteAsync)))).IsTrue();
+        await Assert.That(manager.IsTransitionAllowed(Transition(request, nameof(IRequestExecutionGrain.ExecuteAsync),
+            commit, nameof(IDatabaseCommitGrain.ReadCutAsync)))).IsTrue();
+        await Assert.That(manager.IsTransitionAllowed(Transition(request, nameof(IRequestExecutionGrain.ExecuteAsync),
+            commit, nameof(IDatabaseCommitGrain.ApplyAsync)))).IsTrue();
         await Assert.That(manager.IsTransitionAllowed(Transition(service, Constants.AnyMethod,
             connection, nameof(IConnectionGrain.CloseAsync)))).IsFalse();
         await Assert.That(manager.IsTransitionAllowed(Transition(Constants.UnknownCallerId, Constants.AnyMethod,
-            partition, nameof(ICommandPartitionGrain.ExecuteAsync)))).IsFalse();
-        await Assert.That(manager.IsTransitionAllowed(Client(partition, nameof(ICommandPartitionGrain.ExecuteAsync)))).IsFalse();
+            request, nameof(IRequestExecutionGrain.ExecuteAsync)))).IsFalse();
+        await Assert.That(manager.IsTransitionAllowed(Client(request, nameof(IRequestExecutionGrain.ExecuteAsync)))).IsFalse();
         await Assert.That(manager.IsTransitionAllowed(Client(connection, execute))).IsTrue();
         await Assert.That(manager.IsTransitionAllowed(Transition(RuntimeJournalClient.CallerIdentity,
             RuntimeJournalClient.SendCommandCallerMethod, connection, execute))).IsTrue();
@@ -68,14 +70,16 @@ internal sealed class ConnectionGraphPolicyTests
         var envelope = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
             command.CommandId, OrleansSerialization.Serialize(command));
         var partition = GrainPartitionResolver.Resolve(scenario.Fixture.Codec.Decode(envelope));
+        var owner = scenario.Fixture.Source.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress;
         var grains = scenario.Fixture.Cluster.Client;
         var cut = scenario.Fixture.Database.ReadCanonicalCut();
         using var identity = new GrainRequestIdentityScope(scenario.Fixture.Cluster.ServiceProvider,
             principal, requestId, command.CommandId, token, connectionId: scenario.Fixture.ConnectionId);
         var partitionFailure = await Assert.ThrowsExactlyAsync<InvalidOperationException>(
-            () => grains.GetGrain<ICommandPartitionGrain>(partition).ExecuteAsync(envelope, token));
+            () => grains.GetGrain<IRequestExecutionGrain>(RequestExecutionGrainIdentity.For(requestId))
+                .ExecuteAsync(owner, envelope, partition, token));
         await Assert.That(partitionFailure!.Message).IsEqualTo(
-            $"Transition from {Constants.ClientCallerId} to {typeof(ICommandPartitionGrain).FullName} is not allowed.");
+            $"Transition from {Constants.ClientCallerId} to {typeof(IRequestExecutionGrain).FullName} is not allowed.");
         await Assert.That(scenario.Fixture.Database.ReadCanonicalCut()).IsEqualTo(cut);
         await ConnectionAssertions.MissingOutcomeAsync(scenario, principal, command, Document);
     }

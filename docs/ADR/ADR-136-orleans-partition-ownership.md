@@ -12,7 +12,7 @@ repartitioner. It implements database operations and file ownership through
 ordinary grains and silo-local Grain Services.
 
 The request path is public API -> one connection grain per connected client ->
-logical database/partition grains -> storage owners -> bounded aggregation ->
+independent request grains -> storage owners -> bounded aggregation ->
 caller. Logical atomic partition identity is independent of activation placement
 and physical copy identity. A connection owns its response stream and independent
 request lifetimes; storage services expose self-contained typed Task calls.
@@ -22,7 +22,7 @@ request lifetimes; storage services expose self-contained typed Task calls.
 | Mode | Physical files | Execution and copies |
 |---|---|---|
 | Shared volume | The same configured volume and physical partition paths are visible to the participating silos. Exactly one open storage owner holds each mutable ZoneTree and its file locks. | An ordinary logical owner grain routes work to that open owner through Orleans. Moving ownership drains borrowers and joins the original close before reopening the same files on another silo. Shared access creates no extra persisted copies and requires no data copying. |
-| Isolated volumes | Each silo-local Grain Service owns its configured local files, WAL, locks and ordered apply gate. | Logical partition grains call the required storage owners through Orleans. Optional copies are actual independent persisted stores. A cross-partition query calls each logical partition once and merges bounded partial results. |
+| Isolated volumes | Each silo-local Grain Service owns its configured local files, WAL, locks and ordered apply gate. | Orleans places independent request grains beside the selected storage owners; local execution borrows their resources through DI. Replication calls the required storage owners through Orleans. Optional copies are actual independent persisted stores. A cross-partition query calls each logical partition once and merges bounded partial results. |
 
 `KeyLoad:StorageMode` selects `IsolatedVolumes` by default or `SharedVolume`.
 `KeyLoad:SiloCount` and `KeyLoad:ReplicaCount` remain explicit positive settings;

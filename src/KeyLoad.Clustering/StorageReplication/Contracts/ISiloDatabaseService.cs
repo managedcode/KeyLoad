@@ -20,13 +20,8 @@ public partial interface ISiloDatabaseService : IGrainService
     /// <summary>Applies exactly the prepared operations, in order, through one ZoneTree atomic commit.</summary>
     Task<StorageBatchResult> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations, long firstSequence,
         CancellationToken cancellationToken);
-    /// <summary>Awaits a self-contained request on the execution stateless-worker pool.</summary>
-    Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, CancellationToken cancellationToken);
     /// <summary>Joins a server-owned maintenance session's actual cleanup after cancellation or revocation.</summary>
     Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId);
-    /// <summary>Executes the original partition-ordered command through this silo's execution worker pool.</summary>
-    Task<GrainOperationReply> ExecuteCommandAsync(GrainRequestEnvelope envelope, string actorKey,
-        CancellationToken cancellationToken);
     /// <summary>Observes the exact addressed silo after the caller verified current administrator authority.</summary>
     Task<NodeStatus> ReadStatusAsync(CancellationToken cancellationToken);
     /// <summary>Reads the addressed silo's actual files and process observation.</summary>

@@ -94,7 +94,7 @@ own; scaling means adding silos to the Orleans cluster.
   a missing copy through a stable-ID retry; unrelated gaps require explicit
   recovery and general empty-copy restoration remains unqualified.
 - **Request flow.** Public API (HTTP, .NET SDK, MCP, SQL) -> connection grain ->
-  partition grains -> ZoneTree owner on the same node or on other nodes through
+  independent request grains -> ZoneTree owner on the same node or on other nodes through
   Orleans -> results are gathered -> returned to the caller.
 - **Background work.** Queue deadlines, due and recurring work, remote
   transfers, ANN projection and time-series chunk work never check leadership.
@@ -111,12 +111,12 @@ own; scaling means adding silos to the Orleans cluster.
 flowchart LR
     Caller[HTTP SDK MCP SQL caller] --> Api[Public API and ASP.NET Core authentication]
     Api --> Connection[Connection grain one per client]
-    Connection --> Partition[Logical partition grain]
+    Connection --> Partition[Independent request grain]
     Connection --> Gather[Gather results from several partitions]
     Partition -.->|finds target silos| Membership[Orleans membership]
-    Partition -->|Orleans call| OwnerA[ZoneTree owner on silo A]
-    Partition -->|Orleans call| OwnerB[ZoneTree owner on silo B]
-    Partition -->|Orleans call| OwnerC[ZoneTree owner on silo C]
+    Partition -->|local DI borrow| OwnerA[ZoneTree owner on silo A]
+    Partition -->|local DI borrow| OwnerB[ZoneTree owner on silo B]
+    Partition -->|local DI borrow| OwnerC[ZoneTree owner on silo C]
     Gather -->|Orleans calls| OwnerA
     Gather -->|Orleans calls| OwnerB
     OwnerA --> FilesA[(Local ZoneTree files)]
@@ -215,7 +215,7 @@ NuGet publication follow root policy.
 | src/KeyLoad.Diagnostics | Models/DatabasePhaseKind.cs, Models/DatabasePhaseSnapshot.cs | BCL-only scalar phase observations, with no database state, public control endpoint or framework dependency. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageEngine/Execution/ZoneTreeStoreRuntime.cs, StorageEngine/Recovery/ZoneTreeCheckpointManager.cs | StorageEngine, PointCache and Restore; files, WAL, checkpoints and local archives stay with the silo-local ZoneTree owner. |
 | src/KeyLoad.Query | QueryExecution/Queries/QueryEngine.cs, QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs, ChangeFeeds/Queries/LiveQueryExecutor.cs | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
-| src/KeyLoad.Clustering | RequestExecution/Grains/ConnectionGrain.cs, RequestExecution/Grains/CommandPartitionGrain.cs, RequestExecution/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | OrleansExecution; connection and partition grains route through Orleans to the silo-local ZoneTree owners. |
+| src/KeyLoad.Clustering | RequestExecution/Grains/ConnectionGrain.cs, RequestExecution/Grains/RequestExecutionGrain.cs, RequestExecution/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | OrleansExecution; connection and independent request grains route through Orleans to the silo-local ZoneTree owners. |
 | src/KeyLoad | Program.cs, NodeOptions.cs, ClientApi/, OrleansHosting/Hosting/OrleansNode.Composition.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | ClientApi/Transport/KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
 | src/KeyLoad.Cli | Program.cs, ClientApi/Transport/CliClientApi.cs, Restore/Commands/CliBackupRestore.cs | Administrative entry point with typed ClientApi and backup/restore owners. |
@@ -306,14 +306,14 @@ classDiagram
     class CommandRequest
     class PartitionRef
     class ConnectionGrain
-    class CommandPartitionGrain
+    class RequestExecutionGrain
     class DatabaseEngine
     class IKeyValueView
     class IAtomicTransaction
     KeyLoadClient --> CommandRequest
     CommandRequest --> PartitionRef
-    ConnectionGrain --> CommandPartitionGrain : one logical partition
-    CommandPartitionGrain --> DatabaseEngine : Orleans calls to silo-local owners
+    ConnectionGrain --> RequestExecutionGrain : one per operation
+    RequestExecutionGrain --> DatabaseEngine : borrows silo-local owner through DI
     DatabaseEngine --> IKeyValueView
     DatabaseEngine --> IAtomicTransaction
 ```

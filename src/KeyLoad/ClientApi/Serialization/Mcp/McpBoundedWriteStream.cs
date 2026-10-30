@@ -2,21 +2,23 @@ using System.Security.Cryptography;
 
 namespace KeyLoad.Server;
 
-/// <summary>Owns one fixed execution buffer for sequential canonical JSON writes.</summary>
+/// <summary>Owns bounded sequential writes, allocating for actual payloads and clearing retired capacity.</summary>
 internal sealed class McpBoundedWriteStream : Stream
 {
+    private const int InitialCapacity = 4096;
+    private const int GrowthFactor = 2;
     private const string UnsupportedOperation = "The canonical JSON stream supports sequential writes only.";
-    private readonly MemoryStream buffer;
+    private MemoryStream buffer;
     private readonly int maximumBytes;
     private bool disposed;
 
-    /// <summary>Allocates the single private write capacity without permitting later growth.</summary>
+    /// <summary>Starts with bounded small capacity and preserves the inclusive write ceiling during growth.</summary>
     /// <param name="maximumBytes">The positive inclusive byte ceiling.</param>
     internal McpBoundedWriteStream(int maximumBytes)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
         this.maximumBytes = maximumBytes;
-        buffer = new MemoryStream(maximumBytes);
+        buffer = new MemoryStream(Math.Min(maximumBytes, InitialCapacity));
     }
 
     /// <inheritdoc />
@@ -80,7 +82,13 @@ internal sealed class McpBoundedWriteStream : Stream
     /// <inheritdoc />
     public override void Write(ReadOnlySpan<byte> buffer)
     {
+        ThrowIfDisposed();
+        var borrowed = this.buffer.GetBuffer().AsSpan().Overlaps(buffer, out var offset);
         ValidateWrite(buffer.Length);
+        if (borrowed)
+        {
+            buffer = this.buffer.GetBuffer().AsSpan(offset, buffer.Length);
+        }
         this.buffer.Write(buffer);
     }
 
@@ -110,13 +118,13 @@ internal sealed class McpBoundedWriteStream : Stream
     }
 
     /// <summary>Gets a read-only borrowed view of the entire private capacity while this owner is alive.</summary>
-    /// <returns>A view that remains owned here and observes clearing on disposal.</returns>
+    /// <returns>A view cleared when capacity is replaced or this owner is disposed.</returns>
     internal ReadOnlyMemory<byte> BorrowBuffer()
     {
         const int StartEmptyCount = 0;
 
         ThrowIfDisposed();
-        return buffer.GetBuffer().AsMemory(StartEmptyCount, maximumBytes);
+        return buffer.GetBuffer().AsMemory(StartEmptyCount, buffer.Capacity);
     }
 
     /// <summary>Gets the actual written range without allocating a returned copy of the private buffer.</summary>
@@ -156,6 +164,21 @@ internal sealed class McpBoundedWriteStream : Stream
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.CanonicalPayloadExceeded);
         }
+        EnsureCapacity(checked((int)buffer.Length + count));
+    }
+
+    private void EnsureCapacity(int required)
+    {
+        if (required <= buffer.Capacity)
+        {
+            return;
+        }
+        var capacity = checked((int)Math.Min(maximumBytes, Math.Max(required, (long)buffer.Capacity * GrowthFactor)));
+        var next = new MemoryStream(capacity);
+        next.Write(buffer.GetBuffer().AsSpan(0, checked((int)buffer.Length)));
+        CryptographicOperations.ZeroMemory(buffer.GetBuffer());
+        buffer.Dispose();
+        buffer = next;
     }
 
     private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(disposed, this);

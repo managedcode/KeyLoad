@@ -91,7 +91,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
     private Task<GrainOperationReply> ExecuteLeafAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
         SiloAddress owner, RequestWorkLease binding, CancellationToken token)
         => request.Envelope.CommandKind is not null && !ConnectionParentExecution.Handles(request.Envelope.CommandKind)
-            ? ConnectionCommandExecution.ExecuteAsync(request, envelope, GrainFactory, codec, clock, binding, token)
+            ? ConnectionCommandExecution.ExecuteAsync(request, envelope, storage, owner, codec, clock, binding, token)
             : storage.ExecuteAsync(owner, envelope, token);
 
     /// <inheritdoc />

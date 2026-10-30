@@ -29,7 +29,8 @@ internal sealed class RuntimeJournalReplayActivatorConfiguration(
                     services.GetRequiredService<GrainRequestCodec>(),
                     services.GetRequiredService<RuntimeJournalClient>(),
                     services.GetRequiredService<IOptions<RuntimeTestOptions>>(),
-                    services.GetRequiredService<ConnectionOwnerIdentity>()),
+                    services.GetRequiredService<ConnectionOwnerIdentity>(),
+                    services.GetRequiredService<ILocalSiloDetails>()),
                 new DefaultGrainActivator(services, grainClass)));
         }
     }

@@ -3,7 +3,7 @@ namespace KeyLoad.Clustering;
 internal static class GrainRoutingProtocol
 {
     internal const string RequestAlias = "keyload.connection";
-    internal const string CommandAlias = "keyload.partition.command";
+    internal const string ExecutionAlias = "keyload.request.execution";
     internal const string ExecuteAlias = "keyload.execute";
     internal const string ExecuteStreamAlias = "keyload.execute-stream";
     internal const string PayloadWireName = "payloadBase64Url";
@@ -18,7 +18,7 @@ internal static class GrainRoutingProtocol
     internal const string AdministrationRequired = "Cluster administration is required.";
     internal const string ReplyBudgetExceeded = "The database reply exceeds its byte budget.";
     internal const int RequestInterfaceVersion = 7;
-    internal const int CapabilityInterfaceVersion = 3;
+    internal const int ExecutionInterfaceVersion = 1;
     internal const int EnvelopeMetadataBytes = 65_536;
     internal const int MaximumReplyBytes = 16_777_216;
 }

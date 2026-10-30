@@ -56,7 +56,7 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             }
-            return await storage.On(owner).ExecuteAsync(envelope, cancellationToken).ConfigureAwait(true);
+            return await storage.ExecuteAsync(owner, envelope, cancellationToken).ConfigureAwait(true);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {

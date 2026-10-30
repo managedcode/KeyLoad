@@ -10,7 +10,7 @@ internal sealed class RuntimeJournalGraphCallerProbeGrain(
     GrainRequestCodec codec,
     RuntimeJournalClient journalClient,
     IOptions<RuntimeTestOptions> timingOptions,
-    ConnectionOwnerIdentity connectionOwner) : Grain, IRuntimeJournalGraphCallerProbeGrain
+    ConnectionOwnerIdentity connectionOwner, ILocalSiloDetails local) : Grain, IRuntimeJournalGraphCallerProbeGrain
 {
     public async Task<RuntimeJournalGraphCallerResult> ExerciseAsync(CancellationToken cancellationToken)
     {
@@ -79,13 +79,13 @@ internal sealed class RuntimeJournalGraphCallerProbeGrain(
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    await grains.GetGrain<ICommandPartitionGrain>(RuntimeJournalGraphCallerProtocol.ProbeAlias)
-                        .ExecuteAsync(envelope, cancellationToken).ConfigureAwait(true);
+                    await grains.GetGrain<IRequestExecutionGrain>(RequestExecutionGrainIdentity.For(requestId))
+                        .ExecuteAsync(local.SiloAddress, envelope, null, cancellationToken).ConfigureAwait(true);
                 }
                 catch (InvalidOperationException failure)
                 {
                     RuntimeJournalGraphCallerSupport.RequireGraphDenial(failure,
-                        RuntimeJournalClient.CallerIdentity, typeof(ICommandPartitionGrain).FullName!);
+                        RuntimeJournalClient.CallerIdentity, typeof(IRequestExecutionGrain).FullName!);
                     denied = true;
                 }
             }).ConfigureAwait(true);

@@ -16,11 +16,9 @@ internal static class ConnectionGrainGraphRegistration
                 .AllowClientCallGrain<IAnnProjectionWorkerGrain>()
                 .AddGrainServiceTransition<PartitionStorageGrainService, IDatabaseCommitGrain>(
                     nameof(IDatabaseCommitGrain.ReadCutAsync), nameof(IDatabaseCommitGrain.ApplyAsync),
-                    nameof(IDatabaseCommitGrain.ExecuteSharedAsync), nameof(IDatabaseCommitGrain.AbortSharedMaintenanceAsync),
+                    nameof(IDatabaseCommitGrain.AbortSharedMaintenanceAsync),
                     nameof(IDatabaseCommitGrain.ReadSharedStatusAsync),
-                    nameof(IDatabaseCommitGrain.ReadSharedDashboardAsync), nameof(IDatabaseCommitGrain.CreateSharedBackupAsync))
-                .AddGrainServiceTransition<PartitionStorageGrainService, IPartitionQueryGrain>(
-                    nameof(IPartitionQueryGrain.ResolveOwnerAsync), nameof(IPartitionQueryGrain.ExecuteAsync));
+                    nameof(IDatabaseCommitGrain.ReadSharedDashboardAsync), nameof(IDatabaseCommitGrain.CreateSharedBackupAsync));
             graph.AddGrainTransition<IPartitionQueryGrain, IDatabaseCommitGrain>()
                 .MethodByName(nameof(IPartitionQueryGrain.ResolveOwnerAsync), nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
         });

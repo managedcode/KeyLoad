@@ -7,7 +7,7 @@ namespace KeyLoad.Clustering;
 internal static class ConnectionCommandExecution
 {
     internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, GrainRequestEnvelope envelope,
-        global::Orleans.IGrainFactory grains, GrainRequestCodec codec, TimeProvider clock,
+        SiloDatabaseClient storage, SiloAddress owner, GrainRequestCodec codec, TimeProvider clock,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var stage = GrainFailureStage.PartitionResolution;
@@ -21,8 +21,7 @@ internal static class ConnectionCommandExecution
             var work = new ReadExecutionBudget(clock, token);
             work.ConstrainLifetime(request.Envelope.ExpiresAt);
             work.AttachResourceLifetimeBinding(binding);
-            var target = grains.GetGrain<ICommandPartitionGrain>(partition);
-            var reply = await target.ExecuteAsync(envelope, token).ConfigureAwait(true);
+            var reply = await storage.ExecuteAsync(owner, envelope, token, partition).ConfigureAwait(true);
             CommandResultWorkBinding.BindReturned(request, reply, work, binding);
             return reply;
         }
