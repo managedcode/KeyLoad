@@ -890,8 +890,11 @@ name/path, event and source through GitHub; bounded waiting resolves the race
 between dispatch and producer completion before newest-ready selection. Reject
 invalid/foreign metadata and timeout, preserve failure/absence handling and
 source/tuple freshness. The input never selects metric authority or replaces
-archive provenance. Empty manual input needs no producer wait. Existing execution
-TUnit executor operations cover manual admission and unsupported executor-event
+archive provenance. Empty manual input needs no producer wait. The 270-second
+wait retries failed GitHub status requests within that same deadline, with each
+request bounded to 30 seconds and fresh metadata requested. Successful responses
+must pass the unchanged run identity checks before use. Existing execution TUnit
+executor operations cover manual admission and unsupported executor-event
 rejection, unchanged inputs and a healthy follow-up. Static actionlint and YAML
 graph review verify infrastructure; a genuine final dispatch and separate
 workflow_dispatch Website/Pages run supply provider evidence. ADR-112 owns the ordered implementation.

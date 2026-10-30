@@ -25,6 +25,14 @@ KeyLoad included, starts its Docker image through the same procedure, and the Ke
 topologies, separate Linux runners between databases/topologies and their resource
 contracts are kept. An unavailable topology gets an explicit unavailable result.
 
+The full-run collector requires all 32 authenticated successful worker envelopes.
+GitHub job and artifact indexes can settle after the final worker has uploaded its
+result. The collector captures fresh metadata at most four times, 20 seconds
+apart, within one 180-second deadline. It retains each original capture and uses
+only a complete validated capture; exhaustion or malformed evidence fails.
+The workflow retains the provider metadata even when aggregation fails. Website
+selection keeps its independent rules for authenticated unavailable cells.
+
 One live database runs for the whole job. Aspire starts it, and genuine C# clients run
 the different TUnit tests through one shared session fixture. The mixed tests contain
 parallel operation streams. The database is not restarted or restored from the initial

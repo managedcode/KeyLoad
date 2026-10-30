@@ -381,6 +381,7 @@ jobs:
           if-no-files-found: error
           retention-days: 90
       - name: Save GitHub result verification
+        if: ${{ always() && !cancelled() }}
         uses: actions/upload-artifact@v7
         with:
           name: comparison-session-provider-evidence

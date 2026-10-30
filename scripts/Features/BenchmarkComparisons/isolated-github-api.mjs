@@ -25,12 +25,12 @@ export async function captureApi(endpoint, target, paginated, context, requestOp
   return readJson(target);
 }
 
-async function capturePages(route, directory, key, context) {
+async function capturePages(route, directory, key, context, requestOptions = {}) {
   const pages = [];
   let count = 1;
   for (let page = 1; page <= count; page += 1) {
     const value = await captureApi(`${route}?per_page=${GH.pageSize}&page=${page}`,
-      path.join(directory, `${key}-page-${String(page).padStart(2, '0')}.json`), false, context);
+      path.join(directory, `${key}-page-${String(page).padStart(2, '0')}.json`), false, context, requestOptions);
     requireGitHub(Number.isSafeInteger(value.total_count) && value.total_count >= 0 && value.total_count <= GH.items);
     count = Math.max(1, Math.ceil(value.total_count / GH.pageSize));
     requireGitHub(count <= GH.pages && (pages.length === 0 || value.total_count === pages[0].total_count));
@@ -41,15 +41,15 @@ async function capturePages(route, directory, key, context) {
   return flattenPages(pages, key);
 }
 
-export async function captureRun(directory, context, includeArtifacts) {
+export async function captureRun(directory, context, includeArtifacts, requestOptions = {}) {
   const { runId, attempt } = context.cohort;
-  const workflow = await captureApi(`${GH.api}/workflows/benchmarks.yml`, path.join(directory, 'workflow.json'), false, context);
+  const workflow = await captureApi(`${GH.api}/workflows/benchmarks.yml`, path.join(directory, 'workflow.json'), false, context, requestOptions);
   const route = `${GH.api}/runs/${runId}/attempts/${attempt}`;
-  const run = await captureApi(route, path.join(directory, 'run-attempt.json'), false, context);
+  const run = await captureApi(route, path.join(directory, 'run-attempt.json'), false, context, requestOptions);
   validateWorkflowRun(workflow, run, context.cohort);
-  const jobs = await capturePages(`${route}/jobs`, directory, 'jobs', context);
+  const jobs = await capturePages(`${route}/jobs`, directory, 'jobs', context, requestOptions);
   if (!includeArtifacts) return { run, jobs };
-  const artifacts = await capturePages(`${GH.api}/runs/${runId}/artifacts`, directory, 'artifacts', context);
+  const artifacts = await capturePages(`${GH.api}/runs/${runId}/artifacts`, directory, 'artifacts', context, requestOptions);
   return { run, jobs, artifacts };
 }
 

@@ -1,4 +1,6 @@
 import path from 'node:path';
+import { link } from 'node:fs/promises';
+import { setTimeout as wait } from 'node:timers/promises';
 import { pathToFileURL } from 'node:url';
 import { createDirectory } from './files.mjs';
 import { verifySourceCheckout } from './source-checkout.mjs';
@@ -45,6 +47,27 @@ export async function collectSessionWorker(input, selected, context, runtimeIden
   return { id: row.id, target: row.target, nodeCount: row.nodeCount,
     job: projectJob(job, context.cohort, SESSION.workerSteps), artifact: projectArtifact(artifact), sessionSha256: raw.sha256 };
 }
+async function captureCompleteSessions(input, context) {
+  const github = path.join(input, 'github');
+  const captures = await createDirectory(path.join(github, 'captures'));
+  const deadline = process.hrtime.bigint() + 180_000_000_000n;
+  for (let attempt = 1; attempt <= 4; attempt++) {
+    const directory = await createDirectory(path.join(captures, String(attempt)));
+    const capture = await captureRun(directory, context, true, { deadline });
+    const selected = selectSessionEvidence(capture, context.cohort);
+    if (selected.workers.length === SESSION.workers) {
+      for (const name of ['workflow.json', 'run-attempt.json', 'jobs-pages.json', 'artifacts-pages.json'])
+        await link(path.join(directory, name), path.join(github, name));
+      return selected;
+    }
+    process.stdout.write(`GitHub session metadata contains ${selected.workers.length}/${SESSION.workers} workers (capture ${attempt}/4).\n`);
+    requireSession(attempt < 4);
+    const remaining = Number((deadline - process.hrtime.bigint()) / 1000000n);
+    requireSession(remaining > 20_000);
+    await wait(20_000);
+  }
+  requireSession(false);
+}
 export async function collectSessionEvidence(environment = process.env, argv = process.argv.slice(2)) {
   requireSession(argv.length === 1 && /^--input=.+$/.test(argv[0]));
   const input = path.resolve(argv[0].slice('--input='.length));
@@ -53,8 +76,7 @@ export async function collectSessionEvidence(environment = process.env, argv = p
   await createDirectory(input);
   for (const name of ['github', 'archives', 'workers']) await createDirectory(path.join(input, name));
   await initializeTransport(context, input, path.join(input, 'github'));
-  const capture = await captureRun(path.join(input, 'github'), context, true);
-  const selected = selectSessionEvidence(capture, context.cohort);
+  const selected = await captureCompleteSessions(input, context);
   const runtimeIdentity = await collectSessionRuntimeIdentity(input, selected.runtimeArtifact, context);
   const identity = await readSessionRuntimeIdentity(path.join(input, 'github', 'runtime'), context.cohort);
   const workers = [];

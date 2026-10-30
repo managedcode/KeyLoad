@@ -21,11 +21,11 @@ export async function initializeTransport(context, root, directory) {
 
 export function runtimeArguments(endpoint, context, currentJobId) {
   const args = ['api', '--hostname', GH.host, '--method', 'GET', '--include',
-    '-H', 'Accept: application/vnd.github+json', '-H', `X-GitHub-Api-Version: ${GH.apiVersion}`];
+    '-H', 'Accept: application/vnd.github+json', '-H', `X-GitHub-Api-Version: ${GH.apiVersion}`,
+    '-H', 'Cache-Control: no-cache, max-age=0'];
   if (currentJobId !== undefined) {
     requireGitHub(Number.isSafeInteger(currentJobId) && currentJobId > 0
       && endpoint === `${GH.api}/jobs/${currentJobId}`);
-    args.push('-H', 'Cache-Control: no-cache, max-age=0');
   }
   args.push(endpoint);
   if (context.transport.allowBinary) args.push('--allow-escape-sequences');
