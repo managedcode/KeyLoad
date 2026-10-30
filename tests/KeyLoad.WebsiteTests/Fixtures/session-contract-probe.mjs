@@ -317,7 +317,17 @@ if (scenario === 'json') {
     artifacts:rows.map((row,index) => artifact(index+100,row.artifactName))};
   capture.jobs.push(job(99,contract.SESSION.prepareJob,contract.SESSION.prepareSteps));
   capture.artifacts.push(artifact(201,'comparison-compiled-test-bundle'),artifact(202,'comparison-compiled-runtime-identity'));
-  accepted = selection.selectSessionEvidence(capture,cohort).workers.length === 31;
+  accepted = !selection.hasPendingSessionSteps(capture)
+    && selection.selectSessionEvidence(capture,cohort).workers.length === 31;
+  const pending = clone(capture);
+  pending.jobs[1].steps[0].status = 'in_progress';
+  pending.jobs[1].steps[0].conclusion = null;
+  accepted = accepted && selection.hasPendingSessionSteps(pending);
+  reject(() => selection.selectSessionEvidence(pending,cohort));
+  pending.jobs[1].steps[0].status = 'completed';
+  pending.jobs[1].steps[0].conclusion = 'success';
+  accepted = accepted && !selection.hasPendingSessionSteps(pending)
+    && selection.selectSessionEvidence(pending,cohort).workers.length === 31;
   const partial=clone(capture);partial.jobs.splice(1,1);
   accepted=accepted&&selection.selectSessionEvidence(partial,cohort).workers.length===30;
   for (const change of [value => value.jobs[1].head_sha='c'.repeat(40),

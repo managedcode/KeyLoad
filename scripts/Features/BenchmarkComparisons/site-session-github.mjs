@@ -8,10 +8,10 @@ import { GH } from './isolated-github-contract.mjs';
 import { projectArtifact, projectJob } from './isolated-github-validation.mjs';
 import { SESSION, requireSession, sessionPositive, sessionPath } from './session-contract.mjs';
 import { aggregateSessions } from './session-aggregate.mjs';
-import { collectSessionWorker } from './session-github-collect.mjs';
+import { captureSettledSessionRun, collectSessionWorker } from './session-github-collect.mjs';
 import { collectSessionRuntimeIdentity, readSessionRuntimeIdentity } from './session-runtime-identity.mjs';
 import { sessionSiteContext, parseSessionSiteArguments } from './site-session-context.mjs';
-import { selectSessionSiteProducer, requirePublishableSessionMeasurements } from './site-session-selection.mjs';
+import { validateSessionProducer, selectSessionSiteProducer, requirePublishableSessionMeasurements } from './site-session-selection.mjs';
 import { validateSessionSiteReceipt, sessionSuiteFiles } from './site-session-receipt.mjs';
 
 async function capturePages(route, directory, key, context) {
@@ -57,14 +57,13 @@ async function captureSelection(input, context) {
     .sort((left, right) => right.run_number - left.run_number);
   for (const summary of candidates) {
     const directory = await createDirectory(path.join(metadata, String(summary.id)));
-    const route = `${GH.api}/runs/${summary.id}/attempts/${summary.run_attempt}`;
-    const run = await captureApi(route, path.join(directory, 'run-attempt.json'), false, context);
+    const cohort = validateSessionProducer(summary, workflow, context.mode);
+    const capture = await captureSettledSessionRun(directory, { ...context, cohort }, false);
+    const { run } = capture;
     requireSession(run.id === summary.id && run.run_attempt === summary.run_attempt && run.head_sha === summary.head_sha
       && run.run_number === summary.run_number && run.event === summary.event && run.conclusion === summary.conclusion);
-    const jobs = await capturePages(`${route}/jobs`, directory, 'jobs', context);
-    const artifacts = await capturePages(`${GH.api}/runs/${run.id}/artifacts`, directory, 'artifacts', context);
-    const selected = selectSessionSiteProducer({ run, jobs, artifacts }, workflow, context.mode);
-    if (selected !== null) return { ...selected, run, workflow, directory, capture: {run,jobs,artifacts} };
+    const selected = selectSessionSiteProducer(capture, workflow, context.mode);
+    if (selected !== null) return { ...selected, run, workflow, directory, capture };
     requireSession(context.optional);
   }
   requireSession(context.optional);

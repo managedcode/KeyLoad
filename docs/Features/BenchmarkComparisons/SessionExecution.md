@@ -27,9 +27,11 @@ contracts are kept. An unavailable topology gets an explicit unavailable result.
 
 The full-run collector requires all 32 authenticated successful worker envelopes.
 GitHub job and artifact indexes can settle after the final worker has uploaded its
-result. The collector captures fresh metadata at most four times, 20 seconds
+result, and a completed job can still expose a pending workload step. Benchmarks
+and Website use one shared capture owner to read fresh metadata at most four times, 20 seconds
 apart, within one 180-second deadline. It retains each original capture and uses
-only a complete validated capture; exhaustion or malformed evidence fails.
+only a settled validated capture; the full-run collector additionally requires all
+32 workers. Exhaustion or malformed selected evidence fails.
 The workflow retains the provider metadata even when aggregation fails. Website
 selection keeps its independent rules for authenticated unavailable cells.
 

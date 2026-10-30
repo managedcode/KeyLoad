@@ -3,6 +3,14 @@ import { timestamp } from './isolated-github-contract.mjs';
 import { uniqueNamed, validateArtifact, validateSuccessfulJob } from './isolated-github-validation.mjs';
 import { SESSION, requireSession, sessionRows, validateSessionCohort } from './session-contract.mjs';
 
+export function hasPendingSessionSteps(capture) {
+  return [...sessionRows().map(row => ({ name: row.jobName, steps: SESSION.workerSteps })),
+    { name: SESSION.prepareJob, steps: SESSION.prepareSteps }].some(({ name, steps }) =>
+    capture.jobs.some(job => job.name === name && job.status === 'completed' && job.conclusion === 'success'
+      && Array.isArray(job.steps) && steps.some(name => job.steps.some(step => step.name === name
+        && ['pending', 'queued', 'in_progress'].includes(step.status) && step.conclusion === null))));
+}
+
 export function selectSessionEvidence(capture, cohort) {
   validateSessionCohort(cohort);
   const { jobs, artifacts, run } = capture;
