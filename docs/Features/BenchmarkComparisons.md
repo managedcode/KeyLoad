@@ -420,7 +420,7 @@ complete original TRX, qualification, runtime/resource identities, hashes and
 correctness evidence. Incomplete server resource telemetry does not hide recorded
 operation measurements. Preserve resourceQualified=false and label these rows
 Measured · incomplete telemetry. Missing resource observations remain an em dash;
-server resource comparability remains unverified. Website records original operation timings independently of hosted-runner hardware equality; the native aggregation CLI retains its strict comparison policy. Selected corrupt, expired, foreign or mixed evidence is
+server resource comparability remains unverified. Website records original operation timings independently of hosted-runner hardware equality. The hosted Benchmarks workflow explicitly collects with `--resource-policy=recorded`, retaining every execution, correctness, accounting and provenance check without claiming matched hardware. The native aggregation CLI defaults to `comparison`; that policy still rejects unequal observed hardware and resource profiles. Its aggregate artifact includes `resource-policy.json` so the selected policy stays explicit outside the workflow log. A green collection run does not qualify cross-hardware performance comparisons. Selected corrupt, expired, foreign or mixed evidence is
 rejected. Workflows and triggers are defined in ADR-062, ADR-064 and ADR-112:
 Website intake reads original successful worker/runtime artifacts directly, even
 when the overall run or combined-results job failed. With no eligible sessions it

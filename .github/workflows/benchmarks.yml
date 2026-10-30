@@ -370,7 +370,9 @@ jobs:
           mkdir -p artifacts/comparisons/sessions
           node scripts/Features/BenchmarkComparisons/session-github-collect.mjs --input="$PWD/artifacts/comparisons/sessions/provider"
       - name: Check complete session accounting
-        run: node scripts/Features/BenchmarkComparisons/session-aggregate-cli.mjs --input="$PWD/artifacts/comparisons/sessions/provider" --output="$PWD/artifacts/comparisons/sessions/aggregate"
+        run: |
+          node scripts/Features/BenchmarkComparisons/session-aggregate-cli.mjs --input="$PWD/artifacts/comparisons/sessions/provider" --output="$PWD/artifacts/comparisons/sessions/aggregate" --resource-policy=recorded
+          printf '%s\n' 'All operation, correctness and provenance checks passed. These recorded timings do not qualify matched-hardware performance comparisons across GitHub-hosted runners. The native CLI comparison policy remains strict.' >> "$GITHUB_STEP_SUMMARY"
       - name: Save combined benchmark results
         uses: actions/upload-artifact@v7
         with:
