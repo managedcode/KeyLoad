@@ -15,6 +15,7 @@ internal static class ResourceLifetimeLedgerFlow
         {
             await ResourceLifetimeLedgerBusiness.InitialAsync(owner, workOwner, ledger,
                 parent, budget, expiry, lifetime);
+            await ResourceLifetimeLedgerAssertions.RepeatedIdentityAsync(ledger, lifetime);
             repair = ResourceLifetimeLedgerData.Repair(owner, state.Reader);
             await Assert.That(Errors.Code(repair.Result.Problem).Value).IsNull();
             await ResourceLifetimeLedgerBusiness.RepairedAsync(owner, workOwner, ledger,

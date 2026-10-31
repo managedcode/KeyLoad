@@ -51,15 +51,19 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         lock (gate)
         {
             ObjectDisposedException.ThrowIf(disposed, this);
-            var pending = new HashSet<ResourceLifetime>();
+            HashSet<ResourceLifetime>? pending = null;
             long additionalBytes = Empty;
             foreach (var lifetime in lifetimes)
             {
-                ResourceLifetimeIdentity.Validate(lifetime);
-                if (!retained.Contains(lifetime) && pending.Add(lifetime))
+                // Equal immutable entries were validated before entering this request's ledger.
+                if (retained.Contains(lifetime) || pending?.Contains(lifetime) == true)
                 {
-                    additionalBytes += OrleansSerialization.Measure(lifetime);
+                    continue;
                 }
+                ResourceLifetimeIdentity.Validate(lifetime);
+                pending ??= [];
+                pending.Add(lifetime);
+                additionalBytes += OrleansSerialization.Measure(lifetime);
                 if (additionalBytes > maximumBytes - retainedBytes)
                 {
                     throw Errors.Fail(ErrorCode.BudgetExceeded, Capacity);
@@ -69,7 +73,10 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, Capacity);
             }
-            retained.UnionWith(pending);
+            if (pending is not null)
+            {
+                retained.UnionWith(pending);
+            }
             retainedBytes += additionalBytes;
         }
     }
