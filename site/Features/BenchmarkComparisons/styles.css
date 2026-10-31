@@ -317,13 +317,13 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .bench-details summary::after { content: ""; width: 12px; height: 12px; background: currentColor; -webkit-mask: var(--chevron) center / contain no-repeat; mask: var(--chevron) center / contain no-repeat; transition: transform .3s var(--kl-ease); }
 .bench-details[open] summary::after { transform: rotate(180deg); }
 .bench-details[open] summary { margin-bottom: 1rem; }
-/* Horizontal regions shade the pinned edge once columns pass beneath it and fade the far edge while more columns remain. */
+/* Values fade into the pinned column once they pass beneath it and into the far edge while more columns remain. */
 .scroll-frame { position: relative; min-width: 0; }
-.scroll-frame::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; z-index: 3; width: 4.5rem; background: linear-gradient(to left, var(--kl-surface-solid) 8%, transparent); opacity: 0; pointer-events: none; transition: opacity .25s var(--kl-ease); }
+.scroll-frame::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; z-index: 3; width: min(4.5rem, 12vw); background: linear-gradient(to left, var(--kl-surface-solid) 8%, transparent); opacity: 0; pointer-events: none; transition: opacity .25s var(--kl-ease); }
 .bench-overview .scroll-frame::after { bottom: .5rem; }
 .bench-details .scroll-frame::after { inset: 1px 1px 1px auto; border-radius: 0 var(--kl-radius) var(--kl-radius) 0; }
 .scroll-frame.more-end::after { opacity: 1; }
-.comparison-grid tr > :first-child::after, .pin-nodes::after { content: ""; position: absolute; top: 0; bottom: -1px; left: 100%; width: 1.4rem; background: linear-gradient(90deg, rgba(28, 24, 44, .1), transparent); opacity: 0; pointer-events: none; transition: opacity .25s var(--kl-ease); }
+.comparison-grid tr > :first-child::after, .pin-nodes::after { content: ""; position: absolute; top: 0; bottom: 0; left: 100%; width: min(3rem, 9vw); background: linear-gradient(90deg, var(--row, var(--kl-surface-solid)) 10%, transparent); opacity: 0; pointer-events: none; transition: opacity .25s var(--kl-ease); }
 .more-start .comparison-grid tr > :first-child::after, .more-start .pin-nodes::after { opacity: 1; }
 /* Results table: engine and node count stay pinned while the values scroll. */
 .table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid var(--kl-line); border-radius: var(--kl-radius); background: var(--kl-surface-solid); scrollbar-color: var(--kl-line-strong) transparent; scrollbar-width: thin; }
@@ -340,7 +340,8 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .table-scroll th.pin-nodes, .table-scroll td.pin-nodes { padding-inline: .8rem; color: var(--kl-ink-2); text-align: center; }
 .table-scroll td.pin:first-child { font-weight: 600; }
 .table-scroll td:nth-child(3) { min-width: 10rem; max-width: 10rem; color: var(--kl-ink-2); font-size: .74rem; white-space: normal; }
-.table-scroll tbody tr:hover td { background-color: color-mix(in srgb, #6f5cf0 10%, var(--kl-surface-solid)); }
+.table-scroll tbody tr:hover { --row: color-mix(in srgb, #6f5cf0 10%, var(--kl-surface-solid)); }
+.table-scroll tbody tr:hover td { background-color: var(--row); }
 .table-scroll tr:last-child td { border-bottom: 0; }
 .table-scroll td[data-value=""] { color: var(--kl-faint); }
 .table-links { display: flex; gap: .8rem; }
@@ -416,6 +417,8 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 
 @media (max-width: 760px) {
   .comparison-grid { --pin: 8.75rem; --col: 8.75rem; }
+  .table-scroll table { --pin-name: 7.5rem; }
+  .table-scroll td.pin:first-child { white-space: normal; }
   .bench-controls fieldset { padding-left: 0; }
   .bench-legend { position: static; margin-bottom: -1.2rem; }
   .leaders { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(15.5rem, 82%); margin-inline: calc(-1 * clamp(1rem, 2.4vw, 2rem)); padding: .2rem clamp(1rem, 2.4vw, 2rem) .6rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
