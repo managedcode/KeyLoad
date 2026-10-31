@@ -19,7 +19,13 @@ public static class StoredCommandRead
     public static (bool HasValue, StoredCommand? Value) ReadStoredCommand(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(engine);
-        var original = engine.OwnCommand(operation);
+        return engine.ReadOwnedStoredCommand(engine.OwnCommand(operation), cancellationToken);
+    }
+
+    /// <summary>Reads the retained outcome for the caller's already owned command.</summary>
+    internal static (bool HasValue, StoredCommand? Value) ReadOwnedStoredCommand(this DatabaseEngine engine,
+        Command<DatabaseCommand> original, CancellationToken cancellationToken)
+    {
         return engine.Store.Read<(bool HasValue, StoredCommand? Value)>(view =>
         {
             cancellationToken.ThrowIfCancellationRequested();

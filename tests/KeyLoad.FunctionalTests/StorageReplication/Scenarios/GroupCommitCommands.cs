@@ -20,5 +20,12 @@ internal static class GroupCommitCommands
     internal static DocumentResult? Read(TestDatabase fixture, string id)
         => fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, id));
 
+    internal static TestDatabase SeedCollection()
+    {
+        var fixture = new TestDatabase();
+        fixture.Configure(Collection, ResourceKind.Collection);
+        return fixture;
+    }
+
     internal static CancellationToken Token => TestContext.Current!.Execution.CancellationToken;
 }

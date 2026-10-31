@@ -41,8 +41,9 @@ public static class StorageOperationBatchPreparation
             Command<DatabaseCommand> command;
             try
             {
-                command = engine.ReadStoredCommand(operation, cancellationToken).Value?.Command
-                    ?? engine.PrepareStorageOperation(operation, notBefore, cancellationToken);
+                var owned = engine.OwnCommand(operation);
+                command = engine.ReadOwnedStoredCommand(owned, cancellationToken).Value?.Command
+                    ?? engine.PrepareOwnedStorageOperation(owned, notBefore, cancellationToken);
             }
             catch (Exception error) when (prepared.Count > 0 && CqrsRuntimeFailures.FindFatal(error) is null)
             {

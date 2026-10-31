@@ -155,7 +155,7 @@ internal sealed class GroupCommitTests
     [Test]
     public async Task AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands()
     {
-        await DatabaseCompositionReplicaCut.RunAsync(SeedCollection, async (source, replica) =>
+        await DatabaseCompositionReplicaCut.RunAsync(GroupCommitCommands.SeedCollection, async (source, replica) =>
         {
             var token = GroupCommitCommands.Token;
             var prepared = source.Database.PrepareStorageOperations([GroupCommitCommands.Put(source, First, Created),
@@ -185,10 +185,21 @@ internal sealed class GroupCommitTests
         Command<DatabaseCommand>[] operations = [GroupCommitCommands.Put(fixture, First, Created),
             GroupCommitCommands.Put(fixture, Second, Created)];
         var token = GroupCommitCommands.Token;
+        var inputs = operations.Select(operation => operation.Value!.Input.ToArray()).ToArray();
+        for (var index = 0; index < operations.Length; index++)
+        {
+            operations[index].Value = operations[index].Value! with { Input = inputs[index] };
+        }
+        var originals = operations.Select(OrleansSerialization.Serialize).ToArray();
         clock.Descending = true;
 
         var prepared = fixture.Database.PrepareStorageOperations(operations, token);
         clock.Descending = false;
+        for (var index = 0; index < operations.Length; index++)
+        {
+            await Assert.That(OrleansSerialization.Serialize(operations[index]).AsSpan().SequenceEqual(originals[index])).IsTrue();
+            Array.Clear(inputs[index]);
+        }
         var batch = fixture.Database.ApplyStorageOperations(prepared, fixture.Database.LastApplied + NextSequence, token);
 
         await Assert.That(prepared[1].Timestamp).IsGreaterThanOrEqualTo(prepared[0].Timestamp);
@@ -197,14 +208,9 @@ internal sealed class GroupCommitTests
         {
             await Assert.That(Errors.Code(applied.Result.Problem).Value).IsNull();
         }
+        await Assert.That(GroupCommitCommands.Read(fixture, First)!.Json).IsEqualTo(Created);
+        await Assert.That(GroupCommitCommands.Read(fixture, Second)!.Json).IsEqualTo(Created);
         await Assert.That(GroupCommitCommands.Read(fixture, Second)!.Revision).IsEqualTo(1L);
-    }
-
-    private static TestDatabase SeedCollection()
-    {
-        var fixture = new TestDatabase();
-        fixture.Configure(GroupCommitCommands.Collection, ResourceKind.Collection);
-        return fixture;
     }
 
     private static int MeasureLargeCommandFrame()

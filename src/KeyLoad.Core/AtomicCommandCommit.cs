@@ -30,7 +30,13 @@ public static class AtomicCommandCommit
     {
         ArgumentNullException.ThrowIfNull(engine);
         cancellationToken.ThrowIfCancellationRequested();
-        var verified = engine.OwnCommand(operation);
+        return engine.PrepareOwnedStorageOperation(engine.OwnCommand(operation), notBefore, cancellationToken);
+    }
+
+    /// <summary>Prepares the already owned operation under the committed clock.</summary>
+    internal static Command<DatabaseCommand> PrepareOwnedStorageOperation(this DatabaseEngine engine,
+        Command<DatabaseCommand> owned, DateTimeOffset? notBefore, CancellationToken cancellationToken)
+    {
         var prepared = engine.Store.Read(view =>
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -46,7 +52,8 @@ public static class AtomicCommandCommit
                 now = floor;
             }
 
-            return engine.PrepareQueueRetryInView(view, engine.EvaluateCommand(verified, now));
+            owned.Timestamp = now.UtcDateTime;
+            return engine.PrepareQueueRetryInView(view, owned);
         });
         return prepared;
     }
