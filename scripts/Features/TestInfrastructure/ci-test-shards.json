@@ -365,6 +365,7 @@
               "id": "file-ownership-and-atomic-admission",
               "kind": "own-clusters",
               "classes": [
+                "DocumentPathDiagnosticTests",
                 "FunctionalFileOwnershipClusterTests",
                 "QueueDispatchCasClusterTests",
                 "RequestBodyLimitClusterTests",
