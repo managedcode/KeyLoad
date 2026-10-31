@@ -49,6 +49,15 @@ runs:
         if jq -e '.result.state == "unavailable"' "$EVIDENCE_DIR/isolated-capture-envelope.json" > /dev/null; then
           benchmark_mode=none
         else
+          # Node aggregation has verified every input against its original digest-bound ZIP.
+          # Materialize that validated output directly; Website never invokes test hooks.
+          jq -e '.state == "metadata_verified"' "$isolated_proof" > /dev/null
+          prepared="$KEYLOAD_SITE_ISOLATED_CAPTURE/prepared-input"
+          input="$KEYLOAD_SITE_ISOLATED_CAPTURE/input"
+          [[ -d "$prepared" && ! -L "$prepared" && ! -e "$input" && ! -L "$input" ]]
+          [[ ! -e "$KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT" && ! -L "$KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT" ]]
+          mv -- "$prepared" "$input"
+          jq '.state = "archive_verified"' "$isolated_proof" > "$KEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT"
           printf 'KEYLOAD_SITE_ISOLATED_MEASURED_REVISION=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_ENV"
           printf 'isolated_measured_revision=%s\n' "$(jq -er '.source.measured' "$isolated_proof")" >> "$GITHUB_OUTPUT"
         fi
