@@ -934,6 +934,11 @@ local build do not establish publication qualification.
 
 ## Chrome session admission
 
+Website qualification selects eight concurrent TUnit cases through the existing
+execution option. Full-archive children retain their two active slots, 64-entry
+FIFO queue and 20-minute admission deadline. The complete unfiltered test suite,
+original-byte verification and coverage thresholds remain mandatory.
+
 `REQ-BC-CHROME-001`: Real Chrome work performed by one `KeyLoad.WebsiteTests`
 process is admitted through a bounded session owner. At most one real
 Chrome process may be active in that process. Admission is acquired before

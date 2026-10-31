@@ -156,7 +156,8 @@ runs:
       env:
         NODE_V8_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage/node
       run: |
-        site_args=(--KeyLoadTests:Suite=website --KeyLoadTests:TimeoutMinutes=120 --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests")
+        # Bound the cases waiting for the existing two heavy child slots.
+        site_args=(--KeyLoadTests:Suite=website --KeyLoadTests:Execution:MaximumParallelTests=8 --KeyLoadTests:TimeoutMinutes=120 --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests")
         if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
           site_args+=('--KeyLoadTests:Filter=/*/*/SiteContent*/*')
         else
