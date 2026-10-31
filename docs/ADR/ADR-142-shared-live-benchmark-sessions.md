@@ -60,7 +60,8 @@ identity or resource observation may stand in for a server process.
 
 The measurement matrix is 16 databases × two topologies = 32 jobs. Shared
 preparation, aggregation and Website dispatch make 35 measurement-flow jobs;
-full Benchmarks first calls the canonical Release functional/image publication gates.
+the manual Release workflow owns product image publication and its qualification.
+Benchmarks only consumes the latest public released image pinned to one digest.
 Benchmarks runs no source-built KeyLoad job; the KeyLoad cells start the released
 image like every other database's. A job failure may
 leave later prerequisites failed; original case outcomes must show this honestly.

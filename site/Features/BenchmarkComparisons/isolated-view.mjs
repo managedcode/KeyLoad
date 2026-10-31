@@ -123,6 +123,7 @@ function overview(document, model, sort, type = 'all') {
     'Operations per second. Top bar 1 node, lower bar 3 nodes with the change against 1 node. ' +
       (type === 'all' ? 'Click a card or column to sort.' : 'Click a column to sort.'));
   if (type === 'all') section.append(leaders(document, model, sort));
+  section.append(el(document, 'p', 'table-scroll-hint', 'Swipe or scroll horizontally to see all columns.'));
   const scroll = section.appendChild(el(document, 'div', 'comparison-scroll'));
   scroll.tabIndex = 0;
   scroll.setAttribute('role', 'region');

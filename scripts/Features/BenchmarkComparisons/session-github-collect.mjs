@@ -12,7 +12,7 @@ import { readJson, writeJson } from './isolated-github-files.mjs';
 import { projectArtifact, projectJob } from './isolated-github-validation.mjs';
 import { createSessionContext } from './session-github-context.mjs';
 import { hasPendingSessionSteps, selectSessionEvidence } from './session-github-selection.mjs';
-import { SESSION, requireSession } from './session-contract.mjs';
+import { SESSION, requireSession, sessionCaseIds } from './session-contract.mjs';
 import { collectSessionRuntimeIdentity, readSessionRuntimeIdentity } from './session-runtime-identity.mjs';
 import { validateSessionEnvelope } from './session-report-validation.mjs';
 
@@ -25,8 +25,9 @@ export async function collectSessionWorker(input, selected, context, runtimeIden
     path.join(input, 'github', `${row.id}-inventory.txt`), context);
   const directory = await createDirectory(path.join(input, 'workers', row.id));
   const raw = await extractEntry(archive, 'session.json', path.join(directory, 'session.json'), SESSION.sessionBytes, context);
-  const envelope = validateSessionEnvelope(await readJson(path.join(directory, 'session.json')),
-    row, context.cohort, job.id, runtimeIdentity);
+  const recorded = await readJson(path.join(directory, 'session.json'));
+  const inventoryCases = sessionCaseIds(recorded.cases.map(record => record.id));
+  const envelope = validateSessionEnvelope(recorded, row, context.cohort, job.id, runtimeIdentity, inventoryCases);
   requireSession(envelope.outcome === 'failure' ? job.conclusion === 'failure' : job.conclusion === 'success');
   const references = [...envelope.cases, envelope.runtimeReport, envelope.outerRuntime, envelope.qualificationReport, ...(envelope.resourceReport ? [envelope.resourceReport] : [])];
   const directories = new Set([directory]);

@@ -225,10 +225,10 @@ The server executable project is [`KeyLoad`](src/KeyLoad/KeyLoad.csproj).
 Aspire starts execution `KeyLoad` .NET project processes with in-memory
 [RapidMembership](https://github.com/managedcode/Orleans.RapidMembership)
 for Orleans membership. Ordinary build, development and tests do not publish or run
-KeyLoad Docker images. The canonical Release workflow publishes the server image with
+KeyLoad Docker images. The manual Release workflow publishes the server image with
 SDK `PublishContainer` to `ghcr.io/managedcode/keyload` (commit SHA and `latest`
 tags). The separate `build/KeyLoad.LoadTests.AppHost` owns selected comparison
-database infrastructure and runs the KeyLoad cells from the same-source Release image,
+database infrastructure and runs the KeyLoad cells from the latest released image,
 pinned by digest; its workload client runs outside the Aspire resource graph.
 
 Membership discovers localhost and reachable local IPv4 interfaces automatically.
@@ -465,12 +465,11 @@ The comparison suite uses native clients and isolated nonproduction database dep
 
 Required comparison scales: **100,000 and 1,000,000 records**, at **1 or 3 nodes** where supported. The current shared session uses one million records, with 16 systems and 32 topology rows. The [shared session](docs/Features/BenchmarkComparisons/SessionExecution.md) retains thirteen original cases, including exact vectors, confirmed queue cycles and verified event append/read/mixed operations. These cases cover Qdrant, RabbitMQ and KurrentDB through their native adapters; every website category uses the same comparison table. The new session source still requires exact-source Linux benchmark and website qualification before publishing figures. The [five added targets](docs/Features/BenchmarkComparisons/AdditionalDatabases.md) currently implement one-node document sessions; their three-node deployments and separate time-series/analytics qualification remain open. SQL Server uses Developer edition for nonproduction benchmarks. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
 
-The website can show independently verified successful sessions from a completed
-benchmark run whose overall result failed. It keeps every planned row and shows
-`—` for missing or failed sessions, including KeyLoad when no qualified result is
-available. Each displayed number still requires complete original GitHub artifacts,
-TRX outcomes, source/runtime/resource identities and correctness checks from one
-run and attempt. Website browser, coverage and Pages qualification remain separate.
+The website displays only the latest completed successful Benchmarks measurement
+run and its original authenticated data. Its source, image, attempt, topology and
+workload inventory remain explicit. A failed or unfinished new run never removes
+those verified figures. Cases not measured in that successful run have no invented
+numbers. Website browser, coverage and Pages qualification remain separate.
 
 ---
 

@@ -11,11 +11,19 @@ internal static class SiteIsolatedBrowserLayoutAssertions
     private const string FocusedField = "focused";
     private const string AccessibleField = "accessible";
     private const string ScrollableField = "scrollable";
+    private const string ComparisonAccessibleField = "comparisonAccessible";
+    private const string ComparisonContainedField = "comparisonContained";
+    private const string ComparisonScrollableField = "comparisonScrollable";
+    private const string ComparisonCellsField = "comparisonCells";
+    private const string ComparisonSelector = "#isolated-results .comparison-scroll";
+    private const string DetailsSelector = "#isolated-results .isolated-table-scroll";
     private const string VirtualKeyField = "windowsVirtualKeyCode";
     private const string OpenTable = "(()=>{document.querySelectorAll('#isolated-results .bench-details').forEach(e=>e.open=true);return true;})()";
     private const string Snapshot = """
         (()=>{
           const wrapper=document.querySelector('#isolated-results .isolated-table-scroll');
+          const comparison=document.querySelector('#isolated-results .comparison-scroll');
+          const mainRect=comparison.getBoundingClientRect();
           const rect=wrapper.getBoundingClientRect();const width=document.documentElement.clientWidth;
           const visible=e=>getComputedStyle(e).display!=='none'&&getComputedStyle(e).visibility!=='hidden'&&e.getBoundingClientRect().height>0;
           const rows=Array.from(wrapper.querySelectorAll('tbody tr'));
@@ -23,6 +31,10 @@ internal static class SiteIsolatedBrowserLayoutAssertions
           wrapper.focus();
           return{documentContained:document.documentElement.scrollWidth<=width,
             wrapperContained:rect.width>0&&rect.left>=0&&rect.right<=width,
+            comparisonContained:mainRect.width>0&&mainRect.left>=0&&mainRect.right<=width,
+            comparisonAccessible:comparison.tabIndex===0&&comparison.getAttribute('role')==='region'&&/scroll/i.test(comparison.getAttribute('aria-label')??''),
+            comparisonScrollable:['auto','scroll'].includes(getComputedStyle(comparison).overflowX)&&comparison.scrollWidth>comparison.clientWidth,
+            comparisonCells:Array.from(comparison.querySelectorAll('td')).every(cell=>getComputedStyle(cell).minWidth==='0px'),
             rows:rows.length,rowsVisible:rows.every(row=>visible(row)&&row.cells[2].textContent.trim().length>0),
             workerCount:workers.length,workersVisible:workers.every(e=>visible(e)&&e.closest('.comparison-scroll')?.getBoundingClientRect().right<=width),
             focused:document.activeElement===wrapper,
@@ -40,7 +52,8 @@ internal static class SiteIsolatedBrowserLayoutAssertions
         {
             await SetViewportAsync(cdp, width, token);
             var snapshot = await cdp.EvaluateAsync(Snapshot, false, token);
-            var fields = new[] { DocumentContainedField, WrapperContainedField, RowsVisibleField, WorkersVisibleField, FocusedField, AccessibleField };
+            var fields = new[] { DocumentContainedField, WrapperContainedField, RowsVisibleField, WorkersVisibleField,
+                FocusedField, AccessibleField, ComparisonAccessibleField, ComparisonContainedField, ComparisonCellsField };
             if (fields.Any(field => !snapshot.GetProperty(field).GetBoolean()))
             {
                 TestContext.Current!.Output.WriteLine("Layout snapshot at " + width + ": " + snapshot.GetRawText());
@@ -55,7 +68,9 @@ internal static class SiteIsolatedBrowserLayoutAssertions
             if (width <= SiteBrowserUiTokens.ViewportMobileWidth)
             {
                 await Assert.That(snapshot.GetProperty(ScrollableField).GetBoolean()).IsTrue();
-                await AssertKeyboardScrollAsync(cdp, token);
+                await Assert.That(snapshot.GetProperty(ComparisonScrollableField).GetBoolean()).IsTrue();
+                await AssertKeyboardScrollAsync(cdp, DetailsSelector, token);
+                await AssertKeyboardScrollAsync(cdp, ComparisonSelector, token);
             }
         }
         await SetViewportAsync(cdp, SiteBrowserUiTokens.ViewportDesktopWidth, token);
@@ -70,9 +85,10 @@ internal static class SiteIsolatedBrowserLayoutAssertions
             [SiteBrowserTokens.MobileField] = false,
         }, token);
 
-    private static async Task AssertKeyboardScrollAsync(SiteBrowserCdpClient cdp, CancellationToken token)
+    private static async Task AssertKeyboardScrollAsync(SiteBrowserCdpClient cdp, string selector, CancellationToken token)
     {
-        const string reset = "(()=>{const e=document.querySelector('#isolated-results .isolated-table-scroll');e.scrollLeft=0;e.focus();return document.activeElement===e;})()";
+        var literal = JsonSerializer.Serialize(selector);
+        var reset = "(()=>{const e=document.querySelector(" + literal + ");e.scrollLeft=0;e.focus();return document.activeElement===e;})()";
         await Assert.That((await cdp.EvaluateAsync(reset, false, token)).GetBoolean()).IsTrue();
         foreach (var type in new[] { SiteBrowserTokens.KeyboardKeyDown, SiteBrowserTokens.KeyboardKeyUp })
         {
@@ -84,7 +100,7 @@ internal static class SiteIsolatedBrowserLayoutAssertions
                 [VirtualKeyField] = 39,
             }, token);
         }
-        const string scrolled = "document.querySelector('#isolated-results .isolated-table-scroll').scrollLeft>0";
+        var scrolled = "document.querySelector(" + literal + ").scrollLeft>0";
         await Assert.That(await cdp.WaitForExpressionAsync(scrolled, token)).IsTrue();
     }
 }

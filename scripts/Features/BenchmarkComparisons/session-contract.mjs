@@ -1,4 +1,4 @@
-// Current session cohort only. Physical isolation is database × execution topology.
+// One report format; authenticated runs retain their original declared workload inventory.
 export const SESSION = Object.freeze({
   schema: 'session', profile: 'session', repository: 'managedcode/KeyLoad',
   ref: 'refs/heads/main', workflow: 'Benchmarks', workers: 32,
@@ -14,6 +14,7 @@ export const SESSION = Object.freeze({
   reportBytes: 268_435_456, runtimeBytesCore: 16_777_216, sessionBytes: 4_194_304,
   aggregateBytes: 33_554_432, archiveBytes: 536_870_912, allArchiveBytes: 17_179_869_184,
   topologyUnavailable: 'RuntimeTopologyUnavailable',
+  capabilitiesUnavailable: 'SessionCapabilitiesUnavailable',
   unavailableTopologyTargets: Object.freeze(['Neo4j','SurrealDB','HelixDB','TimescaleDB','SQL Server','MySQL','ClickHouse','InfluxDB']),
   failure: 'Benchmark session evidence rejected.',
 });
@@ -25,6 +26,12 @@ export const SESSION_TARGETS = Object.freeze([
   ['clickhouse', 'ClickHouse'], ['influxdb', 'InfluxDB'],
 ].map(([key, name]) => Object.freeze({ key, name })));
 export const requireSession = condition => { if (!condition) throw new Error(SESSION.failure); };
+export function sessionCaseIds(value) {
+  const required = SESSION.caseIds.indexOf('model-prepare');
+  requireSession(Array.isArray(value) && value.length >= required && value.length <= SESSION.caseIds.length
+    && value.every((id, index) => id === SESSION.caseIds[index]));
+  return value;
+}
 export const exactSession = (value, keys) => value !== null && typeof value === 'object' && !Array.isArray(value)
   && Object.keys(value).length === keys.length && keys.every(key => Object.hasOwn(value, key));
 export const sessionHash = value => typeof value === 'string' && /^[a-f0-9]{64}$/.test(value);

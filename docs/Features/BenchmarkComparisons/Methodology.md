@@ -16,9 +16,10 @@ three nodes. Different databases/topologies never share a runner, containers,
 volumes or measurement session. One Aspire-owned deployment lives for the entire
 job. Many separate real TUnit tests share its fixture; only one workload
 test executes at a time, with the declared concurrent clients inside that test.
-The prerequisite canonical Release qualifies and publishes the same-source KeyLoad image;
-the common preparation builds the runner once; each worker imports
-and verifies the same-source binaries, tools and image identities.
+The common preparation builds the client runner once and resolves the latest public
+released KeyLoad image to one digest. Each worker imports the same-run client
+binaries/tools and deploys the pinned public image. Release and Build and Tests
+remain separate; Benchmarks does not invoke them or publish a product image.
 
 ```mermaid
 flowchart LR
@@ -132,7 +133,7 @@ No automatic measurement retry repairs the statistics. No skipped, missing,
 corrupt or mixed-cohort original is accepted as a complete session.
 
 Aggregation authenticates all 32 database/topology jobs, their exact planned
-cases, original reports and TRX, same-source images, compiled-runtime
+cases, original reports and TRX, pinned released images, compiled-runtime
 identity/import receipts and statistics. Actual failed cases retain null metrics
 and original provenance. Website independently qualifies its source, archives,
 real browser and coverage before rendering these results; content-only publication

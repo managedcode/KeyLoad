@@ -55,7 +55,7 @@ KeyLoad nodes in a comparison run with no request throttling and no admission pr
 | Requirement | Type / priority | Behavior and rationale | Acceptance |
 |---|---|---|---|
 | REQ-BC-001 | Correctness / P0 | Use one deterministic dataset and exact caller-visible correctness oracle for every supported equivalent workload. | AC-BC-001; stable hash and verified documents/vectors/graph/events. |
-| REQ-BC-002 | Topology / P0 | Run every database, KeyLoad included, as digest-pinned containers and keep the workload client outside the selected LoadTests AppHost infrastructure. KeyLoad runs the Release-published server image for the benchmark source commit, pinned to its returned registry digest. Preserve real cluster and SDK calls. | AC-BC-002; actual container graph, image references with digests, endpoints and joined runtime evidence. |
+| REQ-BC-002 | Topology / P0 | Run every database, KeyLoad included, as digest-pinned containers and keep the workload client outside the selected LoadTests AppHost infrastructure. KeyLoad runs the latest public released server image, resolved once per run to its registry digest. Preserve real cluster and SDK calls. | AC-BC-002; actual container graph, image references with digests, endpoints and joined runtime evidence. |
 | REQ-BC-003 | Replication / P0 | Add replicated engine groups with observed membership/copy/acknowledgement state. | AC-BC-003; real connected cluster proof before timing. |
 | REQ-BC-004 | Engine coverage / P0 | Compare the canonical 11-target inventory: KeyLoad, PostgreSQL + pgvector, Qdrant, RabbitMQ, Redis, Neo4j, MongoDB, OpenSearch, KurrentDB, SurrealDB and HelixDB. Preserve actual topology support and explicit unsupported profiles. | AC-BC-004; complete current plan and honest support matrix. |
 | REQ-BC-005 | Event streams / P0 | Add expected-no-stream single-event append and bounded single-event read with identity/revision/cardinality/payload validation. | AC-BC-005; four supported engine implementations and readback. |
@@ -88,13 +88,11 @@ server projects with in-memory RapidMembership for Orleans membership. The separ
 readiness, discovered endpoints and cleanup. `KeyLoad.ComparisonHost` runs the
 client-owned workload outside that resource graph.
 
-The canonical Release workflow publishes the KeyLoad server image with the SDK
-`PublishContainer` target to `ghcr.io/managedcode/keyload`, tagged with the commit
-SHA and the moving `latest` tag. Benchmarks measures that released image, not the
-source built only for the workload client. Full Benchmarks first calls Release,
-which runs its existing functional gates and publishes that exact source commit.
-The returned commit tag and digest identify both KeyLoad cells as
-`ghcr.io/managedcode/keyload:<source-commit>@sha256:…`
+The manual Release workflow publishes the KeyLoad server image with the SDK
+`PublishContainer` target to `ghcr.io/managedcode/keyload` under commit and `latest`
+tags. Benchmarks resolves the latest public released image once and pins its digest.
+It never calls Release or Build and Tests, builds a product image, or publishes one.
+Both KeyLoad cells use `ghcr.io/managedcode/keyload:latest@sha256:…`
 and receive it as `Benchmarks__KeyLoadImage`, and the LoadTests AppHost starts each
 KeyLoad node as an Aspire container from that digest. KeyLoad nodes keep the image
 user, write their ZoneTree data to an anonymous session volume under the image
@@ -256,12 +254,15 @@ The pipeline uses exactly four workflows under
 [ADR-064](../ADR/ADR-064-workflow-release-delivery.md): Build and Tests owns
 ordinary build/test/rule gates; Benchmarks owns load/comparison/TimeSeries
 checks and complete authenticated JSON aggregation; Website owns site/browser
-checks and Pages deployment; Release owns canonical database publication and is also called by full Benchmarks
-to qualify and publish the same source commit before measurement. Benchmarks dispatches Website in its final bounded job
-after all dependencies settle. Website also supports an independent trusted-main manual dispatch and has no workflow_run executor. It publishes metrics
-only from a complete comparable authenticated cohort, or publishes without
-figures. isolated job/artifact identities, workloads and topology remain
-required.
+checks and Pages deployment; manual Release owns canonical database publication.
+Benchmarks resolves the latest public KeyLoad image to one digest and runs it like
+the other database images. It does not invoke Release or Build and Tests.
+After successful aggregation, Benchmarks may dispatch the independent Website
+workflow. Website also runs for site changes and trusted-main manual dispatch,
+with no workflow_run executor. It publishes figures only from the latest completed
+successful full authenticated cohort; newer failed or incomplete runs leave those
+figures in place. Content-only publication applies when no successful measurement
+producer exists. Original job/artifact identities, workloads and topology remain required.
 
 The additive [serialization diagnostics](BenchmarkComparisons/OrleansSerialization.md)
 map REQ-IS-PERF-001..004 to AC-IS-PERF-001..004 under ADR060/ADR047. They are
@@ -423,15 +424,15 @@ operation measurements. Preserve resourceQualified=false and label these rows
 Measured · incomplete telemetry. Missing resource observations remain an em dash;
 server resource comparability remains unverified. Website records original operation timings independently of hosted-runner hardware equality. The hosted Benchmarks workflow explicitly collects with `--resource-policy=recorded`, retaining every execution, correctness, accounting and provenance check without claiming matched hardware. The native aggregation CLI defaults to `comparison`; that policy still rejects unequal observed hardware and resource profiles. Its aggregate artifact includes `resource-policy.json` so the selected policy stays explicit outside the workflow log. A green collection run does not qualify cross-hardware performance comparisons. Selected corrupt, expired, foreign or mixed evidence is
 rejected. Workflows and triggers are defined in ADR-062, ADR-064 and ADR-112:
-Website intake reads original successful worker/runtime artifacts directly, even
-when the overall run or combined-results job failed. With no eligible sessions it
-publishes content without figures. There is no `workflow_run` executor.
+Website intake reads the complete original worker/runtime artifacts from only the
+latest completed successful measurement run. Failed or unfinished new runs leave
+the previously verified figures intact. There is no `workflow_run` executor.
 
 | Requirement | Acceptance | Verification |
 |---|---|---|
 | REQ-BC-FAIL-001 independent workloads finish | AC-BC-FAIL-001 failed matrices do not skip aggregate; no fail-fast or arbitrary parallel cap | actual GitHub job outcomes and complete aggregate accounting; source presence checks are not acceptance evidence |
 | REQ-BC-FAIL-002 explicit unavailable cells | AC-BC-FAIL-002 workload failure produces a bounded null-report envelope before artifact upload; original job failure remains visible | real Node/files TUnit tests, actual failed-job artifact |
-| REQ-BC-FAIL-003 authenticated partial results | AC-BC-FAIL-003 a completed failed run may supply independently successful complete worker sessions; failed/missing workers supply null values, while selected malformed/expired/mixed evidence is rejected | producer/aggregate/site negative and positive TUnit regressions |
+| REQ-BC-FAIL-003 authenticated partial results | AC-BC-FAIL-003 only the latest completed successful measurement run supplies figures; all 32 original sessions must remain complete, and selected malformed/expired/mixed evidence is rejected | producer/aggregate/site negative and positive TUnit regressions |
 | REQ-BC-FAIL-004 honest site | AC-BC-FAIL-004 successful competitors retain values; absent sessions have no numeric values, display an em dash and link the actual run | independent numeric oracle, projection validation and real Chrome |
 | REQ-BC-FAIL-005 repair shared preparation | AC-BC-FAIL-005 diagnose exact failed logs, repair benchmark setup/build invocation, retain isolated topology and Aspire ownership; bounded transient GET retries cover HTTP 503 as well as 403/429, and a failed shared setup finalizes a null-report envelope | exact failed-source log, focused regression, delivered-source GitHub rerun |
 | REQ-BC-FAIL-007 Kurrent writer starts after membership | AC-BC-FAIL-007 verify all execution1/3-member views before constructing the SDK writer; retain DNS seeds, TLS verification, leader preference, NoStream semantics, acknowledgements, replica-copy oracle and cleanup | `IsolatedKurrentDiscoverySettingsTests`:3 actual SDK/resource-model cases; genuine Aspire-owned StreamAppend preflights for1/3 nodes |
@@ -447,7 +448,7 @@ publishes content without figures. There is no `workflow_run` executor.
 | REQ-BC-FAIL-017 database-only benchmark graph | AC-BC-FAIL-017 Benchmarks owns preparation, database comparisons, authenticated result validation and JSON aggregation. It has no browser/site qualification, coverage or Pages dependency; its final bounded job dispatches the separate Website workflow after dependencies settle. Independent cells finish and failed workloads retain null data. | actual completed planned cells/aggregate JSON and original GitHub job graph; source-only workflow tests are not evidence |
 | REQ-BC-FAIL-018 independent automatic website | AC-BC-FAIL-018 Website runs independently on trusted own-main manual dispatch and on the final bounded Benchmarks dispatch. It consumes authenticated ready metrics when available or qualifies content without figures; website qualification/deployment does not affect Benchmarks results. | Website workflow and optional producer-selection TUnit cases; genuine standalone Website/Pages evidence |
 | REQ-BC-FAIL-019 authenticate the bounded producer wait | AC-BC-FAIL-019 Website accepts the optional benchmark run ID only from its trusted manual/final-dispatch input, validates the actual own-repository main Benchmarks run identity, and waits within the frozen bound for completion. The supplied run is the sole candidate for qualification and predeploy recheck; its complete original provenance is revalidated. Empty manual input retains newest-ready selection. | Actual Website input/context/selection rejection tests and final-dispatch plus standalone Website workflow evidence |
-| REQ-BC-FAIL-020 newest ready optional metrics | AC-BC-FAIL-020 select the newest ready completed own-main producer with successful original session artifacts and valid archive/proof inventory, even when the overall run failed. Cancelled/pending producers and failed/incomplete sessions supply no figures; if no session is eligible, publish without figures. Corrupt, expired or missing evidence for a selected ready producer fails closed without an older fallback; recheck the selected tuple before deploy. | Real producer-selection positive/negative TUnit cases, Website capture and freshness/provider join |
+| REQ-BC-FAIL-020 newest ready optional metrics | AC-BC-FAIL-020 select the latest completed successful own-main measurement run with all original session artifacts and valid archive/proof inventory. Failed, cancelled or pending new runs never replace existing verified figures. Corrupt, expired or missing evidence for a selected ready producer fails closed without an older fallback; recheck the selected tuple before deploy. | Real producer-selection positive/negative TUnit cases, Website capture and freshness/provider join |
 | REQ-BC-FAIL-021 independent Website lifecycle | AC-BC-FAIL-021 Website qualification and deployment retain separate serialized job groups with cancellation disabled; content-only and measured modes both revalidate current source and the selected producer tuple before publication. Build and Tests remains independent. | Actual Website job graph, source/tuple freshness cases and provider receipts |
 
 OpenSearch note for AC-BC-FAIL-010: pinned OpenSearch 3.6.0 / k-NN 3.6.0.0 registers
@@ -822,14 +823,13 @@ controlled inputs and healthy newest-ready selection. Original external run/arti
 provenance remains immutable; previous producer formats are not executable publication
 inputs.
 
-REQ-BC-WEB-008 / AC-BC-WEB-008 (ADR-112) require the full measurement path to
-qualify and publish the same-source KeyLoad image, execute the current database
-sessions, then dispatch Website with the producer run ID after dependencies settle.
-Website has no separate push-time executor that publishes before this run. Manual
-trusted-main content publication remains available. Static YAML/actionlint review
-checks the workflow files; genuine GitHub event/job/Pages evidence and bounded
-producer admission remain the required provider evidence. Metric/archive/browser/
-coverage/freshness gates remain unchanged.
+REQ-BC-WEB-008 / AC-BC-WEB-008 (ADR-112) keep the workflows independent:
+Benchmarks deploys public released images, runs applicable scenarios and returns
+original results. It may dispatch a separate Website rebuild after completion.
+Website retains trusted-main push/manual entries and selects only the latest
+completed successful measurement run. The optional triggering run ID is a
+completion barrier and never forces publication from a failed run. Original
+archive, browser, coverage, freshness and provenance gates remain mandatory.
 
 ### Standalone Website acceptance
 
@@ -875,19 +875,21 @@ until eligible current functional coverage exists.
 ### Final Benchmarks trigger
 
 REQ-BC-WEB-007 / AC-BC-WEB-007: the final Benchmarks job only dispatches the
-separate Website workflow on main after aggregation dependencies settle. It runs
-on trusted own-main push/manual even when benchmark checks or aggregation fail,
+separate Website workflow on main after successful aggregation. It runs
+on trusted own-main push/manual after the complete database cohort succeeds,
 and never builds/tests/deploys the website. Scope `actions: write` to that job;
 retain read-only database jobs and unchanged workloads. Website uses workflow_dispatch events, with its independent source publication intact.
 
-Dispatch supplies an optional `benchmark_run_id` for bounded completion waiting
-and selection of that exact authenticated run.
+A failed or incomplete run cannot dispatch an automatic empty replacement of the
+deployed site. Independent Website changes retain the latest successful figures.
+
+Dispatch supplies an optional `benchmark_run_id` for bounded completion waiting.
 Website authenticates the actual original run's repository, branch, workflow
 name/path, event and source through GitHub; bounded waiting resolves the race
-between dispatch and producer completion before selecting that same authenticated run. Reject
+between dispatch and producer completion. Publication then selects the latest completed successful full run. Reject
 invalid/foreign metadata and timeout, preserve failure/absence handling and
-source/tuple freshness. The input restricts the candidate run and never replaces its authenticated
-archive provenance. Empty manual input needs no producer wait. The 270-second
+source/tuple freshness. The input is only a completion barrier and never replaces authenticated
+archive provenance or successful-run selection. Empty manual input needs no producer wait. The 270-second
 wait retries failed GitHub status requests within that same deadline, with each
 request bounded to 30 seconds and fresh metadata requested. Successful responses
 must pass the unchanged run identity checks before use. Existing execution TUnit
@@ -899,7 +901,7 @@ workflow_dispatch Website/Pages run supply provider evidence. ADR-112 owns the o
 ### Current Website capture and archive consumers
 
 The current capture (AC-BC-WEB-001/002/004/006/007 and AC-BC-FAIL-019) admits trusted
-manual/final-dispatch executors, performs bounded authenticated optional-run waiting, and selects
+push/manual/final-dispatch executors, performs bounded authenticated optional-run waiting, and selects
 producers through the current REST API. REST workflow_runs paging and
 artifact.workflow_run provenance remain mandatory authority checks, including
 unsupported producer-list event rejection. Capture has no executor event-file input.

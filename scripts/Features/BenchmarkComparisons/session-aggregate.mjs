@@ -13,7 +13,7 @@ import { readSessionRuntimeIdentity, validateSessionRuntimeImport } from './sess
 import { validateSessionAggregate } from './session-aggregate-contract.mjs';
 export { validateSessionAggregate } from './session-aggregate-contract.mjs';
 import { SESSION, exactSession as exact, requireSession as require, sessionRows, sessionHash,
-  validateSessionCohort } from './session-contract.mjs';
+  sessionCaseIds, validateSessionCohort } from './session-contract.mjs';
 import { validateServerResourceEvidence, requireComparableSessionResources } from './server-resource-evidence.mjs';
 import { validateSessionCase, validateSessionEnvelope, validateSessionResults, validateSessionQualification, validateSessionProfileAccounting } from './session-report-validation.mjs';
 
@@ -21,7 +21,9 @@ const compactCase = report => ({ ...report, lanes: report.lanes.map(({ samples, 
 export async function readOriginalSession(directory, row, cohort, metadata, runtimeIdentity = null) {
   const bytes = await readBytes(path.join(directory, 'session.json'), SESSION.sessionBytes);
   require(hashBytes(bytes) === metadata.sessionSha256);
-  const session = validateSessionEnvelope(parseBytes(bytes), row, cohort, metadata.job.id, runtimeIdentity);
+  const recorded = parseBytes(bytes);
+  const inventoryCases = sessionCaseIds(recorded.cases.map(record => record.id));
+  const session = validateSessionEnvelope(recorded, row, cohort, metadata.job.id, runtimeIdentity, inventoryCases);
   const runtimeBytes = await readBytes(path.join(directory, session.outerRuntime.path), SESSION.sessionBytes);
   require(hashBytes(runtimeBytes) === session.outerRuntime.sha256);
   validateSessionRuntimeImport(parseBytes(runtimeBytes), cohort, runtimeIdentity);
@@ -33,7 +35,7 @@ export async function readOriginalSession(directory, row, cohort, metadata, runt
   }
   const runtimeBytesCore = await readBytes(path.join(directory, session.runtimeReport.path), SESSION.runtimeBytesCore);
   require(hashBytes(runtimeBytesCore) === session.runtimeReport.sha256);
-  const execution = validateSessionResults(runtimeBytesCore.toString('utf8'), reports);
+  const execution = validateSessionResults(runtimeBytesCore.toString('utf8'), reports, inventoryCases);
   const qualificationBytes = await readBytes(path.join(directory, session.qualificationReport.path), SESSION.sessionBytes);
   require(hashBytes(qualificationBytes) === session.qualificationReport.sha256);
   const qualification = validateSessionQualification(parseBytes(qualificationBytes),session,execution);
@@ -128,7 +130,8 @@ export async function aggregateSessions({ input, output, resourcePolicy }) {
     originals.push(original.session);
   }
   if (resourcePolicy === 'comparison') requireComparableSessionResources(comparableResources);
-  const aggregate = validateSessionAggregate({ schemaVersion: SESSION.schema, cohort: proof.cohort, plan: createSessionPlan(),
+  const aggregate = validateSessionAggregate({ schemaVersion: SESSION.schema, cohort: proof.cohort,
+    plan: createSessionPlan(originals[0].cases.map(record => record.id)),
     preparation: proof.preparation, workers });
   await createDirectory(output);
   await createDirectory(path.join(output, 'workers'));

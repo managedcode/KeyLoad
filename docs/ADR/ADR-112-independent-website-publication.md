@@ -6,38 +6,37 @@ Feature: BenchmarkComparisons, REQ/AC-BC-WEB-001..007.
 ## Decision and trust boundary
 
 Website/website.yml owns website source qualification and Pages publication.
-Its executor accepts trusted own-main workflow_dispatch, either manual or from the final Benchmarks trigger. Build and Tests
+Its executor accepts trusted own-main site pushes and workflow_dispatch, either manual or from the final Benchmarks trigger. Build and Tests
 retains every build/analyzer/unit/scalar/recovery/cluster gate independently.
 Benchmarks owns measurements and the final settled aggregate. Its final
-website-trigger job dispatches Website on main after all dependencies settle,
-including a run with failed or skipped database/aggregation jobs. Cancellation
+website-trigger job dispatches Website on main only after successful aggregation.
+A failed image, preparation, worker or aggregation prerequisite does not dispatch
+an automatic replacement of the deployed site. Independent manual content
+publication remains available. Cancellation
 still stops dispatch. Exact trusted repository/event admission is required.
 Only that job has actions:write; database jobs remain read-only.
-Trigger failure is visible. Website has no independent push trigger: a full
-source change first qualifies/publishes the same-source KeyLoad image and runs
-Benchmarks, then dispatches Website with that run ID. Manual content publication
-remains available. There is no `workflow_run` subscription, alternate executor or
-measurement bypass.
+Trigger failure is visible. Website retains its independent trusted-main push
+and manual entries. Benchmarks only deploys public released database images,
+measures workloads and may dispatch Website after completion; it does not call
+Release or Build and Tests.
 
-Optional benchmark_run_id authenticates the original own-repository main run,
-Benchmarks workflow name/path, event and source, then waits at most five minutes
-for completion and accepts terminal `success` or `failure` before qualification. When supplied, the same authenticated run is the sole capture candidate in both qualification and predeploy recheck. Its original archive, source and freshness checks remain mandatory.
-Empty input skips waiting. Invalid metadata, API failure and timeout fail closed.
+An optional benchmark_run_id authenticates the triggering own-main Benchmarks
+run and waits for its completion. This is only a completion barrier: publication
+still selects the latest completed successful full measurement run. Failed,
+cancelled and incomplete runs never provide public figures or clear already
+verified data. Contracts-only runs have no measurement workers and are not data
+producers. The selected successful run must retain all 32 original session
+artifacts with their complete declared workloads, source/run/attempt/topology,
+TRX, hashes, correctness and resource evidence. Missing, expired or corrupt
+selected evidence fails closed; it cannot cause an empty replacement.
 
-With no requested run, select the newest authenticated completed own-main producer with original
-successful session jobs and artifacts. Its overall conclusion may be success or
-failure. Website collects and validates those original worker/runtime ZIPs through
-the shared collector and aggregator; a combined-results artifact is not required.
-Each included session retains the full original TRX, source/runtime/resource and
-correctness contract. Every planned database/topology row remains visible; missing
-or failed sessions have null metrics displayed as an em dash. Authentic sessions
-with incomplete server resource observations retain their recorded operation
-measurements, labelled Measured · incomplete telemetry. Preserve resourceQualified=false;
-missing resource metrics remain an em dash and server resource comparability is unverified.
-Website recorded-operation aggregation validates each original resource report but does not require identical hosted-runner hardware. Native benchmark aggregation retains its strict comparison policy. Selected corrupt,
-expired, foreign or mixed evidence is rejected. A cancelled or in-progress producer
-supplies no figures. If no producer has eligible sessions, emit no metrics and a
-static empty state with benchmarks:null in the publication receipt.
+The current report format retains the case inventory of its original producer.
+Newly added workloads do not invalidate an earlier successful run or acquire
+invented historical results. Server resource telemetry remains honestly labelled;
+recorded operation figures do not claim matched hardware or production readiness.
+
+With no successful measurement run at all, an independent manual content-only
+publication can retain explicit absence. A failed newer run is not that state.
 
 ## Qualification and acceptance
 
@@ -81,7 +80,7 @@ until actual measured and content-only qualification, freshness and Pages proof 
 
 ## Trigger scope, navigation and diagnostics requirements
 
-REQ/AC-BC-WEB-008: Website's manual entry and Benchmarks' final dispatch follow the decision above. Verification: source/event admission and dependency outcome rejection are source checks; GitHub scheduling, dispatch after a failed producer and acceptance only of its independently verified successful sessions in actual Linux execution are required provider evidence, not claims from static inspection. Independent site changes can still publish without benchmark figures when no authenticated producer is ready. Rollback preserves the independent Website executor and all source/metric/coverage/browser/freshness/permission checks.
+REQ/AC-BC-WEB-008: Website's manual entry and Benchmarks' final dispatch follow the decision above. Verification: source/event admission and dependency outcome rejection are source checks; GitHub scheduling, completion waiting after a failed trigger and selection only of the latest successful measurement producer in actual Linux execution are required provider evidence, not claims from static inspection. Independent site changes can still publish without benchmark figures when no authenticated producer is ready. Rollback preserves the independent Website executor and all source/metric/coverage/browser/freshness/permission checks.
 
 REQ/AC-BC-WEB-003: the menu action and restored fragment finish their actual CSS-adjusted target scroll, clamped to the document's real scroll range, before subsequent hero navigation. The actual Chrome/CDP caller clicks the observed visible menu toggle and link centers through mouse press/release rather than DOM `.click()`. Test helpers own bounded observation of location and geometry; they cannot force renderer state or focus, accept paused output, increase timeouts or lower coverage. Popover closure, repeated opening/viewport closure, scene lifecycle and joined child cleanup remain mandatory. `SiteContentBrowserTests` retains the full action chain with genuine pointer inputs; failure diagnostics additionally retain active-element tag/id and real scroll bounds, never credentials or user payload. No new dependency or provider boundary.
 

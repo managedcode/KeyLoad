@@ -9,6 +9,7 @@ function verifiedExecution(worker) {
 const topologyUnavailable = worker => worker.session.images.server === null && sessionUnavailableTopology(worker.session);
 const notRecorded = 'Not recorded in session manifest';
 function disposition(worker, report) {
+  if (report === undefined) return 'unsupported';
   if (report.status === 'notQualified' || report.status === 'measured' && !verifiedExecution(worker)) return 'failed';
   if (report.status === 'measured' && !worker.resourceQualified) return 'resourceIncomplete';
   return report.status === 'unavailable' ? topologyUnavailable(worker) ? 'unsupportedTopology' : 'unsupported' : report.status;
@@ -22,7 +23,7 @@ function viewWorker(worker, report) {
   const status = disposition(worker, report);
   return { ...worker, rawSha256: worker.sessionSha256, disposition: status,
     reason: status === 'resourceIncomplete' ? 'Server resource telemetry is incomplete. Recorded operation measurements remain available.'
-      : worker.qualification.status === 'failed' ? worker.session.reason : report.detail,
+      : worker.qualification.status === 'failed' ? worker.session.reason : report?.detail ?? 'Not in this run\'s workload inventory.',
     report: { hostOs: runtime.operatingSystem, architecture: runtime.architecture, logicalProcessors: runtime.logicalProcessors,
       runtime: runtime.framework, storage: runtime.storage, client: worker.session.processes.client,
       serverImage: worker.session.images.server ?? notRecorded, targets: [target] } };
@@ -40,7 +41,13 @@ export function selectedIsolatedRows(projection, scenario, nodeCount, repetition
         min: null, max: null, attempts: null, successes: null, failures: null, throughput: null,
         p50: null, p95: null, p99: null, detail: 'No verified original result for this session.', nodeCount, worker: null };
       const report = worker.reports.find(item => item.caseId === caseId);
-      requireSession(report !== undefined);
+      if (report === undefined) {
+        requireSession(!projection.plan.caseIds.includes(caseId));
+        return { id: row.id, name: row.target, status: 'unsupported', value: null,
+          min: null, max: null, attempts: null, successes: null, failures: null, throughput: null,
+          p50: null, p95: null, p99: null, detail: 'Not in this run\'s workload inventory.', nodeCount,
+          worker: viewWorker(worker, report) };
+      }
       const selected = laneId === undefined ? report.lanes.length === 1 ? report.lanes[0] : null
         : report.lanes.find(lane => lane.id === laneId);
       const measurement = report.status === 'measured' && verifiedExecution(worker) ? selected?.measurement ?? null : null;

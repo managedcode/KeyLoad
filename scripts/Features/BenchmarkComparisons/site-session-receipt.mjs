@@ -48,7 +48,7 @@ export function validateSessionSiteReceipt(value) {
       && `sha256:${archive.sha256}` === worker.artifact.digest && sessionPositive(archive.bytes)
       && archive.bytes === worker.artifact.sizeInBytes);
   }
-  require(Array.isArray(value.suiteFiles) && value.suiteFiles.length >= value.workers.length * (SESSION.caseIds.length + 2) + 1);
+  require(Array.isArray(value.suiteFiles) && value.suiteFiles.length >= value.workers.length * (SESSION.caseIds.indexOf('model-prepare') + 2) + 1);
   const paths = new Set();
   for (const file of value.suiteFiles) {
     require(exact(file, ['path', 'sha256']) && sessionPath(file.path) && sessionHash(file.sha256) && !paths.has(file.path));

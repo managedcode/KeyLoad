@@ -238,9 +238,12 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .leader-bars b { font-variant-numeric: tabular-nums; text-align: right; }
 .ov-head, .ov-row, .cost-row { display: grid; grid-template-columns: minmax(11rem, 14.5rem) repeat(var(--columns, 8), minmax(8rem, 1fr)); align-items: center; gap: 1.1rem; }
 .comparison-scroll { max-width: 100%; overflow-x: auto; padding-bottom: .5rem; }
+.table-scroll-hint { margin: 0 0 .6rem; color: var(--kl-muted); font-size: .75rem; }
 .comparison-grid { width: 100%; min-width: 90rem; }
 .comparison-grid > thead, .comparison-grid > tbody { display: block; }
 .comparison-grid th, .comparison-grid td { padding: 0; border: 0; font: inherit; text-align: left; white-space: normal; }
+.comparison-grid tr > th, .comparison-grid tr > td { min-width: 0; max-width: none; text-align: left; text-transform: none; letter-spacing: normal; }
+.comparison-grid tr > :first-child { position: sticky; left: 0; z-index: 1; background: var(--kl-surface-solid); }
 .cost-row { --columns: 4; }
 .ov-row .engine-name strong { white-space: normal; }
 .ov-head { padding: 0 .4rem .55rem; border-bottom: 1px solid var(--kl-line-strong); }

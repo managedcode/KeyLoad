@@ -3,7 +3,7 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 internal sealed class SiteIsolatedGitHubSelectionTests
 {
     [Test]
-    public async Task AC_ISO_009_SelectsActualSuccessfulSessionsWithoutRequiringOverallCiSuccess()
+    public async Task AC_ISO_009_SelectsActualSessionsFromTheLatestSuccessfulRun()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await using var scope = await SiteIsolatedGitHubScope.CreateAsync(token);

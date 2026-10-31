@@ -1,10 +1,10 @@
-import { SESSION, requireSession, sessionRows } from './session-contract.mjs';
-export function createSessionPlan() {
+import { SESSION, requireSession, sessionRows, sessionCaseIds } from './session-contract.mjs';
+export function createSessionPlan(caseIds = SESSION.caseIds) {
   return { schemaVersion: SESSION.schema, profile: SESSION.profile, initialRecords: SESSION.records,
-    minimumOperations: SESSION.operations, warmup: SESSION.warmup, caseIds: [...SESSION.caseIds], workers: sessionRows() };
+    minimumOperations: SESSION.operations, warmup: SESSION.warmup, caseIds: [...sessionCaseIds(caseIds)], workers: sessionRows() };
 }
-export function validateSessionPlan(value) {
-  requireSession(sameValue(value, createSessionPlan()));
+export function validateSessionPlan(value, caseIds = SESSION.caseIds) {
+  requireSession(sameValue(value, createSessionPlan(caseIds)));
   return value;
 }
 

@@ -267,10 +267,10 @@ selected database infrastructure, waits for readiness and exposes endpoints;
 client code owns load execution and measurements. Each AppHost removes its own
 session containers and volumes on joined teardown after success, failure or
 cancellation. Preserve unrelated Docker resources. Normal builds and functional
-tests never publish or build a KeyLoad server image. The canonical Release workflow
+tests never publish or build a KeyLoad server image. The manual Release workflow
 publishes the server image with execution .NET SDK `PublishContainer` to
 `ghcr.io/managedcode/keyload` under the commit SHA and `latest` tags; maintain no
-product Dockerfile. Benchmarks resolves the source-matched Release image to one digest per
+product Dockerfile. Benchmarks resolves the latest released image to one digest per
 run and runs the KeyLoad cells as Aspire containers from that digest.
 
 Complete solution build, unit tests, real process recovery, actual Aspire cluster
@@ -287,6 +287,28 @@ Keep generated-code/source identities, reports and executable source
 inventories truthful; do not exclude product code to improve coverage.
 
 ## Performance and comparisons
+
+Benchmarks has one responsibility: pull public released container images, deploy
+the selected database through Docker/Aspire, run its applicable native workloads,
+and collect original results. KeyLoad follows the same path and uses the latest
+public released server image pinned to one immutable digest per run. Benchmarks
+may build its comparison client/test harness; it never builds or publishes a
+product image and never invokes Release or the full Build and Tests workflow.
+The final job may request a separate Website rebuild.
+
+The website uses only the latest completed successful Benchmarks measurement run
+and its original authenticated artifacts and declared workload inventory. A new,
+failed, cancelled or incomplete run must never erase previously verified figures
+or replace them with an empty page. Historical measurements retain their original
+source, image, run, attempt, scenario and topology identities; never invent
+measurements for cases absent from that run.
+
+Ask the owner for concrete approval before changing the existing benchmark
+workflow architecture, test/scenario meaning or counts, report contracts,
+qualification gates, or publication rules. A request to add databases authorizes
+their applicable native scenarios within the existing pattern; it does not
+authorize a release pipeline or functional qualification redesign. The requested
+Qdrant/vector, RabbitMQ/queue and KurrentDB/event cases stay within that scope.
 
 Use execution .NET SIMD/intrinsics in normal supported execution. Validate required
 hardware; scalar arithmetic is limited to tails and independent correctness

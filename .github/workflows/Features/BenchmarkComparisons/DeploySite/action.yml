@@ -1,10 +1,5 @@
 name: Publish the current benchmark website
 description: Recheck exact source and current producer tuple before least-privilege Pages delivery.
-inputs:
-  benchmark_run_id:
-    description: Authenticated completed benchmark run selected by the final producer dispatch
-    required: false
-    default: ''
 outputs:
   page_url:
     value: ${{ steps.deployment.outputs.page_url }}
@@ -17,19 +12,12 @@ runs:
         name: site-qualification-${{ env.QUALIFIED_REVISION }}-${{ github.run_attempt }}
         path: qualification
     - name: Recheck source and benchmark results before publishing
-      env:
-        BENCHMARK_RUN_ID: ${{ inputs.benchmark_run_id }}
       shell: bash
       run: |
         revision=$(timeout 120s gh api "repos/$GH_REPO/git/ref/heads/main" --jq .object.sha)
         [[ "$revision" == "$QUALIFIED_REVISION" ]]
         isolated_capture="$GITHUB_WORKSPACE/predeploy-isolated-capture"
-        isolated_args=("--input=$isolated_capture" --mode=publish "--site-revision=$revision" "--workflow-revision=$CONTROL_REVISION" --optional=true)
-        if [[ -n "$BENCHMARK_RUN_ID" ]]; then
-          [[ "$BENCHMARK_RUN_ID" =~ ^[1-9][0-9]*$ && ${#BENCHMARK_RUN_ID} -le 20 ]]
-          isolated_args+=("--requested-run=$BENCHMARK_RUN_ID")
-        fi
-        node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture-metadata "${isolated_args[@]}" > predeploy-isolated-capture-envelope.json
+        node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture-metadata --input="$isolated_capture" --mode=publish --site-revision="$revision" --workflow-revision="$CONTROL_REVISION" --optional=true > predeploy-isolated-capture-envelope.json
         jq -e '.ok == true' predeploy-isolated-capture-envelope.json > /dev/null
         if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
           before="$GITHUB_WORKSPACE/qualification/artifacts/site-evidence/isolated-capture/metadata-proof.json"

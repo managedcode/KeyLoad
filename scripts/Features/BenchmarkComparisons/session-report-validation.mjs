@@ -1,5 +1,5 @@
 import { SESSION, exactSession as exact, requireSession as require, sessionHash, sessionPath,
-  sessionPositive, sessionCount, sessionText, sessionUnavailableTopology, validateSessionCohort } from './session-contract.mjs';
+  sessionPositive, sessionCount, sessionText, sessionUnavailableTopology, sessionCaseIds, validateSessionCohort } from './session-contract.mjs';
 import { validateSessionProcesses } from './session-process-identity.mjs';
 
 const envelopeFields = ['schemaVersion', 'sessionId', 'target', 'nodeCount', 'sourceRevision', 'runId', 'attempt',
@@ -10,10 +10,11 @@ const measurementFields = ['attempts', 'successes', 'failures', 'elapsedSeconds'
 const finite = value => typeof value === 'number' && Number.isFinite(value) && value >= 0;
 const close = (left, right) => Math.abs(left - right) <= Math.max(1, Math.abs(right)) * 1e-8;
 const image = value => typeof value === 'string' && /(?:@sha256:|^sha256:)[a-f0-9]{64}$/.test(value);
-// KeyLoad cells run the Release-published server image, pinned to the digest resolved for the run.
-const keyLoadImage = (value, sourceRevision) => typeof value === 'string'
-  && value.startsWith(`ghcr.io/managedcode/keyload:${sourceRevision}@sha256:`)
-  && /^ghcr\.io\/managedcode\/keyload:[a-f0-9]{40}@sha256:[a-f0-9]{64}$/.test(value);
+// Every target, including KeyLoad, uses an original released image pinned to its registry digest.
+const keyLoadImage = value => typeof value === 'string'
+  && /^ghcr\.io\/managedcode\/keyload:[A-Za-z0-9_][A-Za-z0-9_.-]{0,127}@sha256:[a-f0-9]{64}$/.test(value);
+const noApplicableModels = (target, cases) => ['Qdrant', 'RabbitMQ', 'KurrentDB'].includes(target)
+  && !cases.some(id => ['model-prepare', 'vector-exact', 'queue-cycle', 'stream-append', 'stream-read', 'stream-mixed'].includes(id));
 const runtimeNames = Object.freeze({ 'load-million': 'LoadMillion', index: 'BuildIndexes',
   'sequential-read': 'SequentialRead', 'random-read': 'RandomRead', search: 'Search', mixed: 'Mixed',
   'verify-final': 'VerifyFinalState', 'model-prepare': 'PrepareModels', 'vector-exact': 'VectorExact', 'queue-cycle': 'QueueCycle',
@@ -124,7 +125,8 @@ export function validateSessionCase(value, id, original = true) {
   }
   return value;
 }
-export function validateSessionEnvelope(value, row, cohort, jobId, runtimeIdentity = null) {
+export function validateSessionEnvelope(value, row, cohort, jobId, runtimeIdentity = null, caseIds = SESSION.caseIds) {
+  sessionCaseIds(caseIds);
   validateSessionCohort(cohort);
   require(exact(value, envelopeFields) && value.schemaVersion === SESSION.schema && value.target === row.target
     && value.nodeCount === row.nodeCount && value.jobId === jobId && sessionPositive(jobId)
@@ -138,13 +140,15 @@ export function validateSessionEnvelope(value, row, cohort, jobId, runtimeIdenti
   require(exact(value.images, ['server'])
     && (value.images.server === null ? value.targetProfile === null && (topologyFailure
       || value.outcome === 'unavailable' && value.reason === SESSION.topologyUnavailable && sessionUnavailableTopology(row))
-      : image(value.images.server) && (row.target !== 'KeyLoad' || keyLoadImage(value.images.server, cohort.sourceRevision))));
+      : image(value.images.server) && (row.target !== 'KeyLoad' || keyLoadImage(value.images.server))));
   require(exact(value.runtime, ['operatingSystem', 'architecture', 'logicalProcessors', 'framework', 'storage'])
     && /Linux|Ubuntu/i.test(value.runtime.operatingSystem ?? '') && sessionPositive(value.runtime.logicalProcessors)
     && ['architecture', 'framework', 'storage'].every(key => sessionText(value.runtime[key])));
   if (value.targetProfile === null) require(value.outcome === 'failure'
     || value.outcome === 'unavailable' && value.reason === SESSION.topologyUnavailable
-      && value.images.server === null && sessionUnavailableTopology(row));
+      && value.images.server === null && sessionUnavailableTopology(row)
+    || value.outcome === 'unavailable' && value.reason === SESSION.capabilitiesUnavailable
+      && noApplicableModels(value.target, caseIds) && image(value.images.server));
   else {
     const profile = value.targetProfile;
     require(exact(profile, ['name', 'version', 'topology', 'writeAcknowledgement', 'readContract', 'transport', 'authorization', 'image', 'cluster'])
@@ -167,9 +171,9 @@ export function validateSessionEnvelope(value, row, cohort, jobId, runtimeIdenti
       && sessionHash(assembly.sha256) && sessionHash(assembly.pdbSha256));
     assemblies.add(assembly.path);
   }
-  require(Array.isArray(value.cases) && value.cases.length === SESSION.caseIds.length);
+  require(Array.isArray(value.cases) && value.cases.length === caseIds.length);
   for (const [index, record] of value.cases.entries()) {
-    require(exact(record, ['id', 'path', 'sha256']) && record.id === SESSION.caseIds[index]
+    require(exact(record, ['id', 'path', 'sha256']) && record.id === caseIds[index]
       && record.path === `reports/${record.id}.json` && sessionHash(record.sha256));
   }
   require(validateSessionReference(value.qualificationReport).path === 'session-qualification.json');
@@ -180,21 +184,22 @@ export function validateSessionEnvelope(value, row, cohort, jobId, runtimeIdenti
 }
 // A missing observed profile cannot authorize any measurement, even when execution infrastructure exists.
 export function validateSessionProfileAccounting(session, reports, execution, qualification) {
+  const caseIds = sessionCaseIds(session.cases.map(record => record.id));
   if (session.targetProfile !== null) {
     if (reports.some(report => report.status === 'measured')) require(
       [session.targetProfile.version,session.targetProfile.topology,session.targetProfile.cluster.state]
         .every(value => !/unverified|unobserved|unknown|not recorded/i.test(value)));
     return session;
   }
-  require(reports.length === SESSION.caseIds.length
-    && reports.every((report,index) => report.caseId === SESSION.caseIds[index] && report.status !== 'measured'));
+  require(reports.length === caseIds.length
+    && reports.every((report,index) => report.caseId === caseIds[index] && report.status !== 'measured'));
   if (session.outcome === 'failure') {
     if (sessionUnavailableTopology(session)) require(session.images.server === null && session.resourceReport === null
       && session.reason === 'SessionTestFailure' && qualification.runtimeExitCode !== 0
       && qualification.status === 'notExecuted' && qualification.reason === 'ClientFailed'
       && reports.every(report => report.status === 'unavailable' && report.lanes.length === 0
         && report.elapsedSeconds === 0 && report.verifiedRecords === 0)
-      && execution.length === SESSION.caseIds.length && execution.every(test => test.outcome === 'Passed'));
+      && execution.length === caseIds.length && execution.every(test => test.outcome === 'Passed'));
     else require(image(session.images.server) && session.resourceReport !== null
       && (qualification.runtimeExitCode !== 0 || qualification.status === 'failed'));
     return session;
@@ -202,19 +207,26 @@ export function validateSessionProfileAccounting(session, reports, execution, qu
   require(session.outcome === 'unavailable'
     && reports.every(report => report.status === 'unavailable' && report.lanes.length === 0
       && report.elapsedSeconds === 0 && report.verifiedRecords === 0)
-    && execution.length === SESSION.caseIds.length && execution.every(test => test.outcome === 'Passed'));
+    && execution.length === caseIds.length && execution.every(test => test.outcome === 'Passed'));
+  if (session.reason === SESSION.capabilitiesUnavailable) {
+    require(noApplicableModels(session.target, caseIds) && image(session.images.server)
+      && session.resourceReport !== null && qualification.status === 'passed'
+      && reports.every(report => report.detail === "Outside this target's shared contract."));
+    return session;
+  }
   require(session.reason === SESSION.topologyUnavailable && sessionUnavailableTopology(session) && session.images.server === null
     && session.resourceReport === null && qualification.status === 'notApplicable');
   return session;
 }
-export function validateSessionResults(xml, reports) {
+export function validateSessionResults(xml, reports, caseIds = SESSION.caseIds) {
+  sessionCaseIds(caseIds);
   require(typeof xml === 'string' && xml.length > 0 && xml.length <= SESSION.runtimeBytesCore
     && !/<!DOCTYPE|<!ENTITY/i.test(xml));
   const results = [...xml.matchAll(/<(?:[A-Za-z_][\w.-]*:)?UnitTestResult\s+([^>]+)\/?\s*>/g)].map(match => {
     const attrs = new Map([...match[1].matchAll(/([A-Za-z_][\w:.-]*)="([^"<>]*)"/g)].map(item => [item[1], item[2]]));
     return { name: attrs.get('testName'), outcome: attrs.get('outcome') };
   });
-  require(results.length === SESSION.caseIds.length);
+  require(results.length === caseIds.length);
   for (const report of reports) {
     const matched = results.filter(result => result.name === runtimeNames[report.caseId]
       || result.name?.endsWith('.' + runtimeNames[report.caseId]));

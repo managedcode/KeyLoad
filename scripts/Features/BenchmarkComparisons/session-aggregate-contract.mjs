@@ -6,7 +6,8 @@ export function validateSessionAggregate(value) {
   require(exact(value, ['schemaVersion', 'cohort', 'plan', 'preparation', 'workers'])
     && value.schemaVersion === SESSION.schema);
   validateSessionCohort(value.cohort);
-  validateSessionPlan(value.plan);
+  validateSessionPlan(value.plan, value.plan.caseIds);
+  const caseIds = value.plan.caseIds;
   require(exact(value.preparation, ['job', 'compiledArtifact', 'runtimeIdentity'])
     && Array.isArray(value.workers) && value.workers.length > 0 && value.workers.length <= SESSION.workers);
   const jobs = new Set(), artifacts = new Set(), sessions = new Set();
@@ -24,14 +25,14 @@ export function validateSessionAggregate(value) {
       && worker.job?.name === row.jobName && worker.artifact?.name === row.artifactName
       && sessionHash(worker.stateSha256) && typeof worker.resourceQualified === 'boolean' && sessionHash(worker.sessionSha256) && !jobs.has(worker.job.id) && !artifacts.has(worker.artifact.id));
     jobs.add(worker.job.id); artifacts.add(worker.artifact.id);
-    const session = validateSessionEnvelope(worker.session, row, value.cohort, worker.job.id);
-    require(!sessions.has(session.sessionId) && Array.isArray(worker.reports) && worker.reports.length === SESSION.caseIds.length
-      && Array.isArray(worker.execution) && worker.execution.length === SESSION.caseIds.length);
+    const session = validateSessionEnvelope(worker.session, row, value.cohort, worker.job.id, null, caseIds);
+    require(!sessions.has(session.sessionId) && Array.isArray(worker.reports) && worker.reports.length === caseIds.length
+      && Array.isArray(worker.execution) && worker.execution.length === caseIds.length);
     require(session.outcome === 'failure' ? worker.job.conclusion === 'failure' : worker.job.conclusion === 'success');
     validateSessionQualification(worker.qualification,session,worker.execution);
     sessions.add(session.sessionId);
-    for (const [caseIndex, report] of worker.reports.entries()) require(report.caseId === SESSION.caseIds[caseIndex]
-      && validateSessionCase(report, SESSION.caseIds[caseIndex], false));
+    for (const [caseIndex, report] of worker.reports.entries()) require(report.caseId === caseIds[caseIndex]
+      && session.cases[caseIndex].id === caseIds[caseIndex] && validateSessionCase(report, caseIds[caseIndex], false));
     validateSessionProfileAccounting(session,worker.reports,worker.execution,worker.qualification);
   }
   return value;

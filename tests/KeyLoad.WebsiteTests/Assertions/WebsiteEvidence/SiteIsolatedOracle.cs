@@ -30,8 +30,21 @@ internal static class SiteIsolatedOracle
     private static SiteIsolatedExpectedRow Row(JsonElement worker, SiteIsolatedSelection selection)
     {
         var parts = selection.Scenario.Split('/');
-        var report = worker.GetProperty(SiteIsolatedFields.Reports).EnumerateArray()
-            .Single(item => item.GetProperty(SiteIsolatedFields.CaseId).GetString() == parts[0]);
+        var matching = worker.GetProperty(SiteIsolatedFields.Reports).EnumerateArray()
+            .Where(item => item.GetProperty(SiteIsolatedFields.CaseId).GetString() == parts[0]).ToArray();
+        if (matching.Length == 0)
+        {
+            if (worker.GetProperty(SiteIsolatedFields.Session).GetProperty(SiteIsolatedFields.Cases).EnumerateArray()
+                .Any(item => item.GetProperty(SiteIsolatedFields.Id).GetString() == parts[0]))
+            {
+                throw new InvalidDataException("An original declared case is absent from its reports.");
+            }
+            return new(worker.GetProperty(SiteIsolatedFields.Target).GetString()!, "unsupported", null,
+                selection.NodeCount, worker.GetProperty(SiteIsolatedFields.Id).GetString()!,
+                worker.GetProperty(SiteIsolatedFields.Job).GetProperty(SiteIsolatedFields.Id).GetInt64(),
+                worker.GetProperty(SiteIsolatedFields.Artifact).GetProperty(SiteIsolatedFields.Id).GetInt64());
+        }
+        var report = matching.Single();
         var status = report.GetProperty(SiteIsolatedFields.Status).GetString()!;
         var profile = worker.GetProperty(SiteIsolatedFields.Session).GetProperty(SiteIsolatedFields.TargetProfile);
         var qualified = Qualified(worker, profile);

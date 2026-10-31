@@ -1,16 +1,6 @@
 name: Release
 on:
   workflow_dispatch:
-  workflow_call:
-    inputs:
-      server_image_only:
-        description: Publish the checked source image required by the benchmark caller
-        type: boolean
-        default: false
-    outputs:
-      server_image:
-        description: Published commit-tagged server image pinned to its registry digest
-        value: ${{ jobs.server-image.outputs.reference }}
 permissions:
   contents: read
 jobs:
@@ -19,7 +9,6 @@ jobs:
     uses: ./.github/workflows/build-and-tests.yml
   publish:
     name: Publish ${{ matrix.runtime }}
-    if: ${{ !inputs.server_image_only }}
     needs: tests
     runs-on: ubuntu-24.04
     timeout-minutes: 60
@@ -50,16 +39,11 @@ jobs:
   server-image:
     name: Publish server container image
     needs: tests
-    concurrency:
-      group: keyload-server-image-publication
-      cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
       contents: read
       packages: write
-    outputs:
-      reference: ${{ steps.image.outputs.reference }}
     env:
       IMAGE_REGISTRY: ghcr.io
       IMAGE_REPOSITORY: managedcode/keyload
@@ -77,7 +61,6 @@ jobs:
       - name: Publish the server image with commit and latest tags
         run: dotnet publish src/KeyLoad/KeyLoad.csproj /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRegistry="$IMAGE_REGISTRY" -p:ContainerRepository="$IMAGE_REPOSITORY" "-p:ContainerImageTags=\"$GITHUB_SHA;latest\""
       - name: Record the published image digest
-        id: image
         shell: bash
         run: |
           image="$IMAGE_REGISTRY/$IMAGE_REPOSITORY"
@@ -86,7 +69,6 @@ jobs:
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ && "$digest" == "$latest" ]]
           mkdir -p artifacts
           printf '%s:%s@%s\n' "$image" "$GITHUB_SHA" "$digest" > artifacts/keyload-server-image.txt
-          printf 'reference=%s:%s@%s\n' "$image" "$GITHUB_SHA" "$digest" >> "$GITHUB_OUTPUT"
           printf 'Server image: %s:%s@%s (also tagged latest)\n' "$image" "$GITHUB_SHA" "$digest" >> "$GITHUB_STEP_SUMMARY"
       - name: Save the image reference
         uses: actions/upload-artifact@v7
@@ -96,7 +78,6 @@ jobs:
           if-no-files-found: error
   benchmark-image:
     name: Build benchmark Docker image
-    if: ${{ !inputs.server_image_only }}
     needs: tests
     runs-on: ubuntu-24.04
     timeout-minutes: 60

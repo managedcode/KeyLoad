@@ -196,7 +196,7 @@ if (scenario === 'json') {
   failed.forEach(report=>reports.validateSessionCase(report,report.caseId));
   reports.validateSessionEnvelope(failure,row,cohort,10);
   for(const tag of ['latest','b'.repeat(40)]) {
-    reject(()=>reports.validateSessionEnvelope({...failure,images:{server:'ghcr.io/managedcode/keyload:'+tag+'@sha256:'+'5'.repeat(64)}},row,cohort,10));
+    reports.validateSessionEnvelope({...failure,images:{server:'ghcr.io/managedcode/keyload:'+tag+'@sha256:'+'5'.repeat(64)}},row,cohort,10);
   }
   for(const image of [null,server,'docker.io/library/keyload:latest@sha256:'+'5'.repeat(64)])
     reject(()=>reports.validateSessionEnvelope({...failure,images:{server:image}},row,cohort,10));
@@ -215,12 +215,12 @@ if (scenario === 'json') {
     repository,head_repository:repository,status:'completed',conclusion:'success',head_sha:cohort.sourceRevision,
     id:cohort.runId,run_attempt:cohort.attempt};
   validateSessionProducer(run,workflow,'publish');
-  validateSessionProducer({...run,conclusion:'failure'},workflow,'validate');
-  validateSessionProducer({...run,conclusion:'failure'},workflow,'publish');
+  reject(()=>validateSessionProducer({...run,conclusion:'failure'},workflow,'validate'));
+  reject(()=>validateSessionProducer({...run,conclusion:'failure'},workflow,'publish'));
   if(selectSessionSiteProducer({run,jobs:[],artifacts:[]},workflow,'publish')!==null)
     throw new Error('A contracts-only run must not supply session measurements.');
   reject(()=>validateSessionProducer({...run,conclusion:'cancelled'},workflow,'validate'));
-  const value={workers:contract.sessionRows().map(()=>({
+  const value={plan:planner.createSessionPlan(),workers:contract.sessionRows().map(()=>({
     job:{conclusion:'success'},session:{outcome:'success',reason:null,
       targetProfile:{version:'1.0',topology:'execution cluster',cluster:{state:'healthy'}}},
     qualification:{status:'passed'},resourceQualified:true,
@@ -228,7 +228,7 @@ if (scenario === 'json') {
     reports:contract.SESSION.caseIds.map(caseId=>({caseId,status:'measured'}))
   }))};
   requirePublishableSessionMeasurements(value);accepted=true;
-  const partial=clone(value);partial.workers.pop();requirePublishableSessionMeasurements(partial);
+  const partial=clone(value);partial.workers.pop();reject(()=>requirePublishableSessionMeasurements(partial));
   const unqualified=clone(value);unqualified.workers[0].resourceQualified=false;requirePublishableSessionMeasurements(unqualified);
   for(const change of [v=>v.workers=[],v=>v.workers[0].job.conclusion='failure',
     v=>v.workers[0].qualification.status='failed',v=>v.workers[0].execution[0].outcome='Failed',
@@ -253,13 +253,13 @@ if (scenario === 'json') {
   const args={input:process.cwd(),mode:'publish',optional:'true','site-revision':revision,'workflow-revision':revision};
   accepted=sessionSiteContext(env,args,'linux').optional;
   sessionSiteContext(env,{...args,mode:'validate',optional:undefined,'requested-run':'123'},'linux');
-  sessionSiteContext(env,{...args,'requested-run':'123'},'linux');
+  reject(()=>sessionSiteContext(env,{...args,'requested-run':'123'},'linux'));
   for(const change of [v=>v.mode='validate',v=>v['requested-run']='0',v=>v.optional='false',
     v=>v['site-revision']='bad',v=>v.input='relative']) {
     const altered={...args};change(altered);reject(()=>sessionSiteContext(env,altered,'linux'));
   }
   for(const [key,value] of [['GITHUB_REPOSITORY_ID','1'],['GITHUB_WORKFLOW','Other'],['RUNNER_OS','Windows'],
-    ['GITHUB_WORKFLOW_SHA','b'.repeat(40)],['GITHUB_JOB','foreign'],['GITHUB_EVENT_NAME','push']]) reject(()=>sessionSiteContext({...env,[key]:value},args,'linux'));
+    ['GITHUB_WORKFLOW_SHA','b'.repeat(40)],['GITHUB_JOB','foreign'],['GITHUB_EVENT_NAME','pull_request']]) reject(()=>sessionSiteContext({...env,[key]:value},args,'linux'));
   reject(()=>sessionSiteContext(env,args,'darwin'));
 } else if (scenario === 'runtime') {
   const { posix } = await import('node:path');

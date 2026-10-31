@@ -18,8 +18,8 @@ the initial million is a separate measurement result.** Operation type and opera
 count do not create jobs.
 
 The 16 databases give **32 measurement jobs**. One shared preparation, one aggregation
-and a separate Website dispatch give **35 measurement-flow jobs**. The prerequisite
-canonical Release call retains its separate functional qualification and image publication jobs. Benchmarks
+and a separate Website dispatch give **35 measurement-flow jobs**. The separate manual
+Release workflow owns image publication and its functional qualification. Benchmarks
 compiles no KeyLoad server and runs no source-built KeyLoad job: every database cell,
 KeyLoad included, starts its Docker image through the same procedure, and the KeyLoad
 1-node and 3-node session cells are the KeyLoad ingestion measurement. Real execution
@@ -130,14 +130,16 @@ have no separate engine cards or incompatible per-engine axes. The document quer
 column describes ID and numeric-range predicates; it does not claim secondary-index
 performance for KeyLoad's point-access query path.
 
-Full Benchmarks calls the canonical Release workflow before preparing measurements.
-Release runs all its current Build and Tests gates, publishes the same source commit
-and returns its immutable image digest. Worker admission rejects `latest` and a
-KeyLoad image tagged with another source commit. The completed benchmark run then
-dispatches Website with its run ID. Qualification and predeploy recheck capture
-that exact authenticated run, rather than substituting another producer. Website
-no longer publishes a separate push-time
-snapshot before these measurements. Manual content publication remains independent.
+Benchmarks pulls the latest public released KeyLoad image once, pins its digest,
+and deploys it through the LoadTests AppHost like every other database. It never
+calls Release or Build and Tests and never builds or publishes a product image.
+Its final job may dispatch the independent Website workflow.
+
+Website selects only the latest completed successful measurement run, with all
+32 original session artifacts. It validates that run's declared case inventory,
+original reports and TRX without changing numbers or inventing later scenarios.
+New cases remain unmeasured in an earlier successful run. Failed, incomplete or
+cancelled producers cannot replace the previously verified published figures.
 
 ## Shared execution plan
 
@@ -271,7 +273,7 @@ selected load infrastructure. It awaits readiness, exposes discovered endpoints 
 `KeyLoad.ComparisonHost`, and joins cleanup after the client-owned workload. The
 client remains outside the resource graph. Only run-owned Docker resources are
 removed; image user defaults and anonymous session volumes own every database's
-files, KeyLoad included. The canonical Release workflow alone publishes the KeyLoad
+files, KeyLoad included. The manual Release workflow alone publishes the KeyLoad
 server image with SDK `PublishContainer`.
 
 The Redis topology probe removes its transient key before document readback.

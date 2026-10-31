@@ -53,7 +53,7 @@ async function captureSelection(input, context) {
   const runs = context.requestedRun === null
     ? await capturePages(`${GH.api}/workflows/benchmarks.yml/runs?branch=main&status=completed`, metadata, 'workflow_runs', context)
     : [await captureApi(`${GH.api}/runs/${context.requestedRun}`, path.join(metadata, 'requested-run.json'), false, context)];
-  const candidates = runs.filter(run => ['success', 'failure'].includes(run.conclusion))
+  const candidates = runs.filter(run => run.status === 'completed' && run.conclusion === 'success')
     .sort((left, right) => right.run_number - left.run_number);
   for (const summary of candidates) {
     const directory = await createDirectory(path.join(metadata, String(summary.id)));
