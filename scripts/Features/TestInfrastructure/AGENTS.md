@@ -7,7 +7,7 @@
 - C# test fixtures own Aspire startup, readiness, discovered endpoints and joined teardown.
 - `KeyLoad.AppHost` starts KeyLoad project processes with the published in-memory RapidMembership provider.
 - `KeyLoad.LoadTests.AppHost` owns selected comparison infrastructure. Client code executes workloads and measurements outside the resource graph.
-- Normal builds and test startup never publish a KeyLoad container. The manual Release workflow publishes the server image with the .NET SDK `PublishContainer` target; Benchmarks consumes the latest released image by digest.
+- Normal builds and test startup never publish a KeyLoad container. The canonical Release workflow publishes the server image with the .NET SDK `PublishContainer` target; full Benchmarks calls its server-image-only entry and consumes the exact-source image by digest after all functional gates.
 - AppHost cleanup removes only resources created for its session, including after failures and cancellation.
 - Preserve original test, process and coverage evidence; do not claim container identities for processes.
 
