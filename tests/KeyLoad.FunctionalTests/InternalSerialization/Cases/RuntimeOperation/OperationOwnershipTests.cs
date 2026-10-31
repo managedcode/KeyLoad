@@ -17,8 +17,17 @@ internal sealed class OperationOwnershipTests
         var callerBytes = issued.Value!.Input.ToArray();
         var caller = database.Database.OwnCommand(issued);
         caller.Value = caller.Value! with { Input = callerBytes };
+        caller.Metadata = new()
+        {
+            Tags = new() { [AuthorityFixture.Entity] = AuthorityFixture.Json },
+            Properties = new() { [AuthorityFixture.Entity] = new byte[] { 1, 2, 3 } }
+        };
+        var original = OrleansSerialization.Serialize(caller);
         var verified = database.Database.OwnCommand(caller);
         Array.Clear(callerBytes);
+        caller.Metadata.Tags[AuthorityFixture.Entity] = AuthorityFixture.InvalidJson;
+        Array.Clear((byte[])caller.Metadata.Properties[AuthorityFixture.Entity]!);
+        await Assert.That(OrleansSerialization.Serialize(verified).AsSpan().SequenceEqual(original)).IsTrue();
         var first = database.Database.Apply(verified);
         var replay = database.Database.Apply(database.Database.OwnCommand(verified));
         await Assert.That(Errors.Code(first.Problem).Value).IsNull();

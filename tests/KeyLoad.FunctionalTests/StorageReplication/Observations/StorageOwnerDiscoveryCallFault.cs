@@ -13,15 +13,28 @@ internal sealed class StorageOwnerDiscoveryCallFault(Guid commandId) : IOutgoing
     private int refused;
     private int armed;
     private int cuts;
+    private int unarmedCuts;
+    private int prepared;
     internal Guid CommandId => commandId;
     internal TaskCompletionSource Arrived { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private TaskCompletionSource Release { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
     internal int CutCalls => Volatile.Read(ref cuts);
+    internal int UnarmedCutCalls => Volatile.Read(ref unarmedCuts);
+    internal int PreparedCalls => Volatile.Read(ref prepared);
 
     public async Task Invoke(IOutgoingGrainCallContext context)
     {
         if (context.InterfaceMethod.DeclaringType == typeof(ISiloDatabaseService))
         {
+            if (context.MethodName == nameof(ISiloDatabaseService.ReadCutAsync)
+                && Volatile.Read(ref refused) != 0 && Volatile.Read(ref armed) == 0)
+            {
+                Interlocked.Increment(ref unarmedCuts);
+            }
+            if (context.MethodName == nameof(ISiloDatabaseService.PrepareBatchAsync) && Volatile.Read(ref armed) != 0)
+            {
+                Interlocked.Increment(ref prepared);
+            }
             if (context.MethodName == nameof(ISiloDatabaseService.PrepareBatchAsync)
                 && context.Request.GetArgument(PayloadArgument) is ImmutableArray<Command<DatabaseCommand>> operations
                 && operations.Any(operation => operation.CommandId == commandId)

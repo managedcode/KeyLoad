@@ -16,6 +16,11 @@ selection, per-assembly provider cache, wire walker or field inspection codec.
 surrogate. All other active attributed DTOs use generated binary codecs.
 
 Core owns model validation, canonical identity and persisted command outcomes.
+In-memory command snapshots use the native Orleans generated deep copier, with
+contract validation before and after copying. The owned encoded operation input
+is decoded once for its type and public-element validation. Mutable payload bytes
+and metadata remain independent of the caller; copying does not encode a new
+transport envelope or change persisted bytes, field IDs or aliases.
 Storage.ZoneTree owns physical metadata, WAL and file recovery. Orleans carries
 grain calls. ClientApi owns actual public JSON and authorized admission. MCP
 checks its actual decoded principal and projection limits rather than parsing

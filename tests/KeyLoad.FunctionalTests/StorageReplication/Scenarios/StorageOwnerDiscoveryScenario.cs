@@ -34,7 +34,14 @@ internal static class StorageOwnerDiscoveryScenario
         {
             try
             {
-                await observation.Arrived.Task.WaitAsync(bounded);
+                try
+                {
+                    await observation.Arrived.Task.WaitAsync(bounded);
+                }
+                catch (OperationCanceledException failure) when (bounded.IsCancellationRequested)
+                {
+                    throw new InvalidOperationException($"Owner-cut hold was not reached; unarmed cuts={observation.UnarmedCutCalls}, armed cuts={observation.CutCalls}, prepared={observation.PreparedCalls}, original={original.Status}.", failure);
+                }
                 await source.Database.Coordinator.ReadBarrierAsync(bounded);
                 await Assert.That(observation.CutCalls).IsEqualTo(DiscoveryCalls);
             }

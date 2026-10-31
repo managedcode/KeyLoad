@@ -31,6 +31,10 @@ internal static class DocumentPathDiagnosticScenario
 
     private static async Task ExecuteAsync(FunctionalGateFixture fixture, int records, int nodes, CancellationToken token)
     {
+        var output = Path.Combine(AppContext.BaseDirectory, "performance-investigation",
+            "documents-" + records + "-n" + nodes + "-" + Guid.NewGuid().ToString("N"));
+        Directory.CreateDirectory(output);
+        await Console.Out.WriteLineAsync("Local SDK diagnostic evidence: " + output);
         using var http = McpCallerHttp.Create(fixture.App, fixture.NodeNames[0]);
         http.DefaultRequestVersion = System.Net.HttpVersion.Version20;
         http.DefaultVersionPolicy = HttpVersionPolicy.RequestVersionExact;
@@ -43,18 +47,18 @@ internal static class DocumentPathDiagnosticScenario
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            await MeasureAsync(phases, "bulk-create", records, () => LoadAsync(sdk, partition, records, nodes, token));
-            await MeasureAsync(phases, "random-point-read", records, () => ReadAsync(sdk, partition, records, token));
-            await MeasureAsync(phases, "point-predicate-query", QueryOperations,
+            await MeasureAsync(output, phases, "bulk-create", records, () => LoadAsync(sdk, partition, records, nodes, token));
+            await MeasureAsync(output, phases, "random-point-read", records, () => ReadAsync(sdk, partition, records, token));
+            await MeasureAsync(output, phases, "point-predicate-query", QueryOperations,
                 () => QueryAsync(sdk, partition, records, token));
+            await MeasureAsync(output, phases, "mixed-point-read-update", records,
+                () => DocumentPathDiagnosticMixed.ExecuteAsync(sdk, partition, records, nodes, token));
+            await DocumentPathDiagnosticMixed.VerifyAsync(sdk, partition, records, token);
         }, failures);
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var output = Path.Combine(AppContext.BaseDirectory, "performance-investigation",
-                "documents-" + records + "-n" + nodes + "-" + Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(output);
             await File.WriteAllBytesAsync(Path.Combine(output, "phases.json"), JsonDefaults.Serialize(phases), CancellationToken.None);
-            await Console.Out.WriteLineAsync("Local SDK diagnostic evidence: " + output);
+            await File.WriteAllTextAsync(Path.Combine(output, "active-phase.txt"), "settled", CancellationToken.None);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -86,7 +90,7 @@ internal static class DocumentPathDiagnosticScenario
             var reference = new EntityRef(partition, DocumentPathDiagnosticCorpus.Collection, DocumentPathDiagnosticCorpus.Id(ordinal));
             var result = ClusterReplicationTestSupport.Success(await sdk.GetAsync(reference, cancellation));
             var document = result.Document ?? throw new InvalidOperationException("An acknowledged diagnostic document is missing.");
-            DocumentPathDiagnosticCorpus.Require(document.Reference.Id, document.Json, ordinal);
+            DocumentPathDiagnosticCorpus.Require(document.Reference.Id, document.Json, document.Revision, ordinal, updated: false);
         });
     }
 
@@ -103,15 +107,16 @@ internal static class DocumentPathDiagnosticScenario
             {
                 throw new InvalidOperationException("The diagnostic point-predicate query has an incorrect access path or result cardinality.");
             }
-            DocumentPathDiagnosticCorpus.Require(page.Rows[0].EntityId, page.Rows[0].Json, ordinal);
+            DocumentPathDiagnosticCorpus.Require(page.Rows[0].EntityId, page.Rows[0].Json, page.Rows[0].Revision, ordinal, updated: false);
         });
     }
 
     private static ParallelOptions Parallelism(CancellationToken token)
         => new() { MaxDegreeOfParallelism = DocumentPathDiagnosticCorpus.Clients, CancellationToken = token };
 
-    private static async Task MeasureAsync(List<DocumentPathDiagnosticPhase> phases, string name, int operations, Func<Task> run)
+    private static async Task MeasureAsync(string output, List<DocumentPathDiagnosticPhase> phases, string name, int operations, Func<Task> run)
     {
+        await File.WriteAllTextAsync(Path.Combine(output, "active-phase.txt"), name, CancellationToken.None);
         await Console.Out.WriteLineAsync($"Local SDK diagnostic phase={name} operations={operations}");
         var started = TimeProvider.System.GetTimestamp();
         await run();

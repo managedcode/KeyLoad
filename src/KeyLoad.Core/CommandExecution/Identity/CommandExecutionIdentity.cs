@@ -23,21 +23,26 @@ public static class CommandExecutionIdentity
     internal static Command<DatabaseCommand> SnapshotCommand(Command<DatabaseCommand> operation)
     {
         ArgumentNullException.ThrowIfNull(operation);
-        ValidateDatabaseCommand(operation);
-        var owned = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(OrleansSerialization.Serialize(operation));
+        ValidateDatabaseCommandIdentity(operation);
+        var owned = OrleansSerialization.Copy(operation);
         ValidateDatabaseCommand(owned);
         return owned;
     }
 
     internal static void ValidateDatabaseCommand(Command<DatabaseCommand> operation)
     {
+        ValidateDatabaseCommandIdentity(operation);
+        var input = operation.Value!;
+        _ = OrleansSerialization.Deserialize(input.Input.Span, (DatabaseCommandInputTypes.OperationPayloadType(input.Kind)).Value ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
+    }
+
+    private static void ValidateDatabaseCommandIdentity(Command<DatabaseCommand> operation)
+    {
         var input = operation.Value;
         if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId) || operation.CommandType != DatabaseCommandType || operation.Timestamp.Kind != DateTimeKind.Utc || input is null || input.Input.IsEmpty || !Enum.IsDefined(input.Kind) || string.IsNullOrEmpty(input.Fingerprint) || input.Fingerprint.Length != FingerprintCharacters || input.Fingerprint.Any(character => !char.IsAsciiHexDigitLower(character)))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidDatabaseCommand);
         }
-
-        _ = OrleansSerialization.Deserialize(input.Input.Span, (DatabaseCommandInputTypes.OperationPayloadType(input.Kind)).Value ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
     }
 
     internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> input, string fingerprint, ReadExecutionBudget? work, IKeyValueView? admissionView = null)

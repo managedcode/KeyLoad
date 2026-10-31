@@ -13,6 +13,7 @@ public static class OrleansSerialization
 {
     private static readonly ServiceProvider Services = CreateServices();
     internal static Serializer Serializer { get; } = Services.GetRequiredService<Serializer>();
+    private static DeepCopier Copier { get; } = Services.GetRequiredService<DeepCopier>();
 
     /// <summary>Encodes one nonnull owned value through the generated Orleans codec.</summary>
     /// <typeparam name="T">The attributed contract or scalar type.</typeparam>
@@ -24,6 +25,14 @@ public static class OrleansSerialization
     {
         ContractValidation.Validate(value, profile);
         return Serializer.SerializeToArray(new RuntimePayload { Version = PayloadVersion.Current, Value = value });
+    }
+
+    internal static T Copy<T>(T value)
+    {
+        ContractValidation.Validate(value);
+        var owned = Copier.Copy(value);
+        ContractValidation.Validate(owned);
+        return owned!;
     }
 
     /// <summary>Encodes one owned value into a caller-owned bounded stream.</summary>
