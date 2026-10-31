@@ -294,10 +294,13 @@ outside slice folders because they join multiple mutation families.
 sequenceDiagram
     participant Caller as SDK or MCP caller
     participant API as Public API
+    participant User as User grain of the credential
     participant Conn as Connection grain
     participant Part as Request grain
     participant Owners as ZoneTree owners on ReplicaCount silos
     Caller->>API: Typed operation and credentials
+    API->>User: Credential secret
+    User-->>API: Principal, from memory after the first storage read
     API->>Conn: Verified subject and bounded request
     Conn->>Part: Admitted operation
     Part->>Part: Fresh persisted authorization
@@ -307,6 +310,12 @@ sequenceDiagram
     Conn-->>API: Public result
     API-->>Caller: Contract result
 ```
+
+Authentication uses one user grain per API credential, addressed by the credential's public ID
+(`UserGrainIdentity`), never by its secret. Its first request reads the credential and principal from storage
+through the connection and request grains; later requests compare the secret's digest and expiry in memory. A
+`ConfigureApiKey` command invalidates that grain, and every operation still reads the current principal and its
+permissions in its own storage view.
 
 ```mermaid
 classDiagram

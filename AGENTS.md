@@ -104,8 +104,10 @@ ad-hoc concatenation. Do not change user entity casing implicitly.
   unsupported ASTs explicitly before effects. Parsing, execution semantics and
   SQL-client interoperability are separate qualification gates.
 - ASP.NET Core Authentication and Authorization admit HTTP/SDK/MCP callers.
-  Tickets carry the verified subject only. Every operation checks fresh persisted
-  credentials and permissions. ManagedCode.Orleans.Identity propagates verified
+  Tickets carry the verified subject only. A credential's user grain verifies it
+  against storage on its first request and serves later requests from memory until
+  that credential changes. Every operation checks fresh persisted permissions.
+  ManagedCode.Orleans.Identity propagates verified
   call-local context and restores it after asynchronous work.
 - Use ManagedCode.Communication commands, results and CQRS response streams.
   Reuse its producer, transport, cancellation and settlement APIs. KeyLoad owns
@@ -306,7 +308,7 @@ cases, schedule and verification, and the driver interface exist once, and each
 database, KeyLoad included, implements only its driver. Change a dataset or
 scenario once, in its module. KeyLoad runs every data type. Every database uses
 seed 1729, 16 clients, 1,000,000-record datasets and 100,000 planned operations
-per case with the same 6-minute limit per measured case (loads always finish), at one
+per case with the same 15-minute limit per measured case (loads always finish), at one
 node and, where the database supports it, three nodes.
 Unsupported capabilities and node counts have no cell; a failed case keeps its
 real error; never estimate, zero or invent a number.

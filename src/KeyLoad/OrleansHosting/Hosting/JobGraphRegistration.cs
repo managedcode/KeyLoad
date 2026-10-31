@@ -79,6 +79,12 @@ internal static class JobGraphRegistration
                 new GrainTransition(nameof(IRequestExecutionGrain.ExecuteAsync), target, IsReentrant: true));
         }
         AddSharedQueries(graph);
+        AddUsers(graph);
+    }
+
+    private static void AddUsers(DirectedGraph graph)
+    {
+        Add<IUserGrain, IConnectionGrain>(graph, nameof(IUserGrain.AuthenticateAsync), nameof(IConnectionGrain.ExecuteAsync));
     }
 
     private static void AddSharedQueries(DirectedGraph graph)

@@ -1,7 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using KeyLoad.Clustering;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -17,9 +15,7 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != PostgresProtocol.AllRows, this);
         var node = services.GetRequiredService<OrleansNode>();
-        var codec = services.GetRequiredService<GrainRequestCodec>();
         var requestId = Guid.NewGuid();
-        var envelope = CanonicalCredentialDispatch.Prepare(codec, Utf8.GetString(credential), requestId);
         PrincipalRecord? principal = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
@@ -27,9 +23,8 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
             using var connection = owner.Acquire(token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                var reply = await CanonicalCredentialDispatch.ReadAsync(node, envelope, connection, requestId);
-                principal = McpAuthentication.ReadPrincipal(GrainReplyFactory.RequireValue(reply),
-                    services.GetRequiredService<IOptions<McpExecutionOptions>>(), connection.Token);
+                principal = await CanonicalCredentialDispatch.AuthenticateAsync(node, Utf8.GetString(credential),
+                    connection, requestId);
                 if (!StringComparer.Ordinal.Equals(principal.Id, Subject))
                 {
                     throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);

@@ -6,7 +6,7 @@ namespace KeyLoad.Server;
 /// <summary>Resolves the current persisted identity through the execution authentication read.</summary>
 internal static class DatabaseCredentialResolver
 {
-    /// <summary>Fetches the owned execution principal envelope without publishing an operation execution identity.</summary>
+    /// <summary>Authenticates through the credential's user grain without publishing an operation execution identity.</summary>
     /// <param name="context">The actual authenticated public request and services.</param>
     /// <param name="executionObserver">The optional borrowed execution observer; no credentials are exposed.</param>
     /// <returns>The current persisted principal reply, decoded by the owning adapter.</returns>
@@ -20,19 +20,17 @@ internal static class DatabaseCredentialResolver
             throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
         }
         var requestId = Guid.NewGuid();
-        var codec = context.RequestServices.GetRequiredService<GrainRequestCodec>();
-        var envelope = CanonicalCredentialDispatch.Prepare(codec,
-            key[ServerProtocol.BearerPrefix.Length..], requestId);
         RequestFailureDiagnostic.MarkCredentialDispatch(context);
         var started = DatabasePhaseTelemetry.Begin();
         var outcome = DatabasePhaseOutcome.Faulted;
-        GrainOperationReply reply;
+        PrincipalRecord principal;
         var observedExecution = false;
         try
         {
             var node = context.RequestServices.GetRequiredService<OrleansNode>();
             using var connection = ServerConnectionFeature.Acquire(context, context.RequestAborted);
-            reply = await CanonicalCredentialDispatch.ReadAsync(node, envelope, connection, requestId, () =>
+            principal = await CanonicalCredentialDispatch.AuthenticateAsync(node, key[ServerProtocol.BearerPrefix.Length..],
+                connection, requestId, () =>
             {
                 if (executionObserver is not null)
                 {
@@ -55,6 +53,6 @@ internal static class DatabaseCredentialResolver
                 executionObserver!.Terminal(context.TraceIdentifier, requestId, outcome);
             }
         }
-        return GrainReplyFactory.RequireValue(reply);
+        return new GrainValue(principal);
     }
 }

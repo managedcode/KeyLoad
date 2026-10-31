@@ -14,6 +14,13 @@ internal static class DatabaseCredentialValidation
     internal static PrincipalRecord Require(IKeyValueView view, DatabaseCredentialWitness witness,
         string? expectedPrincipal, DateTimeOffset now)
     {
+        var key = RequireKey(view, witness, expectedPrincipal, now);
+        return ReadPrincipal(view, key.PrincipalId, now);
+    }
+
+    internal static ApiKeyRecord RequireKey(IKeyValueView view, DatabaseCredentialWitness witness,
+        string? expectedPrincipal, DateTimeOffset now)
+    {
         var key = view.GetRecord<ApiKeyRecord>(KeySpace.ApiKey(witness.CredentialId));
         byte[] verifier;
         try
@@ -34,7 +41,7 @@ internal static class DatabaseCredentialValidation
         {
             throw Errors.Fail(ErrorCode.Corruption, CredentialIdentityInvalid);
         }
-        return ReadPrincipal(view, key.PrincipalId, now);
+        return key;
     }
 
     internal static PrincipalRecord ReadPrincipal(IKeyValueView view, string id, DateTimeOffset now)

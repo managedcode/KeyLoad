@@ -65,13 +65,13 @@ internal static class GrainRequestAuthority
         return principal;
     }
 
-    internal static PrincipalRecord Authenticate(DatabaseEngine database, object payload, TimeProvider clock)
+    internal static CredentialAuthentication Authenticate(DatabaseEngine database, object payload, TimeProvider clock)
     {
         try
         {
             var secret = GrainPayload.Read<string>(payload);
-            var principalId = database.Authenticate(secret, clock.GetUtcNow());
-            return Reload(database, principalId, clock);
+            var key = database.AuthenticateKey(secret, clock.GetUtcNow());
+            return new(Reload(database, key.PrincipalId, clock), key.ExpiresAt);
         }
         catch (Exception error) when (GrainBoundaryErrors.Handles(error))
         {

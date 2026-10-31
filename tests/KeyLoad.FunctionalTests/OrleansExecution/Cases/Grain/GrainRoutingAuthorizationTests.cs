@@ -25,7 +25,7 @@ internal sealed class GrainRoutingAuthorizationTests
     public async Task AuthenticationReloadsPersistedPrincipalAndRevocationIsImmediate()
     {
         using var fixture = new TestDatabase();
-        var principal = GrainRequestAuthority.Authenticate(fixture.Database, Credential, TimeProvider.System);
+        var principal = GrainRequestAuthority.Authenticate(fixture.Database, Credential, TimeProvider.System).Principal;
         await Assert.That(principal.Id).IsEqualTo(Root);
         await Assert.That(principal.ClusterAdministrator).IsTrue();
         fixture.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal with

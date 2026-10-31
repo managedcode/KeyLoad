@@ -10,6 +10,7 @@ internal static class ConnectionGrainGraphRegistration
         silo.AddOrleansGraph(configureFilters: static filters => filters.EnableLiveGraphTelemetry = false, configureGraph: graph =>
         {
             graph.AllowClientCallGrain<IConnectionGrain>()
+                .AllowClientCallGrain<IUserGrain>()
                 .AllowClientCallGrain<IDatabaseCommitGrain>()
                 .AllowClientCallGrain<IRecurringDueWorkerGrain>()
                 .AllowClientCallGrain<ISampleChunkWorkerGrain>()

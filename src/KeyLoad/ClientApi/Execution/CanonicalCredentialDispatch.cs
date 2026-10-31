@@ -1,16 +1,19 @@
 using KeyLoad.Clustering;
+using KeyLoad.Core;
 
 namespace KeyLoad.Server;
 
 internal static class CanonicalCredentialDispatch
 {
-    internal static GrainRequestEnvelope Prepare(GrainRequestCodec codec, string credential, Guid requestId)
-        => codec.CreateRead(requestId, null, GrainReadKind.Authenticate, credential);
-
-    internal static async Task<GrainOperationReply> ReadAsync(OrleansNode node, GrainRequestEnvelope envelope,
+    /// <summary>Authenticates through the credential's user grain, which reads storage only on its first request.</summary>
+    internal static async Task<PrincipalRecord> AuthenticateAsync(OrleansNode node, string credential,
         ServerConnectionOperation connection, Guid requestId, Action? onStarted = null)
     {
-        GrainOperationReply? result = null;
+        var grains = node.DatabaseReady ? node.Grains!
+            : throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
+        var user = grains.GetGrain<IUserGrain>(UserGrainIdentity.For(
+            AuthorizationIdentity.IssueCredentialWitness(credential).CredentialId));
+        PrincipalRecord? result = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -18,7 +21,7 @@ internal static class CanonicalCredentialDispatch
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 onStarted?.Invoke();
-                result = await node.ExecuteAsync(requestId, envelope, false, connection.Token);
+                result = await user.AuthenticateAsync(credential, connection.Token);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);

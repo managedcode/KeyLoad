@@ -61,6 +61,17 @@ public static class AuthorizationExecution
         return engine.Store.Read(view => AuthorizationIdentity.RevalidateCredential(view, witness, null, now).Id);
     }
 
+    /// <summary>Verifies an API credential and returns its persisted record.</summary>
+    /// <param name = "engine">The shared database execution context.</param>
+    /// <param name = "secret">Complete API key secret.</param>
+    /// <param name = "now">Business time used to evaluate expiry.</param>
+    /// <returns>The verified credential record.</returns>
+    internal static ApiKeyRecord AuthenticateKey(this DatabaseEngine engine, string secret, DateTimeOffset now)
+    {
+        var witness = AuthorizationIdentity.IssueCredentialWitness(secret);
+        return engine.Store.Read(view => DatabaseCredentialValidation.RequireKey(view, witness, null, now));
+    }
+
     /// <summary>Verifies the same persisted credential on the caller's original bounded read frame.</summary>
 
     /// <param name = "engine">The shared database execution context.</param>

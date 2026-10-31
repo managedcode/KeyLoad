@@ -75,7 +75,18 @@ internal static class CanonicalOperationGateway
             using var connection = ServerConnectionFeature.Acquire(context, cancellationToken);
             using var requestContext = node.OpenRequestContext(actual.Principal, requestId,
                 commandId, connection.Token, connection.Id);
-            reply = await node.ExecuteAsync(requestId, actual.Envelope, actual.Command, connection.Token);
+            try
+            {
+                reply = await node.ExecuteAsync(requestId, actual.Envelope, actual.Command, connection.Token);
+            }
+            finally
+            {
+                if (commandKind == OperationKind.ConfigureApiKey && payload is ConfigureApiKeyRequest changed)
+                {
+                    // A changed credential is read from storage again on its next request.
+                    await node.Grains!.GetGrain<IUserGrain>(UserGrainIdentity.For(changed.ApiKey.Id)).InvalidateAsync();
+                }
+            }
             outcome = DatabasePhaseOutcome.Completed;
         }
         catch (Exception failure) when (failure is OperationCanceledException or KeyLoadException { Code: ErrorCode.Cancelled })
