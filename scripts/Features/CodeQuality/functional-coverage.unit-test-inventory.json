@@ -12837,7 +12837,7 @@
       "methodName": "ActualServerPolicyAllowsOnlySelectedPartitionMethodsAndPreservesSignedReplay",
       "instanceName": "ActualServerPolicyAllowsOnlySelectedPartitionMethodsAndPreservesSignedReplay",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/Connection/ConnectionGraphPolicyTests.cs",
-      "sourceSha256": "5a7d3ca0d0f628953ba99813a5a71e7d60b1988150075a2eaf4fcfd584562827",
+      "sourceSha256": "4cda928d345258b7e9e342a770ba9e35a07d80b1d452b38d646d20897df66c83",
       "lineNumber": 16,
       "endLineNumber": 36,
       "classification": "functional",
@@ -13480,7 +13480,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests(CqrsClusterFixture)",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests()",
       "methodName": "AllowedMethodRetainsGraphCallerAcrossStartedAndAwait",
       "instanceName": "AllowedMethodRetainsGraphCallerAcrossStartedAndAwait",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsGraphTests.cs",
@@ -13502,7 +13502,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests(CqrsClusterFixture)",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests()",
       "methodName": "MissingMethodSpecificTransitionProducesFailedChunk",
       "instanceName": "MissingMethodSpecificTransitionProducesFailedChunk",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsGraphTests.cs",
@@ -13524,7 +13524,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsIsolationTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsIsolationTests(CqrsClusterFixture)",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsIsolationTests()",
       "methodName": "ConcurrentStreamsKeepRequestCallerAndTerminalIdentitySeparate",
       "instanceName": "ConcurrentStreamsKeepRequestCallerAndTerminalIdentitySeparate",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsIsolationTests.cs",
@@ -13546,7 +13546,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests(CqrsClusterFixture)",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests()",
       "methodName": "CapacityOneProducerBlocksAndCancellationSettlesBeforeNextStream",
       "instanceName": "CapacityOneProducerBlocksAndCancellationSettlesBeforeNextStream",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsLifetimeTests.cs",
@@ -13568,7 +13568,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests(CqrsClusterFixture)",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests()",
       "methodName": "EarlyEnumeratorDisposalSettlesProducerAndLeavesNextStreamHealthy",
       "instanceName": "EarlyEnumeratorDisposalSettlesProducerAndLeavesNextStreamHealthy",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsLifetimeTests.cs",
@@ -13590,7 +13590,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsTerminalTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsTerminalTests(CqrsClusterFixture)",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsTerminalTests()",
       "methodName": "DomainFailureAfterProgressProducesOneSafeTerminalChunk",
       "instanceName": "DomainFailureAfterProgressProducesOneSafeTerminalChunk",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsTerminalTests.cs",

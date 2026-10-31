@@ -2,10 +2,18 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>One uniquely keyed actor for a single public database operation.</summary>
+/// <summary>One server-owned connection routes independent operations and joins their original work.</summary>
 [Orleans.Alias(GrainRoutingProtocol.RequestAlias), Orleans.CodeGeneration.Version(GrainRoutingProtocol.RequestInterfaceVersion)]
 public interface IConnectionGrain : Orleans.IGrainWithGuidKey
 {
+    /// <summary>Consumes the bounded CQRS operation locally and returns its joined terminal reply.</summary>
+    /// <param name="request">Authenticated server envelope with an exact bounded payload.</param>
+    /// <param name="cancellationToken">Caller cancellation propagated through Orleans and joined cleanup.</param>
+    /// <returns>The original terminal reply after complete stream settlement.</returns>
+    [Orleans.Alias(GrainRoutingProtocol.ExecuteAlias), Orleans.Concurrency.AlwaysInterleave,
+        Orleans.ResponseTimeout(GrainRoutingOptions.MaximumExecutionLifetime)]
+    Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope request, CancellationToken cancellationToken);
+
     /// <summary>Validate trusted scope and invoke the required database capability.</summary>
     /// <param name="request">Authenticated server envelope with an exact bounded payload.</param>
     /// <param name="cancellationToken">Caller cancellation propagated through Orleans.</param>

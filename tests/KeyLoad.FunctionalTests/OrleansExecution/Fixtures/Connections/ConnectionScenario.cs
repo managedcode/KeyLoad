@@ -1,7 +1,4 @@
 using KeyLoad.Clustering;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -109,11 +106,7 @@ internal sealed class ConnectionScenario : IAsyncDisposable
         using var bounded = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, calls.Token);
         using var identity = new GrainRequestIdentityScope(Fixture.Cluster.ServiceProvider, principal,
             requestId, commandId, bounded.Token, connectionId: Fixture.ConnectionId);
-        return await GrainRequestStreamConsumer.DrainAsync(
-            token => Connection.ExecuteStreamAsync(envelope, token),
-            Fixture.Cluster.ServiceProvider.GetRequiredService<
-                Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            requestId, Fixture.Clock, Fixture.RoutingOptions, bounded.Token);
+        return await Connection.ExecuteAsync(envelope, bounded.Token);
     }
 
     internal EntityRef Reference(string documentId)

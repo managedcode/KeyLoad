@@ -11,7 +11,7 @@ public sealed class GrainRoutingOptions
     /// <summary>The startup failure for unsafe request and execution lifetimes.</summary>
     public const string ValidationMessage = "Grain request lifetimes must be positive, at most two minutes, and issuance must fit the accepted future window.";
 
-    private const int MaximumFutureMinutes = 2;
+    internal const string MaximumExecutionLifetime = "00:02:00";
     private const int MaximumFrameCount = 128;
     private const int MaximumReplyBytesCeiling = 16_777_216;
     private const int MaximumInitialReplyBufferBytes = 4_096;
@@ -24,12 +24,12 @@ public sealed class GrainRoutingOptions
     private const int MaximumDetailCharactersCeiling = 4_096;
     private const int MaximumPrincipalBytesCeiling = 4_096;
     private const int MaximumContextBytesCeiling = 256;
-    private static readonly TimeSpan MaximumDuration = TimeSpan.FromMinutes(MaximumFutureMinutes);
+    private static readonly TimeSpan MaximumDuration = TimeSpan.Parse(MaximumExecutionLifetime, System.Globalization.CultureInfo.InvariantCulture);
 
     /// <summary>Gets or sets the expiry interval stamped on newly issued envelopes.</summary>
     public TimeSpan RequestLifetime { get; set; } = TimeSpan.FromMinutes(1);
     /// <summary>Gets or sets the accepted future expiry window during request validation.</summary>
-    public TimeSpan MaximumFuture { get; set; } = TimeSpan.FromMinutes(MaximumFutureMinutes);
+    public TimeSpan MaximumFuture { get; set; } = MaximumDuration;
     /// <summary>Gets or sets the cancellation lifetime shared by execution stream producers and consumers.</summary>
     public TimeSpan ExecutionLifetime { get; set; } = TimeSpan.FromMinutes(1);
     /// <summary>Gets or sets the frames one long-running response stream can carry, including progress and its terminal frame.</summary>

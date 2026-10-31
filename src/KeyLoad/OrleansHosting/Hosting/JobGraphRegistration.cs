@@ -55,10 +55,11 @@ internal static class JobGraphRegistration
 
     private static void AddRequests(DirectedGraph graph)
     {
-        Add<IConnectionGrain, IDatabaseCommitGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
-            nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
-        Add<IConnectionGrain, IRequestExecutionGrain>(graph, nameof(IConnectionGrain.ExecuteStreamAsync),
-            nameof(IRequestExecutionGrain.ExecuteAsync));
+        foreach (var method in new[] { nameof(IConnectionGrain.ExecuteAsync), nameof(IConnectionGrain.ExecuteStreamAsync) })
+        {
+            Add<IConnectionGrain, IDatabaseCommitGrain>(graph, method, nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
+            Add<IConnectionGrain, IRequestExecutionGrain>(graph, method, nameof(IRequestExecutionGrain.ExecuteAsync));
+        }
         Add<IPartitionQueryGrain, IRequestExecutionGrain>(graph, nameof(IPartitionQueryGrain.ExecuteAsync),
             nameof(IRequestExecutionGrain.ExecuteAsync));
         Add<IRequestExecutionGrain, IDatabaseCommitGrain>(graph, nameof(IRequestExecutionGrain.ExecuteAsync),

@@ -64,9 +64,6 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         OrleansRpcFailureOperation? originalOperation = null;
         try
         {
-            Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
-                token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(envelope, token);
-            var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
             var purpose = new CqrsStreamPurpose(() =>
             {
                 var request = services.GetRequiredService<GrainRequestCodec>().DecodeRequest(envelope, requestId);
@@ -74,12 +71,19 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
                 return request;
             });
             stage = OrleansRpcFailureStage.Consumption;
-            var reply = progress is null
+            if (progress is null && !ConnectionParentExecution.Handles(envelope.CommandKind))
+            {
+                purpose.Started();
+                return await grains.GetGrain<IConnectionGrain>(connectionId).ExecuteAsync(envelope, executionToken);
+            }
+            Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
+                token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(envelope, token);
+            var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
+            return progress is null
                 ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, serializer, requestId, clock,
                     routingOptions, purpose, executionToken)
                 : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, serializer, requestId, clock,
                     routingOptions, purpose, progress, executionToken);
-            return reply;
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {

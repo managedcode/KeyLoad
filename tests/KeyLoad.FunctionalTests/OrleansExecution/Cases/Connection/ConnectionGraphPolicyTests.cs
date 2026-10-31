@@ -42,12 +42,16 @@ internal sealed class ConnectionGraphPolicyTests
         var commit = typeof(IDatabaseCommitGrain).FullName!;
         var service = typeof(PartitionStorageGrainService).FullName!;
         var execute = nameof(IConnectionGrain.ExecuteStreamAsync);
-        await Assert.That(manager.IsTransitionAllowed(Transition(connection, execute,
-            commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsTrue();
+        foreach (var method in new[] { execute, nameof(IConnectionGrain.ExecuteAsync) })
+        {
+            await Assert.That(manager.IsTransitionAllowed(Transition(connection, method,
+                commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsTrue();
+            await Assert.That(manager.IsTransitionAllowed(Transition(connection, method,
+                request, nameof(IRequestExecutionGrain.ExecuteAsync)))).IsTrue();
+            await Assert.That(manager.IsTransitionAllowed(Client(connection, method))).IsTrue();
+        }
         await Assert.That(manager.IsTransitionAllowed(Transition(connection, nameof(IConnectionGrain.CloseAsync),
             commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsFalse();
-        await Assert.That(manager.IsTransitionAllowed(Transition(connection, execute,
-            request, nameof(IRequestExecutionGrain.ExecuteAsync)))).IsTrue();
         await Assert.That(manager.IsTransitionAllowed(Transition(request, nameof(IRequestExecutionGrain.ExecuteAsync),
             commit, nameof(IDatabaseCommitGrain.ReadCutAsync)))).IsTrue();
         await Assert.That(manager.IsTransitionAllowed(Transition(request, nameof(IRequestExecutionGrain.ExecuteAsync),
@@ -57,7 +61,6 @@ internal sealed class ConnectionGraphPolicyTests
         await Assert.That(manager.IsTransitionAllowed(Transition(Constants.UnknownCallerId, Constants.AnyMethod,
             request, nameof(IRequestExecutionGrain.ExecuteAsync)))).IsFalse();
         await Assert.That(manager.IsTransitionAllowed(Client(request, nameof(IRequestExecutionGrain.ExecuteAsync)))).IsFalse();
-        await Assert.That(manager.IsTransitionAllowed(Client(connection, execute))).IsTrue();
         await Assert.That(manager.IsTransitionAllowed(Transition(RuntimeJournalClient.CallerIdentity,
             RuntimeJournalClient.SendCommandCallerMethod, connection, execute))).IsTrue();
     }

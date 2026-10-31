@@ -19,14 +19,30 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, SiloDatabaseClient 
     internal CancellationToken AdmissionClosedToken => operations.ShutdownToken;
 
     /// <inheritdoc />
+    public Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, CancellationToken cancellationToken)
+    {
+        var request = DecodeRequest(envelope);
+        return GrainRequestStreamConsumer.DrainWithPurposeAsync(
+            token => OpenOperation(request, envelope, token), serializer, request.Envelope.RequestId,
+            clock, options, new CqrsStreamPurpose(() => request), cancellationToken);
+    }
+
+    /// <inheritdoc />
     public IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ExecuteStreamAsync(
         GrainRequestEnvelope envelope, CancellationToken cancellationToken)
+        => OpenOperation(DecodeRequest(envelope), envelope, cancellationToken);
+
+    private DecodedGrainRequest DecodeRequest(GrainRequestEnvelope envelope)
     {
         var request = codec.Decode(envelope);
         GrainIdentityContext.ValidateConnection(request.Envelope, this.GetPrimaryKey());
-        return ConnectionOperationStream.Run(operations, request.Envelope.RequestId,
-            token => CreateStream(request, envelope, token), cancellationToken);
+        return request;
     }
+
+    private IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> OpenOperation(
+        DecodedGrainRequest request, GrainRequestEnvelope envelope, CancellationToken cancellationToken)
+        => ConnectionOperationStream.Run(operations, request.Envelope.RequestId,
+            token => CreateStream(request, envelope, token), cancellationToken);
 
     private IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> CreateStream(
         DecodedGrainRequest request, GrainRequestEnvelope envelope, CancellationToken token)

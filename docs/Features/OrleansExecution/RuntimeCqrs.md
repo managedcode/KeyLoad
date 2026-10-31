@@ -1,8 +1,12 @@
 # CQRS response streams
 
 The connection grain executes authorized database operations through the
-centrally pinned ManagedCode.Communication packages. Orleans carries the execution
-`IAsyncEnumerable<CqrsStreamChunk<TProgress, TResult>>` response. The decision is
+centrally pinned ManagedCode.Communication packages. Ordinary operations without
+a progress consumer drain the producer locally on the connection grain and return
+one settled Orleans Task reply. Progress consumers and composed maintenance or
+queue operations retain the Orleans
+`IAsyncEnumerable<CqrsStreamChunk<TProgress, TResult>>` response from the same
+producer. The decision is
 [ADR-082](../../ADR/ADR-082-cqrs-streams.md).
 
 ## Requirements and acceptance
@@ -22,7 +26,9 @@ flowchart LR
     Stream --> Operation[Authorized operation]
     Operation -->|Orleans call| Owner[Silo-local ZoneTree owner]
     Owner --> Stream
-    Stream --> Caller
+    Stream --> Local[Local consumer for ordinary operations]
+    Local -->|Settled Task reply| Caller
+    Stream -->|Progress or composed response stream| Caller
 ```
 
 ## Ownership
@@ -33,7 +39,9 @@ normalizer when adapting another chunk source. Orleans owns execution
 response enumeration, batching, scheduling and disposal.
 
 ManagedCode.Orleans.Graph enforces application call transitions and preserves the
-originating context across enumeration. KeyLoad checks fresh persisted policy,
+originating context across Task calls and enumeration. The terminal Task entry
+allows independent operations to interleave on the connection while storage stays
+on the independent request path. KeyLoad checks fresh persisted policy,
 request and result identity, operation-specific progress, byte/frame limits,
 execution deadlines and concurrent resource admission. It must not duplicate the
 library's producer, transport or dispatcher.
@@ -54,3 +62,9 @@ Keep mechanism tests, whole database operations, process recovery and actual
 Aspire SDK/MCP checks distinct. Confirmed dependency defects follow the owning
 repository repair and published-NuGet delivery rule. Local build/test results are
 development evidence; exact-source Linux runtime artifacts qualify the product.
+
+Focused local terminal-path checks cover a held operation alongside another read
+on the same connection and physical owner, signed close and replay, fresh policy,
+cancellation and awaited settlement. Small real SDK diagnostics verify every
+stored document after measured reads and updates. These checks do not qualify
+full partition fan-out, background catch-up, endurance or competitor rankings.

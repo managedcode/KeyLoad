@@ -326,10 +326,12 @@ their own Feature owners. The MCP host exposes bounded search/route/invoke tools
 through ManagedCode.MCPGateway and ManagedCode.MarkdownLd.Kb tool-metadata graphs
 ([ToolDiscovery](Features/ClientApi/ToolDiscovery.md),
 [ADR-104](ADR/ADR-104-mcp-gateway-tool-discovery.md)); the graph holds public
-operation documentation only. Streamed results and long operations use
-ManagedCode.Communication CQRS `IAsyncEnumerable` contracts through Orleans
-([RuntimeCqrs](Features/OrleansExecution/RuntimeCqrs.md),
-[ADR-082](ADR/ADR-082-cqrs-streams.md)). enumeration does not move
+operation documentation only. The connection grain consumes the bounded
+ManagedCode.Communication CQRS producer locally for ordinary operations and
+returns its settled terminal reply through one Orleans Task call. Progress
+consumers and composed operations retain Orleans `IAsyncEnumerable` responses
+from the same producer ([RuntimeCqrs](Features/OrleansExecution/RuntimeCqrs.md),
+[ADR-082](ADR/ADR-082-cqrs-streams.md)). Response transport does not move
 node-owned storage or replace persisted authority.
 
 ## SQL and relational model
