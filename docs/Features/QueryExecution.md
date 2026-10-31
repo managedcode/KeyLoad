@@ -16,6 +16,13 @@ flowchart LR
 
 ## Query core contract
 
+`QueryPage.CutPosition` identifies the physical committed read cut. A cursor
+retains its original cut while its existing ownership, source and authorization
+fences remain valid. This position is distinct from the canonical command
+sequence in `CommitToken.Position`: group commit can persist several commands in
+one journal frame, and local derived commits can advance the physical position.
+The two counters must not be compared as though they share one unit.
+
 | Requirement | Acceptance | Automated evidence |
 |---|---|---|
 | REQ-QUERY-001: one cancellation/deadline/raw key-value budget covers SQL parsing plus point, index and full-scan candidates | AC-MP-003 | Real-store SQL/AST index-plus-point accounting, full-scan rejection before page copies, cancellation during a long SQL token, and pre-tokenization rejection above the byte cap |

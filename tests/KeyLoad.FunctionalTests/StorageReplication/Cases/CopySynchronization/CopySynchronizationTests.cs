@@ -12,6 +12,19 @@ internal sealed class CopySynchronizationTests
     private static readonly TimeSpan Interval = TimeSpan.FromMilliseconds(200);
 
     [Test]
+    public Task ConcurrentReadDuringOwnerDiscoveryRetainsTheWriterCutForFollowingCommands()
+    {
+        var token = TestContext.Current!.Execution.CancellationToken;
+        var observation = new StorageOwnerDiscoveryCallFault(Guid.NewGuid());
+        return RequestCqrsHostedCluster.RunAsync(cluster => StorageOwnerDiscoveryScenario.RunAsync(cluster, observation, token),
+            token, configureServices: (_, services, _) =>
+            {
+                services.Configure<ReplicaCopyOptions>(options => options.SynchronizationInterval = TimeSpan.FromHours(1));
+                services.AddSingleton<IOutgoingGrainCallFilter>(observation);
+            });
+    }
+
+    [Test]
     public Task InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair()
     {
         var token = TestContext.Current!.Execution.CancellationToken;

@@ -1,5 +1,7 @@
 using KeyLoad.FunctionalTests.Authorization;
 using KeyLoad.FunctionalTests.DatabaseComposition;
+using KeyLoad.FunctionalTests.QueryExecution;
+using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
 
@@ -19,6 +21,52 @@ internal sealed class GroupCommitTests
     private const int FrameHeadroomNumerator = 3;
     private const int FrameHeadroomDenominator = 2;
     private const int LargeDocumentCharacters = 48 * 1024;
+
+    [Test]
+    public async Task AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedFramesAndCursorContinuation()
+    {
+        using var fixture = new TestDatabase();
+        fixture.Configure(GroupCommitCommands.Collection, ResourceKind.Collection);
+        Command<DatabaseCommand>[] operations = [GroupCommitCommands.Put(fixture, First, Created),
+            GroupCommitCommands.Put(fixture, Second, Created), GroupCommitCommands.Put(fixture, First, Updated, 1)];
+        var token = GroupCommitCommands.Token;
+        var prepared = fixture.Database.PrepareStorageOperations(operations, token);
+        var sequence = fixture.Database.LastApplied;
+        var position = fixture.Store.Position;
+        var batch = fixture.Database.ApplyStorageOperations(prepared, sequence + NextSequence, token);
+        var receipt = batch.Applied[^1].Result.Get<CommitReceipt>();
+        await Assert.That(fixture.Store.Position).IsEqualTo(position + OneFrame);
+        await Assert.That(receipt.Token.Position).IsEqualTo(batch.Position);
+        await Assert.That(receipt.Token.Position).IsNotEqualTo(fixture.Store.Position);
+        var observation = new QueryReadCutObservationCapture();
+        var engine = new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution(),
+            searchEngine: null, readCutObserver: observation);
+        var request = new AstQueryRequest(fixture.Partition,
+            new(GroupCommitCommands.Collection, null, [new("*", "*")], null, [new("/@id", false)], 1),
+            AllowFullScan: true);
+
+        var first = engine.ExecuteAst("root", request, cancellationToken: token);
+
+        await Assert.That(first.CutPosition).IsEqualTo(position + OneFrame);
+        await Assert.That(first.Rows.Select(row => row.EntityId)).IsEquivalentTo([First]);
+        await Assert.That(first.Rows.Single().Json).IsEqualTo(Updated);
+        await Assert.That(observation.Values.Single().ResultCutPosition).IsEqualTo(position + OneFrame);
+        await Assert.That(observation.Values.Single().StorePosition).IsEqualTo(fixture.Store.Position);
+        await Assert.That(first.Cursor).IsNotNull();
+        var following = engine.ExecuteAst("root", request with { Cursor = first.Cursor }, cancellationToken: token);
+        await Assert.That(following.CutPosition).IsEqualTo(position + OneFrame);
+        await Assert.That(following.Rows.Select(row => row.EntityId)).IsEquivalentTo([Second]);
+        await Assert.That(following.Rows.Single().Json).IsEqualTo(Created);
+        await Assert.That(following.Cursor).IsNull();
+        var replay = fixture.Database.ApplyStorageOperations([prepared[0]], batch.Position + NextSequence, token);
+        await Assert.That(replay.Position).IsEqualTo(batch.Position);
+        fixture.Commit(new PutDocument(GroupCommitCommands.Collection, Healthy, Healthy));
+        var expired = Assert.ThrowsExactly<KeyLoadException>(() =>
+            engine.ExecuteAst("root", request with { Cursor = first.Cursor }, cancellationToken: token));
+        await Assert.That(expired.Code).IsEqualTo(ErrorCode.CursorExpired);
+        var healthy = engine.ExecuteAst("root", request, cancellationToken: token);
+        await Assert.That(healthy.CutPosition).IsEqualTo(fixture.Store.Position);
+    }
 
     [Test]
     public async Task AcRep008ConsecutiveCommandsShareOneJournalFrameWithOrderedSequences()

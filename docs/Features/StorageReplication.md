@@ -68,6 +68,11 @@ token must be reached locally before reading, and current persisted credentials,
 resource permissions and projection rules still apply. Observing a cut alone
 does not prove equal data or a distributed snapshot.
 
+Interleaved owner discovery adopts the already-published owner set. Completing a
+batch advances that same set and fences older discoveries; a different cached
+set is invalidated. A concurrent read cannot leave the next command using a
+cached canonical sequence from before the acknowledged batch.
+
 ## Requirements and acceptance
 
 | Requirement | Observable acceptance | Current evidence boundary |

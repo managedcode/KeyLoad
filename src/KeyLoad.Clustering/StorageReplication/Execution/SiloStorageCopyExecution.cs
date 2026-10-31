@@ -98,6 +98,12 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         // Reads interleave with batches; a cut read that a batch overtook must not replace the batch's owners.
         var epoch = ownersEpoch;
         var available = await ReadAvailableCopiesAsync(cancellationToken).ConfigureAwait(true);
+        // A concurrent read can publish the owner set while this discovery awaits its RPCs. The writer must
+        // advance that same set, otherwise its committed cut is lost from the cache.
+        if (cachedOwners is { } published && cachedVersion.Equals(version))
+        {
+            return published;
+        }
         var owners = available.OrderByDescending(copy => copy.Cut.Position)
             .ThenBy(copy => copy.Name, StringComparer.Ordinal).Take(settings.ReplicaCount).ToArray();
         if (requireComplete && owners.Length != settings.ReplicaCount)
@@ -140,7 +146,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     }
 
     /// <summary>Records that every owner persisted <paramref name="sequence"/>, so the next write needs no cut reads.</summary>
-    private static void Advance(StorageCopyOwner[] owners, long sequence)
+    private void Advance(StorageCopyOwner[] owners, long sequence)
     {
         for (var index = StorageCopyContract.FirstOwner; index < owners.Length; index++)
         {
@@ -148,6 +154,11 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
             {
                 owners[index] = owners[index] with { Cut = owners[index].Cut with { Position = sequence } };
             }
+        }
+        ownersEpoch++;
+        if (cachedOwners is { } published && !ReferenceEquals(published, owners))
+        {
+            cachedOwners = null;
         }
     }
 

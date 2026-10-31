@@ -56506,9 +56506,9 @@
       "methodName": "AcRep008ConsecutiveCommandsShareOneJournalFrameWithOrderedSequences",
       "instanceName": "AcRep008ConsecutiveCommandsShareOneJournalFrameWithOrderedSequences",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/GroupCommitTests.cs",
-      "sourceSha256": "18d01a4d14d4394cccc72583d2a11d7e3bd994d05e5d6444328113b3e5aa6267",
-      "lineNumber": 23,
-      "endLineNumber": 58,
+      "sourceSha256": "cdbf2dda1b10158e9412ef60ac9200d92f14b65d5a1deb63ac4d8a786b0c222c",
+      "lineNumber": 71,
+      "endLineNumber": 106,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -56524,9 +56524,9 @@
       "methodName": "AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence",
       "instanceName": "AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/GroupCommitTests.cs",
-      "sourceSha256": "18d01a4d14d4394cccc72583d2a11d7e3bd994d05e5d6444328113b3e5aa6267",
-      "lineNumber": 60,
-      "endLineNumber": 83,
+      "sourceSha256": "cdbf2dda1b10158e9412ef60ac9200d92f14b65d5a1deb63ac4d8a786b0c222c",
+      "lineNumber": 108,
+      "endLineNumber": 131,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -56542,9 +56542,9 @@
       "methodName": "AcRep008CommandThatOverflowsTheSharedFrameWaitsForItsOwnCommit",
       "instanceName": "AcRep008CommandThatOverflowsTheSharedFrameWaitsForItsOwnCommit",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/GroupCommitTests.cs",
-      "sourceSha256": "18d01a4d14d4394cccc72583d2a11d7e3bd994d05e5d6444328113b3e5aa6267",
-      "lineNumber": 85,
-      "endLineNumber": 105,
+      "sourceSha256": "cdbf2dda1b10158e9412ef60ac9200d92f14b65d5a1deb63ac4d8a786b0c222c",
+      "lineNumber": 133,
+      "endLineNumber": 153,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -56560,9 +56560,9 @@
       "methodName": "AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands",
       "instanceName": "AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/GroupCommitTests.cs",
-      "sourceSha256": "18d01a4d14d4394cccc72583d2a11d7e3bd994d05e5d6444328113b3e5aa6267",
-      "lineNumber": 107,
-      "endLineNumber": 129,
+      "sourceSha256": "cdbf2dda1b10158e9412ef60ac9200d92f14b65d5a1deb63ac4d8a786b0c222c",
+      "lineNumber": 155,
+      "endLineNumber": 177,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -56578,9 +56578,9 @@
       "methodName": "AcRep008BatchPreparationNeverMovesBusinessTimeBackwards",
       "instanceName": "AcRep008BatchPreparationNeverMovesBusinessTimeBackwards",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/GroupCommitTests.cs",
-      "sourceSha256": "18d01a4d14d4394cccc72583d2a11d7e3bd994d05e5d6444328113b3e5aa6267",
-      "lineNumber": 131,
-      "endLineNumber": 153,
+      "sourceSha256": "cdbf2dda1b10158e9412ef60ac9200d92f14b65d5a1deb63ac4d8a786b0c222c",
+      "lineNumber": 179,
+      "endLineNumber": 201,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -57199,9 +57199,9 @@
       "methodName": "InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair",
       "instanceName": "InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/CopySynchronization/CopySynchronizationTests.cs",
-      "sourceSha256": "fd480d09a5d5cba328ebe388ee39ae7785d23555246431bfee83f0f9ba88cb89",
-      "lineNumber": 14,
-      "endLineNumber": 26,
+      "sourceSha256": "8351f7f64a786268f935030d2f23d458a4790c9d0f84a6d8269b96787d42da4d",
+      "lineNumber": 27,
+      "endLineNumber": 39,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -57209,6 +57209,45 @@
       ],
       "acceptance": [
         "AC-REP-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.CopySynchronizationTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.CopySynchronizationTests",
+      "methodName": "ConcurrentReadDuringOwnerDiscoveryRetainsTheWriterCutForFollowingCommands",
+      "instanceName": "ConcurrentReadDuringOwnerDiscoveryRetainsTheWriterCutForFollowingCommands",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/CopySynchronization/CopySynchronizationTests.cs",
+      "sourceSha256": "8351f7f64a786268f935030d2f23d458a4790c9d0f84a6d8269b96787d42da4d",
+      "lineNumber": 14,
+      "endLineNumber": 25,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REP-004"
+      ],
+      "acceptance": [
+        "AC-REP-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests",
+      "methodName": "AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedFramesAndCursorContinuation",
+      "instanceName": "AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedFramesAndCursorContinuation",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageReplication/Cases/GroupCommit/GroupCommitTests.cs",
+      "sourceSha256": "cdbf2dda1b10158e9412ef60ac9200d92f14b65d5a1deb63ac4d8a786b0c222c",
+      "lineNumber": 25,
+      "endLineNumber": 69,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-QUERY-003",
+        "REQ-REP-008"
+      ],
+      "acceptance": [
+        "AC-MP-003",
+        "AC-MP-012",
+        "AC-REP-008"
       ]
     }
   ],
@@ -70461,11 +70500,13 @@
         "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeStorageExecutionOptionsTests|InvalidPolicyFailsBeforeDirectoryOwnershipIsCreated|InvalidPolicyFailsBeforeDirectoryOwnershipIsCreated",
         "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeStorageExecutionOptionsTests|InvalidStreamBufferFailsBeforeDirectoryOwnershipIsCreated|InvalidStreamBufferFailsBeforeDirectoryOwnershipIsCreated(0)",
         "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeStorageExecutionOptionsTests|InvalidStreamBufferFailsBeforeDirectoryOwnershipIsCreated|InvalidStreamBufferFailsBeforeDirectoryOwnershipIsCreated(4097)",
+        "KeyLoad.FunctionalTests.StorageReplication.CopySynchronizationTests|ConcurrentReadDuringOwnerDiscoveryRetainsTheWriterCutForFollowingCommands|ConcurrentReadDuringOwnerDiscoveryRetainsTheWriterCutForFollowingCommands",
         "KeyLoad.FunctionalTests.StorageReplication.CopySynchronizationTests|InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair|InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008BatchPreparationNeverMovesBusinessTimeBackwards|AcRep008BatchPreparationNeverMovesBusinessTimeBackwards",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008CommandThatOverflowsTheSharedFrameWaitsForItsOwnCommit|AcRep008CommandThatOverflowsTheSharedFrameWaitsForItsOwnCommit",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008ConsecutiveCommandsShareOneJournalFrameWithOrderedSequences|AcRep008ConsecutiveCommandsShareOneJournalFrameWithOrderedSequences",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands|AcRep008CopyThatMissedTheLastBatchCompletesFromItsRetainedCommands",
+        "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedFramesAndCursorContinuation|AcRep008QueryPagesKeepPhysicalReadCutsAcrossGroupedFramesAndCursorContinuation",
         "KeyLoad.FunctionalTests.StorageReplication.GroupCommitTests|AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence|AcRep008RetryInsideABatchReplaysTheFirstOutcomeWithoutASecondSequence",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkManifestCardinalityTests|AcChunk008010011012SelectedManifestCountMustEqualActualDecodedImmutableBaseRows|AcChunk008010011012SelectedManifestCountMustEqualActualDecodedImmutableBaseRows",
         "KeyLoad.FunctionalTests.TimeSeries.ChunkMultiblockBoundaryWholeFlowTests|Actual257RecordGenerationRefusesSecondBlockThenExactRepairReplayAndTwoCold|Actual257RecordGenerationRefusesSecondBlockThenExactRepairReplayAndTwoCold(False)",
