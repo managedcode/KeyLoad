@@ -1,117 +1,71 @@
 name: Website
+# Builds the static site from the result files of one Benchmarks run and publishes it to GitHub Pages.
+# Benchmarks dispatches this workflow with its run id; a push that changes the site uses the latest completed run.
 on:
   push:
     branches: [main]
     paths:
       - 'site/**'
-      - 'scripts/Features/BenchmarkComparisons/site-*'
-      - 'scripts/Features/BenchmarkComparisons/composite-site-*'
-      - 'scripts/Features/BenchmarkComparisons/isolated-github-stream.mjs'
-      - 'scripts/Features/BenchmarkComparisons/isolated-github-transport.mjs'
       - '.github/workflows/website.yml'
-      - '.github/workflows/Features/BenchmarkComparisons/QualifySite/**'
-      - '.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite/**'
-      - '.github/workflows/Features/BenchmarkComparisons/DeploySite/**'
   workflow_dispatch:
     inputs:
       benchmark_run_id:
-        description: Benchmark run to await (optional)
+        description: Benchmarks run whose results to publish (empty = latest completed run)
         required: false
         type: string
         default: ''
 permissions:
   contents: read
+concurrency:
+  group: keyload-website
+  cancel-in-progress: false
 jobs:
-  qualify:
+  build:
     name: Generate website
-    concurrency:
-      group: keyload-site-qualification
-      cancel-in-progress: true
-    if: >-
-      github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
-      github.ref == 'refs/heads/main' &&
-      (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    runs-on: ubuntu-latest
+    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     permissions: {contents: read, actions: read}
-    outputs:
-      mode: ${{ steps.qualification.outputs.mode }}
-      site_revision: ${{ steps.qualification.outputs.site_revision }}
-      benchmark_mode: ${{ steps.qualification.outputs.benchmark_mode }}
     env:
       GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
+      REQUESTED_RUN: ${{ inputs.benchmark_run_id }}
     steps:
-      - name: Await the triggering benchmark run
-        if: github.event_name == 'workflow_dispatch' && inputs.benchmark_run_id != ''
-        timeout-minutes: 5
-        env:
-          BENCHMARK_RUN_ID: ${{ inputs.benchmark_run_id }}
-        run: |
-          [[ "$BENCHMARK_RUN_ID" =~ ^[1-9][0-9]*$ && ${#BENCHMARK_RUN_ID} -le 20 ]]
-          benchmark_deadline=$((SECONDS + 270))
-          benchmark_poll=0
-          while ((SECONDS < benchmark_deadline)); do
-            benchmark_remaining=$((benchmark_deadline - SECONDS))
-            ((benchmark_remaining > 0)) || break
-            benchmark_request_timeout=$((benchmark_remaining < 30 ? benchmark_remaining : 30))
-            if benchmark_metadata=$(timeout "${benchmark_request_timeout}s" gh api -H 'Cache-Control: no-cache, max-age=0' "repos/$GH_REPO/actions/runs/$BENCHMARK_RUN_ID"); then
-              jq -e --arg run "$BENCHMARK_RUN_ID" '
-              (.id | tostring) == $run and
-              .repository.id == 477801965 and .repository.full_name == "managedcode/KeyLoad" and
-              .head_repository.id == 477801965 and .head_repository.full_name == "managedcode/KeyLoad" and
-              .head_branch == "main" and .name == "Benchmarks" and
-              .path == ".github/workflows/benchmarks.yml" and
-              (.event == "push" or .event == "workflow_dispatch") and
-              (.head_sha | test("^[a-f0-9]{40}$"))' <<< "$benchmark_metadata" > /dev/null
-              if [[ "$(jq -r .status <<< "$benchmark_metadata")" == completed ]]; then
-                jq -e '.conclusion == "success" or .conclusion == "failure"' <<< "$benchmark_metadata" > /dev/null
-                exit 0
-              fi
-            else
-              printf '%s\n' 'GitHub benchmark status request failed; the bounded wait continues.' >&2
-            fi
-            benchmark_poll=$((benchmark_poll + 1))
-            printf 'Waiting for benchmark completion (poll %s).\n' "$benchmark_poll"
-            benchmark_remaining=$((benchmark_deadline - SECONDS))
-            ((benchmark_remaining > 0)) || break
-            sleep "$((benchmark_remaining < 5 ? benchmark_remaining : 5))"
-          done
-          printf '%s\n' 'The triggering benchmark run did not complete within the bounded wait.' >&2
-          exit 1
       - name: Download source code
         uses: actions/checkout@v7
+      - name: Choose the Benchmarks run
+        id: run
+        run: |
+          run_id="$REQUESTED_RUN"
+          if [[ -z "$run_id" ]]; then
+            run_id=$(gh run list --repo "$GITHUB_REPOSITORY" --workflow benchmarks.yml --branch main --status completed \
+              --limit 1 --json databaseId --jq '.[0].databaseId')
+          fi
+          [[ "$run_id" =~ ^[1-9][0-9]*$ ]]
+          printf 'id=%s\n' "$run_id" >> "$GITHUB_OUTPUT"
+          printf 'Publishing results of Benchmarks run %s\n' "$run_id" >> "$GITHUB_STEP_SUMMARY"
+      - name: Download the benchmark results
+        run: gh run download "${{ steps.run.outputs.id }}" --repo "$GITHUB_REPOSITORY" --pattern 'benchmark-*' --dir results
+      - name: Merge the results
+        run: node site/scripts/results.mjs --input=results --output=site-results/results.json
+      - name: Build the site
+        run: node site/scripts/build.mjs --results=site-results/results.json --output=_site --site-revision="$GITHUB_SHA"
+      - name: Upload the site for GitHub Pages
+        uses: actions/upload-pages-artifact@v5
         with:
-          ref: ${{ github.workflow_sha }}
-          path: control
-          persist-credentials: false
-      - name: Generate static landing page
-        id: qualification
-        uses: ./control/.github/workflows/Features/BenchmarkComparisons/QualifySite
+          path: _site
+          include-hidden-files: true
   deploy:
     name: Publish website
-    concurrency:
-      group: keyload-site-deployment
-      cancel-in-progress: false
-    needs: qualify
-    if: ${{ always() && !cancelled() && needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish' }}
-    runs-on: ubuntu-latest
+    needs: [build]
+    runs-on: ubuntu-24.04
     timeout-minutes: 10
-    permissions: {contents: read, actions: read, pages: write, id-token: write}
-    environment: {name: github-pages, url: '${{ steps.publication.outputs.page_url }}'}
-    env:
-      GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-      QUALIFIED_REVISION: ${{ needs.qualify.outputs.site_revision }}
-      CONTROL_REVISION: ${{ github.workflow_sha }}
-      KEYLOAD_SITE_BENCHMARK_MODE: ${{ needs.qualify.outputs.benchmark_mode }}
+    permissions: {pages: write, id-token: write}
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Download source code
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ github.workflow_sha }}
-          path: control
-          persist-credentials: false
-      - name: Publish website
-        id: publication
-        uses: ./control/.github/workflows/Features/BenchmarkComparisons/DeploySite
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v6
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5

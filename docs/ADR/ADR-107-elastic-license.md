@@ -30,7 +30,7 @@ product qualification gates.
 ## Implementation and verification contract
 
 1. The root policy and the ReleaseDelivery contract are recorded before metadata changes; the authoritative text and its consumers must agree.
-2. LICENSE, Directory.Build.props, README.md and the BenchmarkComparisons site metadata carry the license, with their existing SiteMetadata TUnit assertions. NuGet uses PackageLicenseFile and packs the actual root file; CopyToPublishDirectory also retains it in published server/CLI payloads. Preserve Three.js manifests, vendor files and every external notice.
+2. LICENSE, Directory.Build.props, README.md and the BenchmarkComparisons site metadata carry the license. NuGet uses PackageLicenseFile and packs the actual root file; CopyToPublishDirectory also retains it in published server/CLI payloads. Preserve Three.js manifests, vendor files and every external notice.
 3. Compare the complete ELv2 body byte-for-byte with the retrieved official source; inspect real local NuGet license bytes and nuspec; parse the site's real JSON-LD; run governance and the final canonical Release build. Existing full-builder SiteMetadata tests remain the runtime metadata proof through the Aspire-owned site entry when authentic evidence is available. Missing evidence or unrelated build failures are recorded, never relabeled green.
 4. Delivery uses a scoped commit on the current branch and a normal main push, followed by a fresh read of GitHub's main LICENSE. Preserve unrelated changes. No release workflow dispatch, new dependency, stored-data change or alteration of existing benchmark provenance is part of this task.
 

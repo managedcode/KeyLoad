@@ -5,6 +5,7 @@ namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 [ConfigurationOptions]
 internal sealed record BenchmarkDeploymentOptions
 {
+    private const string DefaultKeyLoadLogLevel = "Warning";
     private const int DefaultNeo4jInitialHeap = 256;
     private const int DefaultNeo4jMaximumHeap = 512;
     private const int DefaultNeo4jPageCache = 256;
@@ -29,11 +30,13 @@ internal sealed record BenchmarkDeploymentOptions
     public int InfluxWalFilesPerSnapshot { get; init; } = DefaultInfluxWalFilesPerSnapshot;
     public int PostgresSlotWalRetentionMegabytes { get; init; } = DefaultPostgresSlotRetention;
     public int DocumentPostgresMaximumConnections { get; init; } = DefaultDocumentPostgresConnections;
+    public string KeyLoadLogLevel { get; init; } = DefaultKeyLoadLogLevel;
     internal bool IsValid() => DocumentPostgresMaximumConnections is >= MinimumDocumentPostgresConnections and <= MaximumDocumentPostgresConnections
         && ValidMemory(Neo4jInitialHeapMegabytes) && ValidMemory(Neo4jMaximumHeapMegabytes)
         && Neo4jInitialHeapMegabytes <= Neo4jMaximumHeapMegabytes && ValidMemory(Neo4jPageCacheMegabytes)
         && ValidMemory(OpenSearchHeapMegabytes) && InfluxQueryMemoryPercent is >= 1 and <= MaximumQueryMemoryPercent
         && InfluxWalFilesPerSnapshot is >= 1 and <= MaximumInfluxWalFilesPerSnapshot
-        && PostgresSlotWalRetentionMegabytes is >= 1 and <= MaximumWalMegabytes;
+        && PostgresSlotWalRetentionMegabytes is >= 1 and <= MaximumWalMegabytes
+        && !string.IsNullOrWhiteSpace(KeyLoadLogLevel);
     private static bool ValidMemory(int value) => value is >= 1 and <= MaximumMemoryMegabytes;
 }

@@ -1,0 +1,81 @@
+{
+  "database": "Redis",
+  "type": "key-value",
+  "nodes": 1,
+  "image": "redis:8.0",
+  "commit": "1111111111111111111111111111111111111111",
+  "runId": null,
+  "startedAt": "2026-10-31T09:00:00.0000000+00:00",
+  "finishedAt": "2026-10-31T09:40:00.0000000+00:00",
+  "records": 1000000,
+  "operations": 100000,
+  "clients": 16,
+  "error": null,
+  "cases": [
+    {
+      "id": "load",
+      "status": "passed",
+      "operations": 1000000,
+      "errors": 0,
+      "seconds": 11.312,
+      "opsPerSecond": 88400,
+      "p50Ms": 18.1,
+      "p95Ms": 39.82,
+      "p99Ms": 70.59,
+      "batchSize": 1000,
+      "error": null
+    },
+    {
+      "id": "get",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 1.399,
+      "opsPerSecond": 71500,
+      "p50Ms": 0.22,
+      "p95Ms": 0.48,
+      "p99Ms": 0.86,
+      "batchSize": 1,
+      "error": null
+    },
+    {
+      "id": "set",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 1.443,
+      "opsPerSecond": 69300,
+      "p50Ms": 0.23,
+      "p95Ms": 0.51,
+      "p99Ms": 0.9,
+      "batchSize": 1,
+      "error": null
+    },
+    {
+      "id": "delete",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 1.427,
+      "opsPerSecond": 70100,
+      "p50Ms": 0.23,
+      "p95Ms": 0.51,
+      "p99Ms": 0.9,
+      "batchSize": 1,
+      "error": null
+    },
+    {
+      "id": "mixed",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 1.558,
+      "opsPerSecond": 64200,
+      "p50Ms": 0.25,
+      "p95Ms": 0.55,
+      "p99Ms": 0.97,
+      "batchSize": 1,
+      "error": null
+    }
+  ]
+}

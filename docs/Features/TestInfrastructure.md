@@ -175,9 +175,9 @@ Add a new test class by naming it in one lane or by placing it in a listed names
 
 ## Build and Tests boundary
 
-REQ-TEST-PIPELINE-001: Build and Tests runs solution builds, repository checks and KeyLoad functional analyzer/unit/scalar/recovery/cluster tests only. Benchmark sessions execute only from `benchmarks/KeyLoad.ComparisonHost` in the separate Benchmarks workflow. There is no benchmark test suite under `tests/`.
+REQ-TEST-PIPELINE-001: Build and Tests runs solution builds, repository checks and KeyLoad functional analyzer/unit/scalar/recovery/cluster tests only. Benchmark jobs run only from `benchmarks/KeyLoad.ComparisonHost` in the separate Benchmarks workflow. There is no benchmark test suite under `tests/`.
 
-AC-TEST-PIPELINE-001: the unit assembly discovers no BenchmarkComparisons cases; the comparison assembly retains their test inventory and assertions; Build and Tests invokes no comparison suite or benchmark load-generator preparation. Benchmarks executes the transferred contracts in normal and scalar modes and retains original TRX reports. Static workflow/project inventory review is the explicit infrastructure-placement evidence exception; actual Aspire/TUnit discovery and original reports verify the runtime boundary.
+AC-TEST-PIPELINE-001: the unit assembly discovers no BenchmarkComparisons cases; the benchmark client assembly owns them; Build and Tests invokes no benchmark job. Benchmarks runs one TUnit class of the client per job and retains its TRX report and result file. Static workflow/project inventory review is the explicit infrastructure-placement evidence exception; actual Aspire/TUnit discovery and original reports verify the runtime boundary.
 
 ## Platform, dependency and release qualification
 

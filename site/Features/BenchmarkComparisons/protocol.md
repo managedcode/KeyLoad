@@ -1,86 +1,57 @@
-# Website session evidence protocol
+# Website benchmark results protocol
 
-This is the source contract for the current intake, not proof of successful GitHub qualification. The measurement producers are the original successful Benchmarks session jobs and their `comparison-session-<target>-n<1|3>` artifacts. Website authenticates and aggregates these originals directly; it does not require a successful combined-results job. The schema/profile is `session`. Historical results are never converted into current measurements.
+Benchmarks runs one GitHub Actions job per database, data type and node count. Each job starts its database through Aspire, runs the shared scenario of its data type on that type's standard dataset and uploads its result file, also when the job fails. KeyLoad runs every type's scenario on the same dataset as the specialist databases, so every type compares KeyLoad with those databases.
 
-## Canonical composition and measurement bounds
+## Result file
 
-The inventory contains exactly 32 database/topology jobs: 16 databases × 1/3 nodes, with a separately named matrix for each database. Each runner owns only one database and its real topology. Separate real TUnit tests share one live database session. The initial load of 1,000,000 records is measured separately; there is no warmup, reset or five-repetition scheme. Two-node configurations are not part of the active inventory.
+The harness names each file after its own content, `<database slug>-<type>-n<nodes>.json`, for example `postgresql-pgvector-vector-n3.json`.
 
-The [additional database contract](../../../docs/Features/BenchmarkComparisons/AdditionalDatabases.md) records the five added native targets, one-node deployment scope and open three-node work. Their unavailable topology rows are not replication qualification.
+```json
+{ "database": "KeyLoad", "type": "graph", "nodes": 3, "image": "…", "commit": "…", "runId": 123,
+  "startedAt": "…", "finishedAt": "…", "records": 1000000, "operations": 100000, "clients": 16, "error": null,
+  "cases": [ { "id": "neighbors", "status": "passed", "operations": 100000, "errors": 0, "seconds": 41.2,
+               "opsPerSecond": 2427, "p50Ms": 5.1, "p95Ms": 11.0, "p99Ms": 19.4, "batchSize": 1, "error": null } ] }
+```
 
-The seven current case IDs are `load-million`, `index`, `sequential-read`, `random-read`, `search`, `mixed` and `verify-final`. Operation lanes execute 100,000 operations each; mixed runs create/delete/update/read/search with 16 clients distributed 4/3/3/3/3. The first load makes one million real create attempts. Original samples retain the operation ordinal, worker, time bounds, success and a safe error. Intake recomputes counts and latency percentiles from the originals and verifies the participation of the configured workers and the time overlap of the mixed lanes. Participation of every worker ID alone does not prove that all clients were active simultaneously.
+`results-contract.mjs` owns the shape: exact field names, the data types with their case ids and databases, node counts 1 or 3, ISO timestamps, positive `records`, `operations` and `clients`, and unique case ids. `image` and `commit` are strings or null, `runId` a non-negative integer or null, and `finishedAt` an instant or null; an empty or absent value is shown as absent. A job-level `error` is null or the error that stopped the job before its remaining cases. Every case records non-negative counts and measurements and a positive `batchSize`, the units per call; latencies are per call. A `passed` case has a null `error`; a `failed` case carries its first error.
 
-These seven document-session tests do not prove completion of every product model family, vector accuracy, queue/event contracts or general performance qualification. Absence of a capability has an explicit unavailable result without numeric metrics; adapter/prerequisite gaps are failures. When all seven document cases are genuinely unavailable for Qdrant/RabbitMQ/KurrentDB, the envelope carries `SessionCapabilitiesUnavailable` and a null observed profile but retains the actual image and resource originals. This is not topology unavailability. A failure before profile verification may also have a null profile, but only when no case was measured and actual exit/qualification failure proof exists; partial failed samples are retained without public figures. An unsupported topology is distinct from an unsupported operation. For the declared unavailable n3 rows in the canonical session contract, a nonzero framework/cleanup exit may be an authentic failure without server/resource/profile evidence only when all seven original unavailable reports, execution7Passed and an actual notExecuted/nonzero-exit qualification receipt are present. This case does not permit a missing TRX or fabricated cases. Corpus SHA256 and payload bytes are not invented: the projection leaves those values unknown.
+| Type | Cases | Databases besides KeyLoad |
+| --- | --- | --- |
+| documents | load, point-read, range-query, update, delete, mixed | MongoDB, SurrealDB |
+| key-value | load, get, set, delete, mixed | Redis |
+| relational | load, pk-select, range-select, update, delete, mixed | PostgreSQL + pgvector, SQL Server, MySQL |
+| graph | load, neighbors, traverse | Neo4j, HelixDB, SurrealDB |
+| vector | load, exact-top10 | Qdrant, PostgreSQL + pgvector |
+| search | load, index, term-query, and-query | OpenSearch |
+| time-series | load, range-read, aggregate, windows | TimescaleDB, InfluxDB |
+| analytics | load, group-by, filtered-aggregate | ClickHouse |
+| queue | cycle | RabbitMQ |
+| events | load, append, read, mixed | KurrentDB |
 
-## Original authority and archive verification
+## Merge and build
 
-GitHub API captures bind each original ZIP to the repository/source/run/attempt/job/artifact ID and the API digest. The plan always contains 32 rows. Only completed successful worker jobs with an original artifact enter the measured aggregate. Failed, skipped or missing workers remain visible as rows with null values that read "No data". A selected corrupt, expired, foreign or mixed original is rejected; it is never accepted as a measurement. The number of original input files is derived from the specific authenticated aggregate; there are no fixed totals. A local directory alone does not authenticate GitHub.
+```sh
+node site/scripts/results.mjs --input=results --output=site-results/results.json
+node site/scripts/build.mjs --results=site-results/results.json --output=_site --site-revision=<40-hex revision>
+node site/scripts/build.mjs --results=none --output=_site --site-revision=<40-hex revision>
+```
 
-The worker `session.json` contains the exact session/target/topology identity, actual image refs, observed DLL/PDB hashes, the target profile/runtime and SHA256 references to the seven original case reports, the unchanged `RuntimeTestResults/<original>.trx`, `runtime-import.json`, `session-qualification.json` and, where applicable, `session-resource-evidence.json`. The original resource sidecar is bound to the original `session-state.json`. container DLL/PDB files are not compared byte for byte with the outer package: they are compiled in a different image build context and carry their own source/image-bound identity.
+`results.mjs` walks the downloaded artifacts and reads every file named like a result file at any depth; job test logs beside them are not result files. Each result must match the shape and its own file name. The merge fails when there is no result file, when a file is not valid JSON or breaks the shape, when the tree holds a symbolic link, and when two files describe the same database, type and node count. It writes `{ "results": [...] }` sorted by type, database and node count and never overwrites an existing file.
 
-Preparation retains the original immutable image proof, independent functional cluster proof and `comparison-compiled-runtime-identity`: exactly two original JSON files, `benchmark-runtime.json` and `benchmark-runtime-files.json`. The inventory is bounded to 64 MiB. Descriptor and inventory hashes are bound to each original worker import receipt. Workers download the complete `comparison-compiled-test-bundle` and verify the archive and every file before starting. The collector and Website verify the small identity ZIP and the original metadata of the complete package instead of downloading multi-gigabyte build outputs 32 times.
+The builder validates the merged file with the same contract, renders the benchmark section into static HTML and publishes the merged file unchanged as `data/results.json`. `--results=none` builds the page without figures and states that no results are available yet. The output must be a new directory outside the site source; a failed build removes it. The builder uses Node built-ins only. Authored browser JavaScript stays within 40,960 gzip bytes and CSS within 20,480.
 
-Bounded REST/rate-limit/header/image APIs are retained. The collector re-verifies the original API-digest-bound ZIPs before aggregation. Website reuses the session collector and aggregator to prepare input from the original ZIPs. Independent BCL ZIP checks verify original worker/runtime bytes against the declared inputs before an atomic prepared-input handoff. The production projection reads the original reports again. Path escapes, symlinks, duplicate names, substituted hashes/identities, exceeded bounds and mixed attempts are rejected.
+## Rendering
 
-## Failure accounting and publication policy
+`results-view.mjs` renders one section per data type with the same comparison table: the database column stays pinned, one column per case, and each cell shows a 1-node line and a 3-node line with operations per second (records per second for loads), a bar scaled to the best result of that case in the type, and the 3-node change against 1 node. The index build is measured once, so it shows seconds and treats the shortest time as best. Every declared database of the type has a row, KeyLoad first.
 
-A failed or incomplete session contributes no public figures. Its original GitHub artifacts remain available for diagnosis. Every included successful session has all seven original TRX outcomes, a passed or explicitly inapplicable qualification receipt, and measured/unavailable case accounting. The qualification receipt retains the actual exit code and the current `execution-correctness` step.
+- A failed case reads "Failed" with the first line of its error; the full error stays in the line title and the recorded-values table. A case the job never reached after a job-level error reads "Failed" with that job error.
+- A database without a 3-node result shows only its 1-node line and reads "Single node" beside its name.
+- A database without any result file, or a case absent from its result, reads "No data" with the reason. Missing values never become zero.
 
-Both `validate` and `publish` select successful complete sessions from a single completed producer run, whose overall conclusion may be success or failure. Displayed operation measurements require an actual verified profile and complete successful execution evidence. Incomplete server resource telemetry does not hide recorded throughput, duration, latency or counts: preserve resourceQualified=false and label those rows Measured · incomplete telemetry. Show resource metrics only when their original observations exist; otherwise show "No data". Incomplete or heterogeneous runner telemetry does not establish server resource comparability and does not block original operation timings. Website intake explicitly uses the recorded resource policy, preserving every per-session resource proof; the native aggregation CLI keeps the strict comparison policy. The table retains all planned database/topology rows, shows absent values as "No data", and links unavailable sessions to the original run. Session/worker/archive identities are rechecked before deploy. Permissions are not widened.
+A collapsed recorded-values table per type lists every case of every job with status, operations, errors, seconds, operations per second, p50/p95/p99 latency per call, units per call, error, image and run link. The page links the GitHub Actions runs and source commits named in the results and the merged file.
 
-The finalizer rejects missing inner original reports. An early startup or cleanup failure cannot become a successful session merely because some case JSON says measured. It excludes that worker while other independently verified successful sessions remain eligible.
+`results-controls.mjs` is the only benchmark browser module. It shows the data type filter, hides the other types' sections and shades the edges of horizontally scrolled tables. Without JavaScript every section stays visible.
 
-When no new ready authentic session producer exists, the optional Website publish may build a content-only site without figures. Already selected invalid proof is rejected; there is no fallback to an older cohort or invented metrics. Website/measured/trusted-control source revisions are retained separately. Source configuration, builds or control parser fixtures are not performance measurements or production readiness.
+## Tests
 
-## Projection, browser and resource values
-
-`isolated-projection.mjs` verifies the original session bundle; `isolated-loader.mjs` verifies the hash-bound catalog/projection and bounded HTTP reads. One radio control selects a database family; 1-node and 3-node results always appear side by side, never pooled. Every view reads the single original session result. There is no median across repetitions and no pooling across node counts. Mixed lanes are not averaged into an artificial overall latency distribution. Unavailable never becomes a numeric zero: a missing value reads "No data" with its recorded disposition (single-node topology, outside the workload, no result in this run).
-
-"All databases" shows four headline counts and one row per planned engine with write (load 1M), read (random read), search and mixed throughput, plus read and search latency (p50/p95/p99 on a log scale) and the throughput change from 1 to 3 nodes, drawn as 3-node throughput against a 1-node tick on one shared scale. The mixed figure is the successful operations of all five concurrent lanes divided by the mixed test's elapsed time. A family view shows one card per engine with its version, topologies, write acknowledgement, every test as paired bars relative to the fastest engine of the run, and per-request latency. Family labels are presentation only. A collapsed results table keeps the complete planned row inventory with values per test, the mixed figure, and job and artifact links. Cells round for reading (whole operations per second from 100 up, otherwise two decimals; time tests to milliseconds) and keep the exact recorded value in their title and data attribute. Client process CPU, allocation and RSS remain in the projection and original artifacts; they describe the benchmark client, not the database, and are not charted.
-
-CPU, allocation and peak RSS are process observations over the lane interval; overlapping lanes share one process. Normalizing CPU/allocation by the attempt count of the selected lane does not make them exclusive operation-family costs, and such values must not be summed. The server resource sidecar describes the lifetime of the whole session; intake does not attribute it to an arbitrary individual case.
-
-`isolated-lab.mjs` owns the single visible benchmark surface, cancellation/generations, accessible controls and disposal; `isolated-view.mjs` composes the sections and `isolated-charts.mjs` renders the chart primitives. `bootstrap.mjs` retains the independent lazy scene lifecycle, reduced motion, fallback and joined cleanup. Official Three.js bytes, license and manifest are not changed.
-
-## TUnit, builder and coverage
-
-All tests are TUnit. `SessionCohortContractTests` and `SiteSessionContractCoverageTests` execute the single controlled `session-contract-probe.mjs`, which imports the actual production modules. Nine scenarios cover plan, reports, selection, environment, qualification, runtime, site-context, publication and profile-accounting. They verify positive inputs and specific identity/accounting/admission mutations; their values never enter published artifacts. Node children have bounded concurrent stdout/stderr, caller cancellation instead of a fixed deadline, and joined ownership; Website children inherit the real `NODE_V8_COVERAGE`.
-
-An independent C# oracle computes the expected per-case/lane values from authenticated originals. Real Chrome/CDP sessions load builder-emitted assets through a confined ephemeral HTTP listener and verify controls, keyboard/accessibility, raw hash rejection, cancellation and stale generations. Scene regressions and coverage converter regressions are retained.
-
-Builder entry: `node site/scripts/build.mjs --isolated=<original aggregate directory> --output=<nonexistent isolated output> --revision=<measured SHA> --evidence-url=<exact producer run URL> --site-revision=<qualified website SHA>`. Duplicate/unknown/retired arguments, symlink/path escapes and changed source/vendor bytes are rejected. Original aggregate bytes are retained; the browser receives a compact projection and source-bound static assets, not raw samples. Four shared pure session modules are copied unchanged and verified byte for byte. A failure removes only the newly created owned output.
-
-The trusted-control source closure derives the exact sorted manifest from literal transitive imports, with browser roots listed explicitly. The coverage inventory includes every executable source in that closure. This is source inventory configuration, not a claim of executed coverage. Every required authored JS file without actual execution ranges remains uncovered. Thresholds are not lowered: 80% lines, 70% branches, 90% for critical validators.
-
-GitHub provides the absolute `KEYLOAD_SITE_COVERAGE`, original Node V8 receipts and real Chrome precise-coverage receipts. The immutable source manifest is bound to the actual Website checkout HEAD; source identity alone is not execution proof. Browser URLs `/Features/BenchmarkComparisons/...mjs` and `/scripts/Features/BenchmarkComparisons/...mjs` map to exact repository sources only from allowlisted origins. ranges, stdout and artifact identities are retained; ranges are never fabricated.
-
-Deployment is possible only after Aspire-owned TUnit/analyzer/browser/coverage qualification and exact source/producer freshness, through a needs-gated least-privilege Pages job. Benchmark and Website qualification run only on Linux GitHub Actions.
-
-## range union
-
-Preserve each receipt and script as a separate execution snapshot: raw receipt identity/hash, scriptId, optional execution context, and that script's own functions/ranges. Resolve the deepest physical function and block for a source offset inside one snapshot before taking the covered union across snapshots. Flattening ranges across snapshots is forbidden: a zero-count child in one execution must not override a positive parent in another execution where V8 legitimately omitted that same-count child.
-
-Physical function identity is the exact source path and outer function span; functionName remains metadata and must not create duplicate denominators. The outcome denominator is the union of observed child intervals keyed by source, physical function span and child span. A matching positive explicit outcome proves coverage. When the interval is omitted in another snapshot of the same physical function, infer coverage only when that snapshot proves positive effective execution throughout the canonical interval. An enclosing module is insufficient proof. A positive explicit outer outcome is not invalidated by an unexecuted descendant. Preserve receipts unchanged and record derived decisions separately.
-
-Regression proof uses actual Node-generated receipts from both sides of a real branch. Assert exact executable/covered totals, the true and false return lines covered, an uncalled function uncovered, and identical results after receipt-order reversal. Separate/nested function identity proof also uses real Node output. Malformed/crossing-range cases mutate only the fixture's exact file-URL script, never an unrelated built-in script. Every child process starts bounded concurrent stdout/stderr drains, has a deadline, and joins or kills/joins the owned process in finally. Local development runs remain development evidence; fabricated coverage never qualifies publication.
-
-### equal-span function contract
-
-The [V8 coverage implementation](https://raw.githubusercontent.com/v8/v8/main/src/debug/debug-coverage.cc)
-explicitly permits a script wrapper and uncalled inner function with identical
-spans; report order is nesting order and the inner function is last.
-The converter preserves that order and resolves equal-span ties to the execution
-innermost function within each snapshot. This selection applies to line resolution,
-explicit outcome checks and omitted-child inference, so script execution cannot
-prove an uncalled inner function executed. Names remain metadata and span-based
-branch denominators stay unchanged. A real Node single-function source with no
-trailing newline proves equal spans/order and uncovered function state;
-the Unicode/CRLF9/8line2/2branch and reversed-receipt regressions are retained.
-
-converter regression evidence must survive temporary-directory teardown.
-The converter regressions retain unchanged real fixture source, original Node receipts, stdout and
-raw SHA256/identity metadata under a separate converter-fixtures subtree of
-KEYLOAD_SITE_COVERAGE. These files are uploaded for review and never enter the
-production node/ or browser/sessions/ coverage denominators. Preserve original
-bytes and cleanup of owned temporary files; mutated malformed/crossing
-copies must not be labeled or retained as actual executed evidence.
+`tests/KeyLoad.WebsiteTests` runs the real merge script and builder through Node with artifact folders from its `Fixtures/Results` folder and checks the merged file and the rendered rows, columns and values. These values are test data and never published.

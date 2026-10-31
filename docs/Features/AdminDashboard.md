@@ -1,8 +1,8 @@
 # AdminDashboard
 
-The owner-requested shared favicon export and noindex continuation is specified
-by [SiteMetadata](BenchmarkComparisons/SiteMetadata.md), REQ-SEO-001/005 and
-AC-SEO-001/006 under ADR053. It adds only finite public icon GET/HEAD assets;
+The console owns the canonical logo and the shared PNG/ICO icon set that the
+public site mirrors byte for byte under [ADR-053](../ADR/ADR-053-unified-visual-identity.md).
+It serves only those finite public icon GET/HEAD assets and `noindex,nofollow`;
 all operational authorization and existing console contracts remain required.
 
 This is the durable requirements and acceptance contract; the decision and implementation contract are in [ADR-051](../ADR/ADR-051-admin-dashboard.md). Goal: attractive runtime administration with sizes, throughput, tables/collections, queues and files.

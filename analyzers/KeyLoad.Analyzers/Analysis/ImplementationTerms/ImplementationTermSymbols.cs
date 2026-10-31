@@ -133,10 +133,6 @@ internal static class ImplementationTermSymbols
     {
         ValueType(symbol, out var value);
         return
-        symbol is IFieldSymbol or IPropertySymbol or IMethodSymbol && symbol.ContainingAssembly.Name is "KeyLoad.Comparisons" or "KeyLoad.AppHost" or "KeyLoad.LoadTests.AppHost" or "KeyLoad.ComparisonHost" &&
-        Array.Exists(ImplementationTermCatalog.MeasurementMembers, member => member == symbol.ToDisplayString()) ||
-        symbol is IFieldSymbol { Name: ImplementationTermCatalog.MeasurementSamplesMember, ContainingType: { } owner } &&
-        owner.ToDisplayString() == "KeyLoad.WebsiteTests.BenchmarkComparisons.SiteIsolatedFields" ||
         TypeMeans(value, MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default)) ||
         TypeMeans(symbol?.ContainingType, MeasurementType, new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default));
     }

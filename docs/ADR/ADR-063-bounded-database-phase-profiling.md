@@ -1,7 +1,7 @@
 # ADR-063: Bounded database phase profiling
 
 Status: Partially implemented in source; complete producer/capture and measurement qualification remain pending.
-Related: REQ-RESOURCE-003..006 / AC-DBPROF-001..008; [ResourceExecution](../Features/ResourceExecution.md), [DatabasePhaseProfiling](../Features/ResourceExecution/DatabasePhaseProfiling.md), ADR-035, ADR-113, ADR-076, ADR-080.
+Related: REQ-RESOURCE-003..006 / AC-DBPROF-001..008; [ResourceExecution](../Features/ResourceExecution.md), [DatabasePhaseProfiling](../Features/ResourceExecution/DatabasePhaseProfiling.md), ADR-035, ADR-113.
 
 ## Decision
 
@@ -32,4 +32,4 @@ REQ-RESOURCE-003/004 map to AC-DBPROF-001..004 for preserving real phase ownersh
 
 Core diagnostics owns the bank/schema/arithmetic; producer feature owners add scalar scopes only at the original operation boundaries; Server owns private capture and lifecycle. Tests use actual banks, ZoneTree/store operations, original tasks and Aspire resources; no fake clock/provider is used where the contract requires actual time or state.
 
-Qualification requires enabled full source checks and exact-source Linux unit/scalar/recovery/cluster tests, real private capture verification, and repeated matched on/off profiles at current 100,000- and 1,000,000-record workloads where applicable. Existing BenchmarkComparisons current cohort, coverage and publication gates remain separate and mandatory. Source compilation does not establish measured overhead or benefit. Keep the ADR Accepted until every mapped implementation and evidence gate passes.
+Qualification requires enabled full source checks and exact-source Linux unit/scalar/recovery/cluster tests, real private capture verification, and repeated matched on/off profiles at current 100,000- and 1,000,000-record workloads where applicable. Benchmark comparisons and coverage remain separate gates. Source compilation does not establish measured overhead or benefit. Keep the ADR Accepted until every mapped implementation and evidence gate passes.

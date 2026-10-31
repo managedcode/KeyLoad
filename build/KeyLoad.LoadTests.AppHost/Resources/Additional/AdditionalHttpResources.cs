@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Security.Cryptography;
-using KeyLoad.Comparisons;
 
 namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
@@ -17,11 +16,11 @@ internal static class AdditionalHttpResources
         {
             throw new InvalidOperationException(Invalid);
         }
-        if (context.Selection.Target == BenchmarkAdditionalTargets.ClickHouse)
+        if (context.Selection.Target == BenchmarkDatabases.ClickHouse)
         {
             AddClickHouse(context);
         }
-        else if (context.Selection.Target == BenchmarkAdditionalTargets.InfluxDb)
+        else if (context.Selection.Target == BenchmarkDatabases.InfluxDb)
         {
             AddInflux(context);
         }
@@ -54,7 +53,7 @@ internal static class AdditionalHttpResources
         const string Directory = "--data-dir=" + Mount, Bind = "--http-bind=0.0.0.0:8181", Auth = "--without-auth";
         const string QueryMemory = "--exec-mem-pool-size=", Percent = "%";
         const string SnapshotFiles = "--wal-files-per-snapshot=";
-        var deployment = LoadTestsOptionsRegistration.Get(context.Builder).Deployment.Value;
+        var deployment = context.Deployment.Value;
         var queryMemory = QueryMemory + deployment.InfluxQueryMemoryPercent.ToString(CultureInfo.InvariantCulture) + Percent;
         var snapshotFiles = SnapshotFiles + deployment.InfluxWalFilesPerSnapshot.ToString(CultureInfo.InvariantCulture);
         var node = context.Builder.AddContainer(Influx, BenchmarkAdditionalImages.InfluxImage, BenchmarkAdditionalImages.InfluxTag)

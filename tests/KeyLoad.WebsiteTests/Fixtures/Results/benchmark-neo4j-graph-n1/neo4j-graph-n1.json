@@ -1,0 +1,55 @@
+{
+  "database": "Neo4j",
+  "type": "graph",
+  "nodes": 1,
+  "image": "neo4j:5.26",
+  "commit": "1111111111111111111111111111111111111111",
+  "runId": null,
+  "startedAt": "2026-10-31T09:00:00.0000000+00:00",
+  "finishedAt": "2026-10-31T09:40:00.0000000+00:00",
+  "records": 1000000,
+  "operations": 100000,
+  "clients": 16,
+  "error": null,
+  "cases": [
+    {
+      "id": "load",
+      "status": "passed",
+      "operations": 1000000,
+      "errors": 0,
+      "seconds": 100,
+      "opsPerSecond": 10000,
+      "p50Ms": 160,
+      "p95Ms": 352,
+      "p99Ms": 624,
+      "batchSize": 1000,
+      "error": null
+    },
+    {
+      "id": "neighbors",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 30,
+      "opsPerSecond": 3333.33,
+      "p50Ms": 4.8,
+      "p95Ms": 10.56,
+      "p99Ms": 18.72,
+      "batchSize": 1,
+      "error": null
+    },
+    {
+      "id": "traverse",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 67.568,
+      "opsPerSecond": 1480,
+      "p50Ms": 10.81,
+      "p95Ms": 23.78,
+      "p99Ms": 42.16,
+      "batchSize": 1,
+      "error": null
+    }
+  ]
+}

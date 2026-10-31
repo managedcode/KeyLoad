@@ -1,0 +1,68 @@
+{
+  "database": "KeyLoad",
+  "type": "search",
+  "nodes": 1,
+  "image": "ghcr.io/managedcode/keyload@sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "commit": "1111111111111111111111111111111111111111",
+  "runId": null,
+  "startedAt": "2026-10-31T09:00:00.0000000+00:00",
+  "finishedAt": "2026-10-31T09:40:00.0000000+00:00",
+  "records": 1000000,
+  "operations": 100000,
+  "clients": 16,
+  "error": null,
+  "cases": [
+    {
+      "id": "load",
+      "status": "passed",
+      "operations": 1000000,
+      "errors": 0,
+      "seconds": 40.65,
+      "opsPerSecond": 24600,
+      "p50Ms": 65.04,
+      "p95Ms": 143.09,
+      "p99Ms": 253.66,
+      "batchSize": 1000,
+      "error": null
+    },
+    {
+      "id": "index",
+      "status": "passed",
+      "operations": 1,
+      "errors": 0,
+      "seconds": 23.529,
+      "opsPerSecond": 0.0425,
+      "p50Ms": 23529,
+      "p95Ms": 23529,
+      "p99Ms": 23529,
+      "batchSize": 1,
+      "error": null
+    },
+    {
+      "id": "term-query",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 32.051,
+      "opsPerSecond": 3120,
+      "p50Ms": 5.13,
+      "p95Ms": 11.29,
+      "p99Ms": 20.01,
+      "batchSize": 1,
+      "error": null
+    },
+    {
+      "id": "and-query",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 40.486,
+      "opsPerSecond": 2470,
+      "p50Ms": 6.48,
+      "p95Ms": 14.26,
+      "p99Ms": 25.27,
+      "batchSize": 1,
+      "error": null
+    }
+  ]
+}

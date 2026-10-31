@@ -189,9 +189,8 @@ does not depend on domain execution or the server host.
 the Aspire AppHost and shared build targets live in `build/`; tests and
 benchmarks keep their own roots. Recovery tests own their child-process
 scenarios in the same test assembly. Compiler analyzers, the AppHost, benchmark
-entry, generated-consumer fixtures, the execution
-comparison library and the TUnit comparison host keep their distinct execution
-boundaries.
+entry, generated-consumer fixtures and the TUnit comparison host keep their
+distinct execution boundaries.
 
 Each `Program.cs` shows initialization, mode selection, host composition, run and
 joined shutdown; compiler rule KLD0020 rejects forwarding-only entry wrappers.
@@ -225,15 +224,14 @@ NuGet publication follow root policy.
 | tests/KeyLoad.FunctionalTests | TestDatabase.cs and `<SliceName>/` folders | Matching product slices; contract and engine regressions. |
 | tests/KeyLoad.ProcessRecoveryTests | Program.cs, StorageRecovery/Cases/, feature-owned Processes/ and Execution/ | TUnit recovery tests and their real child-process scenarios in the same test assembly. |
 | tests/KeyLoad.ClusterTests | ClusterFixture.cs, StorageReplication/Cases/Cluster/ClusterTests.cs, ResourceExecution/Cases/RequestBodyLimitClusterTests.cs | Aspire-owned cluster fixtures; business cases mirror their owning slices through the real .NET SDK and official MCP client. |
-| benchmarks/KeyLoad.ComparisonHost | Session/, Orchestration/ | Selected live benchmark topology, measured workloads and original result artifacts. |
-| benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; embedded microbenchmark development, no public claim without CI evidence. |
+| benchmarks/KeyLoad.ComparisonHost | Deployment/Hosting/BenchmarkDeployment.cs, Measurement/, `<Type>/{Dataset,Scenario,Cases,Drivers}` | BenchmarkComparisons; TUnit benchmark client: one shared dataset, scenario and driver interface per data type, and one result file per job. |
+| benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; local BenchmarkDotNet executable for development measurements, never published. |
 | benchmarks/KeyLoad.BenchmarkScenarios | Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
-| benchmarks/KeyLoad.Comparisons | Session/, Targets/ | BenchmarkComparisons; public library with shared workload/oracle and official engine clients. |
-| benchmarks/KeyLoad.ComparisonHost | Session/ | BenchmarkComparisons; TUnit C# client workload container under [ADR-117](ADR/ADR-117-tunit-ci-entry.md). |
-| site | Features/BenchmarkComparisons/index.html, bootstrap.mjs; scripts/build.mjs | BenchmarkComparisons; product introduction and public views of qualified GitHub JSON. |
-| tests/KeyLoad.WebsiteTests | KeyLoad.WebsiteTests.csproj, Cases/, Fixtures/ | BenchmarkComparisons; TUnit suite over the actual Node modules and authentic GitHub report files. |
+| build/KeyLoad.LoadTests.AppHost | Program.cs, Resources/BenchmarkTopology.cs, Configuration/BenchmarkDatabases.cs | BenchmarkComparisons; Aspire deployment of the one database and node count a benchmark job selects. |
+| site | Features/BenchmarkComparisons/index.html, results-merge.mjs, results-view.mjs, results-controls.mjs; scripts/results.mjs, scripts/build.mjs | BenchmarkComparisons; static product page with one comparison table per data type, rendered at build time from one merged results file. |
+| tests/KeyLoad.WebsiteTests | KeyLoad.WebsiteTests.csproj, Cases/, Fixtures/Results/ | BenchmarkComparisons; TUnit suite that runs the real merge and build scripts through Node on test result files. |
 | .github/workflows | build-and-tests.yml, benchmarks.yml, website.yml, release.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, website and release workflows. |
-| scripts | Features/RepositoryGovernance/verify.mjs, Features/BenchmarkComparisons/session-plan.mjs | RepositoryGovernance and BenchmarkComparisons; static repository verification and benchmark session tooling with Node built-ins. |
+| scripts | Features/RepositoryGovernance/verify.mjs, Features/CodeQuality/, Features/TestInfrastructure/, Features/ReleaseDelivery/ | RepositoryGovernance, CodeQuality, TestInfrastructure and ReleaseDelivery; static repository verification, coverage, test-entry and release tooling. |
 | analyzers/KeyLoad.Analyzers | KeyLoad.Analyzers.csproj, Analyzers/, Analysis/ | CodeQuality; source-owned Roslyn diagnostics attached to compilation, never runtime storage or routing. |
 | tests/KeyLoad.AnalyzerTests | KeyLoad.AnalyzerTests.csproj, Cases/, Fixtures/ | CodeQuality; real Roslyn/Orleans metadata checks. |
 | docs | design/, Features/, ADR/, implementation/ | Product specification and canonical slice/decision records. |
@@ -249,8 +247,8 @@ flowchart TB
     Core --> Models[Documents events queues graph search series blobs]
     Aspire[Aspire Docker lifecycle] --> Owners
     CI[GitHub Actions qualification] --> Aspire
-    CI --> JSON[Raw comparison JSON with source SHA]
-    JSON --> Site[README charts and Pages site]
+    CI --> JSON[Benchmark result file per job]
+    JSON --> Site[Per-type tables on the Pages site]
 ```
 
 ## Feature ownership convention
@@ -666,9 +664,9 @@ catalog/queue readers and a matching Client SDK. It uses the connection grain
 with call-local authorized reads; physical observations are reported per node.
 The public `site/` is its own surface. Both share one visual identity under
 [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical
-`brand.css`/`logo.svg` and the site keeps byte-identical mirrors.
-[SiteMetadata](Features/BenchmarkComparisons/SiteMetadata.md) adds mirrored
-PNG/ICO exports, static landing SEO/OG/JSON-LD and a share card.
+`brand.css`/`logo.svg` and the site keeps byte-identical mirrors, including the
+PNG/ICO icon exports. The landing page carries static SEO/OG/JSON-LD metadata and
+a share card.
 
 ```mermaid
 flowchart LR
@@ -712,72 +710,48 @@ classDiagram
 
 ## Benchmark comparisons
 
-[Shared benchmark sessions](Features/BenchmarkComparisons/SessionExecution.md)
-under [ADR-142](ADR/ADR-142-shared-live-benchmark-sessions.md) run exactly two
-measurement jobs per database: one node and three nodes. The current cohort has
-16 systems and 32 topology rows; the [additional database contract](Features/BenchmarkComparisons/AdditionalDatabases.md) records native one-node adapters and open replicated deployment work. An admitted job
-owns one live Aspire topology and runs separate real TUnit cases against
-it, starting with a measured million-record load. Declared unavailable topologies
-retain explicit unavailable results without allocating standalone substitutes. Original per-case outcomes,
-TRX, runtime/image identities and resource observations feed one
-authenticated complete-cohort aggregation; failed or incomplete cohorts cannot
-refresh published metrics. Scales are exactly 100,000 and 1,000,000 records
-([ScaledWorkloads](Features/BenchmarkComparisons/ScaledWorkloads.md),
-[ADR-069](ADR/ADR-069-representative-scaled-workloads.md)). The
-[owning feature](Features/BenchmarkComparisons.md) holds the criteria.
+[BenchmarkComparisons](Features/BenchmarkComparisons.md) under
+[ADR-150](ADR/ADR-150-per-type-benchmark-jobs.md) runs one GitHub job per
+database, data type and node count. A job builds
+`benchmarks/KeyLoad.ComparisonHost`; its shared TUnit fixture starts the one
+selected database through `build/KeyLoad.LoadTests.AppHost`, runs the cases of its
+type in order on that live deployment and rewrites one result file after every
+case. Each data type has one shared dataset, scenario and driver interface; every
+database, KeyLoad included, implements only the driver. KeyLoad runs the released
+server image pinned to the digest the run resolved.
 
 ```mermaid
 flowchart LR
-    Plan[Canonical session inventory] --> Prepare[Common compiled runner and images]
-    Prepare --> Worker[One database and node count per job]
-    Worker --> Aspire[One owned live Aspire topology]
-    Aspire --> Tests[Separate TUnit workload cases]
-    Tests --> Originals[Original reports, TRX and runtime evidence]
-    Originals --> Aggregate[Complete authenticated cohort]
-    Aggregate --> Site[Qualified website metrics]
+    Image[Released KeyLoad image digest] --> Job[One job per database, type and nodes]
+    Job --> AppHost[LoadTests AppHost deploys the database]
+    AppHost --> Cases[Type scenario cases on one live deployment]
+    Cases --> File[Result file after every case]
+    File --> Website[Website merges the run and renders per-type tables]
 ```
 
-[ADR-043](ADR/ADR-043-comparison-library-host.md) keeps the comparison library
-separate from the sole workload host;
-[ADR-044](ADR/ADR-044-benchmark-immutable-contracts.md) and
-[ADR-045](ADR/ADR-045-postgres-schema-ownership.md) own immutable harness
-contracts and transient PostgreSQL schemas.
-[ADR-049](ADR/ADR-049-genuine-neo4j-harness.md) keeps genuine Neo4j protocol and
-acknowledgement checks inside the Aspire lifecycle, and
-[ADR-050](ADR/ADR-050-timeseries-timescale-comparison.md) compares KeyLoad time
-series with TimescaleDB and ManagedCode.TimeSeries, reporting each arm's storage
-and acknowledgement guarantees separately.
-
-```mermaid
-flowchart LR
-    ComparisonHost[Separate benchmark session owner] --> AppHost[Selected Aspire database infrastructure]
-    ComparisonHost --> ComparisonLibrary[Public workload and target library]
-```
+The graph type shows the shape every type shares:
 
 ```mermaid
 classDiagram
-    class ComparisonHost
-    class BenchmarkSession
-    class Neo4jTarget
-    class Neo4jQueryResponse
-    ComparisonHost --> BenchmarkSession : measured workload against actual endpoint
-    BenchmarkSession --> Neo4jTarget : target contract
-    Neo4jTarget --> Neo4jQueryResponse : parsed acknowledgement
-```
-
-```mermaid
-flowchart LR
-    Corpus[Deterministic UTC samples] --> KeyLoad[KeyLoad cluster via SDK]
-    Corpus --> Timescale[TimescaleDB via Npgsql]
-    Corpus --> MCTS[ManagedCode.TimeSeries memory aggregation]
-    KeyLoad --> Oracle[Separate result and guarantees]
-    Timescale --> Oracle
-    MCTS --> Oracle
+    class GraphBenchmarks
+    class BenchmarkDeployment
+    class BenchmarkApplication
+    class GraphScenario
+    class IGraphDriver
+    class OperationLanes
+    class BenchmarkResult
+    GraphBenchmarks --> BenchmarkDeployment : shared live deployment
+    BenchmarkDeployment --> BenchmarkApplication : starts and connects
+    GraphBenchmarks --> GraphScenario : runs each case
+    GraphScenario --> IGraphDriver : database operations only
+    GraphScenario --> OperationLanes : 16 concurrent clients
+    BenchmarkDeployment --> BenchmarkResult : rewritten after every case
 ```
 
 Embedded ZoneTree microbenchmarks
-([ADR-047](ADR/ADR-047-embedded-benchmark-host.md)) use the actual generated
-consumer for local development and never qualify the required scales.
+([ADR-047](ADR/ADR-047-embedded-benchmark-host.md)) and the raw read lane
+([ADR-069](ADR/ADR-069-zonetree-raw-read-lane.md)) use the actual BenchmarkDotNet
+generated consumer for local development and are never published.
 
 ```mermaid
 classDiagram
@@ -790,62 +764,37 @@ classDiagram
     EmbeddedBenchmarks --> ZoneTreeStore : owns actual embedded fixture storage
 ```
 
-[ADR-080](ADR/ADR-080-benchmark-failure-isolation.md) keeps the full planned-cell
-inventory while terminal workload failures coexist with successful measurements:
-a failed job stays failed, has a null report and shows no numeric result.
-
-```mermaid
-flowchart LR
-  Job[Independent Aspire cell] --> Result[Measured or failed null report]
-  GitHub[Actual job steps and immutable artifact] --> Proof[Same source run attempt validation]
-  Result --> Proof
-  Proof --> Aggregate[Complete planned-cell aggregate]
-  Aggregate --> Qualification[Site tests browser coverage freshness]
-  Qualification --> Site[Values or no data and original job links]
-```
-
 ## Delivery workflows
 
 [ADR-064](ADR/ADR-064-workflow-release-delivery.md) and
 [ADR-062](ADR/ADR-062-workflow-separation.md) define exactly four workflows.
 `build-and-tests.yml` (`Build and Tests`) owns PR/main/manual build, format,
 rules, analyzers, unit, process recovery and Docker/Aspire cluster SDK/MCP tests;
-benchmark contracts run only in Benchmarks
+benchmark jobs run only in Benchmarks
 ([ADR-117](ADR/ADR-117-tunit-ci-entry.md)). `benchmarks.yml`
-(`Benchmarks`) owns the isolated Linux database groups and authenticated
-aggregation and ends with a bounded dispatch of `website.yml` (`Website`).
-Website publishes independently on trusted main changes or manual dispatch and
-uses the newest ready authenticated benchmark aggregate when one exists
-([ADR-112](ADR/ADR-112-independent-website-publication.md)). `release.yml`
-(`Release`) stays manual ([ReleaseDelivery](Features/ReleaseDelivery.md)):
-self-contained server/CLI archives, the server image published by the .NET SDK
-`PublishContainer` target to `ghcr.io/managedcode/keyload` under the commit SHA and
-`latest` tags, and the benchmark image archive. Benchmarks runs its KeyLoad cells
-from the image `latest` resolves to, pinned by digest. Packaging does not establish
-runtime or endurance qualification.
+(`Benchmarks`) resolves the released KeyLoad image to one digest, runs one job per
+database, data type and node count, uploads each job's result file whether it
+passed or failed and then dispatches `website.yml` (`Website`) with its run id
+([ADR-150](ADR/ADR-150-per-type-benchmark-jobs.md)). Website downloads the result
+files of that run, or of the latest completed run on a site push or manual
+dispatch, merges them, builds the static site and deploys Pages; without result
+files it publishes nothing. `release.yml` (`Release`) stays manual
+([ReleaseDelivery](Features/ReleaseDelivery.md)): self-contained server/CLI
+archives and the server image published by the .NET SDK `PublishContainer` target
+to `ghcr.io/managedcode/keyload` under the commit SHA and `latest` tags. Packaging
+does not establish runtime or endurance qualification.
 
 ```mermaid
 flowchart LR
     Source[PR or main source] --> CI[Build and Tests]
-    Main[Main source] --> Benchmarks[All isolated benchmarks]
-    Benchmarks --> Aggregate[Complete authenticated JSON]
-    Aggregate --> Dispatch[Settled final Website dispatch]
-    Dispatch --> Site[Website gates and Pages publication]
-    Main --> Site
-    Manual[Manual main release] --> Build[Self-contained archives and images]
+    Main[Main source] --> Benchmarks[One job per database, type and nodes]
+    Benchmarks --> Files[Result file artifacts]
+    Files --> Dispatch[Website dispatch with the run id]
+    Dispatch --> Site[Merge, static build and Pages]
+    SiteSource[Site source push] --> Site
+    Manual[Manual main release] --> Build[Self-contained archives and server image]
     Build --> Registry[GHCR server image SHA and latest]
     Registry --> Benchmarks
-```
-
-```mermaid
-flowchart LR
-  Source[Website source] --> Website[Separate Website qualification]
-  Producer[Ready Benchmarks JSON] --> Website
-  Website --> Content[Product site without metrics]
-  Website --> Measured[Product site with authenticated metrics]
-  Content --> Fresh[Recheck source and available data]
-  Measured --> Fresh
-  Fresh --> Pages[Pages]
 ```
 
 Delivered-source qualification comes only from exact-source Linux GitHub runs

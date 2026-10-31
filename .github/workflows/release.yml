@@ -76,23 +76,3 @@ jobs:
           name: keyload-server-image
           path: artifacts/keyload-server-image.txt
           if-no-files-found: error
-  benchmark-image:
-    name: Build benchmark Docker image
-    needs: tests
-    runs-on: ubuntu-24.04
-    timeout-minutes: 60
-    steps:
-      - name: Download source code
-        uses: actions/checkout@v7
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v6
-        with:
-          global-json-file: global.json
-      - name: Build Docker image
-        run: dotnet publish benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRepository="keyload/benchmarks" -p:ContainerImageTag="$GITHUB_SHA" -p:ContainerArchiveOutputPath="$GITHUB_WORKSPACE/keyload-benchmarks.tar"
-      - name: Save Docker image
-        uses: actions/upload-artifact@v7
-        with:
-          name: keyload-docker-benchmarks
-          path: keyload-benchmarks.tar
-          if-no-files-found: error

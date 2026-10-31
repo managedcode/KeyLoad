@@ -16,7 +16,7 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
 
 ## Decision
 
-- **One brand source.** `src/KeyLoad/AdminDashboard/Assets/Styles/brand.css` holds the tokens and the shared primitives (`kl-brand`, `kl-btn`, `kl-card`, `kl-glass`, `kl-badge`, `kl-chip`, reduced motion). It is mirrored byte-for-byte to `site/Features/BenchmarkComparisons/brand.css`, and `logo.svg` to `site/favicon.svg`. The SiteTests drift test `AC_VI_001` fails on any difference.
+- **One brand source.** `src/KeyLoad/AdminDashboard/Assets/Styles/brand.css` holds the tokens and the shared primitives (`kl-brand`, `kl-btn`, `kl-card`, `kl-glass`, `kl-badge`, `kl-chip`, reduced motion). It is mirrored byte-for-byte to `site/Features/BenchmarkComparisons/brand.css`, and `logo.svg` to `site/favicon.svg`. Changes are made in the canonical files and copied to the mirrors unchanged.
 - **Style direction (owner, 2026-10-02).** Earlier candidates were rejected: a light-blue look, pastel/rainbow glass and a plain grey version. The adopted style is serious Apple-style Liquid Glass in the sibling brands' colours:
   - Managed Code: warm off-white, black ink and system typography.
   - Prostir: graphite instrument panels (`.kl-graphite`).
@@ -38,7 +38,7 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
   - the anatomy of one agent call: a numbered timeline beside a graphite MCP/SDK terminal;
   - a data-shape bento of eight models with line art;
   - a graphite engine cross-section (callers → connection grain → partition grains → silo-local ZoneTree owners);
-  - the evidence instrument: a toolbar, segmented scenarios, the chart and table, and a perforated evidence receipt for provenance;
+  - the benchmarks: one comparison table per data type with a type filter ([BenchmarkComparisons](../Features/BenchmarkComparisons.md));
   - a ledger of "open by default" items and items "not claimed yet";
   - a method rail, a graphite reproduce terminal and an editorial wordmark footer with "Developed by Managed Code".
 
@@ -48,58 +48,25 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
 flowchart LR
     Brand[brand.css and logo.svg canonical in console Assets] --> Console[Blazor Server and Fluent UI console]
     Brand -->|byte identical mirror| Site[site brand.css and favicon.svg]
-    Drift[SiteTests AC_VI_001 parity] --> Site
-    Drift --> Brand
     Server[AdminHttpMetrics ring of 50 failures] --> Snapshot[AdminNodeSnapshot]
     Config[Silo-local node observation] --> Snapshot
     Snapshot --> Console
 ```
 
-## Vector asset repair continuation, 2026-10-03
+## Site icons and metadata
 
-The owner's screenshot reports a pixelated K. REQ-VEC-001..003 and
-AC-VEC-001..005 refine the existing public-site identity without changing its
-canonical logo, layout, data or runtime contracts. See the exact
-[feature continuation](../Features/BenchmarkComparisons/VectorAssets.md).
-
-Use a real vector poster, and the existing canonical favicon as one decorative
-DOM SVG image projected by the existing Three camera/root. Remove the separately
-painted CanvasTexture K. The SVG stays outside the deliberately bounded GPU
-buffer, uses its projected CSS size and follows ready/resize/pointer/reduced-motion,
-pause/error/zero-size/disposal/restoration transitions. GPU budgets remain unchanged.
-The symbol is foreground illustration; it does not express live cluster state.
-
-Shared projection/lifecycle/HTML/CSS and requirements have a single owner; the
-poster and new acceptance-driven source/CDP helpers are separate. Tests join
-first, then source, then diff/development/static/manual review and the
-complete exact-SHA GitHub website/analyzer/coverage gate and normal Pages receipt.
-No local test execution, new dependencies or evidence-policy exemption. The
-canonical favicon/poster paths remain stable; rollback reverts only the
-coherent presentation change. Missing independent comparison evidence remains
-an explicit publication blocker. This continuation remains Accepted until all
-required verification exists.
-
-## Icon and site metadata continuation, 2026-10-03
-
-The owner's favicon/SEO/social-preview request adds REQ-SEO-001..006 and
-AC-SEO-001..007 in [SiteMetadata](../Features/BenchmarkComparisons/SiteMetadata.md).
-Preserve the canonical SVG and existing identity; derive six PNG/ICO files under
-console Assets with byte-identical site mirrors. Static landing metadata and an
-authored SVG/1200×630 PNG share card use the existing www canonical. JSON-LD
-describes the actual project license from the root LICENSE (Elastic License 2.0 under ADR-107) without invented ratings/offers or measurements.
-The console receives only those finite public GET/HEAD icon routes and noindex;
-its authentication, CSP and data routes remain unchanged. Existing robots/sitemap
-generation is extended within BenchmarkComparisons, not a second crawl source.
-
-Implementation stages and acceptance are retained
-in [SiteMetadata](../Features/BenchmarkComparisons/SiteMetadata.md#implementation-and-delivery-contract).
-Join the exported bytes, emitted/static-host behavior and acceptance-driven real
-builder/cluster tests before development/static/manual checks and normal
-exact-SHA GitHub qualification/publication. No new dependency or persisted-data
-change. Rollback coherently reverts the added head/assets/copy/whitelist changes.
-Provider indexing/share-cache refresh is a manual external outcome; source push
-or local rendering cannot establish it. Missing isolated evidence is reported,
-never bypassed. This additive contract remains Accepted until required gates pass.
+The hero scene and its static artwork fallback follow
+[ADR-040](ADR-040-static-site-threejs.md). The console exports six PNG/ICO icon files under
+`src/KeyLoad/AdminDashboard/Assets/Icons/` derived from the canonical SVG, and the
+site root keeps byte-identical copies. The landing page carries static search and
+social metadata with the `https://www.keyload.cloud/` canonical, an authored
+SVG/1200×630 PNG share card and JSON-LD describing the project and its Elastic
+License 2.0 ([ADR-107](ADR-107-elastic-license.md)) without invented ratings, offers
+or measurements. The site builder writes `robots.txt` and `sitemap.xml` and
+excludes `/admin/`. The console serves only those finite public icon GET/HEAD
+routes and `noindex,nofollow`; its authentication, CSP and data routes are
+unchanged. Provider indexing and share-cache refresh are external outcomes that a
+source push or local rendering cannot establish.
 
 ## Alternatives
 
@@ -112,7 +79,7 @@ never bypassed. This additive contract remains Accepted until required gates pas
 1. **Brand:** tokens and logo, mirrored to the site, land before the UI packets.
 2. **Metrics:** ring buffer and middleware in `src/KeyLoad/AdminDashboard/AdminHttp*.cs`, with unit tests `AdminHttpMetricsTests` and `AdminHttpMetricsMiddlewareTests` written first; the DTO is frozen in Abstractions.
 3. **Console:** `Components/`, circuit-owned `Execution/`, the SDK asset manifest and the `AdminStaticAssets` whitelist, plus the node observation fields and observer, with the `AdminDashboardClusterTests` assertions.
-4. **Site:** site HTML/CSS/poster, colour constants in `measurements.mjs` and `scene-geometry.mjs`, `BUILD.assets` and SiteTests parity.
+4. **Site:** site HTML/CSS/poster, colour constants in `scene-geometry.mjs` and `BUILD.commonAssets`.
 5. **Docs:** feature docs, this ADR, the Architecture map and exact-SHA CI evidence.
 
 Dependencies:
@@ -126,7 +93,7 @@ Rollout, rollback and verification:
   - build-and-tests.yml unit tests: metrics ring and middleware.
   - Replicated cluster: failure-log route template and node observation through the real SDK and official MCP.
   - Playwright console flow: native locators, Fluent inputs and grids, all views, authorization failure, reconnect, disconnect and responsive screenshots.
-  - website.yml SiteTests: unchanged hooks, budgets and the parity test.
+  - Site: the static build keeps its asset budgets; `tests/KeyLoad.WebsiteTests` runs the real merge and build scripts.
   - Subjective beauty is judged from desktop/mobile screenshots of a real replicated cluster (manual exception). It never replaces a functional gate.
 
 This ADR stays Accepted until exact-SHA unit, cluster browser and site qualification pass.

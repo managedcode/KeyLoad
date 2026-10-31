@@ -1,6 +1,5 @@
 using System.Globalization;
 using System.Security.Cryptography;
-using KeyLoad.AppHost.Hosting;
 
 namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
@@ -18,6 +17,10 @@ internal static class IsolatedKeyLoadResources
     private const string OriginPrefix = "http://";
     private const string PortSeparator = ":";
     private const string MembershipParameter = "membership-secret";
+    private const string SigningParameter = "signing-key";
+    private const string AdminParameter = "admin-key";
+    private const string IncarnationParameter = "incarnation";
+    private const string AdminPrefix = "root.";
     private const string AdminEnvironment = "Benchmarks__AdminKey";
     private const string ClusterEnvironment = "KeyLoad__ClusterId";
     private const string SiloNameEnvironment = "KeyLoad__SiloName";
@@ -54,10 +57,9 @@ internal static class IsolatedKeyLoadResources
         {
             throw new InvalidOperationException(InvalidTarget);
         }
-        var image = KeyLoadReleaseImage.Parse(BenchmarkSessionResourceOptions.Read(context.Builder.Configuration).Value.KeyLoadImage);
-        var runtime = LoadTestsOptionsRegistration.Get(context.Builder);
-        var identity = AppHostOptionsRegistration.CreateIdentity(context.Builder, ephemeral: true);
-        var secrets = AddSecrets(context.Builder, identity);
+        var image = KeyLoadReleaseImage.Parse(context.Selection.KeyLoadImage);
+        var incarnation = Guid.NewGuid();
+        var secrets = AddSecrets(context.Builder, incarnation);
         var group = Guid.NewGuid().ToString(GroupFormat);
         var nodeCount = context.Selection.NodeCount.ToString(CultureInfo.InvariantCulture);
         for (var index = FirstNodeIndex; index < context.Selection.NodeCount; index++)
@@ -67,7 +69,7 @@ internal static class IsolatedKeyLoadResources
                 .WithContainerName(name + GroupSeparator + group).WithContainerNetworkAlias(name)
                 .WithVolume(HomeMount).WithHttpEndpoint(targetPort: HttpPort, name: HttpEndpoint)
                 .WithHttpHealthCheck(ReadyPath, endpointName: HttpEndpoint)
-                .WithEnvironment(ClusterEnvironment, ClusterPrefix + identity.Incarnation.ToString(GroupFormat))
+                .WithEnvironment(ClusterEnvironment, ClusterPrefix + incarnation.ToString(GroupFormat))
                 .WithEnvironment(SiloNameEnvironment, name).WithEnvironment(SiloCountEnvironment, nodeCount)
                 .WithEnvironment(ReplicaCountEnvironment, nodeCount).WithEnvironment(StorageModeEnvironment, IsolatedStorage)
                 .WithEnvironment(SiloAddressEnvironment, name)
@@ -77,7 +79,7 @@ internal static class IsolatedKeyLoadResources
                 .WithEnvironment(IncarnationEnvironment, secrets.Incarnation).WithEnvironment(SigningEnvironment, secrets.Signing)
                 .WithEnvironment(AdminKeyEnvironment, secrets.Admin).WithEnvironment(MembershipSecretEnvironment, secrets.Membership)
                 .WithEnvironment(MembershipPortEnvironment, MembershipPort.ToString(CultureInfo.InvariantCulture))
-                .WithEnvironment(LogEnvironment, runtime.Execution.Cluster.Value.LoggingLevel);
+                .WithEnvironment(LogEnvironment, context.Deployment.Value.KeyLoadLogLevel);
             context.BindEndpoint(index, node, HttpEndpoint);
         }
         context.Client.Set(AdminEnvironment, secrets.Admin.Resource);
@@ -86,12 +88,13 @@ internal static class IsolatedKeyLoadResources
 
     private static (IResourceBuilder<ParameterResource> Signing, IResourceBuilder<ParameterResource> Admin,
         IResourceBuilder<ParameterResource> Incarnation, IResourceBuilder<ParameterResource> Membership)
-        AddSecrets(IDistributedApplicationBuilder builder, ClusterIdentity identity)
+        AddSecrets(IDistributedApplicationBuilder builder, Guid incarnationId)
     {
-        var signing = builder.AddParameter(ClusterIdentity.SigningParameter, identity.SigningKey, secret: true);
-        var admin = builder.AddParameter(ClusterIdentity.AdminParameter, identity.AdminKey, secret: true);
-        var incarnation = builder.AddParameter(ClusterIdentity.IncarnationParameter,
-            identity.Incarnation.ToString(GuidFormat), secret: true);
+        var signing = builder.AddParameter(SigningParameter,
+            Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
+        var admin = builder.AddParameter(AdminParameter,
+            AdminPrefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
+        var incarnation = builder.AddParameter(IncarnationParameter, incarnationId.ToString(GuidFormat), secret: true);
         var membership = builder.AddParameter(MembershipParameter,
             Convert.ToBase64String(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
         return (signing, admin, incarnation, membership);

@@ -288,40 +288,33 @@ inventories truthful; do not exclude product code to improve coverage.
 
 ## Performance and comparisons
 
-### Static landing-page boundary
+Benchmarks (`benchmarks.yml`) runs one Linux GitHub job per database, data type
+and node count ([BenchmarkComparisons](docs/Features/BenchmarkComparisons.md),
+ADR-150). A small first job resolves the latest public released KeyLoad server
+image to one immutable digest. Each measure job builds
+`benchmarks/KeyLoad.ComparisonHost`, whose TUnit fixture deploys the one selected
+database through `KeyLoad.LoadTests.AppHost`, runs the cases of its type in order
+and rewrites `results/<database-slug>-<type>-n<nodes>.json` after every case; the
+job uploads that file whether it passed or failed. Benchmarks never builds or
+publishes a product image and never invokes Release or Build and Tests. Its final
+job dispatches Website with the run id.
 
-The Website workflow owns only the static landing page: download the latest
-completed successful Benchmarks artifacts, validate their original measurement
-data, generate static HTML/assets and publish GitHub Pages. The landing page has
-no runtime or qualification dependency on KeyLoad product code, .NET, Aspire or
-AppHost. Never restore/build the solution, start containers, run TUnit/browser
-suites, analyzers, coverage, product checks or Release from Website, and never
-make Pages publication wait for those jobs. Product-code and test-infrastructure
-changes must not trigger Website. Preserve the last successful figures while a
-new benchmark fails or remains incomplete. Adding any such coupling requires the
-owner's explicit approval for that specific change.
+Each data type has one shared module, `benchmarks/KeyLoad.ComparisonHost/<Type>/`
+with `Dataset/`, `Scenario/`, `Cases/` and `Drivers/`: the standard dataset, the
+cases, schedule and verification, and the driver interface exist once, and each
+database, KeyLoad included, implements only its driver. Change a dataset or
+scenario once, in its module. KeyLoad runs every data type. Every database uses
+seed 1729, 16 clients, 1,000,000-record datasets and 100,000 measured operations
+per case, at one node and, where the database supports it, three nodes.
+Unsupported capabilities and node counts have no cell; a failed case keeps its
+real error; never estimate, zero or invent a number.
 
-Benchmarks has one responsibility: pull public released container images, deploy
-the selected database through Docker/Aspire, run its applicable native workloads,
-and collect original results. KeyLoad follows the same path and uses the latest
-public released server image pinned to one immutable digest per run. Benchmarks
-may build its comparison client/test harness; it never builds or publishes a
-product image and never invokes Release or the full Build and Tests workflow.
-The final job may request a separate Website rebuild.
-
-The website uses only the latest completed successful Benchmarks measurement run
-and its original authenticated artifacts and declared workload inventory. A new,
-failed, cancelled or incomplete run must never erase previously verified figures
-or replace them with an empty page. Historical measurements retain their original
-source, image, run, attempt, scenario and topology identities; never invent
-measurements for cases absent from that run.
-
-Ask the owner for concrete approval before changing the existing benchmark
-workflow architecture, test/scenario meaning or counts, report contracts,
-qualification gates, or publication rules. A request to add databases authorizes
-their applicable native scenarios within the existing pattern; it does not
-authorize a release pipeline or functional qualification redesign. The requested
-Qdrant/vector, RabbitMQ/queue and KurrentDB/event cases stay within that scope.
+Add no evidence machinery to benchmarks: no runtime bundles, hash or identity
+proofs, resource observation, receipts or aggregation. Ask the owner for concrete
+approval before changing the benchmark workflow layout, data types, cases,
+datasets, schedules, counts, the result file contract or publication rules. A
+request to add databases authorizes their drivers and matrix rows within the
+existing types.
 
 Use execution .NET SIMD/intrinsics in normal supported execution. Validate required
 hardware; scalar arithmetic is limited to tails and independent correctness
@@ -332,19 +325,26 @@ before selecting optimizations. Retain source/DLL/PDB/process, workload and
 capture identities, overhead and matched before/after evidence. A trace alone
 proves no performance improvement.
 
-Comparisons use one-node and three-node topologies, 100,000 and 1,000,000
-actual records, at least 100,000 measured operations per applicable cell, and the
-shared pure/mixed/ingestion/search scenario inventory (including 1/10/500 clients).
-Keep corpus, operation schedule, acknowledgement/durability, resources and result
-oracles equivalent. Each database/topology/scenario has an isolated Linux runner.
-Unsupported capabilities are unavailable cells, never fabricated numbers.
+### Static landing-page boundary
 
-Keep named database job groups and original per-worker JSON. One authenticated
-aggregation validates complete comparable source/run/attempt/topology evidence.
-Only original GitHub Benchmarks artifacts can produce public figures. Website
-publication is independent and can publish product content without figures when
-no qualified measurements exist. Build and Tests, Benchmarks, Website and manual
-Release retain their separate responsibilities and least-privilege permissions.
+Website (`website.yml`) owns only the static landing page. It downloads the
+`benchmark-*` artifacts of the dispatched Benchmarks run, or of the latest
+completed run for a site push or manual dispatch, merges them with
+`node site/scripts/results.mjs`, builds the static site with
+`node site/scripts/build.mjs` and deploys GitHub Pages. The page shows one
+comparison table per data type with KeyLoad in every type; failed cases read as
+failed with their error and missing results as no data. Without result files the
+merge fails and the current Pages stay. Only GitHub Benchmarks artifacts produce
+public figures; local results never do.
+
+The landing page has no runtime or qualification dependency on KeyLoad product
+code, .NET, Aspire or AppHost. Never restore/build the solution, start containers,
+run TUnit/browser suites, analyzers, coverage, product checks or Release from
+Website, and never make Pages publication wait for those jobs. Product-code and
+test-infrastructure changes must not trigger Website. Adding any such coupling
+requires the owner's explicit approval for that specific change. Build and Tests,
+Benchmarks, Website and manual Release retain their separate responsibilities and
+least-privilege permissions.
 
 ## Dependency ownership and delivery
 

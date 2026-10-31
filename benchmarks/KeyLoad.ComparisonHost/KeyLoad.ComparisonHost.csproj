@@ -8,28 +8,19 @@
   <ItemGroup>
     <PackageReference Include="TUnit" />
     <PackageReference Include="Aspire.Hosting.Testing" />
+    <PackageReference Include="Npgsql" />
+    <PackageReference Include="Microsoft.Data.SqlClient" />
+    <PackageReference Include="MySqlConnector" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" />
+    <PackageReference Include="RabbitMQ.Client" />
+    <PackageReference Include="StackExchange.Redis" />
+    <PackageReference Include="MongoDB.Driver" />
+    <PackageReference Include="KurrentDB.Client" />
     <ProjectReference Include="../../build/KeyLoad.LoadTests.AppHost/KeyLoad.LoadTests.AppHost.csproj" />
-    <ProjectReference Include="../KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
-    <ProjectReference Include="../../build/KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
-    <Content Include="Configuration/execution.json" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
-    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <ProjectReference Include="../../src/KeyLoad.Client/KeyLoad.Client.csproj" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />
-  </ItemGroup>
-  <PropertyGroup>
-    <EnableSdkContainerSupport>true</EnableSdkContainerSupport>
-    <ContainerUser>app</ContainerUser>
-    <ContainerWorkingDirectory>/app/</ContainerWorkingDirectory>
-    <ContainerAppCommandInstruction>Entrypoint</ContainerAppCommandInstruction>
-    <ContainerRepository>keyload/comparisons</ContainerRepository>
-  </PropertyGroup>
-  <ItemGroup>
-    <ContainerAppCommandArgs Include="--output;Detailed;--maximum-parallel-tests;1;--report-trx;--results-directory;/reports/RuntimeTestResults" />
-  </ItemGroup>
-  <ItemGroup>
-    <ContainerLabel Include="io.keyload.local.source-context-sha256" Value="$(KeyLoadContainerSourceDigest)" Condition="'$(KeyLoadContainerSourceDigest)' != ''" />
-    <ContainerLabel Include="io.keyload.local.invocation" Value="$(KeyLoadContainerInvocation)" Condition="'$(KeyLoadContainerInvocation)' != ''" />
   </ItemGroup>
   <Import Project="$(MSBuildThisFileDirectory)../../build/CodeQuality/FunctionalCompilationIdentity.targets" />
 </Project>

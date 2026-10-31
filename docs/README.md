@@ -48,7 +48,7 @@ flowchart LR
 | [ResourceExecution](Features/ResourceExecution.md) | Per-operation data bounds, memory, resource lifetimes and telemetry; no request throttling |
 | [CodeQuality](Features/CodeQuality.md) | Analyzers, formatting, maintainability limits and functional coverage |
 | [TestInfrastructure](Features/TestInfrastructure.md) | TUnit with Aspire-owned Docker clusters, real .NET SDK and official MCP clients |
-| [BenchmarkComparisons](Features/BenchmarkComparisons.md) | Equal-workload comparisons with other databases; published figures only from GitHub Actions JSON |
+| [BenchmarkComparisons](Features/BenchmarkComparisons.md) | One shared dataset and scenario per data type, one Benchmarks job per database, type and node count; published figures only from those jobs' result files |
 | [ReleaseDelivery](Features/ReleaseDelivery.md) | The Build and Tests, Benchmarks, Website and Release workflows |
 | [RepositoryGovernance](Features/RepositoryGovernance.md) | Repository rules, local ownership and REQ/AC/ADR traceability |
 

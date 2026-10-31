@@ -1,0 +1,29 @@
+{
+  "database": "RabbitMQ",
+  "type": "queue",
+  "nodes": 3,
+  "image": "rabbitmq:4.1",
+  "commit": "1111111111111111111111111111111111111111",
+  "runId": null,
+  "startedAt": "2026-10-31T09:00:00.0000000+00:00",
+  "finishedAt": "2026-10-31T09:40:00.0000000+00:00",
+  "records": 1000000,
+  "operations": 100000,
+  "clients": 16,
+  "error": null,
+  "cases": [
+    {
+      "id": "cycle",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 13.158,
+      "opsPerSecond": 7600,
+      "p50Ms": 2.11,
+      "p95Ms": 4.64,
+      "p99Ms": 8.23,
+      "batchSize": 1,
+      "error": null
+    }
+  ]
+}

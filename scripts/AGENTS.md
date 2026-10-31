@@ -2,7 +2,7 @@
 
 ## Purpose, entry points and ownership
 
-Owns feature-local repository tooling. Entry points include `Features/RepositoryGovernance/verify.mjs`, the TUnit argument selector and the source-bound coverage, benchmark and release helpers. Tooling does not execute a substitute database runtime. Inventory checks derive projects from the current solution and never follow symbolic links outside the repository.
+Owns feature-local repository tooling. Entry points include `Features/RepositoryGovernance/verify.mjs`, the TUnit argument selector and the source-bound coverage and release helpers. Tooling does not execute a substitute database runtime. Inventory checks derive projects from the current solution and never follow symbolic links outside the repository.
 
 ## Boundaries and protected risks
 

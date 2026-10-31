@@ -2,7 +2,7 @@
 
 Status: Accepted implementation contract; local development regressions passed;
 delivered-source Linux qualification pending.
-Date: 2026-10-04. Related: REQ/AC-TEST-012..014, ADR-085, ADR-117.
+Date: 2026-10-04. Related: REQ/AC-TEST-012..014, ADR-117.
 
 ## Decision
 

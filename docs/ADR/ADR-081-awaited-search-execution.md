@@ -3,7 +3,7 @@
 Status: Accepted implementation contract; reviewed source and local development gates passed; exact-source Linux and public cluster qualification pending.
 Related: REQ-FTS-003/005/007 and AC-FTS-003/005/007 in
 [FullTextProjection](../Features/Search/FullTextProjection.md),
-ADR-034, ADR-078, AC-MCP-001 and AC-SQLVIEW-003.
+ADR-078, AC-MCP-001 and AC-SQLVIEW-003.
 
 ## Problem and evidence boundary
 

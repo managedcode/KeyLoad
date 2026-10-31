@@ -2,30 +2,64 @@
 
 ## Purpose, entry points and ownership
 
-- Owns the static Pages website that presents benchmark comparisons using verified GitHub Actions reports.
-- HTML/modules/styles entry: `Features/BenchmarkComparisons/`; static builder: `scripts/build.mjs`. Website only downloads the latest successful original benchmark data, generates the landing page and publishes Pages. It has no dependency on product code, .NET, Aspire, AppHost, TUnit, Chrome suites, analyzers or coverage. Never introduce those as Website steps or publication prerequisites without the owner's explicit approval. Product/test-infrastructure changes do not trigger this workflow.
-- The site displays the latest completed successful full Benchmarks run, retaining its original source, attempt, image digests and declared workload inventory. New failed or incomplete runs never replace existing figures with an empty state. Require the complete planned worker inventory and original TRX, runtime, resource, correctness and artifact proof. Completed operation measurements may publish when server resource telemetry is incomplete, with an explicit incomplete-telemetry label and the original resourceQualified=false preserved. Display recorded metrics only; capabilities outside the original workload have null metrics displayed as "No data". Every category uses the same comparison table, available through horizontal scrolling on mobile. Preserve every execution, correctness, provenance and publication gate. Website recorded-operation display does not claim identical runner hardware; native comparison aggregation retains its separate strict resource-comparability gate. No fabricated, local-only, durability or production-readiness claims.
-- Do not introduce a backend, credentials, or a second source of truth for benchmark measurements.
-- Preserve the official Three.js 0.186.1 vendor files byte-for-byte against their local manifest and license. `.gitattributes` excludes only upstream `space-before-tab` findings for those exact two files so generic diff checks do not require mutating vendor bytes; authored site files retain normal whitespace checks.
-- Use the installed Orleans skill for Orleans decisions and the relevant installed skill for formatting, Aspire or diagnostics. Follow the owner's explicit installation and dependency scope.
-- Preserve accessible rendering, provenance links and strict input validation. Never include credentials or claim site publication until the Pages workflow succeeds.
-
-The primary hero is the existing animated Three.js composition with a central database, eight connected data models and the agent above it. Preserve the artwork fallback and accessible model labels. Bounds are 120,000 triangles, 30 draw calls, 1,000,000 pixels and DPR 1.5. Preserve official vendor files, manifests and licenses byte-for-byte. Product content may publish without benchmark figures; displayed figures require authenticated original GitHub artifacts.
+- Owns the static GitHub Pages product page and its benchmark results section.
+- Source: `Features/BenchmarkComparisons/` (HTML, styles, hero scene and results
+  modules); entries: `scripts/results.mjs` (merge) and `scripts/build.mjs` (static
+  build). The page contract is
+  [`Features/BenchmarkComparisons/protocol.md`](Features/BenchmarkComparisons/protocol.md);
+  the benchmark contract is
+  [BenchmarkComparisons](../docs/Features/BenchmarkComparisons.md).
+- `results.mjs` merges the downloaded Benchmarks result files into one sorted
+  `results.json` (`results-merge.mjs`); `results-contract.mjs` owns the file shape,
+  types, cases, databases and node counts. `build.mjs` validates the merged file and
+  renders one comparison table per data type into static HTML at build time
+  (`results-view.mjs`), then publishes the merged file unchanged as
+  `data/results.json`. `results-controls.mjs` is the only browser script for the
+  results: the type filter and table edge shading. Without JavaScript every table
+  stays visible.
+- `bootstrap.mjs` loads the hero Three.js scene: a central database, eight connected
+  data models and the agent above it, with the static artwork as its fallback and
+  accessible model labels. Bounds are 120,000 triangles, 30 draw calls, 1,000,000
+  pixels and DPR 1.5.
+- The site keeps byte-identical mirrors of the AdminDashboard `brand.css`, logo and
+  icon files under the shared identity of ADR-053.
 
 ## Boundaries and protected risks
 
-Follow the [root policy](../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+- Website (`.github/workflows/website.yml`) only downloads the result files of one
+  Benchmarks run, runs the two Node scripts and deploys Pages. It has no dependency
+  on product code, .NET, Aspire, AppHost, TUnit, analyzers or coverage, and product
+  or test-infrastructure changes do not trigger it. Adding such coupling needs the
+  owner's explicit approval.
+- Show only recorded values: a failed case reads "Failed" with its error, a missing
+  result reads "No data", a database without a 3-node result reads "Single node".
+  Never invent, estimate or zero a missing value, and never publish test data or
+  local results as measurements.
+- No backend, credentials or second source of truth for results. The builder uses
+  Node built-ins only; authored browser JavaScript stays within 40,960 gzip bytes
+  and CSS within 20,480.
+- Preserve the official Three.js 0.186.1 vendor files byte-for-byte against their
+  manifest and license. `.gitattributes` excludes only upstream `space-before-tab`
+  findings for those exact two files.
+- Keep copy in English, accessible and free of production readiness, durability or
+  winner claims. Follow the [root policy](../AGENTS.md).
 
 ## Commands and verification
 
 From the repository root:
 
 ```sh
-node site/scripts/build.mjs
+node site/scripts/results.mjs --input=<downloaded artifacts> --output=<new>/results.json
+node site/scripts/build.mjs --results=<new>/results.json --output=<new directory> --site-revision=<40-hex revision>
+node site/scripts/build.mjs --results=none --output=<new directory> --site-revision=<40-hex revision>
 ```
 
-For this static site, verify JavaScript/YAML syntax and the actual static build. Product solution builds and test gates belong to their independent workflows. Public measurements still require original successful GitHub Benchmarks artifacts.
+`tests/KeyLoad.WebsiteTests` runs these scripts through Node on its test result
+files and checks the merged file and rendered tables. A local build or preview is
+development evidence; Pages publication is proven only by a successful Website run.
 
 ## Skills
 
-Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.
+Use the relevant installed formatting or diagnostics skill when the task needs it.
+Follow explicit owner scope and dependency-adoption rules; no new library or
+package version is authorized by this policy.

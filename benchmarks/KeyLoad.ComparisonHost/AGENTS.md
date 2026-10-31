@@ -2,29 +2,66 @@
 
 ## Purpose, entry points and ownership
 
-- Owns the separate benchmark executable: `Orchestration/` starts the selected Aspire topology and `Session/` runs measured workloads. No comparison test project lives under `tests/`.
-- Read root AGENTS.md, docs/Architecture.md, BenchmarkComparisons feature, ADR-033/034/043 and comparison-host acceptance/plan before implementation.
-- The selected load-test AppHost owns only database infrastructure. This client process runs outside the resource graph and owns workload, measurements, original reports, and joined client lifetime. Never replace the required KeyLoad topology.
-- Capture the actual client source/DLL/PDB/process identity and every database server's image reference and digest; KeyLoad runs the Release-published `ghcr.io/managedcode/keyload` image pinned by digest (`Benchmarks__KeyLoadImage`). Local execution has no fabricated GitHub IDs and remains unqualified for public figures. Publication independently requires original authenticated GitHub source/run/attempt/job artifacts and matched resources. The client itself has no Docker image prerequisite.
-- Keep Program composition-only and feature behavior under the canonical slice. No new package, duplicate entry, compatibility shim, suppression or hardcoded machine keys.
-- Apply the installed Orleans and Aspire skills when their runtime or composition boundaries are involved.
-- Track each client/target ownership transfer and partial construction cleanup; detach console handlers before lifetime disposal. Keep credentials external and error output safe.
-- Preserve every unrelated shared-checkout change. Workers own only this new project; the lead alone changes library, solution, AppHost, inventory, docs and tests references.
+- Owns the benchmark client: a TUnit project that measures one database, data type
+  and node count per run. The contract is
+  [BenchmarkComparisons](../../docs/Features/BenchmarkComparisons.md); the decision
+  is [ADR-150](../../docs/ADR/ADR-150-per-type-benchmark-jobs.md).
+- Entry points: one TUnit class per data type in `<Type>/Cases/` (for example
+  `Graph/Cases/GraphBenchmarks.cs`), selected with
+  `--treenode-filter "/*/*/<Class>/*"`, and the shared fixture
+  `Deployment/Hosting/BenchmarkDeployment.cs`.
+- `Deployment/` reads the job from `Benchmarks__*` environment settings, starts
+  `build/KeyLoad.LoadTests.AppHost` through `Aspire.Hosting.Testing`, waits for its
+  resources and reads the published connection. `KeyLoadDatabase` gives every
+  KeyLoad driver the same SDK clients and partition.
+- `Measurement/` owns the standard settings (seed 1729, 16 clients, 100,000
+  operations, 1,000,000 records), `OperationLanes` and the result file records.
+- The AppHost owns every container and its cleanup; this project owns the
+  workload, the verification and the result file.
+
+## Shared modules: change a dataset or scenario once
+
+- Each data type has exactly one module, `<Type>/{Dataset,Scenario,Cases,Drivers}`.
+  `Dataset/` generates the standard data and any independent oracle; `Scenario/`
+  owns the case ids, schedule and verification of every answer; `Cases/` runs the
+  cases in order; `Drivers/` holds the driver interface and its factory.
+- A database implements only its driver: the interface's operations through the
+  database's own client or HTTP API. A driver never generates data, schedules calls,
+  retries for a better number or checks answers.
+- Change a dataset, scenario or verification once in its module; it applies to
+  every database of the type. Never fork a scenario per database.
+- Adding a database adds its driver, its factory entry, its AppHost resource and its
+  workflow matrix rows. Adding a type, case or database, or changing a dataset,
+  schedule or count, needs the owner's approval.
 
 ## Boundaries and protected risks
 
-Follow the [root policy](../../AGENTS.md) and the owning feature specification. Keep changes in their actual owner, preserve unrelated work, and remove replaced code together with exclusive callers and fixtures. Use Orleans calls for distributed execution and silo-local ZoneTree owners for files. Preserve persisted authorization, operation correctness, resource bounds, cancellation and joined shutdown. Never turn a static check or focused test into a claim of complete runtime qualification.
+- Follow the [root policy](../../AGENTS.md). Record what happened: a failed case
+  keeps its real first error, and no value is estimated, zeroed or filled in.
+- Rewrite the result file atomically after startup, after every case and on
+  disposal, so a failed or timed-out job still uploads what it measured.
+- No evidence machinery: no runtime bundles, hash or identity proofs, resource
+  observation, receipts, aggregation or GitHub metadata capture. No mocks or
+  in-memory substitutes for a database.
+- Keep credentials out of results and logs. All files live below the test binaries'
+  `AppContext.BaseDirectory` or the configured `Benchmarks__Output`.
 
 ## Commands and verification
 
-From the repository root:
+From the repository root, one cell at a time:
 
 ```sh
-dotnet build KeyLoad.slnx --no-restore -warnaserror
+dotnet build benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj -warnaserror
+dotnet benchmarks/KeyLoad.ComparisonHost/bin/Debug/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --treenode-filter "/*/*/GraphBenchmarks/*"
 ```
 
-Use the root's complete solution, TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+Set `Benchmarks__Database`, `Benchmarks__Type`, `Benchmarks__Nodes` and, for
+KeyLoad, `Benchmarks__KeyLoadImage` first; `Benchmarks__Records`,
+`Benchmarks__Operations` and `Benchmarks__Output` are optional. Local results are
+development evidence; published figures come only from the Benchmarks workflow.
 
 ## Skills
 
-Use the installed Orleans skill for Orleans design and the relevant installed formatting, Aspire or diagnostics skill when the task needs it. Follow explicit owner scope and dependency-adoption rules.
+Use the installed Aspire skill for the AppHost boundary, the Orleans skill for
+KeyLoad runtime questions and the profiling skill before any optimization claim.
+Follow explicit owner scope and dependency-adoption rules.

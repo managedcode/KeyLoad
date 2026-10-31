@@ -3,31 +3,27 @@
 Status: Accepted; complete delivered-source qualification pending.
 Features: RepositoryGovernance, BenchmarkComparisons.
 Related: [ADR-064](ADR-064-workflow-release-delivery.md),
-[ADR-112](ADR-112-independent-website-publication.md).
+[ADR-150](ADR-150-per-type-benchmark-jobs.md).
 
 ## Decision
 
 Use exactly four workflows. Build and Tests owns full solution restore/build,
 format, analyzers, governance, unit/scalar, process recovery and genuine cluster.
-Benchmarks owns every performance/comparison workload, images and isolated
-Linux cells, original per-database results and one authenticated aggregation.
-Website independently qualifies and publishes current source with optional
-verified benchmark data. Release prepares source-bound versioned distributions;
+Benchmarks owns every database comparison: one isolated Linux job per database,
+data type and node count, each uploading its own result file. Website builds the
+static site from one Benchmarks run's result files and publishes Pages. Release prepares source-bound versioned distributions;
 publication waits for product readiness or a direct owner release instruction.
 
-Every comparison database has its own readable job group and complete source-bound
-matrix; each cell runs alone with that engine's actual topology and loader.
-One- and two-node benchmark profiles never replace production cluster. Preserve the
-complete canonical planned inventory, exact scale/ACK/correctness/resource contracts,
-all image gates and every original result, including failures and unavailable cells.
+Each benchmark job runs alone with its database's actual topology. A one-node
+benchmark never stands in for the production cluster. Every result, including a
+failed case, keeps its real outcome; an unsupported cell has no number.
 
 ```mermaid
 flowchart LR
     Source[Current source] --> Tests[Build and Tests]
-    Source --> Benchmarks[Isolated database job groups]
-    Benchmarks --> Aggregate[Authenticated complete accounting]
-    Aggregate --> Trigger[Final Benchmarks dispatch]
-    Trigger --> Website[Independent Website qualify and deploy]
+    Source --> Benchmarks[One job per database, type and nodes]
+    Benchmarks --> Trigger[Final Website dispatch with the run id]
+    Trigger --> Website[Merge result files, build and deploy]
     Source --> Website
     Tests --> Release[Owner admitted source bound Release]
 ```
@@ -36,19 +32,17 @@ flowchart LR
 
 1. Shared workflow identities, file ownership and REQ/AC are frozen before edits.
 2. Disjoint workflow/composite changes are owned by infrastructure; product code preserves actual callers, image receipts and bounded shutdown.
-3. Join exact workflow names/paths/events with source/run/attempt/job/artifact
-   validators, release context, source closure and all SDK/MCP test entry points.
-   Never relabel originals, accept a different source cohort or bypass a failed gate.
+3. Join exact workflow names, paths and events with the release context and all
+   SDK/MCP test entry points. Never relabel results or bypass a failed gate.
 4. Validate YAML/action contracts statically; source-shape assertions are infrastructure
-   review. Actual admission, wrong executor, corrupted artifact and healthy
-   follow-up operations run through the TUnit entry.
+   review. Actual operations and healthy follow-up operations run through the
+   TUnit entry.
 5. Combined source, build/format/governance and original Linux runs are reviewed.
-   The review covers responsibilities and actual distribution artifacts, execution
-   provenance, Website qualification with fresh source/producer identities and
-   complete traceable delivery.
+   The review covers responsibilities, actual distribution artifacts and the Website
+   publication of one Benchmarks run.
 
-Rollout is one source checkpoint containing workflows, validators, actual callers,
-source maps and docs. Source rollback keeps the four mandatory responsibilities
+Rollout is one source checkpoint containing workflows, actual callers, source maps
+and docs. Source rollback keeps the four mandatory responsibilities
 and every required gate. Database bytes, credentials, replication and public operation
-semantics are unchanged. Original evidence remains immutable; missing, failed,
-skipped or mixed-source evidence cannot become current measurements or qualification.
+semantics are unchanged. Missing, failed or skipped results never become measurements or
+qualification.

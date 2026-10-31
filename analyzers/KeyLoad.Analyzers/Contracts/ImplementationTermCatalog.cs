@@ -8,7 +8,6 @@ internal static class ImplementationTermCatalog
     internal const string Title = "Implementation terminology requires explicit approval";
     internal const string Message = "Term '{0}' requires explicit owner approval in this implementation context";
     internal const string Description = "Only the explicitly approved execution runtime, domain and testing meanings are permitted. Renaming an unauthorized mechanism does not authorize it.";
-    internal const string MeasurementSamplesMember = "Samples";
     internal const string NamespacePrefix = "KeyLoad.";
     internal const string RuleVocabularyType = "KeyLoad.Analyzers.CodeQuality.ImplementationTermCatalog";
     internal const string RuleReaderType = "KeyLoad.Analyzers.CodeQuality.ImplementationTermReader";
@@ -125,35 +124,8 @@ internal static class ImplementationTermCatalog
     ];
     internal static readonly string[] MeasurementTypes =
     [
-        "KeyLoad.Comparisons.OperationSample", "KeyLoad.Comparisons.BenchmarkSessionOperationSample",
-        "KeyLoad.Comparisons.Measurement", "KeyLoad.Comparisons.ClientResources",
-        "KeyLoad.Comparisons.ComparisonCase", "KeyLoad.Comparisons.BenchmarkSessionLaneReport",
-        "KeyLoad.Comparisons.ClientResourceSampler",
         "KeyLoad.AdminNodeSnapshot", "KeyLoad.OperationalAnalyticsCounters",
         "KeyLoad.OperationalAnalyticsReport", "KeyLoad.OperationalAnalyticsRow",
-        "KeyLoad.WebsiteTests.BenchmarkComparisons.SiteIsolatedFixture",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerContainer",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerObservationPolicy",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceSampleBudget",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceSampler",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceEvidenceCollector",
-    ];
-    internal static readonly string[] MeasurementMembers =
-    [
-        "KeyLoad.Comparisons.ComparisonExecutionOptions.ResourceSampleIntervalMilliseconds",
-        "KeyLoad.Comparisons.ComparisonOperationalPolicy.DefaultResourceSampleIntervalMilliseconds",
-        "KeyLoad.Comparisons.ComparisonOperationalPolicy.MaximumResourceSampleIntervalMilliseconds",
-        "KeyLoad.Comparisons.VectorComparisonProfile.LatencySampleCount",
-        "KeyLoad.Comparisons.VectorComparisonProfileValues.LatencySampleCount",
-        "KeyLoad.Comparisons.VectorProfileJsonFields.LatencySampleCount",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceOptions.SupportedMaxSampleMetadataBytes",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceOptions.SupportedMaxSamples",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceOptions.MaxSampleMetadataBytes",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceOptions.MaxSamples",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceBounds.MinimumSamples",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceBounds.SamplingMissing",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceProcess.ReadBoundedAsync(System.IO.Stream, int, int, System.Threading.CancellationToken)",
-        "KeyLoad.LoadTests.AppHost.BenchmarkComparisons.ScaleServerResourceProcess.DrainBoundedAsync(System.IO.Stream, int, System.Threading.CancellationToken)",
     ];
 
     internal static bool RuntimeNamespace(string value) => Array.Exists(RuntimeNamespaces,

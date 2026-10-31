@@ -130,8 +130,8 @@ is available; it is not claimed as an executed environmental fault branch.
 
 Persisted format and data remain unchanged. Public changes add read APIs;
 roll back the contracts/routes/read catalog/reader slice together while
-retaining existing numeric read kinds and storage formats. The separate ADR-050
-comparison continues declaring its own measured operations; client-folded
+retaining existing numeric read kinds and storage formats. The time-series
+benchmark comparison declares its own measured operations; client-folded
 statistics must not be relabeled measured server aggregation.
 
 This ADR remains Accepted until all implementation, tests, docs and verification

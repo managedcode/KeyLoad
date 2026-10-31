@@ -1,0 +1,15 @@
+{
+  "database": "SurrealDB",
+  "type": "graph",
+  "nodes": 1,
+  "image": "",
+  "commit": null,
+  "runId": null,
+  "startedAt": "2026-10-31T09:00:00.0000000+00:00",
+  "finishedAt": null,
+  "records": 1000000,
+  "operations": 100000,
+  "clients": 16,
+  "error": "InvalidOperationException: The database bootstrap container exited with code 1.",
+  "cases": []
+}

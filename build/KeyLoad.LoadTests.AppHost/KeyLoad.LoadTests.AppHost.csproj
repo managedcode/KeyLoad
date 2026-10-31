@@ -8,17 +8,13 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="../KeyLoad.AppHost/KeyLoad.AppHost.csproj" IsAspireProjectResource="false" />
-    <ProjectReference Include="../../src/KeyLoad/KeyLoad.csproj" IsAspireProjectResource="false" />
-    <ProjectReference Include="../../benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" IsAspireProjectResource="false" />
+    <ProjectReference Include="../../src/KeyLoad.Abstractions/KeyLoad.Abstractions.csproj" IsAspireProjectResource="false" />
     <PackageReference Include="Aspire.Hosting.AppHost" />
     <PackageReference Include="Aspire.Hosting.PostgreSQL" />
     <PackageReference Include="Aspire.Hosting.Qdrant" />
     <PackageReference Include="Aspire.Hosting.RabbitMQ" />
     <PackageReference Include="Aspire.Hosting.Redis" />
-    <InternalsVisibleTo Include="KeyLoad.FunctionalTests" />
     <InternalsVisibleTo Include="KeyLoad.ComparisonHost" />
-    <InternalsVisibleTo Include="KeyLoad.ClusterTests" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../../analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" IsAspireProjectResource="false" PrivateAssets="all" />

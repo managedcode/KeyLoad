@@ -21,7 +21,6 @@
     <Project Path="benchmarks/KeyLoad.BenchmarkScenarios/KeyLoad.BenchmarkScenarios.csproj" />
     <Project Path="benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj" />
     <Project Path="benchmarks/KeyLoad.Benchmarks/KeyLoad.Benchmarks.csproj" />
-    <Project Path="benchmarks/KeyLoad.Comparisons/KeyLoad.Comparisons.csproj" />
   </Folder>
   <Folder Name="/analyzers/">
     <Project Path="analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj" />

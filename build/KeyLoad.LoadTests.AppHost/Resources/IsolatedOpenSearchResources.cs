@@ -47,7 +47,7 @@ internal static class IsolatedOpenSearchResources
         {
             throw new InvalidOperationException(InvalidSelection);
         }
-        var deployment = LoadTestsOptionsRegistration.Get(context.Builder).Deployment.Value;
+        var deployment = context.Deployment.Value;
         var heap = string.Format(CultureInfo.InvariantCulture, HeapCompositeFormat, deployment.OpenSearchHeapMegabytes);
         var cell = Guid.NewGuid().ToString(GuidFormat);
         var names = Enumerable.Range(StartValue, context.Selection.NodeCount)

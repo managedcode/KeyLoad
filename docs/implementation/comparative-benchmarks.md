@@ -1,102 +1,51 @@
 # Benchmark methodology
 
-KeyLoad is compared with other databases by running the same workload against each
-database's own topology and reporting what was measured. This page explains
-the rules behind that comparison and how to read the published numbers. The
-execution contract (jobs, phases, schedules) is in
-[Methodology](../Features/BenchmarkComparisons/Methodology.md); requirements and
-acceptance criteria are in [BenchmarkComparisons](../Features/BenchmarkComparisons.md),
-[ADR-122](../ADR/ADR-122-benchmark-methodology.md) and
-[ADR-142](../ADR/ADR-142-shared-live-benchmark-sessions.md). The measured figures
-themselves are on the [benchmark website](https://www.keyload.cloud/#benchmarks).
+KeyLoad is compared with other databases one data type at a time: documents,
+key-value, relational, graph, vector, search, time series, analytics, queues and
+events. This page explains how to read the published numbers. The exact contract
+(types, cases, databases, result files and how to run one cell) is in
+[BenchmarkComparisons](../Features/BenchmarkComparisons.md); the decision is
+[ADR-150](../ADR/ADR-150-per-type-benchmark-jobs.md). The figures are on the
+[benchmark website](https://www.keyload.cloud/#benchmarks).
 
-## Principles
+## How a number is produced
 
-- Every database runs the same deterministic scenario: the same corpus, seed,
-  payload bytes, operation order and count, concurrency, timing boundaries and
-  correctness oracle. An adapter executes the shared scenario; it never swaps in an
-  easier workload.
-- Each database runs its real topology: one node and three nodes, with real
-  membership. Client counts and independent standalone databases are never relabelled
-  as cluster nodes. Only free community features are used, with no enterprise images
-  or paid cluster features.
-- Different databases and topologies never share a runner, process, container,
-  volume or measurement session. Each runs in its own isolated Linux job.
-- A capability a database does not provide ly is an explicit unavailable
-  result, never a substitute or a zero.
-- Acknowledgement and durability are compared as the contract each database really
-  gives. Unequal contracts are visible in the report and rule out a performance
-  winner claim.
-- Published numbers come only from authenticated original JSON produced by GitHub
-  Actions runs of the [Benchmarks workflow](../../.github/workflows/benchmarks.yml).
-  Local runs are development evidence and are never published. Failed, skipped or
-  missing cells stay null with their provenance and never refresh published figures.
-
-## What is measured
-
-Each job starts the database through Aspire, waits for readiness and membership, and
-then runs separate real TUnit tests with the real client of that database: the
-initial load, index construction, sequential and random reads, search and
-queries, and a mixed concurrent test. Setup, readiness and the final correctness
-check (full content and replica verification) are outside operation latency.
-Acknowledgement defines when a write is complete; no extra read is added to a
-measured write. A batch records its real size and duration and is never split
-into invented per-record samples.
-
-## Workload families and oracles
-
-| Family | Correctness oracle |
-|---|---|
-| Point read | The returned document is compared semantically with the stored one (JSON key order may differ) |
-| Document write | Unique create; every created document is read back after the timed interval |
-| Exact vector search | The result must match an exhaustive float64 cosine oracle including top-K order and the projected document; approximate search forms its own cohort and reports recall@k |
-| Queue cycle | enqueue, lease or receive, then acknowledge; missing, unknown, duplicate or mismatched completions fail the case, and the complete expected set is checked across concurrent workers |
-| Graph neighbors and traversal | Sorted distinct reachable IDs, excluding the start vertex, checked against an independent breadth-first oracle on the same directed graph |
-| Time series | Identical UTC samples for every database; only verified results count |
-
-Protocol, projection and transport costs differ between databases (for example a
-graph traversal that returns complete vertices versus IDs only); the report keeps
-them visible instead of hiding them.
+- Every database of a data type runs the same standard dataset and the same
+  scenario: seed 1729, 1,000,000 records, 16 concurrent clients and 100,000
+  measured operations per case. KeyLoad runs every type with the same dataset and
+  scenario as the specialist databases.
+- Each database, data type and node count is one GitHub Actions job on its own
+  Linux runner. Aspire starts the database from its pinned image; KeyLoad runs its
+  latest released server image, pinned by digest for the whole run.
+- The cases of a type run in order on that one live database, starting with the
+  measured load of the dataset. Each database is reached through its own .NET
+  client or HTTP API.
+- Every answer is checked: the stored document or row, the ids of a range, a
+  vertex's neighbours, the exact cosine top-10, the documents matching a search,
+  series aggregates and windows, exactly-once queue delivery and the events of a
+  stream. A wrong answer counts as an error and fails the case.
 
 ## Reading the results
 
-- Percentiles use the nearest-rank method over all attempts, including timeouts and
-  failures. They are never averaged across repetitions, and no best repetition is
-  chosen.
-- Useful throughput is the number of verified successes divided by the measured wall
-  time. The wall time of a concurrent mixed test is not the sum of its lanes.
-- The bytes field is the input document size, not estimated network traffic.
-- Client CPU, allocations and working set describe the load generator. Database-node
-  CPU and memory are separate observations; when they are not instrumented the cell
-  says so.
-- The load model is closed loop. It does not correct coordinated omission and does
-  not qualify overload, endurance or power-loss behaviour.
-- Every report records the exact source revision, run and job, runtime and CPU, DLL/PDB/process identities or external image
-  digests, engine versions, topology, resource limits, read consistency, index
-  settings and effective acknowledgement and durability.
+- **Operations per second** is successful operations divided by the case's wall
+  time; a load counts records per second. The search index build is one call and
+  shows seconds instead.
+- **p50, p95, p99** are nearest-rank latencies per call over successful calls. A
+  load sends records in batches, so its latency is per batch; the recorded-values
+  table shows the units per call.
+- **3 nodes** runs the database's three-node deployment where one exists. KeyLoad
+  runs three silos keeping three copies; a write is acknowledged after every copy.
+  Other databases use the replication settings of their deployment, so the same
+  node count does not mean the same guarantees.
+- **Failed** means the case ran and failed; the real error is shown. **No data**
+  means no result exists for that cell. **Single node** means the database has no
+  three-node deployment here. No number is estimated or filled in.
 
-The primary development/functional AppHost runs KeyLoad projects with
-in-memory RapidMembership. The separate LoadTests AppHost owns selected database infrastructure and
-exposes endpoints to the client-owned workload, then removes only its own
-resources. Ordinary execution never publishes KeyLoad server or client images.
-process resource equivalence remains an open publication gate; observed
-workload figures alone are not comparable server-resource proof.
+## What the numbers do not show
 
-## Topology and guarantees
-
-KeyLoad's one-node arm keeps a single copy. Its three-node arm is a replicated
-cluster of three copies in which a write is acknowledged once all configured
-copies confirm durable local apply. Other databases run their own execution
-configuration (for example synchronous commit, append-only fsync or quorum queues
-where the engine offers them), and the exact settings are part of each report. A node
-count alone does not establish equal guarantees.
-
-Nothing here claims production readiness, power-loss durability or leadership over a
-competitor; those claims need their own fault, endurance and exact-source
-comparison evidence.
-
-Primary sources used for the adapters: the first-party
-[Aspire database integrations](https://aspire.dev/integrations/databases/qdrant/qdrant-host/),
-the [pgvector exact-search contract](https://github.com/pgvector/pgvector),
-[RabbitMQ acknowledgements and confirms](https://www.rabbitmq.com/docs/confirms) and
-the [Neo4j Query API](https://neo4j.com/docs/query-api/current/query/).
+The figures describe one Benchmarks run on GitHub-hosted runners whose hardware is
+not matched between jobs. They are not production readiness, power-loss durability,
+endurance or overload results, and they do not make KeyLoad or any other database a
+winner. The load is a closed loop of 16 clients and does not correct coordinated
+omission. KeyLoad writes each job's data into one partition, so its three-node
+numbers measure replication, not partition fan-out.

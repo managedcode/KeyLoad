@@ -1,10 +1,24 @@
 using System.Globalization;
-using KeyLoad.Comparisons;
+using Microsoft.Extensions.Options;
 
 namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
+/// <summary>The selected database and node count of one benchmark job.</summary>
+internal sealed record BenchmarkSelection(string Target, int NodeCount, string? KeyLoadImage)
+{
+    private const string Invalid = "BenchmarkSelectionInvalid";
+
+    internal void Validate()
+    {
+        if (!BenchmarkDatabases.Supports(Target, NodeCount))
+        {
+            throw new InvalidOperationException(Invalid);
+        }
+    }
+}
+
 internal sealed record IsolatedResourceContext(IDistributedApplicationBuilder Builder,
-    BenchmarkSessionSelection Selection, LoadTestClientSettings Client, string Root)
+    BenchmarkSelection Selection, LoadTestClientSettings Client, string Root, IOptions<BenchmarkDeploymentOptions> Deployment)
 {
     private const string RuntimeDirectoryCore = "execution";
     private const string RuntimePrefix = "Benchmarks__Execution__";
@@ -13,7 +27,7 @@ internal sealed record IsolatedResourceContext(IDistributedApplicationBuilder Bu
 
     internal string DataDirectory(string name)
     {
-        var path = Path.Combine(ExecutionDirectory(Root), name);
+        var path = Path.Combine(Root, RuntimeDirectoryCore, name);
         Directory.CreateDirectory(path);
         if (!OperatingSystem.IsWindows())
         {
@@ -21,8 +35,6 @@ internal sealed record IsolatedResourceContext(IDistributedApplicationBuilder Bu
         }
         return path;
     }
-
-    internal static string ExecutionDirectory(string root) => Path.Combine(root, RuntimeDirectoryCore);
 
     internal void BindEndpoint<T>(int index, IResourceBuilder<T> node, string endpointName)
         where T : IResourceWithEndpoints

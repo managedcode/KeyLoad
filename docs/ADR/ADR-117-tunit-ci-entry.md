@@ -14,8 +14,7 @@ exposes actual endpoints; tests start the workload client outside its
 resource graph, retain Detailed output and original TRX, and join its real
 completion and readers before disposing infrastructure. Ordinary execution has no
 KeyLoad/workload-client image prerequisite. TRX remains separate from
-website measurement JSON; source/DLL/PDB/process and authenticated GitHub evidence
-are independently validated. Static checks establish no runtime qualification.
+benchmark result files. Static checks establish no runtime qualification.
 
 ## Isolated measurements and heavy load scheduling
 
@@ -53,7 +52,7 @@ The selector preserves bounded original arguments, TRX and coverage settings.
 
 Real distributed fixtures use `TUnit.Aspire` and the current AppHost. TUnit owns
 initialization and disposal; the owning fixtures retain actual process readiness,
-abrupt-fault and joined-cleanup evidence. Benchmark sessions execute separately from
-`benchmarks/KeyLoad.ComparisonHost` in the Benchmarks workflow.
+abrupt-fault and joined-cleanup evidence. Benchmark jobs run
+`benchmarks/KeyLoad.ComparisonHost` separately in the Benchmarks workflow.
 
 No product, public or persisted ID or storage-format change, clock, deadline or resource increase. Current execution, coverage and Linux qualification stay OPEN until actual source/DLL/PDB/discovery/reports/cleanup bind; source-path/count arithmetic is not a UID or PASS.

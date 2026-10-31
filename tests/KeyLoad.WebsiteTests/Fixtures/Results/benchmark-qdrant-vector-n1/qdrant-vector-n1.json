@@ -1,0 +1,42 @@
+{
+  "database": "Qdrant",
+  "type": "vector",
+  "nodes": 1,
+  "image": "qdrant/qdrant:v1.15",
+  "commit": "1111111111111111111111111111111111111111",
+  "runId": null,
+  "startedAt": "2026-10-31T09:00:00.0000000+00:00",
+  "finishedAt": "2026-10-31T09:40:00.0000000+00:00",
+  "records": 1000000,
+  "operations": 100000,
+  "clients": 16,
+  "error": null,
+  "cases": [
+    {
+      "id": "load",
+      "status": "passed",
+      "operations": 1000000,
+      "errors": 0,
+      "seconds": 37.313,
+      "opsPerSecond": 26800,
+      "p50Ms": 59.7,
+      "p95Ms": 131.34,
+      "p99Ms": 232.83,
+      "batchSize": 1000,
+      "error": null
+    },
+    {
+      "id": "exact-top10",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 185.787,
+      "opsPerSecond": 538.25,
+      "p50Ms": 29.73,
+      "p95Ms": 65.41,
+      "p99Ms": 115.95,
+      "batchSize": 1,
+      "error": null
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 # Aspire-owned abrupt faults for replicated-cluster tests
 
-The existing Aspire `ContainerResource` owns every test lifecycle command under [ADR-034](../../ADR/ADR-034-cluster-comparisons.md), [ADR-117](../../ADR/ADR-117-tunit-ci-entry.md) and [ADR-136](../../ADR/ADR-136-orleans-partition-ownership.md). TUnit fixtures retain startup, readiness, SDK/MCP operations and joined shutdown. Parent specification: [StorageReplication](../StorageReplication.md).
+The existing Aspire `ContainerResource` owns every test lifecycle command under [ADR-117](../../ADR/ADR-117-tunit-ci-entry.md) and [ADR-136](../../ADR/ADR-136-orleans-partition-ownership.md). TUnit fixtures retain startup, readiness, SDK/MCP operations and joined shutdown. Parent specification: [StorageReplication](../StorageReplication.md).
 
 `KeyLoadTests:ContainerFaults=true` explicitly selects the test fault command. Registration refuses non-ephemeral and comparison/benchmark resources. Each command is bound to the existing resource and its original `ContainerNameAnnotation`; the caller supplies only an expected full 64-hex container ID. The AppHost inspects its bound name, refuses a mismatching or non-running container, then issues `docker kill --signal KILL` against that exact inspected ID. Metadata inspection is read-only. No test caller launches a container-engine lifecycle command.
 

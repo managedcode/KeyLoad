@@ -270,24 +270,12 @@
       </div>
     </section>
 
-    <section id="benchmarks" class="benchmark-section" aria-labelledby="benchmark-title" data-isolated-catalog="data/isolated-catalog.json">
+    <section id="benchmarks" class="benchmark-section" aria-labelledby="benchmark-title">
       <header class="section-head">
-        <div><p class="eyebrow">Benchmarks</p><h2 id="benchmark-title">Every engine.<br>The same workload.</h2></div>
-        <p class="section-intro">One million documents per engine, then 100,000 timed operations per test from 16 concurrent clients. Each database runs alone on its own GitHub Actions runner, on one or three nodes.</p>
+        <div><p class="eyebrow">Benchmarks</p><h2 id="benchmark-title">Every data type.<br>Same data, same cases.</h2></div>
+        <p class="section-intro">Each data type has one shared scenario and dataset. KeyLoad runs every type against the specialist databases for that type, each in its own GitHub Actions job on one or three nodes.</p>
       </header>
-      <noscript><p>Enable JavaScript to explore the measurements. The original aggregate and authenticated GitHub run remain available:</p><!-- KEYLOAD_ISOLATED_EVIDENCE --></noscript>
-      <div class="instrument">
-        <div id="isolated-summary" class="bench-kpis"></div>
-        <div class="bench-controls">
-          <fieldset id="isolated-type" class="bench-chips"><legend>Database type</legend></fieldset>
-        </div>
-        <div class="measurement-workspace">
-          <div id="isolated-results" aria-live="polite"><p class="empty-state">Loading benchmark results…</p></div>
-          <p id="isolated-error" class="load-error" role="alert" hidden></p>
-          <button id="isolated-retry" class="retry-button" type="button" hidden>Retry measurements</button>
-          <p id="isolated-announcement" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></p>
-        </div>
-      </div>
+      <!-- KEYLOAD_BENCHMARK_RESULTS -->
     </section>
 
     <section class="ledger" aria-labelledby="ledger-title">
@@ -299,7 +287,7 @@
         <article class="ledger-col ledger-col--open"><h3>Ready to inspect</h3><ul>
           <li>Source code and architecture decisions</li>
           <li>Benchmark methodology and seeded inputs</li>
-          <li>Raw JSON reports with source revision and host</li>
+          <li>One result file per job with source commit and image</li>
           <li>The GitHub Actions run behind every published figure</li>
         </ul></article>
         <article class="ledger-col ledger-col--held"><h3>Qualification still open</h3><ul>
@@ -318,9 +306,9 @@
         <a class="text-link" href="https://github.com/managedcode/KeyLoad/blob/main/docs/implementation/comparative-benchmarks.md">Read the benchmark methodology <span aria-hidden="true">↗</span></a>
       </header>
       <ol class="method-rail">
-        <li><span class="step-no" aria-hidden="true">01</span><h3>Shared inputs</h3><p>A deterministic document corpus and operation schedule are shared across applicable adapters. Original reports retain actual record counts, source identity and per-operation samples.</p></li>
-        <li><span class="step-no" aria-hidden="true">02</span><h3>Real command paths</h3><p>Clients call real services. One live database is shared by the ordered TUnit tests. The initial million-record load is measured separately; operation tests retain their own timing and correctness evidence, without warmup or reset.</p></li>
-        <li><span class="step-no" aria-hidden="true">03</span><h3>Correctness first</h3><p>Each operation test keeps its own correctness result. Process CPU, allocation and RAM are observed over lane intervals; overlapping lane figures are never summed. Server resource observations cover the whole session.</p></li>
+        <li><span class="step-no" aria-hidden="true">01</span><h3>Shared datasets</h3><p>Each data type has one standard dataset and scenario. KeyLoad and the specialist databases for that type load the same records and run the same cases with the same number of clients.</p></li>
+        <li><span class="step-no" aria-hidden="true">02</span><h3>One job per cell</h3><p>Every database, data type and node count runs in its own GitHub Actions job. The job starts the database through Aspire, then its clients call the real service.</p></li>
+        <li><span class="step-no" aria-hidden="true">03</span><h3>Every outcome recorded</h3><p>Each job uploads its result file even when it fails. A failed case is shown as failed with its error, never as a number, and a missing topology is shown as single node.</p></li>
       </ol>
     </section>
 

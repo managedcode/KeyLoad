@@ -32,7 +32,7 @@ Owned storage copies stay wherever a caller may keep or change an array.
 | JSON (ResourceExecution) | Stream exact canonical JSON into the fingerprint hash, share pooled input serialization and avoid validation clones; keep a bounded configured UTF-8 pool and reuse cached-receive requests; replacement rules, strict errors and fingerprints stay exact |
 | Checkpoints (StorageRecovery) | Remove redundant full snapshot passes only after the file identity, lifetime and recovery cut are established; checksum, format and replay guarantees are unchanged |
 | Client transport (ClientApi) | Stream successful JSON after the headers and cap the size of problem bodies |
-| Benchmark harness (BenchmarkComparisons) | Bound aggregate corpus bytes, targets, attempts and input before allocation; write reports progressively; keep operation-sized samples bounded |
+| Benchmark client (BenchmarkComparisons) | Generate datasets deterministically per batch instead of materializing them; rewrite the result file after every case; keep one latency slot per call |
 | Resource measurement (BenchmarkComparisons) | Measure database-node CPU, allocations, GC and working set in addition to the load generator, and label working set honestly; export logical ZoneTree counters and label physical I/O only when it is measured |
 | Public operations (ClientApi) | Exercise every affected flow through the official MCP client and the .NET SDK on the Aspire-owned replicated topology |
 

@@ -88,7 +88,7 @@ flowchart LR
 
 Current focus: removing the self-written cluster code so that Orleans alone runs the cluster ([ADR-136](docs/ADR/ADR-136-orleans-partition-ownership.md)).
 
-[.NET profiling](docs/Features/BenchmarkComparisons/DotnetProfiling.md) with `dotnet-diagnostics-mcp` guides measured bottleneck repairs.
+[.NET profiling](docs/Features/BenchmarkComparisons.md#local-development-benchmarks-and-profiling) with `dotnet-diagnostics-mcp` guides measured bottleneck repairs.
 
 
 | Workstream | What it does and why | State | Remaining work |
@@ -111,7 +111,7 @@ Full product functional coverage remains **unqualified**. Load tests and benchma
 
 Complete Linux cluster, recovery, fault and coverage qualification remains open; see the [current status](docs/implementation/status.json).
 
-[Status](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/Features/BenchmarkComparisons/Methodology.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
+[Status](docs/implementation/status.json) · [SQL conformance](docs/implementation/sql-client-conformance.json) · [Coverage](docs/Features/CodeQuality.md) · [Benchmark methodology](docs/implementation/comparative-benchmarks.md) · [Published benchmarks](https://www.keyload.cloud/#benchmarks)
 
 ## One database, connected models
 
@@ -414,7 +414,7 @@ node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=func
 dotnet format KeyLoad.slnx --verify-no-changes --no-restore
 ```
 
-TUnit fixtures own Aspire startup and cleanup; the `cluster` suite uses real .NET and official MCP clients against the Aspire-owned Docker cluster (three silos by default). Benchmark builds, checks and measurements run exclusively in GitHub's Benchmarks workflow.
+TUnit fixtures own Aspire startup and cleanup; the `cluster` suite uses real .NET and official MCP clients against the Aspire-owned Docker cluster (three silos by default). Published benchmark figures come only from GitHub's Benchmarks workflow; one cell can also run locally for development.
 
 </details>
 
@@ -463,15 +463,19 @@ The comparison suite uses native clients and isolated nonproduction database dep
 | Columnar records | [ClickHouse](https://github.com/ClickHouse/ClickHouse) | Native HTTP |
 | Time series | [TimescaleDB](https://github.com/timescale/timescaledb), [InfluxDB](https://github.com/influxdata/influxdb) | Npgsql / native HTTP |
 
-Required comparison scales: **100,000 and 1,000,000 records**, at **1 or 3 nodes** where supported. The current shared session uses one million records, with 16 systems and 32 topology rows. The [shared session](docs/Features/BenchmarkComparisons/SessionExecution.md) retains thirteen original cases, including exact vectors, confirmed queue cycles and verified event append/read/mixed operations. These cases cover Qdrant, RabbitMQ and KurrentDB through their native adapters; every website category uses the same comparison table. The new session source still requires a successful exact-source Linux benchmark before its figures can appear on the static site. The [five added targets](docs/Features/BenchmarkComparisons/AdditionalDatabases.md) currently implement one-node document sessions; their three-node deployments and separate time-series/analytics qualification remain open. SQL Server uses Developer edition for nonproduction benchmarks. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
+Benchmarks runs one GitHub job per database, data type and node count: ten data
+types, each with one shared dataset and scenario (seed 1729, 16 clients,
+1,000,000 records and 100,000 measured operations per case), and KeyLoad in every
+type at 1 and 3 nodes. Databases without a supported 3-node deployment run on one
+node. SQL Server uses Developer edition for nonproduction benchmarks. See
+[BenchmarkComparisons](docs/Features/BenchmarkComparisons.md) for the types,
+cases and result files.
 
-The website displays only the latest completed successful Benchmarks measurement
-run and its original authenticated data. Its source, image, attempt, topology and
-workload inventory remain explicit. A failed or unfinished new run never removes
-those verified figures. Cases not measured in that successful run have no invented
-numbers. Website only validates those original benchmark artifacts, generates the
-static landing page and publishes Pages. It does not build or test KeyLoad, .NET,
-Aspire or AppHost and runs no analyzer, browser, TUnit or coverage suite.
+The website shows one comparison table per data type from the result files of one
+Benchmarks run. A failed case reads "Failed" with its real error and a case without
+a result reads "No data"; no number is invented. The figures describe that run on
+GitHub-hosted runners, not production readiness. Website builds the static page
+from those files only; it does not build or test KeyLoad, .NET, Aspire or AppHost.
 
 ---
 

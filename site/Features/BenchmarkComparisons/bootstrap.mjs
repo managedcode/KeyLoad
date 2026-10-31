@@ -6,7 +6,7 @@ const SCENE = Object.freeze({ module: './cluster-scene.mjs', unavailable: 'Stati
   hidden: 'hidden', initialGeneration: 0, nextGeneration: 1 });
 let mounted = false;
 let generation = SCENE.initialGeneration;
-let isolatedLab;
+let resultsControls;
 let scene;
 let deferred;
 let copyReset;
@@ -16,9 +16,9 @@ function stop() {
   generation += SCENE.nextGeneration;
   clearTimeout(deferred);
   clearTimeout(copyReset);
-  isolatedLab?.dispose();
+  resultsControls?.dispose();
   scene?.dispose();
-  isolatedLab = undefined;
+  resultsControls = undefined;
   scene = undefined;
 }
 
@@ -45,11 +45,11 @@ function start() {
   if (mounted) return;
   mounted = true;
   const token = ++generation;
-  const isolatedRoot = document.getElementById(IDS.benchmarks);
-  if (isolatedRoot?.dataset.isolatedCatalog) {
-    import('./isolated-lab.mjs').then(({ mountIsolatedLab }) => {
+  const benchmarks = document.getElementById(IDS.benchmarks);
+  if (benchmarks?.querySelector(SELECTORS.results)) {
+    import('./results-controls.mjs').then(({ mountResultsControls }) => {
       if (token !== generation || !mounted) return;
-      isolatedLab = mountIsolatedLab({ root: isolatedRoot, catalogUrl: isolatedRoot.dataset.isolatedCatalog });
+      resultsControls = mountResultsControls(benchmarks);
     }).catch(() => {});
   }
   // Resolve the initial fragment before observing the hero: smooth anchor travel

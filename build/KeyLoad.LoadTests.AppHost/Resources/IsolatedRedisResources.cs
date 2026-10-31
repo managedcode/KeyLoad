@@ -90,7 +90,7 @@ internal static class IsolatedRedisResources
 
     private static IResourceBuilder<RedisResource> UseTcp(IResourceBuilder<RedisResource> node)
     {
-        // ADR-080: the owned authenticated bootstrap and replica links use execution TCP on port 6379.
+        // The owned authenticated bootstrap and replica links use execution TCP on port 6379.
 #pragma warning disable ASPIRECERTIFICATES001
         return node.WithoutHttpsCertificate();
 #pragma warning restore ASPIRECERTIFICATES001

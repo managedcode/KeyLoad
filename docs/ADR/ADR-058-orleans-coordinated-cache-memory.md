@@ -1,7 +1,7 @@
 # ADR-058: Orleans-coordinated disposable cache memory
 
 Status: Accepted; local cache source is partially implemented, while Orleans cache control, complete qualification and measured benefit remain open.
-Related: REQ-CACHE-001..007 / AC-CACHE-001..011 and REQ-MP-002/005 / AC-MP-002/011/012 in [ResourceExecution](../Features/ResourceExecution.md); ADR-035, ADR-041, ADR-056, ADR-081, ADR-113.
+Related: REQ-CACHE-001..007 / AC-CACHE-001..011 and REQ-MP-002/005 / AC-MP-002/011/012 in [ResourceExecution](../Features/ResourceExecution.md); ADR-035, ADR-041, ADR-081, ADR-113.
 
 ## Decision and boundaries
 

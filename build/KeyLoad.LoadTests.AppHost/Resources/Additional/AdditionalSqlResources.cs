@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Comparisons;
 
 namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
@@ -8,7 +7,7 @@ internal static class AdditionalSqlResources
     private const string TimescaleName = "isolated-timescale", SqlServerName = "isolated-sqlserver", MySqlName = "isolated-mysql";
     private const string PasswordName = "additional-database-password", PasswordPrefix = "Kl1!";
     private const string Tcp = "tcp", Docker = "docker.io/", Separator = ":", DigestSeparator = "@";
-    private const string Invalid = "AdditionalSqlResourceSelectionRejected";
+    private const string Invalid = "AdditionalSqlResourceSelectionRejected", Connection = "ConnectionString";
     private const string PgHost = "Host=", PgPort = ";Port=", PgUser = ";Username=", PgSecret = ";Password=", PgDatabase = ";Database=";
     private const string SqlHost = "Server=", SqlPort = ",", SqlUser = ";User ID=sa;Password=", SqlEncryption = ";Encrypt=True;TrustServerCertificate=True";
     private const string MySqlHost = "Server=", MySqlPortSetting = ";Port=", MySqlUser = ";User ID=root;Password=", MySqlTls = ";SslMode=Preferred";
@@ -25,13 +24,13 @@ internal static class AdditionalSqlResources
             PasswordPrefix + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
         switch (context.Selection.Target)
         {
-            case BenchmarkAdditionalTargets.Timescale:
+            case BenchmarkDatabases.Timescale:
                 AddTimescale(context, password);
                 break;
-            case BenchmarkAdditionalTargets.SqlServer:
+            case BenchmarkDatabases.SqlServer:
                 AddSqlServer(context, password);
                 break;
-            case BenchmarkAdditionalTargets.MySql:
+            case BenchmarkDatabases.MySql:
                 AddMySql(context, password);
                 break;
             default:
@@ -51,7 +50,7 @@ internal static class AdditionalSqlResources
             .WithArgs(Shell, Setting, Fsync, Setting, Commit)
             .WithEndpoint(targetPort: PostgresPort, name: Tcp, scheme: Tcp);
         var endpoint = node.GetEndpoint(Tcp);
-        AdditionalSqlReadiness.Bind(context, node, ReferenceExpression.Create(
+        context.BindSetting(Connection, ReferenceExpression.Create(
             $"{PgHost}{endpoint.Property(EndpointProperty.Host)}{PgPort}{endpoint.Property(EndpointProperty.Port)}{PgUser}{Postgres}{PgSecret}{password}{PgDatabase}{Postgres}"));
         context.BindEndpoint(EndpointIndex, node, Tcp);
         context.BindImage(Docker + BenchmarkAdditionalImages.TimescaleImage + Separator + BenchmarkAdditionalImages.TimescaleTag + DigestSeparator + BenchmarkAdditionalImages.TimescaleDigest);
@@ -66,7 +65,7 @@ internal static class AdditionalSqlResources
             .WithEnvironment(Accept, Yes).WithEnvironment(Edition, Developer).WithEnvironment(Secret, password)
             .WithVolume(target: Mount).WithEndpoint(targetPort: SqlServerPort, name: Tcp, scheme: Tcp);
         var endpoint = node.GetEndpoint(Tcp);
-        AdditionalSqlReadiness.Bind(context, node, ReferenceExpression.Create(
+        context.BindSetting(Connection, ReferenceExpression.Create(
             $"{SqlHost}{endpoint.Property(EndpointProperty.Host)}{SqlPort}{endpoint.Property(EndpointProperty.Port)}{SqlUser}{password}{SqlEncryption}"));
         context.BindEndpoint(EndpointIndex, node, Tcp);
         context.BindImage(BenchmarkAdditionalImages.SqlServerImage + Separator + BenchmarkAdditionalImages.SqlServerTag + DigestSeparator + BenchmarkAdditionalImages.SqlServerDigest);
@@ -81,7 +80,7 @@ internal static class AdditionalSqlResources
             .WithEnvironment(Secret, password).WithEnvironment(Host, AnyHost).WithVolume(target: Mount)
             .WithArgs(Flush, Sync).WithEndpoint(targetPort: MySqlPort, name: Tcp, scheme: Tcp);
         var endpoint = node.GetEndpoint(Tcp);
-        AdditionalSqlReadiness.Bind(context, node, ReferenceExpression.Create(
+        context.BindSetting(Connection, ReferenceExpression.Create(
             $"{MySqlHost}{endpoint.Property(EndpointProperty.Host)}{MySqlPortSetting}{endpoint.Property(EndpointProperty.Port)}{MySqlUser}{password}{MySqlTls}"));
         context.BindEndpoint(EndpointIndex, node, Tcp);
         context.BindImage(Docker + BenchmarkAdditionalImages.MySqlImage + Separator + BenchmarkAdditionalImages.MySqlTag + DigestSeparator + BenchmarkAdditionalImages.MySqlDigest);

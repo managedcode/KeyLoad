@@ -1,379 +1,156 @@
 name: Benchmarks
+# One job per database, data type and node count. Each job starts the database with Aspire, runs the type's
+# shared scenario and saves its result file whether or not the run passed. Website then renders the results.
 on:
   push:
     branches: [main]
-    # Automatic runs follow KeyLoad product source only; tests, harness, docs and site use manual dispatch.
-    paths:
-      - 'src/**'
-      - 'Directory.Build.props'
-      - 'Directory.Build.targets'
-      - 'Directory.Packages.props'
-      - 'global.json'
   workflow_dispatch:
-permissions: {contents: read, actions: read}
+permissions: {contents: read}
 concurrency:
   group: keyload-benchmarks-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'workflow_dispatch' }}
-env:
-  NUGET_PACKAGES: ${{ github.workspace }}/artifacts/benchmark-runtime/packages
 jobs:
-  comparison-runtime:
-    name: Prepare comparison runtime
+  image:
+    name: Resolve the KeyLoad image
     if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
-    timeout-minutes: 150
-    permissions: {contents: read, actions: read, packages: read}
+    timeout-minutes: 5
+    permissions: {contents: read, packages: read}
     outputs:
-      databases: ${{ steps.plan.outputs.database_matrices }}
-      runtime-artifact-id: ${{ steps.runtime-bundle.outputs.artifact-id }}
-      keyload-image: ${{ steps.keyload-image.outputs.reference }}
+      reference: ${{ steps.resolve.outputs.reference }}
+    steps:
+      - name: Resolve the latest released KeyLoad server image to one digest
+        id: resolve
+        env:
+          REGISTRY_TOKEN: ${{ github.token }}
+        run: |
+          printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+          digest=$(docker buildx imagetools inspect ghcr.io/managedcode/keyload:latest --format '{{json .Manifest}}' | jq -er '.digest')
+          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf 'reference=ghcr.io/managedcode/keyload:latest@%s\n' "$digest" >> "$GITHUB_OUTPUT"
+          docker logout ghcr.io
+  measure:
+    name: ${{ matrix.database }} / ${{ matrix.type }} / ${{ matrix.nodes }} node(s)
+    needs: [image]
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    permissions: {contents: read, packages: read}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {database: 'KeyLoad', type: documents, nodes: 1}
+          - {database: 'KeyLoad', type: documents, nodes: 3}
+          - {database: 'KeyLoad', type: key-value, nodes: 1}
+          - {database: 'KeyLoad', type: key-value, nodes: 3}
+          - {database: 'KeyLoad', type: relational, nodes: 1}
+          - {database: 'KeyLoad', type: relational, nodes: 3}
+          - {database: 'KeyLoad', type: graph, nodes: 1}
+          - {database: 'KeyLoad', type: graph, nodes: 3}
+          - {database: 'KeyLoad', type: vector, nodes: 1}
+          - {database: 'KeyLoad', type: vector, nodes: 3}
+          - {database: 'KeyLoad', type: search, nodes: 1}
+          - {database: 'KeyLoad', type: search, nodes: 3}
+          - {database: 'KeyLoad', type: time-series, nodes: 1}
+          - {database: 'KeyLoad', type: time-series, nodes: 3}
+          - {database: 'KeyLoad', type: analytics, nodes: 1}
+          - {database: 'KeyLoad', type: analytics, nodes: 3}
+          - {database: 'KeyLoad', type: queue, nodes: 1}
+          - {database: 'KeyLoad', type: queue, nodes: 3}
+          - {database: 'KeyLoad', type: events, nodes: 1}
+          - {database: 'KeyLoad', type: events, nodes: 3}
+          - {database: 'MongoDB', type: documents, nodes: 1}
+          - {database: 'MongoDB', type: documents, nodes: 3}
+          - {database: 'SurrealDB', type: documents, nodes: 1}
+          - {database: 'Redis', type: key-value, nodes: 1}
+          - {database: 'Redis', type: key-value, nodes: 3}
+          - {database: 'PostgreSQL + pgvector', type: relational, nodes: 1}
+          - {database: 'PostgreSQL + pgvector', type: relational, nodes: 3}
+          - {database: 'SQL Server', type: relational, nodes: 1}
+          - {database: 'MySQL', type: relational, nodes: 1}
+          - {database: 'Neo4j', type: graph, nodes: 1}
+          - {database: 'HelixDB', type: graph, nodes: 1}
+          - {database: 'SurrealDB', type: graph, nodes: 1}
+          - {database: 'Qdrant', type: vector, nodes: 1}
+          - {database: 'Qdrant', type: vector, nodes: 3}
+          - {database: 'PostgreSQL + pgvector', type: vector, nodes: 1}
+          - {database: 'PostgreSQL + pgvector', type: vector, nodes: 3}
+          - {database: 'OpenSearch', type: search, nodes: 1}
+          - {database: 'OpenSearch', type: search, nodes: 3}
+          - {database: 'TimescaleDB', type: time-series, nodes: 1}
+          - {database: 'InfluxDB', type: time-series, nodes: 1}
+          - {database: 'ClickHouse', type: analytics, nodes: 1}
+          - {database: 'RabbitMQ', type: queue, nodes: 1}
+          - {database: 'RabbitMQ', type: queue, nodes: 3}
+          - {database: 'KurrentDB', type: events, nodes: 1}
+          - {database: 'KurrentDB', type: events, nodes: 3}
     env:
-      GH_TOKEN: ${{ github.token }}
-      Configuration: Release
-      KEYLOAD_COMPARISON_JOB_NAME: Prepare comparison runtime
+      Benchmarks__Database: ${{ matrix.database }}
+      Benchmarks__Type: ${{ matrix.type }}
+      Benchmarks__Nodes: ${{ matrix.nodes }}
+      Benchmarks__KeyLoadImage: ${{ needs.image.outputs.reference }}
+      Benchmarks__Output: ${{ github.workspace }}/results
     steps:
       - name: Download source code
         uses: actions/checkout@v7
-      - name: Read the pinned .NET SDK version
-        id: dotnet-sdk
-        shell: bash
-        run: jq -er '"version=" + .sdk.version' global.json >> "$GITHUB_OUTPUT"
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
-          dotnet-version: ${{ steps.dotnet-sdk.outputs.version }}
-      # KeyLoad cells run the released server image; this job compiles only the comparison harness.
-      - name: Restore the comparison harness packages
-        run: dotnet restore benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj
-      - name: Prepare the pinned Aspire runtime inside the archive inputs
-        shell: bash
+          global-json-file: global.json
+      - name: Name this cell
+        id: cell
         run: |
-          aspire_version=$(jq -er '."msbuild-sdks"."Aspire.AppHost.Sdk"' global.json)
-          [[ "$aspire_version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
-          aspire_rid="linux-${RUNNER_ARCH,,}"
-          [[ "$aspire_rid" == linux-x64 || "$aspire_rid" == linux-arm64 ]]
-          aspire_cli="$NUGET_PACKAGES/aspire.cli.$aspire_rid/$aspire_version/tools/net10.0/$aspire_rid"
-          dotnet dnx --yes "aspire.cli@$aspire_version" -- setup --install-path "$aspire_cli" --non-interactive
-          test -x "$aspire_cli/bundle/dcp/dcp"
-          test -x "$aspire_cli/bundle/dashboard/Aspire.Dashboard"
-          printf 'AspireCliBundlePath=%s/bundle\n' "$aspire_cli" >> "$GITHUB_ENV"
-      - name: Build the comparison harness
-        run: dotnet build benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj --no-restore --configuration Release -p:AspireCliInvocationMode=DnxPinned -warnaserror
-      - name: Check repository rules
-        run: node scripts/Features/RepositoryGovernance/verify.mjs
-      - name: Plan the shared database sessions
-        id: plan
-        run: node scripts/Features/BenchmarkComparisons/session-plan.mjs --output="$RUNNER_TEMP/session-plan.json" --github-output="$GITHUB_OUTPUT"
-      - name: Save the canonical session plan
-        uses: actions/upload-artifact@v7
-        with:
-          name: comparison-plan
-          path: ${{ runner.temp }}/session-plan.json
-          if-no-files-found: error
-          retention-days: 90
-      - name: Check Docker
+          case "$Benchmarks__Type" in
+            documents) cases=DocumentBenchmarks ;;
+            key-value) cases=KeyValueBenchmarks ;;
+            relational) cases=RelationalBenchmarks ;;
+            graph) cases=GraphBenchmarks ;;
+            vector) cases=VectorBenchmarks ;;
+            search) cases=SearchBenchmarks ;;
+            time-series) cases=TimeSeriesBenchmarks ;;
+            analytics) cases=AnalyticsBenchmarks ;;
+            queue) cases=QueueBenchmarks ;;
+            events) cases=EventBenchmarks ;;
+            *) exit 1 ;;
+          esac
+          slug=$(printf '%s' "$Benchmarks__Database" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g; s/^-|-$//g')
+          printf 'cases=%s\nartifact=benchmark-%s-%s-n%s\n' "$cases" "$slug" "$Benchmarks__Type" "$Benchmarks__Nodes" >> "$GITHUB_OUTPUT"
+      - name: Prepare the Docker host
         run: |
-          docker version
-          uname -a
+          sudo sysctl -w vm.max_map_count=262144
           docker info --format 'Docker kernel: {{.KernelVersion}}'
-      - name: Resolve the latest released KeyLoad server image to one digest
-        id: keyload-image
+      - name: Pull the KeyLoad image
+        if: matrix.database == 'KeyLoad'
         env:
           REGISTRY_TOKEN: ${{ github.token }}
-          KEYLOAD_IMAGE_REPOSITORY: ghcr.io/managedcode/keyload
         run: |
           printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
-          digest=$(docker buildx imagetools inspect "$KEYLOAD_IMAGE_REPOSITORY:latest" --format '{{json .Manifest}}' | jq -er '.digest')
-          [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
-          reference="$KEYLOAD_IMAGE_REPOSITORY:latest@$digest"
-          printf 'reference=%s\n' "$reference" >> "$GITHUB_OUTPUT"
-          printf 'KeyLoad cells use %s\n' "$reference" >> "$GITHUB_STEP_SUMMARY"
+          docker pull "$Benchmarks__KeyLoadImage"
           docker logout ghcr.io
-      - name: Pack the compiled benchmark runtime
-        run: node scripts/Features/BenchmarkComparisons/compiled-test-bundle.mjs --pack
-      - name: Save compiled runtime identities
-        uses: actions/upload-artifact@v7
-        with:
-          name: comparison-compiled-runtime-identity
-          path: |
-            artifacts/benchmark-runtime-bundle/benchmark-runtime.json
-            artifacts/benchmark-runtime-bundle/benchmark-runtime-files.json
-          if-no-files-found: error
-          retention-days: 90
-      - name: Save the compiled benchmark runtime
-        id: runtime-bundle
-        uses: actions/upload-artifact@v7
-        with:
-          name: comparison-compiled-test-bundle
-          path: artifacts/benchmark-runtime-bundle/*
-          if-no-files-found: error
-          compression-level: 0
-          retention-days: 90
-      - name: Test bounded terminal execution diagnostics
-        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --minimum-expected-tests 1 --treenode-filter '/*/*/ComparisonHostCaptureTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/TerminalDiagnostics" --report-trx
-      - name: Save original preparation diagnostics
+      - name: Build the benchmark client
+        run: dotnet build benchmarks/KeyLoad.ComparisonHost/KeyLoad.ComparisonHost.csproj --configuration Release -warnaserror
+      - name: Run the benchmark
+        run: >-
+          dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll
+          --output Detailed --treenode-filter "/*/*/${{ steps.cell.outputs.cases }}/*"
+          --results-directory "$GITHUB_WORKSPACE/results/test-results" --report-trx --timeout 220m
+      - name: Save the results
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: comparison-runtime-qualification
-          path: |
-            TestResults/**
-            benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/**
-            artifacts/qualification/**
-            artifacts/code-quality/**
-            ${{ runner.temp }}/keyload-cell-github/**
+          name: ${{ steps.cell.outputs.artifact }}
+          path: results/
           if-no-files-found: warn
           retention-days: 90
-  comparison-keyload:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    permissions: {contents: read, actions: read, packages: read}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).keyload }}
-    env: &database-environment
-      GH_TOKEN: ${{ github.token }}
-      KEYLOAD_BENCHMARK_SESSION_ID: ${{ matrix.id }}
-      KEYLOAD_COMPARISON_JOB_NAME: ${{ matrix.jobName }}
-      Benchmarks__Target: ${{ matrix.target }}
-      Benchmarks__NodeCount: ${{ matrix.nodeCount }}
-      Benchmarks__Session: 'true'
-      Benchmarks__SessionId: ${{ matrix.id }}
-      Benchmarks__EvidenceProfile: session-v1
-      Benchmarks__KeyLoadImage: ${{ matrix.target == 'KeyLoad' && needs.comparison-runtime.outputs.keyload-image || '' }}
-    steps: &database-steps
-      - name: Download source code
-        uses: actions/checkout@v7
-      - name: Prepare the execution database session
-        id: setup
-        uses: ./.github/workflows/Features/BenchmarkComparisons/SessionSetup
-        with:
-          runtime-artifact-id: ${{ needs.comparison-runtime.outputs.runtime-artifact-id }}
-          keyload-image: ${{ matrix.target == 'KeyLoad' && needs.comparison-runtime.outputs.keyload-image || '' }}
-      - name: Run database workload
-        id: workload
-        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --github-reporter-style full --maximum-parallel-tests 1 --minimum-expected-tests 1 --treenode-filter '/*/*/BenchmarkSessionTests/*' --results-directory "$KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY/TestResults" --report-trx --timeout 210m
-      - name: Record benchmark availability
-        if: ${{ !cancelled() && (steps.workload.outcome == 'success' || steps.workload.outcome == 'failure') }}
-        env:
-          KEYLOAD_WORKLOAD_OUTCOME: ${{ steps.workload.outcome }}
-        run: node scripts/Features/BenchmarkComparisons/session-finalize.mjs
-      - name: Save benchmark results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: ${{ matrix.artifactName }}
-          path: artifacts/comparisons/sessions/workers/${{ matrix.id }}/**
-          if-no-files-found: error
-          retention-days: 90
-      - name: End this job and retain execution diagnostics
-        if: always()
-        uses: ./.github/workflows/Features/BenchmarkComparisons/SessionTeardown
-        with:
-          artifact-name: comparison-case-qualification-session-${{ matrix.id }}
-  comparison-postgresql:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).postgresql }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-qdrant:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).qdrant }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-rabbitmq:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).rabbitmq }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-redis:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).redis }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-neo4j:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).neo4j }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-mongodb:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).mongodb }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-opensearch:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).opensearch }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-kurrentdb:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).kurrentdb }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-surrealdb:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).surrealdb }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-helixdb:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).helixdb }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-timescaledb:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).timescaledb }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-sqlserver:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).sqlserver }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-mysql:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).mysql }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-clickhouse:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).clickhouse }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-influxdb:
-    name: ${{ matrix.jobName }}
-    needs: [comparison-runtime]
-    runs-on: ubuntu-22.04
-    timeout-minutes: 240
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJSON(needs.comparison-runtime.outputs.databases).influxdb }}
-    env: *database-environment
-    steps: *database-steps
-  comparison-aggregate:
-    name: Combine benchmark results
-    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb]
-    if: ${{ always() && !cancelled() && needs.comparison-runtime.result == 'success' }}
-    runs-on: ubuntu-22.04
-    timeout-minutes: 150
-    env:
-      GH_TOKEN: ${{ github.token }}
-    steps:
-      - name: Download source code
-        uses: actions/checkout@v7
-      - name: Download original authenticated session results
-        run: |
-          mkdir -p artifacts/comparisons/sessions
-          node scripts/Features/BenchmarkComparisons/session-github-collect.mjs --input="$PWD/artifacts/comparisons/sessions/provider"
-      - name: Check complete session accounting
-        run: |
-          node scripts/Features/BenchmarkComparisons/session-aggregate-cli.mjs --input="$PWD/artifacts/comparisons/sessions/provider" --output="$PWD/artifacts/comparisons/sessions/aggregate" --resource-policy=recorded
-          printf '%s\n' 'All operation, correctness and provenance checks passed. These recorded timings do not qualify matched-hardware performance comparisons across GitHub-hosted runners. The native CLI comparison policy remains strict.' >> "$GITHUB_STEP_SUMMARY"
-      - name: Save combined benchmark results
-        uses: actions/upload-artifact@v7
-        with:
-          name: comparison-session-suite
-          path: artifacts/comparisons/sessions/aggregate/**
-          if-no-files-found: error
-          retention-days: 90
-      - name: Save GitHub result verification
-        if: ${{ always() && !cancelled() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: comparison-session-provider-evidence
-          path: |
-            artifacts/comparisons/sessions/provider/github/**
-            artifacts/comparisons/sessions/provider/proof.json
-          if-no-files-found: error
-          retention-days: 90
-  website-trigger:
+  website:
     name: Trigger Website
-    needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb, comparison-aggregate]
-    if: >-
-      always() && !cancelled() &&
-      needs.comparison-aggregate.result == 'success' &&
-      github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
-      github.ref == 'refs/heads/main'
+    needs: [measure]
+    if: always() && !cancelled() && github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     permissions: {actions: write}
     env:
       GH_TOKEN: ${{ github.token }}
-      GH_REPO: ${{ github.repository }}
-      BENCHMARK_RUN_ID: ${{ github.run_id }}
     steps:
-      - name: Start the separate Website workflow
-        run: timeout 120s gh api --method POST "repos/$GH_REPO/actions/workflows/website.yml/dispatches" -f ref=main -f "inputs[benchmark_run_id]=$BENCHMARK_RUN_ID"
+      - name: Start the Website workflow for this run
+        run: gh api --method POST "repos/$GITHUB_REPOSITORY/actions/workflows/website.yml/dispatches" -f ref=main -f "inputs[benchmark_run_id]=$GITHUB_RUN_ID"

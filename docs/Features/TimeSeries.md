@@ -54,27 +54,12 @@ Source-present baseline: sample append/order/dedup and inclusive bounded read. P
 
 Decisions: [ADR-005 keyspace](../ADR/ADR-005-canonical-keyspace-codec.md), [ADR-010 bounds/security](../ADR/ADR-010-query-budgets-security.md), [ADR-011 current format](../ADR/ADR-011-current-format.md), [ADR-116 first-release format policy](../ADR/ADR-116-first-release-current-format.md), [ADR-030 retention/restore](../ADR/ADR-030-retention-paused-restore.md). Shared codec/storage/replication integration has a single lead; feature helpers and matching tests live in `Features/TimeSeries/`. Frontend N/A. Product tests are real TUnit, process recovery and Docker/Aspire SDK/MCP on GitHub; runtime evidence for the shared source is pending.
 
-## ManagedCode.TimeSeries and Timescale comparison
+## Time-series comparison
 
-REQ-SERIES-007 / AC-SERIES-007 map to REQ-BC-026 and AC-TSC-001..006 under
-[ADR-050](../ADR/ADR-050-timeseries-timescale-comparison.md) and the
-[time-series comparison acceptance](../ADR/ADR-050-timeseries-timescale-comparison.md).
-The profile exercises KeyLoad's persisted sample API, a real TimescaleDB hypertable and the published `ManagedCode.TimeSeries` library for in-memory bucket aggregation. REQ-SERIES-007/009/010/011 and AC-SERIES-007/009/010/011 retain their real comparison and raw/window/date-edge/budget/security regression oracles. The library is not KeyLoad's persistence layer.
-Reports keep persistence, recovery, replication, and acknowledgement guarantees
-distinct; the public API and existing nine-engine matrix remain unchanged. The
-comparison implementation and TUnit cases compile in the full Release solution.
-Container execution, test results, and exact-SHA comparison artifacts remain
-pending GitHub Actions qualification.
-
-```mermaid
-flowchart LR
- Samples[Shared UTC sample corpus] --> KeyLoad[KeyLoad cluster SDK append and range read]
- Samples --> Timescale[TimescaleDB hypertable and SQL buckets]
- Samples --> Managed[ManagedCode.TimeSeries in-memory buckets]
- KeyLoad --> Oracle[Exact correctness oracle and separate guarantees]
- Timescale --> Oracle
- Managed --> Oracle
-```
+The `time-series` data type of [BenchmarkComparisons](BenchmarkComparisons.md)
+compares KeyLoad with TimescaleDB and InfluxDB on one shared dataset and scenario
+(load, range-read, aggregate, windows). The comparison measures the public sample
+API; it is not a persistence, recovery or replication result.
 
 ## Bounded latest, raw aggregates and dense windows
 
@@ -82,9 +67,7 @@ flowchart LR
 implementation. It freezes exact DTOs, boundary/overflow/budget/security rules,
 dependencies, ordered task graph, disjoint ownership and rollback. Acceptance
 and execution criteria live in this Feature and the ADR; the durable
-normative contract remains the ADR and this Feature. The comparison baseline's
-existing API statement above describes ADR-050; it does not erase these additive
-product APIs or relabel caller-folded benchmark statistics as server measurements.
+normative contract remains the ADR and this Feature.
 
 | Requirement | Measurable acceptance | Automated mapping / TASK |
 |---|---|---|

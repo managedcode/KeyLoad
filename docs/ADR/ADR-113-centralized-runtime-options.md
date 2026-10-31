@@ -313,7 +313,7 @@ owner through a narrow internal forwarding of `Maintenance.CloneOptions()` at
 the pinned ZoneTree1.9.8 source, then verifies the actual mutable-segment capacity,
 real loaded/read values and residence under default/lower slack. The diagnostic
 clone contains configuration and does not replace storage, recalculate an
-expected capacity or change the public benchmark receipt/schema. Invalid execution
+expected capacity or change a benchmark report. Invalid execution
 options must reject before owner file IO; no performance claim follows from it.
 
 The scoped-outcome contract preserves an already selected canonical outcome on

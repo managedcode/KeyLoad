@@ -49,8 +49,9 @@ The [acceptance matrix](InternalSerialization/Acceptance.md) identifies current
 operation-level verification. Source/build checks, focused local tests, real
 process recovery, Aspire SDK/MCP, coverage and delivered-source Linux execution
 are separate gates. No power-loss, endurance or speed claim follows from a local
-round trip. [Serialization diagnostics](BenchmarkComparisons/OrleansSerialization.md)
-remain separate from end-to-end database comparisons.
+round trip. The serialization BenchmarkDotNet scenarios are
+[local development benchmarks](BenchmarkComparisons.md#local-development-benchmarks-and-profiling),
+separate from database comparisons.
 
 ## Concrete contracts
 

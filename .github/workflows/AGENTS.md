@@ -2,7 +2,7 @@
 
 ## Purpose, entry points and ownership
 
-Owns the four delivery workflows: `build-and-tests.yml`, `benchmarks.yml`, `website.yml` and `release.yml`. Build and Tests owns Release functional qualification; Benchmarks owns isolated database measurements and authenticated aggregation; Website only reads the latest successful benchmark data, generates the static landing page and publishes Pages; Release owns explicitly authorized packaging and publication. Website must never build .NET/AppHost, start Aspire or containers, run product/browser/TUnit/analyzer/coverage suites, depend on product checks, or trigger on product/test-infrastructure changes. Adding such coupling requires specific owner approval. Preserve pinned actions, source identities, original artifacts and least-privilege permissions.
+Owns the four delivery workflows: `build-and-tests.yml`, `benchmarks.yml`, `website.yml` and `release.yml`. Build and Tests owns Release functional qualification; Benchmarks runs one job per database, data type and node count and uploads each job's result file; Website only downloads the result files of one Benchmarks run, generates the static landing page and publishes Pages; Release owns explicitly authorized packaging and publication. Website must never build .NET/AppHost, start Aspire or containers, run product/browser/TUnit/analyzer/coverage suites, depend on product checks, or trigger on product/test-infrastructure changes. Adding such coupling requires specific owner approval. Preserve pinned actions, source identities, original artifacts and least-privilege permissions.
 
 ## Boundaries and protected risks
 

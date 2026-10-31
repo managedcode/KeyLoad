@@ -249,15 +249,6 @@ JsonData stays within the type limit. Public wrappers, 1,024-character bound,
 RFC 6901 decoding, missing/scalar distinction and field-patch behavior stay exact;
 direct pointer/patch acceptance cases join existing real-document regressions.
 
-## Benchmark report output
-
-Shared benchmark sessions ([ADR-142](../ADR/ADR-142-shared-live-benchmark-sessions.md))
-retain original per-case reports and samples through asynchronous file
-serialization. They must preserve bounded output, cancellation, exact
-source/image/runtime provenance and meaningful correctness assertions.
-Successful compilation and current Linux output/resource qualification remain
-separate gates.
-
 ## Analytical admission and JSON oracle flows
 
 REQ-MP-002/005 and AC-MP-004/011/012 under ADR-035: a held shared read callback

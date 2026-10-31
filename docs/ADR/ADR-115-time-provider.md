@@ -15,7 +15,7 @@ A controlled test clock is authorized by the owner for real operation tests; sto
 
 ## Verification
 
-Canonical Release solution build and dotnet format; real TUnit analyzer/engine workflows through Aspire; required unit, process recovery and Docker cluster via real SDK/official MCP clients. Benchmark measurements remain original authenticated GitHub evidence. Source review is additional evidence, never a passing runtime gate. Status remains Accepted until required evidence exists.
+Canonical Release solution build and dotnet format; real TUnit analyzer/engine workflows through Aspire; required unit, process recovery and Docker cluster via real SDK/official MCP clients. Benchmark measurements come only from GitHub Benchmarks result files. Source review is additional evidence, never a passing runtime gate. Status remains Accepted until required evidence exists.
 
 ```mermaid
 flowchart TD

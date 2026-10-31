@@ -1,0 +1,68 @@
+{
+  "database": "KeyLoad",
+  "type": "time-series",
+  "nodes": 1,
+  "image": "ghcr.io/managedcode/keyload@sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "commit": "1111111111111111111111111111111111111111",
+  "runId": null,
+  "startedAt": "2026-10-31T09:00:00.0000000+00:00",
+  "finishedAt": "2026-10-31T09:40:00.0000000+00:00",
+  "records": 1000000,
+  "operations": 100000,
+  "clients": 16,
+  "error": null,
+  "cases": [
+    {
+      "id": "load",
+      "status": "passed",
+      "operations": 1000000,
+      "errors": 0,
+      "seconds": 14.045,
+      "opsPerSecond": 71200,
+      "p50Ms": 22.47,
+      "p95Ms": 49.43,
+      "p99Ms": 87.63,
+      "batchSize": 1000,
+      "error": null
+    },
+    {
+      "id": "range-read",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 11.364,
+      "opsPerSecond": 8800,
+      "p50Ms": 1.82,
+      "p95Ms": 4,
+      "p99Ms": 7.1,
+      "batchSize": 1,
+      "error": null
+    },
+    {
+      "id": "aggregate",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 68.493,
+      "opsPerSecond": 1460,
+      "p50Ms": 10.96,
+      "p95Ms": 24.11,
+      "p99Ms": 42.74,
+      "batchSize": 1,
+      "error": null
+    },
+    {
+      "id": "windows",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 108.696,
+      "opsPerSecond": 920,
+      "p50Ms": 17.39,
+      "p95Ms": 38.26,
+      "p99Ms": 67.82,
+      "batchSize": 1,
+      "error": null
+    }
+  ]
+}

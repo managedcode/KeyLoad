@@ -68,7 +68,7 @@ flowchart LR
 
 ## Guarded original-store inspection
 
-REQ-STORAGE-015 maps AC-SG009-001..004 ([ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md)). The private original-store guard rejects missing original files or changed identity before provider recovery, uses provider Open rather than OpenOrCreate, and preserves ordinary public open/codecs. Real file TUnit verifies identity/data/position, missing/mismatch/locked/invalid flows and normal reopen. Independent registered cleanup retains primary and cleanup failures. Every proof uses a separately owned original inspector process and joins its exit and readers before restart, because provider partial open cannot prove handle settlement. Parent control/ACK/copy is outside this guard, and no power-loss or immutability claim is made. Ordered ownership, tests and exceptions are in ADR-059.
+REQ-STORAGE-015 maps AC-SG009-001..004 ([ADR-059](../ADR/ADR-059-guarded-original-store-inspection.md)). The private original-store guard rejects missing original files or changed identity before provider recovery, uses provider Open rather than OpenOrCreate, and preserves ordinary public open/codecs. Real file TUnit verifies identity/data/position, missing/mismatch/locked/invalid flows and normal reopen. Independent registered cleanup retains primary and cleanup failures. Every proof uses a separately owned original inspector process and joins its exit and readers before restart, because provider partial open cannot prove handle settlement. Parent control/ACK/copy is outside this guard, and no power-loss or immutability claim is made. Ordered ownership, tests and exceptions are in ADR-059.
 
 ```mermaid
 flowchart LR
@@ -211,7 +211,7 @@ The protected-principal cases in `tests/KeyLoad.FunctionalTests/StorageRecovery/
 
 `OfflineRegularFileEntryTypeTests`, `OfflineRegularFileIdentityTests`, `OfflineRegularFileLockTests` and `OfflineRegularFileDuplicateLockTests` provide supporting primitive evidence for REQ-STORAGE-015 / AC-SG009P-001..004 through actual regular-entry, identity, BCL lock-interoperation and handle lifetime observations. They do not invoke the guarded RecoveryTests process protocol and cannot establish its complete strict-request, receipt or original-reader settlement contract by themselves.
 
-REQ-STORAGE-015 also maps AC-SG009P-001..004 ([ADR-059](../ADR/ADR-059-isolated-intensive-timeseries.md)). The canonical directory is lexical normalized ordinal equality, without a symlink/rename resistance claim. Every guard test invokes the genuine compiled RecoveryTests process using bounded private JSON and actual failure/data facts; original process exit and both pipe drains precede outer-lock release and ordinary reopen. The cancellation case observes the original ready child, kills/reaps it and checks data after normal reopen. This helper is not the benchmark inspector/control/copy oracle.
+REQ-STORAGE-015 also maps AC-SG009P-001..004 ([ADR-059](../ADR/ADR-059-guarded-original-store-inspection.md)). The canonical directory is lexical normalized ordinal equality, without a symlink/rename resistance claim. Every guard test invokes the genuine compiled RecoveryTests process using bounded private JSON and actual failure/data facts; original process exit and both pipe drains precede outer-lock release and ordinary reopen. The cancellation case observes the original ready child, kills/reaps it and checks data after normal reopen. This helper is not the benchmark inspector/control/copy oracle.
 
 ## Event append seeded crash cuts
 

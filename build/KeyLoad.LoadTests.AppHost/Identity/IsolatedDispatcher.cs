@@ -1,5 +1,3 @@
-using KeyLoad.Comparisons;
-
 namespace KeyLoad.LoadTests.AppHost.BenchmarkComparisons;
 
 internal static class IsolatedDispatcher
@@ -55,13 +53,13 @@ internal static class IsolatedDispatcher
             case HelixDb:
                 IsolatedHelixDbResources.Add(context);
                 break;
-            case BenchmarkAdditionalTargets.Timescale:
-            case BenchmarkAdditionalTargets.SqlServer:
-            case BenchmarkAdditionalTargets.MySql:
+            case BenchmarkDatabases.Timescale:
+            case BenchmarkDatabases.SqlServer:
+            case BenchmarkDatabases.MySql:
                 AdditionalSqlResources.Add(context);
                 break;
-            case BenchmarkAdditionalTargets.ClickHouse:
-            case BenchmarkAdditionalTargets.InfluxDb:
+            case BenchmarkDatabases.ClickHouse:
+            case BenchmarkDatabases.InfluxDb:
                 AdditionalHttpResources.Add(context);
                 break;
             default:

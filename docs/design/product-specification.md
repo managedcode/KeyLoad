@@ -1322,7 +1322,6 @@ silo lifecycle stages and `IHostedService` components have a defined start/stop 
 | ADR-018 | Global per-modality windows → weightedRrfV1 | Statistics scope, ties, candidate completeness |
 | ADR-019 | Managed-first ANN; exact oracle mandatory | Qualified library/code, dependency audit |
 | ADR-020 | One connection grain per client, independent query contexts | No per-client head-of-line blocking, bounded CPU |
-| ADR-021 | PostgreSQL as the primary performance baseline | Comparable quality/durability/security evidence |
 | ADR-022 | Current policy epoch at the request/page boundary | Revocation ACK, fail-closed cache proof |
 
 ### 36.1. Questions that remain qualification gates

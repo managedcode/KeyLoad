@@ -32,7 +32,6 @@ internal static class IsolatedPostgresResources
         {
             throw new InvalidOperationException(InvalidSelection);
         }
-        var runtime = LoadTestsOptionsRegistration.Get(context.Builder);
         var scripts = IsolatedPostgresBootstrap.FindScripts(context);
         var password = context.Builder.AddParameter(PasswordName,
             Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes)), secret: true);
@@ -41,9 +40,7 @@ internal static class IsolatedPostgresResources
             .WithImage(Image).WithImageTag(Tag).WithImageSHA256(BenchmarkResources.PostgresDigest[DigestPrefixLength..])
             .WithContainerNetworkAlias(primaryName);
         IsolatedPostgresBootstrap.Configure(primary, context.DataDirectory(primaryName), scripts, password, null,
-            context.Selection.NodeCount - Step, runtime.Deployment);
-        context.Client.Set(DocumentResourceBounds.PostgresConnectionsEvidence,
-            runtime.Deployment.Value.DocumentPostgresMaximumConnections.ToString(CultureInfo.InvariantCulture));
+            context.Selection.NodeCount - Step, context.Deployment);
         context.BindSetting(Connection, primary.Resource.ConnectionStringExpression);
         context.BindEndpoint(IndexValue, primary, Tcp);
         for (var index = IndexInitialValue; index < context.Selection.NodeCount; index++)
@@ -52,7 +49,7 @@ internal static class IsolatedPostgresResources
             var standby = context.Builder.AddContainer(name, Image, Tag).WithImageSHA256(BenchmarkResources.PostgresDigest[DigestPrefixLength..])
                 .WithContainerNetworkAlias(name).WithEndpoint(targetPort: Port, name: Tcp, scheme: Tcp).WaitFor(primary);
             IsolatedPostgresBootstrap.Configure(standby, context.DataDirectory(name), scripts, password,
-                index.ToString(CultureInfo.InvariantCulture), context.Selection.NodeCount - Step, runtime.Deployment);
+                index.ToString(CultureInfo.InvariantCulture), context.Selection.NodeCount - Step, context.Deployment);
             context.BindEndpoint(index, standby, Tcp);
         }
         context.BindImage(Registry + Image + TagSeparator + Tag + DigestSeparator + BenchmarkResources.PostgresDigest);

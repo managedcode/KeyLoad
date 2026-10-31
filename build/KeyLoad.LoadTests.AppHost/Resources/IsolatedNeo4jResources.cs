@@ -41,7 +41,7 @@ internal static class IsolatedNeo4jResources
         {
             throw new InvalidOperationException(UnsupportedSelection);
         }
-        var deployment = LoadTestsOptionsRegistration.Get(context.Builder).Deployment.Value;
+        var deployment = context.Deployment.Value;
         var directory = context.DataDirectory(Name);
         Directory.CreateDirectory(directory);
         var password = context.Builder.AddParameter(PasswordParameter,

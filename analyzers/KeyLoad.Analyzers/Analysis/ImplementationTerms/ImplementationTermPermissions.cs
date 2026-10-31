@@ -53,7 +53,7 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
              nameof(ImplementationTermCatalog.DataRecordFamilyFields) or nameof(ImplementationTermCatalog.DataReadKinds) or
              nameof(ImplementationTermCatalog.DataRequestPhases) or nameof(ImplementationTermCatalog.DataToolDescriptionFields) or
              nameof(ImplementationTermCatalog.DataRuntimeTypes) or nameof(ImplementationTermCatalog.MeasurementTypes) or
-             nameof(ImplementationTermCatalog.MeasurementMembers) or nameof(ImplementationTermCatalog.DataControlTypes) or
+             nameof(ImplementationTermCatalog.DataControlTypes) or
              nameof(ImplementationTermCatalog.DataControlMembers)
          }) ||
         symbol?.ContainingType?.ToDisplayString() == ImplementationTermCatalog.RuleReaderType &&

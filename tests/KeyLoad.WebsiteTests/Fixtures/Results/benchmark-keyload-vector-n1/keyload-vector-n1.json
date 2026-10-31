@@ -1,0 +1,42 @@
+{
+  "database": "KeyLoad",
+  "type": "vector",
+  "nodes": 1,
+  "image": "ghcr.io/managedcode/keyload@sha256:3333333333333333333333333333333333333333333333333333333333333333",
+  "commit": "1111111111111111111111111111111111111111",
+  "runId": null,
+  "startedAt": "2026-10-31T09:00:00.0000000+00:00",
+  "finishedAt": "2026-10-31T09:40:00.0000000+00:00",
+  "records": 1000000,
+  "operations": 100000,
+  "clients": 16,
+  "error": null,
+  "cases": [
+    {
+      "id": "load",
+      "status": "passed",
+      "operations": 1000000,
+      "errors": 0,
+      "seconds": 46.729,
+      "opsPerSecond": 21400,
+      "p50Ms": 74.77,
+      "p95Ms": 164.49,
+      "p99Ms": 291.6,
+      "batchSize": 1000,
+      "error": null
+    },
+    {
+      "id": "exact-top10",
+      "status": "passed",
+      "operations": 100000,
+      "errors": 0,
+      "seconds": 242.424,
+      "opsPerSecond": 412.5,
+      "p50Ms": 38.79,
+      "p95Ms": 85.34,
+      "p99Ms": 151.28,
+      "batchSize": 1,
+      "error": null
+    }
+  ]
+}
