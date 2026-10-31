@@ -682,6 +682,9 @@ output/playwright/
 *.brainstorm.md
 *.acceptance.md
 
+# Local ZoneTree reports for the owner to forward privately.
+/zonetree-private-report-*.md
+
 # Canonical documentation records only; intermediate reports belong in CI artifacts.
 /docs/implementation/*.json
 !/docs/implementation/sql-client-conformance.json

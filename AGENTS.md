@@ -363,17 +363,19 @@ its focused regressions. These scoped commits, pushes and releases are authorize
 An unpublished local package or project reference is not delivery. Report exact
 infrastructure, credential or source blockers.
 
-For confirmed ZoneTree, ZoneTree.FullTextSearch or ZoneTree.Analytics defects,
-search the owning repository's open issues and read relevant discussions before
-publishing. If a matching issue already exists, report its link and current status
-to the user; do not create a duplicate or add comments, repeated evidence or status
-requests without the user's explicit instruction. Respect maintainers' requests
-to avoid further comments while they are working on the issue. Only when no
-matching open issue exists, publish bounded reproducible evidence in a new issue.
-Include exact version/source, environment, operation flow, expected/actual results
-and impact; separate verified causes from hypotheses and exclude secrets. This
-scoped new-issue publication is authorized and is not acceptance proof or permission
-for an engine replacement or unpublished workaround.
+For any defect, problem or suspected vulnerability found in ZoneTree,
+ZoneTree.FullTextSearch or ZoneTree.Analytics, create a local Markdown report in
+the repository root named `zonetree-private-report-<short-topic>.md`. Include
+the exact version/source, environment, reproduction steps, expected/actual results
+and impact; distinguish verified facts from hypotheses and exclude secrets.
+Tell the user about the finding and provide a clickable link to that local file.
+The user forwards the report to the project author personally.
+
+Keep these reports and their sensitive reproduction details local. Do not commit,
+push or upload them, include them in public documentation or CI artifacts, open
+or comment on public issues, or contact maintainers on the user's behalf.
+Finding a problem does not authorize public disclosure, an engine replacement
+or an unpublished workaround.
 
 Commit each completed implementation checkpoint on the current branch, stating
 actual verification. When asked to commit all changes, include the complete
