@@ -20,10 +20,10 @@ internal sealed class TextGenerationSlot
     {
         get; set;
     }
-    internal bool LeaseActive
-    {
-        get; set;
-    }
+    internal int Readers { get; set; }
+    internal int SettlingReaders { get; set; }
+    internal bool LeaseActive => Readers > 0 || SettlingReaders > 0;
+    internal bool Invalidated { get; set; }
     internal bool Unsettled
     {
         get; set;

@@ -101,11 +101,22 @@ internal sealed class RuntimeTextProjection : ITextProjection
         ReadExecutionBudget budget, bool building, bool invalidate, bool completed)
     {
         var failures = new List<Exception>();
-        var currentInvalidation = invalidate && state.BeginInvalidation(generation);
-        ServerFailureObserver.Observe(() => TextSettlement.Release(lifecycle.Root, generation,
-            lifecycle.SourceNodeId, budget, building, invalidate, completed, currentInvalidation,
-            () => state.ClearCurrent(generation), () => state.ClearFailedBuild(slot), faultObserver, physicalGate, executionOptions: executionOptions),
-            failures);
+        var settle = state.BeginRelease(slot, invalidate, out var invalidated);
+        var currentInvalidation = invalidated && state.BeginInvalidation(generation);
+        if (settle)
+        {
+            ServerFailureObserver.Observe(() => TextSettlement.Release(lifecycle.Root, generation,
+                lifecycle.SourceNodeId, budget, building, invalidated, completed, currentInvalidation,
+                () =>
+                {
+                    slot.SharedReservation?.CompleteAfterJoinedCleanup();
+                    state.ClearCurrent(generation);
+                }, () =>
+                {
+                    slot.SharedReservation?.CompleteAfterJoinedCleanup();
+                    state.ClearFailedBuild(slot);
+                }, faultObserver, physicalGate, executionOptions: executionOptions), failures);
+        }
         ServerFailureObserver.Observe(() => lifecycle.CheckPhysical(completed && failures.Count == NoCleanupFailures ? budget : null), failures);
         var retired = state.CompleteLease(slot, (Failure(failures)).Value);
         if (retired is not null)

@@ -12,9 +12,12 @@ original physical budget/settlement gates.
 Implementation contract: the interface-preserving manager contract is frozen first;
 the Search slice owns the Server Storage/Lifecycle manager, lease and
 settlement helpers, the existing generation capacity and restart retirement
-preflight joins, and new independent real-UnitTests. Keep 1 builder,
-2 leases, 1 retired/1 current generation and 3 physical generations including staging
-as upper bounds; actual provider safety may tighten concurrent readers. The actual
+preflight joins, and new independent real-UnitTests. Keep one builder, one retired/current generation and three physical generations
+including staging as physical ownership bounds. Published readers share one
+read-only native index with independent budgets and iterators, without a reader
+count admission limit. Retirement, invalidation and shutdown join all readers
+before closing or deleting their generation. The single cold-build slot remains
+an open concurrency limitation. The actual
 production caller is integrated and serialized Release/format/governance and Aspire
 unit/recovery/cluster runs retain exact-SHA Linux original results before qualification.
 

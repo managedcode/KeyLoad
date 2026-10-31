@@ -98,25 +98,29 @@ internal sealed class RuntimeTextProjectionLifecycle
     internal void Retire(TextGenerationSlot slot)
     {
         Exception? failure = null;
-        physicalGate.Run(() =>
+        try
         {
-            try
+            var generation = slot.Generation ?? throw TextErrors.Corrupt();
+            if (generation.CurrentIndex is not null)
             {
-                var generation = slot.Generation ?? throw TextErrors.Corrupt();
+                TextSettlement.Refresh(Root, generation, null, faultObserver, physicalGate, executionOptions);
+            }
+            physicalGate.Run(() =>
+            {
                 generation.DisposeIndex();
                 TextFiles.DeleteOwnedGeneration(Root, generation.Leaf, SourceNodeId, executionOptions: executionOptions, resources: resources);
                 slot.SharedReservation?.CompleteAfterJoinedCleanup();
-            }
-            catch (Exception error)
-            {
-                failure = error;
-                throw;
-            }
-            finally
-            {
-                state.CompleteRetirement(slot, failure);
-            }
-        });
+            });
+        }
+        catch (Exception error)
+        {
+            failure = error;
+            throw;
+        }
+        finally
+        {
+            state.CompleteRetirement(slot, failure);
+        }
     }
 
     internal void Shutdown(TextGenerationSlot?[] slots) => shutdown.Run(slots);
@@ -163,11 +167,15 @@ internal sealed class RuntimeTextProjectionLifecycle
 
     private void DeleteForReplacement(TextGenerationSlot previous, TextGeneration generation)
     {
+        var previousGeneration = previous.Generation ?? throw TextErrors.Corrupt();
+        if (previousGeneration.CurrentIndex is not null)
+        {
+            TextSettlement.Refresh(Root, previousGeneration, null, faultObserver, physicalGate, executionOptions);
+        }
         physicalGate.Run(() =>
         {
             try
             {
-                var previousGeneration = previous.Generation ?? throw TextErrors.Corrupt();
                 previousGeneration.DisposeIndex();
                 TextFiles.DeleteOwnedGeneration(Root, previousGeneration.Leaf, SourceNodeId, executionOptions: executionOptions, resources: resources);
                 previous.SharedReservation?.CompleteAfterJoinedCleanup();

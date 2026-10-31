@@ -5,9 +5,6 @@ namespace KeyLoad.Server.Search;
 
 internal sealed class TextProjectionState
 {
-    // Each bootstrap generation slot has one reader; the current and the retired slot hold the only two leases
-    // while a replacement publishes, so a third lease would let a build overlap both live generations.
-    private const int SlotLeaseBound = 2;
     private readonly IOptions<TextExecutionOptions> executionOptions;
 
     private readonly Lock sync = new();
@@ -28,17 +25,14 @@ internal sealed class TextProjectionState
         lock (sync)
         {
             ObjectDisposedException.ThrowIf(shutdown.Closing, typeof(RuntimeTextProjection));
-            if (slots.Transition || slots.CleanupActive || slots.ReplacementWaitingForRetiredLease)
-            {
-                throw TextErrors.Busy();
-            }
             var existing = (slots.FindCurrent(scope)).Value;
-            if (existing is not null)
+            if (existing is not null && !slots.Transition)
             {
                 ReserveLease(existing);
                 return new(existing, false);
             }
-            if (slots.Building || work.ActiveLeases >= SlotLeaseBound || slots.HasUnleasedRetired
+            if (slots.Transition || slots.CleanupActive || slots.ReplacementWaitingForRetiredLease
+                || slots.Building || slots.HasUnleasedRetired
                 || slots.Count >= executionOptions.Value.MaximumGenerations)
             {
                 throw TextErrors.Busy();
@@ -77,7 +71,7 @@ internal sealed class TextProjectionState
     {
         lock (sync)
         {
-            reservation.Slot.LeaseActive = false;
+            reservation.Slot.Readers--;
             work.EndLease();
             if (preserveOwner)
             {
@@ -126,17 +120,33 @@ internal sealed class TextProjectionState
     internal void CaptureSlots(out TextGenerationSlot? first, out TextGenerationSlot? second,
         out TextGenerationSlot? third) => shutdown.CaptureSlots(out first, out second, out third);
 
+    internal bool BeginRelease(TextGenerationSlot slot, bool invalidated, out bool invalidate)
+    {
+        lock (sync)
+        {
+            if (slot.Readers <= 0)
+            {
+                throw TextErrors.Corrupt();
+            }
+            slot.Readers--;
+            slot.SettlingReaders++;
+            slot.Invalidated |= invalidated;
+            invalidate = slot.Invalidated;
+            return slot.Readers == 0 && (invalidate || slot.Generation is { Published: false });
+        }
+    }
+
     internal TextGenerationSlot? CompleteLease(TextGenerationSlot slot, Exception? failure)
     {
         const int EmptyActiveLeases = 0;
 
         lock (sync)
         {
-            if (!slot.LeaseActive)
+            if (slot.SettlingReaders <= 0)
             {
                 throw TextErrors.Corrupt();
             }
-            slot.LeaseActive = false;
+            slot.SettlingReaders--;
             work.EndLease();
             if (failure is not null)
             {
@@ -168,11 +178,11 @@ internal sealed class TextProjectionState
 
     private void ReserveLease(TextGenerationSlot slot)
     {
-        if (slot.LeaseActive || slot.Unsettled || work.ActiveLeases >= SlotLeaseBound)
+        if (slot.CleanupActive || slot.Unsettled || slot.Invalidated)
         {
-            throw slot.Unsettled ? TextErrors.Corrupt() : TextErrors.Busy();
+            throw slot.Unsettled || slot.Invalidated ? TextErrors.Corrupt() : TextErrors.Busy();
         }
-        slot.LeaseActive = true;
+        slot.Readers++;
         work.StartLease();
     }
 

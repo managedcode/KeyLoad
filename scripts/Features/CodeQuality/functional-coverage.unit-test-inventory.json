@@ -13480,7 +13480,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests()",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests(CqrsClusterFixture)",
       "methodName": "AllowedMethodRetainsGraphCallerAcrossStartedAndAwait",
       "instanceName": "AllowedMethodRetainsGraphCallerAcrossStartedAndAwait",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsGraphTests.cs",
@@ -13502,7 +13502,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests()",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsGraphTests(CqrsClusterFixture)",
       "methodName": "MissingMethodSpecificTransitionProducesFailedChunk",
       "instanceName": "MissingMethodSpecificTransitionProducesFailedChunk",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsGraphTests.cs",
@@ -13524,7 +13524,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsIsolationTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsIsolationTests()",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsIsolationTests(CqrsClusterFixture)",
       "methodName": "ConcurrentStreamsKeepRequestCallerAndTerminalIdentitySeparate",
       "instanceName": "ConcurrentStreamsKeepRequestCallerAndTerminalIdentitySeparate",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsIsolationTests.cs",
@@ -13546,7 +13546,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests()",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests(CqrsClusterFixture)",
       "methodName": "CapacityOneProducerBlocksAndCancellationSettlesBeforeNextStream",
       "instanceName": "CapacityOneProducerBlocksAndCancellationSettlesBeforeNextStream",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsLifetimeTests.cs",
@@ -13568,7 +13568,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests()",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsLifetimeTests(CqrsClusterFixture)",
       "methodName": "EarlyEnumeratorDisposalSettlesProducerAndLeavesNextStreamHealthy",
       "instanceName": "EarlyEnumeratorDisposalSettlesProducerAndLeavesNextStreamHealthy",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsLifetimeTests.cs",
@@ -13590,7 +13590,7 @@
     },
     {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.CqrsTerminalTests",
-      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsTerminalTests()",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.CqrsTerminalTests(CqrsClusterFixture)",
       "methodName": "DomainFailureAfterProgressProducesOneSafeTerminalChunk",
       "instanceName": "DomainFailureAfterProgressProducesOneSafeTerminalChunk",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/RuntimeCqrs/CqrsTerminalTests.cs",
@@ -47332,7 +47332,7 @@
       "methodName": "SaturationAndCancellationReleaseLeaseForHealthySearch",
       "instanceName": "SaturationAndCancellationReleaseLeaseForHealthySearch",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/Projection/TextProjectionLeaseTests.cs",
-      "sourceSha256": "5de93fcf564655488988d1d1bee6de219d07653b716ba90f991e8a19044628f9",
+      "sourceSha256": "cea9306924e52b77b36ac35caff8d00850490bda6faba3ae496ded17d46f5d23",
       "lineNumber": 14,
       "endLineNumber": 37,
       "classification": "functional",
@@ -47342,6 +47342,66 @@
       ],
       "acceptance": [
         "AC-FTS-003"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests",
+      "methodName": "PublishedReadersOverlapWithoutClosingAnotherLeaseOrRewritingItsManifest",
+      "instanceName": "PublishedReadersOverlapWithoutClosingAnotherLeaseOrRewritingItsManifest",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/Projection/TextProjectionLeaseTests.cs",
+      "sourceSha256": "cea9306924e52b77b36ac35caff8d00850490bda6faba3ae496ded17d46f5d23",
+      "lineNumber": 39,
+      "endLineNumber": 77,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-LEASE-002",
+        "REQ-LEASE-003"
+      ],
+      "acceptance": [
+        "AC-LEASE-002",
+        "AC-LEASE-003"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests",
+      "methodName": "CancellingOnePublishedReaderPreservesAnotherAndFollowingSearch",
+      "instanceName": "CancellingOnePublishedReaderPreservesAnotherAndFollowingSearch",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/Projection/TextProjectionLeaseTests.cs",
+      "sourceSha256": "cea9306924e52b77b36ac35caff8d00850490bda6faba3ae496ded17d46f5d23",
+      "lineNumber": 79,
+      "endLineNumber": 109,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-LEASE-002",
+        "REQ-LEASE-003"
+      ],
+      "acceptance": [
+        "AC-LEASE-002",
+        "AC-LEASE-003"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests",
+      "methodName": "InvalidatingOneReaderRetainsOthersAndReleasesThePhysicalReservation",
+      "instanceName": "InvalidatingOneReaderRetainsOthersAndReleasesThePhysicalReservation",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/Projection/TextProjectionLeaseTests.cs",
+      "sourceSha256": "cea9306924e52b77b36ac35caff8d00850490bda6faba3ae496ded17d46f5d23",
+      "lineNumber": 111,
+      "endLineNumber": 146,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-LEASE-002",
+        "REQ-LEASE-003"
+      ],
+      "acceptance": [
+        "AC-LEASE-002",
+        "AC-LEASE-003"
       ]
     },
     {
@@ -70433,6 +70493,9 @@
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests|InvalidatedCurrentCanRebuildWhileItsRetiredLeaseRemainsBorrowed|InvalidatedCurrentCanRebuildWhileItsRetiredLeaseRemainsBorrowed",
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests|LivePreflightRejectsUnknownEntryAndPreservesTheBorrowedGeneration|LivePreflightRejectsUnknownEntryAndPreservesTheBorrowedGeneration",
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests|PublishedReplacementKeepsOldReaderUntilItsLastLeaseSettles|PublishedReplacementKeepsOldReaderUntilItsLastLeaseSettles",
+        "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests|CancellingOnePublishedReaderPreservesAnotherAndFollowingSearch|CancellingOnePublishedReaderPreservesAnotherAndFollowingSearch",
+        "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests|InvalidatingOneReaderRetainsOthersAndReleasesThePhysicalReservation|InvalidatingOneReaderRetainsOthersAndReleasesThePhysicalReservation",
+        "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests|PublishedReadersOverlapWithoutClosingAnotherLeaseOrRewritingItsManifest|PublishedReadersOverlapWithoutClosingAnotherLeaseOrRewritingItsManifest",
         "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests|SaturationAndCancellationReleaseLeaseForHealthySearch|SaturationAndCancellationReleaseLeaseForHealthySearch",
         "KeyLoad.FunctionalTests.Search.ThreeWayHybridFusionTests|AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize|AcGsearch003ExpansionIsSeparateAndZeroWeightsStillAuthorize",
         "KeyLoad.FunctionalTests.Search.ThreeWayHybridFusionTests|AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks|AcGsearch003ScopeAndAllowlistIntersectBeforeIndependentBranchRanks",
