@@ -28,7 +28,9 @@ flowchart LR
 ```
 
 Delivery uses four independent workflows: Build and Tests, Benchmarks, Website
-and Release. Release is manual. It builds downloadable applications, publishes
+and Release. Release has a manual entry and a reusable server-image-only entry
+called by full Benchmarks. Both retain the Build and Tests prerequisite. The manual
+entry builds downloadable applications, publishes
 the server container image to GitHub Container Registry and builds the benchmark
 image archive, all through the .NET SDK.
 
@@ -41,7 +43,9 @@ image archive, all through the .NET SDK.
   `latest` tag, and retains the centrally configured base image and non-root user.
   The job verifies that both tags resolve to one digest and records
   `ghcr.io/managedcode/keyload:<sha>@sha256:<digest>` in the job summary and the
-  `keyload-server-image` artifact. Benchmarks measures the image `latest` resolves to.
+  `keyload-server-image` artifact. Full Benchmarks calls the reusable Release entry
+  and measures its exact-source SHA image pinned to the returned digest. This entry
+  skips application and benchmark-image archives; it preserves all functional gates.
   The benchmark image remains a downloadable Docker archive tagged with the source SHA.
 - REQ-REL-003 / AC-REL-003: Release uses read-only repository permissions; only the
   server image job receives `packages: write`. Source package and assembly versions
