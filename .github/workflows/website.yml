@@ -4,7 +4,6 @@ on:
     branches: [main]
     paths:
       - 'site/**'
-      - 'tests/KeyLoad.WebsiteTests/**'
       - 'scripts/Features/BenchmarkComparisons/site-*'
       - 'scripts/Features/BenchmarkComparisons/composite-site-*'
       - 'scripts/Features/BenchmarkComparisons/isolated-github-stream.mjs'
@@ -13,12 +12,6 @@ on:
       - '.github/workflows/Features/BenchmarkComparisons/QualifySite/**'
       - '.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite/**'
       - '.github/workflows/Features/BenchmarkComparisons/DeploySite/**'
-      - 'scripts/Features/TestInfrastructure/run-tests.mjs'
-      - '.editorconfig'
-      - 'Directory.Build.props'
-      - 'Directory.Build.targets'
-      - 'Directory.Packages.props'
-      - 'global.json'
   workflow_dispatch:
     inputs:
       benchmark_run_id:
@@ -30,16 +23,16 @@ permissions:
   contents: read
 jobs:
   qualify:
-    name: Check website
+    name: Generate website
     concurrency:
       group: keyload-site-qualification
-      cancel-in-progress: false
+      cancel-in-progress: true
     if: >-
       github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
       github.ref == 'refs/heads/main' &&
       (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 15
     permissions: {contents: read, actions: read}
     outputs:
       mode: ${{ steps.qualification.outputs.mode }}
@@ -92,7 +85,7 @@ jobs:
           ref: ${{ github.workflow_sha }}
           path: control
           persist-credentials: false
-      - name: Run website checks
+      - name: Generate static landing page
         id: qualification
         uses: ./control/.github/workflows/Features/BenchmarkComparisons/QualifySite
   deploy:
@@ -103,7 +96,7 @@ jobs:
     needs: qualify
     if: ${{ always() && !cancelled() && needs.qualify.result == 'success' && needs.qualify.outputs.mode == 'publish' }}
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 10
     permissions: {contents: read, actions: read, pages: write, id-token: write}
     environment: {name: github-pages, url: '${{ steps.publication.outputs.page_url }}'}
     env:

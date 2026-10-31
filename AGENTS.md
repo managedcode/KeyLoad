@@ -288,6 +288,19 @@ inventories truthful; do not exclude product code to improve coverage.
 
 ## Performance and comparisons
 
+### Static landing-page boundary
+
+The Website workflow owns only the static landing page: download the latest
+completed successful Benchmarks artifacts, validate their original measurement
+data, generate static HTML/assets and publish GitHub Pages. The landing page has
+no runtime or qualification dependency on KeyLoad product code, .NET, Aspire or
+AppHost. Never restore/build the solution, start containers, run TUnit/browser
+suites, analyzers, coverage, product checks or Release from Website, and never
+make Pages publication wait for those jobs. Product-code and test-infrastructure
+changes must not trigger Website. Preserve the last successful figures while a
+new benchmark fails or remains incomplete. Adding any such coupling requires the
+owner's explicit approval for that specific change.
+
 Benchmarks has one responsibility: pull public released container images, deploy
 the selected database through Docker/Aspire, run its applicable native workloads,
 and collect original results. KeyLoad follows the same path and uses the latest

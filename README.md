@@ -463,13 +463,15 @@ The comparison suite uses native clients and isolated nonproduction database dep
 | Columnar records | [ClickHouse](https://github.com/ClickHouse/ClickHouse) | Native HTTP |
 | Time series | [TimescaleDB](https://github.com/timescale/timescaledb), [InfluxDB](https://github.com/influxdata/influxdb) | Npgsql / native HTTP |
 
-Required comparison scales: **100,000 and 1,000,000 records**, at **1 or 3 nodes** where supported. The current shared session uses one million records, with 16 systems and 32 topology rows. The [shared session](docs/Features/BenchmarkComparisons/SessionExecution.md) retains thirteen original cases, including exact vectors, confirmed queue cycles and verified event append/read/mixed operations. These cases cover Qdrant, RabbitMQ and KurrentDB through their native adapters; every website category uses the same comparison table. The new session source still requires exact-source Linux benchmark and website qualification before publishing figures. The [five added targets](docs/Features/BenchmarkComparisons/AdditionalDatabases.md) currently implement one-node document sessions; their three-node deployments and separate time-series/analytics qualification remain open. SQL Server uses Developer edition for nonproduction benchmarks. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
+Required comparison scales: **100,000 and 1,000,000 records**, at **1 or 3 nodes** where supported. The current shared session uses one million records, with 16 systems and 32 topology rows. The [shared session](docs/Features/BenchmarkComparisons/SessionExecution.md) retains thirteen original cases, including exact vectors, confirmed queue cycles and verified event append/read/mixed operations. These cases cover Qdrant, RabbitMQ and KurrentDB through their native adapters; every website category uses the same comparison table. The new session source still requires a successful exact-source Linux benchmark before its figures can appear on the static site. The [five added targets](docs/Features/BenchmarkComparisons/AdditionalDatabases.md) currently implement one-node document sessions; their three-node deployments and separate time-series/analytics qualification remain open. SQL Server uses Developer edition for nonproduction benchmarks. New adapters remain under qualification. The [vector comparison contract](docs/Features/BenchmarkComparisons/VectorQualification.md) defines accuracy, latency, index cost and memory checks; only qualified original GitHub results become public figures.
 
 The website displays only the latest completed successful Benchmarks measurement
 run and its original authenticated data. Its source, image, attempt, topology and
 workload inventory remain explicit. A failed or unfinished new run never removes
 those verified figures. Cases not measured in that successful run have no invented
-numbers. Website browser, coverage and Pages qualification remain separate.
+numbers. Website only validates those original benchmark artifacts, generates the
+static landing page and publishes Pages. It does not build or test KeyLoad, .NET,
+Aspire or AppHost and runs no analyzer, browser, TUnit or coverage suite.
 
 ---
 

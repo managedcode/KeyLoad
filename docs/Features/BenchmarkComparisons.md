@@ -760,19 +760,16 @@ pointer inputs, and failure diagnostics additionally retain active-element tag/i
 real scroll bounds, never credentials or user payload. No production renderer, timeout,
 allowed-state, dependency or coverage-threshold change is authorized.
 
-## Required analyzer dependency for the website
+## Static landing-page delivery boundary
 
-REQ-BC-027 is specified in [site acceptance](../ADR/ADR-040-static-site-threejs-evidence.md)
-and [ADR-033](../ADR/ADR-033-code-quality.md). The website must qualify its actual
-KeyLoad.Analyzers dependency using the complete real TUnit suite and MTP 18.11.2
-Cobertura counts at the same candidate SHA. Freeze all 30 source files and
-configuration; include all 25 executable sources. Enforce module 80% line/70% branch and
-each of 12 critical diagnostic pipelines 90% line coverage from integer counts.
-Missing, malformed, ambiguous, changed or empty evidence fails. Retain raw XML, exact
-source/runtime hashes, the derived report and pure gate boundary/error regressions. This
-establishes only the first analyzer module baseline; broader AC-CQ-009, replication
-and repository no-decrease qualification stay open. Mandatory website no-decrease
-coverage is retained in AC-BC-024.
+Website is a static landing-page generator, independent of product code. Its only
+execution path is authenticated latest-successful benchmark data, Node static
+HTML/assets generation and GitHub Pages publication. It never restores/builds
+.NET, invokes Aspire/AppHost, starts containers, runs TUnit/browser/analyzer suites
+or coverage, or waits for product CI. Product and test-infrastructure changes do
+not trigger Website. Adding any such coupling requires specific owner approval.
+The publication receipt records the actual static build and original benchmark
+source, without claiming code/test/coverage qualification.
 
 ## Website delivery from authenticated evidence
 
@@ -781,8 +778,7 @@ and [ADR-040](../ADR/ADR-040-static-site-threejs-evidence.md). Every published n
 read from actual comparison-job JSON; separate sibling website/measured/control
 checkouts retain accurate revisions; invalid selected evidence fails without fallback,
 and existing verified public data remains until a successful update. Exact
-comparison-step/artifact/ZIP proof and full current-main website qualification precede
-deployment. The selection, trigger and freshness rules are REQ/AC-BC-WEB-001..008 and
+comparison-step/artifact/ZIP proof and the static page build precede deployment. The selection, trigger and freshness rules are REQ/AC-BC-WEB-001..008 and
 AC-BC-FAIL-018..021 below. Backend/contracts/database persistence N/A: no runtime/data
 API changes. Pure controlled metadata/ZIP tests are not fake API transport evidence;
 real workflow/provider/live evidence remains mandatory.
@@ -801,7 +797,7 @@ publication. ADR-112 owns the conditional artifact and qualification boundary.
 | REQ-BC-WEB-002 optional authenticated metrics | AC-BC-WEB-002 select the newest ready completed own-main producer with a successful authenticated aggregate and valid current archives; failed/incomplete producers supply no measurements, and no ready producer yields explicit bounded unavailability. Corrupt, duplicate, expired or missing selected evidence and API failures fail closed without silent fallback. | real retained GitHub metadata selection positive/negative TUnit cases; authenticated capture |
 | REQ-BC-WEB-003 accurate empty publication | AC-BC-WEB-003 explicit `--benchmarks=none` emits product/scene/SEO/vendor assets, no numeric data/catalog or measurement requests, plain empty state, source-bound publication receipt with benchmarks null | new SiteContent build/assets/browser/error cases using real Node, files and Chrome |
 | REQ-BC-WEB-004 automatic refresh | AC-BC-WEB-004 the final bounded Benchmarks dispatch supplies a run ID only for a bounded completion wait; Website independently selects the newest ready producer. Predeploy reselects and rejects a changed available tuple or newly available data after a no-data qualification. | workflow and selection/freshness TUnit cases; genuine separate Website dispatch/Pages |
-| REQ-BC-WEB-005 scoped complete qualification | AC-BC-WEB-005 no-data artifact runs complete closed SiteContent tests through the same Aspire `site` entry, original TRX/no-skip checks, source/asset/vendor/Chrome and scoped coverage thresholds; measured artifact retains full existing site/archive/numeric/browser/coverage tests | original TRX/coverage/source inventories and final build; content is never labeled full metric qualification |
+| REQ-BC-WEB-005 static publication only | AC-BC-WEB-005 Website validates original benchmark data and generates static assets with Node; no product/.NET/Aspire/AppHost/test/analyzer/coverage dependency | actual Website job graph, original input hashes, emitted page and Pages result |
 
 ```mermaid
 flowchart LR
@@ -810,7 +806,7 @@ flowchart LR
   Website --> Ready{Authenticated aggregate ready}
   Ready -->|yes| Metrics[Website with verified metrics]
   Ready -->|no| Content[Website without measurements]
-  Metrics --> Qualification[Applicable complete tests and freshness]
+  Metrics --> Qualification[Static build and data freshness]
   Content --> Qualification
   Qualification --> Pages[Pages publication]
 ```
@@ -922,22 +918,11 @@ remains authenticated. Unsupported sources are classified before jobs/archive re
 cannot supply live metrics. Remaining model-family and physical 100k qualification
 requirements stay open; these seven document cases do not complete them.
 
-Website preparation invokes SiteQualificationStartupTests and SessionCohortContractTests
-through the comparison entry. SiteTests retain authenticated capture, optional
-unavailability, newest-ready selection, strict selected-evidence rejection, unchanged
-inputs and healthy follow-up under AC-BC-WEB-002 and AC-BC-FAIL-019/020. The session,
-browser and executor tests and SiteIsolatedInventory consume the canonical session
-inventory. Real Node/Chrome, all applicable TUnit/coverage/no-skip gates,
-complete source/input hashes and final freshness remain mandatory. Full ordinary unit
-tests run separately from eligible functional coverage; removed source and a passing
-local build do not establish publication qualification.
+Website runs only data capture, original-input validation, static generation and
+Pages delivery. The independently runnable developer checks below are not Website
+steps or publication prerequisites.
 
-## Chrome session admission
-
-Website qualification selects eight concurrent TUnit cases through the existing
-execution option. Full-archive children retain their two active slots, 64-entry
-FIFO queue and 20-minute admission deadline. The complete unfiltered test suite,
-original-byte verification and coverage thresholds remain mandatory.
+## Developer Chrome session admission
 
 `REQ-BC-CHROME-001`: Real Chrome work performed by one `KeyLoad.WebsiteTests`
 process is admitted through a bounded session owner. At most one real

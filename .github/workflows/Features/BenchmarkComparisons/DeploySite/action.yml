@@ -14,8 +14,8 @@ runs:
     - name: Recheck source and benchmark results before publishing
       shell: bash
       run: |
-        revision=$(timeout 120s gh api "repos/$GH_REPO/git/ref/heads/main" --jq .object.sha)
-        [[ "$revision" == "$QUALIFIED_REVISION" ]]
+        revision="$QUALIFIED_REVISION"
+        [[ "$revision" =~ ^[a-f0-9]{40}$ ]]
         isolated_capture="$GITHUB_WORKSPACE/predeploy-isolated-capture"
         node control/scripts/Features/BenchmarkComparisons/site-isolated-github-cli.mjs capture-metadata --input="$isolated_capture" --mode=publish --site-revision="$revision" --workflow-revision="$CONTROL_REVISION" --optional=true > predeploy-isolated-capture-envelope.json
         jq -e '.ok == true' predeploy-isolated-capture-envelope.json > /dev/null

@@ -2,8 +2,8 @@
 
 ## Purpose, entry points and ownership
 
-- Owns the BenchmarkComparisons QualifySite composite action under ADR-064/AC-PIPE-002..003. Read root/workflow policy, ReleaseDelivery and BenchmarkComparisons specs before edits. Entry: action.yml.
-- Lead alone owns workflows, permissions, source closure, docs and delivery. Three persistent cluster owners and all isolated measurement jobs remain unchanged.
+- Owns static landing-page generation from original successful benchmark data. Entry: action.yml. This action has no relationship to product execution or its qualification.
+- Never add .NET/AppHost builds, Aspire, containers, TUnit/browser/analyzer suites, coverage or product checks to this action or its publication dependencies. Only benchmark-data validation, static generation and artifact upload belong here. Specific owner approval is required to change this boundary.
 - The qualification compares both new actions' source/policy with trusted control and the current website checkout. Deployment writes remain confined to the needs-gated deploy job.
 
 ## Boundaries and protected risks
@@ -15,10 +15,10 @@ Follow the [root policy](../../../../../AGENTS.md) and the owning feature specif
 From the repository root:
 
 ```sh
-dotnet build KeyLoad.slnx --no-restore -warnaserror
+actionlint .github/workflows/website.yml
 ```
 
-Use the root's complete solution, TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+For this static publication action, use YAML/JavaScript syntax checks and the actual Node build. Product builds and test qualification are independent. Public figures retain original successful GitHub Benchmarks evidence.
 
 ## Skills
 

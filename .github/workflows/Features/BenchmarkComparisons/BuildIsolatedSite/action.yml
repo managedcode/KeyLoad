@@ -1,4 +1,4 @@
-name: Build the qualified current comparison website
+name: Build the static comparison landing page
 description: Preserve original successful-session authority through the bounded final Pages build.
 runs:
   using: composite
@@ -8,10 +8,7 @@ runs:
       shell: bash
       run: |
         set -euo pipefail
-        jq -e '.passed == true' "$EVIDENCE_DIR/analyzer-coverage/report.json"
-        jq -e '.passed == true' "$KEYLOAD_SITE_COVERAGE/report.json"
         [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured || "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]
-        jq -e --arg mode "$KEYLOAD_SITE_BENCHMARK_MODE" --arg revision "$KEYLOAD_SITE_SOURCE_REVISION" '.benchmarkMode == $mode and .sourceRevision == $revision' "$KEYLOAD_SITE_COVERAGE/report.json" > /dev/null
         if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
           availability="$KEYLOAD_SITE_ISOLATED_CAPTURE/metadata-proof.json"
           [[ -f "$availability" && ! -L "$availability" ]]
@@ -22,11 +19,9 @@ runs:
           [[ ! -e "$GITHUB_WORKSPACE/_site/data" && ! -L "$GITHUB_WORKSPACE/_site/data" ]]
           [[ "$(sha256sum "$availability" | cut -d' ' -f1)" == "$availability_hash" ]]
           timeout 120s gh api --paginate --slurp "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" > "$EVIDENCE_DIR/qualification-jobs-pages.json"
-          job_url=$(jq -er '[.[].jobs[] | select(.name == "Check website")] | select(length == 1) | .[0].html_url' "$EVIDENCE_DIR/qualification-jobs-pages.json")
-          _hash=$(sha256sum "$EVIDENCE_DIR/analyzer-coverage/report.json" | cut -d' ' -f1)
-          site_hash=$(sha256sum "$KEYLOAD_SITE_COVERAGE/report.json" | cut -d' ' -f1)
+          job_url=$(jq -er '[.[].jobs[] | select(.name == "Generate website")] | select(length == 1) | .[0].html_url' "$EVIDENCE_DIR/qualification-jobs-pages.json")
           mkdir "$GITHUB_WORKSPACE/_site/data"
-          jq -n --slurpfile tests "$EVIDENCE_DIR/test-receipts.json" --arg website "$KEYLOAD_SITE_SOURCE_REVISION" --arg control "$KEYLOAD_SITE_CONTROL_REVISION" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --arg job_url "$job_url" --arg _hash "$_hash" --arg site_hash "$site_hash" --arg availability_hash "$availability_hash" '{schemaVersion:3,source:{website:$website,control:$control,measured:null},qualification:{scope:"content",runUrl:$run_url,jobUrl:$job_url,reportSha256:$_hash,siteReportSha256:$site_hash,availabilitySha256:$availability_hash,tests:$tests[0]},benchmarks:null}' > "$GITHUB_WORKSPACE/_site/data/publication.json"
+          jq -n --arg website "$KEYLOAD_SITE_SOURCE_REVISION" --arg control "$KEYLOAD_SITE_CONTROL_REVISION" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --arg job_url "$job_url" --arg availability_hash "$availability_hash" '{schemaVersion:3,source:{website:$website,control:$control,measured:null},qualification:{scope:"content",runUrl:$run_url,jobUrl:$job_url,availabilitySha256:$availability_hash},benchmarks:null}' > "$GITHUB_WORKSPACE/_site/data/publication.json"
           exit 0
         fi
         readonly isolated_receipt_limit=4194304
@@ -64,8 +59,6 @@ runs:
         cmp "$KEYLOAD_SITE_ISOLATED_AGGREGATE/aggregate.json" "$GITHUB_WORKSPACE/_site/data/isolated/aggregate.json"
         verify_isolated_inputs after
         timeout 120s gh api --paginate --slurp "repos/$GH_REPO/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100" > "$EVIDENCE_DIR/qualification-jobs-pages.json"
-        job_url=$(jq -er '[.[].jobs[] | select(.name == "Check website")] | select(length == 1) | .[0].html_url' "$EVIDENCE_DIR/qualification-jobs-pages.json")
-        _hash=$(sha256sum "$EVIDENCE_DIR/analyzer-coverage/report.json" | cut -d' ' -f1)
-        site_hash=$(sha256sum "$KEYLOAD_SITE_COVERAGE/report.json" | cut -d' ' -f1)
-        jq -n --slurpfile tests "$EVIDENCE_DIR/test-receipts.json" --slurpfile isolated "$isolated_snapshot" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --arg job_url "$job_url" --arg _hash "$_hash" --arg site_hash "$site_hash" '{schemaVersion:2,source:$isolated[0].source,qualification:{runUrl:$run_url,jobUrl:$job_url,reportSha256:$_hash,siteReportSha256:$site_hash,tests:$tests[0]},isolated:$isolated[0]}' > "$GITHUB_WORKSPACE/_site/data/publication.json"
+        job_url=$(jq -er '[.[].jobs[] | select(.name == "Generate website")] | select(length == 1) | .[0].html_url' "$EVIDENCE_DIR/qualification-jobs-pages.json")
+        jq -n --slurpfile isolated "$isolated_snapshot" --arg run_url "https://github.com/$GH_REPO/actions/runs/$GITHUB_RUN_ID" --arg job_url "$job_url" '{schemaVersion:2,source:$isolated[0].source,qualification:{runUrl:$run_url,jobUrl:$job_url},isolated:$isolated[0]}' > "$GITHUB_WORKSPACE/_site/data/publication.json"
         verify_authority

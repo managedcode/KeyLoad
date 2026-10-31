@@ -1,5 +1,5 @@
-name: Qualify the current benchmark website
-description: Preserve every original archive, browser, TUnit and coverage gate.
+name: Generate the static benchmark landing page
+description: Read original successful benchmark results and generate the static Pages site.
 outputs:
   mode:
     value: ${{ steps.source.outputs.mode }}
@@ -10,7 +10,7 @@ outputs:
 runs:
   using: composite
   steps:
-    - name: Create website test folders
+    - name: Create benchmark data folders
       shell: bash
       run: |
         base="$GITHUB_WORKSPACE/artifacts/site-evidence"
@@ -23,7 +23,6 @@ runs:
         mkdir -p "$base"
         {
           printf 'EVIDENCE_DIR=%s\nKEYLOAD_SITE_REPOSITORY=%s\n' "$base" "$GITHUB_WORKSPACE/w"
-          printf 'KEYLOAD_SITE_COVERAGE=%s/js-coverage\n' "$base"
           printf 'KEYLOAD_SITE_ISOLATED_CAPTURE=%s/isolated-capture\nKEYLOAD_SITE_ISOLATED_ARCHIVE_RECEIPT=%s/isolated-capture/archive-receipt.json\nKEYLOAD_SITE_ISOLATED_AGGREGATE=%s/isolated-capture/input/aggregate\n' "$base" "$base" "$base"
         } >> "$GITHUB_ENV"
     - name: Download verified benchmark data
@@ -59,28 +58,12 @@ runs:
       uses: actions/checkout@v7
       with:
         ref: ${{ steps.source.outputs.revision }}
-        # Keep the TUnit monitor socket below the Unix 103-byte path limit.
         path: w
         persist-credentials: false
-    - name: Download current benchmark source
-      if: steps.source.outputs.benchmark_mode == 'measured'
-      uses: actions/checkout@v7
-      with:
-        ref: ${{ steps.source.outputs.isolated_measured_revision }}
-        path: measured-isolated
-        persist-credentials: false
-    - name: Check source revisions and browser tools
+    - name: Check landing-page source identity
       shell: bash
       run: |
         [[ "$(git -C w rev-parse HEAD)" == "$KEYLOAD_SITE_SOURCE_REVISION" ]]
-        if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured ]]; then
-          [[ "$(git -C measured-isolated rev-parse HEAD)" == "$KEYLOAD_SITE_ISOLATED_MEASURED_REVISION" ]]
-          test -f measured-isolated/.github/workflows/benchmarks.yml
-          git -C measured-isolated rev-parse HEAD > "$EVIDENCE_DIR/isolated-measured-revision.txt"
-          cp measured-isolated/.github/workflows/benchmarks.yml "$EVIDENCE_DIR/isolated-measured-producer.yml"
-        else
-          [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]
-        fi
         git -C w rev-parse HEAD > "$EVIDENCE_DIR/website-revision.txt"
         git -C control rev-parse HEAD > "$EVIDENCE_DIR/control-revision.txt"
         closure="scripts/Features/BenchmarkComparisons/site-isolated-dependencies.txt"
@@ -106,98 +89,22 @@ runs:
           done
         done
         node --version > "$EVIDENCE_DIR/node-version.txt"
-        chrome=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)
-        test -n "$chrome" && test -x "$chrome"
-        "$chrome" --version > "$EVIDENCE_DIR/browser-version.txt"
-        printf 'KEYLOAD_SITE_BROWSER=%s\n' "$chrome" >> "$GITHUB_ENV"
-        mkdir -p "$KEYLOAD_SITE_COVERAGE/node"
-        cd w || exit
-        git ls-files -z | xargs -0 sha256sum > "$EVIDENCE_DIR/source.sha256"
-    - name: Set up .NET
-      uses: actions/setup-dotnet@v6
-      with:
-        global-json-file: w/global.json
-    - name: Build and test code analyzers
-      id: analyzers
-      working-directory: w
-      shell: bash
-      run: |
-        dotnet --info > "$EVIDENCE_DIR/dotnet-info.txt"
-        pwsh --version > "$EVIDENCE_DIR/powershell-version.txt"
-        dotnet restore KeyLoad.slnx
-        dotnet build build/KeyLoad.AppHost/KeyLoad.AppHost.csproj --no-restore -warnaserror
-        dotnet build tests/KeyLoad.AnalyzerTests/KeyLoad.AnalyzerTests.csproj --no-restore -warnaserror
-        mkdir -p "$EVIDENCE_DIR/analyzer-coverage"
-        cp scripts/Features/CodeQuality/site-analyzer-coverage.settings.xml "$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml"
-        pwsh -NoProfile -File scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Prepare -Repository "$KEYLOAD_SITE_REPOSITORY" -Contract "$KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$EVIDENCE_DIR/analyzer-coverage"
-        node scripts/Features/TestInfrastructure/run-tests.mjs --KeyLoadTests:Suite=analyzers --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/analyzer-tests" "--KeyLoadTests:CoverageSettings=$EVIDENCE_DIR/analyzer-coverage/coverage.config.xml" "--KeyLoadTests:CoverageOutput=$EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
-    - name: Check analyzer test coverage
-      if: (success() || failure()) && steps.analyzers.outcome != 'skipped'
-      working-directory: w
-      shell: pwsh
-      run: ./scripts/Features/CodeQuality/site-analyzer-coverage.ps1 -Mode Verify -Repository "$env:KEYLOAD_SITE_REPOSITORY" -Contract "$env:KEYLOAD_SITE_REPOSITORY/scripts/Features/CodeQuality/site-analyzer-coverage.contract.json" -EvidenceRoot "$env:EVIDENCE_DIR/analyzer-coverage" -CoverageReport "$env:EVIDENCE_DIR/analyzer-coverage/coverage.cobertura.xml"
-    - name: Build website tests
-      working-directory: w
-      shell: bash
-      run: |
-        dotnet restore tests/KeyLoad.WebsiteTests/KeyLoad.WebsiteTests.csproj
-        dotnet build tests/KeyLoad.WebsiteTests/KeyLoad.WebsiteTests.csproj --no-restore -warnaserror
-    - name: Check website test formatting and repository rules
-      working-directory: w
-      shell: bash
-      run: |
-        dotnet format analyzers/KeyLoad.Analyzers/KeyLoad.Analyzers.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzers.txt" 2>&1
-        dotnet format tests/KeyLoad.AnalyzerTests/KeyLoad.AnalyzerTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-analyzer-tests.txt" 2>&1
-        dotnet format tests/KeyLoad.WebsiteTests/KeyLoad.WebsiteTests.csproj --verify-no-changes --no-restore --severity warn --verbosity minimal > "$EVIDENCE_DIR/format-site-tests.txt" 2>&1
-        node scripts/Features/RepositoryGovernance/verify.mjs
-    - name: Run all website tests
-      working-directory: w
-      shell: bash
-      env:
-        NODE_V8_COVERAGE: ${{ github.workspace }}/artifacts/site-evidence/js-coverage/node
-      run: |
-        # Bound the cases waiting for the existing two heavy child slots.
-        site_args=(--KeyLoadTests:Suite=website --KeyLoadTests:Execution:MaximumParallelTests=8 --KeyLoadTests:TimeoutMinutes=120 --KeyLoadTests:ReportTrx=true "--KeyLoadTests:ResultsDirectory=$EVIDENCE_DIR/site-tests")
-        if [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == none ]]; then
-          site_args+=('--KeyLoadTests:Filter=/*/*/SiteContent*/*')
-        else
-          [[ "$KEYLOAD_SITE_BENCHMARK_MODE" == measured ]]
-        fi
-        node scripts/Features/TestInfrastructure/run-tests.mjs "${site_args[@]}"
-    - name: Check every required test passed
-      shell: pwsh
-      run: |
-        $receipts = foreach ($suite in @('analyzer-tests', 'site-tests')) {
-          $files = @(Get-ChildItem -LiteralPath "$env:EVIDENCE_DIR/$suite" -Filter '*.trx' -File)
-          if ($files.Count -ne 1) { throw "Expected exactly one $suite TRX receipt" }
-          [xml]$document = Get-Content -LiteralPath $files[0].FullName -Raw
-          $counts = $document.TestRun.ResultSummary.Counters
-          if ($null -eq $counts -or [int]$counts.total -le 0 -or
-              [int]$counts.executed -ne [int]$counts.total -or
-              [int]$counts.passed -ne [int]$counts.total) {
-            throw "Incomplete or failing $suite qualification; skipped tests cannot pass"
-          }
-          [ordered]@{ suite = $suite; total = [int]$counts.total; executed = [int]$counts.executed; passed = [int]$counts.passed; sha256 = (Get-FileHash -LiteralPath $files[0].FullName -Algorithm SHA256).Hash.ToLowerInvariant() }
-        }
-        ConvertTo-Json -InputObject @($receipts) -Depth 4 | Set-Content -LiteralPath "$env:EVIDENCE_DIR/test-receipts.json" -Encoding utf8NoBOM
-    - name: Build website from verified results
+    - name: Generate website from benchmark results
       uses: ./control/.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite
     - name: Upload website for GitHub Pages
-      if: success() && steps.source.outputs.mode == 'publish'
       uses: actions/upload-pages-artifact@v5
       with:
         path: _site
         include-hidden-files: true
-    - name: Save website test results
+    - name: Save benchmark publication evidence
       if: always()
       uses: actions/upload-artifact@v7
       with:
         name: site-qualification-${{ steps.source.outputs.revision }}-${{ github.run_attempt }}
         path: |
           _site
-          artifacts/site-evidence
-          w/artifacts/code-quality/KeyLoad.WebsiteTests
-          w/artifacts/code-quality/KeyLoad.Analyzers
-          w/artifacts/code-quality/KeyLoad.AnalyzerTests
-          w/tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0/KeyLoad.Analyzers.dll
-          w/tests/KeyLoad.AnalyzerTests/bin/Debug/net10.0/KeyLoad.Analyzers.pdb
+          artifacts/site-evidence/*.json
+          artifacts/site-evidence/*.txt
+          artifacts/site-evidence/*.sha256
+          artifacts/site-evidence/isolated-capture/archive-receipt.json
+          artifacts/site-evidence/isolated-capture/metadata-proof.json

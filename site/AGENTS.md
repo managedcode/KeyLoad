@@ -3,7 +3,7 @@
 ## Purpose, entry points and ownership
 
 - Owns the static Pages website that presents benchmark comparisons using verified GitHub Actions reports.
-- HTML/modules/styles entry: `Features/BenchmarkComparisons/`; thin builder: `scripts/build.mjs`; real qualification: `tests/KeyLoad.WebsiteTests` through the unified Aspire AppHost.
+- HTML/modules/styles entry: `Features/BenchmarkComparisons/`; static builder: `scripts/build.mjs`. Website only downloads the latest successful original benchmark data, generates the landing page and publishes Pages. It has no dependency on product code, .NET, Aspire, AppHost, TUnit, Chrome suites, analyzers or coverage. Never introduce those as Website steps or publication prerequisites without the owner's explicit approval. Product/test-infrastructure changes do not trigger this workflow.
 - The site displays the latest completed successful full Benchmarks run, retaining its original source, attempt, image digests and declared workload inventory. New failed or incomplete runs never replace existing figures with an empty state. Require the complete planned worker inventory and original TRX, runtime, resource, correctness and artifact proof. Completed operation measurements may publish when server resource telemetry is incomplete, with an explicit incomplete-telemetry label and the original resourceQualified=false preserved. Display recorded metrics only; capabilities outside the original workload have null metrics displayed as "No data". Every category uses the same comparison table, available through horizontal scrolling on mobile. Preserve every execution, correctness, provenance and publication gate. Website recorded-operation display does not claim identical runner hardware; native comparison aggregation retains its separate strict resource-comparability gate. No fabricated, local-only, durability or production-readiness claims.
 - Do not introduce a backend, credentials, or a second source of truth for benchmark measurements.
 - Preserve the official Three.js 0.186.1 vendor files byte-for-byte against their local manifest and license. `.gitattributes` excludes only upstream `space-before-tab` findings for those exact two files so generic diff checks do not require mutating vendor bytes; authored site files retain normal whitespace checks.
@@ -24,7 +24,7 @@ From the repository root:
 node site/scripts/build.mjs
 ```
 
-Use the root's complete solution, TUnit, real process recovery and Aspire SDK/MCP gates as applicable. Local checks are development evidence; delivered-source qualification and public measurements require exact-source Linux GitHub artifacts. Do not weaken compiler, analyzer, source-identity, coverage or runtime assertions.
+For this static site, verify JavaScript/YAML syntax and the actual static build. Product solution builds and test gates belong to their independent workflows. Public measurements still require original successful GitHub Benchmarks artifacts.
 
 ## Skills
 
