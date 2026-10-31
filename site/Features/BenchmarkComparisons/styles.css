@@ -401,6 +401,7 @@ td[data-value=""] { color: var(--kl-faint); }
 }
 
 @media (max-width: 760px) {
+  .comparison-grid .ov-head, .comparison-grid .ov-row { grid-template-columns: 8rem repeat(var(--columns, 8), minmax(8rem, 1fr)); }
   .bench-controls fieldset { padding-left: 0; }
   .bench-legend { position: static; margin-bottom: -1.2rem; }
   .leaders { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(15.5rem, 82%); margin-inline: calc(-1 * clamp(1rem, 2.4vw, 2rem)); padding: .2rem clamp(1rem, 2.4vw, 2rem) .6rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
