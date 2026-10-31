@@ -53,7 +53,6 @@ internal sealed class GraphIncomingEdgesPageBuilder
         }
         var result = new GraphIncomingEdgesPage(Version, rows.ToImmutable(), cutPosition,
             GraphCrossPartitionProtocol.EventualProjection);
-        budget.CheckResult(result);
         return result;
     }
 }

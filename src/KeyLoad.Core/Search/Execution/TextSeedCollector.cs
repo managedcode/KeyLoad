@@ -30,7 +30,6 @@ internal static partial class TextSeedCollector
         var documents = new List<DocumentRecord>();
         _ = budget.VisitAll(raw, DocumentStorageKeys.Prefix(partition, pin.Collection), (key, value) =>
             {
-                budget.ChargeBytes(value.Length);
                 var document = OrleansSerialization.Deserialize<DocumentRecord>(value);
                 if (document.Reference.Partition != partition || document.Reference.Collection != pin.Collection
                     || document.Revision <= EmptyPosition
@@ -129,8 +128,6 @@ internal static partial class TextSeedCollector
 
     private static string ResourceDigest(ResourceDefinition resource, ReadExecutionBudget budget)
     {
-        budget.ChargeBytes(OrleansSerialization.Measure(resource));
-        budget.ChargeBytes(SHA256.HashSizeInBytes);
         var bytes = OrleansSerialization.Serialize(resource);
         budget.Check();
         return Convert.ToHexStringLower(SHA256.HashData(bytes));

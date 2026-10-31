@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Query.Search;
 using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
@@ -13,7 +12,7 @@ internal static class DistributedSearchCandidateExecution
     internal static DistributedSearchCandidateLeaf Execute(DatabaseEngine database, string principalId,
         SearchRequest request, string tenant, DistributedTextWitness witness,
         DistributedTextStatistics statistics, GlobalBranchScope scope, string sourceWindowId,
-        IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
+        IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, PartitionQueryLifetimeMetadata? metadata = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(request);
@@ -22,7 +21,6 @@ internal static class DistributedSearchCandidateExecution
         ArgumentNullException.ThrowIfNull(scope);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(grant);
         budget.Check();
         var execution = options.Value;
         execution.Validate();
@@ -30,21 +28,19 @@ internal static class DistributedSearchCandidateExecution
         FilteredSearchEligibility.ValidateRequest(request.AllowedIds, budget);
         var eligibility = FilteredSearchEligibility.Create(request.AllowedIds, budget);
         using var admission = database.AdmitQuery(budget.Cancellation);
-        using var charged = budget.EnterReadGrant(grant);
         Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedSearchCandidateLeaf> read =
             (view, principal, resource, digest) => Capture(database, view, principal, resource, digest,
-                request, tenant, witness, statistics, scope, sourceWindowId, execution, eligibility, budget, grant, metadata);
+                request, tenant, witness, statistics, scope, sourceWindowId, execution, eligibility, budget, metadata);
         return metadata is null
-            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read, budget)
-            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
-                grant, budget, metadata, read);
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, read, budget)
+            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection, budget, metadata, read);
     }
 
     private static DistributedSearchCandidateLeaf Capture(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, string digest, SearchRequest request,
         string tenant, DistributedTextWitness witness, DistributedTextStatistics statistics,
         GlobalBranchScope scope, string sourceWindowId, QueryExecutionOptions execution,
-        FilteredSearchEligibility eligibility, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant,
+        FilteredSearchEligibility eligibility, ReadExecutionBudget budget,
         PartitionQueryLifetimeMetadata? metadata)
     {
         budget.Check();
@@ -54,7 +50,7 @@ internal static class DistributedSearchCandidateExecution
         }
         DistributedSearchFieldAuthorization.Require(database, principal, resource, request, metadata);
         DistributedTextWitnessValidation.Require(database, view, principal, resource, digest,
-            witness, request.Partition, grant, budget);
+            witness, request.Partition, budget);
         GlobalBranchWindow? text = null;
         GlobalBranchWindow? vector = null;
         if (request.Text is not null)
@@ -72,8 +68,7 @@ internal static class DistributedSearchCandidateExecution
             vector = DistributedSearchCandidateWindow.Capture(view, scores, request.Partition, request.Collection,
                 DistributedSearchBranchNames.Vector, GlobalBranchKind.Vector, sourceWindowId, scope, budget);
         }
-        var result = new DistributedSearchCandidateLeaf(witness, text, vector, grant.ReadBytes, grant.ExaminedRecords);
-        budget.CheckResult(result);
+        var result = new DistributedSearchCandidateLeaf(witness, text, vector);
         return result;
     }
 }

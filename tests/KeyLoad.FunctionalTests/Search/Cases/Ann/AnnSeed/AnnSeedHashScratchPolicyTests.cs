@@ -75,15 +75,16 @@ internal sealed class AnnSeedHashScratchPolicyTests
     [Arguments(-1)]
     [Arguments(255)]
     [Arguments(4097)]
-    public async Task InvalidStandaloneScratchRejectsBeforeReadAndWorkChargingAsync(int scratchBytes)
+    public async Task InvalidStandaloneScratchRejectsBeforeReadAsync(int scratchBytes)
     {
         using var database = AnnSeedTestSupport.Create(1);
         var budget = new ReadExecutionBudget();
         var options = Options.Create(new AnnSeedOptions { HashScratchBytes = scratchBytes });
+        var reads = database.Store.GetReadDiagnostics();
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => Capture(database, AnnSeedTestSupport.Space(), options, budget));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(failure.Message).IsEqualTo(AnnSeedOptions.ValidationMessage);
-        await Assert.That(budget.ReadBytes).IsEqualTo(0L);
+        await Assert.That(database.Store.GetReadDiagnostics()).IsEqualTo(reads);
     }
 
     [Test]
@@ -96,10 +97,11 @@ internal sealed class AnnSeedHashScratchPolicyTests
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var budget = new ReadExecutionBudget(cancellationToken: cancellation.Token);
+        var reads = database.Store.GetReadDiagnostics();
         var failure = Assert.ThrowsExactly<OperationCanceledException>(() =>
             Capture(database, AnnSeedTestSupport.Space(), options, budget));
         await Assert.That(failure.CancellationToken).IsEqualTo(cancellation.Token);
-        await Assert.That(budget.ReadBytes).IsEqualTo(0L);
+        await Assert.That(database.Store.GetReadDiagnostics()).IsEqualTo(reads);
         await Assert.That(Capture(database, AnnSeedTestSupport.Space(), options).Records).HasSingleItem();
     }
 

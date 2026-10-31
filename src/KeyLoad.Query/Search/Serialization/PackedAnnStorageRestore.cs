@@ -13,7 +13,8 @@ internal static class PackedAnnStorageRestore
         PackedAnnStorageCodec.RequirePeak(checked(snapshotBytes + PackedAnnReservations.Array(sizeof(long), nodes.Length)), storage);
         var ids = nodes.Select(node => node.Id).ToArray();
         var plan = PackedAnnAdmission.CreateRestored(header.Space, ids, configured.Value, budget);
-        if (header.RetainedBytes != plan.RetainedBytes || header.BuildScratchBytes != plan.BuildScratchBytes)
+        var snapshotRetainedBytes = checked(plan.RetainedBytes - PackedAnnReservations.CosineNorms(header.Space.Metric, plan.Count));
+        if (header.RetainedBytes != snapshotRetainedBytes || header.BuildScratchBytes != plan.BuildScratchBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, PackedAnnStorageFrames.InvalidSnapshot);
         }

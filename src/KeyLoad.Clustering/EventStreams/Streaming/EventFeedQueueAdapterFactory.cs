@@ -3,7 +3,7 @@ using Orleans.Streams;
 namespace KeyLoad.Clustering;
 
 internal sealed class EventFeedQueueAdapterFactory(
-    IQueueAdapterFactory original, IQueueAdapterCache cache, EventFeedHintBatchAdmission admission) : IQueueAdapterFactory
+    IQueueAdapterFactory original, IQueueAdapterCache cache) : IQueueAdapterFactory
 {
     private const string UseCancellationOverload = "Use the overload which accepts a CancellationToken.";
 
@@ -13,7 +13,7 @@ internal sealed class EventFeedQueueAdapterFactory(
     public async Task<IQueueAdapter> CreateAdapter(CancellationToken cancellationToken)
     {
         var adapter = await original.CreateAdapter(cancellationToken);
-        return new EventFeedQueueAdapter(adapter, admission);
+        return new EventFeedQueueAdapter(adapter);
     }
 
     public IQueueAdapterCache GetQueueAdapterCache() => cache;

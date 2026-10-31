@@ -107,8 +107,6 @@ internal sealed class TextIncrementalOwner : IDisposable
         ReadExecutionBudget budget)
     {
         var actual = TextIncrementalMetadata.ReadIntent(Path, maximumBytes, budget);
-        budget.ChargeBytes(OrleansSerialization.Measure(expected));
-        budget.ChargeBytes(OrleansSerialization.Measure(actual));
         var expectedBytes = OrleansSerialization.Serialize(expected);
         var actualBytes = OrleansSerialization.Serialize(actual);
         budget.Check();

@@ -1,8 +1,6 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -46,8 +44,7 @@ internal static class ConnectionProducerCleanupFlow
         }
         var stream = CqrsStreamLifetime.RunWithAwaitedSettlement(
             execution => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(ProduceAsync, execution),
-            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            requestId, fixture.Clock, NotifyAsync, fixture.RoutingOptions, fixture.RequestWork,
+            requestId, NotifyAsync, fixture.RequestWork,
             new CqrsStreamPurpose(), token.Token);
         var original = DrainFailureAsync(stream, token.Token);
         try

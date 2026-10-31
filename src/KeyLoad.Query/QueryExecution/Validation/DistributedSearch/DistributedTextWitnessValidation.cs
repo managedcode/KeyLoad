@@ -9,17 +9,16 @@ internal static class DistributedTextWitnessValidation
 
     internal static void Require(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         ResourceDefinition resource, string digest, DistributedTextWitness witness,
-        PartitionRef partition, global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget)
+        PartitionRef partition, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(resource);
         ArgumentNullException.ThrowIfNull(witness);
-        ArgumentNullException.ThrowIfNull(grant);
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
-        var placement = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition, grant);
+        var placement = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition);
         PartitionQueryPlacementValidation.Validate(placement, partition, witness.Owner);
         var identity = database.Store.Identity;
         if (witness.Partition != partition || witness.NodeId != identity.NodeId

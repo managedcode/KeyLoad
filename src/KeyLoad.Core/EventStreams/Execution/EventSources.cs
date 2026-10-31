@@ -185,7 +185,6 @@ public static class EventSources
         var last = records.Count == EmptyEventSourceResultCount ? after : records[^LastReadPositionOffset].Position;
         var token = engine.Sign(new SourceCursor(SourceCursorPurpose, engine.Store.Identity.Incarnation, request.Source, principal.Id, principal.PolicyEpoch, resource.SchemaVersion, last, now.Add(engine.eventSourceCursorLifetime)));
         var page = new EventSourcePage(request.Source, head, records.ToImmutableArray(), token, engine.Store.Position, last < head.TailPosition);
-        budget.CheckResult(page);
         return page;
     }
 }

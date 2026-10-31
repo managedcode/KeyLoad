@@ -10,7 +10,8 @@ internal static class PartitionQueryCancellationRun
     {
         using var armed = new ManualResetEventSlim(false);
         using var settled = new ManualResetEventSlim(false);
-        var observer = new PartitionQueryCancellationObserver(budget, cancellation, armed, settled);
+        var observer = new PartitionQueryCancellationObserver(
+            () => database.Store.GetReadDiagnostics().RangeBaselineEntries, cancellation, armed, settled);
         var outcome = new PartitionQueryCancellationOutcome(false, null, 0, false);
         Exception? primary = null;
         List<Exception> settlement;
@@ -34,7 +35,7 @@ internal static class PartitionQueryCancellationRun
             settlement = observer.JoinAfterQuery();
             outcome = outcome with
             {
-                ObservedReadBytes = observer.ObservedReadBytes,
+                ObservedEntries = observer.ObservedEntries,
                 CancellationRequested = observer.CancellationRequested
             };
         }
@@ -49,12 +50,12 @@ internal static class PartitionQueryCancellationRun
         {
             _ = engine.ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
                 PartitionQueryTestSupport.Request(database, 1), [database.Partition], budget);
-            return new PartitionQueryCancellationOutcome(true, null, budget.ReadBytes,
+            return new PartitionQueryCancellationOutcome(true, null, 0,
                 cancellation.IsCancellationRequested);
         }
         catch (OperationCanceledException failure) when (failure.CancellationToken == cancellation.Token)
         {
-            return new PartitionQueryCancellationOutcome(false, failure, budget.ReadBytes,
+            return new PartitionQueryCancellationOutcome(false, failure, 0,
                 cancellation.IsCancellationRequested);
         }
     }

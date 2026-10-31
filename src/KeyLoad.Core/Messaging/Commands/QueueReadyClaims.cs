@@ -53,7 +53,7 @@ public static class QueueReadyClaims
             return state.TransitionInputs.Count < engine.MessagingExecution.QueueScanPageSize;
         }
 
-        if (state.ReceivedBytes + body.Bytes > request.MaxBytes || state.Counters.InFlightMessages >= resource.QueuePolicy.MaxInFlightMessages || state.Counters.InFlightBytes + body.Bytes > resource.QueuePolicy.MaxInFlightBytes)
+        if (state.Counters.InFlightMessages >= resource.QueuePolicy.MaxInFlightMessages || state.Counters.InFlightBytes + body.Bytes > resource.QueuePolicy.MaxInFlightBytes)
         {
             return false;
         }

@@ -4,7 +4,6 @@ namespace KeyLoad.FunctionalTests.Search;
 
 internal sealed class TextOnlineSeedBudgetTests
 {
-
     [Test]
     public async Task ActualCapturedSeedCancellationJoinsBeforeFreshFullHealthySeed()
     {
@@ -20,6 +19,6 @@ internal sealed class TextOnlineSeedBudgetTests
             var failure = Assert.ThrowsExactly<OperationCanceledException>(() => cancelled.ReadSeed());
             await Assert.That(failure.CancellationToken.IsCancellationRequested).IsTrue();
         }
-        _ = await TextOnlineSeedAssertions.HealthyAsync(database, fixture, token);
+        await TextOnlineSeedAssertions.HealthyAsync(database, fixture, token);
     }
 }

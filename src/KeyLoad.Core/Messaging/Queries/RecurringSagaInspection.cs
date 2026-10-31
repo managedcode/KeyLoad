@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using KeyLoad.Core.Authorization;
 using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
@@ -38,7 +37,6 @@ public static class RecurringSagaInspection
             var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(read, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
             var record = read.GetRecord<RecurringScheduleRecord>(RecurringSagaStorage.ScheduleKey(lane, scheduleId));
             var result = record is null ? null : engine.ProjectSchedule(read, principal, resource, record, lane, scheduleId);
-            budget.CheckResult(result);
             return result;
         });
     }
@@ -69,7 +67,6 @@ public static class RecurringSagaInspection
             var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(read, lane.Partition, lane.Queue, ResourceKind.WorkQueue);
             var record = read.GetRecord<SagaRecord>(RecurringSagaStorage.SagaKey(lane, sagaId));
             var result = record is null ? null : engine.ProjectSaga(read, principal, resource, record, lane, sagaId);
-            budget.CheckResult(result);
             return result;
         });
     }
@@ -88,7 +85,6 @@ public static class RecurringSagaInspection
                 break;
         }
 
-        budget.ChargeBytes(checked(Encoding.UTF8.GetByteCount(principalId) + OrleansSerialization.Serialize(request).LongLength));
     }
 
     internal static void ValidateRecurringReadIdentity(QueueLaneRef lane, Guid id)

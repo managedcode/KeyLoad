@@ -1,8 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.FunctionalTests.Messaging;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -26,8 +23,7 @@ internal static class RequestCqrsAnnCheckpointReplay
             id, original.CommandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainAsync(
             execution => connection.ExecuteStreamAsync(envelope, execution),
-            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            id, fixture.Clock, fixture.RoutingOptions, token);
+            id, token);
         await Assert.That(reply.Error).IsNull();
         var replay = GrainReplyFactory.RequireValue(reply).Value as ProjectionBatchResult
             ?? throw new InvalidOperationException();

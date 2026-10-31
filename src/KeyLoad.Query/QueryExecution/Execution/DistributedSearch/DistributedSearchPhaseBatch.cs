@@ -1,7 +1,5 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
-using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.QueryExecution;
@@ -11,10 +9,8 @@ internal static class DistributedSearchPhaseBatch
     private const int FirstLeaf = 0;
 
     internal static async Task<ImmutableArray<DistributedSearchLeafResult>> RunAsync(
-        ImmutableArray<DistributedSearchPhaseWork> work, ReadExecutionBudgetReadGrant[] grants,
-        int grantOffset, IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget,
-        Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
-            Task<DistributedSearchPreparedLeaf>> prepare,
+        ImmutableArray<DistributedSearchPhaseWork> work, IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget,
+        Func<DistributedSearchPhaseWork, ReadExecutionBudget, CancellationToken, Task<DistributedSearchPreparedLeaf>> prepare,
         CancellationTokenSource execution)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -27,14 +23,11 @@ internal static class DistributedSearchPhaseBatch
         {
             throw Errors.Fail(ErrorCode.Corruption, DistributedSearchPhaseErrors.InvalidBatch);
         }
-        budget.ChargeBytes(checked(PartitionQueryRetention.ArrayDescriptorBytes
-            + (long)work.Length * PartitionQueryRetention.LeafDescriptorBytes));
         var prepared = new DistributedSearchPreparedLeaf[work.Length];
         for (var index = FirstLeaf; index < work.Length; index++)
         {
             budget.Check();
-            prepared[index] = await prepare(work[index], grants[grantOffset + index], budget,
-                execution.Token).ConfigureAwait(true);
+            prepared[index] = await prepare(work[index], budget, execution.Token).ConfigureAwait(true);
         }
         var leaves = ImmutableArray.CreateBuilder<DistributedSearchLeafResult>(work.Length);
         var concurrency = Math.Min(policy.MaximumConcurrentPartitionLeaves, work.Length);
@@ -51,9 +44,6 @@ internal static class DistributedSearchPhaseBatch
                 DistributedSearchLeafResultValidation.Require(leaf.ActualRequest, actual[index], budget);
                 await leaf.CompleteAsync(actual[index], execution.Token).ConfigureAwait(true);
                 budget.Check();
-                budget.CompleteReadGrant(grants[grantOffset + offset + index]);
-                var retained = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-                retained.Accept(OrleansSerialization.Measure(actual[index]));
                 leaves.Add(actual[index]);
             }
         }

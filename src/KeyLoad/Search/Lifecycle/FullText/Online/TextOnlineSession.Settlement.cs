@@ -12,7 +12,6 @@ internal sealed partial class TextOnlineSession
         {
             throw TextErrors.Mismatch();
         }
-        Budget.ChargeBytes(OrleansSerialization.Measure(expected));
         expectedPublication = OrleansSerialization.Serialize(expected);
     }
 

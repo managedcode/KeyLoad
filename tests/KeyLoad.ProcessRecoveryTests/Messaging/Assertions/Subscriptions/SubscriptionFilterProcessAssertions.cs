@@ -36,7 +36,7 @@ internal static class SubscriptionFilterProcessAssertions
         {
             await Assert.That(actual.Generation).IsEqualTo(UpdatedGeneration);
         }
-        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(path, SubscriptionFilterCrashScenario.OperationFile), token));
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(path, SubscriptionFilterCrashScenario.OperationFile), token));
         var first = db.ApplyEmbedded(operation, token).Get<SubscriptionInfo>();
         await Assert.That(first.Generation).IsEqualTo(UpdatedGeneration);
         var repeated = db.ApplyEmbedded(operation, token).Get<SubscriptionInfo>();

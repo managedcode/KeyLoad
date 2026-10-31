@@ -14,7 +14,6 @@ internal static partial class TextSeedCollector
         var documents = new List<DocumentRecord>();
         _ = budget.VisitAll(raw, DocumentStorageKeys.Prefix(pin.Consumer.Partition, pin.Collection), (key, value) =>
             {
-                budget.ChargeBytes(value.Length);
                 if (documents.Count == documents.Capacity)
                 {
                     var capacity = documents.Capacity == 0 ? 1
@@ -23,7 +22,6 @@ internal static partial class TextSeedCollector
                     {
                         throw Errors.Fail(ErrorCode.BudgetExceeded, SeedExceeded);
                     }
-                    budget.ChargeBytes(checked((long)capacity * IntPtr.Size));
                     documents.Capacity = capacity;
                 }
                 var document = OrleansSerialization.Deserialize<DocumentRecord>(value);
@@ -36,7 +34,6 @@ internal static partial class TextSeedCollector
                 documents.Add(document);
                 return true;
             });
-        budget.ChargeBytes(checked((long)documents.Count * IntPtr.Size));
         return metadata with
         {
             Documents = documents.ToArray()

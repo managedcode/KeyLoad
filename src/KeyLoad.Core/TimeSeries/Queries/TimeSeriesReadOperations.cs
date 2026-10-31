@@ -80,7 +80,6 @@ public static class TimeSeriesReadOperations
         return database.Store.Read(view =>
         {
             var result = read(budget.CreateView(view), budget);
-            budget.CheckResult(result);
             return result;
         });
     }

@@ -3,7 +3,7 @@ namespace KeyLoad.ProcessRecoveryTests;
 internal static class QueueDeadlineCrashProtocol
 {
     internal const string Mode = "queue-deadline-crash";
-    internal const string OperationFile = "queue-deadline-operation.json";
+    internal const string OperationFile = "queue-deadline-operation.bin";
     internal const string Queue = "deadline-work";
     internal const string Message = "original";
     internal const string Healthy = "healthy";

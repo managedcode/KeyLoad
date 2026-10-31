@@ -57,7 +57,6 @@ internal sealed class TextOnlineRoot
             TextFileIO.SetPrivateDirectoryMode(path);
             var owner = new TextOwnerReceipt(TextProtocol.FormatVersion, Directory, leaf, node,
                 scope, [new(TextProtocol.RuntimeDirectoryCore, true)]);
-            budget.ChargeBytes(OrleansSerialization.Measure(owner));
             TextFileIO.WriteEnvelope(Path.Combine(path, TextProtocol.OwnerFile), owner,
                 options.Value.MaximumOwnerReceiptBytes, options, resources);
         }, budget);
@@ -116,7 +115,6 @@ internal sealed class TextOnlineRoot
         {
             return;
         } // Partial owner creation is retained; never a publication proof.
-        budget?.ChargeBytes(new FileInfo(receipt).Length);
         var staging = TextFileIO.ReadEnvelope<TextOnlineStaging>(receipt,
             options.Value.MaximumOwnerReceiptBytes);
         if (staging.FormatVersion != TextProtocol.FormatVersion || staging.NodeId != node
@@ -125,7 +123,6 @@ internal sealed class TextOnlineRoot
         {
             throw TextErrors.Corrupt();
         }
-        budget?.ChargeBytes(OrleansSerialization.Measure(staging.Request));
         var actual = KeyLoad.Core.Search.OnlineTextParentIdentity.Fingerprint(staging.PrincipalId, staging.Request);
         if (actual != staging.ParentFingerprint)
         {

@@ -159,6 +159,7 @@
                 "SampleChunkRetentionRollupClusterTests",
                 "SampleChunkSubnormalClusterTests",
                 "SdkProblemBudgetPublicTests",
+                "TextConcurrentColdReadersTests",
                 "TextDistinctTermsPublicTests",
                 "TextNestedWildcardPublicTests",
                 "TextNonStringTransitionsPublicTests",
@@ -179,7 +180,6 @@
               "id": "queue-workers-transfer-and-query-admission",
               "kind": "own-clusters",
               "classes": [
-                "CapabilityOutputClusterTests",
                 "QueryEquivalentIntegerClusterTests",
                 "QueueWorkerSdkClusterTests",
                 "RemoteTransferCoordinatorClusterTests",
@@ -446,13 +446,12 @@
           "id": "cluster-bootstrap-and-authorized-traversal",
           "lanes": [
             {
-              "id": "bootstrap-epochs-transfer-repair-and-sql-budgets",
+              "id": "bootstrap-epochs-transfer-repair-and-sql-values",
               "kind": "own-clusters",
               "classes": [
                 "ColdBootstrapSdkTests",
                 "InitialPrincipalEpochClusterTests",
                 "PostgresDecimalClusterWholeFlowTests",
-                "RelationalSqlClusterJoinBudgetTests",
                 "RemoteTransferRepairClusterTests",
                 "SqlBooleanTruthClusterWholeFlowTests"
               ]
@@ -463,7 +462,6 @@
               "classes": [
                 "ClusterTests",
                 "DeclarativeCompositionReverseQuotaClusterTests",
-                "EventByteBoundPublicTests",
                 "EventMessageSensitivePublicClusterTests",
                 "EventSchemaCursorPublicTests",
                 "GraphIncomingClusterSiloRestartTests",

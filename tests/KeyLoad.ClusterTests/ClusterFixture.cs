@@ -54,7 +54,7 @@ internal sealed partial class ClusterFixture : AspireFixture<Projects.KeyLoad_Ap
     internal ClusterFixture(int maximumBodyBytes)
         => this.maximumBodyBytes = maximumBodyBytes;
 
-    /// <summary>Creates an Orleans fixture with explicit query result bounds.</summary>
+    /// <summary>Creates an Orleans fixture with explicit query execution options.</summary>
     internal ClusterFixture(QueryExecutionOptions queryExecution)
         => this.queryExecution = ClusterFixtureQueryResultLimits.Validate(queryExecution);
 

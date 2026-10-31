@@ -10,7 +10,7 @@ internal static class MultiLaneReceiveFailureObservation
     internal static MultiLaneReceiveFailureCapture Get(RequestCqrsHostedRuntimeFixture fixture)
         => Captures.GetValue(fixture, static owner =>
         {
-            var capture = new MultiLaneReceiveFailureCapture(owner.RoutingOptions.Value.MaximumStreamFrames);
+            var capture = new MultiLaneReceiveFailureCapture();
             owner.Services.GetRequiredService<ILoggerFactory>().AddProvider(capture);
             return capture;
         });

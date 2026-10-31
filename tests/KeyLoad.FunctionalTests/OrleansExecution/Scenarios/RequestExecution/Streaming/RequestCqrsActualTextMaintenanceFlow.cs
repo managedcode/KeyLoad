@@ -2,8 +2,6 @@ using System.Runtime.CompilerServices;
 using KeyLoad.Clustering;
 using KeyLoad.FunctionalTests.Search;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -85,8 +83,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
             id, request.CommandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
             execution => ObserveAsync(connection.ExecuteStreamAsync(envelope, execution), frames, execution),
-            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            id, fixture.Clock, fixture.RoutingOptions,
+            id,
             new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         if (reply.Error is not null)
         {

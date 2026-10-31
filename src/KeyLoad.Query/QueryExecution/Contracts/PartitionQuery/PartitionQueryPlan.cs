@@ -10,7 +10,4 @@ internal sealed record PartitionQueryPlan(
     [property: Id(2)] Guid Incarnation,
     [property: Id(3)] long ReadGeneration,
     [property: Id(4)] ImmutableArray<PartitionQueryLeafPlan> Leaves,
-    [property: Id(5)] int Limit,
-    [property: Id(6)] int MaxExaminedRecords,
-    [property: Id(7)] long MaxReadBytes,
-    [property: Id(8)] long MaxRetainedBytes);
+    [property: Id(5)] int Limit);

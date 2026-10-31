@@ -12,8 +12,6 @@ internal static class TextIncrementalPublishedInventory
         budget.Check();
         var original = TextIncrementalMetadata.ReadManifest(actual.Path,
             options.Value.MaximumDiskBytes, budget);
-        budget.ChargeBytes(OrleansSerialization.Measure(original));
-        budget.ChargeBytes(OrleansSerialization.Measure(manifest));
         if (!OrleansSerialization.Serialize(original).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(manifest)))
         {

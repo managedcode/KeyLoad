@@ -43,7 +43,7 @@ internal sealed class MultiLaneReceiveExpiryClock : TimeProvider, IGrainRequestP
     {
         lock (gate)
         {
-            if (!advanced && identity.CommandId == commandId && context.GrainInstance is ConnectionGrain
+            if (!advanced && identity.CommandId == commandId && context.GrainInstance is RequestGrain
                 && position is { } observe && observe() > armed)
             {
                 ObservedPosition = observe();

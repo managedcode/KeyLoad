@@ -16,7 +16,6 @@ public static class SearchQueriesOnlineText
             return (false, default(OnlineTextCurrentPublication?));
         }
 
-        budget.ChargeBytes(OrleansSerialization.Measure(current));
         if (current.FormatVersion != OnlineTextPublicationProtocol.CurrentFormat || current.PrincipalId != principal.Id || current.Consumer != request.Consumer || current.ConsumerGeneration != request.ConsumerGeneration || current.Authority.Collection != request.Collection || current.Authority.Field != request.Field)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
@@ -26,14 +25,12 @@ public static class SearchQueriesOnlineText
         engine.RequireOnlineTextOriginalAuthority(view, principal, originalRequest);
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var stored = CommandOutcomeKeyResolver.Select(view, principal.Id, current.CommandId, scope).Outcome ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
-        engine.ValidateOnlineTextStoredOutcome(view, principal, originalRequest, stored, budget);
+        engine.ValidateOnlineTextStoredOutcome(view, principal, originalRequest, stored);
         if (Errors.Code(stored.Result.Problem).Value is not null || stored.OnlineTextAuthority is null || current.ParentFingerprint != stored.OnlineTextAuthority.ParentFingerprint)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         }
 
-        budget.ChargeBytes(OrleansSerialization.Measure(current.Authority));
-        budget.ChargeBytes(OrleansSerialization.Measure(stored.OnlineTextAuthority));
         if (!OrleansSerialization.Serialize(current.Authority).AsSpan().SequenceEqual(OrleansSerialization.Serialize(stored.OnlineTextAuthority)) || current.PublishedCut != stored.Result.Get<OnlineTextIndexMaintenanceResult>().PublishedCut)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);

@@ -55,12 +55,6 @@ internal static class Bm25CorpusCall
         {
             work.Check();
             token.ThrowIfCancellationRequested();
-            var replyBytes = GrainReplyFactory.Measure(reply);
-            if (replyBytes > work.MaximumResultBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
-            }
-            work.ChargeBytes(replyBytes);
             if (GrainReplyFactory.RequireValue(reply).Value is not CommitReceipt receipt
                 || receipt.CommandId != commandId)
             {

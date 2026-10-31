@@ -69,65 +69,6 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         await HealthyAsync(fixture);
     }
 
-    [Test]
-    public async Task SubmittedClaimReplyByteFailureIsUnknownAndNeverClaimsLaterLaneOrChangesOnReplay()
-    {
-        const int replyCeiling = 1024;
-        await using var fixture = new RequestCqrsHostedRuntimeFixture(routing: new GrainRoutingOptions
-        {
-            MaximumReplyBytes = replyCeiling
-        });
-        await fixture.InitializeAsync();
-        var prefix = "large-receive-" + Guid.NewGuid().ToString("N");
-        var lanes = new[] { new QueueLaneRef(fixture.Database.Partition, prefix + "-first"),
-            new QueueLaneRef(fixture.Database.Partition, prefix + "-second") };
-        foreach (var lane in lanes)
-        {
-            fixture.Database.Configure(lane.Queue, ResourceKind.WorkQueue);
-        }
-        var payload = "{\"value\":\"" + new string('a', 2048) + "\"}";
-        fixture.Database.Commit(new EnqueueMessage(lanes[0].Queue, "large", payload, "{\"kind\":\"large\"}"),
-            new EnqueueMessage(lanes[1].Queue, "untouched", "{\"value\":2}"));
-        var before = OrleansSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "untouched")!);
-        var request = new MultiLaneReceiveRequest(Guid.NewGuid(),
-            [new(Guid.NewGuid(), lanes[0]), new(Guid.NewGuid(), lanes[1])]);
-        var cut = fixture.Database.Store.Position;
-        var reply = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request);
-        await Assert.That(reply.Error).IsNull().Because(MultiLaneReceiveFailureObservation.Summary(fixture));
-        var result = MultiLaneReceiveFlow.Value(reply);
-        await Assert.That(result.Outcomes.Length).IsEqualTo(2);
-        await Assert.That(result.Outcomes[0].Status).IsEqualTo(QueueLaneReceiveStatus.Unknown);
-        await Assert.That(result.Outcomes[0].Error).IsEqualTo(ErrorCode.UnknownWriteOutcome);
-        await Assert.That(result.Outcomes[0].SafeDetail).IsEqualTo("The write outcome is unknown. Retry the same command ID.");
-        await Assert.That(result.Outcomes[0].Result).IsNull();
-        await Assert.That(result.Outcomes[1].Status).IsEqualTo(QueueLaneReceiveStatus.NotAttempted);
-        await Assert.That(result.Outcomes[1].Result).IsNull();
-        await Assert.That(result.Outcomes[1].Error).IsNull();
-        await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut + 1);
-        var outcome = OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
-            "root", request.Requests[0].RequestId)
-            ?? throw new InvalidOperationException("The submitted first-lane outcome is absent.");
-        var original = outcome.Get<ReceiveResult>();
-        var delivery = await Assert.That(original.Deliveries).HasSingleItem();
-        await Assert.That(delivery.Id).IsEqualTo("large");
-        await Assert.That(delivery.PayloadJson).IsEqualTo(payload);
-        await Assert.That(delivery.HeadersJson).IsEqualTo("{\"kind\":\"large\"}");
-        await Assert.That(delivery.Attempt).IsEqualTo(1);
-        await Assert.That(delivery.LeaseVersion).IsEqualTo(1L);
-        await Assert.That(OrleansSerialization.Serialize(new GrainValue(original)).Length).IsGreaterThan(replyCeiling);
-        await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Database.Store, fixture.Database.Partition,
-            "root", request.Requests[1].RequestId)).IsNull();
-        await Assert.That(OrleansSerialization.Serialize(fixture.Database.Database.InspectMessage("root", lanes[1], "untouched")!)
-            .SequenceEqual(before)).IsTrue();
-        var state = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
-        var position = fixture.Database.Store.Position;
-        var retry = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request);
-        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(retry)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(reply)))).IsTrue();
-        await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
-        await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);
-        await HealthyAsync(fixture);
-    }
-
     private static async Task HealthyAsync(RequestCqrsHostedRuntimeFixture fixture)
     {
         var lane = MultiLaneReceiveFlow.Seed(fixture, 1)[0];

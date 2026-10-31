@@ -13,8 +13,6 @@ internal static class TextOnlineIntentApplication
         var target = session.Target ?? throw TextErrors.Ownership();
         TextIncrementalIntentValidation.Require(intent, target.Scope, target.Consumer,
             target.Generation, target.Placement, budget);
-        budget.ChargeBytes(OrleansSerialization.Measure(intent.Records));
-        budget.ChargeBytes(OrleansSerialization.Measure(target.Records));
         if (intent.NextRecord != target.NextRecord || !OrleansSerialization.Serialize(intent.Records).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(target.Records)))
         {

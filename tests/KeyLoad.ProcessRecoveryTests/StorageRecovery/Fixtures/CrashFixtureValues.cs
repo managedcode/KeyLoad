@@ -11,7 +11,7 @@ internal static class CrashFixtureValues
     // Fixed child-process protocol tokens. They are machine signals, not localized console text.
     internal const string CrashMarker = "crash-point";
     internal const string Acknowledgement = "ack";
-    internal const string ProcessingCommandFile = "processing-command.json";
+    internal const string ProcessingCommandFile = "processing-command.bin";
     internal const string IncomingSnapshotFile = "incoming.snapshot";
     internal const string SnapshotSourceDirectory = "snapshot-source";
     internal const string Principal = "root";

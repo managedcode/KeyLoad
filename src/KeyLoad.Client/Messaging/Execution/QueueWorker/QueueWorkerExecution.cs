@@ -1,4 +1,3 @@
-using System.Text;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Client;
@@ -62,14 +61,14 @@ internal static class QueueWorkerExecution
                 return available.Remaining <= QueueWorkerProtocol.EmptyCapacity
                     ? QueueWorkerStopReason.DeliveryBudget : QueueWorkerStopReason.ReceiveBudget;
             }
-            if (available.Slots <= QueueWorkerProtocol.EmptyCapacity || available.Bytes <= QueueWorkerProtocol.EmptyCapacity)
+            if (available.Slots <= QueueWorkerProtocol.EmptyCapacity)
             {
                 await QueueWorkerSettlement.WaitOneOrStopAsync(session).ConfigureAwait(false);
                 continue;
             }
             var id = available.Calls == QueueWorkerProtocol.NoPriorReceives ? firstReceive : Guid.NewGuid();
             var request = new ReceiveRequest(id, lane, Math.Min(available.Slots, available.Remaining),
-                Math.Min(available.Bytes, session.Policy.MaximumReceiveBytes), session.Policy.LeaseSeconds);
+                LeaseSeconds: session.Policy.LeaseSeconds);
             session.ReceiveStarted();
             var result = await QueueWorkerReceive.RunAsync(client, request, session.Policy,
                 session.Observe, session.Lifetime.Token).ConfigureAwait(false);
@@ -80,13 +79,10 @@ internal static class QueueWorkerExecution
                 return QueueWorkerStopReason.ReceiveRefused;
             }
             var page = result.Value;
-            var bodyBytes = page.Deliveries.Sum(value => checked((long)Encoding.UTF8.GetByteCount(value.PayloadJson)
-                + Encoding.UTF8.GetByteCount(value.HeadersJson)));
-            if (page.RequestId != request.RequestId || page.Deliveries.Length > request.MaxMessages
-                || bodyBytes > available.Bytes)
+            if (page.RequestId != request.RequestId || page.Deliveries.Length > request.MaxMessages)
             {
                 session.KnownUnhandled(page.Deliveries);
-                session.Stop(bodyBytes > available.Bytes ? QueueWorkerStopReason.InFlightBytes : QueueWorkerStopReason.RuntimeReplyRejected);
+                session.Stop(QueueWorkerStopReason.RuntimeReplyRejected);
                 return QueueWorkerStopReason.RuntimeReplyRejected;
             }
             foreach (var delivery in page.Deliveries)

@@ -9,7 +9,7 @@ internal sealed class EventSourceLogCapture : EventListener
 {
     private const string LoggingEventSourceName = "Microsoft-Extensions-Logging";
     private const string FilterSpecsKey = "FilterSpecs";
-    private const string LoggerFilter = "GrainFailureDiagnosticsTests:Warning;McpTransportDiagnosticsTests:Warning;KeyLoad.Clustering.ConnectionGrain:Warning";
+    private const string LoggerFilter = "GrainFailureDiagnosticsTests:Warning;McpTransportDiagnosticsTests:Warning;KeyLoad.Clustering.RequestGrain:Warning";
     private const string FormattedMessageEvent = "FormattedMessage";
     private const string LoggerNameField = "LoggerName";
     private readonly ConcurrentQueue<(string? Logger, string Row)> messages = new();

@@ -37,7 +37,6 @@ internal static class QueueWorkerClusterProcess
         await child.KillAndJoinAsync();
         await ImagesAsync(sdk, mcp, seed, context, token);
         var request = new ReceiveRequest(receiveId, seed.Lane, QueueWorkerClusterProtocol.SingleDelivery,
-            QueueWorkerClusterProtocol.Options(QueueWorkerClusterProtocol.SingleDelivery).Value.MaximumReceiveBytes,
             QueueWorkerClusterProtocol.LeaseSeconds);
         var recovered = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(request, token));
         await QueueWorkerClusterAssertions.EqualAsync(recovered.Deliveries.ToArray(), new[] { claim.Delivery });

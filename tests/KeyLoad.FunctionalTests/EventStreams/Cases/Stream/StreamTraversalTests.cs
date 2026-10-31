@@ -22,15 +22,11 @@ internal sealed class StreamTraversalTests
     }
 
     [Test]
-    public async Task ByteRefusalTamperedScopeAndCancellationLeaveCompleteCutThenHealthyTraversal()
+    public async Task TamperedScopeAndCancellationLeaveCompleteCutThenHealthyTraversal()
     {
         using var fixture = new StreamReadResourceFixture(eventCount: StreamTraversalTestProtocol.Third, protectedFields: true);
         var before = fixture.Cut();
         var valid = fixture.Traverse(fixture.Traversal(limit: StreamTraversalTestProtocol.First));
-        var continued = fixture.Traverse(fixture.Traversal(limit: StreamTraversalTestProtocol.First, cursor: valid.Cursor));
-        var bytes = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(continued, JsonDefaults.Options).Length;
-        var tooLarge = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Traverse(fixture.Traversal(limit: StreamTraversalTestProtocol.First, maxBytes: bytes - StreamTraversalTestProtocol.First, cursor: valid.Cursor)));
-        await Assert.That(tooLarge.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         var wrongDirection = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Traverse(
             fixture.Traversal(StreamReadDirection.Backward, cursor: valid.Cursor)));
         await Assert.That(wrongDirection.Code).IsEqualTo(ErrorCode.CursorExpired);
@@ -41,7 +37,7 @@ internal sealed class StreamTraversalTests
         await cancelled.CancelAsync();
         Assert.ThrowsExactly<OperationCanceledException>(() => fixture.Traverse(fixture.Traversal(), cancelled.Token));
         await StreamTraversalAssertions.UnchangedAsync(fixture, before);
-        var healthy = fixture.Traverse(fixture.Traversal(limit: StreamTraversalTestProtocol.First, maxBytes: bytes, cursor: valid.Cursor));
+        var healthy = fixture.Traverse(fixture.Traversal(limit: StreamTraversalTestProtocol.First, cursor: valid.Cursor));
         await StreamTraversalAssertions.PageAsync(healthy, [StreamTraversalTestProtocol.Second], StreamTraversalTestProtocol.Third, true);
         await StreamTraversalAssertions.UnchangedAsync(fixture, before);
     }

@@ -8,9 +8,6 @@ internal sealed class ReadBudgetAllocationTests
 {
     private const int LargeValueBytes = 1_048_576;
     private const long RejectionAllocationAllowance = 131_072;
-    private const long SerializationAllocationAllowance = 262_144;
-    private const int ResultParts = 4_096;
-    private const int ResultPartCharacters = 512;
     private const string Prefix = "budget/";
     private const string FirstKey = "budget/1";
     private const string SecondKey = "budget/2";
@@ -38,20 +35,6 @@ internal sealed class ReadBudgetAllocationTests
     }
 
     [Test]
-    public async Task AcMp005ResultCountingDoesNotAllocateACompleteSerializedResultBuffer()
-    {
-        var result = Enumerable.Repeat(new string('x', ResultPartCharacters), ResultParts).ToArray();
-        new ReadExecutionBudget().CheckResult(result);
-        var budget = new ReadExecutionBudget(cancellationToken: TestContext.Current!.Execution.CancellationToken);
-
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        budget.CheckResult(result);
-        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-
-        await Assert.That(allocated).IsLessThan(SerializationAllocationAllowance);
-    }
-
-    [Test]
     public async Task AcMp002CancellationAndReadFailurePreserveTheCommittedStore()
     {
         using var fixture = new StoreFixture();
@@ -64,7 +47,6 @@ internal sealed class ReadBudgetAllocationTests
 
         await Assert.That(() => fixture.Store.Read(view => budget.Read(view, key))).Throws<OperationCanceledException>();
         await Assert.That(() => fixture.Store.Read(view => budget.Scan(view, Key(Prefix), 1))).Throws<OperationCanceledException>();
-        await Assert.That(() => budget.CheckResult(new JsonRecord(EscapedUnicode))).Throws<OperationCanceledException>();
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         fixture.Store.Commit((tx, _) => { tx.PutRecord(Key(SecondKey), new JsonRecord(EscapedUnicode)); return true; });
         await Assert.That(fixture.Store.Read(view => view.Scan(Key(Prefix), 2).Records.Length)).IsEqualTo(2);

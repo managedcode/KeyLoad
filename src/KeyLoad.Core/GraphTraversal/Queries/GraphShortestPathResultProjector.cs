@@ -28,7 +28,6 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
             Vertices = vertices,
             Edges = edges
         };
-        budget.CheckResult(result);
         return result;
     }
 
@@ -36,7 +35,6 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
     {
         var result = new GraphShortestPathResult(ContractVersion, false, null, ImmutableArray<EntityRef>.Empty,
             ImmutableArray<EdgeRecord>.Empty, database.Store.Position);
-        budget.CheckResult(result);
         return result;
     }
 

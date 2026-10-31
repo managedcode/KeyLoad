@@ -7,7 +7,7 @@ namespace KeyLoad.Query.QueryExecution;
 /// <summary>Streams one authorized access path through the shared read budget.</summary>
 internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
     ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, Action<DocumentRecord> accept,
-    PartitionQueryLeafReadGrant? leafGrant = null, long? visibilitySourceEpoch = null, QueryKeysetPage? keyset = null)
+    long? visibilitySourceEpoch = null, QueryKeysetPage? keyset = null)
 {
     private const string PointPath = "point";
     private const string IndexPathPrefix = "index:";
@@ -17,7 +17,6 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     private const string IdentifierPath = "/@id";
     private const string CandidateLimitExceeded = "The query access path exceeds its candidate budget.";
     private const string FullScanDenied = "The query requires an index or explicit full-scan permission.";
-    private readonly PartitionQueryLeafReadGrant? leafGrant = leafGrant;
 
     internal string Visit()
     {
@@ -97,25 +96,13 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     {
         budget.Check();
         var key = KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, id);
-        if (leafGrant is null)
-        {
-            view.ReadValue(key, Candidate, budget.ChargeBytes);
-        }
-        else
-        {
-            leafGrant.ReadValue(view, key, Candidate);
-        }
+        view.ReadValue(key, Candidate);
     }
 
     /// <summary>Visits a complete range in storage-sized pages; only the visitor ends it early.</summary>
     private StorageScanResult VisitRange(byte[] prefix, StorageRecordVisitor visitor, byte[]? afterKey = null)
     {
-        if (leafGrant is null)
-        {
-            return budget.VisitAll(view, prefix, visitor, afterKey);
-        }
-
-        return leafGrant.VisitRange(view, prefix, visitor);
+        return budget.VisitAll(view, prefix, visitor, afterKey);
     }
 
     private static IEnumerable<KeyValuePair<string, object?>> Equalities(Predicate? predicate,

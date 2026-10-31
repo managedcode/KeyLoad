@@ -18,7 +18,6 @@ internal static class TextOnlineCatalogFiles
         TextFileIO.VerifyDirectory(root);
         var path = Path.Combine(root, CurrentFile);
         TextFileIO.VerifyRegularFile(path);
-        budget.ChargeBytes(new FileInfo(path).Length);
         var result = TextFileIO.ReadEnvelope<TextOnlineCatalog>(path,
             options.Value.MaximumOwnerReceiptBytes);
         ValidateShape(result);
@@ -42,7 +41,6 @@ internal static class TextOnlineCatalogFiles
         if (File.Exists(pending))
         {
             TextFileIO.VerifyRegularFile(pending);
-            budget.ChargeBytes(new FileInfo(pending).Length);
             var retainedPending = TextFileIO.ReadEnvelope<TextOnlineCatalog>(pending,
                 options.Value.MaximumOwnerReceiptBytes);
             RequireRebind(retainedPending, catalog, budget);
@@ -54,9 +52,7 @@ internal static class TextOnlineCatalogFiles
         {
             TextFileIO.VerifyRegularFile(current);
         }
-        budget.ChargeBytes(OrleansSerialization.Measure(catalog));
         TextFileIO.WriteEnvelope(pending, catalog, options.Value.MaximumOwnerReceiptBytes, options, resources);
-        budget.ChargeBytes(new FileInfo(pending).Length);
         var verified = TextFileIO.ReadEnvelope<TextOnlineCatalog>(pending,
             options.Value.MaximumOwnerReceiptBytes);
         ValidateShape(verified);
@@ -98,8 +94,6 @@ internal static class TextOnlineCatalogFiles
             AppliedPosition = fresh.AppliedPosition,
             ThroughSequence = fresh.ThroughSequence
         };
-        budget.ChargeBytes(OrleansSerialization.Measure(normalized));
-        budget.ChargeBytes(OrleansSerialization.Measure(fresh));
         if (!OrleansSerialization.Serialize(normalized).AsSpan().SequenceEqual(OrleansSerialization.Serialize(fresh)))
         {
             throw TextErrors.Mismatch();

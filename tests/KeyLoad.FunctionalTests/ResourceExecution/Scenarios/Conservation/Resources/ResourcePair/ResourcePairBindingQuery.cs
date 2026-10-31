@@ -21,7 +21,6 @@ internal static class ResourcePairBindingQuery
         await RefusedAsync(state, Capability.VectorSearch, ErrorCode.PermissionDenied);
         Configure(state.Source, true, NextPolicyEpoch);
         await HealthyAsync(state, state.Source.Database, true);
-        await BudgetAsync(state, token);
         await AbsentAsync(state);
         await ResourcePairBindingAssertions.PairsAsync(state, state.Source.Store);
     }
@@ -69,43 +68,6 @@ internal static class ResourcePairBindingQuery
         await ResourceIncarnationAssertions.EqualAsync(new DocumentResult(state.Source.ExpectedReference(new(state.Source.Partition, Documents,
             state.Mixed[Zero].Id)), FirstRevision, DocumentJson, false, []), actual);
         await Assert.That(entered).IsTrue();
-    }
-
-    private static async Task BudgetAsync(ResourcePairBindingState state, CancellationToken token)
-    {
-        var database = state.Source.Database;
-        var image = QueueWholeFlowStorage.Bytes(state.Source.Store);
-        var position = state.Source.Store.Position;
-        var entered = false;
-        DocumentResult Read(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource)
-        {
-            entered = true;
-            return Project(state, database, view, principal, resource);
-        }
-        var baseline = new ReadExecutionBudget(database.EvaluationClock, token);
-        baseline.ConstrainWork(baseline.RuntimeMaximumReadBytes, baseline.MaximumScanRecords);
-        var expected = database.WithQueryView(QueryUser, state.Source.Partition, Documents, Capability.VectorSearch, Read, baseline);
-        await Assert.That(entered).IsTrue();
-        var lifetimeCharge = ResourcePairBindingFlow.LifetimeKey(state.Source.Partition, Documents).Length
-            + (long)state.Pairs[Documents].Lifetime.Length;
-        await Assert.That(baseline.ReadBytes).IsGreaterThan(lifetimeCharge);
-        await Assert.That(baseline.ConstrainedRecords).IsGreaterThan(One);
-        var limited = new ReadExecutionBudget(database.EvaluationClock, token);
-        limited.ConstrainWork(baseline.ReadBytes - One, limited.MaximumScanRecords);
-        entered = false;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => database.WithQueryView(QueryUser, state.Source.Partition,
-            Documents, Capability.VectorSearch, Read, limited));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(entered).IsFalse();
-        await Assert.That(limited.ReadBytes).IsEqualTo(baseline.ReadBytes - lifetimeCharge);
-        await Assert.That(limited.ConstrainedRecords).IsEqualTo(baseline.ConstrainedRecords - One);
-        var healthy = new ReadExecutionBudget(database.EvaluationClock, token);
-        healthy.ConstrainWork(healthy.RuntimeMaximumReadBytes, healthy.MaximumScanRecords);
-        await ResourceIncarnationAssertions.EqualAsync(expected, database.WithQueryView(QueryUser, state.Source.Partition,
-            Documents, Capability.VectorSearch, Read, healthy));
-        await Assert.That(healthy.ReadBytes).IsEqualTo(baseline.ReadBytes);
-        await Assert.That(healthy.ConstrainedRecords).IsEqualTo(baseline.ConstrainedRecords);
-        await ResourceIncarnationAssertions.UnchangedAsync(state.Source.Store, image, position);
     }
 
     private static async Task AbsentAsync(ResourcePairBindingState state)

@@ -79,13 +79,10 @@ internal static class TextIncrementalRoot
             new TextOwnerReceipt(TextProtocol.FormatVersion, root, leaf, scope.NodeId,
                 scope, [new(TextProtocol.RuntimeDirectoryCore, true)]),
             executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions, resources);
-        budget.ChargeBytes(OrleansSerialization.Measure(request));
-        budget.ChargeBytes(SHA256.HashSizeInBytes);
         var originalDigest = SHA256.HashData(OrleansSerialization.Serialize(request));
         var enrollment = new TextIncrementalEnrollment(TextIncrementalProtocol.FormatVersion,
             request.CommandId, scope, request.Consumer, request.IndexGeneration, request.Placement, originalDigest,
             sourceUpperSequence, resourceSha256);
-        budget.ChargeBytes(OrleansSerialization.Measure(enrollment));
         TextFileIO.WriteEnvelope(Path.Combine(path, TextIncrementalProtocol.EnrollmentFile),
             enrollment, executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions, resources);
         _ = CheckRoot(root, scope.NodeId, executionOptions, budget);
@@ -95,7 +92,6 @@ internal static class TextIncrementalRoot
         IOptions<TextExecutionOptions> executionOptions, ReadExecutionBudget? budget = null)
     {
         budget?.Check();
-        budget?.ChargeBytes(new FileInfo(Path.Combine(root, TextProtocol.RootReceiptFile)).Length);
         TextRootFiles.VerifyReceipt(root, sourceNodeId, executionOptions);
         var generations = InitialGenerationCount;
         foreach (var entry in Directory.EnumerateFileSystemEntries(root))
@@ -115,7 +111,6 @@ internal static class TextIncrementalRoot
             }
             budget?.Check();
             TextFileIO.VerifyDirectory(entry);
-            budget?.ChargeBytes(new FileInfo(Path.Combine(entry, TextProtocol.OwnerFile)).Length);
             var owner = TextOwnerFiles.ReadOwner(Path.Combine(entry, TextProtocol.OwnerFile),
                 root, leaf, sourceNodeId, executionOptions);
             CheckEntries(entry);

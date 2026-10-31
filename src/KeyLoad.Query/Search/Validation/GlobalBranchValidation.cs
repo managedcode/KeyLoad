@@ -9,7 +9,7 @@ internal static class GlobalBranchValidation
     private const string InvalidWindow = "A global branch window is malformed or incomparable.";
     private const int MaximumIdentifierCharacters = 256;
 
-    internal static HashSet<string> ValidateRequest(GlobalBranchMergeRequest request, ImmutableArray<GlobalBranchWindow> windows, ReadExecutionBudget budget, GlobalBranchByteAdmission bytes)
+    internal static HashSet<string> ValidateRequest(GlobalBranchMergeRequest request, ImmutableArray<GlobalBranchWindow> windows, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
@@ -19,8 +19,6 @@ internal static class GlobalBranchValidation
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
         }
         PreflightIdentifiers(request, windows, budget);
-        bytes.Accept(OrleansSerialization.Measure(request));
-        PreflightWindowHeaders(windows, budget, bytes);
         var expected = ValidateExpectedIds(request.ExpectedWindowIds, budget);
         return ValidateWindowHeaders(request, windows, expected, budget);
     }
@@ -45,23 +43,6 @@ internal static class GlobalBranchValidation
             CheckIdentifier(window.BranchName);
             CheckIdentifier(window.SourceWindowId);
             ValidateScope(window.Scope);
-        }
-    }
-
-    private static void PreflightWindowHeaders(ImmutableArray<GlobalBranchWindow> windows,
-        ReadExecutionBudget budget, GlobalBranchByteAdmission bytes)
-    {
-        foreach (var window in windows)
-        {
-            budget.Check();
-            if (window is null || window.Scope is null || window.Candidates.IsDefault)
-            {
-                throw Errors.Fail(ErrorCode.Corruption, InvalidWindow);
-            }
-            bytes.Accept(OrleansSerialization.Measure(window with
-            {
-                Candidates = []
-            }));
         }
     }
 

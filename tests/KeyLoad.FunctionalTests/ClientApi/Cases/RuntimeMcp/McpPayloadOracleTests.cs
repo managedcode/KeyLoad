@@ -46,7 +46,6 @@ internal sealed class McpPayloadOracleTests
         await Assert.That(leaf.Lane).IsEqualTo(new QueueLaneRef(
             new("mcp-tenant", "mcp-database", "mcp-domain", ExpectedPartitionKey), "mcp-records"));
         await Assert.That(leaf.MaxMessages).IsEqualTo(1);
-        await Assert.That(leaf.MaxBytes).IsEqualTo(1_048_576);
         await Assert.That(leaf.LeaseSeconds).IsEqualTo(30);
     }
 }

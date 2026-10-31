@@ -31,7 +31,7 @@ source metric. KeyLoad sets no group, record, byte or lifetime ceiling
 ([ADR-149](../ADR/ADR-149-no-operation-limits.md)): it sizes the engine's
 ingestion queue by the captured row count, never truncates dimension values and
 sets the engine query timeout only from the caller's explicit expiry. The output
-must fit the grain reply ceiling.
+is not measured or capped.
 Canonical timestamps may be ahead of system UTC. Each disposable generation
 configures the engine's ingestion skew to include its latest already captured
 timestamp. Original timestamps, capture limits and complete-ingestion checks stay

@@ -31,7 +31,6 @@ internal sealed class TextCapturedCommitAuthorityHarness : IDisposable
         execution = options.Value;
         execution.Validate();
         budget = new(database.EvaluationClock, token);
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         SearchRequestValidation.Validate(request, false, execution);
         if (request.Text is null || request.TextField is null || request.Vector is not null)

@@ -20,9 +20,6 @@ internal static class DistributedSearchCandidateWindow
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
         GlobalBranchOrder.SortScores(scores, budget);
-        var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        admission.Accept(checked(PartitionQueryRetention.ArrayDescriptorBytes
-            + (long)scores.Length * PartitionQueryRetention.PointerBytes));
         var candidates = ImmutableArray.CreateBuilder<GlobalBranchCandidate>(scores.Length);
         for (var index = FirstCandidate; index < scores.Length; index++)
         {
@@ -35,12 +32,10 @@ internal static class DistributedSearchCandidateWindow
                 throw Errors.Fail(ErrorCode.HistoryUnavailable, MissingDocument);
             }
             var candidate = new GlobalBranchCandidate(document.Reference, document.Revision, score.Score);
-            admission.Accept(OrleansSerialization.Measure(candidate));
             candidates.Add(candidate);
         }
         var result = new GlobalBranchWindow(branchName, kind, sourceWindowId, scope,
             candidates.MoveToImmutable(), true, false, false, true);
-        budget.CheckResult(result);
         return result;
     }
 }

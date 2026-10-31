@@ -56,7 +56,6 @@ internal sealed partial class TextCapturedRead
             return;
         }
         execution.Dispose();
-        budget.CompleteSettledReadGrant(grant);
         runtimeJoined = true;
     }
 }

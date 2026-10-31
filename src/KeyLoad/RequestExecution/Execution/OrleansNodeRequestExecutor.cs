@@ -1,13 +1,10 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Server;
 
 /// <summary>Bounds one admitted execution request and its complete CQRS response stream.</summary>
-internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> routingOptions,
-    ILogger<OrleansNode> logger)
+internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
 {
     internal static Task CloseAsync(IGrainFactory grains, IServiceProvider services,
         Guid connectionId, CancellationToken cancellationToken)
@@ -43,11 +40,8 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
         var grains = factory ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var services = runtime ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
-        var clock = services.GetRequiredService<TimeProvider>();
-        using var deadline = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
-        using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
-        var reply = await DrainAsync(grains, services, connectionId, requestId, envelope, command, clock,
-            progress, execution.Token, cancellationToken);
+        var reply = await DrainAsync(grains, services, connectionId, requestId, envelope, command,
+            progress, cancellationToken);
         if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected);
@@ -56,9 +50,8 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
     }
 
     private async Task<GrainOperationReply> DrainAsync(IGrainFactory grains, IServiceProvider services,
-        Guid connectionId, Guid requestId, GrainRequestEnvelope envelope, bool command, TimeProvider clock,
-        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
-        CancellationToken executionToken, CancellationToken callerToken)
+        Guid connectionId, Guid requestId, GrainRequestEnvelope envelope, bool command,
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken executionToken)
     {
         var stage = OrleansRpcFailureStage.Preparation;
         OrleansRpcFailureOperation? originalOperation = null;
@@ -78,16 +71,13 @@ internal sealed class OrleansNodeRequestExecutor(IOptions<GrainRoutingOptions> r
             }
             Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
                 token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(envelope, token);
-            var serializer = services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
             return progress is null
-                ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, serializer, requestId, clock,
-                    routingOptions, purpose, executionToken)
-                : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, serializer, requestId, clock,
-                    routingOptions, purpose, progress, executionToken);
+                ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, requestId, purpose, executionToken)
+                : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, requestId, purpose, progress, executionToken);
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
-            throw OrleansRpcFailure.Translate(failure, command, requestId, logger, stage, originalOperation, callerToken);
+            throw OrleansRpcFailure.Translate(failure, command, requestId, logger, stage, originalOperation, executionToken);
         }
     }
 }

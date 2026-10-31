@@ -47,8 +47,6 @@ internal static class TextIncrementalGenerationFlow
     private static void RequireRecords(TextIncrementalIntent intent,
         TextIncrementalManifest manifest, ReadExecutionBudget budget)
     {
-        budget.ChargeBytes(OrleansSerialization.Measure(intent.Records));
-        budget.ChargeBytes(OrleansSerialization.Measure(manifest.Records));
         var original = OrleansSerialization.Serialize(intent.Records);
         var target = OrleansSerialization.Serialize(manifest.Records);
         budget.Check();

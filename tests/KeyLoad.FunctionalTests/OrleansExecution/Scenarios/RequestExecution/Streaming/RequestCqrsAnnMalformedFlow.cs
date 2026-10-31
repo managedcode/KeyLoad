@@ -17,25 +17,21 @@ internal static class RequestCqrsAnnMalformedFlow
         var serializer = fixture.Services
             .GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         var stream = CqrsStreamLifetime.RunWithPurpose(
-            execution => RequestCqrsAnnProducer.Run(id, original, fault, producer,
-                fixture.RoutingOptions.Value.MaximumStreamFrames, execution), serializer, id, fixture.Clock,
-            producer.MarkActivationSettled, fixture.RoutingOptions, null,
+            execution => RequestCqrsAnnProducer.Run(id, original, fault, producer, execution), id,
+            producer.MarkActivationSettled, null,
             new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         KeyLoadException? failure = null;
         try
         {
-            _ = await GrainRequestStreamConsumer.DrainWithPurposeAsync(_ => stream, serializer, id,
-                fixture.Clock, fixture.RoutingOptions,
+            _ = await GrainRequestStreamConsumer.DrainWithPurposeAsync(_ => stream, id,
                 new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         }
         catch (KeyLoadException error) { failure = error; }
         await producer.ProducerSettled.Task.WaitAsync(token);
         await producer.ActivationSettled.Task.WaitAsync(token);
         await Assert.That(failure).IsNotNull();
-        await Assert.That(failure!.Code).IsEqualTo(fault == RequestCqrsAnnFault.FrameBudget
-            ? ErrorCode.BudgetExceeded : ErrorCode.OwnershipLost);
-        await Assert.That(failure.Message).IsEqualTo(fault == RequestCqrsAnnFault.FrameBudget
-            ? GrainRoutingProtocol.ReplyBudgetExceeded : GrainRoutingProtocol.InvalidRequest);
+        await Assert.That(failure!.Code).IsEqualTo(ErrorCode.OwnershipLost);
+        await Assert.That(failure.Message).IsEqualTo(GrainRoutingProtocol.InvalidRequest);
         await Assert.That(producer.ProducerSettlementCount).IsEqualTo(RequestCqrsAnnTestData.OneStep);
         await Assert.That(producer.ActivationSettlementCount).IsEqualTo(RequestCqrsAnnTestData.OneStep);
     }

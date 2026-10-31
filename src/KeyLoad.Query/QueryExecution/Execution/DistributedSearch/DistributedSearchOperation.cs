@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
@@ -8,20 +7,18 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal sealed class DistributedSearchOperation(DistributedSearchRequest request,
     ImmutableArray<PartitionRef> partitions, IOptions<QueryExecutionOptions> options,
-    ReadExecutionBudget budget, ReadExecutionBudgetReadGrant[] grants,
-    Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
-        Task<DistributedSearchPreparedLeaf>> prepare,
+    ReadExecutionBudget budget,
+    Func<DistributedSearchPhaseWork, ReadExecutionBudget, CancellationToken, Task<DistributedSearchPreparedLeaf>> prepare,
     Func<CancellationToken, Task> sourceBarrier, CancellationTokenSource execution,
     Func<CancellationToken, Task>? statisticsCaptured)
 {
-    private const int FirstLeaf = 0;
     private const string ScoreProfile = "distributed-canonical";
 
     internal async Task<DistributedSearchPage> RunAsync()
     {
         var initial = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Statistics, partitions,
             request.Search, default, null, null, default, default, budget);
-        var captured = await RunAsync(DistributedSearchPhase.Statistics, initial).ConfigureAwait(true);
+        var captured = await RunAsync(initial).ConfigureAwait(true);
         var witnesses = Witnesses(captured);
         DistributedSearchStatisticsRequestBinding.Require(request.Search, witnesses, options, budget);
         var digest = DistributedSearchRequestDigest.Create(request, budget);
@@ -36,30 +33,28 @@ internal sealed class DistributedSearchOperation(DistributedSearchRequest reques
         }
         var candidateWork = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Candidates, partitions,
             request.Search, witnesses, statistics, scope, windows, default, budget);
-        var candidates = await RunAsync(DistributedSearchPhase.Candidates, candidateWork).ConfigureAwait(true);
+        var candidates = await RunAsync(candidateWork).ConfigureAwait(true);
         var selected = DistributedSearchGlobalFusion.Select(request.Search,
             Branches(candidates, text: true), Branches(candidates, text: false), windows, scope, budget, out var fusion);
         var projectionWork = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Projection, partitions,
             request.Search, witnesses, null, null, default, selected, budget);
-        var projected = await RunAsync(DistributedSearchPhase.Projection, projectionWork).ConfigureAwait(true);
+        var projected = await RunAsync(projectionWork).ConfigureAwait(true);
         await sourceBarrier(execution.Token).ConfigureAwait(true);
         budget.Check();
         var finalWork = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Revalidate, partitions,
             request.Search, witnesses, null, null, default, default, budget);
-        _ = await RunAsync(DistributedSearchPhase.Revalidate, finalWork).ConfigureAwait(true);
+        _ = await RunAsync(finalWork).ConfigureAwait(true);
         budget.Check();
         return DistributedSearchPublicMapper.Map(selected, projected, witnesses, epoch,
             fusion, request.Search.Explain, budget);
     }
 
-    private Task<ImmutableArray<DistributedSearchLeafResult>> RunAsync(DistributedSearchPhase phase,
+    private Task<ImmutableArray<DistributedSearchLeafResult>> RunAsync(
         ImmutableArray<DistributedSearchPhaseWork> work)
-        => DistributedSearchPhaseBatch.RunAsync(work, grants, DistributedSearchGrants.Index(phase,
-            FirstLeaf, partitions.Length), options, budget, prepare, execution);
+        => DistributedSearchPhaseBatch.RunAsync(work, options, budget, prepare, execution);
 
     private ImmutableArray<DistributedTextWitness> Witnesses(ImmutableArray<DistributedSearchLeafResult> results)
     {
-        budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(results.Length));
         var witnesses = ImmutableArray.CreateBuilder<DistributedTextWitness>(results.Length);
         foreach (var result in results)
         {
@@ -71,7 +66,6 @@ internal sealed class DistributedSearchOperation(DistributedSearchRequest reques
 
     private DistributedTextStatistics Statistics(ImmutableArray<DistributedTextWitness> witnesses)
     {
-        budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(witnesses.Length));
         var summaries = ImmutableArray.CreateBuilder<DistributedTextStatistics>(witnesses.Length);
         foreach (var witness in witnesses)
         {
@@ -87,7 +81,6 @@ internal sealed class DistributedSearchOperation(DistributedSearchRequest reques
         {
             return [];
         }
-        budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(results.Length));
         var windows = ImmutableArray.CreateBuilder<GlobalBranchWindow>(results.Length);
         foreach (var result in results)
         {

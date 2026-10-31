@@ -60,7 +60,7 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return GrainReplyFactory.Failure(error, false, diagnostics, codec.ExecutionOptions, requestId,
+            return GrainReplyFactory.Failure(error, false, diagnostics, requestId,
                 GrainFailureStage.CapabilityExecution, cancellationToken);
         }
     }

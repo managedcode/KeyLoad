@@ -40,7 +40,6 @@ internal static class SampleRangeReader
             return records.Count < request.Limit;
         }, after, until);
         var result = records.ToArray();
-        budget.CheckResult(result);
         return result;
     }
 

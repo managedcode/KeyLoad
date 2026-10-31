@@ -11,7 +11,6 @@ namespace KeyLoad.Query;
 /// <param name="MissingPolicy">The policy for missing values.</param>
 /// <param name="Adapters">The supported query adapters.</param>
 /// <param name="Predicates">The supported predicate forms.</param>
-/// <param name="MaxBytes">The configured maximum result size in bytes, or <see cref="int.MaxValue"/> when no result ceiling is configured.</param>
 /// <param name="FullScanRequiresOptIn">Whether full scans require explicit caller opt-in.</param>
 /// <param name="ReadOnly">Whether queries described by this manifest are read-only.</param>
 /// <param name="ReadProfiles">The available read profiles.</param>
@@ -21,6 +20,6 @@ namespace KeyLoad.Query;
 [Orleans.Alias(ContractAliases.QueryCapabilityManifest)]
 public sealed record QueryCapabilityManifest([property: Orleans.Id(0)] int ProtocolVersion, [property: Orleans.Id(1)] int AstVersion, [property: Orleans.Id(2)] string SqlDialect, [property: Orleans.Id(3)] string Scope,
     [property: Orleans.Id(4)] string NumericPolicy, [property: Orleans.Id(5)] string MissingPolicy, [property: Orleans.Id(6)] ImmutableArray<string> Adapters, [property: Orleans.Id(7)] ImmutableArray<string> Predicates,
-    [property: Orleans.Id(10)] int MaxBytes, [property: Orleans.Id(12)] bool FullScanRequiresOptIn, [property: Orleans.Id(13)] bool ReadOnly, [property: Orleans.Id(15)] ImmutableArray<string> ReadProfiles,
+    [property: Orleans.Id(12)] bool FullScanRequiresOptIn, [property: Orleans.Id(13)] bool ReadOnly, [property: Orleans.Id(15)] ImmutableArray<string> ReadProfiles,
     [property: Orleans.Id(16)] ImmutableArray<int> SupportedAstVersions,
     [property: Orleans.Id(17)] ImmutableArray<int> SupportedQueryDialectVersions);

@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.FunctionalTests.Search;
 
@@ -20,15 +19,12 @@ internal static class OnlineTextProgressFrames
     internal static async Task<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>[]> CreateAsync(
         Guid requestId, OnlineTextPhase[] phases)
     {
-        var options = new GrainRoutingOptions();
-        options.Validate();
-        var accounting = new OnlineTextFrameAccounting(Options.Create(options));
         var stream = CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(async writer =>
         {
             await writer.StartedAsync(new GrainRequestProgress(requestId));
             foreach (var phase in phases)
             {
-                await OnlineTextProgress.WriteAsync(writer, accounting, requestId, phase);
+                await OnlineTextProgress.WriteAsync(writer, requestId, phase);
             }
             // Opaque terminal bytes are only a execution CQRS grammar control, never an online maintenance result.
             return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(new byte[] { ControlPayload }) });

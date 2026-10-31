@@ -23,13 +23,10 @@ internal static class TextIncrementalPagePlanner
         {
             throw TextErrors.Corrupt();
         }
-        budget.ChargeBytes(checked((long)records.Length * TextIncrementalSourceProtocol.MapSlotBytes));
         var map = new Dictionary<EntityRef, TextIncrementalRecord>();
         var ids = new HashSet<ulong>();
         foreach (var record in records)
         {
-            budget.ChargeBytes(OrleansSerialization.Measure(record));
-            budget.ChargeBytes(sizeof(ulong));
             if (record.Id < InitialRecord || record.Id >= nextRecord || !ids.Add(record.Id)
                 || record.Revision <= InitialRevisionBoundary || record.CanonicalSha256.Length != SHA256.HashSizeInBytes
                 || record.Reference.Partition != batch.Consumer.Consumer.Partition

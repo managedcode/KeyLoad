@@ -1,14 +1,9 @@
 using KeyLoad.Core.TimeSeries;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
 internal sealed class SampleChunkJobDispatch(BackgroundStorageClient storage, GrainRequestCodec codec,
-    IServiceProvider services, TimeProvider clock,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-    IOptions<GrainRoutingOptions> routing)
+    IServiceProvider services)
 {
     internal async Task<GrainOperationReply> ExecuteAsync(IGrainFactory grains, SampleChunkWorkHint hint,
         CancellationToken cancellationToken)
@@ -28,7 +23,7 @@ internal sealed class SampleChunkJobDispatch(BackgroundStorageClient storage, Gr
         var envelope = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, hint.CommandId, payload);
         var request = grains.GetGrain<IConnectionGrain>(connectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
-            createStream: token => request.ExecuteStreamAsync(envelope, token), serializer: serializer,
-            requestId: requestId, clock: clock, cancellationToken: cancellationToken, options: routing).ConfigureAwait(true);
+            createStream: token => request.ExecuteStreamAsync(envelope, token),
+            requestId: requestId, cancellationToken: cancellationToken).ConfigureAwait(true);
     }
 }

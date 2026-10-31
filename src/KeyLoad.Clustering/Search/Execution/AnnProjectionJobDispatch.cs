@@ -1,13 +1,8 @@
 using KeyLoad.Core.ResourceExecution;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IServiceProvider services,
-    TimeProvider clock, Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-    IOptions<GrainRoutingOptions> routing)
+internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IServiceProvider services)
 {
     private const string InvalidResult = "The execution ANN maintenance result is invalid.";
 
@@ -56,8 +51,7 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
         var purpose = new CqrsStreamPurpose(() => codec.Decode(envelope));
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-            streamToken => actor.ExecuteStreamAsync(envelope, streamToken), serializer, requestId,
-            clock, routing, purpose, token).ConfigureAwait(true);
+            streamToken => actor.ExecuteStreamAsync(envelope, streamToken), requestId, purpose, token).ConfigureAwait(true);
         return Read(reply, original);
     }
 

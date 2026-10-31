@@ -4,7 +4,7 @@ internal static class RemoteTransferRepairCrashProtocol
 {
     internal const string AcceptMode = "remote-transfer-policy-accept-repair";
     internal const string CompleteMode = "remote-transfer-policy-complete-repair";
-    internal const string OperationFile = "transfer-repair-operation.json";
+    internal const string OperationFile = "transfer-repair-operation.bin";
     internal const string OriginalFile = "transfer-repair-original-command.json";
     internal const string FailureFile = "transfer-repair-original-failure.bin";
     internal const string Missing = "The actual policy repair process state is missing.";

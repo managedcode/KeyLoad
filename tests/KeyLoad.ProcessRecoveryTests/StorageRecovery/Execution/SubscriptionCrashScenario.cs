@@ -28,7 +28,7 @@ internal static class SubscriptionCrashScenario
         var request = new SubscriptionProcessingRequest(CommandId, Subscription, delivery.Token, CrashFixtureValues.Handler, ExecutionGenerationSingleItemCount,
             [new PutDocument(CrashFixtureValues.Orders, CrashFixtureValues.Effect, CrashFixtureValues.EffectJson, ExpectedRevisionEmptyCount)]);
         var operation = CrashDatabase.Operation(database, OperationKind.SubscriptionProcessing, request, request.CommandId);
-        await File.WriteAllBytesAsync(Path.Combine(directory, CrashFixtureValues.ProcessingCommandFile), JsonDefaults.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, CrashFixtureValues.ProcessingCommandFile), OrleansSerialization.Serialize(operation));
         boundary.Position = store.Position + PositionStep;
         boundary.Armed = true;
         database.Apply(operation).Get<SubscriptionProcessingResult>();

@@ -20,15 +20,12 @@ internal static class TextIncrementalCapabilityResult
             session.Manifest?.Records.Length ?? observed.Documents.Length, session.Intent?.CheckpointCommand,
             session.Manifest is { } complete ? Digest(complete, budget) : null,
             session.CurrentReplayUpperSequence, session.Manifest?.LastSettledCheckpointRequest);
-        budget.CheckResult(result);
         budget.Check();
         return result;
     }
 
     private static string Digest(TextIncrementalManifest actual, ReadExecutionBudget budget)
     {
-        budget.ChargeBytes(OrleansSerialization.Measure(actual.Files));
-        budget.ChargeBytes(SHA256.HashSizeInBytes);
         var original = OrleansSerialization.Serialize(actual.Files);
         budget.Check();
         var digest = Convert.ToHexStringLower(SHA256.HashData(original));

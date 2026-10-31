@@ -70,7 +70,6 @@ internal static class TimeSeriesBoundReadOperations
         return database.Store.Read(raw =>
         {
             var result = read(budget.CreateView(raw));
-            budget.CheckResult(result);
             return result;
         });
     }

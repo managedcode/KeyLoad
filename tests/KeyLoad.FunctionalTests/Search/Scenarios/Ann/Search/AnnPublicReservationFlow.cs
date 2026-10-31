@@ -31,8 +31,7 @@ internal static class AnnPublicReservationFlow
                 var seeds = Options.Create(new AnnSeedOptions());
                 var source = AnnSeedCollector.CapturePinned(database.Database, AnnWaitWholeFlow.Root, pin, seeds, read);
                 var page = database.Database.ReadProjectionBatch(AnnWaitWholeFlow.Root,
-                    new(pin.Consumer, AnnMaintenanceTestData.SnapshotBound,
-                        AnnMaintenanceTestData.PageBytes, source.Cut.OutboxTail));
+                    new(pin.Consumer, AnnMaintenanceTestData.SnapshotBound, source.Cut.OutboxTail));
                 await Assert.That(page.HasMore).IsFalse();
                 await Assert.That(page.ThroughSequence).IsEqualTo(source.Cut.OutboxTail);
                 var intent = AnnMaintenanceTestData.Intent(page);

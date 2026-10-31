@@ -122,8 +122,7 @@ internal sealed class GrainFailureCauseDiagnosticsTests
             var requestId = Guid.NewGuid();
             using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
             using var capture = new EventSourceLogCapture();
-            var reply = GrainReplyFactory.Failure(error, command, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)),
-                UnitRoutingOptions.Routing(), requestId, GrainFailureStage.CapabilityExecution);
+            var reply = GrainReplyFactory.Failure(error, command, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)), requestId, GrainFailureStage.CapabilityExecution);
             var output = capture.Text;
             await Assert.That(reply.Error).IsEqualTo(command ? commandCode : readCode);
             await Assert.That(reply.SafeDetail).IsEqualTo(command ? commandDetail : readDetail);
@@ -149,9 +148,8 @@ internal sealed class GrainFailureCauseDiagnosticsTests
     private static async Task HealthyAsync()
     {
         var expected = new BackupReceipt(HealthyId, HealthyPosition);
-        var options = UnitRoutingOptions.Routing();
-        var reply = GrainReplyFactory.Value(expected, options, CancellationToken.None);
-        var stream = GrainReplyFactory.StreamResult(reply, options);
+        var reply = GrainReplyFactory.Value(expected);
+        var stream = GrainReplyFactory.StreamResult(reply);
         await Assert.That(stream.IsSuccess).IsTrue();
         await Assert.That(stream.Value).IsSameReferenceAs(reply);
         await Assert.That(reply.Error).IsNull();

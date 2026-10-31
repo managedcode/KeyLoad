@@ -55,7 +55,6 @@ public static class AnalyticsReads
             var more = candidates.Length > request.Limit;
             var page = candidates.Take(request.Limit).Select(row => AnalyticsStoreRowProjection.Project(engine, view, scope, request.Partition, row)).ToImmutableArray();
             var result = new AnalyticsEventsPage(page, more, more ? page.Last().Id : null);
-            work.CheckResult(result);
             work.Check();
             return result;
         });

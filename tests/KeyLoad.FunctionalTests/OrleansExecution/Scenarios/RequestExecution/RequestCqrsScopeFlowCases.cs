@@ -4,7 +4,6 @@ using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Identity.Core.Constants;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -59,9 +58,7 @@ internal static class RequestCqrsScopeFlowCases
                     token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                         writer => CompleteWhileScopedAsync(writer, expectedState, principal.Id,
                             () => producerSawScope = true), token),
-                    fixture.Services.GetRequiredService<Serializer<
-                        CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                    requestId, TimeProvider.System, fixture.RoutingOptions, CancellationToken.None);
+                    requestId, CancellationToken.None);
                 await Assert.That(reply.Result).IsNotNull();
                 await Assert.That(producerSawScope).IsTrue();
                 await AssertPublishedContextAsync(expectedState, principal.Id);

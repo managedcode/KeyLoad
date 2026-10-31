@@ -44,7 +44,6 @@ internal static class AggregateReplayReader
         ValidateRetainedStart(startRevision, head);
         var events = ReadTail(view, request.Stream, head, startRevision, request.MaximumEvents, budget);
         var page = new AggregateReplayPage(request.Stream, head, snapshot, events, database.Store.Position);
-        budget.CheckResult(page);
         return page;
     }
 

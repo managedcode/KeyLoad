@@ -54,7 +54,6 @@ internal sealed class DuePageState
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DueWorkProtocol.RangeBytesExceeded);
         }
-        budget.ChargeBytes(count);
         ExaminedBytes = checked(ExaminedBytes + count);
     }
 

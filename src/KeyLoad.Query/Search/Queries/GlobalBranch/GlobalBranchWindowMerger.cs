@@ -19,8 +19,7 @@ internal static class GlobalBranchWindowMerger
         ImmutableArray<GlobalBranchWindow> windows, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(budget);
-        var bytes = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        var received = GlobalBranchValidation.ValidateRequest(request, windows, budget, bytes);
+        var received = GlobalBranchValidation.ValidateRequest(request, windows, budget);
         budget.Check();
         var candidateCount = PreflightWindows(windows, budget);
         var missing = MissingIds(request.ExpectedWindowIds, received, budget);
@@ -37,7 +36,7 @@ internal static class GlobalBranchWindowMerger
             allExhaustive &= window.Exhaustive;
         }
         RequireStrictCompleteness(request, missing, complete, approximate, truncated);
-        PreflightCandidates(windows, candidateCount, budget, bytes);
+        PreflightCandidates(windows, candidateCount, budget);
         var candidates = Deduplicate(windows, candidateCount, budget);
         var ordered = candidates.Values.ToArray();
         GlobalBranchOrder.SortCandidates(ordered, budget);
@@ -68,7 +67,7 @@ internal static class GlobalBranchWindowMerger
     }
 
     private static void PreflightCandidates(ImmutableArray<GlobalBranchWindow> windows, int expectedCount,
-        ReadExecutionBudget budget, GlobalBranchByteAdmission bytes)
+        ReadExecutionBudget budget)
     {
         var examined = NoRetainedBytes;
         foreach (var window in windows)
@@ -78,7 +77,6 @@ internal static class GlobalBranchWindowMerger
             {
                 budget.Check();
                 GlobalBranchValidation.ValidateCandidateEncodingBounds(candidate);
-                bytes.Accept(OrleansSerialization.Measure(candidate));
                 GlobalBranchValidation.ValidateCandidate(candidate);
                 if (previous is not null && GlobalBranchOrder.CompareCandidates(previous, candidate) > EqualOrder)
                 {

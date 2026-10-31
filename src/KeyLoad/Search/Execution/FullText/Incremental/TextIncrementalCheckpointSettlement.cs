@@ -73,8 +73,6 @@ internal static class TextIncrementalCheckpointSettlement
     {
         var actual = TextIncrementalMetadata.ReadIntent(generationPath,
             options.Value.MaximumDiskBytes, budget);
-        budget.ChargeBytes(OrleansSerialization.Measure(expected));
-        budget.ChargeBytes(OrleansSerialization.Measure(actual));
         var expectedBytes = OrleansSerialization.Serialize(expected);
         var actualBytes = OrleansSerialization.Serialize(actual);
         budget.Check();

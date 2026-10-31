@@ -36,7 +36,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
     {
         if (phase == GrainRequestPhase.RequestStarted)
         {
-            if (context.GrainInstance is not ConnectionGrain producer)
+            if (context.GrainInstance is not RequestGrain producer)
             {
                 throw new InvalidOperationException(ConnectionProtocol.IdentityChanged);
             }
@@ -64,15 +64,12 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
             {
                 throw new InvalidOperationException(ConnectionProtocol.IdentityChanged);
             }
-            if (producer.GetPrimaryKey() != state.ConnectionId)
+            // A parent request grain also hosts its child leaves, so a child's producer is the observed parent.
+            if (producer.GetPrimaryKey() != state.RequestId && !operations.ContainsKey(producer.GetPrimaryKey()))
             {
                 throw new InvalidOperationException(ConnectionProtocol.IdentityChanged);
             }
-            if (connection.GrainId != context.GrainId)
-            {
-                throw new InvalidOperationException(ConnectionProtocol.IdentityChanged);
-            }
-            if (connection.ActivationId != context.ActivationId)
+            if (!Equals(connection.Address.SiloAddress, context.Address.SiloAddress))
             {
                 throw new InvalidOperationException(ConnectionProtocol.IdentityChanged);
             }

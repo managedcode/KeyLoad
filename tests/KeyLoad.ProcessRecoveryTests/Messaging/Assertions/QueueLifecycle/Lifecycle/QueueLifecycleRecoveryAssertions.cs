@@ -11,7 +11,7 @@ internal static class QueueLifecycleRecoveryAssertions
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = Open(store);
-        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueLifecycleCrashProtocol.OperationFile), token));
         var outcome = OutcomeStoreOracle.Read(store, operation);
         var committed = outcome is not null;

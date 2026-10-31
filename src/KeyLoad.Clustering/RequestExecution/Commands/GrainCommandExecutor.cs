@@ -59,7 +59,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             var result = await SubmitCommandAsync(kind, request, principal, budget, operationToken).ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
             await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken).ConfigureAwait(true);
-            var reply = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
+            var reply = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken);
             if (work is null || reply.Error is not null)
             {
                 return reply;
@@ -73,7 +73,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             if (original is not null && kind is OperationKind.Receive or OperationKind.ReceiveSubscription)
             {
                 result = database.ResolveAppliedSubmissionOutcome(original, budget);
-                var current = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken, options: options);
+                var current = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken);
                 return current.Error is null ? current with { WorkProof = reply.WorkProof } : current;
             }
             return reply;

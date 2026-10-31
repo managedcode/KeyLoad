@@ -45,7 +45,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
             try
             {
                 return GrainReplyFactory.Failure(error: error, command: false, diagnostics: diagnostics, requestId: work.RequestId, stage: work.Stage,
-                    cancellationToken: work.Token, options: codec.ExecutionOptions);
+                    cancellationToken: work.Token);
             }
             catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
             {
@@ -105,7 +105,7 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         var result = (await capabilities.ReadAsync(request, work.RequestId, work, work.Token).ConfigureAwait(true)).Value;
         work.CompletePhase();
         work.Stage = GrainFailureStage.ReplyEncoding;
-        return GrainReplyFactory.Value(value: result, cancellationToken: work.Token, options: codec.ExecutionOptions);
+        return GrainReplyFactory.Value(result);
     }
 
     internal static void ValidateFreshRequest(GrainRequestCodec codec, DecodedGrainRequest request,

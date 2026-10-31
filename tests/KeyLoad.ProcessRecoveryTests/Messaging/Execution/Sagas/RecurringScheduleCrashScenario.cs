@@ -20,7 +20,7 @@ internal static class RecurringScheduleCrashScenario
     [ImmutableTemporalData]
     private static readonly TimeSpan OccurrenceInterval = TimeSpan.FromDays(1);
     internal const string Mode = "recurring-schedule-crash";
-    internal const string OperationFile = "recurring-schedule-operation.json";
+    internal const string OperationFile = "recurring-schedule-operation.bin";
     internal const string SeedTailFile = "recurring-schedule-seed-tail.txt";
     internal const string Queue = "scheduled-work";
     internal const string ScheduleIdText = "59b1031d-feb3-4d60-a0cf-c09351472a38";
@@ -87,7 +87,7 @@ internal static class RecurringScheduleCrashScenario
 
     private static async Task SaveOperationAsync(string directory, long tail, Command<DatabaseCommand> operation)
     {
-        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), JsonDefaults.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllTextAsync(Path.Combine(directory, SeedTailFile), tail.ToString(CultureInfo.InvariantCulture));
     }
 

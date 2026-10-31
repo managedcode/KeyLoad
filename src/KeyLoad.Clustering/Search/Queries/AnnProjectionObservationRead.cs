@@ -17,8 +17,6 @@ internal static partial class AnnProjectionObservationRead
             || string.IsNullOrEmpty(request.OriginalRequest.Collection) || string.IsNullOrEmpty(request.OriginalRequest.Field)
             || request.Approximate is { Search: null }
             || request.OriginalRequest.IndexGeneration < AnnProjectionObservationProtocol.FirstGeneration
-            || request.MaximumReadBytes <= AnnProjectionObservationProtocol.NoReadWork
-            || request.MaximumRecords <= AnnProjectionObservationProtocol.NoReadWork
             || request.Kind == AnnProjectionObservationKind.Identity && (request.Wait is not null || request.Approximate is not null)
             || request.Kind == AnnProjectionObservationKind.Wait && (request.Wait is null || request.Approximate is not null)
             || request.Kind == AnnProjectionObservationKind.Approximate && (request.Approximate is null || request.Wait is not null))

@@ -15,7 +15,7 @@ internal static class Bm25ColdInvalidationAssertions
         return owner.Store.Read(view =>
         {
             byte[]? raw = null;
-            if (!view.ReadValue(Bm25CorpusKeys.Current(head), bytes => raw = bytes.ToArray(), work.ChargeBytes))
+            if (!view.ReadValue(Bm25CorpusKeys.Current(head), bytes => raw = bytes.ToArray()))
             {
                 throw new InvalidOperationException("The original execution BM25 head is missing.");
             }

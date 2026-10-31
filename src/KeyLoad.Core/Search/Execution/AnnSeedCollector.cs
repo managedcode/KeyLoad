@@ -32,10 +32,9 @@ internal static class AnnSeedCollector
         readBudget.Check();
         var work = new AnnSeedWork(readBudget, options.MaxWorkUnits);
         AnnSeedValidation.ValidateRequest(principalId, partition, collection, field, space, work);
-        var startingReadBytes = readBudget.ReadBytes;
         var buffer = database.Store.Read(view => CaptureCut(database, view, principalId,
             partition, collection, field, space, options, readBudget, work, pin));
-        return Finish(buffer, readBudget, startingReadBytes);
+        return Finish(buffer, readBudget);
     }
 
     internal static AnnSeed CapturePinnedView(DatabaseEngine database, IKeyValueView view,
@@ -57,14 +56,12 @@ internal static class AnnSeedCollector
         options.Validate();
         var work = scopeWork ?? new AnnSeedWork(readBudget, options.MaxWorkUnits);
         AnnSeedValidation.ValidateRequest(principalId, partition, collection, field, space, work);
-        var startingReadBytes = readBudget.ReadBytes;
         var buffer = CaptureCut(database, view, principalId, partition,
             collection, field, space, options, readBudget, work, pin, sourceMetadata);
-        return Finish(buffer, readBudget, startingReadBytes);
+        return Finish(buffer, readBudget);
     }
 
-    private static AnnSeed Finish(AnnSeedBuffer buffer, ReadExecutionBudget readBudget,
-        long startingReadBytes)
+    private static AnnSeed Finish(AnnSeedBuffer buffer, ReadExecutionBudget readBudget)
     {
         readBudget.Check();
         var captured = buffer.Finish();
@@ -72,8 +69,7 @@ internal static class AnnSeedCollector
             captured.Work, captured.HashScratch);
         captured.Work.Check();
         return new(captured.Scope, captured.Cut, captured.Records, digest,
-            captured.OwnedBytes, captured.PeakBytes,
-            checked(readBudget.ReadBytes - startingReadBytes), captured.Work.Units)
+            captured.OwnedBytes, captured.PeakBytes, captured.Work.Units)
         {
             DependencySha256 = captured.DependencySha256,
             ProjectionCheckpoint = captured.ProjectionCheckpoint

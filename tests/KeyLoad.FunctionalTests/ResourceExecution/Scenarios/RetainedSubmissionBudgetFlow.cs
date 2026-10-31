@@ -12,11 +12,6 @@ internal static class RetainedSubmissionBudgetFlow
     private const string Content = "{\"value\":1}";
     private const long InitialEpoch = 1;
     private const long RevokedEpoch = 2;
-    private const long OneByte = 1;
-    private const int OneRecord = 1;
-    private const int RepeatedReads = 2;
-    private const long NoReadBytes = 0;
-    private const int NoReadRecords = 0;
 
     internal static async Task RunAsync()
     {
@@ -44,14 +39,8 @@ internal static class RetainedSubmissionBudgetFlow
         var before = RetainedSubmissionBudgetImage.Capture(fixture);
         var first = fixture.Database.ReadRetainedSubmissionOutcome(original, work);
         await RetainedSubmissionBudgetImage.ResultAsync(committed, first);
-        var bytes = work.ReadBytes;
-        var records = work.ConstrainedRecords;
-        await Assert.That(bytes).IsGreaterThan(NoReadBytes);
-        await Assert.That(records).IsGreaterThan(NoReadRecords);
         var second = fixture.Database.ReadRetainedSubmissionOutcome(original, work);
         await RetainedSubmissionBudgetImage.ResultAsync(committed, second);
-        await Assert.That(work.ReadBytes).IsEqualTo(checked(bytes * RepeatedReads));
-        await Assert.That(work.ConstrainedRecords).IsEqualTo(checked(records * RepeatedReads));
         await before.UnchangedAsync(fixture);
     }
 
@@ -61,12 +50,6 @@ internal static class RetainedSubmissionBudgetFlow
         var before = RetainedSubmissionBudgetImage.Capture(fixture);
         var healthy = Work(fixture);
         await Assert.That(fixture.Database.ReadRetainedSubmissionOutcome(uncommitted, healthy)).IsNull();
-        await Assert.That(healthy.ReadBytes).IsGreaterThan(NoReadBytes);
-        var tiny = fixture.CreateReadWork(CancellationToken.None);
-        tiny.ConstrainWork(OneByte, OneRecord);
-        var refused = Assert.ThrowsExactly<KeyLoadException>(() =>
-            fixture.Database.ReadRetainedSubmissionOutcome(uncommitted, tiny));
-        await Assert.That(refused.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(fixture.Database.GetDocument("root",
             new(fixture.Partition, Collection, UncommittedDocumentId))).IsNull();
         await before.UnchangedAsync(fixture);
@@ -82,20 +65,15 @@ internal static class RetainedSubmissionBudgetFlow
                 PolicyEpoch = RevokedEpoch
             })).Problem).Value).IsNull();
         var before = RetainedSubmissionBudgetImage.Capture(fixture);
-        var previousBytes = work.ReadBytes;
-        var previousRecords = work.ConstrainedRecords;
         var denied = Assert.ThrowsExactly<KeyLoadException>(() =>
             fixture.Database.ReadRetainedSubmissionOutcome(original, work));
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.Unauthenticated);
-        await Assert.That(work.ReadBytes).IsGreaterThan(previousBytes);
-        await Assert.That(work.ConstrainedRecords).IsGreaterThan(previousRecords);
         await before.UnchangedAsync(fixture);
     }
 
     private static ReadExecutionBudget Work(TestDatabase fixture)
     {
         var work = fixture.CreateReadWork(CancellationToken.None);
-        work.ConstrainWork(work.RuntimeMaximumReadBytes, work.MaximumScanRecords);
         return work;
     }
 

@@ -8,9 +8,8 @@ public static class MessagingQueriesRemoteTransfer
     internal static RemoteTransferCoordinationReadResult ReadRemoteTransferCoordination(this DatabaseEngine engine, string subject, RemoteTransferCoordinationReadRequest request, CancellationToken token)
     {
         RemoteTransferAttemptReadShape.Require(request);
-        using var budget = RemoteTransferPendingBudget.Coordination(engine, token);
+        var budget = RemoteTransferPendingBudget.Coordination(engine, token);
         var result = engine.Store.Read(view => engine.ReadRemoteTransferCoordination(budget.View(view), subject, request));
-        budget.Result(result);
         return result;
     }
 

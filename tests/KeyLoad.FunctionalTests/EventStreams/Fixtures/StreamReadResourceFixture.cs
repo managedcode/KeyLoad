@@ -83,8 +83,8 @@ internal sealed class StreamReadResourceFixture : IDisposable
         => Database.ReadStream(ReaderId, request, cancellationToken);
 
     internal ReadStreamRequest Traversal(StreamReadDirection direction = StreamReadDirection.Forward,
-        int limit = 100, int maxBytes = 0, string? cursor = null, long after = 0)
-        => new(new(Partition, StreamSetName, StreamId, 1), after, limit, direction, maxBytes, cursor);
+        int limit = 100, string? cursor = null, long after = 0)
+        => new(new(Partition, StreamSetName, StreamId, 1), after, limit, direction, cursor);
 
     internal (long Position, string[] Image) Cut()
         => (store.Position, CanonicalStoreImage.Bytes(store));

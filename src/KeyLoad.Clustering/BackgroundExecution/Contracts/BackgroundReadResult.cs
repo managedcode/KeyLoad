@@ -1,12 +1,24 @@
+using System.Collections.Immutable;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Returns actual settled work and bounded execution lifetime bytes with the original domain result.</summary>
+/// <summary>Returns the observed resource lifetimes with the original domain result.</summary>
 [GenerateSerializer, Alias(BackgroundReadResult.SerializerAlias)]
-public sealed record BackgroundReadResult([property: Id(0)] Result<object> Result,
-    [property: Id(1)] long ReadBytes, [property: Id(2)] int ExaminedRecords,
-    [property: Id(3)] ReadOnlyMemory<byte> Lifetimes)
+public sealed record BackgroundReadResult
 {
     internal const string SerializerAlias = "keyload.orleans.background-read-result";
+
+    /// <summary>The original domain result.</summary>
+    [Id(0)]
+    public required Result<object> Result
+    {
+        get; init;
+    }
+
+    [Id(3)]
+    internal ImmutableArray<ResourceLifetime> Lifetimes
+    {
+        get; init;
+    }
 }

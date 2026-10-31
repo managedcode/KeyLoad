@@ -88,12 +88,13 @@ ad-hoc concatenation. Do not change user entity casing implicitly.
 - Use ZoneTree.FullTextSearch for full-text indexing and ZoneTree.Analytics for
   approved analytics integration. Derived indexes, caches and analytics never
   become a second authority for database records or permissions.
-- Access ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics through their
-  public synchronous APIs. Their asynchronous API calls and dispatching
-  engine work through `Task.Run`, `Task.Factory.StartNew` or a thread-pool callback
-  are compiler errors (`KLD0039`). Do not wrap synchronous engine operations to
-  bypass this rule. Orleans, HTTP and other actual asynchronous transports remain
-  asynchronous; the rule makes no claim about a dependency's internal scheduling.
+- Use ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics through their
+  public APIs. Await their asynchronous APIs, such as `CommitDurableAsync` and
+  `SyncWALAsync`, so engine waits never block a grain or thread-pool thread.
+  Blocking on their tasks (`.Result`, `.Wait()`, `.GetAwaiter().GetResult()`) and
+  dispatching engine work through `Task.Run`, `Task.Factory.StartNew` or a
+  thread-pool callback are compiler errors (`KLD0039`). The rule makes no claim
+  about a dependency's internal scheduling.
 - Use generated Orleans binary serialization with explicit stable
   `[GenerateSerializer]`, `[Id]` and `[Alias]` contracts internally. Preserve raw
   ZoneTree bytes, sortable keys, public JSON and exact user content. Introduce no

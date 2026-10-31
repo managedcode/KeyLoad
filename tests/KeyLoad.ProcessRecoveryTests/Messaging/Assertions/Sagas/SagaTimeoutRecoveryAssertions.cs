@@ -27,7 +27,7 @@ internal static class SagaTimeoutRecoveryAssertions
     }
 
     private static async Task<Command<DatabaseCommand>> ReadOperationAsync(string root, CancellationToken cancellationToken)
-        => JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        => OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, SagaTimeoutCrashScenario.OperationFile), cancellationToken));
 
     private static async Task<long> ReadSeedTailAsync(string root, CancellationToken cancellationToken)

@@ -1,16 +1,12 @@
 using System.Security.Claims;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
 internal static class RequestContextAdmission
 {
-    internal static void Admit(IServiceProvider services, ClaimsPrincipal? principal,
-        GrainRequestContextState state, CancellationToken cancellationToken, SiloAddress? placement = null)
+    internal static void Admit(ClaimsPrincipal? principal, GrainRequestContextState state,
+        CancellationToken cancellationToken)
     {
-        var options = services.GetRequiredService<IOptions<GrainRoutingOptions>>();
         cancellationToken.ThrowIfCancellationRequested();
         if (state.RequestId == Guid.Empty || state.ConnectionId == Guid.Empty)
         {
@@ -22,21 +18,6 @@ internal static class RequestContextAdmission
             var subject = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value
                 ?? throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
             GrainIdentityContext.ValidatePrincipal(principal, subject);
-            GrainByteCounter.Measure(serializer: services.GetRequiredService<Serializer<ClaimsPrincipal>>(), value: principal,
-                maximumBytes: options.Value.MaximumPrincipalBytes, cancellationToken: cancellationToken, options: options);
-        }
-
-        var stateBytes = GrainByteCounter.Measure(serializer: services.GetRequiredService<Serializer<GrainRequestContextState>>(), value: state,
-            maximumBytes: options.Value.MaximumContextBytes, cancellationToken: cancellationToken, options: options);
-        if (placement is not null)
-        {
-            var remaining = checked(options.Value.MaximumContextBytes - (int)stateBytes);
-            if (remaining <= 0)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
-            }
-            GrainByteCounter.Measure(services.GetRequiredService<Serializer<SiloAddress>>(), placement,
-                remaining, options, cancellationToken);
         }
     }
 }

@@ -12,12 +12,11 @@ internal static class RemoteTransferPendingDiscovery
         RemoteTransferPendingCursor? supplied, CancellationToken token)
     {
         JsonData.Identifier(subject);
-        using var budget = new RemoteTransferPendingBudget(database, token);
+        var budget = new RemoteTransferPendingBudget(database, token);
         budget.Check();
         var page = database.Store.Read(view => Scan(database, view, subject,
             RemoteTransferPendingCursorSelection.Match(database.Store.Identity, supplied), budget, token));
         budget.Check();
-        budget.Result(page.Hint);
         return page;
     }
 

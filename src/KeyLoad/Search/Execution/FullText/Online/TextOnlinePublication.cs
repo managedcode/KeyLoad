@@ -23,7 +23,7 @@ internal static class TextOnlinePublication
         var result = new OnlineTextIndexMaintenanceResult(session.Request.CommandId, session.Request.Consumer,
             session.Request.ConsumerGeneration, TextOnlineCapabilityResult.Cut(session.Request.NodeId, original),
             TextOnlineCapabilityResult.Cut(session.Request.NodeId, current),
-            TextOnlineCapabilityResult.Digest(manifest, session.Budget), manifest.Records.Length, checkpoint);
+            TextOnlineCapabilityResult.Digest(manifest), manifest.Records.Length, checkpoint);
         var digest = TextOnlineManifestDigest.Calculate(Path.Combine(
             TextOnlinePagePreparation.RequireOwner(session).Path, TextIncrementalProtocol.ManifestFile),
             session.Budget, options.RuntimeText);

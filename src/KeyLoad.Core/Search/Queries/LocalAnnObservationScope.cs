@@ -50,9 +50,9 @@ public static class LocalAnnObservationScope
                 throw Errors.Fail(ErrorCode.HistoryUnavailable, LocalAnnObservationInvalid);
             }
 
-            RequireSameAnnObservation(retained, original, budget);
+            RequireSameAnnObservation(retained, original);
             var actual = engine.Store.Identity;
-            return new LocalAnnObservationFence(principal.Id, principal.TenantId, principal.PolicyEpoch, actual.NodeId, actual.ReadGeneration, LocalAnnObservationDigest(resource, budget), LocalAnnObservationDigest(state, budget));
+            return new LocalAnnObservationFence(principal.Id, principal.TenantId, principal.PolicyEpoch, actual.NodeId, actual.ReadGeneration, LocalAnnObservationDigest(resource), LocalAnnObservationDigest(state));
         });
     }
 
@@ -64,17 +64,14 @@ public static class LocalAnnObservationScope
         }
     }
 
-    internal static void RequireSameAnnObservation(AnnMaintenanceRequest retained, AnnMaintenanceRequest original, ReadExecutionBudget budget)
+    internal static void RequireSameAnnObservation(AnnMaintenanceRequest retained, AnnMaintenanceRequest original)
     {
-        var retainedSize = OrleansSerialization.Measure(retained);
-        var originalSize = OrleansSerialization.Measure(original);
-        budget.ChargeBytes(checked(retainedSize + originalSize));
         var retainedBytes = OrleansSerialization.Serialize(retained);
         byte[]? originalBytes = null;
         try
         {
             originalBytes = OrleansSerialization.Serialize(original);
-            if (retainedBytes.Length != retainedSize || originalBytes.Length != originalSize || !retainedBytes.AsSpan().SequenceEqual(originalBytes))
+            if (!retainedBytes.AsSpan().SequenceEqual(originalBytes))
             {
                 throw Errors.Fail(ErrorCode.TokenInvalidated, LocalAnnObservationInvalid);
             }
@@ -89,18 +86,11 @@ public static class LocalAnnObservationScope
         }
     }
 
-    internal static string LocalAnnObservationDigest<T>(T value, ReadExecutionBudget budget)
+    internal static string LocalAnnObservationDigest<T>(T value)
     {
-        var measured = OrleansSerialization.Measure(value);
-        budget.ChargeBytes(measured);
         var bytes = OrleansSerialization.Serialize(value);
         try
         {
-            if (bytes.Length != measured)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, LocalAnnObservationInvalid);
-            }
-
             return Convert.ToHexStringLower(SHA256.HashData(bytes));
         }
         finally

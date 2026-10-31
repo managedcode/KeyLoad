@@ -2,9 +2,6 @@ using KeyLoad.Clustering;
 using KeyLoad.FunctionalTests.Messaging;
 using KeyLoad.FunctionalTests.Search;
 using KeyLoad.Server.Search;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -76,8 +73,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
             id, request.CommandId, token, connectionId: fixture.ConnectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
             execution => connection.ExecuteStreamAsync(envelope, execution),
-            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            id, fixture.Clock, fixture.RoutingOptions, token);
+            id, token);
     }
 
     private static async Task UnchangedAsync(RequestCqrsHostedRuntimeFixture fixture,

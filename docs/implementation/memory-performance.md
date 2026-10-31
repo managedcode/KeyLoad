@@ -17,8 +17,8 @@ Owned storage copies stay wherever a caller may keep or change an array.
 | Area (owning slice) | Required result |
 |---|---|
 | Storage reads (StorageRecovery) | Charge borrowed point and range work before copying; merge staged and baseline data in order; bound the examined entries |
-| Read budget (ResourceExecution) | No whole-result byte arrays; reject an excess read before an owned copy is made; count bytes through a counting stream |
-| Queries (QueryExecution) | Charge index bytes plus referenced document bytes; never materialize full raw or eligible pages; parsing and lowering observe the operation budget, deadline and cancellation ([ADR-130](../ADR/ADR-130-microsoft-scriptdom-tsql.md)) |
+| Read execution (ResourceExecution) | No whole-result byte arrays; check cancellation and expiry before an owned copy is made; results are not measured |
+| Queries (QueryExecution) | Read index entries and referenced documents through one operation view; never materialize full raw or eligible pages; parsing and lowering observe the operation budget, deadline and cancellation ([ADR-130](../ADR/ADR-130-microsoft-scriptdom-tsql.md)) |
 | Ordering (QueryExecution) | Prepare JSON paths and order keys once and keep only the requested ordered prefix |
 | Live queries and cancellation (QueryExecution, ClientApi) | Propagate cancellation through SQL, AST and live work and through HTTP callers; keep cursor and read-cut authority |
 | Search (Search) | Bound text and vector branch ranking and hybrid fusion where a semantics-preserving bounded design exists (no full score array or union map); validate and prepare the query vector once and compute only the selected metric with the same accumulation order and exact ranks |

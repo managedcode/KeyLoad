@@ -9,5 +9,5 @@ internal static class SampleChunkWireCodecAssertions
 
     internal static KeyLoadException DecodeFailure(byte[] bytes)
         => Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(bytes,
-            SampleChunkTestData.ChargedDecodeBudget(bytes), UnitExecutionOptions.TimeSeriesExecution()));
+            SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution()));
 }

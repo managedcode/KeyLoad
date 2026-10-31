@@ -1395,7 +1395,7 @@ KurrentDB is the semantic reference: its .NET API has expected state/revision an
 
 ### 38.3. ReadStream, catch-up and live tail
 
-ReadStream takes fromRevision, direction, maxEvents, maxBytes and a stable committed cut for the page. Stream metadata returns FirstAvailableRevision, TailRevision and retention status. A request for already removed history returns HistoryUnavailable/CursorExpired with permitted diagnostics.
+ReadStream takes fromRevision, direction, a record limit and a stable committed cut for the page; a page has no byte budget. Stream metadata returns FirstAvailableRevision, TailRevision and retention status. A request for already removed history returns HistoryUnavailable/CursorExpired with permitted diagnostics.
 
 A catch-up subscription reads retained records, then continues the tail from a durable cursor. To close the race between the last scan and wake-up registration, the consumer registers for change notifications and then rechecks cursor/tail. A new-data notification is a hint; reconnects and lost wake-ups recover by re-reading committed state.
 
@@ -1463,7 +1463,7 @@ ReadySequence defines the current readiness order. After a delayed retry, the me
 
 ### 39.3. ClaimBatch and delivery
 
-The consumer sends ReceiveRequestId, maxMessages/maxBytes and the lease duration. The server checks permissions, inflight quota and resource budget, finds bounded candidates and submits a Claim command. Apply rechecks that each candidate is still Ready and eligible for delivery. Claim records the current owner, leaseVersion/nonce, attempt and deadline.
+The consumer sends ReceiveRequestId, maxMessages and the lease duration. The server checks permissions, inflight quota and resource budget, finds bounded candidates and submits a Claim command. Apply rechecks that each candidate is still Ready and eligible for delivery. Claim records the current owner, leaseVersion/nonce, attempt and deadline.
 
 Payload and DeliveryToken are returned after the commit with the declared durability. A multi-lane receive consists of separate lane outcomes; the API reports partial claims honestly. Long polling waits for readiness without holding a transaction, the apply gate or a long grain turn.
 

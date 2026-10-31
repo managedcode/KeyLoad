@@ -21,7 +21,6 @@ internal sealed class TextOnlineCheckpointWork
         {
             throw TextErrors.Mismatch();
         }
-        budget.ChargeBytes(OrleansSerialization.Measure(command));
         commandBytes = OrleansSerialization.Serialize(command);
         this.principalId = principalId;
         expiry = originalExpiry;
@@ -46,7 +45,6 @@ internal sealed class TextOnlineCheckpointWork
         {
             throw TextErrors.Mismatch();
         }
-        budget.ChargeBytes(OrleansSerialization.Measure(command));
         if (!commandBytes.AsSpan().SequenceEqual(OrleansSerialization.Serialize(command)))
         {
             throw TextErrors.Mismatch();
@@ -60,8 +58,6 @@ internal sealed class TextOnlineCheckpointWork
         var original = await Work.RequireOriginal();
         var actual = RequireReceipt(original);
         budget.Check();
-        budget.ChargeBytes(OrleansSerialization.Measure(actual));
-        budget.ChargeBytes(OrleansSerialization.Measure(acknowledged));
         if (!OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(acknowledged)))
         {
             throw TextErrors.Corrupt();

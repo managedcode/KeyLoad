@@ -17,6 +17,7 @@ internal sealed class PackedAnnStorageTests
     private const int SnapshotBound = 1_024;
     private const int DigestBit = 1;
     private const long MinimumFileBytes = 1_024;
+    private const long ThreeCosineNormsReservation = 88;
     private static readonly float[] Query = [1, 0];
     private static readonly string[] LiteralIds = ["record-00000", "record-00001", "record-00002"];
     private static readonly double[] LiteralScores = [1, 0, -1];
@@ -24,10 +25,18 @@ internal sealed class PackedAnnStorageTests
     [Test]
     public async Task SaveLoadRestoresLiteralScoresExactGraphBytesAndOriginalWorkCounters()
     {
+        foreach (var metric in new[] { DistanceMetric.DotProduct, DistanceMetric.Cosine })
+        {
+            await AssertRoundTripAsync(metric);
+        }
+    }
+
+    private static async Task AssertRoundTripAsync(DistanceMetric metric)
+    {
         using var db = new TestDatabase();
-        SeedLiteral(db);
+        SeedLiteral(db, metric);
         var policy = new PackedAnnOptions { ExactThreshold = First };
-        var index = Build(db, policy);
+        var index = Build(db, policy, metric);
         var storage = Options.Create(new PackedAnnStorageOptions());
         var before = Snapshot(db);
         var position = db.Store.Position;
@@ -35,6 +44,10 @@ internal sealed class PackedAnnStorageTests
         var originalDigest = index.Save(originalFile, storage, PackedAnnIndexTestSupport.Budget());
         await originalFile.FlushAsync(TestContext.Current!.Execution.CancellationToken);
         RandomAccess.FlushToDisk(originalFile.SafeFileHandle);
+        originalFile.Position = First;
+        var header = PackedAnnStorageFrames.Read<PackedAnnStorageHeader>(originalFile, PackedAnnIndexTestSupport.Budget());
+        var normBytes = metric == DistanceMetric.Cosine ? ThreeCosineNormsReservation : First;
+        await Assert.That(checked(header.RetainedBytes + normBytes)).IsEqualTo(index.RetainedBytesUpperBound);
         var restored = PackedAnnIndex.Load(originalFile, originalDigest, UnitExecutionOptions.PackedAnn(policy),
             storage, PackedAnnIndexTestSupport.Budget());
         using var restoredFile = Open(db, RestoredFile);
@@ -127,17 +140,17 @@ internal sealed class PackedAnnStorageTests
         await Assert.That(db.Store.Position).IsEqualTo(position);
     }
 
-    private static void SeedLiteral(TestDatabase db)
+    private static void SeedLiteral(TestDatabase db, DistanceMetric metric = DistanceMetric.DotProduct)
     {
         PackedAnnTestData.Configure(db);
-        PackedAnnIndexTestSupport.PersistVectors(db, PackedAnnTestData.Space(DistanceMetric.DotProduct, Dimension),
-            PackedAnnTestData.Field(DistanceMetric.DotProduct), [[1, 0], [0, 1], [-1, 0]]);
+        PackedAnnIndexTestSupport.PersistVectors(db, PackedAnnTestData.Space(metric, Dimension),
+            PackedAnnTestData.Field(metric), [[1, 0], [0, 1], [-1, 0]]);
     }
 
-    private static PackedAnnIndex Build(TestDatabase db, PackedAnnOptions policy)
+    private static PackedAnnIndex Build(TestDatabase db, PackedAnnOptions policy, DistanceMetric metric = DistanceMetric.DotProduct)
     {
-        var records = PackedAnnTestData.Load(db, DistanceMetric.DotProduct);
-        return PackedAnnIndexTestSupport.Build(PackedAnnTestData.Space(DistanceMetric.DotProduct,
+        var records = PackedAnnTestData.Load(db, metric);
+        return PackedAnnIndexTestSupport.Build(PackedAnnTestData.Space(metric,
             records.First().Values.Length), records, policy, PackedAnnIndexTestSupport.Budget());
     }
 

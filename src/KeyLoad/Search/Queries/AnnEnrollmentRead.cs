@@ -88,8 +88,6 @@ internal static class AnnEnrollmentRead
                     throw Errors.Fail(ErrorCode.TokenInvalidated, AnnProtocol.InvalidSource);
                 }
                 result = candidate;
-                read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(candidate));
-                read.CheckResult(candidate);
                 read.Check();
             }
             catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }

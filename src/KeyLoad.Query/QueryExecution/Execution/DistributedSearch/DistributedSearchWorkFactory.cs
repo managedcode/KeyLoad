@@ -15,10 +15,7 @@ internal static class DistributedSearchWorkFactory
         ImmutableArray<GlobalBranchCandidate> selected, ReadExecutionBudget budget)
     {
         budget.Check();
-        budget.ChargeBytes(checked(PartitionQueryRetention.ArrayDescriptorBytes
-            + (long)partitions.Length * PartitionQueryRetention.LeafDescriptorBytes));
         var work = ImmutableArray.CreateBuilder<DistributedSearchPhaseWork>(partitions.Length);
-        var resultBytes = DistributedSearchGrants.ResultBytes(partitions.Length, budget);
         for (var index = FirstLeaf; index < partitions.Length; index++)
         {
             budget.Check();
@@ -30,7 +27,7 @@ internal static class DistributedSearchWorkFactory
                 Partition = partitions[index]
             }, witness,
                 statistics, scope, phase == DistributedSearchPhase.Candidates ? windows[index] : null,
-                projection, resultBytes));
+                projection));
         }
         return work.MoveToImmutable();
     }
@@ -38,7 +35,6 @@ internal static class DistributedSearchWorkFactory
     internal static ImmutableArray<string> WindowIds(ImmutableArray<PartitionRef> partitions,
         ReadExecutionBudget budget)
     {
-        budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(partitions.Length));
         var windows = ImmutableArray.CreateBuilder<string>(partitions.Length);
         foreach (var partition in partitions)
         {
@@ -59,7 +55,6 @@ internal static class DistributedSearchWorkFactory
                 count++;
             }
         }
-        budget.ChargeBytes(PartitionQueryRetention.CandidateArrayBytes(count));
         var result = ImmutableArray.CreateBuilder<GlobalBranchCandidate>(count);
         foreach (var candidate in selected)
         {

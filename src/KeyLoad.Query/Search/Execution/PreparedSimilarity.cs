@@ -13,25 +13,25 @@ internal sealed class PreparedSimilarity : IPackedAnnSimilarity
     private readonly DistanceMetric metric;
     private readonly double queryNorm;
 
-    private PreparedSimilarity(ReadOnlyMemory<float> query, DistanceMetric metric)
+    private PreparedSimilarity(ReadOnlyMemory<float> query, DistanceMetric metric, double queryNorm)
     {
         this.query = query;
         this.metric = metric;
-        queryNorm = SimilarityMetricMath.QueryNorm(query.Span, metric);
+        this.queryNorm = queryNorm;
     }
 
     public static PreparedSimilarity Create(ReadOnlyMemory<float> query, DistanceMetric metric)
     {
         Validate(query.Span);
         SimilarityMetricMath.ValidateMetric(metric);
-        return new(query, metric);
+        return new(query, metric, SimilarityMetricMath.QueryNorm(query.Span, metric));
     }
 
     internal static PreparedSimilarity CreatePacked(PackedAnnVectors vectors, int ordinal, DistanceMetric metric)
     {
         ArgumentNullException.ThrowIfNull(vectors);
         SimilarityMetricMath.ValidateMetric(metric);
-        return new(vectors.Memory(ordinal), metric);
+        return new(vectors.Memory(ordinal), metric, metric == DistanceMetric.Cosine ? vectors.SquaredNorm(ordinal) : 0);
     }
 
     public double Score(ReadOnlyMemory<float> candidate)
@@ -52,7 +52,9 @@ internal sealed class PreparedSimilarity : IPackedAnnSimilarity
             throw Errors.Fail(ErrorCode.Validation, InvalidVector);
         }
         var candidate = vectors.Memory(ordinal);
-        return ScoreCore(candidate);
+        return metric == DistanceMetric.Cosine
+            ? SimilarityMetricMath.CosineWithNorms(query.Span, candidate.Span, queryNorm, vectors.SquaredNorm(ordinal))
+            : ScoreCore(candidate);
     }
 
     double IPackedAnnSimilarity.ScorePacked(PackedAnnVectors vectors, int ordinal)

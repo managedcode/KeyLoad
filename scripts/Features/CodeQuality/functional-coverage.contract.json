@@ -19,7 +19,6 @@
     "src/KeyLoad.Query/ChangeFeeds/Contracts/LiveCursorContract.cs",
     "src/KeyLoad.Query/ChangeFeeds/Execution/QueryEngine.cs",
     "src/KeyLoad.Query/ChangeFeeds/Queries/LiveQueryExecutor.cs",
-    "src/KeyLoad.Query/ChangeFeeds/Validation/LiveQueryResultByteAdmission.cs",
     "src/KeyLoad.Query/QueryExecution/Configuration/QueryExecutionOptions.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchBranchNames.cs",
     "src/KeyLoad.Query/QueryExecution/Contracts/DistributedSearch/DistributedSearchCandidateLeaf.cs",
@@ -50,7 +49,6 @@
     "src/KeyLoad.Query/QueryExecution/Execution/DistributedSearch/DistributedSearchCoordinator.LifetimeWork.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/DistributedSearch/DistributedSearchCoordinator.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/DistributedSearch/DistributedSearchGlobalFusion.cs",
-    "src/KeyLoad.Query/QueryExecution/Execution/DistributedSearch/DistributedSearchGrants.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/DistributedSearch/DistributedSearchOperation.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/DistributedSearch/DistributedSearchOwnedLeafExecution.LifetimeWork.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/DistributedSearch/DistributedSearchOwnedLeafExecution.cs",
@@ -68,8 +66,6 @@
     "src/KeyLoad.Query/QueryExecution/Execution/ModelQueryExecutor.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryExecution.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryLeafExecutor.cs",
-    "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryLeafReadGrant.cs",
-    "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryLeafRetention.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryLifetimeLeafExecution.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryMerge.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryOrder.cs",
@@ -78,7 +74,6 @@
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryPublicMapper.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryRemoteExecution.LifetimeWork.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryRemoteExecution.cs",
-    "src/KeyLoad.Query/QueryExecution/Execution/PartitionQuery/PartitionQueryRetention.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/QueryCursorExecution.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/QueryKeysetPage.cs",
     "src/KeyLoad.Query/QueryExecution/Execution/QueryProjectionRedactions.cs",
@@ -143,7 +138,6 @@
     "src/KeyLoad.Query/QueryExecution/Queries/SqlGraphSearchExecutor.cs",
     "src/KeyLoad.Query/QueryExecution/Serialization/DistributedSearchAliases.cs",
     "src/KeyLoad.Query/QueryExecution/Serialization/QueryRequestIdentity.cs",
-    "src/KeyLoad.Query/QueryExecution/Validation/DistributedSearch/DistributedSearchDeadlineFailure.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/DistributedSearch/DistributedSearchFieldAuthorization.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/DistributedSearch/DistributedSearchLeafResultValidation.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/DistributedSearch/DistributedSearchOwnedLeafValidation.cs",
@@ -159,14 +153,11 @@
     "src/KeyLoad.Query/QueryExecution/Validation/EntityJoins/QueueEntityRefJoinReference.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/PartitionQuery/PartitionQueryLeafOwnerValidation.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/PartitionQuery/PartitionQueryOwnedLeafValidation.cs",
-    "src/KeyLoad.Query/QueryExecution/Validation/PartitionQuery/PartitionQueryParallelRetention.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/PartitionQuery/PartitionQueryPlacementValidation.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/PartitionQuery/PartitionQueryPlanFactory.cs",
-    "src/KeyLoad.Query/QueryExecution/Validation/PartitionQuery/PartitionQueryPlanValidation.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/PartitionQuery/PartitionQueryPublicValidation.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/QuerySemantics/QueryFieldAuthorization.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/QuerySemantics/QueryPredicateNormalizer.cs",
-    "src/KeyLoad.Query/QueryExecution/Validation/QuerySemantics/QueryResultBudgetPolicy.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/QuerySemantics/QuerySelectionNormalization.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/QuerySemantics/QueryValidation.cs",
     "src/KeyLoad.Query/QueryExecution/Validation/Relational/RelationalInnerJoinLeftPredicate.cs",
@@ -241,7 +232,6 @@
     "src/KeyLoad.Query/Search/Queries/AnnLifetimeProjection.cs",
     "src/KeyLoad.Query/Search/Queries/FilteredSearch/FilteredSearchBranch.cs",
     "src/KeyLoad.Query/Search/Queries/FilteredSearch/FilteredSearchErrors.cs",
-    "src/KeyLoad.Query/Search/Queries/GlobalBranch/GlobalBranchByteAdmission.cs",
     "src/KeyLoad.Query/Search/Queries/GlobalBranch/GlobalBranchOrder.cs",
     "src/KeyLoad.Query/Search/Queries/GlobalBranch/GlobalBranchSinglePartitionAdapter.cs",
     "src/KeyLoad.Query/Search/Queries/GlobalBranch/GlobalBranchWindowMerger.cs",
@@ -288,7 +278,6 @@
     ],
     "testNamePrefix": "PartitionQuery",
     "sourceFiles": [
-      "tests/KeyLoad.FunctionalTests/QueryExecution/Assertions/Distribution/PartitionQueryReferenceSizing.cs",
       "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/Partition/PartitionQueryAuthorizationTests.cs",
       "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/Partition/PartitionQueryCancellationTests.cs",
       "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/Partition/PartitionQueryContractTests.cs",
@@ -338,8 +327,8 @@
       },
       {
         "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryCancellationTests",
-        "methodName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
-        "instanceName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+        "methodName": "ObservedReadProgressCancelsTheOriginalReadAndLeavesNoPartialResult",
+        "instanceName": "ObservedReadProgressCancelsTheOriginalReadAndLeavesNoPartialResult",
         "acceptance": [
           "AC-PQUERY-004"
         ],
@@ -365,21 +354,6 @@
           "KeyLoad.Query"
         ],
         "operationOutcomeAndState": "execution plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
-      },
-      {
-        "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryContractTests",
-        "methodName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
-        "instanceName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
-        "acceptance": [
-          "AC-PQUERY-001"
-        ],
-        "requirements": [
-          "REQ-PQUERY-001"
-        ],
-        "executedModules": [
-          "KeyLoad.Query"
-        ],
-        "operationOutcomeAndState": "real plan validation rejects mismatched leaf partition as Validation before storage position changes"
       },
       {
         "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryContractTests",

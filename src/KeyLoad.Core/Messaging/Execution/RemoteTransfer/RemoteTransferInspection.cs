@@ -34,11 +34,9 @@ public static class RemoteTransferInspection
         }
 
         var request = new InspectQueueTransferRequest(source, transferId);
-        budget.ChargeBytes(InspectionRequestBytes(principalId, request));
         return engine.Store.Read(view =>
         {
             var result = (engine.InspectQueueTransfer(budget.CreateView(view), principalId, source, transferId)).Value;
-            budget.CheckResult(result);
             return result;
         });
     }
@@ -72,11 +70,9 @@ public static class RemoteTransferInspection
         }
 
         var request = new InspectQueueTransferReceiptRequest(destination, source, transferId);
-        budget.ChargeBytes(InspectionRequestBytes(principalId, request));
         return engine.Store.Read(view =>
         {
             var result = (engine.InspectQueueTransferReceipt(budget.CreateView(view), principalId, destination, source, transferId)).Value;
-            budget.CheckResult(result);
             return result;
         });
     }

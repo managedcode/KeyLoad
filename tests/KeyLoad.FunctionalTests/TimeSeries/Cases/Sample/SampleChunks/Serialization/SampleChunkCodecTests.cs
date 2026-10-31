@@ -4,7 +4,6 @@ namespace KeyLoad.FunctionalTests.TimeSeries;
 
 internal sealed class SampleChunkCodecTests
 {
-    private const int UnboundedRecords = int.MaxValue;
     private static readonly TimeSpan CallerLifetime = TimeSpan.FromSeconds(1);
 
     [Test]
@@ -23,7 +22,7 @@ internal sealed class SampleChunkCodecTests
     {
         var expected = SampleChunkTestData.TextRecords();
         var encoded = SampleChunkCodec.Encode(expected, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
-        var actual = SampleChunkCodec.Decode(encoded, SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution());
+        var actual = SampleChunkCodec.Decode(encoded, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
 
         await SampleChunkTestData.AssertRecordsExact(expected, actual);
         await SampleChunkCodecRoundTripAssertions.AssertRawFoldSame(expected, actual);
@@ -39,7 +38,7 @@ internal sealed class SampleChunkCodecTests
         };
         var encoded = SampleChunkCodec.Encode(expected, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
         var payload = SampleChunkTestData.Payload(encoded);
-        var decoded = SampleChunkCodec.Decode(encoded, SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution());
+        var decoded = SampleChunkCodec.Decode(encoded, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
 
         await Assert.That((byte)(payload.Tags.Span[1] & 1)).IsEqualTo((byte)1);
         await SampleChunkTestData.AssertRecordsExact(expected, decoded);
@@ -51,7 +50,7 @@ internal sealed class SampleChunkCodecTests
         var expected = SampleChunkTestData.FixedRecords();
         var encoded = SampleChunkCodec.Encode(expected, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
         var exact = SampleChunkCodec.Encode(expected, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution(), encoded.Length);
-        var decoded = SampleChunkCodec.Decode(encoded, SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution(), encoded.Length);
+        var decoded = SampleChunkCodec.Decode(encoded, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution(), encoded.Length);
         var encodeShort = EncodeFailure(expected, encoded.Length - 1);
         var decodeShort = DecodeFailure(encoded, encoded.Length - 1);
 
@@ -147,9 +146,9 @@ internal sealed class SampleChunkCodecTests
             SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution(), SampleChunkTestData.MaximumBytes + 1));
         var encoded = SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
         var decodeLow = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(encoded,
-            SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution(), 0));
+            SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution(), 0));
         var decodeHigh = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(encoded,
-            SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution(), SampleChunkTestData.MaximumBytes + 1));
+            SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution(), SampleChunkTestData.MaximumBytes + 1));
 
         await Assert.That(low.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(high.Code).IsEqualTo(ErrorCode.Validation);
@@ -158,26 +157,12 @@ internal sealed class SampleChunkCodecTests
     }
 
     [Test]
-    public async Task AcChunk003CallerReadBudgetRejectsBeforeDecodeAndFollowingBudgetCanSucceed()
-    {
-        var records = SampleChunkTestData.FixedRecords();
-        var encoded = SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
-        var constrained = SampleChunkTestData.Budget();
-        constrained.ConstrainWork(encoded.Length - 1, UnboundedRecords);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => constrained.ChargeBytes(encoded.Length));
-        var actual = SampleChunkCodec.Decode(encoded, SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution());
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await SampleChunkTestData.AssertRecordsExact(records, actual);
-    }
-
-    [Test]
     public async Task AcChunk003CancellationAndElapsedDeadlineFailWholeOperation()
     {
         var records = SampleChunkTestData.FixedRecords();
         using var cancellation = new CancellationTokenSource();
         var encoded = SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
-        var decodeBudget = SampleChunkTestData.ChargedDecodeBudget(encoded, cancellationToken: cancellation.Token);
+        var decodeBudget = SampleChunkTestData.Budget(cancellationToken: cancellation.Token);
         await cancellation.CancelAsync();
         var encodeCancelled = Assert.ThrowsExactly<OperationCanceledException>(() =>
             SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(cancellationToken: cancellation.Token), UnitExecutionOptions.TimeSeriesExecution()));
@@ -185,7 +170,7 @@ internal sealed class SampleChunkCodecTests
             SampleChunkCodec.Decode(encoded, decodeBudget, UnitExecutionOptions.TimeSeriesExecution()));
         var deadlineClock = new SampleRollupWorkClock();
         var deadlineBudget = SampleChunkTestData.Budget(clock: deadlineClock);
-        var decodeDeadlineBudget = SampleChunkTestData.ChargedDecodeBudget(encoded, clock: deadlineClock);
+        var decodeDeadlineBudget = SampleChunkTestData.Budget(clock: deadlineClock);
         deadlineBudget.ConstrainLifetime(deadlineClock.GetUtcNow() + CallerLifetime);
         decodeDeadlineBudget.ConstrainLifetime(deadlineClock.GetUtcNow() + CallerLifetime);
         deadlineClock.Advance(TimeSpan.FromMilliseconds(1_100));
@@ -204,5 +189,5 @@ internal sealed class SampleChunkCodecTests
 
     private static KeyLoadException DecodeFailure(byte[] encoded, int maximumBytes)
         => Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(encoded,
-            SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution(), maximumBytes));
+            SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution(), maximumBytes));
 }

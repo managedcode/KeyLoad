@@ -16,7 +16,6 @@ internal static class TextOnlineManifestDigest
         {
             throw TextErrors.BoundExceeded();
         }
-        budget.ChargeBytes(size);
         string? digest = null;
         var failures = new List<Exception>();
         Exception? primary = null;

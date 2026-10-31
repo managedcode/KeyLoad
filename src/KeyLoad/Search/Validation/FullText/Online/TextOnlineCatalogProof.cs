@@ -41,7 +41,7 @@ internal sealed class TextOnlineCatalogProof : IDisposable
         try
         {
             var current = ReadCurrent(database, principalId, request, budget, clock);
-            RequireSame(current, generation.Original, budget);
+            RequireSame(current, generation.Original);
             var original = database.ReadOnlineTextOriginalOutcome(principalId, request, budget)
                 ?? throw TextErrors.Ownership();
             var result = original.Get<OnlineTextIndexMaintenanceResult>();
@@ -55,8 +55,6 @@ internal sealed class TextOnlineCatalogProof : IDisposable
                 scope, request.Placement, request.Consumer, request.ConsumerGeneration,
                 current.Authority.Leaf, fresh.AppliedPosition, fresh.UpperSequence,
                 current.Authority.ManifestSha256, current.CommandId);
-            budget.ChargeBytes(OrleansSerialization.Measure(current));
-            budget.ChargeBytes(OrleansSerialization.Measure(catalog));
             var proof = new TextOnlineCatalogProof(retained, current, request, catalog, principalId, clock);
             proof.RequireCurrent(database, budget);
             return proof;
@@ -80,7 +78,7 @@ internal sealed class TextOnlineCatalogProof : IDisposable
             var view = budget.CreateView(raw);
             var current = (database.ReadOnlineTextCurrentPublication(view, principal, request, budget)).Value
                 ?? throw TextErrors.Ownership();
-            RequireSame(current, generation.Original, budget);
+            RequireSame(current, generation.Original);
             var original = (database.ReadOnlineTextOriginalOutcome(view, principal, request, budget)).Value
                 ?? throw TextErrors.Ownership();
             var result = original.Get<OnlineTextIndexMaintenanceResult>();
@@ -95,8 +93,6 @@ internal sealed class TextOnlineCatalogProof : IDisposable
             var catalog = new TextOnlineCatalog(TextProtocol.FormatVersion, request.NodeId,
                 scope, request.Placement, request.Consumer, request.ConsumerGeneration, current.Authority.Leaf,
                 fresh.AppliedPosition, fresh.UpperSequence, current.Authority.ManifestSha256, current.CommandId);
-            budget.ChargeBytes(OrleansSerialization.Measure(current));
-            budget.ChargeBytes(OrleansSerialization.Measure(catalog));
             return new(retained, current, request, catalog, principal.Id, clock);
         }
         catch (Exception primary)
@@ -112,7 +108,6 @@ internal sealed class TextOnlineCatalogProof : IDisposable
     {
         retained.RequireActive();
         var current = ReadCurrent(database, principalId, request, budget, clock);
-        budget.ChargeBytes(OrleansSerialization.Measure(current));
         if (!OrleansSerialization.Serialize(current).AsSpan().SequenceEqual(immutableCurrent))
         {
             throw TextErrors.Mismatch();
@@ -123,7 +118,6 @@ internal sealed class TextOnlineCatalogProof : IDisposable
     internal void RequireExact(TextOnlineCatalog catalog, ReadExecutionBudget budget)
     {
         retained.RequireActive();
-        budget.ChargeBytes(OrleansSerialization.Measure(catalog));
         if (!OrleansSerialization.Serialize(catalog).AsSpan().SequenceEqual(immutableCatalog))
         {
             throw TextErrors.Mismatch();
@@ -142,10 +136,8 @@ internal sealed class TextOnlineCatalogProof : IDisposable
         });
 
     private static void RequireSame(OnlineTextCurrentPublication current,
-        OnlineTextCurrentPublication expected, ReadExecutionBudget budget)
+        OnlineTextCurrentPublication expected)
     {
-        budget.ChargeBytes(OrleansSerialization.Measure(current));
-        budget.ChargeBytes(OrleansSerialization.Measure(expected));
         if (!OrleansSerialization.Serialize(current).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected)))
         {
             throw TextErrors.Mismatch();

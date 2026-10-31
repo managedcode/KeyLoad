@@ -78,8 +78,6 @@ internal static class AnnProjectionPublicationRead
                 }
                 result = new(published.Consumer, published.IndexGeneration, published.Source, published.Count,
                     Convert.ToHexStringLower(published.IndexSha256));
-                read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(result));
-                read.CheckResult(result);
                 read.Check();
             }
             catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }

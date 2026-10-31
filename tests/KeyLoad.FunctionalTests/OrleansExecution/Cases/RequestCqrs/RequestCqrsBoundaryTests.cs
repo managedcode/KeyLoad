@@ -65,25 +65,12 @@ internal sealed class RequestCqrsBoundaryTests(RequestCqrsHostedRuntimeFixture f
     [Arguments(RequestCqrsProblemMutation.WrongType)]
     [Arguments(RequestCqrsProblemMutation.WrongStatus)]
     [Arguments(RequestCqrsProblemMutation.Instance)]
-    [Arguments(RequestCqrsProblemMutation.ExcessDetail)]
     public Task AcCrs004OpenProblemShapesFailClosed(RequestCqrsProblemMutation mutation)
         => RequestCqrsProtocolCases.AcCrs004OpenProblemShapesFailClosed(mutation);
 
     [Test]
-    public Task AcCrs004ActualClientSerializerCounterIsInclusiveAndCancellationAware()
-        => RequestCqrsProtocolCases.AcCrs004ActualClientSerializerCounterIsInclusiveAndCancellationAware(fixture);
-
-    [Test]
-    public Task AcCrs004ScratchAdmissionHonorsActualAdvanceNotReservationHint()
-        => RequestCqrsProtocolCases.AcCrs004ScratchAdmissionHonorsActualAdvanceNotReservationHint();
-
-    [Test]
-    public Task AcCrs004SixteenMiBReplyUsesActualRegisteredChunkSerializer()
-        => RequestCqrsProtocolCases.AcCrs004SixteenMiBReplyUsesActualRegisteredChunkSerializer(fixture);
-
-    [Test]
     public Task AcCrs004AdmissionAcceptsOnlyTheTwoDefinedTerminalShapes()
-        => RequestCqrsAdmissionCases.AcCrs004AdmissionAcceptsOnlyTheTwoDefinedTerminalShapes(fixture);
+        => RequestCqrsAdmissionCases.AcCrs004AdmissionAcceptsOnlyTheTwoDefinedTerminalShapes();
 
     [Test]
     [Arguments(RequestCqrsInvalidChunk.UnknownKind)]
@@ -96,15 +83,11 @@ internal sealed class RequestCqrsBoundaryTests(RequestCqrsHostedRuntimeFixture f
     [Arguments(RequestCqrsInvalidChunk.FailedWithValue)]
     [Arguments(RequestCqrsInvalidChunk.WrongStartedIdentity)]
     public Task AcCrs004MalformedChunkIsRejectedBeforeAdmission(RequestCqrsInvalidChunk invalid)
-        => RequestCqrsAdmissionCases.AcCrs004MalformedChunkIsRejectedBeforeAdmission(fixture, invalid);
+        => RequestCqrsAdmissionCases.AcCrs004MalformedChunkIsRejectedBeforeAdmission(invalid);
 
     [Test]
     public Task AcCrs004MissingTerminalAndCancellationCannotLookLikeCompletion()
-        => RequestCqrsAdmissionCases.AcCrs004MissingTerminalAndCancellationCannotLookLikeCompletion(fixture);
-
-    [Test]
-    public Task AcCrs004CompletedReplyPayloadRemainsInsideItsExistingRawReplyBound()
-        => RequestCqrsAdmissionCases.AcCrs004CompletedReplyPayloadRemainsInsideItsExistingRawReplyBound(fixture);
+        => RequestCqrsAdmissionCases.AcCrs004MissingTerminalAndCancellationCannotLookLikeCompletion();
 
     [Test]
     public Task AcCrs003RealProducerSettlesOnCancellation()

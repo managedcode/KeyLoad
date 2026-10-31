@@ -14,7 +14,7 @@ internal static class SharedDomainPublicProcessing
         await SharedDomainPublicSession.RunAsync(fixture, state.Identity.Secret, async (sdk, official) =>
         {
             var before = TimeProvider.System.GetUtcNow();
-            var request = new ReceiveRequest(Guid.NewGuid(), new(scope.Partition, scope.Queue!), ReceiveCount, ReceiveBytes, LeaseSeconds);
+            var request = new ReceiveRequest(Guid.NewGuid(), new(scope.Partition, scope.Queue!), ReceiveCount, LeaseSeconds: LeaseSeconds);
             var received = await McpCallerAssertions.SdkSuccessAsync(await sdk.ReceiveAsync(request, token));
             var after = TimeProvider.System.GetUtcNow();
             await ReceivedAsync(state, request, received, before, after);

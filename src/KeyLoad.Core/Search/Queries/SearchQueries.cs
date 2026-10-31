@@ -21,7 +21,6 @@ public static class SearchQueries
         ArgumentNullException.ThrowIfNull(binding);
         budget.AttachResourceLifetimeBinding(binding);
         var page = engine.ReadAnnProjectionWorkPageCore(after, budget, binding);
-        budget.CheckResult(page);
         return page;
     }
 

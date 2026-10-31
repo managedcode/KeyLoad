@@ -2,7 +2,7 @@
 
 Canonical slice: ChangeFeeds, linked QueryExecution/OrleansExecution infrastructure. Refines REQ/AC-FEED-PUBLIC-RESUME-001..004 and the original change-feed delivery requirements. This source packet keeps both existing FeedLiveClusterTests declarations, original trials, credentials, bounds and McpCallerDeadline. Original feed/live policy-revoke/repair and two cold flows remain first. New code is a same-Case continuation, not a separate case or qualification claim.
 
-REQ-LIVE-READ-LIFECYCLE-001 / AC-LIVE-READ-LIFECYCLE-001: one positive-byte budget below the first visible live delta refuses with the exact owning SDK Problem and MCP safe capacity detail. Each individual refusal is followed by complete literal current document/query/outbox observations; the same original signed cursor then returns the exact original removal delta and an empty consumed continuation. Raw store cut and logical replica receipt coordinates are independently positive, never ordered across domains.
+REQ-LIVE-READ-LIFECYCLE-001 / AC-LIVE-READ-LIFECYCLE-001: through the SDK and then through official MCP, the same original signed cursor returns the exact original removal delta and an empty consumed continuation; each read is bracketed by complete literal current document/query/outbox observations. A live page is bounded by its `Limit` only and has no byte refusal. Raw store cut and logical replica receipt coordinates are independently positive, never ordered across domains.
 
 REQ-LIVE-READ-LIFECYCLE-002 / AC-LIVE-READ-LIFECYCLE-002: genuine persisted c1-probe identity on an existing Aspire-owned StartProbed cluster wave reads an actual committed live delta. Both SDK and official MCP separately start the original read, reach the AuthorizationReload hold and remain incomplete before caller cancellation. settled/producer-disposed evidence is correlated to the same actual request; the exact original tasks are awaited before retire/healthy continuation. SDK Cancelled uses the read-response-unavailable Problem. MCP retains an authentic transport interruption, never a fabricated dispatched Problem/GUID. Every refusal is immediately full-current bracketed.
 
@@ -14,7 +14,7 @@ The original Case already owns two cold cycles; this additional cancellation/res
 
 ```mermaid
 flowchart LR
- O[Original complete feed and live trials] --> B[Byte refusal then same-cursor healthy delta]
+ O[Original complete feed and live trials] --> B[Same-cursor healthy delta through SDK and MCP]
  B --> S[Genuine c1 persisted subject and probed cluster wave]
  S --> C[SDK and MCP held read cancel and producer join]
  C --> H[Literal healthy delta and original receipts]

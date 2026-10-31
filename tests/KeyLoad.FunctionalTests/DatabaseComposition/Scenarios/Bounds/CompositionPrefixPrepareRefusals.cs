@@ -10,7 +10,6 @@ internal static class CompositionPrefixPrepareRefusals
             [CompositionPrefixPrepareCommands.Forward(prefix: D.Rollback),
              CompositionPrefixPrepareCommands.Forward(prefix: D.Rollback)]);
         var before = CompositionPrefixPrepareAssertions.ModelImage(owner);
-        var charged = command.Work.ReadBytes;
         var result = owner.Submit(command.Original);
         await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.RevisionConflict);
         await Assert.That(result.Problem?.Detail).IsEqualTo("The expected revision does not match.");
@@ -23,7 +22,6 @@ internal static class CompositionPrefixPrepareRefusals
         };
         owner.Commands.Add(command);
         await Assert.That(CompositionPrefixPrepareAssertions.ModelImage(owner).SequenceEqual(before, StringComparer.Ordinal)).IsTrue();
-        await Assert.That(command.Work.ReadBytes).IsEqualTo(charged);
         await CompositionPrefixPrepareAssertions.ReplayAsync(owner);
     }
 

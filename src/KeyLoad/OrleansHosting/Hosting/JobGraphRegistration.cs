@@ -57,8 +57,16 @@ internal static class JobGraphRegistration
     {
         foreach (var method in new[] { nameof(IConnectionGrain.ExecuteAsync), nameof(IConnectionGrain.ExecuteStreamAsync) })
         {
-            Add<IConnectionGrain, IDatabaseCommitGrain>(graph, method, nameof(IDatabaseCommitGrain.GetReadOwnerAsync));
-            Add<IConnectionGrain, IRequestExecutionGrain>(graph, method, nameof(IRequestExecutionGrain.ExecuteAsync));
+            Add<IConnectionGrain, IRequestGrain>(graph, method, method, nameof(IRequestGrain.ReleaseAsync));
+            Add<IRequestGrain, IDatabaseCommitGrain>(graph, method, nameof(IDatabaseCommitGrain.GetReadOwnerAsync),
+                nameof(IDatabaseCommitGrain.ReadCutAsync), nameof(IDatabaseCommitGrain.ApplyAsync),
+                nameof(IDatabaseCommitGrain.ExecuteSharedAsync));
+            Add<IRequestGrain, IRequestExecutionGrain>(graph, method, nameof(IRequestExecutionGrain.ExecuteAsync));
+            foreach (var target in new[] { nameof(IPartitionQueryGrain.ResolveOwnerAsync), nameof(IPartitionQueryGrain.ExecuteAsync) })
+            {
+                graph.AddTransition(typeof(IRequestGrain).FullName!, typeof(IPartitionQueryGrain).FullName!,
+                    new GrainTransition(method, target, IsReentrant: true));
+            }
         }
         Add<IPartitionQueryGrain, IRequestExecutionGrain>(graph, nameof(IPartitionQueryGrain.ExecuteAsync),
             nameof(IRequestExecutionGrain.ExecuteAsync));

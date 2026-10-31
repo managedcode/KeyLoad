@@ -20,9 +20,7 @@ internal static class SubscriptionContinuationProtocol
     internal const string HealthyId = "event4";
     internal const string EventType = "Created";
     internal const string HealthyPayload = "{\"n\":4}";
-    internal const string ByteBudgetDetail = "The next subscription event exceeds the receive byte budget.";
     internal const string MissingPending = "The genuine pending version row is missing.";
-    internal const string MissingByteOutcome = "The earlier genuine byte-budget refusal disappeared.";
     internal const int FirstDelivery = 0;
     internal const int SecondDelivery = 1;
     internal const int ThirdDelivery = 2;

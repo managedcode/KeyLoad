@@ -7,7 +7,6 @@ internal static class QueryLifetimeProtocol
     internal const long NextEpoch = 1;
     internal const int Version = 1;
     internal const int Limit = 1;
-    internal const int GrantDivisor = 4;
     internal const int NoRows = 0;
     internal const int ColdCount = 2;
     internal const string Text = "destination";

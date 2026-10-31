@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -10,7 +9,6 @@ namespace KeyLoad.Query.QueryExecution;
 internal static class QueryViewExecution
 {
     private const int InitialSequence = 0;
-    private const long NoRetainedBytesLong = 0L;
 
     internal static QueryPage Execute(DatabaseEngine database, TimeSpan cursorLifetime, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, ReadExecutionBudget budget, TimeProvider clock)
@@ -45,7 +43,6 @@ internal static class QueryViewExecution
             var explain = new QueryPage([new(QueryEngine.ExplainId, InitialSequence, JsonSerializer.Serialize(new { AccessPath = accessPath,
                 AtomicPartition = request.Partition.AtomicPartitionId },
                 JsonDefaults.Options))], null, cursor.Cut, accessPath);
-            budget.CheckResult(explain);
             return explain;
         }
         return BuildPage(database, cursorLifetime, principal, resource, request, hash, cursor, prepared, accessPath, budget, clock,
@@ -58,25 +55,17 @@ internal static class QueryViewExecution
     {
         var query = request.Query;
         var rows = new List<QueryRow>();
-        var minimumResultBytes = NoRetainedBytesLong;
         string? lastId = null;
         foreach (var row in prepared.Page(cursor.Offset, query.Limit, budget))
         {
             lastId = row.Document.Reference.Id;
             budget.Check();
-            var projected = QueryRowProjection.Project(database, principal, resource, row.Document, query.Projection, prepared.Paths);
-            minimumResultBytes += Encoding.UTF8.GetByteCount(projected.Json);
-            if (minimumResultBytes > budget.MaximumResultBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, QueryEngine.ResultLimitExceeded);
-            }
-            rows.Add(projected);
+            rows.Add(QueryRowProjection.Project(database, principal, resource, row.Document, query.Projection, prepared.Paths));
         }
         var next = cursor.Offset + rows.Count;
         var token = (QueryCursorExecution.SignNext(database, cursorLifetime, principal, resource, hash,
             cursor, next, prepared.EligibleCount, clock, paged ? lastId : null)).Value;
         var result = new QueryPage(rows.ToImmutableArray(), token, cursor.Cut, accessPath);
-        budget.CheckResult(result);
         return result;
     }
 }

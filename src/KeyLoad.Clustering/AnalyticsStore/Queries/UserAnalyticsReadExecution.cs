@@ -51,7 +51,6 @@ internal static class UserAnalyticsReadExecution
             throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded, error);
         }
         database.ValidateAnalyticsAggregatePublication(snapshot);
-        work.CheckResult(original.Result);
         return original.Result;
     }
 }

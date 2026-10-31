@@ -3,7 +3,7 @@ namespace KeyLoad.ProcessRecoveryTests.Messaging;
 internal static class RemoteTransferAttemptCrashProtocol
 {
     internal const string Mode = "remote-transfer-capacity-attempt";
-    internal const string OperationFile = "transfer-advance-operation.json";
+    internal const string OperationFile = "transfer-advance-operation.bin";
     internal const string FailureFile = "transfer-original-failure.bin";
     internal const string AcceptFile = "transfer-original-accept.json";
     internal const string SourceKey = "source";

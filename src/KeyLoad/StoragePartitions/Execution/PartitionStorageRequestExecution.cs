@@ -31,7 +31,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            return GrainReplyFactory.Failure(error, command, diagnostics, options, requestId,
+            return GrainReplyFactory.Failure(error, command, diagnostics, requestId,
                 GrainFailureStage.CapabilityExecution, token);
         }
     }
@@ -97,7 +97,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
             await services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync(work.Token).ConfigureAwait(true);
             ConnectionReadExecution.ValidateFreshRequest(codec, request, request.Envelope.RequestId, work.Token);
             ConnectionParentExecution.Authorize(database, request, clock);
-            return GrainReplyFactory.Value(true, options, work.Token);
+            return GrainReplyFactory.Value(true);
         }
         if (request.Envelope.CommandKind is not null)
         {

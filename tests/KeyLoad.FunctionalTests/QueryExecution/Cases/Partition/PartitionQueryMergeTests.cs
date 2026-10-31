@@ -59,7 +59,6 @@ internal sealed class PartitionQueryMergeTests
             && leaf.ReadGeneration == database.Store.Identity.ReadGeneration
             && leaf.CutPosition > 0)).IsTrue();
         await Assert.That(actual.Leaves.Select(leaf => leaf.PolicyEpoch).Distinct().Count()).IsEqualTo(1);
-        await Assert.That(actual.RetainedBytes).IsEqualTo(PartitionQueryReferenceSizing.RetainedBytes(actual));
     }
 
     [Test]
@@ -102,7 +101,6 @@ internal sealed class PartitionQueryMergeTests
         await Assert.That(row.Json).IsEqualTo("{\"label\":\"visible\"}");
         await Assert.That(row.Redacted).IsFalse();
         await Assert.That(row.RedactedFields!.Value).IsEmpty();
-        await Assert.That(result.RetainedBytes).IsEqualTo(PartitionQueryReferenceSizing.RetainedBytes(result));
         var selectedRequest = request with
         {
             Query = request.Query with
@@ -124,7 +122,6 @@ internal sealed class PartitionQueryMergeTests
         await Assert.That(leaf.Incarnation).IsEqualTo(identity.Incarnation);
         await Assert.That(leaf.ReadGeneration).IsEqualTo(identity.ReadGeneration);
         await Assert.That(leaf.CutPosition).IsEqualTo(result.Leaves.Single().CutPosition);
-        await Assert.That(selected.RetainedBytes).IsEqualTo(PartitionQueryReferenceSizing.RetainedBytes(selected));
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await Assert.That(database.Store.Identity).IsEqualTo(identity);
     }

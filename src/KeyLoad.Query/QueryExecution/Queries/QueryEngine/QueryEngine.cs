@@ -26,7 +26,6 @@ public sealed partial class QueryEngine
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         if (request is null)
         {

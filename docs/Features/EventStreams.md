@@ -104,7 +104,7 @@ oracles. Original event RecordedAt values are retained across refusal/replay.
 
 ### Current product implementation contract
 
-REQ-EVENT-READ-DIRECTION-001 / AC-EVENT-READ-DIRECTION-001 requires complete independent forward/backward retained-event pages, exclusive bounds, current field/header redaction, byte refusal without partial publication, cancellation/refusal followed by a healthy operation. REQ-EVENT-READ-CUT-001 / AC-EVENT-READ-CUT-001 freezes original traversal tail/floor and snapshot cut, with subsequent append excluded until a new traversal; current CutPosition remains actual same-view position. Original generation/history, signed source feed and every global gate remain mandatory.
+REQ-EVENT-READ-DIRECTION-001 / AC-EVENT-READ-DIRECTION-001 requires complete independent forward/backward retained-event pages bounded by their `Limit`, exclusive bounds, current field/header redaction, no partial publication, cancellation/refusal followed by a healthy operation. REQ-EVENT-READ-CUT-001 / AC-EVENT-READ-CUT-001 freezes original traversal tail/floor and snapshot cut, with subsequent append excluded until a new traversal; current CutPosition remains actual same-view position. Original generation/history, signed source feed and every global gate remain mandatory.
 
 ## Traceability join
 
@@ -112,11 +112,11 @@ REQ/AC-BACKUP-003/004 and REQ/AC-EVENT-RETENTION-001–005 map to the exact curr
 
 ## Bounded provider operation
 
-REQ-EVENTFEED-PUBSUB-001: the disposable EventFeed execution `IGrainStorage` provider must own keyed state, detached values, ETag CAS and joined cleanup through the actual Orleans `GrainId` and registered serializers. Each entry's encoded key, state name, ETag and value must fit `GrainRoutingOptions.MaximumReplyBytes`; the provider has no entry-count or total-byte quota ([ADR-149](../ADR/ADR-149-no-operation-limits.md)). Cancellation, stale ETag, foreign state, an entry above that ceiling and disposal must refuse without replacing existing state.
+REQ-EVENTFEED-PUBSUB-001: the disposable EventFeed execution `IGrainStorage` provider must own keyed state, detached values, ETag CAS and joined cleanup through the actual Orleans `GrainId` and registered serializers. Each write serializes its state once with the registered serializer; the provider measures no encoded bytes and has no entry-count, entry-size or total-byte quota ([ADR-149](../ADR/ADR-149-no-operation-limits.md)). Cancellation, stale ETag, foreign state and disposal must refuse without replacing existing state.
 
-AC-EVENTFEED-PUBSUB-001: both existing `EventFeedPubSubStorageTests` whole operations must write/read the complete original value and ETag, reject stale CAS and the actual oversized-entry/cancellation/foreign-state/disposed-owner cases with unchanged state, then clear or replace through the actual provider and verify a fresh complete healthy value. Preserve original owner cleanup and every failure. These are disposable provider operations; canonical ZoneTree state, durable delivery, public registration, restart and cluster acceptance require their independent mapped gates. ADR-025 and the existing provider implementation contract remain sufficient; no additional public or persisted contract is introduced by this traceability clarification.
+AC-EVENTFEED-PUBSUB-001: the existing `EventFeedPubSubStorageTests.ActualPubSubCasCancellationAndDisposeRefuseThenHealthyStateRemainsComplete` whole operation must write/read the complete original value and ETag, reject stale CAS and the actual cancellation/foreign-state/disposed-owner cases with unchanged state, then clear or replace through the actual provider and verify a fresh complete healthy value. Preserve original owner cleanup and every failure. These are disposable provider operations; canonical ZoneTree state, durable delivery, public registration, restart and cluster acceptance require their independent mapped gates. ADR-025 and the existing provider implementation contract remain sufficient; no additional public or persisted contract is introduced by this traceability clarification.
 
-REQ/AC scope: approved advisory-provider admission and disposable pubsub resource ownership. The purpose-owned EventFeed provider borrows the actual pinned Orleans10.4 MemoryAdapterFactory, IQueueAdapter/cache, and registered Serializer<MemoryMessageBody>; Microsoft.Orleans.Streaming is explicitly centrally pinned at the SAME10.4 version to expose those APIs. There is no replacement/copied provider. Queue slots, cache batch slots, and encoded fixed-hint bytes remain distinct; MaxAddCount is not a memory bound.
+REQ/AC scope: approved advisory-provider admission and disposable pubsub resource ownership. The purpose-owned EventFeed provider borrows the actual pinned Orleans10.4 MemoryAdapterFactory with its default memory message body serializer and IQueueAdapter/cache; Microsoft.Orleans.Streaming is explicitly centrally pinned at the SAME10.4 version to expose those APIs. There is no replacement/copied provider. Queue slots and cache batch slots remain distinct, hint batches are validated for shape and not measured, and MaxAddCount is not a memory bound.
 
 ## Complete ACK/Release public operations
 
@@ -195,8 +195,8 @@ no-effects. An original forward cursor already past missing1 legitimately reads
 2,3; an original backward cursor already past missing3 legitimately reads2,1.
 An empty read strictly after tail3 remains valid and empty. Existing real-store
 StreamTraversalTests and StreamReadResourceTests preserve retained floor,
-original cursor invalidation, policy/owner/expiry, raw/result byte bounds,
-pre-cancel and subsequent healthy operations; these controls are not replaced.
+original cursor invalidation, policy/owner/expiry, pre-cancel and subsequent
+healthy operations; these controls are not replaced.
 Restore exact original bytes, preserve full retained append outcome during the
 fault and after repair, publish literal healthy4, then require independent full
 four-event pages, original captured three-event cursors and original receipts

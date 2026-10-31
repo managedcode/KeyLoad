@@ -1,7 +1,5 @@
 using KeyLoad.Core.ResourceExecution;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -13,7 +11,6 @@ internal sealed class MaintenanceChildCalls(DecodedGrainRequest parent,
 {
     internal Guid ParentRequestId => parent.Envelope.RequestId;
     internal Guid SessionId { get; } = Guid.NewGuid();
-    internal int ProjectionPageBytes => services.GetRequiredService<IOptions<GrainRoutingOptions>>().Value.MaximumReplyBytes;
 
     internal Task<TResult> ReadAsync<TRequest, TResult>(GrainReadKind kind, TRequest request, CancellationToken token)
         where TRequest : notnull where TResult : class

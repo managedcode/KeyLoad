@@ -1,7 +1,5 @@
 using System.Runtime.CompilerServices;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
@@ -10,20 +8,17 @@ internal static class BoundCqrsStreamLifetime
 {
     internal static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Run(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, Func<ValueTask> settled, IOptions<GrainRoutingOptions> options,
-        RequestWorkOwner owner, CqrsStreamPurpose purpose,
+        Guid requestId, Func<ValueTask> settled, RequestWorkOwner owner, CqrsStreamPurpose purpose,
         Func<RequestWorkLease> acquireVerified, CancellationToken cancellationToken,
         [EnumeratorCancellation] CancellationToken enumerationToken = default)
     {
         var work = new BoundCqrsStreamWork();
-        var admission = new CqrsStreamAdmission(serializer, requestId, options, purpose);
+        var admission = new CqrsStreamAdmission(requestId, purpose);
         IAsyncEnumerator<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>? enumerator = null;
         Exception? primary = null;
         try
         {
-            work.Start(clock, options, owner, purpose, acquireVerified,
-                cancellationToken, enumerationToken);
+            work.Start(owner, purpose, acquireVerified, cancellationToken, enumerationToken);
             var creation = Create(createStream, work.Token);
             enumerator = creation.Enumerator;
             primary = creation.Error;
@@ -79,7 +74,7 @@ internal static class BoundCqrsStreamLifetime
                 return new(false, null, null);
             }
             var item = enumerator.Current;
-            admission.Admit(item, work.Token);
+            admission.Admit(item);
             work.Token.ThrowIfCancellationRequested();
             work.AdmitPublication(item.Kind);
             return new(true, item, null);

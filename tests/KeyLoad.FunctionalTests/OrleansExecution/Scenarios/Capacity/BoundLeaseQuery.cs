@@ -11,15 +11,14 @@ internal static class BoundLeaseQuery
     {
         var database = state.Leader.Database.Database;
         var budget = operation.Budget;
-        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes / K.GrantDivisor, budget.RemainingReadGrantRecords / K.GrantDivisor);
         var request = new AstQueryRequest(K.Partition,
             new(K.Collection, null, [new(K.Projection, K.ProjectionAlias)], null, [], K.RowCount), AllowFullScan: true);
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         var normalized = QueryValidation.Normalize(request, engine.Execution);
-        return database.WithPartitionQueryFenceView(K.Root, K.Partition, K.Collection, grant,
+        return database.WithPartitionQueryFenceView(K.Root, K.Partition, K.Collection,
             (view, principal, resource, _) =>
             {
-                var coverage = budget.CaptureResourceLifetimes(budget.CreateView(view, grant),
+                var coverage = budget.CaptureResourceLifetimes(budget.CreateView(view),
                     K.Partition, [resource]);
                 var plan = PartitionQueryPlanFactory.Create(normalized, database.Store.Identity,
                     [K.Partition], engine.Execution).Leaves.Single();

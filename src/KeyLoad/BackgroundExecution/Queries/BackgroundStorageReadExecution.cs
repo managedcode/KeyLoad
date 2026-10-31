@@ -5,7 +5,7 @@ using ManagedCode.Communication;
 
 namespace KeyLoad.Server;
 
-/// <summary>Settles actual physical read work before returning its bounded accounting to the original caller.</summary>
+/// <summary>Settles actual physical read work before returning its observed lifetimes to the original caller.</summary>
 internal static class BackgroundStorageReadExecution
 {
     internal static async Task<T> RunLocalAsync<T>(PartitionStorageScope storage,
@@ -42,8 +42,6 @@ internal static class BackgroundStorageReadExecution
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         var work = new ReadExecutionBudget(clock, lifetime.Token);
         work.ConstrainLifetime(bounds.ExpiresAt);
-        work.ConstrainWork(bounds.MaximumReadBytes, bounds.MaximumRecords);
-        work.ConstrainResultBytes(bounds.MaximumResultBytes);
         var binding = new BackgroundStorageReadBinding(lifetime);
         work.AttachResourceLifetimeBinding(binding);
         try
@@ -60,13 +58,7 @@ internal static class BackgroundStorageReadExecution
                 lifetime.PrimaryError = failure;
                 result = Result<object>.Fail(Errors.Problem(failure.Code, failure.Message));
             }
-            var response = new BackgroundReadResult(result, work.ReadBytes, work.ConstrainedRecords,
-                binding.Capture(bounds.MaximumResultBytes));
-            if (OrleansSerialization.Measure(response) > bounds.MaximumResultBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
-            }
-            return response;
+            return new BackgroundReadResult { Result = result, Lifetimes = binding.Capture() };
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
@@ -86,9 +78,7 @@ internal static class BackgroundStorageReadExecution
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        if (bounds is null || bounds.ExpiresAt.Offset != TimeSpan.Zero
-            || bounds.MaximumReadBytes <= default(long) || bounds.MaximumRecords <= default(int)
-            || bounds.MaximumResultBytes <= default(int))
+        if (bounds is null || bounds.ExpiresAt.Offset != TimeSpan.Zero)
         {
             throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }

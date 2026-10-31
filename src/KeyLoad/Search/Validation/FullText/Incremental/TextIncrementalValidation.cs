@@ -50,7 +50,6 @@ internal static class TextIncrementalValidation
         var previousId = EmptyRecordId;
         foreach (var record in records)
         {
-            budget.ChargeBytes(OrleansSerialization.Measure(record));
             if (record is null || record.Id <= previousId || record.Id >= nextRecord
                 || record.Reference is null || record.Reference.Partition != scope.Partition || record.Reference.Collection != scope.Collection
                 || record.Revision <= InitialRevisionBoundary || !references.Add(record.Reference)
@@ -72,7 +71,6 @@ internal static class TextIncrementalValidation
             return;
         }
         budget.Check();
-        budget.ChargeBytes(OrleansSerialization.Measure(original));
         if (original.CommandId == Guid.Empty || original.Consumer != consumer
             || string.IsNullOrEmpty(original.Token) || original.Effects.IsDefault || !original.Effects.IsEmpty)
         {

@@ -40,8 +40,6 @@ internal static class AnalyticsMapColdReads
                 await VerifyAsync(owner, events, token);
             }
             AnalyticsEventsPage? published = null;
-            await N.RefusedAsync(() => N.Query(owner.Database, D.Query(owner.Source), token, resultBytes: 1));
-            await VerifyAsync(owner, events, token);
             using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
             await cancelled.CancelAsync();
             var cancelledFailure = Assert.ThrowsExactly<OperationCanceledException>(() => published = owner.Database.ReadAnalyticsEvents(

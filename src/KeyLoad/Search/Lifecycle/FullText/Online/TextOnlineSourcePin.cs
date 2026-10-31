@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -9,24 +8,20 @@ namespace KeyLoad.Server.Search;
 internal sealed class TextOnlineSourcePin : IDisposable
 {
     private const int NoFailures = 0;
-    private const int AllocationOnlyRecords = 0;
     private const string InvalidPin = "The online text snapshot does not match its captured canonical source.";
     private const string AlreadyVisited = "The online text snapshot traversal is already settled.";
     private readonly Lock sync = new();
     private readonly ZoneTreeReadCutLease execution;
     private readonly ReadExecutionBudget budget;
-    private readonly ReadExecutionBudgetReadGrant grant;
     private readonly TextSeedPin scope;
     private readonly TextSeedCapture metadata;
     private bool visited;
     private bool disposed;
 
-    private TextOnlineSourcePin(ZoneTreeReadCutLease execution, ReadExecutionBudget budget,
-        ReadExecutionBudgetReadGrant grant, TextSeedPin scope, TextSeedCapture metadata)
+    private TextOnlineSourcePin(ZoneTreeReadCutLease execution, ReadExecutionBudget budget, TextSeedPin scope, TextSeedCapture metadata)
     {
         this.execution = execution;
         this.budget = budget;
-        this.grant = grant;
         this.scope = scope;
         this.metadata = metadata;
     }
@@ -58,8 +53,7 @@ internal sealed class TextOnlineSourcePin : IDisposable
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidPin);
         }
-        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
-        var limits = owner.BoundReadCut(grant.RemainingRecords, grant.RemainingBytes, budget.RemainingLifetime);
+        var limits = owner.BoundReadCut(int.MaxValue, long.MaxValue, budget.RemainingLifetime);
         ZoneTreeReadCutLease execution;
         try
         {
@@ -72,12 +66,9 @@ internal sealed class TextOnlineSourcePin : IDisposable
             {
                 throw;
             }
-            var failures = new List<Exception> { failure };
-            ServerFailureObserver.Observe(() => budget.CompleteSettledReadGrant(grant), failures);
-            ServerFailureObserver.ThrowIfAny(failures);
             throw;
         }
-        return new(execution, budget, grant, scope, metadata);
+        return new(execution, budget, scope, metadata);
     }
 
     internal TextSeedCapture CapturedMetadata
@@ -92,15 +83,6 @@ internal sealed class TextOnlineSourcePin : IDisposable
         }
     }
 
-    internal void AdmitRetainedBytes(long bytes)
-    {
-        lock (sync)
-        {
-            ObjectDisposedException.ThrowIf(disposed, this);
-            budget.ImportReadGrant(grant, bytes, AllocationOnlyRecords);
-        }
-    }
-
     internal TextSeedCapture ReadSeed()
     {
         lock (sync)
@@ -111,7 +93,7 @@ internal sealed class TextOnlineSourcePin : IDisposable
                 throw Errors.Fail(ErrorCode.Conflict, AlreadyVisited);
             }
             visited = true;
-            var reader = new TextOnlineSeedReader(execution, budget, grant, scope);
+            var reader = new TextOnlineSeedReader(execution, scope);
             return metadata with
             {
                 Documents = reader.Read()
@@ -140,7 +122,6 @@ internal sealed class TextOnlineSourcePin : IDisposable
                 return;
             }
             execution.Dispose();
-            budget.CompleteSettledReadGrant(grant);
             disposed = true;
         }
     }

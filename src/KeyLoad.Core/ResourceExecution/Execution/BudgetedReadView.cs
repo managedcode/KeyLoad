@@ -1,15 +1,13 @@
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.ResourceExecution;
 
-/// <summary>Charges one read operation before borrowed storage data is copied or consumed.</summary>
+/// <summary>Reads through one operation's cancellation and binds the resource lifetimes it observes.</summary>
 internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBindingView,
     IResourceEffectObservation
 {
     private readonly IKeyValueView view;
     private readonly ReadExecutionBudget budget;
-    private readonly ReadExecutionBudgetReadGrant? grant;
 
     void IResourceLifetimeReadBindingView.BindResourceLifetime(PartitionRef partition,
         ResourceDefinition definition, ResourceLifetime lifetime)
@@ -34,14 +32,12 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     /// <summary>Creates a view whose lifetime is bounded by the wrapped storage action.</summary>
     /// <param name="view">The underlying view, valid only in its current storage action.</param>
     /// <param name="budget">The shared operation budget.</param>
-    /// <param name="grant">Optional existing execution leaf reservation charging actual examined records.</param>
-    public BudgetedReadView(IKeyValueView view, ReadExecutionBudget budget, ReadExecutionBudgetReadGrant? grant = null)
+    public BudgetedReadView(IKeyValueView view, ReadExecutionBudget budget)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(budget);
         this.view = view;
         this.budget = budget;
-        this.grant = grant;
     }
 
     /// <inheritdoc />
@@ -75,12 +71,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(reader);
         budget.Check();
-        var found = view.ReadValue(key, reader, bytes =>
-        {
-            Charge(bytes);
-            observer?.Invoke(bytes);
-            budget.Check();
-        });
+        var found = view.ReadValue(key, reader, observer);
         budget.Check();
         return found;
     }
@@ -114,27 +105,8 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     private StorageScanResult VisitRangeCore(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey, byte[]? untilKey, StorageReadObserver? observer, bool reverse, CancellationToken cancellationToken)
     {
-        StorageReadObserver charge = bytes =>
-        {
-            Charge(bytes);
-            observer?.Invoke(bytes);
-            cancellationToken.ThrowIfCancellationRequested();
-            budget.Check();
-        };
-        return reverse ? view.VisitReverseRange(prefix, maxRecords, visitor, afterKey, untilKey, charge, cancellationToken)
-            : view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, charge, cancellationToken);
-    }
-
-    private void Charge(long bytes)
-    {
-        if (grant is null)
-        {
-            budget.ChargeReadRecord(bytes);
-        }
-        else
-        {
-            budget.ChargeReadGrant(grant, bytes);
-        }
+        return reverse ? view.VisitReverseRange(prefix, maxRecords, visitor, afterKey, untilKey, observer, cancellationToken)
+            : view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, observer, cancellationToken);
     }
 
     private (bool HasValue, CancellationTokenSource? Value) CreateLinkedToken(CancellationToken viewToken, out CancellationToken effectiveToken)

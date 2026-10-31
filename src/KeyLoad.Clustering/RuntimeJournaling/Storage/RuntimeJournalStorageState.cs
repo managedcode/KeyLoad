@@ -6,8 +6,7 @@ using Orleans.Journaling;
 namespace KeyLoad.Clustering;
 
 internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, JournalId journalId,
-    IOptions<RuntimeJournalOptions> options, string format, IOptions<GrainRoutingOptions> routingOptions,
-    SemaphoreSlim[] gates, int gateIndex)
+    IOptions<RuntimeJournalOptions> options, string format, SemaphoreSlim[] gates, int gateIndex)
 {
     private bool retired;
 
@@ -21,7 +20,7 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
 
     internal async ValueTask<Lease> EnterAsync(CancellationToken cancellationToken)
     {
-        var lease = new Lease(gates[gateIndex], routingOptions.Value.ExecutionLifetime, client.Clock, cancellationToken);
+        var lease = new Lease(gates[gateIndex], cancellationToken);
         try
         {
             await lease.AcquireAsync();
@@ -108,35 +107,24 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
 
     internal void Retire() => retired = true;
 
-    internal sealed class Lease(SemaphoreSlim gate, TimeSpan timeout, TimeProvider clock, CancellationToken callerToken) : IDisposable
+    internal sealed class Lease(SemaphoreSlim gate, CancellationToken callerToken) : IDisposable
     {
-        private readonly CancellationTokenSource timeoutSource = new(timeout, clock);
-        private CancellationTokenSource? deadline;
         private bool acquired;
 
-        internal CancellationToken Token => deadline!.Token;
+        internal CancellationToken Token => callerToken;
 
         internal async ValueTask AcquireAsync()
         {
-            deadline = CancellationTokenSource.CreateLinkedTokenSource(callerToken, timeoutSource.Token);
-            await gate.WaitAsync(deadline.Token);
+            await gate.WaitAsync(callerToken);
             acquired = true;
         }
 
         public void Dispose()
         {
-            try
+            if (acquired)
             {
-                if (acquired)
-                {
-                    acquired = false;
-                    gate.Release();
-                }
-            }
-            finally
-            {
-                deadline?.Dispose();
-                timeoutSource.Dispose();
+                acquired = false;
+                gate.Release();
             }
         }
     }

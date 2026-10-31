@@ -9,7 +9,7 @@ internal static class RemoteTransferRepairProcessRecovery
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
-        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferRepairCrashProtocol.OperationFile), token));
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferRepairCrashProtocol.OperationFile), token));
         var command = ((CommandRequest)operation.Value!.Input);
         var failed = JsonDefaults.Deserialize<CommandRequest>(await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferRepairCrashProtocol.OriginalFile), token));
         var bytes = await File.ReadAllBytesAsync(Path.Combine(root, RemoteTransferRepairCrashProtocol.FailureFile), token);

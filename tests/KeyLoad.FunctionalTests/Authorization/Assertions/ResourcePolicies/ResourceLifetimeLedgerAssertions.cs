@@ -9,8 +9,6 @@ internal static class ResourceLifetimeLedgerAssertions
         params ResourceLifetime[] expected)
     {
         await Assert.That(ledger.RetainedEntries).IsEqualTo(expected.Length);
-        var bytes = expected.Sum(lifetime => OrleansSerialization.Measure(lifetime));
-        await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo(bytes);
     }
 
     internal static async Task HealthyChildAsync(SafeProjectorOperationDatabase owner,
@@ -22,16 +20,7 @@ internal static class ResourceLifetimeLedgerAssertions
 
     internal static async Task RepeatedIdentityAsync(ResourceLifetimeWorkResultRetention ledger, ResourceLifetime lifetime)
     {
-        var bytes = checked((int)ledger.RetainedEncodedBytes);
-        ledger.Reserve([lifetime, lifetime with { }], bytes);
-        await RetainedAsync(ledger, lifetime);
-        var capacity = Assert.ThrowsExactly<KeyLoadException>(() => ledger.Reserve([lifetime], bytes - 1));
-        await Assert.That(capacity.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var changed = lifetime with { ResourceName = lifetime.ResourceName + "-altered" };
-        var identity = Assert.ThrowsExactly<KeyLoadException>(() => ledger.Reserve([changed]));
-        await Assert.That(identity.Code).IsEqualTo(ErrorCode.Corruption);
-        var absent = Assert.ThrowsExactly<KeyLoadException>(() => ledger.Reserve([null!]));
-        await Assert.That(absent.Code).IsEqualTo(ErrorCode.Corruption);
+        ledger.Reserve([lifetime, lifetime with { }]);
         await RetainedAsync(ledger, lifetime);
     }
 

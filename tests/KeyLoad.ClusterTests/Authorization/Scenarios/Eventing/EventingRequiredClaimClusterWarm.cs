@@ -9,12 +9,10 @@ internal static class EventingRequiredClaimClusterWarm
         EventingRequiredClaimClusterState state, CancellationToken token)
     {
         var input = state.Input;
-        await EventingRequiredClaimClusterReceive.AcceptProbeAsync(root, reader, state, token);
         await RequiredProcessingPolicyClusterSetup.PolicyAsync(root, input, RequiredProcessingPolicyClusterState.After, token);
         await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Denied, ErrorCode.PermissionDenied, RequiredProcessingPolicyClusterState.Denied, token);
         await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.EpochProbe, ErrorCode.PermissionDenied, RequiredProcessingPolicyClusterState.Denied, token);
         await RequiredProcessingPolicyClusterSetup.PolicyAsync(root, input, RequiredProcessingPolicyClusterState.Before, token);
-        await EventingRequiredClaimClusterReceive.ReplayAsync(root, reader, state, state.EpochProbe, state.EpochReceipt, token);
         await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Denied, ErrorCode.PermissionDenied, RequiredProcessingPolicyClusterState.Denied, token);
         await RequiredProcessingPolicyClusterSetup.PrincipalAsync(root, input, 2L, true, token);
         await EventingRequiredClaimClusterRefusals.ReceiveAsync(root, reader, state, state.Denied, ErrorCode.Unauthenticated, "The credential is unavailable or expired.", token);

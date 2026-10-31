@@ -137,7 +137,6 @@ internal sealed class UserAnalyticsHostBoundWork : IAsyncDisposable
 
         using var result = await runtime.AggregateAsync(snapshot, lease, cancellation.Token);
         host.Database.ValidateAnalyticsAggregatePublication(snapshot);
-        work.CheckResult(result.Result);
         await consume(result.Result);
     }
 

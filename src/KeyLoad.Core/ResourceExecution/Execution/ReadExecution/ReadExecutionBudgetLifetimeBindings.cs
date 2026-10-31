@@ -13,9 +13,6 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
     private IResourceLifetimeWorkBinding? binding;
     private ResourceLifetimeWorkResultRetention? resultRetention;
 
-    internal int AvailableResultBytes(int maximumBytes)
-        => resultRetention?.AvailableResultBytes(maximumBytes) ?? maximumBytes;
-
     internal void Attach(IResourceLifetimeWorkBinding value)
     {
         work.Check();
@@ -61,7 +58,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
     {
         work.Check();
         var coverage = new ResourceLifetimeCoverage(partition, [lifetime]);
-        resultRetention?.Reserve(coverage.Lifetimes, work.LifetimeResultBytesLimit);
+        resultRetention?.Reserve(coverage.Lifetimes);
         binding?.Bind(coverage);
         work.Check();
     }
@@ -69,7 +66,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
     internal void ObserveAuthenticated(ImmutableArray<ResourceLifetime> lifetimes)
     {
         work.Check();
-        resultRetention?.Reserve(lifetimes, work.LifetimeResultBytesLimit);
+        resultRetention?.Reserve(lifetimes);
         binding?.Bind(lifetimes);
         work.Check();
     }

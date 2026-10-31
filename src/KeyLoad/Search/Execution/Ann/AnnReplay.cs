@@ -7,7 +7,6 @@ namespace KeyLoad.Server.Search;
 
 internal sealed class AnnReplay
 {
-    private const int Empty = 0;
     private const int DictionaryEntryBytes = 128;
     private const int ReferenceBytes = 8;
     private readonly AnnReplaySource initial;
@@ -184,7 +183,7 @@ internal sealed class AnnReplay
             throw Errors.Fail(ErrorCode.HistoryUnavailable, AnnProtocol.MissingDependencyHistory);
         }
         work.Check();
-        return new(upper.Scope, upper.Cut, immutable, digest, retained, peak, Empty, work.Units)
+        return new(upper.Scope, upper.Cut, immutable, digest, retained, peak, work.Units)
         {
             DependencySha256 = upper.DependencySha256,
             ProjectionCheckpoint = upper.ProjectionCheckpoint

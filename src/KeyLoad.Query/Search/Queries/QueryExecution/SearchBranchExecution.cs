@@ -7,11 +7,9 @@ namespace KeyLoad.Query;
 
 internal static class SearchBranchExecution
 {
-    private const int NoRetainedBytes = 0;
     private const int FirstElementIndex = 0;
 
     private const string MissingSelectedDocument = "A selected search document is unavailable.";
-    private const string ResultExceeded = "The search result byte budget is exceeded.";
 
     internal static SearchScore[] RankText(DatabaseEngine database, ITextProjection? textProjection,
         IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, SearchRequest request,
@@ -75,23 +73,14 @@ internal static class SearchBranchExecution
         PrincipalRecord principal, ResourceDefinition resource, SearchScore[] selected, ReadExecutionBudget budget, SearchRankFusion? fusion = null)
     {
         var result = new RankedDocument[selected.Length];
-        long projectedBytes = NoRetainedBytes;
         for (var index = FirstElementIndex; index < selected.Length; index++)
         {
             budget.Check();
             var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(selected[index].Reference))
                 ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, MissingSelectedDocument);
-            var ranked = new RankedDocument(database.Project(principal, resource, document), selected[index].Score,
+            result[index] = new RankedDocument(database.Project(principal, resource, document), selected[index].Score,
                 fusion?.Explain(selected[index].Reference));
-            var bytes = budget.MeasureResult(ranked);
-            if (bytes > budget.MaximumResultBytes - projectedBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, ResultExceeded);
-            }
-            projectedBytes += bytes;
-            result[index] = ranked;
         }
-        budget.CheckResult(result);
         return result;
     }
 

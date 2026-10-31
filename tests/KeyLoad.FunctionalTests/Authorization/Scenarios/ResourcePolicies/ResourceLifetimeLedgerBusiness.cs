@@ -15,15 +15,8 @@ internal static class ResourceLifetimeLedgerBusiness
             var page = ResourceLifetimeLedgerSession.Read(owner, budget, parent);
             await SafeProjectorOperationSeed.EqualAsync(page, ResourceLifetimeLedgerData.Expected(owner));
             await ResourceLifetimeLedgerAssertions.RetainedAsync(ledger, lifetime);
-            var outputBytes = budget.MeasureResult(page);
-            var tight = checked((int)(OrleansSerialization.Measure(lifetime) + outputBytes
-                - ResourceLifetimeLedgerData.OneByte));
             await ResourceLifetimeLedgerAssertions.HealthyChildAsync(owner,
                 await ResourceLifetimeLedgerChild.ExecuteAsync(owner, workOwner, ledger, expiry, P.Collection));
-            await ResourceLifetimeLedgerAssertions.RetainedAsync(ledger, lifetime);
-            var refused = await ResourceLifetimeLedgerChild.ExecuteAsync(owner, workOwner, ledger,
-                expiry, P.Collection, tight);
-            await ResourceLifetimeLedgerAssertions.RefusedAsync(refused, ErrorCode.BudgetExceeded);
             await ResourceLifetimeLedgerAssertions.RetainedAsync(ledger, lifetime);
             await SafeProjectorOperationSeed.EqualAsync(ResourceLifetimeLedgerSession.Read(owner, budget, parent),
                 ResourceLifetimeLedgerData.Expected(owner));

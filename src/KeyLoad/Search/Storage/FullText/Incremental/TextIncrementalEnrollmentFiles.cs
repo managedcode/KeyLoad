@@ -11,7 +11,6 @@ internal static class TextIncrementalEnrollmentFiles
     {
         var file = Path.Combine(path, TextIncrementalProtocol.EnrollmentFile);
         TextFileIO.VerifyRegularFile(file);
-        budget?.ChargeBytes(new FileInfo(file).Length);
         var value = TextFileIO.ReadEnvelope<TextIncrementalEnrollment>(file,
             options.Value.MaximumOwnerReceiptBytes);
         if (value is null || value.FormatVersion != TextIncrementalProtocol.FormatVersion

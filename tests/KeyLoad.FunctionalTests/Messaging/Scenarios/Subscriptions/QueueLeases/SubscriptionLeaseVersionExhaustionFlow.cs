@@ -11,7 +11,6 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
     private const int Window = 3;
     private const long FirstPosition = 1;
     private const int FirstDelivery = 0;
-    private const int SmallByteBudget = 1;
 
     internal static async Task RunAsync(CancellationToken token)
     {
@@ -44,17 +43,14 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
             });
             return true;
         });
-        var byteRequest = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: SingleEventCount, MaxBytes: SmallByteBudget);
-        await SubscriptionLeaseVersionExhaustionAssertions.FailAsync(fixture.Database, fixture.Store, byteRequest, due,
-            ByteBudgetDetail);
         var request = new ReceiveSubscriptionRequest(Guid.NewGuid(), group, MaxEvents: SingleEventCount);
         var failed = await SubscriptionLeaseVersionExhaustionAssertions.FailAsync(fixture.Database, fixture.Store, request,
             due, SubscriptionLeaseVersionExhaustionAssertions.Exhausted);
-        await ColdAsync(fixture, group, claim, request, failed, byteRequest, due, key, saved, nack, nacked, token);
+        await ColdAsync(fixture, group, claim, request, failed, due, key, saved, nack, nacked, token);
     }
 
     private static async Task ColdAsync(TestDatabase fixture, SubscriptionRef group, ReceiveSubscriptionResult claim,
-        ReceiveSubscriptionRequest request, Result<object> failed, ReceiveSubscriptionRequest byteRequest,
+        ReceiveSubscriptionRequest request, Result<object> failed,
         DateTimeOffset due, byte[] key, byte[] saved, SubscriptionDeliveryCommand nack,
         Result<object> nacked, CancellationToken token)
     {
@@ -73,9 +69,6 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
             return true;
         });
         await SubscriptionLeaseVersionExhaustionAssertions.ReplayAsync(db, cold, request, failed, due);
-        var byteOutcome = OutcomeStoreOracle.ReadPartition(cold, group.Source.Partition, Subject, byteRequest.RequestId)
-            ?? throw new InvalidOperationException(MissingByteOutcome);
-        await SubscriptionLeaseVersionExhaustionAssertions.ReplayAsync(db, cold, byteRequest, byteOutcome, due);
         var healthy = request with
         {
             RequestId = Guid.NewGuid()
@@ -83,7 +76,6 @@ internal static class SubscriptionLeaseVersionExhaustionFlow
         await SubscriptionPendingCounterAuthorityContinuation.RunAsync(db, cold, fixture.Directory,
             group, claim, healthy, due,
             [new(OperationKind.SubscriptionDelivery, nack, nack.CommandId, nacked),
-                new(OperationKind.ReceiveSubscription, request, request.RequestId, failed),
-                new(OperationKind.ReceiveSubscription, byteRequest, byteRequest.RequestId, byteOutcome)], token);
+                new(OperationKind.ReceiveSubscription, request, request.RequestId, failed)], token);
     }
 }

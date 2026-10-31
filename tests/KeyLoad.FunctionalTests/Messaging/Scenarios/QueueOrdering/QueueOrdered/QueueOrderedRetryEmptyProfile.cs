@@ -28,7 +28,7 @@ internal static class QueueOrderedRetryEmptyProfile
         {
             ExpectedSchemaVersion = original.SchemaVersion
         }, Guid.NewGuid()).Get<ResourceDefinition>();
-        await Assert.That(result).IsEqualTo(expected);
+        await Assert.That(JsonDefaults.Serialize(result).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await QueueOrderedRetryImage.SameAsync(store, state.Lane, image);
         state.Batch(database, QueueOrderedRetryOperations.Literal(QueueOrderedRetryProtocol.ProfileHealthy, null)).Get<CommitReceipt>();
         var lease = await QueueOrderedRetryOperations.ClaimAsync(database, state, QueueOrderedRetryProtocol.ProfileHealthy);
@@ -41,7 +41,8 @@ internal static class QueueOrderedRetryEmptyProfile
         store.Dispose();
         using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
         var reopened = QueueWholeFlowStorage.Open(cold);
-        await Assert.That(cold.Read(view => view.GetRecord<ResourceDefinition>(key))).IsEqualTo(expected);
+        await Assert.That(JsonDefaults.Serialize(cold.Read(view => view.GetRecord<ResourceDefinition>(key))).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await QueueOrderedRetryImage.SameAsync(cold, state.Lane, terminal);
         await QueueOrderedRetryOperations.ReplayAsync(reopened, state);
         await QueueOrderedRetryAssertions.MessageAsync(reopened, state, new(QueueOrderedRetryProtocol.ProfileHealthy, MessageState.Acked,

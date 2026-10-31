@@ -16,7 +16,7 @@ internal sealed record PartitionStorageImage(StoreIdentity Identity, long Positi
         {
             rows.Add(new(key.ToArray(), value.ToArray()));
             return true;
-        }, observer: work.ChargeBytes, cancellationToken: token);
+        }, cancellationToken: token);
         work.Check();
         if (scan.HasMore || scan.StoppedByVisitor)
         {

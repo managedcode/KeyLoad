@@ -9,9 +9,6 @@ internal sealed class AnalyticsBoundsTests
     public Task FiniteInputSumOverflowRefusesAllRowsThenCountOnlyQueryIsHealthy()
         => AnalyticsBoundsFlow.SumAsync(TestContext.Current!.Execution.CancellationToken);
     [Test]
-    public Task ExactOutputByteLimitRejectsWholeResultThenBoundedQueryIsHealthy()
-        => AnalyticsBoundsFlow.ResultAsync(TestContext.Current!.Execution.CancellationToken);
-    [Test]
     public Task CanonicalEmptyWhitespaceControlAndUnicodeDimensionsRemainDistinctAfterRebuildUpdateAndDelete()
         => AnalyticsBoundsDimensionsFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
     [Test]

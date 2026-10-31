@@ -39,7 +39,6 @@ internal static class QueueEntityRefJoinExecutor
                 request.Query, candidate.Left, candidate.Right));
         }
         var page = new QueryPage(rows.MoveToImmutable(), null, cut, QueueEntityRefJoinBinding.AccessPath);
-        budget.CheckResult(page);
         return page;
     }
 

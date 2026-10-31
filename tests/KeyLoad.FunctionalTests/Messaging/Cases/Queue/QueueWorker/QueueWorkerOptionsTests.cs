@@ -9,7 +9,6 @@ internal sealed class QueueWorkerOptionsTests
     [Arguments(QueueWorkerInvalidPolicy.HandlerLimit)]
     [Arguments(QueueWorkerInvalidPolicy.ReceiveBudget)]
     [Arguments(QueueWorkerInvalidPolicy.RenewalBudget)]
-    [Arguments(QueueWorkerInvalidPolicy.ReceiveBytes)]
     [Arguments(QueueWorkerInvalidPolicy.RenewalAtExpiry)]
     [Arguments(QueueWorkerInvalidPolicy.EmptyPoll)]
     [Arguments(QueueWorkerInvalidPolicy.UncertaintyCount)]
@@ -54,7 +53,6 @@ internal sealed class QueueWorkerOptionsTests
             QueueWorkerInvalidPolicy.HandlerLimit => valid with { MaximumConcurrentHandlers = QueueWorkerUnitProtocol.Initial },
             QueueWorkerInvalidPolicy.ReceiveBudget => valid with { MaximumReceiveCalls = QueueWorkerUnitProtocol.Initial },
             QueueWorkerInvalidPolicy.RenewalBudget => valid with { MaximumRenewalCalls = QueueWorkerUnitProtocol.Initial },
-            QueueWorkerInvalidPolicy.ReceiveBytes => valid with { MaximumReceiveBytes = valid.MaximumInFlightBytes + QueueWorkerUnitProtocol.ExtraByte },
             QueueWorkerInvalidPolicy.RenewalAtExpiry => valid with { RenewalInterval = TimeSpan.FromSeconds(valid.LeaseSeconds) },
             QueueWorkerInvalidPolicy.EmptyPoll => valid with { EmptyPollDelay = TimeSpan.Zero },
             QueueWorkerInvalidPolicy.UncertaintyCount => valid with { UncertaintyRetries = QueueWorkerUnitProtocol.ExceedsUncertainty },

@@ -1,6 +1,4 @@
-using System.Runtime.CompilerServices;
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Core.Search;
 using KeyLoad.Query.Search;
 using KeyLoad.Storage;
@@ -11,7 +9,6 @@ namespace KeyLoad.Server.Search;
 internal static class TextCapturedReadFactory
 {
     private const int NoFailures = 0;
-    private const int NoImportedRecords = 0;
 
     private const string Invalid = "The execution search snapshot does not match its original source authority.";
 
@@ -25,42 +22,25 @@ internal static class TextCapturedReadFactory
         var authority = SearchTerminalPrivacy.Capture(database, raw, principal, resource, request.Partition, budget);
         var projection = SelectedTextProjectionAdmission.Acquire(database, provider, raw, principal, resource, request, budget)
             ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Invalid);
-        ReadExecutionBudgetReadGrant? grant = null;
         ZoneTreeReadCutLease? execution = null;
         ICapturedTextRead? result = null;
-        var captureUncertain = false;
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() =>
         {
-            grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
-            AdmitMetadata(budget, grant, principal, resource, request, authority);
-            try
-            {
-                execution = owner.CaptureReadCut(raw,
-                    owner.BoundReadCut(grant.RemainingRecords, grant.RemainingBytes, budget.RemainingLifetime),
-                    budget.Cancellation);
-            }
-            catch (AggregateException) { captureUncertain = true; throw; }
+            execution = owner.CaptureReadCut(raw,
+                owner.BoundReadCut(int.MaxValue, long.MaxValue, budget.RemainingLifetime),
+                budget.Cancellation);
             RequireCut(execution, authority);
-            result = new TextCapturedRead(database, request, budget, grant, authority, execution,
+            result = new TextCapturedRead(database, request, budget, authority, execution,
                 projection, principal, resource);
             budget.Check();
         }, failures);
         if (failures.Count != NoFailures)
         {
-            SettleFailedCapture(budget, grant, execution, projection, captureUncertain, failures);
+            SettleFailedCapture(execution, projection, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
         return result!;
-    }
-
-    private static void AdmitMetadata(ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant,
-        PrincipalRecord principal, ResourceDefinition resource, SearchRequest request, SearchReadAuthority authority)
-    {
-        var bytes = checked(OrleansSerialization.Measure(principal) + OrleansSerialization.Measure(resource)
-            + OrleansSerialization.Measure(request) + OrleansSerialization.Measure(authority.Placement)
-            + Unsafe.SizeOf<SearchReadAuthority>() + (long)authority.ResourceSha256.Length * sizeof(char));
-        budget.ImportReadGrant(grant, bytes, NoImportedRecords);
     }
 
     private static void RequireCut(ZoneTreeReadCutLease execution, SearchReadAuthority original)
@@ -74,17 +54,12 @@ internal static class TextCapturedReadFactory
         }
     }
 
-    private static void SettleFailedCapture(ReadExecutionBudget budget, ReadExecutionBudgetReadGrant? grant,
-        ZoneTreeReadCutLease? execution, ITextProjectionLease projection, bool uncertain, List<Exception> failures)
+    private static void SettleFailedCapture(ZoneTreeReadCutLease? execution, ITextProjectionLease projection,
+        List<Exception> failures)
     {
-        var runtimeBefore = failures.Count;
         if (execution is not null)
         {
             ServerFailureObserver.Observe(execution.Dispose, failures);
-        }
-        if (!uncertain && failures.Count == runtimeBefore && grant is { IsCompleted: false })
-        {
-            ServerFailureObserver.Observe(() => budget.CompleteSettledReadGrant(grant), failures);
         }
         ServerFailureObserver.Observe(projection.Dispose, failures);
     }

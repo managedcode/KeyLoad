@@ -13,8 +13,6 @@ internal sealed class QueueWorkerSession : IDisposable
     private readonly List<Exception> failures = [];
     private readonly TaskCompletionSource stopped = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private QueueWorkerStopReason? reason;
-    private long bytes;
-    private long peakBytes;
     private int peakHandlers;
     private int received;
     private int acknowledged;
@@ -39,12 +37,11 @@ internal sealed class QueueWorkerSession : IDisposable
     }
     internal Task Stopped => stopped.Task;
 
-    internal (int Slots, int Bytes, int Remaining, int Calls, bool Stopped) Admission()
+    internal (int Slots, int Remaining, int Calls, bool Stopped) Admission()
     {
         lock (gate)
         {
-            return (Policy.MaximumConcurrentHandlers - active.Count,
-                checked((int)(Policy.MaximumInFlightBytes - bytes)), Policy.MaximumDeliveries - received,
+            return (Policy.MaximumConcurrentHandlers - active.Count, Policy.MaximumDeliveries - received,
                 receives, reason is not null || Lifetime.IsCancellationRequested);
         }
     }
@@ -71,8 +68,6 @@ internal sealed class QueueWorkerSession : IDisposable
         {
             active.Add(delivery);
             received++;
-            bytes += delivery.BodyBytes;
-            peakBytes = Math.Max(peakBytes, bytes);
             peakHandlers = Math.Max(peakHandlers, active.Count);
         }
     }
@@ -93,7 +88,6 @@ internal sealed class QueueWorkerSession : IDisposable
             {
                 return;
             }
-            bytes -= delivery.BodyBytes;
             if (delivery.Acknowledged)
             {
                 acknowledged++;
@@ -159,7 +153,7 @@ internal sealed class QueueWorkerSession : IDisposable
     {
         lock (gate)
         {
-            return new(reason ?? loopExitReason, received, acknowledged, peakHandlers, peakBytes,
+            return new(reason ?? loopExitReason, received, acknowledged, peakHandlers,
                 operations.ToImmutableArray(), unacknowledged.ToImmutableArray(), failures.ToImmutableArray());
         }
     }

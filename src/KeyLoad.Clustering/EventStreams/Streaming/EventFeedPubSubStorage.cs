@@ -2,16 +2,13 @@ using global::Orleans.Serialization;
 using global::Orleans.Serialization.Serializers;
 using global::Orleans.Storage;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices, IOptions<GrainRoutingOptions> routing) : IGrainStorage, IDisposable
+internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices) : IGrainStorage, IDisposable
 {
-    private const long EmptyBytes = 0;
     private readonly Lock gate = new();
     private readonly Dictionary<GrainId, EventFeedPubSubRow> entries = new();
-    private long retainedBytes;
     private bool closed;
 
     public Task ReadStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> state)
@@ -61,12 +58,9 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices, 
             {
                 RequireType<T>(before);
             }
-            var row = EventFeedPubSubRowEncoding.Create(originalServices, grainId, state.State!,
-                routing, cancellationToken);
-            var nextBytes = checked(retainedBytes - (before?.EncodedBytes ?? EmptyBytes) + row.EncodedBytes);
+            var row = EventFeedPubSubRowEncoding.Create(originalServices, grainId, state.State!);
             cancellationToken.ThrowIfCancellationRequested();
             entries[row.Key] = row;
-            retainedBytes = nextBytes;
             state.ETag = row.ETag;
             state.RecordExists = true;
         }
@@ -94,9 +88,7 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices, 
             cancellationToken.ThrowIfCancellationRequested();
             if (before is not null)
             {
-                var nextBytes = checked(retainedBytes - before.EncodedBytes);
                 entries.Remove(grainId);
-                retainedBytes = nextBytes;
             }
             state.State = replacement;
             state.ETag = null;
@@ -140,7 +132,6 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices, 
                 row.Value.AsSpan().Clear();
             }
             entries.Clear();
-            retainedBytes = EmptyBytes;
         }
     }
 }

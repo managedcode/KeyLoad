@@ -12,7 +12,6 @@ internal sealed class AnnExactPrefixTests
     private const long Step = 1;
     private const int SingleEntry = 1;
     private const int BatchLimit = 10;
-    private const int BatchBytes = 4_194_304;
     private const int SnapshotBound = 128;
     private static readonly ImmutableArray<float> PrefixValues = [11.25f, -2.5f, 0.75f];
     private static readonly ImmutableArray<float> LaterValues = [-0f, 7.125f, 3.5f];
@@ -27,7 +26,7 @@ internal sealed class AnnExactPrefixTests
         AnnProjectionPinTestSupport.PutVector(db, PrefixValues);
         var seed = AnnProjectionPinTestSupport.Capture(db);
         AnnProjectionPinTestSupport.PutVector(db, LaterValues);
-        var request = new ReadProjectionBatchRequest(consumer, BatchLimit, BatchBytes, seed.Cut.OutboxTail);
+        var request = new ReadProjectionBatchRequest(consumer, BatchLimit, seed.Cut.OutboxTail);
         var execution = OrleansSerialization.Deserialize<ReadProjectionBatchRequest>(OrleansSerialization.Serialize(request));
         var json = JsonSerializer.Deserialize<ReadProjectionBatchRequest>(JsonSerializer.Serialize(request, JsonDefaults.Options), JsonDefaults.Options)!;
         var before = Snapshot(db);
@@ -70,20 +69,20 @@ internal sealed class AnnExactPrefixTests
         foreach (var upper in new[] { checkpoint - Step, tail + Step })
         {
             var error = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadProjectionBatch(
-                AnnProjectionPinTestSupport.Principal, new(consumer, BatchLimit, BatchBytes, upper)));
+                AnnProjectionPinTestSupport.Principal, new(consumer, BatchLimit, upper)));
             await Assert.That(error.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             await Assert.That(error.Message).IsEqualTo(UpperDetail);
             await Assert.That(Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
             await Assert.That(db.Store.Position).IsEqualTo(position);
             await AssertPrefixAsync(AnnProjectionPinTestSupport.Read(db, consumer, limit: BatchLimit), tail);
         }
-        var ordinary = new ReadProjectionBatchRequest(consumer, BatchLimit, BatchBytes);
+        var ordinary = new ReadProjectionBatchRequest(consumer, BatchLimit);
         using var json = JsonDocument.Parse(JsonSerializer.Serialize(ordinary, JsonDefaults.Options));
         await Assert.That(json.RootElement.TryGetProperty(ThroughField, out _)).IsFalse();
         var released = AnnProjectionPinTestSupport.Release(db, consumer).Get<ProjectionConsumerInfo>();
         await Assert.That(released.Released).IsTrue();
         var stale = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadProjectionBatch(
-            AnnProjectionPinTestSupport.Principal, new(consumer, BatchLimit, BatchBytes, tail)));
+            AnnProjectionPinTestSupport.Principal, new(consumer, BatchLimit, tail)));
         await Assert.That(stale.Code).IsEqualTo(ErrorCode.TokenInvalidated);
     }
 

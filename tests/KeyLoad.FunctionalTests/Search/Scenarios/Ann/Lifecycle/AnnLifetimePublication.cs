@@ -16,7 +16,7 @@ internal static class AnnLifetimePublication
         for (var number = 0; number < MaximumPages; number++)
         {
             var page = database.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal,
-                new(request.Consumer, PageLimit, AnnMaintenanceTestData.PageBytes, upper));
+                new(request.Consumer, PageLimit, upper));
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != upper || !page.Entries.IsEmpty)

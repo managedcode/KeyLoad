@@ -18,8 +18,6 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
     private bool transferred;
     private int prefixBaseRecords;
 
-    public void AdmitRetainedBytes(long bytes) => admit(bytes, 0);
-
     public void CapturePrefix(byte[] prefix)
     {
         ArgumentNullException.ThrowIfNull(prefix);

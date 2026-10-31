@@ -27,9 +27,8 @@ public static class GraphIncomingEdges
         return engine.Store.Read(view =>
         {
             budget.Check();
-            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
-            var principal = GraphIncomingReadScope.ReadPrincipal(view, grant, principalId, clock.GetUtcNow());
-            return new GraphIncomingEdgesReader(engine, view, principal, request, budget, grant, engine.Store.Position).Read();
+            var principal = GraphIncomingReadScope.ReadPrincipal(view, principalId, clock.GetUtcNow());
+            return new GraphIncomingEdgesReader(engine, view, principal, request, budget, engine.Store.Position).Read();
         });
     }
 }

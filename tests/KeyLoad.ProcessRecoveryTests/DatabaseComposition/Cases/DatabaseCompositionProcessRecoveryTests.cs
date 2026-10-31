@@ -72,7 +72,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var tail = long.Parse(await File.ReadAllTextAsync(Path.Combine(root,
             DatabaseCompositionCrashScenario.SeedOutboxTailFile), cancellationToken), CultureInfo.InvariantCulture);
-        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, DatabaseCompositionCrashScenario.CommandFile), cancellationToken));
         var committed = await AssertAtomicRecoveredCutAsync(store, database, tail, operation, stage);
         var recoveredReceipt = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();

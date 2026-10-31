@@ -38,7 +38,6 @@ internal static class TextIncrementalSourceValidation
         {
             throw TextErrors.Mismatch();
         }
-        budget.ChargeBytes(checked((long)manifest.Records.Length * TextIncrementalSourceProtocol.MapSlotBytes));
         var records = manifest.Records.ToDictionary(record => record.Reference);
         foreach (var document in current.Documents)
         {

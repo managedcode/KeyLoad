@@ -25,7 +25,6 @@ public static class DocumentStorageExecution
             var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
             return engine.ReadDocumentAtCut(view, principal, request.Reference, request.MinimumToken, cancellationToken);
         });
-        work.CheckResult(result);
         return result;
     }
 }

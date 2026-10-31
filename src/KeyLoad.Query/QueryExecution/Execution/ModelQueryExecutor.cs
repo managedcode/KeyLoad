@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using System.Text;
 using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
@@ -13,7 +12,6 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
     private const string TopicModelScanPath = "model-scan:topic-events";
     private const int EmptyElementCount = 0;
     private const int InitialSequence = 0;
-    private const long NoRetainedBytesLong = 0L;
     private const int NoRetainedBytes = 0;
 
     internal QueryPage Execute(string principalId, AstQueryRequest request, ReadExecutionBudget budget)
@@ -22,7 +20,6 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         var source = query.ModelSource!;
         if (source.Kind == ModelQuerySourceKind.Events && query.InnerJoin is not null)
         {
-            budget.ConstrainWork(budget.RuntimeMaximumReadBytes, budget.MaximumScanRecords);
         }
         return database.WithModelQueryView(principalId, request.Partition, query.Collection, source, budget,
             (view, principal, resource) => ExecuteModelView(view, principal, resource, request, budget));
@@ -70,7 +67,6 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
             ModelViews = true
         }, JsonDefaults.Options));
         var page = new QueryPage([row], null, database.Store.Position, accessPath);
-        budget.CheckResult(page);
         return page;
     }
 
@@ -90,20 +86,12 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         PreparedQuery prepared, ReadExecutionBudget budget, string accessPath)
     {
         var rows = ImmutableArray.CreateBuilder<QueryRow>();
-        var resultBytes = NoRetainedBytesLong;
         foreach (var row in prepared.Page(NoRetainedBytes, request.Query.Limit, budget))
         {
             budget.Check();
-            var projected = queries.Project(principal, resource, row.Document, request.Query.Projection, prepared.Paths);
-            resultBytes += Encoding.UTF8.GetByteCount(projected.Json);
-            if (resultBytes > budget.MaximumResultBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, QueryEngine.ResultLimitExceeded);
-            }
-            rows.Add(projected);
+            rows.Add(queries.Project(principal, resource, row.Document, request.Query.Projection, prepared.Paths));
         }
         var page = new QueryPage(rows.ToImmutable(), null, database.Store.Position, accessPath);
-        budget.CheckResult(page);
         return page;
     }
 }

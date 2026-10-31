@@ -19,7 +19,7 @@ source joined under ADR-052, with its delivered-SHA CI and remaining gates pendi
 | Requirement | Acceptance | Evidence |
 |---|---|---|
 | REQ-SERIES-001: stop at the requested timestamp end before decoding later records | AC-MP-005 | Real-store narrow range with large later values, equal timestamps and min/max/offset boundaries |
-| REQ-SERIES-002: one work/cancel/deadline and complete response budget | AC-MP-005 | Small raw/result budget failures, exact serialized boundary and cancellation with a healthy following operation |
+| REQ-SERIES-002: one cancel/deadline operation for the complete response | AC-MP-005 | Caller cancellation and elapsed expiry with a healthy following operation; the response has no byte budget |
 | REQ-SERIES-003: retain UTC/sequence ordering, dedup and tag projection | AC-MP-005/012 | Existing real append/dedup tests plus persisted-policy range cases |
 
 The existing operation includes both `from` and `until` timestamps; the repair
@@ -34,7 +34,7 @@ flowchart LR
  Keys --> Visitor[Scoped bounded range visit]
  Visitor --> Projection[Tags projected by persisted policy]
  Projection --> Result[Incrementally bounded ordered samples]
- Result --> Envelope[Exact complete result byte check]
+ Result --> Envelope[Complete ordered result under one operation]
 ```
 
 Tests use real ZoneTree state and TUnit/MTP. Release/static development checks are
@@ -74,7 +74,7 @@ normative contract remains the ADR and this Feature.
 | REQ-SERIES-008: bounded latest at the current committed cut | AC-SERIES-008: descending UTC/sequence identity, inclusive optional cut, absence/min/max/offset/ties, one matching committed baseline entry independent of history | SampleLatestTests; TimeSeries SDK/MCP parity; /CLUSTER-W8 |
 | REQ-SERIES-009: complete raw half-open aggregate using published library | AC-SERIES-009: count/sum/min/max/raw average match independent reference for late/dedup/negative/empty/offset/date edges; null end includes MaxValue; finite overflow rejects safely | SampleAggregateTests and cluster SDK/MCP oracle; /CLUSTER-W8 |
 | REQ-SERIES-010: bounded dense UTC windows | AC-SERIES-010: anchor From, positive fixed Width, empty windows, final clamping, raw weighted average, date-edge arithmetic and caller/server window cap checked before allocation | SampleAggregateWindowTests and SDK/MCP windows; /CLUSTER-W8 |
-| REQ-SERIES-011: one complete operation/security budget | AC-SERIES-011: positive caller caps, charged sample lookahead fails the whole aggregate, metadata/raw/exact result bytes/deadline/cancel share one view; current SeriesRead, projected latest tags and revocation; failures preserve data and healthy next reads | SampleAggregateBudgetTests, SampleAggregateAuthorizationTests and real cluster persisted-authority cases; /CLUSTER-W8 |
+| REQ-SERIES-011: one complete operation/security budget | AC-SERIES-011: positive caller caps, a sample lookahead beyond the cap fails the whole aggregate, metadata/raw reads and deadline/cancel share one view; current SeriesRead, projected latest tags and revocation; failures preserve data and healthy next reads | SampleAggregateBudgetTests, SampleAggregateAuthorizationTests and real cluster persisted-authority cases; /CLUSTER-W8 |
 | REQ-SERIES-012: typed public operations preserve real cluster request isolation | AC-SERIES-012.NET/HTTP/official MCP same results/errors/discovery schemas; old enum values preserved; genuine follower kill/restart retains results across all live replicas | TimeSeries cluster integration, typed round trips and official MCP discovery; /CLUSTER-W8 |
 
 Slice map: Abstractions/Features/TimeSeries read/result DTOs;

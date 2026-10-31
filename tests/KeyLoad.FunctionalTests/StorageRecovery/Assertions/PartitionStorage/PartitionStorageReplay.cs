@@ -16,7 +16,7 @@ internal static class PartitionStorageReplay
         work.Check();
         byte[]? bytes = null;
         database.Store.Read(view => view.ReadValue(KeySpace.PartitionOutcome(P.Partition, P.Root, P.Command),
-            value => bytes = value.ToArray(), work.ChargeBytes));
+            value => bytes = value.ToArray()));
         work.Check();
         return bytes ?? throw new InvalidOperationException(Missing);
     }

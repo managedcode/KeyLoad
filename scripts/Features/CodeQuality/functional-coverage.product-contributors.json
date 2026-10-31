@@ -20,8 +20,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryCancellationTests",
-      "methodName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
-      "instanceName": "ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult",
+      "methodName": "ObservedReadProgressCancelsTheOriginalReadAndLeavesNoPartialResult",
+      "instanceName": "ObservedReadProgressCancelsTheOriginalReadAndLeavesNoPartialResult",
       "requirements": [
         "REQ-PQUERY-004"
       ],
@@ -48,22 +48,6 @@
         "KeyLoad.Query"
       ],
       "operationOutcomeAndState": "execution plan and result round trip are checked alongside a real ZoneTree query, duplicate textual IDs/full partition identity, and exact rows"
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryContractTests",
-      "methodName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
-      "instanceName": "MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead",
-      "requirements": [
-        "REQ-PQUERY-001"
-      ],
-      "acceptance": [
-        "AC-PQUERY-001"
-      ],
-      "executedModules": [
-        "KeyLoad.Query"
-      ],
-      "operationOutcomeAndState": "The invalid leaf/request partition is rejected as Validation before execution reads; seeded valid data is then read through QueryEngine on the same ZoneTree database, with exact full EntityRef, projected JSON/revision and unchanged committed position."
     },
     {
       "suite": "unit",
@@ -731,31 +715,6 @@
       "operationOutcomeAndState": "interleaves atomic pair-generation commits with SDK and official MCP direct/unified reads; each page must represent the complete previous or next pair generation and final pages agree across all four routes"
     },
     {
-      "suite": "cluster",
-      "className": "KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinBudgetTests",
-      "methodName": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
-      "instanceName": "JoinedPageByteBudgetReturnsSafeErrorsAndPreservesStateBeforeHealthyFollowUp",
-      "requirements": [
-        "REQ-REL-004",
-        "REQ-QUERY-007"
-      ],
-      "acceptance": [
-        "AC-REL-004-JOIN-004",
-        "AC-REL-004-JOIN-006",
-        "AC-QUERY-007-JOIN-002"
-      ],
-      "executedModules": [
-        "KeyLoad.Abstractions",
-        "KeyLoad.Client",
-        "KeyLoad.Core",
-        "KeyLoad.Clustering",
-        "KeyLoad.Query",
-        "KeyLoad",
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "applies a real CLUSTER serialized joined-page byte limit, checks SDK and official MCP return BudgetExceeded, verifies seeded source documents remain unchanged, then confirms both callers complete an exact healthy joined result"
-    },
-    {
       "suite": "recovery",
       "className": "KeyLoad.ProcessRecoveryTests.DocumentStorage.CommandIdempotencyProcessRecoveryTests",
       "methodName": "AcDocument006OneHundredCommandRetriesSurviveRealProcessRestart",
@@ -802,8 +761,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.FunctionalTests.StorageRecovery.MaintenancePeriodicLifetimeTests",
-      "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
-      "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(False)",
+      "methodName": "AcStorageMaintenanceJoin002003OrleansTimerStopsBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin002003OrleansTimerStopsBeforeOwnerFilesAndHealthyReopen(False)",
       "requirements": [
         "REQ-STORAGE-MAINTENANCE-JOIN-002"
       ],
@@ -818,8 +777,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.FunctionalTests.StorageRecovery.MaintenancePeriodicLifetimeTests",
-      "methodName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen",
-      "instanceName": "AcStorageMaintenanceJoin002003ActualPeriodicCleanupJoinsBeforeOwnerFilesAndHealthyReopen(True)",
+      "methodName": "AcStorageMaintenanceJoin002003OrleansTimerStopsBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin002003OrleansTimerStopsBeforeOwnerFilesAndHealthyReopen(True)",
       "requirements": [
         "REQ-STORAGE-MAINTENANCE-JOIN-002"
       ],

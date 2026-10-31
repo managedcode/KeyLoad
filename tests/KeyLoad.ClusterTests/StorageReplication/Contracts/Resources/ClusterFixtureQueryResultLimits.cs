@@ -9,8 +9,6 @@ internal static class ClusterFixtureQueryResultLimits
 {
     private const string ApproximateSearchSetting = "KeyLoad__QueryExecution__EnableApproximateSearch";
 
-    private const string MaximumResultBytesSetting = "KeyLoad__QueryExecution__MaximumResultBytes";
-
     internal static QueryExecutionOptions Validate(QueryExecutionOptions options)
     {
         ArgumentNullException.ThrowIfNull(options);
@@ -31,10 +29,6 @@ internal static class ClusterFixtureQueryResultLimits
             var node = builder.CreateResourceBuilder(builder.Resources.OfType<ProjectResource>()
                 .Single(resource => resource.Name == ClusterFixtureProtocol.NodeName(number)));
             node.WithEnvironment(ApproximateSearchSetting, options.EnableApproximateSearch.ToString());
-            if (options.MaximumResultBytes is { } maximum)
-            {
-                node.WithEnvironment(MaximumResultBytesSetting, maximum.ToString(System.Globalization.CultureInfo.InvariantCulture));
-            }
         }
     }
 }

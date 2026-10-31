@@ -74,10 +74,10 @@ Neither Limit nor provider paging can truncate branch ranks before RRF.
 
 Use the actual primary iterator with `NoRefresh`, no block-cache
 contribution, per-token lower-bound seeks, and a checked unique record-ID union.
-Charge each examined posting's key/value bytes to the same ReadExecutionBudget;
-check cancellation/deadline before iterator advances and allocations. Corpus
-records and tokens obey existing MaxScanRecords/MaxSearchTextTokens. Bound unique
-candidates by MaxScanRecords, retained metadata bytes by MaxQueryReadBytes, execution
+Read each examined posting through the same ReadExecutionBudget, which checks
+cancellation/deadline before iterator advances and allocations and counts no
+bytes. Corpus records, tokens, unique candidates and retained metadata have no
+KeyLoad record, token or byte ceiling ([ADR-149](ADR-149-no-operation-limits.md)). Bound execution
 generation files to512, directories to32, relative depth to8, combined entries
 and owner-ledger paths to544, and actual temporary/current disk bytes to256MiB each.
 Reject excess with BudgetExceeded; no partial results or increased hidden limit.

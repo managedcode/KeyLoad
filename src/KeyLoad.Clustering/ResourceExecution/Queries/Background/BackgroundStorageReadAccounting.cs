@@ -1,10 +1,9 @@
-using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Charges actual owner reads to the same original producer ledger without renewing its limits.</summary>
+/// <summary>Binds actual owner reads to the same original producer ledger.</summary>
 internal static class BackgroundStorageReadAccounting
 {
     internal static async Task<T> ReadAsync<T>(ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
@@ -12,14 +11,7 @@ internal static class BackgroundStorageReadAccounting
         bool allowAbsent = false, CancellationToken token = default)
     {
         work.Check();
-        var bytes = work.RemainingReadGrantBytes;
-        var records = work.RemainingReadGrantRecords;
-        if (bytes <= default(long) || records <= default(int))
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadExecutionBudget.ReadBytesExceeded);
-        }
-        var bounds = new BackgroundReadBudget(expiry, bytes, records, work.MaximumResultBytes);
-        var grant = work.CreateReadGrant(bytes, records);
+        var bounds = new BackgroundReadBudget(expiry);
         var failures = new List<Exception>();
         var dispatched = false;
         var imported = false;
@@ -28,10 +20,8 @@ internal static class BackgroundStorageReadAccounting
         {
             dispatched = true;
             var response = await send(bounds, token).ConfigureAwait(true);
-            Require(response, bounds);
-            var lifetimes = OrleansSerialization.Deserialize<ImmutableArray<ResourceLifetime>>(response.Lifetimes.Span);
-            work.ImportSettledReadGrant(grant, response.ReadBytes, response.ExaminedRecords);
-            binding.Bind(lifetimes);
+            Require(response);
+            binding.Bind(response.Lifetimes);
             imported = true;
             if (response.Result.IsFailed)
             {
@@ -48,10 +38,6 @@ internal static class BackgroundStorageReadAccounting
         {
             Record(work, failure, failures, dispatched, imported);
         }
-        try
-        { work.CompleteSettledReadGrant(grant); }
-        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         AnnProjectionJobFailures.ThrowIfAny(failures);
         return result!;
     }
@@ -82,15 +68,12 @@ internal static class BackgroundStorageReadAccounting
         failures.Add(failure);
     }
 
-    private static void Require(BackgroundReadResult response, BackgroundReadBudget bounds)
+    private static void Require(BackgroundReadResult response)
     {
-        if (response is null || response.ReadBytes < default(long) || response.ExaminedRecords < default(int)
-            || response.ReadBytes > bounds.MaximumReadBytes || response.ExaminedRecords > bounds.MaximumRecords
-            || response.Lifetimes.IsEmpty || response.Lifetimes.Length > bounds.MaximumResultBytes
+        if (response is null || response.Lifetimes.IsDefault
             || response.Result.IsFailed && (Errors.Code(response.Result.Problem).Value is null
                 || string.IsNullOrEmpty(response.Result.Problem.Detail))
-            || response.Result.IsSuccess && response.Result.Problem is not null
-            || OrleansSerialization.Measure(response) > bounds.MaximumResultBytes)
+            || response.Result.IsSuccess && response.Result.Problem is not null)
         {
             throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         }

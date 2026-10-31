@@ -25,7 +25,6 @@ internal static class AnnWaitExecution
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
         }
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return Task.FromResult(Read(database, projection, principalId, request, budget));
@@ -42,7 +41,6 @@ internal static class AnnWaitExecution
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
         }
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return Task.FromResult(Read(database, projection, principalId, request, budget, sourceMetadata));
@@ -99,11 +97,9 @@ internal static class AnnWaitExecution
                 }
                 result = new(database.Token(authority, request.Partition, indexed), lease.IndexGeneration,
                     resource.SchemaVersion, principal.PolicyEpoch);
-                budget.CheckResult(result);
             }
             catch (Exception error) { primary = error; throw; }
             finally { Dispose(lease, primary); }
-            budget.CheckResult(result);
             return result;
         }, budget);
 

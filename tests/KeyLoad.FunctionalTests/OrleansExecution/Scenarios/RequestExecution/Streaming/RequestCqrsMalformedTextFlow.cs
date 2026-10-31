@@ -1,8 +1,6 @@
 using System.Runtime.CompilerServices;
 using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -26,15 +24,14 @@ internal static class RequestCqrsMalformedTextFlow
         {
             var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
                 execution => ObserveAsync(connection.ExecuteStreamAsync(envelope, execution), frames, execution),
-                fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                requestId, fixture.Clock, fixture.RoutingOptions,
+                requestId,
                 new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, requestId)), token);
             await Assert.That(reply.Error).IsEqualTo(ErrorCode.Validation);
             await Assert.That(reply.Result).IsNull();
             await Assert.That(reply.SafeDetail).IsEqualTo(GrainRoutingProtocol.InvalidRequest);
         }
         await Assert.That(frames.Select(x => x.Kind).SequenceEqual(new[] { CqrsStreamChunkKind.Started, CqrsStreamChunkKind.Failed })).IsTrue();
-        await AssertMalformedShapeAsync(frames, requestId, fixture);
+        await AssertMalformedShapeAsync(frames, requestId);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);
         await Assert.That(KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store)
             .AsSpan().SequenceEqual(bytes)).IsTrue();
@@ -42,7 +39,7 @@ internal static class RequestCqrsMalformedTextFlow
     }
     private static async Task AssertMalformedShapeAsync(
         List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> frames,
-        Guid requestId, RequestCqrsHostedRuntimeFixture fixture)
+        Guid requestId)
     {
         const int StartedOffset = 0;
         const int FailedOffset = 1;
@@ -53,7 +50,7 @@ internal static class RequestCqrsMalformedTextFlow
         await Assert.That(final.IsSuccess).IsFalse();
         await Assert.That(final.Value).IsNull();
         await Assert.That(final.TryGetProblem(out var problem)).IsTrue();
-        await Assert.That(GrainRequestStreamProblem.ReadCode(problem!, fixture.RoutingOptions)).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(GrainRequestStreamProblem.ReadCode(problem!)).IsEqualTo(ErrorCode.Validation);
         await Assert.That(problem!.Detail).IsEqualTo(GrainRoutingProtocol.InvalidRequest);
     }
 

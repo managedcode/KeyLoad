@@ -63,7 +63,7 @@ internal sealed class TextGeneration
 
     internal void ClearDeferredBudgetFailure() => DeferredBudgetFailure = null;
 
-    internal void AddRecord(EntityRef reference, long revision, ReadExecutionBudget budget)
+    internal void AddRecord(EntityRef reference, long revision)
     {
         const int RevisionValidationBoundary = 0;
         const int PendingRecordsCountStep = 1;
@@ -74,7 +74,6 @@ internal sealed class TextGeneration
             throw TextErrors.Corrupt();
         }
         var record = new TextRecord((ulong)pendingRecords!.Count + PendingRecordsCountStep, reference, revision);
-        budget.ChargeBytes(OrleansSerialization.Measure(record));
         pendingRecords.Add(record);
     }
 

@@ -1,8 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.FunctionalTests.Search;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
@@ -61,8 +58,7 @@ internal static class RequestCqrsAnnOriginalReplay
             id, original.CommandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
             execution => connection.ExecuteStreamAsync(envelope, execution),
-            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            id, fixture.Clock, fixture.RoutingOptions,
+            id,
             new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         await Assert.That(reply.Error).IsEqualTo(expected);
         await Assert.That(reply.Result).IsNull();

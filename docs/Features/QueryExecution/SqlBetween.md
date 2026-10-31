@@ -16,7 +16,7 @@ Existing eager three-valued conjunction applies. Only TRUE survives WHERE. Null/
 flowchart LR
     SQL[Three existing operands and unquoted delimiter] --> AST[Comparison >= AND Comparison <=]
     AST --> NOT[Optional outer Negation]
-    NOT --> Normalize[Expanded node depth and byte budgets]
+    NOT --> Normalize[Expanded AST normalization]
     Normalize --> Authority[All persisted field permissions]
     Authority --> View[One existing authorized read view]
     View --> Rows[Independent expected result and cursor parity]

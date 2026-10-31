@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <ItemGroup>
     <InternalsVisibleTo Include="KeyLoad.FunctionalTests" />
+    <InternalsVisibleTo Include="KeyLoad.BenchmarkScenarios" />
     <InternalsVisibleTo Include="KeyLoad.ClusterTests" />
     <InternalsVisibleTo Include="KeyLoad" />
     <InternalsVisibleTo Include="KeyLoad.Clustering" />

@@ -28,7 +28,7 @@ internal static class MultiLaneReceiveAdmission
             token.ThrowIfCancellationRequested();
             if (leaf is null || leaf.Lane is null || leaf.Lane.Partition is null
                 || leaf.RequestId == Guid.Empty || !ids.Add(leaf.RequestId) || !lanes.Add(leaf.Lane)
-                || leaf.MaxMessages <= 0 || leaf.MaxBytes <= 0
+                || leaf.MaxMessages <= 0
                 || leaf.LeaseSeconds <= 0)
             {
                 throw Errors.Fail(ErrorCode.Validation, Invalid);

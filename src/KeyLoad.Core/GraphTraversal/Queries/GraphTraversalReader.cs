@@ -45,7 +45,6 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         var result = new GraphTraversalResult(visited.OrderBy(vertex => vertex.Collection, StringComparer.Ordinal)
             .ThenBy(vertex => vertex.Id, StringComparer.Ordinal).ToImmutableArray(),
             edges.Values.OrderBy(edge => edge.Id, StringComparer.Ordinal).ToImmutableArray());
-        budget.CheckResult(result);
         return result;
     }
 

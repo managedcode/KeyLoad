@@ -17,8 +17,6 @@ internal sealed record CoreRuntimeOptions(
     IOptions<KeyLoad.Query.Search.PackedAnnOptions> PackedAnn,
     IOptions<KeyLoad.Core.Search.AnnSeedOptions> AnnSeed,
     IOptions<KeyLoad.Query.Search.PackedAnnStorageOptions> PackedAnnStorage,
-    IOptions<AnnMaintenanceOptions> AnnMaintenance,
-    IOptions<TextIndexMaintenanceOptions> TextMaintenance,
     IOptions<QueryExecutionOptions> QueryExecution,
     IOptions<CacheMemoryLimits> CacheMemory,
     IOptions<CacheReadPermitOptions> CacheReadPermit,
@@ -37,8 +35,6 @@ internal sealed record CoreRuntimeOptions(
         _ = PackedAnn.Value;
         _ = AnnSeed.Value;
         _ = PackedAnnStorage.Value;
-        _ = AnnMaintenance.Value;
-        _ = TextMaintenance.Value;
         _ = QueryExecution.Value;
         _ = CacheMemory.Value;
         _ = CacheReadPermit.Value;

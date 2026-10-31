@@ -9,6 +9,7 @@ internal sealed class PackedAnnReservationTests
     private const int SparseDimension = 1_024;
     private const int ConstructionConnections = 4;
     private const int ConstructionEf = 4;
+    private const long SingleNormArrayReservation = 72;
 
     [Test]
     public async Task AcAnn001BuildScratchReportedReservationIsInclusiveAndOneByteBelowFails()
@@ -21,6 +22,9 @@ internal sealed class PackedAnnReservationTests
         var records = PackedAnnTestData.Load(database, metric);
         var measured = PackedAnnIndexTestSupport.Build(space, records, new(), PackedAnnIndexTestSupport.Budget());
         var retainedReservation = measured.RetainedBytesUpperBound;
+        var withoutNorms = PackedAnnAdmission.Create(space with { Metric = DistanceMetric.DotProduct }, records,
+            new(), PackedAnnIndexTestSupport.Budget());
+        await Assert.That(retainedReservation - withoutNorms.RetainedBytes).IsEqualTo(SingleNormArrayReservation);
         await Assert.That(retainedReservation > 1_024).IsTrue();
         var retainedAtCap = PackedAnnIndexTestSupport.Build(space, records,
             new()

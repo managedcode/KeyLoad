@@ -18,7 +18,7 @@ internal static class DatabaseCompositionCrashScenario
     private const string CompositionCommandIdText = "1eebc759-9dfa-4785-8f4f-f508934e1a9d";
 
     internal const string Mode = "database-composition";
-    internal const string CommandFile = "composition-command.json";
+    internal const string CommandFile = "composition-command.bin";
     internal const string SeedOutboxTailFile = "composition-seed-tail.txt";
     internal const string Principal = "root";
     internal const string Collection = "entities";
@@ -47,7 +47,7 @@ internal static class DatabaseCompositionCrashScenario
             [new QueueToGraph(Graph, SourceQueue, EdgePrefix),
                 new GraphToQueueMutation(TargetQueue, Graph, Vertex(First), MessagePrefix)]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, CommandId);
-        await File.WriteAllBytesAsync(Path.Combine(directory, CommandFile), JsonDefaults.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, CommandFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllTextAsync(Path.Combine(directory, SeedOutboxTailFile),
             tail.ToString(CultureInfo.InvariantCulture));
         boundary.Position = store.Position + PositionStep;

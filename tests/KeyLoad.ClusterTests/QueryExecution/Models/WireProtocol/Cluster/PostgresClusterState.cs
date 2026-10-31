@@ -5,8 +5,8 @@ namespace KeyLoad.ClusterTests.QueryExecution;
 internal static class PostgresClusterState
 {
     internal static PartitionRef Partition => PostgresClusterProtocol.Partition;
-    internal static readonly EntityRef Left = new(Partition, RelationalSqlClusterJoinBudgetData.LeftCollection, OrderId);
-    internal static readonly EntityRef Right = new(Partition, RelationalSqlClusterJoinBudgetData.RightCollection, CustomerId);
+    internal static readonly EntityRef Left = new(Partition, RelationalSqlClusterJoinData.LeftCollection, OrderId);
+    internal static readonly EntityRef Right = new(Partition, RelationalSqlClusterJoinData.RightCollection, CustomerId);
     internal const string OrderId = "order-execution";
     internal const string CustomerId = "customer-execution";
     internal const string LeftJson = "{\"customer_id\":\"customer-execution\",\"detail\":\"small\",\"order_id\":\"order-execution\"}";

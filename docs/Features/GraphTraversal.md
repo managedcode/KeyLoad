@@ -77,7 +77,7 @@ The source does not establish incoming traversal, shortest-path results, cross-p
 | REQ-GRAPH-001: keep edge and adjacency mutations atomic and partition-scoped | AC-GRAPH-001 passes when create/update/delete leaves edge and both adjacency directions consistent; stale revision, hidden/missing endpoint, or endpoint in another partition rejects without partial writes. | Planned `GraphEdgeMutationRevisionAndPartitionCases`; current transaction rollback tests establish shared mutation atomicity but do not constitute a full edge index matrix. |
 | REQ-GRAPH-002: traverse only authorized visible graph/document data | AC-GRAPH-002 passes when a hidden/missing intermediate vertex and its downstream path are excluded, denied graph access fails, and disallowed edge attributes are projected. | `TraversalStopsAtHiddenIntermediateVerticesAndHandlesCycles`, `FilteredOrHiddenGraphEdgesCountAgainstTheGlobalVisitBudget`. |
 | REQ-GRAPH-003: bound traversal depth, visits, time, and result | AC-GRAPH-003 passes when cycles terminate, each invalid/exhausted bound returns a visible budget error without an implicit partial result, and cancellation or an explicit caller expiry is honored. | `FilteredOrHiddenGraphEdgesCountAgainstTheGlobalVisitBudget`; planned adversarial max-depth/max-vertex/max-edge boundary matrix. |
-| REQ-GRAPH-004: keep graph traversal stable under shared read accounting | AC-GRAPH-004 passes when point reads, adjacency scans, edge/vertex dereferences, and response metadata are charged to the operation budget and a subsequent healthy operation remains usable after rejection/cancellation. | `CancelledReadsStopBeforeTouchingCanonicalState`. |
+| REQ-GRAPH-004: keep graph traversal stable under one shared operation | AC-GRAPH-004 passes when point reads, adjacency scans and edge/vertex dereferences run under the operation's cancellation and explicit expiry, a cancelled read touches no canonical state, and a subsequent healthy operation remains usable after rejection/cancellation. | `CancelledReadsStopBeforeTouchingCanonicalState`. |
 
 ## Flows and failure behavior
 
@@ -97,9 +97,9 @@ flowchart LR
  Budget --> Result[Deterministically ordered bounded result]
 ```
 
-## Graph shortest path observed cancellation
+## Graph shortest path cancellation
 
-REQ-GRAPH-003/004, AC-GRAPH-003/004 retain original cancellation semantics. Replace exclusive polling/thread helpers with an owning operation TimeProvider which synchronously cancels the original token only after both charged bytes exceed the actual empty-adjacency probe and same-store RangeExaminedBytes increases. storage/read-cut and budget are real. Require exact original-token cancellation, no partial result, full storage bytes/cut unchanged, then the identical busy-source request returns the complete literal no-path result and identical store/cut. No corpus/budget/timeout increase or permitted-success branch. Authored source requires original normal/scalar and Linux reruns; preserve original failure receipt.
+REQ-GRAPH-003/004, AC-GRAPH-003/004 retain original cancellation semantics. `GraphShortestPathCancellationTests.AlreadyCanceledShortestPathDoesNoReadAndHealthyFollowupSucceeds` cancels the original token before the call: the request throws `OperationCanceledException`, performs no storage read (the store's read diagnostics are unchanged) and leaves the store position unchanged, and the identical request under a live token then returns the literal no-path result at the same position. No corpus/budget/timeout increase or permitted-success branch.
 
 ## Incoming projection negative to cold healthy flow
 

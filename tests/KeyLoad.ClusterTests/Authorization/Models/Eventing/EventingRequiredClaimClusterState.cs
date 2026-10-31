@@ -4,9 +4,8 @@ internal sealed class EventingRequiredClaimClusterState(RequiredProcessingPolicy
 {
     internal RequiredProcessingPolicyClusterState Input { get; } = input;
     internal ReceiveRequest Denied { get; } = new(Guid.NewGuid(), input.Lane);
-    internal ReceiveRequest EpochProbe { get; } = new(Guid.NewGuid(), input.Lane, MaxBytes: 1);
+    internal ReceiveRequest EpochProbe { get; } = new(Guid.NewGuid(), input.Lane);
     internal ReceiveRequest Claim { get; } = new(Guid.NewGuid(), input.Lane);
-    internal ReceiveResult EpochReceipt { get; set; } = null!;
     internal ReceiveResult Claimed { get; set; } = null!;
     internal bool Completed
     {

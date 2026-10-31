@@ -15,15 +15,10 @@ internal static class SqlGraphSearchExecutor
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         var graphRequest = SqlGraphSearchParser.Parse(request, budget, execution.MaximumParameters);
         budget.Check();
         var result = await search.GraphSearchAsync(principalId, graphRequest, budget, cancellationToken);
-        if (execution.MaximumResultBytes is not null)
-        {
-            budget.CheckResult(result);
-        }
         return result;
     }
 }

@@ -45,7 +45,6 @@ internal sealed class SampleChunkStoreFailureTests
         var clock = new SampleRollupWorkClock();
         var budget = new ReadExecutionBudget(clock);
         budget.ConstrainLifetime(clock.GetUtcNow().AddSeconds(1));
-        budget.ChargeBytes(cut.Encoded.Length);
         clock.Advance(TimeSpan.FromMilliseconds(1_100));
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(cut.Encoded, budget, UnitExecutionOptions.TimeSeriesExecution()));

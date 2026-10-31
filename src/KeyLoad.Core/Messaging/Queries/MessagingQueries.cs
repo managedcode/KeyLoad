@@ -50,7 +50,6 @@ public static class MessagingQueries
         return engine.Store.Read(raw =>
         {
             var result = (engine.InspectMessageRead(budget.CreateView(raw), principalId, request.Lane, request.Id)).Value;
-            budget.CheckResult(result);
             return result;
         });
     }

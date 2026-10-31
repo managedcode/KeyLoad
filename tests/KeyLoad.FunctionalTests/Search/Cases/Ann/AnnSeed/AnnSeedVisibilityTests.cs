@@ -50,20 +50,17 @@ internal sealed class AnnSeedVisibilityTests
         await Assert.That(seed.Records.Select(record => record.DocumentId).ToArray())
             .IsEquivalentTo(["visible"], CollectionOrdering.Matching);
         await Assert.That(seed.Records.Single().DocumentRevision).IsEqualTo(1L);
-        await Assert.That(seed.ReadBytes).IsGreaterThan(0L);
     }
 
     [Test]
-    public async Task CaptureCountsValidDifferentSpacesAsExaminedButExcludesThem()
+    public async Task CaptureExcludesValidDifferentSpaces()
     {
         using var database = AnnSeedTestSupport.Create(1);
-        var original = AnnSeedTestSupport.Capture(database);
         AnnSeedTestSupport.CommitVector(database, AnnSeedTestSupport.Id(0),
             ImmutableArray.Create(1f, 2f, 3f), AnnSeedTestSupport.Space(id: "other-valid-space"));
 
         var seed = AnnSeedTestSupport.Capture(database);
 
         await Assert.That(seed.Records).IsEmpty();
-        await Assert.That(seed.ReadBytes).IsGreaterThan(original.ReadBytes);
     }
 }

@@ -32,7 +32,6 @@ public static class ResourceExecutionExecution
                 return ManagedCode.Communication.Result<object>.Fail(Errors.Problem(refusal.Code, refusal.Message));
             }
         });
-        work?.CheckResult(result.Value ?? result);
         work?.Check();
         return result;
     }

@@ -1,16 +1,12 @@
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-/// <summary>Borrows the caller's original numeric read grant through the same execution request-grain entry.</summary>
+/// <summary>Authenticates the administrator through the same execution request-grain entry.</summary>
 internal static class AdministratorAuthenticationRequests
 {
-    private const long NoReadBytes = 0L;
-    private const int NoExaminedRecords = 0;
-    private const int NoResultBytes = 0;
     internal static Task<PrincipalRecord> StartupAsync(OrleansNode node, string secret,
         IOptions<McpExecutionOptions> options, CancellationToken token)
     {
@@ -26,94 +22,40 @@ internal static class AdministratorAuthenticationRequests
         CancellationToken token)
     {
         work.Check();
-        var bytes = work.RemainingReadGrantBytes;
-        var records = work.RemainingReadGrantRecords;
-        if (bytes <= NoReadBytes || records <= NoExaminedRecords || work.MaximumResultBytes <= NoResultBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, AdministratorAuthenticationProtocol.BudgetExceeded);
-        }
-        var grant = work.CreateReadGrant(bytes, records);
-        var failures = new List<Exception>();
-        PrincipalRecord? principal = null;
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            principal = await AuthenticateAsync(node, secret, options, work, grant,
-                originalExpiry, token);
-        }, failures);
-        ServerFailureObserver.Observe(() => work.CompleteSettledReadGrant(grant), failures);
-        ServerFailureObserver.ThrowIfAny(failures);
-        return principal!;
-    }
-
-    internal static async Task<PrincipalRecord> AuthenticateAsync(OrleansNode node, string secret,
-        IOptions<McpExecutionOptions> options, ReadExecutionBudget work,
-        ReadExecutionBudgetReadGrant metadataGrant, DateTimeOffset originalExpiry, CancellationToken token)
-    {
-        ArgumentNullException.ThrowIfNull(metadataGrant);
-        if (!metadataGrant.BelongsTo(work) || metadataGrant.IsCompleted)
-        {
-            throw Errors.Fail(ErrorCode.Validation, AdministratorAuthenticationProtocol.Invalid);
-        }
-        work.Check();
-        var bytes = metadataGrant.RemainingBytes;
-        var records = metadataGrant.RemainingRecords;
-        var resultBytes = work.MaximumResultBytes;
-        if (bytes <= NoReadBytes || records <= NoExaminedRecords || resultBytes <= NoResultBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, AdministratorAuthenticationProtocol.BudgetExceeded);
-        }
-        var failures = new List<Exception>();
-        PrincipalRecord? principal = null;
+        var requestId = Guid.NewGuid();
+        var codec = node.CatalogRequestCodec();
+        var envelope = codec.CreateAdministratorAuthentication(requestId,
+            new AdministratorAuthenticationRequest(secret, originalExpiry));
         var dispatched = false;
-        var imported = false;
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            var requestId = Guid.NewGuid();
-            var codec = node.CatalogRequestCodec();
-            var input = new AdministratorAuthenticationRequest(secret, bytes, records, resultBytes, originalExpiry);
-            var envelope = codec.CreateAdministratorAuthentication(requestId, input);
-            var reply = await AdministratorAuthenticationDispatch.SendAsync(node, requestId,
-                envelope, () => dispatched = true, token);
-            if (reply.Result is null || GrainReplyFactory.Measure(reply) > resultBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, AdministratorAuthenticationProtocol.BudgetExceeded);
-            }
-            var value = GrainReplyFactory.RequireValue(reply).Value
-                as AdministratorAuthenticationResult
-                ?? throw Errors.Fail(ErrorCode.Corruption, AdministratorAuthenticationProtocol.Invalid);
-            Require(value, codec.ExecutionOptions.Value.MaximumDetailCharacters);
-            work.ImportSettledReadGrant(metadataGrant, value.ReadBytes, value.ExaminedRecords);
-            imported = true;
-            if (value.Error is { } denied)
-            {
-                throw Errors.Fail(denied, value.SafeDetail!);
-            }
-            work.Check();
-            principal = McpAuthentication.ReadPrincipal(new GrainValue(value.Principal), options, token);
-            GrainRequestAuthority.RequireAdministrator(principal);
-            work.CheckResult(principal);
-            work.Check();
-        }, failures);
+        AdministratorAuthenticationResult? value = null;
         try
         {
-            ServerFailureObserver.ThrowIfAny(failures);
+            var reply = await AdministratorAuthenticationDispatch.SendAsync(node, requestId,
+                envelope, () => dispatched = true, token);
+            value = GrainReplyFactory.RequireValue(reply).Value as AdministratorAuthenticationResult
+                ?? throw Errors.Fail(ErrorCode.Corruption, AdministratorAuthenticationProtocol.Invalid);
         }
-        catch (Exception original)
+        catch (Exception original) when (dispatched && CqrsBoundaryErrors.IsNonFatal(original))
         {
-            if (dispatched && !imported)
-            {
-                work.FailIndeterminateMetadata(original);
-            }
+            work.FailIndeterminateMetadata(original);
             throw;
         }
-        return principal!;
+        Require(value);
+        if (value.Error is { } denied)
+        {
+            throw Errors.Fail(denied, value.SafeDetail!);
+        }
+        work.Check();
+        var principal = McpAuthentication.ReadPrincipal(new GrainValue(value.Principal), options, token);
+        GrainRequestAuthority.RequireAdministrator(principal);
+        work.Check();
+        return principal;
     }
 
-    private static void Require(AdministratorAuthenticationResult value, int maximumDetailCharacters)
+    private static void Require(AdministratorAuthenticationResult value)
     {
-        if (value.ReadBytes < NoReadBytes || value.ExaminedRecords < NoExaminedRecords
-            || value.Error is { } error && (!Enum.IsDefined(error) || value.Principal is not null
-                || string.IsNullOrEmpty(value.SafeDetail) || value.SafeDetail.Length > maximumDetailCharacters)
+        if (value.Error is { } error && (!Enum.IsDefined(error) || value.Principal is not null
+                || string.IsNullOrEmpty(value.SafeDetail))
             || value.Error is null && (value.Principal is null || value.SafeDetail is not null))
         {
             throw Errors.Fail(ErrorCode.Corruption, AdministratorAuthenticationProtocol.Invalid);

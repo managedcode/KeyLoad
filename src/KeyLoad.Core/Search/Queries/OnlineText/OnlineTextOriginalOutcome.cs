@@ -26,7 +26,7 @@ public static class OnlineTextOriginalOutcome
             return (false, default(Result<object>?));
         }
 
-        engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous, budget);
+        engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous);
         budget.Check();
         return (true, ((Result<object>?)(previous.Result)));
     }
@@ -43,7 +43,7 @@ public static class OnlineTextOriginalOutcome
             return null;
         }
 
-        engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous, budget);
+        engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous);
         var result = previous.Result.Get<OnlineTextIndexMaintenanceResult>();
         var authority = previous.OnlineTextAuthority ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         return new OnlineTextCurrentPublication(OnlineTextPublicationProtocol.CurrentFormat, principal.Id, request.CommandId, authority.ParentFingerprint, request.Consumer, request.ConsumerGeneration, authority, result.PublishedCut);
@@ -57,10 +57,10 @@ public static class OnlineTextOriginalOutcome
 
         var command = OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(operation);
         engine.RequireOnlineTextOriginalAuthority(view, principal, command.Request);
-        engine.ValidateOnlineTextStoredOutcome(view, principal, command.Request, previous, null);
+        engine.ValidateOnlineTextStoredOutcome(view, principal, command.Request, previous);
     }
 
-    internal static void ValidateOnlineTextStoredOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, StoredOutcome previous, ReadExecutionBudget? budget)
+    internal static void ValidateOnlineTextStoredOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, StoredOutcome previous)
     {
         if (previous.OnlineTextAuthority is not { } authority || authority.ParentFingerprint != OnlineTextParentIdentity.Fingerprint(principal.Id, request) || authority.Collection != request.Collection || authority.Field != request.Field)
         {
@@ -84,14 +84,12 @@ public static class OnlineTextOriginalOutcome
 
         var original = previous.Result.Get<OnlineTextIndexMaintenanceResult>();
         var resource = engine.Resource(view, request.Consumer.Partition, request.Collection, ResourceKind.Collection);
-        budget?.ChargeBytes(OrleansSerialization.Measure(resource));
         var sha = Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(resource)));
         if (original.CommandId != request.CommandId || original.Consumer != request.Consumer || original.ConsumerGeneration != request.ConsumerGeneration || original.PublishedCut.ResourceSha256 != sha || original.PublishedCut.SchemaVersion != resource.SchemaVersion)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority);
         }
 
-        budget?.CheckResult(original);
     }
 
     internal static void RequireOnlineTextOriginalAuthority(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request)

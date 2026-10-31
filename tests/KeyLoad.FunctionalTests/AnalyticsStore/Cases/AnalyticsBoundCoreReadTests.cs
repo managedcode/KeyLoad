@@ -11,10 +11,6 @@ internal sealed class AnalyticsBoundCoreReadTests
         => AnalyticsBoundCoreRefusals.AuthorityAsync(TestContext.Current!.Execution.CancellationToken);
 
     [Test]
-    public Task ActualLifetimeRetentionBytesRefuseBeforeRowsAndFreshOperationIsHealthy()
-        => AnalyticsBoundCoreRefusals.ResultBytesAsync(TestContext.Current!.Execution.CancellationToken);
-
-    [Test]
     public Task DifferentActualLeaseCannotReplaceOriginalBindingThenOriginalReadIsHealthy()
         => AnalyticsBoundCoreRefusals.BindingAsync(TestContext.Current!.Execution.CancellationToken);
 

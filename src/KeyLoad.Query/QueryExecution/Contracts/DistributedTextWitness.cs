@@ -12,6 +12,4 @@ internal sealed record DistributedTextWitness(
     [property: global::Orleans.Id(6)] long SchemaVersion,
     [property: global::Orleans.Id(7)] string ResourcePolicyDigest,
     [property: global::Orleans.Id(8)] DistributedTextStatistics Statistics,
-    [property: global::Orleans.Id(9)] long ReadBytes,
-    [property: global::Orleans.Id(10)] int ExaminedRecords,
     [property: global::Orleans.Id(11)] Guid Incarnation);

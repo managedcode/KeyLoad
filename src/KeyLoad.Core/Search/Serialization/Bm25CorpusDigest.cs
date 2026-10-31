@@ -10,7 +10,6 @@ internal static class Bm25CorpusDigest
     internal static string Compute(Bm25CorpusCurrent current, AtomicPartitionPlacementResolution placement,
         ReadExecutionBudget work)
     {
-        work.ChargeBytes(Measure(current, placement));
         work.Check();
         return Compute(current, placement);
     }
@@ -43,7 +42,6 @@ internal static class Bm25CorpusDigest
 
     internal static string Resource(ResourceDefinition resource, ReadExecutionBudget work)
     {
-        work.ChargeBytes(checked(OrleansSerialization.Measure(resource) + SHA256.HashSizeInBytes));
         work.Check();
         return Resource(resource);
     }
@@ -58,11 +56,4 @@ internal static class Bm25CorpusDigest
         finally { CryptographicOperations.ZeroMemory(bytes); }
     }
 
-    private static long Measure(Bm25CorpusCurrent current, AtomicPartitionPlacementResolution placement)
-        => checked(OrleansSerialization.Measure(current with
-        {
-            PayloadDigest = string.Empty
-        })
-            + OrleansSerialization.Measure(placement) + SourceDigestDomainBytes.Length
-            + SHA256.HashSizeInBytes);
 }

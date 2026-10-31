@@ -17,7 +17,6 @@ internal sealed class SqlEventReferenceJoinTests
                 var seed = SqlEventReferenceJoinFixture.Seed(database);
                 await SqlEventReferenceJoinOperation.VerifyAsync(database);
                 await SqlEventReferenceJoinOperation.RefusalsAsync(database);
-                await SqlEventReferenceJoinBudget.RunAsync(database);
                 var repair = await SqlEventReferenceJoinPolicy.RunAsync(database);
                 await SqlEventReferenceJoinCold.RunAsync(database, seed.Command, seed.Receipt, repair.Command, repair.Receipt);
             }

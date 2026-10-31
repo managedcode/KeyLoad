@@ -9,7 +9,7 @@ using KeyLoad.ClusterTests.ResourceExecution;
 namespace KeyLoad.ClusterTests.RelationalStorage;
 
 /// <summary>Builds current typed rows through the actual SDK for the bounded Orleans join cases.</summary>
-internal static class RelationalSqlClusterJoinBudgetData
+internal static class RelationalSqlClusterJoinData
 {
     internal const string LeftCollection = "budgetorders";
     internal const string RightCollection = "budgetcustomers";

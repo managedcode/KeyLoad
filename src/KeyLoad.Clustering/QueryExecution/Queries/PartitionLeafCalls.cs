@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
@@ -45,11 +44,9 @@ internal sealed class PartitionLeafCalls(DatabaseEngine database, string princip
             ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
     }
 
-    internal static Task CompleteAsync(ReadExecutionBudget parent, ReadExecutionBudgetReadGrant grant,
-        long readBytes, int examinedRecords, CancellationToken token)
+    internal static Task CompleteAsync(ReadExecutionBudget parent, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        parent.ImportReadGrant(grant, readBytes, examinedRecords);
         parent.Check();
         return Task.CompletedTask;
     }

@@ -1,15 +1,12 @@
 using KeyLoad.Core.ResourceExecution;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Owns the original call's linked cancellation and result ledger until its enumerator settles.</summary>
 internal sealed class BoundCqrsStreamWork : IAsyncDisposable
 {
-    private CancellationTokenSource? deadline;
     private CancellationTokenSource? request;
-    private CancellationTokenSource? ownerRequest;
     private CancellationTokenSource? execution;
     private CancellationTokenSource? selected;
     private RequestWorkLease? lease;
@@ -22,18 +19,15 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
     private Exception? originalPrimary;
     internal CancellationToken Token => selected?.Token ?? execution?.Token ?? request?.Token ?? originalToken;
 
-    internal void Start(TimeProvider clock, IOptions<GrainRoutingOptions> options, RequestWorkOwner owner,
-        CqrsStreamPurpose purpose,
+    internal void Start(RequestWorkOwner owner, CqrsStreamPurpose purpose,
         Func<RequestWorkLease> acquireVerified, CancellationToken cancellationToken, CancellationToken enumerationToken)
     {
         originalPurpose = purpose;
         originalToken = cancellationToken;
         try
         {
-            deadline = new(options.Value.ExecutionLifetime, clock);
             request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, enumerationToken);
-            ownerRequest = CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);
-            execution = CancellationTokenSource.CreateLinkedTokenSource(ownerRequest.Token, deadline.Token);
+            execution = CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);
             lease = acquireVerified();
             ownedRetention = new();
             lease.AttachResultRetention(ownedRetention);
@@ -120,9 +114,7 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
     {
         cleanup = Dispose(selected, cleanup);
         cleanup = Dispose(execution, cleanup);
-        cleanup = Dispose(ownerRequest, cleanup);
-        cleanup = Dispose(request, cleanup);
-        return Dispose(deadline, cleanup);
+        return Dispose(request, cleanup);
     }
 
     private Exception? DisposeOwnedRetention(Exception? previous)

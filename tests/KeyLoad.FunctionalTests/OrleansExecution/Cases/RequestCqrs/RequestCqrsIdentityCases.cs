@@ -57,9 +57,6 @@ internal static class RequestCqrsIdentityCases
         await Assert.That(observed.Subject).IsEqualTo(subject);
         await Assert.That(observed.RequestId).IsEqualTo(requestId);
         await Assert.That(observed.CommandId).IsEqualTo(Guid.Empty);
-        await Assert.That(observed.PrincipalBytes).IsEqualTo((long)principalBytes.Length);
-        await Assert.That(observed.StateBytes).IsEqualTo((long)stateBytes.Length);
-        await Assert.That(observed.StartedChunkBytes).IsGreaterThan(0);
         await Assert.That(observed.CapabilityCalls).IsEqualTo(priorCalls + 1);
     }
 
@@ -73,7 +70,6 @@ internal static class RequestCqrsIdentityCases
         var result = await Probe(fixture, requestId, token);
         await Assert.That(result.Accepted).IsTrue();
         await Assert.That(result.Subject).IsNull();
-        await Assert.That(result.PrincipalBytes).IsEqualTo(0L);
     }
 
     internal static async Task AcCrs006PresentNullPrincipalEntryIsNotAnonymousAuthentication(RequestCqrsHostedRuntimeFixture fixture)

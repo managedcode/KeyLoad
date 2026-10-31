@@ -3,8 +3,9 @@ using Microsoft.Extensions.Logging;
 
 namespace KeyLoad.FunctionalTests.Messaging;
 
-internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILoggerProvider
+internal sealed class MultiLaneReceiveFailureCapture : ILoggerProvider
 {
+    private const int MaximumRecords = 256;
     private const int RuntimeFailureEventId = 3;
     private const string StageKey = "Stage";
     private const string CategoryKey = "Category";
@@ -35,7 +36,7 @@ internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILogg
         }
     }
     public ILogger CreateLogger(string categoryName)
-        => new CaptureLogger(this, categoryName == typeof(ConnectionGrain).FullName);
+        => new CaptureLogger(this, categoryName == typeof(RequestGrain).FullName);
     public void Dispose()
     {
         lock (gate)
@@ -79,7 +80,7 @@ internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILogg
             {
                 return;
             }
-            if (records.Count >= maximumRecords)
+            if (records.Count >= MaximumRecords)
             {
                 exhausted = true;
                 return;
@@ -88,19 +89,15 @@ internal sealed class MultiLaneReceiveFailureCapture(int maximumRecords) : ILogg
         }
     }
 
-    internal void SetSummary(int originalCount, GrainOperationReply reply, int maximumDetailCharacters)
+    internal void SetSummary(int originalCount, GrainOperationReply reply)
     {
         lock (gate)
         {
-            var detail = reply.SafeDetail;
-            var safeDetail = detail is null || detail.Length <= maximumDetailCharacters
-                ? detail : InvalidReplyDetail;
-            Summary = FormattableString.Invariant($"MultiLane execution reply Error={reply.Error}; SafeDetail={safeDetail}; Event3Exhausted={exhausted}; ")
+            Summary = FormattableString.Invariant($"MultiLane execution reply Error={reply.Error}; SafeDetail={reply.SafeDetail}; Event3Exhausted={exhausted}; ")
                 + string.Join(Separator, records.Skip(originalCount).Select(static item =>
                     FormattableString.Invariant($"stage={item.Stage}/category={item.Category}/code={item.Code}")));
         }
     }
-    private const string InvalidReplyDetail = "InvalidReturnedDetailShape";
     private const string Separator = "; ";
     private readonly record struct Entry(GrainFailureStage Stage, GrainFailureCategory Category, ErrorCode Code);
     private sealed class CaptureLogger(MultiLaneReceiveFailureCapture owner, bool enabled) : ILogger

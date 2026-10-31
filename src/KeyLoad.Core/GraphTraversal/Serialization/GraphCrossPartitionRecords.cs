@@ -1,5 +1,4 @@
 using System.Security.Cryptography;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.GraphTraversal.Serialization;
@@ -12,14 +11,6 @@ internal static class GraphCrossPartitionRecords
     {
         T? record = null;
         view.ReadValue(key, bytes => record = Decode<T>(bytes));
-        return record;
-    }
-
-    internal static T? Read<T>(IKeyValueView view, byte[] key, ReadExecutionBudgetReadGrant grant)
-        where T : class
-    {
-        T? record = null;
-        grant.ReadValue(view, key, bytes => record = Decode<T>(bytes));
         return record;
     }
 

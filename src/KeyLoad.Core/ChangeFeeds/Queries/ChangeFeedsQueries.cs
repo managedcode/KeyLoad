@@ -26,7 +26,6 @@ public static class ChangeFeedsQueries
         return engine.Store.Read(raw =>
         {
             var result = engine.ReadProjectionBatchRead(budget.CreateView(raw), principalId, request);
-            budget.CheckResult(result);
             return result;
         });
     }
@@ -41,7 +40,6 @@ public static class ChangeFeedsQueries
         return engine.Store.Read(raw =>
         {
             var result = engine.GetOutboxStatusRead(budget.CreateView(raw), principalId, partition);
-            budget.CheckResult(result);
             return result;
         });
     }

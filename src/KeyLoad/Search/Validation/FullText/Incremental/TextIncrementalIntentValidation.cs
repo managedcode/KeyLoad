@@ -64,7 +64,6 @@ internal static class TextIncrementalIntentValidation
         }
         foreach (var posting in postings)
         {
-            budget.ChargeBytes(TextProtocol.PostingBytes);
             if (posting is null || posting.Record != record)
             {
                 throw TextErrors.Corrupt();

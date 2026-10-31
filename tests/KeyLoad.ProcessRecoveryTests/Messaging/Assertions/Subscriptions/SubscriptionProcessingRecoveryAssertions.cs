@@ -10,7 +10,7 @@ internal static class SubscriptionProcessingRecoveryAssertions
 {
     internal static async Task VerifyAsync(string path, CommitStage stage, CancellationToken token)
     {
-        var original = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        var original = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(path, CrashFixtureValues.ProcessingCommandFile), token));
         using var store = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution(),
             RecoveryExecutionOptions.PointCacheExecution());

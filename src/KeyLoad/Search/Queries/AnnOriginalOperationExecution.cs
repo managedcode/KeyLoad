@@ -76,11 +76,9 @@ internal static class AnnOriginalOperationExecution
                     stages, owner, current, seeds.Value, retained, read);
                 if (result is not null)
                 {
-                    read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(result));
                 }
                 if (settlement is not null)
                 {
-                    read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(settlement));
                 }
                 read.Check();
             }
@@ -101,7 +99,6 @@ internal static class AnnOriginalOperationExecution
         AnnMaintenanceResult? result;
         CommitProjectionBatchRequest? settlement = null;
         var configuredCurrent = database.ReadAnnProjectionConsumer(fresh, request);
-        read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(configuredCurrent));
         if (originalConfigure is not null && (originalConfigure.Consumer != configuredCurrent.Consumer
             || !global::KeyLoad.OrleansSerialization.Serialize(originalConfigure.Definition).AsSpan()
                 .SequenceEqual(global::KeyLoad.OrleansSerialization.Serialize(configuredCurrent.Definition))
@@ -131,8 +128,6 @@ internal static class AnnOriginalOperationExecution
         else
         {
             RequirePublished(stages, owner, request, originalResult, current, seeds, retained, read);
-            read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(request));
-            read.ChargeBytes(global::KeyLoad.OrleansSerialization.Measure(originalResult));
             settlement = (stages.OriginalSettlementIntent(request)).Value
                 ?? (database.CreateAnnInitialSettlementIntent(fresh, request, originalResult,
                     AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Completed,

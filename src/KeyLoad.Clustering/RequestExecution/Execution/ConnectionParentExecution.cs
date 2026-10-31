@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -56,32 +55,32 @@ internal static class ConnectionParentExecution
         Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         Func<GrainReadKind, Guid, Task> abortMaintenance,
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
-        IOptions<GrainRoutingOptions> options, ILogger diagnostics, IGrainContext context,
+        ILogger diagnostics, IGrainContext context,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose)
     {
         if (request.Envelope.CommandKind == OperationKind.MaintainOnlineTextIndex)
         {
             var result = await OnlineTextExecution.ExecuteAsync(request, parentEnvelope, executeChild,
                 id => abortMaintenance(GrainReadKind.OnlineTextMaintenance, id), services, codec,
-                options, diagnostics, context, writer, purpose.WorkBinding).ConfigureAwait(true);
-            return GrainReplyFactory.ParentValue(result, options, writer.CancellationToken);
+                diagnostics, context, writer, purpose.WorkBinding).ConfigureAwait(true);
+            return GrainReplyFactory.Value(result);
         }
         if (request.Envelope.CommandKind == OperationKind.MaintainTextIndex)
         {
             var result = await TextMaintenanceExecution.ExecuteAsync(request, executeChild,
                 id => abortMaintenance(GrainReadKind.TextMaintenance, id), services, codec,
-                options, diagnostics, writer, purpose, purpose.WorkBinding).ConfigureAwait(true);
-            return GrainReplyFactory.ParentValue(result, options, writer.CancellationToken);
+                diagnostics, writer, purpose, purpose.WorkBinding).ConfigureAwait(true);
+            return GrainReplyFactory.Value(result);
         }
         if (request.Envelope.CommandKind == OperationKind.MaintainAnnIndex)
         {
             var result = await AnnMaintenanceExecution.ExecuteAsync(request, executeChild,
                 id => abortMaintenance(GrainReadKind.AnnMaintenance, id), services, codec,
-                options, diagnostics, writer, purpose).ConfigureAwait(true);
-            return GrainReplyFactory.ParentValue(result, options, writer.CancellationToken);
+                diagnostics, writer, purpose).ConfigureAwait(true);
+            return GrainReplyFactory.Value(result);
         }
         var lanes = await MultiLaneReceiveExecution.ExecuteAsync(request, executeChild, services, codec,
             clock, diagnostics, purpose.WorkBinding, writer.CancellationToken).ConfigureAwait(true);
-        return GrainReplyFactory.ParentValue(lanes, options, writer.CancellationToken);
+        return GrainReplyFactory.Value(lanes);
     }
 }

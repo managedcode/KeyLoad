@@ -1,5 +1,4 @@
 using System.Net;
-using KeyLoad.Clustering;
 using KeyLoad.Server.OrleansHosting;
 using Microsoft.Extensions.Options;
 using Orleans.Configuration;
@@ -29,7 +28,6 @@ internal static class OrleansSiloConfiguration
             cluster.ServiceId = OrleansNodeProtocol.ServiceId;
         });
         OrleansClustering.Configure(silo, options, address);
-        ConfigureMessaging(silo.Services);
         PartitionStorageRegistration.Register(silo);
         silo.Services.AddSingleton<OrleansNodeLifecycle>();
         silo.Services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(provider => provider.GetRequiredService<OrleansNodeLifecycle>());
@@ -43,8 +41,4 @@ internal static class OrleansSiloConfiguration
         ConnectionGrainGraphRegistration.Register(silo);
         RuntimeJournalRegistration.Register(silo);
     }
-
-    private static void ConfigureMessaging(IServiceCollection services)
-        => services.AddOptions<SiloMessagingOptions>().Configure<IOptions<GrainRoutingOptions>>(
-            (messaging, routing) => messaging.MaxMessageBodySize = routing.Value.MaximumCompletedBytes);
 }

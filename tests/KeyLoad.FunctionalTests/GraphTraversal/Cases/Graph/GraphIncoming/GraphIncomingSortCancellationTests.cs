@@ -116,10 +116,9 @@ internal sealed class GraphIncomingSortCancellationTests
         TestDatabase database, ReadExecutionBudget budget, PartitionRef partition)
         => database.Store.Read(view =>
         {
-            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
-            var principal = GraphIncomingReadScope.ReadPrincipal(view, grant,
+            var principal = GraphIncomingReadScope.ReadPrincipal(view,
                 GraphCrossPartitionTestSupport.Root, TimeProvider.System.GetUtcNow());
-            var graph = GraphIncomingReadScope.ReadGraphResource(view, grant, partition,
+            var graph = GraphIncomingReadScope.ReadGraphResource(view, partition,
                 GraphCrossPartitionTestSupport.Graph, budget);
             return (principal, graph);
         });

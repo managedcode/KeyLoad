@@ -49,7 +49,6 @@ internal static class TextIndexWaitExecution
                     document => TextIndexPublication.Publish(lease, path, budget, document, execution));
                 lease.VerifyCandidates([], [], budget);
                 result = new WaitForIndexResult(database.Token(authority, request.Partition, applied), resource.SchemaVersion, principal.PolicyEpoch);
-                budget.CheckResult(result);
             }
             catch (Exception error)
             {
@@ -60,7 +59,6 @@ internal static class TextIndexWaitExecution
             {
                 TextProjectionLifecycle.Dispose(lease, primaryFailure);
             }
-            budget.CheckResult(result);
             observation = readCutObserver is null ? null
                 : WaitForIndexReadCutObservationDispatch.Capture(database, principal, resource, request, result, budget);
             return result;

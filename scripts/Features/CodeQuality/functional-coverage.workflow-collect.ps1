@@ -49,7 +49,7 @@ finally { $stream.Dispose() }
     ('--KeyLoadTests:CoverageOutput=' + (Join-Path $EvidenceRoot 'recovery/coverage.coverage'))
 $recoveryExit = [int] $LASTEXITCODE
 "recovery_exit_code=$recoveryExit" | Add-Content $env:GITHUB_OUTPUT
-$clusterFilter = '/*/*/(PartitionQueryPublicClusterTests|McpDocumentCrudParityTests|RelationalSqlClusterJoinTests|RelationalSqlClusterJoinAuthorizationTests|RelationalSqlClusterJoinBudgetTests|RelationalSqlClusterJoinCancellationTests|RelationalSqlClusterJoinReadCutTests)/*'
+$clusterFilter = '/*/*/(PartitionQueryPublicClusterTests|McpDocumentCrudParityTests|RelationalSqlClusterJoinTests|RelationalSqlClusterJoinAuthorizationTests|RelationalSqlClusterJoinCancellationTests|RelationalSqlClusterJoinReadCutTests)/*'
 & node @common @coverage '--KeyLoadTests:Suite=cluster' ('--KeyLoadTests:Filter=' + $clusterFilter) `
     ('--KeyLoadTests:ResultsDirectory=' + $EvidenceRoot) ('--KeyLoadTests:CoverageOutput=' + (Join-Path $EvidenceRoot 'coverage.coverage'))
 $clusterExit = [int] $LASTEXITCODE

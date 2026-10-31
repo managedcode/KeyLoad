@@ -1,4 +1,3 @@
-using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.TimeSeries;
@@ -19,9 +18,7 @@ internal static class SampleRetentionStateReader
         ArgumentNullException.ThrowIfNull(view);
         var key = Key(partition, set, seriesId);
         SampleRetentionState? state = null;
-        StorageReadObserver? observer = budget is not null && view is not BudgetedReadView
-            ? budget.ChargeBytes : null;
-        var found = view.ReadValue(key, value => state = Decode(value), observer);
+        var found = view.ReadValue(key, value => state = Decode(value));
         budget?.Check();
         if (!found)
         {

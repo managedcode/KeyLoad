@@ -54,7 +54,7 @@ internal static class AnnLoadedSources
         var cut = new AnnSeedCut(source.NodeId, source.Incarnation, source.StoreFormatVersion,
             source.KeyCodecVersion, source.ReadGeneration, source.Position, source.AppliedPosition,
             source.ThroughSequence, source.OutboxFirstAvailable);
-        var seed = new AnnSeed(scope, cut, snapshot.Records, digest, owned, peak, 0, work.Units)
+        var seed = new AnnSeed(scope, cut, snapshot.Records, digest, owned, peak, work.Units)
         {
             DependencySha256 = source.DependencySha256,
             ProjectionCheckpoint = source.ThroughSequence

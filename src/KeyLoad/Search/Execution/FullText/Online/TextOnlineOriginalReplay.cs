@@ -69,16 +69,15 @@ internal sealed class TextOnlineOriginalReplay(DatabaseEngine database,
             ServerFailureObserver.Observe(admitted.CompleteAfterJoinedCleanup, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
-        return (true, ((OnlineTextCapabilityResult?)(CreateReply(request, result, budget))));
+        return (true, ((OnlineTextCapabilityResult?)(CreateReply(request, result))));
     }
 
     private static OnlineTextCapabilityResult CreateReply(OnlineTextCapabilityRequest request,
-        OnlineTextIndexMaintenanceResult result, ReadExecutionBudget budget)
+        OnlineTextIndexMaintenanceResult result)
     {
         var reply = new OnlineTextCapabilityResult(request.SessionId, null, null,
             result.PublishedCut.ThroughSequence, result.TrackedRecords, result.IndexSha256,
             result, null, null, null);
-        budget.CheckResult(reply);
         return reply;
     }
 }

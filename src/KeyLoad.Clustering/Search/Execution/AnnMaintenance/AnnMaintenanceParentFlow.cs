@@ -5,21 +5,15 @@ namespace KeyLoad.Clustering;
 internal static class AnnMaintenanceParentFlow
 {
     private const long EmptySequence = 0;
-    private const int ReservedFrames = 12;
     private const int EmptyCount = 0;
     private static readonly string[] MutationKinds = [MutationDiscriminatorNames.PutDocument,
         MutationDiscriminatorNames.PatchDocument, MutationDiscriminatorNames.DeleteDocument,
         MutationDiscriminatorNames.PutVector, MutationDiscriminatorNames.ApplyVectorProjection];
 
     internal static async Task<AnnMaintenanceResult> RunAsync(MaintenanceChildCalls children,
-        AnnMaintenanceRequest request, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
-        AnnMaintenanceOptions options, GrainRoutingOptions routing)
+        AnnMaintenanceRequest request, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
-        if (!options.IsValid())
-        {
-            throw Errors.Fail(ErrorCode.Validation, AnnMaintenanceOptions.ValidationMessage);
-        }
         if (request.Mode == AnnMaintenanceMode.Release)
         {
             return await ReleaseAsync(children, request, token).ConfigureAwait(true);
@@ -43,12 +37,7 @@ internal static class AnnMaintenanceParentFlow
             }
             state = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.Load, token).ConfigureAwait(true);
         }
-        var maximumPages = Math.Min(options.MaximumReplayPages, routing.MaximumStreamFrames - ReservedFrames);
-        if (maximumPages <= EmptyCount)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
-        }
-        var replayed = await ReplayAsync(children, request, state, checkpoint, maximumPages, writer).ConfigureAwait(true);
+        var replayed = await ReplayAsync(children, request, state, checkpoint, writer).ConfigureAwait(true);
         _ = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.Verify, token).ConfigureAwait(true);
         await AnnMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, AnnMaintenancePhase.Verify).ConfigureAwait(true);
         state = await children.CapabilityAsync(request, AnnMaintenanceCapabilityKind.Publish, token,
@@ -106,14 +95,14 @@ internal static class AnnMaintenanceParentFlow
 
     private static async Task<AnnMaintenanceReplayResult> ReplayAsync(MaintenanceChildCalls children,
         AnnMaintenanceRequest request, AnnMaintenanceCapabilityResult state, ProjectionBatchResult? checkpoint,
-        int maximumPages, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
         var upper = state.Source?.ThroughSequence ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
-        for (var pageNumber = EmptyCount; pageNumber < maximumPages; pageNumber++)
+        while (true)
         {
             var page = await children.ReadAsync<ReadProjectionBatchRequest, ProjectionBatch>(GrainReadKind.ProjectionBatch,
-                new(request.Consumer, ProjectionReplayPage.Records, children.ProjectionPageBytes, upper), token).ConfigureAwait(true);
+                new(request.Consumer, ProjectionReplayPage.Records, upper), token).ConfigureAwait(true);
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != upper || !page.Entries.IsEmpty)
@@ -136,7 +125,6 @@ internal static class AnnMaintenanceParentFlow
                 return new(checkpoint, null);
             }
         }
-        throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
     }
 
     private static async Task<AnnMaintenanceResult> ReleaseAsync(MaintenanceChildCalls children,

@@ -1,18 +1,14 @@
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
-using KeyLoad.Core.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.QueryExecution;
 
 internal static partial class DistributedSearchCoordinator
 {
-    private const string DeadlineExceeded = "The read execution deadline is exceeded.";
-
     internal static async Task<DistributedSearchPage> ExecuteAsync(DatabaseEngine database,
         DistributedSearchRequest request, IOptions<QueryExecutionOptions> options,
-        Func<DistributedSearchPhaseWork, ReadExecutionBudgetReadGrant, ReadExecutionBudget, CancellationToken,
-            Task<DistributedSearchPreparedLeaf>> prepare,
+        Func<DistributedSearchPhaseWork, ReadExecutionBudget, CancellationToken, Task<DistributedSearchPreparedLeaf>> prepare,
         Func<CancellationToken, Task> sourceBarrier, TimeProvider clock, DateTimeOffset originalExpiry,
         CancellationToken original, Func<CancellationToken, Task>? statisticsCaptured = null,
         IResourceLifetimeWorkBinding? binding = null)
@@ -28,31 +24,11 @@ internal static partial class DistributedSearchCoordinator
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        QueryResultBudgetPolicy.Constrain(budget, options.Value);
         budget.ConstrainLifetime(originalExpiry);
         using var admission = database.AdmitQuery(original);
-        using var deadline = new CancellationTokenSource(budget.RemainingLifetime, clock);
-        using var execution = CancellationTokenSource.CreateLinkedTokenSource(original, deadline.Token);
-        using var stage = budget.EnterStageCancellation(execution.Token);
-        try
-        {
-            var partitions = DistributedSearchValidation.Require(request, options, budget);
-            var grants = DistributedSearchGrants.Reserve(partitions.Length, budget);
-            return await new DistributedSearchOperation(request, partitions, options, budget, grants,
-                prepare, sourceBarrier, execution, statisticsCaptured).RunAsync().ConfigureAwait(true);
-        }
-        catch (OperationCanceledException) when (original.IsCancellationRequested)
-        {
-            original.ThrowIfCancellationRequested();
-            throw;
-        }
-        catch (OperationCanceledException) when (deadline.IsCancellationRequested)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded);
-        }
-        catch (Exception cause) when (DistributedSearchDeadlineFailure.IsOwnedDeadline(cause, deadline.Token, original))
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded, cause);
-        }
+        using var execution = CancellationTokenSource.CreateLinkedTokenSource(original);
+        var partitions = DistributedSearchValidation.Require(request, options, budget);
+        return await new DistributedSearchOperation(request, partitions, options, budget,
+            prepare, sourceBarrier, execution, statisticsCaptured).RunAsync().ConfigureAwait(true);
     }
 }

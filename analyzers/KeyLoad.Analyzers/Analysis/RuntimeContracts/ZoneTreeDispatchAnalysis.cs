@@ -37,6 +37,33 @@ internal static class ZoneTreeDispatchAnalysis
         return false;
     }
 
+    /// <summary>Finds whether a blocked awaitable comes from a ZoneTree asynchronous member.</summary>
+    internal static bool FromEngine(IOperation? operation)
+    {
+        while (operation is not null)
+        {
+            switch (operation)
+            {
+                case IConversionOperation conversion:
+                    operation = conversion.Operand;
+                    continue;
+                case IInvocationOperation invocation when invocation.TargetMethod.Name is "GetAwaiter" or "ConfigureAwait"
+                    or "AsTask":
+                    operation = invocation.Instance;
+                    continue;
+                case IInvocationOperation invocation:
+                    return ZoneTreeAccessPolicy.Execution(invocation.TargetMethod)
+                        && ZoneTreeAccessPolicy.Asynchronous(invocation.TargetMethod);
+                case IPropertyReferenceOperation property:
+                    return ZoneTreeAccessPolicy.Execution(property.Property)
+                        && ZoneTreeAccessPolicy.Awaitable(property.Property.Type);
+                default:
+                    return false;
+            }
+        }
+        return false;
+    }
+
     internal static bool RuntimeResource(IOperation operation)
     {
         if (ZoneTreeAccessPolicy.Execution(operation.Type))

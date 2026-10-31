@@ -127,7 +127,7 @@ internal static class RequestCqrsCommandStream
         await Assert.That(chunk.Final?.IsSuccess).IsFalse();
         await Assert.That(chunk.Final?.Value).IsNull();
         var problem = chunk.Final?.Problem ?? throw new InvalidOperationException("The failure terminal has no Problem.");
-        await Assert.That(GrainRequestStreamProblem.ReadCode(problem, UnitRoutingOptions.Routing())).IsEqualTo(expectedError);
+        await Assert.That(GrainRequestStreamProblem.ReadCode(problem)).IsEqualTo(expectedError);
         await Assert.That((problem.Detail ?? string.Empty).Length).IsGreaterThan(0);
     }
 
@@ -140,7 +140,7 @@ internal static class RequestCqrsCommandStream
         var problem = chunk.Final?.Problem ?? throw new InvalidOperationException("The failed request has no Problem.");
         return new()
         {
-            Error = GrainRequestStreamProblem.ReadCode(problem, UnitRoutingOptions.Routing()),
+            Error = GrainRequestStreamProblem.ReadCode(problem),
             SafeDetail = problem.Detail
         };
     }

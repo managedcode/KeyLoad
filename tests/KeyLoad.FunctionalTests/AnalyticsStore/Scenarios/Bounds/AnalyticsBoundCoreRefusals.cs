@@ -21,26 +21,6 @@ internal static class AnalyticsBoundCoreRefusals
             await AnalyticsBoundCoreFlow.HealthyAsync(fixture, owner, original);
         }, token);
 
-    internal static Task ResultBytesAsync(CancellationToken token)
-        => AnalyticsBoundCoreOwner.RunAsync(async (fixture, owner, original) =>
-        {
-            var lifetime = fixture.Store.Read(view => (KeyLoad.Core.ResourceExecution.ResourceLifetimeCatalog.Read(view,
-                fixture.Partition.TenantId, fixture.Partition.DatabaseId, D.Store,
-                fixture.Database.Resource(view, fixture.Partition, D.Store))).Value)
-                ?? throw new InvalidOperationException("The actual analytics lifetime is absent.");
-            await AnalyticsBoundCoreOwner.LeaseAsync(fixture, owner, async (lease, ledger, work) =>
-                await RuntimeAnalyticsBounds.UnchangedAsync(fixture, async () =>
-                {
-                    work.ConstrainResultBytes(checked((int)OrleansSerialization.Measure(lifetime) - 1));
-                    var error = Assert.ThrowsExactly<KeyLoadException>(() =>
-                        fixture.Database.ReadAnalyticsEventsBound(D.Root, D.Read(fixture), work, lease));
-                    await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-                    await Assert.That(ledger.RetainedEntries).IsEqualTo(0);
-                    await Assert.That(lease.Dependencies.Count).IsEqualTo(0);
-                }), original);
-            await AnalyticsBoundCoreFlow.HealthyAsync(fixture, owner, original);
-        }, token);
-
     internal static Task BindingAsync(CancellationToken token)
         => AnalyticsBoundCoreOwner.RunAsync(async (fixture, owner, original) =>
         {

@@ -1,9 +1,12 @@
 
+using System.Numerics;
+
 namespace KeyLoad.FunctionalTests.Search;
 
 internal sealed class PackedAnnOwnedSimilarityTests
 {
-    private static readonly int[] Dimensions = [1, 4_096];
+    private static readonly int[] Dimensions =
+        [1, Vector<float>.Count - 1, Vector<float>.Count, Vector<float>.Count + 1, (2 * Vector<float>.Count) + 1, 4_096];
     private static readonly DistanceMetric[] Metrics =
         [DistanceMetric.Cosine, DistanceMetric.Euclidean, DistanceMetric.DotProduct];
 

@@ -1,6 +1,5 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query.QueryExecution;
@@ -12,31 +11,25 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
     private const int VersionOne = 1;
 
     internal PartitionQueryLeafResult Execute(string principalId, PartitionQueryLeafPlan plan,
-        AstQueryRequest normalized, ReadExecutionBudgetReadGrant grant)
+        AstQueryRequest normalized)
     {
-        var leafGrant = new PartitionQueryLeafReadGrant(grant, plan.MaxExaminedRecords);
-        var retention = new PartitionQueryLeafRetention(plan.MaxRetainedBytes, plan.MaxCandidates);
         PartitionQueryLeafResult Read(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource)
-            => Capture(view, principal, resource, plan, normalized, leafGrant, retention);
+            => Capture(view, principal, resource, plan, normalized);
         return !receivingLeaf
             ? database.WithQueryView(principalId, plan.Partition, normalized.Query.Collection, Capability.None, Read, budget)
-            : database.WithPartitionQueryView(principalId, plan.Partition, normalized.Query.Collection,
-                grant, Read, budget);
+            : database.WithPartitionQueryView(principalId, plan.Partition, normalized.Query.Collection, Read, budget);
     }
 
     internal PartitionQueryLeafResult ExecuteLifetime(string principalId, PartitionQueryLeafPlan plan,
-        AstQueryRequest normalized, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata metadata)
+        AstQueryRequest normalized, PartitionQueryLifetimeMetadata metadata)
     {
-        var leafGrant = new PartitionQueryLeafReadGrant(grant, plan.MaxExaminedRecords);
-        var retention = new PartitionQueryLeafRetention(plan.MaxRetainedBytes, plan.MaxCandidates);
-        return database.WithPartitionQueryLifetimeView(principalId, plan.Partition, normalized.Query.Collection,
-            grant, budget, metadata, (view, principal, resource, _) =>
-                Capture(view, principal, resource, plan, normalized, leafGrant, retention, metadata));
+        return database.WithPartitionQueryLifetimeView(principalId, plan.Partition, normalized.Query.Collection, budget, metadata, (view, principal, resource, _) =>
+                Capture(view, principal, resource, plan, normalized, metadata));
     }
 
     private PartitionQueryLeafResult Capture(IKeyValueView view, PrincipalRecord principal,
         ResourceDefinition resource, PartitionQueryLeafPlan plan, AstQueryRequest request,
-        PartitionQueryLeafReadGrant grant, PartitionQueryLeafRetention retention, PartitionQueryLifetimeMetadata? metadata = null)
+        PartitionQueryLifetimeMetadata? metadata = null)
     {
         budget.Check();
         QueryFieldAuthorization.RequireSchema(database, principal, resource, request);
@@ -46,14 +39,13 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
             engine.Bind(metadata.Principal, metadata.Definition, request);
         }
         engine.Bind(principal, resource, request);
-        ValidatePlacement(view, plan.Partition, grant);
+        ValidatePlacement(view, plan.Partition);
         PreparedQuery? prepared = null;
         prepared = new(request.Query, EmptyElementCount, plan.MaxCandidates, ordinalFullReferenceOrder: true,
             projectCandidate: document => metadata is null
                 ? engine.Project(principal, resource, document, request.Query.Projection, prepared!.Paths)
                 : QueryRowProjection.ProjectIntersection(database, metadata, principal, resource, document,
-                    request.Query.Projection, prepared!.Paths),
-            reserveCandidate: retention.Reserve, releaseCandidate: retention.Release);
+                    request.Query.Projection, prepared!.Paths));
         var reader = new QueryCandidateReader(database, view, principal, resource, request, budget,
             document =>
             {
@@ -61,26 +53,22 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
                 {
                     Accept(document, request, prepared, budget);
                 }
-            }, grant);
+            });
         var accessPath = reader.Visit();
-        var candidates = prepared.DrainCandidates(request.Query.Limit, budget,
-            retention.Reserve, retention.ReleaseHeap);
+        var candidates = prepared.DrainCandidates(request.Query.Limit, budget);
         var identity = database.Store.Identity;
         return new(VersionOne, plan.Partition, identity.NodeId, identity.Incarnation, identity.ReadGeneration,
-            database.Store.Position, principal.PolicyEpoch, resource.SchemaVersion, grant.ExaminedRecords,
-            grant.ReadBytes, retention.CurrentBytes, accessPath, candidates);
+            database.Store.Position, principal.PolicyEpoch, resource.SchemaVersion, accessPath, candidates);
     }
 
-    private void ValidatePlacement(IKeyValueView view, PartitionRef partition,
-        PartitionQueryLeafReadGrant grant)
+    private void ValidatePlacement(IKeyValueView view, PartitionRef partition)
     {
         if (expectedOwner is null)
         {
             return;
         }
 
-        var resolution = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition,
-            grant.RuntimeGrant);
+        var resolution = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition);
         PartitionQueryPlacementValidation.Validate(resolution, partition, expectedOwner);
     }
 

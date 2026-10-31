@@ -43,7 +43,7 @@ internal static class TextOnlineCrashFlow
         OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityResult state, DateTimeOffset expiry,
         CancellationToken token)
     {
-        for (var number = 0; number < runtime.Canonical.Options.Core.TextMaintenance.Value.MaximumReplayPages; number++)
+        while (true)
         {
             var page = runtime.Canonical.Database.ReadProjectionBatch(CrashFixtureValues.Principal,
                 new(request.Consumer, ThroughSequence: state.CurrentCut!.ThroughSequence));
@@ -66,7 +66,6 @@ internal static class TextOnlineCrashFlow
                 return;
             }
         }
-        throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
     }
 
     internal static void RequireEqual<T>(T expected, T actual)

@@ -32,7 +32,6 @@ internal static class TextIncrementalTokens
         foreach (var term in CanonicalTextTerms.Enumerate(content, budget, execution.TextBudgetCheckInterval,
                      execution.MaximumDocumentWords, execution.MaximumWordCharacters))
         {
-            budget.ChargeBytes(TextIncrementalSourceProtocol.RetainedPostingBytes);
             var token = TextHash.Sha256(term);
             postings.Add(new(token, record, previous));
             previous = token;

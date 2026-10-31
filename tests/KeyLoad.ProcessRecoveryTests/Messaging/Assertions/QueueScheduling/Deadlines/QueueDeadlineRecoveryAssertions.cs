@@ -10,7 +10,7 @@ internal static class QueueDeadlineRecoveryAssertions
     {
         using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
         var database = QueueLifecycleRecoveryAssertions.Open(store);
-        var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueDeadlineCrashProtocol.OperationFile), token));
         var original = ((CommandRequest)operation.Value!.Input);
         var condition = (AdvanceQueueDeadline)original.Mutations.Single();

@@ -73,7 +73,6 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
     public void BeginRecord(EntityRef reference, long revision)
     {
         budget.Check();
-        budget.ChargeBytes(OrleansSerialization.Measure(reference));
         if (disposed || completed || !visited.Add(reference))
         {
             throw TextErrors.Corrupt();
@@ -103,7 +102,6 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
         var candidates = new HashSet<EntityRef>();
         foreach (var term in terms)
         {
-            budget.ChargeBytes(System.Text.Encoding.UTF8.GetByteCount(term));
             ReadCandidates(TextHash.Sha256(term), candidates);
         }
         foreach (var reference in references)
@@ -129,7 +127,6 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
                 iterator.Seek(RuntimeTextIndex.LowerBound(token));
                 while (true)
                 {
-                    budget.ChargeBytes(TextProtocol.PostingBytes);
                     if (!iterator.Next())
                     {
                         return;
@@ -147,7 +144,6 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
                     {
                         throw TextErrors.Corrupt();
                     }
-                    budget.ChargeBytes(OrleansSerialization.Measure(record.Reference));
                     candidates.Add(record.Reference);
                 }
             }, failures);

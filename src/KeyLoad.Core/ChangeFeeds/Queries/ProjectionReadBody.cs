@@ -11,7 +11,7 @@ public static class ProjectionReadBody
         var now = engine.Clock.GetUtcNow();
         var principal = engine.Principal(view, principalId, now);
         ProjectionBatchExecution.RequireProjectionAdministrator(principal);
-        if (request.Limit < ProjectionOutbox.MinimumProjectionReadCount || request.MaxBytes < ProjectionOutbox.MinimumProjectionReadCount)
+        if (request.Limit < ProjectionOutbox.MinimumProjectionReadCount)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ProjectionOutbox.ProjectionBatchBudgetDetail);
         }
@@ -28,7 +28,6 @@ public static class ProjectionReadBody
         var upper = ProjectionBatchExecution.ProjectionUpperSequence(request, state, head);
         var entries = new List<OutboxEntry>();
         var through = state.Checkpoint;
-        var bytes = ProjectionOutbox.InitialProjectionPageBytes;
         foreach (var stored in StoredOutboxReader.ReadRange(view, request.Consumer.Partition, through, upper, request.Limit))
         {
             var entry = stored.Entry;
@@ -38,19 +37,7 @@ public static class ProjectionReadBody
                 continue;
             }
 
-            var size = stored.StoredBytes;
-            if (size > request.MaxBytes - bytes)
-            {
-                if (through == state.Checkpoint)
-                {
-                    throw Errors.Fail(ErrorCode.BudgetExceeded, ProjectionOutbox.FirstProjectionEntryExceedsBudgetDetail);
-                }
-
-                break;
-            }
-
             entries.Add(entry);
-            bytes += size;
             through = entry.Sequence;
         }
 

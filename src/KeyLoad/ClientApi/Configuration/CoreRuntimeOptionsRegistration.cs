@@ -39,10 +39,6 @@ internal static class CoreRuntimeOptionsRegistration
             .Validate(options => options.IsValid(), KeyLoad.Query.Search.PackedAnnStorageOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<KeyLoad.Core.Search.AnnSeedOptions>().Bind(configuration.GetSection(KeyLoad.Core.Search.AnnSeedOptions.SectionName))
             .Validate(options => options.IsValid(), KeyLoad.Core.Search.AnnSeedOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<AnnMaintenanceOptions>().Bind(configuration.GetSection(AnnMaintenanceOptions.SectionName))
-            .Validate(options => options.IsValid(), AnnMaintenanceOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<TextIndexMaintenanceOptions>().Bind(configuration.GetSection(TextIndexMaintenanceOptions.SectionName))
-            .Validate(options => options.IsValid(), TextIndexMaintenanceOptions.ValidationMessage).ValidateOnStart();
         services.AddSingleton<CoreRuntimeOptions>();
     }
 }

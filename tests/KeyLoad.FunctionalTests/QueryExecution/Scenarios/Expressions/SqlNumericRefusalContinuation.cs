@@ -17,9 +17,6 @@ internal static class SqlNumericRefusalContinuation
     {
         await RefusalsAsync(db, db.Store, engine);
         await SqlNumericRefusalAssertions.HealthyAsync(db, db.Store, engine, DecimalEndpointsSql);
-        var bounded = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution(
-            new QueryExecutionOptions { MaximumResultBytes = 1 }));
-        await SqlNumericRefusalAssertions.RefusedAsync(db, db.Store, bounded, HealthySql, ErrorCode.BudgetExceeded);
         await SqlNumericRefusalAssertions.HealthyAsync(db, db.Store, engine, HealthySql);
         await ColdAsync(db);
     }

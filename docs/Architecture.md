@@ -47,7 +47,7 @@ classDiagram
     QueueGraphLink --> EntityRef : canonical endpoints
     CommandRequest --> Mutation : ordered source and effect stages
     DatabaseEngine --> QueueGraphLink : authorized transaction expansion
-    DatabaseEngine --> ReadExecutionBudget : cumulative read accounting
+    DatabaseEngine --> ReadExecutionBudget : operation cancellation and expiry
 ```
 
 ## Cluster and execution concept
@@ -70,7 +70,14 @@ own; scaling means adding silos to the Orleans cluster.
   callers ([ADR-145](ADR/ADR-145-no-request-throttling.md)), and no configured
   operation limit refuses work
   ([ADR-149](ADR/ADR-149-no-operation-limits.md)).
-  The connection grain never caches trusted roles and never owns storage.
+  The connection grain never caches trusted roles and never owns storage; it
+  admits each operation and hands it to that operation's request grain.
+- **Request grains.** One `RequestGrain` per admitted operation, keyed by its
+  request identity and placed on the connection's silo, coordinates the
+  operation: it resolves the storage owner, runs the work in place when its silo
+  owns the data or through a `RequestExecutionGrain` on the owner's silo, fans
+  partitioned queries, searches and composed maintenance out to the owners and
+  gathers the results.
 - **Partition grains.** A logical partition grain is an ordinary Orleans grain
   that serializes and routes the commands of one logical (atomic) partition.
 - **Silo-local ZoneTree owner.** Each silo hosts a Grain Service; typed Orleans
@@ -96,8 +103,9 @@ own; scaling means adding silos to the Orleans cluster.
   unrelated gaps require explicit
   recovery and general empty-copy restoration remains unqualified.
 - **Request flow.** Public API (HTTP, .NET SDK, MCP, SQL) -> connection grain ->
-  independent request grains -> ZoneTree owner on the same node or on other nodes through
-  Orleans -> results are gathered -> returned to the caller.
+  one request grain per operation -> ZoneTree owner on the same node, or on other
+  nodes through their request execution grains -> results are gathered -> returned
+  to the caller.
 - **Background work.** Queue deadlines, due and recurring work, remote
   transfers, ANN projection and time-series chunk work never check leadership.
   Orleans `[StatelessWorker(1)]` grains share one pool key per work kind, so each
@@ -113,8 +121,8 @@ own; scaling means adding silos to the Orleans cluster.
 flowchart LR
     Caller[HTTP SDK MCP SQL caller] --> Api[Public API and ASP.NET Core authentication]
     Api --> Connection[Connection grain one per client]
-    Connection --> Partition[Independent request grain]
-    Connection --> Gather[Gather results from several partitions]
+    Connection --> Partition[Request grain one per operation]
+    Partition --> Gather[Gather results from several partitions]
     Partition -.->|finds target silos| Membership[Orleans membership]
     Partition -->|local DI borrow| OwnerA[ZoneTree owner on silo A]
     Partition -->|local DI borrow| OwnerB[ZoneTree owner on silo B]
@@ -148,7 +156,7 @@ Orleans-managed activation pools.
 The source implements lazy shared-session acquisition and joined close, isolated
 full-copy routing, and ordinary partition grains for `PartitionQuery` and
 `DistributedSearch`. A request pins one actual owner per distinct logical
-partition and preserves its expiry, cumulative budgets and read-cut checks across
+partition and preserves its expiry, cancellation and read-cut checks across
 all leaf stages. Full copies remain copies of the same database; this does not
 implement a partition-to-disk sharding scheme. Both modes still require complete
 runtime and exact-source Linux qualification, including the deployed shared
@@ -287,12 +295,12 @@ sequenceDiagram
     participant Caller as SDK or MCP caller
     participant API as Public API
     participant Conn as Connection grain
-    participant Part as Partition grain
+    participant Part as Request grain
     participant Owners as ZoneTree owners on ReplicaCount silos
     Caller->>API: Typed operation and credentials
     API->>Conn: Verified subject and bounded request
-    Conn->>Conn: Fresh persisted authorization
-    Conn->>Part: Ordered command for one logical partition
+    Conn->>Part: Admitted operation
+    Part->>Part: Fresh persisted authorization
     Part->>Owners: Orleans calls with the command
     Owners-->>Part: Durable local apply confirmations
     Part-->>Conn: Outcome after every configured copy confirms
@@ -306,14 +314,17 @@ classDiagram
     class CommandRequest
     class PartitionRef
     class ConnectionGrain
+    class RequestGrain
     class RequestExecutionGrain
     class DatabaseEngine
     class IKeyValueView
     class IAtomicTransaction
     KeyLoadClient --> CommandRequest
     CommandRequest --> PartitionRef
-    ConnectionGrain --> RequestExecutionGrain : one per operation
-    RequestExecutionGrain --> DatabaseEngine : borrows silo-local owner through DI
+    ConnectionGrain --> RequestGrain : one per operation
+    RequestGrain --> DatabaseEngine : borrows the local owner through DI
+    RequestGrain --> RequestExecutionGrain : leaf on a remote owner silo
+    RequestExecutionGrain --> DatabaseEngine : borrows that silo's owner through DI
     DatabaseEngine --> IKeyValueView
     DatabaseEngine --> IAtomicTransaction
 ```
@@ -466,9 +477,9 @@ persistence, grain requests/replies, copies sent to ZoneTree owners and signed
 claims. Public HTTP/MCP JSON, exact user content, frozen canonical fingerprint
 identities, sortable keys, raw ZoneTree values, fixed checksum framing and blob
 bytes keep their concrete protocols. Grain requests and replies carry generated
-typed values directly. Requests retain their HTTP/MCP frame and native Orleans
-message ceilings; replies retain encoded-size checks through counting
-destinations. They contain no private encoded operation/result buffer. Generated bytes are not canonical
+typed values directly. Requests retain their HTTP/MCP frame limits and Orleans
+keeps its default message size limits; replies are not measured
+([ADR-149](ADR/ADR-149-no-operation-limits.md)). They contain no private encoded operation/result buffer. Generated bytes are not canonical
 hashes for unordered values. Readers reject unsupported formats before effects.
 
 ```mermaid
@@ -494,8 +505,9 @@ classDiagram
 ## Query, search and read budgets
 
 [ResourceExecution](Features/ResourceExecution.md) and
-[ADR-035](ADR/ADR-035-memory-performance.md) own common budgets in shared
-node-local building blocks; operation behavior stays in its canonical slice.
+[ADR-035](ADR/ADR-035-memory-performance.md) own the common operation context
+(cancellation, explicit expiry, resource lifetimes) in shared node-local
+building blocks; there are no read-byte or result-byte budgets; operation behavior stays in its canonical slice.
 [ClientApi](Features/ClientApi.md) owns HTTP response streaming. Scoped document
 and vector visitors feed QueryExecution and Search without raw pages;
 GraphTraversal keeps cut-scoped visibility decisions. The shared canonical JSON
@@ -529,10 +541,10 @@ classDiagram
     QueryEngine --> VisibleDocumentReads : visible candidates
     VisibleDocumentReads --> ReadExecutionBudget : borrowed scan
     VisibleVectorReads --> ReadExecutionBudget : vector and document work
-    GraphTraversalReader --> ReadExecutionBudget : visibility and output
+    GraphTraversalReader --> ReadExecutionBudget : visibility reads
     JsonData --> CanonicalJsonWriter : exact canonical bytes
     CanonicalJsonWriter --> CanonicalHashStream : incremental fingerprint
-    ReadExecutionBudget --> IKeyValueView : accounted work
+    ReadExecutionBudget --> IKeyValueView : cancellation-checked reads
     ZoneTreeStore ..|> IKeyValueView : gate scoped implementation
     ZoneTreeStore --> ZoneTreeStoreRuntime : sole node local owner
     ZoneTreeStoreRuntime --> ZoneTreeTransaction : staged atomic work
@@ -561,7 +573,7 @@ are background work under the StatelessWorker pattern above.
 
 ```mermaid
 classDiagram
-    AnnSeedCollector --> ReadExecutionBudget : one charged canonical cut
+    AnnSeedCollector --> ReadExecutionBudget : one canonical cut
     AnnSeedCollector --> AnnSeed : owned snapshot input
     AnnSeed --> PackedAnnBuilder : later explicit integration
     AnnWorkBudget --> ReadExecutionBudget : work and elapsed checks

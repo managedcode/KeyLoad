@@ -49,8 +49,6 @@ internal static class TextIncrementalRevision
 
     internal static byte[] Digest(DocumentRecord document, ReadExecutionBudget budget)
     {
-        budget.ChargeBytes(OrleansSerialization.Measure(document));
-        budget.ChargeBytes(SHA256.HashSizeInBytes);
         var bytes = OrleansSerialization.Serialize(document);
         budget.Check();
         return SHA256.HashData(bytes);

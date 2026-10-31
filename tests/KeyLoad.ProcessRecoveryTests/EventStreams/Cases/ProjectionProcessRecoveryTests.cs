@@ -82,8 +82,8 @@ internal sealed class ProjectionProcessRecoveryTests
     private static async Task RetryRecoveredCommandAsync(string root, DatabaseEngine database,
         CancellationToken cancellationToken)
     {
-        var commandPath = Path.Combine(root, "processing-command.json");
-        var original = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(commandPath, cancellationToken));
+        var commandPath = Path.Combine(root, CrashFixtureValues.ProcessingCommandFile);
+        var original = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(commandPath, cancellationToken));
         var recovered = database.Apply(database.OwnCommand(new Command<DatabaseCommand> { CommandId = original.CommandId, UserId = original.UserId, Timestamp = (TimeProvider.System.GetUtcNow()).UtcDateTime, Value = original.Value })).Get<ProjectionBatchResult>();
         await AssertRetryReceiptAsync(database, original, recovered);
     }

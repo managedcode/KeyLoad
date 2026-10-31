@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Orleans.Serialization;
 using Orleans.Serialization.Serializers;
 
@@ -12,8 +11,6 @@ internal sealed class EventFeedPubSubFreshStateFixture : IDisposable
     internal const string Original = "original-execution-subscription";
     internal const string Healthy = "healthy-execution-subscription";
     private const string Flow = "/fresh-state";
-    private const int MinimumScratchBytes = 256;
-    private const int MaximumScratchBytes = 4096;
     private const int MaximumRows = 1;
     private readonly ServiceProvider services;
 
@@ -27,13 +24,7 @@ internal sealed class EventFeedPubSubFreshStateFixture : IDisposable
             registrations.AddSerializer(builder => builder.AddAssembly(typeof(EventFeedWakeupHint).Assembly));
             var actualServices = registrations.BuildServiceProvider();
             acquiredServices = actualServices;
-            var routing = Options.Create(new GrainRoutingOptions
-            {
-                MinimumScratchBytes = MinimumScratchBytes,
-                MaximumScratchBytes = MaximumScratchBytes
-            });
-            var limits = Options.Create(new DatabaseLimits());
-            var actualStorage = new EventFeedPubSubStorage(actualServices, routing);
+            var actualStorage = new EventFeedPubSubStorage(actualServices);
             acquiredStorage = actualStorage;
             var actualId = IdFor(Flow);
             services = actualServices;

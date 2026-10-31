@@ -20,7 +20,6 @@ internal static class QueueWorkerClusterEmptyBudget
         await Assert.That(result.Received).IsEqualTo(QueueWorkerClusterProtocol.NoDeliveries);
         await Assert.That(result.Acknowledged).IsEqualTo(QueueWorkerClusterProtocol.NoAcknowledgements);
         await Assert.That(result.PeakActiveHandlers).IsEqualTo(QueueWorkerClusterProtocol.NoActiveHandlers);
-        await Assert.That(result.PeakInFlightBytes).IsEqualTo((long)QueueWorkerClusterProtocol.NoActiveBytes);
         await Assert.That(result.Unacknowledged).IsEmpty();
         await Assert.That(result.Failures).IsEmpty();
         await Assert.That(result.Operations.Any(row => row.Command is not null)).IsFalse();

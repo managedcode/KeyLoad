@@ -6,36 +6,13 @@ namespace KeyLoad.ClusterTests.ChangeFeeds;
 
 internal static class LiveReadBackpressureR49
 {
-    private const int OneByte = 1;
-    private const string FirstChangeDetail = "The first change exceeds the page byte budget.";
-    private const string SafeBudgetDetail = "The operation exceeds the available resource capacity.";
-    private const string DetailKey = "detail";
     private const long PositiveCutBoundary = 0;
 
     internal static async Task RequireAsync(RequestCqrsClusterCallers administrator,
         RequestCqrsClusterCallers reader, FeedLiveClusterScenario scenario, ReadLiveQueryRequest original,
         CommitReceipt deletion, CancellationToken token)
     {
-        var refused = original with
-        {
-            MaxBytes = OneByte
-        };
-        await CurrentAsync(administrator, scenario, async () =>
-        {
-            var result = await reader.Sdk.ReadLiveQueryAsync(refused, token);
-            await Assert.That(result.IsSuccess).IsFalse();
-            await Assert.That(result.Value).IsNull();
-            await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.BudgetExceeded, FirstChangeDetail), result.Problem);
-        }, token);
         await HealthyAsync(administrator, reader, scenario, original, deletion, false, token);
-        await CurrentAsync(administrator, scenario, async () =>
-        {
-            var reply = await reader.Mcp.CallAsync(FeedLiveClusterProtocol.LiveRead, refused, token);
-            _ = (await McpCallerAssertions.ErrorAsync(reply, ErrorCode.BudgetExceeded, dispatched: true)).Value;
-            await Assert.That(reply.StructuredContent!.Value.GetProperty(McpCallerProtocol.Error)
-                .GetProperty(DetailKey).GetString()).IsEqualTo(SafeBudgetDetail);
-            await McpCallerAssertions.DoesNotDiscloseAsync(reply, scenario.Identity.Secret, FeedLiveClusterProtocol.Secret);
-        }, token);
         await HealthyAsync(administrator, reader, scenario, original, deletion, true, token);
     }
 

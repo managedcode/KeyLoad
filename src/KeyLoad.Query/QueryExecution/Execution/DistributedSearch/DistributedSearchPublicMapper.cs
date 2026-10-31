@@ -18,11 +18,6 @@ internal static class DistributedSearchPublicMapper
         SearchRankFusion fusion, bool explain, ReadExecutionBudget budget)
     {
         budget.Check();
-        budget.ChargeBytes(checked(PartitionQueryRetention.RootDescriptorBytes
-            + PartitionQueryRetention.CandidateArrayBytes(selected.Length)
-            + (long)selected.Length * PartitionQueryRetention.CandidateDescriptorBytes
-            + PartitionQueryRetention.CandidateArrayBytes(witnesses.Length)
-            + (long)witnesses.Length * PartitionQueryRetention.LeafDescriptorBytes));
         var hits = ImmutableArray.CreateBuilder<RankedDocument>(selected.Length);
         foreach (var candidate in selected)
         {
@@ -40,7 +35,6 @@ internal static class DistributedSearchPublicMapper
             leaves.Add(new(witness.Partition, witness.CutPosition, witness.PolicyEpoch, witness.SchemaVersion, AccessPath));
         }
         var page = new DistributedSearchPage(VersionOne, hits.MoveToImmutable(), leaves.MoveToImmutable(), epoch, true);
-        budget.CheckResult(page);
         return page;
     }
 

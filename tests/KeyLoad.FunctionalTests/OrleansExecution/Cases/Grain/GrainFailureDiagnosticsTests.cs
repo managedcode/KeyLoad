@@ -81,7 +81,7 @@ internal sealed class GrainFailureDiagnosticsTests
     {
         using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         using var capture = new EventSourceLogCapture();
-        var reply = GrainReplyFactory.Failure(error, false, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)), UnitRoutingOptions.Routing(), requestId, stage);
+        var reply = GrainReplyFactory.Failure(error, false, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)), requestId, stage);
         return (reply, capture.Text);
     }
 }

@@ -41,7 +41,6 @@ public static class Bm25CorpusCurrentRead
             return (false, default(DistributedTextStatistics?));
         }
 
-        work.ChargeBytes(OrleansSerialization.Measure(current.Statistics));
         return (true, ((DistributedTextStatistics?)(current.Statistics)));
     }
 }

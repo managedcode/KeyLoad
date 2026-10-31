@@ -10,7 +10,6 @@ internal static class DistributedSearchWitnessEquality
             && expected.ReadGeneration == actual.ReadGeneration && expected.CutPosition == actual.CutPosition
             && expected.PolicyEpoch == actual.PolicyEpoch && expected.SchemaVersion == actual.SchemaVersion
             && string.Equals(expected.ResourcePolicyDigest, actual.ResourcePolicyDigest, StringComparison.Ordinal)
-            && expected.ReadBytes == actual.ReadBytes && expected.ExaminedRecords == actual.ExaminedRecords
             && SameStatistics(expected.Statistics, actual.Statistics);
 
     internal static bool SameOwner(PhysicalShardRecord expected, PhysicalShardRecord actual)

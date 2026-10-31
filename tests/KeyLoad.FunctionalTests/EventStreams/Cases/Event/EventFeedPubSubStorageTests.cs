@@ -2,7 +2,6 @@ using global::Orleans.Serialization;
 using global::Orleans.Storage;
 using KeyLoad.Clustering;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.FunctionalTests.EventStreams;
 
@@ -20,11 +19,9 @@ internal sealed class EventFeedPubSubStorageTests
     public async Task ActualPubSubCasCancellationAndDisposeRefuseThenHealthyStateRemainsComplete()
     {
         var registrations = new ServiceCollection();
-        registrations.AddOptions<GrainRoutingOptions>();
         registrations.AddSerializer(builder => builder.AddAssembly(typeof(EventFeedWakeupHint).Assembly));
         await using var services = registrations.BuildServiceProvider();
-        using var storage = new EventFeedPubSubStorage(services,
-            services.GetRequiredService<IOptions<GrainRoutingOptions>>());
+        using var storage = new EventFeedPubSubStorage(services);
         var firstId = Id(FirstKey);
         var secondId = Id(SecondKey);
         var firstValue = new EventFeedWakeupHint(Version, Guid.NewGuid(), FirstRevision, Coverage);

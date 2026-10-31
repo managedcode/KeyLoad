@@ -1,21 +1,13 @@
 using System.Security.Claims;
 using KeyLoad.Clustering;
-using ManagedCode.Communication;
-using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Identity.Core.Constants;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.ProcessRecoveryTests.OrleansExecution;
 
 [global::Orleans.GrainType(RequestCqrsTestProtocol.ProbeAlias)]
 internal sealed class RequestCqrsIdentityProbeGrain(
     GrainRequestCodec codec,
-    RequestCqrsCapabilityLedger ledger,
-    Serializer<ClaimsPrincipal> principalSerializer,
-    Serializer<GrainRequestContextState> stateSerializer,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
-    IOptions<GrainRoutingOptions> routingOptions)
+    RequestCqrsCapabilityLedger ledger)
     : Grain, IRequestCqrsIdentityProbeGrain
 {
     public Task<int> CapabilityCallsAsync() => Task.FromResult(ledger.Count);
@@ -29,26 +21,13 @@ internal sealed class RequestCqrsIdentityProbeGrain(
             var calls = ledger.RecordCall();
             var state = RequestContext.Get(GrainRequestStreamProtocol.ContextKey) as GrainRequestContextState;
             var principal = RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS) as ClaimsPrincipal;
-            var principalBytes = principal is null
-                ? 0
-                : GrainByteCounter.Measure(principalSerializer, principal,
-                    routingOptions.Value.MaximumPrincipalBytes, routingOptions, CancellationToken.None);
-            var stateBytes = state is null
-                ? 0
-                : GrainByteCounter.Measure(stateSerializer, state,
-                    routingOptions.Value.MaximumContextBytes, routingOptions, CancellationToken.None);
-            var started = CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>.Started(
-                Result<GrainRequestProgress>.Succeed(new GrainRequestProgress(actorRequestId)), sequence: 1);
-            var startedBytes = GrainByteCounter.Measure(chunkSerializer, started,
-                routingOptions.Value.MaximumStartedBytes, routingOptions, CancellationToken.None);
             return Task.FromResult(new RequestCqrsProbeResult(true, null, principal?.FindFirst(ClaimTypes.NameIdentifier)?.Value,
-                state?.RequestId ?? Guid.Empty, state?.CommandId ?? Guid.Empty, principalBytes, stateBytes,
-                startedBytes, calls));
+                state?.RequestId ?? Guid.Empty, state?.CommandId ?? Guid.Empty, calls));
         }
         catch (KeyLoadException error)
         {
             return Task.FromResult(new RequestCqrsProbeResult(false, error.Code, null, Guid.Empty, Guid.Empty,
-                0, 0, 0, ledger.Count));
+                ledger.Count));
         }
     }
 }

@@ -17,11 +17,11 @@ internal static class PackedAnnOwnedSimilarityAssertions
         var prepared = Enumerable.Range(0, records.Length)
             .Select(ordinal => PreparedSimilarity.CreatePacked(packed, ordinal, metric)).ToArray();
         MutateSource(records);
-        await AssertScoresAsync(packed, prepared, expected);
+        await AssertScoresAsync(packed, prepared, metric, expected);
         PoisonSource(records);
         await AssertValidationAsync(() => PackedAnnVectors.Copy(records, layout,
             PackedAnnIndexTestSupport.Budget(), options.VectorBudgetCheckInterval));
-        await AssertScoresAsync(packed, prepared, expected);
+        await AssertScoresAsync(packed, prepared, metric, expected);
     }
 
     internal static async Task AssertGraphAdjacencyAsync(PackedAnnState state, AnnWorkBudget budget)
@@ -67,14 +67,16 @@ internal static class PackedAnnOwnedSimilarityAssertions
     }
 
     private static async Task AssertScoresAsync(PackedAnnVectors packed,
-        PreparedSimilarity[] prepared, double[][] expected)
+        PreparedSimilarity[] prepared, DistanceMetric metric, double[][] expected)
     {
         for (var query = 0; query < prepared.Length; query++)
         {
+            var construction = PreparedPackedSimilarity.Create(packed, query, metric);
             for (var candidate = 0; candidate < prepared.Length; candidate++)
             {
                 var actual = prepared[query].ScorePacked(packed, candidate);
                 await Assert.That(actual).IsEqualTo(expected[query][candidate]);
+                await Assert.That(construction.Score(packed, candidate)).IsEqualTo(expected[query][candidate]);
             }
         }
     }

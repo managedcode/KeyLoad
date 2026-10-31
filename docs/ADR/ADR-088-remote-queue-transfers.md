@@ -60,8 +60,8 @@ flowchart LR
   source-side compare-and-set (`AdvanceQueueTransferRepair`) bounded by
   `MaxQueueTransferRepairAttempts`; the original failed outcome stays byte-identical
   and the repaired attempt is authorized against current persisted policy.
-- Every history reference charges one source record plus its encoded bytes against the
-  existing operation limits; coordination reads are charged like any other read.
+- History references and coordination reads run like any other read, under the
+  operation's cancellation and explicit expiry, with no record or byte charge.
 
 Open: universal automatic retry, same-epoch field-only policy repair, capacity-only
 complete repair, retention-horizon evidence and all Linux runtime qualification.

@@ -25,7 +25,6 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
 
     private async Task RunAsync()
     {
-        QueryResultBudgetPolicy.Constrain(budget, options.Value);
         var first = await ExecuteAsync(DistributedSearchPhase.Statistics);
         var witness = first.Witness;
         var digest = DistributedSearchRequestDigest.Create(search, budget);
@@ -58,9 +57,7 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
         await Assert.That(work.Selected.IsDefault).IsFalse();
         var original = new DistributedSearchOwnedLeaf(QueryLifetimeProtocol.Version, phase, work.Search,
             flow.Fixture.DestinationOwner, QueryFixture.Tenant,
-            long.MaxValue / QueryLifetimeProtocol.GrantDivisor,
-            int.MaxValue / QueryLifetimeProtocol.GrantDivisor,
-            work.MaxResultBytes, work.Witness, work.Statistics, work.Scope, work.SourceWindowId, work.Selected, metadata.Definition, metadata.Coverage, metadata.Principal);
+            work.Witness, work.Statistics, work.Scope, work.SourceWindowId, work.Selected, metadata.Definition, metadata.Coverage, metadata.Principal);
         var bytes = OrleansSerialization.Serialize(original);
         var actual = OrleansSerialization.Deserialize<DistributedSearchOwnedLeaf>(bytes);
         await Assert.That(bytes.AsSpan().SequenceEqual(OrleansSerialization.Serialize(actual))).IsTrue();

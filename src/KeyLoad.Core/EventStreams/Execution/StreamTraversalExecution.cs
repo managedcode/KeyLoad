@@ -27,17 +27,12 @@ public static class StreamTraversalExecution
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(request.Stream);
-        if (request.AfterRevision < StreamTraversalProtocol.EmptyRevision || request.Direction is not (StreamReadDirection.Forward or StreamReadDirection.Backward) || request.MaxBytes < StreamTraversalProtocol.UnspecifiedBytes || request.Cursor is not null && request.AfterRevision != StreamTraversalProtocol.EmptyRevision)
+        if (request.AfterRevision < StreamTraversalProtocol.EmptyRevision || request.Direction is not (StreamReadDirection.Forward or StreamReadDirection.Backward) || request.Cursor is not null && request.AfterRevision != StreamTraversalProtocol.EmptyRevision)
         {
             throw Errors.Fail(ErrorCode.Validation, StreamTraversalProtocol.InvalidRequest);
         }
 
         StreamReadExecution.ValidateStreamRead(request.AfterRevision, request.Limit);
-        if (request.MaxBytes != StreamTraversalProtocol.UnspecifiedBytes)
-        {
-            budget.ConstrainResultBytes(request.MaxBytes);
-        }
-
         return engine.Store.Read(view => engine.ReadStreamTraversal(view, principalId, request, budget));
     }
 
@@ -54,11 +49,10 @@ public static class StreamTraversalExecution
         var head = StreamReadExecution.ReadStreamHead(view, stream, budget);
         StreamReadExecution.ValidateStreamHead(head, stream, request.Cursor is null && request.Direction == StreamReadDirection.Forward ? request.AfterRevision : head.FirstAvailableRevision - StreamTraversalProtocol.FirstRevision);
         var cursor = request.Cursor is null ? engine.NewStreamTraversal(principal, resource, request, head, now, applied) : engine.ReadStreamTraversalCursor(request, principal, resource, head, now, applied);
-        var range = engine.ReadTraversalEvents(bounded, stream, principal, resource, cursor, request.Limit, budget);
+        var range = engine.ReadTraversalEvents(bounded, stream, principal, resource, cursor, request.Limit);
         var next = range.Events.IsEmpty ? cursor.NextExclusiveRevision : range.Events[^StreamTraversalProtocol.LastEventOffset].Revision;
         var token = range.HasMore ? engine.Sign(cursor with { NextExclusiveRevision = next }) : null;
         var page = new StreamPage(stream, new(cursor.CapturedTailRevision, cursor.CapturedFirstAvailableRevision, stream.Generation), range.Events, applied, range.HasMore, token, cursor.SnapshotCutPosition);
-        budget.CheckResult(page);
         return page;
     }
 }

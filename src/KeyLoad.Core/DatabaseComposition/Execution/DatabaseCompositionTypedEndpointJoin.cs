@@ -85,25 +85,20 @@ public static class DatabaseCompositionTypedEndpointJoin
             return engine.ExpandQueueToGraphSelection(transaction, principal, partition, command, now, budget, transaction);
         }
 
-        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
         try
         {
-            using var lease = budget.EnterReadGrant(grant);
             return engine.ExpandQueueToGraphSelection(transaction, principal, partition, command, now, budget, budget.CreateView(transaction));
         }
         finally
         {
             // The using lease exits before settled completion, including failure paths.
-            budget.CompleteSettledReadGrant(grant);
         }
     }
 
     internal static void ValidateTypedEndpointOutcomeReferences(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, ImmutableArray<EntityRef> references, ReadExecutionBudget budget)
     {
-        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
         try
         {
-            using var lease = budget.EnterReadGrant(grant);
             var chargedView = budget.CreateView(view);
             foreach (var reference in references)
             {
@@ -120,7 +115,6 @@ public static class DatabaseCompositionTypedEndpointJoin
         }
         finally
         {
-            budget.CompleteSettledReadGrant(grant);
         }
     }
 }

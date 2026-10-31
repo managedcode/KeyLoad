@@ -14,7 +14,7 @@ internal sealed class QueryHostedReadObserver : IGrainRequestPhaseObserver
     {
         var observation = new QueryHostedReadObservation(node.ConnectionId,
             node.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress,
-            node.Grains.GetGrain<IConnectionGrain>(node.ConnectionId).GetGrainId(),
+            node.Grains.GetGrain<IRequestGrain>(requestId).GetGrainId(),
             data.Principal.Id, data.Request.Partitions.Length);
         if (!reads.TryAdd(requestId, observation))
         {

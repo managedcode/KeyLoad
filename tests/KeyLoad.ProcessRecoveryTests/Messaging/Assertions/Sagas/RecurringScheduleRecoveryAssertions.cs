@@ -24,7 +24,7 @@ internal static class RecurringScheduleRecoveryAssertions
     }
 
     private static async Task<Command<DatabaseCommand>> ReadOperationAsync(string root, CancellationToken cancellationToken)
-        => JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
+        => OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, RecurringScheduleCrashScenario.OperationFile), cancellationToken));
 
     private static async Task<long> ReadSeedTailAsync(string root, CancellationToken cancellationToken)

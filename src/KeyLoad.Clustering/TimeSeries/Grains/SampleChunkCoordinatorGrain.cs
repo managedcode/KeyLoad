@@ -1,12 +1,10 @@
 using KeyLoad.Core;
 using KeyLoad.Core.TimeSeries;
-using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
 using Orleans.Placement;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
@@ -16,13 +14,12 @@ namespace KeyLoad.Clustering;
 internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
     ILocalDurableJobManager jobs, BackgroundStorageClient storage, IOptions<TimeSeriesExecutionOptions> timeSeries,
     RuntimeJournalAdmission runtime, GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-    IOptions<GrainRoutingOptions> routing, IOptions<DueCoordinationOptions> execution)
+    IOptions<DueCoordinationOptions> execution)
     : Grain, ISampleChunkCoordinatorGrain, IDurableJobHandler
 {
     private readonly IDurableDictionary<Guid, SampleChunkJobAdmission> admissions =
         state.GetOrAddDictionary<Guid, SampleChunkJobAdmission>(SampleChunkJobProtocol.Admissions);
-    private readonly SampleChunkJobDispatch dispatch = new(storage, codec, services, clock, serializer, routing);
+    private readonly SampleChunkJobDispatch dispatch = new(storage, codec, services);
     private bool open = true;
 
     public Task ScheduleAsync(SampleChunkWorkHint hint, CancellationToken cancellationToken)

@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 using ZoneTree;
@@ -12,7 +11,6 @@ internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
 {
     private const int Empty = 0;
     private const int SingleReader = 1;
-    private const int ReferenceLedgerCapacity = 3;
     private readonly Lock gate = new();
     private IndexOfTokenRecordPreviousToken<ulong, ulong>? index;
     private HashSet<TextSelectedProjectionLease>? readers;
@@ -32,9 +30,6 @@ internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
             budget.Check();
             if (readers is null)
             {
-                budget.ChargeBytes(checked(TextIncrementalSourceProtocol.MapSlotBytes
-                    + (long)ReferenceLedgerCapacity * (sizeof(int)
-                    + Unsafe.SizeOf<(int Hash, int Next, TextSelectedProjectionLease Reader)>())));
                 readers = new(ReferenceEqualityComparer.Instance);
             }
             if (!readers.Add(reader))

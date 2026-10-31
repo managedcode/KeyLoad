@@ -14,7 +14,7 @@ internal static class PostgresClusterSeed
         KeyLoadClient root, CancellationToken token)
     {
         var partition = PostgresClusterState.Partition;
-        await RelationalSqlClusterJoinBudgetData.ConfigureAsync(root, partition, token);
+        await RelationalSqlClusterJoinData.ConfigureAsync(root, partition, token);
         var writer = await IdentityAsync(root, WriterMarker,
             Capability.DocumentsRead | Capability.DocumentsWrite | Capability.Query, token);
         var reader = await IdentityAsync(root, ReaderMarker, Capability.DocumentsRead | Capability.Query, token);
@@ -28,8 +28,8 @@ internal static class PostgresClusterSeed
         var principal = new PrincipalRecord(PostgresClusterProtocol.PrincipalPrefix + marker
             + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat), partition.TenantId,
             singleResource is null
-                ? [new(partition.DatabaseId, RelationalSqlClusterJoinBudgetData.LeftCollection, capabilities),
-                   new(partition.DatabaseId, RelationalSqlClusterJoinBudgetData.RightCollection, capabilities)]
+                ? [new(partition.DatabaseId, RelationalSqlClusterJoinData.LeftCollection, capabilities),
+                   new(partition.DatabaseId, RelationalSqlClusterJoinData.RightCollection, capabilities)]
                 : [new(partition.DatabaseId, singleResource, capabilities)], []);
         var id = PostgresClusterProtocol.CredentialPrefix + Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat);
         var secret = id + "." + Convert.ToHexStringLower(RandomNumberGenerator.GetBytes(SecretBytes));
@@ -44,8 +44,8 @@ internal static class PostgresClusterSeed
 
     internal static CommandRequest Command()
         => new(Guid.NewGuid(), PostgresClusterState.Partition,
-            [new PutDocument(RelationalSqlClusterJoinBudgetData.LeftCollection, PostgresClusterState.OrderId, PostgresClusterState.LeftJson),
-             new PutDocument(RelationalSqlClusterJoinBudgetData.RightCollection, PostgresClusterState.CustomerId, PostgresClusterState.RightJson)]);
+            [new PutDocument(RelationalSqlClusterJoinData.LeftCollection, PostgresClusterState.OrderId, PostgresClusterState.LeftJson),
+             new PutDocument(RelationalSqlClusterJoinData.RightCollection, PostgresClusterState.CustomerId, PostgresClusterState.RightJson)]);
 
     private const string WriterMarker = "writer-";
     private const string ReaderMarker = "reader-";

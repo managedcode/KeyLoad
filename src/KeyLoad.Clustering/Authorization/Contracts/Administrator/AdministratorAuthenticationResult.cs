@@ -4,7 +4,5 @@ namespace KeyLoad.Clustering;
 [Orleans.GenerateSerializer, Orleans.Alias(GrainContracts.AdministratorAuthenticationResultAlias)]
 internal sealed record AdministratorAuthenticationResult(
     [property: Orleans.Id(5)] PrincipalRecord? Principal,
-    [property: Orleans.Id(1)] long ReadBytes,
-    [property: Orleans.Id(2)] int ExaminedRecords,
     [property: Orleans.Id(3)] ErrorCode? Error,
     [property: Orleans.Id(4)] string? SafeDetail);

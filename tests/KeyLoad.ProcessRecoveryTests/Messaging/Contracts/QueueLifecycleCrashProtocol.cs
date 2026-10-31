@@ -3,7 +3,7 @@ namespace KeyLoad.ProcessRecoveryTests;
 internal static class QueueLifecycleCrashProtocol
 {
     internal const string Mode = "queue-lifecycle-crash";
-    internal const string OperationFile = "queue-lifecycle-operation.json";
+    internal const string OperationFile = "queue-lifecycle-operation.bin";
     internal const string Queue = "queue-lifecycle";
     internal const string Parked = "parked";
     internal const string Pending = "pending";

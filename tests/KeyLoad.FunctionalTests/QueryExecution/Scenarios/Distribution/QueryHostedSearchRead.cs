@@ -1,7 +1,5 @@
 using KeyLoad.Clustering;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.QueryExecution;
 
@@ -18,8 +16,7 @@ internal static class QueryHostedSearchRead
         var connection = node.Grains.GetGrain<IConnectionGrain>(node.ConnectionId);
         return await GrainRequestStreamConsumer.DrainWithPurposeAsync(
             execution => connection.ExecuteStreamAsync(envelope, execution),
-            node.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            requestId, node.Clock, node.RoutingOptions,
+            requestId,
             new CqrsStreamPurpose(() => node.Codec.DecodeRequest(envelope, requestId)), token).ConfigureAwait(false);
     }
 

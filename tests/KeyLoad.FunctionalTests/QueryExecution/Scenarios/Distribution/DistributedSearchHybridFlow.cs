@@ -11,7 +11,6 @@ internal static class DistributedSearchHybridFlow
     private const string SourceWindow = "source-owner";
     private const string DestinationWindow = "destination-owner";
     private const string ScoreProfile = "distributed-canonical";
-    private const int IndependentOwners = 2;
 
     internal static RankedDocument[] Execute(QueryFixture fixture, CancellationToken token)
     {
@@ -40,7 +39,7 @@ internal static class DistributedSearchHybridFlow
     {
         var budget = Budget(owner, token);
         return DistributedTextStatisticsLeaf.Execute(owner.Database, QueryFixture.Reader, request,
-            placement, QueryFixture.Tenant, UnitExecutionOptions.QueryExecution(), budget, Grant(budget));
+            placement, QueryFixture.Tenant, UnitExecutionOptions.QueryExecution(), budget);
     }
 
     private static DistributedSearchCandidateLeaf Candidates(DocumentPatchAtomicityOwner owner,
@@ -50,7 +49,7 @@ internal static class DistributedSearchHybridFlow
         var budget = Budget(owner, token);
         return DistributedSearchCandidateExecution.Execute(owner.Database, QueryFixture.Reader,
             request, QueryFixture.Tenant, witness, statistics, scope, window,
-            UnitExecutionOptions.QueryExecution(), budget, Grant(budget));
+            UnitExecutionOptions.QueryExecution(), budget);
     }
 
     private static ImmutableArray<RankedDocument> Project(DocumentPatchAtomicityOwner owner,
@@ -61,12 +60,9 @@ internal static class DistributedSearchHybridFlow
         return DistributedSearchProjectionExecution.Execute(owner.Database, QueryFixture.Reader,
             request, QueryFixture.Tenant, witness,
             [.. selected.Where(candidate => candidate.Reference.Partition == request.Partition)],
-            budget, Grant(budget)).Hits;
+            budget).Hits;
     }
 
     private static ReadExecutionBudget Budget(DocumentPatchAtomicityOwner owner, CancellationToken token)
         => new(owner.Database.EvaluationClock, token);
-
-    private static global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant Grant(ReadExecutionBudget budget)
-        => budget.CreateReadGrant(budget.RemainingReadGrantBytes / IndependentOwners, budget.RemainingReadGrantRecords);
 }

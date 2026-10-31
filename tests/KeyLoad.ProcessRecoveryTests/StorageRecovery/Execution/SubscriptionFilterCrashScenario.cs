@@ -6,7 +6,7 @@ namespace KeyLoad.ProcessRecoveryTests;
 internal static class SubscriptionFilterCrashScenario
 {
     internal const string Mode = "subscription-filter-cas";
-    internal const string OperationFile = "filter-command.json";
+    internal const string OperationFile = "filter-command.bin";
     internal const string OldTokenFile = "filter-old-token.json";
     private const string FirstEvent = "one";
     private const string SecondEvent = "two";
@@ -49,7 +49,7 @@ internal static class SubscriptionFilterCrashScenario
                 EventTypes = [ReplacementType]
             },
                 ExpectedGeneration: OriginalGeneration), CommandId);
-        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), JsonDefaults.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, OldTokenFile), JsonDefaults.Serialize(received.Deliveries[1].Token));
         boundary.Position = checked(store.Position + OriginalGeneration);
         boundary.Armed = true;

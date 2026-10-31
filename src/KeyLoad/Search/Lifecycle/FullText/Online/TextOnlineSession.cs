@@ -18,7 +18,7 @@ internal sealed partial class TextOnlineSession
     {
         Work = work;
         Budget = work.Budget;
-        immutableRequest = TextOnlineSessionWork.Open(id, request, work);
+        immutableRequest = TextOnlineSessionWork.Open(id, request);
         Id = id;
         Request = request;
         PrincipalId = principalId;

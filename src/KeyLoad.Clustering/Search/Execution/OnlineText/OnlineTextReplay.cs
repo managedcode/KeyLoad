@@ -6,16 +6,16 @@ namespace KeyLoad.Clustering;
 internal static class OnlineTextReplay
 {
     internal static async Task<OnlineTextCapabilityResult> RunAsync(OnlineTextChildCalls children,
-        OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityResult state, int maximumPages,
+        OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityResult state,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
-        for (var number = 0; number < maximumPages; number++)
+        while (true)
         {
             var upper = state.CurrentCut?.ThroughSequence
                 ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
-            var page = await children.ReadPageAsync(new(request.Consumer, ProjectionReplayPage.Records,
-                children.ProjectionPageBytes, upper), token).ConfigureAwait(true);
+            var page = await children.ReadPageAsync(new(request.Consumer, ProjectionReplayPage.Records, upper), token)
+                .ConfigureAwait(true);
             if (page.ThroughSequence > upper || page.Consumer.Consumer != request.Consumer
                 || page.Consumer.Definition.IndexGeneration != request.ConsumerGeneration || page.Consumer.Released)
             {
@@ -39,6 +39,5 @@ internal static class OnlineTextReplay
                 return state;
             }
         }
-        throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
     }
 }

@@ -155,7 +155,7 @@ REQ-COMP-001/004/005 and AC-COMP-005 also require the actual retained DocumentRe
 
 ## Typed saved canonical endpoint replay identity
 
-REQ-COMP-TYPED-ENDPOINT-JOIN-003 and REQ/AC-COMP-005 require every saved canonical endpoint observed by the typed composition replay read grant to match its actual retained DocumentRecord.Reference. Keep the existing current persisted authority, charged VisibleVertex probe and read grant lease settlement. A retained Reference mismatch already rejected by that probe preserves its data-free Corruption/canonical graph vertex consistency detail; a later comparison never replaces the original refusal. Initial typed retained JSON primary-key validation remains Corruption/TypedJoinRecordMismatch; compare only after that same original probe. No source rescan, changed receipt, schema/alias, public protocol, clock, quota, scheduling or GraphTraversal change.
+REQ-COMP-TYPED-ENDPOINT-JOIN-003 and REQ/AC-COMP-005 require every saved canonical endpoint observed by the typed composition replay read to match its actual retained DocumentRecord.Reference. Keep the existing current persisted authority and VisibleVertex probe. A retained Reference mismatch already rejected by that probe preserves its data-free Corruption/canonical graph vertex consistency detail; a later comparison never replaces the original refusal. Initial typed retained JSON primary-key validation remains Corruption/TypedJoinRecordMismatch; compare only after that same original probe. No source rescan, changed receipt, schema/alias, public protocol, clock, quota, scheduling or GraphTraversal change.
 
 ## Typed initial retained JSON primary identity
 

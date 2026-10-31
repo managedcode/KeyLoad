@@ -1,11 +1,9 @@
 #pragma warning disable ORLEANSEXP005
 using KeyLoad.Clustering;
 using KeyLoad.Core;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
-using Orleans.Serialization;
 
 namespace KeyLoad.Server;
 
@@ -22,7 +20,6 @@ internal static class RuntimeJournalRegistration
         services.AddSingleton<RuntimeJournalClient>(CreateClient);
         silo.AddJournalStorage(ProviderName, provider => new RuntimeJournalStorageProvider(
             provider.GetRequiredService<RuntimeJournalClient>(), provider.GetRequiredService<IOptions<RuntimeJournalOptions>>(),
-            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
             provider.GetRequiredService<IOptions<JournaledStateManagerOptions>>()));
         // A grain-scoped IDurableStateManager (the time-series chunk and ANN projection coordinators) resolves the unkeyed
         // provider, which Orleans registers only for its "Default" name; KeyLoad has exactly this one journal store.
@@ -42,8 +39,6 @@ internal static class RuntimeJournalRegistration
         return new RuntimeJournalClient(provider.GetRequiredService<IGrainFactory>(),
             () => codec.Value, provider,
             provider.GetRequiredService<TimeProvider>(),
-            provider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            provider.GetRequiredService<IOptions<GrainRoutingOptions>>(),
             provider.GetRequiredService<IOptions<RuntimeJournalOptions>>(),
             provider.GetRequiredService<RuntimeJournalAdmission>());
     }

@@ -43,7 +43,6 @@ internal static class TextCandidateReader
         iterator.Seek(RuntimeTextIndex.LowerBound(token));
         while (true)
         {
-            budget.ChargeBytes(TextProtocol.PostingBytes);
             if (!iterator.Next())
             {
                 return;

@@ -39,7 +39,6 @@ internal static class TextOnlineCatalogSource
         using var actual = new TextIncrementalOwner(generation.Root, current.Authority.Leaf,
             current.PublishedCut.NodeId, options);
         TextIncrementalPublishedInventory.Require(actual, manifest, budget, options, retained);
-        budget.ChargeBytes(OrleansSerialization.Measure(manifest.Files));
         if (Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(manifest.Files))) != result.IndexSha256
             || manifest.Records.Length != result.TrackedRecords)
         {

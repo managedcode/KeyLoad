@@ -29,6 +29,5 @@ internal static class DistributedTextStatisticsValidation
                 throw Errors.Fail(ErrorCode.Corruption, Invalid);
             }
         }
-        budget.CheckResult(statistics);
     }
 }

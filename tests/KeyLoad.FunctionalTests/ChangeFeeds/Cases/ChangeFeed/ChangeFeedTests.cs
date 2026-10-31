@@ -127,30 +127,4 @@ internal sealed class ChangeFeedTests
         Complete(db, consumer, remaining);
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Consumers.Single().Checkpoint).IsEqualTo(2);
     }
-    [Test]
-    public async Task FeedAndProjectionByteBoundariesPreserveTheFirstUndeliveredPosition()
-    {
-        using var db = new TestDatabase();
-        db.Configure("orders", ResourceKind.Collection);
-        db.Commit(new PutDocument("orders", "a", "{\"data\":\"" + new string('x', 1_000) + "\"}"), new PutDocument("orders", "b", "{}"));
-        var full = db.Database.ReadChangeFeed("root", new(db.Partition, "orders"));
-        var size = JsonDefaults.Serialize(full.Changes[0]).Length;
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadChangeFeed("root", new(db.Partition, "orders", MaxBytes: size - 1))).Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        var first = db.Database.ReadChangeFeed("root", new(db.Partition, "orders", MaxBytes: size));
-        await Assert.That(System.Linq.Enumerable.Single(first.Changes).Reference.Id).IsEqualTo("a");
-        await Assert.That(first.HasMore).IsTrue();
-        await Assert.That(first.ThroughSequence).IsEqualTo(1);
-        await Assert.That(System.Linq.Enumerable.Single(db.Database.ReadChangeFeed("root", new(db.Partition, "orders", first.Cursor)).Changes).Reference.Id).IsEqualTo("b");
-        var consumer = Consumer(db);
-        Configure(db, consumer);
-        var all = db.Database.ReadProjectionBatch("root", new(consumer));
-        var entrySize = ProjectionByteFixture.StoredEntryBytes(db, all.Entries[0].Sequence);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadProjectionBatch("root", new(consumer, MaxBytes: entrySize - 1))).Code)
-            .IsEqualTo(ErrorCode.BudgetExceeded);
-        var batch = db.Database.ReadProjectionBatch("root", new(consumer, MaxBytes: entrySize));
-        await Assert.That(batch.Entries).HasSingleItem();
-        await Assert.That(batch.ThroughSequence).IsEqualTo(1);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => Complete(db, consumer, batch with { Token = "invalid" })).Code).IsEqualTo(ErrorCode.TokenInvalidated);
-        await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Consumers.Single().Checkpoint).IsEqualTo(0);
-    }
 }

@@ -49,7 +49,7 @@ internal static class AnnCrashOperations
         => commands.Submit(CrashDatabase.Operation(commands.Database, kind, payload, id), explicitTime: false);
     internal static ProjectionBatch Read(DatabaseEngine database, AnnMaintenanceRequest request, long upper)
         => database.ReadProjectionBatch(CrashFixtureValues.Principal,
-            new(request.Consumer, AnnCrashContract.PageLimit, AnnCrashContract.PageBytes, upper));
+            new(request.Consumer, AnnCrashContract.PageLimit, upper));
     internal static ProjectionBatchResult Commit(AnnCrashCommandOwner commands, CommitProjectionBatchRequest intent)
         => Apply(commands, OperationKind.CommitProjectionBatch, intent, intent.CommandId).Get<ProjectionBatchResult>();
 }

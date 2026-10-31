@@ -1,15 +1,11 @@
-using KeyLoad.Core;
 using KeyLoad.Core.DocumentStorage;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Core.Search;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.Server.Search;
 
-internal sealed class TextOnlineSeedReader(ZoneTreeReadCutLease execution,
-    ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, TextSeedPin scope)
+internal sealed class TextOnlineSeedReader(ZoneTreeReadCutLease execution, TextSeedPin scope)
 {
-    private const int AllocationOnlyRecords = 0;
     private const long UnissuedDocumentRevision = 0;
     private const int EmptyDocumentCapacity = 0;
     private const int FirstDocumentCapacity = 1;
@@ -17,7 +13,6 @@ internal sealed class TextOnlineSeedReader(ZoneTreeReadCutLease execution,
     private const string InvalidSeed = "The online text seed does not match its captured canonical source.";
     private const string InvalidAccounting = "The online text seed execution accounting is inconsistent.";
     private readonly List<DocumentRecord> documents = [];
-    private readonly int maximumRecords = grant.RemainingRecords;
     private long runtimeAdmittedBytes;
     private int runtimeAdmittedRecords;
 
@@ -33,20 +28,17 @@ internal sealed class TextOnlineSeedReader(ZoneTreeReadCutLease execution,
         }, failures);
         ServerFailureObserver.Observe(() => ValidateSettledAccounting(completed), failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        budget.ImportReadGrant(grant, checked((long)documents.Count * IntPtr.Size), AllocationOnlyRecords);
         return documents.ToArray();
     }
 
     private void RuntimeAdmit(long bytes, int records)
     {
-        budget.ImportReadGrant(grant, bytes, records);
         runtimeAdmittedBytes = checked(runtimeAdmittedBytes + bytes);
         runtimeAdmittedRecords = checked(runtimeAdmittedRecords + records);
     }
 
     private bool Retain(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
     {
-        budget.ImportReadGrant(grant, value.Length, AllocationOnlyRecords);
         ReserveArray();
         var document = OrleansSerialization.Deserialize<DocumentRecord>(value);
         if (document.Reference.Partition != scope.Consumer.Partition
@@ -66,12 +58,11 @@ internal sealed class TextOnlineSeedReader(ZoneTreeReadCutLease execution,
             return;
         }
         var capacity = documents.Capacity == EmptyDocumentCapacity ? FirstDocumentCapacity
-            : (int)Math.Min(maximumRecords, checked((long)documents.Capacity * DocumentCapacityGrowthFactor));
+            : checked(documents.Capacity * DocumentCapacityGrowthFactor);
         if (capacity <= documents.Count)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidAccounting);
         }
-        budget.ImportReadGrant(grant, checked((long)capacity * IntPtr.Size), AllocationOnlyRecords);
         documents.Capacity = capacity;
     }
 

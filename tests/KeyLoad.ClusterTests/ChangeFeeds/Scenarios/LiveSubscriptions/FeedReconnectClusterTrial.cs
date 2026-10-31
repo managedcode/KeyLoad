@@ -16,14 +16,6 @@ internal static class FeedReconnectClusterTrial
         var scenario = await FeedLiveClusterScenario.CreateAsync(fixture, administrator, token);
         string cursor;
         var reader = await owner.ConnectAsync(scenario.Identity.Secret, token);
-        await FeedLiveClusterNoEffects.RequireAsync(administrator, scenario,
-            FeedLiveClusterNoEffects.Rows(FeedLiveClusterProtocol.FirstRevision, FeedLiveClusterProtocol.FirstJson), FeedLiveClusterProtocol.HiddenSequence,
-            () => FeedLiveClusterAssertions.DeniedAsync(reader,
-                scenario.Feed with
-                {
-                    MaxBytes = FeedLiveClusterProtocol.RejectedFirstEntryBytes
-                },
-                ErrorCode.BudgetExceeded, token), token);
         {
             var initial = await FeedLiveClusterAssertions.FeedAsync(reader, scenario, scenario.Feed,
                 scenario.Receipt.Token, FeedLiveClusterProtocol.FirstSequence, FeedLiveClusterProtocol.FirstRevision,

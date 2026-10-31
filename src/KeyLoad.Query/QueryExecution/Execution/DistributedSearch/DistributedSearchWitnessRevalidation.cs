@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query.QueryExecution;
@@ -10,10 +9,9 @@ internal static class DistributedSearchWitnessRevalidation
 
     internal static DistributedTextWitness Execute(DatabaseEngine database, string principalId,
         SearchRequest request, string tenant, DistributedTextWitness witness,
-        ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
+        ReadExecutionBudget budget, PartitionQueryLifetimeMetadata? metadata = null)
     {
         using var admission = database.AdmitQuery(budget.Cancellation);
-        using var charged = budget.EnterReadGrant(grant);
         Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedTextWitness> read =
             (view, principal, resource, digest) =>
             {
@@ -23,13 +21,12 @@ internal static class DistributedSearchWitnessRevalidation
                     throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged);
                 }
                 DistributedTextWitnessValidation.Require(database, view, principal, resource, digest,
-                    witness, request.Partition, grant, budget);
+                    witness, request.Partition, budget);
                 DistributedSearchFieldAuthorization.Require(database, principal, resource, request, metadata);
                 return witness;
             };
         return metadata is null
-            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read, budget)
-            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
-                grant, budget, metadata, read);
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, read, budget)
+            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection, budget, metadata, read);
     }
 }

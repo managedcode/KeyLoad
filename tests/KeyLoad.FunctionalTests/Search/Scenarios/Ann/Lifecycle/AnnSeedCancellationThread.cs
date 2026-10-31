@@ -6,32 +6,32 @@ namespace KeyLoad.FunctionalTests.Search;
 internal sealed class AnnSeedCancellationThread
 {
     private const string ObserverName = "ann-seed-cancellation-observer";
-    private const string ObservationTimeoutMessage = "The seed capture did not charge a read before cancellation.";
+    private const string ObservationTimeoutMessage = "The seed capture did not examine a stored entry before cancellation.";
     private const string JoinTimeoutMessage = "The ANN seed cancellation observer exceeded its join bound.";
     internal const int TimeoutSeconds = 15;
 
     private readonly TimeProvider clock;
-    private readonly ReadExecutionBudget budget;
+    private readonly Func<long> examinedEntries;
     private readonly CancellationTokenSource cancellation;
     private readonly ManualResetEventSlim started;
     private readonly AnnSeedCancellationFailureBag observerFailures = new();
     private readonly Thread thread;
     private int cancellationRequested;
-    private long observedReadBytes;
+    private long observedEntries;
     private bool threadStarted;
 
-    internal AnnSeedCancellationThread(ReadExecutionBudget budget, CancellationTokenSource cancellation,
+    internal AnnSeedCancellationThread(Func<long> examinedEntries, CancellationTokenSource cancellation,
         ManualResetEventSlim started, TimeProvider? timeProvider = null)
     {
         clock = timeProvider ?? TimeProvider.System;
-        this.budget = budget;
+        this.examinedEntries = examinedEntries;
         this.cancellation = cancellation;
         this.started = started;
         thread = new Thread(Observe) { IsBackground = false, Name = ObserverName };
     }
 
     internal bool CancellationRequested => Volatile.Read(ref cancellationRequested) != 0;
-    internal long ObservedReadBytes => Interlocked.Read(ref observedReadBytes);
+    internal long ObservedEntries => Interlocked.Read(ref observedEntries);
 
     internal void StartAndWait()
     {
@@ -79,12 +79,13 @@ internal sealed class AnnSeedCancellationThread
     private void WaitForChargeAndCancel()
     {
         var observedAt = new TestElapsedClock(clock);
+        var initial = examinedEntries();
         while (true)
         {
-            var readBytes = budget.ReadBytes;
-            if (readBytes > 0)
+            var examined = examinedEntries() - initial;
+            if (examined > 0)
             {
-                Interlocked.Exchange(ref observedReadBytes, readBytes);
+                Interlocked.Exchange(ref observedEntries, examined);
                 RequestCancellation();
                 return;
             }

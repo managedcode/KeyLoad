@@ -10,9 +10,6 @@ namespace KeyLoad.Clustering;
 
 internal static class MultiLaneReceiveExecution
 {
-    // The encoded result travels in one grain reply; that reply ceiling, not this check, bounds its size.
-    private const int UnboundedResultBytes = int.MaxValue;
-
     internal static async Task<MultiLaneReceiveResult> ExecuteAsync(DecodedGrainRequest parent,
         Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
@@ -37,9 +34,7 @@ internal static class MultiLaneReceiveExecution
             }
             if (halted)
             {
-                AcceptOutcome(request.RequestId, outcomes,
-                    new(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted), stopped,
-                    binding, UnboundedResultBytes, token);
+                outcomes.Add(new(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted));
                 continue;
             }
             var dispatched = await DispatchAsync(leaf, executeChild, services, codec, clock,
@@ -47,13 +42,11 @@ internal static class MultiLaneReceiveExecution
             stopped = dispatched.Stopped;
             var outcome = stopped is null ? Outcome(leaf, dispatched.Reply!, diagnostics, parent.Envelope.RequestId)
                 : new QueueLaneReceiveOutcome(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted);
-            AcceptOutcome(request.RequestId, outcomes, outcome, stopped, binding, UnboundedResultBytes, token);
+            outcomes.Add(outcome);
             halted = stopped is not null || outcome.Status == QueueLaneReceiveStatus.Unknown;
         }
         token.ThrowIfCancellationRequested();
-        var result = new MultiLaneReceiveResult(request.RequestId, outcomes.MoveToImmutable(), stopped?.Code, stopped?.Message);
-        CheckResult(result, binding, UnboundedResultBytes, token);
-        return result;
+        return new MultiLaneReceiveResult(request.RequestId, outcomes.MoveToImmutable(), stopped?.Code, stopped?.Message);
     }
 
     private static async Task<MultiLaneReceiveDispatchResult> DispatchAsync(ReceiveRequest leaf,
@@ -96,27 +89,6 @@ internal static class MultiLaneReceiveExecution
             }
             return new(null, stopped);
         }
-    }
-
-    private static void AcceptOutcome(Guid requestId, ImmutableArray<QueueLaneReceiveOutcome>.Builder outcomes,
-        QueueLaneReceiveOutcome next, KeyLoadException? stopped, IResourceLifetimeWorkBinding binding,
-        int maximumBytes, CancellationToken token)
-    {
-        var candidate = new MultiLaneReceiveResult(requestId, outcomes.ToImmutable().Add(next),
-            stopped?.Code, stopped?.Message);
-        CheckResult(candidate, binding, maximumBytes, token);
-        outcomes.Add(next);
-    }
-
-    private static void CheckResult(MultiLaneReceiveResult result, IResourceLifetimeWorkBinding binding,
-        int maximumBytes, CancellationToken token)
-    {
-        // Encoding the retained terminal result does not admit another command after parent expiry.
-        token.ThrowIfCancellationRequested();
-        using var counter = new ResultByteCounterStream(binding.ResultRetention.AvailableResultBytes(maximumBytes),
-            token.ThrowIfCancellationRequested);
-        System.Text.Json.JsonSerializer.Serialize(counter, result, JsonDefaults.Options);
-        token.ThrowIfCancellationRequested();
     }
 
     private static QueueLaneReceiveOutcome Outcome(ReceiveRequest leaf, GrainOperationReply reply,

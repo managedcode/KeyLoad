@@ -45,14 +45,11 @@ internal static class BoundLeaseAssertions
         await Assert.That(actual.CutPosition).IsEqualTo(state.Images[state.Leader].Position);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(input.Principal.PolicyEpoch);
         await Assert.That(actual.SchemaVersion).IsEqualTo(input.Definition.SchemaVersion);
-        await Assert.That(actual.ReadBytes > K.Empty).IsTrue();
-        await Assert.That(actual.ReadBytes <= input.Plan.MaxReadBytes).IsTrue();
     }
 
     internal static async Task RetentionAsync(BoundLeaseOperation operation, ResourceLifetime lifetime)
     {
         await Assert.That(operation.Ledger.RetainedEntries).IsEqualTo(K.LifetimeCount);
-        await Assert.That(operation.Ledger.RetainedEncodedBytes).IsEqualTo(OrleansSerialization.Measure(lifetime));
         await Assert.That(operation.Parent.Dependencies.SetEquals([lifetime])).IsTrue();
     }
 }

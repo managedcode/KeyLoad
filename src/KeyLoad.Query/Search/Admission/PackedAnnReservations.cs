@@ -16,6 +16,9 @@ internal static class PackedAnnReservations
     private const long FixedScratchBytes = 1_024;
     private const string ResourceExceeded = "The packed ANN resource bound is exceeded.";
 
+    internal static long CosineNorms(DistanceMetric metric, int count)
+        => metric == DistanceMetric.Cosine ? Array(sizeof(double), count) : 0;
+
     internal static long Array(int width, long length)
     {
         if (width < MinimumPositiveCount || length < InitialSequence || length > System.Array.MaxLength)

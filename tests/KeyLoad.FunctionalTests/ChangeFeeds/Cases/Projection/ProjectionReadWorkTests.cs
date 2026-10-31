@@ -33,14 +33,11 @@ internal sealed class ProjectionReadWorkTests
 
         var before = database.Store.GetReadDiagnostics();
         var batch = database.Database.ReadProjectionBatch(PrincipalId,
-            new(consumer, Limit: 1, MaxBytes: stored.Length));
+            new(consumer, Limit: 1));
         var after = database.Store.GetReadDiagnostics();
 
         await Assert.That(batch.Entries).HasSingleItem();
         await Assert.That(batch.ThroughSequence).IsEqualTo(1L);
         await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsEqualTo(4L);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
-            database.Database.ReadProjectionBatch(PrincipalId,
-                new(consumer, Limit: 1, MaxBytes: stored.Length - 1))).Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 }

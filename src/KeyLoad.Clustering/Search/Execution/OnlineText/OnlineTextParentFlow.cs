@@ -6,13 +6,8 @@ namespace KeyLoad.Clustering;
 internal static class OnlineTextParentFlow
 {
     internal static async Task<OnlineTextIndexMaintenanceResult> RunAsync(OnlineTextChildCalls children,
-        OnlineTextIndexMaintenanceRequest request, OnlineTextFrameAccounting frames,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, TextIndexMaintenanceOptions options)
+        OnlineTextIndexMaintenanceRequest request, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
-        if (!options.IsValid())
-        {
-            throw Errors.Fail(ErrorCode.Validation, TextIndexMaintenanceOptions.ValidationMessage);
-        }
         var token = writer.CancellationToken;
         var original = await children.CapabilityAsync(request, OnlineTextCapabilityKind.ResolveOriginal, token)
             .ConfigureAwait(true);
@@ -22,21 +17,21 @@ internal static class OnlineTextParentFlow
         }
         _ = await children.CapabilityAsync(request, OnlineTextCapabilityKind.Capture, token).ConfigureAwait(true);
         await children.ObserveCapturedAsync(token).ConfigureAwait(true);
-        await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.Captured).ConfigureAwait(true);
+        await OnlineTextProgress.WriteAsync(writer, children.ParentRequestId, OnlineTextPhase.Captured).ConfigureAwait(true);
         var state = await children.CapabilityAsync(request, OnlineTextCapabilityKind.Seed, token).ConfigureAwait(true);
-        await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.Seeded).ConfigureAwait(true);
-        _ = await OnlineTextReplay.RunAsync(children, request, state, options.MaximumReplayPages, writer).ConfigureAwait(true);
-        await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.CaughtUp).ConfigureAwait(true);
+        await OnlineTextProgress.WriteAsync(writer, children.ParentRequestId, OnlineTextPhase.Seeded).ConfigureAwait(true);
+        _ = await OnlineTextReplay.RunAsync(children, request, state, writer).ConfigureAwait(true);
+        await OnlineTextProgress.WriteAsync(writer, children.ParentRequestId, OnlineTextPhase.CaughtUp).ConfigureAwait(true);
         _ = await children.CapabilityAsync(request, OnlineTextCapabilityKind.Validate, token).ConfigureAwait(true);
-        await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.Validated).ConfigureAwait(true);
+        await OnlineTextProgress.WriteAsync(writer, children.ParentRequestId, OnlineTextPhase.Validated).ConfigureAwait(true);
         state = await children.CapabilityAsync(request, OnlineTextCapabilityKind.IssuePublication, token).ConfigureAwait(true);
         var issued = state.IssuedPublication ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         var result = await children.PublishAsync(issued, token).ConfigureAwait(true);
         var reconciled = await children.CapabilityAsync(request, OnlineTextCapabilityKind.ReconcileCommitted, token)
             .ConfigureAwait(true);
         RequireOriginal(result, reconciled.OriginalResult);
-        await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.Published).ConfigureAwait(true);
-        await OnlineTextProgress.WriteAsync(writer, frames, children.ParentRequestId, OnlineTextPhase.RetirementMarked).ConfigureAwait(true);
+        await OnlineTextProgress.WriteAsync(writer, children.ParentRequestId, OnlineTextPhase.Published).ConfigureAwait(true);
+        await OnlineTextProgress.WriteAsync(writer, children.ParentRequestId, OnlineTextPhase.RetirementMarked).ConfigureAwait(true);
         return result;
     }
 

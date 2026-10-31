@@ -13,8 +13,6 @@ public enum QueueWorkerStopReason
     ReceiveRefused,
     /// <summary>Original execution receive remains uncertain.</summary>
     ReceiveUncertain,
-    /// <summary>Returned active UTF8 body/header bytes exceeded the caller allowance.</summary>
-    InFlightBytes,
     /// <summary>Actual execution renewal refused or remained uncertain.</summary>
     RenewalFailed,
     /// <summary>Actual execution ACK refused or remained uncertain.</summary>

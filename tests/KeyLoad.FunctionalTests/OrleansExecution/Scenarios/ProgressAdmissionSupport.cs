@@ -1,8 +1,5 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -20,7 +17,7 @@ internal static class ProgressAdmissionSupport
     private const byte TerminalMarker = 1;
 
     internal static CqrsStreamAdmission Admission(RequestCqrsHostedRuntimeFixture fixture, Guid id,
-        OperationKind kind, object request, IOptions<GrainRoutingOptions>? options = null)
+        OperationKind kind, object request)
     {
         var command = request switch
         {
@@ -29,8 +26,7 @@ internal static class ProgressAdmissionSupport
             _ => throw new InvalidOperationException(nameof(request))
         };
         var envelope = fixture.Codec.CreateCommand(id, Root, kind, command, request);
-        return new(Serializer(fixture), id, options ?? fixture.RoutingOptions,
-            new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)));
+        return new(id, new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)));
     }
 
     internal static OnlineTextIndexMaintenanceRequest Online(RequestCqrsHostedRuntimeFixture fixture)
@@ -43,9 +39,6 @@ internal static class ProgressAdmissionSupport
     internal static CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> Terminal(long sequence)
         => RequestCqrsProtocolCases.CompletedChunk(new byte[] { TerminalMarker }, sequence);
 
-    internal static Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Serializer(RequestCqrsHostedRuntimeFixture fixture)
-        => fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
-
     internal static async Task RefusedAsync(Action operation, ErrorCode code)
     {
         var failure = Assert.ThrowsExactly<KeyLoadException>(operation);
@@ -57,7 +50,7 @@ internal static class ProgressAdmissionSupport
     {
         foreach (var frame in frames)
         {
-            admission.Admit(frame, CancellationToken.None);
+            admission.Admit(frame);
         }
         await Assert.That((admission.CompletionFailure(CancellationToken.None)).Value).IsNull();
     }

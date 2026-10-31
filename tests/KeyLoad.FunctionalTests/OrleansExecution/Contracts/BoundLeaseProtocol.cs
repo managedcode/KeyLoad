@@ -18,7 +18,6 @@ internal static class BoundLeaseProtocol
     internal const int LifetimeCount = 1;
     internal const int PersistedCopies = 1;
     internal const int NextIndex = 1;
-    internal const int GrantDivisor = 4;
     internal const int MaximumImageRecords = 4096;
     internal const int Empty = 0;
     internal const string Root = "root";

@@ -1,6 +1,6 @@
 # Current query capabilities and ordinary query examples
 
-This contract extends [QueryExecution](../QueryExecution.md), [the selected T-SQL contract](ScriptDom.md), [ADR-130](../../ADR/ADR-130-microsoft-scriptdom-tsql.md) and the existing capability-output budget contract. This stage adds the explicit `AST.Explain` read-profile name for existing execution and preserves every existing manifest field, version, profile and limit.
+This contract extends [QueryExecution](../QueryExecution.md), [the selected T-SQL contract](ScriptDom.md), [ADR-130](../../ADR/ADR-130-microsoft-scriptdom-tsql.md) and [ADR-149](../../ADR/ADR-149-no-operation-limits.md). This stage adds the explicit `AST.Explain` read-profile name for existing execution and preserves every existing manifest field, version, profile and limit.
 
 ## Current format
 
@@ -24,23 +24,23 @@ All collection operations require current persisted `Query | DocumentsRead` in t
 |---|---|---|
 | Field, JSON scalar, named operand | Canonical JSON path; scalar value or separately bound named value | Bounded path/value normalization. Parameter values are not substituted into SQL text. |
 | `=`, `!=`, `<>`, `<`, `<=`, `>`, `>=` | Existing decimal/scalar comparison; null/missing retain their distinct policies | Bounded predicate work for each admitted candidate; supported equality can select a point/index path. |
-| `AND`, `OR`, `NOT` | Existing three-valued predicate composition; WHERE retains true rows | Shared node/depth budget and candidate budget; field-use requirements cover dependencies. |
-| `IN`, `NOT IN` | Bounded scalar membership and negation | Existing maximum membership count and predicate budgets. |
+| `AND`, `OR`, `NOT` | Existing three-valued predicate composition; WHERE retains true rows | Nesting is bounded by the execution-stack guard; field-use requirements cover dependencies. |
+| `IN`, `NOT IN` | Bounded scalar membership and negation | Existing `QueryExecutionOptions.MaximumInValues` membership count. |
 | `BETWEEN`, `NOT BETWEEN` | SQL lowering to existing bounded comparisons/logical nodes | Same field-use, node/depth and candidate costs; no separate execution engine. |
 | `IS NULL`, `IS NOT NULL` | Explicit null test | Bounded per-candidate test. |
 | AST `IS MISSING` and its negated form | Explicit absence test, distinct from JSON null | AST/C# marker only; selected SQL grammar does not gain an `IS MISSING` keyword. |
 | `IS DISTINCT FROM`, `IS NOT DISTINCT FROM` | Existing null-aware SQL lowering | Same authorized predicate tree and costs. |
 | Projection and aliases | Requested fields or the declared all-fields projection | Bounded projection bytes; current field-read projection may omit/redact protected output. |
 | ASC/DESC and AST null ordering | Deterministic requested field order with existing tie/NULL rules | Bounded retained ordering over admitted candidates. SQL syntax support remains distinct from AST null-order metadata. |
-| TOP / ordered OFFSET-FETCH / AST limit and offset | Bounded page and existing continuation semantics | Row, examined-candidate, result-byte and signed-cursor limits. Full scan requires explicit consent. |
-| C# `.Explain()` / AST `Explain` | Existing one-row plan, not matching user rows | Current permission/path binding, shared budgets and bounded planning/source-head work; not a promise of zero storage reads. |
+| TOP / ordered OFFSET-FETCH / AST limit and offset | Bounded page and existing continuation semantics | The caller's row limit and signed-cursor lifetime; no examined-candidate or result-byte limit. Full scan requires explicit consent. |
+| C# `.Explain()` / AST `Explain` | Existing one-row plan, not matching user rows | Current permission/path binding, the shared operation's cancellation and expiry, and bounded planning/source-head work; not a promise of zero storage reads. |
 | Model sources | Existing event, topic and queue views in one database | Current Query plus EventsRead/TopicsRead/QueueInspect, including the existing dead-letter rule; bounded source scans. |
 | Q2 inner join | Existing same-partition bounded join and source lineage | Both current resource grants and field-use/row rules; supported join shape only, no Explain. |
-| Graph search, change feed, live query profiles | Their existing typed/operations | Their own permissions, candidate/backpressure/cursor/lifecycle budgets; not additional scalar AST operators. |
+| Graph search, change feed, live query profiles | Their existing typed/operations | Their own permissions, record limits, backpressure, cursors and lifecycles; not additional scalar AST operators. |
 
 Unknown AST versions and operators refuse before candidate execution. Public JSON discriminator failures retain their existing validation boundary. grammar, adapter support, AST semantics and transport compatibility remain distinct qualification gates.
 
-`MaxBytes` reports the configured `QueryExecutionOptions.MaximumResultBytes`, or `int.MaxValue` when no result ceiling is configured ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). It covers the serialized `QueryPage` including rows, cursor, cut and access path. SDK Result/MCP transport wrappers and the grain reply ceilings have separate framing limits. It is not a request-byte ceiling. The manifest reports no row, candidate, depth or candidate-byte limit, because none is configured.
+The manifest reports no row, candidate, depth, candidate-byte or result-byte limit, because none is configured ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). SDK Result and MCP transport wrappers keep their own framing limits.
 
 ## Normal examples
 
@@ -96,7 +96,7 @@ flowchart TD
 
 | Requirement | Acceptance | Actual case mapping |
 |---|---|---|
-| REQ-QCV-001 | AC-QCV-001: complete literal manifest preserves `[1]`, all existing profiles and the effective output ceiling, adding only the existing AST Explain profile | `QueryCapabilityVersionWholeFlowTests.ManifestVersionsRoundTripBuilderAndSqlPagesExplainCurrentReaderAndTwoColdOwners`; public `QueryCapabilityVersionClusterWholeFlowTests.ManifestVersionsAndBuilderSqlMcpPagesExplainPersistedReaderRepairAndTwoColdOwners` |
+| REQ-QCV-001 | AC-QCV-001: complete literal manifest preserves `[1]` and all existing profiles, adding only the existing AST Explain profile | `QueryCapabilityVersionWholeFlowTests.ManifestVersionsRoundTripBuilderAndSqlPagesExplainCurrentReaderAndTwoColdOwners`; public `QueryCapabilityVersionClusterWholeFlowTests.ManifestVersionsAndBuilderSqlMcpPagesExplainPersistedReaderRepairAndTwoColdOwners` |
 | REQ-QCV-002 | AC-QCV-002: C# builder matches an independently authored plan; actual JSON and generated-binary round trips retain every field and execute complete literal pages | Same whole operation; actual public C#→JSON SDK/MCP operations and the same current SQL format |
 | REQ-QCV-003 | AC-QCV-003: direct SDK/official MCP/unified SQL return full `b` then `d` rows with positive original captured continuation cut; C# Explain returns the complete independently expected plan | Same two whole cases; no comparison of fresh physical cuts with logical write positions |
 | REQ-QCV-004 | AC-QCV-004: current persisted reader removal refuses normal queries and planning; repair restores results, while the static manifest remains unchanged | Same cases, full fixed Problems and no partial result; original full image/cut/identity and public full rows/outbox/receipt observation |
@@ -104,6 +104,6 @@ flowchart TD
 
 The new four-document fixture is a functional example, not scale or performance evidence. output is ProcessDurable through actual ordered journal admission; public output is the actual ProcessDurable receipt. `CompositionReferences` is JsonIgnored and is checked only at the actual boundary, never inferred from a public DTO getter. JSON/store round trips do not claim a new client binary wire protocol. Public rows/outbox are logical conservation observations, not private raw-store access.
 
-Existing `CapabilityOutputWholeFlowTests` / `CapabilityOutputClusterTests` retain all three result-ceiling modes, admitted/before-cancel behavior and full output refusals. Existing `SqlModelViewAstTests.AcSqlView001ExplainSupportsBothSourcesWithoutScanningBodies` and the original `SqlModelViewClusterParityTests` Explain path remain mandatory. The prior original model Explain failure is not hidden, skipped or claimed repaired by this profile addition. Existing Q2 join restrictions, malformed/unsupported operators, field policy, recovery, public transport and coverage suites remain mandatory.
+Existing `SqlModelViewAstTests.AcSqlView001ExplainSupportsBothSourcesWithoutScanningBodies` and the original `SqlModelViewClusterParityTests` Explain path remain mandatory. The prior original model Explain failure is not hidden, skipped or claimed repaired by this profile addition. Existing Q2 join restrictions, malformed/unsupported operators, field policy, recovery, public transport and coverage suites remain mandatory.
 
 Implementation status: coherent source/self-review only. No qualifying run, power-loss durability, speed or production-readiness claim follows from this document or syntax/numeric/nesting preflight. No dependency, serializer field/alias, persisted format, parser method, protocol version, UI, benchmark or orchestration implementation is changed; those surfaces need no new code in this stage.

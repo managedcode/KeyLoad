@@ -7,7 +7,6 @@ internal static class AnnMaintenanceTestData
     internal const long Generation = 1;
     internal const int Version = 1;
     internal const int PageLimit = 1;
-    internal const int PageBytes = 4_194_304;
     internal const int SnapshotBound = 512;
     private static readonly string[] Kinds = ["putDocument", "patchDocument", "deleteDocument", "putVector", "applyVectorProjection"];
 
@@ -23,7 +22,7 @@ internal static class AnnMaintenanceTestData
             AnnSeedTestSupport.Space(), Generation, database.Store.Identity.NodeId, placement, AnnMaintenanceMode.Build);
     }
     internal static ProjectionBatch Read(TestDatabase database, AnnMaintenanceRequest request, long upper)
-        => database.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal, new(request.Consumer, PageLimit, PageBytes, upper));
+        => database.Database.ReadProjectionBatch(AnnProjectionPinTestSupport.Principal, new(request.Consumer, PageLimit, upper));
     internal static CommitProjectionBatchRequest Intent(ProjectionBatch page)
         => new(Guid.NewGuid(), page.Consumer.Consumer, page.Token, []);
     internal static ProjectionBatchResult Commit(TestDatabase database, CommitProjectionBatchRequest intent)

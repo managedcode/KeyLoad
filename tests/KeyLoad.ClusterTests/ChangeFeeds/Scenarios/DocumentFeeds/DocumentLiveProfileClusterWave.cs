@@ -23,8 +23,6 @@ internal static class DocumentLiveProfileClusterWave
         await DocumentLiveProfileClusterSetup.UpdateAsync(root, state, token);
         await DocumentLiveProfileClusterValues.ObserveAsync(root, state, 1, async () =>
         {
-            await DocumentLiveProfileClusterRefusals.ReadAsync(reader, state, new(state.Query, state.OriginalCursor, MaxBytes: 1),
-                ErrorCode.BudgetExceeded, "The first change exceeds the page byte budget.", token);
             await DocumentLiveProfileClusterPages.TailAsync(reader, state, token);
         }, token);
         await DocumentLiveProfileClusterPolicy.RunAsync(root, reader, state, token);

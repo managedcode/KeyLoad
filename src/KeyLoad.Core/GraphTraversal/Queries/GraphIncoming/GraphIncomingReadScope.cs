@@ -1,7 +1,6 @@
 using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Core.GraphTraversal.Serialization;
 using KeyLoad.Core.ResourceExecution;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.GraphTraversal;
@@ -13,11 +12,11 @@ internal static class GraphIncomingReadScope
     private const string ResourceDomainConflict = "The resource belongs to a different transaction domain.";
     private const string ResourceKindConflict = "The resource has a different kind.";
 
-    internal static PrincipalRecord ReadPrincipal(IKeyValueView view, ReadExecutionBudgetReadGrant grant,
+    internal static PrincipalRecord ReadPrincipal(IKeyValueView view,
         string principalId, DateTimeOffset now)
     {
         var principal = GraphCrossPartitionRecords.Read<PrincipalRecord>(view,
-            KeySpace.Principal(principalId), grant);
+            KeySpace.Principal(principalId));
         if (principal is null || principal.Revoked || principal.ExpiresAt <= now)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, MissingPrincipal);
@@ -25,12 +24,11 @@ internal static class GraphIncomingReadScope
         return principal;
     }
 
-    internal static ResourceDefinition ReadGraphResource(IKeyValueView view,
-        ReadExecutionBudgetReadGrant grant, PartitionRef partition, string graph, ReadExecutionBudget budget)
+    internal static ResourceDefinition ReadGraphResource(IKeyValueView view, PartitionRef partition, string graph, ReadExecutionBudget budget)
     {
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
-            KeySpace.Resource(partition.TenantId, partition.DatabaseId, graph), grant);
-        var metadata = budget.CreateView(view, grant);
+            KeySpace.Resource(partition.TenantId, partition.DatabaseId, graph));
+        var metadata = budget.CreateView(view);
         var lifetime = (ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, graph, resource)).Value;
         if (resource is null)
         {
@@ -48,12 +46,11 @@ internal static class GraphIncomingReadScope
         return resource;
     }
 
-    internal static ResourceDefinition ReadCollection(IKeyValueView view,
-        ReadExecutionBudgetReadGrant grant, PartitionRef partition, string collection, ReadExecutionBudget budget)
+    internal static ResourceDefinition ReadCollection(IKeyValueView view, PartitionRef partition, string collection, ReadExecutionBudget budget)
     {
         var resource = GraphCrossPartitionRecords.Read<ResourceDefinition>(view,
-            KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection), grant);
-        var metadata = budget.CreateView(view, grant);
+            KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection));
+        var metadata = budget.CreateView(view);
         var lifetime = (ResourceLifetimeCatalog.Read(metadata, partition.TenantId, partition.DatabaseId, collection, resource)).Value;
         if (resource is null)
         {
@@ -71,12 +68,11 @@ internal static class GraphIncomingReadScope
         return resource;
     }
 
-    internal static DocumentRecord? ReadDocument(IKeyValueView view,
-        ReadExecutionBudgetReadGrant grant, EntityRef entity)
+    internal static DocumentRecord? ReadDocument(IKeyValueView view, EntityRef entity)
     {
         const string VertexMismatch = "A canonical graph vertex record is inconsistent.";
         var document = GraphCrossPartitionRecords.Read<DocumentRecord>(view,
-            DocumentStorageKeys.RecordKey(entity), grant);
+            DocumentStorageKeys.RecordKey(entity));
         if (document is not null && document.Reference != entity)
         {
             throw Errors.Fail(ErrorCode.Corruption, VertexMismatch);

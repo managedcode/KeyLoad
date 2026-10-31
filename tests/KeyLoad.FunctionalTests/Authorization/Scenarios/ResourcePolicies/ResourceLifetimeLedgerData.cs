@@ -12,7 +12,6 @@ internal static class ResourceLifetimeLedgerData
     internal const int NoEntries = 0;
     internal const int OneEntry = 1;
     internal const int TwoEntries = 2;
-    internal const int OneByte = 1;
 
     internal static AstQueryRequest Request(SafeProjectorOperationDatabase owner, string name)
         => new(owner.Source.Partition, new(name, null, [new(P.Star, P.Star)], null,

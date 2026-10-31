@@ -40,8 +40,8 @@ All decisions occur inside the existing ordered atomic command path.
    an older cutoff returns RevisionConflict. No background per-sample timers.
 5. Range/latest/raw aggregate/dense-window reads apply the same floor, preserving
    their original inclusive/half-open windows and empty-window anchors. All
-   metadata, scans, cancellation/deadline and complete result bytes remain under
-   the operation budget. Existing store read leases protect an in-flight cut:
+   metadata reads and scans run under the operation's cancellation and explicit
+   expiry; results are not measured. Existing store read leases protect an in-flight cut:
    expiry waits for that cut and cannot dispose its storage or borrowed buffers.
 6. Real process reopen/recovery and SDK/official MCP cluster tests run through the TUnit test entry, followed by the complete build/format/governance/CI gates. Source presence alone is not acceptance.
 

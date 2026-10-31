@@ -22,7 +22,7 @@ internal sealed class StreamTraversalMcpSchemaTests
     private const string StringType = "string";
     private const string IntegerType = "integer";
     private static readonly string[] ResultProperties = ["stream", "head", "events", "cutPosition", "hasMore", "cursor", "snapshotCutPosition"];
-    private static readonly string[] RequestProperties = ["stream", "afterRevision", "limit", "direction", "maxBytes", "cursor"];
+    private static readonly string[] RequestProperties = ["stream", "afterRevision", "limit", "direction", "cursor"];
 
     [Test]
     public async Task CompleteOriginalCursorRequestDecodeRefusesCallerAuthorityThenPageRoundtripIsHealthy()
@@ -30,7 +30,7 @@ internal sealed class StreamTraversalMcpSchemaTests
         using var fixture = new StreamReadResourceFixture(eventCount: StreamTraversalTestProtocol.Third, protectedFields: true);
         var first = fixture.Traverse(fixture.Traversal(StreamReadDirection.Backward, limit: StreamTraversalTestProtocol.First));
         var expected = fixture.Traversal(StreamReadDirection.Backward, limit: StreamTraversalTestProtocol.Second,
-            maxBytes: int.MaxValue, cursor: first.Cursor);
+            cursor: first.Cursor);
         await Assert.That(McpOperationCatalog.TryGet(Tool, out var descriptor)).IsTrue();
         var operation = descriptor ?? throw new InvalidOperationException();
         await Assert.That(operation.Route).IsEqualTo(Route);

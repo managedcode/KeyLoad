@@ -1,11 +1,9 @@
 using KeyLoad.Core;
-using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
 using Orleans.Placement;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
@@ -15,13 +13,12 @@ namespace KeyLoad.Clustering;
 internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, ILocalDurableJobManager jobs,
     BackgroundStorageClient storage, RuntimeJournalAdmission runtime,
     GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing, IOptions<RuntimeJournalOptions> journal)
     : Grain, IAnnProjectionCoordinatorGrain, IDurableJobHandler
 {
     private readonly AnnProjectionJobStateOwner owner = new(state, journal);
     private readonly AnnProjectionJobExecution execution = new(storage,
-        new(codec, services, clock, serializer, routing));
+        new(codec, services));
 
     public Task ScheduleAsync(ProjectionConsumerRef consumer, long generation, Guid nodeId, CancellationToken cancellationToken)
         => AnnProjectionJobOperation.RunAsync(services,
@@ -32,10 +29,8 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     {
         RequireKey(consumer, generation, nodeId);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
-        var expiry = clock.GetUtcNow() + routing.Value.ExecutionLifetime;
-        using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
-        var token = deadline.Token;
+        var expiry = clock.GetUtcNow() + routing.Value.RequestLifetime;
+        var token = linked.Token;
         var budget = new ReadExecutionBudget(clock, token);
         budget.ConstrainLifetime(expiry);
         budget.AttachResourceLifetimeBinding(binding);
@@ -92,10 +87,8 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             return;
         }
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
-        var expiry = clock.GetUtcNow() + routing.Value.ExecutionLifetime;
-        using var timeout = new CancellationTokenSource(routing.Value.ExecutionLifetime, clock);
-        using var deadline = CancellationTokenSource.CreateLinkedTokenSource(linked.Token, timeout.Token);
-        var token = deadline.Token;
+        var expiry = clock.GetUtcNow() + routing.Value.RequestLifetime;
+        var token = linked.Token;
         var budget = new ReadExecutionBudget(clock, token);
         budget.ConstrainLifetime(expiry);
         budget.AttachResourceLifetimeBinding(binding);

@@ -16,7 +16,8 @@ internal static class ChunkMultiblockReadInterruptionTrial
         var budget = new ReadExecutionBudget(clock, cancellation.Token);
         budget.ConstrainLifetime(clock.GetUtcNow().AddSeconds(CallerLifetimeSeconds));
         Action afterWork = cancelled ? cancellation.Cancel : () => clock.Advance(TimeSpan.FromSeconds(PastDeadlineSeconds));
-        clock.Arm(() => budget.ReadBytes == recipe.FirstBytes, afterWork);
+        var start = fixture.Store.GetReadDiagnostics().PointExaminedBytes;
+        clock.Arm(() => fixture.Store.GetReadDiagnostics().PointExaminedBytes - start >= recipe.FirstBytes, afterWork);
         var failures = new List<Exception>();
         try
         {
@@ -31,7 +32,6 @@ internal static class ChunkMultiblockReadInterruptionTrial
                     await ChunkMultiblockReadInterruptionFaults.DeadlineAsync(fixture, budget);
                 }
                 await Assert.That(clock.Triggered).IsTrue();
-                await Assert.That(budget.ReadBytes).IsEqualTo(recipe.FirstBytes);
             }, failures);
         }
         finally
@@ -40,9 +40,7 @@ internal static class ChunkMultiblockReadInterruptionTrial
         }
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var following = ChunkMultiblockReadBudgetCalls.Budget(fixture, recipe.TotalBytes);
-            var rows = ChunkMultiblockReadBudgetCalls.Read(fixture, following);
-            await Assert.That(following.ReadBytes).IsEqualTo(recipe.TotalBytes);
+            var rows = ChunkMultiblockReadBudgetCalls.Read(fixture, ChunkMultiblockReadBudgetCalls.Budget(fixture));
             await Assert.That(JsonSerializer.Serialize(rows, JsonDefaults.Options))
                 .IsEqualTo(JsonSerializer.Serialize(ChunkMultiblockBoundaryData.Expected(healthy), JsonDefaults.Options));
         }, failures);

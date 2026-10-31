@@ -61,7 +61,6 @@ internal static class SampleRollupLeaseDropFlow
             var request = new ReadSampleRollupRequest(db.Partition, SampleRollupWholeFlow.Set,
                 SampleRollupWholeFlow.Series, SampleRollupWholeFlow.Start, SampleRollupWholeFlow.End);
             var result = SampleRollupReader.Read(db.Database, budget.CreateView(view), SampleRollupWholeFlow.Root, request, budget);
-            budget.CheckResult(result);
             var page = view.Scan([], MaximumRecords);
             if (page.HasMore)
             {

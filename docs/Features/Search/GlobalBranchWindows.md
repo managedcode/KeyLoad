@@ -6,7 +6,7 @@ Global branch windows under [ADR-096](../../ADR/ADR-096-global-branch-windows.md
 |---|---|
 | REQ-RANK-001: global window before fusion | AC-RANK-001: independent centralized oracle and two/three window layouts return identical exact candidates/ranks for identical comparable scores, missing branch contributes zero, duplicated replica candidates contribute once; RRF is applied after global modality ordering. `GlobalBranchWindowTests` |
 | REQ-RANK-002: full stable identity and comparable witnesses | AC-RANK-002: same Id in different tenant/database/domain/partition/collection remains distinct and ties use ordinal full EntityRef; duplicate reference with conflicting score/revision fails explicitly; nonfinite values or differing score-profile/corpus/statistics epochs fail, never win by arrival order |
-| REQ-RANK-003: bounded truthful completeness | AC-RANK-003: record/byte/window/deadline/cancellation limits are checked before retention, failed/missing/approximate/truncated windows cannot be marked exhaustive; exact mode fails closed, explicit incomplete mode retains its missing-window/approximation flags; boundary failures release all owned temporary work |
+| REQ-RANK-003: bounded truthful completeness | AC-RANK-003: deadline and cancellation are checked before retention, failed/missing/approximate/truncated windows cannot be marked exhaustive; exact mode fails closed, explicit incomplete mode retains its missing-window/approximation flags; boundary failures release all owned temporary work |
 | REQ-RANK-004: real existing runtime join | AC-RANK-004: the same core candidate-order/merge kernel is consumed by current SearchRankFusion through a single-partition adapter, preserving all current exact text/vector/graph results and source-cut authorization. Single-window fast path avoids redundant materialization; unit and replicated-cluster suites pass |
 
 The internal generated v1 BranchWindow contract containing branch
@@ -32,10 +32,9 @@ AllowIncomplete=false); GlobalBranchMergeResult(Candidates,MissingWindowIds,
 WindowComplete,Approximate,Truncated,Exhaustive,ExaminedCandidateCount).
 String identifiers are nonblank and bounded by JsonData.Identifier; candidate
 revision is positive; arrays are initialized; duplicate/unknown source IDs reject.
-The merger receives the shared ReadExecutionBudget, charges every examined
-record and exact bytes before retaining it, and retains no more bytes than the
-budget's result ceiling (the optional `QueryExecutionOptions.MaximumResultBytes`).
-There is no record or window-count ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)).
+The merger receives the shared ReadExecutionBudget and checks its cancellation
+and expiry for every examined candidate before retaining it. There is no record,
+byte or window-count ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)).
 Strict mode rejects Approximate or Truncated input; explicit incomplete mode
 retains those flags. Exhaustive also requires every source Exhaustive and no
 candidate omitted by the requested output window. Local fusion may use a narrow

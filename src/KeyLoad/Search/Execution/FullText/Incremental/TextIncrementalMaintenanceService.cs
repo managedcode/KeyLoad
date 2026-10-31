@@ -93,7 +93,6 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
                 root, sessions, budget, configured.RuntimeText, resources, generations.ReleaseGeneration);
             var released = new TextMaintenanceCapabilityResult(request.SessionId, null,
                 ReleasedSequence, ReleasedSequence, ReleasedRecords, null, null, ReleasedSequence);
-            budget.CheckResult(released);
             return released;
         }
         if (request.Kind == TextMaintenanceCapabilityKind.Begin)

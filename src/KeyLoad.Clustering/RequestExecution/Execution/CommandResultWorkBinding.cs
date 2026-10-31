@@ -24,7 +24,6 @@ internal static class CommandResultWorkBinding
             var proof = RequireProof(request, reply);
             await BindCurrentAsync(database, coordinator, clock, request, proof, proof.Lifetimes,
                 work, binding, token).ConfigureAwait(true);
-            work.CheckResult(GrainReplyFactory.RequireValue(reply).Value);
             work.Check();
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
@@ -45,9 +44,7 @@ internal static class CommandResultWorkBinding
         try
         {
             var proof = RequireProof(request, reply);
-            work.CheckResult(proof);
             binding.Bind(proof.Lifetimes);
-            work.CheckResult(GrainReplyFactory.RequireValue(reply).Value);
             work.Check();
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
@@ -64,7 +61,6 @@ internal static class CommandResultWorkBinding
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         work.RequireResourceLifetimeBinding(binding);
-        work.CheckResult(proof);
         await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
         var principal = GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock);

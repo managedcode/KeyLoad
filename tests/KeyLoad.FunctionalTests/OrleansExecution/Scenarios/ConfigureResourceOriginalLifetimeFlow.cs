@@ -80,11 +80,9 @@ internal static class ConfigureResourceOriginalLifetimeFlow
             await Assert.That(lease.Dependencies.Count).IsEqualTo(previous is null ? 0 : 1);
             await A.EqualAsync(expected, fixture.SubmitIssued(original).Get<ResourceDefinition>());
             lifetime = A.Lifetime(fixture, expected);
-            var spent = work.ReadBytes;
             await A.UnchangedAsync(fixture, async () =>
             {
                 await A.EqualAsync(expected, fixture.Database.ResolveSubmissionOutcome(original, work).Get<ResourceDefinition>());
-                await Assert.That(work.ReadBytes).IsGreaterThan(spent);
                 await A.BoundAsync(lease, lifetime);
             });
         }, token);

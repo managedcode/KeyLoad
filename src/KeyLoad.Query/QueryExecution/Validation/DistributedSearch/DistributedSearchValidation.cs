@@ -32,9 +32,6 @@ internal static class DistributedSearchValidation
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, SelectedGenerationUnsupported);
         }
-        var retention = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        retention.Accept(checked(PartitionQueryRetention.RootDescriptorBytes
-            + (long)request.Partitions.Length * PartitionQueryRetention.LeafDescriptorBytes));
         var unique = new HashSet<PartitionRef>();
         foreach (var partition in request.Partitions)
         {

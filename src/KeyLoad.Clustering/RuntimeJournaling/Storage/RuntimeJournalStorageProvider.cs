@@ -11,19 +11,16 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
 {
     private readonly RuntimeJournalClient client;
     private readonly IOptions<RuntimeJournalOptions> options;
-    private readonly IOptions<GrainRoutingOptions> routingOptions;
     private readonly string format;
     private readonly SemaphoreSlim[] gates;
     private int disposed;
 
     public RuntimeJournalStorageProvider(RuntimeJournalClient client,
         IOptions<RuntimeJournalOptions> configuredOptions,
-        IOptions<GrainRoutingOptions> configuredRoutingOptions,
         IOptions<JournaledStateManagerOptions> managerOptions)
     {
         this.client = client;
         options = ValidateOptions(configuredOptions);
-        routingOptions = configuredRoutingOptions;
         format = ValidateFormat(managerOptions.Value.JournalFormatKey);
         gates = CreateGates(options.Value.MaximumJournals);
     }
@@ -37,7 +34,7 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
         }
 
         RuntimeJournalStorageValidation.ValidateName(journalId.Value, options.Value);
-        return new RuntimeJournalStorage(client, journalId, options, format, routingOptions, gates,
+        return new RuntimeJournalStorage(client, journalId, options, format, gates,
             GateIndex(journalId.Value, gates.Length));
     }
 

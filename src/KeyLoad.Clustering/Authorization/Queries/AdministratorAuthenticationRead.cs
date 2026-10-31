@@ -22,8 +22,6 @@ internal static class AdministratorAuthenticationRead
         }
         var input = GrainPayload.Read<AdministratorAuthenticationRequest>(request.Payload);
         Require(input, request.Envelope.ExpiresAt);
-        work.ConstrainWork(input.MaximumReadBytes, input.MaximumExaminedRecords);
-        work.ConstrainResultBytes(input.MaximumResultBytes);
         binding.Bind(ImmutableArray<ResourceLifetime>.Empty);
         PrincipalRecord? principal = null;
         KeyLoadException? refusal = null;
@@ -37,21 +35,15 @@ internal static class AdministratorAuthenticationRead
         {
             refusal = error;
         }
-        if (refusal is null)
-        {
-            work.CheckResult(principal!);
-        }
-        var reply = new AdministratorAuthenticationResult(refusal is null ? principal : null, work.ReadBytes,
-            work.ConstrainedRecords, refusal?.Code, refusal?.Message);
-        _ = ResultByteCounterStream.RuntimeMeasure(work, new GrainValue(reply));
+        var reply = new AdministratorAuthenticationResult(refusal is null ? principal : null,
+            refusal?.Code, refusal?.Message);
         work.Check();
         return reply;
     }
 
     private static void Require(AdministratorAuthenticationRequest input, DateTimeOffset expiry)
     {
-        if (string.IsNullOrEmpty(input.Secret) || input.ExpiresAt != expiry
-            || input.MaximumReadBytes <= 0 || input.MaximumExaminedRecords <= 0 || input.MaximumResultBytes <= 0)
+        if (string.IsNullOrEmpty(input.Secret) || input.ExpiresAt != expiry)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

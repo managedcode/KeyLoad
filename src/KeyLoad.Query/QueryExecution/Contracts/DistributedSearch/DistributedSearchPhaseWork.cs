@@ -10,5 +10,4 @@ internal sealed record DistributedSearchPhaseWork(
     DistributedTextStatistics? Statistics,
     GlobalBranchScope? Scope,
     string? SourceWindowId,
-    ImmutableArray<GlobalBranchCandidate> Selected,
-    int MaxResultBytes);
+    ImmutableArray<GlobalBranchCandidate> Selected);

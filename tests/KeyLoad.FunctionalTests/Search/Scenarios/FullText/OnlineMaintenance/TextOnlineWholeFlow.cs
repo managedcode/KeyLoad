@@ -39,7 +39,7 @@ internal static class TextOnlineWholeFlow
         TextOnlineTestRuntime runtime, Guid session, OnlineTextIndexMaintenanceRequest request,
         OnlineTextCapabilityResult state, DateTimeOffset expiry, CancellationToken token)
     {
-        for (var pageNumber = 0; pageNumber < runtime.Options.Core.TextMaintenance.Value.MaximumReplayPages; pageNumber++)
+        while (true)
         {
             var page = fixture.Database.ReadProjectionBatch(TextMaintenanceTestValues.Principal,
                 new(request.Consumer, ThroughSequence: state.CurrentCut!.ThroughSequence));
@@ -59,6 +59,5 @@ internal static class TextOnlineWholeFlow
                 return state;
             }
         }
-        throw new InvalidOperationException("Actual execution replay did not settle within its original centrally configured page bound.");
     }
 }

@@ -53,13 +53,11 @@ internal static class SampleChunkWindowReader
                 TagsJson = database.Authorization.Project(principal,
                 resource.FieldPolicies, record.TagsJson, out _)
             };
-            budget.CheckResult(projected);
             selected.Add(projected);
         }
         var result = new SampleChunkWindowResult(window.WindowId, new(window.FromUtcTicks, TimeSpan.Zero),
             new(window.UntilUtcTicks, TimeSpan.Zero), window.Generation, window.Revision, window.SourceSequence,
             watermark.Floor, selected.ToImmutable(), cutPosition);
-        budget.CheckResult(result);
         budget.Check();
         return result;
     }

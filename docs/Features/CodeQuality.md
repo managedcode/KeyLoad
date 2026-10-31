@@ -118,7 +118,7 @@ unique and never reused.
 | KLD0036 | Runtime strings, characters, interpolation text and format tokens use named identities or `nameof` | Error |
 | KLD0037 | Operational policy comes from centrally bound, validated `IOptions<T>`, not from raw configuration reads or constants | Error |
 | KLD0038 | Implementation terminology requires explicit owner approval; only narrowly approved runtime, domain and testing meanings are allowed | Error |
-| KLD0039 | ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics use public synchronous APIs without thread-pool dispatch | Error |
+| KLD0039 | ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics work is awaited: no blocking on their tasks and no thread-pool dispatch of engine access | Error |
 | KLD0040 | Return explicit `ManagedCode.Communication.Result` / `Result<T>` outcomes instead of null; preserve resolved nullable contracts from another project or API | Error |
 
 Rule fixtures (all under `Cases/`): KLD0001 `LiteralMachineKey/`, KLD0013

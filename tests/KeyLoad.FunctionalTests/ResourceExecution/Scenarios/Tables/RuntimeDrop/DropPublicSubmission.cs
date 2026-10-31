@@ -1,8 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.ResourceExecution;
 
@@ -45,8 +42,7 @@ internal static class DropPublicSubmission
             {
                 reply = await GrainRequestStreamConsumer.DrainAsync(
                     execution => node.Grains.GetGrain<IConnectionGrain>(node.ConnectionId).ExecuteStreamAsync(envelope, execution),
-                    node.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                    requestId, node.Clock, node.RoutingOptions, token).ConfigureAwait(false);
+                    requestId, token).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

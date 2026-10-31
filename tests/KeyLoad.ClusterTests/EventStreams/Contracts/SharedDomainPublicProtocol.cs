@@ -14,7 +14,6 @@ internal static class SharedDomainPublicProtocol
     internal const int NoAttempts = 0;
     internal const int FirstAttempt = 1;
     internal const int ReceiveCount = 1;
-    internal const int ReceiveBytes = 4096;
     internal const int LeaseSeconds = 30;
     internal const int EventPageLimit = 4;
     internal const int ProducerEffects = 3;

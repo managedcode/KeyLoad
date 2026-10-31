@@ -5,15 +5,12 @@ namespace KeyLoad.Server.Search;
 
 internal static class TextOnlineSessionWork
 {
-    internal static byte[] Open(Guid id, OnlineTextIndexMaintenanceRequest request, MaintenanceSessionWork work)
+    internal static byte[] Open(Guid id, OnlineTextIndexMaintenanceRequest request)
     {
         if (id == Guid.Empty || request.CommandId == Guid.Empty)
         {
             throw TextErrors.Ownership();
         }
-        var budget = work.Budget;
-        budget.ChargeBytes(OrleansSerialization.Measure(request));
-        budget.ChargeBytes(SHA256.HashSizeInBytes);
         return SHA256.HashData(OrleansSerialization.Serialize(request));
     }
 
@@ -26,24 +23,10 @@ internal static class TextOnlineSessionWork
         {
             throw TextErrors.Mismatch();
         }
-        ChargeRetainedBytes(session, OrleansSerialization.Measure(request));
-        ChargeRetainedBytes(session, SHA256.HashSizeInBytes);
         if (!CryptographicOperations.FixedTimeEquals(immutableRequest,
             SHA256.HashData(OrleansSerialization.Serialize(request))))
         {
             throw TextErrors.Mismatch();
-        }
-    }
-
-    private static void ChargeRetainedBytes(TextOnlineSession session, long bytes)
-    {
-        if (session.SourcePin is { } original)
-        {
-            original.AdmitRetainedBytes(bytes);
-        }
-        else
-        {
-            session.Budget.ChargeBytes(bytes);
         }
     }
 

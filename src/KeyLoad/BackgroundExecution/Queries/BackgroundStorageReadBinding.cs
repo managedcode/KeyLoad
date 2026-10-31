@@ -19,13 +19,5 @@ internal sealed class BackgroundStorageReadBinding(CapabilityWorkLifetime origin
         observed.UnionWith(lifetimes);
     }
 
-    internal ReadOnlyMemory<byte> Capture(int maximumBytes)
-    {
-        var lifetimes = observed.ToImmutableArray();
-        if (OrleansSerialization.Measure(lifetimes) > maximumBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
-        }
-        return OrleansSerialization.Serialize(lifetimes);
-    }
+    internal ImmutableArray<ResourceLifetime> Capture() => [.. observed];
 }

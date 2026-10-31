@@ -16,7 +16,6 @@ internal sealed class GrainRoutingAuthorizationTests
     private const string OtherDomain = "another-domain";
     private const int NoDtoMarker = 0;
     private const int InvalidMarker = 1;
-    private const char Padding = 'x';
     private const int FirstRevision = 1;
     private const long BackupPosition = 42;
     private const long PolicyEpochIncrement = 1;
@@ -134,19 +133,17 @@ internal sealed class GrainRoutingAuthorizationTests
         await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, Root, command.CommandId)).IsNull();
     }
 
-    /// <summary>AC-ROUTE-001: no-DTO requests use the exact execution zero marker and replies enforce actual encoded byte bounds.</summary>
+    /// <summary>AC-ROUTE-001: no-DTO requests use the exact execution zero marker and replies preserve typed values.</summary>
     [Test]
     public async Task ExactMarkerAndBoundedRepliesPreserveTypedValues()
     {
         GrainPayload.RequireNoDto(NoDtoMarker);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainPayload.RequireNoDto(
             InvalidMarker)).Code).IsEqualTo(ErrorCode.Validation);
-        var reply = GrainReplyFactory.Value(new BackupReceipt(DocumentId, BackupPosition), UnitRoutingOptions.Routing(), CancellationToken.None);
+        var reply = GrainReplyFactory.Value(new BackupReceipt(DocumentId, BackupPosition));
         await Assert.That(((BackupReceipt)GrainReplyFactory.RequireValue(reply).Value!).Id).IsEqualTo(DocumentId);
         await Assert.That(reply.Error).IsNull();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainReplyFactory.Value(
-            new string(Padding, UnitRoutingOptions.Routing().Value.MaximumReplyBytes), UnitRoutingOptions.Routing(), CancellationToken.None)).Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        var error = GrainReplyFactory.Failure(Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired), false, null, UnitRoutingOptions.Routing());
+        var error = GrainReplyFactory.Failure(Errors.Fail(ErrorCode.PermissionDenied, GrainRoutingProtocol.AdministrationRequired), false, null);
         await Assert.That(error.Result).IsNull();
         await Assert.That(error.Error).IsEqualTo(ErrorCode.PermissionDenied);
     }

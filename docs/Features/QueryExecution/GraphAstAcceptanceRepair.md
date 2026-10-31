@@ -11,7 +11,7 @@ Canonical slice: QueryExecution. Linked GraphTraversal and Search use their unch
 
 ## Operation map
 
-Parsing roles: ScriptDomGraphShape and ScriptDomGraphScalar, with a narrowly shared ScriptDomSyntax/ScriptDomTokenBounds internal consumer boundary. Existing scalar entry points preserve their original call signatures and structural diagnostics. Existing tests: SqlGraphSearchParityTests (6 failures), SqlGraphSearchRejectionTests (3), SqlGraphSearchResultCompositionTests (2), SqlGraphPathParameterBoundaryTests (2), AdapterVectorAttachmentWholeFlowTests (1), VectorAttachmentAdmissionWholeFlowTests (3), VectorAttachmentScalarStateWholeFlowTests (3). All original case names, arguments, whole results and healthy controls are preserved. Existing cluster consumers and their receipts/cold lifetimes remain unchanged and require Main's original execution evidence.
+Parsing roles: ScriptDomGraphShape and ScriptDomGraphScalar, with a narrowly shared ScriptDomSyntax/ScriptDomTokenBounds internal consumer boundary. Existing scalar entry points preserve their original call signatures and structural diagnostics. Existing tests: SqlGraphSearchParityTests (6 failures), SqlGraphSearchRejectionTests (3), SqlGraphPathParameterBoundaryTests (2), AdapterVectorAttachmentWholeFlowTests (1), VectorAttachmentAdmissionWholeFlowTests (3), VectorAttachmentScalarStateWholeFlowTests (3). All original case names, arguments, whole results and healthy controls are preserved. Existing cluster consumers and their receipts/cold lifetimes remain unchanged and require Main's original execution evidence.
 
 ```mermaid
 flowchart LR

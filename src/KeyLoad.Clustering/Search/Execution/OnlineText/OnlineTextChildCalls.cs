@@ -1,20 +1,17 @@
 using KeyLoad.Clustering.Search;
 using KeyLoad.Core.ResourceExecution;
 using ManagedCode.Communication.Commands;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, GrainRequestEnvelope parentEnvelope,
     Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild, Func<Guid, Task> abort,
     IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics,
-    OnlineTextFrameAccounting frames, IGrainContext context, IResourceLifetimeWorkBinding binding)
+    IGrainContext context, IResourceLifetimeWorkBinding binding)
 {
     internal Guid ParentRequestId => parent.Envelope.RequestId;
     internal Guid SessionId { get; } = Guid.NewGuid();
-    internal int ProjectionPageBytes => services.GetRequiredService<IOptions<GrainRoutingOptions>>().Value.MaximumReplyBytes;
 
     internal Task<OnlineTextCapabilityResult> CapabilityAsync(OnlineTextIndexMaintenanceRequest request,
         OnlineTextCapabilityKind kind, CancellationToken token, ProjectionBatch? page = null,
@@ -55,7 +52,6 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, GrainRequ
         token.ThrowIfCancellationRequested();
         codec.ValidateScope(parent.Envelope);
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-        frames.AdmitChildExchange();
         var verified = await executeChild(parentEnvelope, token).ConfigureAwait(true);
         if (verified.Error is { } failure)
         {
@@ -65,9 +61,6 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, GrainRequ
 
     private Task<TResult> DispatchAsync<TResult>(Func<Guid, string, GrainRequestEnvelope> sign,
         Guid commandId, CancellationToken token) where TResult : class
-        => MaintenanceChildDispatch.CallAsync<TResult>(parent, sign, commandId, (value, cancellation) =>
-        {
-            frames.AdmitChildExchange();
-            return executeChild(value, cancellation);
-        }, services, codec, diagnostics, binding, TextIndexMaintenanceProtocol.Interrupted, token);
+        => MaintenanceChildDispatch.CallAsync<TResult>(parent, sign, commandId, executeChild,
+            services, codec, diagnostics, binding, TextIndexMaintenanceProtocol.Interrupted, token);
 }

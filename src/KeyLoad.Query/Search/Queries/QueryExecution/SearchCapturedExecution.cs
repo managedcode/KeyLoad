@@ -6,7 +6,6 @@ namespace KeyLoad.Query.Search;
 internal static class SearchCapturedExecution
 {
     private const string MissingOwner = "The original search owner is missing.";
-    private const long ReferenceArrayHeaderPointerSlots = 3;
 
     internal static SearchStart Start(DatabaseEngine database, ITextProjection? provider,
         IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, SearchRequest request,
@@ -78,11 +77,7 @@ internal static class SearchCapturedExecution
         }
         var selected = fusion.Select();
         var result = SearchBranchExecution.ProjectSelected(database, view, principal, resource, selected, budget, fusion);
-        if (original is not null)
-        {
-            budget.ChargeBytes(checked((long)selected.Length * IntPtr.Size + ReferenceArrayHeaderPointerSlots * IntPtr.Size));
-            original.VerifyTerminal(selected.Select(score => score.Reference).ToArray());
-        }
+        original?.VerifyTerminal(selected.Select(score => score.Reference).ToArray());
         budget.Check();
         return result;
     }

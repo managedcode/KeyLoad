@@ -1,5 +1,3 @@
-using System.Text;
-
 namespace KeyLoad.Client;
 
 internal sealed class QueueWorkerActiveDelivery
@@ -17,15 +15,10 @@ internal sealed class QueueWorkerActiveDelivery
         this.handler = handler;
         context = new(lane, actual, Guid.NewGuid(), Guid.NewGuid());
         Identity = QueueWorkerObservations.Identity(actual);
-        BodyBytes = checked((long)Encoding.UTF8.GetByteCount(actual.PayloadJson) + Encoding.UTF8.GetByteCount(actual.HeadersJson));
         Lease = new(context);
     }
 
     internal QueueWorkerClaimIdentity Identity
-    {
-        get;
-    }
-    internal long BodyBytes
     {
         get;
     }

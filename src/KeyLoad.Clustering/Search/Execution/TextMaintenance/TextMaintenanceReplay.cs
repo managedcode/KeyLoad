@@ -6,15 +6,13 @@ internal static class TextMaintenanceReplay
 {
     internal static async Task<ProjectionBatchResult?> RunAsync(MaintenanceChildCalls children,
         TextIndexMaintenanceRequest request, TextMaintenanceCapabilityResult state,
-        ProjectionBatchResult? checkpoint, int maximumPages,
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
+        ProjectionBatchResult? checkpoint, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
-        for (var pageNumber = 0; pageNumber < maximumPages; pageNumber++)
+        while (true)
         {
             var page = await children.ReadAsync<ReadProjectionBatchRequest, ProjectionBatch>(GrainReadKind.ProjectionBatch,
-                new(request.Consumer, ProjectionReplayPage.Records,
-                    children.ProjectionPageBytes, state.ReplayUpperSequence), token).ConfigureAwait(true);
+                new(request.Consumer, ProjectionReplayPage.Records, state.ReplayUpperSequence), token).ConfigureAwait(true);
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != state.ReplayUpperSequence || !page.Entries.IsEmpty)
@@ -39,7 +37,6 @@ internal static class TextMaintenanceReplay
                 return checkpoint;
             }
         }
-        throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
     }
 
     internal static async Task<TextMaintenanceCommittedPage> ApplyAndCommitAsync(MaintenanceChildCalls children,

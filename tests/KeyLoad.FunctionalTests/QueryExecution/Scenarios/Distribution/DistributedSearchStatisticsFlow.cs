@@ -14,10 +14,9 @@ internal static class DistributedSearchStatisticsFlow
         PartitionRef partition, PhysicalShardRecord placement, CancellationToken token)
     {
         var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
-        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes / IndependentOwners, budget.RemainingReadGrantRecords);
         return DistributedTextStatisticsLeaf.Execute(owner.Database, QueryFixture.Reader,
             Request(partition), placement, QueryFixture.Tenant,
-            UnitExecutionOptions.QueryExecution(), budget, grant);
+            UnitExecutionOptions.QueryExecution(), budget);
     }
 
     internal static DistributedTextStatistics Combine(DocumentPatchAtomicityOwner source,
@@ -32,14 +31,12 @@ internal static class DistributedSearchStatisticsFlow
         DistributedTextStatistics statistics, CancellationToken token)
     {
         var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
-        var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes / IndependentOwners, budget.RemainingReadGrantRecords);
         using var admission = owner.Database.AdmitQuery(token);
-        using var charged = budget.EnterReadGrant(grant);
         return owner.Database.WithPartitionQueryFenceView(QueryFixture.Reader, witness.Partition,
-            QueryFixture.Collection, grant, (view, principal, resource, digest) =>
+            QueryFixture.Collection, (view, principal, resource, digest) =>
             {
                 DistributedTextWitnessValidation.Require(owner.Database, view, principal, resource, digest,
-                    witness, witness.Partition, grant, budget);
+                    witness, witness.Partition, budget);
                 owner.Database.Authorization.RequireFieldUse(principal, resource, QueryFixture.Title);
                 var execution = UnitExecutionOptions.QueryExecution().Value;
                 var request = Request(witness.Partition);

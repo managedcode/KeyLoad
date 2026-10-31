@@ -67,12 +67,10 @@ public static class ChangeFeedsExecutionChangeFeeds
         return engine.Store.Read<ChangeFeedPage>(original =>
         {
             budget.Check();
-            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
-            var view = budget.CreateView(original, grant);
+            var view = budget.CreateView(original);
             var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
-            var page = engine.ReadChangeFeedView(view, principal, request, (resource, change) => new DocumentChange(change.Sequence, change.Commit, change.CommittedAt, change.After.Reference, change.After.Revision, change.After.Deleted, change.Before is { } before ? engine.Project(principal, resource, before) : null, change.After.Deleted ? null : engine.Project(principal, resource, change.After)), budget.CheckResult);
+            var page = engine.ReadChangeFeedView(view, principal, request, (resource, change) => new DocumentChange(change.Sequence, change.Commit, change.CommittedAt, change.After.Reference, change.After.Revision, change.After.Deleted, change.Before is { } before ? engine.Project(principal, resource, before) : null, change.After.Deleted ? null : engine.Project(principal, resource, change.After)));
             var result = new ChangeFeedPage(page.Changes, page.Cursor, page.ThroughSequence, page.Tail, page.FirstAvailable, page.HasMore, page.CutPosition);
-            budget.CheckResult(result);
             budget.Check();
             return result;
         });
@@ -91,24 +89,17 @@ public static class ChangeFeedsExecutionChangeFeeds
         where T : class
     {
         ArgumentNullException.ThrowIfNull(engine);
-        return engine.ReadChangeFeedView(view, principal, request, project, beforeRetain: null);
-    }
-
-    internal static AuthorizedDocumentChangePage<T> ReadChangeFeedView<T>(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ReadChangeFeedRequest request, Func<ResourceDefinition, AuthorizedDocumentChange, T?> project, Action<T>? beforeRetain)
-        where T : class
-    {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(principal);
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(project);
         var (resource, head, after) = engine.PrepareChangeRead(view, principal, request);
-        return engine.ProjectChangePage(view, principal, request, project, resource, head, after, beforeRetain);
+        return engine.ProjectChangePage(view, principal, request, project, resource, head, after);
     }
 
     internal static (ResourceDefinition Resource, OutboxHead Head, long After) PrepareChangeRead(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ReadChangeFeedRequest request)
     {
         const int LimitValidationBoundary = 1;
-        const int MaxBytesValidationBoundary = 1;
         const string InvalidChangeReadBoundsDetail = "The change-feed request exceeds its supported bounds.";
         const int FirstAvailableStep = 1;
         const string FreshAuthorizedSnapshotRequiredDetail = "The change-feed cursor requires a fresh authorized snapshot.";
@@ -117,7 +108,7 @@ public static class ChangeFeedsExecutionChangeFeeds
         var now = engine.Clock.GetUtcNow();
         engine.Authorization.Require(principal, request.Partition, request.Collection, Capability.ChangesRead | Capability.DocumentsRead);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, request.Partition, request.Collection, ResourceKind.Collection);
-        if (request.Limit < LimitValidationBoundary || request.MaxBytes < MaxBytesValidationBoundary || request.Start is not (ChangeFeedStart.Beginning or ChangeFeedStart.Now))
+        if (request.Limit < LimitValidationBoundary || request.Start is not (ChangeFeedStart.Beginning or ChangeFeedStart.Now))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, InvalidChangeReadBoundsDetail);
         }
@@ -139,14 +130,11 @@ public static class ChangeFeedsExecutionChangeFeeds
         return (resource, head, after);
     }
 
-    internal static AuthorizedDocumentChangePage<T> ProjectChangePage<T>(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ReadChangeFeedRequest request, Func<ResourceDefinition, AuthorizedDocumentChange, T?> project, ResourceDefinition resource, OutboxHead head, long after, Action<T>? beforeRetain)
+    internal static AuthorizedDocumentChangePage<T> ProjectChangePage<T>(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ReadChangeFeedRequest request, Func<ResourceDefinition, AuthorizedDocumentChange, T?> project, ResourceDefinition resource, OutboxHead head, long after)
         where T : class
     {
-        const int BytesInitialValue = 0;
-        const string ProjectChangePageDetailText = "The first change exceeds the page byte budget.";
         var changes = new List<T>();
         var through = after;
-        var bytes = BytesInitialValue;
         foreach (var entry in ProjectionOutbox.ReadOutboxRange(view, request.Partition, after, head.Tail, request.Limit))
         {
             var visible = (engine.VisibleChange(view, principal, resource, request.Partition, entry)).Value;
@@ -157,20 +145,7 @@ public static class ChangeFeedsExecutionChangeFeeds
                 continue;
             }
 
-            var size = JsonDefaults.Serialize(change).Length;
-            if (size > request.MaxBytes - bytes)
-            {
-                if (through == after)
-                {
-                    throw Errors.Fail(ErrorCode.BudgetExceeded, ProjectChangePageDetailText);
-                }
-
-                break;
-            }
-
-            beforeRetain?.Invoke(change);
             changes.Add(change);
-            bytes += size;
             through = entry.Sequence;
         }
 

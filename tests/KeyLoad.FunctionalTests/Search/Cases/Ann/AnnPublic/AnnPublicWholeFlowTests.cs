@@ -42,7 +42,7 @@ internal sealed class AnnPublicWholeFlowTests
         });
 
     [Test]
-    public Task ActualDisabledMissingGenerationAndResultBudgetFailWithoutProvisioningOrPartialThenHealthyPage()
+    public Task ActualDisabledAndMissingGenerationFailWithoutProvisioningOrPartialThenHealthyPage()
         => AnnPublicWholeFlow.RunAsync(ExactThreshold, FullBreadth, async (database, runtime, pin) =>
         {
             var image = AnnMaintenanceTestData.Snapshot(database);
@@ -57,8 +57,6 @@ internal sealed class AnnPublicWholeFlowTests
                 {
                     IndexGeneration = MissingGeneration
                 }), ErrorCode.HistoryUnavailable);
-            await FailureAsync(() => AnnPublicWholeFlow.Engine(database, runtime, bytes: 1)
-                .ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request), ErrorCode.BudgetExceeded);
             await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
             await Assert.That(AnnFixtureFileSnapshot.Capture(database.Directory)).IsEquivalentTo(files, CollectionOrdering.Matching);
             await AnnPublicWholeFlow.PageAsync(await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request),

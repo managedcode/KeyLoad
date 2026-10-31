@@ -4,7 +4,7 @@ namespace KeyLoad.Core.Search;
 
 internal sealed record AnnSeed(AnnSeedScope Scope, AnnSeedCut Cut,
     ImmutableArray<VectorRecord> Records, string CorpusSha256,
-    long OwnedBytesUpperBound, long PeakBytesUpperBound, long ReadBytes, long WorkUnits)
+    long OwnedBytesUpperBound, long PeakBytesUpperBound, long WorkUnits)
 {
     internal string? DependencySha256
     {

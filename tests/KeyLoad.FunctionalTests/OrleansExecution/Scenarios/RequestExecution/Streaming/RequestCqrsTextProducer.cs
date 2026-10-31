@@ -8,11 +8,11 @@ namespace KeyLoad.FunctionalTests.OrleansExecution;
 internal static class RequestCqrsTextProducer
 {
     internal static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Run(
-        Guid id, bool payload, RequestCqrsTextFault? fault, RequestCqrsProducerObservation observed, int maximumFrames,
+        Guid id, bool payload, RequestCqrsTextFault? fault, RequestCqrsProducerObservation observed,
         [EnumeratorCancellation] CancellationToken token)
     {
         var original = CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-            writer => ProduceAsync(writer, id, payload, fault, observed, maximumFrames), token);
+            writer => ProduceAsync(writer, id, payload, fault, observed), token);
         await foreach (var chunk in original.WithCancellation(token))
         {
             yield return chunk;
@@ -28,7 +28,7 @@ internal static class RequestCqrsTextProducer
 
     private static async ValueTask<Result<GrainOperationReply>> ProduceAsync(
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, Guid id, bool payload,
-        RequestCqrsTextFault? fault, RequestCqrsProducerObservation observed, int maximumFrames)
+        RequestCqrsTextFault? fault, RequestCqrsProducerObservation observed)
     {
         try
         {
@@ -39,10 +39,6 @@ internal static class RequestCqrsTextProducer
             await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.RuntimeIndex);
             await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Publish);
             await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Checkpoint);
-            if (fault == RequestCqrsTextFault.FrameBudget)
-            {
-                await ExhaustFramesAsync(writer, id, maximumFrames);
-            }
             await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Completed);
             if (fault == RequestCqrsTextFault.ExtraCompleted)
             {
@@ -51,18 +47,6 @@ internal static class RequestCqrsTextProducer
             return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(payload) });
         }
         finally { observed.MarkProducerSettled(writer.CancellationToken.IsCancellationRequested); }
-    }
-
-    private static async ValueTask ExhaustFramesAsync(ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
-        Guid id, int maximumFrames)
-    {
-        const int FramesPerPage = 3;
-        for (var page = 0; page <= maximumFrames / FramesPerPage; page++)
-        {
-            await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.RuntimeIndex);
-            await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Publish);
-            await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Checkpoint);
-        }
     }
 
     private static ValueTask FirstAsync(ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,

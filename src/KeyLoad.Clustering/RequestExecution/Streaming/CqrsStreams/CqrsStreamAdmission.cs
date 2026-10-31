@@ -1,24 +1,19 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>Validates the fixed producer shape and admits its execution encoded bytes before yield.</summary>
-internal sealed class CqrsStreamAdmission(
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer, Guid requestId, IOptions<GrainRoutingOptions> options, CqrsStreamPurpose? purpose = null)
+/// <summary>Validates the fixed producer shape before yield.</summary>
+internal sealed class CqrsStreamAdmission(Guid requestId, CqrsStreamPurpose? purpose = null)
 {
     private const int EmptyCount = 0;
-    private long aggregateBytes;
     private int count;
     private bool terminal;
     private readonly TextMaintenanceStreamShape text = new(requestId);
     private AnnMaintenanceStreamShape? ann;
     private OnlineTextMaintenanceStreamShape? online;
 
-    internal void Admit(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk,
-        CancellationToken cancellationToken)
+    internal void Admit(CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> chunk)
     {
         const int CountStep = 1;
 
@@ -32,28 +27,13 @@ internal sealed class CqrsStreamAdmission(
             purpose?.ResolveProgress();
         }
         var nextCount = checked(count + CountStep);
-        if (nextCount > (purpose?.HasLongProfile == true ? options.Value.MaximumStreamFrames : GrainRequestStreamProtocol.MaximumChunks))
+        if (purpose?.HasLongProfile != true && nextCount > GrainRequestStreamProtocol.MaximumChunks)
         {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
-        }
-
-        var maximumBytes = chunk.Kind switch
-        {
-            CqrsStreamChunkKind.Started or CqrsStreamChunkKind.Progress => options.Value.MaximumStartedBytes,
-            CqrsStreamChunkKind.Completed => options.Value.MaximumCompletedBytes,
-            CqrsStreamChunkKind.Failed => options.Value.MaximumFailedBytes,
-            _ => throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest)
-        };
-        var chunkBytes = GrainByteCounter.Measure(serializer: serializer, value: chunk, maximumBytes: maximumBytes, cancellationToken: cancellationToken, options: options);
-        var nextAggregate = checked(aggregateBytes + chunkBytes);
-        if (nextAggregate > options.Value.MaximumAggregateBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
+            throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
 
         ValidateShape(chunk, nextCount);
         count = nextCount;
-        aggregateBytes = nextAggregate;
         terminal = chunk.IsTerminal;
     }
 
@@ -139,14 +119,13 @@ internal sealed class CqrsStreamAdmission(
         ValidateTerminal(chunk.Kind, final);
     }
 
-    private void ValidateTerminal(CqrsStreamChunkKind kind, Result<GrainOperationReply> final)
+    private static void ValidateTerminal(CqrsStreamChunkKind kind, Result<GrainOperationReply> final)
     {
         if (final.IsSuccess)
         {
             var reply = final.Value;
             if (kind != CqrsStreamChunkKind.Completed || final.Problem is not null
-                || reply.Result is null || GrainReplyFactory.Measure(reply) > options.Value.MaximumReplyBytes
-                || reply.Error is not null || reply.SafeDetail is not null)
+                || reply.Result is null || reply.Error is not null || reply.SafeDetail is not null)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
             }
@@ -160,6 +139,6 @@ internal sealed class CqrsStreamAdmission(
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
 
-        GrainRequestStreamProblem.Validate(problem: problem, options: options);
+        GrainRequestStreamProblem.Validate(problem);
     }
 }

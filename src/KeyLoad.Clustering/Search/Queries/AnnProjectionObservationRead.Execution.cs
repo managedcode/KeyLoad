@@ -25,8 +25,6 @@ internal static partial class AnnProjectionObservationRead
         var work = new ReadExecutionBudget(clock, cancellationToken);
         work.AttachResourceLifetimeBinding(binding);
         work.ConstrainLifetime(original.Envelope.ExpiresAt);
-        work.ConstrainWork(request.MaximumReadBytes, request.MaximumRecords);
-        work.ChargeBytes(OrleansSerialization.Measure(request));
         var admitted = AnnProjectionObservationRead.RequireScope(database, services, principal, request, work, metadata, binding);
         var search = services.GetRequiredService<SearchEngine>();
         WaitForAnnIndexResult? waited = null;
@@ -50,8 +48,7 @@ internal static partial class AnnProjectionObservationRead
         var actual = database.Store.Identity;
         work.Check();
         var result = new AnnProjectionObservationResult(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, waited,
-            work.ReadBytes, work.ConstrainedRecords, approximate);
-        work.CheckResult(result);
+            approximate);
         return result;
     }
 

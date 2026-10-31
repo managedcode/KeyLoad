@@ -25,7 +25,6 @@ internal static class SearchLookupClosure
         source.VisitCapturedPrefix(prefix, (_, bytes) =>
         {
             budget.Check();
-            source.AdmitRetainedBytes(bytes.Length);
             var vector = OrleansSerialization.Deserialize<VectorRecord>(bytes);
             CaptureVector(database, source, principal, partition, collection, vector, budget);
             return true;
@@ -60,7 +59,6 @@ internal static class SearchLookupClosure
         T? result = null;
         source.ReadCapturedValue(key, bytes =>
         {
-            source.AdmitRetainedBytes(bytes.Length);
             result = OrleansSerialization.Deserialize<T>(bytes);
         });
         return result;

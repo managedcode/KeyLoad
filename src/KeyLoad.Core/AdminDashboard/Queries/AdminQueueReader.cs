@@ -48,7 +48,6 @@ public sealed class AdminQueueReader(DatabaseEngine database)
                 return true;
             }, after, cancellationToken: budget.Cancellation);
         var page = new AdminQueuePage(counters, [.. items], scan.HasMore ? items[^1].Id : null, AdminReadAuthority.Position(view));
-        budget.CheckResult(page);
         return page;
     }
 }

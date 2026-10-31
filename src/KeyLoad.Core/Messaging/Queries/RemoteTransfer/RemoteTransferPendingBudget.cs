@@ -1,13 +1,10 @@
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
-internal sealed class RemoteTransferPendingBudget : IDisposable
+internal sealed class RemoteTransferPendingBudget
 {
     private readonly ReadExecutionBudget budget;
-    private readonly ReadExecutionBudgetReadGrant grant;
-    private readonly ReadExecutionBudgetReadGrantLease lease;
     private readonly TimeProvider clock;
     private readonly TimeSpan deadline;
     private readonly long started;
@@ -31,17 +28,12 @@ internal sealed class RemoteTransferPendingBudget : IDisposable
         started = clock.GetTimestamp();
         deadline = database.DueDiscoveryDeadline;
         budget = original;
-        grant = coordination
-            ? budget.CreateReadGrant(budget.RuntimeMaximumReadBytes, budget.MaximumScanRecords)
-            : budget.CreateReadGrant(Math.Min(database.DueExecution.MaximumRangeBytes, budget.RuntimeMaximumReadBytes),
-                Math.Min(database.DueExecution.MaximumRecordsPerPage, budget.MaximumScanRecords));
-        lease = budget.EnterReadGrant(grant);
+        Remaining = coordination ? int.MaxValue : database.DueExecution.MaximumRecordsPerPage;
     }
-    internal int Remaining => grant.RemainingRecords;
-    internal void Observe(long bytes)
+    internal int Remaining { get; }
+    internal void Observe(long _)
     {
         Check();
-        budget.ChargeReadGrant(grant, bytes);
     }
     internal void Check()
     {
@@ -52,10 +44,4 @@ internal sealed class RemoteTransferPendingBudget : IDisposable
         }
     }
     internal IKeyValueView View(IKeyValueView view) => budget.CreateView(view);
-    internal void Result(object? value) => budget.CheckResult(value);
-    public void Dispose()
-    {
-        lease.Dispose();
-        budget.CompleteReadGrant(grant);
-    }
 }

@@ -9,14 +9,9 @@ internal static class RuntimeAnalyticsBounds
 {
     private const string Prefix = "keyload-analytics-bound-unit-";
     internal static AnalyticsAggregateResult Query(DatabaseEngine database,
-        AggregateAnalyticsRequest request, CancellationToken token, int? resultBytes = null)
+        AggregateAnalyticsRequest request, CancellationToken token)
     {
         var snapshot = database.CaptureAnalyticsAggregate(D.Root, request, token);
-        if (resultBytes is { } maximum)
-        {
-            snapshot.Work.ConstrainResultBytes(maximum);
-        }
-
         var path = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString("N"));
         AnalyticsStoreGeneration? generation = null;
         AnalyticsAggregateResult? result = null;

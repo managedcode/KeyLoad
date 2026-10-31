@@ -19,7 +19,6 @@ internal sealed class RequestCqrsTextMaintenanceTests(RequestCqrsHostedRuntimeFi
     [Arguments(RequestCqrsTextFault.MixedPhase)]
     [Arguments(RequestCqrsTextFault.ExtraCompleted)]
     [Arguments(RequestCqrsTextFault.AfterFinal)]
-    [Arguments(RequestCqrsTextFault.FrameBudget)]
     public Task MalformedTextProgressJoinsOriginalProducerThenHealthyWithoutChangingTheCut(RequestCqrsTextFault fault)
         => RequestCqrsTextMaintenanceFlow.RunAsync(fixture, TextIndexMaintenanceMode.Build, fault);
 }

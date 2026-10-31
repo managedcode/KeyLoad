@@ -5,21 +5,13 @@ namespace KeyLoad.Clustering;
 internal static class TextMaintenanceParentFlow
 {
     private const long InitialSequence = 0;
-    private const int ReservedFrames = 8;
-    private const int FramesPerPage = 3;
-    private const int EmptyPages = 0;
     private static readonly string[] MutationKinds = [MutationDiscriminatorNames.PutDocument,
         MutationDiscriminatorNames.PatchDocument, MutationDiscriminatorNames.DeleteDocument];
 
     internal static async Task<TextIndexMaintenanceResult> RunAsync(MaintenanceChildCalls children,
-        TextIndexMaintenanceRequest request, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
-        TextIndexMaintenanceOptions options, GrainRoutingOptions routing)
+        TextIndexMaintenanceRequest request, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
-        if (!options.IsValid())
-        {
-            throw Errors.Fail(ErrorCode.Validation, TextIndexMaintenanceOptions.ValidationMessage);
-        }
         if (request.Mode == TextIndexMaintenanceMode.Release)
         {
             return await TextMaintenanceRelease.RunAsync(children, request, token).ConfigureAwait(true);
@@ -44,14 +36,8 @@ internal static class TextMaintenanceParentFlow
             state = recovered.State;
             checkpoint = recovered.Checkpoint;
         }
-        var maximumPages = Math.Min(options.MaximumReplayPages,
-            (routing.MaximumStreamFrames - ReservedFrames) / FramesPerPage);
-        if (maximumPages <= EmptyPages)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
-        }
-        var replayed = await TextMaintenanceReplay.RunAsync(children, request, state, checkpoint,
-            maximumPages, writer).ConfigureAwait(true);
+        var replayed = await TextMaintenanceReplay.RunAsync(children, request, state, checkpoint, writer)
+            .ConfigureAwait(true);
         state = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.Verify, token).ConfigureAwait(true);
         await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.Completed)
             .ConfigureAwait(true);

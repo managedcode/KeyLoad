@@ -6,12 +6,12 @@ namespace KeyLoad.FunctionalTests.QueryExecution;
 internal sealed class PartitionQueryCancellationObserver
 {
     private const string ThreadName = "partition-query-cancellation-observer";
-    private const string ProgressTimeoutMessage = "The partition query did not charge execution read bytes before the observer bound.";
-    private const string EarlyCompletionMessage = "The partition query completed before cancellation was observed on charged execution reads.";
+    private const string ProgressTimeoutMessage = "The partition query did not examine stored entries before the observer bound.";
+    private const string EarlyCompletionMessage = "The partition query completed before cancellation was observed on examined stored entries.";
     private const string JoinTimeoutMessage = "The partition-query observer exceeded its initial join bound.";
     internal const int TimeoutSeconds = 15;
 
-    private readonly ReadExecutionBudget budget;
+    private readonly Func<long> examinedEntries;
     private readonly CancellationTokenSource cancellation;
     private readonly ManualResetEventSlim armed;
     private readonly ManualResetEventSlim querySettled;
@@ -20,13 +20,13 @@ internal sealed class PartitionQueryCancellationObserver
     private readonly Thread thread;
     private int cancellationRequested;
     private int queryStarted;
-    private long observedReadBytes;
+    private long observedEntries;
     private bool threadStarted;
 
-    internal PartitionQueryCancellationObserver(ReadExecutionBudget budget, CancellationTokenSource cancellation,
+    internal PartitionQueryCancellationObserver(Func<long> examinedEntries, CancellationTokenSource cancellation,
         ManualResetEventSlim armed, ManualResetEventSlim querySettled)
     {
-        this.budget = budget;
+        this.examinedEntries = examinedEntries;
         this.cancellation = cancellation;
         this.armed = armed;
         this.querySettled = querySettled;
@@ -34,7 +34,7 @@ internal sealed class PartitionQueryCancellationObserver
     }
 
     internal bool CancellationRequested => Volatile.Read(ref cancellationRequested) != 0;
-    internal long ObservedReadBytes => Interlocked.Read(ref observedReadBytes);
+    internal long ObservedEntries => Interlocked.Read(ref observedEntries);
 
     internal void StartAndWait()
     {
@@ -87,12 +87,13 @@ internal sealed class PartitionQueryCancellationObserver
     private void WaitForReadProgressAndCancel()
     {
         var startedAt = new TestElapsedClock(TimeProvider.System);
+        var initial = examinedEntries();
         while (true)
         {
-            var readBytes = budget.ReadBytes;
-            if (readBytes > 0)
+            var examined = examinedEntries() - initial;
+            if (examined > 0)
             {
-                Interlocked.Exchange(ref observedReadBytes, readBytes);
+                Interlocked.Exchange(ref observedEntries, examined);
                 RequestCancellation();
                 return;
             }

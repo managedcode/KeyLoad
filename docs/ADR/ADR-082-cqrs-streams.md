@@ -40,7 +40,7 @@ flowchart LR
 | Microsoft Orleans | Grain execution, response enumeration, batching, cancellation propagation and enumerator disposal. |
 | `ManagedCode.Orleans.Graph` | Allowed grain-call transitions and their context across response enumeration. |
 | `ManagedCode.Communication.AspNetCore` | CQRS HTTP stream results when an external HTTP streaming endpoint is exposed. |
-| KeyLoad | Fresh persisted authorization; request/result identity; operation-specific progress validation; byte, frame, duration and concurrent-operation bounds; database effects and storage shutdown ordering. |
+| KeyLoad | Fresh persisted authorization; request/result identity; operation-specific progress and stream-shape validation; request expiry; database effects and storage shutdown ordering. Chunks carry no byte or frame cap and concurrent operations no count limit ([ADR-145](ADR-145-no-request-throttling.md), [ADR-149](ADR-149-no-operation-limits.md)). |
 
 `ConnectionGrain` creates its shared operation producer with `CqrsStream.Create`.
 Its KeyLoad adapters must remain limited to the last row;

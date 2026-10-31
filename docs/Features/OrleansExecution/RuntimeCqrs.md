@@ -42,8 +42,9 @@ ManagedCode.Orleans.Graph enforces application call transitions and preserves th
 originating context across Task calls and enumeration. The terminal Task entry
 allows independent operations to interleave on the connection while storage stays
 on the independent request path. KeyLoad checks fresh persisted policy,
-request and result identity, operation-specific progress, byte/frame limits,
-execution deadlines and concurrent resource admission. It must not duplicate the
+request and result identity, operation-specific progress, stream shape and
+request expiry; chunks carry no byte or frame cap and concurrent work no count
+limit. It must not duplicate the
 library's producer, transport or dispatcher.
 
 The request envelope and bounded progress contracts are in

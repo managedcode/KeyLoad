@@ -1,7 +1,8 @@
 # ResourceExecution
 
-ResourceExecution owns per-operation data bounds, canonical resource lifetimes,
-shared result retention and joined ownership. Orleans owns cluster and activation
+ResourceExecution owns the per-operation execution context (cancellation,
+explicit expiry), canonical resource lifetimes, the shared deduplicated
+resource-lifetime ledger and joined ownership. Orleans owns cluster and activation
 lifecycle; the silo-local ZoneTree owner retains files and engine handles.
 [AnalyticsStore](AnalyticsStore.md) owns user analytics requirements and its
 bounded derived generations. OpenTelemetry owns instrumentation.
@@ -17,7 +18,7 @@ workstream changes no authorized cut, database state, WAL or acknowledgement.
 The additive TimeSeries readers under
 [ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md) map REQ-MP-002/005 and
 AC-MP-002/005/011/012 to AC-SERIES-011 and AC-RANGE-REV-003. One original read
-gate and one budgeted view charge metadata/data/lookahead exactly once, enforce
+gate and one budgeted view read metadata/data/lookahead exactly once, enforce
 deadline/cancellation and exact full JSON results, and preserve healthy
 following operations after failure. Architecture choices do not establish
 maximum throughput, physical I/O, process RSS or numeric coverage.
@@ -161,7 +162,7 @@ qualify the current delivered source.
 
 | Existing requirement / AC | Exact source families or method identities | Observed contribution and boundary |
 |---|---|---|
-| REQ-MP-002 / AC-MP-004, AC-MP-005 | `AnalyticalAdmissionTests`; `BudgetedReadViewTests`; `ReadBudgetAllocationTests`; `ReadExecutionBudgetGrant*Tests`; `ReadExecutionTests` | Real engine/store reservation, shared read-byte/record debit, limits before reader/callback/materialization, read cancellation and healthy-follow-up subflows. Allocation assertions are scoped observations, not RSS/physical-I/O or performance qualification. |
+| REQ-MP-002 / AC-MP-004, AC-MP-005 | `AnalyticalAdmissionTests`; `BudgetedReadViewTests`; `ReadBudgetAllocationTests`; `ReadExecutionTests` | Real engine/store reservation, one operation's cancellation and expiry before reader/callback/materialization, read cancellation and healthy-follow-up subflows. Allocation assertions are scoped observations, not RSS/physical-I/O or performance qualification. |
 | REQ-MP-006 / AC-MP-006; REQ-MP-002 / AC-MP-003 | `CanonicalJsonTests`; `CanonicalJsonAllocationTests`; `JsonPathTests`; `JsonTextProtocolTests`; `JsonTextAllocationTests`; `PreparedScalarTests` | Exact canonical bytes/fingerprints, pointer/scalar behavior, strict text/byte decoding, malformed-input cleanup, persisted retry and bounded allocation cases. These cover named serializer paths, not all public API transports. |
 | REQ-MP-006 / AC-MP-006; REQ-MSG-001 / AC-MSG-001; REQ-MSG-003 / AC-MSG-003 | `JsonTextQueueReplayTests` and `JsonTextSubscriptionReplayTests` | Actual receive/replay preserves delivery identity, rejects changed raw request/result data, rechecks current principal or subscription generation, and rejects stale lease/token use. This is a replay/lease subset, not the full messaging API or official-client proof. |
 | REQ-ROC-001..004 / AC-ROC-001..004 | `ReadOnlyCollectionContractTests`; `ReadOnlyCollectionValidationTests`; `ReadOnlyCollectionWireTests`; `CanonicalKeyContractTests`; relevant `ReadBudgetAllocationTests` typed owned-read case | Reflection/API shape, exact wire/fingerprint bytes, required collection validation and real independent owned buffers/read results. AC-ROC-005/006 caller-wide build/delivery gates remain separate. |
@@ -293,10 +294,10 @@ hangs and are not throughput measurements.
 
 An internal BudgetedReadView in this slice
 wraps an existing IKeyValueView only inside a committed read action, forwards
-borrowed callbacks with one cumulative ReadExecutionBudget charge before copy/
-decode, and implements the same owned Get/Scan contracts through borrowed work.
-VisitRange composes a caller observer without double charging and honors both the
-operation and any method-specific cancellation token. Existing provider budgets,
+borrowed callbacks after the ReadExecutionBudget cancellation and expiry check,
+binds the resource lifetimes it observes, and implements the same owned Get/Scan
+contracts through borrowed work. VisitRange composes a caller observer and honors
+both the operation and any method-specific cancellation token. Existing provider budgets,
 ordering, lookahead, stop flags and callback non-mutation remain unchanged. This
 adapter reuses persisted authorization helpers; it does not reimplement principal
 or policy decisions. The shared budget's CreateView(IKeyValueView) exposes that
@@ -320,7 +321,7 @@ matching fetched baseline or selected staged entry is counted before cancellatio
 provider cap or observer rejection, including prefetch, overwrite, tombstone and
 true live result-limit lookahead. Never-fetched staged peeks and iterator keys
 outside the range are not examined payloads. Existing StorageScanResult.ReadBytes
-remains accepted budget work and is distinct from these total attempted counters.
+reports the bytes one storage range delivered and is distinct from these total attempted counters.
 
 This observes logical provider operations only; iterator/cache/seek and OS
 physical I/O remain unmeasured. No keys, paths, identities, payloads or credentials
@@ -332,38 +333,22 @@ range overwrite/tombstone/prefetch/lookahead/bounds, pre- and mid-cancellation,
 provider budget failure and healthy subsequent reads. GitHub executes them; no
 measurement claim follows from authored counters or local static validation.
 
-Actors: the caller, the operator and the CI observer. Actual entry points: the request body limit in [ServerExecutionOptions](../../src/KeyLoad/ClientApi/Configuration/ServerExecutionOptions.cs), reply and stream ceilings in [GrainRoutingOptions](../../src/KeyLoad.Clustering/RequestExecution/Configuration/GrainRoutingOptions.cs), [ReadExecutionBudget](../../src/KeyLoad.Core/ResourceExecution/Execution/ReadExecution/ReadExecutionBudget.cs), [AnalyticalReadGate](../../src/KeyLoad.Core/ResourceExecution/Queries/AnalyticalReadGate.cs), [ServiceDefaults telemetry](../../src/KeyLoad.ServiceDefaults), Aspire composition; the optional queue transfer attempt policies are [DatabaseLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/DatabaseLimits.cs). Public UI is N/A; benchmark views belong to BenchmarkComparisons.
+Actors: the caller, the operator and the CI observer. Actual entry points: the request body limit in [ServerExecutionOptions](../../src/KeyLoad/ClientApi/Configuration/ServerExecutionOptions.cs), request lifetimes and the connection idle timeout in [GrainRoutingOptions](../../src/KeyLoad.Clustering/RequestExecution/Configuration/GrainRoutingOptions.cs), [ReadExecutionBudget](../../src/KeyLoad.Core/ResourceExecution/Execution/ReadExecution/ReadExecutionBudget.cs), [AnalyticalReadGate](../../src/KeyLoad.Core/ResourceExecution/Queries/AnalyticalReadGate.cs), [ServiceDefaults telemetry](../../src/KeyLoad.ServiceDefaults), Aspire composition; the optional queue transfer attempt policies are [DatabaseLimits](../../src/KeyLoad.Abstractions/ResourceExecution/Contracts/DatabaseLimits.cs). Public UI is N/A; benchmark views belong to BenchmarkComparisons.
 
 | Requirement | Acceptance / flows | Test mapping |
 |---|---|---|
-| REQ-RESOURCE-001: requests are limited only by the server-wide request body limit, caller-supplied operation bounds, explicit expiries and the physical reply and storage ceilings; no node, tenant, principal or connection pool throttles callers and no configured operation limit refuses work ([ADR-145](../ADR/ADR-145-no-request-throttling.md), [ADR-149](../ADR/ADR-149-no-operation-limits.md)) | AC-RESOURCE-001: a declared or chunked body above `KeyLoad:ServerExecution:MaximumBodyBytes` returns `ResourceExhausted` (HTTP 429) before the command claims its ID, and a control command then commits under that same ID; a second command on one connection succeeds while the first is held; caller-supplied operation bounds reject excess work with their typed errors and a following operation succeeds | [RequestBodyLimitClusterTests](../../tests/KeyLoad.ClusterTests/ResourceExecution/Cases/RequestBodyLimitClusterTests.cs) `OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds`; `ConnectionFailureTests.AcCrs053ConnectionRunsAnotherOperationWhileTheFirstIsHeld`; the per-operation bound cases in the traceability table above; real cluster mixed-load expansion PLANNED |
+| REQ-RESOURCE-001: requests are limited only by the server-wide request body limit, caller-supplied operation bounds, explicit expiries and the physical storage ceilings; no node, tenant, principal or connection pool throttles callers and no configured operation limit refuses work ([ADR-145](../ADR/ADR-145-no-request-throttling.md), [ADR-149](../ADR/ADR-149-no-operation-limits.md)) | AC-RESOURCE-001: a declared or chunked body above `KeyLoad:ServerExecution:MaximumBodyBytes` returns `ResourceExhausted` (HTTP 429) before the command claims its ID, and a control command then commits under that same ID; a second command on one connection succeeds while the first is held; caller-supplied operation bounds reject excess work with their typed errors and a following operation succeeds | [RequestBodyLimitClusterTests](../../tests/KeyLoad.ClusterTests/ResourceExecution/Cases/RequestBodyLimitClusterTests.cs) `OversizedDeclaredAndChunkedBodiesAreRejectedBeforeCommandsClaimTheirIds`; `ConnectionFailureTests.AcCrs053ConnectionRunsAnotherOperationWhileTheFirstIsHeld`; the per-operation bound cases in the traceability table above; real cluster mixed-load expansion PLANNED |
 | REQ-RESOURCE-002: operations/telemetry show the actual guarantees and bounded work without secrets | AC-RESOURCE-002: every advertised operation family has an exact workload, topology, read/acknowledgement semantics, an explicit numeric resource/latency/throughput budget and a measured result; bounded low-cardinality counters/timings cover Orleans hops, configured-copy apply wait and logical reads/bytes/scans where applicable; no PII, keys, tokens or request IDs appear; logical bytes, managed allocations/GC, client working set and per-node CPU/RAM have separate names and provenance; unknown measurements are reported unavailable, not zero | Source counters alone do not pass. TUnit proves metric names/labels/privacy and configured thresholds; real Docker/Aspire cluster profiles exercise successful, overloaded, bound-rejected, cancelled and slow-consumer/backpressure cases through the .NET SDK and official MCP client. Repeated exact-SHA baseline/candidate JSON must use identical workload, topology and acknowledgement/read guarantees; thresholds are derived from that evidence under AC-MP-011. |
 
 Decisions: [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-028 scheduling time](../ADR/ADR-028-persisted-scheduling-time.md), [ADR-031 modular deployment](../ADR/ADR-031-modular-all-in-one-resource-isolation.md), ADR-035, [ADR-145 no request throttling](../ADR/ADR-145-no-request-throttling.md), [ADR-149 no operation limits](../ADR/ADR-149-no-operation-limits.md). TimeProvider.System remains the host/Orleans clock; an operation clock does not freeze the cluster runtime. Mixed query/search/graph/event/queue workloads need real correctness and liveness tests, not separate synthetic doubles.
 
 Business work and the matching tests stay in the owning `<SliceName>/` slice. Configuration validation, invalid bounds, zero/empty work, overflow, cancellation/deadline and a healthy follow-up are part of the AC. A local document review proves no numeric coverage, memory ceiling or performance gain; metrics are published only from successful GitHub JSON.
 
-## Independent query output ceiling
+## Query output and live query pages
 
-REQ-QUERY-007 / AC-QUERY-007-JOIN-001 and AC-REL-004-JOIN-004/006 require the literal 4096 complete joined-result rejection without applying that ceiling to journal quotas: a journal limit cannot fit a ceiling smaller than the required envelope metadata. Raising 4096 or reducing journal quotas is inadmissible.
+There is no query, search or read result-byte ceiling and no query execution option that configures one ([ADR-149](../ADR/ADR-149-no-operation-limits.md)). `ReadExecutionBudget` carries only cancellation, the explicit expiry and resource-lifetime bindings; scalar, Q2, model and explain SQL, live-query snapshots and deltas, partition query leaves and merge, and text, vector, hybrid and graph search results are bounded by their own `Limit` and the data they read. SQL graph search shares one operation with the graph search it calls; its composition is in [QueryExecution](QueryExecution.md).
 
-QueryExecutionOptions.MaximumResultBytes is nullable and positive; null configures no KeyLoad result ceiling, and an explicit value is the only configured query/read output ceiling ([ADR-149](../ADR/ADR-149-no-operation-limits.md)); otherwise the grain reply and stream ceilings in GrainRoutingOptions bound delivered results. This is server-owned typed query/read output configuration, not a caller request field, command budget or persisted format. Existing Core ReadExecutionBudget adds a monotonic result-byte constraint over its cancellation and explicit expiry. It changes only bounded exact UTF8 output counting; it does not restart a clock, read/work grant, admission lease, authorization or read cut. Default null preserves original calls and clock checks. Callback/page state and complete response accounting remain shared across SQL/AST/SDK/official MCP execution.
-
-All existing output owners share one bound: QueryEngine scalar/Q2/model/explain and GraphPath SQL, live-query snapshot/delta, partition query plan/leaf retained grants/merge/public mapping, SearchEngine text/vector/hybrid/graph results and SQL graph search consume the same bound. Existing cumulative selected-result/retained byte checks use the constrained budget; storage-owned range work bounds (ZoneTreeStorageExecutionOptions) remain unchanged. Exact final serializer accounting includes response metadata and must throw existing BudgetExceeded without a successful partial result. No serialization alias/field IDs, policy/authority, cursors, journal limits or HTTP request body limit changes. Existing server QueryExecutionOptions binding/Validate remains configuration authority.
-
-Core ReadExecutionBudget owns the monotonic counter constraint; Query QueryExecution/Validation/QuerySemantics/QueryResultBudgetPolicy.cs resolves and composes the typed ceiling; existing feature execution owners consume it. The Aspire test fixture accepts an explicitly validated query-options overload and applies only the explicit MaximumResultBytes environment setting to every owned node. `DatabaseLimits` keeps only the two optional queue transfer attempt policies. The result-budget replicated-cluster case keeps 4096 and all original source/payload/no-effect/error/healthy SDK/official MCP assertions, configuring only the independent query cap with default valid journal limits.
-
-QueryExecution QueryResultByteLimitTests must execute real scalar and Q2 SQL/AST large-page rejection at 4096, default successful baseline, complete persisted-source equivalence and a complete healthy smaller projection with unchanged position; null/default configures no result ceiling. The shared constraint uses the original token and explicit expiry with no reset. Rollback removes this query configuration and its consumer composition, never changes stored bytes, admission or old outcomes. No performance, durability or readiness claim follows.
-
-Composition: REQ-QUERY-007 and AC-QUERY-007-GRAPH-002 require SQL graph parsing, graph owner admission, graph reachability, selected document/context projection and final protocol serialization to share the original ReadExecutionBudget. QueryEngine may receive a SearchEngine with different frozen options: effective output/retained cap is the monotonic minimum of the original ceiling, SQL owner configured cap and SearchEngine configured cap. No new clock/start, token, examined-record/read-byte grants or task boundary may replace that parser budget. The public SearchEngine GraphSearchAsync entry still creates its original budget, then delegates to one feature-local internal owned-budget overload; that overload constrains its own frozen output policy, admits with the original initiating token, awaits the original worker, and disposes its actual admission. SQL delegates to that same overload and retains existing final checks. No duplicated dispatcher or worker exists.
-
-AC-QUERY-007-GRAPH-002 maps to SqlGraphSearchResultCompositionTests: actual persisted ZoneTree documents and graph, mismatched caps in both directions, exact projected-search cumulative BudgetExceeded diagnostic before final graph serialization, no returned partial result, complete ordered raw record bytes and commit position unchanged, then literal healthy graph hit/entity/revision/JSON/rank/empty-expansion oracle under the same owners. This specifically distinguishes early retained projection enforcement from post-allocation wrapper rejection. Rollback removes the shared-budget composition and regression coherently with its accepted query-cap contract; journal/auth/storage/SQL dialect contracts remain unchanged.
-
-## Live delta retained output composition
-
-REQ-QUERY-001/003, AC-MP-003/012 and REQ/AC-FEED-002/003 under ADR-004/010/013/022/118 require the existing constrained result budget to admit each retained selected live delta before retention. Core keeps its existing public ReadChangeFeedView signature and adds an internal synchronous before-retain overload, invoked only after original request.MaxBytes admits the change and before changes.Add/checkpoint advancement. LiveQueryResultByteAdmission uses exact original budget.MeasureResult and cumulative MaximumResultBytes; overflow is existing QueryEngine.ResultLimitExceeded BudgetExceeded, not partial success. Full wrapper serializer check remains. No operation clock/token/read grants/admission/read cut reset or new request/serialization/persistence field. Install this additional callback only for an explicit configured result cap; null/default preserves old feed behavior.
-
-LiveQueryResultCompositionTests use actual ZoneTree Start->multirow mutation->Read, individually fitting changes whose combined output exceeds4096, exact terminal error/noPartial/runtimeFull store bytes and position invariance, healthy smaller literal projection and complete checkpoint/cut/receipt/row metadata. A separate original request.MaxBytes page/resume flow proves candidates excluded by original pagination are not charged against retained query cap. Rollback removes internal callback, live admission helper and matching cases together; default cap/journal/auth contracts remain unchanged.
+A live-query page is bounded by its `Limit` only. `LiveQueryResultCompositionTests.HiddenOutboxPagesResumeFromTheOriginalCursorWithLiteralPages` reads through outbox entries of a hidden collection one page at a time: each page advances the cursor without returning hidden rows, the visible change arrives exactly once and replays from its cursor, and the raw store image, position and identity stay unchanged.
 
 ### Database phase bank invalid-construction flow
 
@@ -412,17 +397,6 @@ The source maps these oracles to `TenantShutdownWholeFlow`,
 SDK/MCP overload, Orleans request shutdown under in-flight distributed work,
 physical CPU/RSS/disk liveness and delivered-source qualification remain open;
 this focused local operation alone establishes none of those gates.
-
-## failed-reader grant settlement
-
-REQ-MP-002/005, AC-MP-004/005/012.
-The original scoped grant retains its unused bytes/records while the real borrowed callback and scope own the read. CompleteSettledReadGrant rejects an active scope without mutation. A consumer IOException retains its original identity; accepted bytes/record stay charged. After the original scope has exited, original caller cancellation rejects ordinary completion; cancellation-independent settled completion returns only the actual unused reservation, once. A fresh independent operation reads both original literal records under its unchanged aggregate ceiling. Full raw image and committed position remain unchanged throughout refusal/cleanup/healthy reads and same-root cold reopen.
-
-This is one complete Unit ZoneTree read/lifetime acceptance flow, not a new resource policy or proven production defect. No cancellation reset, deadline renewal, quota change, storage mutation, wire/schema/alias/API change, public transport, cluster or physical-memory claim. Cross-owner ordinary CompleteReadGrant active-scope semantics remain untouched.
-
-declaration: `ReadExecutionBudgetSettledGrantTests.AcMp004005012FailedBorrowedReaderSettlesOnlyAfterScopeExitThenCancelledCleanupAndColdHealthyRead`; the existing three settled-grant cases and all cancellation/scoped-grant cases remain mandatory.
-
-## Original analytical byte-budget continuation
 
 ## Original analytical admission healthy T-SQL continuation
 

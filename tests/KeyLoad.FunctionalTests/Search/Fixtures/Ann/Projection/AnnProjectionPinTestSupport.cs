@@ -45,8 +45,8 @@ internal static class AnnProjectionPinTestSupport
             database.Store.Position, StoredOutbox(database, seedTail), StoredOutbox(database, seedTail + 1));
 
     internal static ProjectionBatch Read(TestDatabase database, ProjectionConsumerRef consumer,
-        string principal = Principal, int limit = 1, int maxBytes = 4_194_304)
-        => database.Database.ReadProjectionBatch(principal, new(consumer, limit, maxBytes));
+        string principal = Principal, int limit = 1)
+        => database.Database.ReadProjectionBatch(principal, new(consumer, limit));
 
     internal static Result<object> CommitEmpty(TestDatabase database, ProjectionConsumerRef consumer,
         ProjectionBatch batch, string principal, Guid commandId, DateTimeOffset evaluatedAt)

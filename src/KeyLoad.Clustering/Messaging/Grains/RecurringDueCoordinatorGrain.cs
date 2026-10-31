@@ -1,11 +1,9 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Messaging;
-using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Placement;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
@@ -13,8 +11,7 @@ namespace KeyLoad.Clustering;
 [GrainType(DueCoordinatorAliases.Coordinator), PreferLocalPlacement]
 internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, BackgroundStorageClient storage,
     IServiceProvider services, TimeProvider clock,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> chunkSerializer,
-    IOptions<DueCoordinationOptions> options, IOptions<GrainRoutingOptions> routingOptions,
+    IOptions<DueCoordinationOptions> options,
     ILocalDurableJobManager durableJobs, RuntimeJournalAdmission runtimeJournalAdmission)
     : Grain, IRecurringDueCoordinatorGrain, IDurableJobHandler
 {
@@ -54,7 +51,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
 
     public Task<DueDispatchResult> ProcessQueueTransferAsync(RemoteTransferCoordinationHint hint, CancellationToken cancellationToken)
         => RemoteTransferCoordination.ExecuteAsync(hint, this.GetPrimaryKeyString(), codec,
-            new(codec, storage, hint, services, GrainFactory, clock, chunkSerializer, routingOptions),
+            new(codec, storage, hint, services, GrainFactory),
             clock, options, runtimeJournalAdmission, cancellationToken);
 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
@@ -156,8 +153,8 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         var envelope = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, commandId, payload);
         var request = GrainFactory.GetGrain<IConnectionGrain>(connectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
-            createStream: token => request.ExecuteStreamAsync(envelope, token), serializer: chunkSerializer, requestId: requestId, clock: clock,
-            cancellationToken: cancellationToken, options: routingOptions).ConfigureAwait(true);
+            createStream: token => request.ExecuteStreamAsync(envelope, token), requestId: requestId,
+            cancellationToken: cancellationToken).ConfigureAwait(true);
     }
 
     private void ValidateHint(DueWorkHint hint)

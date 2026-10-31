@@ -11,10 +11,8 @@ internal sealed class PreparedQuery
 {
     private const int AdjacentElementOffset = 1;
     private const int FirstElementIndex = 0;
-    private const int InitialSequence = 0;
     private const int EmptyElementCount = 0;
     private const int EqualOrder = 0;
-    private const int NoRetainedBytes = 0;
     private const int VersionOne = 1;
     private const int HeapChildCount = 2;
 
@@ -28,12 +26,9 @@ internal sealed class PreparedQuery
     private int rowCount;
     private readonly bool ordinalFullReferenceOrder;
     private readonly Func<DocumentRecord, QueryRow>? projectCandidate;
-    private readonly Action<long>? reserveCandidate;
-    private readonly Action<long>? releaseCandidate;
 
     internal PreparedQuery(SelectQuery query, int cursorOffset, int maxCandidates,
-        bool ordinalFullReferenceOrder = false, Func<DocumentRecord, QueryRow>? projectCandidate = null,
-        Action<long>? reserveCandidate = null, Action<long>? releaseCandidate = null)
+        bool ordinalFullReferenceOrder = false, Func<DocumentRecord, QueryRow>? projectCandidate = null)
     {
         order = query.Order;
         paths = PredicateEvaluator.Fields(query.Filter).Concat(order.Select(item => item.Path))
@@ -42,16 +37,9 @@ internal sealed class PreparedQuery
         capacity = (int)Math.Min(maxCandidates, (long)cursorOffset + query.Limit);
         this.ordinalFullReferenceOrder = ordinalFullReferenceOrder;
         this.projectCandidate = projectCandidate;
-        this.reserveCandidate = reserveCandidate;
-        this.releaseCandidate = releaseCandidate;
         if (ordinalFullReferenceOrder)
         {
             ArgumentNullException.ThrowIfNull(projectCandidate);
-            ArgumentNullException.ThrowIfNull(reserveCandidate);
-            ArgumentNullException.ThrowIfNull(releaseCandidate);
-        }
-        if (ordinalFullReferenceOrder)
-        {
             partitionRows = new PreparedRow?[capacity + AdjacentElementOffset];
         }
         else
@@ -76,7 +64,7 @@ internal sealed class PreparedQuery
         }
 
         var reference = ordinalFullReferenceOrder ? null : KeyCodec.Encode(document.Reference.Id);
-        var pending = new PreparedRow(document, keys, reference, null, InitialSequence);
+        var pending = new PreparedRow(document, keys, reference, null);
         if (!ordinalFullReferenceOrder)
         {
             var queue = ordinaryRows!;
@@ -98,12 +86,7 @@ internal sealed class PreparedQuery
         else if (capacity > EmptyElementCount && Compare(pending, partitionRows![FirstElementIndex]!) < EqualOrder)
         {
             var retained = Retain(pending);
-            var removed = RemoveWorst();
-            if (removed.ReservedBytes > NoRetainedBytes)
-            {
-                releaseCandidate?.Invoke(removed.ReservedBytes);
-            }
-
+            _ = RemoveWorst();
             Insert(retained);
         }
     }
@@ -122,8 +105,7 @@ internal sealed class PreparedQuery
         return page;
     }
 
-    internal ImmutableArray<PartitionQueryCandidate> DrainCandidates(int limit, ReadExecutionBudget budget,
-        Action<long> reserveArray, Action releaseHeap)
+    internal ImmutableArray<PartitionQueryCandidate> DrainCandidates(int limit, ReadExecutionBudget budget)
     {
         if (!ordinalFullReferenceOrder)
         {
@@ -131,7 +113,6 @@ internal sealed class PreparedQuery
         }
 
         var count = Math.Min(limit, rowCount);
-        reserveArray(PartitionQueryRetention.CandidateArrayBytes(count));
         var candidates = ImmutableArray.CreateBuilder<PartitionQueryCandidate>(count);
         candidates.Count = count;
         for (var index = count - AdjacentElementOffset; index >= EmptyElementCount; index--)
@@ -140,7 +121,6 @@ internal sealed class PreparedQuery
             candidates[index] = RemoveWorst().Candidate ?? throw new InvalidOperationException();
         }
         partitionRows = null;
-        releaseHeap();
         return candidates.MoveToImmutable();
     }
 
@@ -151,8 +131,6 @@ internal sealed class PreparedQuery
     {
         var projected = projectCandidate!(row.Document!);
         var pendingKeys = row.PendingOrderKeys!;
-        var retainedBytes = PartitionQueryRetention.CandidateBytes(row.Document!.Reference, projected, pendingKeys);
-        reserveCandidate!(retainedBytes);
         var keys = ImmutableArray.CreateRange(pendingKeys.Select(static key =>
             ImmutableCollectionsMarshal.AsImmutableArray(key)));
         var candidate = new PartitionQueryCandidate(VersionOne, row.Document.Reference, projected, keys);
@@ -160,8 +138,7 @@ internal sealed class PreparedQuery
         {
             SourceDocument = null,
             PendingOrderKeys = null,
-            Candidate = candidate,
-            ReservedBytes = retainedBytes
+            Candidate = candidate
         };
         return retained;
     }

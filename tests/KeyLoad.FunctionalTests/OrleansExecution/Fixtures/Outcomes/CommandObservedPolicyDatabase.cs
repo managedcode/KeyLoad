@@ -1,9 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 using P = KeyLoad.FunctionalTests.OrleansExecution.CommandObservedPolicyProtocol;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
@@ -43,8 +40,7 @@ internal sealed class CommandObservedPolicyDatabase(Func<RequestCqrsHostedRuntim
                 reply = await GrainRequestStreamConsumer.DrainAsync(
                     createStream: original => actual.Grains.GetGrain<IConnectionGrain>(actual.ConnectionId)
                         .ExecuteStreamAsync(envelope, original),
-                    serializer: actual.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                    requestId: operationId, clock: actual.Clock, options: actual.RoutingOptions,
+                    requestId: operationId,
                     cancellationToken: token).ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);

@@ -4,8 +4,7 @@ namespace KeyLoad.FunctionalTests.Search;
 
 internal sealed record AnnSeedCancellationObservation(
     TimeSpan Elapsed,
-    long ReadBytes,
-    long ObservedReadBytes,
+    long ObservedEntries,
     bool CancellationRequested,
     AnnSeed? Seed,
     OperationCanceledException? CaptureCancellation);

@@ -15,11 +15,9 @@ internal static class RuntimeJournalStartup
         CancellationToken cancellationToken)
     {
         var clock = services.GetRequiredService<TimeProvider>();
-        using var deadline = new CancellationTokenSource(runtime.GrainRouting.Value.ExecutionLifetime, clock);
-        using var pending = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, deadline.Token);
-        var token = pending.Token;
+        var token = cancellationToken;
         var requests = new RuntimeJournalStartupRequests(services.GetRequiredService<IGrainFactory>(),
-            services.GetRequiredService<GrainRequestCodec>(), services, clock, runtime.GrainRouting);
+            services.GetRequiredService<GrainRequestCodec>(), services);
         var incarnation = runtime.Node.Value.Incarnation;
         var commandId = BootstrapCommandId(incarnation, incarnation);
         await InitializeAuthorityAsync(requests, authenticateAdministrator, commandId, runtime, clock, token);

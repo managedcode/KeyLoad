@@ -3,5 +3,5 @@ namespace KeyLoad.FunctionalTests.QueryExecution;
 internal readonly record struct PartitionQueryCancellationOutcome(
     bool QueryReturned,
     OperationCanceledException? Cancellation,
-    long ObservedReadBytes,
+    long ObservedEntries,
     bool CancellationRequested);

@@ -13,8 +13,5 @@ internal sealed record PartitionQueryLeafResult(
     [property: Id(5)] long CutPosition,
     [property: Id(6)] long PolicyEpoch,
     [property: Id(7)] long SchemaVersion,
-    [property: Id(8)] int ExaminedRecords,
-    [property: Id(9)] long ReadBytes,
-    [property: Id(10)] long RetainedBytes,
     [property: Id(11)] string AccessPath,
     [property: Id(12)] ImmutableArray<PartitionQueryCandidate> Candidates);

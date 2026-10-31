@@ -68,7 +68,8 @@ internal static class AnnProviderQualificationPersistence
         await Assert.That(header.Space).IsEqualTo(AnnProviderQualificationCorpus.Space(state.Metric));
         await Assert.That(header.Policy).IsEqualTo(state.Policy);
         await Assert.That(header.Count).IsEqualTo(CorpusCount);
-        await Assert.That(header.RetainedBytes).IsEqualTo(index.RetainedBytesUpperBound);
+        await Assert.That(header.RetainedBytes).IsEqualTo(index.RetainedBytesUpperBound
+            - PackedAnnReservations.CosineNorms(header.Space.Metric, header.Count));
         await Assert.That(header.BuildScratchBytes).IsEqualTo(index.BuildScratchBytesUpperBound);
         var records = AnnProviderQualificationCorpus.Expected(state);
         var nodes = new PackedAnnStorageNode[header.Count];

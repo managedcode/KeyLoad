@@ -13,7 +13,7 @@ public static class SubscriptionDeliveryExecution
         var resource = engine.SourceResource(tx, subscription.Source);
         var head = engine.SourceHead(tx, subscription.Source);
         var dataPrincipal = engine.Principal(tx, state.Definition.DataPrincipalId, now);
-        if (request.MaxEvents < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.MaxEvents > engine.MessagingExecution.MaximumReceiveEvents || request.MaxBytes < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.LeaseSeconds < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
+        if (request.MaxEvents < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.LeaseSeconds < SubscriptionGroups.SubscriptionGroupsMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
         {
             throw Errors.Fail(ErrorCode.Validation, SubscriptionGroups.SubscriptionGroupsSubscriptionReceiveBudgetOrLeaseIsInvalidDetail);
         }
@@ -37,27 +37,15 @@ public static class SubscriptionDeliveryExecution
         return new(request.RequestId, result.ToImmutableArray(), SubscriptionGroups.ValidatedGroupInfo(subscription, state, head), engine.Token(tx, subscription.Source.Partition, position));
     }
 
-    internal static bool TryLeaseSubscriptionEvent(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request, DateTimeOffset now, GroupState state, ResourceDefinition resource, PrincipalRecord dataPrincipal, List<SubscriptionDelivery> result, SourceEventRecord record, byte[] key, GroupDelivery delivery, long sequence, ref long bytes, out GroupState issuedState)
+    internal static bool TryLeaseSubscriptionEvent(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request, DateTimeOffset now, GroupState state, ResourceDefinition resource, PrincipalRecord dataPrincipal, List<SubscriptionDelivery> result, SourceEventRecord record, byte[] key, GroupDelivery delivery, long sequence, out GroupState issuedState)
     {
         issuedState = state;
         var projected = engine.ProjectEvent(principal, resource, engine.ProjectEvent(dataPrincipal, resource, record));
-        var size = JsonDefaults.Serialize(projected).LongLength;
-        if (size > request.MaxBytes && result.Count == SubscriptionGroups.SubscriptionGroupsNoRetainedBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, SubscriptionGroups.SubscriptionGroupsNextSubscriptionEventExceedsTheReceiveByteBudgetDetail);
-        }
-
-        if (bytes + size > request.MaxBytes)
-        {
-            return false;
-        }
-
         if (delivery.LeaseVersion == long.MaxValue)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, SubscriptionDeliveryAuthority.SubscriptionGroupsDeliveryLeaseVersionExhaustedDetail);
         }
 
-        bytes += size;
         delivery = delivery with
         {
             State = GroupDeliveryState.Leased,

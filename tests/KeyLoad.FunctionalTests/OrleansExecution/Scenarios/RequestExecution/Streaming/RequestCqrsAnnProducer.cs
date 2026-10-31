@@ -15,11 +15,11 @@ internal static class RequestCqrsAnnProducer
 
     internal static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Run(
         Guid id, GrainOperationReply reply, RequestCqrsAnnFault? fault, RequestCqrsProducerObservation observed,
-        int maximumFrames, [EnumeratorCancellation] CancellationToken token, int replayCount = FirstOffset)
+        [EnumeratorCancellation] CancellationToken token, int replayCount = FirstOffset)
     {
         long last = FirstOffset;
         var original = CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-            writer => ProduceAsync(writer, id, reply, fault, observed, maximumFrames, replayCount), token);
+            writer => ProduceAsync(writer, id, reply, fault, observed, replayCount), token);
         await foreach (var chunk in original.WithCancellation(token))
         {
             last = chunk.Sequence ?? throw new InvalidOperationException(MissingSequence);
@@ -37,7 +37,7 @@ internal static class RequestCqrsAnnProducer
 
     private static async ValueTask<Result<GrainOperationReply>> ProduceAsync(
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, Guid id, GrainOperationReply reply,
-        RequestCqrsAnnFault? fault, RequestCqrsProducerObservation observed, int maximumFrames, int replayCount)
+        RequestCqrsAnnFault? fault, RequestCqrsProducerObservation observed, int replayCount)
     {
         try
         {
@@ -45,13 +45,6 @@ internal static class RequestCqrsAnnProducer
             observed.MarkStarted();
             await FirstAsync(writer, id, fault);
             await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Capture);
-            if (fault == RequestCqrsAnnFault.FrameBudget)
-            {
-                for (var index = FirstOffset; index <= maximumFrames; index++)
-                {
-                    await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Replay);
-                }
-            }
             for (var index = FirstOffset; index < replayCount; index++)
             {
                 await AnnMaintenanceProgress.WriteAsync(writer, id, AnnMaintenancePhase.Replay);

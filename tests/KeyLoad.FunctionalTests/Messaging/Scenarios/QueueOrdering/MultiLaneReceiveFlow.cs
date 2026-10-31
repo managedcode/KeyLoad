@@ -1,8 +1,5 @@
 using KeyLoad.Clustering;
 using KeyLoad.FunctionalTests.OrleansExecution;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.Messaging;
 
@@ -27,10 +24,8 @@ internal static class MultiLaneReceiveFlow
         var reply = await GrainRequestStreamConsumer.DrainAsync(
             createStream: cancellation => fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId)
                 .ExecuteStreamAsync(envelope, cancellation),
-            serializer: fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            requestId: actor, clock: fixture.Database.Database.EvaluationClock,
-            options: fixture.RoutingOptions, cancellationToken: token);
-        capture.SetSummary(originalCount, reply, fixture.RoutingOptions.Value.MaximumDetailCharacters);
+            requestId: actor, cancellationToken: token);
+        capture.SetSummary(originalCount, reply);
         return reply;
     }
 

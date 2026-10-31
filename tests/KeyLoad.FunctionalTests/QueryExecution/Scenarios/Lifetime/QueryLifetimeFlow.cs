@@ -67,12 +67,11 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
     {
         var database = fixture.Source.Database;
         var work = new ReadExecutionBudget(database.EvaluationClock, CancellationToken.None);
-        var grant = work.CreateReadGrant(work.RemainingReadGrantBytes / QueryLifetimeProtocol.GrantDivisor, work.RemainingReadGrantRecords / QueryLifetimeProtocol.GrantDivisor);
         return database.WithPartitionQueryFenceView<PartitionQueryLifetimeMetadata>(QueryFixture.Reader,
-            QueryFixture.Partition, QueryFixture.Collection, grant,
+            QueryFixture.Partition, QueryFixture.Collection,
             (view, principal, resource, _) => new(resource,
-                ResourceLifetimeCoverageValidation.Capture(work.CreateView(view, grant),
-                    QueryFixture.Partition, [resource]), principal));
+                ResourceLifetimeCoverageValidation.Capture(work.CreateView(view),
+                    QueryFixture.Partition, [resource]), principal), work);
     }
 
     internal ResourceLifetimeCoverage CreateOtherLifetime()
@@ -121,10 +120,7 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
                 QueryFixture.Collection, TextField: field,
                 Text: text, Limit: QueryLifetimeProtocol.Limit),
             fixture.DestinationOwner, QueryFixture.Tenant,
-            long.MaxValue / QueryLifetimeProtocol.GrantDivisor,
-            int.MaxValue / QueryLifetimeProtocol.GrantDivisor,
-            QueryResultBudgetPolicy.Resolve(UnitExecutionOptions.QueryExecution().Value)
-                / QueryLifetimeProtocol.GrantDivisor, null, null, null, null, [], metadata.Definition, metadata.Coverage, metadata.Principal);
+            null, null, null, null, [], metadata.Definition, metadata.Coverage, metadata.Principal);
         var roundTrip = runtimeRoundTrip
             ? OrleansSerialization.Deserialize<DistributedSearchOwnedLeaf>(OrleansSerialization.Serialize(input)) : input;
         return DistributedSearchOwnedLeafExecution.Execute(database, QueryFixture.Reader,

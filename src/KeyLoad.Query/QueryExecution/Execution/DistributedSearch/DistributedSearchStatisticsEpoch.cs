@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
 using KeyLoad.Core;
-using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.QueryExecution;
@@ -39,8 +38,6 @@ internal static class DistributedSearchStatisticsEpoch
             DistributedTextStatisticsValidation.Require(witness.Statistics, witness.Statistics.Terms, budget);
         }
         var input = new DistributedSearchEpochInput(VersionOne, requestDigest, witnesses);
-        var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        admission.Accept(OrleansSerialization.Measure(input));
         var bytes = OrleansSerialization.Serialize(input);
         budget.Check();
         return Convert.ToHexStringLower(SHA256.HashData(bytes));

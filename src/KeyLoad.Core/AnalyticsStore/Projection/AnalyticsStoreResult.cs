@@ -24,7 +24,6 @@ internal static class AnalyticsStoreResult
         }
         rows.Sort((left, right) => Compare(snapshot.Request.GroupBy, left, right));
         var result = new AnalyticsAggregateResult([.. rows], snapshot.Rows.Length);
-        snapshot.Work.CheckResult(result);
         snapshot.Work.Check();
         return result;
     }

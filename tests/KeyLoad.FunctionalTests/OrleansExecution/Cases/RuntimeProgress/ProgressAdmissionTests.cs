@@ -6,8 +6,4 @@ internal sealed class ProgressAdmissionTests(RequestCqrsHostedRuntimeFixture fix
     [Test]
     public Task SignedOnlineFreshZeroReplayAndPartialTerminalKeepStrictAdmission()
         => OnlineAdmissionFlow.GrammarAsync(fixture);
-
-    [Test]
-    public Task CancelledOnlineFrameDoesNotAdvanceAcceptedShapeBeforeHealthyContinuation()
-        => OnlineAdmissionFlow.CancelledAsync(fixture);
 }

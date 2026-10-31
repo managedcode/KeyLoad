@@ -21,8 +21,6 @@ internal sealed class TextIncrementalSession
             throw TextErrors.Corrupt();
         }
         budget.Check();
-        budget.ChargeBytes(OrleansSerialization.Measure(request));
-        budget.ChargeBytes(SHA256.HashSizeInBytes);
         immutableRequest = SHA256.HashData(OrleansSerialization.Serialize(request));
         Id = id;
         Request = request;
@@ -109,8 +107,6 @@ internal sealed class TextIncrementalSession
         {
             throw TextErrors.Mismatch();
         }
-        Budget.ChargeBytes(OrleansSerialization.Measure(request));
-        Budget.ChargeBytes(SHA256.HashSizeInBytes);
         var actual = SHA256.HashData(OrleansSerialization.Serialize(request));
         Budget.Check();
         if (!CryptographicOperations.FixedTimeEquals(immutableRequest, actual))

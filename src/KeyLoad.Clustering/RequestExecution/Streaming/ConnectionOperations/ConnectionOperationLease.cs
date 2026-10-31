@@ -5,8 +5,6 @@ internal sealed class ConnectionOperationLease(ConnectionOperationOwner owner, G
 {
     private bool disposed;
 
-    internal CancellationToken ShutdownToken => owner.ShutdownToken;
-
     public void Dispose()
     {
         if (disposed)

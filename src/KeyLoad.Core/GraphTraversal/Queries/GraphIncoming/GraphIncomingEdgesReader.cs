@@ -1,14 +1,12 @@
 using KeyLoad.Core.GraphTraversal.Serialization;
 using KeyLoad.Core.GraphTraversal.Validation;
 using KeyLoad.Core.ResourceExecution;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.GraphTraversal;
 
 internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValueView view,
-    PrincipalRecord principal, ReadIncomingGraphEdgesRequest request, ReadExecutionBudget budget,
-    ReadExecutionBudgetReadGrant grant, long cutPosition)
+    PrincipalRecord principal, ReadIncomingGraphEdgesRequest request, ReadExecutionBudget budget, long cutPosition)
 {
     private const string InvalidProjection = "A graph reverse projection is inconsistent.";
     private const string VertexUnavailable = "The graph vertex is unavailable.";
@@ -19,18 +17,18 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
     {
         targetGraph = RequireGraphRead(request.Target.Partition);
         RequireTargetCollectionRead();
-        targetCollection = GraphIncomingReadScope.ReadCollection(view, grant,
+        targetCollection = GraphIncomingReadScope.ReadCollection(view,
             request.Target.Partition, request.Target.Collection, budget);
         request = request with
         {
-            Target = EntityReferenceLifetime.Bind(budget.CreateView(view, grant), request.Target, targetCollection)
+            Target = EntityReferenceLifetime.Bind(budget.CreateView(view), request.Target, targetCollection)
         };
         RequireVisible(request.Target);
         var page = new GraphIncomingEdgesPageBuilder(database, principal, request.Limit, budget, cutPosition);
-        _ = grant.VisitAll(view,
+        _ = budget.VisitAll(view,
             GraphCrossPartitionKeys.LocalIncomingPrefix(request.Target, request.Graph),
             (key, value) => VisitLocal(page, key, value));
-        _ = grant.VisitAll(view, GraphCrossPartitionKeys.ReversePrefix(request.Target, request.Graph),
+        _ = budget.VisitAll(view, GraphCrossPartitionKeys.ReversePrefix(request.Target, request.Graph),
             (key, value) => VisitRemote(page, key, value));
         return page.Build();
     }
@@ -47,10 +45,10 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
             throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);
         }
         var edge = GraphCrossPartitionRecords.Read<EdgeRecord>(view,
-            GraphCrossPartitionKeys.CanonicalEdge(request.Target.Partition, request.Graph, edgeId), grant)
+            GraphCrossPartitionKeys.CanonicalEdge(request.Target.Partition, request.Graph, edgeId))
             ?? throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);
         GraphCrossPartitionValidation.ValidateEdge(edge);
-        EntityReferenceLifetime.RequireStored(budget.CreateView(view, grant), edge.To, targetCollection);
+        EntityReferenceLifetime.RequireStored(budget.CreateView(view), edge.To, targetCollection);
         if (edge.Id != edgeId || edge.From.Partition != request.Target.Partition
             || edge.To != request.Target)
         {
@@ -69,7 +67,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         budget.Check();
         var state = GraphCrossPartitionRecords.Decode<GraphCrossPartitionReceiverState>(value)
             ?? throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);
-        EntityReferenceLifetime.RequireStored(budget.CreateView(view, grant), state.Destination, targetCollection);
+        EntityReferenceLifetime.RequireStored(budget.CreateView(view), state.Destination, targetCollection);
         GraphCrossPartitionValidation.ValidateReceiver(state, state.SourcePartition, request.Graph,
             state.EdgeId, request.Target);
         if (!key.SequenceEqual(GraphCrossPartitionKeys.Reverse(state.Destination.Partition,
@@ -87,7 +85,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
             return true;
         }
         var owner = GraphCrossPartitionRecords.Read<GraphEdgeOwnerVersion>(view,
-            GraphCrossPartitionKeys.OwnerVersion(state.SourcePartition, request.Graph, state.EdgeId), grant)
+            GraphCrossPartitionKeys.OwnerVersion(state.SourcePartition, request.Graph, state.EdgeId))
             ?? throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);
         GraphCrossPartitionValidation.ValidateOwnerVersion(owner);
         if (owner.Revision > state.Revision || owner.Deleted)
@@ -99,7 +97,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
             throw Errors.Fail(ErrorCode.Corruption, InvalidProjection);
         }
         var edge = GraphCrossPartitionRecords.Read<EdgeRecord>(view,
-            GraphCrossPartitionKeys.CanonicalEdge(state.SourcePartition, request.Graph, state.EdgeId), grant);
+            GraphCrossPartitionKeys.CanonicalEdge(state.SourcePartition, request.Graph, state.EdgeId));
         if (!IsCurrentEdge(state, owner, edge))
         {
             return true;
@@ -115,7 +113,7 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
     private ResourceDefinition RequireGraphRead(PartitionRef partition)
     {
         AuthorizationRequire(partition, Capability.GraphRead);
-        return GraphIncomingReadScope.ReadGraphResource(view, grant, partition, request.Graph, budget);
+        return GraphIncomingReadScope.ReadGraphResource(view, partition, request.Graph, budget);
     }
 
     private (bool HasValue, ResourceDefinition? Value) TryRequireSourceGraphRead(PartitionRef partition)
@@ -155,9 +153,9 @@ internal sealed class GraphIncomingEdgesReader(DatabaseEngine database, IKeyValu
         try
         {
             AuthorizationRequire(entity.Partition, Capability.DocumentsRead, entity.Collection);
-            var definition = GraphIncomingReadScope.ReadCollection(view, grant, entity.Partition, entity.Collection, budget);
-            EntityReferenceLifetime.RequireStored(budget.CreateView(view, grant), entity, definition);
-            var document = GraphIncomingReadScope.ReadDocument(view, grant, entity);
+            var definition = GraphIncomingReadScope.ReadCollection(view, entity.Partition, entity.Collection, budget);
+            EntityReferenceLifetime.RequireStored(budget.CreateView(view), entity, definition);
+            var document = GraphIncomingReadScope.ReadDocument(view, entity);
             return document is not null && !document.Deleted
                 && database.Authorization.CanReadRow(principal, document.Access);
         }

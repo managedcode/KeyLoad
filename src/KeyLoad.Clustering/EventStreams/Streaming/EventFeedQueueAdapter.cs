@@ -2,7 +2,7 @@ using global::Orleans.Streams;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class EventFeedQueueAdapter(IQueueAdapter original, EventFeedHintBatchAdmission admission)
+internal sealed class EventFeedQueueAdapter(IQueueAdapter original)
     : IQueueAdapter
 {
     public string Name => original.Name;
@@ -13,7 +13,7 @@ internal sealed class EventFeedQueueAdapter(IQueueAdapter original, EventFeedHin
     public Task QueueMessageBatchAsync<T>(StreamId streamId, IEnumerable<T> events,
         StreamSequenceToken? token, Dictionary<string, object>? requestContext)
     {
-        var hint = admission.Require(events, requestContext);
+        var hint = EventFeedHintBatchAdmission.Require(events, requestContext);
         return original.QueueMessageBatchAsync(streamId, new[] { hint }, token, null!);
     }
 }

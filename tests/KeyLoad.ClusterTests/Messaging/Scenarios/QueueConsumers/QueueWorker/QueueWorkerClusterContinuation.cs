@@ -1,4 +1,3 @@
-using System.Text;
 using KeyLoad.Client;
 using KeyLoad.ClusterTests.ClientApi;
 
@@ -14,9 +13,6 @@ internal static class QueueWorkerClusterContinuation
         await Assert.That(result.Received).IsEqualTo(QueueWorkerClusterProtocol.InvocationDeliveries);
         await Assert.That(handlers.Exited).IsEqualTo(handlers.Entered);
         await Assert.That(result.PeakActiveHandlers).IsEqualTo(QueueWorkerClusterProtocol.ConcurrentHandlerLimit);
-        var expectedBytes = (Encoding.UTF8.GetByteCount(QueueWorkerClusterProtocol.Payload)
-            + Encoding.UTF8.GetByteCount(QueueWorkerClusterProtocol.Headers)) * QueueWorkerClusterProtocol.ConcurrentHandlerLimit;
-        await Assert.That(result.PeakInFlightBytes).IsEqualTo((long)expectedBytes);
         await Assert.That(result.Operations.Any(row => row.Stage == QueueWorkerOperationStage.Prepared
             && row.Receive?.RequestId == firstReceive)).IsTrue();
         var acknowledgements = result.Operations.Where(row => row.Stage == QueueWorkerOperationStage.Returned

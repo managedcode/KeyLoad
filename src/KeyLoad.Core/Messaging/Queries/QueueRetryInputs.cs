@@ -34,7 +34,7 @@ public static class QueueRetryInputs
                 return inputs;
             }
 
-            engine.RequireQueueRetryReceive(request, resource.QueuePolicy);
+            RequireQueueRetryReceive(request, resource.QueuePolicy);
             engine.ReadQueueLeaseRetryInputs(view, request.Lane, resource.QueuePolicy, operation.Timestamp, inputs);
         }
 
@@ -46,9 +46,9 @@ public static class QueueRetryInputs
         return inputs;
     }
 
-    internal static void RequireQueueRetryReceive(this DatabaseEngine engine, ReceiveRequest request, QueuePolicy policy)
+    internal static void RequireQueueRetryReceive(ReceiveRequest request, QueuePolicy policy)
     {
-        if (request.MaxMessages < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.MaxMessages > engine.MessagingExecution.MaximumReceiveMessages || request.MaxBytes < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.LeaseSeconds < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
+        if (request.MaxMessages < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.LeaseSeconds < MessagingExecutionMessaging.MessagingMinimumPositiveCount || request.LeaseSeconds > policy.MaxLeaseSeconds)
         {
             throw Errors.Fail(ErrorCode.Validation, QueueSweepTransitions.InvalidReceiveBudget);
         }

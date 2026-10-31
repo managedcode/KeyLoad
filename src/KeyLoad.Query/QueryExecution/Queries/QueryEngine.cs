@@ -12,7 +12,6 @@ namespace KeyLoad.Query;
 public sealed partial class QueryEngine
 {
     internal const string ExplainId = "explain";
-    internal const string ResultLimitExceeded = "The query result byte budget is exceeded.";
     private readonly TimeSpan cursorLifetime;
     private readonly QueryExecutionOptions execution;
     private readonly IOptions<QueryExecutionOptions> executionOptions;
@@ -61,7 +60,7 @@ public sealed partial class QueryEngine
     public QueryPage ExecuteAst(string principalId, AstQueryRequest request, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default) => Execute(principalId, _ => request, timeProvider, cancellationToken);
     /// <summary>Describes the supported query language and configured budgets.</summary>
-    public QueryCapabilityManifest Capabilities => QueryCapabilityCatalog.Create(execution);
+    public QueryCapabilityManifest Capabilities => QueryCapabilityCatalog.Create();
     private QueryPage Execute(string principalId, Func<ReadExecutionBudget, AstQueryRequest> adapt, TimeProvider? timeProvider,
         CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null, ReadExecutionBudget? originalBudget = null)
     {
@@ -70,7 +69,6 @@ public sealed partial class QueryEngine
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         budget.Check();

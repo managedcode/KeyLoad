@@ -23,14 +23,10 @@ internal static class AnalyticsBoundCoreFlow
                     ?? throw new InvalidOperationException("The actual analytics lifetime is absent.");
                 await Assert.That(lease.Dependencies.SetEquals([lifetime])).IsTrue();
                 await Assert.That(ledger.RetainedEntries).IsEqualTo(1);
-                await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo((long)OrleansSerialization.Measure(lifetime));
-                var before = work.ReadBytes;
                 var snapshot = fixture.Database.CaptureAnalyticsAggregateBound(D.Root, D.Query(fixture), work, lease);
                 await Assert.That(ReferenceEquals(snapshot.Work, work)).IsTrue();
-                await Assert.That(work.ReadBytes).IsGreaterThan(before);
                 await AnalyticsStoreTestProjection.RunAsync(snapshot, new([D.Row(D.Alpha, 1, 2, 2, 2, 2)], 1), token);
                 fixture.Database.ValidateAnalyticsAggregatePublication(snapshot);
                 await Assert.That(ledger.RetainedEntries).IsEqualTo(1);
-                await Assert.That(ledger.RetainedEncodedBytes).IsEqualTo((long)OrleansSerialization.Measure(lifetime));
             }), token);
 }

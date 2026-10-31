@@ -39,18 +39,4 @@ internal static class AnalyticsBoundsFlow
             await O.EqualAsync(expected, N.Query(db.Database, count, token));
         });
     }
-
-    internal static async Task ResultAsync(CancellationToken token)
-    {
-        using var db = new TestDatabase();
-        await AnalyticsBoundsOwner.SeedAsync(db, [D.Event(db, D.First, D.Alpha, 2), D.Event(db, D.Second, D.Beta, 4)]);
-        var expected = new AnalyticsAggregateResult([P.Row(D.Alpha, 1, 2), P.Row(D.Beta, 1, 4)], 2);
-        var bound = System.Text.Json.JsonSerializer.SerializeToUtf8Bytes(expected, JsonDefaults.Options).Length - 1;
-        await N.UnchangedAsync(db, async () =>
-        {
-            await N.RefusedAsync(() => N.Query(db.Database, P.Query(db), token, bound));
-            await O.EqualAsync(new AnalyticsAggregateResult([P.Row(D.Alpha, 1, 7)], 1),
-                N.Query(db.Database, P.Query(db, P.HealthyStore), token, bound));
-        });
-    }
 }

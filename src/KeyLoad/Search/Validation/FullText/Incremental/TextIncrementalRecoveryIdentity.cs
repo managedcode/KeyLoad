@@ -14,8 +14,6 @@ internal static class TextIncrementalRecoveryIdentity
         {
             throw TextErrors.Mismatch();
         }
-        budget.ChargeBytes(OrleansSerialization.Measure(request));
-        budget.ChargeBytes(SHA256.HashSizeInBytes);
         var actual = SHA256.HashData(OrleansSerialization.Serialize(request));
         budget.Check();
         if (!CryptographicOperations.FixedTimeEquals(enrollment.OriginalRequestSha256, actual))

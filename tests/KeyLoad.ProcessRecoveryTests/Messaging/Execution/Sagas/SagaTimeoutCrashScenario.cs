@@ -23,7 +23,7 @@ internal static class SagaTimeoutCrashScenario
     [ImmutableTemporalData]
     private static readonly TimeSpan TimeoutMessageLifetime = TimeSpan.FromDays(1);
     internal const string Mode = "saga-timeout-crash";
-    internal const string OperationFile = "saga-timeout-operation.json";
+    internal const string OperationFile = "saga-timeout-operation.bin";
     internal const string SeedTailFile = "saga-timeout-seed-tail.txt";
     internal const string Queue = "saga-work";
     internal const string TimeoutQueue = "saga-timeouts";
@@ -108,7 +108,7 @@ internal static class SagaTimeoutCrashScenario
 
     private static async Task SaveOperationAsync(string directory, long tail, Command<DatabaseCommand> operation)
     {
-        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), JsonDefaults.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllTextAsync(Path.Combine(directory, SeedTailFile), tail.ToString(CultureInfo.InvariantCulture));
     }
 }

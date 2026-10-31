@@ -35,7 +35,6 @@ internal static class FeedLiveClusterProtocol
     internal const long RepairedRevision = 4;
     internal const long RepairedSequence = 5;
     internal const int PageLimit = 1;
-    internal const int RejectedFirstEntryBytes = 1;
     internal const long EpochStep = 1;
     internal const string ColdScenario = "feed-live-cold-owner";
 }

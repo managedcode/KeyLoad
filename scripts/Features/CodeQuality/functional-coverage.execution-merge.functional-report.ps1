@@ -9,9 +9,6 @@ $script:FcFunctionalReport = [ordered]@{
         'KeyLoad.ClusterTests.RelationalStorage|RelationalSqlClusterJoinCancellationTests(ClusterFixture)' = 'KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinCancellationTests'
         'KeyLoad.ClusterTests.RelationalStorage|RelationalSqlClusterJoinReadCutTests(ClusterFixture)' = 'KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinReadCutTests'
     }
-    ClusterParameterlessClassAliases = [ordered]@{
-        'KeyLoad.ClusterTests.RelationalStorage|RelationalSqlClusterJoinBudgetTests' = 'KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinBudgetTests'
-    }
     Invalid = 'The original execution TUnit report does not match its contributors or has an unsuccessful outcome.'
     RootRequired = @('schemaVersion','assemblyName','machineName','timestamp','tunitVersion','operatingSystem',
         'runtimeVersion','totalDurationMs','summary','groups','spans')
@@ -48,9 +45,6 @@ function Read-FcFunctionalCases([object] $Report, [object[]] $ExpectedCases, [st
             if ($script:FcFunctionalReport.ClusterClassAliases.Contains($displayClass)) {
                 $qualifiedClass = [string] $script:FcFunctionalReport.ClusterClassAliases[$displayClass]
                 $clusterHasConstructorData = $true
-            }
-            elseif ($script:FcFunctionalReport.ClusterParameterlessClassAliases.Contains($displayClass)) {
-                $qualifiedClass = [string] $script:FcFunctionalReport.ClusterParameterlessClassAliases[$displayClass]
             }
             else { throw $script:FcFunctionalReport.Invalid }
         }

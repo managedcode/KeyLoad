@@ -5,16 +5,12 @@ namespace KeyLoad.Core.ResourceExecution.Execution;
 /// <summary>Executes gate-scoped reads through the same original budget and execution observers.</summary>
 internal static class ReadExecutionBudgetStorageReads
 {
-    private static (bool HasValue, StorageReadObserver? Value) Observer(ReadExecutionBudget budget, IKeyValueView view)
-        => (view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, budget)
-            ? null : (StorageReadObserver)budget.ChargeReadRecord) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(StorageReadObserver?));
-
     internal static byte[]? Read(ReadExecutionBudget budget, IKeyValueView view, byte[] key)
     {
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         byte[]? value = null;
-        view.ReadValue(key, borrowed => value = borrowed.ToArray(), (Observer(budget, view)).Value);
+        view.ReadValue(key, borrowed => value = borrowed.ToArray());
         budget.Check();
         return value;
     }
@@ -24,7 +20,7 @@ internal static class ReadExecutionBudgetStorageReads
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         T? record = null;
-        view.ReadValue(key, value => record = OrleansSerialization.Deserialize<T>(value), (Observer(budget, view)).Value);
+        view.ReadValue(key, value => record = OrleansSerialization.Deserialize<T>(value));
         budget.Check();
         return record;
     }
@@ -35,7 +31,7 @@ internal static class ReadExecutionBudgetStorageReads
         ArgumentNullException.ThrowIfNull(view);
         budget.Check();
         var result = view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey,
-            (Observer(budget, view)).Value, budget.Cancellation);
+            cancellationToken: budget.Cancellation);
         budget.Check();
         return result;
     }

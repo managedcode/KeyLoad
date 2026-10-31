@@ -57,9 +57,8 @@ internal static class GraphSearchExecutor
         var selected = fusion.Select();
         var hits = SearchBranchExecution.ProjectSelected(database, view, principal, resource, selected, budget, fusion);
         var expansion = request.Expansion is null ? null : GraphSearchExpansion.Execute(database, principal,
-            view, request, selected, hits, budget);
+            view, request, selected, budget);
         var result = new GraphSearchResult([.. hits], expansion);
-        budget.CheckResult(result);
         return result;
     }
 

@@ -3,9 +3,6 @@ namespace KeyLoad.Core.AnalyticsStore;
 // Execution Text.Value sanitizes text. This explicit disposable projection representation preserves canonical identity.
 internal sealed class AnalyticsStoreDimensions
 {
-    private const int Base64InputPadding = 2;
-    private const int Base64InputBytes = 3;
-    private const int Base64OutputCharacters = 4;
     private const string Prefix = "b64:";
     private const string Changed = "The execution analytics dimension does not match the captured input.";
     private readonly Dictionary<string, Values> values = new(StringComparer.Ordinal);
@@ -19,9 +16,7 @@ internal sealed class AnalyticsStoreDimensions
             foreach (var row in snapshot.Rows)
             {
                 var original = row.Dimensions[name];
-                var bytes = AnalyticsStoreDimensionValues.Require(original);
-                var encodedLength = checked(Prefix.Length + ((long)bytes + Base64InputPadding) / Base64InputBytes * Base64OutputCharacters);
-                snapshot.Work.ChargeBytes(encodedLength);
+                _ = AnalyticsStoreDimensionValues.Require(original);
                 if (dimension.Encoded.ContainsKey(original))
                 {
                     continue;

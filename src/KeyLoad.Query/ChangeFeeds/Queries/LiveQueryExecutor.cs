@@ -22,7 +22,6 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        QueryResultBudgetPolicy.Constrain(budget, queryEngine.Execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         var query = LiveRequest(request.Query);
@@ -42,7 +41,6 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        QueryResultBudgetPolicy.Constrain(budget, queryEngine.Execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         var query = LiveRequest(request.Query);
@@ -70,7 +68,6 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
             database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, capture.Cursor,
                 lifetime, LiveCursorContract.CurrentVersion)), capture.Tail,
             page.CutPosition);
-        budget.CheckResult(snapshot);
         return snapshot;
     }
 
@@ -87,17 +84,13 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, LiveQueryCursorBelongsToADifferentQueryDetail);
         }
-        var retained = queryEngine.Execution.MaximumResultBytes is null ? null : new LiveQueryResultByteAdmission(budget);
         var page = database.ReadChangeFeedView<LiveQueryChange>(view, principal,
-            new(query.Partition, query.Query.Collection, claims.ChangeCursor, Limit: request.Limit,
-                MaxBytes: request.MaxBytes),
-            (schema, change) => (MapChange(principal, schema, change, query, prepared, budget)).Value,
-            retained is null ? null : retained.Accept);
+            new(query.Partition, query.Query.Collection, claims.ChangeCursor, Limit: request.Limit),
+            (schema, change) => (MapChange(principal, schema, change, query, prepared, budget)).Value);
         var result = new LiveQueryPage(page.Changes,
             database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, page.Cursor,
                 lifetime, LiveCursorContract.CurrentVersion)), page.ThroughSequence,
             page.HasMore, page.CutPosition);
-        budget.CheckResult(result);
         return result;
     }
 

@@ -1,7 +1,5 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -11,14 +9,14 @@ internal static class RequestCqrsFatalSettlementCases
     private const string CleanupCanary = "fatal-settlement-cleanup-canary";
 
     internal static async Task AcCrs003FatalCreateFailureSettlesActivationAndKeepsFatalPrecedence(
-        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal)
+        RequestCqrsFatalCase fatal)
     {
         await AssertFatalAsync(fatal);
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         using var cancellation = new CancellationTokenSource(SettlementBound, TimeProvider.System);
         var ordinaryCleanup = new IOException(CleanupCanary);
-        var stream = CqrsStreamLifetime.Run(_ => throw fatal.Thrown, ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, ordinaryCleanup), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
+        var stream = CqrsStreamLifetime.Run(_ => throw fatal.Thrown, requestId, RequestCqrsFatalSettlementProbe.Activation(observation, ordinaryCleanup), owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainAsync(stream, requestId, observation, cancellation.Token), fatal.Fatal);
@@ -26,12 +24,12 @@ internal static class RequestCqrsFatalSettlementCases
         await AssertNoChunksAsync(observation);
         await Assert.That(observation.ProducerSettlementCount).IsEqualTo(0);
         await Assert.That(observation.ActivationSettlementCount).IsEqualTo(1);
-        await AssertHealthyFollowingStreamAsync(fixture);
-        await AssertPrimaryFatalWinsAsync(fixture, fatal);
+        await AssertHealthyFollowingStreamAsync();
+        await AssertPrimaryFatalWinsAsync(fatal);
     }
 
     internal static async Task AcCrs003PullFatalNeverBecomesFailedAndJoinsProducer(
-        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal)
+        RequestCqrsFatalCase fatal)
     {
         await AssertFatalAsync(fatal);
         var observation = new RequestCqrsFatalObservation();
@@ -39,103 +37,103 @@ internal static class RequestCqrsFatalSettlementCases
         using var cancellation = new CancellationTokenSource(SettlementBound, TimeProvider.System);
         var stream = CqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => RequestCqrsFatalSettlementProbe.ThrowAfterStartedAsync(
-                    writer, requestId, fatal.Thrown, observation), token), ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
+                    writer, requestId, fatal.Thrown, observation), token), requestId, RequestCqrsFatalSettlementProbe.Activation(observation), owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainFatalPullAsync(stream, requestId, observation, cancellation.Token), fatal.Fatal);
         await Assert.That(escaped).IsSameReferenceAs(fatal.Fatal);
         await AssertObservedStartedOnlyAsync(observation, requestId);
         await AssertSettledOnceAsync(observation);
-        await AssertHealthyFollowingStreamAsync(fixture);
+        await AssertHealthyFollowingStreamAsync();
     }
 
     internal static async Task AcCrs003DisposalFatalSettlesBeforeActivation(
-        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal)
+        RequestCqrsFatalCase fatal)
     {
         await AssertFatalAsync(fatal);
-        await AssertDisposalFatalAsync(fixture, fatal, new IOException(CleanupCanary));
+        await AssertDisposalFatalAsync(fatal, new IOException(CleanupCanary));
         await AssertDisposalFatalAsync(
-            fixture, fatal, RequestCqrsFatalSettlementProbe.DifferentFatal(fatal.Fatal));
+            fatal, RequestCqrsFatalSettlementProbe.DifferentFatal(fatal.Fatal));
     }
 
     internal static async Task AcCrs003ActivationFatalAndOrdinaryCleanupFaultsRemainObservable(
-        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal)
+        RequestCqrsFatalCase fatal)
     {
         await AssertFatalAsync(fatal);
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         using var cancellation = new CancellationTokenSource(SettlementBound, TimeProvider.System);
         var stream = CqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => RequestCqrsFatalSettlementProbe.CompleteAsync(writer, requestId, observation), token), ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, fatal.Thrown), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
+                writer => RequestCqrsFatalSettlementProbe.CompleteAsync(writer, requestId, observation), token), requestId, RequestCqrsFatalSettlementProbe.Activation(observation, fatal.Thrown), owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainCompletedAsync(stream, requestId, observation, cancellation.Token), fatal.Fatal);
         await Assert.That(escaped).IsSameReferenceAs(fatal.Fatal);
         await AssertObservedCompletedPairAsync(observation, requestId);
         await AssertSettledOnceAsync(observation);
-        await AssertHealthyFollowingStreamAsync(fixture);
+        await AssertHealthyFollowingStreamAsync();
     }
 
     private static async Task AssertPrimaryFatalWinsAsync(
-        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase primaryFatal)
+        RequestCqrsFatalCase primaryFatal)
     {
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         var activationFatal = RequestCqrsFatalSettlementProbe.DifferentFatal(primaryFatal.Fatal);
         using var cancellation = new CancellationTokenSource(SettlementBound, TimeProvider.System);
-        var stream = CqrsStreamLifetime.Run(_ => throw primaryFatal.Thrown, ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, activationFatal), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
+        var stream = CqrsStreamLifetime.Run(_ => throw primaryFatal.Thrown, requestId, RequestCqrsFatalSettlementProbe.Activation(observation, activationFatal), owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainAsync(stream, requestId, observation, cancellation.Token), primaryFatal.Fatal);
         await Assert.That(escaped).IsSameReferenceAs(primaryFatal.Fatal);
         await AssertNoChunksAsync(observation);
         await Assert.That(observation.ActivationSettlementCount).IsEqualTo(1);
-        await AssertHealthyFollowingStreamAsync(fixture);
+        await AssertHealthyFollowingStreamAsync();
     }
 
     private static async Task AssertDisposalFatalAsync(
-        RequestCqrsHostedRuntimeFixture fixture, RequestCqrsFatalCase fatal, Exception activationFailure)
+        RequestCqrsFatalCase fatal, Exception activationFailure)
     {
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         using var cancellation = new CancellationTokenSource(SettlementBound, TimeProvider.System);
         var stream = CqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
                 writer => RequestCqrsFatalSettlementProbe.WaitThenThrowAsync(
-                    writer, requestId, fatal.Thrown, observation), token), ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, activationFailure), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
+                    writer, requestId, fatal.Thrown, observation), token), requestId, RequestCqrsFatalSettlementProbe.Activation(observation, activationFailure), owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.CancelAndDisposeAfterStartedAsync(stream, requestId, cancellation, observation), fatal.Fatal);
         await Assert.That(escaped).IsSameReferenceAs(fatal.Fatal);
         await AssertObservedStartedOnlyAsync(observation, requestId);
         await AssertSettledOnceAsync(observation);
-        await AssertHealthyFollowingStreamAsync(fixture);
+        await AssertHealthyFollowingStreamAsync();
     }
 
-    internal static async Task AssertFatalActivationWinsOverOrdinaryPrimaryAsync(RequestCqrsHostedRuntimeFixture fixture)
+    internal static async Task AssertFatalActivationWinsOverOrdinaryPrimaryAsync()
     {
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         var ordinaryPrimary = new InvalidOperationException(CleanupCanary);
         var activationFatal = RequestCqrsFatalSettlementProbe.FatalCases().First().Fatal;
         using var cancellation = new CancellationTokenSource(SettlementBound, TimeProvider.System);
-        var stream = CqrsStreamLifetime.Run(_ => throw ordinaryPrimary, ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, activationFatal), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
+        var stream = CqrsStreamLifetime.Run(_ => throw ordinaryPrimary, requestId, RequestCqrsFatalSettlementProbe.Activation(observation, activationFatal), owner: null, cancellationToken: cancellation.Token);
 
         var escaped = await RequestCqrsFatalSettlementProbe.CaptureExpectedAsync(
             () => RequestCqrsFatalStreamDrain.DrainAsync(stream, requestId, observation, cancellation.Token), activationFatal);
         await Assert.That(escaped).IsSameReferenceAs(activationFatal);
         await AssertNoChunksAsync(observation);
         await Assert.That(observation.ActivationSettlementCount).IsEqualTo(1);
-        await AssertHealthyFollowingStreamAsync(fixture);
+        await AssertHealthyFollowingStreamAsync();
     }
 
-    internal static async Task AssertOrdinaryCleanupFailuresRemainObservable(RequestCqrsHostedRuntimeFixture fixture)
+    internal static async Task AssertOrdinaryCleanupFailuresRemainObservable()
     {
         var observation = new RequestCqrsFatalObservation();
         var requestId = Guid.NewGuid();
         var primary = new InvalidOperationException(CleanupCanary);
         var cleanup = new IOException(CleanupCanary);
         using var cancellation = new CancellationTokenSource(SettlementBound, TimeProvider.System);
-        var stream = CqrsStreamLifetime.Run(_ => throw primary, ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation, cleanup), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
+        var stream = CqrsStreamLifetime.Run(_ => throw primary, requestId, RequestCqrsFatalSettlementProbe.Activation(observation, cleanup), owner: null, cancellationToken: cancellation.Token);
 
         var failure = (await Assert.ThrowsExactlyAsync<AggregateException>(
             () => RequestCqrsFatalStreamDrain.DrainAsync(stream, requestId, observation, cancellation.Token)))!;
@@ -144,7 +142,7 @@ internal static class RequestCqrsFatalSettlementCases
         await Assert.That(failure.InnerExceptions[1]).IsSameReferenceAs(cleanup);
         await AssertNoChunksAsync(observation);
         await Assert.That(observation.ActivationSettlementCount).IsEqualTo(1);
-        await AssertHealthyFollowingStreamAsync(fixture);
+        await AssertHealthyFollowingStreamAsync();
     }
 
     private static async Task AssertFatalAsync(RequestCqrsFatalCase fatal)
@@ -180,18 +178,13 @@ internal static class RequestCqrsFatalSettlementCases
         await Assert.That(observation.ActivationSettlementOrder).IsGreaterThan(observation.ProducerSettlementOrder);
     }
 
-    private static Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> ChunkSerializer(
-        RequestCqrsHostedRuntimeFixture fixture)
-        => fixture.Services.GetRequiredService<
-            Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
-
-    private static async Task AssertHealthyFollowingStreamAsync(RequestCqrsHostedRuntimeFixture fixture)
+    private static async Task AssertHealthyFollowingStreamAsync()
     {
         var requestId = Guid.NewGuid();
         var observation = new RequestCqrsFatalObservation();
         using var cancellation = new CancellationTokenSource(SettlementBound, TimeProvider.System);
         var stream = CqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => RequestCqrsFatalSettlementProbe.CompleteAsync(writer, requestId, observation), token), ChunkSerializer(fixture), requestId, TimeProvider.System, RequestCqrsFatalSettlementProbe.Activation(observation), options: fixture.RoutingOptions, owner: null, cancellationToken: cancellation.Token);
+                writer => RequestCqrsFatalSettlementProbe.CompleteAsync(writer, requestId, observation), token), requestId, RequestCqrsFatalSettlementProbe.Activation(observation), owner: null, cancellationToken: cancellation.Token);
         await RequestCqrsFatalStreamDrain.DrainCompletedAsync(stream, requestId, observation, cancellation.Token);
         await AssertSettledOnceAsync(observation);
     }

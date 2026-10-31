@@ -31,15 +31,12 @@ internal static class DistributedSearchGlobalFusion
             fusion.AddBranch(Scores(vectorCandidates, budget), request.VectorWeight, SearchBranchKind.Vector);
         }
         var ranked = fusion.Select();
-        var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        admission.Accept(PartitionQueryRetention.CandidateArrayBytes(ranked.Length));
         var result = ImmutableArray.CreateBuilder<GlobalBranchCandidate>(ranked.Length);
         foreach (var score in ranked)
         {
             budget.Check();
             var revision = Revision(score.Reference, textCandidates, vectorCandidates, budget);
             var candidate = new GlobalBranchCandidate(score.Reference, revision, score.Score);
-            admission.Accept(OrleansSerialization.Measure(candidate));
             result.Add(candidate);
         }
         return result.MoveToImmutable();
@@ -61,8 +58,6 @@ internal static class DistributedSearchGlobalFusion
 
     private static SearchScore[] Scores(ImmutableArray<GlobalBranchCandidate> candidates, ReadExecutionBudget budget)
     {
-        var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        admission.Accept(PartitionQueryRetention.CandidateArrayBytes(candidates.Length));
         var result = new SearchScore[candidates.Length];
         for (var index = 0; index < candidates.Length; index++)
         {

@@ -3,7 +3,7 @@ namespace KeyLoad.ProcessRecoveryTests.Messaging;
 internal static class TargetInboxCrashProtocol
 {
     internal const string Mode = "target-inbox-processing";
-    internal const string OperationFile = "target-inbox-operation.json";
+    internal const string OperationFile = "target-inbox-operation.bin";
     internal const string DeliveryFile = "target-inbox-delivery.json";
     internal const string SourceKey = "source";
     internal const string TargetKey = "target";

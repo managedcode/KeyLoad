@@ -11,7 +11,8 @@ internal static class AnnSeedCancellationCapture
         using var cancellation = new CancellationTokenSource();
         using var started = new ManualResetEventSlim(false);
         var budget = new ReadExecutionBudget(cancellationToken: cancellation.Token);
-        var observer = new AnnSeedCancellationThread(budget, cancellation, started);
+        var observer = new AnnSeedCancellationThread(
+            () => database.Store.GetReadDiagnostics().RangeBaselineEntries, cancellation, started);
         var startedAt = new TestElapsedClock(TimeProvider.System);
         AnnSeed? seed = null;
         Exception? primary = null;
@@ -42,8 +43,7 @@ internal static class AnnSeedCancellationCapture
         }
 
         AnnSeedCancellationFailures.ThrowIfAny(primary, captureCancellation, settlementFailures);
-        return new(startedAt.Elapsed, budget.ReadBytes,
-            observer.ObservedReadBytes, observer.CancellationRequested, seed, captureCancellation);
+        return new(startedAt.Elapsed, observer.ObservedEntries, observer.CancellationRequested, seed, captureCancellation);
     }
 
     private static void Capture(TestDatabase database, ReadExecutionBudget budget,

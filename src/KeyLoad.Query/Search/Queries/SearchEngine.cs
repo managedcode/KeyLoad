@@ -15,7 +15,6 @@ public sealed partial class SearchEngine
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return Task.FromResult(TextIndexWaitExecution.Execute(database, textProjection, execution, readCutObserver,

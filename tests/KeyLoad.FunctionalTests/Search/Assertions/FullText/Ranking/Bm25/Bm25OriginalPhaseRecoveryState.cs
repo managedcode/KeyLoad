@@ -25,7 +25,7 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
                 {
                     rows.Add(Convert.ToHexString(key) + ":" + Convert.ToHexString(value));
                     return true;
-                }, observer: work.ChargeBytes, cancellationToken: Bm25OriginalPhaseRecoveryFlow.Token);
+                }, cancellationToken: Bm25OriginalPhaseRecoveryFlow.Token);
             if (scan.HasMore)
             {
                 throw new InvalidOperationException("The complete original canonical image exceeded the execution record bound.");

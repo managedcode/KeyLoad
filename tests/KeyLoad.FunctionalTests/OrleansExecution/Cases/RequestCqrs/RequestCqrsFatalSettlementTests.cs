@@ -1,19 +1,17 @@
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
-[RequestCqrsHostedDataSource]
-[NotInParallel(KeyLoad.FunctionalTests.OrleansExecution.RequestCqrsFixtureScheduling.SharedSession)]
-internal sealed class RequestCqrsFatalSettlementTests(RequestCqrsHostedRuntimeFixture fixture)
+internal sealed class RequestCqrsFatalSettlementTests
 {
     [Test]
     public async Task AcCrs003FatalCreateFailureSettlesActivationAndKeepsFatalPrecedence()
     {
         foreach (var fatal in RequestCqrsFatalSettlementProbe.FatalCases())
         {
-            await RequestCqrsFatalSettlementCases.AcCrs003FatalCreateFailureSettlesActivationAndKeepsFatalPrecedence(fixture, fatal);
+            await RequestCqrsFatalSettlementCases.AcCrs003FatalCreateFailureSettlesActivationAndKeepsFatalPrecedence(fatal);
         }
 
-        await RequestCqrsFatalSettlementCases.AssertOrdinaryCleanupFailuresRemainObservable(fixture);
-        await RequestCqrsFatalSettlementCases.AssertFatalActivationWinsOverOrdinaryPrimaryAsync(fixture);
+        await RequestCqrsFatalSettlementCases.AssertOrdinaryCleanupFailuresRemainObservable();
+        await RequestCqrsFatalSettlementCases.AssertFatalActivationWinsOverOrdinaryPrimaryAsync();
     }
 
     [Test]
@@ -21,7 +19,7 @@ internal sealed class RequestCqrsFatalSettlementTests(RequestCqrsHostedRuntimeFi
     {
         foreach (var fatal in RequestCqrsFatalSettlementProbe.FatalCases())
         {
-            await RequestCqrsFatalSettlementCases.AcCrs003PullFatalNeverBecomesFailedAndJoinsProducer(fixture, fatal);
+            await RequestCqrsFatalSettlementCases.AcCrs003PullFatalNeverBecomesFailedAndJoinsProducer(fatal);
         }
     }
 
@@ -30,7 +28,7 @@ internal sealed class RequestCqrsFatalSettlementTests(RequestCqrsHostedRuntimeFi
     {
         foreach (var fatal in RequestCqrsFatalSettlementProbe.FatalCases())
         {
-            await RequestCqrsFatalSettlementCases.AcCrs003DisposalFatalSettlesBeforeActivation(fixture, fatal);
+            await RequestCqrsFatalSettlementCases.AcCrs003DisposalFatalSettlesBeforeActivation(fatal);
         }
     }
 
@@ -39,7 +37,7 @@ internal sealed class RequestCqrsFatalSettlementTests(RequestCqrsHostedRuntimeFi
     {
         foreach (var fatal in RequestCqrsFatalSettlementProbe.FatalCases())
         {
-            await RequestCqrsFatalSettlementCases.AcCrs003ActivationFatalAndOrdinaryCleanupFaultsRemainObservable(fixture, fatal);
+            await RequestCqrsFatalSettlementCases.AcCrs003ActivationFatalAndOrdinaryCleanupFaultsRemainObservable(fatal);
         }
     }
 }

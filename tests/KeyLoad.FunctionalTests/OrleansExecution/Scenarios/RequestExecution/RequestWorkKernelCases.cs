@@ -149,7 +149,7 @@ internal static class RequestWorkKernelCases
         var serializer = fixture.Services.GetRequiredService<
             Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();
         return CqrsStreamLifetime.Run(token => CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
-                writer => probe.HoldAsync(writer, requestId, throwOnCancellation), token), serializer, requestId, TimeProvider.System, probe.SettleActivation, options: fixture.RoutingOptions, owner: owner, cancellationToken: CancellationToken.None);
+                writer => probe.HoldAsync(writer, requestId, throwOnCancellation), token), requestId, probe.SettleActivation, owner: owner, cancellationToken: CancellationToken.None);
     }
 
 }

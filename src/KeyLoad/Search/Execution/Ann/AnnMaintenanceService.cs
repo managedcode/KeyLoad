@@ -96,13 +96,11 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
                 expiry, shutdown.Token);
             using var releaseStage = release.EnterStage(binding, token);
             var released = await ExecuteCoreAsync(principal, request, release, token);
-            release.Budget.CheckResult(released);
             return released;
         }
         var work = admitted.RequireWork(principal.Id, request, clock, expiry, shutdown.Token);
         using var stage = work.EnterStage(binding, token);
         var result = await ExecuteCoreAsync(principal, request, work, token);
-        work.Budget.CheckResult(result);
         return result;
     }
 

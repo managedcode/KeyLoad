@@ -47,6 +47,10 @@ internal static class SimilarityMetricMath
         }
     }
 
+    internal static double CosineWithNorms(ReadOnlySpan<float> query, ReadOnlySpan<float> candidate,
+        double queryNorm, double candidateNorm)
+        => queryNorm == 0 || candidateNorm == 0 ? 0 : Dot(query, candidate) / Math.Sqrt(queryNorm * candidateNorm);
+
     private static double Cosine(ReadOnlySpan<float> source, ReadOnlySpan<float> candidate, double queryNorm)
     {
         if (queryNorm == 0)

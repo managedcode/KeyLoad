@@ -1,15 +1,10 @@
 using KeyLoad.Core.Messaging;
-using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
 internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, BackgroundStorageClient storage,
     RemoteTransferCoordinationHint hint,
-    IServiceProvider services, IGrainFactory grainFactory, TimeProvider clock,
-    Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-    IOptions<GrainRoutingOptions> routing)
+    IServiceProvider services, IGrainFactory grainFactory)
 {
     internal async Task<(bool HasValue, T? Value)> ReadAsync<T>(string subject, GrainReadKind kind, object payload, CancellationToken token) where T : class
     {
@@ -48,6 +43,5 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
     }
 
     private Task<GrainOperationReply> DrainAsync(Guid connection, Guid requestId, GrainRequestEnvelope envelope, CancellationToken token)
-        => GrainRequestStreamConsumer.DrainAsync(original => grainFactory.GetGrain<IConnectionGrain>(connection).ExecuteStreamAsync(envelope, original),
-            serializer, requestId, clock, routing, token);
+        => GrainRequestStreamConsumer.DrainAsync(original => grainFactory.GetGrain<IConnectionGrain>(connection).ExecuteStreamAsync(envelope, original), requestId, token);
 }

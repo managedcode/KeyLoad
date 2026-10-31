@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Query;
 using KeyLoad.Query.QueryExecution;
 using Microsoft.Extensions.DependencyInjection;
@@ -16,24 +15,19 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
     private readonly QueryExecutionOptions options = services.GetRequiredService<IOptions<QueryExecutionOptions>>().Value;
     private readonly Dictionary<PartitionRef, (SiloAddress Address, PhysicalShardRecord Owner)> owners = [];
 
-    internal async Task<DistributedSearchPreparedLeaf> PrepareAsync(DistributedSearchPhaseWork phase,
-        ReadExecutionBudgetReadGrant grant, ReadExecutionBudget parent, CancellationToken token)
+    internal async Task<DistributedSearchPreparedLeaf> PrepareAsync(DistributedSearchPhaseWork phase, ReadExecutionBudget parent, CancellationToken token)
     {
         parent.Check();
         var source = leaves.CaptureMetadata(phase.Search.Partition, phase.Search.Collection, parent);
         var target = leaves.Target(phase.Search.Partition);
         var selected = await ResolveOwnerAsync(target, phase, parent, token).ConfigureAwait(true);
         var request = new DistributedSearchOwnedLeaf(ContractVersion, phase.Phase, phase.Search,
-            selected.Owner, phase.Search.Partition.TenantId, grant.RemainingBytes, grant.RemainingRecords,
-            phase.MaxResultBytes, phase.Witness, phase.Statistics, phase.Scope, phase.SourceWindowId, phase.Selected, source.Definition, source.Coverage, source.Principal);
-        parent.ChargeBytes(OrleansSerialization.Measure(request));
+            selected.Owner, phase.Search.Partition.TenantId, phase.Witness, phase.Statistics, phase.Scope, phase.SourceWindowId, phase.Selected, source.Definition, source.Coverage, source.Principal);
         var childId = Guid.NewGuid();
         var child = codec.CreateDistributedSearchLeaf(childId, principalId, request, parent.ExpiresAt);
-        parent.ChargeBytes(OrleansSerialization.Measure(child));
         return new(request, childToken => leaves.RunAsync<DistributedSearchLeafResult>(target, selected.Address, child,
                 childId, childToken),
-            (result, childToken) => PartitionLeafCalls.CompleteAsync(parent, grant, result.ReadBytes, result.ExaminedRecords,
-                childToken));
+            (_, childToken) => PartitionLeafCalls.CompleteAsync(parent, childToken));
     }
 
     private async Task<(SiloAddress Address, PhysicalShardRecord Owner)> ResolveOwnerAsync(IPartitionQueryGrain target,
@@ -46,7 +40,6 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
             {
                 throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
             }
-            parent.ChargeBytes(PartitionQueryRetention.LeafDescriptorBytes);
             var selected = await leaves.ResolveOwnerAsync(target, parent, token).ConfigureAwait(true);
             owners.Add(phase.Search.Partition, selected);
             return selected;

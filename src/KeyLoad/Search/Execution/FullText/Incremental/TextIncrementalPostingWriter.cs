@@ -43,7 +43,6 @@ internal static class TextIncrementalPostingWriter
         }
         foreach (var posting in postings)
         {
-            budget.ChargeBytes(TextProtocol.PostingBytes);
             if (posting is null || posting.Record == InvalidRecord)
             {
                 throw TextErrors.Corrupt();

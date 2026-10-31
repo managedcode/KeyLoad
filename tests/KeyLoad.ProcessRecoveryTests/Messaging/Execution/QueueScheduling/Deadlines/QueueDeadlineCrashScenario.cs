@@ -28,7 +28,7 @@ internal static class QueueDeadlineCrashScenario
                 MessageState.Ready, QueueDeadlineCrashProtocol.First, QueueDeadlineCrashProtocol.Initial,
                 expiry, QueueDeadlineKind.ExpireMessage)]);
         var operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId));
-        await File.WriteAllBytesAsync(Path.Combine(directory, QueueDeadlineCrashProtocol.OperationFile), JsonDefaults.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, QueueDeadlineCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
         boundary.Position = store.Position + QueueDeadlineCrashProtocol.First;
         boundary.Armed = true;
         database.Apply(operation).Get<CommitReceipt>();

@@ -22,7 +22,8 @@ internal static class PackedAnnStorageCodec
         RequirePeak(checked(state.RetainedBytesUpperBound + PackedAnnStorageFrames.MaximumChunkBytes), options);
         var header = new PackedAnnStorageHeader(PackedAnnStorageFrames.CurrentVersion, state.Space,
             state.Options, state.Count, state.EntryPoint, state.MaximumLevel,
-            state.RetainedBytesUpperBound, state.BuildScratchBytesUpperBound);
+            checked(state.RetainedBytesUpperBound - PackedAnnReservations.CosineNorms(state.Space.Metric, state.Count)),
+            state.BuildScratchBytesUpperBound);
         PackedAnnStorageFrames.Write(destination, header, options, budget);
         for (var ordinal = Empty; ordinal < state.Count; ordinal++)
         {

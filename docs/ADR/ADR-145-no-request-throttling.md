@@ -17,16 +17,16 @@ Two kinds of limits remain:
   32 MiB). An MCP POST whose declared `Content-Length` exceeds it is rejected
   before the body is read. The identity middleware rewrites a Kestrel 413 into a
   `ResourceExhausted` problem (HTTP 429).
-- Physical reply and protocol bounds. `DatabaseLimits` sets no per-operation
-  data bound ([ADR-149](ADR-149-no-operation-limits.md) removes them); the
-  grain reply and stream ceilings in `GrainRoutingOptions` (`MaximumReplyBytes`,
-  `MaximumStartedBytes`, `MaximumCompletedBytes`, `MaximumFailedBytes`, `MaximumAggregateBytes` and
-  `MaximumStreamFrames`, the frames one long-running response stream carries,
-  progress plus its terminal frame); the MCP JSON token and property limits; the
-  MCP canonical payload ceiling, equal to the server body limit; the classified
-  MCP reply ceilings `McpExecutionOptions.MaximumControlReplyBytes` and
-  `MaximumDataReplyBytes`; request and execution lifetimes; and the connection
-  idle timeout.
+- Protocol and transport bounds. `DatabaseLimits` sets no per-operation data
+  bound, and grain request streams carry no reply byte or frame cap
+  ([ADR-149](ADR-149-no-operation-limits.md) removes them); a short-profile grain
+  request stream has the fixed two-chunk shape
+  (`GrainRequestStreamProtocol.MaximumChunks`); Orleans keeps its default message
+  size limits; the MCP JSON token and property limits; the MCP canonical payload
+  ceiling, equal to the server body limit; the classified MCP reply ceilings
+  `McpExecutionOptions.MaximumControlReplyBytes` and `MaximumDataReplyBytes`; the
+  request lifetimes (`GrainRoutingOptions.RequestLifetime` and `MaximumFuture`);
+  and the connection idle timeout.
 
 Engine-internal resource planning is not request throttling and remains: ANN
 resident-memory and disk planning (`AnnExecutionOptions.MaximumResidentBytes`,
@@ -69,9 +69,9 @@ benchmark run with no request throttling, the same as the other databases' clien
   than the cluster can serve waits longer; it does not receive `ResourceExhausted`
   because a node, tenant or principal pool is full.
 - Operators size hardware (silos, CPU, memory, disk) for their load instead of
-  tuning admission pools. The physical reply and protocol bounds above still stop
-  one request from returning more than one reply can carry; ADR-149 removes the
-  configured per-operation data limits.
+  tuning admission pools. The protocol and transport bounds above remain;
+  ADR-149 removes the configured per-operation data limits and the grain reply
+  and frame caps.
 - Cancellation, shutdown and recovery do not depend on reserved control capacity.
   Each operation carries its own cancellation, and shutdown closes new work and
   joins running operations before storage closes.

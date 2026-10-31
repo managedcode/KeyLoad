@@ -39,7 +39,6 @@ internal static class EventEntityRefJoinExecutor
                 request.Query, candidate.Left, candidate.Right));
         }
         var page = new QueryPage(rows.MoveToImmutable(), null, cut, EventEntityRefJoinBinding.AccessPath);
-        budget.CheckResult(page);
         return page;
     }
 

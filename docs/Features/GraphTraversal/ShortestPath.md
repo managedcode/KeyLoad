@@ -28,8 +28,8 @@ a separate `RawReadGrant` does not authorize filtering. Without the use grant,
 the operation returns `PermissionDenied` before adjacency traversal.
 Version/shape/identifier/label errors are Validation; invalid numeric caps are
 BudgetExceeded; a foreign endpoint partition is UnsupportedCapability.
-Caller cancellation, explicit expiry and the grain reply ceiling apply; no
-KeyLoad request, read or result byte cap applies ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)).
+Caller cancellation and explicit expiry apply; no KeyLoad request, read or
+result byte cap applies ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)).
 Alias: `keyload.contract.graph-shortest-path-request`.
 
 `GraphShortestPathResult` generated IDs: 0 Version=1, 1 Found, 2 nullable Hops,
@@ -98,15 +98,14 @@ Visited identity is the complete EntityRef. Keep only first predecessor edge
 ID/reference/depth, and stop at the first minimum-depth target; later equal-hop
 paths cannot replace it. Depth exhaustion returns no-path success; node/edge exhaustion,
 cancellation and explicit expiry throw. Validate adjacency/edge ID/from/partition
-agreement as Corruption. Re-read only final path edges through charged reads,
+agreement as Corruption. Re-read only final path edges through the operation's view,
 then project attributes; retain neither all explored edge payloads nor documents.
 
 Reuse GraphVertexVisibility's policy/boolean caches. Vertex, predecessor,
 collection-decision and frontier metadata and the serialized result have no
 KeyLoad byte ledger ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)): the
 node and edge caps, caller cancellation and explicit expiry bound the traversal,
-and the grain reply ceiling (`GrainRoutingOptions.MaximumReplyBytes`) bounds the
-delivered result. Use checked arithmetic and cancellation checks. None of this
+and the delivered result is not measured. Use checked arithmetic and cancellation checks. None of this
 establishes an aggregate RSS bound.
 
 ## Ordered ownership, verification and rollout

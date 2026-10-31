@@ -49,7 +49,7 @@ internal static class RemoteTransferAttemptCrashScenario
         var advance = new CommandRequest(RemoteTransferAttemptIdentity.AdvanceId(hint, hint.AcceptGeneration, claims.OutcomeDigest),
             Source.Partition, [new AdvanceQueueTransferAttempt(Source, transfer.TransferId, hint.AcceptGeneration, witness)]);
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, advance, advance.CommandId);
-        await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.OperationFile), JsonDefaults.Serialize(operation));
+        await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.AcceptFile), JsonDefaults.Serialize(accept));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferAttemptCrashProtocol.FailureFile), failureBytes);
         boundary.Position = store.Position + RemoteTransferAttemptCrashProtocol.PositionStep;

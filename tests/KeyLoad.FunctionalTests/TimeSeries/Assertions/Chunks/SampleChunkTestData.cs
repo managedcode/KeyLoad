@@ -82,13 +82,6 @@ internal static class SampleChunkTestData
         CancellationToken cancellationToken = default)
         => new(clock, cancellationToken);
 
-    internal static ReadExecutionBudget ChargedDecodeBudget(ReadOnlySpan<byte> bytes, TimeProvider? clock = null, CancellationToken cancellationToken = default)
-    {
-        var budget = Budget(clock, cancellationToken);
-        budget.ChargeBytes(bytes.Length);
-        return budget;
-    }
-
     internal static async Task AssertRecordsExact(SampleRecord[] expected, SampleRecord[] actual)
     {
         await Assert.That(actual.Length).IsEqualTo(expected.Length);

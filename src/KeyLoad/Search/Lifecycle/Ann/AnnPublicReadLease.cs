@@ -27,8 +27,8 @@ internal sealed class AnnPublicReadLease : IAnnProjectionLease
             budget.Check();
             var manifest = owner.DescribePublished(new(request.Consumer, request.IndexGeneration));
             AnnPublicAcquisition.RequireScope(request, manifest);
-            memory = owner.ReserveRead(AnnPublicFrameAdmission.Desired(configured, budget));
-            callerOptions = AnnPublicFrameAdmission.CaptureOptions(configured, budget, memory.Bytes);
+            memory = owner.ReserveRead(AnnPublicFrameAdmission.Desired(configured));
+            callerOptions = AnnPublicFrameAdmission.CaptureOptions(configured, memory.Bytes);
             var pinned = AnnPublicAcquisition.Request(database, view, manifest, budget);
             scopeWork = new AnnSeedWork(budget, callerOptions.Value.MaxWorkUnits);
             source = AnnSeedCollector.CapturePinnedView(database, view, manifest.PrincipalId,

@@ -17,7 +17,6 @@ public static class OnlineTextImplicitCurrent
         var view = budget.CreateView(raw);
         _ = budget.VisitAll(raw, OnlineTextPublicationKeys.Prefix(partition, collection, field), (key, value) =>
         {
-            budget.ChargeBytes(value.Length);
             var current = OrleansSerialization.Deserialize<OnlineTextCurrentPublication>(value);
             var request = new OnlineTextIndexMaintenanceRequest(current.CommandId, current.Consumer, current.Authority.Collection, current.Authority.Field, current.ConsumerGeneration, current.PublishedCut.NodeId, current.Authority.Placement);
             if (!key.SequenceEqual(OnlineTextPublicationKeys.Current(request)) || current.Consumer.Partition != partition || current.Authority.Collection != collection || current.Authority.Field != field)

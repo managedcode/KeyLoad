@@ -38,6 +38,7 @@ internal sealed class ConnectionGraphPolicyTests
     private static async Task PolicyAsync(GrainTransitionManager manager)
     {
         var connection = typeof(IConnectionGrain).FullName!;
+        var coordinator = typeof(IRequestGrain).FullName!;
         var request = typeof(IRequestExecutionGrain).FullName!;
         var commit = typeof(IDatabaseCommitGrain).FullName!;
         var service = typeof(PartitionStorageGrainService).FullName!;
@@ -45,13 +46,18 @@ internal sealed class ConnectionGraphPolicyTests
         foreach (var method in new[] { execute, nameof(IConnectionGrain.ExecuteAsync) })
         {
             await Assert.That(manager.IsTransitionAllowed(Transition(connection, method,
+                coordinator, method))).IsTrue();
+            await Assert.That(manager.IsTransitionAllowed(Transition(coordinator, method,
                 commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsTrue();
-            await Assert.That(manager.IsTransitionAllowed(Transition(connection, method,
+            await Assert.That(manager.IsTransitionAllowed(Transition(coordinator, method,
                 request, nameof(IRequestExecutionGrain.ExecuteAsync)))).IsTrue();
+            await Assert.That(manager.IsTransitionAllowed(Transition(connection, method,
+                commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsFalse();
             await Assert.That(manager.IsTransitionAllowed(Client(connection, method))).IsTrue();
+            await Assert.That(manager.IsTransitionAllowed(Client(coordinator, method))).IsFalse();
         }
         await Assert.That(manager.IsTransitionAllowed(Transition(connection, nameof(IConnectionGrain.CloseAsync),
-            commit, nameof(IDatabaseCommitGrain.GetReadOwnerAsync)))).IsFalse();
+            coordinator, nameof(IRequestGrain.ExecuteAsync)))).IsFalse();
         await Assert.That(manager.IsTransitionAllowed(Transition(request, nameof(IRequestExecutionGrain.ExecuteAsync),
             commit, nameof(IDatabaseCommitGrain.ReadCutAsync)))).IsTrue();
         await Assert.That(manager.IsTransitionAllowed(Transition(request, nameof(IRequestExecutionGrain.ExecuteAsync),

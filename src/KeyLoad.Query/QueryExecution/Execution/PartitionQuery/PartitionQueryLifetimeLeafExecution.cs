@@ -28,7 +28,7 @@ internal static class PartitionQueryLifetimeLeafExecution
             throw Errors.Fail(ErrorCode.OwnershipLost, Invalid);
         }
         var original = request;
-        PartitionQueryOwnedLeafValidation.Validate(original, engine.Execution);
+        PartitionQueryOwnedLeafValidation.Validate(original);
         database.VerifyStorageOwner(actualOwner, token);
         if (original.Owner != actualOwner)
         {
@@ -39,15 +39,12 @@ internal static class PartitionQueryLifetimeLeafExecution
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        QueryResultBudgetPolicy.Constrain(budget, engine.Execution);
         budget.ConstrainLifetime(originalExpiry);
         var normalized = QueryValidation.Normalize(original.Plan.Request, engine.Execution);
-        var grant = budget.CreateReadGrant(original.Plan.MaxReadBytes, original.Plan.MaxExaminedRecords);
         using var admission = database.AdmitQuery(token);
         var result = new PartitionQueryLeafExecutor(engine, database, budget, actualOwner, receivingLeaf: true)
-            .ExecuteLifetime(principalId, original.Plan, normalized, grant,
+            .ExecuteLifetime(principalId, original.Plan, normalized,
                 new(request.Definition, request.Coverage, request.Principal));
-        budget.CheckResult(result);
         return result;
     }
 }

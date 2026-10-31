@@ -1,67 +1,36 @@
 using System.Text.Json;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 internal static class GrainReplyFactory
 {
-    private const long EmptyReplyBytes = 0;
     private const string Cancelled = "The database request was cancelled.";
     private const string Unavailable = "The database request could not complete. Retry the same command ID for writes.";
     private const string InterruptedWrite = "The write outcome is unknown. Retry the same command ID.";
 
-    internal static GrainOperationReply Value(object? value, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
+    internal static GrainOperationReply Value(object? value) => new()
     {
-        var result = new GrainValue(value);
-        using var counter = new GrainCountingWriter(options.Value.MaximumReplyBytes, options, cancellationToken);
-        try
-        {
-            OrleansSerialization.SerializeToWriter(result, counter);
-        }
-        catch (KeyLoadException error) when (error.Code == ErrorCode.BudgetExceeded)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.ReplyBudgetExceeded);
-        }
-        return new()
-        {
-            Result = result
-        };
-    }
+        Result = new GrainValue(value)
+    };
 
     internal static GrainValue RequireValue(GrainOperationReply reply)
         => reply.Error is null && reply.Result is { } result ? result
             : throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
 
-    internal static long Measure(GrainOperationReply reply)
-        => reply.Result is { } result ? OrleansSerialization.Measure(result) : EmptyReplyBytes;
-
-    internal static GrainOperationReply ParentValue<T>(T result, IOptions<GrainRoutingOptions> options, CancellationToken token)
-    {
-        try
-        {
-            return Value(result, options, token);
-        }
-        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
-        {
-            GrainFailureDiagnostics.Mark(error, GrainFailureStage.ReplyEncoding);
-            throw;
-        }
-    }
-
-    internal static GrainOperationReply Operation(Result<object> result, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
+    internal static GrainOperationReply Operation(Result<object> result, CancellationToken cancellationToken)
     {
         if (result.IsFailed)
         {
-            return Rejected(code: Errors.Code(result.Problem).Value!.Value, detail: result.Problem.Detail, options: options);
+            return Rejected(code: Errors.Code(result.Problem).Value!.Value, detail: result.Problem.Detail);
         }
 
         cancellationToken.ThrowIfCancellationRequested();
-        return Value(value: result.Value, cancellationToken: cancellationToken, options: options);
+        return Value(result.Value);
     }
 
-    internal static Result<GrainOperationReply> StreamResult(GrainOperationReply reply, IOptions<GrainRoutingOptions> options)
+    internal static Result<GrainOperationReply> StreamResult(GrainOperationReply reply)
     {
         ArgumentNullException.ThrowIfNull(reply);
         if (reply.Error is { } code)
@@ -71,11 +40,10 @@ internal static class GrainReplyFactory
                 throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
             }
 
-            return Result<GrainOperationReply>.Fail(GrainRequestStreamProblem.Create(code: code, detail: detail, options: options));
+            return Result<GrainOperationReply>.Fail(GrainRequestStreamProblem.Create(code, detail));
         }
 
-        if (reply.Result is null || Measure(reply) > options.Value.MaximumReplyBytes
-            || reply.SafeDetail is not null)
+        if (reply.Result is null || reply.SafeDetail is not null)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
@@ -83,7 +51,7 @@ internal static class GrainReplyFactory
         return Result<GrainOperationReply>.Succeed(reply);
     }
 
-    internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics, IOptions<GrainRoutingOptions> options, Guid requestId = default, GrainFailureStage stage = GrainFailureStage.EnvelopeVerification, CancellationToken cancellationToken = default)
+    internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics, Guid requestId = default, GrainFailureStage stage = GrainFailureStage.EnvelopeVerification, CancellationToken cancellationToken = default)
     {
         var encodingFailure = command
             && error.Data[GrainFailureDiagnostics.StageMetadataKey] is GrainFailureStage.ReplyEncoding;
@@ -91,24 +59,24 @@ internal static class GrainReplyFactory
         GrainFailureDiagnostics.Log(diagnostics, error, requestId, stage, code);
         if (encodingFailure)
         {
-            return Rejected(code: code, detail: InterruptedWrite, options: options);
+            return Rejected(code: code, detail: InterruptedWrite);
         }
         if (error is KeyLoadException failure)
         {
-            return Rejected(code: code, detail: failure.Message, options: options);
+            return Rejected(code: code, detail: failure.Message);
         }
 
         if (error is OperationCanceledException)
         {
-            return Rejected(code: code, detail: CancellationDetail(code), options: options);
+            return Rejected(code: code, detail: CancellationDetail(code));
         }
 
         if (error is JsonException or ArgumentException)
         {
-            return Rejected(code: code, detail: GrainRoutingProtocol.InvalidRequest, options: options);
+            return Rejected(code: code, detail: GrainRoutingProtocol.InvalidRequest);
         }
 
-        return Rejected(code: code, detail: Unavailable, options: options);
+        return Rejected(code: code, detail: Unavailable);
     }
 
     private static ErrorCode FailureCode(Exception error, bool command, CancellationToken cancellationToken) => error switch
@@ -127,9 +95,9 @@ internal static class GrainReplyFactory
         _ => Unavailable
     };
 
-    private static GrainOperationReply Rejected(ErrorCode code, string? detail, IOptions<GrainRoutingOptions> options) => new()
+    private static GrainOperationReply Rejected(ErrorCode code, string? detail) => new()
     {
         Error = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost,
-        SafeDetail = detail is { Length: > 0 } && detail.Length <= options.Value.MaximumDetailCharacters ? detail : Unavailable
+        SafeDetail = detail is { Length: > 0 } ? detail : Unavailable
     };
 }

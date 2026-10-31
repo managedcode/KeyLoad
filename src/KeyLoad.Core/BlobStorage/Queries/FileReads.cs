@@ -13,7 +13,6 @@ public static class FileReads
         work.AttachResourceLifetimeBinding(binding);
         using var admission = engine.AdmitQuery(cancellationToken);
         var result = engine.Store.Read(raw => engine.ReadFileMetadata(work.CreateView(raw), principalId, request));
-        work.CheckResult(result);
         return result;
     }
 

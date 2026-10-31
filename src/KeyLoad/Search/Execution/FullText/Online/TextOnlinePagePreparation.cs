@@ -65,7 +65,6 @@ internal static class TextOnlinePagePreparation
             {
                 continue;
             }
-            budget.ChargeBytes(TextIncrementalSourceProtocol.MapSlotBytes);
             entries.Add(entry);
         }
         return actual with

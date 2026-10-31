@@ -5,7 +5,7 @@ namespace KeyLoad.Core;
 /// <summary>Executes StreamTraversalRange operations against the caller's database context.</summary>
 public static class StreamTraversalRange
 {
-    internal static (ImmutableArray<EventRecord> Events, bool HasMore) ReadTraversalEvents(this DatabaseEngine engine, IKeyValueView bounded, StreamRef stream, PrincipalRecord principal, ResourceDefinition resource, StreamTraversalCursor cursor, int limit, ReadExecutionBudget budget)
+    internal static (ImmutableArray<EventRecord> Events, bool HasMore) ReadTraversalEvents(this DatabaseEngine engine, IKeyValueView bounded, StreamRef stream, PrincipalRecord principal, ResourceDefinition resource, StreamTraversalCursor cursor, int limit)
     {
         var prefix = KeySpace.Partition(StreamReadExecution.EventSpace, stream.Partition, stream.StreamSet, stream.StreamId, stream.Generation);
         var backward = cursor.Direction == StreamReadDirection.Backward;
@@ -14,7 +14,6 @@ public static class StreamTraversalRange
         var after = KeySpace.Partition(StreamReadExecution.EventSpace, stream.Partition, stream.StreamSet, stream.StreamId, stream.Generation, lower);
         var until = KeySpace.Partition(StreamReadExecution.EventSpace, stream.Partition, stream.StreamSet, stream.StreamId, stream.Generation, upper);
         var events = new List<EventRecord>();
-        var projectedBytes = StreamTraversalProtocol.EmptyRevision;
         var expectedExclusiveRevision = cursor.NextExclusiveRevision;
         bool Visit(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
         {
@@ -24,15 +23,7 @@ public static class StreamTraversalRange
                 throw Errors.Fail(ErrorCode.Corruption, StreamTraversalProtocol.InvalidRequest);
             }
 
-            var projected = engine.ProjectEvent(principal, resource, record);
-            var bytes = budget.MeasureResult(projected);
-            if (bytes > budget.MaximumResultBytes - projectedBytes)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, StreamTraversalProtocol.Bytes);
-            }
-
-            events.Add(projected);
-            projectedBytes += bytes;
+            events.Add(engine.ProjectEvent(principal, resource, record));
             expectedExclusiveRevision = record.Revision;
             return true;
         }

@@ -9,6 +9,5 @@ internal enum RequestCqrsProblemMutation
     WrongTitle,
     WrongType,
     WrongStatus,
-    Instance,
-    ExcessDetail
+    Instance
 }

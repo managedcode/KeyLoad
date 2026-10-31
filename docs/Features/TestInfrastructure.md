@@ -271,11 +271,11 @@ Parser attachments remain bound to the same accepted header; rejected/saturated 
 
 ### Owned fixture failure settlement
 
-REQ-UNIT-OWNED-FAILURE-SETTLEMENT-001: Genuine SampleChunkPartialRetention, RemoteModelMac and ReadGrantFailureSettlement whole operations lexically own their fixture acquisition. Preserve operation exceptions before implicit disposal and all acquisition/disposal exceptions afterward, including fatal errors. Original reverse cold-store disposal and conditional original-store release remain unchanged. Owned MAC credential bytes are cleared on construction/disposal failures without touching borrowed caller bytes. ReadGrant inherits only the independently sealed CancellationToken-last constructor/caller contract; capacity, cancellation, settled grant accounting and complete images stay unchanged.
+REQ-UNIT-OWNED-FAILURE-SETTLEMENT-001: Genuine SampleChunkPartialRetention and RemoteModelMac whole operations lexically own their fixture acquisition. Preserve operation exceptions before implicit disposal and all acquisition/disposal exceptions afterward, including fatal errors. Original reverse cold-store disposal and conditional original-store release remain unchanged. Owned MAC credential bytes are cleared on construction/disposal failures without touching borrowed caller bytes.
 
-AC-UNIT-OWNED-FAILURE-SETTLEMENT-001: All original retention/merge/refusal/replay/two-cold, MAC sign/verify/privacy and read-consumer failure→retained charge→settlement→healthy→cold assertions and declarations remain unchanged. No invented failure/provider, no cap/deadline/default/protocol changes. Canonical Unit50 SIMD and exact source/image/current UID discovery remain mandatory OPEN gates.
+AC-UNIT-OWNED-FAILURE-SETTLEMENT-001: All original retention/merge/replay/two-cold and MAC sign/verify/privacy assertions and declarations remain unchanged. No invented failure/provider, no cap/deadline/default/protocol changes. Canonical Unit50 SIMD and exact source/image/current UID discovery remain mandatory OPEN gates.
 
-Source map: TimeSeries/Fixtures/SampleChunks/SampleChunkPartialRetentionFixture.cs and Helpers/SampleChunkPartialRetentionFlow.cs; DocumentStorage/Fixtures/RemoteModelMacFixture.cs; ResourceExecution/Scenarios/ReadBudgets/ReadGrantFailureSettlementFlow.cs.
+Source map: TimeSeries/Fixtures/SampleChunks/SampleChunkPartialRetentionFixture.cs and Helpers/SampleChunkPartialRetentionFlow.cs; DocumentStorage/Fixtures/RemoteModelMacFixture.cs.
 
 ### Scoped task artifact retention
 

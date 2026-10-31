@@ -10,19 +10,19 @@ public sealed partial class SearchEngine
     internal Task<RankedDocument[]> SearchBoundAsync(string principalId, SearchRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        var budget = SearchLifetimeWorkBudget.Create(database, execution, binding, token);
+        var budget = SearchLifetimeWorkBudget.Create(database, binding, token);
         using var reservation = database.AdmitQuery(token);
         return Task.FromResult(SearchCore(principalId, request, budget));
     }
 
     internal Task<GraphSearchResult> GraphSearchBoundAsync(string principalId, GraphSearchRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
-        => GraphSearchAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, execution, binding, token), token);
+        => GraphSearchAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, binding, token), token);
 
     internal Task<WaitForIndexResult> WaitForIndexBoundAsync(string principalId, WaitForIndexRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        var budget = SearchLifetimeWorkBudget.Create(database, execution, binding, token);
+        var budget = SearchLifetimeWorkBudget.Create(database, binding, token);
         using var reservation = database.AdmitQuery(token);
         return Task.FromResult(TextIndexWaitExecution.Execute(database, textProjection, execution,
             readCutObserver, principalId, request, budget));
@@ -30,11 +30,11 @@ public sealed partial class SearchEngine
 
     internal Task<WaitForAnnIndexResult> WaitForAnnIndexBoundAsync(string principalId, WaitForAnnIndexRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
-        => WaitForAnnIndexAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, execution, binding, token), token);
+        => WaitForAnnIndexAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, binding, token), token);
 
     internal Task<AnnSearchPage> ApproximateSearchBoundAsync(string principalId, ApproximateSearchRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
-        => ApproximateSearchAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, execution, binding, token), token);
+        => ApproximateSearchAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, binding, token), token);
 
     internal Task<WaitForAnnIndexResult> WaitForAnnIndexBoundAsync(string principalId, WaitForAnnIndexRequest request,
         ReadExecutionBudget budget, AnnReadLifetimeMetadata metadata, IResourceLifetimeWorkBinding binding,

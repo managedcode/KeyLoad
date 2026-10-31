@@ -8,7 +8,7 @@ internal static class SampleChunkCodecRoundTripAssertions
     internal static async Task RoundTripExact(SampleRecord[] expected)
     {
         var encoded = SampleChunkCodec.Encode(expected, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
-        var actual = SampleChunkCodec.Decode(encoded, SampleChunkTestData.ChargedDecodeBudget(encoded), UnitExecutionOptions.TimeSeriesExecution());
+        var actual = SampleChunkCodec.Decode(encoded, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution());
         await SampleChunkTestData.AssertRecordsExact(expected, actual);
     }
 

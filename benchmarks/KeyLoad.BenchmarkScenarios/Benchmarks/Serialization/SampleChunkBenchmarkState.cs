@@ -55,19 +55,13 @@ internal sealed class SampleChunkBenchmarkState
         var decoded = new SampleRecord[records.Length];
         for (var index = IndexInitialValue; index < records.Length; index++)
         {
-            budget.ChargeBytes(runtimeValues[index].Length);
             decoded[index] = OrleansSerialization.Deserialize<SampleRecord>(runtimeValues[index]);
             budget.Check();
         }
         return decoded;
     }
 
-    internal SampleRecord[] ChunkDecode()
-    {
-        var budget = Budget();
-        budget.ChargeBytes(chunk.Length);
-        return SampleChunkCodec.Decode(chunk, budget, executionOptions);
-    }
+    internal SampleRecord[] ChunkDecode() => SampleChunkCodec.Decode(chunk, Budget(), executionOptions);
 
     private static ReadExecutionBudget Budget() => new();
 

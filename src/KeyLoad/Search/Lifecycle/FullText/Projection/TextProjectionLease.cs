@@ -32,7 +32,7 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
         recordIndex++;
         if (building)
         {
-            owner.MutatePhysical(() => generation.AddRecord(reference, revision, budget));
+            owner.MutatePhysical(() => generation.AddRecord(reference, revision));
         }
         else if (recordIndex >= generation.Records.Count
             || generation.Records[recordIndex].Reference != reference

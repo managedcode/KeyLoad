@@ -7,7 +7,6 @@ public static class ProjectionOutbox
 {
     internal const string ConsumerIdentityRequiresNewGenerationDetail = "Use a new consumer identity for a different index generation or rebuild.";
     internal const string ReleasedProjectionGenerationDetail = "The projection generation was released.";
-    internal const string FirstProjectionEntryExceedsBudgetDetail = "The first projection entry exceeds the batch byte budget.";
     internal const string EmptyProjectionBatchEffectsDetail = "An empty projection batch cannot produce effects.";
     internal const string PinnedOutboxHistoryDetail = "A projection consumer or rebuild pins the requested outbox history.";
     internal const string OutboxEntrySpace = "outbox";
@@ -21,7 +20,6 @@ public static class ProjectionOutbox
     internal const int ProjectionAcceptsEmptyMutationKindsLength = 0;
     internal const int MinimumProjectionReadCount = 1;
     internal const string ProjectionBatchBudgetDetail = "The projection batch exceeds its budget.";
-    internal const int InitialProjectionPageBytes = 0;
     internal const string ProjectionReceiptSpace = "projection-receipt";
     internal const string ProjectionBatchTokenPurpose = "projection-batch";
     internal static byte[] OutboxKey(PartitionRef partition, long sequence) => KeySpace.Partition(OutboxEntrySpace, partition, sequence);

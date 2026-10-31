@@ -1,11 +1,9 @@
 using global::Orleans.Configuration;
 using global::Orleans.Providers;
 using global::Orleans.Providers.Streams.Common;
-using global::Orleans.Serialization;
 using global::Orleans.Streams;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -21,10 +19,7 @@ internal static class EventFeedAdapterCreation
         var cacheOptions = new SimpleQueueCacheOptions();
         var cache = new SimpleQueueAdapterCache(cacheOptions, providerName,
             services.GetRequiredService<ILoggerFactory>());
-        var admission = new EventFeedHintBatchAdmission(
-            services.GetRequiredService<Serializer<MemoryMessageBody>>(),
-            services.GetRequiredService<IOptions<GrainRoutingOptions>>());
         var original = MemoryAdapterFactory<DefaultMemoryMessageBodySerializer>.Create(services, providerName);
-        return new EventFeedQueueAdapterFactory(original, cache, admission);
+        return new EventFeedQueueAdapterFactory(original, cache);
     }
 }

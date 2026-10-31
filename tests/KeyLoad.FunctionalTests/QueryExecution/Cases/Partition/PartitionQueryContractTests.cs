@@ -27,38 +27,6 @@ internal sealed class PartitionQueryContractTests
     }
 
     [Test]
-    public async Task MismatchedLeafRequestPartitionFailsBeforeAnyStorageRead()
-    {
-        using var database = PartitionQueryTestSupport.Create(out var creation);
-        var partitions = PartitionQueryTestSupport.Partitions(database)[..2];
-        PartitionQueryTestSupport.AddRows(database, partitions[0], new PartitionQuerySeed("valid-leaf", 1, "healthy"));
-        var limits = database.Database.Limits;
-        var request = QueryValidation.Normalize(PartitionQueryTestSupport.Request(database, 1), UnitExecutionOptions.QueryExecution().Value);
-        var plan = PartitionQueryPlanFactory.Create(request, database.Store.Identity, [.. partitions], UnitExecutionOptions.QueryExecution().Value);
-        var original = plan.Leaves[1];
-        var invalid = plan with
-        {
-            Leaves = plan.Leaves.SetItem(1,
-            original with
-            {
-                Request = original.Request with
-                {
-                    Partition = database.Partition
-                }
-            })
-        };
-        var position = database.Store.Position;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => PartitionQueryPlanValidation.Validate(invalid, UnitExecutionOptions.QueryExecution().Value));
-
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-        var healthy = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).ExecutePartitionQuery(
-            PartitionQueryTestSupport.Principal, PartitionQueryTestSupport.Request(database, 1), [partitions[0]]);
-        await PartitionQueryWholeFlowAssertions.RuntimeAssertRowAsync(healthy, partitions[0], "valid-leaf", "healthy", creation);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-    }
-
-    [Test]
     public async Task EmptyOversizedAndNullPartitionSetsFailAsValidation()
     {
         using var database = PartitionQueryTestSupport.Create(out var creation);

@@ -4,21 +4,23 @@ Status: Accepted (owner decision 2026-10-09, simplified 2026-10-18 under [ADR-13
 
 ## Decision
 
-Every connected client gets one Orleans `ConnectionGrain`. All operations sent over that connection run through this grain; no grain is created per request. The connection grain calls partition grains and the silo-local ZoneTree owners on its own or other nodes through Orleans, gathers the results and returns them.
+Every connected client gets one Orleans `ConnectionGrain`. It owns only the connection: admission, the duplicate-request check, close and the join of its live operations. Each admitted operation runs in its own `RequestGrain`, keyed by the operation's request identity and placed on the connection's silo. The request grain is the coordinator: it reloads authority, resolves the storage owner through Orleans, runs the operation beside that owner (in place when its own silo owns the data, otherwise through a `RequestExecutionGrain` placed on the owner's silo), fans composed and partitioned work out to the owners of the required partitions, gathers the results and returns them.
 
 ```mermaid
 flowchart LR
     T[Accepted Kestrel connection] --> C[ConnectionGrain]
-    C --> P[Partition grains]
-    C --> R[Reads fanned out and merged]
-    P -->|Orleans calls| Z[ZoneTree owners on own and other silos]
-    R -->|Orleans calls| Z
+    C --> Q[RequestGrain per operation]
+    Q -->|owner is this silo| Z[Silo-local ZoneTree owner through DI]
+    Q -->|owner on another silo| L[RequestExecutionGrain on the owner silo]
+    Q -->|partitioned query or search| P[Partition grains and their leaves]
+    L --> Z2[That silo's ZoneTree owner]
+    P --> L
 ```
 
 ## Contract
 
 - Identity. The server's connection middleware issues one opaque GUID per accepted physical connection. No client header, principal, HttpClient instance or MCP session id can choose the grain. request context carries the connection id; it confers no authorization.
-- Operations. Each operation keeps its own request envelope id, stable command id, fresh persisted authorization, cancellation and cleanup. Independent operations use the ManagedCode.Communication streaming contract; operation state stays local to its enumerator. Admission and close invariants use a joined operation owner instead of a blanket `[Reentrant]`. A duplicate active request id on one connection fails with `Conflict`.
+- Operations. Each operation keeps its own request envelope id, stable command id, fresh persisted authorization, cancellation and cleanup. The operation's ManagedCode.Communication response stream and its producer live in its request grain; the connection grain forwards the stream or the settled reply. Admission and close invariants use a joined operation owner instead of a blanket `[Reentrant]`; closing the connection cancels the linked call into every live request grain and waits for it. A duplicate active request id on one connection fails with `Conflict`.
 - Close. `CloseAsync` is `[AlwaysInterleave]`, accepts only a signed close control, cannot execute a database effect, stops admission, cancels and joins the original operations and then requests `DeactivateOnIdle`. Transport cleanup cancels and joins the caller enumerators and their producer disposal before the close call, because Orleans sends the final `DisposeAsync` RPC even after enumeration ends.
 - Limits (typed validated options). No count limit on transport connections per node or concurrent operations per connection and no queued admission ([ADR-145](ADR-145-no-request-throttling.md)); `GrainRoutingOptions.ConnectionIdleTimeout` (two-minute default) expires a connection when no operation is active.
 - Lifetime. Disconnect uses Kestrel `ConnectionClosed`; `RequestAborted` belongs to one operation. Host shutdown closes connection admission and joins connections before the silo and storage stop. Reconnect obtains a new grain. Silo loss discards the disposable grain; command-receipt retry and uncertain writes keep their existing semantics.

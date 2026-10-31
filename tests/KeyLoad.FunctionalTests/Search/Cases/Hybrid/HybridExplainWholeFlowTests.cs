@@ -5,8 +5,6 @@ namespace KeyLoad.FunctionalTests.Search;
 
 internal sealed class HybridExplainWholeFlowTests
 {
-    private const int WorkingBytes = 128;
-    private const string CaptureExceeded = "The search explanation byte budget is exceeded.";
     private const string FieldDenied = "The query requires a protected field-use grant.";
 
     [Test]
@@ -74,33 +72,4 @@ internal sealed class HybridExplainWholeFlowTests
         await Assert.That(HybridExplainWholeFlow.Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
         await Assert.That(db.Store.Position).IsEqualTo(position);
     }
-    [Test]
-    public async Task ActualExplainCaptureByteCapRejectsWithoutPartialOrEffectAndHealthyReadContinues()
-    {
-        using var db = HybridExplainWholeFlow.Create();
-        var before = HybridExplainWholeFlow.Snapshot(db);
-        var position = db.Store.Position;
-        var request = HybridExplainWholeFlow.Request(db, false);
-        var limited = new SearchEngine(db.Database,
-            UnitExecutionOptions.QueryExecution(new()
-            {
-                MaximumResultBytes = WorkingBytes
-            }));
-        GraphSearchResult? partial = null;
-        var token = TestContext.Current!.Execution.CancellationToken;
-        var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () =>
-            partial = await limited.GraphSearchAsync(ThreeWayHybridTestSupport.Reader, request, token))
-            ?? throw new InvalidOperationException("The actual bounded Explain capture did not fail.");
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(error.Message).IsEqualTo(CaptureExceeded);
-        await Assert.That(partial).IsNull();
-        await Assert.That(HybridExplainWholeFlow.Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
-        await Assert.That(db.Store.Position).IsEqualTo(position);
-        await HybridExplainWholeFlow.LiteralAsync(await new SearchEngine(db.Database,
-            UnitExecutionOptions.QueryExecution()).GraphSearchAsync(ThreeWayHybridTestSupport.Reader, request, token),
-            db, false);
-        await Assert.That(HybridExplainWholeFlow.Snapshot(db)).IsEquivalentTo(before, CollectionOrdering.Matching);
-        await Assert.That(db.Store.Position).IsEqualTo(position);
-    }
-
 }

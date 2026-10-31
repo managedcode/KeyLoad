@@ -25,7 +25,7 @@ flowchart LR
 
 AC001 maps to SqlGraphPathParityTests, SqlGraphPathRejectionTests, SqlGraphPathParameterBoundaryTests, SqlGraphPathOperationFlowTests, GraphPathClusterParityTests and its existing GraphPathRawReadR43Trial continuation. GraphPathFieldUseR43State and GraphPathRebindR44State already use the shortest-path SELECT form. GraphPathPayloadTests separately qualifies payload/envelope identity without interpreting its opaque SQL sample.
 
-AC002 maps to all original SqlGraphSearchParityTests and SqlGraphSearchResultCompositionTests, their original SqlGraphSearchTestSupport and AdapterVectorWholeFlow, SqlGraphSearchClusterTests and ThreeWayHybridClusterTests. The text/vector/scope/retriever/expansion corpus, independent rank fields, allowlist semantics and all original zero-weight/label/refusal assertions remain.
+AC002 maps to all original SqlGraphSearchParityTests, their original SqlGraphSearchTestSupport and AdapterVectorWholeFlow, SqlGraphSearchClusterTests and ThreeWayHybridClusterTests. The text/vector/scope/retriever/expansion corpus, independent rank fields, allowlist semantics and all original zero-weight/label/refusal assertions remain.
 
 AC003 maps to SqlGraphSearchRejectionTests and the complete original SqlGraphPath rejection/deadline flows. The repeated-semicolon criterion is retained unchanged; its execution remains a required compatibility gate, not waived by this migration.
 

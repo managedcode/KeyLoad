@@ -35,12 +35,6 @@ public sealed record QueryExecutionOptions
         get; init;
     }
 
-    /// <summary>Gets an additional complete query/read result byte ceiling; null retains the execution batch ceiling.</summary>
-    public int? MaximumResultBytes
-    {
-        get; init;
-    }
-
     /// <summary>Gets the maximum age of a newly issued authorized query continuation.</summary>
     public TimeSpan CursorLifetime { get; init; } = TimeSpan.FromMinutes(DefaultCursorLifetimeMinutes);
 
@@ -73,7 +67,7 @@ public sealed record QueryExecutionOptions
 
     /// <summary>Checks that the configured duration remains positive and bounded.</summary>
     /// <returns>Whether the configured lifetime is valid.</returns>
-    public bool IsValid() => (MaximumResultBytes is null or >= 1) && CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumCursorLifetime
+    public bool IsValid() => CursorLifetime > TimeSpan.Zero && CursorLifetime <= MaximumCursorLifetime
         && MaximumProjection >= 1 && MaximumOrdering >= 1
         && MaximumParameters is >= 1 and <= DefaultMaximumParameters && MaximumInValues >= 1
         && MaximumPartitions >= 1 && MaximumPartitions <= MaximumConformingPartitions

@@ -2,7 +2,7 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Query.Search;
 
-internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int VectorsPerBlock, int BlockCount,
+internal readonly record struct PackedAnnAdmission(int Count, int Dimension, DistanceMetric Metric, int VectorsPerBlock, int BlockCount,
     int BaseSlots, int UpperOffsetLength, int UpperSlots, long SumLevels, long RetainedBytes,
     long BuildScratchBytes)
 {
@@ -73,7 +73,7 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, ResourceExceeded);
         }
-        return new(count, dimension, vectorsPerBlock, blocks, baseSlots, offsetsLength, upperSlots,
+        return new(count, dimension, space.Metric, vectorsPerBlock, blocks, baseSlots, offsetsLength, upperSlots,
             sumLevels, retained, buildScratch);
     }
 
@@ -100,6 +100,7 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, int
         bytes = AddArray(bytes, sizeof(int), upperSlots);
         bytes = AddArray(bytes, sizeof(long), blocks);
         bytes = AddVectorBlocks(bytes, count, vectorsPerBlock, dimension);
+        bytes = checked(bytes + PackedAnnReservations.CosineNorms(space.Metric, count));
         bytes = AddArray(bytes, sizeof(long), count);
         bytes = checked(bytes + identityBytes);
         bytes = checked(bytes + PackedAnnReservations.String(space.Id.Length)

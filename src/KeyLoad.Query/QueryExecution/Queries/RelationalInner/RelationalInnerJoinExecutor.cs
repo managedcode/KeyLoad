@@ -141,7 +141,6 @@ internal static class RelationalInnerJoinExecutor
                 candidate.Left, candidate.Right, request.Query.Projection));
         }
         var page = new QueryPage(rows.MoveToImmutable(), null, candidateSet.Cut, AccessPath);
-        budget.CheckResult(page);
         return page;
     }
 

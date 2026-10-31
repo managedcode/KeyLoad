@@ -1,8 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.FunctionalTests.Search;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -24,8 +22,7 @@ internal static class RequestCqrsTextMaintenanceFlow
         {
             var rejected = await ConsumeAsync(fixture, request, payload, fault, token);
             await Assert.That(rejected.Error).IsTypeOf<KeyLoadException>();
-            await Assert.That(((KeyLoadException)rejected.Error!).Code).IsEqualTo(
-                fault == RequestCqrsTextFault.FrameBudget ? ErrorCode.BudgetExceeded : ErrorCode.OwnershipLost);
+            await Assert.That(((KeyLoadException)rejected.Error!).Code).IsEqualTo(ErrorCode.OwnershipLost);
             await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);
             await Assert.That(KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store)
                 .AsSpan().SequenceEqual(bytes)).IsTrue();
@@ -46,9 +43,8 @@ internal static class RequestCqrsTextMaintenanceFlow
         GrainValue? final = null;
         Exception? failure = null;
         var stream = CqrsStreamLifetime.RunWithPurpose(
-            execution => RequestCqrsTextProducer.Run(id, payload, fault, producer, fixture.RoutingOptions.Value.MaximumStreamFrames, execution),
-            fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            id, fixture.Clock, producer.MarkActivationSettled, fixture.RoutingOptions, null, purpose, token);
+            execution => RequestCqrsTextProducer.Run(id, payload, fault, producer, execution),
+            id, producer.MarkActivationSettled, null, purpose, token);
         try
         {
             await foreach (var chunk in stream.WithCancellation(token))

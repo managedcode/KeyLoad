@@ -17,7 +17,6 @@ internal static class TextIncrementalMetadata
         {
             throw TextErrors.Ownership();
         }
-        budget.ChargeBytes(OrleansSerialization.Measure(intent));
         TextFileIO.WriteEnvelope(pending, intent, maximumBytes, executionOptions, resources);
         if (resources is null)
         {
@@ -36,7 +35,6 @@ internal static class TextIncrementalMetadata
         budget.Check();
         var path = Path.Combine(generationPath, TextIncrementalProtocol.IntentFile);
         TextFileIO.VerifyRegularFile(path);
-        budget.ChargeBytes(new FileInfo(path).Length);
         var intent = TextFileIO.ReadEnvelope<TextIncrementalIntent>(path, maximumBytes);
         budget.Check();
         return intent;
@@ -58,7 +56,6 @@ internal static class TextIncrementalMetadata
         {
             TextFileIO.VerifyRegularFile(current);
         }
-        budget.ChargeBytes(OrleansSerialization.Measure(manifest));
         TextFileIO.WriteEnvelope(pending, manifest, maximumBytes, executionOptions, resources);
         if (resources is null)
         {
@@ -77,7 +74,6 @@ internal static class TextIncrementalMetadata
         budget.Check();
         var path = Path.Combine(generationPath, TextIncrementalProtocol.ManifestFile);
         TextFileIO.VerifyRegularFile(path);
-        budget.ChargeBytes(new FileInfo(path).Length);
         var manifest = TextFileIO.ReadEnvelope<TextIncrementalManifest>(path, maximumBytes);
         budget.Check();
         return manifest;

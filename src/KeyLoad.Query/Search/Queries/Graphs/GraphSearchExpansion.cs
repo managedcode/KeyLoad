@@ -11,11 +11,10 @@ internal static class GraphSearchExpansion
 {
     private const string ResourceMissing = "An authorized graph context collection is unavailable.";
     private const string DocumentMissing = "A graph context document is unavailable in the current read cut.";
-    private const string ByteLimit = "The graph expansion result byte budget was exhausted.";
     private const string DomainMismatch = "A graph context collection belongs to another partition domain.";
 
     internal static GraphExpansionResult Execute(DatabaseEngine database, PrincipalRecord principal,
-        IKeyValueView view, GraphSearchRequest request, SearchScore[] selected, RankedDocument[] hits,
+        IKeyValueView view, GraphSearchRequest request, SearchScore[] selected,
         ReadExecutionBudget budget)
     {
         var operatorSpec = request.Expansion!;
@@ -23,17 +22,15 @@ internal static class GraphSearchExpansion
             operatorSpec.MaxDepth, operatorSpec.MaxVertices, operatorSpec.MaxEdges, operatorSpec.Labels);
         var reachable = database.ReadGraphSearchReachability(view, principal, request.Search.Partition, walk, budget);
         var hitReferences = selected.Select(item => item.Reference).ToHashSet();
-        var documents = Project(database, principal, view, reachable, hitReferences, hits, budget);
+        var documents = Project(database, principal, view, reachable, hitReferences, budget);
         return new([.. documents], GraphExpansionCompleteness.SelectedHits);
     }
 
     private static List<GraphContextDocument> Project(DatabaseEngine database, PrincipalRecord principal,
-        IKeyValueView view, GraphSearchReachability[] reachable, HashSet<EntityRef> hitReferences,
-        RankedDocument[] hits, ReadExecutionBudget budget)
+        IKeyValueView view, GraphSearchReachability[] reachable, HashSet<EntityRef> hitReferences, ReadExecutionBudget budget)
     {
         var resources = new Dictionary<string, ResourceDefinition>(StringComparer.Ordinal);
         var results = new List<GraphContextDocument>(reachable.Length);
-        var retainedBytes = budget.MeasureResult(hits);
         foreach (var entry in reachable)
         {
             budget.Check();
@@ -44,7 +41,7 @@ internal static class GraphSearchExpansion
             var resource = GetResource(database, principal, view, entry.Reference, resources, budget);
             var document = ReadDocument(database, principal, view, entry.Reference, budget);
             var context = new GraphContextDocument(database.Project(principal, resource, document), entry.ShortestHops);
-            AddContext(context, results, ref retainedBytes, budget);
+            results.Add(context);
         }
         return results;
     }
@@ -83,17 +80,5 @@ internal static class GraphSearchExpansion
             throw Errors.Fail(ErrorCode.Corruption, DocumentMissing);
         }
         return document;
-    }
-
-    private static void AddContext(GraphContextDocument context,
-        List<GraphContextDocument> results, ref long retainedBytes, ReadExecutionBudget budget)
-    {
-        var bytes = budget.MeasureResult(context);
-        if (bytes > budget.MaximumResultBytes - retainedBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ByteLimit);
-        }
-        retainedBytes += bytes;
-        results.Add(context);
     }
 }

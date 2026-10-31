@@ -38,8 +38,8 @@ same tenant/database. Depth0..16, vertices1..10000, examined edges1..50000,
 nondefault nonempty seeds no greater than MaxVertices, finite nonnegative
 weight and valid identifiers are validated before reads; the serialized request
 has no KeyLoad byte ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). Unknown versions fail Validation. Every operator
-shares the request's read-work, cancellation and retained/output-byte budgets;
-its local caps never reset the shared budget. Limit exhaustion fails explicitly,
+shares the request's cancellation and explicit expiry; its local caps never
+reset the shared operation. Limit exhaustion fails explicitly,
 with no truncated success or exact/completeness claim.
 
 ## Requirements and acceptance

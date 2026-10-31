@@ -6,33 +6,21 @@ internal static class PartitionQueryOwnedLeafValidation
 {
     private const int Version = 1;
     private const int MinimumCount = 1;
-    private const long EmptyBytes = 0;
-    private const int EmptyRecords = 0;
     private const string InvalidDetail = "The partition query plan is invalid.";
-    private const string BudgetDetail = "The partition query plan exceeds its resource budget.";
 
-    internal static void Validate(PartitionQueryOwnedLeafRequest request,
-        QueryExecutionOptions execution)
+    internal static void Validate(PartitionQueryOwnedLeafRequest request)
     {
         var leaf = request.Plan;
         if (request.Owner is null || leaf is null || leaf.Version != Version || leaf.Partition is null || leaf.Request is null
             || leaf.Request.Partition != leaf.Partition || leaf.Request.Query is null
             || string.IsNullOrEmpty(request.Tenant) || request.Tenant != leaf.Partition.TenantId
             || leaf.Request.Cursor is not null || leaf.Request.Query.Explain
-            || leaf.Request.Query.ModelSource is not null || leaf.MaxCandidates != leaf.Request.Query.Limit)
+            || leaf.Request.Query.ModelSource is not null || leaf.MaxCandidates != leaf.Request.Query.Limit
+            || leaf.MaxCandidates < MinimumCount)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidDetail);
         }
         EngineResourceAccess.ValidatePartition(leaf.Partition);
         JsonData.Identifier(request.Tenant);
-        if (leaf.MaxCandidates < MinimumCount
-            || leaf.MaxExaminedRecords < EmptyRecords
-            || leaf.MaxReadBytes < EmptyBytes
-            || leaf.MaxRetainedBytes < checked(PartitionQueryRetention.LeafHeapReserve(leaf.MaxCandidates)
-                + PartitionQueryRetention.CandidateArrayBytes(leaf.MaxCandidates))
-            || leaf.MaxRetainedBytes > QueryResultBudgetPolicy.Resolve(execution))
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, BudgetDetail);
-        }
     }
 }

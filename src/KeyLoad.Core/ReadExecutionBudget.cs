@@ -4,26 +4,12 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 
-/// <summary>Accounts logical storage work and output bytes within one consistent read cut under caller cancellation.</summary>
-/// <remarks>Starts a ledger for one operation; only caller cancellation and explicit bounds stop its work.</remarks>
+/// <summary>Carries one operation's caller cancellation and resource lifetime bindings within one consistent read cut.</summary>
 /// <param name="timeProvider">Optional operation clock, defaulting to system time.</param>
 /// <param name="cancellationToken">Caller cancellation for all subsequent work.</param>
 public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
 {
-
-    internal const string ReadBytesExceeded = "The read execution byte budget is exceeded.";
-    private const long NoReservedReadBytes = 0;
-    private const long UnboundedReadBytes = long.MaxValue;
-    private const int UnboundedRecords = int.MaxValue;
-    private const int UnboundedResultBytes = int.MaxValue;
-    private ReadExecutionBudgetScopedReadGrants? readGrants;
     private ReadExecutionBudgetLifetime executionLifetime = new(timeProvider, cancellationToken);
-    private long bytes;
-    private ReadExecutionBudgetWork runtimeWork = new(UnboundedReadBytes, UnboundedRecords);
-    private int resultBytesLimit = UnboundedResultBytes;
-
-    /// <summary>Gets accepted logical key/value bytes; this is not physical disk I/O.</summary>
-    public long ReadBytes => bytes;
 
     /// <summary>Gets the earliest explicit absolute expiry without reminting it from remaining monotonic time.</summary>
     internal DateTimeOffset ExpiresAt => executionLifetime.ExpiresAt;
@@ -33,44 +19,16 @@ public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = nul
     internal void ConstrainLifetime(DateTimeOffset absoluteExpiry) => executionLifetime.ConstrainLifetime(absoluteExpiry);
 
     internal CancellationToken Cancellation => executionLifetime.Cancellation;
-    internal int MaximumResultBytes => lifetimeBindings?.AvailableResultBytes(resultBytesLimit) ?? resultBytesLimit;
-    internal int LifetimeResultBytesLimit => resultBytesLimit;
-    internal long RuntimeMaximumReadBytes => runtimeWork.MaximumBytes;
-    internal int MaximumScanRecords => runtimeWork.MaximumRecords;
-    internal int ConstrainedRecords => runtimeWork.ExaminedRecords + (readGrants?.ExaminedRecords ?? EmptyClaimedRecords);
 
-    internal void ConstrainWork(long maximumBytes, int maximumRecords)
-    {
-        Check();
-        runtimeWork.Constrain(maximumBytes, maximumRecords, bytes + (readGrants?.ReservedBytes ?? NoReservedReadBytes),
-            readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
-    }
-
-    internal void ImportObservation(long observedBytes, int observedRecords)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegative(observedBytes);
-        Check();
-        runtimeWork.RequireObservation(observedRecords, RemainingReadGrantRecords);
-        ChargeBytes(observedBytes);
-        runtimeWork.Record(observedRecords);
-    }
-
-    internal void ConstrainResultBytes(int maximumBytes)
-    {
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
-        Check();
-        resultBytesLimit = Math.Min(resultBytesLimit, maximumBytes);
-    }
-
-    /// <summary>Wraps an existing gated view so its reads share this operation budget.</summary>
+    /// <summary>Wraps an existing gated view so its reads observe this operation's resource lifetimes.</summary>
     /// <param name="view">Existing view valid only inside its owning store action.</param>
-    /// <returns>A read-only budgeted view that must not escape that same action.</returns>
+    /// <returns>A read-only view that must not escape that same action.</returns>
     public IKeyValueView CreateView(IKeyValueView view)
     {
         ArgumentNullException.ThrowIfNull(view);
         Check();
         return view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, this)
-            ? view : new BudgetedReadView(view, this, readGrants?.Current);
+            ? view : new BudgetedReadView(view, this);
     }
 
     /// <summary>Throws when cancellation or an explicit expiry prevents further work.</summary>
@@ -78,33 +36,20 @@ public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = nul
 
     internal bool HasIndeterminateMetadata => executionLifetime.HasIndeterminateMetadata;
 
-    /// <summary>Retains an uncertain dispatched frame failure without inventing observed work or renewing this ledger.</summary>
+    /// <summary>Retains an uncertain dispatched frame failure without renewing this operation.</summary>
     internal void FailIndeterminateMetadata(Exception original) => executionLifetime.FailIndeterminateMetadata(original);
 
     internal ReadExecutionBudgetStageCancellationLease EnterStageCancellation(CancellationToken stageToken)
         => executionLifetime.EnterStageCancellation(stageToken);
 
-    /// <summary>Accepts examined storage bytes before the consumer allocates or decodes them.</summary>
-    /// <param name="count">Nonnegative key/value work, including matching scan lookahead.</param>
-    public void ChargeBytes(long count)
-    {
-        Check();
-        ArgumentOutOfRangeException.ThrowIfNegative(count);
-        if (count > runtimeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes))
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, ReadBytesExceeded);
-        }
-        bytes += count;
-    }
-
-    /// <summary>Returns an owned value copy only after the raw work has been accepted.</summary>
+    /// <summary>Returns an owned value copy.</summary>
     /// <param name="view">Storage view inside its read or transaction gate.</param>
     /// <param name="key">Lookup key.</param>
     /// <returns>An independent value buffer or null for an absent record.</returns>
     public byte[]? Read(IKeyValueView view, byte[] key)
         => ReadExecutionBudgetStorageReads.Read(this, view, key);
 
-    /// <summary>Decodes a record directly from gate-scoped bytes after accepting its work.</summary>
+    /// <summary>Decodes a record directly from gate-scoped bytes.</summary>
     /// <typeparam name="T">Owned decoded record type.</typeparam>
     /// <param name="view">Storage view inside its read or transaction gate.</param>
     /// <param name="key">Lookup key.</param>
@@ -112,85 +57,35 @@ public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = nul
     public T? ReadRecord<T>(IKeyValueView view, byte[] key) where T : class
         => ReadExecutionBudgetStorageReads.ReadRecord<T>(this, view, key);
 
-    /// <summary>Visits ordered borrowed records with one cumulative operation budget.</summary>
+    /// <summary>Visits ordered borrowed records under this operation's cancellation.</summary>
     /// <param name="view">Storage view inside its read or transaction gate.</param>
     /// <param name="prefix">Required key prefix.</param>
-    /// <param name="maxRecords">Maximum delivered records before charged lookahead.</param>
+    /// <param name="maxRecords">Maximum delivered records.</param>
     /// <param name="visitor">Read-only callback; must not mutate a transaction.</param>
     /// <param name="afterKey">Optional exclusive lower bound.</param>
     /// <param name="untilKey">Optional exclusive upper bound.</param>
-    /// <returns>Delivered count, stop reason and examined logical storage bytes.</returns>
+    /// <returns>Delivered count and stop reason.</returns>
     public StorageScanResult VisitRange(IKeyValueView view, byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null)
         => ReadExecutionBudgetStorageReads.VisitRange(this, view, prefix, maxRecords, visitor, afterKey, untilKey);
 
-    /// <summary>Visits every record of a range in provider-sized pages with one cumulative operation budget.</summary>
+    /// <summary>Visits every record of a range in provider-sized pages under this operation's cancellation.</summary>
     /// <param name="view">Storage view inside its read or transaction gate.</param>
     /// <param name="prefix">Required key prefix.</param>
     /// <param name="visitor">Read-only callback; returning false stops the traversal.</param>
     /// <param name="afterKey">Optional exclusive lower bound.</param>
     /// <param name="untilKey">Optional exclusive upper bound.</param>
-    /// <returns>Delivered count, early stop and examined logical storage bytes across all pages.</returns>
+    /// <returns>Delivered count and early stop across all pages.</returns>
     internal StorageScanResult VisitAll(IKeyValueView view, byte[] prefix, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null)
         => ReadExecutionBudgetStorageReads.VisitAll(this, view, prefix, visitor, afterKey, untilKey);
 
-    /// <summary>Materializes only records whose raw work passed the shared budget.</summary>
+    /// <summary>Materializes owned copies of one ordered range page.</summary>
     /// <param name="view">Storage view inside its read or transaction gate.</param>
     /// <param name="prefix">Required key prefix.</param>
-    /// <param name="maxRecords">Maximum delivered records before charged lookahead.</param>
+    /// <param name="maxRecords">Maximum delivered records.</param>
     /// <param name="afterKey">Optional exclusive lower bound.</param>
     /// <returns>Independent key/value copies and the record-limit lookahead result.</returns>
     public ScanPage Scan(IKeyValueView view, byte[] prefix, int maxRecords, byte[]? afterKey = null)
         => ReadExecutionBudgetStorageReads.Scan(this, view, prefix, maxRecords, afterKey);
-
-    /// <summary>Checks exact JSON output bytes without allocating the complete serialized result.</summary>
-    /// <typeparam name="T">Response type using the current wire serializer options.</typeparam>
-    /// <param name="result">Owned result whose protocol bytes must fit the response limit.</param>
-    public void CheckResult<T>(T result)
-        => MeasureResult(result);
-
-    /// <summary>Counts exact bounded JSON bytes for incremental result selection.</summary>
-    /// <typeparam name="T">Value type using the current wire serializer options.</typeparam>
-    /// <param name="result">Value whose complete serialized bytes must fit the response limit.</param>
-    /// <returns>The exact serialized UTF-8 byte count.</returns>
-    public long MeasureResult<T>(T result)
-        => ResultByteCounterStream.Measure(this, result);
-    private ReadExecutionBudgetScopedReadGrants ReadGrants => readGrants ??= new(this);
-    internal long RemainingReadGrantBytes => runtimeWork.MaximumBytes - bytes - (readGrants?.ReservedBytes ?? NoReservedReadBytes);
-    internal int RemainingReadGrantRecords => runtimeWork.MaximumRecords - runtimeWork.ExaminedRecords - (readGrants?.ClaimedRecords ?? EmptyClaimedRecords);
-    private const int EmptyClaimedRecords = 0;
-    internal void AcceptReadGrantBytes(long count) => bytes += count;
-    internal void CompleteReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.CompleteReadGrant(grant);
-    internal void ImportSettledReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
-        => ReadGrants.ImportSettledReadGrant(grant, count, records);
-    internal void CompleteSettledReadGrant(ReadExecutionBudgetReadGrant grant)
-        => ReadGrants.CompleteSettledReadGrant(grant);
-    internal ReadExecutionBudgetReadGrantLease EnterReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.EnterReadGrant(grant);
-    internal void ExitReadGrant(ReadExecutionBudgetReadGrant grant) => ReadGrants.ExitReadGrant(grant);
-    internal IKeyValueView CreateView(IKeyValueView view, ReadExecutionBudgetReadGrant grant) => ReadGrants.CreateView(view, grant);
-    internal ReadExecutionBudgetReadGrant CreateReadGrant(long maximumBytes, int maximumRecords)
-        => ReadGrants.CreateReadGrant(maximumBytes, maximumRecords);
-    internal void ChargeReadGrant(ReadExecutionBudgetReadGrant grant, long count) => ReadGrants.ChargeReadGrant(grant, count);
-    internal void ImportReadGrant(ReadExecutionBudgetReadGrant grant, long count, int records)
-        => ReadGrants.ImportReadGrant(grant, count, records);
-    internal void ChargeReadRecord(long count)
-    {
-        if (readGrants is { } grants)
-        {
-            grants.ChargeReadRecord(count);
-        }
-        else
-        {
-            ChargeUnscopedRecord(count);
-        }
-    }
-
-    internal void ChargeUnscopedRecord(long count)
-    {
-        runtimeWork.RequireRecord(RemainingReadGrantRecords);
-        ChargeBytes(count);
-        runtimeWork.Record(ReadExecutionBudgetWork.SingleRecord);
-    }
-
 }

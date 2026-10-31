@@ -52,11 +52,10 @@ internal static class AnnPublicWholeFlow
             pin.Consumer, pin.IndexGeneration);
 
     internal static SearchEngine Engine(TestDatabase database, AnnMaintenanceTestRuntime runtime,
-        bool enabled = true, int? bytes = null)
+        bool enabled = true)
         => new(database.Database, Options.Create(new QueryExecutionOptions
         {
-            EnableApproximateSearch = enabled,
-            MaximumResultBytes = bytes
+            EnableApproximateSearch = enabled
         }), null, runtime.Owner);
 
     internal static async Task PageAsync(AnnSearchPage page, TestDatabase database, long cut, AnnPageMode mode, bool empty = false, bool redacted = false)

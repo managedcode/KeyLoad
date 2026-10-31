@@ -2,8 +2,6 @@ using KeyLoad.Clustering;
 using KeyLoad.FunctionalTests.OrleansExecution;
 using KeyLoad.Server;
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.Authorization;
 
@@ -27,8 +25,7 @@ internal static class StartedReadPolicyConsumer
             {
                 var bounded = CqrsStreamLifetime.RunWithPurpose(
                     token => scenario.Connection.ExecuteStreamAsync(envelope, token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
-                    fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                    requestId, fixture.Clock, static () => { }, fixture.RoutingOptions, null,
+                    requestId, static () => { }, null,
                     new CqrsStreamPurpose(), selected);
                 await using var enumerator = bounded.GetAsyncEnumerator(selected);
                 await ServerFailureObserver.ObserveAsync(async () =>

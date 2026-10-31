@@ -27,7 +27,6 @@ internal sealed class QueueWorkerPollBoundaryTests
         await Assert.That(result.Received).IsEqualTo(QueueWorkerUnitProtocol.Initial);
         await Assert.That(result.Acknowledged).IsEqualTo(QueueWorkerUnitProtocol.Initial);
         await Assert.That(result.PeakActiveHandlers).IsEqualTo(QueueWorkerUnitProtocol.Initial);
-        await Assert.That(result.PeakInFlightBytes).IsEqualTo((long)QueueWorkerUnitProtocol.Initial);
         await Assert.That(result.Operations).IsEmpty();
         await Assert.That(result.Unacknowledged).IsEmpty();
         await Assert.That(result.Failures).IsEmpty();

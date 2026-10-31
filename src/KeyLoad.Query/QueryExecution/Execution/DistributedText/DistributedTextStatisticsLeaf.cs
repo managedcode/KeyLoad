@@ -12,14 +12,13 @@ internal static class DistributedTextStatisticsLeaf
 
     internal static DistributedTextWitness Execute(DatabaseEngine database, string principalId,
         SearchRequest request, PhysicalShardRecord owner, string tenant,
-        IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
+        IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, PartitionQueryLifetimeMetadata? metadata = null)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(owner);
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(grant);
         budget.Check();
         var execution = options.Value;
         execution.Validate();
@@ -29,21 +28,18 @@ internal static class DistributedTextStatisticsLeaf
             throw Errors.Fail(ErrorCode.UnsupportedCapability, CanonicalTextRequired);
         }
         using var admission = database.AdmitQuery(budget.Cancellation);
-        using var charged = budget.EnterReadGrant(grant);
         Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, DistributedTextWitness> read =
             (view, principal, resource, digest) => Capture(database, view, principal, resource, digest,
-                request, owner, tenant, execution, budget, grant, metadata);
+                request, owner, tenant, execution, budget, metadata);
         return metadata is null
-            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, grant, read, budget)
-            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection,
-                grant, budget, metadata, read);
+            ? database.WithPartitionQueryFenceView(principalId, request.Partition, request.Collection, read, budget)
+            : database.WithPartitionQueryLifetimeView(principalId, request.Partition, request.Collection, budget, metadata, read);
     }
 
     private static DistributedTextWitness Capture(DatabaseEngine database, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, string digest, SearchRequest request,
         PhysicalShardRecord owner, string tenant, QueryExecutionOptions execution,
-        ReadExecutionBudget budget, global::KeyLoad.Core.ResourceExecution.Execution.ReadExecutionBudgetReadGrant grant,
-        PartitionQueryLifetimeMetadata? metadata)
+        ReadExecutionBudget budget, PartitionQueryLifetimeMetadata? metadata)
     {
         budget.Check();
         if (!string.Equals(principal.TenantId, tenant, StringComparison.Ordinal))
@@ -51,7 +47,7 @@ internal static class DistributedTextStatisticsLeaf
             throw Errors.Fail(ErrorCode.PermissionDenied, ReceivingPrincipalChanged);
         }
         DistributedSearchFieldAuthorization.Require(database, principal, resource, request, metadata);
-        var placement = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, request.Partition, grant);
+        var placement = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, request.Partition);
         PartitionQueryPlacementValidation.Validate(placement, request.Partition, owner);
         if (request.Text is not null)
         {
@@ -66,8 +62,7 @@ internal static class DistributedTextStatisticsLeaf
         var identity = database.Store.Identity;
         var result = new DistributedTextWitness(request.Partition, owner, identity.NodeId,
             identity.ReadGeneration, database.Store.Position, principal.PolicyEpoch, resource.SchemaVersion,
-            digest, statistics, grant.ReadBytes, grant.ExaminedRecords, identity.Incarnation);
-        budget.CheckResult(result);
+            digest, statistics, identity.Incarnation);
         return result;
     }
 

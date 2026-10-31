@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Operations;
 
 namespace KeyLoad.Analyzers.CodeQuality;
 
-/// <summary>Requires synchronous execution engine access while preserving asynchronous Orleans and transport calls.</summary>
+/// <summary>Requires awaited ZoneTree work: no blocking on its tasks and no thread-pool dispatch of engine access.</summary>
 [DiagnosticAnalyzer(LanguageNames.CSharp)]
 public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
 {
@@ -30,15 +30,13 @@ public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
         context.EnableConcurrentExecution();
         context.RegisterOperationAction(AnalyzeInvocation, Microsoft.CodeAnalysis.OperationKind.Invocation);
         context.RegisterOperationAction(AnalyzeProperty, Microsoft.CodeAnalysis.OperationKind.PropertyReference);
-        context.RegisterOperationAction(AnalyzeUsing, Microsoft.CodeAnalysis.OperationKind.Using, Microsoft.CodeAnalysis.OperationKind.UsingDeclaration);
     }
 
     private static void AnalyzeInvocation(OperationAnalysisContext context)
     {
         var invocation = (IInvocationOperation)context.Operation;
         var method = invocation.TargetMethod;
-        if ((ZoneTreeAccessPolicy.Execution(method) || invocation.Instance is not null &&
-            ZoneTreeDispatchAnalysis.RuntimeResource(invocation.Instance)) && ZoneTreeAccessPolicy.Asynchronous(method) ||
+        if (ZoneTreeAccessPolicy.Blocking(method) && ZoneTreeDispatchAnalysis.FromEngine(invocation.Instance) ||
             ZoneTreeAccessPolicy.Dispatch(method) && ZoneTreeDispatchAnalysis.ContainsAccess(invocation, context,
                 new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default)))
         {
@@ -49,23 +47,10 @@ public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
     private static void AnalyzeProperty(OperationAnalysisContext context)
     {
         var reference = (IPropertyReferenceOperation)context.Operation;
-        if (ZoneTreeAccessPolicy.Execution(reference.Property) && ZoneTreeAccessPolicy.Awaitable(reference.Property.Type))
+        if (reference.Property.Name == "Result" && ZoneTreeAccessPolicy.Awaitable(reference.Property.ContainingType)
+            && ZoneTreeDispatchAnalysis.FromEngine(reference.Instance))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rule, reference.Syntax.GetLocation(), reference.Property.ToDisplayString()));
-        }
-    }
-
-    private static void AnalyzeUsing(OperationAnalysisContext context)
-    {
-        var resource = context.Operation switch
-        {
-            IUsingOperation { IsAsynchronous: true } operation => operation.Resources,
-            IUsingDeclarationOperation { IsAsynchronous: true } declaration => declaration.DeclarationGroup,
-            _ => null
-        };
-        if (resource is not null && ZoneTreeDispatchAnalysis.RuntimeResource(resource))
-        {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, resource.Syntax.GetLocation(), "DisposeAsync"));
         }
     }
 }

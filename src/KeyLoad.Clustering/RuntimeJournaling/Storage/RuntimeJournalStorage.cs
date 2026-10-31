@@ -13,11 +13,10 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     private readonly RuntimeJournalStorageOperations operations;
 
     internal RuntimeJournalStorage(RuntimeJournalClient client, JournalId journalId,
-        Microsoft.Extensions.Options.IOptions<RuntimeJournalOptions> options, string format,
-        Microsoft.Extensions.Options.IOptions<GrainRoutingOptions> routingOptions, SemaphoreSlim[] gates,
+        Microsoft.Extensions.Options.IOptions<RuntimeJournalOptions> options, string format, SemaphoreSlim[] gates,
         int gateIndex)
     {
-        state = new(client, journalId, options, format, routingOptions, gates, gateIndex);
+        state = new(client, journalId, options, format, gates, gateIndex);
         operations = new(client, state);
     }
 

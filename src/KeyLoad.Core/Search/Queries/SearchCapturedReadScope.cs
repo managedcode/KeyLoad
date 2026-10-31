@@ -5,7 +5,6 @@ namespace KeyLoad.Core.Search;
 /// <summary>Borrows frozen bytes captured at the original cut; never owns storage or live-cache publication.</summary>
 internal sealed class SearchCapturedReadScope : IKeyValueView
 {
-    private const long RetainedPointerSlots = 3;
     private readonly IKeyValueView captured;
 
     internal SearchCapturedReadScope(IKeyValueView captured, ReadExecutionBudget budget)
@@ -13,7 +12,6 @@ internal sealed class SearchCapturedReadScope : IKeyValueView
         ArgumentNullException.ThrowIfNull(captured);
         ArgumentNullException.ThrowIfNull(budget);
         // Object header and one borrowed view reference.
-        budget.ChargeBytes(checked(RetainedPointerSlots * IntPtr.Size));
         this.captured = captured;
     }
 

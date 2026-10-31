@@ -43,8 +43,6 @@ internal static class TextIncrementalReplayPreparation
     private static void RequireOriginal(TextIncrementalIntent actual,
         TextIncrementalIntent expected, ReadExecutionBudget budget)
     {
-        budget.ChargeBytes(OrleansSerialization.Measure(expected));
-        budget.ChargeBytes(OrleansSerialization.Measure(actual));
         var original = OrleansSerialization.Serialize(expected);
         var persisted = OrleansSerialization.Serialize(actual);
         budget.Check();

@@ -1,6 +1,4 @@
 using ManagedCode.Communication.CQRS;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 
 namespace KeyLoad.Clustering;
 
@@ -8,39 +6,33 @@ internal static class GrainRequestStreamConsumer
 {
     internal static Task<GrainOperationReply> DrainAsync(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
-        => DrainCoreAsync(createStream, serializer, requestId, clock, options, null, null, cancellationToken);
+        Guid requestId, CancellationToken cancellationToken)
+        => DrainCoreAsync(createStream, requestId, null, null, cancellationToken);
 
     internal static Task<GrainOperationReply> DrainWithPurposeAsync(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, IOptions<GrainRoutingOptions> options,
-        CqrsStreamPurpose purpose, CancellationToken cancellationToken)
-        => DrainCoreAsync(createStream, serializer, requestId, clock, options, purpose, null, cancellationToken);
+        Guid requestId, CqrsStreamPurpose purpose, CancellationToken cancellationToken)
+        => DrainCoreAsync(createStream, requestId, purpose, null, cancellationToken);
 
     internal static Task<GrainOperationReply> DrainWithProgressAsync(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, IOptions<GrainRoutingOptions> options,
-        CqrsStreamPurpose purpose, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
+        Guid requestId, CqrsStreamPurpose purpose, Func<GrainRequestProgress, CancellationToken, ValueTask> progress,
         CancellationToken cancellationToken)
-        => DrainCoreAsync(createStream, serializer, requestId, clock, options, purpose, progress, cancellationToken);
+        => DrainCoreAsync(createStream, requestId, purpose, progress, cancellationToken);
 
     private static async Task<GrainOperationReply> DrainCoreAsync(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
-        Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
-        Guid requestId, TimeProvider clock, IOptions<GrainRoutingOptions> options,
-        CqrsStreamPurpose? purpose, Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
+        Guid requestId, CqrsStreamPurpose? purpose, Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
         CancellationToken cancellationToken)
     {
         GrainOperationReply? terminal;
         var bounded = CqrsStreamLifetime.RunWithPurpose(
             createStream: token => createStream(token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
-            serializer: serializer, requestId: requestId, clock: clock, settled: static () => { }, cancellationToken: cancellationToken, options: options, owner: null, purpose: purpose ?? new CqrsStreamPurpose());
+            requestId: requestId, settled: static () => { }, owner: null, purpose: purpose ?? new CqrsStreamPurpose(),
+            cancellationToken: cancellationToken);
         try
         {
-            terminal = await ReadTerminalAsync(bounded, options, progress, cancellationToken);
+            terminal = await ReadTerminalAsync(bounded, progress, cancellationToken);
         }
         catch (OperationCanceledException error) when (cancellationToken.IsCancellationRequested
             && error.CancellationToken != cancellationToken && CqrsBoundaryErrors.IsNonFatal(error))
@@ -54,7 +46,7 @@ internal static class GrainRequestStreamConsumer
 
     private static async Task<GrainOperationReply?> ReadTerminalAsync(
         IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> bounded,
-        IOptions<GrainRoutingOptions> options, Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
         CancellationToken cancellationToken)
     {
         GrainOperationReply? terminal = null;
@@ -73,7 +65,7 @@ internal static class GrainRequestStreamConsumer
                 var problem = chunk.Final!.Value.Problem!;
                 terminal = new GrainOperationReply
                 {
-                    Error = GrainRequestStreamProblem.ReadCode(problem: problem, options: options),
+                    Error = GrainRequestStreamProblem.ReadCode(problem),
                     SafeDetail = problem.Detail
                 };
             }

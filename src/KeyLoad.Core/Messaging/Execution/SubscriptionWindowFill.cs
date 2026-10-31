@@ -8,7 +8,6 @@ public static class SubscriptionWindowFill
     internal static GroupState FillSubscriptionWindow(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, ReceiveSubscriptionRequest request, DateTimeOffset now, GroupState state, SubscriptionPolicy policy, ResourceDefinition resource, EventSourceHead head, PrincipalRecord dataPrincipal, List<SubscriptionDelivery> result)
     {
         var subscription = request.Subscription;
-        long bytes = SubscriptionGroups.SubscriptionGroupsNoRetainedBytes;
         var windowEnd = long.Min(head.TailPosition, checked(state.Checkpoint + policy.MaxWindow));
         for (var sequence = state.Checkpoint + SubscriptionGroups.SubscriptionGroupsAdjacentElementOffset; sequence <= windowEnd && result.Count < request.MaxEvents; sequence++)
         {
@@ -44,7 +43,7 @@ public static class SubscriptionWindowFill
                 break;
             }
 
-            if (!engine.TryLeaseSubscriptionEvent(tx, principal, request, now, state, resource, dataPrincipal, result, record, key, delivery, sequence, ref bytes, out var issuedState))
+            if (!engine.TryLeaseSubscriptionEvent(tx, principal, request, now, state, resource, dataPrincipal, result, record, key, delivery, sequence, out var issuedState))
             {
                 break;
             }

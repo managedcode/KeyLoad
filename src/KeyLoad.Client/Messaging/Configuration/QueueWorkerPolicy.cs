@@ -15,8 +15,6 @@ internal static class QueueWorkerPolicy
             MaximumDeliveries = original.MaximumDeliveries,
             MaximumReceiveCalls = original.MaximumReceiveCalls,
             MaximumRenewalCalls = original.MaximumRenewalCalls,
-            MaximumInFlightBytes = original.MaximumInFlightBytes,
-            MaximumReceiveBytes = original.MaximumReceiveBytes,
             LeaseSeconds = original.LeaseSeconds,
             RenewalInterval = original.RenewalInterval,
             EmptyPollDelay = original.EmptyPollDelay,

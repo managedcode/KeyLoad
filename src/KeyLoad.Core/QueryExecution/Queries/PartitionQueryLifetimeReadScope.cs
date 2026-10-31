@@ -1,5 +1,4 @@
 using KeyLoad.Core.ResourceExecution;
-using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -8,7 +7,7 @@ public static class PartitionQueryLifetimeReadScope
 {
     internal const string PartitionQuerySourceMetadataInvalid = "The query source metadata is invalid.";
     internal const string PartitionQueryReceivingIdentityChanged = "The partition query receiving identity changed.";
-    internal static T WithPartitionQueryLifetimeView<T>(this DatabaseEngine engine, string principalId, PartitionRef partition, string collection, ReadExecutionBudgetReadGrant grant, ReadExecutionBudget budget, PartitionQueryLifetimeMetadata metadata, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, T> read)
+    internal static T WithPartitionQueryLifetimeView<T>(this DatabaseEngine engine, string principalId, PartitionRef partition, string collection, ReadExecutionBudget budget, PartitionQueryLifetimeMetadata metadata, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, T> read)
     {
         ArgumentNullException.ThrowIfNull(metadata);
         budget.Check();
@@ -24,7 +23,7 @@ public static class PartitionQueryLifetimeReadScope
         }
 
         engine.Authorization.Require(metadata.Principal, partition, collection, Capability.Query | Capability.DocumentsRead);
-        return engine.Store.Read(view => engine.ReadPartitionQueryFenceView(view, principalId, partition, collection, grant, (raw, principal, resource, digest) =>
+        return engine.Store.Read(view => engine.ReadPartitionQueryFenceView(view, principalId, partition, collection, (raw, principal, resource, digest) =>
         {
             budget.Check();
             if (!OrleansSerialization.Serialize(principal).AsSpan().SequenceEqual(OrleansSerialization.Serialize(metadata.Principal)))
@@ -33,7 +32,7 @@ public static class PartitionQueryLifetimeReadScope
             }
 
             budget.Check();
-            budget.CaptureAuthenticatedResourceLifetimes(budget.CreateView(raw, grant), metadata.Coverage, [metadata.Definition]);
+            budget.CaptureAuthenticatedResourceLifetimes(budget.CreateView(raw), metadata.Coverage, [metadata.Definition]);
             return read(raw, principal, resource, digest);
         }, budget));
     }

@@ -21,8 +21,7 @@ public static class SampleChunkRead
         budget.Check();
         return engine.Store.Read(original =>
         {
-            var grant = budget.CreateReadGrant(budget.RemainingReadGrantBytes, budget.RemainingReadGrantRecords);
-            var view = budget.CreateView(original, grant);
+            var view = budget.CreateView(original);
             var result = TimeSeries.SampleChunkWindowReader.Read(engine, view, principalId, request, budget, engine.TimeSeriesOptions, engine.Store.Position);
             if (request.MinimumToken is { } minimum)
             {

@@ -17,7 +17,7 @@ internal static class SearchTerminalPrivacy
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Missing);
         return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
             database.Store.Position, OrleansSerialization.Deserialize<long>(applied), principal.PolicyEpoch,
-            resource.SchemaVersion, ResourceHash(resource, budget), database.ReadPlacementWitness(view, partition));
+            resource.SchemaVersion, ResourceHash(resource), database.ReadPlacementWitness(view, partition));
     }
 
     internal static void Verify(DatabaseEngine database, string principalId, PartitionRef partition,
@@ -56,7 +56,7 @@ internal static class SearchTerminalPrivacy
         if (identity.NodeId != original.NodeId || identity.Incarnation != original.Incarnation
             || identity.FormatVersion != original.DataEpoch || identity.ReadGeneration != original.ReadGeneration
             || principal.PolicyEpoch != original.PolicyEpoch || resource.SchemaVersion != original.SchemaVersion
-            || ResourceHash(resource, budget) != original.ResourceSha256
+            || ResourceHash(resource) != original.ResourceSha256
             || placement.PhysicalShardId != original.Placement.PhysicalShardId
             || placement.Incarnation != original.Placement.Incarnation)
         {
@@ -89,7 +89,7 @@ internal static class SearchTerminalPrivacy
         var originalResource = budget.ReadRecord<ResourceDefinition>(captured,
             KeySpace.Resource(target.Partition.TenantId, target.Partition.DatabaseId, lineage.SourceDocument.Collection))
             ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, Missing);
-        if (ResourceHash(sourceResource, budget) != ResourceHash(originalResource, budget))
+        if (ResourceHash(sourceResource) != ResourceHash(originalResource))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, Changed);
         }
@@ -107,9 +107,8 @@ internal static class SearchTerminalPrivacy
         }
     }
 
-    private static string ResourceHash(ResourceDefinition resource, ReadExecutionBudget budget)
+    private static string ResourceHash(ResourceDefinition resource)
     {
-        budget.ChargeBytes(OrleansSerialization.Measure(resource));
         return Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(resource)));
     }
 }

@@ -52,7 +52,7 @@ internal sealed class AnnSeedOwnershipTests
             ["NodeId", "Incarnation", "StoreFormatVersion", "KeyCodecVersion", "ReadGeneration", "Position",
              "AppliedPosition", "OutboxTail", "OutboxFirstAvailable"], CollectionOrdering.Matching);
         await Assert.That(seedProperties).IsEquivalentTo(
-            ["Scope", "Cut", "Records", "CorpusSha256", "OwnedBytesUpperBound", "PeakBytesUpperBound", "ReadBytes", "WorkUnits"],
+            ["Scope", "Cut", "Records", "CorpusSha256", "OwnedBytesUpperBound", "PeakBytesUpperBound", "WorkUnits"],
             CollectionOrdering.Matching);
         await Assert.That(seed.Scope.PrincipalId).IsEqualTo(AnnSeedTestSupport.Principal);
         await Assert.That(seed.Records).HasSingleItem();

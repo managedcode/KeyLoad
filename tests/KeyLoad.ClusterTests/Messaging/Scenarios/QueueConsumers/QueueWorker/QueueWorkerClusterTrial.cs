@@ -42,24 +42,6 @@ internal static class QueueWorkerClusterTrial
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task ByteRefusalAsync()
-    {
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            await using var fixture = new ClusterFixture();
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                await fixture.InitializeAsync();
-                using var deadline = McpCallerDeadline.Create();
-                var seed = await QueueWorkerClusterByteSetup.CreateAsync(fixture, deadline.Token);
-                await QueueWorkerClusterByteRefusal.RunAsync(fixture, seed, deadline.Token);
-            }, failures);
-            ServerFailureObserver.ThrowIfAny(failures);
-        }, failures);
-        ServerFailureObserver.ThrowIfAny(failures);
-    }
-
     internal static async Task RenewalBudgetAsync()
     {
         var failures = new List<Exception>();

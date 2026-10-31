@@ -21,9 +21,7 @@ public static class SearchIdentity
                 throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
             }
 
-            work.ChargeBytes(OrleansSerialization.Measure(phase));
             engine.RequireBm25Subject(view, administrator, phase, evaluatedAt);
-            work.ChargeBytes(OrleansSerialization.Measure(phase));
             return engine.CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId, administrator.Id, evaluatedAt, phase, DatabaseCommandFingerprint.Compute(phase.CommandId, OperationKind.Bm25CorpusPublicationPhase, administrator.Id, CommandExecutionExecution.Identity(phase)), work, view);
         });
     }

@@ -49,7 +49,7 @@ internal sealed class QueryHostedReadObservation(Guid connectionId, SiloAddress 
             RequireOriginalContext(identity, state);
             if (Identity.RequestId != Guid.Empty || identity.ReadKind != GrainReadKind.DistributedSearch
                 || identity.CommandKind is not null || identity.PrincipalId != principalId
-                || context.GrainId != expectedProducer || context.GrainInstance is not ConnectionGrain)
+                || context.GrainId != expectedProducer || context.GrainInstance is not RequestGrain)
             {
                 throw new InvalidOperationException(ChangedOwner);
             }

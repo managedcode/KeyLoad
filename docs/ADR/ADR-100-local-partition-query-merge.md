@@ -3,12 +3,12 @@
 Status: Accepted; implementation and qualification pending.
 Date: 2026-10-05. Scope: prerequisite for distributed query fan-out only.
 
-Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+[ADR-149](ADR-149-no-operation-limits.md) governs operation bounds: leaves carry no read, record or result allowance.
 
 The cancellation-observation amendment implements
 AC-DQUERY-PREREQ-005 with an already-armed, owned observation thread and
 the unchanged synchronous real ZoneTree query. Exact case/helper ownership,
-15-second observation/join bounds, original token/budget, no-result and healthy
+15-second observation/join bounds, original token and operation, no-result and healthy
 follow-up requirements are frozen in DistributedQueryExecution before code.
 No product boundary or stored-data/wire-format change;
 rollback may revert this test synchronization but cannot weaken its assertions.
@@ -40,8 +40,8 @@ feature: `PartitionQueryPlan`, `PartitionQueryLeafPlan`,
 `DistributedQueryExecution.md`. The plan is valid only for 1–8 unique atomic
 partitions all executed by the same actual store owner identity. It carries no
 trusted principal or caller-selected node. A leaf plan carries
-one identical normalized Q1 AST with only `PartitionRef` varied and a fixed
-resource grant. The executor uses the authenticated principal already passed
+one identical normalized Q1 AST with only `PartitionRef` varied and a candidate
+count equal to the root limit. The executor uses the authenticated principal already passed
 to QueryEngine; each leaf reloads persisted principal/resource policy through
 the existing read path.
 
@@ -60,31 +60,27 @@ single cross-partition snapshot position. Require the same owner and policy
 epoch for every leaf, fail the whole result on a missing/denied/inconsistent
 leaf, and expose no partial rows.
 
-Allocate deterministic fixed per-leaf record, raw-byte and retained-byte
-shares before starting any leaf. Sum of grants stays within current configured
-limits after one parse/admission charge. Every leaf enforces its share while
-scanning and before retaining candidates. The merger reserves bounded
-retention before accepting results and returns no more than current
-`MaxResults`. There is no work stealing. A root token and the existing single
-operation deadline cover parse, all leaves and merge. Current local leaf calls
+Leaves carry no record, raw-byte or retained-byte share, and nothing is
+measured or charged. Each leaf retains at most the query's `Limit` candidates
+and the merger returns no more than `Limit` rows. There is no work stealing. A
+root token and the operation's explicit expiry cover parse, all leaves and
+merge. Current local leaf calls
 are synchronous, so this ADR does not claim remote capacity/backpressure or
 slow-owner settlement.
 
 ## Ordered implementation and evidence
 
-1. The exact requirements, aliases/IDs, comparator, fixed-grant arithmetic, error map and truthful limitations are frozen in `docs/Features/QueryExecution/DistributedQueryExecution.md`.
+1. The exact requirements, aliases/IDs, comparator, error map and truthful limitations are frozen in `docs/Features/QueryExecution/DistributedQueryExecution.md`.
 2. Query adds only feature-local internal contracts, models, validation,
    coordinator and leaf execution helpers. It reuses `QueryValidation`,
    `QueryEngine` admission, SQL compiler, `PreparedQuery` sort encoding,
-   `QueryCandidateReader`, and `DatabaseEngine.WithQueryView`. The internal read-grant seam frozen in the linked feature
-   enforces every raw scan/lookup before decoding or copying.
+   `QueryCandidateReader`, and `DatabaseEngine.WithQueryView`.
 3. UnitTests seed real ZoneTree records in at least two distinct
    `PartitionRef`s using `TestDatabase`. Expected order and result projection
    come from a separate seeded scalar model, not from production leaf order or
    merger code. Include ties, hidden sort fields, duplicate textual IDs,
-   persisted permission denial/revocation, all global exact/one-over budgets,
-   invalid plan shape, cancellation after observed actual read bytes and a
-   healthy follow-up. Assert positions and policy witnesses per leaf; never
+   persisted permission denial/revocation, invalid plan shape, cancellation
+   after an observed actual read and a healthy follow-up. Assert positions and policy witnesses per leaf; never
    assert a synthetic scalar global cut.
 4. The full solution build, format, governance and Aspire suites run after the stage. Passing local unit tests only qualify this prerequisite implementation. Distributed query execution remains pending all actual leaf-on-other-silo, Orleans, SDK/official MCP, fault, bounded fan-out and Linux delivered-source acceptance.
 
@@ -107,47 +103,24 @@ There is one existing local query read capability and no second dispatcher.
 ```mermaid
 sequenceDiagram
     participant Q as Local QueryEngine operation
-    participant B as One root budget
+    participant B as One root operation
     participant Z as Actual node-local ZoneTree owner
-    Q->>B: Validate and reserve fixed leaf grants
+    Q->>B: Validate the plan and bind cancellation and expiry
     loop Each unique atomic partition
         Q->>Z: Reload persisted authority and bounded Q1 read
-        Z-->>Q: Owned candidates, cut and policy witness
-        Q->>B: Account accepted work and retention
+        Z-->>Q: Owned top-Limit candidates, cut and policy witness
     end
     Q->>Q: Validate all witnesses and merge exact order
     Q-->>Q: Return complete result or original failure
 ```
 
-The explicit ResourceExecution dependency is now frozen in the linked
-feature: internal CreateReadGrant(maximumBytes, maximumRecords) returns
-ReadExecutionBudgetReadGrant;
-accepted bytes convert fixed reserved capacity before decode/copy.
-Core adds only KeyLoad.Query friend visibility and actual regressions.
-The grant cases are split by responsibility into
-ReadExecutionBudgetGrantPointTests, ReadExecutionBudgetGrantRangeTests,
-ReadExecutionBudgetGrantReservationTests and
-ReadExecutionBudgetGrantCancellationTests, sharing only the actual ZoneTree
-seed helper ReadExecutionBudgetGrantSeed. The original assertions and execution
-read callbacks remain intact; the split satisfies the mandatory type-size limit.
-This ADR does not authorize fresh per-leaf deadlines, post-hoc accounting,
-changing public Q1 tie ordering or enlarging any configured limit.
-
-Both raw-byte and examined-attempt reservations convert before read
-callbacks; point misses and charged range lookahead count one each. The
-feature freezes the exact conservative retention constants/formula and the
-leaf-array transfer peak, with alias-aware candidate payload ownership. These
-model logical retained state and do not establish peak process RSS.
-
 The accepted local top-L implementation uses a custom L+1-reference binary
 heap for the internal partition leaf, with full EntityRef ties before selection.
 The public Q1 PriorityQueue path keeps its existing UTF-8 EntityId comparator.
-Reserve each exact candidate payload before heap insertion; rejection must
-leave prior heap/output unchanged. Reserve the final leaf array while scratch
-is still held, clear and relinquish the scratch container, then release its
-reservation. At most one callback-local temporary projection/order encoding
-is bounded by admitted raw bytes and document limits. Execution helpers,
-including retained-byte arithmetic, belong in QueryExecution/Execution.
+Draining the heap yields the ordered leaf candidates and releases its slots.
+This ADR does not authorize fresh per-leaf deadlines, changing public Q1 tie
+ordering or a configured operation limit. Execution helpers belong in
+QueryExecution/Execution.
 
 The narrow integration is an internal PartitionQueryExecution extension in
 QueryExecution/Execution plus one internal QueryEngine owner accessor. It

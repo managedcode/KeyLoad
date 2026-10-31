@@ -22,7 +22,6 @@ internal static class AnnCrashContract
     internal const int Count = 3;
     internal const int Dimension = 3;
     internal const int PageLimit = 1;
-    internal const int PageBytes = 4_194_304;
     internal const int MaximumPages = 12;
     internal const int SnapshotBound = 512;
     internal const long Generation = 1;

@@ -19,12 +19,10 @@ internal sealed class GraphSearchReachabilityReader(
     private const string MismatchedEdge = "A graph adjacency record does not match its canonical edge.";
     private const string EdgeLimit = "The graph edge visit budget was exhausted.";
     private const string VertexLimit = "The graph vertex visit budget was exhausted.";
-    private const string RetainedLimit = "The graph reachability byte budget was exhausted.";
     private readonly GraphVertexVisibility visibility = new(database, view, principal, budget);
     private readonly Dictionary<EntityRef, int> shortestHops = [];
     private readonly Queue<GraphSearchReachability> pending = new();
     private readonly HashSet<string>? labelSet = walk.Labels is { } labels ? new(labels, StringComparer.Ordinal) : null;
-    private long retainedBytes;
     private int examinedEdges;
 
     internal GraphSearchReachability[] Read()
@@ -119,12 +117,6 @@ internal sealed class GraphSearchReachabilityReader(
             throw Errors.Fail(ErrorCode.BudgetExceeded, VertexLimit);
         }
         var entry = new GraphSearchReachability(reference, depth);
-        var bytes = budget.MeasureResult(entry);
-        if (bytes > budget.MaximumResultBytes - retainedBytes)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, RetainedLimit);
-        }
-        retainedBytes += bytes;
         shortestHops.Add(reference, depth);
         pending.Enqueue(entry);
     }

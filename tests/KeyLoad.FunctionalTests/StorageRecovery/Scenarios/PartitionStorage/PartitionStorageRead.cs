@@ -2,10 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 using KeyLoad.Storage;
-using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
-using Orleans.Serialization;
 using P = KeyLoad.FunctionalTests.StorageRecovery.PartitionStorageProtocol;
 
 namespace KeyLoad.FunctionalTests.StorageRecovery;
@@ -27,8 +24,7 @@ internal static class PartitionStorageRead
         var connection = source.GetRequiredService<IGrainFactory>().GetGrain<IConnectionGrain>(connectionId);
         var reply = await GrainRequestStreamConsumer.DrainAsync(
             execution => connection.ExecuteStreamAsync(envelope, execution),
-            source.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-            requestId, clock, source.GetRequiredService<IOptions<GrainRoutingOptions>>(), token).ConfigureAwait(false);
+            requestId, token).ConfigureAwait(false);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(reply.SafeDetail).IsNull();
         var actual = GrainReplyFactory.RequireValue(reply).Value as DocumentResult;

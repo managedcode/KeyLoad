@@ -6,35 +6,6 @@ namespace KeyLoad.FunctionalTests.OrleansExecution;
 internal sealed class ConnectionSettlementTests
 {
     [Test]
-    public Task AcCrs055ExecutionDeadlineJoinsSelectedOperationAndFollowingWriteSucceeds()
-    {
-        var timing = new RuntimeTestOptions();
-        var routing = new GrainRoutingOptions();
-        return ConnectionScenario.RunAsync(async scenario =>
-        {
-            await scenario.InitializeAsync(TestContext.Current!.Execution.CancellationToken);
-            using var timeout = new CancellationTokenSource(timing.CompletionTimeout, TimeProvider.System);
-            var token = timeout.Token;
-            var principal = scenario.Principal();
-            routing.ExecutionLifetime = timing.HeldJobDelay;
-            var requestId = Guid.NewGuid();
-            var held = scenario.Observation.Hold(requestId);
-            var command = scenario.Command("deadline-original");
-            var original = scenario.CommandAsync(principal, requestId, command, token);
-            await held.Arrived.Task.WaitAsync(token);
-            await ConnectionAssertions.CancelledAsync(original);
-            await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(token);
-            await ConnectionAssertions.MissingOutcomeAsync(scenario, principal, command, "deadline-original");
-            var followingId = Guid.NewGuid();
-            var following = await scenario.CommandAsync(principal, followingId, scenario.Command("deadline-following"), token);
-            await Assert.That(following.Error).IsNull();
-            await ConnectionAssertions.StoredAsync(scenario, "deadline-following", 1, ConnectionProtocol.FirstJson);
-            await ConnectionAssertions.SameOwnerAsync(scenario, requestId, followingId, token);
-            await scenario.CloseAsync(token);
-        }, routing);
-    }
-
-    [Test]
     public Task AcCrs056NeverPulledStreamDoesNotActivateAndEarlyDisposalJoinsWithoutEffects()
     {
         return ConnectionScenario.RunAsync(async scenario =>

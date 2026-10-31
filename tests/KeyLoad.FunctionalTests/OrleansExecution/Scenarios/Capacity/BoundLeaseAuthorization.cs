@@ -31,7 +31,6 @@ internal static class BoundLeaseAuthorization
     private static async Task ReadRefusedAsync(BoundLeaseSeeded state,
         BoundLeaseOperation operation, PartitionQueryOwnedLeafRequest request, ErrorCode code, string detail)
     {
-        var before = operation.Ledger.RetainedEncodedBytes;
         var entries = operation.Ledger.RetainedEntries;
         PartitionQueryLeafResult? published = null;
         var refused = Assert.ThrowsExactly<KeyLoadException>(() => published =
@@ -42,7 +41,6 @@ internal static class BoundLeaseAuthorization
         await Assert.That(published).IsNull();
         await BoundLeaseSeed.UnchangedAsync(state.Leader, state.Images[state.Leader]);
         await BoundLeaseSeed.UnchangedAsync(state.Other, state.Images[state.Other]);
-        await Assert.That(operation.Ledger.RetainedEncodedBytes).IsEqualTo(before);
         await Assert.That(operation.Ledger.RetainedEntries).IsEqualTo(entries);
     }
 }

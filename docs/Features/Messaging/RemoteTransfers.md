@@ -176,9 +176,9 @@ fresh authorization first and the current epoch against the epoch recorded with 
 original failure, and a repaired command re-derives its ID from the immutable tuple
 and the new generation.
 
-A complete coordination read accounts every examined authorization, resource, intent,
-history, outcome and receipt record in one read ledger with no configured record or
-byte ceiling; a due-discovery page size does not truncate it
+A complete coordination read examines every authorization, resource, intent,
+history, outcome and receipt record under one operation with no record or byte
+ceiling and no read accounting; a due-discovery page size does not truncate it
 (REQ/AC-XFER-COORDINATION-READ-001). Cancellation or expiry fails the read without
 partial output or effects.
 

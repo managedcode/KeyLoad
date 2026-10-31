@@ -1,6 +1,6 @@
 # EventStreams — resource schema fence for signed traversal
 
-Current acceptance code is authored; compiler, runtime and Linux qualification remain pending. Owning requirements are REQ-EVENT-003/006 and AC-EVENT-006. Existing StreamTraversalCold covers count/direction/snapshot one-cold; EventMessageSensitivePublicTrial covers source/queue receive field policies with one cold, not signed ReadStream resource-schema fencing. The selective EventsRead principal-epoch flow and caller MaxBytes flow are separate.
+Current acceptance code is authored; compiler, runtime and Linux qualification remain pending. Owning requirements are REQ-EVENT-003/006 and AC-EVENT-006. Existing StreamTraversalCold covers count/direction/snapshot one-cold; EventMessageSensitivePublicTrial covers source/queue receive field policies with one cold, not signed ReadStream resource-schema fencing. The selective EventsRead principal-epoch flow is separate.
 
 | Requirement | Acceptance | Canonical roles |
 |---|---|---|

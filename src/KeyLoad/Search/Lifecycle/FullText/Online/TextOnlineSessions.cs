@@ -121,7 +121,7 @@ internal sealed class TextOnlineSessions
             var originals = new List<TextOnlineSession>();
             foreach (var session in sessions.Values)
             {
-                if (MatchesOriginal(session, principalId, request, budget))
+                if (MatchesOriginal(session, principalId, request))
                 {
                     originals.Add(session);
                 }
@@ -146,7 +146,7 @@ internal sealed class TextOnlineSessions
     }
 
     private static bool MatchesOriginal(TextOnlineSession session, string principalId,
-        OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
+        OnlineTextIndexMaintenanceRequest request)
     {
         lock (session.Gate)
         {
@@ -154,8 +154,6 @@ internal sealed class TextOnlineSessions
             {
                 return false;
             }
-            budget.ChargeBytes(OrleansSerialization.Measure(session.Request));
-            budget.ChargeBytes(OrleansSerialization.Measure(request));
             if (!OrleansSerialization.Serialize(session.Request).AsSpan().SequenceEqual(OrleansSerialization.Serialize(request)))
             {
                 throw TextErrors.Mismatch();

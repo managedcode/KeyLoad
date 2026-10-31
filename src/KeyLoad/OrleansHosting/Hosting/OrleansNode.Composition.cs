@@ -10,7 +10,7 @@ internal sealed partial class OrleansNode(IServiceProvider applicationServices, 
 {
     private readonly Lock lifecycle = new();
     private readonly OrleansNodeRequestLifetime requestLifetime = new();
-    private readonly OrleansNodeRequestExecutor requests = new(runtimeOptions.GrainRouting, loggerFactory.CreateLogger<OrleansNode>());
+    private readonly OrleansNodeRequestExecutor requests = new(loggerFactory.CreateLogger<OrleansNode>());
     private readonly ConnectionOwnerIdentity connectionOwner = new();
     private readonly OrleansNodeClosure closure = new();
     private readonly OrleansNodeStartupWait startupWait = new();

@@ -4,14 +4,8 @@ namespace KeyLoad.FunctionalTests.TimeSeries;
 
 internal static class ChunkMultiblockReadBudgetCalls
 {
-    private const int UnboundedRecords = int.MaxValue;
-
-    internal static ReadExecutionBudget Budget(ChunkSelectedIntegrityFixture fixture, long maximum)
-    {
-        var budget = new ReadExecutionBudget(fixture.Owner.EvaluationClock);
-        budget.ConstrainWork(maximum, UnboundedRecords);
-        return budget;
-    }
+    internal static ReadExecutionBudget Budget(ChunkSelectedIntegrityFixture fixture)
+        => new(fixture.Owner.EvaluationClock);
 
     internal static SampleRecord[] Read(ChunkSelectedIntegrityFixture fixture, ReadExecutionBudget budget)
         => fixture.Store.Read(original =>

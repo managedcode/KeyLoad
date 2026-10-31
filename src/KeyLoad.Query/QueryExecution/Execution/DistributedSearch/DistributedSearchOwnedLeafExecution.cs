@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
-using KeyLoad.Core.ResourceExecution.Execution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.QueryExecution;
@@ -28,21 +27,17 @@ internal static partial class DistributedSearchOwnedLeafExecution
         }
         var execution = options.Value;
         execution.Validate();
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.ConstrainLifetime(originalExpiry);
         DistributedSearchOwnedLeafValidation.Require(original, execution, budget);
         RequireOwner(database, original.Owner, actualOwner);
-        budget.ConstrainResultBytes(original.MaxResultBytes);
-        var grant = budget.CreateReadGrant(original.MaxReadBytes, original.MaxExaminedRecords);
-        var result = ExecutePhase(database, principalId, original, options, budget, grant,
+        var result = ExecutePhase(database, principalId, original, options, budget,
             new(request.Definition, request.Coverage, request.Principal));
-        budget.CheckResult(result);
         return result;
     }
 
     private static DistributedSearchLeafResult ExecutePhase(DatabaseEngine database, string principalId,
         DistributedSearchOwnedLeaf request, IOptions<QueryExecutionOptions> options,
-        ReadExecutionBudget budget, ReadExecutionBudgetReadGrant grant, PartitionQueryLifetimeMetadata? metadata = null)
+        ReadExecutionBudget budget, PartitionQueryLifetimeMetadata? metadata = null)
     {
         var witness = request.Witness;
         DistributedSearchCandidateLeaf? candidates = null;
@@ -51,24 +46,24 @@ internal static partial class DistributedSearchOwnedLeafExecution
         {
             case DistributedSearchPhase.Statistics:
                 witness = DistributedTextStatisticsLeaf.Execute(database, principalId, request.Search,
-                    request.Owner, request.Tenant, options, budget, grant, metadata);
+                    request.Owner, request.Tenant, options, budget, metadata);
                 break;
             case DistributedSearchPhase.Candidates:
                 candidates = DistributedSearchCandidateExecution.Execute(database, principalId, request.Search,
-                    request.Tenant, witness!, request.Statistics!, request.Scope!, request.SourceWindowId!, options, budget, grant, metadata);
+                    request.Tenant, witness!, request.Statistics!, request.Scope!, request.SourceWindowId!, options, budget, metadata);
                 break;
             case DistributedSearchPhase.Projection:
                 projection = DistributedSearchProjectionExecution.Execute(database, principalId, request.Search,
-                    request.Tenant, witness!, request.Selected, budget, grant, metadata);
+                    request.Tenant, witness!, request.Selected, budget, metadata);
                 break;
             case DistributedSearchPhase.Revalidate:
                 _ = DistributedSearchWitnessRevalidation.Execute(database, principalId, request.Search,
-                    request.Tenant, witness!, budget, grant, metadata);
+                    request.Tenant, witness!, budget, metadata);
                 break;
             default:
                 throw Errors.Fail(ErrorCode.Corruption, InvalidPhase);
         }
-        return new(request.Phase, witness!, candidates, projection, grant.ReadBytes, grant.ExaminedRecords);
+        return new(request.Phase, witness!, candidates, projection);
     }
 
     private static void RequireOwner(DatabaseEngine database, PhysicalShardRecord expected, PhysicalShardRecord actual)

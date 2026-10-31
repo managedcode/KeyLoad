@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using KeyLoad.Core;
-using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Query.QueryExecution;
@@ -26,14 +25,9 @@ internal static class DistributedTextStatisticsMerge
         {
             throw Errors.Fail(ErrorCode.Corruption, Invalid);
         }
-        var admission = new GlobalBranchByteAdmission(budget.MaximumResultBytes, budget);
-        var frequenciesBytes = checked(PartitionQueryRetention.ArrayDescriptorBytes
-            + (long)sizeof(int) * first.Terms.Length);
-        admission.Accept(frequenciesBytes);
         foreach (var leaf in leaves)
         {
             DistributedTextStatisticsValidation.Require(leaf, first.Terms, budget);
-            admission.Accept(OrleansSerialization.Measure(leaf));
         }
         var frequencies = ImmutableArray.CreateBuilder<int>(first.Terms.Length);
         for (var index = Empty; index < first.Terms.Length; index++)
@@ -62,7 +56,6 @@ internal static class DistributedTextStatisticsMerge
             throw Errors.Fail(ErrorCode.BudgetExceeded, Exhausted);
         }
         var result = new DistributedTextStatistics(first.Terms, documents, length, frequencies.MoveToImmutable());
-        admission.Accept(OrleansSerialization.Measure(result));
         DistributedTextStatisticsValidation.Require(result, first.Terms, budget);
         return result;
     }

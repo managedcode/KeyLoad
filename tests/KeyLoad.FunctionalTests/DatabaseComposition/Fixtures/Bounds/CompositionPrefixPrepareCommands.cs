@@ -35,10 +35,7 @@ internal static class CompositionPrefixPrepareCommands
         {
             Receipt = expected
         };
-        var charged = issued.Work.ReadBytes;
-        await Assert.That(charged > D.Absent).IsTrue();
         await CompositionPrefixPrepareAssertions.ResultAsync(issued, owner.Submit(issued.Original));
-        await Assert.That(issued.Work.ReadBytes).IsEqualTo(charged);
         owner.Commands.Add(issued);
         return issued;
     }

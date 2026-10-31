@@ -17,7 +17,7 @@ EventStreams `REQ-EVENT-001..003`/`AC-MP-005`, QueryExecution `REQ-QUERY-001..00
 ## Implementation contract
 
 1. Freeze the read cut and generation semantics for each canonical, feed, and derived-projection read.
-2. Add tests for concurrent append/page, exact boundary/lookahead, stale generation/retention, cancellation, and complete metadata byte limits.
+2. Add tests for concurrent append/page, exact boundary/lookahead, stale generation/retention, cancellation, and complete page metadata.
 3. Keep the common storage view contract in `src/KeyLoad.Abstractions/Storage/Contracts/StorageContracts.cs` and implement its lifetime/committed cut under `src/KeyLoad.Storage.ZoneTree/StorageEngine/`; per-feature readers live under their canonical Core `Features/<SliceName>/` roots and do not leak borrowed spans beyond the gate. Do not add a ReadViews slice.
 4. Validate current cursor versions and invalidate stale bindings explicitly. Reject unsupported cursors with a stable error rather than translating them or guessing their cut.
 5. GitHub CI runs real-store TUnit, process recovery, and replicated-cluster client reads across failover.

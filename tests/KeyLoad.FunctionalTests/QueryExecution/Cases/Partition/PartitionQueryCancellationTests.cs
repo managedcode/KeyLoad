@@ -7,7 +7,7 @@ internal sealed class PartitionQueryCancellationTests
     private const int SeedCount = 5_000;
 
     [Test]
-    public async Task ObservedReadProgressCancelsTheOriginalBudgetAndLeavesNoPartialResult()
+    public async Task ObservedReadProgressCancelsTheOriginalReadAndLeavesNoPartialResult()
     {
         using var database = PartitionQueryTestSupport.Create();
         SeedRows(database);
@@ -19,7 +19,7 @@ internal sealed class PartitionQueryCancellationTests
         await Assert.That(outcome.QueryReturned).IsFalse();
         await Assert.That(outcome.Cancellation?.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(outcome.CancellationRequested).IsTrue();
-        await Assert.That(outcome.ObservedReadBytes).IsGreaterThan(0L);
+        await Assert.That(outcome.ObservedEntries).IsGreaterThan(0L);
         var healthy = engine.ExecutePartitionQuery(PartitionQueryTestSupport.Principal,
             PartitionQueryTestSupport.Request(database, 1), [database.Partition]);
         await Assert.That(healthy.Complete).IsTrue();

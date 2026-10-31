@@ -1,8 +1,6 @@
 using KeyLoad.Clustering;
 using ManagedCode.Communication.CQRS;
 using ManagedCode.Orleans.Identity.Core.Constants;
-using Microsoft.Extensions.DependencyInjection;
-using Orleans.Serialization;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
@@ -25,8 +23,7 @@ internal static class ConnectionAwaitedSettlementCalls
             var envelope = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
                 command.CommandId, command);
             return await GrainRequestStreamConsumer.DrainAsync(execution => scenario.Fixture.Cluster.Client.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(envelope, execution),
-                scenario.Fixture.Cluster.ServiceProvider.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
-                requestId, scenario.Fixture.Clock, scenario.Fixture.RoutingOptions, token);
+                requestId, token);
         }
         catch (Exception error) { primary = error; throw; }
         finally

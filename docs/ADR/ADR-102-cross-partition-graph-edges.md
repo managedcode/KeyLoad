@@ -2,7 +2,7 @@
 
 Status: Accepted implementation contract; source integration and actual tests remain required. Related REQ/AC-GRAPH-XPART-001..005. See [CrossPartitionEdges](../Features/GraphTraversal/CrossPartitionEdges.md).
 
-Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLimits` operation limits it references are removed.
+[ADR-149](ADR-149-no-operation-limits.md) governs operation bounds: the incoming read has no server record, scan or byte ceiling.
 
 ## Decision
 
@@ -12,9 +12,9 @@ The source atomic partition remains the canonical owner of each graph edge. For 
 
 1. Freeze the stable generated aliases/IDs and source/version/intent/receiver/completion contracts in GraphTraversal Abstractions. The accepted feature table additionally fixes the generated capacity record, direction enum and canonical fingerprint tuple before their implementation; checked capacity accounting and the exact tuple are authoritative.
 2. Core source mutation writes the canonical edge, source owner version, coalesced target intent and normal outbox entry in one existing transaction. Target apply validates the actual source intent, canonical owner state and current source/target graph grants in the target transaction; active delivery validates both visible endpoints. It writes the derived reverse row and receiver high-water together.
-3. `ReadIncomingGraphEdgesRequest` performs one current local store read on the target partition. It admits at most `MaxResults`, scans at most `MaxScanRecords`, charges point/range/result bytes through the existing `ReadExecutionBudgetReadGrant` and `BudgetedReadView`, and checks the original deadline. It verifies the current source canonical edge/version plus destination high-water in that read cut and returns only visible, matching rows. If more eligible rows remain than the requested result limit, it returns no page and fails visibly; no partial result or completeness claim is allowed. Its output marks `eventual-reverse`.
+3. `ReadIncomingGraphEdgesRequest` performs one current local store read on the target partition. It returns at most the caller's result limit, reads the matching ranges in storage range pages through the existing `BudgetedReadView`, and checks the caller's cancellation and original deadline; nothing is charged. It verifies the current source canonical edge/version plus destination high-water in that read cut and returns only visible, matching rows. If more eligible rows remain than the requested result limit, it returns no page and fails visibly; no partial result or completeness claim is allowed. Its output marks `eventual-reverse`.
 4. Source completion validates the actual target receiver state, the exact current source intent and current source plus destination graph-write grants before retiring/accounting the intent. Target applied/source completion lost is safe to retry; superseded old messages are harmless stale no-ops. A later service stage may automate bounded page/apply/complete calls through ManagedCode CQRS; no task fanout or network under the apply gate.
-5. Tests are actual ZoneTree tests for source atomicity, exact aliases/serialization, duplicate/out-of-order/tombstone behavior, target/source separate commits, incoming query privacy/read budgets, revocation, endpoint deletion, capacity, corruption, retry and source completion failure.
+5. Tests are actual ZoneTree tests for source atomicity, exact aliases/serialization, duplicate/out-of-order/tombstone behavior, target/source separate commits, incoming query privacy and limits, revocation, endpoint deletion, capacity, corruption, retry and source completion failure.
 
 ## Limits, rollout and rollback
 

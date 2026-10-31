@@ -14,13 +14,15 @@ internal sealed class PackedAnnVectors
     private readonly float[][] blocks;
     private readonly int vectorsPerBlock;
     private readonly int dimension;
+    private readonly double[] squaredNorms;
 
-    private PackedAnnVectors(float[][] blocks, int count, int dimension, int vectorsPerBlock)
+    private PackedAnnVectors(float[][] blocks, double[] squaredNorms, int count, int dimension, int vectorsPerBlock)
     {
         this.blocks = blocks;
         Count = count;
         this.vectorsPerBlock = vectorsPerBlock;
         this.dimension = dimension;
+        this.squaredNorms = squaredNorms;
     }
 
     internal int Count
@@ -28,6 +30,16 @@ internal sealed class PackedAnnVectors
         get;
     }
     internal int Dimension => dimension;
+
+    internal double SquaredNorm(int ordinal)
+    {
+        ValidateOrdinal(ordinal);
+        if (squaredNorms.Length != Count)
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidVectors);
+        }
+        return squaredNorms[ordinal];
+    }
 
     internal ReadOnlySpan<float> Span(int ordinal)
     {
@@ -52,6 +64,7 @@ internal sealed class PackedAnnVectors
         var components = checked((long)layout.Count * layout.Dimension);
         budget.Charge(checked(components * CopyAndValidateWorkPerComponent));
         var blocks = AllocateBlocks(layout, budget);
+        var squaredNorms = AllocateNorms(layout, budget);
         var total = components;
         for (long vectorOffset = FirstElementIndex; vectorOffset < total; vectorOffset += layout.Dimension)
         {
@@ -77,12 +90,17 @@ internal sealed class PackedAnnVectors
                     throw Errors.Fail(ErrorCode.Validation, InvalidCopiedVector);
                 }
             }
+            if (squaredNorms.Length != 0)
+            {
+                budget.Charge(target.Length);
+                squaredNorms[ordinal] = SimilarityMetricMath.Norm(target);
+            }
         }
-        return new(blocks, layout.Count, layout.Dimension, layout.VectorsPerBlock);
+        return new(blocks, squaredNorms, layout.Count, layout.Dimension, layout.VectorsPerBlock);
     }
 
     internal static PackedAnnVectors Restore(PackedAnnAdmission layout, AnnWorkBudget budget)
-        => new(AllocateBlocks(layout, budget), layout.Count, layout.Dimension, layout.VectorsPerBlock);
+        => new(AllocateBlocks(layout, budget), AllocateNorms(layout, budget), layout.Count, layout.Dimension, layout.VectorsPerBlock);
 
     internal void RestoreNode(int ordinal, ReadOnlySpan<float> source, AnnWorkBudget budget)
     {
@@ -92,7 +110,23 @@ internal sealed class PackedAnnVectors
             throw Errors.Fail(ErrorCode.Corruption, InvalidVectors);
         }
         budget.Charge(source.Length);
-        source.CopyTo(blocks[ordinal / vectorsPerBlock].AsSpan(ordinal % vectorsPerBlock * dimension, dimension));
+        var target = blocks[ordinal / vectorsPerBlock].AsSpan(ordinal % vectorsPerBlock * dimension, dimension);
+        source.CopyTo(target);
+        if (squaredNorms.Length != 0)
+        {
+            budget.Charge(source.Length);
+            squaredNorms[ordinal] = SimilarityMetricMath.Norm(target);
+        }
+    }
+
+    private static double[] AllocateNorms(PackedAnnAdmission layout, AnnWorkBudget budget)
+    {
+        if (layout.Metric != DistanceMetric.Cosine)
+        {
+            return [];
+        }
+        budget.Charge(layout.Count);
+        return new double[layout.Count];
     }
 
     private void ValidateOrdinal(int ordinal)

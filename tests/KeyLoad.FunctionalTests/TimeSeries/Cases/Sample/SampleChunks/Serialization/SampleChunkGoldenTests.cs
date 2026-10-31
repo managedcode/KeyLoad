@@ -28,7 +28,7 @@ internal sealed class SampleChunkGoldenTests
         await Assert.That(Convert.ToBase64String(encoded)).IsEqualTo(RuntimeEnvelope);
         var frozen = Convert.FromBase64String(RuntimeEnvelope);
         await SampleChunkTestData.AssertRecordsExact(source,
-            SampleChunkCodec.Decode(frozen, SampleChunkTestData.ChargedDecodeBudget(frozen), UnitExecutionOptions.TimeSeriesExecution()));
+            SampleChunkCodec.Decode(frozen, SampleChunkTestData.Budget(), UnitExecutionOptions.TimeSeriesExecution()));
     }
 
     private static async Task Hex(ReadOnlyMemory<byte> actual, string expected)

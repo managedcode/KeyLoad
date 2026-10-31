@@ -20,7 +20,6 @@ internal static class AnnPublicSearchExecutor
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
         }
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return Task.FromResult(Execute(database, projection, principalId, request, budget, execution));
@@ -37,7 +36,6 @@ internal static class AnnPublicSearchExecutor
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, AnnSearchProtocol.Disabled);
         }
-        QueryResultBudgetPolicy.Constrain(budget, execution);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return Task.FromResult(Execute(database, projection, principalId, request, budget, execution, sourceMetadata));
@@ -84,7 +82,6 @@ internal static class AnnPublicSearchExecutor
                 var page = new AnnSearchPage(AnnPublicRequestValidation.CurrentVersion, ImmutableCollectionsMarshal.AsImmutableArray(documents),
                     caller.Cut.Position, Mode(result.Mode), result.Mode != AnnSearchMode.Approximate,
                     request.IndexGeneration, request.RequestedMode);
-                budget.CheckResult(page);
                 return page;
             }
             catch (Exception error) { primary = error; throw; }

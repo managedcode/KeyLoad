@@ -38,7 +38,6 @@ public sealed class AdminCatalogReader(DatabaseEngine database)
                 return true;
             }, after, cancellationToken: budget.Cancellation);
         var page = new AdminResourcesPage([.. items], scan.HasMore ? items[^1].Name : null, AdminReadAuthority.Position(view));
-        budget.CheckResult(page);
         return page;
     }
 }
