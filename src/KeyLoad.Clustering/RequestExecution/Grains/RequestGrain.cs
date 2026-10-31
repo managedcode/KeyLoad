@@ -94,7 +94,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
                 reply = await ConnectionParentExecution.ExecuteAsync(request, envelope,
                     (child, cancellation) => ExecuteLeafAsync(codec.Decode(child), child, owner,
                         purpose.WorkBinding, cancellation),
-                    (kind, id) => storage.AbortMaintenanceAsync(owner, kind, id), services, codec, clock,
+                    (kind, id) => storage.AbortMaintenanceAsync(owner, kind, id), services, codec,
                     diagnostics, ((IGrainBase)this).GrainContext, writer, purpose).ConfigureAwait(true);
             }
             return GrainReplyFactory.StreamResult(reply);

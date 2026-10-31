@@ -9,7 +9,7 @@ internal static class Bm25CorpusCapture
 {
     internal static Command<DatabaseCommand> Create(DatabaseEngine database, string administratorId,
         string subjectId, SearchRequest request, Guid commandId, Guid? expectedGeneration,
-        DateTimeOffset originalExpiry, ReadExecutionBudget work, IOptions<QueryExecutionOptions> options)
+        ReadExecutionBudget work, IOptions<QueryExecutionOptions> options)
     {
         ArgumentNullException.ThrowIfNull(database);
         ArgumentNullException.ThrowIfNull(work);
@@ -21,7 +21,6 @@ internal static class Bm25CorpusCapture
         {
             throw Errors.Fail(ErrorCode.Validation, Bm25CorpusProtocol.Invalid);
         }
-        work.ConstrainLifetime(originalExpiry);
         var phase = database.WithQueryView(subjectId, request.Partition, request.Collection, Capability.None,
             (raw, subject, resource) =>
             {
@@ -30,7 +29,7 @@ internal static class Bm25CorpusCapture
                     execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters);
                 database.VisitVisibleDocuments(raw, subject, request.Partition, request.Collection, work, ranker.Visit);
                 return database.CaptureBm25CorpusMetadata(raw, subject, resource, request, ranker.CaptureStatistics(),
-                    TextProjectionProtocol.TokenizerVersion, commandId, expectedGeneration, originalExpiry, work);
+                    TextProjectionProtocol.TokenizerVersion, commandId, expectedGeneration, work);
             }, work, metadata =>
             {
                 var administrator = database.Principal(metadata, administratorId, database.EvaluationClock.GetUtcNow());

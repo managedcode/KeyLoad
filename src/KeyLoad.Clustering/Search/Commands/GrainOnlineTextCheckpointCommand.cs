@@ -14,7 +14,7 @@ internal static class GrainOnlineTextCheckpointCommand
             return (false, default(Task<Result<object>>?));
         }
         var checkpoint = GrainPayload.ReadCommand<CommitProjectionBatchRequest>(request.Payload);
-        var work = maintenance.TryRequireCheckpointWork(checkpoint, principal.Id, request.Envelope.ExpiresAt);
+        var work = maintenance.TryRequireCheckpointWork(checkpoint, principal.Id);
         if (work is null)
         {
             if (request.Envelope.Purpose == OnlineTextRequestScope.Purpose)

@@ -5,4 +5,4 @@ namespace KeyLoad.FunctionalTests.OrleansExecution;
 
 internal sealed record BoundLeaseOperation(RequestWorkOwner Owner,
     ResourceLifetimeWorkResultRetention Ledger, RequestWorkLease Parent,
-    ReadExecutionBudget Budget, DateTimeOffset Expiry, CancellationToken Token);
+    ReadExecutionBudget Budget, CancellationToken Token);

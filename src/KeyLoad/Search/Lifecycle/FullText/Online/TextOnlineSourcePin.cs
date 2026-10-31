@@ -53,7 +53,7 @@ internal sealed class TextOnlineSourcePin : IDisposable
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidPin);
         }
-        var limits = owner.BoundReadCut(int.MaxValue, long.MaxValue, budget.RemainingLifetime);
+        var limits = owner.BoundReadCut(int.MaxValue, long.MaxValue, Timeout.InfiniteTimeSpan);
         ZoneTreeReadCutLease execution;
         try
         {

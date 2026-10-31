@@ -18,7 +18,7 @@ internal sealed class EpochGrainRequestPurposeTests
     public async Task AcEpoch005UnsupportedRequestPurposeFailsBeforeActorRouting(string rejectedPurpose)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var requestId = Guid.NewGuid();
         object payload = NoDtoMarker;
         var current = codec.CreateRead(requestId, PrincipalId, GrainReadKind.QueryCapabilities, payload);

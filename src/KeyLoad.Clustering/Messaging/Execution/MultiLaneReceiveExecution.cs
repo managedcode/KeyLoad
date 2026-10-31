@@ -12,82 +12,61 @@ internal static class MultiLaneReceiveExecution
 {
     internal static async Task<MultiLaneReceiveResult> ExecuteAsync(DecodedGrainRequest parent,
         Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
-        IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
+        IServiceProvider services, GrainRequestCodec codec,
         ILogger diagnostics, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
         var request = GrainPayload.ReadCommand<MultiLaneReceiveRequest>(parent.Payload);
         ArgumentNullException.ThrowIfNull(binding);
-        var incarnation = codec.Incarnation;
         MultiLaneReceiveAdmission.Validate(request, parent.Envelope.CommandId,
             services.GetRequiredService<IOptions<MessagingExecutionOptions>>().Value, token);
         var outcomes = ImmutableArray.CreateBuilder<QueueLaneReceiveOutcome>(request.Requests.Length);
         var halted = false;
-        KeyLoadException? stopped = null;
         foreach (var leaf in request.Requests)
         {
             token.ThrowIfCancellationRequested();
-            if (!halted)
-            {
-                stopped = (ValidateNext(parent, incarnation, codec, clock, outcomes.Count, diagnostics)).Value;
-                halted = stopped is not null;
-            }
             if (halted)
             {
                 outcomes.Add(new(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted));
                 continue;
             }
-            var dispatched = await DispatchAsync(leaf, executeChild, services, codec, clock,
-                diagnostics, parent, binding, incarnation, outcomes.Count, token).ConfigureAwait(true);
-            stopped = dispatched.Stopped;
-            var outcome = stopped is null ? Outcome(leaf, dispatched.Reply!, diagnostics, parent.Envelope.RequestId)
-                : new QueueLaneReceiveOutcome(leaf.RequestId, leaf.Lane, QueueLaneReceiveStatus.NotAttempted);
+            ValidateParent(parent, codec, outcomes.Count, diagnostics);
+            var reply = await DispatchAsync(leaf, executeChild, services, codec, diagnostics, parent, binding, token)
+                .ConfigureAwait(true);
+            var outcome = Outcome(leaf, reply, diagnostics, parent.Envelope.RequestId);
             outcomes.Add(outcome);
-            halted = stopped is not null || outcome.Status == QueueLaneReceiveStatus.Unknown;
+            halted = outcome.Status == QueueLaneReceiveStatus.Unknown;
         }
         token.ThrowIfCancellationRequested();
-        return new MultiLaneReceiveResult(request.RequestId, outcomes.MoveToImmutable(), stopped?.Code, stopped?.Message);
+        return new MultiLaneReceiveResult(request.RequestId, outcomes.MoveToImmutable());
     }
 
-    private static async Task<MultiLaneReceiveDispatchResult> DispatchAsync(ReceiveRequest leaf,
+    private static async Task<GrainOperationReply> DispatchAsync(ReceiveRequest leaf,
         Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
-        IServiceProvider services, GrainRequestCodec codec,
-        TimeProvider clock, ILogger diagnostics, DecodedGrainRequest parent,
-        IResourceLifetimeWorkBinding binding, Guid incarnation, int precedingOutcomes, CancellationToken token)
+        IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics, DecodedGrainRequest parent,
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var actorId = Guid.NewGuid();
         var invoked = false;
         try
         {
-            var child = codec.CreateMultiLaneReceiveChild(actorId, parent.Envelope.PrincipalId!, leaf.RequestId,
-                leaf, parent.Envelope.ExpiresAt);
-            var reply = await MaintenanceChildDispatch.ExecuteAsync(parent, child, actorId, leaf.RequestId,
+            var child = codec.CreateMultiLaneReceiveChild(actorId, parent.Envelope.PrincipalId!, leaf.RequestId, leaf);
+            return await MaintenanceChildDispatch.ExecuteAsync(parent, child, actorId, leaf.RequestId,
                 (request, cancellation) =>
                 {
                     invoked = true;
                     return executeChild(request, cancellation);
                 }, services, codec, binding, token).ConfigureAwait(true);
-            return new(reply, null);
         }
         catch (KeyLoadException error) when (invoked)
         {
             GrainFailureDiagnostics.Log(diagnostics, error, parent.Envelope.RequestId, GrainFailureStage.ReplyEncoding,
                 ErrorCode.UnknownWriteOutcome);
-            return new(new GrainOperationReply
+            return new GrainOperationReply
             {
                 Error = ErrorCode.UnknownWriteOutcome,
                 SafeDetail = MultiLaneReceiveAdmission.Interrupted
-            }, null);
-        }
-        catch (KeyLoadException error) when (!invoked && error.Code == ErrorCode.TokenInvalidated)
-        {
-            var stopped = (ValidateNext(parent, incarnation, codec, clock,
-                precedingOutcomes, diagnostics)).Value;
-            if (stopped is null)
-            {
-                throw;
-            }
-            return new(null, stopped);
+            };
         }
     }
 
@@ -119,31 +98,20 @@ internal static class MultiLaneReceiveExecution
         }
     }
 
-    private static (bool HasValue, KeyLoadException? Value) ValidateNext(DecodedGrainRequest parent, Guid incarnation,
-        GrainRequestCodec codec, TimeProvider clock, int precedingOutcomes, ILogger diagnostics)
+    private static void ValidateParent(DecodedGrainRequest parent, GrainRequestCodec codec, int precedingOutcomes,
+        ILogger diagnostics)
     {
-        var identityValidated = false;
         try
         {
             GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-            identityValidated = true;
             codec.ValidateScope(parent.Envelope);
-            return (false, default(KeyLoadException?));
         }
         catch (KeyLoadException error) when (precedingOutcomes > 0)
         {
             GrainFailureDiagnostics.Log(diagnostics, error, parent.Envelope.RequestId,
                 GrainFailureStage.EnvelopeVerification, error.Code);
-            if (identityValidated && error.Code == ErrorCode.TokenInvalidated
-                && parent.Envelope.Incarnation == incarnation
-                && parent.Envelope.ExpiresAt <= clock.GetUtcNow())
-            {
-                // Only the verified expired parent stopped this undispatched suffix.
-                return (true, ((KeyLoadException?)(error)));
-            }
-            // Identity or other parent-scope failure cannot safely release retained payloads.
+            // A parent-scope failure after an earlier lane cannot safely release retained payloads.
             throw Errors.Fail(ErrorCode.UnknownWriteOutcome, MultiLaneReceiveAdmission.Interrupted);
         }
     }
-
 }

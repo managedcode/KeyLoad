@@ -20,7 +20,6 @@ internal static class ConnectionCommandExecution
             var partition = GrainPartitionResolver.Resolve(request);
             stage = GrainFailureStage.CapabilityExecution;
             var work = new ReadExecutionBudget(clock, token);
-            work.ConstrainLifetime(request.Envelope.ExpiresAt);
             work.AttachResourceLifetimeBinding(binding);
             var reply = await runOnOwner(owner, envelope, partition, token).ConfigureAwait(true);
             CommandResultWorkBinding.BindReturned(request, reply, work, binding);

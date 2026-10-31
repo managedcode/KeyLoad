@@ -12,10 +12,10 @@ internal static class GrainRequestScope
         }
     }
 
-    internal static void Validate(GrainRequestEnvelope request, Guid incarnation, DateTimeOffset now, TimeSpan maximumFuture)
+    internal static void Validate(GrainRequestEnvelope request, Guid incarnation)
     {
         if (request.Incarnation != incarnation
-            || request.RequestId == Guid.Empty || request.ExpiresAt <= now || request.ExpiresAt > now + maximumFuture
+            || request.RequestId == Guid.Empty
             || (request.ReadKind is null) == (request.CommandKind is null) || request.Payload is null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);

@@ -78,9 +78,8 @@ internal static class SampleChunkTestData
     internal static SampleRecord Row(string id, DateTimeOffset timestamp, long sequence, double value, string tags)
         => new(Series, new(id, timestamp, value), sequence, tags);
 
-    internal static ReadExecutionBudget Budget(TimeProvider? clock = null,
-        CancellationToken cancellationToken = default)
-        => new(clock, cancellationToken);
+    internal static ReadExecutionBudget Budget(CancellationToken cancellationToken = default)
+        => new(null, cancellationToken);
 
     internal static async Task AssertRecordsExact(SampleRecord[] expected, SampleRecord[] actual)
     {

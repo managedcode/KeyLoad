@@ -72,10 +72,8 @@ internal static class Bm25PrivateAdmissionFlow
 
     private static Command<DatabaseCommand> Capture(TestDatabase database, Guid id, Guid? expected, CancellationToken token)
     {
-        var lifetime = UnitRoutingOptions.Routing().Value.RequestLifetime;
         return Bm25CorpusCapture.Create(database.Database, Root, Subject,
             new(database.Partition, Collection, Field, Term), id, expected,
-            database.Database.EvaluationClock.GetUtcNow().Add(TimeSpan.FromTicks(lifetime.Ticks / 2)),
             database.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
     }
 
@@ -98,19 +96,14 @@ internal static class Bm25PrivateAdmissionFlow
     private static async Task<Result<object>> SubmitAsync(TestDatabase database, Command<DatabaseCommand> operation,
         CancellationToken token)
     {
-        var routing = UnitRoutingOptions.Routing();
-        var codec = new KeyLoad.Clustering.GrainRequestCodec(database.Database.Store.Identity.Incarnation, database.Database.EvaluationClock, routing);
-        var expiry = database.Database.EvaluationClock.GetUtcNow().Add(routing.Value.RequestLifetime);
-        var envelope = codec.CreateBm25CorpusPublication(Guid.NewGuid(), operation, expiry);
+        var codec = new KeyLoad.Clustering.GrainRequestCodec(database.Database.Store.Identity.Incarnation, database.Database.EvaluationClock);
+        var envelope = codec.CreateBm25CorpusPublication(Guid.NewGuid(), operation);
         var decoded = codec.Decode(envelope);
         await Assert.That(decoded.Envelope.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(decoded.Envelope.PrincipalId).IsEqualTo(Root);
         await Assert.That(decoded.Envelope.Purpose).IsEqualTo(KeyLoad.Clustering.Bm25RequestScope.Purpose);
-        await Assert.That(decoded.Envelope.ExpiresAt).IsEqualTo(expiry);
         await Assert.That(KeyLoad.Clustering.GrainPartitionResolver.Resolve(decoded))
             .IsEqualTo(database.Partition.AtomicPartitionId);
-        var phase = ((Bm25CorpusPublicationPhaseCommand)(operation).Value!.Input);
-        await Assert.That(decoded.Envelope.ExpiresAt > phase.OriginalExpiry).IsTrue();
         var principal = database.Store.Read(view =>
             database.Database.Principal(view, Root, database.Database.EvaluationClock.GetUtcNow()));
         return await KeyLoad.Clustering.GrainBm25CorpusPublicationCommand.SubmitAsync(database.Database,

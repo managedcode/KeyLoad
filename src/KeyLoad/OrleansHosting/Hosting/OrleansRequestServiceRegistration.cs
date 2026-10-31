@@ -1,5 +1,4 @@
 using KeyLoad.Clustering;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
@@ -12,7 +11,7 @@ internal static class OrleansRequestServiceRegistration
             var runtime = provider.GetRequiredService<ServerRuntimeOptions>();
             var node = runtime.Node.Value;
             return new GrainRequestCodec(node.Incarnation,
-                provider.GetRequiredService<TimeProvider>(), provider.GetRequiredService<IOptions<GrainRoutingOptions>>())
+                provider.GetRequiredService<TimeProvider>())
             {
                 PhaseObserver = provider.GetService<IGrainRequestPhaseObserver>(),
                 PurposeObserver = provider.GetService<IGrainRequestPurposeObserver>()

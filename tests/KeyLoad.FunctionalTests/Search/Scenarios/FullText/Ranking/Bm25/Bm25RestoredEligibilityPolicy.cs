@@ -48,8 +48,7 @@ internal static class Bm25RestoredEligibilityPolicy
         await Assert.That(Bm25RestoredEligibilityAssertions.Current(fixture, original.Id)).IsNull();
         var operation = Bm25CorpusCapture.Create(fixture.Database, Bm25PortableFamilyBackupSeed.Root, original.Id,
             new(fixture.Source.Partition, Bm25PortableFamilyBackupSeed.Collection, Bm25PortableFamilyBackupSeed.Field, "needle"),
-            Guid.NewGuid(), originalHead.Generation, fixture.Database.EvaluationClock.GetUtcNow()
-                .Add(UnitRoutingOptions.Routing().Value.RequestLifetime), fixture.Source.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
+            Guid.NewGuid(), originalHead.Generation, fixture.Source.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
         var receipt = fixture.SubmitIssued(fixture.Database, operation, cancellationToken: token).Get<CommitReceipt>();
         var bytes = fixture.Target!.Read(view => view.ReadOwnedValue(Bm25CorpusKeys.Current(originalHead)))!;
         var head = OrleansSerialization.Deserialize<Bm25CorpusCurrent>(bytes);

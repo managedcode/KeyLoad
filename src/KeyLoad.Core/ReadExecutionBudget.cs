@@ -11,13 +11,6 @@ public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = nul
 {
     private ReadExecutionBudgetLifetime executionLifetime = new(timeProvider, cancellationToken);
 
-    /// <summary>Gets the earliest explicit absolute expiry without reminting it from remaining monotonic time.</summary>
-    internal DateTimeOffset ExpiresAt => executionLifetime.ExpiresAt;
-
-    internal TimeSpan RemainingLifetime => executionLifetime.RemainingLifetime;
-
-    internal void ConstrainLifetime(DateTimeOffset absoluteExpiry) => executionLifetime.ConstrainLifetime(absoluteExpiry);
-
     internal CancellationToken Cancellation => executionLifetime.Cancellation;
 
     /// <summary>Wraps an existing gated view so its reads observe this operation's resource lifetimes.</summary>
@@ -31,7 +24,7 @@ public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = nul
             ? view : new BudgetedReadView(view, this);
     }
 
-    /// <summary>Throws when cancellation or an explicit expiry prevents further work.</summary>
+    /// <summary>Throws when cancellation or a retained uncertain failure prevents further work.</summary>
     public void Check() => executionLifetime.Check();
 
     internal bool HasIndeterminateMetadata => executionLifetime.HasIndeterminateMetadata;

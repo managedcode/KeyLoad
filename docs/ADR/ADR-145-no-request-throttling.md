@@ -24,9 +24,8 @@ Two kinds of limits remain:
   (`GrainRequestStreamProtocol.MaximumChunks`); Orleans keeps its default message
   size limits; the MCP JSON token and property limits; the MCP canonical payload
   ceiling, equal to the server body limit; the classified MCP reply ceilings
-  `McpExecutionOptions.MaximumControlReplyBytes` and `MaximumDataReplyBytes`; the
-  request lifetimes (`GrainRoutingOptions.RequestLifetime` and `MaximumFuture`);
-  and the connection idle timeout.
+  `McpExecutionOptions.MaximumControlReplyBytes` and `MaximumDataReplyBytes`; and
+  the connection idle timeout. Internal request envelopes carry no expiry.
 
 Engine-internal resource planning is not request throttling and remains: ANN
 resident-memory and disk planning (`AnnExecutionOptions.MaximumResidentBytes`,

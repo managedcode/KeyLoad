@@ -24,7 +24,6 @@ internal sealed class MaintenanceChildDispatchAdmission : IDisposable
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
         var verified = codec.DecodeRequest(child, actorId);
         if (verified.Envelope.PrincipalId != parent.Envelope.PrincipalId || verified.Envelope.CommandId != commandId
-            || verified.Envelope.ExpiresAt != parent.Envelope.ExpiresAt
             || binding is not IRequestWorkBinding execution
             || !ReferenceEquals(binding.ResultRetention, execution.OriginalProducer.ResultRetention))
         {

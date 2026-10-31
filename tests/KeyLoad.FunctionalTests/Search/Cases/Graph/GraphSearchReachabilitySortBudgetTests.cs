@@ -4,16 +4,14 @@ namespace KeyLoad.FunctionalTests.Search;
 
 internal sealed class GraphSearchReachabilitySortBudgetTests
 {
-    private const string DeadlineDiagnostic = "The read execution deadline is exceeded.";
     private const string PrincipalId = "root";
     private const string FirstId = "sort-alpha";
     private const string SecondId = "sort-beta";
     private const string ThirdId = "sort-gamma";
     private const int SeedCount = 3;
-    private static readonly TimeSpan CallerLifetime = TimeSpan.FromSeconds(30);
 
     [Test]
-    public async Task ReachabilitySortPreservesCancellationAndDeadlineAndHealthyFollowup()
+    public async Task ReachabilitySortPreservesCancellationAndHealthyFollowup()
     {
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
@@ -26,7 +24,6 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
         await AssertOrdered(database, baseline, seeds);
 
         await AssertCancellation(database, walk, baselineClock.TimestampCalls - 2);
-        await AssertDeadline(database, walk, baselineClock.TimestampCalls - 1);
         await AssertOrdered(database, ReadReachability(database, walk, TimeProvider.System, CancellationToken.None), seeds);
     }
 
@@ -40,21 +37,10 @@ internal sealed class GraphSearchReachabilitySortBudgetTests
         await Assert.That(clock.CancellationTriggered).IsTrue();
     }
 
-    private static async Task AssertDeadline(TestDatabase database, GraphWalkSpec walk, long deadlineAt)
-    {
-        var clock = new GraphSearchReachabilitySortClock(deadlineAt: deadlineAt);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            ReadReachability(database, walk, clock, CancellationToken.None));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(failure.Message).IsEqualTo(DeadlineDiagnostic);
-        await Assert.That(clock.DeadlineTriggered).IsTrue();
-    }
-
     private static GraphSearchReachability[] ReadReachability(TestDatabase database, GraphWalkSpec walk,
         TimeProvider clock, CancellationToken cancellationToken)
     {
         var budget = new ReadExecutionBudget(clock, cancellationToken);
-        budget.ConstrainLifetime(clock.GetUtcNow() + CallerLifetime);
         return database.Database.WithQueryView(PrincipalId, database.Partition,
             GraphSearchTestSupport.Documents, (view, principal, _) =>
                 database.Database.ReadGraphSearchReachability(view, principal, database.Partition, walk, budget));

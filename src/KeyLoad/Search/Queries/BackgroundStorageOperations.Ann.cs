@@ -7,8 +7,8 @@ namespace KeyLoad.Server;
 internal sealed partial class BackgroundStorageOperations
 {
     public Task<BackgroundReadResult> ReadAnnProjectionWorkPageAsync(
-        SiloAddress target, byte[]? after, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => BackgroundStorageReadExecution.RunAsync(storage, clock, budget, (work, binding, token) =>
+        SiloAddress target, byte[]? after, CancellationToken cancellationToken)
+        => BackgroundStorageReadExecution.RunAsync(storage, clock, (work, binding, token) =>
         {
             var page = Database.ReadAnnProjectionWorkPageBound(after, work, binding);
             return Task.FromResult(new AnnProjectionDiscoveryPage(page.Items.Select(item =>
@@ -18,15 +18,14 @@ internal sealed partial class BackgroundStorageOperations
         }, cancellationToken);
 
     public Task<BackgroundReadResult> PrepareAnnProjectionAsync(SiloAddress target,
-        ProjectionConsumerRef consumer, long generation, Guid nodeId, AnnProjectionJobState? current,
-        BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => BackgroundStorageReadExecution.RunAsync(storage, clock, budget,
+        ProjectionConsumerRef consumer, long generation, Guid nodeId, AnnProjectionJobState? current, CancellationToken cancellationToken)
+        => BackgroundStorageReadExecution.RunAsync(storage, clock,
             (work, binding, token) => new AnnProjectionStoragePlanning(Database, storage.Host.AnnMaintenance)
                 .PrepareAsync(consumer, generation, nodeId, current, work, binding, token), cancellationToken);
 
     public Task<BackgroundReadResult> ReadAnnProjectionCreatorAsync(SiloAddress target,
-        AnnProjectionJobState original, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => BackgroundStorageReadExecution.RunAsync(storage, clock, budget, (work, binding, token) =>
+        AnnProjectionJobState original, CancellationToken cancellationToken)
+        => BackgroundStorageReadExecution.RunAsync(storage, clock, (work, binding, token) =>
         {
             var request = original.PendingRequest
                 ?? throw Errors.Fail(ErrorCode.Validation, AnnProjectionJobProtocol.Invalid);
@@ -36,9 +35,9 @@ internal sealed partial class BackgroundStorageOperations
         }, cancellationToken);
 
     public Task<BackgroundReadResult> ValidateAnnProjectionResultAsync(SiloAddress target,
-        AnnProjectionJobState original, AnnMaintenanceResult result, BackgroundReadBudget budget,
+        AnnProjectionJobState original, AnnMaintenanceResult result,
         CancellationToken cancellationToken)
-        => BackgroundStorageReadExecution.RunAsync(storage, clock, budget, async (work, binding, token) =>
+        => BackgroundStorageReadExecution.RunAsync(storage, clock, async (work, binding, token) =>
         {
             var request = original.PendingRequest
                 ?? throw Errors.Fail(ErrorCode.Validation, AnnProjectionJobProtocol.Invalid);

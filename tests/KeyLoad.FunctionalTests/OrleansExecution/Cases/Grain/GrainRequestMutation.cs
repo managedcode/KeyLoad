@@ -7,10 +7,6 @@ internal enum GrainRequestMutation
     Purpose,
     /// <summary>A different installation.</summary>
     Incarnation,
-    /// <summary>An expired request.</summary>
-    Expired,
-    /// <summary>An excessive future expiry.</summary>
-    Future,
     /// <summary>Both read and command kinds.</summary>
     BothKinds,
     /// <summary>No operation kind.</summary>

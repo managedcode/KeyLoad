@@ -18,12 +18,12 @@ internal sealed class Bm25PublicAdmissionTests
             var execution = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateCommand(
                 OperationKind.Bm25CorpusPublicationPhase, original.CommandId, original.UserId!, new DateTimeOffset(original.Timestamp), payload));
             await Assert.That(execution.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-            var codec = new KeyLoad.Clustering.GrainRequestCodec(flow.Database.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+            var codec = new KeyLoad.Clustering.GrainRequestCodec(flow.Database.Database.Store.Identity.Incarnation, TimeProvider.System);
             var generic = Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateCommand(Guid.NewGuid(),
                 original.UserId!, OperationKind.Bm25CorpusPublicationPhase, original.CommandId, payload));
             await Assert.That(generic.Code).IsEqualTo(ErrorCode.TokenInvalidated);
             var privateWrongKind = Assert.ThrowsExactly<KeyLoadException>(() =>
-                codec.CreateBm25CorpusPublication(Guid.NewGuid(), original, TimeProvider.System.GetUtcNow().AddSeconds(1)));
+                codec.CreateBm25CorpusPublication(Guid.NewGuid(), original));
             await Assert.That(privateWrongKind.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await Assert.That(KeyLoad.Server.McpOperationCatalog.Entries.Any(entry =>
                 entry.CommandKind == OperationKind.Bm25CorpusPublicationPhase)).IsFalse();

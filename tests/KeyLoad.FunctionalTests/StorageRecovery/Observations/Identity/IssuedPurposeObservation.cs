@@ -47,7 +47,7 @@ internal sealed class IssuedPurposeObservation : IGrainRequestPurposeObserver
                 || actual.Purpose != InvalidPurpose || actual.RequestId != expected.RequestId
                 || actual.Incarnation != expected.Incarnation || actual.PrincipalId != expected.PrincipalId
                 || actual.ReadKind != expected.ReadKind || actual.CommandKind != expected.CommandKind
-                || actual.CommandId != expected.CommandId || actual.ExpiresAt != expected.ExpiresAt
+                || actual.CommandId != expected.CommandId
                 || !OrleansSerialization.Serialize(actual.Payload).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected.Payload)))
             {
                 throw new InvalidOperationException("The genuine purpose receiver observation is invalid.");
@@ -56,7 +56,7 @@ internal sealed class IssuedPurposeObservation : IGrainRequestPurposeObserver
             {
                 Purpose = expected.Purpose
             },
-                cut.Incarnation, cut.EvaluatedAt, cut.MaximumFuture);
+                cut.Incarnation);
             received = true;
         }
     }

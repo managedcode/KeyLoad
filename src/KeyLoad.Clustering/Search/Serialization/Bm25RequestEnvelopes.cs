@@ -5,13 +5,8 @@ namespace KeyLoad.Clustering;
 
 internal static class Bm25RequestEnvelopes
 {
-    internal static GrainRequestEnvelope Publication(GrainRequestCodec scope, DateTimeOffset now,
-        TimeSpan lifetime, Guid requestId, Command<DatabaseCommand> operation, DateTimeOffset expiry)
+    internal static GrainRequestEnvelope Publication(GrainRequestCodec scope, Guid requestId, Command<DatabaseCommand> operation)
     {
-        if (expiry <= now || expiry > now + lifetime)
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
         var verified = CommandExecutionIdentity.SnapshotCommand(operation);
         if (verified.Value!.Kind != OperationKind.Bm25CorpusPublicationPhase)
         {
@@ -25,8 +20,7 @@ internal static class Bm25RequestEnvelopes
             PrincipalId = verified.UserId,
             CommandKind = verified.Value!.Kind,
             CommandId = verified.CommandId,
-            Payload = GrainPayload.Strict(verified),
-            ExpiresAt = expiry
+            Payload = GrainPayload.Strict(verified)
         };
     }
 }

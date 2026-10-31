@@ -11,7 +11,7 @@ internal static partial class DistributedSearchOwnedLeafExecution
 
     internal static DistributedSearchLeafResult Execute(DatabaseEngine database, string principalId,
         DistributedSearchOwnedLeaf request, PhysicalShardRecord actualOwner,
-        IOptions<QueryExecutionOptions> options, TimeProvider clock, DateTimeOffset originalExpiry,
+        IOptions<QueryExecutionOptions> options, TimeProvider clock,
         CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
     {
         if (request is null || request.Definition is null || request.Coverage is null
@@ -27,7 +27,6 @@ internal static partial class DistributedSearchOwnedLeafExecution
         }
         var execution = options.Value;
         execution.Validate();
-        budget.ConstrainLifetime(originalExpiry);
         DistributedSearchOwnedLeafValidation.Require(original, execution, budget);
         RequireOwner(database, original.Owner, actualOwner);
         var result = ExecutePhase(database, principalId, original, options, budget,

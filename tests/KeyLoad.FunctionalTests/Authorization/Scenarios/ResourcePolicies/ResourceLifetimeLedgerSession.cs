@@ -16,7 +16,7 @@ internal static class ResourceLifetimeLedgerSession
 
     internal static async Task<ResourceLifetimeWorkResultRetention> RunAsync(SafeProjectorOperationDatabase owner,
         Func<RequestWorkOwner, ResourceLifetimeWorkResultRetention, RequestWorkLease,
-            ReadExecutionBudget, DateTimeOffset, Task> body)
+            ReadExecutionBudget, Task> body)
     {
         RequestWorkOwner? workOwner = null;
         ResourceLifetimeWorkResultRetention? retention = null;
@@ -30,10 +30,8 @@ internal static class ResourceLifetimeLedgerSession
             parent.AttachResultRetention(retention);
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(owner.CallerToken, parent.Cancellation);
             var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, linked.Token);
-            var expiry = owner.Database.EvaluationClock.GetUtcNow().Add(UnitExecutionOptions.OperationLifetime);
-            budget.ConstrainLifetime(expiry);
             await Assert.That(parent.ResultRetention).IsSameReferenceAs(retention);
-            await body(workOwner, retention, parent, budget, expiry);
+            await body(workOwner, retention, parent, budget);
         }, failures);
         if (parent is not null)
         {

@@ -21,12 +21,12 @@ internal static class GrainRequestPurposeObservation
     {
         if (observer is null)
         {
-            GrainRequestScope.Validate(actual, cut.Incarnation, cut.EvaluatedAt, cut.MaximumFuture);
+            GrainRequestScope.Validate(actual, cut.Incarnation);
             return;
         }
         try
         {
-            GrainRequestScope.Validate(actual, cut.Incarnation, cut.EvaluatedAt, cut.MaximumFuture);
+            GrainRequestScope.Validate(actual, cut.Incarnation);
         }
         catch (KeyLoadException failure)
         {

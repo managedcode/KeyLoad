@@ -96,13 +96,13 @@ internal sealed class TextOnlineSessions
     }
 
     internal (bool HasValue, OnlineTextPublicationWork? Value) TryMatchCheckpoint(CommitProjectionBatchRequest command,
-        string principalId, DateTimeOffset originalExpiry)
+        string principalId)
     {
         lock (gate)
         {
             foreach (var session in sessions.Values)
             {
-                var matched = TryMatchOriginal(session, command, principalId, originalExpiry);
+                var matched = TryMatchOriginal(session, command, principalId);
                 if (matched is not null)
                 {
                     return (true, matched);
@@ -132,11 +132,11 @@ internal sealed class TextOnlineSessions
     }
 
     private OnlineTextPublicationWork? TryMatchOriginal(TextOnlineSession session,
-        CommitProjectionBatchRequest command, string principalId, DateTimeOffset originalExpiry)
+        CommitProjectionBatchRequest command, string principalId)
     {
         lock (session.Gate)
         {
-            var matched = session.TryMatchCheckpoint(command, principalId, originalExpiry);
+            var matched = session.TryMatchCheckpoint(command, principalId);
             if (matched is not null)
             {
                 ObjectDisposedException.ThrowIf(closed, this);

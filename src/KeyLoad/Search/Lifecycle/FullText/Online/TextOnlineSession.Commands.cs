@@ -11,13 +11,13 @@ internal sealed partial class TextOnlineSession
         {
             throw TextErrors.Mismatch();
         }
-        CheckpointWork = new(Id, original.CheckpointCommand, PrincipalId, OriginalExpiry,
+        CheckpointWork = new(Id, original.CheckpointCommand, PrincipalId,
             original.ThroughSequence, Budget);
     }
 
     internal OnlineTextPublicationWork? TryMatchCheckpoint(CommitProjectionBatchRequest command,
-        string actualPrincipal, DateTimeOffset expiry)
-        => CheckpointWork?.TryMatch(command, actualPrincipal, expiry, Budget).Value;
+        string actualPrincipal)
+        => CheckpointWork?.TryMatch(command, actualPrincipal, Budget).Value;
 
     internal async Task<ProjectionBatchResult> RequireOriginalCheckpointAsync(ProjectionBatchResult acknowledged)
         => await (CheckpointWork ?? throw TextErrors.Ownership())

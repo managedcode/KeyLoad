@@ -8,16 +8,12 @@ internal static class SampleChunkMinimumEnvelopeIssuance
         ReadSampleChunkWindowRequest request)
         => codec.CreateRead(requestId, reader.Id, GrainReadKind.SampleChunkWindow, request);
 
-    /// <summary>The two scope faults a receiving grain refuses before routing: a foreign incarnation and an expired envelope.</summary>
+    /// <summary>The scope fault a receiving grain refuses before routing: a foreign incarnation.</summary>
     internal static IEnumerable<Func<GrainRequestEnvelope, GrainRequestEnvelope>> OutOfScope()
     {
         yield return static original => original with
         {
             Incarnation = Guid.NewGuid()
-        };
-        yield return static original => original with
-        {
-            ExpiresAt = DateTimeOffset.UnixEpoch
         };
     }
 

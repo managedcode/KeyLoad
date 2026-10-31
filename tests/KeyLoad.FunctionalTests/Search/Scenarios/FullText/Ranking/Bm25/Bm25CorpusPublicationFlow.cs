@@ -50,7 +50,6 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
     internal Command<DatabaseCommand> Capture(Guid id, Guid? expected, string text = Term, string subject = Subject)
         => Bm25CorpusCapture.Create(database.Database, Root, subject,
             new(database.Partition, Collection, Field, text), id, expected,
-            database.Database.EvaluationClock.GetUtcNow().Add(UnitRoutingOptions.Routing().Value.RequestLifetime),
             database.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
     internal static Bm25CorpusPublicationPhaseCommand Phase(Command<DatabaseCommand> operation)

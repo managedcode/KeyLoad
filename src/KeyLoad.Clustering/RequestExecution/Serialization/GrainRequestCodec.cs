@@ -1,5 +1,4 @@
 using KeyLoad.InternalSerialization;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -7,16 +6,9 @@ namespace KeyLoad.Clustering;
 public sealed partial class GrainRequestCodec
 {
     private readonly TimeProvider clock;
-    private readonly GrainRoutingOptions settings;
-    private readonly IOptions<GrainRoutingOptions> executionOptions;
-
-    internal IOptions<GrainRoutingOptions> ExecutionOptions => executionOptions;
 
     internal Guid Incarnation { get; }
     internal TimeProvider RuntimeClock => clock;
-
-    internal (GrainRequestCodec Scope, DateTimeOffset Now, TimeSpan Lifetime) LifetimeReadContext
-        => (this, clock.GetUtcNow(), settings.RequestLifetime);
 
     internal IGrainRequestPhaseObserver? PhaseObserver
     {
@@ -32,21 +24,16 @@ public sealed partial class GrainRequestCodec
 
     /// <summary>Creates the envelope issuer for one database incarnation.</summary>
     /// <param name="incarnation">The database incarnation every envelope is scoped to.</param>
-    /// <param name="clock">The clock that stamps and checks envelope expiry.</param>
-    /// <param name="options">Request lifetime and execution bounds.</param>
-    public GrainRequestCodec(Guid incarnation, TimeProvider clock,
-        IOptions<GrainRoutingOptions> options)
+    /// <param name="clock">The operation clock of this node.</param>
+    public GrainRequestCodec(Guid incarnation, TimeProvider clock)
     {
         if (incarnation == Guid.Empty)
         {
             throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }
         ArgumentNullException.ThrowIfNull(clock);
-        ArgumentNullException.ThrowIfNull(options);
         Incarnation = incarnation;
         this.clock = clock;
-        settings = options.Value;
-        executionOptions = options;
     }
 
     /// <summary>Issues a read envelope for one capability.</summary>
@@ -57,7 +44,7 @@ public sealed partial class GrainRequestCodec
     /// <returns>The scoped envelope.</returns>
     public GrainRequestEnvelope CreateRead(Guid requestId, string? principalId, GrainReadKind kind, object payload)
         => Issue(GrainRequestEnvelopeConstruction.Read(requestId, Incarnation,
-            principalId, kind, GrainPayload.Own(payload, ReadProfile(kind)), clock.GetUtcNow() + settings.RequestLifetime));
+            principalId, kind, GrainPayload.Own(payload, ReadProfile(kind))));
 
     /// <summary>Issues a command envelope with its stable command identity.</summary>
     /// <param name="requestId">The caller's request identity.</param>
@@ -68,7 +55,7 @@ public sealed partial class GrainRequestCodec
     /// <returns>The scoped envelope.</returns>
     public GrainRequestEnvelope CreateCommand(Guid requestId, string principalId, OperationKind kind, Guid commandId, object payload)
         => Issue(GrainRequestEnvelopeConstruction.Command(requestId, Incarnation,
-            principalId, kind, commandId, GrainPayload.Copy(payload), clock.GetUtcNow() + settings.RequestLifetime));
+            principalId, kind, commandId, GrainPayload.Copy(payload)));
 
     /// <summary>Public graph and query inputs keep their null elements for owner validation; other reads are strict.</summary>
     internal static ValidationProfile ReadProfile(GrainReadKind kind)
@@ -114,5 +101,5 @@ public sealed partial class GrainRequestCodec
 
     private void ValidateScope(GrainRequestEnvelope request, IGrainRequestPurposeObserver? observer)
         => GrainRequestPurposeObservation.Validate(request,
-            new GrainRequestScopeCut(Incarnation, clock.GetUtcNow(), settings.MaximumFuture), observer);
+            new GrainRequestScopeCut(Incarnation), observer);
 }

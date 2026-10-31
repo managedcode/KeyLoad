@@ -7,8 +7,7 @@ internal static class ChunkMultiblockReadBudgetAssertions
     internal static async Task RequireAsync(ChunkSelectedIntegrityFixture fixture, bool healthy)
     {
         var recipe = ChunkMultiblockReadByteRecipe.Capture(fixture, healthy);
-        await PhaseAsync(fixture, () => ChunkMultiblockReadInterruptionTrial.RequireAsync(fixture, recipe, healthy, cancelled: true));
-        await PhaseAsync(fixture, () => ChunkMultiblockReadInterruptionTrial.RequireAsync(fixture, recipe, healthy, cancelled: false));
+        await PhaseAsync(fixture, () => ChunkMultiblockReadInterruptionTrial.RequireAsync(fixture, recipe, healthy));
         await ChunkMultiblockBoundaryRows.RequireAsync(fixture, healthy);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
     }

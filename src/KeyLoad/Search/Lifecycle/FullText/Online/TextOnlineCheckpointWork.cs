@@ -9,11 +9,10 @@ internal sealed class TextOnlineCheckpointWork
     private const long InitialProjectionSequence = 0;
     private readonly byte[] commandBytes;
     private readonly string principalId;
-    private readonly DateTimeOffset expiry;
     private readonly long through;
 
     internal TextOnlineCheckpointWork(Guid sessionId, CommitProjectionBatchRequest command,
-        string principalId, DateTimeOffset originalExpiry, long through, ReadExecutionBudget budget)
+        string principalId, long through, ReadExecutionBudget budget)
     {
         budget.Check();
         if (command.CommandId == Guid.Empty || through < InitialProjectionSequence || command.Effects.IsDefault
@@ -23,7 +22,6 @@ internal sealed class TextOnlineCheckpointWork
         }
         commandBytes = OrleansSerialization.Serialize(command);
         this.principalId = principalId;
-        expiry = originalExpiry;
         this.through = through;
         Work = new(sessionId, command.CommandId);
     }
@@ -34,14 +32,14 @@ internal sealed class TextOnlineCheckpointWork
     }
 
     internal (bool HasValue, OnlineTextPublicationWork? Value) TryMatch(CommitProjectionBatchRequest command,
-        string actualPrincipal, DateTimeOffset actualExpiry, ReadExecutionBudget budget)
+        string actualPrincipal, ReadExecutionBudget budget)
     {
         if (command.CommandId != Work.CommandId)
         {
             return (false, default(OnlineTextPublicationWork?));
         }
         budget.Check();
-        if (actualPrincipal != principalId || actualExpiry != expiry)
+        if (actualPrincipal != principalId)
         {
             throw TextErrors.Mismatch();
         }

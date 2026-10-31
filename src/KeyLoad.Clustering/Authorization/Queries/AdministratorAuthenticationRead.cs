@@ -15,13 +15,12 @@ internal static class AdministratorAuthenticationRead
         ArgumentNullException.ThrowIfNull(binding);
         var work = new ReadExecutionBudget(clock, token);
         work.AttachResourceLifetimeBinding(binding);
-        work.ConstrainLifetime(request.Envelope.ExpiresAt);
         if (!AdministratorAuthenticationScope.Validate(request.Envelope))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
         var input = GrainPayload.Read<AdministratorAuthenticationRequest>(request.Payload);
-        Require(input, request.Envelope.ExpiresAt);
+        Require(input);
         binding.Bind(ImmutableArray<ResourceLifetime>.Empty);
         PrincipalRecord? principal = null;
         KeyLoadException? refusal = null;
@@ -41,9 +40,9 @@ internal static class AdministratorAuthenticationRead
         return reply;
     }
 
-    private static void Require(AdministratorAuthenticationRequest input, DateTimeOffset expiry)
+    private static void Require(AdministratorAuthenticationRequest input)
     {
-        if (string.IsNullOrEmpty(input.Secret) || input.ExpiresAt != expiry)
+        if (string.IsNullOrEmpty(input.Secret))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

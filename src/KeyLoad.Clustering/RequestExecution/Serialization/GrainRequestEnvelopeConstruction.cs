@@ -4,7 +4,7 @@ namespace KeyLoad.Clustering;
 internal static class GrainRequestEnvelopeConstruction
 {
     internal static GrainRequestEnvelope Read(Guid requestId, Guid incarnation, string? principalId,
-        GrainReadKind kind, object payload, DateTimeOffset expiry)
+        GrainReadKind kind, object payload)
     {
         if (AnnProjectionObservationScope.Handles(kind))
         {
@@ -17,13 +17,12 @@ internal static class GrainRequestEnvelopeConstruction
             Incarnation = incarnation,
             PrincipalId = principalId,
             ReadKind = kind,
-            Payload = payload,
-            ExpiresAt = expiry
+            Payload = payload
         };
     }
 
     internal static GrainRequestEnvelope Command(Guid requestId, Guid incarnation, string principalId,
-        OperationKind kind, Guid commandId, object payload, DateTimeOffset expiry)
+        OperationKind kind, Guid commandId, object payload)
     {
         return new()
         {
@@ -33,9 +32,7 @@ internal static class GrainRequestEnvelopeConstruction
             PrincipalId = principalId,
             CommandKind = kind,
             CommandId = commandId,
-            Payload = payload,
-            ExpiresAt = expiry
+            Payload = payload
         };
     }
-
 }

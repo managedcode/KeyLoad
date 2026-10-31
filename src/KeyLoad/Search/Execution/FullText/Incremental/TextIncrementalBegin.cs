@@ -12,10 +12,9 @@ internal static class TextIncrementalBegin
         TextMaintenanceCapabilityRequest request, ServerRuntimeOptions configured, TimeProvider clock,
         CancellationTokenSource shutdown, TextIncrementalSessions sessions, Action<TextFaultStage>? faultObserver,
         TextResourceOwnership? resources, Action<string, TextResourceReservation> retainGeneration,
-        DateTimeOffset? expiry, IResourceLifetimeWorkBinding? binding, CancellationToken token)
+        IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
-        var work = new MaintenanceSessionWork(clock,
-            expiry, shutdown.Token);
+        var work = new MaintenanceSessionWork(clock, shutdown.Token);
         var captureStarted = false;
         var captured = false;
         try

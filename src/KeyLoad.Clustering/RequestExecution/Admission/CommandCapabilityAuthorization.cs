@@ -6,16 +6,16 @@ namespace KeyLoad.Clustering;
 internal static class CommandCapabilityAuthorization
 {
     internal static async Task<PrincipalRecord> AuthorizeAsync(DatabaseEngine database,
-        ICommitCoordinator coordinator, TimeProvider clock, GrainRoutingOptions settings,
+        ICommitCoordinator coordinator, TimeProvider clock,
         GrainRequestCodec? codec, DecodedGrainRequest request, IGrainContext? context, CancellationToken token)
     {
         var stage = GrainFailureStage.ReadBarrier;
         try
         {
             await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
-            ValidateFresh(database, clock, settings, request, token);
+            ValidateFresh(database, request, token);
             stage = GrainFailureStage.Authorization;
-            await ObserveAndValidateAsync(database, clock, settings, codec, request,
+            await ObserveAndValidateAsync(database, codec, request,
                 GrainRequestPhase.AuthorizationReload, context, token).ConfigureAwait(true);
             return GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock);
         }
@@ -26,8 +26,8 @@ internal static class CommandCapabilityAuthorization
         }
     }
 
-    internal static async ValueTask ObserveAndValidateAsync(DatabaseEngine database, TimeProvider clock,
-        GrainRoutingOptions settings, GrainRequestCodec? codec, DecodedGrainRequest request,
+    internal static async ValueTask ObserveAndValidateAsync(DatabaseEngine database,
+        GrainRequestCodec? codec, DecodedGrainRequest request,
         GrainRequestPhase phase, IGrainContext? context, CancellationToken token)
     {
         if (codec is not { HasPhaseObserver: true } observerCodec)
@@ -35,15 +35,13 @@ internal static class CommandCapabilityAuthorization
             return;
         }
         await observerCodec.ObservePhaseAsync(request, phase, context, token).ConfigureAwait(true);
-        ValidateFresh(database, clock, settings, request, token);
+        ValidateFresh(database, request, token);
     }
 
-    private static void ValidateFresh(DatabaseEngine database, TimeProvider clock, GrainRoutingOptions settings,
-        DecodedGrainRequest request, CancellationToken token)
+    private static void ValidateFresh(DatabaseEngine database, DecodedGrainRequest request, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        GrainRequestScope.Validate(request.Envelope, database.Store.Identity.Incarnation,
-            clock.GetUtcNow(), settings.MaximumFuture);
+        GrainRequestScope.Validate(request.Envelope, database.Store.Identity.Incarnation);
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
     }
 }

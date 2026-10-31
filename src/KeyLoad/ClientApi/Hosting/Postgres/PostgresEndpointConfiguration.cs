@@ -36,7 +36,7 @@ internal sealed class PostgresEndpointConfiguration(IOptions<PostgresSessionOpti
         {
             return;
         }
-        var duration = routing.Value.RequestLifetime;
+        var duration = routing.Value.ConnectionIdleTimeout;
         listen.Use(next => context => PostgresAdmissionLifetime.RunAsync(context, next, duration, clock));
         if (options.RequireTls)
         {

@@ -14,8 +14,6 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
     private readonly PartitionQueryLifetimeMetadata metadata = flow.Capture();
     private readonly IOptions<QueryExecutionOptions> options = UnitExecutionOptions.QueryExecution();
     private readonly ReadExecutionBudget budget = new(flow.Fixture.Destination.Database.EvaluationClock, CancellationToken.None);
-    private readonly DateTimeOffset expiry = flow.Fixture.Destination.Database.EvaluationClock.GetUtcNow()
-        + UnitExecutionOptions.OperationLifetime;
     private readonly SearchRequest search = new(QueryFixture.Partition,
         QueryFixture.Collection, TextField: QueryFixture.Title,
         Text: QueryLifetimeProtocol.Text, Limit: QueryLifetimeProtocol.Limit);
@@ -80,6 +78,6 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
                 invalid, options.Value, budget), ErrorCode.Corruption);
         }
         return DistributedSearchOwnedLeafExecution.Execute(database, QueryFixture.Reader, actual,
-            flow.Fixture.DestinationOwner, options, database.EvaluationClock, expiry, CancellationToken.None);
+            flow.Fixture.DestinationOwner, options, database.EvaluationClock, CancellationToken.None);
     }
 }

@@ -12,7 +12,7 @@ internal static partial class PartitionQueryRemoteExecution
     internal static async Task<PartitionQueryPage> ExecuteAsync(QueryEngine engine,
         PartitionQueryRequest request,
         Func<PartitionQueryLeafPlan, ReadExecutionBudget, CancellationToken, Task<PartitionQueryPreparedLeaf>> prepare,
-        Func<CancellationToken, Task> revalidate, TimeProvider clock, DateTimeOffset originalExpiry,
+        Func<CancellationToken, Task> revalidate, TimeProvider clock,
         CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
@@ -21,7 +21,6 @@ internal static partial class PartitionQueryRemoteExecution
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        budget.ConstrainLifetime(originalExpiry);
         budget.Check();
         using var admission = database.AdmitQuery(cancellationToken);
         var prepared = PartitionQueryPublicValidation.Prepare(request, engine.Execution);

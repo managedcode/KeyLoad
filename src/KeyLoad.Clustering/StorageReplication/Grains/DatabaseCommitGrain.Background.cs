@@ -23,8 +23,8 @@ public sealed partial class DatabaseCommitGrain
         => ExecuteBackgroundAsync(null, target => target.ReadSampleChunkWorkPageAsync(after, cancellationToken), cancellationToken);
 
     /// <inheritdoc />
-    public Task<BackgroundReadResult> ReadAnnProjectionWorkPageAsync(SiloAddress target, byte[]? after, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => ExecuteBackgroundAsync(target, backend => backend.ReadAnnProjectionWorkPageAsync(target, after, budget, cancellationToken), cancellationToken);
+    public Task<BackgroundReadResult> ReadAnnProjectionWorkPageAsync(SiloAddress target, byte[]? after, CancellationToken cancellationToken)
+        => ExecuteBackgroundAsync(target, backend => backend.ReadAnnProjectionWorkPageAsync(target, after, cancellationToken), cancellationToken);
 
     /// <inheritdoc />
     public Task<PrincipalRecord?> ReadDueCreatorAsync(DueWorkHint hint, CancellationToken cancellationToken)
@@ -47,15 +47,15 @@ public sealed partial class DatabaseCommitGrain
         => ExecuteBackgroundAsync(null, target => target.ReadSampleChunkCreatorAsync(hint, cancellationToken), cancellationToken);
 
     /// <inheritdoc />
-    public Task<BackgroundReadResult> PrepareAnnProjectionAsync(SiloAddress target, ProjectionConsumerRef consumer, long generation, Guid nodeId, AnnProjectionJobState? current, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => ExecuteBackgroundAsync(target, backend => backend.PrepareAnnProjectionAsync(target, consumer, generation, nodeId, current, budget, cancellationToken), cancellationToken);
+    public Task<BackgroundReadResult> PrepareAnnProjectionAsync(SiloAddress target, ProjectionConsumerRef consumer, long generation, Guid nodeId, AnnProjectionJobState? current, CancellationToken cancellationToken)
+        => ExecuteBackgroundAsync(target, backend => backend.PrepareAnnProjectionAsync(target, consumer, generation, nodeId, current, cancellationToken), cancellationToken);
 
     /// <inheritdoc />
-    public Task<BackgroundReadResult> ReadAnnProjectionCreatorAsync(SiloAddress target, AnnProjectionJobState original, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => ExecuteBackgroundAsync(target, backend => backend.ReadAnnProjectionCreatorAsync(target, original, budget, cancellationToken), cancellationToken);
+    public Task<BackgroundReadResult> ReadAnnProjectionCreatorAsync(SiloAddress target, AnnProjectionJobState original, CancellationToken cancellationToken)
+        => ExecuteBackgroundAsync(target, backend => backend.ReadAnnProjectionCreatorAsync(target, original, cancellationToken), cancellationToken);
 
     /// <inheritdoc />
-    public Task<BackgroundReadResult> ValidateAnnProjectionResultAsync(SiloAddress target, AnnProjectionJobState original, AnnMaintenanceResult result, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => ExecuteBackgroundAsync(target, backend => backend.ValidateAnnProjectionResultAsync(target, original, result, budget, cancellationToken), cancellationToken);
+    public Task<BackgroundReadResult> ValidateAnnProjectionResultAsync(SiloAddress target, AnnProjectionJobState original, AnnMaintenanceResult result, CancellationToken cancellationToken)
+        => ExecuteBackgroundAsync(target, backend => backend.ValidateAnnProjectionResultAsync(target, original, result, cancellationToken), cancellationToken);
 
 }

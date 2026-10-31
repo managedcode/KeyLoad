@@ -45,19 +45,19 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
     }
 
     public Task<OnlineTextCapabilityResult> ExecuteAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry, CancellationToken token)
-        => worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, null, token));
+        OnlineTextCapabilityRequest request, CancellationToken token)
+        => worker.RunAsync(() => ExecuteOwnedAsync(principal, request, null, token));
 
     public Task<OnlineTextCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry,
+        OnlineTextCapabilityRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        return worker.RunAsync(() => ExecuteOwnedAsync(principal, request, originalExpiry, binding, token));
+        return worker.RunAsync(() => ExecuteOwnedAsync(principal, request, binding, token));
     }
 
     private async Task<OnlineTextCapabilityResult> ExecuteOwnedAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry,
+        OnlineTextCapabilityRequest request,
         IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
@@ -74,23 +74,22 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
             var work = session?.Work;
             if (work is null)
             {
-                created = new MaintenanceSessionWork(clock, expiry, shutdown.Token);
+                created = new MaintenanceSessionWork(clock, shutdown.Token);
                 work = created;
                 sessions.BeginWork(request.SessionId, created);
             }
             using var stage = work.EnterStage(binding, token);
-            work.RequireExpiry(expiry);
             if (request.Kind == OnlineTextCapabilityKind.ResolveOriginal)
             {
-                var resolved = await ResolveCommittedOriginalAsync(principal, request, expiry, work.Budget, token);
+                var resolved = await ResolveCommittedOriginalAsync(principal, request, work.Budget, token);
                 if (resolved is not null)
                 {
                     return resolved;
                 }
-                session = await sessions.AddOwnedAsync(new(request.SessionId, request.Request, principal.Id, expiry, work));
+                session = await sessions.AddOwnedAsync(new(request.SessionId, request.Request, principal.Id, work));
                 created = null;
             }
-            return await ExecuteStageAsync(session ?? throw TextErrors.Ownership(), principal, request, expiry);
+            return await ExecuteStageAsync(session ?? throw TextErrors.Ownership(), principal, request);
         }
         finally
         {
@@ -103,9 +102,9 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
     }
 
     private async Task<OnlineTextCapabilityResult> ExecuteStageAsync(TextOnlineSession session, PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry)
+        OnlineTextCapabilityRequest request)
     {
-        session.Require(request.SessionId, request.Request, principal.Id, expiry);
+        session.Require(request.SessionId, request.Request, principal.Id);
         if (request.Kind == OnlineTextCapabilityKind.SettleCheckpoint)
         {
             await TextOnlineCheckpointSettlement.ExecuteAsync(database, session,
@@ -139,14 +138,14 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
         var session = sessions.Require(sessionId);
         lock (session.Gate)
         {
-            session.Require(sessionId, request, principalId, session.OriginalExpiry);
+            session.Require(sessionId, request, principalId);
             return session.RequirePreparedPublication();
         }
     }
 
     public OnlineTextPublicationWork? TryRequireCheckpointWork(CommitProjectionBatchRequest request,
-        string principalId, DateTimeOffset originalExpiry)
-        => (sessions.TryMatchCheckpoint(request, principalId, originalExpiry)).Value;
+        string principalId)
+        => (sessions.TryMatchCheckpoint(request, principalId)).Value;
 
     public ValueTask DisposeAsync()
     {

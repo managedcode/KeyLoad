@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.Connections.Features;
 using Microsoft.Extensions.Options;
@@ -37,15 +36,9 @@ internal sealed class PostgresConnectionHandler(IServiceProvider services, IOpti
             var failures = new List<Exception> { error };
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                using var deadline = new PostgresTransportDeadline(
-                    services.GetRequiredService<IOptions<GrainRoutingOptions>>().Value.RequestLifetime,
-                    services.GetRequiredService<TimeProvider>(), context.ConnectionClosed);
-                await ServerFailureObserver.ObserveAsync(async () =>
-                {
-                    var writer = new PostgresWireWriter(context.Transport.Output, options.MaximumFrameBytes);
-                    PostgresErrorReply.Write(writer, error);
-                    await writer.FlushAsync(deadline.Token);
-                }, failures);
+                var writer = new PostgresWireWriter(context.Transport.Output, options.MaximumFrameBytes);
+                PostgresErrorReply.Write(writer, error);
+                await writer.FlushAsync(context.ConnectionClosed);
             }, failures);
             ServerFailureObserver.ThrowIfAny(failures);
         }

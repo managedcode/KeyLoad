@@ -35,10 +35,6 @@ internal sealed class BoundLeaseSession
         Linked = CancellationTokenSource.CreateLinkedTokenSource(token, Parent.Cancellation);
         var budget = new ReadExecutionBudget(database.EvaluationClock, Linked.Token);
         budget.AttachResourceLifetimeBinding(Parent);
-        var lifetime = state.Leader.RoutingOptions.Value.RequestLifetime;
-        var queryLifetime = UnitExecutionOptions.OperationLifetime;
-        var expiry = database.EvaluationClock.GetUtcNow() + (lifetime < queryLifetime ? lifetime : queryLifetime);
-        budget.ConstrainLifetime(expiry);
-        return new(Owner, Ledger, Parent, budget, expiry, Linked.Token);
+        return new(Owner, Ledger, Parent, budget, Linked.Token);
     }
 }

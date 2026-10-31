@@ -1,6 +1,5 @@
 using System.Text.Json;
 using KeyLoad.FunctionalTests.DocumentStorage;
-using KeyLoad.Storage;
 using ManagedCode.Communication;
 
 namespace KeyLoad.FunctionalTests.ResourceExecution;
@@ -12,7 +11,6 @@ internal sealed class TimeProviderOperationTests
     private const string Entity = "clock-entry";
     private const string Root = "root";
     private const string Json = "{\"clock\":true}";
-    private const int DeadlineSeconds = 5;
     private static readonly DateTimeOffset Epoch = new(2040, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
     [Test]
@@ -58,27 +56,6 @@ internal sealed class TimeProviderOperationTests
         var page = DueWorkDiscovery.ReadPage(fixture.Database, null, Epoch);
         await Assert.That(page.Jobs).IsEmpty();
         await Assert.That(page.Rejected).IsEmpty();
-        await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, Entity))!.Json).IsEqualTo(Json);
-    }
-
-    [Test]
-    public async Task UtcJumpDoesNotExpireMonotonicReadBudgetButElapsedAdvanceDoes()
-    {
-        var clock = new ControlledReadClock(Epoch);
-        using var fixture = new TestDatabase(timeProvider: clock);
-        fixture.Configure(Collection, ResourceKind.Collection);
-        fixture.Commit(new PutDocument(Collection, Entity, Json));
-        var budget = new ReadExecutionBudget(clock);
-        budget.ConstrainLifetime(clock.GetUtcNow().AddSeconds(DeadlineSeconds));
-        var before = fixture.Store.Position;
-        clock.MoveUtc(Epoch.AddYears(1));
-        var record = fixture.Store.Read(view => budget.CreateView(view).GetRecord<DocumentRecord>(
-            KeyLoad.Core.DocumentStorage.DocumentStorageKeys.RecordKey(new(fixture.Partition, Collection, Entity))));
-        await Assert.That(record!.Json).IsEqualTo(Json);
-        clock.Advance(TimeSpan.FromSeconds(DeadlineSeconds + 1));
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Store.Read(view => budget.CreateView(view)));
-        await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(fixture.Store.Position).IsEqualTo(before);
         await Assert.That(fixture.Database.GetDocument(Root, new(fixture.Partition, Collection, Entity))!.Json).IsEqualTo(Json);
     }
 

@@ -12,7 +12,7 @@ internal static class ResourceLifetimeLedgerChild
 
     internal static async Task<Observation> ExecuteAsync(SafeProjectorOperationDatabase owner,
         RequestWorkOwner workOwner, ResourceLifetimeWorkResultRetention retention,
-        DateTimeOffset expiry, string resource)
+        string resource)
     {
         var lease = workOwner.Acquire(Guid.NewGuid(), RequestWorkKind.ReadCapability);
         lease.AttachResultRetention(retention);
@@ -23,7 +23,6 @@ internal static class ResourceLifetimeLedgerChild
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(owner.CallerToken, lease.Cancellation);
             await Assert.That(lease.ResultRetention).IsSameReferenceAs(retention);
             var budget = new ReadExecutionBudget(owner.Database.EvaluationClock, linked.Token);
-            budget.ConstrainLifetime(expiry);
             result = new QueryEngine(owner.Database, UnitExecutionOptions.QueryExecution()).ExecuteBound(
                 P.Reader, ResourceLifetimeLedgerData.Request(owner, resource), budget,
                 owner.Database.EvaluationClock, lease, linked.Token);

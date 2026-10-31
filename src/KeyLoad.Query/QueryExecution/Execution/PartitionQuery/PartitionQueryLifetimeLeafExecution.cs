@@ -11,15 +11,15 @@ internal static class PartitionQueryLifetimeLeafExecution
 
     internal static PartitionQueryLeafResult ExecuteBound(QueryEngine engine, string principalId,
         PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner, TimeProvider clock,
-        DateTimeOffset originalExpiry, IResourceLifetimeWorkBinding binding, CancellationToken token)
+        IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        return Execute(engine, principalId, request, actualOwner, clock, originalExpiry, token, binding);
+        return Execute(engine, principalId, request, actualOwner, clock, token, binding);
     }
 
     internal static PartitionQueryLeafResult Execute(QueryEngine engine, string principalId,
         PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner, TimeProvider clock,
-        DateTimeOffset originalExpiry, CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
+        CancellationToken token, IResourceLifetimeWorkBinding? binding = null)
     {
         var database = engine.PartitionQueryOwner;
         if (request is null || request.Definition is null || request.Coverage is null
@@ -39,7 +39,6 @@ internal static class PartitionQueryLifetimeLeafExecution
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        budget.ConstrainLifetime(originalExpiry);
         var normalized = QueryValidation.Normalize(original.Plan.Request, engine.Execution);
         using var admission = database.AdmitQuery(token);
         var result = new PartitionQueryLeafExecutor(engine, database, budget, actualOwner, receivingLeaf: true)

@@ -54,7 +54,7 @@ internal static class ConnectionParentExecution
     internal static async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, GrainRequestEnvelope parentEnvelope,
         Func<GrainRequestEnvelope, CancellationToken, Task<GrainOperationReply>> executeChild,
         Func<GrainReadKind, Guid, Task> abortMaintenance,
-        IServiceProvider services, GrainRequestCodec codec, TimeProvider clock,
+        IServiceProvider services, GrainRequestCodec codec,
         ILogger diagnostics, IGrainContext context,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose)
     {
@@ -80,7 +80,7 @@ internal static class ConnectionParentExecution
             return GrainReplyFactory.Value(result);
         }
         var lanes = await MultiLaneReceiveExecution.ExecuteAsync(request, executeChild, services, codec,
-            clock, diagnostics, purpose.WorkBinding, writer.CancellationToken).ConfigureAwait(true);
+            diagnostics, purpose.WorkBinding, writer.CancellationToken).ConfigureAwait(true);
         return GrainReplyFactory.Value(lanes);
     }
 }

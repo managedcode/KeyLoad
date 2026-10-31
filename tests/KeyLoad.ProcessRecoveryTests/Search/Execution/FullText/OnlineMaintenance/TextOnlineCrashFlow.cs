@@ -6,7 +6,6 @@ namespace KeyLoad.ProcessRecoveryTests.Search;
 
 internal static class TextOnlineCrashFlow
 {
-    private static readonly TimeSpan PhaseLifetime = TimeSpan.FromSeconds(30);
 
     internal static async Task<OnlineTextIndexMaintenanceResult> RunAsync(TextOnlineCrashRuntime runtime,
         OnlineTextIndexMaintenanceRequest request, CancellationToken token,
@@ -14,17 +13,16 @@ internal static class TextOnlineCrashFlow
     {
         var session = Guid.NewGuid();
         var database = runtime.Canonical.Database;
-        var expiry = database.EvaluationClock.GetUtcNow().Add(PhaseLifetime);
-        var original = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ResolveOriginal, expiry, token);
+        var original = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ResolveOriginal, token);
         if (original.OriginalResult is { } replay)
         {
             return replay;
         }
-        _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.Capture, expiry, token);
-        var state = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.Seed, expiry, token);
-        await ReplayAsync(runtime, session, request, state, expiry, token);
-        _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.Validate, expiry, token);
-        var prepared = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.IssuePublication, expiry, token);
+        _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.Capture, token);
+        var state = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.Seed, token);
+        await ReplayAsync(runtime, session, request, state, token);
+        _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.Validate, token);
+        var prepared = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.IssuePublication, token);
         var operation = prepared.IssuedPublication ?? throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
         var work = runtime.Online.RequirePublicationWork(session, request, CrashFixtureValues.Principal);
         var committed = await work.AdmitOriginal(() => runtime.Canonical.CommitIssuedAsync(operation, token));
@@ -33,14 +31,14 @@ internal static class TextOnlineCrashFlow
         {
             await afterOriginalCommit(result);
         }
-        var reconciled = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ReconcileCommitted, expiry, token);
+        var reconciled = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ReconcileCommitted, token);
         RequireEqual(result, reconciled.OriginalResult);
         await runtime.Online.AbortAsync(session);
         return result;
     }
 
     private static async Task ReplayAsync(TextOnlineCrashRuntime runtime, Guid session,
-        OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityResult state, DateTimeOffset expiry,
+        OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityResult state,
         CancellationToken token)
     {
         while (true)
@@ -49,9 +47,9 @@ internal static class TextOnlineCrashFlow
                 new(request.Consumer, ThroughSequence: state.CurrentCut!.ThroughSequence));
             var id = OnlineTextCheckpointIdentity.Create(request.CommandId, page.ThroughSequence);
             var intent = new CommitProjectionBatchRequest(id, request.Consumer, page.Token, []);
-            _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.PreparePage, expiry, token, page, intent);
-            _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ApplyIntent, expiry, token);
-            var work = runtime.Online.TryRequireCheckpointWork(intent, CrashFixtureValues.Principal, expiry)
+            _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.PreparePage, token, page, intent);
+            _ = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.ApplyIntent, token);
+            var work = runtime.Online.TryRequireCheckpointWork(intent, CrashFixtureValues.Principal)
                 ?? throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
             var original = await work.AdmitOriginal(async () =>
             {
@@ -59,8 +57,7 @@ internal static class TextOnlineCrashFlow
                 return runtime.Canonical.Database.ResolveOutcome(runtime.Canonical.Database.OwnCommand(
                     runtime.Canonical.Database.CreateCommand(OperationKind.CommitProjectionBatch, id, CrashFixtureValues.Principal, runtime.Canonical.Database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(intent, JsonDefaults.Options))));
             });
-            state = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.SettleCheckpoint,
-                expiry, token, receipt: original.Get<ProjectionBatchResult>());
+            state = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.SettleCheckpoint, token, receipt: original.Get<ProjectionBatchResult>());
             if (!page.HasMore)
             {
                 return;

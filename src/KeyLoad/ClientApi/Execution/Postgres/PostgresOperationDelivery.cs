@@ -1,4 +1,3 @@
-using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -15,18 +14,12 @@ internal static class PostgresOperationDelivery
         var delivering = false;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var deadline = new PostgresTransportDeadline(
-                services.GetRequiredService<IOptions<GrainRoutingOptions>>().Value.RequestLifetime,
-                services.GetRequiredService<TimeProvider>(), original);
-            await ServerFailureObserver.ObserveAsync(async () =>
-            {
-                var reply = await PostgresOperationExecutor.ExecuteAsync(services, owner, identity,
-                    partition, portal, rows, admission, catalog, deadline.Token);
-                delivering = true;
-                await PostgresSessionReplies.ResultAsync(writer, reply, portal.ResultFormat, options,
-                    services.GetRequiredService<IOptions<McpExecutionOptions>>().Value.IngressScratchBytes,
-                    describe, deadline.Token);
-            }, failures);
+            var reply = await PostgresOperationExecutor.ExecuteAsync(services, owner, identity,
+                partition, portal, rows, admission, catalog, original);
+            delivering = true;
+            await PostgresSessionReplies.ResultAsync(writer, reply, portal.ResultFormat, options,
+                services.GetRequiredService<IOptions<McpExecutionOptions>>().Value.IngressScratchBytes,
+                describe, original);
         }, failures);
         if (delivering && failures.Count != PostgresProtocol.AllRows)
         {

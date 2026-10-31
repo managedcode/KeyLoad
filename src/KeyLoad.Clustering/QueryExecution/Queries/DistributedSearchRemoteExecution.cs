@@ -24,7 +24,7 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
         var request = new DistributedSearchOwnedLeaf(ContractVersion, phase.Phase, phase.Search,
             selected.Owner, phase.Search.Partition.TenantId, phase.Witness, phase.Statistics, phase.Scope, phase.SourceWindowId, phase.Selected, source.Definition, source.Coverage, source.Principal);
         var childId = Guid.NewGuid();
-        var child = codec.CreateDistributedSearchLeaf(childId, principalId, request, parent.ExpiresAt);
+        var child = codec.CreateDistributedSearchLeaf(childId, principalId, request);
         return new(request, childToken => leaves.RunAsync<DistributedSearchLeafResult>(target, selected.Address, child,
                 childId, childToken),
             (_, childToken) => PartitionLeafCalls.CompleteAsync(parent, childToken));

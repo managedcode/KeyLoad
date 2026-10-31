@@ -35,9 +35,6 @@ internal static class PackedAnnWideSearchBoundary
         }
     }
 
-    internal static Task AssertOneSecondDeadlineAsync(PackedAnnIndex index, float[] query)
-        => PackedAnnDeadlineBoundary.AssertOneSecondDeadlineAsync(index, query, SearchLimit);
-
     internal static async Task<PackedAnnStartedSearch> StartAsync(PackedAnnIndex index,
         float[] query, CancellationTokenSource request)
     {

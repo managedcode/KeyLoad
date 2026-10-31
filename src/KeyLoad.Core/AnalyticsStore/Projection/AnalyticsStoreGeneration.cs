@@ -11,7 +11,6 @@ public sealed class AnalyticsStoreGeneration : IDisposable
     private const long TrackedEventStep = 1;
     private const string OccupiedGeneration = "The analytics projection generation is not empty.";
     private const string IncompleteProjection = "The analytics projection is incomplete.";
-    private const string DeadlineExceeded = "The read execution deadline is exceeded.";
     private const string AlreadyQueried = "The analytics projection generation was already queried.";
     private const long EmptyEvents = 0;
     private readonly AnalyticsAggregateSnapshot snapshot;
@@ -48,7 +47,6 @@ public sealed class AnalyticsStoreGeneration : IDisposable
                 .Select(value => value.Metric).Distinct(StringComparer.Ordinal).Count(), failures);
         IncludeCapturedTimestamps();
         options.Queries.MaxGroups = snapshot.Request.MaxGroups;
-        options.Queries.Timeout = (AnalyticsStoreOptions.QueryTimeout(snapshot.Work.RemainingLifetime)).Value;
     }
 
     /// <summary>Gets whether the actual execution engine has completed successful joined disposal.</summary>
@@ -68,8 +66,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
             throw Errors.Fail(ErrorCode.Conflict, AlreadyQueried);
         }
 
-        using var deadline = new CancellationTokenSource(snapshot.Work.RemainingLifetime, snapshot.Clock);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, snapshot.Work.Cancellation, deadline.Token);
+        using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, snapshot.Work.Cancellation);
         try
         {
             return QueryOwned(linked.Token);
@@ -77,11 +74,6 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         catch (AnalyticsQueryException error) when (AnalyticsStoreGroupLimit.Exceeded(snapshot))
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, AnalyticsStoreValidation.Budget, error);
-        }
-        catch (OperationCanceledException error) when (deadline.IsCancellationRequested
-            && !cancellationToken.IsCancellationRequested && !snapshot.Work.Cancellation.IsCancellationRequested)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, DeadlineExceeded, error);
         }
     }
 

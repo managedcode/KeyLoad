@@ -1,14 +1,12 @@
 using KeyLoad.Core;
 using ManagedCode.Communication;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
 internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
-    IOptions<GrainRoutingOptions> options, GrainRequestCodec? codec = null, RequestWorkOwner? workOwner = null,
+    GrainRequestCodec? codec = null, RequestWorkOwner? workOwner = null,
     IOnlineTextMaintenance? onlineText = null, Func<IDropTableExecution>? borrowDropTable = null)
 {
-    private readonly GrainRoutingOptions settings = options.Value;
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, string actorKey,
         CancellationToken cancellationToken, IGrainContext? context = null)
     {
@@ -44,16 +42,15 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         try
         {
             var budget = new ReadExecutionBudget(clock, operationToken);
-            budget.ConstrainLifetime(request.Envelope.ExpiresAt);
             if (work is not null)
             {
                 budget.AttachResourceLifetimeBinding(work);
             }
             var principal = await CommandCapabilityAuthorization.AuthorizeAsync(database, coordinator,
-                clock, settings, codec, request, context, operationToken).ConfigureAwait(true);
+                clock, codec, request, context, operationToken).ConfigureAwait(true);
             var kind = request.Envelope.CommandKind
                 ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-            await CommandCapabilityAuthorization.ObserveAndValidateAsync(database, clock, settings,
+            await CommandCapabilityAuthorization.ObserveAndValidateAsync(database,
                 codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken).ConfigureAwait(true);
             var original = (CommandWorkAdmission.Bind(database, request, principal, clock, work, budget)).Value;
             var result = await SubmitCommandAsync(kind, request, principal, budget, operationToken).ConfigureAwait(true);
@@ -101,7 +98,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             OperationKind.DropTable => await (borrowDropTable?.Invoke()
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest))
                 .ExecuteAsync(request.Envelope.RequestId, request.Envelope.CommandId, principal.Id,
-                    GrainPayload.Read<DropTableRequest>(request.Payload), request.Envelope.ExpiresAt, operationToken).ConfigureAwait(true),
+                    GrainPayload.Read<DropTableRequest>(request.Payload), operationToken).ConfigureAwait(true),
             OperationKind.Batch => await SubmitBatchAsync(request, principal, budget, operationToken).ConfigureAwait(true),
             OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
                 operationToken).ConfigureAwait(true),

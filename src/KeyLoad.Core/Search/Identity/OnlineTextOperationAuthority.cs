@@ -12,14 +12,8 @@ public static class OnlineTextOperationAuthority
         ArgumentNullException.ThrowIfNull(budget);
         var command = prepared.Command;
         OnlineTextPublicationShape.Require(command);
-        if (engine.EvaluationClock.GetUtcNow() >= prepared.OriginalExpiry)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, OnlineTextPublicationProtocol.InvalidPublication);
-        }
-
         return engine.Store.Read(raw =>
         {
-            budget.ConstrainLifetime(prepared.OriginalExpiry);
             var view = budget.CreateView(raw);
             var principal = engine.Principal(view, principalId, evaluatedAt);
             if (!principal.ClusterAdministrator)

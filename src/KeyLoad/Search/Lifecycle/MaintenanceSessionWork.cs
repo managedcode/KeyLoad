@@ -8,7 +8,6 @@ namespace KeyLoad.Server.Search;
 /// <summary>Owns one storage maintenance session budget and ledger independently of its temporary request stages.</summary>
 internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWorkBinding
 {
-    private readonly CancellationTokenSource deadline;
     private readonly CancellationTokenSource lifetime;
     private readonly ResourceLifetimeWorkResultRetention retention;
     private readonly Lock gate = new();
@@ -16,8 +15,6 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
     private bool closed;
     private bool releaseAfterStage;
     private bool disposed;
-    /// <summary>Gets the caller's explicit expiry, or <see cref="DateTimeOffset.MaxValue"/> when only cancellation ends the session.</summary>
-    internal DateTimeOffset OriginalExpiry { get; }
     internal ReadExecutionBudget Budget { get; }
     internal bool ReleaseRequested => releaseAfterStage || disposed;
     public ResourceLifetimeWorkResultRetention ResultRetention
@@ -29,25 +26,13 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
         }
     }
 
-    internal MaintenanceSessionWork(TimeProvider clock,
-        DateTimeOffset? originalExpiry, CancellationToken shutdown)
+    internal MaintenanceSessionWork(TimeProvider clock, CancellationToken shutdown)
     {
-        OriginalExpiry = originalExpiry ?? DateTimeOffset.MaxValue;
-        var remaining = originalExpiry is { } expiry ? expiry - clock.GetUtcNow() : Timeout.InfiniteTimeSpan;
-        if (originalExpiry is not null && remaining <= TimeSpan.Zero)
-        {
-            throw TextErrors.Ownership();
-        }
         retention = new();
-        deadline = new(remaining, clock);
-        lifetime = CancellationTokenSource.CreateLinkedTokenSource(shutdown, deadline.Token);
+        lifetime = CancellationTokenSource.CreateLinkedTokenSource(shutdown);
         try
         {
             Budget = new(clock, lifetime.Token);
-            if (originalExpiry is { } explicitExpiry)
-            {
-                Budget.ConstrainLifetime(explicitExpiry);
-            }
             Budget.AttachResourceLifetimeBinding(this);
         }
         catch (Exception primary)
@@ -55,18 +40,8 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
             var failures = new List<Exception> { primary };
             ServerFailureObserver.Observe(retention.Dispose, failures);
             ServerFailureObserver.Observe(lifetime.Dispose, failures);
-            ServerFailureObserver.Observe(deadline.Dispose, failures);
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
-        }
-    }
-
-    internal void RequireExpiry(DateTimeOffset? actual)
-    {
-        Budget.Check();
-        if (actual is { } expiry && expiry != OriginalExpiry)
-        {
-            throw TextErrors.Ownership();
         }
     }
 
@@ -141,7 +116,6 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
             }
             retention.Dispose();
             lifetime.Dispose();
-            deadline.Dispose();
             disposed = true;
             closed = true;
         }

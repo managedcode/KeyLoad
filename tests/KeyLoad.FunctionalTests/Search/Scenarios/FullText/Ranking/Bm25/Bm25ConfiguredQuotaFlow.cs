@@ -50,7 +50,6 @@ internal sealed class Bm25ConfiguredQuotaFlow(TestDatabase database)
     internal Command<DatabaseCommand> Capture(int index, Guid? expected = null, string text = Text)
         => Bm25CorpusCapture.Create(database.Database, "root", Subject(index),
             new(database.Partition, Collection, "/text", text), Guid.NewGuid(), expected,
-            database.Database.EvaluationClock.GetUtcNow().Add(UnitRoutingOptions.Routing().Value.RequestLifetime),
             database.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
     internal static Bm25CorpusPublicationPhaseCommand Phase(Command<DatabaseCommand> operation)

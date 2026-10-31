@@ -37,7 +37,7 @@ internal sealed class TextOnlineWholeOperationTests
         using var cancelled = CancellationTokenSource.CreateLinkedTokenSource(token);
         await cancelled.CancelAsync();
         _ = await Assert.ThrowsAsync<OperationCanceledException>(() => runtime.PhaseAsync(fixture, Guid.NewGuid(), request,
-            OnlineTextCapabilityKind.ResolveOriginal, TextOnlineTestRuntime.FreshExpiry(fixture), cancelled.Token));
+            OnlineTextCapabilityKind.ResolveOriginal, cancelled.Token));
         var healthy = await TextOnlineWholeFlow.RunAsync(fixture, runtime, request, token);
         await Assert.That(healthy.CommandId).IsEqualTo(request.CommandId);
         await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
@@ -52,7 +52,6 @@ internal sealed class TextOnlineWholeOperationTests
         var request = new OnlineTextIndexMaintenanceRequest(Guid.NewGuid(), seed.Pin.Consumer,
             seed.Pin.Collection, seed.Pin.Field, seed.Pin.Generation, seed.Pin.NodeId, seed.Pin.Placement);
         var owners = new List<Guid>();
-        var expiry = TextOnlineTestRuntime.FreshExpiry(fixture);
         var failures = new List<Exception>();
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
@@ -64,15 +63,15 @@ internal sealed class TextOnlineWholeOperationTests
                 {
                     CommandId = Guid.NewGuid()
                 };
-                _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.ResolveOriginal, expiry, token);
+                _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.ResolveOriginal, token);
                 if (index == 0)
                 {
-                    _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.Capture, expiry, token);
+                    _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.Capture, token);
                 }
                 else
                 {
                     var refused = await Assert.ThrowsAsync<KeyLoadException>(() => runtime.PhaseAsync(fixture,
-                        id, competing, OnlineTextCapabilityKind.Capture, expiry, token));
+                        id, competing, OnlineTextCapabilityKind.Capture, token));
                     await Assert.That((refused ?? throw new InvalidOperationException()).Code).IsEqualTo(ErrorCode.ResourceExhausted);
                 }
             }

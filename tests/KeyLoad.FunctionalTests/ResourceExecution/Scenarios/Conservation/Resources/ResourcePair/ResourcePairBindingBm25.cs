@@ -60,7 +60,6 @@ internal static class ResourcePairBindingBm25
     private static Command<DatabaseCommand> Capture(ResourcePairBindingState state, string publisher, CancellationToken token)
         => Bm25CorpusCapture.Create(state.Source.Database, publisher, CorpusSubject,
             new(state.Source.Partition, Corpus, CorpusField, CorpusTerm), Guid.NewGuid(), null,
-            state.Source.Database.EvaluationClock.GetUtcNow().Add(UnitRoutingOptions.Routing().Value.RequestLifetime),
             state.Source.CreateReadWork(token), UnitExecutionOptions.QueryExecution());
 
     internal static async Task HealthyAsync(ResourcePairBindingState state, DatabaseEngine database, CancellationToken token, bool expectedCurrent = true)

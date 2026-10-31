@@ -8,7 +8,7 @@ internal static class ResourceLifetimeLedgerBusiness
 {
     internal static async Task InitialAsync(SafeProjectorOperationDatabase owner, RequestWorkOwner workOwner,
         ResourceLifetimeWorkResultRetention ledger, RequestWorkLease parent, ReadExecutionBudget budget,
-        DateTimeOffset expiry, ResourceLifetime lifetime)
+        ResourceLifetime lifetime)
     {
         await SafeProjectorOperationImages.ObserveAsync(owner, async () =>
         {
@@ -16,12 +16,11 @@ internal static class ResourceLifetimeLedgerBusiness
             await SafeProjectorOperationSeed.EqualAsync(page, ResourceLifetimeLedgerData.Expected(owner));
             await ResourceLifetimeLedgerAssertions.RetainedAsync(ledger, lifetime);
             await ResourceLifetimeLedgerAssertions.HealthyChildAsync(owner,
-                await ResourceLifetimeLedgerChild.ExecuteAsync(owner, workOwner, ledger, expiry, P.Collection));
+                await ResourceLifetimeLedgerChild.ExecuteAsync(owner, workOwner, ledger, P.Collection));
             await ResourceLifetimeLedgerAssertions.RetainedAsync(ledger, lifetime);
             await SafeProjectorOperationSeed.EqualAsync(ResourceLifetimeLedgerSession.Read(owner, budget, parent),
                 ResourceLifetimeLedgerData.Expected(owner));
-            var denied = await ResourceLifetimeLedgerChild.ExecuteAsync(owner, workOwner, ledger,
-                expiry, ResourceLifetimeLedgerData.Other);
+            var denied = await ResourceLifetimeLedgerChild.ExecuteAsync(owner, workOwner, ledger, ResourceLifetimeLedgerData.Other);
             await ResourceLifetimeLedgerAssertions.RefusedAsync(denied, ErrorCode.PermissionDenied);
             await ResourceLifetimeLedgerAssertions.RetainedAsync(ledger, lifetime);
         });
@@ -29,12 +28,11 @@ internal static class ResourceLifetimeLedgerBusiness
 
     internal static async Task RepairedAsync(SafeProjectorOperationDatabase owner, RequestWorkOwner workOwner,
         ResourceLifetimeWorkResultRetention ledger, RequestWorkLease parent, ReadExecutionBudget budget,
-        DateTimeOffset expiry, ResourceLifetime lifetime, ResourceLifetime otherLifetime)
+        ResourceLifetime lifetime, ResourceLifetime otherLifetime)
     {
         await SafeProjectorOperationImages.ObserveAsync(owner, async () =>
         {
-            var healthy = await ResourceLifetimeLedgerChild.ExecuteAsync(owner, workOwner, ledger,
-                expiry, ResourceLifetimeLedgerData.Other);
+            var healthy = await ResourceLifetimeLedgerChild.ExecuteAsync(owner, workOwner, ledger, ResourceLifetimeLedgerData.Other);
             await Assert.That(healthy.Error).IsNull();
             await SafeProjectorOperationSeed.EqualAsync(healthy.Page,
                 new QueryPage([], null, owner.Store.Position, ResourceLifetimeLedgerData.FullScan));

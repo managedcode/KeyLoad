@@ -12,27 +12,25 @@ internal static class Bm25CorpusMaintenance
 {
     internal static async Task<CommitReceipt> PublishAsync(OrleansNode node, PartitionHost partition,
         string administratorId, string subjectId, SearchRequest query, Guid commandId,
-        Guid? expectedGeneration, DateTimeOffset originalExpiry, ReadExecutionBudget work,
+        Guid? expectedGeneration, ReadExecutionBudget work,
         CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         work.Check();
-        work.ConstrainLifetime(originalExpiry);
-        await ReadCurrentViewAsync(partition, originalExpiry, work, token);
+        await ReadCurrentViewAsync(partition, work, token);
         work.Check();
         var operation = Bm25CorpusCapture.Create(partition.Database, administratorId, subjectId,
-            query, commandId, expectedGeneration, originalExpiry, work,
+            query, commandId, expectedGeneration, work,
             node.RuntimeServices.GetRequiredService<IOptions<QueryExecutionOptions>>());
-        return await PublishAsync(node, partition, operation, originalExpiry, work, token);
+        return await PublishAsync(node, partition, operation, work, token);
     }
 
     internal static async Task<CommitReceipt> PublishAsync(OrleansNode node, PartitionHost partition,
-        Command<DatabaseCommand> original, DateTimeOffset envelopeExpiry, ReadExecutionBudget work,
+        Command<DatabaseCommand> original, ReadExecutionBudget work,
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(original);
         token.ThrowIfCancellationRequested();
-        work.ConstrainLifetime(envelopeExpiry);
         var verified = partition.Database.OwnCommand(original);
         if (verified.Value!.Kind != OperationKind.Bm25CorpusPublicationPhase)
         {
@@ -43,28 +41,18 @@ internal static class Bm25CorpusMaintenance
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(
             work.CreateView(view), actual.UserId!, partition.Database.EvaluationClock.GetUtcNow()));
         var requestId = Guid.NewGuid();
-        var envelope = node.CatalogRequestCodec().CreateBm25CorpusPublication(requestId, actual, envelopeExpiry);
+        var envelope = node.CatalogRequestCodec().CreateBm25CorpusPublication(requestId, actual);
         return await Bm25CorpusCall.ExecuteAsync(node, principal, requestId,
             actual.CommandId, envelope, work, token);
     }
 
-    private static async Task ReadCurrentViewAsync(PartitionHost partition, DateTimeOffset originalExpiry,
+    private static async Task ReadCurrentViewAsync(PartitionHost partition,
         ReadExecutionBudget work, CancellationToken token)
     {
-        var clock = partition.Database.EvaluationClock;
-        var remaining = originalExpiry - clock.GetUtcNow();
-        var lifetime = work.RemainingLifetime;
-        var bounded = lifetime == Timeout.InfiniteTimeSpan || remaining < lifetime ? remaining : lifetime;
-        if (bounded <= TimeSpan.Zero)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Changed);
-        }
         var failures = new List<Exception>();
         try
         {
-            using var deadline = new CancellationTokenSource(bounded, clock);
-            using var caller = CancellationTokenSource.CreateLinkedTokenSource(token,
-                work.Cancellation, deadline.Token);
+            using var caller = CancellationTokenSource.CreateLinkedTokenSource(token, work.Cancellation);
             await ServerFailureObserver.ObserveAsync(() =>
                 partition.Coordinator.ReadBarrierAsync(caller.Token), failures);
         }

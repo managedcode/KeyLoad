@@ -51,13 +51,13 @@ internal sealed class TextOnlineCrashRuntime : IAsyncDisposable
     }
 
     internal Task<OnlineTextCapabilityResult> PhaseAsync(Guid session, OnlineTextIndexMaintenanceRequest request,
-        OnlineTextCapabilityKind kind, DateTimeOffset expiry, CancellationToken token, ProjectionBatch? page = null,
+        OnlineTextCapabilityKind kind, CancellationToken token, ProjectionBatch? page = null,
         CommitProjectionBatchRequest? intent = null, ProjectionBatchResult? receipt = null)
     {
         var database = Canonical.Database;
         var principal = database.Store.Read(view => database.Principal(view, CrashFixtureValues.Principal,
             database.EvaluationClock.GetUtcNow()));
-        return Online.ExecuteAsync(principal, new(session, request, kind, page, intent, receipt), expiry, token);
+        return Online.ExecuteAsync(principal, new(session, request, kind, page, intent, receipt), token);
     }
 
     public async ValueTask DisposeAsync()

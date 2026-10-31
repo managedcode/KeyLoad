@@ -14,7 +14,7 @@ internal sealed partial class TextOnlineSession
     private byte[]? expectedPublication;
 
     internal TextOnlineSession(Guid id, OnlineTextIndexMaintenanceRequest request,
-        string principalId, DateTimeOffset originalExpiry, MaintenanceSessionWork work)
+        string principalId, MaintenanceSessionWork work)
     {
         Work = work;
         Budget = work.Budget;
@@ -22,7 +22,6 @@ internal sealed partial class TextOnlineSession
         Id = id;
         Request = request;
         PrincipalId = principalId;
-        OriginalExpiry = originalExpiry;
         Publication = new(id, request.CommandId);
     }
 
@@ -36,10 +35,6 @@ internal sealed partial class TextOnlineSession
         get;
     }
     internal string PrincipalId
-    {
-        get;
-    }
-    internal DateTimeOffset OriginalExpiry
     {
         get;
     }
@@ -129,8 +124,8 @@ internal sealed partial class TextOnlineSession
         get; private set;
     }
 
-    internal void Require(Guid id, OnlineTextIndexMaintenanceRequest request, string principalId, DateTimeOffset expiry)
-        => TextOnlineSessionWork.Require(this, disposed, immutableRequest, id, request, principalId, expiry);
+    internal void Require(Guid id, OnlineTextIndexMaintenanceRequest request, string principalId)
+        => TextOnlineSessionWork.Require(this, disposed, immutableRequest, id, request, principalId);
 
     internal void DisposeAfterJoinedOwners() => DisposeWithJoinedCleanup(null);
 

@@ -1,17 +1,12 @@
 namespace KeyLoad.FunctionalTests.Search;
 
 internal sealed class GraphSearchReachabilitySortClock(CancellationTokenSource? cancellation = null,
-    long? cancelAt = null, long? deadlineAt = null) : TimeProvider
+    long? cancelAt = null) : TimeProvider
 {
-    private const int DeadlineAdvanceSeconds = 31;
     private long timestampCalls;
 
     internal long TimestampCalls => Volatile.Read(ref timestampCalls);
     internal bool CancellationTriggered
-    {
-        get; private set;
-    }
-    internal bool DeadlineTriggered
     {
         get; private set;
     }
@@ -25,11 +20,6 @@ internal sealed class GraphSearchReachabilitySortClock(CancellationTokenSource? 
         {
             CancellationTriggered = true;
             cancellation!.Cancel();
-        }
-        if (current == deadlineAt)
-        {
-            DeadlineTriggered = true;
-            return checked(current + TimestampFrequency * DeadlineAdvanceSeconds);
         }
         return current;
     }

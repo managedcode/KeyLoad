@@ -32,16 +32,14 @@ internal static class BackgroundStorageReadExecution
     }
 
     internal static async Task<BackgroundReadResult> RunAsync<T>(PartitionStorageScope storage,
-        TimeProvider clock, BackgroundReadBudget bounds,
+        TimeProvider clock,
         Func<ReadExecutionBudget, IResourceLifetimeWorkBinding, CancellationToken, Task<T>> execute,
         CancellationToken token)
     {
-        Require(bounds, clock);
         await using var lifetime = (CapabilityWorkLifetime.Acquire(storage.Work, Guid.NewGuid(),
             RequestWorkKind.RuntimeTransport, token)).Value
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         var work = new ReadExecutionBudget(clock, lifetime.Token);
-        work.ConstrainLifetime(bounds.ExpiresAt);
         var binding = new BackgroundStorageReadBinding(lifetime);
         work.AttachResourceLifetimeBinding(binding);
         try
@@ -69,18 +67,6 @@ internal static class BackgroundStorageReadExecution
         {
             lifetime.PrimaryError = CapabilityWorkLifetime.CombinePrimary(lifetime.PrimaryError, failure);
             throw;
-        }
-    }
-
-    private static void Require(BackgroundReadBudget bounds, TimeProvider clock)
-    {
-        if (bounds is not null && bounds.ExpiresAt <= clock.GetUtcNow())
-        {
-            throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        }
-        if (bounds is null || bounds.ExpiresAt.Offset != TimeSpan.Zero)
-        {
-            throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }
     }
 }

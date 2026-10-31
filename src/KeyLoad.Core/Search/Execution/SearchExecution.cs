@@ -6,7 +6,7 @@ namespace KeyLoad.Core;
 /// <summary>Executes SearchExecution operations against the caller's database context.</summary>
 public static class SearchExecution
 {
-    internal static Bm25CorpusPublicationPhaseCommand CaptureBm25CorpusMetadata(this DatabaseEngine engine, IKeyValueView raw, PrincipalRecord principal, ResourceDefinition resource, SearchRequest request, DistributedTextStatistics statistics, string tokenizer, Guid commandId, Guid? expectedGeneration, DateTimeOffset originalExpiry, ReadExecutionBudget work)
+    internal static Bm25CorpusPublicationPhaseCommand CaptureBm25CorpusMetadata(this DatabaseEngine engine, IKeyValueView raw, PrincipalRecord principal, ResourceDefinition resource, SearchRequest request, DistributedTextStatistics statistics, string tokenizer, Guid commandId, Guid? expectedGeneration, ReadExecutionBudget work)
     {
         var view = work.CreateView(raw);
         var placement = engine.ReadPlacementWitness(view, request.Partition);
@@ -17,7 +17,7 @@ public static class SearchExecution
         {
             PayloadDigest = Bm25CorpusDigest.Compute(current, placement, work)
         };
-        var phase = new Bm25CorpusPublicationPhaseCommand(commandId, current, expectedGeneration, originalExpiry, placement);
+        var phase = new Bm25CorpusPublicationPhaseCommand(commandId, current, expectedGeneration, placement);
         Bm25CorpusShape.RequirePhase(phase);
         return phase;
     }

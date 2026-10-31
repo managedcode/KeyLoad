@@ -4,11 +4,10 @@ namespace KeyLoad.Clustering;
 internal static class GrainLifetimeReadCodec
 {
     internal static GrainRequestEnvelope CreatePartitionQueryLeaf(this GrainRequestCodec codec, Guid requestId, string principalId,
-        object payload, DateTimeOffset expiresAt)
+        object payload)
     {
-        var context = codec.LifetimeReadContext;
-        return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(context.Scope, context.Now,
-            context.Lifetime, requestId, principalId, GrainReadKind.PartitionQueryLeaf, payload, expiresAt)
+        return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(codec, requestId, principalId,
+            GrainReadKind.PartitionQueryLeaf, payload)
             with
         {
             Purpose = QueryLifetimeReadProtocol.Purpose
@@ -16,11 +15,10 @@ internal static class GrainLifetimeReadCodec
     }
 
     internal static GrainRequestEnvelope CreateDistributedSearchLeaf(this GrainRequestCodec codec, Guid requestId, string principalId,
-        object payload, DateTimeOffset expiresAt)
+        object payload)
     {
-        var context = codec.LifetimeReadContext;
-        return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(context.Scope, context.Now,
-            context.Lifetime, requestId, principalId, GrainReadKind.DistributedSearchLeaf, payload, expiresAt)
+        return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(codec, requestId, principalId,
+            GrainReadKind.DistributedSearchLeaf, payload)
             with
         {
             Purpose = QueryLifetimeReadProtocol.Purpose

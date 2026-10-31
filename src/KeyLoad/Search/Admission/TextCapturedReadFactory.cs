@@ -28,7 +28,7 @@ internal static class TextCapturedReadFactory
         ServerFailureObserver.Observe(() =>
         {
             execution = owner.CaptureReadCut(raw,
-                owner.BoundReadCut(int.MaxValue, long.MaxValue, budget.RemainingLifetime),
+                owner.BoundReadCut(int.MaxValue, long.MaxValue, Timeout.InfiniteTimeSpan),
                 budget.Cancellation);
             RequireCut(execution, authority);
             result = new TextCapturedRead(database, request, budget, authority, execution,

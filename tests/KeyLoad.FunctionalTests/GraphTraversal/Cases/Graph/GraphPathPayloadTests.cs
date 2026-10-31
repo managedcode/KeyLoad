@@ -111,7 +111,7 @@ internal sealed class GraphPathPayloadTests
     public async Task AppendedReadKindsPassTheSignedEnvelopeValidator()
     {
         using var database = new TestDatabase();
-        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System);
         var partition = database.Partition;
         var direct = new GraphShortestPathRequest(1, partition, Graph,
             new(partition, Orders, "source"), new(partition, Projects, "target"));

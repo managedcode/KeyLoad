@@ -80,7 +80,6 @@ internal sealed class QueryHostedReadObservation(Guid connectionId, SiloAddress 
             if (Coordinator is null || identity.ReadKind != GrainReadKind.DistributedSearchLeaf
                 || identity.PrincipalId != Identity.PrincipalId || identity.CommandKind is not null
                 || identity.CommandId != Guid.Empty || identity.RequestId == Identity.RequestId
-                || identity.OriginalExpiresAt == default || identity.OriginalExpiresAt > Identity.OriginalExpiresAt
                 || state.RequestId != identity.RequestId || state.CommandId != Guid.Empty
                 || state.ConnectionId != ConnectionId || !Equals(state.OriginSilo, Coordinator.Silo)
                 || children.Count >= maximumChildren || children.ContainsKey(identity.RequestId))

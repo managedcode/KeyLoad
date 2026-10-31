@@ -19,21 +19,19 @@ gone: the `BudgetExceeded`, `ResourceExhausted` and `Validation` errors for
 document size, JSON depth, batch mutation count, batch bytes, scanned records,
 result count, SQL text bytes, SQL depth and token count, query read bytes,
 search text tokens, projection consumer count, projection batch bytes and fixed
-deadlines. An operation runs as far as its data, the caller's cancellation, the
-caller's explicit expiries and real physical constraints allow.
+deadlines. An operation runs as far as its data, the caller's cancellation and
+real physical constraints allow. Internal request envelopes carry no expiry.
 
 - **Read execution.** `ReadExecutionBudget` carries only the caller's
-  cancellation, the operation's explicit expiry (the request envelope
-  `ExpiresAt` and caller-supplied expiries, applied through `ConstrainLifetime`)
-  and its resource-lifetime bindings. It counts no read bytes or records, issues
+  cancellation, stage cancellation, the first indeterminate metadata failure and
+  its resource-lifetime bindings. It counts no read bytes or records, issues
   no read grants and measures no results. There is no fixed 30-second deadline
   and no result-byte ceiling: a page or result is bounded by its own record
   `Limit` (`MaxMessages`, `MaxEvents`) and by the data it reads.
 - **Grain request streams.** The ManagedCode.Communication CQRS stream between
   grains carries typed chunks without measuring their encoded size: there is no
   per-chunk, reply or aggregate byte cap, no serializer scratch bound and no
-  frame cap. `GrainRoutingOptions` has only `RequestLifetime`, `MaximumFuture`
-  and `ConnectionIdleTimeout`. A short-profile stream still carries at most
+  frame cap. `GrainRoutingOptions` has only `ConnectionIdleTimeout`. A short-profile stream still carries at most
   `GrainRequestStreamProtocol.MaximumChunks` (two) chunks, Started plus one
   terminal; more chunks are a protocol-shape violation (`OwnershipLost`).
   Long-profile maintenance streams carry their progress frames without a frame
@@ -45,12 +43,11 @@ caller's explicit expiries and real physical constraints allow.
   `AnnMaintenanceOptions` or `TextIndexMaintenanceOptions` section.
 - **Partition leaves.** Partition query and distributed search plans carry no
   per-leaf read-byte, record or result-byte allowance, and leaf results report no
-  read, retained or examined counters. Expiry and cancellation of the one
-  operation bound every leaf.
+  read, retained or examined counters. Cancellation of the one operation bounds
+  every leaf.
 - **Internal reads, advisory and client state.** Administrator credential reads
-  and background owner reads carry only the original caller's expiry
-  (`BackgroundReadBudget.ExpiresAt`), with no read-byte, record or result
-  allowance. Event feed Orleans PubSub storage serializes a row once and keeps no
+  and background owner reads carry only cancellation, with no expiry, read-byte,
+  record or result allowance. Event feed Orleans PubSub storage serializes a row once and keeps no
   encoded-byte account. The .NET SDK queue worker counts handlers, deliveries and
   calls, not payload bytes.
 - **Complete ranges.** A read that needs a complete key range pages through the
@@ -69,8 +66,9 @@ caller's explicit expiries and real physical constraints allow.
   sum is a `Validation` error because no row index beyond it exists.
 - **Physical owners.** Values that bounded a real resource moved to that
   resource's owner:
-  - the Postgres wire transport deadlines and the TLS and admission handshake use
-    `GrainRoutingOptions.RequestLifetime`;
+  - the Postgres TLS and admission handshake use
+    `GrainRoutingOptions.ConnectionIdleTimeout`, matching PostgreSQL
+    `authentication_timeout`; established wire transport has no deadline;
   - Postgres SQL text is bounded by `PostgresSessionOptions.MaximumFrameBytes`
     (Query messages) and `MaximumRetainedBytes` (prepared statements);
   - full-text manifest file reads and writes are bounded by

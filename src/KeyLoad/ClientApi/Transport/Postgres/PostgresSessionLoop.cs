@@ -37,17 +37,17 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
                         Sync(frame.Payload, draining);
                         draining = false;
                         writer.Ready();
-                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed);
+                        await PostgresControlFlush.RunAsync(writer, context.ConnectionClosed);
                         break;
                     case PostgresMessageProtocol.Flush:
                         Empty(frame.Payload);
-                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed);
+                        await PostgresControlFlush.RunAsync(writer, context.ConnectionClosed);
                         break;
                     case PostgresMessageProtocol.QueryMessage:
                         catalog.BeginQueryMessage();
                         await ExecuteQueryMessageAsync(frame.Payload, owner, identity, partition, cancellation, context.ConnectionClosed);
                         writer.Ready();
-                        await PostgresControlFlush.RunAsync(services, writer, context.ConnectionClosed);
+                        await PostgresControlFlush.RunAsync(writer, context.ConnectionClosed);
                         break;
                     case PostgresMessageProtocol.Execute:
                         await dispatch.ExecuteAsync(frame, owner, identity, partition, cancellation,
@@ -88,7 +88,7 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             {
                 writer.Ready();
             }
-            await PostgresControlFlush.RunAsync(services, writer, closed);
+            await PostgresControlFlush.RunAsync(writer, closed);
         }, failures);
         if (failures.Count != PostgresProtocol.AllRows)
         {

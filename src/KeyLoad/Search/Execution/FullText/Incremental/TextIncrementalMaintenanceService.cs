@@ -54,39 +54,38 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
 
     public Task<TextMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         TextMaintenanceCapabilityRequest request, CancellationToken cancellationToken)
-        => worker.RunAsync(() => ExecuteExclusiveAsync(principal, request, null, null, cancellationToken));
+        => worker.RunAsync(() => ExecuteExclusiveAsync(principal, request, null, cancellationToken));
 
     public Task<TextMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, DateTimeOffset originalExpiry,
+        TextMaintenanceCapabilityRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        return worker.RunAsync(() => ExecuteExclusiveAsync(principal, request, originalExpiry, binding, token));
+        return worker.RunAsync(() => ExecuteExclusiveAsync(principal, request, binding, token));
     }
 
     /// <summary>Waits for the selected readers to drain, runs the exclusive stage synchronously, then releases the write admission.</summary>
     private async Task<TextMaintenanceCapabilityResult> ExecuteExclusiveAsync(PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, DateTimeOffset? originalExpiry, IResourceLifetimeWorkBinding? binding, CancellationToken token)
+        TextMaintenanceCapabilityRequest request, IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
         await selectedAdmission.WaitForWriteAsync(token);
         var failures = new List<Exception>();
         TextMaintenanceCapabilityResult? result = null;
-        ServerFailureObserver.Observe(() => result = ExecuteExclusive(principal, request, originalExpiry, binding, token), failures);
+        ServerFailureObserver.Observe(() => result = ExecuteExclusive(principal, request, binding, token), failures);
         ServerFailureObserver.Observe(selectedAdmission.ExitWrite, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result!;
     }
 
     private TextMaintenanceCapabilityResult ExecuteExclusive(PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, DateTimeOffset? originalExpiry, IResourceLifetimeWorkBinding? binding, CancellationToken token)
+        TextMaintenanceCapabilityRequest request, IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
         RequireSelectedSettled();
         token.ThrowIfCancellationRequested();
         TextIncrementalAdmission.Request(request, database.Store.Identity.NodeId);
         if (request.Kind == TextMaintenanceCapabilityKind.Release)
         {
-            using var release = new MaintenanceSessionWork(clock,
-                originalExpiry, shutdown.Token);
+            using var release = new MaintenanceSessionWork(clock, shutdown.Token);
             using var stage = release.EnterStage(binding, token);
             var budget = release.Budget;
             TextIncrementalRelease.Execute(database, principal.Id, request.Maintenance,
@@ -98,10 +97,9 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         if (request.Kind == TextMaintenanceCapabilityKind.Begin)
         {
             return TextIncrementalBegin.Run(database, root, principal, request, configured, clock,
-                shutdown, sessions, faultObserver, resources, generations.RetainGeneration, originalExpiry, binding, token);
+                shutdown, sessions, faultObserver, resources, generations.RetainGeneration, binding, token);
         }
         var retained = sessions.Require(request.SessionId);
-        retained.Work.RequireExpiry(originalExpiry);
         using var retainedStage = retained.Work.EnterStage(binding, token);
         return TextIncrementalSessionOperations.Execute(database, retained,
             principal, request, configured.Core.QueryExecution.Value, configured.RuntimeText, token);

@@ -7,7 +7,7 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
     private const string InvalidResult = "The execution ANN maintenance result is invalid.";
 
     internal async Task<AnnMaintenanceResult> ExecuteAsync(global::Orleans.IGrainFactory grains,
-        PrincipalRecord principal, AnnMaintenanceRequest original, DateTimeOffset expiry, IResourceLifetimeWorkBinding binding,
+        PrincipalRecord principal, AnnMaintenanceRequest original, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
         var requestId = Guid.NewGuid();
@@ -21,15 +21,9 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
             }
-            var context = codec.LifetimeReadContext;
-            if (expiry <= context.Now)
-            {
-                throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-            }
             execution.OriginalProducer.AdmitPublication();
             var envelope = codec.Issue(GrainRequestEnvelopeConstruction.Command(requestId, codec.Incarnation,
-                principal.Id, OperationKind.MaintainAnnIndex, original.CommandId, GrainPayload.Strict(original),
-                expiry < context.Now + context.Lifetime ? expiry : context.Now + context.Lifetime));
+                principal.Id, OperationKind.MaintainAnnIndex, original.CommandId, GrainPayload.Strict(original)));
             using var identity = new GrainRequestIdentityScope(services, principal, requestId,
                 original.CommandId, token, connectionId: connectionId);
             try

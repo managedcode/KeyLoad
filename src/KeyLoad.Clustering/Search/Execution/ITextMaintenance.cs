@@ -8,7 +8,7 @@ internal interface ITextMaintenance
         TextMaintenanceCapabilityRequest request, CancellationToken cancellationToken);
 
     Task<TextMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
-        TextMaintenanceCapabilityRequest request, DateTimeOffset originalExpiry,
+        TextMaintenanceCapabilityRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token);
 
     Task AbortAsync(Guid sessionId);

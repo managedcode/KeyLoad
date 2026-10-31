@@ -44,8 +44,7 @@ internal sealed class ConnectionCallerFactoryCalls(ConnectionIdentityCollisionSt
     {
         var envelope = state.Scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
             command.CommandId, command);
-        var expiry = state.Scenario.Fixture.Codec.Decode(envelope).Envelope.ExpiresAt;
-        if (!state.OriginalExpiries.TryAdd(requestId, expiry))
+        if (!state.IssuedRequests.TryAdd(requestId, 0))
         {
             throw new InvalidOperationException(P.Duplicate);
         }

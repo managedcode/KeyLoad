@@ -41,7 +41,7 @@ SourceOwner is the node-local ZoneTree owner identity. SourcePlacement binds the
 
 Query capture uses tokenizer `keyload-nfkc-rune-lower`, CanonicalTextTerms/SearchTerms and TextRanker.ForStatistics through the shared TextProjectionProtocol tokenizer identity.
 
-First-run local apply compares OriginalExpiry with the original command Timestamp. capture retains caller cancellation and its deadline. Existing ReadExecutionBudget counters enforce read/scan bounds independently of retained-family admission.
+Capture retains caller cancellation. The publication phase carries no expiry, and retained-family admission is independent of the capture read.
 
 Fresh canonical capture checks retained-family capacity in the bounded authorized source view before issuing a command. Known over-capacity capture refuses without changing canonical rows, cuts or retained outcomes. Retry retains its original phase and does not recapture or repeat first-run capacity, dependency or inner-expiry checks. Atomic apply independently checks capacity before the first family write. A race after capture may persist a failed command outcome and must be tested against that actual effect.
 

@@ -62,7 +62,7 @@ internal static class PublicReadFixture
     internal static DecodedGrainRequest Signed(TestDatabase database, object payload, GrainReadKind kind,
         string principal = AuthorityFixture.Root)
     {
-        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System);
         return codec.Decode(codec.CreateRead(Guid.NewGuid(), principal, kind, payload));
     }
 

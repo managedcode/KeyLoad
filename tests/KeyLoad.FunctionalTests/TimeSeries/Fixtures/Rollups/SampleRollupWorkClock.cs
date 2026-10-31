@@ -6,13 +6,12 @@ internal sealed class SampleRollupWorkClock : TimeProvider
     private readonly DateTimeOffset epoch = TimeProvider.System.GetUtcNow();
     private Func<bool>? observedWork;
     private Action? afterWork;
-    private long timestamp;
     internal bool Triggered
     {
         get; private set;
     }
     public override long TimestampFrequency => TimeSpan.TicksPerSecond;
-    public override DateTimeOffset GetUtcNow() => epoch.AddTicks(Interlocked.Read(ref timestamp));
+    public override DateTimeOffset GetUtcNow() => epoch;
     public override long GetTimestamp()
     {
         if (observedWork is { } predicate && predicate())
@@ -21,7 +20,7 @@ internal sealed class SampleRollupWorkClock : TimeProvider
             Triggered = true;
             afterWork!();
         }
-        return Interlocked.Read(ref timestamp);
+        return 0;
     }
     internal void Arm(Func<bool> predicate, Action action)
     {
@@ -31,7 +30,6 @@ internal sealed class SampleRollupWorkClock : TimeProvider
         afterWork = action;
         observedWork = predicate;
     }
-    internal void Advance(TimeSpan elapsed) => Interlocked.Add(ref timestamp, elapsed.Ticks);
     internal void Disarm()
     {
         observedWork = null;

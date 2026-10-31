@@ -15,11 +15,11 @@ internal static class TextOnlineSessionWork
     }
 
     internal static void Require(TextOnlineSession session, bool disposed, byte[] immutableRequest, Guid id,
-        OnlineTextIndexMaintenanceRequest request, string principalId, DateTimeOffset expiry)
+        OnlineTextIndexMaintenanceRequest request, string principalId)
     {
         ObjectDisposedException.ThrowIf(disposed, session);
         session.Budget.Check();
-        if (id != session.Id || principalId != session.PrincipalId || expiry != session.OriginalExpiry)
+        if (id != session.Id || principalId != session.PrincipalId)
         {
             throw TextErrors.Mismatch();
         }

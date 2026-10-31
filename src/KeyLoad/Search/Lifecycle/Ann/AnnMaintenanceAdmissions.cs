@@ -12,7 +12,7 @@ internal sealed class AnnMaintenanceAdmissions
     private (Guid Id, string Principal, AnnMaintenanceRequest Request, MaintenanceSessionWork Work)? retainedWork;
 
     internal MaintenanceSessionWork RequireWork(string principal, AnnMaintenanceCapabilityRequest request,
-        TimeProvider clock, DateTimeOffset? expiry, CancellationToken shutdown)
+        TimeProvider clock, CancellationToken shutdown)
     {
         lock (gate)
         {
@@ -24,15 +24,13 @@ internal sealed class AnnMaintenanceAdmissions
                 {
                     throw Errors.Fail(ErrorCode.OwnershipLost, AnnProtocol.Ownership);
                 }
-                original.Work.RequireExpiry(expiry);
                 return original.Work;
             }
             if (request.Kind is not (AnnMaintenanceCapabilityKind.AdmitOriginal or AnnMaintenanceCapabilityKind.Begin))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, AnnProtocol.Ownership);
             }
-            var work = new MaintenanceSessionWork(clock,
-                expiry, shutdown);
+            var work = new MaintenanceSessionWork(clock, shutdown);
             retainedWork = (request.SessionId, principal, request.Maintenance, work);
             return work;
         }

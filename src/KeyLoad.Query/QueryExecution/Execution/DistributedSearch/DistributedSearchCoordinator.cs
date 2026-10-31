@@ -9,7 +9,7 @@ internal static partial class DistributedSearchCoordinator
     internal static async Task<DistributedSearchPage> ExecuteAsync(DatabaseEngine database,
         DistributedSearchRequest request, IOptions<QueryExecutionOptions> options,
         Func<DistributedSearchPhaseWork, ReadExecutionBudget, CancellationToken, Task<DistributedSearchPreparedLeaf>> prepare,
-        Func<CancellationToken, Task> sourceBarrier, TimeProvider clock, DateTimeOffset originalExpiry,
+        Func<CancellationToken, Task> sourceBarrier, TimeProvider clock,
         CancellationToken original, Func<CancellationToken, Task>? statisticsCaptured = null,
         IResourceLifetimeWorkBinding? binding = null)
     {
@@ -24,7 +24,6 @@ internal static partial class DistributedSearchCoordinator
         {
             budget.AttachResourceLifetimeBinding(binding);
         }
-        budget.ConstrainLifetime(originalExpiry);
         using var admission = database.AdmitQuery(original);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(original);
         var partitions = DistributedSearchValidation.Require(request, options, budget);

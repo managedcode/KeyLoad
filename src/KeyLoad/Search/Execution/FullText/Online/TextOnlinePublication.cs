@@ -32,6 +32,6 @@ internal static class TextOnlinePublication
             session.ExpectedCurrentCommandId, session.Id);
         session.RegisterPublication(result);
         session.Issued = database.CreateOnlineTextPublicationOperation(session.PrincipalId, clock.GetUtcNow(),
-            new(command, current, intent, session.OriginalExpiry), session.Budget);
+            new(command, current, intent), session.Budget);
     }
 }

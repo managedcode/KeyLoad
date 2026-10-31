@@ -8,10 +8,9 @@ internal sealed class TextOnlineOriginalReplay(DatabaseEngine database,
     TextOnlineCatalogOwner catalog, Func<TextOnlineSession, Task> cleanupSession)
 {
     internal async Task<(bool HasValue, OnlineTextCapabilityResult? Value)> ExecuteAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset expiry, CancellationToken token, ReadExecutionBudget? originalBudget = null)
+        OnlineTextCapabilityRequest request, CancellationToken token, ReadExecutionBudget? originalBudget = null)
     {
         var budget = originalBudget ?? new ReadExecutionBudget(clock, token);
-        budget.ConstrainLifetime(expiry);
         var original = database.ReadOnlineTextOriginalOutcome(principal.Id, request.Request, budget);
         if (original is null)
         {

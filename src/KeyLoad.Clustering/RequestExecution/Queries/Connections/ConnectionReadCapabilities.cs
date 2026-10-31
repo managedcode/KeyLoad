@@ -112,7 +112,6 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (GrainCoreReadCapabilities.Handles(kind))
         {
             var budget = new ReadExecutionBudget(runtimeClock, cancellationToken);
-            budget.ConstrainLifetime(request.Envelope.ExpiresAt);
             return GrainCoreReadCapabilities.Execute(localDatabase, kind, principal.Id, request.Payload, budget, binding,
                 kind == GrainReadKind.Stream ? services.GetRequiredService<PhysicalShardRecord>() : null);
         }

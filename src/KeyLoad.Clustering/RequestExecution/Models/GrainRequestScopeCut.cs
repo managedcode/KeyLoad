@@ -1,4 +1,3 @@
 namespace KeyLoad.Clustering;
 
-internal readonly record struct GrainRequestScopeCut(Guid Incarnation,
-    DateTimeOffset EvaluatedAt, TimeSpan MaximumFuture);
+internal readonly record struct GrainRequestScopeCut(Guid Incarnation);

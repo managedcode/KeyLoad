@@ -7,11 +7,10 @@ namespace KeyLoad.Clustering;
 internal static class BackgroundStorageReadAccounting
 {
     internal static async Task<T> ReadAsync<T>(ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
-        DateTimeOffset expiry, Func<BackgroundReadBudget, CancellationToken, Task<BackgroundReadResult>> send,
+        Func<CancellationToken, Task<BackgroundReadResult>> send,
         bool allowAbsent = false, CancellationToken token = default)
     {
         work.Check();
-        var bounds = new BackgroundReadBudget(expiry);
         var failures = new List<Exception>();
         var dispatched = false;
         var imported = false;
@@ -19,7 +18,7 @@ internal static class BackgroundStorageReadAccounting
         try
         {
             dispatched = true;
-            var response = await send(bounds, token).ConfigureAwait(true);
+            var response = await send(token).ConfigureAwait(true);
             Require(response);
             binding.Bind(response.Lifetimes);
             imported = true;

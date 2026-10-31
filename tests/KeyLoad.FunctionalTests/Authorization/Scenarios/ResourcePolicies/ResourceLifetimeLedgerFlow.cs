@@ -11,18 +11,18 @@ internal static class ResourceLifetimeLedgerFlow
         var otherDefinition = other.Result.Get<ResourceDefinition>();
         var otherLifetime = ResourceLifetimeLedgerData.Lifetime(owner, other, otherDefinition);
         SafeProjectorOperationCommand? repair = null;
-        var released = await ResourceLifetimeLedgerSession.RunAsync(owner, async (workOwner, ledger, parent, budget, expiry) =>
+        var released = await ResourceLifetimeLedgerSession.RunAsync(owner, async (workOwner, ledger, parent, budget) =>
         {
             await ResourceLifetimeLedgerBusiness.InitialAsync(owner, workOwner, ledger,
-                parent, budget, expiry, lifetime);
+                parent, budget, lifetime);
             await ResourceLifetimeLedgerAssertions.RepeatedIdentityAsync(ledger, lifetime);
             repair = ResourceLifetimeLedgerData.Repair(owner, state.Reader);
             await Assert.That(Errors.Code(repair.Result.Problem).Value).IsNull();
             await ResourceLifetimeLedgerBusiness.RepairedAsync(owner, workOwner, ledger,
-                parent, budget, expiry, lifetime, otherLifetime);
+                parent, budget, lifetime, otherLifetime);
         });
         _ = Assert.ThrowsExactly<ObjectDisposedException>(() => _ = released.RetainedEntries);
-        _ = await ResourceLifetimeLedgerSession.RunAsync(owner, async (_, ledger, parent, budget, _) =>
+        _ = await ResourceLifetimeLedgerSession.RunAsync(owner, async (_, ledger, parent, budget) =>
         {
             await Assert.That(ReferenceEquals(ledger, released)).IsFalse();
             await ResourceLifetimeLedgerAssertions.RetainedAsync(ledger);

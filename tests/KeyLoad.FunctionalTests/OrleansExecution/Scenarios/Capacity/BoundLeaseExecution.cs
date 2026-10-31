@@ -12,6 +12,6 @@ internal static class BoundLeaseExecution
         var database = state.Leader.Database.Database;
         var engine = new QueryEngine(database, UnitExecutionOptions.QueryExecution());
         return PartitionQueryLifetimeLeafExecution.ExecuteBound(engine, K.Root, input, state.PhysicalOwner,
-            database.EvaluationClock, operation.Expiry, operation.Parent, operation.Token);
+            database.EvaluationClock, operation.Parent, operation.Token);
     }
 }

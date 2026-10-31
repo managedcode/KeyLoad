@@ -10,9 +10,6 @@ internal sealed class GrainRequestEnvelopeWireTests
     private const string IncarnationIdentifier = "22222222-2222-2222-2222-222222222222";
     private const string PayloadJson = "{}";
     private const string UnsupportedPurpose = "unsupported-grain-request-purpose";
-    private const int ExpiryYear = 2099;
-    private const int FirstDay = 1;
-    private const int OffsetHours = 2;
     private const int NoDtoMarker = 0;
 
     [Test]
@@ -25,8 +22,7 @@ internal sealed class GrainRequestEnvelopeWireTests
             Incarnation = Guid.Parse(IncarnationIdentifier),
             PrincipalId = Principal,
             ReadKind = GrainReadKind.Document,
-            Payload = PayloadJson,
-            ExpiresAt = new DateTimeOffset(ExpiryYear, FirstDay, FirstDay, 0, 0, 0, TimeSpan.FromHours(OffsetHours))
+            Payload = PayloadJson
         };
         var encoded = OrleansSerialization.Serialize(envelope);
         var decoded = OrleansSerialization.Deserialize<GrainRequestEnvelope>(encoded);
@@ -39,15 +35,13 @@ internal sealed class GrainRequestEnvelopeWireTests
         await Assert.That(decoded.CommandKind).IsNull();
         await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
         await Assert.That(decoded.Payload).IsEqualTo(PayloadJson);
-        await Assert.That(decoded.ExpiresAt).IsEqualTo(envelope.ExpiresAt);
-        await Assert.That(decoded.ExpiresAt.Offset).IsEqualTo(envelope.ExpiresAt.Offset);
     }
 
     [Test]
     public async Task IssuedReadPreservesPayloadAndVersionedPurpose()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var requestId = Guid.NewGuid();
         var payload = new GetDocumentRequest(new(fixture.Partition, Principal, Principal));
         var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.Document, payload);
@@ -63,7 +57,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task MissingPayloadIsRejectedAtTheRealScopeBoundary()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var requestId = Guid.NewGuid();
         var invalid = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NoDtoMarker) with
         {
@@ -77,7 +71,7 @@ internal sealed class GrainRequestEnvelopeWireTests
     public async Task UnsupportedPurposeIsInvalidated()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var requestId = Guid.NewGuid();
         var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NoDtoMarker) with
         {

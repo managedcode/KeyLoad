@@ -5,32 +5,20 @@ namespace KeyLoad.FunctionalTests.TimeSeries;
 
 internal static class ChunkMultiblockReadInterruptionTrial
 {
-    private const int PastDeadlineSeconds = 2;
-    private const int CallerLifetimeSeconds = 1;
-
     internal static async Task RequireAsync(ChunkSelectedIntegrityFixture fixture,
-        ChunkMultiblockReadByteRecipe recipe, bool healthy, bool cancelled)
+        ChunkMultiblockReadByteRecipe recipe, bool healthy)
     {
         using var cancellation = new CancellationTokenSource();
         var clock = new SampleRollupWorkClock();
         var budget = new ReadExecutionBudget(clock, cancellation.Token);
-        budget.ConstrainLifetime(clock.GetUtcNow().AddSeconds(CallerLifetimeSeconds));
-        Action afterWork = cancelled ? cancellation.Cancel : () => clock.Advance(TimeSpan.FromSeconds(PastDeadlineSeconds));
         var start = fixture.Store.GetReadDiagnostics().PointExaminedBytes;
-        clock.Arm(() => fixture.Store.GetReadDiagnostics().PointExaminedBytes - start >= recipe.FirstBytes, afterWork);
+        clock.Arm(() => fixture.Store.GetReadDiagnostics().PointExaminedBytes - start >= recipe.FirstBytes, cancellation.Cancel);
         var failures = new List<Exception>();
         try
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                if (cancelled)
-                {
-                    await ChunkMultiblockReadInterruptionFaults.CancellationAsync(fixture, budget, cancellation.Token);
-                }
-                else
-                {
-                    await ChunkMultiblockReadInterruptionFaults.DeadlineAsync(fixture, budget);
-                }
+                await ChunkMultiblockReadInterruptionFaults.CancellationAsync(fixture, budget, cancellation.Token);
                 await Assert.That(clock.Triggered).IsTrue();
             }, failures);
         }

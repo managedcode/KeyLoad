@@ -6,13 +6,13 @@ namespace KeyLoad.Clustering;
 internal interface IOnlineTextMaintenance
 {
     Task<OnlineTextCapabilityResult> ExecuteAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry, CancellationToken cancellationToken);
+        OnlineTextCapabilityRequest request, CancellationToken cancellationToken);
     OnlineTextPublicationWork RequirePublicationWork(Guid sessionId,
         OnlineTextIndexMaintenanceRequest request, string principalId);
     OnlineTextPublicationWork? TryRequireCheckpointWork(CommitProjectionBatchRequest request,
-        string principalId, DateTimeOffset originalExpiry);
+        string principalId);
     Task<OnlineTextCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
-        OnlineTextCapabilityRequest request, DateTimeOffset originalExpiry,
+        OnlineTextCapabilityRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token);
 
     Task AbortAsync(Guid sessionId);

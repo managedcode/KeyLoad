@@ -10,22 +10,18 @@ internal static class AdministratorAuthenticationRequests
     internal static Task<PrincipalRecord> StartupAsync(OrleansNode node, string secret,
         IOptions<McpExecutionOptions> options, CancellationToken token)
     {
-        var context = node.CatalogRequestCodec().LifetimeReadContext;
-        var work = new ReadExecutionBudget(context.Scope.RuntimeClock, token);
-        var expiry = context.Now + context.Lifetime;
-        work.ConstrainLifetime(expiry);
-        return AuthenticateAsync(node, secret, options, work, expiry, token);
+        var work = new ReadExecutionBudget(node.CatalogRequestCodec().RuntimeClock, token);
+        return AuthenticateAsync(node, secret, options, work, token);
     }
 
     internal static async Task<PrincipalRecord> AuthenticateAsync(OrleansNode node, string secret,
-        IOptions<McpExecutionOptions> options, ReadExecutionBudget work, DateTimeOffset originalExpiry,
-        CancellationToken token)
+        IOptions<McpExecutionOptions> options, ReadExecutionBudget work, CancellationToken token)
     {
         work.Check();
         var requestId = Guid.NewGuid();
         var codec = node.CatalogRequestCodec();
         var envelope = codec.CreateAdministratorAuthentication(requestId,
-            new AdministratorAuthenticationRequest(secret, originalExpiry));
+            new AdministratorAuthenticationRequest(secret));
         var dispatched = false;
         AdministratorAuthenticationResult? value = null;
         try

@@ -17,8 +17,4 @@ internal sealed class AnalyticsBoundCoreReadTests
     [Test]
     public Task OriginalCallerCancellationPublishesNoRowsThenIndependentOriginalReadIsHealthy()
         => AnalyticsBoundCoreCancellation.CallerAsync(TestContext.Current!.Execution.CancellationToken);
-
-    [Test]
-    public Task OriginalAbsoluteDeadlineCannotBeRenewedByBoundCapture()
-        => AnalyticsBoundCoreCancellation.DeadlineAsync(TestContext.Current!.Execution.CancellationToken);
 }

@@ -16,7 +16,7 @@ public interface IBackgroundStorageOperations
     /// <summary>Reads bounded persisted chunk-work hints.</summary>
     Task<SampleChunkWorkPage> ReadSampleChunkWorkPageAsync(byte[]? after, CancellationToken cancellationToken);
     /// <summary>Reads bounded ANN hints at the selected actual storage owner.</summary>
-    Task<BackgroundReadResult> ReadAnnProjectionWorkPageAsync(SiloAddress target, byte[]? after, BackgroundReadBudget budget, CancellationToken cancellationToken);
+    Task<BackgroundReadResult> ReadAnnProjectionWorkPageAsync(SiloAddress target, byte[]? after, CancellationToken cancellationToken);
     /// <summary>Reloads the persisted creator; a genuinely stale saga returns no creator.</summary>
     Task<PrincipalRecord?> ReadDueCreatorAsync(DueWorkHint hint, CancellationToken cancellationToken);
     /// <summary>Reloads only the configured queue-deadline subject after validating the hint.</summary>
@@ -28,9 +28,9 @@ public interface IBackgroundStorageOperations
     /// <summary>Reloads the original chunk creator and requires its exact policy epoch.</summary>
     Task<PrincipalRecord> ReadSampleChunkCreatorAsync(SampleChunkWorkHint hint, CancellationToken cancellationToken);
     /// <summary>Checks current physical ANN authority, enrollment and the next original job request.</summary>
-    Task<BackgroundReadResult> PrepareAnnProjectionAsync(SiloAddress target, ProjectionConsumerRef consumer, long generation, Guid nodeId, AnnProjectionJobState? current, BackgroundReadBudget budget, CancellationToken cancellationToken);
+    Task<BackgroundReadResult> PrepareAnnProjectionAsync(SiloAddress target, ProjectionConsumerRef consumer, long generation, Guid nodeId, AnnProjectionJobState? current, CancellationToken cancellationToken);
     /// <summary>Reloads the original ANN creator after current authority and physical-owner checks.</summary>
-    Task<BackgroundReadResult> ReadAnnProjectionCreatorAsync(SiloAddress target, AnnProjectionJobState original, BackgroundReadBudget budget, CancellationToken cancellationToken);
+    Task<BackgroundReadResult> ReadAnnProjectionCreatorAsync(SiloAddress target, AnnProjectionJobState original, CancellationToken cancellationToken);
     /// <summary>Validates the real completed result against current physical publication lineage.</summary>
-    Task<BackgroundReadResult> ValidateAnnProjectionResultAsync(SiloAddress target, AnnProjectionJobState original, AnnMaintenanceResult result, BackgroundReadBudget budget, CancellationToken cancellationToken);
+    Task<BackgroundReadResult> ValidateAnnProjectionResultAsync(SiloAddress target, AnnProjectionJobState original, AnnMaintenanceResult result, CancellationToken cancellationToken);
 }

@@ -4,7 +4,6 @@ namespace KeyLoad.FunctionalTests.TimeSeries;
 
 internal sealed class SampleChunkCodecTests
 {
-    private static readonly TimeSpan CallerLifetime = TimeSpan.FromSeconds(1);
 
     [Test]
     public async Task AcChunk001FixedAndSeededRowsRoundTripEveryPersistedFieldExactly()
@@ -157,7 +156,7 @@ internal sealed class SampleChunkCodecTests
     }
 
     [Test]
-    public async Task AcChunk003CancellationAndElapsedDeadlineFailWholeOperation()
+    public async Task AcChunk003CancellationFailsWholeOperation()
     {
         var records = SampleChunkTestData.FixedRecords();
         using var cancellation = new CancellationTokenSource();
@@ -168,19 +167,9 @@ internal sealed class SampleChunkCodecTests
             SampleChunkCodec.Encode(records, SampleChunkTestData.Budget(cancellationToken: cancellation.Token), UnitExecutionOptions.TimeSeriesExecution()));
         var decodeCancelled = Assert.ThrowsExactly<OperationCanceledException>(() =>
             SampleChunkCodec.Decode(encoded, decodeBudget, UnitExecutionOptions.TimeSeriesExecution()));
-        var deadlineClock = new SampleRollupWorkClock();
-        var deadlineBudget = SampleChunkTestData.Budget(clock: deadlineClock);
-        var decodeDeadlineBudget = SampleChunkTestData.Budget(clock: deadlineClock);
-        deadlineBudget.ConstrainLifetime(deadlineClock.GetUtcNow() + CallerLifetime);
-        decodeDeadlineBudget.ConstrainLifetime(deadlineClock.GetUtcNow() + CallerLifetime);
-        deadlineClock.Advance(TimeSpan.FromMilliseconds(1_100));
-        var encodeDeadline = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Encode(records, deadlineBudget, UnitExecutionOptions.TimeSeriesExecution()));
-        var decodeDeadline = Assert.ThrowsExactly<KeyLoadException>(() => SampleChunkCodec.Decode(encoded, decodeDeadlineBudget, UnitExecutionOptions.TimeSeriesExecution()));
 
         await Assert.That(encodeCancelled.CancellationToken).IsEqualTo(cancellation.Token);
         await Assert.That(decodeCancelled.CancellationToken).IsEqualTo(cancellation.Token);
-        await Assert.That(encodeDeadline.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(decodeDeadline.Code).IsEqualTo(ErrorCode.BudgetExceeded);
     }
 
     private static KeyLoadException EncodeFailure(SampleRecord[] records, int maximumBytes)

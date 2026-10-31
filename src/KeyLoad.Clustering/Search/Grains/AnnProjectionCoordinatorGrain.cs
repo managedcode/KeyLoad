@@ -13,7 +13,7 @@ namespace KeyLoad.Clustering;
 internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, ILocalDurableJobManager jobs,
     BackgroundStorageClient storage, RuntimeJournalAdmission runtime,
     GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
-    IOptions<GrainRoutingOptions> routing, IOptions<RuntimeJournalOptions> journal)
+    IOptions<RuntimeJournalOptions> journal)
     : Grain, IAnnProjectionCoordinatorGrain, IDurableJobHandler
 {
     private readonly AnnProjectionJobStateOwner owner = new(state, journal);
@@ -29,23 +29,21 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     {
         RequireKey(consumer, generation, nodeId);
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
-        var expiry = clock.GetUtcNow() + routing.Value.RequestLifetime;
         var token = linked.Token;
         var budget = new ReadExecutionBudget(clock, token);
-        budget.ConstrainLifetime(expiry);
         budget.AttachResourceLifetimeBinding(binding);
         var target = await storage.ResolveAnnOwnerAsync(nodeId, token).ConfigureAwait(true);
         var current = owner.Current;
         if (current is null)
         {
-            current = await execution.PrepareAsync(target, consumer, generation, nodeId, null, budget, expiry, binding, token).ConfigureAwait(true);
+            current = await execution.PrepareAsync(target, consumer, generation, nodeId, null, budget, binding, token).ConfigureAwait(true);
             if (current is null)
             {
                 return;
             }
             await WriteAsync(current, binding, token).ConfigureAwait(true);
         }
-        var next = await execution.PrepareAsync(target, consumer, generation, nodeId, current, budget, expiry, binding, token).ConfigureAwait(true);
+        var next = await execution.PrepareAsync(target, consumer, generation, nodeId, current, budget, binding, token).ConfigureAwait(true);
         if (next is null)
         {
             return;
@@ -87,16 +85,14 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             return;
         }
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(binding.Token, runtime.SchedulingToken);
-        var expiry = clock.GetUtcNow() + routing.Value.RequestLifetime;
         var token = linked.Token;
         var budget = new ReadExecutionBudget(clock, token);
-        budget.ConstrainLifetime(expiry);
         budget.AttachResourceLifetimeBinding(binding);
         var target = await storage.ResolveAnnOwnerAsync(original.PendingRequest.NodeId, token).ConfigureAwait(true);
         AnnMaintenanceResult result;
         try
         {
-            result = await execution.ExecuteAsync(GrainFactory, target, original, budget, expiry, binding, token).ConfigureAwait(true);
+            result = await execution.ExecuteAsync(GrainFactory, target, original, budget, binding, token).ConfigureAwait(true);
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated
             or ErrorCode.TokenInvalidated)

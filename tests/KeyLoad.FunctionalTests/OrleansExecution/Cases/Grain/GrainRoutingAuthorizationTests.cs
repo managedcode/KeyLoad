@@ -56,8 +56,8 @@ internal sealed class GrainRoutingAuthorizationTests
     {
         using var fixture = new TestDatabase();
         fixture.Configure(Collection, ResourceKind.Collection);
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
-        var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
+        var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, fixture.Partition, [new PutDocument(Collection, DocumentId, DocumentJson)]);
         var first = codec.Decode(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, command));
@@ -83,7 +83,7 @@ internal sealed class GrainRoutingAuthorizationTests
     {
         using var fixture = new TestDatabase();
         fixture.Configure(Collection, ResourceKind.Collection);
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var commandId = Guid.NewGuid();
         var command = new CommandRequest(commandId, fixture.Partition, [new PutDocument(Collection, DocumentId, DocumentJson)]);
         var request = codec.Decode(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, commandId, command));
@@ -93,7 +93,7 @@ internal sealed class GrainRoutingAuthorizationTests
             Revoked = true,
             PolicyEpoch = principal.PolicyEpoch + PolicyEpochIncrement
         }));
-        var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System, UnitRoutingOptions.Routing());
+        var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
         var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => SignedGrainRequestTestContext.ExecuteAsync(executor, request,
             fixture.Partition.AtomicPartitionId, CancellationToken.None))
             ?? throw new InvalidOperationException();
@@ -106,7 +106,7 @@ internal sealed class GrainRoutingAuthorizationTests
     public async Task QueueDispatchControlRoutesToTheCatalogPartition()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var control = new QueueDispatchControlRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId, Collection,
             FirstRevision, true);
         var request = codec.Decode(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.SetQueueDispatch, Guid.NewGuid(),
@@ -120,14 +120,14 @@ internal sealed class GrainRoutingAuthorizationTests
     public async Task EmbeddedWriteIdentityAndCancellationAreCheckedBeforeEffects()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var command = new CommandRequest(Guid.NewGuid(), fixture.Partition, []);
         var request = codec.Decode(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, Guid.NewGuid(), command));
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => GrainPartitionResolver.Resolve(request)).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         var valid = codec.Decode(codec.CreateCommand(Guid.NewGuid(), Root, OperationKind.Batch, command.CommandId, command));
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System, UnitRoutingOptions.Routing());
+        var executor = new GrainCommandExecutor(fixture.Database, new EmbeddedCoordinator(fixture.Database), TimeProvider.System);
         await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => SignedGrainRequestTestContext.ExecuteAsync(executor, valid,
             fixture.Partition.AtomicPartitionId, cancellation.Token));
         await Assert.That(OutcomeStoreOracle.ReadPartition(fixture.Store, fixture.Partition, Root, command.CommandId)).IsNull();

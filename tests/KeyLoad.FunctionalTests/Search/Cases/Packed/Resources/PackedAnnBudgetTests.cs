@@ -49,7 +49,7 @@ internal sealed class PackedAnnBudgetTests
     }
 
     [Test, NotInParallel]
-    public async Task AcAnn003RealCancellationAndDeadlineInterruptWideCanonicalSearchAndAllowHealthySearch()
+    public async Task AcAnn003RealCancellationInterruptsWideCanonicalSearchAndAllowsHealthySearch()
     {
         using var database = new TestDatabase();
         PackedAnnTestData.Configure(database);
@@ -66,7 +66,6 @@ internal sealed class PackedAnnBudgetTests
         await Assert.That(index.Count).IsEqualTo(PackedAnnTestData.QualityRecordCount);
 
         await PackedAnnWideSearchBoundary.AssertCancellationAsync(index, query);
-        await PackedAnnWideSearchBoundary.AssertOneSecondDeadlineAsync(index, query);
 
         var healthy = index.Search(query, 10, null, PackedAnnIndexTestSupport.Budget());
         await Assert.That(healthy.Candidates.Length).IsEqualTo(10);

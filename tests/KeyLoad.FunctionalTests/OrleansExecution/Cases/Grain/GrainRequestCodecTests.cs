@@ -15,7 +15,7 @@ internal sealed class GrainRequestCodecTests
     public async Task ExactUnicodePayloadAndDistinctReadActorKeysArePreserved()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var firstId = Guid.NewGuid();
         var secondId = Guid.NewGuid();
         var first = codec.DecodeRead(codec.CreateRead(firstId, Principal, GrainReadKind.Document, Payload), firstId);
@@ -29,8 +29,6 @@ internal sealed class GrainRequestCodecTests
     [Test]
     [Arguments(GrainRequestMutation.Purpose)]
     [Arguments(GrainRequestMutation.Incarnation)]
-    [Arguments(GrainRequestMutation.Expired)]
-    [Arguments(GrainRequestMutation.Future)]
     [Arguments(GrainRequestMutation.BothKinds)]
     [Arguments(GrainRequestMutation.NoKind)]
     [Arguments(GrainRequestMutation.CommandId)]
@@ -38,7 +36,7 @@ internal sealed class GrainRequestCodecTests
     public async Task InvalidScopeIsDenied(GrainRequestMutation mutation)
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var id = Guid.NewGuid();
         var envelope = codec.DecodeRead(codec.CreateRead(id, Principal, GrainReadKind.QueryCapabilities,
             NoDtoMarker), id).Envelope;
@@ -46,12 +44,6 @@ internal sealed class GrainRequestCodecTests
         {
             GrainRequestMutation.Purpose => envelope with { Purpose = WrongPurpose },
             GrainRequestMutation.Incarnation => envelope with { Incarnation = Guid.NewGuid() },
-            GrainRequestMutation.Expired => envelope with { ExpiresAt = TimeProvider.System.GetUtcNow() - UnitRoutingOptions.Routing().Value.RequestLifetime },
-            GrainRequestMutation.Future => envelope with
-            {
-                ExpiresAt = TimeProvider.System.GetUtcNow()
-                + UnitRoutingOptions.Routing().Value.MaximumFuture + UnitRoutingOptions.Routing().Value.RequestLifetime
-            },
             GrainRequestMutation.BothKinds => envelope with { CommandKind = OperationKind.Batch, CommandId = Guid.NewGuid() },
             GrainRequestMutation.NoKind => envelope with { ReadKind = null },
             GrainRequestMutation.CommandId => envelope with { CommandId = Guid.NewGuid() },
@@ -66,7 +58,7 @@ internal sealed class GrainRequestCodecTests
     public async Task WrongActorKeyAndForeignIncarnationAreDenied()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var id = Guid.NewGuid();
         var envelope = codec.CreateRead(id, Principal, GrainReadKind.Document, Payload);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.DecodeRead(envelope, Guid.NewGuid())).Code).IsEqualTo(ErrorCode.TokenInvalidated);
@@ -79,7 +71,7 @@ internal sealed class GrainRequestCodecTests
     public async Task ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateCommand(Guid.NewGuid(), Principal,
             (OperationKind)8, Guid.NewGuid(), NoDtoMarker)).Code).IsEqualTo(ErrorCode.TokenInvalidated);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(Guid.NewGuid(), Principal,
@@ -93,7 +85,7 @@ internal sealed class GrainRequestCodecTests
     public async Task ContractInvalidPayloadIsDeniedAtIssuanceAndDecode()
     {
         using var fixture = new TestDatabase();
-        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
         var id = Guid.NewGuid();
         var invalid = new GetDocumentRequest(null!);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(id, Principal,

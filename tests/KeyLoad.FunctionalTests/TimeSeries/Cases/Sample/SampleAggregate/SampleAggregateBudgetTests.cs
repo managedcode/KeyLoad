@@ -1,10 +1,7 @@
-using KeyLoad.Core.TimeSeries;
-
 namespace KeyLoad.FunctionalTests.TimeSeries;
 
 internal sealed class SampleAggregateBudgetTests
 {
-    private const int CallerLifetimeMilliseconds = 1;
     [Test]
     public async Task AcSeries011SampleCapRequiresChargedLookaheadAndNeverReturnsTruncatedAggregate()
     {
@@ -67,7 +64,7 @@ internal sealed class SampleAggregateBudgetTests
     }
 
     [Test]
-    public async Task AcSeries011PreCancellationAndElapsedCallerExpiryRejectAndPreserveStore()
+    public async Task AcSeries011PreCancellationRejectsAndPreservesStore()
     {
         using var db = new TestDatabase();
         SampleAggregateTestData.Configure(db);
@@ -79,17 +76,9 @@ internal sealed class SampleAggregateBudgetTests
         await cancelled.CancelAsync();
         var cancellation = Assert.ThrowsExactly<OperationCanceledException>(() => db.Database.AggregateSamples(
             SampleAggregateTestData.RootPrincipal, request, cancelled.Token));
-        var expiredBudget = new ReadExecutionBudget(TimeProvider.System);
-        expiredBudget.ConstrainLifetime(TimeProvider.System.GetUtcNow().AddMilliseconds(CallerLifetimeMilliseconds));
-        await Task.Delay(TimeSpan.FromMilliseconds(SampleAggregateTestData.DeadlineElapsedWaitMilliseconds), TimeProvider.System, TestContext.Current!.Execution.CancellationToken);
-        var deadlineFailure = SampleAggregateTestData.Failure(() => db.Store.Read(view =>
-            SampleAggregateReader.Read(db.Database, expiredBudget.CreateView(view), SampleAggregateTestData.RootPrincipal,
-                request, expiredBudget)), ErrorCode.BudgetExceeded);
         var healthy = db.Database.AggregateSamples(SampleAggregateTestData.RootPrincipal, request);
 
         await Assert.That(cancellation).IsNotNull();
-        await Assert.That(deadlineFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(deadlineFailure.Message).IsEqualTo(SampleAggregateTestData.DeadlineExceededDetail);
         await Assert.That(db.Store.Position).IsEqualTo(position);
         await Assert.That(healthy.Count).IsEqualTo(0L);
     }

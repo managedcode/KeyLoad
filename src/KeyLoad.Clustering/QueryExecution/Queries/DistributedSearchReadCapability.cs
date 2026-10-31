@@ -25,6 +25,6 @@ internal static class DistributedSearchReadCapability
         return DistributedSearchCoordinator.ExecuteBoundAsync(database,
             GrainPayload.Read<DistributedSearchRequest>(request.Payload), options, execution.PrepareAsync,
             services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync,
-            clock, request.Envelope.ExpiresAt, observed, binding, token);
+            clock, observed, binding, token);
     }
 }

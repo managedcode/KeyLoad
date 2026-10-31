@@ -27,7 +27,7 @@ internal interface IAnnMaintenance
     Task AbortAsync(Guid sessionId);
 
     Task<AnnMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, DateTimeOffset requestExpiry, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken);
+        AnnMaintenanceCapabilityRequest request, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken);
 
     Task<AnnMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, CancellationToken cancellationToken);

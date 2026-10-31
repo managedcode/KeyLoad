@@ -28,6 +28,6 @@ internal sealed class MaintenanceChildCalls(DecodedGrainRequest parent,
     private Task<TResult> CallAsync<TResult>(GrainReadKind? read, OperationKind? command, Guid commandId,
         object request, CancellationToken token) where TResult : class
         => MaintenanceChildDispatch.CallAsync<TResult>(parent, (actor, principal) => codec.CreateMaintenanceChild(purpose,
-                actor, principal, read, command, commandId, request, parent.Envelope.ExpiresAt), commandId, executeChild,
+                actor, principal, read, command, commandId, request), commandId, executeChild,
             services, codec, diagnostics, binding, interrupted, token);
 }

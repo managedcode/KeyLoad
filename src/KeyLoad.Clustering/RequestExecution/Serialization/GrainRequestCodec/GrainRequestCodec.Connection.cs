@@ -11,18 +11,15 @@ public sealed partial class GrainRequestCodec
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        return new GrainConnectionCloseControl(ConnectionControlProtocol.Purpose,
-            Incarnation, connectionId, clock.GetUtcNow() + settings.RequestLifetime);
+        return new GrainConnectionCloseControl(ConnectionControlProtocol.Purpose, Incarnation, connectionId);
     }
 
     internal void ValidateConnectionClose(GrainConnectionCloseControl control, Guid connectionId)
     {
         ArgumentNullException.ThrowIfNull(control);
-        var now = clock.GetUtcNow();
         if (connectionId == Guid.Empty || control.ConnectionId != connectionId
             || control.Purpose != ConnectionControlProtocol.Purpose
-            || control.Incarnation != Incarnation
-            || control.ExpiresAt <= now || control.ExpiresAt > now + settings.MaximumFuture)
+            || control.Incarnation != Incarnation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

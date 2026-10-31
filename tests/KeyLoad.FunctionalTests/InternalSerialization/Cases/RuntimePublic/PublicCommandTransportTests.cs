@@ -19,11 +19,11 @@ internal sealed class PublicCommandTransportTests
         var decoded = Decode(operation);
         await Assert.That(decoded.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(decoded.CommandKind).IsEqualTo(operation.Value!.Kind);
-        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
+        var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System);
         var request = codec.Decode(codec.CreateCommand(Guid.NewGuid(), operation.UserId!,
             operation.Value.Kind, operation.CommandId, decoded.Payload));
         var actorKey = GrainPartitionResolver.Resolve(request);
-        var executor = new GrainCommandExecutor(database.Database, new EmbeddedCoordinator(database.Database), TimeProvider.System, UnitRoutingOptions.Routing());
+        var executor = new GrainCommandExecutor(database.Database, new EmbeddedCoordinator(database.Database), TimeProvider.System);
         var result = await SignedGrainRequestTestContext.ExecuteAsync(executor, request, actorKey, CancellationToken.None);
         await Assert.That(result.Error).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.SafeDetail).IsEqualTo(PublicNormalizationFixture.Detail(shape));

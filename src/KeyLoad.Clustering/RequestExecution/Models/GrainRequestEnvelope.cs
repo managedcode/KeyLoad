@@ -52,10 +52,4 @@ public sealed record GrainRequestEnvelope
     {
         get; init;
     }
-    /// <summary>Bounded server-issued expiration evaluated with the runtime system clock.</summary>
-    [Orleans.Id(GrainContracts.ExpiresAtField)]
-    public required DateTimeOffset ExpiresAt
-    {
-        get; init;
-    }
 }

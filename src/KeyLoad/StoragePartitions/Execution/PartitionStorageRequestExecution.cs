@@ -3,14 +3,13 @@ using KeyLoad.Clustering.Search;
 using KeyLoad.Core;
 using KeyLoad.Core.Search;
 using ManagedCode.Communication.Commands;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
 /// <summary>Owns accepted storage Tasks and joins their actual local leases before session cleanup.</summary>
 internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, RequestWorkOwner workOwner,
     GrainRequestCodec codec, IServiceProvider services, TimeProvider clock,
-    IOptions<GrainRoutingOptions> options, ILogger diagnostics)
+    ILogger diagnostics)
 {
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, (GrainReadKind Kind, RequestWorkLease Work)> active = [];
@@ -81,7 +80,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         if (actorKey is not null)
         {
             var executor = new GrainCommandExecutor(database, services.GetRequiredService<Func<ICommitCoordinator>>()(),
-                clock, options, codec, workOwner,
+                clock, codec, workOwner,
                 services.GetService<Func<IOnlineTextMaintenance>>()?.Invoke(),
                 () => services.GetRequiredService<IDropTableExecution>());
             return executor.ExecuteAsync(request, actorKey, work.Token, context);
@@ -135,7 +134,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         {
             var original = GrainPayload.ReadCommand<CommitProjectionBatchRequest>(request.Payload);
             id = services.GetRequiredService<Func<IOnlineTextMaintenance>>()()
-                .TryRequireCheckpointWork(original, request.Envelope.PrincipalId!, request.Envelope.ExpiresAt)?.SessionId
+                .TryRequireCheckpointWork(original, request.Envelope.PrincipalId!)?.SessionId
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         if (id == Guid.Empty)

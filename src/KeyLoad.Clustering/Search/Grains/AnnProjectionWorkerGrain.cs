@@ -62,9 +62,9 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
             var budget = new ReadExecutionBudget(clock, token);
             budget.AttachResourceLifetimeBinding(binding);
             var targetOwner = await storage.AnnDiscoveryTargetAsync(token).ConfigureAwait(true);
-            var page = await BackgroundStorageReadAccounting.ReadAsync<AnnProjectionDiscoveryPage>(budget, binding, budget.ExpiresAt,
-                (bounds, cancellation) => storage.Operations.ReadAnnProjectionWorkPageAsync(targetOwner, after,
-                    bounds, cancellation), token: token).ConfigureAwait(true);
+            var page = await BackgroundStorageReadAccounting.ReadAsync<AnnProjectionDiscoveryPage>(budget, binding,
+                cancellation => storage.Operations.ReadAnnProjectionWorkPageAsync(targetOwner, after,
+                    cancellation), token: token).ConfigureAwait(true);
             foreach (var rejection in page.Rejected)
             {
                 AnnProjectionJobDiagnostics.Failed(diagnostics, rejection);

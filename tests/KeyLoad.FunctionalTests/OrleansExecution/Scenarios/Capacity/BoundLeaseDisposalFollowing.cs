@@ -19,9 +19,7 @@ internal static class BoundLeaseDisposalFollowing
             parent.AttachResultRetention(ledger);
             var budget = new ReadExecutionBudget(database.EvaluationClock, token);
             budget.AttachResourceLifetimeBinding(parent);
-            budget.ConstrainLifetime(previous.Expiry);
-            var operation = new BoundLeaseOperation(previous.Owner, ledger, parent, budget,
-                previous.Expiry, token);
+            var operation = new BoundLeaseOperation(previous.Owner, ledger, parent, budget, token);
             var input = BoundLeaseQuery.Create(state, operation);
             var result = BoundLeaseExecution.Read(state, operation, input);
             parent.AdmitPublication();

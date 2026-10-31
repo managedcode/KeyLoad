@@ -5,7 +5,6 @@ namespace KeyLoad.FunctionalTests.DatabaseComposition;
 
 internal sealed class DatabaseCompositionDeterminismTests
 {
-    private const int ProbeLifetimeSeconds = 1;
     private const string Collection = "entities";
     private const string Graph = "relations";
     private const string Queue = "actions";
@@ -42,10 +41,6 @@ internal sealed class DatabaseCompositionDeterminismTests
             var leftEngine = new DatabaseEngine(left.Store, left.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), steady);
             var rightEngine = new DatabaseEngine(right.Store, right.Database.Authorization, UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), jumping);
 
-            var probe = new ReadExecutionBudget(jumping);
-            probe.ConstrainLifetime(jumping.GetUtcNow().AddSeconds(ProbeLifetimeSeconds));
-            var elapsedFailure = Assert.ThrowsExactly<KeyLoadException>(probe.Check);
-            await Assert.That(elapsedFailure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
             var sequence = checked(leftEngine.LastApplied + NextSequence);
             await Assert.That(rightEngine.LastApplied).IsEqualTo(sequence - NextSequence);
             var callerToken = TestContext.Current!.Execution.CancellationToken;

@@ -8,15 +8,7 @@ internal readonly record struct GrainRequestProbeIdentity(
     GrainReadKind? ReadKind,
     OperationKind? CommandKind)
 {
-    internal DateTimeOffset OriginalExpiresAt
-    {
-        get; init;
-    }
-
     internal static GrainRequestProbeIdentity From(GrainRequestEnvelope envelope)
         => new(envelope.RequestId, envelope.CommandId, envelope.PrincipalId,
-            envelope.ReadKind, envelope.CommandKind)
-        {
-            OriginalExpiresAt = envelope.ExpiresAt
-        };
+            envelope.ReadKind, envelope.CommandKind);
 }

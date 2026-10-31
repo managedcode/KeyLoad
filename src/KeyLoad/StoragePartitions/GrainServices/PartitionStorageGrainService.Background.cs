@@ -24,8 +24,8 @@ internal sealed partial class PartitionStorageGrainService
         => BackgroundTarget.ReadSampleChunkWorkPageAsync(after, cancellationToken);
 
     /// <inheritdoc />
-    public Task<BackgroundReadResult> ReadAnnProjectionWorkPageAsync(SiloAddress target, byte[]? after, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => BackgroundTarget.ReadAnnProjectionWorkPageAsync(target, after, budget, cancellationToken);
+    public Task<BackgroundReadResult> ReadAnnProjectionWorkPageAsync(SiloAddress target, byte[]? after, CancellationToken cancellationToken)
+        => BackgroundTarget.ReadAnnProjectionWorkPageAsync(target, after, cancellationToken);
 
     /// <inheritdoc />
     public Task<PrincipalRecord?> ReadDueCreatorAsync(DueWorkHint hint, CancellationToken cancellationToken)
@@ -48,15 +48,15 @@ internal sealed partial class PartitionStorageGrainService
         => BackgroundTarget.ReadSampleChunkCreatorAsync(hint, cancellationToken);
 
     /// <inheritdoc />
-    public Task<BackgroundReadResult> PrepareAnnProjectionAsync(SiloAddress target, ProjectionConsumerRef consumer, long generation, Guid nodeId, AnnProjectionJobState? current, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => BackgroundTarget.PrepareAnnProjectionAsync(target, consumer, generation, nodeId, current, budget, cancellationToken);
+    public Task<BackgroundReadResult> PrepareAnnProjectionAsync(SiloAddress target, ProjectionConsumerRef consumer, long generation, Guid nodeId, AnnProjectionJobState? current, CancellationToken cancellationToken)
+        => BackgroundTarget.PrepareAnnProjectionAsync(target, consumer, generation, nodeId, current, cancellationToken);
 
     /// <inheritdoc />
-    public Task<BackgroundReadResult> ReadAnnProjectionCreatorAsync(SiloAddress target, AnnProjectionJobState original, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => BackgroundTarget.ReadAnnProjectionCreatorAsync(target, original, budget, cancellationToken);
+    public Task<BackgroundReadResult> ReadAnnProjectionCreatorAsync(SiloAddress target, AnnProjectionJobState original, CancellationToken cancellationToken)
+        => BackgroundTarget.ReadAnnProjectionCreatorAsync(target, original, cancellationToken);
 
     /// <inheritdoc />
-    public Task<BackgroundReadResult> ValidateAnnProjectionResultAsync(SiloAddress target, AnnProjectionJobState original, AnnMaintenanceResult result, BackgroundReadBudget budget, CancellationToken cancellationToken)
-        => BackgroundTarget.ValidateAnnProjectionResultAsync(target, original, result, budget, cancellationToken);
+    public Task<BackgroundReadResult> ValidateAnnProjectionResultAsync(SiloAddress target, AnnProjectionJobState original, AnnMaintenanceResult result, CancellationToken cancellationToken)
+        => BackgroundTarget.ValidateAnnProjectionResultAsync(target, original, result, cancellationToken);
 
 }

@@ -71,18 +71,18 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
 
     public Task<AnnMaintenanceCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         AnnMaintenanceCapabilityRequest request, CancellationToken token)
-        => ExecuteOwnedAsync(principal, request, null, null, token);
+        => ExecuteOwnedAsync(principal, request, null, token);
 
     public Task<AnnMaintenanceCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, DateTimeOffset requestExpiry,
+        AnnMaintenanceCapabilityRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
-        return ExecuteOwnedAsync(principal, request, requestExpiry, binding, token);
+        return ExecuteOwnedAsync(principal, request, binding, token);
     }
 
     private async Task<AnnMaintenanceCapabilityResult> ExecuteOwnedAsync(PrincipalRecord principal,
-        AnnMaintenanceCapabilityRequest request, DateTimeOffset? expiry,
+        AnnMaintenanceCapabilityRequest request,
         IResourceLifetimeWorkBinding? binding, CancellationToken token)
     {
         AnnOriginalCapabilityExecution.Require(request);
@@ -92,13 +92,12 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
         }
         if (request.Kind == AnnMaintenanceCapabilityKind.Release)
         {
-            using var release = new MaintenanceSessionWork(clock,
-                expiry, shutdown.Token);
+            using var release = new MaintenanceSessionWork(clock, shutdown.Token);
             using var releaseStage = release.EnterStage(binding, token);
             var released = await ExecuteCoreAsync(principal, request, release, token);
             return released;
         }
-        var work = admitted.RequireWork(principal.Id, request, clock, expiry, shutdown.Token);
+        var work = admitted.RequireWork(principal.Id, request, clock, shutdown.Token);
         using var stage = work.EnterStage(binding, token);
         var result = await ExecuteCoreAsync(principal, request, work, token);
         return result;

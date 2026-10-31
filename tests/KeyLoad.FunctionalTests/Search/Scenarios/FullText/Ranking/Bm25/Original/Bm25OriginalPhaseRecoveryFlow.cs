@@ -36,7 +36,6 @@ internal sealed class Bm25OriginalPhaseRecoveryFlow(Bm25OriginalPhaseRecoveryOwn
     internal Command<DatabaseCommand> Capture(Guid? expectedGeneration)
         => Bm25CorpusCapture.Create(owner.Database, Publisher, Subject,
             new(owner.Source.Partition, Collection, Field, Text), Guid.NewGuid(), expectedGeneration,
-            owner.Database.EvaluationClock.GetUtcNow().Add(UnitRoutingOptions.Routing().Value.RequestLifetime),
             Work(), UnitExecutionOptions.QueryExecution());
 
     internal Command<DatabaseCommand> Reissue(Command<DatabaseCommand> original)

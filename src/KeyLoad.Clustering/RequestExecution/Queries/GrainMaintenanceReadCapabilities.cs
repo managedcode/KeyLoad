@@ -18,12 +18,12 @@ internal static class GrainMaintenanceReadCapabilities
         return kind switch
         {
             GrainReadKind.OnlineTextMaintenance => await services.GetRequiredService<Func<IOnlineTextMaintenance>>()().ExecuteBoundAsync(principal,
-                GrainPayload.Read<OnlineTextCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt,
+                GrainPayload.Read<OnlineTextCapabilityRequest>(request.Payload),
                 binding, cancellationToken).ConfigureAwait(true),
             GrainReadKind.TextMaintenance => await services.GetRequiredService<Func<ITextMaintenance>>()().ExecuteBoundAsync(principal,
-                GrainPayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt, binding, cancellationToken).ConfigureAwait(true),
+                GrainPayload.Read<TextMaintenanceCapabilityRequest>(request.Payload), binding, cancellationToken).ConfigureAwait(true),
             GrainReadKind.AnnMaintenance => await services.GetRequiredService<Func<IAnnMaintenance>>()().ExecuteBoundAsync(principal,
-                GrainPayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), request.Envelope.ExpiresAt, binding, cancellationToken).ConfigureAwait(true),
+                GrainPayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload), binding, cancellationToken).ConfigureAwait(true),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

@@ -47,7 +47,7 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
             analytics = Services.GetRequiredService<UserAnalyticsRuntime>();
             analytics.Open(host);
             requests = new(host.Database, work, Services.GetRequiredService<GrainRequestCodec>(), Services,
-                Services.GetRequiredService<TimeProvider>(), options.GrainRouting,
+                Services.GetRequiredService<TimeProvider>(),
                 Services.GetRequiredService<ILogger<PartitionStorageGrainService>>());
         }
         var interval = options.StorageExecution.Value.MaintenanceInterval;

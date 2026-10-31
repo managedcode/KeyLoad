@@ -12,10 +12,6 @@ internal static class AnalyticsStoreOptions
     private const int UnboundedQueryRows = int.MaxValue;
 
     /// <summary>Maps the operation's remaining lifetime to the engine timeout; only an explicit expiry bounds a query.</summary>
-    internal static (bool HasValue, TimeSpan? Value) QueryTimeout(TimeSpan remaining) => remaining == Timeout.InfiniteTimeSpan
-        ? (false, default(TimeSpan?))
-        : (true, remaining);
-
     internal static AnalyticsOptions Create(string ownedDirectory, int rowCount,
         IReadOnlyCollection<string> dimensions, int metricCount, ZoneTree.Logger.ILogger failures)
     {

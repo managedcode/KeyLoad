@@ -19,11 +19,11 @@ internal static class QueryLifetimeReadCapability
             GrainReadKind.PartitionQueryLeaf => PartitionQueryLifetimeLeafExecution.ExecuteBound(
                 services.GetRequiredService<QueryEngine>(), principal.Id,
                 GrainPayload.Read<PartitionQueryOwnedLeafRequest>(request.Payload), owner, clock,
-                request.Envelope.ExpiresAt, binding, token),
+                binding, token),
             GrainReadKind.DistributedSearchLeaf => DistributedSearchOwnedLeafExecution.ExecuteBound(database,
                 principal.Id, GrainPayload.Read<DistributedSearchOwnedLeaf>(request.Payload), owner,
                 services.GetRequiredService<IOptions<QueryExecutionOptions>>(), clock,
-                request.Envelope.ExpiresAt, binding, token),
+                binding, token),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

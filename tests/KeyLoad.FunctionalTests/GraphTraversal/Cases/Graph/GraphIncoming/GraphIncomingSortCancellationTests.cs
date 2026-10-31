@@ -8,13 +8,11 @@ internal sealed class GraphIncomingSortCancellationTests
     private const string TargetId = "sort-target-vertex";
     private const string SourcePrefix = "sort-source-";
     private const string EdgePrefix = "sort-edge-";
-    private const string DeadlineDiagnostic = "The read execution deadline is exceeded.";
     private const string Label = "sort-links";
     private const int IncomingCount = 8;
-    private static readonly TimeSpan CallerLifetime = TimeSpan.FromSeconds(1);
 
     [Test]
-    public async Task FullPageSortPreservesCancellationAndDeadlineAndHealthyReadFollows()
+    public async Task FullPageSortPreservesCancellationAndHealthyReadFollows()
     {
         using var database = GraphCrossPartitionTestSupport.CreateDatabase(new DatabaseLimits());
         var partition = GraphCrossPartitionTestSupport.Partition(TargetPartitionKey);
@@ -25,7 +23,6 @@ internal sealed class GraphIncomingSortCancellationTests
         await AssertOrderedSourcesAsync(fullPage, sources);
 
         await AssertCancellationPreservedAsync(database, fullPage, target);
-        await AssertDeadlinePreservedAsync(database, fullPage, target);
 
         var healthy = ReadPage(database, target);
         await AssertOrderedSourcesAsync(healthy, sources);
@@ -45,25 +42,9 @@ internal sealed class GraphIncomingSortCancellationTests
         await Assert.That(clock.CancellationTriggered).IsTrue();
     }
 
-    private static async Task AssertDeadlinePreservedAsync(TestDatabase database,
-        GraphIncomingEdgesPage page, EntityRef target)
-    {
-        using var cancellation = new CancellationTokenSource();
-        var clock = new GraphIncomingSortCancellationTimeProvider(cancellation);
-        var budget = CreateBudget(clock, cancellation.Token);
-        var builder = CreateBuilder(database, page, target, budget);
-        clock.ExceedDeadlineAfterTimestampCalls(2);
-
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => builder.Build());
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
-        await Assert.That(failure.Message).IsEqualTo(DeadlineDiagnostic);
-        await Assert.That(clock.DeadlineTriggered).IsTrue();
-    }
-
     private static ReadExecutionBudget CreateBudget(TimeProvider clock, CancellationToken cancellationToken)
     {
         var budget = new ReadExecutionBudget(clock, cancellationToken);
-        budget.ConstrainLifetime(clock.GetUtcNow() + CallerLifetime);
         return budget;
     }
 

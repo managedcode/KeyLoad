@@ -102,17 +102,14 @@ internal static class TextOnlineReplacementRollbackFlow
     {
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(token);
         var session = Guid.NewGuid();
-        var expiry = TextOnlineTestRuntime.FreshExpiry(fixture);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            _ = await runtime.PhaseAsync(fixture, session, replacement, OnlineTextCapabilityKind.ResolveOriginal,
-                expiry, cancellation.Token);
-            _ = await runtime.PhaseAsync(fixture, session, replacement, OnlineTextCapabilityKind.Capture,
-                expiry, cancellation.Token);
+            _ = await runtime.PhaseAsync(fixture, session, replacement, OnlineTextCapabilityKind.ResolveOriginal, cancellation.Token);
+            _ = await runtime.PhaseAsync(fixture, session, replacement, OnlineTextCapabilityKind.Capture, cancellation.Token);
             await cancellation.CancelAsync();
             await Assert.ThrowsAsync<OperationCanceledException>(() => runtime.PhaseAsync(fixture, session,
-                replacement, OnlineTextCapabilityKind.Seed, expiry, cancellation.Token));
+                replacement, OnlineTextCapabilityKind.Seed, cancellation.Token));
         }, failures);
         await ServerFailureObserver.ObserveAsync(() => runtime.Owner.AbortAsync(session), failures);
         ServerFailureObserver.ThrowIfAny(failures);

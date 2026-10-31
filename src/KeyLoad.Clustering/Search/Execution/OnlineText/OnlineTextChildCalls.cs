@@ -17,20 +17,20 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, GrainRequ
         OnlineTextCapabilityKind kind, CancellationToken token, ProjectionBatch? page = null,
         CommitProjectionBatchRequest? intent = null, ProjectionBatchResult? acknowledged = null)
         => DispatchAsync<OnlineTextCapabilityResult>((actor, principal) => codec.CreateOnlineTextCapability(
-            actor, principal, new(SessionId, request, kind, page, intent, acknowledged), parent.Envelope.ExpiresAt),
+            actor, principal, new(SessionId, request, kind, page, intent, acknowledged)),
             Guid.Empty, token);
 
     internal Task<ProjectionBatch> ReadPageAsync(ReadProjectionBatchRequest request, CancellationToken token)
         => DispatchAsync<ProjectionBatch>((actor, principal) => codec.CreateOnlineTextProjectionRead(actor,
-            principal, request, parent.Envelope.ExpiresAt), Guid.Empty, token);
+            principal, request), Guid.Empty, token);
 
     internal Task<ProjectionBatchResult> CheckpointAsync(CommitProjectionBatchRequest request, CancellationToken token)
         => DispatchAsync<ProjectionBatchResult>((actor, principal) => codec.CreateOnlineTextCheckpoint(actor,
-            principal, request, parent.Envelope.ExpiresAt), request.CommandId, token);
+            principal, request), request.CommandId, token);
 
     internal Task<OnlineTextIndexMaintenanceResult> PublishAsync(Command<DatabaseCommand> original, CancellationToken token)
         => DispatchAsync<OnlineTextIndexMaintenanceResult>((actor, _) => codec.CreateOnlineTextPublication(actor,
-            original, parent.Envelope.ExpiresAt), original.CommandId, token);
+            original), original.CommandId, token);
 
     internal Task AbortAsync() => abort(SessionId);
 

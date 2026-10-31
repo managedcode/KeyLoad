@@ -18,6 +18,6 @@ internal static class PartitionQueryReadCapability
         return PartitionQueryRemoteExecution.ExecuteBoundAsync(services.GetRequiredService<QueryEngine>(),
             GrainPayload.ReadPublicInput<PartitionQueryRequest>(request.Payload), execution.PrepareAsync,
             services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync,
-            clock, request.Envelope.ExpiresAt, binding, token);
+            clock, binding, token);
     }
 }

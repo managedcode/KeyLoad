@@ -13,11 +13,6 @@ public static class SearchCommands
         OperationProtocol.RequireEnvelopeId(operation, phase.CommandId);
         var principal = engine.RequireBm25Subject(transaction, administrator, phase, operation.Timestamp);
         var current = phase.Current;
-        if (operation.Timestamp >= phase.OriginalExpiry)
-        {
-            throw Errors.Fail(ErrorCode.BudgetExceeded, Bm25CorpusProtocol.Changed);
-        }
-
         var resource = engine.Resource(transaction, current.Partition, current.Collection, ResourceKind.Collection);
         var placement = engine.ReadPlacementWitness(transaction, current.Partition);
         if (!Bm25CorpusDependencies.Matches(engine, transaction, principal, resource, current, placement))

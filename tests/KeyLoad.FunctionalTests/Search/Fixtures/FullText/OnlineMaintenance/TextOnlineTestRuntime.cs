@@ -48,17 +48,14 @@ internal sealed class TextOnlineTestRuntime : IAsyncDisposable
         }
     }
 
-    internal static DateTimeOffset FreshExpiry(TestDatabase fixture)
-        => fixture.Database.EvaluationClock.GetUtcNow().Add(UnitExecutionOptions.OperationLifetime);
-
     internal Task<OnlineTextCapabilityResult> PhaseAsync(TestDatabase fixture, Guid session,
-        OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityKind kind, DateTimeOffset expiry,
+        OnlineTextIndexMaintenanceRequest request, OnlineTextCapabilityKind kind,
         CancellationToken token, ProjectionBatch? page = null, CommitProjectionBatchRequest? intent = null,
         ProjectionBatchResult? receipt = null)
     {
         var principal = fixture.Store.Read(view => fixture.Database.Principal(view,
             TextMaintenanceTestValues.Principal, fixture.Database.EvaluationClock.GetUtcNow()));
-        return Owner.ExecuteAsync(principal, new(session, request, kind, page, intent, receipt), expiry, token);
+        return Owner.ExecuteAsync(principal, new(session, request, kind, page, intent, receipt), token);
     }
 
     internal ITextProjectionLease BorrowCurrent(TestDatabase fixture, SearchRequest request, ReadExecutionBudget budget)
