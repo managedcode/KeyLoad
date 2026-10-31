@@ -27,7 +27,7 @@ internal static class AdditionalDatabaseResources
         if (target is not (BenchmarkAdditionalTargets.Timescale or BenchmarkAdditionalTargets.SqlServer
             or BenchmarkAdditionalTargets.MySql or BenchmarkAdditionalTargets.ClickHouse or BenchmarkAdditionalTargets.InfluxDb
             or NativeDatabaseTests.Redis or NativeDatabaseTests.OpenSearch or NativeDatabaseTests.HelixDb or NativeDatabaseTests.MongoDb
-            or IsolatedHostConstants.Qdrant or IsolatedHostConstants.Rabbit or IsolatedHostConstants.Kurrent))
+            or IsolatedHostConstants.Qdrant or IsolatedHostConstants.Rabbit or IsolatedHostConstants.Kurrent or IsolatedHostConstants.SurrealDb))
         {
             throw new InvalidOperationException(Invalid);
         }
@@ -124,6 +124,7 @@ internal static class AdditionalDatabaseResources
                 NativeDatabaseTests.OpenSearch => new OpenSearchTarget(http, runId, values[Image], NativeDatabaseTargets.Topology(values),
                     ComparisonExecutionRegistration.ReadLifecycle(configuration), options),
                 NativeDatabaseTests.HelixDb => new HelixDbTarget(http, runId, values[Image], options),
+                IsolatedHostConstants.SurrealDb => new SurrealDbTarget(http, runId, values[Image], options),
                 _ => HttpComparisonTargets.Create(target, http, runId, values[Image], options)
             };
             http = null;

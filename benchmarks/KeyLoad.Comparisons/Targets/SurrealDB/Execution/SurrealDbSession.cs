@@ -15,7 +15,7 @@ internal sealed class SurrealDbSession(HttpClient http, string table, string edg
     private const string InvalidPointReadCardinality = "SurrealDbPointReadCardinalityMismatch";
     private const string SELECTKeyPayloadNumberFROMWHERENumberORDERFormatTemplate = "SELECT key, payload, number FROM {0} WITH INDEX {3} WHERE number > {1} ORDER BY number LIMIT {2};";
     private static readonly System.Text.CompositeFormat SELECTKeyPayloadNumberFROMWHERENumberORDERFormat = System.Text.CompositeFormat.Parse(SELECTKeyPayloadNumberFROMWHERENumberORDERFormatTemplate);
-    private const string SELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormatTemplate = "SELECT key, payload FROM {0} WHERE embedding <|{1},COSINE|> {2} ORDER BY vector::distance::knn(), key LIMIT {3};";
+    private const string SELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormatTemplate = "SELECT key, payload, vector::distance::knn() AS distance FROM {0} WHERE embedding <|{1},COSINE|> {2} ORDER BY distance, key LIMIT {3};";
     private static readonly System.Text.CompositeFormat SELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormat = System.Text.CompositeFormat.Parse(SELECTKeyPayloadFROMWHEREEmbeddingCOSINEORDERFormatTemplate);
     public async Task<(bool HasValue, FoundDocument? Value)> ReadAsync(BenchmarkDocument document, CancellationToken cancellationToken)
     {

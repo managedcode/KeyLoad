@@ -180,8 +180,9 @@ internal sealed class IsolatedHostTargetOwner(IOptions<ComparisonExecutionOption
     private async Task DisposeTargetAsync(IComparisonTarget ownedTarget)
     {
         var cleanup = ownedTarget.DisposeAsync().AsTask();
-        // Targets that own a document namespace can settle it under the document cleanup deadline.
-        var limit = ownedTarget is IDocumentComparisonTarget ? Policy.DocumentCleanupTimeout : Policy.CleanupTimeout;
+        // Preserve the target's own bounded stream deletion and client drain lifetime.
+        var limit = ownedTarget is IDocumentComparisonTarget ? Policy.DocumentCleanupTimeout
+            : ownedTarget is KurrentTarget ? lifecycleOptions.Value.KurrentCleanupHostTimeout : Policy.CleanupTimeout;
         try
         {
             await cleanup.WaitAsync(limit, Clock);

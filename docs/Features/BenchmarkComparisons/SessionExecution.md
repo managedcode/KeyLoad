@@ -121,6 +121,10 @@ healthy continuation; they do not qualify public figures. Full 100k/1m scale,
 1/10/500-client ingestion, ANN, filtered/mixed vector, fault/endurance and matched
 hardware requirements retain their distinct open qualification gates.
 
+SurrealDB's exact vector query projects `vector::distance::knn() AS distance`
+before ordering by `distance, key`. A real single-node control verifies ordered
+identities, complete bodies and healthy continuation against its public image.
+
 Every website category uses the same comparison table with engines in rows,
 operation families in columns and paired one/three-node observations in each cell.
 Vector, queue and event-store views place their relevant columns first while
@@ -299,6 +303,11 @@ join allows that host-shutdown budget plus the existing 30-second original-task
 settlement budget; other teardown stages retain their 30-second deadlines. The
 original disposal task remains joined after a threshold, and any timeout or
 disposal failure still fails the original session.
+
+The client target owner joins KurrentDB disposal under its existing 180-second
+delete/drain lifetime, including the existing 120-second owned-stream deletion
+deadline. Deletion, cancellation, client-drain and disposal failures still fail
+the session after the complete event workload.
 
 ClickHouse uses native patch-part `UPDATE` and `DELETE FROM` operations over the
 same MergeTree table, with block-number/offset columns enabled. Deletes require

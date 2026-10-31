@@ -12,6 +12,9 @@ internal sealed class ModelDatabaseTests
     [Test, Arguments(1), Arguments(3)]
     public Task QdrantModelsRetainVerifiedOperationsAndHealthyContinuation(int nodes) => RunAsync(IsolatedHostConstants.Qdrant, nodes);
 
+    [Test, Arguments(1)]
+    public Task SurrealModelsRetainVerifiedOperationsAndHealthyContinuation(int nodes) => RunAsync(IsolatedHostConstants.SurrealDb, nodes);
+
     [Test, Arguments(1), Arguments(3)]
     public Task RabbitModelsRetainVerifiedOperationsAndHealthyContinuation(int nodes) => RunAsync(IsolatedHostConstants.Rabbit, nodes);
 
