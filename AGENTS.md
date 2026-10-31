@@ -328,11 +328,16 @@ An unpublished local package or project reference is not delivery. Report exact
 infrastructure, credential or source blockers.
 
 For confirmed ZoneTree, ZoneTree.FullTextSearch or ZoneTree.Analytics defects,
-check for a matching upstream issue and publish bounded reproducible evidence to
-the owning repository. Include exact version/source, environment, operation flow,
-expected/actual results and impact; separate verified causes from hypotheses and
-exclude secrets. This scoped publication is authorized and is not acceptance
-proof or permission for an engine replacement or unpublished workaround.
+search the owning repository's open issues and read relevant discussions before
+publishing. If a matching issue already exists, report its link and current status
+to the user; do not create a duplicate or add comments, repeated evidence or status
+requests without the user's explicit instruction. Respect maintainers' requests
+to avoid further comments while they are working on the issue. Only when no
+matching open issue exists, publish bounded reproducible evidence in a new issue.
+Include exact version/source, environment, operation flow, expected/actual results
+and impact; separate verified causes from hypotheses and exclude secrets. This
+scoped new-issue publication is authorized and is not acceptance proof or permission
+for an engine replacement or unpublished workaround.
 
 Commit each completed implementation checkpoint on the current branch, stating
 actual verification. When asked to commit all changes, include the complete
