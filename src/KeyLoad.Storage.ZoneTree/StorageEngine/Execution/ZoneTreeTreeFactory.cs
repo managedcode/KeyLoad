@@ -9,6 +9,8 @@ namespace KeyLoad.Storage.ZoneTree;
 internal static class ZoneTreeTreeFactory
 {
     private const string OriginalTreeMissing = "Original store inspection requires the existing execution tree directory.";
+    // MVCC point reads snapshot a mutable leaf; keep those copied key/value arrays small.
+    private const int MutableLeafSize = 32;
 
     internal static ITransactionalZoneTree<Memory<byte>, Memory<byte>> Open(ZoneTreeStoreOptions options, bool requireExisting = false)
     {
@@ -29,6 +31,7 @@ internal static class ZoneTreeTreeFactory
         => new ZoneTreeFactory<Memory<byte>, Memory<byte>>()
             .SetDataDirectory(directory).SetComparer(new KeyComparer())
             .SetKeySerializer(new ByteArraySerializer()).SetValueSerializer(new ByteArraySerializer())
+            .Configure(o => o.BTreeLeafSize = MutableLeafSize)
             .ConfigureWriteAheadLogOptions(o =>
             {
                 // The durable KeyLoad command journal supplies ordered replay and acknowledgements.

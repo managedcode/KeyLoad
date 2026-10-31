@@ -40,6 +40,15 @@ Owned storage copies stay wherever a caller may keep or change an array.
 
 Integration closes each row with the exact source, run, job, test and resource
 artifact, then updates the acceptance criteria, the feature documents and the ADR.
+
+The native MVCC store configures mutable BTree leaves to 32 records through
+the public ZoneTree factory. Point lookups copy a mutable leaf in the pinned
+engine, so the smaller leaf reduces that copied workspace. This changes neither
+key ordering nor snapshot visibility; the canonical journal still flushes before
+acknowledgement. Local Debug SDK diagnostics and allocation captures are
+development evidence only. Exact-source Linux comparisons and full cluster
+qualification remain open.
+
 Coverage, complexity, endurance and fault gates stay mandatory. Process-kill tests
 do not support a power-loss claim, and nothing here is a production-readiness or
 performance-leadership claim.
