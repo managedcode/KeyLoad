@@ -14,7 +14,7 @@ internal static class RemoteTransferRepairClaimsFields
     internal const uint PolicyGeneration = 9;
     internal const uint CompleteGeneration = 10;
     internal const uint FailedCommandId = 11;
-    internal const uint CommandFingerprint = 12;
+    // Field 12 was the failed command fingerprint. It is retired and must never be reused.
     internal const uint OutcomeDigest = 13;
     internal const uint OriginalPolicyEpoch = 14;
     internal const uint CurrentPolicyEpoch = 15;

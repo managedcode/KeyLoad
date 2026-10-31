@@ -70,7 +70,7 @@ internal static class AnnProviderQualificationHistoryAssertions
         await Assert.That(operation.Value!.Kind).IsEqualTo(history.Operation.Value!.Kind);
         await Assert.That(operation.UserId!).IsEqualTo(history.Operation.UserId!);
         await Assert.That(new DateTimeOffset(operation.Timestamp)).IsEqualTo(new DateTimeOffset(history.Operation.Timestamp));
-        await Assert.That(operation.Value!.Fingerprint).IsEqualTo(history.Operation.Value!.Fingerprint);
+        await Assert.That(DatabaseCommandContentIdentity.SameContent(operation, history.Operation)).IsTrue();
         await Assert.That(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(history.Payload)).IsTrue();
     }
 

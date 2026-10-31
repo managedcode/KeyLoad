@@ -7,7 +7,6 @@ public static class CommandExecutionIdentity
 {
     internal const string DatabaseCommandType = nameof(DatabaseCommand);
     internal const string InvalidDatabaseCommand = "The database command identity, subject, time or input is invalid.";
-    internal const int FingerprintCharacters = 64;
     /// <summary>Snapshots a trusted execution command before asynchronous admission or retained use.</summary>
     /// <param name = "operation">Execution command whose subject was bound by the server boundary.</param>
     /// <returns>An independently owned command and generated execution input.</returns>
@@ -38,15 +37,15 @@ public static class CommandExecutionIdentity
     private static void ValidateDatabaseCommandIdentity(Command<DatabaseCommand> operation)
     {
         var input = operation.Value;
-        if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId) || operation.CommandType != DatabaseCommandType || operation.Timestamp.Kind != DateTimeKind.Utc || input is null || input.Input is null || !Enum.IsDefined(input.Kind) || string.IsNullOrEmpty(input.Fingerprint) || input.Fingerprint.Length != FingerprintCharacters || input.Fingerprint.Any(character => !char.IsAsciiHexDigitLower(character)))
+        if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId) || operation.CommandType != DatabaseCommandType || operation.Timestamp.Kind != DateTimeKind.Utc || input is null || input.Input is null || !Enum.IsDefined(input.Kind))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidDatabaseCommand);
         }
     }
 
-    internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input, string fingerprint, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
+    internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
     {
-        var operation = Command<DatabaseCommand>.Create(DatabaseCommandType, new DatabaseCommand(kind, input, fingerprint), id);
+        var operation = Command<DatabaseCommand>.Create(DatabaseCommandType, new DatabaseCommand(kind, input), id);
         operation.UserId = principalId;
         operation.Timestamp = evaluatedAt.UtcDateTime;
         byte[] admission;
@@ -58,7 +57,7 @@ public static class CommandExecutionIdentity
             }
 
             work?.Check();
-            admission = ResourceEffectCapture.EncodeResourceEffectAdmission(engine.CaptureResourceEffectAdmission(admissionView, operation, fingerprint, preserveBudgetFailure: work is not null));
+            admission = ResourceEffectCapture.EncodeResourceEffectAdmission(engine.CaptureResourceEffectAdmission(admissionView, operation, preserveBudgetFailure: work is not null));
             work?.Check();
         }
         else

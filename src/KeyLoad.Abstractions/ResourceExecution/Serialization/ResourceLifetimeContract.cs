@@ -11,5 +11,5 @@ internal static class ResourceLifetimeContract
     internal const int TransactionDomainField = 3;
     internal const int KindField = 4;
     internal const int IncarnationField = 5;
-    internal const int CreationFingerprintField = 6;
+    // Field 6 was the creation fingerprint. It is retired and must never be reused.
 }

@@ -37,7 +37,7 @@ internal sealed partial class TextOnlineCatalogOwner
                     throw TextErrors.Mismatch();
                 }
                 actual = new TextSelectedProjectionLease(OnlineReadAdmission,
-                    () => (generation, generation.Manifest), budget);
+                    () => (generation, generation.Cut), budget);
             }
             catch (Exception error)
             {

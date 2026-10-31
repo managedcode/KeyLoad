@@ -18,9 +18,8 @@ internal static class SubscriptionOldCutSavedFailure
         var position = store.Position;
         var identity = ReadCutStoreStateAssertions.SnapshotIdentity(store);
         var outcomeKey = KeySpace.PartitionOutcome(partition, operation.UserId!, operation.CommandId);
-        var fingerprint = operation.Value!.Fingerprint;
         var next = checked(database.LastApplied + 1);
-        var outcome = new StoredOutcome(fingerprint, store.Identity.Incarnation, 2, Result<object>.Fail(Errors.Problem(code, detail)), operation)
+        var outcome = new StoredOutcome(store.Identity.Incarnation, 2, Result<object>.Fail(Errors.Problem(code, detail)), operation)
         {
             ScopeKind = CommandOutcomeScopeKind.Partition,
             Partition = partition,
@@ -66,7 +65,7 @@ internal static class SubscriptionOldCutSavedFailure
     }
     private static async Task OutcomeAsync(StoredOutcome actual, StoredOutcome expected)
     {
-        await Assert.That(actual.Fingerprint).IsEqualTo(expected.Fingerprint);
+        await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(expected.PreparedCommand.CommandId);
         await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(expected.PolicyEpoch);
         await ResultAsync(actual.Result, Errors.Code(expected.Result.Problem).Value!.Value, expected.Result.Problem?.Detail!);

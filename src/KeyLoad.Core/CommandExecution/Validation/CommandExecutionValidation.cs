@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -27,7 +26,7 @@ public static class CommandExecutionValidation
         }
 
         var input = DatabaseCommandInputTypes.Require(kind, Normalize(payloadJson, DatabaseCommandInputTypes.For(kind)));
-        return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, input, DatabaseCommandFingerprint.Compute(id, kind, principalId, payloadJson), null);
+        return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, input, null);
     }
 
     private static object Normalize(string json, Type type)

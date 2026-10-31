@@ -1,15 +1,30 @@
 name: Release
+# A successful Build and Tests run for a push to main publishes that exact commit. A manual run qualifies
+# the selected commit with Build and Tests first.
 on:
+  workflow_run:
+    workflows: [Build and Tests]
+    types: [completed]
+    branches: [main]
   workflow_dispatch:
 permissions:
   contents: read
+concurrency:
+  group: keyload-release
+  cancel-in-progress: false
+env:
+  RELEASE_SHA: ${{ github.event.workflow_run.head_sha || github.sha }}
 jobs:
   tests:
     name: Build and Tests
+    if: github.event_name == 'workflow_dispatch'
     uses: ./.github/workflows/build-and-tests.yml
   publish:
     name: Publish ${{ matrix.runtime }}
     needs: tests
+    if: >-
+      always() && (needs.tests.result == 'success' || (github.event_name == 'workflow_run'
+      && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:
@@ -19,6 +34,8 @@ jobs:
     steps:
       - name: Download source code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_SHA }}
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
@@ -39,6 +56,9 @@ jobs:
   server-image:
     name: Publish server container image
     needs: tests
+    if: >-
+      always() && (needs.tests.result == 'success' || (github.event_name == 'workflow_run'
+      && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'))
     runs-on: ubuntu-24.04
     timeout-minutes: 60
     permissions:
@@ -50,6 +70,8 @@ jobs:
     steps:
       - name: Download source code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ env.RELEASE_SHA }}
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:
@@ -59,17 +81,17 @@ jobs:
           REGISTRY_TOKEN: ${{ github.token }}
         run: printf '%s' "$REGISTRY_TOKEN" | docker login "$IMAGE_REGISTRY" --username "$GITHUB_ACTOR" --password-stdin
       - name: Publish the server image with commit and latest tags
-        run: dotnet publish src/KeyLoad/KeyLoad.csproj /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRegistry="$IMAGE_REGISTRY" -p:ContainerRepository="$IMAGE_REPOSITORY" "-p:ContainerImageTags=\"$GITHUB_SHA;latest\""
+        run: dotnet publish src/KeyLoad/KeyLoad.csproj /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRegistry="$IMAGE_REGISTRY" -p:ContainerRepository="$IMAGE_REPOSITORY" "-p:ContainerImageTags=\"$RELEASE_SHA;latest\""
       - name: Record the published image digest
         shell: bash
         run: |
           image="$IMAGE_REGISTRY/$IMAGE_REPOSITORY"
-          digest=$(docker buildx imagetools inspect "$image:$GITHUB_SHA" --format '{{json .Manifest}}' | jq -er '.digest')
+          digest=$(docker buildx imagetools inspect "$image:$RELEASE_SHA" --format '{{json .Manifest}}' | jq -er '.digest')
           latest=$(docker buildx imagetools inspect "$image:latest" --format '{{json .Manifest}}' | jq -er '.digest')
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ && "$digest" == "$latest" ]]
           mkdir -p artifacts
-          printf '%s:%s@%s\n' "$image" "$GITHUB_SHA" "$digest" > artifacts/keyload-server-image.txt
-          printf 'Server image: %s:%s@%s (also tagged latest)\n' "$image" "$GITHUB_SHA" "$digest" >> "$GITHUB_STEP_SUMMARY"
+          printf '%s:%s@%s\n' "$image" "$RELEASE_SHA" "$digest" > artifacts/keyload-server-image.txt
+          printf 'Server image: %s:%s@%s (also tagged latest)\n' "$image" "$RELEASE_SHA" "$digest" >> "$GITHUB_STEP_SUMMARY"
       - name: Save the image reference
         uses: actions/upload-artifact@v7
         with:

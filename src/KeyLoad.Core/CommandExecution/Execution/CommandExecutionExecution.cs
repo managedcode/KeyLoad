@@ -1,5 +1,3 @@
-using System.Text.Json;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
@@ -13,7 +11,7 @@ public static class CommandExecutionExecution
     /// <param name = "principalId">Persisted principal selected by the caller's trusted boundary.</param>
     /// <param name = "evaluatedAt">Original operation evaluation time.</param>
     /// <param name = "input">The typed input contract of this capability.</param>
-    /// <returns>An owned execution command retaining the original input fingerprint.</returns>
+    /// <returns>An owned execution command.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
     public static Command<DatabaseCommand> CreateCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input)
@@ -43,25 +41,6 @@ public static class CommandExecutionExecution
         }
 
         var admitted = DatabaseCommandInputTypes.Require(kind, input);
-        var identity = admitted is CommandRequest batch ? BatchIdentity(batch, work) : Identity(admitted);
-        return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, admitted, DatabaseCommandFingerprint.Compute(id, kind, principalId, identity), work, admissionView);
+        return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, admitted, work, admissionView);
     }
-
-    internal static string BatchIdentity(CommandRequest request, ReadExecutionBudget? work)
-    {
-        if (!AnalyticsIdentity.HasAnalyticsMutation(request))
-        {
-            return Identity(request);
-        }
-
-        if (work is null)
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, AnalyticsWorkRequired);
-        }
-
-        return AnalyticsIdentity.Canonicalize(request, work);
-    }
-
-    internal const string AnalyticsWorkRequired = "Execution analytics issuance requires the original operation budget.";
-    internal static string Identity(object input) => JsonSerializer.Serialize(input, input.GetType(), JsonDefaults.Options);
 }

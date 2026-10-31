@@ -142,6 +142,7 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
             foreach (var slot in selectedSlots.Values)
             {
                 slot.RequireSettled();
+                slot.Dispose();
             }
             selectedSlots.Clear();
             selectedWork.Clear();
@@ -185,21 +186,27 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         }
     }
 
-    private (ITextSelectedIndexLeaseOwner Slot, TextIncrementalManifest Manifest) CaptureSelected(
+    private (ITextSelectedIndexLeaseOwner Slot, TextSelectedManifestCut Manifest) CaptureSelected(
         IKeyValueView view, SearchRequest request, ReadExecutionBudget budget)
     {
-        var selected = TextSelectedSourceAdmission.Capture(database, view, root, request, budget, configured.RuntimeText);
+        var options = configured.RuntimeText;
+        var (leaf, enrollment) = TextSelectedSourceAdmission.Select(database, root, request, budget, options);
         TextSelectedIndexSlot slot;
         lock (selectedGate)
         {
-            if (!selectedSlots.TryGetValue(selected.Leaf, out slot!))
+            if (!selectedSlots.TryGetValue(leaf, out slot!))
             {
-                slot = new(root, selected.Leaf, database.Store.Identity.NodeId, configured.RuntimeText, resources);
-                selectedSlots.Add(selected.Leaf, slot);
+                slot = new(root, leaf, database.Store.Identity.NodeId, options, resources);
+                selectedSlots.Add(leaf, slot);
             }
+        }
+        var manifest = slot.Manifest(() => TextSelectedSourceAdmission.ReadManifest(root, leaf, enrollment, request, budget, options));
+        TextSelectedSourceAdmission.RequireCurrent(database, view, enrollment, manifest.Manifest, request, budget);
+        lock (selectedGate)
+        {
             selectedWork[request.TextIndex!] = slot;
         }
-        return (slot, selected.Manifest);
+        return (slot, manifest);
     }
 
     public ValueTask DisposeAsync()

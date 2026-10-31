@@ -1,4 +1,3 @@
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.FunctionalTests.Authorization;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -30,7 +29,7 @@ internal sealed record CompositionLinkFailureImage(long Position, long Applied, 
         await Assert.That(owner.Database.LastApplied).IsEqualTo(checked(Applied + 1L));
         var actual = owner.ReadOutcome(operation);
         await Assert.That(actual.CanonicalSequence).IsEqualTo(checked(Applied + 1L));
-        await Assert.That(actual.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(operation));
+        await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(OrleansSerialization.Serialize(actual.PreparedCommand).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(operation))).IsTrue();
         await Assert.That(OrleansSerialization.Serialize(actual.Result).AsSpan().SequenceEqual(

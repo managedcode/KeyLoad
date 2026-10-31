@@ -10,11 +10,11 @@ internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
     IOptions<TextExecutionOptions> options, TextResourceOwnership? resources = null) : IDisposable, ITextSelectedIndexLeaseOwner
 {
     private const int Empty = 0;
-    private const int SingleReader = 1;
     private readonly Lock gate = new();
     private IndexOfTokenRecordPreviousToken<ulong, ulong>? index;
     private HashSet<TextSelectedProjectionLease>? readers;
     private Exception? failure;
+    private TextSelectedManifestCut? manifestCut;
     private long successfulPostingReads;
     internal long SuccessfulPostingReads => Volatile.Read(ref successfulPostingReads);
     public void ObserveOriginalPostingRead() => Interlocked.Increment(ref successfulPostingReads);
@@ -66,14 +66,6 @@ internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
             {
                 throw TextErrors.Corrupt();
             }
-            if (readers.Count == SingleReader)
-            {
-                try
-                {
-                    DisposeIndex();
-                }
-                catch (Exception error) { failure = error; throw; }
-            }
             _ = readers.Remove(reader);
         }
     }
@@ -97,11 +89,31 @@ internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
             {
                 throw new AggregateException(failure);
             }
-            if ((readers?.Count ?? Empty) != Empty || index is not null)
+            if ((readers?.Count ?? Empty) != Empty)
             {
                 throw TextErrors.Ownership();
             }
         }
+    }
+
+    /// <summary>Returns the validated manifest, reading the file again only after maintenance rewrote it.</summary>
+    internal TextSelectedManifestCut Manifest(Func<TextIncrementalManifest> read)
+    {
+        var file = new FileInfo(Path.Combine(root, leaf, TextIncrementalProtocol.ManifestFile));
+        var (written, length) = file.Exists ? (file.LastWriteTimeUtc, file.Length) : (DateTime.MinValue, Empty);
+        lock (gate)
+        {
+            if (manifestCut is { } cached && cached.Written == written && cached.Length == length)
+            {
+                return cached;
+            }
+        }
+        var cut = TextSelectedManifestCut.Create(read(), written, length);
+        lock (gate)
+        {
+            manifestCut = cut;
+        }
+        return cut;
     }
 
     public void Dispose()

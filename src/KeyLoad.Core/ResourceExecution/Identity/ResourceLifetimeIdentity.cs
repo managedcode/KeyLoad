@@ -1,16 +1,13 @@
-using System.Security.Cryptography;
-using KeyLoad.Core.InternalSerialization;
-using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core.ResourceExecution;
 
-/// <summary>Derives active creation identity from the original canonical operation without changing its fingerprint.</summary>
+/// <summary>Derives an active resource's incarnation from the command that created it.</summary>
 internal static class ResourceLifetimeIdentity
 {
-    private const string IncarnationDomain = "keyload:resource-incarnation";
     private const string InvalidIdentity = "The persisted resource lifetime identity is invalid.";
-    private const int DigestCharacters = 64;
+    private const string IncarnationFormat = "N";
+    internal const int IncarnationCharacters = 32;
 
     internal static ResourceLifetime Create(Command<DatabaseCommand> original, string tenantId,
         string databaseId, ResourceDefinition definition)
@@ -23,10 +20,8 @@ internal static class ResourceLifetimeIdentity
             throw Invalid();
         }
         RequireIdentifier(original.UserId!);
-        var fingerprint = DatabaseCommandFingerprint.Compute(original);
-        var incarnation = Compute(tenantId, databaseId, definition.Name, fingerprint);
         return new(tenantId, databaseId, definition.Name, definition.TransactionDomainId,
-            definition.Kind, new(incarnation), fingerprint);
+            definition.Kind, Incarnation(original));
     }
 
     internal static void Validate(ResourceLifetime lifetime)
@@ -45,17 +40,16 @@ internal static class ResourceLifetimeIdentity
         RequireScope(tenantId, databaseId, definition);
         if (lifetime is null || lifetime.TenantId != tenantId || lifetime.DatabaseId != databaseId
             || lifetime.ResourceName != definition.Name || lifetime.TransactionDomainId != definition.TransactionDomainId
-            || lifetime.Kind != definition.Kind || !IsDigest(lifetime.CreationFingerprint)
-            || lifetime.Incarnation is null || !IsDigest(lifetime.Incarnation.Value))
-        {
-            throw Invalid();
-        }
-        var expected = Compute(tenantId, databaseId, definition.Name, lifetime.CreationFingerprint);
-        if (lifetime.Incarnation.Value != expected)
+            || lifetime.Kind != definition.Kind
+            || lifetime.Incarnation is null || !IsIncarnation(lifetime.Incarnation.Value))
         {
             throw Invalid();
         }
     }
+
+    /// <summary>The incarnation a creating command gives its resource.</summary>
+    internal static ResourceIncarnation Incarnation(Command<DatabaseCommand> original)
+        => new(original.CommandId.ToString(IncarnationFormat));
 
     private static void RequireScope(string tenantId, string databaseId, ResourceDefinition definition)
     {
@@ -81,21 +75,8 @@ internal static class ResourceLifetimeIdentity
         }
     }
 
-    private static string Compute(string tenantId, string databaseId, string resourceName, string fingerprint)
-    {
-        try
-        {
-            return Convert.ToHexStringLower(SHA256.HashData(KeyCodec.Encode(
-                IncarnationDomain, tenantId, databaseId, resourceName, fingerprint)));
-        }
-        catch (KeyLoadException)
-        {
-            throw Invalid();
-        }
-    }
-
-    private static bool IsDigest(string value)
-        => value is { Length: DigestCharacters }
+    internal static bool IsIncarnation(string? value)
+        => value is { Length: IncarnationCharacters }
             && value.All(char.IsAsciiHexDigitLower);
 
     private static KeyLoadException Invalid() => Errors.Fail(ErrorCode.Corruption, InvalidIdentity);

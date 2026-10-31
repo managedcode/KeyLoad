@@ -85,8 +85,7 @@ public static class AtomicCommandCommit
     {
         var rosterTransaction = new AtomicPartitionRosterTransaction(transaction, position, replicationIndex);
         var partitionScope = CommandOutcomePartitionIdentity.Resolve(operation);
-        var fingerprint = OperationProtocol.CommandFingerprint(operation);
-        var outcome = engine.ExecuteAndBuildOutcome(rosterTransaction, operation, position, replicationIndex, fingerprint, partitionScope, siloLocal, out var replayed, out var selection, out var persistOutcome, cancellationToken);
+        var outcome = engine.ExecuteAndBuildOutcome(rosterTransaction, operation, position, replicationIndex, partitionScope, siloLocal, out var replayed, out var selection, out var persistOutcome, cancellationToken);
         if (replayed || !persistOutcome)
         {
             return new(outcome.CanonicalSequence, outcome.Result);
@@ -106,7 +105,7 @@ public static class AtomicCommandCommit
         return new(outcome.CanonicalSequence, result);
     }
 
-    internal static StoredOutcome ExecuteAndBuildOutcome(this DatabaseEngine engine, AtomicPartitionRosterTransaction transaction, Command<DatabaseCommand> operation, long position, long replicationIndex, string fingerprint, CommandOutcomePartitionScope partitionScope, bool siloLocal, out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome, CancellationToken cancellationToken)
+    internal static StoredOutcome ExecuteAndBuildOutcome(this DatabaseEngine engine, AtomicPartitionRosterTransaction transaction, Command<DatabaseCommand> operation, long position, long replicationIndex, CommandOutcomePartitionScope partitionScope, bool siloLocal, out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome, CancellationToken cancellationToken)
     {
         replayed = false;
         selection = CommandOutcomeKeyResolver.ForNew(operation.UserId!, operation.CommandId, partitionScope);
@@ -162,7 +161,7 @@ public static class AtomicCommandCommit
             result = ManagedCode.Communication.Result<object>.Fail(Errors.Problem(ErrorCode.Validation, InvalidCommandJsonMessage));
         }
 
-        return engine.BuildStoredOutcome(operation, fingerprint, policyEpoch, result, compositionAuthority, partitionScope, onlineTextAuthority, transferFailure, selection.Outcome?.CanonicalSequence ?? (persistOutcome ? replicationIndex : StorageOperationApply.ReadCanonicalSequence(transaction)));
+        return engine.BuildStoredOutcome(operation, policyEpoch, result, compositionAuthority, partitionScope, onlineTextAuthority, transferFailure, selection.Outcome?.CanonicalSequence ?? (persistOutcome ? replicationIndex : StorageOperationApply.ReadCanonicalSequence(transaction)));
     }
 
     internal static void ValidateCommandClock(AtomicPartitionRosterTransaction view, DateTimeOffset evaluatedAt)

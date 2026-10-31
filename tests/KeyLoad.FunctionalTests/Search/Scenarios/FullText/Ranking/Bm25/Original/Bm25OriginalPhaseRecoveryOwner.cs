@@ -88,7 +88,6 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
             || stored.Partition != phase.Current.Partition || stored.PreparedCommand is not { } prepared
             || prepared.CommandId != operation.CommandId || prepared.UserId != operation.UserId
             || prepared.Value is not { } actual || actual.Kind != input.Kind
-            || actual.Fingerprint != input.Fingerprint || stored.Fingerprint != input.Fingerprint
             || !OrleansSerialization.Serialize(actual.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(input.Input, ValidationProfile.PublicInputElements).AsSpan()))
         {
             throw new InvalidOperationException("The exact original BM25 partition outcome is missing or inconsistent.");

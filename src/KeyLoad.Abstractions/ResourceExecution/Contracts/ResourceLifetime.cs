@@ -9,5 +9,4 @@ internal sealed record ResourceLifetime(
     [property: Orleans.Id(ResourceLifetimeContract.ResourceField)] string ResourceName,
     [property: Orleans.Id(ResourceLifetimeContract.TransactionDomainField)] string TransactionDomainId,
     [property: Orleans.Id(ResourceLifetimeContract.KindField)] ResourceKind Kind,
-    [property: Orleans.Id(ResourceLifetimeContract.IncarnationField)] ResourceIncarnation Incarnation,
-    [property: Orleans.Id(ResourceLifetimeContract.CreationFingerprintField)] string CreationFingerprint);
+    [property: Orleans.Id(ResourceLifetimeContract.IncarnationField)] ResourceIncarnation Incarnation);

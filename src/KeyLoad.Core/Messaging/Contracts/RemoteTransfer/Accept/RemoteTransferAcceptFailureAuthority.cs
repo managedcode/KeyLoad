@@ -9,6 +9,5 @@ internal sealed record RemoteTransferAcceptFailureAuthority(
     [property: global::Orleans.Id(RemoteTransferAcceptFailureAuthorityFields.MessageFingerprint)] string MessageFingerprint,
     [property: global::Orleans.Id(RemoteTransferAcceptFailureAuthorityFields.IntentDigest)] string IntentDigest,
     [property: global::Orleans.Id(RemoteTransferAcceptFailureAuthorityFields.AcceptCommandId)] Guid AcceptCommandId,
-    [property: global::Orleans.Id(RemoteTransferAcceptFailureAuthorityFields.CommandFingerprint)] string CommandFingerprint,
     [property: global::Orleans.Id(RemoteTransferAcceptFailureAuthorityFields.TargetIncarnation)] Guid TargetIncarnation,
     [property: global::Orleans.Id(RemoteTransferAcceptFailureAuthorityFields.Dependency)] RemoteTransferAcceptDependency Dependency);

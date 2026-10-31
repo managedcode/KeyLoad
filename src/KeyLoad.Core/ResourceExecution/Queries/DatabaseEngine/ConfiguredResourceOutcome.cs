@@ -1,4 +1,3 @@
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
@@ -33,7 +32,7 @@ public static class ConfiguredResourceOutcome
         var definition = view.GetRecord<ResourceDefinition>(KeySpace.Resource(tenantId, databaseId, resourceName));
         var lifetime = (ResourceLifetimeCatalog.Read(view, tenantId, databaseId, resourceName, definition)).Value ?? throw Errors.Fail(ErrorCode.NotFound, EngineResourceAccess.DatabaseEngineResourceIsNotConfiguredDetail);
         var admitted = ResourceEffectAdmissionValidation.Read(operation);
-        var sameLifetime = admitted.Bindings.IsEmpty ? lifetime.CreationFingerprint == DatabaseCommandFingerprint.Compute(operation) : admitted.Bindings.Contains(lifetime);
+        var sameLifetime = admitted.Bindings.IsEmpty ? lifetime.Incarnation == ResourceLifetimeIdentity.Incarnation(operation) : admitted.Bindings.Contains(lifetime);
         if (!sameLifetime)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, ConfiguredOutcomeLifetimeChanged);

@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.FunctionalTests.Authorization;
 
 namespace KeyLoad.FunctionalTests.DatabaseComposition;
@@ -27,7 +26,7 @@ internal static class CompositionBoundReferenceAssertions
         var retained = owner.ReadOutcome(command.Operation).PreparedCommand!;
         await Assert.That(retained.CommandId).IsEqualTo(command.Operation.CommandId);
         await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(command.Operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
-        await Assert.That(DatabaseCommandFingerprint.Compute(retained)).IsEqualTo(DatabaseCommandFingerprint.Compute(command.Operation));
+        await Assert.That(DatabaseCommandContentIdentity.SameContent(retained, command.Operation)).IsTrue();
         var request = ((CommandRequest)retained.Value!.Input);
         await EqualAsync(command.Request, request);
         if (!command.Derived)

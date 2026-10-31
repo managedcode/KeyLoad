@@ -9,7 +9,7 @@ internal static class RemoteTransferAcceptFailureAuthorityFields
     internal const uint MessageFingerprint = 4;
     internal const uint IntentDigest = 5;
     internal const uint AcceptCommandId = 6;
-    internal const uint CommandFingerprint = 7;
+    // Field 7 was the accept command fingerprint. It is retired and must never be reused.
     internal const uint TargetIncarnation = 8;
     internal const uint Dependency = 9;
     internal const string Alias = "keyload.core.queue-transfer.accept-failure-authority";

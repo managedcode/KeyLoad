@@ -35,7 +35,7 @@ public static class RemoteTransferRepairFailureRead
         var partition = request.RepairStage == QueueTransferRepairStage.Accept ? request.Destination.Partition : request.Source.Partition;
         var selected = CommandOutcomeKeyResolver.Select(view, principal.Id, original.CommandId, new(CommandOutcomeScopeKind.Partition, partition));
         var outcome = selected.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Unavailable);
-        if (outcome.Incarnation != engine.Store.Identity.Incarnation || outcome.Fingerprint != OperationProtocol.CommandFingerprint(original))
+        if (outcome.Incarnation != engine.Store.Identity.Incarnation || outcome.PreparedCommand.CommandId != original.CommandId)
         {
             throw Errors.Fail(ErrorCode.Conflict, RemoteTransferRepairProtocol.Invalid);
         }
@@ -53,7 +53,7 @@ public static class RemoteTransferRepairFailureRead
         var bytes = view.ReadOwnedValue(selected.Key) ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Unavailable);
         var resource = engine.Resource(view, partition, request.RepairStage == QueueTransferRepairStage.Accept ? request.Destination.Queue : request.Source.Queue, ResourceKind.WorkQueue);
         var cut = engine.Token(view, partition, engine.Store.Position);
-        var claims = new RemoteTransferRepairClaims(RemoteTransferRepairProtocol.Purpose, intent.Source, intent.Destination, intent.TransferId, principal.Id, intent.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(request.IntentToken), request.RepairStage!.Value, request.ExpectedGeneration, request.PolicyGeneration, request.CompleteGeneration, original.CommandId, outcome.Fingerprint, Convert.ToHexString(SHA256.HashData(bytes)), outcome.PolicyEpoch, principal.PolicyEpoch, JsonData.Fingerprint(new { resource.FieldPolicies, resource.HeaderPolicies }), cut, cut.Position, request.ReceiptToken is null ? null : RemoteTransferCoordinationIdentity.IntentDigest(request.ReceiptToken));
+        var claims = new RemoteTransferRepairClaims(RemoteTransferRepairProtocol.Purpose, intent.Source, intent.Destination, intent.TransferId, principal.Id, intent.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(request.IntentToken), request.RepairStage!.Value, request.ExpectedGeneration, request.PolicyGeneration, request.CompleteGeneration, original.CommandId, Convert.ToHexString(SHA256.HashData(bytes)), outcome.PolicyEpoch, principal.PolicyEpoch, JsonData.Fingerprint(new { resource.FieldPolicies, resource.HeaderPolicies }), cut, cut.Position, request.ReceiptToken is null ? null : RemoteTransferCoordinationIdentity.IntentDigest(request.ReceiptToken));
         var signed = engine.Sign(claims);
         return new(null, null, null, signed);
     }

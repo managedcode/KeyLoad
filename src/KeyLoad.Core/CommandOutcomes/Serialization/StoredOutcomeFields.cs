@@ -2,7 +2,7 @@ namespace KeyLoad.Core.InternalSerialization;
 
 internal static class StoredOutcomeFields
 {
-    internal const uint Fingerprint = 0;
+    // Field 0 was the command fingerprint. It is retired and must never be reused.
     internal const uint Incarnation = 1;
     internal const uint PolicyEpoch = 2;
     internal const uint Result = 3;

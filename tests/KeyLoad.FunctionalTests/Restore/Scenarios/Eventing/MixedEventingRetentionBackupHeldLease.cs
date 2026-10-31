@@ -15,7 +15,7 @@ internal static class MixedEventingRetentionBackupHeldLease
         await Assert.That(original.CommandId).IsEqualTo(issued.Operation.CommandId);
         await Assert.That(original.UserId!).IsEqualTo(QueueLifecycleTestProtocol.Administrator);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.Receive);
-        await Assert.That(original.Value.Fingerprint).IsEqualTo(issued.Operation.Value!.Fingerprint);
+        await Assert.That(DatabaseCommandContentIdentity.SameContent(original, issued.Operation)).IsTrue();
         _ = fixture.Source.Database.OwnCommand(original);
         await MixedEventingRetentionBackupTopic.EqualAsync(new ReceiveRequest(issued.Operation.CommandId,
                 state.Queue.Lane, LeaseSeconds: QueueLifecycleTestProtocol.LeaseSeconds),

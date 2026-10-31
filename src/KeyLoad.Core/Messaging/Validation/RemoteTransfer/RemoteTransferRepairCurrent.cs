@@ -26,7 +26,7 @@ public static class RemoteTransferRepairCurrent
         }
 
         var fresh = engine.VerifyRetained<RemoteTransferRepairClaims>(current.RepairWitness);
-        if (fresh.OutcomeDigest != witness.OutcomeDigest || fresh.CommandFingerprint != witness.CommandFingerprint || fresh.OriginalPolicyEpoch != witness.OriginalPolicyEpoch || fresh.CurrentPolicyEpoch != witness.CurrentPolicyEpoch || fresh.CurrentFieldHeaderDigest != witness.CurrentFieldHeaderDigest || fresh.ReceiptDigest != witness.ReceiptDigest)
+        if (fresh.OutcomeDigest != witness.OutcomeDigest || fresh.OriginalPolicyEpoch != witness.OriginalPolicyEpoch || fresh.CurrentPolicyEpoch != witness.CurrentPolicyEpoch || fresh.CurrentFieldHeaderDigest != witness.CurrentFieldHeaderDigest || fresh.ReceiptDigest != witness.ReceiptDigest)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferRepairProtocol.Stale);
         }

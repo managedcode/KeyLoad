@@ -1,6 +1,5 @@
 using System.Collections.Immutable;
 using System.Text.Json;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Server;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
@@ -46,7 +45,7 @@ internal static class SafeProjectorOperationMutations
         var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))
             ?? throw new InvalidOperationException(MissingOutcome);
         await RefusalAsync(stored.Result, expectedDetail);
-        await Assert.That(StringComparer.Ordinal.Equals(stored.Fingerprint, DatabaseCommandFingerprint.Compute(command.Operation))).IsTrue();
+        await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(command.Operation.CommandId);
         await Assert.That(stored.PolicyEpoch).IsEqualTo(policyEpoch);
         await Assert.That(stored.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
         await Assert.That(stored.Partition).IsEqualTo(owner.Source.Partition);

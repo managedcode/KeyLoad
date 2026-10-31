@@ -1,5 +1,4 @@
 using System.Text.Json;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.FunctionalTests.Messaging;
 using KeyLoad.Storage;
@@ -45,7 +44,7 @@ internal static class CompositionPrefixPrepareAssertions
             await ResultAsync(command, owner.Submit(command.Original));
             await ResultAsync(command, owner.Database.ResolveOutcome(command.Original));
             var stored = OutcomeStoreOracle.ReadStored(owner.Store, command.Original)!;
-            await Assert.That(stored.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(command.Original));
+            await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(command.Original.CommandId);
             await ResultAsync(command, stored.Result);
         }
         await Assert.That(QueueWholeFlowStorage.Bytes(owner.Store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();

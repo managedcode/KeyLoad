@@ -19,7 +19,7 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
     private bool postingObserved;
 
     internal TextSelectedProjectionLease(TextSelectedReadAdmission admissionOwner,
-        Func<(ITextSelectedIndexLeaseOwner Slot, TextIncrementalManifest Manifest)> capture,
+        Func<(ITextSelectedIndexLeaseOwner Slot, TextSelectedManifestCut Manifest)> capture,
         ReadExecutionBudget budget)
     {
         this.budget = budget;
@@ -30,8 +30,8 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
             slot = selected.Slot;
             slot.Enter(budget, this);
             entered = true;
-            byReference = TextSelectedRecordMap.ByReference(selected.Manifest, budget);
-            byId = TextSelectedRecordMap.ById(selected.Manifest, budget);
+            byReference = selected.Manifest.ByReference;
+            byId = selected.Manifest.ById;
         }
         catch (Exception primary)
         {

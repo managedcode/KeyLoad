@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using KeyLoad.FunctionalTests.Messaging;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -37,23 +36,13 @@ internal static class ResourceIncarnationAssertions
     internal static async Task IdentityAsync(ZoneTreeStore store, PartitionRef partition, Command<DatabaseCommand> original,
         ResourceDefinition definition, bool sql)
     {
-        var fingerprint = JsonData.Fingerprint(new
-        {
-            Id = original.CommandId,
-            Kind = original.Value!.Kind,
-            PrincipalId = original.UserId!,
-            PayloadJson = ResourceIncarnationLiteral.CreationJson(original)
-        });
-        await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
-        var incarnation = Convert.ToHexStringLower(SHA256.HashData(KeyCodec.Encode(
-            "keyload:resource-incarnation", partition.TenantId, partition.DatabaseId, definition.Name, fingerprint)));
+        var incarnation = original.CommandId.ToString("N");
         if (!sql)
         {
-            await Assert.That(fingerprint).IsEqualTo(ResourceIncarnationLiteral.Fingerprint);
             await Assert.That(incarnation).IsEqualTo(ResourceIncarnationLiteral.Incarnation);
         }
         var expected = new ResourceLifetime(partition.TenantId, partition.DatabaseId, definition.Name,
-            definition.TransactionDomainId, definition.Kind, new(incarnation), fingerprint);
+            definition.TransactionDomainId, definition.Kind, new(incarnation));
         await EqualAsync(expected, Lifetime(store, partition));
     }
 

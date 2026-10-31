@@ -1,5 +1,4 @@
 using KeyLoad.Core.CommandOutcomes.Contracts;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.FunctionalTests.Authorization;
 using KeyLoad.FunctionalTests.ResourceExecution;
 using KeyLoad.Storage;
@@ -46,7 +45,7 @@ internal static class RecurringSagaSchemaReplay
             : KeySpace.PartitionOutcome(owner.Source.Partition, command.Operation.UserId!, command.Operation.CommandId);
         var stored = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key))
             ?? throw new InvalidOperationException(MissingStored);
-        await Assert.That(stored.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(command.Operation));
+        await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(command.Operation.CommandId);
         await Assert.That(stored.PolicyEpoch).IsEqualTo(command.CreatorEpoch);
         await Assert.That(stored.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
         await Assert.That(stored.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);

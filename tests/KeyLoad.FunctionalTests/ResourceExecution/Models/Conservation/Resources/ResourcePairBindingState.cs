@@ -7,7 +7,7 @@ namespace KeyLoad.FunctionalTests.ResourceExecution;
 
 internal enum ResourcePairBindingFault
 {
-    MissingLifetime, MalformedLifetime, ConflictingLifetime, MissingDefinition
+    MissingLifetime, MalformedLifetime, MissingDefinition
 }
 
 internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePairBindingFault fault)
@@ -60,8 +60,6 @@ internal sealed class ResourcePairBindingState(TestDatabase source, ResourcePair
     internal const long FirstRevision = 1L;
     internal const long FirstEpoch = 1L;
     internal const long NextPolicyEpoch = 2L;
-    internal const char HexZero = '0';
-    internal const char HexOne = '1';
     internal static readonly string[] Models = [Documents, Events, Queue];
     internal TestDatabase Source { get; } = source;
     internal ResourcePairBindingFault Fault { get; } = fault;

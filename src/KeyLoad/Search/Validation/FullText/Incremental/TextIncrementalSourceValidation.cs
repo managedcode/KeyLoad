@@ -29,6 +29,16 @@ internal static class TextIncrementalSourceValidation
         budget.Check();
     }
 
+    /// <summary>A search reads the generation only while no source change follows its manifest sequence.</summary>
+    internal static void Current(TextIncrementalManifest manifest, TextSeedCapture current, ReadExecutionBudget budget)
+    {
+        budget.Check();
+        if (manifest.ThroughSequence != current.UpperSequence)
+        {
+            throw TextErrors.Mismatch();
+        }
+    }
+
     internal static void CompleteCorpus(TextIncrementalManifest manifest,
         TextSeedCapture current, ReadExecutionBudget budget)
     {

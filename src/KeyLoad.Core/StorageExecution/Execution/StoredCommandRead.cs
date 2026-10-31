@@ -11,7 +11,7 @@ public static class StoredCommandRead
     internal const string StoredCommandScopeInvalid = "The retained command does not match its committed canonical outcome.";
     internal const string LastCommandScopeInvalid = "The last canonical outcome does not match the committed apply watermark.";
     /// <summary>Reads the exact original command for a freshly authorized retry of the same identity and content.</summary>
-    /// <param name = "operation">Server-bound retry with the same stable command identity and original fingerprint.</param>
+    /// <param name = "operation">Server-bound retry with the same stable command identity.</param>
     /// <param name = "cancellationToken">Bounds the synchronous retained lookup.</param>
     /// <returns>The owned original command and its actual sequence, or a not-found result if it was never committed here.</returns>
 
@@ -49,7 +49,7 @@ public static class StoredCommandRead
             _ = engine.ReadValidatedSubmissionOutcome(view, original, verifiedSelection: selected);
             StorageOperationApply.RequireStoredCanonicalSequence(view, outcome, siloLocal: false);
             var retained = engine.OwnCommand(outcome.PreparedCommand);
-            if (retained.CommandId != original.CommandId || retained.UserId != original.UserId || retained.Value!.Kind != original.Value!.Kind || retained.Value.Fingerprint != outcome.Fingerprint)
+            if (retained.CommandId != original.CommandId || retained.UserId != original.UserId || retained.Value!.Kind != original.Value!.Kind)
             {
                 throw Errors.Fail(ErrorCode.Corruption, StoredCommandScopeInvalid);
             }
@@ -112,12 +112,6 @@ public static class StoredCommandRead
             throw Errors.Fail(ErrorCode.Corruption, LastCommandScopeInvalid);
         }
 
-        var retained = engine.OwnCommand(outcome.PreparedCommand);
-        if (retained.Value!.Fingerprint != outcome.Fingerprint)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, StoredCommandScopeInvalid);
-        }
-
-        return new StoredCommand(sequence, retained);
+        return new StoredCommand(sequence, engine.OwnCommand(outcome.PreparedCommand));
     }
 }

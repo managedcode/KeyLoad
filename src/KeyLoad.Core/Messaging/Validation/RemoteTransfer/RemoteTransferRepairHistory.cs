@@ -21,7 +21,7 @@ public static class RemoteTransferRepairHistory
             var hint = new RemoteTransferCoordinationHint(record.Source, record.Destination, record.TransferId, record.PrincipalId, record.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(record.IntentToken), engine.Token(view, record.Source.Partition, engine.Store.Position), reference.CapacityGeneration, record.Attempts?.Ceiling, reference.PolicyGeneration, reference.CompleteGeneration, state.Ceiling);
             var claims = engine.VerifyRetained<RemoteTransferRepairClaims>(reference.WitnessToken);
             RemoteTransferRepairWitness.RequireRemoteTransferRepairWitness(claims, hint);
-            if (claims.Stage != reference.Stage || claims.FailedCommandId != reference.FailedCommandId || claims.CommandFingerprint != reference.Fingerprint || claims.OutcomeDigest != reference.OutcomeDigest || claims.OwnerCut.Incarnation != intent.Incarnation || reference.CapacityGeneration > (record.Attempts?.Generation ?? RemoteTransferRepairProtocol.InitialGeneration))
+            if (claims.Stage != reference.Stage || claims.FailedCommandId != reference.FailedCommandId || claims.OutcomeDigest != reference.OutcomeDigest || claims.OwnerCut.Incarnation != intent.Incarnation || reference.CapacityGeneration > (record.Attempts?.Generation ?? RemoteTransferRepairProtocol.InitialGeneration))
             {
                 throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
             }
@@ -36,7 +36,7 @@ public static class RemoteTransferRepairHistory
         var selection = CommandOutcomeKeyResolver.Select(view, claims.PrincipalId, claims.FailedCommandId, new(CommandOutcomeScopeKind.Partition, partition));
         var outcome = selection.Outcome;
         var bytes = view.ReadOwnedValue(selection.Key);
-        if (outcome is null || bytes is null || outcome.Incarnation != claims.OwnerCut.Incarnation || outcome.PolicyEpoch != claims.OriginalPolicyEpoch || outcome.Fingerprint != claims.CommandFingerprint || Errors.Code(outcome.Result.Problem).Value != ErrorCode.PermissionDenied || outcome.Result.Value is not null || Convert.ToHexString(SHA256.HashData(bytes)) != claims.OutcomeDigest)
+        if (outcome is null || bytes is null || outcome.Incarnation != claims.OwnerCut.Incarnation || outcome.PolicyEpoch != claims.OriginalPolicyEpoch || outcome.PreparedCommand.CommandId != claims.FailedCommandId || Errors.Code(outcome.Result.Problem).Value != ErrorCode.PermissionDenied || outcome.Result.Value is not null || Convert.ToHexString(SHA256.HashData(bytes)) != claims.OutcomeDigest)
         {
             throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
         }

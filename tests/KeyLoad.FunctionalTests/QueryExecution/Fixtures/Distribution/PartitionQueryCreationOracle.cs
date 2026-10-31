@@ -15,7 +15,7 @@ internal static class PartitionQueryCreationOracle
         if (outcome is null || outcome.Result.IsFailed || outcome.PreparedCommand.CommandId != command.CommandId
             || outcome.PreparedCommand.UserId != command.UserId
             || outcome.PreparedCommand.Value!.Kind != OperationKind.ConfigureResource
-            || outcome.PreparedCommand.Value.Fingerprint != command.Value!.Fingerprint
+            || !DatabaseCommandContentIdentity.SameContent(outcome.PreparedCommand, command)
             || !OrleansSerialization.Serialize(outcome.PreparedCommand.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(command.Value!.Input, ValidationProfile.PublicInputElements).AsSpan()))
         {
             throw new InvalidOperationException(OriginalConfigurationRequired);

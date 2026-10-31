@@ -1,6 +1,4 @@
-using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
@@ -31,10 +29,6 @@ internal static class EventAppendCollectionAssertions
             .SequenceEqual(JsonDefaults.Serialize(definition))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(((ConfigureResourceRequest)original.Value.Input))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(request))).IsTrue();
-        var fingerprint = DatabaseCommandFingerprint.Compute(commandId, OperationKind.ConfigureResource,
-            EventAppendCrashContract.Principal, JsonSerializer.Serialize(request, JsonDefaults.Options));
-        await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
-        await Assert.That(stored.Fingerprint).IsEqualTo(fingerprint);
         var lifetime = ResourceLifetimeIdentity.Create(original, partition.TenantId, partition.DatabaseId, definition);
         return new(partition, EventAppendCrashContract.Documents, id)
         {

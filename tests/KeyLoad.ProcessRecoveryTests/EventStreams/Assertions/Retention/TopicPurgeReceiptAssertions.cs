@@ -1,6 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
@@ -34,11 +31,7 @@ internal static class TopicPurgeReceiptAssertions
         }
         await Assert.That(stored.Incarnation).IsEqualTo(store.Identity.Incarnation);
         await Assert.That(stored.Partition).IsEqualTo(TopicPurgeCrashContract.Partition);
-        var canonical = "{\"id\":" + JsonSerializer.Serialize(operation.CommandId, JsonDefaults.Options) + ",\"kind\":" +
-            JsonSerializer.Serialize(OperationKind.Batch, JsonDefaults.Options) + ",\"payloadJson\":" +
-            JsonSerializer.Serialize(JsonSerializer.Serialize(((CommandRequest)operation.Value!.Input),
-                JsonDefaults.Options), JsonDefaults.Options) + ",\"principalId\":\"root\"}";
-        await Assert.That(stored.Fingerprint).IsEqualTo(Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(canonical))));
+        await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
         await EventAppendReceiptAssertions.SameResultAsync(outcome, stored.Result);
         await Assert.That(store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(view.ReadOwnedValue(KeySpace.Clock.ToArray())!))).IsEqualTo(new DateTimeOffset(operation.Timestamp));
         await Assert.That(stored.CanonicalSequence).IsGreaterThan(0L);

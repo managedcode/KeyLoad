@@ -1,4 +1,3 @@
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.Search;
 using ManagedCode.Communication.Commands;
 
@@ -26,7 +25,7 @@ public static class OnlineTextOperationAuthority
             OnlineTextPublicationValidation.LocalSource(command, current, prepared.ValidatedSource);
             engine.ValidateOnlineTextCheckpoint(raw, principal, command.Request, command.Result.Checkpoint, prepared.CheckpointIntent);
             budget.Check();
-            return engine.CreatePreparedCommand(OperationKind.OnlineTextPublicationPhase, command.Request.CommandId, principalId, evaluatedAt, command, DatabaseCommandFingerprint.Compute(command.Request.CommandId, OperationKind.OnlineTextPublicationPhase, principalId, CommandExecutionExecution.Identity(command)), budget, view);
+            return engine.CreatePreparedCommand(OperationKind.OnlineTextPublicationPhase, command.Request.CommandId, principalId, evaluatedAt, command, budget, view);
         });
     }
 }

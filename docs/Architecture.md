@@ -790,7 +790,8 @@ passed or failed and then dispatches `website.yml` (`Website`) with its run id
 ([ADR-150](ADR/ADR-150-per-type-benchmark-jobs.md)). Website downloads the result
 files of that run, or of the latest completed run on a site push or manual
 dispatch, merges them, builds the static site and deploys Pages; without result
-files it publishes nothing. `release.yml` (`Release`) stays manual
+files it publishes nothing. `release.yml` (`Release`) runs after a successful Build
+and Tests run for a push to main and publishes that tested commit
 ([ReleaseDelivery](Features/ReleaseDelivery.md)): self-contained server/CLI
 archives and the server image published by the .NET SDK `PublishContainer` target
 to `ghcr.io/managedcode/keyload` under the commit SHA and `latest` tags. Packaging

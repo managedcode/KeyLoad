@@ -154,6 +154,7 @@ internal sealed class TextOnlineGeneration(string root, OnlineTextCurrentPublica
     internal string Root => root;
     internal OnlineTextCurrentPublication Original => original;
     internal TextIncrementalManifest Manifest => manifest;
+    internal TextSelectedManifestCut Cut { get; } = TextSelectedManifestCut.Create(manifest);
 
     internal TextOnlineGenerationPin Pin(ReadExecutionBudget budget)
     {

@@ -59,11 +59,10 @@ internal static class ResourcePairBindingFlow
         var lifetime = LifetimeKey(partition, name);
         var key = state.Fault == ResourcePairBindingFault.MissingDefinition ? definition : lifetime;
         var original = ResourceIncarnationAssertions.Bytes(state.Source.Store, key);
-        var changed = state.Fault switch
+        byte[]? changed = state.Fault switch
         {
             ResourcePairBindingFault.MissingLifetime or ResourcePairBindingFault.MissingDefinition => null,
             ResourcePairBindingFault.MalformedLifetime => [MalformedTag, MalformedLength, MalformedTail],
-            ResourcePairBindingFault.ConflictingLifetime => Conflict(original),
             _ => throw new InvalidOperationException(Invalid)
         };
         state.Source.Store.Commit((transaction, _) =>
@@ -83,17 +82,6 @@ internal static class ResourcePairBindingFlow
 
     internal static void Repair(ZoneTreeStore store, (byte[] Key, byte[] Original) row)
         => store.Commit((transaction, _) => { transaction.Put(row.Key, row.Original); return true; });
-
-    private static byte[] Conflict(byte[] original)
-    {
-        var lifetime = OrleansSerialization.Deserialize<ResourceLifetime>(original);
-        var value = lifetime.Incarnation.Value.ToCharArray();
-        value[Zero] = value[Zero] == HexZero ? HexOne : HexZero;
-        return OrleansSerialization.Serialize(lifetime with
-        {
-            Incarnation = lifetime.Incarnation with { Value = new string(value) }
-        });
-    }
 
     internal static async Task<(Command<DatabaseCommand> Original, Result<object> Result)> ApplyAfterRepairAsync(
         ResourcePairBindingState state, Command<DatabaseCommand> issued, string resource, CancellationToken token)
@@ -121,7 +109,7 @@ internal static class ResourcePairBindingFlow
             await Assert.That(original.CommandId).IsEqualTo(issued.CommandId);
             await Assert.That(original.UserId).IsEqualTo(issued.UserId);
             await Assert.That(original.Value!.Kind).IsEqualTo(issued.Value!.Kind);
-            await Assert.That(original.Value.Fingerprint).IsEqualTo(issued.Value.Fingerprint);
+            await Assert.That(DatabaseCommandContentIdentity.SameContent(original, issued)).IsTrue();
             await Assert.That(OrleansSerialization.Serialize(original.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(issued.Value.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
             state.Remember(original, result);
             await ResourcePairBindingAssertions.PairsAsync(state, source.Store);

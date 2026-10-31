@@ -1,6 +1,5 @@
 using KeyLoad.Core.CommandOutcomes.Contracts;
 using KeyLoad.Core.DocumentStorage;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.FunctionalTests.Authorization;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
@@ -28,7 +27,7 @@ internal static class CompositionReverseFinalImageAssertions
         await Assert.That(retained.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(retained.UserId!).IsEqualTo(D.Root);
         await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(state.Original.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
-        await Assert.That(DatabaseCommandFingerprint.Compute(retained)).IsEqualTo(DatabaseCommandFingerprint.Compute(state.Original));
+        await Assert.That(DatabaseCommandContentIdentity.SameContent(retained, state.Original)).IsTrue();
         await A.EqualAsync(state.Request, ((CommandRequest)retained.Value!.Input));
         await OutcomeAsync(owner, state.Seed, state.SeedReceipt, null);
         await Assert.That(owner.Store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(
@@ -41,7 +40,7 @@ internal static class CompositionReverseFinalImageAssertions
     {
         var actual = OutcomeStoreOracle.ReadStored(owner.Store, operation)
             ?? throw new InvalidOperationException("The original composition outcome is absent.");
-        await Assert.That(actual.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(operation));
+        await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(actual.Incarnation).IsEqualTo(owner.Store.Identity.Incarnation);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(1);
         await Assert.That(actual.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);

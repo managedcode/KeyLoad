@@ -6,7 +6,7 @@ namespace KeyLoad.FunctionalTests.DatabaseComposition;
 /// <summary>Captures the actual catalog identity before an operation without reading its document result.</summary>
 internal static class DatabaseCompositionExpectedReferences
 {
-    private const int IncarnationCharacters = 64;
+    private const int IncarnationCharacters = ResourceLifetimeIdentity.IncarnationCharacters;
     private const string FreshInputRequired = "Capture the expected lifetime from the original name-only input before execution.";
     private const string CatalogRequired = "The literal composition fixture requires its actual configured collection lifetime.";
 

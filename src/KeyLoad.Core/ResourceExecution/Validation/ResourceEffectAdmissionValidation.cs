@@ -1,4 +1,3 @@
-using KeyLoad.Core.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core.ResourceExecution;
@@ -14,7 +13,6 @@ internal static class ResourceEffectAdmissionValidation
         }
         var value = OrleansSerialization.Deserialize<ResourceEffectAdmission>(payload.ResourceAdmission.Span);
         if (value is null || value.Version != ResourceEffectAdmissionProtocol.Version
-            || value.OperationFingerprint != DatabaseCommandFingerprint.Compute(operation)
             || value.Bindings.IsDefault
             || (value.Error is null) != (value.SafeDetail is null)
             || value.Error is { } error && (!Enum.IsDefined(error) || string.IsNullOrWhiteSpace(value.SafeDetail)

@@ -30,13 +30,13 @@ internal sealed class JsonTextSubscriptionReplayTests
         var replay = db.Submit(OperationKind.ReceiveSubscription, request, id: id, time: now);
         var deliveries = original.Get<ReceiveSubscriptionResult>().Deliveries;
         var changedSpelling = JsonSerializer.Serialize(request, JsonDefaults.Options) + RawSpellingSuffix;
-        var conflict = db.Database.Apply(db.Database.CreateCommand(OperationKind.ReceiveSubscription, id, RootPrincipal, now, changedSpelling));
+        var respelled = db.Database.Apply(db.Database.CreateCommand(OperationKind.ReceiveSubscription, id, RootPrincipal, now, changedSpelling));
 
         await Assert.That(deliveries.Length).IsEqualTo(MultiDeliveryCount);
         await Assert.That(deliveries.Select(delivery => delivery.Event.Data.EventId))
             .IsEquivalentTo(new[] { FirstEventId, SecondEventId, ThirdEventId }, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(replay, original);
-        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
+        await ReplayResultAssertions.Same<ReceiveSubscriptionResult>(respelled, original);
 
         var ack = Guid.NewGuid();
         db.Submit(OperationKind.SubscriptionDelivery,

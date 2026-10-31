@@ -8,8 +8,7 @@ internal static class ResourceIncarnationFlow
     {
         token.ThrowIfCancellationRequested();
         var original = ResourceIncarnationLiteral.Creation(fixture, sql, token);
-        var fingerprint = original.Value!.Fingerprint;
-        var execution = OrleansSerialization.Serialize(original.Value.Input, ValidationProfile.PublicInputElements);
+        var execution = OrleansSerialization.Serialize(original.Value!.Input, ValidationProfile.PublicInputElements);
         var created = fixture.Database.Apply(original);
         var definition = ResourceIncarnationLiteral.Definition(sql);
         await ResourceIncarnationAssertions.EqualAsync(definition, created.Get<ResourceDefinition>());
@@ -34,7 +33,6 @@ internal static class ResourceIncarnationFlow
         await ResourceIncarnationAssertions.WriteAsync(fixture.Database, fixture.Partition, lifetime, 2);
         await ResourceIncarnationRefusals.RunAsync(fixture, state, token);
         await ResourceIncarnationAssertions.ReplayAsync(fixture.Database, fixture.Store, state);
-        await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
         await Assert.That(OrleansSerialization.Serialize(original.Value.Input, ValidationProfile.PublicInputElements)).IsEquivalentTo(execution,
             global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await ResourceIncarnationCold.RunAsync(fixture, state, token);
@@ -56,8 +54,7 @@ internal static class ResourceIncarnationFlow
             await ResourceIncarnationAssertions.EqualAsync(definition, second.Database.ApplyEmbedded(independent, token).Get<ResourceDefinition>());
             var left = ResourceIncarnationAssertions.Lifetime(first.Store, first.Partition);
             var right = ResourceIncarnationAssertions.Lifetime(second.Store, second.Partition);
-            await Assert.That(right.CreationFingerprint).IsNotEqualTo(left.CreationFingerprint);
-            await Assert.That(right.Incarnation.Value).IsNotEqualTo(left.Incarnation.Value);
+            await Assert.That(right.Incarnation.Value).IsEqualTo(left.Incarnation.Value);
             await ResourceIncarnationAssertions.WriteAsync(second.Database, second.Partition, right, 1);
         });
 

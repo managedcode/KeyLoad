@@ -8,7 +8,10 @@ measurement job per database, data type and node count under
 [ADR-150](ADR-150-per-type-benchmark-jobs.md). Website builds the static site from
 one Benchmarks run's result files and publishes Pages.
 
-Release is a manual workflow with read-only repository permissions. It uses
+Release runs automatically when Build and Tests succeeds for a push to main and
+publishes exactly the tested commit (`workflow_run` head SHA); a manual run first
+qualifies the selected commit with Build and Tests. It has read-only repository
+permissions and uses
 `dotnet publish` to build self-contained server and CLI archives for Linux, Windows
 and macOS on x64 and ARM64. SDK `PublishContainer` publishes the Linux x64 server
 image to `ghcr.io/managedcode/keyload` with the source SHA and moving `latest`

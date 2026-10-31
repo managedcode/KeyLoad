@@ -64,15 +64,6 @@ internal static class PublicNormalizationFixture
         return " \n" + Encoding.UTF8.GetString(JsonDefaults.Serialize(input)) + "\t ";
     }
 
-    internal static string Fingerprint(Command<DatabaseCommand> operation)
-        => JsonData.Fingerprint(new
-        {
-            Id = operation.CommandId,
-            Kind = operation.Value!.Kind,
-            PrincipalId = operation.UserId!,
-            PayloadJson = PublicJson(operation)
-        });
-
     internal static PrincipalRecord OrdinaryPrincipal(TestDatabase database)
         => new(NonAdministrator, database.Partition.TenantId, [new(Wildcard, Wildcard, Capability.All)], []);
 }

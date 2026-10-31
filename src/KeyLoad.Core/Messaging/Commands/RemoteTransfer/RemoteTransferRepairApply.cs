@@ -37,7 +37,7 @@ public static class RemoteTransferRepairApply
             throw Errors.Fail(ErrorCode.ResourceExhausted, RemoteTransferRepairProtocol.Capacity);
         }
 
-        var reference = new RemoteTransferRepairReference(request.Stage, generation, state.AcceptPolicyGeneration, state.CompleteGeneration, witness.FailedCommandId, witness.CommandFingerprint, witness.OutcomeDigest, request.FailureWitness);
+        var reference = new RemoteTransferRepairReference(request.Stage, generation, state.AcceptPolicyGeneration, state.CompleteGeneration, witness.FailedCommandId, witness.OutcomeDigest, request.FailureWitness);
         var nextState = state with
         {
             History = state.History.Add(reference)

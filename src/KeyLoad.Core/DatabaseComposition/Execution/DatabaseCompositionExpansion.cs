@@ -20,7 +20,6 @@ public static class DatabaseCompositionExpansion
     internal const string AtomicPartitionIdJsonProperty = "atomicPartitionId";
     internal const string LifetimeJsonProperty = "lifetime";
     internal const string IncarnationJsonProperty = "incarnation";
-    internal const int ReferenceLifetimeCharacters = 64;
     internal static List<Mutation> ExpandQueueToGraphSelection(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, QueueToGraph command, DateTimeOffset now, ReadExecutionBudget budget, IKeyValueView authorityView)
     {
         const int ExpectedRevisionEmptyCount = 0;
@@ -147,7 +146,7 @@ public static class DatabaseCompositionExpansion
             return false;
         }
 
-        if (element.TryGetProperty(LifetimeJsonProperty, out var lifetime) && (!HasExactProperties(lifetime, [IncarnationJsonProperty], []) || lifetime.GetProperty(IncarnationJsonProperty).ValueKind != JsonValueKind.String || lifetime.GetProperty(IncarnationJsonProperty).GetString() is not { Length: ReferenceLifetimeCharacters } incarnation || !incarnation.All(char.IsAsciiHexDigitLower)))
+        if (element.TryGetProperty(LifetimeJsonProperty, out var lifetime) && (!HasExactProperties(lifetime, [IncarnationJsonProperty], []) || lifetime.GetProperty(IncarnationJsonProperty).ValueKind != JsonValueKind.String || !KeyLoad.Core.ResourceExecution.ResourceLifetimeIdentity.IsIncarnation(lifetime.GetProperty(IncarnationJsonProperty).GetString())))
         {
             return false;
         }

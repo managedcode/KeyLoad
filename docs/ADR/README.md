@@ -107,7 +107,7 @@ source artifacts own those checks.
 | [ADR-135: write-through journal admission](ADR-135-write-through-journal-admission.md) |
 | [ADR-136: Orleans is the cluster; every silo owns its own ZoneTree](ADR-136-orleans-partition-ownership.md) |
 | [ADR-137: Schema-visible safe projection and restricted field binding](ADR-137-schema-visible-projection.md) |
-| [ADR-140: Deterministic first issuance of new Analytics command identity](ADR-140-new-analytics-command-identity.md) |
+| [ADR-140: Command identity without fingerprints](ADR-140-new-analytics-command-identity.md) |
 | [ADR-143: Silo count and replica count](ADR-143-independent-silo-replica-topology.md) |
 | [ADR-144: Typed Orleans request envelopes](ADR-144-typed-request-envelopes.md) |
 | [ADR-145: No request throttling](ADR-145-no-request-throttling.md) |

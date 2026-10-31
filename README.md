@@ -225,7 +225,8 @@ The server executable project is [`KeyLoad`](src/KeyLoad/KeyLoad.csproj).
 Aspire starts execution `KeyLoad` .NET project processes with in-memory
 [RapidMembership](https://github.com/managedcode/Orleans.RapidMembership)
 for Orleans membership. Ordinary build, development and tests do not publish or run
-KeyLoad Docker images. The manual Release workflow publishes the server image with
+KeyLoad Docker images. The Release workflow runs after a successful Build and Tests
+run for a push to main and publishes the server image with
 SDK `PublishContainer` to `ghcr.io/managedcode/keyload` (commit SHA and `latest`
 tags). The separate `build/KeyLoad.LoadTests.AppHost` owns selected comparison
 database infrastructure and runs the KeyLoad cells from the latest released image,

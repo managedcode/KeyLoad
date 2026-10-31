@@ -268,8 +268,8 @@ selected database infrastructure, waits for readiness and exposes endpoints;
 client code owns load execution and measurements. Each AppHost removes its own
 session containers and volumes on joined teardown after success, failure or
 cancellation. Preserve unrelated Docker resources. Normal builds and functional
-tests never publish or build a KeyLoad server image. The manual Release workflow
-publishes the server image with execution .NET SDK `PublishContainer` to
+tests never publish or build a KeyLoad server image. The Release workflow runs
+after a successful Build and Tests run for a push to main and publishes the server image with execution .NET SDK `PublishContainer` to
 `ghcr.io/managedcode/keyload` under the commit SHA and `latest` tags; maintain no
 product Dockerfile. Benchmarks resolves the latest released image to one digest per
 run and runs the KeyLoad cells as Aspire containers from that digest.
@@ -306,7 +306,7 @@ cases, schedule and verification, and the driver interface exist once, and each
 database, KeyLoad included, implements only its driver. Change a dataset or
 scenario once, in its module. KeyLoad runs every data type. Every database uses
 seed 1729, 16 clients, 1,000,000-record datasets and 100,000 planned operations
-per case with the same 15-minute limit per measured case (loads always finish), at one
+per case with the same 6-minute limit per measured case (loads always finish), at one
 node and, where the database supports it, three nodes.
 Unsupported capabilities and node counts have no cell; a failed case keeps its
 real error; never estimate, zero or invent a number.
@@ -345,7 +345,7 @@ run TUnit/browser suites, analyzers, coverage, product checks or Release from
 Website, and never make Pages publication wait for those jobs. Product-code and
 test-infrastructure changes must not trigger Website. Adding any such coupling
 requires the owner's explicit approval for that specific change. Build and Tests,
-Benchmarks, Website and manual Release retain their separate responsibilities and
+Benchmarks, Website and Release retain their separate responsibilities and
 least-privilege permissions.
 
 ## Dependency ownership and delivery

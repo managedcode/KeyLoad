@@ -8,7 +8,7 @@ public static class MessagingExecution
 {
     internal static void ValidateRetainedQueueRetryAdmission(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, CommandOutcomeSelection selection, StoredOutcome outcome)
     {
-        if (outcome.Incarnation != engine.Store.Identity.Incarnation || outcome.Fingerprint == OperationProtocol.CommandFingerprint(operation) || outcome.PolicyEpoch != principal.PolicyEpoch)
+        if (outcome.Incarnation != engine.Store.Identity.Incarnation || DatabaseCommandContentIdentity.SameContent(outcome.PreparedCommand, operation) || outcome.PolicyEpoch != principal.PolicyEpoch)
         {
             return;
         }

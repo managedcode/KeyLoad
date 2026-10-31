@@ -18,14 +18,13 @@ internal static class PublicNormalizationChecks
         var normalized = database.Database.OwnCommand(operation);
         await Assert.That((normalized.Value!.Input is null)).IsFalse();
         await Assert.That(OrleansSerialization.Serialize(normalized.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
-        await Assert.That(normalized.Value.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
         var result = database.Database.Apply(normalized);
         await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);
         var stored = PublicNormalizationFixture.Stored(database, operation);
         var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);
         await Assert.That(stored.Result).IsEqualTo(result);
-        await Assert.That(stored.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
+        await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(database.Database.Apply(operation)).IsEqualTo(result);
         await Assert.That(database.Database.ResolveOutcome(normalized)).IsEqualTo(result);
         await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();

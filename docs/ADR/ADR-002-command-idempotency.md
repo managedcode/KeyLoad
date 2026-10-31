@@ -4,11 +4,11 @@ Status: Accepted; implementation and GitHub qualification pending. Source contra
 
 ## Context and decision
 
-Network retries can repeat a request after its outcome committed but before the client received the response. Every mutating command therefore has a stable caller-generated `CommandId`, scoped to its authenticated principal and resolved atomic partition. The server fingerprints canonical command content and persists the outcome in the same ordered transaction as its effects. Matching retries return the stored receipt/error; reuse with a different fingerprint is a conflict. Event and message identities provide resource-level deduplication with their own declared retention horizons; they do not replace command identity.
+Network retries can repeat a request after its outcome committed but before the client received the response. Every mutating command therefore has a stable caller-generated `CommandId`, scoped to its authenticated principal and resolved atomic partition. The server stores the original typed command with its outcome. A retry with the same principal and command ID replays the stored outcome when its typed input matches the retained input; different content is a `Conflict`. The comparison runs only when a stored outcome for that command ID exists, so a first-time command is neither serialized for identity nor hashed.
 
 ## Rationale and consequences
 
-Persisting command identity with effects resolves lost responses across process restart and failover. An in-memory response cache cannot do so. Fingerprinting raw noncanonical JSON or omitting principal/scope could alias distinct requests, so canonicalization and authorization precede replay. Deduplication is bounded by persisted retention/format rules; this decision does not promise eternal retry safety after dedup metadata expires or exactly-once external side effects.
+Persisting command identity with effects resolves lost responses across process restart and failover. An in-memory response cache cannot do so. Principal and scope are part of the outcome key, and authorization precedes replay. Deduplication is bounded by persisted retention/format rules; this decision does not promise eternal retry safety after dedup metadata expires or exactly-once external side effects.
 
 ## Related requirements
 
@@ -16,17 +16,17 @@ Persisting command identity with effects resolves lost responses across process 
 
 ## Implementation contract
 
-1. Freeze command fingerprint inputs, principal/scope binding, error replay, and retention horizon before changing envelopes.
+1. Freeze principal/scope binding, retry content comparison, error replay, and retention horizon before changing envelopes.
 2. Add TUnit tests for same-ID/same-content replay, same-ID/changed-content conflict, lost response after commit, precondition failure replay, and unrelated principal/partition scope.
 3. Keep shared command/request/outcome contracts in the existing `src/KeyLoad.Abstractions/Contracts.cs` building block and dispatch/persisted outcome handling in `src/KeyLoad.Core/DatabaseEngine.cs`; feature-specific mutation logic remains in its canonical owning `Features/<SliceName>/` directory. Do not create a separate CommandExecution slice or project.
 4. The current outcome format has one canonical reader and writer. Unknown, malformed, or unsupported outcomes fail closed without rewrite or alternate-key lookup.
 5. GitHub qualification is TUnit, real process recovery, and replicated-cluster SDK outcomes after failover.
 
-Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md). Stop if canonical fingerprint or dedup expiry behavior is not specified. Do not infer exactly-once handler execution or include an external API call in the database transaction.
+Dependencies: [ADR-001](ADR-001-partition-identity-affinity.md), [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md). Stop if retry comparison or dedup expiry behavior is not specified. Do not infer exactly-once handler execution or include an external API call in the database transaction.
 
 ```mermaid
 flowchart LR
-    Request[Authenticated command ID and payload] --> Canonical[Resolve scope and fingerprint]
+    Request[Authenticated command ID and payload] --> Canonical[Resolve scope]
     Canonical --> Lookup{Persisted outcome?}
     Lookup -->|same fingerprint| Return[Return stored outcome]
     Lookup -->|different fingerprint| Conflict[Reject conflict]

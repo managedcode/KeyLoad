@@ -17,7 +17,7 @@ internal sealed class JsonTextQueueReplayTests
     private const int MultiDeliveryCount = 2;
 
     [Test]
-    public async Task AcMp006MultiQueueReceiveReplayRetainsTokensAndRawSpellingIdentity()
+    public async Task AcMp006MultiQueueReceiveReplayRetainsTokensAndReplaysRespelledInput()
     {
         using var db = new TestDatabase();
         db.Configure(QueueName, ResourceKind.WorkQueue);
@@ -31,13 +31,13 @@ internal sealed class JsonTextQueueReplayTests
         var replay = db.Submit(OperationKind.Receive, request, id: id, time: now);
         var deliveries = original.Get<ReceiveResult>().Deliveries;
         var changedSpelling = JsonSerializer.Serialize(request, JsonDefaults.Options) + RawSpellingSuffix;
-        var conflict = db.Database.Apply(db.Database.CreateCommand(OperationKind.Receive, id, RootPrincipal, now, changedSpelling));
+        var respelled = db.Database.Apply(db.Database.CreateCommand(OperationKind.Receive, id, RootPrincipal, now, changedSpelling));
 
         await Assert.That(deliveries.Length).IsEqualTo(MultiDeliveryCount);
         await Assert.That(deliveries[0].Id).IsEqualTo(FirstMessageId);
         await Assert.That(deliveries[1].Id).IsEqualTo(SecondMessageId);
         await ReplayResultAssertions.Same<ReceiveResult>(replay, original);
-        await Assert.That(Errors.Code(conflict.Problem).Value).IsEqualTo(ErrorCode.Conflict);
+        await ReplayResultAssertions.Same<ReceiveResult>(respelled, original);
 
         var ack = Guid.NewGuid();
         db.Submit(OperationKind.Delivery, new DeliveryCommand(ack, lane, deliveries[0].Token, DeliveryAction.Ack),

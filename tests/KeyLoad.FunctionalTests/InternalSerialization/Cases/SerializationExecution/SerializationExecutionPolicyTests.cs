@@ -1,5 +1,4 @@
 using System.Text;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.ResourceExecution;
 
 namespace KeyLoad.FunctionalTests.InternalSerialization;
@@ -11,7 +10,7 @@ internal sealed class SerializationExecutionPolicyTests
     [Arguments(4095)]
     [Arguments(4097)]
     [Arguments(4096)]
-    public async Task PoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync(int boundaryCharacters)
+    public async Task PoolPreservesCanonicalBytesAndOriginalShapeAsync(int boundaryCharacters)
     {
         const string TextKey = "text";
         const string EmptyKey = "empty";
@@ -26,18 +25,5 @@ internal sealed class SerializationExecutionPolicyTests
         await Assert.That(JsonDefaults.Serialize(decoded).SequenceEqual(json)).IsTrue();
         await Assert.That(OrleansSerialization.Serialize(decoded[TextKey]).SequenceEqual(
             OrleansSerialization.Serialize(payload))).IsTrue();
-        var id = new Guid(FingerprintFixtures.Id);
-        const string Principal = "root界\\\"😀";
-        var authored = payload + "\uD800";
-        var fingerprint = JsonData.Fingerprint(new
-        {
-            Id = id,
-            Kind = OperationKind.Batch,
-            PrincipalId = Principal,
-            PayloadJson = authored
-        });
-        await Assert.That(DatabaseCommandFingerprint.Compute(id, OperationKind.Batch, Principal, authored))
-            .IsEqualTo(fingerprint);
     }
-
 }

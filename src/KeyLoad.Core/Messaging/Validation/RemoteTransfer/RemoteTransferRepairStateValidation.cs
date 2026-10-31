@@ -27,7 +27,7 @@ internal static class RemoteTransferRepairStateValidation
             if (reference is null || !Enum.IsDefined(reference.Stage) || reference.PolicyGeneration != policy
                 || reference.CompleteGeneration != complete || reference.CapacityGeneration < first
                 || reference.FailedCommandId == Guid.Empty || !RemoteTransferDependencyShape.Digest(reference.OutcomeDigest)
-                || !RemoteTransferDependencyShape.Digest(reference.Fingerprint) || string.IsNullOrEmpty(reference.WitnessToken))
+                || string.IsNullOrEmpty(reference.WitnessToken))
             {
                 throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
             }

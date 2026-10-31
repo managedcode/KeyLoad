@@ -10,7 +10,7 @@ namespace KeyLoad.Core;
 /// <summary>Owns the CommandOutcomeApplication operation contract.</summary>
 internal static class CommandOutcomeApplication
 {
-    internal static StoredOutcome BuildStoredOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, string fingerprint, long policyEpoch, Result<object> result, global::KeyLoad.Core.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority, CommandOutcomePartitionScope partitionScope, global::KeyLoad.Core.Search.OnlineTextOutcomeAuthority? onlineTextAuthority, global::KeyLoad.Core.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence) => new(fingerprint, engine.Store.Identity.Incarnation, policyEpoch, result, operation)
+    internal static StoredOutcome BuildStoredOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, long policyEpoch, Result<object> result, global::KeyLoad.Core.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority, CommandOutcomePartitionScope partitionScope, global::KeyLoad.Core.Search.OnlineTextOutcomeAuthority? onlineTextAuthority, global::KeyLoad.Core.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence) => new(engine.Store.Identity.Incarnation, policyEpoch, result, operation)
     {
         CompositionAuthority = Errors.Code(result.Problem).Value is null ? compositionAuthority : null,
         ScopeKind = partitionScope.Kind,

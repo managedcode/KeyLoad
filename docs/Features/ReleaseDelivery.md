@@ -28,7 +28,9 @@ flowchart LR
 ```
 
 Delivery uses four independent workflows: Build and Tests, Benchmarks, Website
-and Release. Release is manual. It builds downloadable applications, publishes
+and Release. Release runs automatically after a successful Build and Tests run for a
+push to main and publishes exactly that tested commit; a manual run first qualifies the
+selected commit with Build and Tests. It builds downloadable applications, publishes
 the server container image to GitHub Container Registry, both through the .NET SDK.
 
 - REQ-REL-001 / AC-REL-001: `dotnet publish --self-contained true` builds the server

@@ -1,6 +1,4 @@
-using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server;
 using KeyLoad.Storage;
@@ -63,12 +61,9 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
             ?? throw new InvalidOperationException(MissingCreation);
         var original = retained.PreparedCommand ?? throw new InvalidOperationException(MissingCreation);
         var payload = original.Value ?? throw new InvalidOperationException(MissingCreation);
-        var fingerprint = DatabaseCommandFingerprint.Compute(creation, OperationKind.ConfigureResource,
-            RequestCqrsHostedProfile.Root, JsonSerializer.Serialize(expected, JsonDefaults.Options));
         var body = ((ConfigureResourceRequest)payload.Input);
         if (retained.Result.IsFailed || original.CommandId != creation || payload.Kind != OperationKind.ConfigureResource
-            || original.UserId != RequestCqrsHostedProfile.Root || payload.Fingerprint != fingerprint
-            || retained.Fingerprint != fingerprint
+            || original.UserId != RequestCqrsHostedProfile.Root
             || !JsonDefaults.Serialize(body).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))
         {
             throw new InvalidOperationException(MissingCreation);

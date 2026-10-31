@@ -17,14 +17,13 @@ internal sealed class PublicNormalizationTests
         var verified = database.Database.OwnCommand(normalized);
         await Assert.That((verified.Value!.Input is null)).IsFalse();
         await Assert.That(PublicNormalizationChecks.HasNullElement(verified, shape)).IsTrue();
-        await Assert.That(verified.Value.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
 
         var result = database.Database.Apply(verified);
         await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.Problem?.Detail).IsEqualTo(PublicNormalizationFixture.Detail(shape));
         var stored = PublicNormalizationFixture.Stored(database, operation);
         var originalOutcome = PublicNormalizationFixture.StoredBytes(database, operation);
-        await Assert.That(stored.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
+        await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(stored.Result).IsEqualTo(result);
         await Assert.That(database.Database.Apply(operation)).IsEqualTo(result);
         await Assert.That(database.Database.ResolveOutcome(verified)).IsEqualTo(result);
@@ -69,7 +68,7 @@ internal sealed class PublicNormalizationTests
     }
 
     [Test]
-    public async Task ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndExactFingerprintConflict()
+    public async Task ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndReplaysRespelledInput()
     {
         using var database = new TestDatabase();
         await Assert.That(Errors.Code(database.Submit(OperationKind.SetDispatch, true).Problem).Value).IsNull();
@@ -88,7 +87,7 @@ internal sealed class PublicNormalizationTests
         await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();
         var changed = database.Database.CreateCommand(retry.Value!.Kind, retry.CommandId, retry.UserId!,
             new DateTimeOffset(retry.Timestamp), PublicNormalizationFixture.PublicJson(retry) + "\n");
-        await Assert.That(Errors.Code(database.Database.Apply(changed).Problem).Value).IsEqualTo(ErrorCode.Conflict);
+        await Assert.That(database.Database.Apply(changed)).IsEqualTo(result);
         await Assert.That(PublicNormalizationFixture.StoredBytes(database, operation).SequenceEqual(originalOutcome)).IsTrue();
     }
 
@@ -120,8 +119,7 @@ internal sealed class PublicNormalizationTests
         var result = database.Database.Apply(created);
         await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(ErrorCode.Validation);
         await Assert.That(result.Problem?.Detail).IsEqualTo(PublicNormalizationFixture.Detail(shape));
-        await Assert.That(PublicNormalizationFixture.Stored(database, created).Fingerprint)
-            .IsEqualTo(created.Value!.Fingerprint);
+        await Assert.That(DatabaseCommandContentIdentity.SameContent(PublicNormalizationFixture.Stored(database, created).PreparedCommand, created)).IsTrue();
     }
 
     [Test]

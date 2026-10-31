@@ -53,7 +53,7 @@ internal sealed class TestDatabaseOriginalResourceCommands
         if (outcome is null || outcome.Result.IsFailed || outcome.PreparedCommand.CommandId != command.CommandId
             || outcome.PreparedCommand.UserId != command.UserId
             || outcome.PreparedCommand.Value!.Kind != command.Value!.Kind
-            || outcome.PreparedCommand.Value.Fingerprint != command.Value.Fingerprint
+            || !DatabaseCommandContentIdentity.SameContent(outcome.PreparedCommand, command)
             || !OrleansSerialization.Serialize(outcome.PreparedCommand.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(command.Value.Input, ValidationProfile.PublicInputElements).AsSpan()))
         {
             throw new InvalidOperationException(OriginalRequired);

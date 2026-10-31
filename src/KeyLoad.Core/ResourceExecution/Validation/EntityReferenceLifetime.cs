@@ -5,7 +5,6 @@ namespace KeyLoad.Core.ResourceExecution;
 /// <summary>Binds fresh names once and refuses rebinding of persisted canonical entity references.</summary>
 internal static class EntityReferenceLifetime
 {
-    private const int IncarnationCharacters = 64;
     private const string MissingBinding = "The canonical entity reference has no supported lifetime binding.";
     private const string ChangedBinding = "The entity reference belongs to another resource lifetime.";
     private const string MissingResource = "The entity reference resource is unavailable.";
@@ -100,6 +99,5 @@ internal static class EntityReferenceLifetime
         JsonData.Identifier(reference.Id);
     }
 
-    private static bool Digest(string value)
-        => value is { Length: IncarnationCharacters } && value.All(char.IsAsciiHexDigitLower);
+    private static bool Digest(string value) => ResourceLifetimeIdentity.IsIncarnation(value);
 }

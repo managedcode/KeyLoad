@@ -1,5 +1,4 @@
 using KeyLoad.Core.CommandOutcomes.Contracts;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication;
 
@@ -53,7 +52,7 @@ internal static class SafeProjectorOperationReplay
         await SafeProjectorOperationHistoryImages.UnchangedAsync(owner, expected);
         var actual = owner.ReadOutcome(expected.Operation);
         await SafeProjectorOperationSeed.EqualAsync(actual, expected.Outcome);
-        await Assert.That(actual.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(expected.Operation));
+        await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(expected.Operation.CommandId);
         await Assert.That(actual.CanonicalSequence).IsEqualTo(expected.ExpectedToken.Position);
     }
 
@@ -68,7 +67,7 @@ internal static class SafeProjectorOperationReplay
         var key = global ? KeySpace.GlobalOutcome(command.Operation.UserId!, command.Operation.CommandId)
             : KeySpace.PartitionOutcome(owner.Source.Partition, command.Operation.UserId!, command.Operation.CommandId);
         var actual = owner.Store.Read(view => view.GetRecord<StoredOutcome>(key)) ?? throw new InvalidOperationException(MissingStored);
-        await Assert.That(StringComparer.Ordinal.Equals(actual.Fingerprint, DatabaseCommandFingerprint.Compute(command.Operation))).IsTrue();
+        await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(command.Operation.CommandId);
         await Assert.That(actual.PolicyEpoch).IsEqualTo(command.CreatorEpoch);
         await Assert.That(actual.Incarnation).IsEqualTo(command.ExpectedToken.Incarnation);
         await Assert.That(actual.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);

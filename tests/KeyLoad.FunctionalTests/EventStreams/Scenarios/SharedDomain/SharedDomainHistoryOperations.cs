@@ -11,7 +11,6 @@ internal static class SharedDomainHistoryOperations
 {
     private const string EpochDenied = "The principal policy changed since this command was evaluated.";
     private const string ScopeDenied = "The principal cannot perform this operation in this scope.";
-    private const int FingerprintCharacters = 64;
     private const string StaleLeaseDetail = "The delivery lease is stale.";
 
     internal static async Task SaveAsync(IAtomicStore store, SharedDomainState state, PartitionRef partition,
@@ -27,8 +26,6 @@ internal static class SharedDomainHistoryOperations
         await Assert.That(outcome.PolicyEpoch).IsEqualTo(state.PolicyEpoch);
         await Assert.That(outcome.ScopeKind).IsEqualTo(CommandOutcomeScopeKind.Partition);
         await Assert.That(outcome.Partition).IsEqualTo(partition);
-        await Assert.That(outcome.Fingerprint.Length).IsEqualTo(FingerprintCharacters);
-        await Assert.That(outcome.Fingerprint.All(char.IsAsciiHexDigit)).IsTrue();
         await Assert.That(outcome.OnlineTextAuthority).IsNull();
         await Assert.That(outcome.RemoteTransferFailureAuthority).IsNull();
         if (result.Value is ReceiveResult)

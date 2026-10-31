@@ -1,6 +1,4 @@
-using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Server.Search;
 
@@ -96,10 +94,6 @@ internal static class TextIncrementalProcessAssertions
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
         await Assert.That(JsonDefaults.Serialize(((ConfigureResourceRequest)original.Value.Input))
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        var fingerprint = DatabaseCommandFingerprint.Compute(original.CommandId, OperationKind.ConfigureResource,
-            CrashFixtureValues.Principal, JsonSerializer.Serialize(expected, JsonDefaults.Options));
-        await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
-        await Assert.That(creation.Fingerprint).IsEqualTo(fingerprint);
         var lifetime = ResourceLifetimeIdentity.Create(original, partition.TenantId, partition.DatabaseId, definition);
         return new(lifetime.Incarnation.Value);
     }

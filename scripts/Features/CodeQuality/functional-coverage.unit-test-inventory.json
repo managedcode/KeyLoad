@@ -21327,46 +21327,6 @@
       ]
     },
     {
-      "className": "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests",
-      "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests",
-      "methodName": "FreshAnalyticsIssuanceRetainsMixedReceiptAcrossMapOrderingConflictAndCold",
-      "instanceName": "FreshAnalyticsIssuanceRetainsMixedReceiptAcrossMapOrderingConflictAndCold(False)",
-      "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/Analytics/AnalyticsCommandIdentityTests.cs",
-      "sourceSha256": "acca46ef0a18e5f6f716929e3d4d6df2253d53e971bb403786c6dc2627a6400d",
-      "lineNumber": 5,
-      "endLineNumber": 9,
-      "classification": "functional",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-ANALYTICS-ID-001",
-        "REQ-ANALYTICS-ID-002",
-        "REQ-ANALYTICS-ID-004"
-      ],
-      "acceptance": [
-        "AC-ANALYTICS-ID-001"
-      ]
-    },
-    {
-      "className": "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests",
-      "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests",
-      "methodName": "FreshAnalyticsIssuanceRetainsMixedReceiptAcrossMapOrderingConflictAndCold",
-      "instanceName": "FreshAnalyticsIssuanceRetainsMixedReceiptAcrossMapOrderingConflictAndCold(True)",
-      "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/Analytics/AnalyticsCommandIdentityTests.cs",
-      "sourceSha256": "acca46ef0a18e5f6f716929e3d4d6df2253d53e971bb403786c6dc2627a6400d",
-      "lineNumber": 5,
-      "endLineNumber": 9,
-      "classification": "functional",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-ANALYTICS-ID-001",
-        "REQ-ANALYTICS-ID-002",
-        "REQ-ANALYTICS-ID-004"
-      ],
-      "acceptance": [
-        "AC-ANALYTICS-ID-001"
-      ]
-    },
-    {
       "className": "KeyLoad.FunctionalTests.InternalSerialization.CoreModelPersistenceTests",
       "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.CoreModelPersistenceTests",
       "methodName": "AcIs002DocumentsEventsAndMessagesKeepExactUserJsonInRecords",
@@ -22478,7 +22438,7 @@
       "methodName": "VerifiedSnapshotSurvivesCallerBufferMutationAndAppliesItsOriginalBody",
       "instanceName": "VerifiedSnapshotSurvivesCallerBufferMutationAndAppliesItsOriginalBody",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimeOperation/OperationOwnershipTests.cs",
-      "sourceSha256": "e4b6f9b18b37dcca4b08aa84ab971cd02195ca938c6c7c0f8cc63198ee746aee",
+      "sourceSha256": "b23128efa0e9cdd411d67f700b747eb64190efd575c88f68197b84a4b3ecc831",
       "lineNumber": 5,
       "endLineNumber": 35,
       "classification": "functional",
@@ -23020,9 +22980,9 @@
       "methodName": "ConfiguredNullGrantDoesNotPreemptCurrentClusterAdministration",
       "instanceName": "ConfiguredNullGrantDoesNotPreemptCurrentClusterAdministration",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 54,
-      "endLineNumber": 69,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 53,
+      "endLineNumber": 68,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23035,12 +22995,12 @@
     {
       "className": "KeyLoad.FunctionalTests.InternalSerialization.PublicNormalizationTests",
       "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.PublicNormalizationTests",
-      "methodName": "ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndExactFingerprintConflict",
-      "instanceName": "ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndExactFingerprintConflict",
+      "methodName": "ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndReplaysRespelledInput",
+      "instanceName": "ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndReplaysRespelledInput",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 71,
-      "endLineNumber": 93,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 70,
+      "endLineNumber": 92,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23058,9 +23018,9 @@
       "methodName": "MalformedAlreadyOperationStillPropagatesCorruptionWithoutAnOutcome",
       "instanceName": "MalformedAlreadyOperationStillPropagatesCorruptionWithoutAnOutcome",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 127,
-      "endLineNumber": 138,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 125,
+      "endLineNumber": 136,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23078,9 +23038,9 @@
       "methodName": "FactoryAndOwnedSnapshotsRetainPublicNullElements",
       "instanceName": "FactoryAndOwnedSnapshotsRetainPublicNullElements(NullGrant)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 105,
-      "endLineNumber": 125,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 104,
+      "endLineNumber": 123,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23098,9 +23058,9 @@
       "methodName": "FactoryAndOwnedSnapshotsRetainPublicNullElements",
       "instanceName": "FactoryAndOwnedSnapshotsRetainPublicNullElements(NullMutation)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 105,
-      "endLineNumber": 125,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 104,
+      "endLineNumber": 123,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23118,9 +23078,9 @@
       "methodName": "FactoryAndOwnedSnapshotsRetainPublicNullElements",
       "instanceName": "FactoryAndOwnedSnapshotsRetainPublicNullElements(NullPatch)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 105,
-      "endLineNumber": 125,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 104,
+      "endLineNumber": 123,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23138,9 +23098,9 @@
       "methodName": "NullGrantRetainsProtectedTargetBeforeGrantValidation",
       "instanceName": "NullGrantRetainsProtectedTargetBeforeGrantValidation",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 95,
-      "endLineNumber": 103,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 94,
+      "endLineNumber": 102,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23156,9 +23116,9 @@
       "methodName": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication",
       "instanceName": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication(NullGrant)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 35,
-      "endLineNumber": 52,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 34,
+      "endLineNumber": 51,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23174,9 +23134,9 @@
       "methodName": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication",
       "instanceName": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication(NullMutation)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 35,
-      "endLineNumber": 52,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 34,
+      "endLineNumber": 51,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23192,9 +23152,9 @@
       "methodName": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication",
       "instanceName": "PublicNullElementsDoNotPreemptCurrentPrincipalAuthentication(NullPatch)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
-      "lineNumber": 35,
-      "endLineNumber": 52,
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
+      "lineNumber": 34,
+      "endLineNumber": 51,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23210,9 +23170,9 @@
       "methodName": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures",
       "instanceName": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures(NullGrant)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
       "lineNumber": 5,
-      "endLineNumber": 33,
+      "endLineNumber": 32,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23228,9 +23188,9 @@
       "methodName": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures",
       "instanceName": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures(NullMutation)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
       "lineNumber": 5,
-      "endLineNumber": 33,
+      "endLineNumber": 32,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -23246,9 +23206,9 @@
       "methodName": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures",
       "instanceName": "PublicNullElementsRetainTypedBodiesExactIdentityAndDurableDomainFailures(NullPatch)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimePublic/PublicNormalizationTests.cs",
-      "sourceSha256": "acd81d74cb879d7239755bda2ba4bd1c20e62b6ae3f536d821c524f4f2100d01",
+      "sourceSha256": "3d959875afc7162378653e2b055518ba01f433e81f4a62cd7994cd93dd667738",
       "lineNumber": 5,
-      "endLineNumber": 33,
+      "endLineNumber": 32,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -38452,7 +38412,7 @@
       "methodName": "AcMp006EmptyQueueReceiveReplayStillReauthorizesPrincipal",
       "instanceName": "AcMp006EmptyQueueReceiveReplayStillReauthorizesPrincipal",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Json/JsonTextQueueReplayTests.cs",
-      "sourceSha256": "b9137029eb16ac60a0ebaabbd59a231fbedb7db37edfa4630f2d80539e6a9ab9",
+      "sourceSha256": "2c0f5fca655e7f7ed986c77070da334a3cdfc709abf534d2a4b9c57074608866",
       "lineNumber": 49,
       "endLineNumber": 75,
       "classification": "functional",
@@ -38469,10 +38429,10 @@
     {
       "className": "KeyLoad.FunctionalTests.ResourceExecution.JsonTextQueueReplayTests",
       "reportClassName": "KeyLoad.FunctionalTests.ResourceExecution.JsonTextQueueReplayTests",
-      "methodName": "AcMp006MultiQueueReceiveReplayRetainsTokensAndRawSpellingIdentity",
-      "instanceName": "AcMp006MultiQueueReceiveReplayRetainsTokensAndRawSpellingIdentity",
+      "methodName": "AcMp006MultiQueueReceiveReplayRetainsTokensAndReplaysRespelledInput",
+      "instanceName": "AcMp006MultiQueueReceiveReplayRetainsTokensAndReplaysRespelledInput",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Json/JsonTextQueueReplayTests.cs",
-      "sourceSha256": "b9137029eb16ac60a0ebaabbd59a231fbedb7db37edfa4630f2d80539e6a9ab9",
+      "sourceSha256": "2c0f5fca655e7f7ed986c77070da334a3cdfc709abf534d2a4b9c57074608866",
       "lineNumber": 19,
       "endLineNumber": 47,
       "classification": "functional",
@@ -38492,7 +38452,7 @@
       "methodName": "AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody",
       "instanceName": "AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody(Deliveries)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Json/JsonTextQueueReplayTests.cs",
-      "sourceSha256": "b9137029eb16ac60a0ebaabbd59a231fbedb7db37edfa4630f2d80539e6a9ab9",
+      "sourceSha256": "2c0f5fca655e7f7ed986c77070da334a3cdfc709abf534d2a4b9c57074608866",
       "lineNumber": 77,
       "endLineNumber": 107,
       "classification": "functional",
@@ -38512,7 +38472,7 @@
       "methodName": "AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody",
       "instanceName": "AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody(PayloadJson)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Json/JsonTextQueueReplayTests.cs",
-      "sourceSha256": "b9137029eb16ac60a0ebaabbd59a231fbedb7db37edfa4630f2d80539e6a9ab9",
+      "sourceSha256": "2c0f5fca655e7f7ed986c77070da334a3cdfc709abf534d2a4b9c57074608866",
       "lineNumber": 77,
       "endLineNumber": 107,
       "classification": "functional",
@@ -38532,7 +38492,7 @@
       "methodName": "AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody",
       "instanceName": "AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody(Token)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Json/JsonTextQueueReplayTests.cs",
-      "sourceSha256": "b9137029eb16ac60a0ebaabbd59a231fbedb7db37edfa4630f2d80539e6a9ab9",
+      "sourceSha256": "2c0f5fca655e7f7ed986c77070da334a3cdfc709abf534d2a4b9c57074608866",
       "lineNumber": 77,
       "endLineNumber": 107,
       "classification": "functional",
@@ -38552,7 +38512,7 @@
       "methodName": "AcMp006EmptySubscriptionReplayRechecksGenerationBeforeReturningCachedResult",
       "instanceName": "AcMp006EmptySubscriptionReplayRechecksGenerationBeforeReturningCachedResult",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Json/JsonTextSubscriptionReplayTests.cs",
-      "sourceSha256": "05349bd3eba413ad036c969f9d34968eb42afecead41434ccd6d5ba51594520f",
+      "sourceSha256": "1fcb11c4b810e1cb16ff5d14a58d11f14e4b98dd03704515252dfda82663ac25",
       "lineNumber": 49,
       "endLineNumber": 70,
       "classification": "functional",
@@ -38572,7 +38532,7 @@
       "methodName": "AcMp006MultiSubscriptionReplayRetainsDeliveryIdentityAndLeaseFencing",
       "instanceName": "AcMp006MultiSubscriptionReplayRetainsDeliveryIdentityAndLeaseFencing",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Json/JsonTextSubscriptionReplayTests.cs",
-      "sourceSha256": "05349bd3eba413ad036c969f9d34968eb42afecead41434ccd6d5ba51594520f",
+      "sourceSha256": "1fcb11c4b810e1cb16ff5d14a58d11f14e4b98dd03704515252dfda82663ac25",
       "lineNumber": 18,
       "endLineNumber": 47,
       "classification": "functional",
@@ -39036,33 +38996,11 @@
       "className": "KeyLoad.FunctionalTests.ResourceExecution.ResourcePairBindingWholeFlowTests",
       "reportClassName": "KeyLoad.FunctionalTests.ResourceExecution.ResourcePairBindingWholeFlowTests",
       "methodName": "MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners",
-      "instanceName": "MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(ConflictingLifetime)",
-      "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Resource/ResourcePairBindingWholeFlowTests.cs",
-      "sourceSha256": "d197e141637b87be25f960fd7a0a659f45d2ab53768dc239c5048715bafe7c0f",
-      "lineNumber": 5,
-      "endLineNumber": 12,
-      "classification": "functional",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-RLLOCAL-001",
-        "REQ-RLLOCAL-002",
-        "REQ-RLLOCAL-004"
-      ],
-      "acceptance": [
-        "AC-RLLOCAL-001",
-        "AC-RLLOCAL-002",
-        "AC-RLLOCAL-004"
-      ]
-    },
-    {
-      "className": "KeyLoad.FunctionalTests.ResourceExecution.ResourcePairBindingWholeFlowTests",
-      "reportClassName": "KeyLoad.FunctionalTests.ResourceExecution.ResourcePairBindingWholeFlowTests",
-      "methodName": "MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners",
       "instanceName": "MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(MalformedLifetime)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Resource/ResourcePairBindingWholeFlowTests.cs",
-      "sourceSha256": "d197e141637b87be25f960fd7a0a659f45d2ab53768dc239c5048715bafe7c0f",
+      "sourceSha256": "3d8b782468d07ef4a5acc9d5c6d9dbbf8ce66dec7d3ccc4206228232f8319b7f",
       "lineNumber": 5,
-      "endLineNumber": 12,
+      "endLineNumber": 11,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -39082,9 +39020,9 @@
       "methodName": "MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners",
       "instanceName": "MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(MissingDefinition)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Resource/ResourcePairBindingWholeFlowTests.cs",
-      "sourceSha256": "d197e141637b87be25f960fd7a0a659f45d2ab53768dc239c5048715bafe7c0f",
+      "sourceSha256": "3d8b782468d07ef4a5acc9d5c6d9dbbf8ce66dec7d3ccc4206228232f8319b7f",
       "lineNumber": 5,
-      "endLineNumber": 12,
+      "endLineNumber": 11,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -39104,9 +39042,9 @@
       "methodName": "MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners",
       "instanceName": "MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(MissingLifetime)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ResourceExecution/Cases/Resource/ResourcePairBindingWholeFlowTests.cs",
-      "sourceSha256": "d197e141637b87be25f960fd7a0a659f45d2ab53768dc239c5048715bafe7c0f",
+      "sourceSha256": "3d8b782468d07ef4a5acc9d5c6d9dbbf8ce66dec7d3ccc4206228232f8319b7f",
       "lineNumber": 5,
-      "endLineNumber": 12,
+      "endLineNumber": 11,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -58104,110 +58042,6 @@
       "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
     },
     {
-      "className": "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests",
-      "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests",
-      "methodName": "NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint",
-      "instanceName": "NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint",
-      "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/Analytics/AnalyticsCommandIdentityTests.cs",
-      "sourceSha256": "acca46ef0a18e5f6f716929e3d4d6df2253d53e971bb403786c6dc2627a6400d",
-      "lineNumber": 11,
-      "endLineNumber": 13,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-ANALYTICS-ID-004",
-        "REQ-IS-007"
-      ],
-      "acceptance": [
-        "AC-ANALYTICS-ID-002",
-        "AC-IS-007"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "NonAnalyticsAsync issues Batch/ConfigureResource commands and checks exact typed input and frozen identity; it never applies a command or observes persisted model/outcome. Required identity-factory control rather than operation contribution."
-    },
-    {
-      "className": "KeyLoad.FunctionalTests.InternalSerialization.DatabaseCommandFingerprintTests",
-      "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.DatabaseCommandFingerprintTests",
-      "methodName": "EveryKindAndEscapeMatchesTheExistingGoldenFingerprintShape",
-      "instanceName": "EveryKindAndEscapeMatchesTheExistingGoldenFingerprintShape",
-      "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimeOperation/OperationFingerprintTests.cs",
-      "sourceSha256": "d5ea597e738b53ed34c49cdc864e3b2ea608fe532dbf3c9ac73321992cc899b2",
-      "lineNumber": 16,
-      "endLineNumber": 26,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-IS-007",
-        "REQ-ANALYTICS-ID-004"
-      ],
-      "acceptance": [
-        "AC-IS-007",
-        "AC-ANALYTICS-ID-002"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Pure DatabaseCommandFingerprint.Compute versus independent JsonData.Fingerprint golden input over all operation kinds/escapes/numeric spelling; no canonical command apply/read or persisted state oracle. Preserve identity tags while classifying this required hash control separately."
-    },
-    {
-      "className": "KeyLoad.FunctionalTests.InternalSerialization.DatabaseCommandFingerprintTests",
-      "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.DatabaseCommandFingerprintTests",
-      "methodName": "LargeStringSegmentsPreserveEscapesAndSplitUnicodeExactly",
-      "instanceName": "LargeStringSegmentsPreserveEscapesAndSplitUnicodeExactly(0)",
-      "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimeOperation/OperationFingerprintTests.cs",
-      "sourceSha256": "d5ea597e738b53ed34c49cdc864e3b2ea608fe532dbf3c9ac73321992cc899b2",
-      "lineNumber": 28,
-      "endLineNumber": 38,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-IS-007"
-      ],
-      "acceptance": [
-        "AC-IS-007"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Pure fingerprint comparison at three string-segment boundaries, escaped content and split Unicode. It does not execute a database command. Required exact hashing/encoding control; not persisted operation coverage."
-    },
-    {
-      "className": "KeyLoad.FunctionalTests.InternalSerialization.DatabaseCommandFingerprintTests",
-      "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.DatabaseCommandFingerprintTests",
-      "methodName": "LargeStringSegmentsPreserveEscapesAndSplitUnicodeExactly",
-      "instanceName": "LargeStringSegmentsPreserveEscapesAndSplitUnicodeExactly(1)",
-      "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimeOperation/OperationFingerprintTests.cs",
-      "sourceSha256": "d5ea597e738b53ed34c49cdc864e3b2ea608fe532dbf3c9ac73321992cc899b2",
-      "lineNumber": 28,
-      "endLineNumber": 38,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-IS-007"
-      ],
-      "acceptance": [
-        "AC-IS-007"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Pure fingerprint comparison at three string-segment boundaries, escaped content and split Unicode. It does not execute a database command. Required exact hashing/encoding control; not persisted operation coverage."
-    },
-    {
-      "className": "KeyLoad.FunctionalTests.InternalSerialization.DatabaseCommandFingerprintTests",
-      "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.DatabaseCommandFingerprintTests",
-      "methodName": "LargeStringSegmentsPreserveEscapesAndSplitUnicodeExactly",
-      "instanceName": "LargeStringSegmentsPreserveEscapesAndSplitUnicodeExactly(2)",
-      "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimeOperation/OperationFingerprintTests.cs",
-      "sourceSha256": "d5ea597e738b53ed34c49cdc864e3b2ea608fe532dbf3c9ac73321992cc899b2",
-      "lineNumber": 28,
-      "endLineNumber": 38,
-      "classification": "required-non-contributor",
-      "exclusionReason": null,
-      "requirements": [
-        "REQ-IS-007"
-      ],
-      "acceptance": [
-        "AC-IS-007"
-      ],
-      "nonContributorReason": "required-control",
-      "reviewBasis": "Pure fingerprint comparison at three string-segment boundaries, escaped content and split Unicode. It does not execute a database command. Required exact hashing/encoding control; not persisted operation coverage."
-    },
-    {
       "className": "KeyLoad.FunctionalTests.InternalSerialization.EncodedTypeMeasureTests",
       "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.EncodedTypeMeasureTests",
       "methodName": "ConcurrentFreshSessionsJoinAndCancelledAdmissionHasHealthyContinuation",
@@ -58319,7 +58153,7 @@
       "methodName": "OwnedSnapshotPreservesIndependentMetadataAndBusinessTime",
       "instanceName": "OwnedSnapshotPreservesIndependentMetadataAndBusinessTime",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/RuntimeOperation/OperationOwnershipTests.cs",
-      "sourceSha256": "e4b6f9b18b37dcca4b08aa84ab971cd02195ca938c6c7c0f8cc63198ee746aee",
+      "sourceSha256": "b23128efa0e9cdd411d67f700b747eb64190efd575c88f68197b84a4b3ecc831",
       "lineNumber": 37,
       "endLineNumber": 49,
       "classification": "required-non-contributor",
@@ -64362,12 +64196,12 @@
     {
       "className": "KeyLoad.FunctionalTests.InternalSerialization.SerializationExecutionPolicyTests",
       "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.SerializationExecutionPolicyTests",
-      "methodName": "PoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync",
-      "instanceName": "PoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync(4095)",
+      "methodName": "PoolPreservesCanonicalBytesAndOriginalShapeAsync",
+      "instanceName": "PoolPreservesCanonicalBytesAndOriginalShapeAsync(4095)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/SerializationExecution/SerializationExecutionPolicyTests.cs",
-      "sourceSha256": "43692861162acbe962d790129d07da39a47defa944ffc50aec387c51de4ccef8",
-      "lineNumber": 10,
-      "endLineNumber": 41,
+      "sourceSha256": "0eb0beb2c4d48b1d9eeb7727cca79a7ca43d2d1a71545c5b290e81c24302c2ef",
+      "lineNumber": 9,
+      "endLineNumber": 28,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "nonContributorReason": "required-control",
@@ -64384,12 +64218,12 @@
     {
       "className": "KeyLoad.FunctionalTests.InternalSerialization.SerializationExecutionPolicyTests",
       "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.SerializationExecutionPolicyTests",
-      "methodName": "PoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync",
-      "instanceName": "PoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync(4096)",
+      "methodName": "PoolPreservesCanonicalBytesAndOriginalShapeAsync",
+      "instanceName": "PoolPreservesCanonicalBytesAndOriginalShapeAsync(4096)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/SerializationExecution/SerializationExecutionPolicyTests.cs",
-      "sourceSha256": "43692861162acbe962d790129d07da39a47defa944ffc50aec387c51de4ccef8",
-      "lineNumber": 10,
-      "endLineNumber": 41,
+      "sourceSha256": "0eb0beb2c4d48b1d9eeb7727cca79a7ca43d2d1a71545c5b290e81c24302c2ef",
+      "lineNumber": 9,
+      "endLineNumber": 28,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "nonContributorReason": "required-control",
@@ -64406,12 +64240,12 @@
     {
       "className": "KeyLoad.FunctionalTests.InternalSerialization.SerializationExecutionPolicyTests",
       "reportClassName": "KeyLoad.FunctionalTests.InternalSerialization.SerializationExecutionPolicyTests",
-      "methodName": "PoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync",
-      "instanceName": "PoolAndFingerprintPreserveCanonicalBytesAndOriginalShapeAsync(4097)",
+      "methodName": "PoolPreservesCanonicalBytesAndOriginalShapeAsync",
+      "instanceName": "PoolPreservesCanonicalBytesAndOriginalShapeAsync(4097)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/InternalSerialization/Cases/SerializationExecution/SerializationExecutionPolicyTests.cs",
-      "sourceSha256": "43692861162acbe962d790129d07da39a47defa944ffc50aec387c51de4ccef8",
-      "lineNumber": 10,
-      "endLineNumber": 41,
+      "sourceSha256": "0eb0beb2c4d48b1d9eeb7727cca79a7ca43d2d1a71545c5b290e81c24302c2ef",
+      "lineNumber": 9,
+      "endLineNumber": 28,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "nonContributorReason": "required-control",
@@ -65179,7 +65013,7 @@
   "coverageGroups": [
     {
       "groupId": "unit-functional-01",
-      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayS*)|(AnalyticsComp*)|(AnnLifetimeD*)|(AnnPublicR*)|(AnnSeedC*)|(AnnSeedF*)|(AnnWaitA*)|(AtomicPartitionRosterB*)|(Bi*)|(Bm25O*)|(Bm25R*)|(CacheReadPermitC*)|(ChunkC*)|(ChunkManifestT*)|(ChunkW*)|(CliBackupJ*)|(CliBackupRestoreL*)|(Compe*)|(CompositionL*)|(CompositionP*)|(Conf*)|(ConnectionFi*)|(Cont*)|(CqrsT*)|(CredentialF*)|(CurrentA*)|(CurrentJ*)|(CurrentW*)|(DatabaseCompositionF*)|(Dec*)|(Disp*)|(DistributedSearchD*)|(DocumentE*)|(DocumentMutationImageT*)|(DropL*)|(DueF*)|(EventAppendC*)|(EventFeedPubSubA*)|(EventProjectionI*)|(EventQ*)|(FeedV*)|(Fie*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphIncomingV*)|(GraphSearchI*)|(GraphShortestPathC*)|(Ho*)|(HybridE*)|(Ini*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(LiveQ*)|(Man*)|(McpAuthenticationE*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpP*)|(McpRes*)|(MetadataB*)|(Metam*)|(MultiLaneC*)|(OperationH*)|(OrleansTelemetryA*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(Partia*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(PartitionStoragePu*)|(ProjectionPr*)|(ProjectionR*)|(PublicN*)|(QueueA*)|(QueueEn*)|(QueueLifecycleC*)|(QueueLifecycleN*)|(QueueLifecycleP*)|(QueueO*)|(ReadB*)|(ReadCutCa*)|(ReadD*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RelationalQ*)|(RemoteTransferL*)|(RemoteTransferRec*)|(RemoteTransferRet*)|(RequestCqrsF*)|(ResourcePa*)|(ResourcePolicyUpdateV*)|(RowRevisionI*)|(RuntimeJournalL*)|(SagaS*)|(SagaTimeoutR*)|(SagaTimeoutTe*)|(SampleAggregateT*)|(SampleChunkCod*)|(SampleChunkPar*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(SdkPr*)|(Secu*)|(SqlBetweenB*)|(SqlBo*)|(SqlCr*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageRe*)|(StoreO*)|(StreamTe*)|(SubscriptionLeaseV*)|(TargetInboxA*)|(TargetInboxCap*)|(TextBi*)|(TextBm25E*)|(TextOnlineW*)|(TextProjectionA*)|(TextProjectionO*)|(TextProjectionRem*)|(TextProv*)|(TextWaitF*)|(TextWaitObserve*)|(TimeP*)|(TimeSeriesR*)|(TopicSqlR*)|(TransactionP*)|(Un*)|(Va*)|(VectorR*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcChunk002UnpairedCodeUnitsUseExactUtf16Encoding*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafPayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayS*)|(AnalyticsC*)|(AnnLifetimeD*)|(AnnPublicR*)|(AnnSeedC*)|(AnnSeedF*)|(AnnWaitA*)|(AtomicPartitionRosterB*)|(Bi*)|(Bm25O*)|(Bm25R*)|(CacheReadPermitC*)|(ChunkC*)|(ChunkManifestT*)|(ChunkW*)|(CliBackupJ*)|(CliBackupRestoreL*)|(Compe*)|(CompositionL*)|(CompositionP*)|(Conf*)|(ConnectionFi*)|(Cont*)|(CqrsT*)|(CredentialF*)|(CurrentA*)|(CurrentJ*)|(CurrentW*)|(DatabaseCompositionF*)|(Dec*)|(Disp*)|(DistributedSearchD*)|(DocumentE*)|(DocumentMutationImageT*)|(DropL*)|(DueF*)|(EventAppendC*)|(EventFeedPubSubA*)|(EventProjectionI*)|(EventQ*)|(FeedV*)|(Fie*)|(GraphCrossPartitionC*)|(GraphCrossPartitionRec*)|(GraphCrossPartitionS*)|(GraphIncomingE*)|(GraphIncomingV*)|(GraphSearchI*)|(GraphShortestPathC*)|(Ho*)|(HybridE*)|(Ini*)|(KeyCodecI*)|(KeyCodecM*)|(KeyLoadClientT*)|(KeyLoadQ*)|(LiveQ*)|(Man*)|(McpAuthenticationE*)|(McpB*)|(McpE*)|(McpF*)|(McpGatewayP*)|(McpP*)|(McpRes*)|(MetadataB*)|(Metam*)|(MultiLaneC*)|(OperationH*)|(OrleansTelemetryA*)|(PackedAnnConc*)|(PackedAnnF*)|(PackedAnnOwner*)|(Partia*)|(PartitionQueryC*)|(PartitionQueryPublicC*)|(PartitionRecordC*)|(PartitionStoragePu*)|(ProjectionPr*)|(ProjectionR*)|(PublicN*)|(QueueA*)|(QueueEn*)|(QueueLifecycleC*)|(QueueLifecycleN*)|(QueueLifecycleP*)|(QueueO*)|(ReadB*)|(ReadCutCa*)|(ReadD*)|(ReadOnlyCollectionV*)|(RelationalL*)|(RelationalQ*)|(RemoteTransferL*)|(RemoteTransferRec*)|(RemoteTransferRet*)|(RequestCqrsF*)|(ResourcePa*)|(ResourcePolicyUpdateV*)|(RowRevisionI*)|(RuntimeJournalL*)|(SagaS*)|(SagaTimeoutR*)|(SagaTimeoutTe*)|(SampleAggregateT*)|(SampleChunkCod*)|(SampleChunkPar*)|(SampleChunkStoreF*)|(SampleO*)|(SampleRetentionR*)|(SampleRollupO*)|(SampleRollupW*)|(SdkPr*)|(Secu*)|(SqlBetweenB*)|(SqlBo*)|(SqlCr*)|(SqlInnerJoinD*)|(SqlInnerJoinS*)|(SqlModelViewB*)|(StorageRe*)|(StoreO*)|(StreamTe*)|(SubscriptionLeaseV*)|(TargetInboxA*)|(TargetInboxCap*)|(TextBi*)|(TextBm25E*)|(TextOnlineW*)|(TextProjectionA*)|(TextProjectionO*)|(TextProjectionRem*)|(TextProv*)|(TextWaitF*)|(TextWaitObserve*)|(TimeP*)|(TimeSeriesR*)|(TopicSqlR*)|(TransactionP*)|(Un*)|(Va*)|(VectorR*)|(ZoneTreeCoordinatedPointCacheE*)|(ZoneTreePointCacheP*)/(*)&(!AcChunk002UnpairedCodeUnitsUseExactUtf16Encoding*)&(!AcCq001_TypedStorageHelpersRejectNullArgumentsBeforeWork*)&(!EmptyAndUnknownVersionsRemainFormatUnsupported*)&(!LiteralMalformedTagScalarEscapeTextAndTimestampVectorsFailClosed*)&(!LiteralNoncanonicalAndUnrepresentableDecimalVectorsFailClosed*)&(!MultiLanePublicJsonDescriptorRetainsLiteralParentAndLeafPayloads*)&(!ValidUnicodeEscapesAndNumericExtremaRemainReadable*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsCompositionTests",
         "KeyLoad.FunctionalTests.Authorization.CredentialFrameBudgetTests",
@@ -65555,7 +65389,7 @@
         "KeyLoad.FunctionalTests.InternalSerialization.ContractFamilyTests|AcIs002RawBytesEmptyValuesAndTombstonesStayDistinctAndOwned|AcIs002RawBytesEmptyValuesAndTombstonesStayDistinctAndOwned",
         "KeyLoad.FunctionalTests.InternalSerialization.ContractFamilyTests|AcIs002ScalarTypesAndExactMeasurementsStayIntact|AcIs002ScalarTypesAndExactMeasurementsStayIntact",
         "KeyLoad.FunctionalTests.InternalSerialization.PublicNormalizationTests|ConfiguredNullGrantDoesNotPreemptCurrentClusterAdministration|ConfiguredNullGrantDoesNotPreemptCurrentClusterAdministration",
-        "KeyLoad.FunctionalTests.InternalSerialization.PublicNormalizationTests|ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndExactFingerprintConflict|ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndExactFingerprintConflict",
+        "KeyLoad.FunctionalTests.InternalSerialization.PublicNormalizationTests|ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndReplaysRespelledInput|ConfiguredNullGrantRetainsCommittedClockCachedOutcomeAndReplaysRespelledInput",
         "KeyLoad.FunctionalTests.InternalSerialization.PublicNormalizationTests|FactoryAndOwnedSnapshotsRetainPublicNullElements|FactoryAndOwnedSnapshotsRetainPublicNullElements(NullGrant)",
         "KeyLoad.FunctionalTests.InternalSerialization.PublicNormalizationTests|FactoryAndOwnedSnapshotsRetainPublicNullElements|FactoryAndOwnedSnapshotsRetainPublicNullElements(NullMutation)",
         "KeyLoad.FunctionalTests.InternalSerialization.PublicNormalizationTests|FactoryAndOwnedSnapshotsRetainPublicNullElements|FactoryAndOwnedSnapshotsRetainPublicNullElements(NullPatch)",
@@ -65756,7 +65590,6 @@
         "KeyLoad.FunctionalTests.ResourceExecution.ReadOnlyCollectionValidationTests|AcRoc002RequiredByteBuffersRejectExplicitNullAndMissingMembers|AcRoc002RequiredByteBuffersRejectExplicitNullAndMissingMembers",
         "KeyLoad.FunctionalTests.ResourceExecution.ReadOnlyCollectionValidationTests|AcRoc002RequiredVectorAndPolicyCollectionsRejectNullOrDefault|AcRoc002RequiredVectorAndPolicyCollectionsRejectNullOrDefault",
         "KeyLoad.FunctionalTests.ResourceExecution.ReadOnlyCollectionValidationTests|AcRoc003And004OwnedScanAndPointResultsStayIndependentOfCallerAndStoreBuffers|AcRoc003And004OwnedScanAndPointResultsStayIndependentOfCallerAndStoreBuffers",
-        "KeyLoad.FunctionalTests.ResourceExecution.ResourcePairBindingWholeFlowTests|MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners|MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(ConflictingLifetime)",
         "KeyLoad.FunctionalTests.ResourceExecution.ResourcePairBindingWholeFlowTests|MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners|MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(MalformedLifetime)",
         "KeyLoad.FunctionalTests.ResourceExecution.ResourcePairBindingWholeFlowTests|MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners|MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(MissingDefinition)",
         "KeyLoad.FunctionalTests.ResourceExecution.ResourcePairBindingWholeFlowTests|MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners|MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(MissingLifetime)",
@@ -66529,7 +66362,6 @@
         "KeyLoad.FunctionalTests.ResourceExecution.CacheReadPermitTests|WithdrawalRequiresExactGrantAndRevisionAndPreservesSequenceHistory|WithdrawalRequiresExactGrantAndRevisionAndPreservesSequenceHistory",
         "KeyLoad.FunctionalTests.ResourceExecution.JsonTextAllocationTests|AcMp006MalformedParseReturnsReusableLoanAndHealthyCallStillSucceeds|AcMp006MalformedParseReturnsReusableLoanAndHealthyCallStillSucceeds",
         "KeyLoad.FunctionalTests.ResourceExecution.JsonTextQueueReplayTests|AcMp006EmptyQueueReceiveReplayStillReauthorizesPrincipal|AcMp006EmptyQueueReceiveReplayStillReauthorizesPrincipal",
-        "KeyLoad.FunctionalTests.ResourceExecution.JsonTextQueueReplayTests|AcMp006MultiQueueReceiveReplayRetainsTokensAndRawSpellingIdentity|AcMp006MultiQueueReceiveReplayRetainsTokensAndRawSpellingIdentity",
         "KeyLoad.FunctionalTests.ResourceExecution.JsonTextQueueReplayTests|AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody|AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody(Deliveries)",
         "KeyLoad.FunctionalTests.ResourceExecution.JsonTextQueueReplayTests|AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody|AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody(PayloadJson)",
         "KeyLoad.FunctionalTests.ResourceExecution.JsonTextQueueReplayTests|AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody|AcR14ReplayComparisonRejectsChangedTokenOrderedElementOrExactBody(Token)",
@@ -66659,7 +66491,8 @@
         "KeyLoad.FunctionalTests.TimeSeries.SampleSequenceIntegrityTests|CounterCorruptionRefusesAtomicAppendThenExactRepairCorrectionReplayAndTwoCold|CounterCorruptionRefusesAtomicAppendThenExactRepairCorrectionReplayAndTwoCold(1)",
         "KeyLoad.FunctionalTests.Search.AnnSeedVisibilityTests|CaptureExcludesValidDifferentSpaces|CaptureExcludesValidDifferentSpaces",
         "KeyLoad.FunctionalTests.GrainReplyTests|ReplyUsesActualQueryDtoWithUnchangedUserJson|ReplyUsesActualQueryDtoWithUnchangedUserJson",
-        "KeyLoad.FunctionalTests.GraphTraversal.GraphIncomingSortCancellationTests|FullPageSortPreservesCancellationAndHealthyReadFollows|FullPageSortPreservesCancellationAndHealthyReadFollows"
+        "KeyLoad.FunctionalTests.GraphTraversal.GraphIncomingSortCancellationTests|FullPageSortPreservesCancellationAndHealthyReadFollows|FullPageSortPreservesCancellationAndHealthyReadFollows",
+        "KeyLoad.FunctionalTests.ResourceExecution.JsonTextQueueReplayTests|AcMp006MultiQueueReceiveReplayRetainsTokensAndReplaysRespelledInput|AcMp006MultiQueueReceiveReplayRetainsTokensAndReplaysRespelledInput"
       ]
     },
     {
@@ -68188,7 +68021,7 @@
     },
     {
       "groupId": "unit-functional-05",
-      "selector": "/KeyLoad.FunctionalTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsComm*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(BackupCr*)|(CacheP*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupE*)|(CliBackupRestoreF*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionG*)|(ConnectionPo*)|(Cop*)|(CoreS*)|(CqrsI*)|(CurrentS*)|(Curs*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(Gro*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(MetadataFormatF*)|(Mo*)|(Nu*)|(OrleansWalL*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(Q2*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(ReadOnlyB*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextProjectionL*)|(Th*)|(TopicRetentionB*)|(TopicRetentionP*)|(TransactionT*)|(W*)|(ZoneTreeCoordinatedPointCacheB*)|(ZoneTreeE*)|(ZoneTreePointCacheL*)|(ZoneTreePointCacheOwnerP*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchProfileWithoutChangingQ1Dialect*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(BackupCr*)|(CacheP*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupE*)|(CliBackupRestoreF*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionG*)|(ConnectionPo*)|(Cop*)|(CoreS*)|(CqrsI*)|(CurrentS*)|(Curs*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(Gro*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(MetadataFormatF*)|(Mo*)|(Nu*)|(OrleansWalL*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(Q2*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(ReadOnlyB*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextProjectionL*)|(Th*)|(TopicRetentionB*)|(TopicRetentionP*)|(TransactionT*)|(W*)|(ZoneTreeCoordinatedPointCacheB*)|(ZoneTreeE*)|(ZoneTreePointCacheL*)|(ZoneTreePointCacheOwnerP*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchProfileWithoutChangingQ1Dialect*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminHttpMetricsMiddlewareTests",
         "KeyLoad.FunctionalTests.AdminDashboard.AdminStorageObservationTests",
@@ -68241,7 +68074,6 @@
         "KeyLoad.FunctionalTests.GraphTraversal.GraphCrossPartitionDeleteTests",
         "KeyLoad.FunctionalTests.GraphTraversal.GraphPathPayloadTests",
         "KeyLoad.FunctionalTests.GraphTraversal.GraphShortestPathIntegrityWholeFlowTests",
-        "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests",
         "KeyLoad.FunctionalTests.InternalSerialization.CoreSignedClaimsTests",
         "KeyLoad.FunctionalTests.InternalSerialization.NullableMetadataTests",
         "KeyLoad.FunctionalTests.InternalSerialization.PairMetadataTests",
@@ -68352,7 +68184,6 @@
         "CountOnlyShapeDefaultsDepthToZero",
         "EnabledBankStartsWithTheExactEmptyFixedSchema",
         "MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation",
-        "NonAnalyticsIssuanceRetainsPublicIdentityInFrozenFingerprint",
         "SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation",
         "UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation"
       ],
@@ -68532,8 +68363,6 @@
         "KeyLoad.FunctionalTests.GraphTraversal.GraphShortestPathIntegrityWholeFlowTests|AcGraphPathIntegrity001RefuseBeforeFilteringColdRepairReplayAndContinue|AcGraphPathIntegrity001RefuseBeforeFilteringColdRepairReplayAndContinue(InvalidAttributes, True)",
         "KeyLoad.FunctionalTests.GraphTraversal.GraphShortestPathIntegrityWholeFlowTests|AcGraphPathIntegrity001RefuseBeforeFilteringColdRepairReplayAndContinue|AcGraphPathIntegrity001RefuseBeforeFilteringColdRepairReplayAndContinue(NonpositiveRevision, False)",
         "KeyLoad.FunctionalTests.GraphTraversal.GraphShortestPathIntegrityWholeFlowTests|AcGraphPathIntegrity001RefuseBeforeFilteringColdRepairReplayAndContinue|AcGraphPathIntegrity001RefuseBeforeFilteringColdRepairReplayAndContinue(NonpositiveRevision, True)",
-        "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests|FreshAnalyticsIssuanceRetainsMixedReceiptAcrossMapOrderingConflictAndCold|FreshAnalyticsIssuanceRetainsMixedReceiptAcrossMapOrderingConflictAndCold(False)",
-        "KeyLoad.FunctionalTests.InternalSerialization.AnalyticsCommandIdentityTests|FreshAnalyticsIssuanceRetainsMixedReceiptAcrossMapOrderingConflictAndCold|FreshAnalyticsIssuanceRetainsMixedReceiptAcrossMapOrderingConflictAndCold(True)",
         "KeyLoad.FunctionalTests.InternalSerialization.CoreSignedClaimsTests|AcIs007ClaimsRoundTripAndTamperingOrWrongKeyRejects|AcIs007ClaimsRoundTripAndTamperingOrWrongKeyRejects",
         "KeyLoad.FunctionalTests.InternalSerialization.CoreSignedClaimsTests|AcIs007OldValidJsonTokenAndRemovedPrefixInvalidateExplicitly|AcIs007OldValidJsonTokenAndRemovedPrefixInvalidateExplicitly",
         "KeyLoad.FunctionalTests.InternalSerialization.NullableMetadataTests|AcIs002NullableCollectionsRetainAbsentAndNestedPresentElementPolicies|AcIs002NullableCollectionsRetainAbsentAndNestedPresentElementPolicies(False)",

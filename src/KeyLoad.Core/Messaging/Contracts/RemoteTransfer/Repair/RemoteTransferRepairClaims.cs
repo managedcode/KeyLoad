@@ -14,7 +14,6 @@ internal sealed record RemoteTransferRepairClaims(
     [property: global::Orleans.Id(RemoteTransferRepairClaimsFields.PolicyGeneration)] long PolicyGeneration,
     [property: global::Orleans.Id(RemoteTransferRepairClaimsFields.CompleteGeneration)] long CompleteGeneration,
     [property: global::Orleans.Id(RemoteTransferRepairClaimsFields.FailedCommandId)] Guid FailedCommandId,
-    [property: global::Orleans.Id(RemoteTransferRepairClaimsFields.CommandFingerprint)] string CommandFingerprint,
     [property: global::Orleans.Id(RemoteTransferRepairClaimsFields.OutcomeDigest)] string OutcomeDigest,
     [property: global::Orleans.Id(RemoteTransferRepairClaimsFields.OriginalPolicyEpoch)] long OriginalPolicyEpoch,
     [property: global::Orleans.Id(RemoteTransferRepairClaimsFields.CurrentPolicyEpoch)] long CurrentPolicyEpoch,

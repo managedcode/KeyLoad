@@ -1,6 +1,4 @@
-using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.ResourceExecution;
 using ManagedCode.Communication.Commands;
 
@@ -18,8 +16,6 @@ internal static class LocalInboxProcessingRecoveryModels
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
         await LocalInboxProcessingRecoveryImage.ExactAsync(
             ((ConfigureResourceRequest)original.Value.Input), request);
-        await Assert.That(original.Value.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(original.CommandId,
-            OperationKind.ConfigureResource, CrashFixtureValues.Principal, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         var lifetime = ResourceLifetimeIdentity.Create(original, partition.TenantId, partition.DatabaseId, definition);
         return new(lifetime.Incarnation.Value);
     }

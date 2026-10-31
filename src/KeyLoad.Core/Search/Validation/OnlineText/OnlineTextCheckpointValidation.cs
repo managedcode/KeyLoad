@@ -1,6 +1,5 @@
 using KeyLoad.Core.CommandOutcomes.Contracts;
 using KeyLoad.Core.CommandOutcomes.Execution;
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 
@@ -29,8 +28,7 @@ public static class OnlineTextCheckpointValidation
                 throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
             }
 
-            var fingerprint = DatabaseCommandFingerprint.Compute(intent.CommandId, OperationKind.CommitProjectionBatch, principal.Id, CommandExecutionExecution.Identity(intent));
-            if (outcome.Fingerprint != fingerprint)
+            if (!DatabaseCommandContentIdentity.SameInput(outcome.PreparedCommand, OperationKind.CommitProjectionBatch, intent))
             {
                 throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.ChangedOriginal);
             }

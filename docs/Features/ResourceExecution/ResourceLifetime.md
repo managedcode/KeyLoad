@@ -6,28 +6,18 @@ This foundation supports REQ-SQLC-006 / AC-SQLC-006, SQLC-DDL, without closing t
 
 ## Frozen D1 contracts
 
-Both new records are internal, generated Orleans contracts in namespace `KeyLoad`. No field is added to ResourceDefinition, EntityRef, Command<DatabaseCommand>, public requests or default public JSON. Existing request fingerprints and raw-byte conventions remain unchanged.
+Both new records are internal, generated Orleans contracts in namespace `KeyLoad`. No field is added to ResourceDefinition, EntityRef, Command<DatabaseCommand>, public requests or default public JSON. Existing raw-byte conventions remain unchanged.
 
 | Record | Stable alias | Fields |
 |---|---|---|
-| ResourceIncarnation | `keyload.resource-incarnation` | 0: Value, a full lowercase 64-character SHA256 hexadecimal identity. |
-| ResourceLifetime | `keyload.resource-lifetime` | 0: TenantId; 1: DatabaseId; 2: ResourceName; 3: TransactionDomainId; 4: Kind; 5: typed Incarnation; 6: CreationFingerprint. |
+| ResourceIncarnation | `keyload.resource-incarnation` | 0: Value, the creating command GUID as 32 lowercase hexadecimal characters (`N` format). |
+| ResourceLifetime | `keyload.resource-lifetime` | 0: TenantId; 1: DatabaseId; 2: ResourceName; 3: TransactionDomainId; 4: Kind; 5: typed Incarnation. Field 6 is retired. |
 
 The adjacent sidecar key is the existing KeyCodec version-one encoding of `("resource-lifetime", tenantId, databaseId, resourceName)`. The canonical catalog definition remains at its existing key. The producer owns atomic creation and validation of that pair in the original transaction; the pure identity helper owns neither storage nor routing.
 
-CreationFingerprint is exactly the existing `RuntimeOperationFingerprint.Compute(original)` of the original canonical committed creator operation. That frozen fingerprint already binds operation kind, principal ID, original command GUID and exact normalized PayloadJson. It excludes evaluation time. The helper does not change that digest or reserialize the request to introduce another input identity.
+The incarnation is the GUID of the original canonical committed creator command, written in `N` format. Replicas applying the same committed command derive the same identity; evaluation time, clock, store-local identity, randomness and process hash codes are not inputs, and no input is serialized or hashed. A retry of the same principal and command GUID replays the stored outcome and creates nothing. A different principal that reuses another principal's command GUID for a later creation of the same name would receive the same incarnation; callers generate fresh command GUIDs.
 
-The incarnation is exactly:
-
-```text
-lowerhex(SHA256(KeyCodec.Encode(
-  "keyload:resource-incarnation:v1",
-  tenantId, databaseId, definition.Name, CreationFingerprint)))
-```
-
-KeyCodec supplies its existing version byte, typed UTF-8 components and zero escaping. This frames each component unambiguously and introduces no new encoder or library. Replicas applying the same original committed input derive the same identity; evaluation time, clock, store-local identity, randomness and process hash codes are not inputs. Equal GUIDs used by different principals have different creation fingerprints and thus different incarnations. Scope and changed canonical input also remain bound.
-
-`ResourceLifetimeIdentity.Create(original, tenantId, databaseId, definition)` returns a complete ResourceLifetime for ConfigureResource or CreateTable creation. Producers invoke it only after their existing canonical payload and authority admission. `Validate(lifetime, tenantId, databaseId, definition)` requires matching tenant/database/name/domain/kind, strict lowercase 64-hex creation fingerprint and incarnation, and exact recomputation from the stored fingerprint and current scope. Malformed or mismatched identity fails the fixed Corruption diagnostic. serialization with an unsupported version retains its existing FormatUnsupported contract; this helper does not catch or reinterpret deserialization. These hashes identify trusted persisted creation; they do not authorize client-supplied lifetime fields or replace operation authentication.
+`ResourceLifetimeIdentity.Create(original, tenantId, databaseId, definition)` returns a complete ResourceLifetime for ConfigureResource or CreateTable creation. Producers invoke it only after their existing canonical payload and authority admission. `Validate(lifetime, tenantId, databaseId, definition)` requires matching tenant/database/name/domain/kind and a strict lowercase 32-hex incarnation. Malformed or mismatched identity fails the fixed Corruption diagnostic. serialization with an unsupported version retains its existing FormatUnsupported contract; this helper does not catch or reinterpret deserialization. These hashes identify trusted persisted creation; they do not authorize client-supplied lifetime fields or replace operation authentication.
 
 ## Producer transitions
 
@@ -62,7 +52,7 @@ The following source cases map only the D1 implementation slice of REQ-SQLC-006 
 
 | Existing requirement / acceptance slice | Actual owning source case | Whole-operation oracle |
 |---|---|---|
-| REQ-SQLC-006 / AC-SQLC-006: D1 creation identity | Creation flow, both arguments | Real canonical creation and rows; the ConfigureResource argument checks an independent literal creation fingerprint/incarnation; both arguments check agreement with a separate actual store and a distinct identity for another persisted principal using the same GUID. |
+| REQ-SQLC-006 / AC-SQLC-006: D1 creation identity | Creation flow, both arguments | Real canonical creation and rows; the ConfigureResource argument checks the literal incarnation of its fixed creation GUID; both arguments check agreement with a separate actual store, where another persisted principal using the same GUID derives the same incarnation. |
 | Same criteria: metadata update preservation | Creation flow, both arguments; Queue flow | Real policy CAS and queue pause/resume preserve the original sidecar bytes while complete metadata and row/queue work remain correct. |
 | Same criteria: original outcomes and policy versions | Creation flow, both arguments; Queue flow | Original success/failure replay, changed-content conflict, stale policy CAS refusal and persisted-pair repair retain the documented outcome/model boundaries and do not mint a new lifetime. |
 | Same criteria: malformed/missing pair refusal | Creation flow, both arguments; Queue flow | Genuine stored-pair corruption refuses, complete unchanged model effects are checked, and exact repair is followed by healthy original-owner operations. |
@@ -106,7 +96,7 @@ The ordinary-owned/document-query READ paths remove redundant extra definition c
 
 | Requirement / acceptance | Actual source declaration and bounded oracle |
 |---|---|
-| RLLOCAL-001 local current pair | `ResourcePairBindingWholeFlowTests.MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(ResourcePairBindingFault)` has four arguments: MissingLifetime, MalformedLifetime, ConflictingLifetime and MissingDefinition. It uses genuine canonical/journal mixed document/event/queue commands and compiled SQL INSERT plans, checks complete independent model/cut/receipt images, exact repair and healthy continuation. Both-absent preserves NotFound. This is current local pair integrity, not a name-reuse witness. |
+| RLLOCAL-001 local current pair | `ResourcePairBindingWholeFlowTests.MixedModelsAndSqlRefuseDamagedResourcePairsThenRecoverSameEntriesAcrossTwoColdOwners(ResourcePairBindingFault)` has three arguments: MissingLifetime, MalformedLifetime and MissingDefinition. It uses genuine canonical/journal mixed document/event/queue commands and compiled SQL INSERT plans, checks complete independent model/cut/receipt images, exact repair and healthy continuation. Both-absent preserves NotFound. This is current local pair integrity, not a name-reuse witness. |
 | RLLOCAL-002 original authority/outcomes | The same case checks coarse extra VectorSearch denial over damaged metadata, separate-grant authorized continuation and unchanged four-argument query admission. It checks a scheduler administrator without its required stripped data grant before pair diagnostics. Genuine BM25 capture uses distinct persisted subject and publisher identities: publisher denial wins over damaged metadata, exact repair permits actual publication with independent literal statistics/receipt/replay. Pair Corruption retains the committed-but-unapplied original entry/materializer failure; exact repair and recovery resume that same entry, while existing ordinary failed-outcome and same-GUID semantics remain intact. |
 | RLLOCAL-004 budgets, completion and recovery | The pair case exercises the original-budget metadata/lifetime boundary with refusal and authorized healthy control, same-original-entry recovery and two genuine joined cold reopen cycles of the same canonical/journal roots followed by fresh work. Original command receipt/replay, complete images and two cold continuations remain mandatory. |
 

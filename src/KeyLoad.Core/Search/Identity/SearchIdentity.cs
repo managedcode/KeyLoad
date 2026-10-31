@@ -1,4 +1,3 @@
-using KeyLoad.Core.InternalSerialization;
 using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
@@ -22,7 +21,7 @@ public static class SearchIdentity
             }
 
             engine.RequireBm25Subject(view, administrator, phase, evaluatedAt);
-            return engine.CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId, administrator.Id, evaluatedAt, phase, DatabaseCommandFingerprint.Compute(phase.CommandId, OperationKind.Bm25CorpusPublicationPhase, administrator.Id, CommandExecutionExecution.Identity(phase)), work, view);
+            return engine.CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId, administrator.Id, evaluatedAt, phase, work, view);
         });
     }
 
