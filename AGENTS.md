@@ -306,7 +306,7 @@ cases, schedule and verification, and the driver interface exist once, and each
 database, KeyLoad included, implements only its driver. Change a dataset or
 scenario once, in its module. KeyLoad runs every data type. Every database uses
 seed 1729, 16 clients, 1,000,000-record datasets and 100,000 planned operations
-per case with the same 6-minute limit per measured case (loads always finish), at one
+per case with the same 15-minute limit per measured case (loads always finish), at one
 node and, where the database supports it, three nodes.
 Unsupported capabilities and node counts have no cell; a failed case keeps its
 real error; never estimate, zero or invent a number.

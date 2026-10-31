@@ -13,8 +13,8 @@ internal sealed record BenchmarkSettings(int Records, int Operations, int Client
     internal const int StandardClients = 16;
     internal const int StandardSeed = 1729;
 
-    /// <summary>The mean measured case time across every database of the first per-type run (41203341021): 5.8 minutes.</summary>
-    internal const int StandardCaseMinutes = 6;
+    /// <summary>The owner's maximum wall time for one measured case, the same for every database.</summary>
+    internal const int StandardCaseMinutes = 15;
 
     /// <summary>Spreads <paramref name="index"/> deterministically over <c>[first, first + count)</c>.</summary>
     internal int Spread(int index, int first, int count)
