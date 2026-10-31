@@ -48,9 +48,15 @@ atomic transaction. A retry must match the original authorized operation and
 keeps its original result and sequence. A timeout after effects may have started
 is an unknown outcome, resolved using that same command ID.
 
-If an unfinished batch is present on only some copies, the next write completes the
-missing commands from the last batch that the newest copy retained. Retrying an original
-command also completes its missing applications. Gaps larger than the last batch
+If an unfinished batch is present on only some copies, the ordinary commit owner
+periodically completes the missing commands from the last batch that the newest
+copy retained. `KeyLoad:SynchronizationInterval` is a positive, validated timer
+interval with a five-second default. The timer runs only for isolated storage with
+several configured copies. It shares the existing command drain: background copy
+completion and new canonical writes never apply concurrently, while read barriers
+can continue on an advanced copy. Timer disposal and activation shutdown join the
+original drain. The next write or a stable-ID retry can complete the same work
+through this one copy path. Gaps larger than the last batch
 and unrelated divergent prefixes return `RecoveryRequired`; a successful response
 never hides that condition.
 General restoration of an empty or lagging data copy is not qualified by this
@@ -74,10 +80,11 @@ does not prove equal data or a distributed snapshot.
 | REQ-REP-006: admission, cancellation and shutdown bound all admitted work. | AC-REP-006: saturation explicitly refuses excess work; cancellation settles retained identities, joins producers and preserves earlier acknowledged data. | Unit ownership mechanisms and real cluster fault flows remain distinct. |
 | REQ-REP-007: startup validates independent positive silo/copy counts without an artificial maximum. | AC-REP-007: 1/1, 2/1, 2/2, 3/2, 5/3 and 5/5 are valid counts; zero counts and copies exceeding silos refuse before resources start. | Configuration acceptance does not qualify a topology's runtime or durability. |
 | REQ-REP-008: concurrent canonical commands share one commit and one journal flush per copy. | AC-REP-008: commands of one batch receive their own ordered sequences and the outcomes they would have alone. A retry inside a batch replays the first outcome without another sequence. A command that overflows the shared frame commits next. Business time never decreases along a batch. Reset discards only the current command's writes. A copy that missed the last batch completes from its retained commands. | `GroupCommitTests` and `ActionStagingTests` own the engine and store contracts; the cluster batch path and its throughput are qualified by the Aspire suites and the benchmark cells. |
+| REQ-REP-009: retained interrupted copy work is completed without requiring a new write. | AC-REP-009: interrupt one actual copy RPC, observe the background repair RPC, keep a read barrier available while repair is held, then verify the original document and sequence on both copies, exact retry and healthy continuation with joined cleanup. | `CopySynchronizationTests.InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair`; local and delivered-source qualification remain separate. |
 
 ## Source and verification
 
-- `src/KeyLoad.Clustering/StorageReplication/Grains/DatabaseCommitGrain.cs` owns ordered copy calls.
+- `src/KeyLoad.Clustering/StorageReplication/Grains/DatabaseCommitGrain.cs` owns ordered copy calls; `StorageReplication/Execution/StorageCommitQueue.cs` joins foreground batches and timer-driven completion on that same activation.
 - `src/KeyLoad.Clustering/StorageReplication/GrainServices/` owns addressing of silo-local storage services.
 - `src/KeyLoad/StoragePartitions/GrainServices/PartitionStorageGrainService.cs` owns each silo's storage lifetime.
 - `build/KeyLoad.AppHost/TestInfrastructure/` owns topology and fault commands.

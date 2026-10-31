@@ -16,7 +16,7 @@
     <PackageVersion Include="ManagedCode.TimeSeries" Version="10.1.2" />
     <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.7" />
     <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.7" />
-    <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.8" />
+    <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.9" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.2" />
     <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.3" />
     <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.18" />

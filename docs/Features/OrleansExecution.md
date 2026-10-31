@@ -18,6 +18,8 @@ In scope:
 
 Out of scope (forbidden as self-written clustering, see ADR-136 rule 1): KeyLoad consensus, terms, votes or leaders; membership tables or providers; KeyLoad discovery, peer transports or peer authentication; physical owner directories, shard catalogs, placement or capacity managers; partition movement, transfer, split or merge; ownership epochs and session tokens across movement; coordination-only silos; leader-gated background work. Public HTTP/SDK/MCP/SQL transports are client boundaries owned by [ClientApi](ClientApi.md), not cluster transports. Credentials and policies are owned by Authorization.
 
+KeyLoad keeps the default-deny ManagedCode.Orleans.Graph policy and call-history isolation while selecting `EnableLiveGraphTelemetry=false`. Automatic live-graph worker RPCs are unused by this server. Native Orleans activities/meters, ASP.NET Core instrumentation, ServiceDefaults and the existing telemetry privacy gates remain active.
+
 ## Request flow
 
 1. A public API call (HTTP, .NET SDK, MCP or SQL) is authenticated by the server and handed to the caller's connection grain.

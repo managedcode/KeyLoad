@@ -7,7 +7,7 @@ internal static class ConnectionGrainGraphRegistration
 {
     internal static void Register(ISiloBuilder silo)
     {
-        silo.AddOrleansGraph(configureGraph: graph =>
+        silo.AddOrleansGraph(configureFilters: static filters => filters.EnableLiveGraphTelemetry = false, configureGraph: graph =>
         {
             graph.AllowClientCallGrain<IConnectionGrain>()
                 .AllowClientCallGrain<IDatabaseCommitGrain>()

@@ -15,6 +15,16 @@ public sealed partial class DatabaseCommitGrain
         options.Value.Validate();
         if (!UsesSharedVolume)
         {
+            if (options.Value.ReplicaCount > StorageCopyContract.MinimumCount)
+            {
+                synchronizationTimer = this.RegisterGrainTimer(Commands.SynchronizeAsync, new GrainTimerCreationOptions
+                {
+                    DueTime = options.Value.SynchronizationInterval,
+                    Period = options.Value.SynchronizationInterval,
+                    Interleave = true,
+                    KeepAlive = true
+                });
+            }
             await base.OnActivateAsync(cancellationToken).ConfigureAwait(true);
             return;
         }
@@ -47,6 +57,11 @@ public sealed partial class DatabaseCommitGrain
     /// <inheritdoc />
     public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
     {
+        synchronizationTimer?.Dispose();
+        if (commands is { } originalCommands)
+        {
+            await originalCommands.JoinAsync().ConfigureAwait(true);
+        }
         if (shared is { } original)
         {
             await (localRuntime ?? throw Errors.Fail(ErrorCode.OwnershipLost, SharedUnavailable))

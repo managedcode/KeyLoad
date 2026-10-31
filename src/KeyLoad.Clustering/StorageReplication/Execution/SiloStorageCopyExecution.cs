@@ -12,9 +12,9 @@ namespace KeyLoad.Clustering;
 internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClusterMembershipService membership,
     IOptions<ReplicaCopyOptions> options, Guid incarnation, ILogger diagnostics)
 {
-    private readonly record struct AvailableCopy(SiloAddress Address, string Name, SiloStorageCut Cut);
 
-    private AvailableCopy[]? cachedOwners;
+    private readonly StorageCopyGapCompletion gaps = new(storage, diagnostics);
+    private StorageCopyOwner[]? cachedOwners;
     private MembershipVersion cachedVersion;
     private long ownersEpoch;
 
@@ -32,7 +32,8 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         try
         {
             var owners = await OwnersAsync(cancellationToken).ConfigureAwait(true);
-            var maximum = await CompleteCopyGapAsync(owners, cancellationToken).ConfigureAwait(true);
+            var maximum = await gaps.CompleteAsync(owners, cancellationToken).ConfigureAwait(true);
+            Advance(owners, maximum);
             started = true;
             var prepared = await storage.On(owners[StorageCopyContract.FirstOwner].Address)
                 .PrepareBatchAsync(operations, cancellationToken).ConfigureAwait(true);
@@ -70,8 +71,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         {
             if (!completed)
             {
-                cachedOwners = null;
-                ownersEpoch++;
+                InvalidateOwners();
             }
         }
         return outcomes;
@@ -86,7 +86,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     /// <summary>Selects up to ReplicaCount of the most advanced reachable copies. A batch requires the complete owner
     /// set; a read takes the most advanced reachable copy, so surviving copies keep serving every acknowledged write
     /// after a silo loss. Only a complete owner set is cached.</summary>
-    private async Task<AvailableCopy[]> OwnersAsync(CancellationToken cancellationToken, bool requireComplete = true)
+    private async Task<StorageCopyOwner[]> OwnersAsync(CancellationToken cancellationToken, bool requireComplete = true)
     {
         var settings = options.Value;
         settings.Validate();
@@ -112,8 +112,35 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         return owners;
     }
 
+    /// <summary>Completes retained canonical work without requiring another foreground write.</summary>
+    internal async Task SynchronizeAsync(CancellationToken token)
+    {
+        try
+        {
+            var owners = await OwnersAsync(token).ConfigureAwait(true);
+            var cut = await gaps.CompleteAsync(owners, token).ConfigureAwait(true);
+            Advance(owners, cut);
+        }
+        catch (OperationCanceledException) when (token.IsCancellationRequested)
+        {
+            InvalidateOwners();
+        }
+        catch (Exception failure) when (CqrsRuntimeFailures.FindFatal(failure) is null)
+        {
+            InvalidateOwners();
+            StorageCopyDiagnostics.SynchronizationDeferred(diagnostics,
+                failure is KeyLoadException error ? error.Code : ErrorCode.OwnershipLost);
+        }
+    }
+
+    private void InvalidateOwners()
+    {
+        cachedOwners = null;
+        ownersEpoch++;
+    }
+
     /// <summary>Records that every owner persisted <paramref name="sequence"/>, so the next write needs no cut reads.</summary>
-    private static void Advance(AvailableCopy[] owners, long sequence)
+    private static void Advance(StorageCopyOwner[] owners, long sequence)
     {
         for (var index = StorageCopyContract.FirstOwner; index < owners.Length; index++)
         {
@@ -124,7 +151,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         }
     }
 
-    private async Task<AvailableCopy[]> ReadAvailableCopiesAsync(CancellationToken cancellationToken)
+    private async Task<StorageCopyOwner[]> ReadAvailableCopiesAsync(CancellationToken cancellationToken)
     {
         var members = membership.CurrentSnapshot.Members.Values.Where(member => member.Status == SiloStatus.Active)
             .OrderBy(member => member.Name, StringComparer.Ordinal).ToArray();
@@ -134,7 +161,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
             reads[index] = TryReadCutAsync(members[index].SiloAddress, cancellationToken);
         }
         var cuts = await Task.WhenAll(reads).ConfigureAwait(true);
-        var available = new List<AvailableCopy>(members.Length);
+        var available = new List<StorageCopyOwner>(members.Length);
         for (var index = StorageCopyContract.FirstOwner; index < members.Length; index++)
         {
             if (cuts[index].Value is { } cut)
@@ -165,9 +192,9 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         }
     }
 
-    private async Task<AvailableCopy> ReadAvailableAsync(CancellationToken cancellationToken, SiloAddress? preferredSilo = null)
+    private async Task<StorageCopyOwner> ReadAvailableAsync(CancellationToken cancellationToken, SiloAddress? preferredSilo = null)
     {
-        AvailableCopy? selected = null;
+        StorageCopyOwner? selected = null;
         foreach (var copy in await OwnersAsync(cancellationToken, requireComplete: false).ConfigureAwait(true))
         {
             if (selected is not { } current || copy.Cut.Position > current.Cut.Position
@@ -179,53 +206,4 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         return selected ?? throw Errors.Fail(ErrorCode.OwnershipLost, StorageCopyContract.OwnersUnavailable);
     }
 
-    /// <summary>Completes every owner that missed part of the last committed batch and returns the shared cut.</summary>
-    private async Task<long> CompleteCopyGapAsync(AvailableCopy[] owners, CancellationToken cancellationToken)
-    {
-        var maximum = owners[StorageCopyContract.FirstOwner].Cut.Position;
-        if (maximum == long.MaxValue)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, StorageCopyContract.SequenceExhausted);
-        }
-        if (owners[^StorageCopyContract.LastOwnerFromEnd].Cut.Position == maximum)
-        {
-            return maximum;
-        }
-
-        var committed = await storage.On(owners[StorageCopyContract.FirstOwner].Address)
-            .ReadLastCommittedCommandsAsync(cancellationToken).ConfigureAwait(true);
-        var completed = StorageCopyContract.UnpersistedCopies;
-        foreach (var owner in owners)
-        {
-            if (owner.Cut.Position == maximum)
-            {
-                continue;
-            }
-            cancellationToken.ThrowIfCancellationRequested();
-            var missing = Missing(committed, owner.Cut.Position, maximum);
-            var applied = await storage.On(owner.Address).ApplyBatchAsync(missing,
-                owner.Cut.Position + StorageCopyContract.NextSequence, cancellationToken).ConfigureAwait(true);
-            if (applied.Position != maximum || applied.Applied.Length != missing.Length)
-            {
-                throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);
-            }
-            completed++;
-        }
-        Advance(owners, maximum);
-        StorageCopyDiagnostics.CopyGapCompleted(diagnostics, maximum, completed);
-        return maximum;
-    }
-
-    /// <summary>Selects the committed commands after <paramref name="position"/>; they must reach the shared cut.</summary>
-    private static ImmutableArray<Command<DatabaseCommand>> Missing(ImmutableArray<StoredCommand> committed,
-        long position, long maximum)
-    {
-        var missing = committed.Where(command => command.Sequence > position).ToImmutableArray();
-        if (missing.Length == 0 || missing.Length != maximum - position
-            || missing[StorageCopyContract.FirstOwner].Sequence != position + StorageCopyContract.NextSequence)
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);
-        }
-        return [.. missing.Select(command => command.Command)];
-    }
 }

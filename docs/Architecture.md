@@ -91,7 +91,9 @@ own; scaling means adding silos to the Orleans cluster.
   `IsolatedVolumes` (each silo owns its own disk, the default) or `SharedVolume`
   (one shared disk, `ReplicaCount=1`)
   ([ADR-143](ADR/ADR-143-independent-silo-replica-topology.md)). An unfinished original command can complete on
-  a missing copy through a stable-ID retry; unrelated gaps require explicit
+  a missing copy through a stable-ID retry or the commit owner's periodic
+  `KeyLoad:SynchronizationInterval` timer. Both use the same ordered copy drain;
+  unrelated gaps require explicit
   recovery and general empty-copy restoration remains unqualified.
 - **Request flow.** Public API (HTTP, .NET SDK, MCP, SQL) -> connection grain ->
   independent request grains -> ZoneTree owner on the same node or on other nodes through
