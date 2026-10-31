@@ -3,8 +3,9 @@ namespace KeyLoad;
 internal static class DatabaseCommandFields
 {
     internal const uint Kind = 0;
-    internal const uint Input = 1;
+    // Field 1 was the encoded input. It is retired and must never be reused.
     internal const uint Fingerprint = 2;
     internal const uint RetryDecisions = 3;
     internal const uint ResourceAdmission = 4;
+    internal const uint Input = 5;
 }

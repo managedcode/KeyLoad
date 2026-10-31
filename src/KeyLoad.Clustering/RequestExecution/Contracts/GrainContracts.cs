@@ -22,8 +22,9 @@ internal static class GrainContracts
     internal const int CommandIdField = 6;
     // Field 7 was EncodedPayload. It is retired and must never be reused.
     internal const int ExpiresAtField = 8;
-    internal const int PayloadField = 9;
+    // Field 9 was the encoded operation payload. It is retired and must never be reused.
     internal const int ObservationField = 10;
     internal const int MetadataField = 11;
+    internal const int PayloadField = 12;
     internal const int ValueField = 0;
 }

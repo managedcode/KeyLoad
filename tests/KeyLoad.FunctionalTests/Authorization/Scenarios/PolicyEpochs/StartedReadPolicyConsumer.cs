@@ -15,7 +15,7 @@ internal static class StartedReadPolicyConsumer
     {
         var fixture = scenario.Fixture;
         var envelope = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
-            OrleansSerialization.Serialize(new GetDocumentRequest(scenario.Reference(StartedReadPolicyProtocol.Document))));
+            new GetDocumentRequest(scenario.Reference(StartedReadPolicyProtocol.Document)));
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
         OperationCanceledException? cancellation = null;
         var failures = new List<Exception>();

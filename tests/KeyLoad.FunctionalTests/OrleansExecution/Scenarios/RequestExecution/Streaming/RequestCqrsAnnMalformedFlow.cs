@@ -12,7 +12,7 @@ internal static class RequestCqrsAnnMalformedFlow
     {
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
-            OperationKind.MaintainAnnIndex, request.CommandId, OrleansSerialization.Serialize(request));
+            OperationKind.MaintainAnnIndex, request.CommandId, request);
         var producer = new RequestCqrsProducerObservation();
         var serializer = fixture.Services
             .GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>();

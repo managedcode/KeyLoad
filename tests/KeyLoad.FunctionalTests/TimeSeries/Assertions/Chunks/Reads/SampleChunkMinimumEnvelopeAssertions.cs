@@ -62,6 +62,6 @@ internal static class SampleChunkMinimumEnvelopeAssertions
         var reply = await scenario.InvokeAsync(state.Reader, id, Guid.Empty, envelope, token);
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(reply.SafeDetail).IsEqualTo(ScopeDenied);
-        await Assert.That(reply.Payload.IsEmpty).IsTrue();
+        await Assert.That(reply.Result).IsNull();
     }
 }

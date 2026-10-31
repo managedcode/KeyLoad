@@ -19,7 +19,7 @@ internal static class AnalyticsExpectedResourceCreation
     {
         var original = fixture.ReadStoredOutcome(commandId).PreparedCommand
             ?? throw new InvalidOperationException("The original analytics fixture resource creation is missing.");
-        var request = OrleansSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span);
+        var request = ((ConfigureResourceRequest)(original).Value!.Input);
         return ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
     }
 

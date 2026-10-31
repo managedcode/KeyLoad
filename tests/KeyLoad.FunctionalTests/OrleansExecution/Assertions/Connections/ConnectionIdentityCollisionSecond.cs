@@ -16,7 +16,7 @@ internal static class ConnectionIdentityCollisionSecond
         await Assert.That(operation.CommandId).IsEqualTo(state.Following.CommandId);
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(operation.UserId!).IsEqualTo(state.Second.Id);
-        await DeclaredResponseEofAssertions.EqualAsync(state.Following, OrleansSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
+        await DeclaredResponseEofAssertions.EqualAsync(state.Following, ((CommandRequest)(operation).Value!.Input));
         var expected = new CommitReceipt(state.Following.CommandId, new(placement.Incarnation, state.Following.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(D.PutKind, ConnectionProtocol.Collection, P.SecondDocument, P.InitialRevision)], DurabilityProfile.ProcessDurable, 2);
         await DeclaredResponseEofAssertions.EqualAsync(expected, actual);
         await Assert.That(actual.Mutations.All(value => value.CompositionReferences.IsEmpty)).IsTrue();

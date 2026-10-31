@@ -53,7 +53,7 @@ internal static class FeedDeleteClassificationFlow
         token.ThrowIfCancellationRequested();
         var result = FeedHealthyAdmission.Submit(owner,
             owner.CreateCommand(OperationKind.Batch, command.CommandId, FeedVertexAuthorityFixture.Root,
-                state.Source.CommittedAt, OrleansSerialization.Serialize(command)),
+                state.Source.CommittedAt, command),
             explicitTime: true, token);
         var receipt = result.Get<CommitReceipt>();
         await FeedVertexAuthorityAssertions.ReceiptAsync(command, receipt,

@@ -7,19 +7,35 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainReplyFactory
 {
+    private const long EmptyReplyBytes = 0;
     private const string Cancelled = "The database request was cancelled.";
     private const string Unavailable = "The database request could not complete. Retry the same command ID for writes.";
     private const string InterruptedWrite = "The write outcome is unknown. Retry the same command ID.";
 
     internal static GrainOperationReply Value(object? value, IOptions<GrainRoutingOptions> options, CancellationToken cancellationToken)
     {
-        using var stream = new GrainBoundedPayloadStream(options.Value.MaximumReplyBytes, options, cancellationToken);
-        OrleansSerialization.Serialize(new GrainValue(value), stream);
+        var result = new GrainValue(value);
+        using var counter = new GrainCountingWriter(options.Value.MaximumReplyBytes, options, cancellationToken);
+        try
+        {
+            OrleansSerialization.SerializeToWriter(result, counter);
+        }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.BudgetExceeded)
+        {
+            throw Errors.Fail(ErrorCode.ResourceExhausted, GrainRoutingProtocol.ReplyBudgetExceeded);
+        }
         return new()
         {
-            Payload = stream.Complete()
+            Result = result
         };
     }
+
+    internal static GrainValue RequireValue(GrainOperationReply reply)
+        => reply.Error is null && reply.Result is { } result ? result
+            : throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
+
+    internal static long Measure(GrainOperationReply reply)
+        => reply.Result is { } result ? OrleansSerialization.Measure(result) : EmptyReplyBytes;
 
     internal static GrainOperationReply ParentValue<T>(T result, IOptions<GrainRoutingOptions> options, CancellationToken token)
     {
@@ -50,7 +66,7 @@ internal static class GrainReplyFactory
         ArgumentNullException.ThrowIfNull(reply);
         if (reply.Error is { } code)
         {
-            if (!reply.Payload.IsEmpty || reply.SafeDetail is not { } detail)
+            if (reply.Result is not null || reply.SafeDetail is not { } detail)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
             }
@@ -58,7 +74,7 @@ internal static class GrainReplyFactory
             return Result<GrainOperationReply>.Fail(GrainRequestStreamProblem.Create(code: code, detail: detail, options: options));
         }
 
-        if (reply.Payload.IsEmpty || reply.Payload.Length > options.Value.MaximumReplyBytes
+        if (reply.Result is null || Measure(reply) > options.Value.MaximumReplyBytes
             || reply.SafeDetail is not null)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);

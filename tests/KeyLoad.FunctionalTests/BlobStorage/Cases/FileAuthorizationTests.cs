@@ -94,5 +94,5 @@ internal sealed class FileAuthorizationTests
 
     private static Result<object> Apply(TestDatabase database, FileMetadataMutation request)
         => database.SubmitIssued(database.Database.CreateCommand(OperationKind.FileMetadata, request.CommandId,
-            Root, default, OrleansSerialization.Serialize(request)));
+            Root, default, request));
 }

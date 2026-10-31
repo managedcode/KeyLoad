@@ -19,7 +19,7 @@ internal static class MixedEventingRetentionBackupHeldLease
         _ = fixture.Source.Database.OwnCommand(original);
         await MixedEventingRetentionBackupTopic.EqualAsync(new ReceiveRequest(issued.Operation.CommandId,
                 state.Queue.Lane, LeaseSeconds: QueueLifecycleTestProtocol.LeaseSeconds),
-            OrleansSerialization.Deserialize<ReceiveRequest>(original.Value.Input.Span));
+            ((ReceiveRequest)original.Value.Input));
         var deadline = new DateTimeOffset(original.Timestamp).AddSeconds(QueueLifecycleTestProtocol.LeaseSeconds);
         var held = fixture.Database.InspectMessage(QueueLifecycleTestProtocol.Administrator,
             state.Queue.Lane, QueueLifecycleTestProtocol.Held)!;

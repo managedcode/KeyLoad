@@ -29,7 +29,7 @@ internal static class RequestCqrsAnnProgressControls
         var cut = fixture.Database.Store.Position;
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
-            OperationKind.MaintainAnnIndex, request.CommandId, OrleansSerialization.Serialize(request));
+            OperationKind.MaintainAnnIndex, request.CommandId, request);
         var observed = new RequestCqrsProducerObservation();
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
         var serializer = fixture.Services
@@ -49,10 +49,12 @@ internal static class RequestCqrsAnnProgressControls
         await RequestCqrsAnnAssertions.FramesAsync(frames, request, id);
         await Assert.That(frames.Count(frame => frame.Kind == CqrsStreamChunkKind.Progress
             && frame.ProgressResult!.Value.Value!.AnnPhase == AnnMaintenancePhase.Replay)).IsEqualTo(replayCount);
-        await Assert.That(reply.Payload.Span.SequenceEqual(genuineReply.Payload.Span)).IsTrue();
+        var expected = OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(genuineReply));
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(reply)).AsSpan().SequenceEqual(expected)).IsTrue();
         await Assert.That(reply.Error).IsEqualTo(genuineReply.Error);
         await Assert.That(reply.SafeDetail).IsEqualTo(genuineReply.SafeDetail);
-        await Assert.That(frames.Last().Final!.Value.Value!.Payload.Span.SequenceEqual(genuineReply.Payload.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(frames.Last().Final!.Value.Value!))
+            .AsSpan().SequenceEqual(expected)).IsTrue();
         await Assert.That(frames.Last().Final!.Value.Value!.Error).IsEqualTo(genuineReply.Error);
         await Assert.That(frames.Last().Final!.Value.Value!.SafeDetail).IsEqualTo(genuineReply.SafeDetail);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);

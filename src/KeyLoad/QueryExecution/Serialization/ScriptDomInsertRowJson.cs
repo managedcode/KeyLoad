@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text;
 using System.Text.Json;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
@@ -16,14 +17,14 @@ internal static class ScriptDomInsertRowJson
         {
             Write(writer, columns, row, parameters, checkBudget, token);
         }
-        using var buffer = new MemoryStream(checked((int)counter.Length));
+        var buffer = new ArrayBufferWriter<byte>(checked((int)counter.Length));
         using (var writer = new Utf8JsonWriter(buffer))
         {
             Write(writer, columns, row, parameters, checkBudget, token);
         }
         checkBudget();
         token.ThrowIfCancellationRequested();
-        return Encoding.UTF8.GetString(buffer.GetBuffer(), Empty, checked((int)buffer.Length));
+        return Encoding.UTF8.GetString(buffer.WrittenSpan);
     }
     private static void Write(Utf8JsonWriter writer, string[] columns, Dom.RowValue row,
         ScriptDomCompositionParameters parameters, Action checkBudget, CancellationToken token)

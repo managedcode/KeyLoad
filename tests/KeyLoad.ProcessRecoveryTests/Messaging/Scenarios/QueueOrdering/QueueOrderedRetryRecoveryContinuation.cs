@@ -25,8 +25,8 @@ internal static class QueueOrderedRetryRecoveryContinuation
         await Assert.That(Capture(reopened)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await ReplayAsync(cold, outcomes);
         var commandId = Guid.NewGuid();
-        var operation = cold.OwnCommand(cold.CreateCommand(OperationKind.Batch, commandId, CrashFixtureValues.Principal, retryAt, OrleansSerialization.Serialize(new CommandRequest(commandId, QueueOrderedRetryCrashProtocol.Partition,
-                [QueueOrderedRetryCrashSeed.Enqueue(QueueOrderedRetryCrashProtocol.Healthy)]))));
+        var operation = cold.OwnCommand(cold.CreateCommand(OperationKind.Batch, commandId, CrashFixtureValues.Principal, retryAt, new CommandRequest(commandId, QueueOrderedRetryCrashProtocol.Partition,
+                [QueueOrderedRetryCrashSeed.Enqueue(QueueOrderedRetryCrashProtocol.Healthy)])));
         outcomes.Add((operation, cold.Apply(operation).Get<CommitReceipt>()));
         await CompleteAsync(cold, retryAt, QueueOrderedRetryCrashProtocol.Healthy, outcomes);
         await QueueOrderedRetryRecoveryTerminal.AssertAsync(cold, healthy: true);
@@ -39,13 +39,13 @@ internal static class QueueOrderedRetryRecoveryContinuation
         var request = new ReceiveRequest(Guid.NewGuid(), new(QueueOrderedRetryCrashProtocol.Partition, QueueOrderedRetryCrashProtocol.Queue),
             MaxMessages: QueueOrderedRetryCrashProtocol.One);
         var operation = database.PrepareQueueRetryOperation(database.OwnCommand(
-            database.CreateCommand(OperationKind.Receive, request.RequestId, CrashFixtureValues.Principal, at, OrleansSerialization.Serialize(request))));
+            database.CreateCommand(OperationKind.Receive, request.RequestId, CrashFixtureValues.Principal, at, request)));
         var delivery = await Assert.That(database.Apply(operation).Get<ReceiveResult>().Deliveries).HasSingleItem();
         await Assert.That(delivery.Id).IsEqualTo(id);
         await Assert.That(delivery.PayloadJson).IsEqualTo(QueueOrderedRetryCrashProtocol.Payload);
         await Assert.That(delivery.HeadersJson).IsEqualTo(QueueOrderedRetryCrashProtocol.Headers);
         var command = new DeliveryCommand(Guid.NewGuid(), request.Lane, delivery.Token, DeliveryAction.Ack);
-        var acknowledged = database.OwnCommand(database.CreateCommand(OperationKind.Delivery, command.CommandId, CrashFixtureValues.Principal, at, OrleansSerialization.Serialize(command)));
+        var acknowledged = database.OwnCommand(database.CreateCommand(OperationKind.Delivery, command.CommandId, CrashFixtureValues.Principal, at, command));
         outcomes.Add((acknowledged, database.Apply(acknowledged).Get<CommitReceipt>()));
     }
     private static async Task ReplayAsync(DatabaseEngine database, List<(Command<DatabaseCommand> Operation, CommitReceipt Receipt)> outcomes)

@@ -63,20 +63,17 @@ internal static class MultiLaneReceiveExecution
         IResourceLifetimeWorkBinding binding, Guid incarnation, int precedingOutcomes, CancellationToken token)
     {
         var actorId = Guid.NewGuid();
-        var payload = OrleansSerialization.Serialize(leaf);
         var invoked = false;
-        var transferred = false;
         try
         {
             var child = codec.CreateMultiLaneReceiveChild(actorId, parent.Envelope.PrincipalId!, leaf.RequestId,
-                payload, parent.Envelope.ExpiresAt);
-            transferred = true;
+                leaf, parent.Envelope.ExpiresAt);
             var reply = await MaintenanceChildDispatch.ExecuteAsync(parent, child, actorId, leaf.RequestId,
                 (request, cancellation) =>
                 {
                     invoked = true;
                     return executeChild(request, cancellation);
-                }, services, codec, binding, payload, token).ConfigureAwait(true);
+                }, services, codec, binding, token).ConfigureAwait(true);
             return new(reply, null);
         }
         catch (KeyLoadException error) when (invoked)
@@ -98,13 +95,6 @@ internal static class MultiLaneReceiveExecution
                 throw;
             }
             return new(null, stopped);
-        }
-        finally
-        {
-            if (!transferred)
-            {
-                System.Security.Cryptography.CryptographicOperations.ZeroMemory(payload);
-            }
         }
     }
 
@@ -140,7 +130,7 @@ internal static class MultiLaneReceiveExecution
         }
         try
         {
-            var result = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as ReceiveResult
+            var result = GrainReplyFactory.RequireValue(reply).Value as ReceiveResult
                 ?? throw Errors.Fail(ErrorCode.UnknownWriteOutcome, GrainRoutingProtocol.InvalidRequest);
             if (result.RequestId != leaf.RequestId)
             {

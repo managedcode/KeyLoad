@@ -60,9 +60,9 @@ internal static class CommandOutcomeAuthorizationOrderScenario
     private static Command<DatabaseCommand> CreateWrite(TestDatabase database, Guid commandId, string documentId,
         string documentJson)
         => database.Database.CreateCommand(OperationKind.Batch, commandId, Writer,
-            database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(
-                new CommandRequest(commandId, database.Partition,
-                    [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, documentId, documentJson)])));
+            database.Database.EvaluationClock.GetUtcNow(),
+            new CommandRequest(commandId, database.Partition,
+                [new PutDocument(CommandOutcomePartitionScopeTestData.Resource, documentId, documentJson)]));
 
     private static byte[] CorruptCurrentPartitionOutcome(TestDatabase database, Guid commandId)
     {

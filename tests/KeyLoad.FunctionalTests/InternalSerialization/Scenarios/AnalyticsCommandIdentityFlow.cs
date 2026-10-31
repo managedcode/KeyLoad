@@ -70,6 +70,6 @@ internal static class AnalyticsCommandIdentityFlow
     {
         var work = new ReadExecutionBudget(owner.Database.EvaluationClock, owner.CallerToken);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
+            owner.Database.EvaluationClock.GetUtcNow(), request, work);
     }
 }

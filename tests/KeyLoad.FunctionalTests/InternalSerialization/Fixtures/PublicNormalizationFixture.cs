@@ -45,9 +45,9 @@ internal static class PublicNormalizationFixture
     internal static KeyLoadException EncodingFailure(Command<DatabaseCommand> operation)
         => operation.Value!.Kind == OperationKind.Batch
             ? Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(
-                OrleansSerialization.Deserialize<CommandRequest>(operation.Value.Input.Span, ValidationProfile.PublicInputElements)))
+                ((CommandRequest)operation.Value.Input)))
             : Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(
-                OrleansSerialization.Deserialize<ConfigurePrincipalRequest>(operation.Value.Input.Span, ValidationProfile.PublicInputElements)));
+                ((ConfigurePrincipalRequest)operation.Value.Input)));
 
     internal static StoredOutcome Stored(TestDatabase database, Command<DatabaseCommand> operation)
         => OutcomeStoreOracle.ReadStored(database.Store, operation)!;
@@ -59,8 +59,8 @@ internal static class PublicNormalizationFixture
     internal static string PublicJson(Command<DatabaseCommand> operation)
     {
         object input = operation.Value!.Kind == OperationKind.Batch
-            ? OrleansSerialization.Deserialize<CommandRequest>(operation.Value.Input.Span, ValidationProfile.PublicInputElements)
-            : OrleansSerialization.Deserialize<ConfigurePrincipalRequest>(operation.Value.Input.Span, ValidationProfile.PublicInputElements);
+            ? ((CommandRequest)operation.Value.Input)
+            : ((ConfigurePrincipalRequest)operation.Value.Input);
         return " \n" + Encoding.UTF8.GetString(JsonDefaults.Serialize(input)) + "\t ";
     }
 

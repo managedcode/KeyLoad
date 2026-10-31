@@ -12,7 +12,7 @@ internal static class TextParentBoundaryAssertions
         var position = database.Store.Position;
         var error = Assert.ThrowsExactly<KeyLoadException>(() => database.Database.CreateCommand(
             OperationKind.MaintainTextIndex, request.CommandId, TextMaintenanceTestValues.Principal,
-            database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request)));
+            database.Database.EvaluationClock.GetUtcNow(), request));
         await Assert.That(error.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(error.Message).IsEqualTo(Unsupported);
         await Assert.That(database.Store.Position).IsEqualTo(position);

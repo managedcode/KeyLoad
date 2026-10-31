@@ -94,7 +94,7 @@ internal static class TextIncrementalProcessAssertions
         await Assert.That(original.CommandId).IsNotEqualTo(Guid.Empty);
         await Assert.That(original.UserId).IsEqualTo(CrashFixtureValues.Principal);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
-        await Assert.That(JsonDefaults.Serialize(OrleansSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span))
+        await Assert.That(JsonDefaults.Serialize(((ConfigureResourceRequest)original.Value.Input))
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         var fingerprint = DatabaseCommandFingerprint.Compute(original.CommandId, OperationKind.ConfigureResource,
             CrashFixtureValues.Principal, JsonSerializer.Serialize(expected, JsonDefaults.Options));

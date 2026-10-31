@@ -1,9 +1,9 @@
 namespace KeyLoad.Clustering;
 
-/// <summary>Preserves the original principal wire grammar and the actual charged authentication work.</summary>
+/// <summary>Returns the persisted principal and the actual charged authentication work.</summary>
 [Orleans.GenerateSerializer, Orleans.Alias(GrainContracts.AdministratorAuthenticationResultAlias)]
 internal sealed record AdministratorAuthenticationResult(
-    [property: Orleans.Id(0)] ReadOnlyMemory<byte> PrincipalPayload,
+    [property: Orleans.Id(5)] PrincipalRecord? Principal,
     [property: Orleans.Id(1)] long ReadBytes,
     [property: Orleans.Id(2)] int ExaminedRecords,
     [property: Orleans.Id(3)] ErrorCode? Error,

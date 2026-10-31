@@ -18,7 +18,7 @@ internal static class ResourceLifetimeIdentity
         RequireScope(tenantId, databaseId, definition);
         if (original is null || original.CommandId == Guid.Empty
             || original.Value!.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable)
-            || original.Value.Input.IsEmpty)
+            || original.Value.Input is null)
         {
             throw Invalid();
         }

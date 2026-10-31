@@ -15,7 +15,7 @@ internal static class SdkProblemBoundaryAssertions
     {
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(reply.SafeDetail).IsEqualTo(P.Denied);
-        await Assert.That(reply.Payload.IsEmpty).IsTrue();
+        await Assert.That(reply.Result).IsNull();
     }
     internal static async Task ReceiptAsync(SdkProblemBoundaryScenario state, CommandRequest command,
         CommitReceipt receipt, bool root)
@@ -25,7 +25,7 @@ internal static class SdkProblemBoundaryAssertions
         var operation = entry.PreparedCommand ?? throw new InvalidOperationException(P.Failure);
         await Assert.That(operation.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(operation.UserId!).IsEqualTo(root ? P.Root : state.Principal.Id);
-        await EqualAsync(command, OrleansSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
+        await EqualAsync(command, ((CommandRequest)(operation).Value!.Input));
         var expectedToken = (root ? state.SeedToken : state.HealthyToken) ?? throw new InvalidOperationException(P.Failure);
         await Assert.That(entry.CanonicalSequence).IsEqualTo(expectedToken.Position);
         MutationReceipt[] mutations = root

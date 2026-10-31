@@ -49,7 +49,7 @@ internal static class QueryHostedSearchDeadline
             await Assert.That(clock.Triggered).IsTrue();
             await Assert.That(reply.Error).IsEqualTo(ErrorCode.BudgetExceeded);
             await Assert.That(reply.SafeDetail).IsEqualTo(DeadlineDetail);
-            await Assert.That(reply.Payload.IsEmpty).IsTrue();
+            await Assert.That(reply.Result).IsNull();
             await QueryHostedSearchAssertions.StateAsync(cluster, images).ConfigureAwait(false);
             await QueryHostedSearchAssertions.HealthyAsync(cluster, data, images, token).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);

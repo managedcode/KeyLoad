@@ -11,7 +11,7 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
     Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> serializer,
     IOptions<GrainRoutingOptions> routing)
 {
-    internal async Task<(bool HasValue, T? Value)> ReadAsync<T>(string subject, GrainReadKind kind, ReadOnlyMemory<byte> payload, CancellationToken token) where T : class
+    internal async Task<(bool HasValue, T? Value)> ReadAsync<T>(string subject, GrainReadKind kind, object payload, CancellationToken token) where T : class
     {
         var requestId = Guid.NewGuid();
         var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
@@ -23,7 +23,7 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
         {
             throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferCoordinationProtocol.InvalidResult);
         }
-        var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
+        var value = GrainReplyFactory.RequireValue(reply).Value;
         return value is null ? (false, default(T?)) : (true, ((T?)(value as T ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCoordinationProtocol.InvalidResult))));
     }
 
@@ -33,7 +33,7 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
         var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
         var connection = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, request.CommandId, token, connectionId: connection);
-        var envelope = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, request.CommandId, OrleansSerialization.Serialize(request));
+        var envelope = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, request.CommandId, request);
         return await DrainAsync(connection, requestId, envelope, token).ConfigureAwait(true);
     }
 

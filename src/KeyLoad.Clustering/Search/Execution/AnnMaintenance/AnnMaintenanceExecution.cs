@@ -15,23 +15,9 @@ internal static class AnnMaintenanceExecution
     {
         var request = GrainPayload.ReadCommand<AnnMaintenanceRequest>(parent.Payload);
         purpose.EnableAnnMaintenance(request.Mode);
-        var children = new AnnMaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, purpose.WorkBinding);
-        AnnMaintenanceResult result;
-        try
-        {
-            result = await AnnMaintenanceParentFlow.RunAsync(children, request, writer,
-                services.GetRequiredService<IOptions<AnnMaintenanceOptions>>().Value, routing.Value).ConfigureAwait(true);
-        }
-        catch (Exception primary)
-        {
-            try
-            {
-                await children.AbortAsync().ConfigureAwait(true);
-            }
-            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
-            throw;
-        }
-        await children.AbortAsync().ConfigureAwait(true);
-        return result;
+        var children = new MaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, purpose.WorkBinding,
+            AnnMaintenanceChildScope.Purpose, AnnMaintenanceProtocol.Interrupted);
+        return await children.RunAsync(() => AnnMaintenanceParentFlow.RunAsync(children, request, writer,
+            services.GetRequiredService<IOptions<AnnMaintenanceOptions>>().Value, routing.Value)).ConfigureAwait(true);
     }
 }

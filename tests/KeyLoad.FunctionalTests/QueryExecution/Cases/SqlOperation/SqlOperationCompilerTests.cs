@@ -109,10 +109,10 @@ internal sealed class SqlOperationCompilerTests
         {
             compiled = SqlOperationTestData.Compile(SqlOperationTestData.Request(
                 SqlOperationTestData.CallPrefix + item.Name + SqlOperationTestData.CallSuffix, document.RootElement));
-            copiedWhileDocumentWasAlive = compiled.Payload.ToArray();
+            copiedWhileDocumentWasAlive = OrleansSerialization.Serialize(compiled.Payload);
         }
         await Assert.That(compiled.CommandId).IsEqualTo(item.CommandId);
-        await Assert.That(compiled.Payload.Span.SequenceEqual(copiedWhileDocumentWasAlive)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(compiled.Payload).AsSpan().SequenceEqual(copiedWhileDocumentWasAlive)).IsTrue();
         _ = await McpPayloadAssertions.AssertFullPublicPayload(item, compiled.Payload);
     }
 }

@@ -10,10 +10,10 @@ internal sealed class Bm25PublicAdmissionTests
         {
             var id = Guid.NewGuid();
             var original = flow.Database.Database.CreateCommand(OperationKind.Batch, id, Bm25CorpusPublicationFlow.Root,
-                flow.Database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(new CommandRequest(id,
-                    flow.Database.Partition, [new PutDocument(Bm25CorpusPublicationFlow.Collection, "bm25-boundary", "{\"value\":1}")])));
-            var payload = OrleansSerialization.Serialize(new CommandRequest(original.CommandId, flow.Database.Partition,
-                [new PutDocument(Bm25CorpusPublicationFlow.Collection, "bm25-boundary", "{\"value\":1}")]));
+                flow.Database.Database.EvaluationClock.GetUtcNow(), new CommandRequest(id,
+                    flow.Database.Partition, [new PutDocument(Bm25CorpusPublicationFlow.Collection, "bm25-boundary", "{\"value\":1}")]));
+            var payload = new CommandRequest(original.CommandId, flow.Database.Partition,
+                [new PutDocument(Bm25CorpusPublicationFlow.Collection, "bm25-boundary", "{\"value\":1}")]);
             var before = CanonicalStoreCut.Read(flow.Database);
             var execution = Assert.ThrowsExactly<KeyLoadException>(() => flow.Database.Database.CreateCommand(
                 OperationKind.Bm25CorpusPublicationPhase, original.CommandId, original.UserId!, new DateTimeOffset(original.Timestamp), payload));

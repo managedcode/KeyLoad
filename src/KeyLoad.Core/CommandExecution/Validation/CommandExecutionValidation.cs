@@ -1,6 +1,5 @@
 using System.Text.Json;
 using KeyLoad.Core.InternalSerialization;
-using KeyLoad.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -22,41 +21,20 @@ public static class CommandExecutionValidation
     {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(payloadJson);
-        var payload = kind switch
+        if (kind is OperationKind.FileMetadata or OperationKind.Bm25CorpusPublicationPhase or OperationKind.OnlineTextPublicationPhase)
         {
-            OperationKind.Batch => NormalizePayload<CommandRequest>(payloadJson),
-            OperationKind.Receive => NormalizePayload<ReceiveRequest>(payloadJson),
-            OperationKind.Delivery => NormalizePayload<DeliveryCommand>(payloadJson),
-            OperationKind.Processing => NormalizePayload<ProcessingRequest>(payloadJson),
-            OperationKind.CommitInbox => NormalizePayload<CommitInboxRequest>(payloadJson),
-            OperationKind.ConfigureResource => NormalizePayload<ConfigureResourceRequest>(payloadJson),
-            OperationKind.CreateTable => NormalizePayload<CreateTableRequest>(payloadJson),
-            OperationKind.DropTable => NormalizePayload<DropTableRequest>(payloadJson),
-            OperationKind.SetQueueDispatch => NormalizePayload<QueueDispatchControlRequest>(payloadJson),
-            OperationKind.ConfigurePrincipal => NormalizePayload<ConfigurePrincipalRequest>(payloadJson),
-            OperationKind.ConfigureApiKey => NormalizePayload<ConfigureApiKeyRequest>(payloadJson),
-            OperationKind.SetDispatch => NormalizePayload<bool>(payloadJson),
-            OperationKind.RuntimeJournal => NormalizePayload<RuntimeJournalMutation>(payloadJson),
-            OperationKind.ConfigureSubscription => NormalizePayload<ConfigureSubscriptionRequest>(payloadJson),
-            OperationKind.SeekSubscription => NormalizePayload<SeekSubscriptionRequest>(payloadJson),
-            OperationKind.ReceiveSubscription => NormalizePayload<ReceiveSubscriptionRequest>(payloadJson),
-            OperationKind.SubscriptionDelivery => NormalizePayload<SubscriptionDeliveryCommand>(payloadJson),
-            OperationKind.SubscriptionProcessing => NormalizePayload<SubscriptionProcessingRequest>(payloadJson),
-            OperationKind.SetSubscriptionPaused => NormalizePayload<SetSubscriptionPausedRequest>(payloadJson),
-            OperationKind.ConfigureProjectionConsumer => NormalizePayload<ConfigureProjectionConsumerRequest>(payloadJson),
-            OperationKind.CommitProjectionBatch => NormalizePayload<CommitProjectionBatchRequest>(payloadJson),
-            OperationKind.ReleaseProjectionConsumer => NormalizePayload<ReleaseProjectionConsumerRequest>(payloadJson),
-            OperationKind.PurgeOutbox => NormalizePayload<PurgeOutboxRequest>(payloadJson),
-            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDatabaseCommand)
-        };
-        return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(id, kind, principalId, payloadJson), null);
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDatabaseCommand);
+        }
+
+        var input = DatabaseCommandInputTypes.Require(kind, Normalize(payloadJson, DatabaseCommandInputTypes.For(kind)));
+        return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, input, DatabaseCommandFingerprint.Compute(id, kind, principalId, payloadJson), null);
     }
 
-    internal static byte[] NormalizePayload<T>(string json)
+    private static object Normalize(string json, Type type)
     {
         try
         {
-            return OrleansSerialization.Serialize(JsonDefaults.Deserialize<T>(json), ValidationProfile.PublicInputElements);
+            return JsonDefaults.Deserialize(json, type);
         }
         catch (JsonException)
         {

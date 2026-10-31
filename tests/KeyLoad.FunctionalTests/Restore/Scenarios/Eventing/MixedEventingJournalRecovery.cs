@@ -60,7 +60,7 @@ internal static class MixedEventingJournalRecovery
         await Assert.That(retained.PreparedCommand.CommandId).IsEqualTo(operation.CommandId);
         await Assert.That(retained.PreparedCommand.UserId).IsEqualTo(operation.UserId);
         await Assert.That(retained.PreparedCommand.Value!.Kind).IsEqualTo(operation.Value!.Kind);
-        await Assert.That(retained.PreparedCommand.Value.Input.Span.SequenceEqual(operation.Value.Input.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retained.PreparedCommand.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
         await QueueLifecycleImage.SameAsync(source.Store, state.Lane, whole);
         await QueueLifecycleAccountingAssertions.InitialAsync(source.Store, state);
         await MixedEventingFailurePostimage.RequireAsync(source, state, retained.PreparedCommand, corruptRaw, key, exact,

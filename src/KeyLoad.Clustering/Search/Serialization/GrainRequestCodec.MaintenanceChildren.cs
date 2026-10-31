@@ -2,11 +2,8 @@ namespace KeyLoad.Clustering;
 
 public sealed partial class GrainRequestCodec
 {
-    internal GrainRequestEnvelope CreateAnnMaintenanceChild(Guid requestId, string principalId,
-        GrainReadKind? readKind, OperationKind? commandKind, Guid commandId, byte[] payload, DateTimeOffset expiry)
-        => SearchMaintenanceRequestIssuance.CreateAnnMaintenanceChild(this, requestId, principalId, readKind, commandKind, commandId, payload, expiry);
-
-    internal GrainRequestEnvelope CreateTextMaintenanceChild(Guid requestId, string principalId,
-        GrainReadKind? readKind, OperationKind? commandKind, Guid commandId, byte[] payload, DateTimeOffset expiry)
-        => SearchMaintenanceRequestIssuance.CreateTextMaintenanceChild(this, requestId, principalId, readKind, commandKind, commandId, payload, expiry);
+    internal GrainRequestEnvelope CreateMaintenanceChild(string purpose, Guid requestId, string principalId,
+        GrainReadKind? readKind, OperationKind? commandKind, Guid commandId, object payload, DateTimeOffset expiry)
+        => SearchMaintenanceRequestIssuance.CreateChild(this, purpose, requestId, principalId, readKind, commandKind,
+            commandId, payload, expiry);
 }

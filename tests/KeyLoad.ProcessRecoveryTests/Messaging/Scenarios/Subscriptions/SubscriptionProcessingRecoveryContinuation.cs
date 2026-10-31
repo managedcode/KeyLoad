@@ -20,7 +20,7 @@ internal static class SubscriptionProcessingRecoveryContinuation
     {
         var group = SubscriptionCrashScenario.Subscription;
         await ReplayAsync(db, store, original, first, token);
-        var request = OrleansSerialization.Deserialize<SubscriptionProcessingRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var request = ((SubscriptionProcessingRequest)original.Value!.Input);
         var retry = request with
         {
             CommandId = Guid.NewGuid()

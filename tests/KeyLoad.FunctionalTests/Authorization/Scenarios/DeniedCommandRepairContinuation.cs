@@ -115,7 +115,7 @@ internal static class DeniedCommandRepairContinuation
         var command = new CommandRequest(id, partition,
             [new PutDocument(Collection, Document, json, revision - NextPosition)]);
         return database.CreateCommand(OperationKind.Batch, id, principal, database.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(command));
+            command);
     }
 
     private static async Task OldDeniedAsync(DatabaseEngine database, ZoneTreeStore store,

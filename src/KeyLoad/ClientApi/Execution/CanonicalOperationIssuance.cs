@@ -6,7 +6,7 @@ internal static class CanonicalOperationIssuance
 {
     internal static CanonicalOperationRequestPreparation.Prepared Create(IServiceProvider services,
         PrincipalRecord principal, GrainReadKind? readKind, OperationKind? commandKind,
-        Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken token)
+        Guid commandId, object payload, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var requestId = Guid.NewGuid();

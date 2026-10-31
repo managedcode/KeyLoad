@@ -91,7 +91,7 @@ internal static class DatabaseCompositionRecoveryAssertions
         await Assert.That(Errors.Code(stored.Result.Problem).Value).IsNull();
         await Assert.That(JsonDefaults.Serialize(stored.Result.Get<ResourceDefinition>()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(definition))).IsTrue();
-        await Assert.That(JsonDefaults.Serialize(OrleansSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span))
+        await Assert.That(JsonDefaults.Serialize(((ConfigureResourceRequest)original.Value.Input))
             .AsSpan().SequenceEqual(JsonDefaults.Serialize(request))).IsTrue();
         var fingerprint = DatabaseCommandFingerprint.Compute(commandId, OperationKind.ConfigureResource,
             DatabaseCompositionCrashScenario.Principal, JsonSerializer.Serialize(request, JsonDefaults.Options));

@@ -34,10 +34,7 @@ internal sealed class IssuedPurposeObservation : IGrainRequestPurposeObserver
             {
                 throw new InvalidOperationException("The purpose producer was repeated.");
             }
-            original = value with
-            {
-                Payload = value.Payload.ToArray()
-            };
+            original = value;
             return InvalidPurpose;
         }
     }
@@ -51,7 +48,7 @@ internal sealed class IssuedPurposeObservation : IGrainRequestPurposeObserver
                 || actual.Incarnation != expected.Incarnation || actual.PrincipalId != expected.PrincipalId
                 || actual.ReadKind != expected.ReadKind || actual.CommandKind != expected.CommandKind
                 || actual.CommandId != expected.CommandId || actual.ExpiresAt != expected.ExpiresAt
-                || !actual.Payload.Span.SequenceEqual(expected.Payload.Span))
+                || !OrleansSerialization.Serialize(actual.Payload).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected.Payload)))
             {
                 throw new InvalidOperationException("The genuine purpose receiver observation is invalid.");
             }

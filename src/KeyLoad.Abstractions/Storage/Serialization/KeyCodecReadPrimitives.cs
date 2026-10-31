@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Buffers.Binary;
 using System.Text;
 using static KeyLoad.Storage.KeyCodecTokens;
@@ -76,20 +77,21 @@ internal static class KeyCodecReadPrimitives
 
     internal static byte[] ReadEscaped(ReadOnlySpan<byte> key, ref int offset)
     {
-        using var bytes = new MemoryStream();
+        var bytes = new ArrayBufferWriter<byte>();
         while (offset < key.Length)
         {
             var value = ReadByte(key, ref offset);
             if (value != EscapedZeroByte)
             {
-                bytes.WriteByte(value);
+                bytes.GetSpan(1)[0] = value;
+                bytes.Advance(1);
                 continue;
             }
 
             var escape = ReadByte(key, ref offset);
             if (escape == EscapedZeroByte)
             {
-                return bytes.ToArray();
+                return bytes.WrittenSpan.ToArray();
             }
 
             if (escape != ZeroEscapeMarker)
@@ -97,7 +99,8 @@ internal static class KeyCodecReadPrimitives
                 throw BadKey();
             }
 
-            bytes.WriteByte(EscapedZeroByte);
+            bytes.GetSpan(1)[0] = EscapedZeroByte;
+            bytes.Advance(1);
         }
 
         throw BadKey();

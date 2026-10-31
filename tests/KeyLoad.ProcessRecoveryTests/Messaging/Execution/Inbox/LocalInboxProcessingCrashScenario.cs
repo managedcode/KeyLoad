@@ -62,7 +62,7 @@ internal static class LocalInboxProcessingCrashScenario
             database.Apply(operation).Get<ResourceDefinition>();
             operations.Add(operation);
         }
-        return operations.Single(operation => OrleansSerialization.Deserialize<ConfigureResourceRequest>(operation.Value!.Input.Span)
+        return operations.Single(operation => ((ConfigureResourceRequest)operation.Value!.Input)
             .Definition.Name == LocalInboxProcessingCrashContract.Documents);
     }
 }

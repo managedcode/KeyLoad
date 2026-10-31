@@ -17,23 +17,9 @@ internal static class TextMaintenanceExecution
         ArgumentNullException.ThrowIfNull(binding);
         var request = GrainPayload.ReadCommand<TextIndexMaintenanceRequest>(parent.Payload);
         purpose.EnableTextMaintenance(request.Mode);
-        var children = new TextMaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, binding);
-        TextIndexMaintenanceResult result;
-        try
-        {
-            result = await TextMaintenanceParentFlow.RunAsync(children, request, writer,
-                services.GetRequiredService<IOptions<TextIndexMaintenanceOptions>>().Value, routing.Value).ConfigureAwait(true);
-        }
-        catch (Exception primary)
-        {
-            try
-            {
-                await children.AbortAsync().ConfigureAwait(true);
-            }
-            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
-            throw;
-        }
-        await children.AbortAsync().ConfigureAwait(true);
-        return result;
+        var children = new MaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, binding,
+            TextMaintenanceChildScope.Purpose, TextIndexMaintenanceProtocol.Interrupted);
+        return await children.RunAsync(() => TextMaintenanceParentFlow.RunAsync(children, request, writer,
+            services.GetRequiredService<IOptions<TextIndexMaintenanceOptions>>().Value, routing.Value)).ConfigureAwait(true);
     }
 }

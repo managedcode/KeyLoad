@@ -46,7 +46,7 @@ internal static class QueueVisibilityBoundaryAssertions
         {
             if (original.Operation.Value!.Kind == OperationKind.Receive && Errors.Code(original.Result.Problem).Value is null)
             {
-                var request = OrleansSerialization.Deserialize<ReceiveRequest>(original.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
+                var request = ((ReceiveRequest)original.Operation.Value!.Input)
                     ?? throw new InvalidOperationException("The original Receive request is absent.");
                 var current = original.Result.Get<ReceiveResult>().Deliveries.All(item => item.Token == activeToken);
                 await QueueReceiveReplayAssertions.SameAsync(store, request.Lane.Partition, original.Operation,
@@ -101,7 +101,7 @@ internal static class QueueVisibilityBoundaryAssertions
     internal static async Task DeliveryReceiptAsync((Command<DatabaseCommand> Operation, Result<object> Result) original,
         DeliveryAction action, string message, long version)
     {
-        var command = OrleansSerialization.Deserialize<DeliveryCommand>(original.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
+        var command = ((DeliveryCommand)original.Operation.Value!.Input)
             ?? throw new InvalidOperationException("The original delivery command is absent.");
         var receipt = original.Result.Get<CommitReceipt>();
         await Assert.That(receipt.CommandId).IsEqualTo(command.CommandId);

@@ -39,6 +39,9 @@ public static class JsonDefaults
     public static T Deserialize<T>(ReadOnlySpan<byte> value) => JsonSerializer.Deserialize<T>(value, Options)
         ?? throw Errors.Fail(ErrorCode.Corruption, MissingRecordMessage);
 
+    internal static object Deserialize(ReadOnlySpan<byte> value, Type type) => JsonSerializer.Deserialize(value, type, Options)
+        ?? throw Errors.Fail(ErrorCode.Corruption, MissingRecordMessage);
+
     /// <summary>Deserializes canonical JSON text with a scoped, cleared UTF-8 input loan.</summary>
     /// <typeparam name="T">Specifies the type to deserialize.</typeparam>
     /// <param name="value">Provides JSON text with the existing UTF-8 replacement encoding semantics.</param>
@@ -46,4 +49,6 @@ public static class JsonDefaults
     /// <exception cref="ArgumentNullException">The JSON text argument is null.</exception>
     /// <exception cref="KeyLoadException">The serialized value is missing or corrupt.</exception>
     public static T Deserialize<T>(string value) => PooledJsonText.Deserialize<T>(value);
+
+    internal static object Deserialize(string value, Type type) => PooledJsonText.Deserialize(value, type);
 }

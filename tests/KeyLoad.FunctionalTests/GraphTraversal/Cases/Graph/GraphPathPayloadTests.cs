@@ -96,7 +96,7 @@ internal sealed class GraphPathPayloadTests
         var request = new GraphShortestPathRequest(1, database.Partition, Graph,
             new(database.Partition, Orders, "source"), new(database.Partition, Projects, "target"),
             Labels: ImmutableArray.Create((string)null!));
-        var payload = OrleansSerialization.Serialize(request, ValidationProfile.PublicInputElements);
+        object payload = request;
         var decoded = GrainPayload.ReadPublicInput<GraphShortestPathRequest>(payload);
 
         await Assert.That(decoded.Labels.HasValue).IsTrue();
@@ -118,19 +118,19 @@ internal sealed class GraphPathPayloadTests
         var sql = new SqlGraphPathRequest(1, new QueryRequest(partition, "SELECT * FROM GRAPH_SHORTEST_PATH(...) ",
             AllowFullScan: true));
 
-        await AssertEnvelopeAsync(codec, GrainReadKind.GraphShortestPath, OrleansSerialization.Serialize(direct));
-        await AssertEnvelopeAsync(codec, GrainReadKind.SqlGraphPath, OrleansSerialization.Serialize(sql));
+        await AssertEnvelopeAsync(codec, GrainReadKind.GraphShortestPath, direct);
+        await AssertEnvelopeAsync(codec, GrainReadKind.SqlGraphPath, sql);
         await Assert.That(GrainCoreReadCapabilities.Handles(GrainReadKind.GraphShortestPath)).IsTrue();
     }
 
     private static async Task AssertEnvelopeAsync(GrainRequestCodec codec, GrainReadKind kind,
-        ReadOnlyMemory<byte> payload)
+        object payload)
     {
         var requestId = Guid.NewGuid();
         var token = codec.CreateRead(requestId, Principal, kind, payload);
         var verified = codec.DecodeRead(token, requestId);
         await Assert.That(verified.Envelope.ReadKind).IsEqualTo(kind);
-        await Assert.That(verified.Payload.Span.SequenceEqual(payload.Span)).IsTrue();
+        await Assert.That(verified.Payload).IsSameReferenceAs(payload);
     }
 
     private static PartitionRef Partition() => new(Tenant, DatabaseName, Domain, PartitionKey);

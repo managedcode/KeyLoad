@@ -10,13 +10,9 @@ internal sealed class OperationOwnershipTests
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, database.Partition,
             [new PutDocument(AuthorityFixture.Collection, AuthorityFixture.Entity, AuthorityFixture.Json)]);
-        var input = OrleansSerialization.Serialize(request);
         var issued = database.Database.CreateCommand(OperationKind.Batch, id, AuthorityFixture.Root,
-            database.Database.EvaluationClock.GetUtcNow(), input);
-        Array.Clear(input);
-        var callerBytes = issued.Value!.Input.ToArray();
+            database.Database.EvaluationClock.GetUtcNow(), request);
         var caller = database.Database.OwnCommand(issued);
-        caller.Value = caller.Value! with { Input = callerBytes };
         caller.Metadata = new()
         {
             Tags = new() { [AuthorityFixture.Entity] = AuthorityFixture.Json },
@@ -24,7 +20,6 @@ internal sealed class OperationOwnershipTests
         };
         var original = OrleansSerialization.Serialize(caller);
         var verified = database.Database.OwnCommand(caller);
-        Array.Clear(callerBytes);
         caller.Metadata.Tags[AuthorityFixture.Entity] = AuthorityFixture.InvalidJson;
         Array.Clear((byte[])caller.Metadata.Properties[AuthorityFixture.Entity]!);
         await Assert.That(OrleansSerialization.Serialize(verified).AsSpan().SequenceEqual(original)).IsTrue();
@@ -50,7 +45,7 @@ internal sealed class OperationOwnershipTests
         await Assert.That(verified.Timestamp).IsEqualTo(restamped.Timestamp);
         await Assert.That(verified.Timestamp).IsNotEqualTo(operation.Timestamp);
         await Assert.That(verified.Value!.Fingerprint).IsEqualTo(operation.Value!.Fingerprint);
-        await Assert.That(verified.Value.Input.Span.SequenceEqual(operation.Value.Input.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(verified.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value.Input, ValidationProfile.PublicInputElements))).IsTrue();
     }
 
 }

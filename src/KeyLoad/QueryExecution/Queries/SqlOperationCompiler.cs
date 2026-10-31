@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Query;
 using Microsoft.Extensions.Options;
 
@@ -47,21 +46,21 @@ internal static class SqlOperationCompiler
         var operation = statement switch
         {
             global::Microsoft.SqlServer.TransactSql.ScriptDom.SelectStatement { Into: null } => Select(request, statement,
-                maximumPayloadBytes, queryOptions, budget, positionalParameterCount, token),
+                queryOptions, budget, positionalParameterCount, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.ExecuteStatement execute => ScriptDomExecOperation.Compile(request,
                 execute, maximumPayloadBytes, positionalParameterCount, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement insert => Composition(request, insert,
                 maximumPayloadBytes, positionalParameterCount, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.DropTableStatement drop => ScriptDomDropTableOperation.Compile(
-                request, drop, maximumPayloadBytes, budget.Check, token),
+                request, drop, budget.Check, token),
             global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement table => ScriptDomCreateTableOperation.Compile(
-                request, table, maximumPayloadBytes, budget.Check, token),
+                request, table, budget.Check, token),
             _ => throw ScriptDomOperationErrors.Unsupported()
         };
         return new(SqlOriginalMutationIdentity.Require(request.CommandId, operation), null);
     }
     private static McpDecodedOperation Select(SqlOperationRequest request,
-        global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement statement, int maximumPayloadBytes, IOptions<QueryExecutionOptions> queryOptions,
+        global::Microsoft.SqlServer.TransactSql.ScriptDom.TSqlStatement statement, IOptions<QueryExecutionOptions> queryOptions,
         global::KeyLoad.Core.ReadExecutionBudget budget, int? positionalParameterCount, CancellationToken token)
     {
         if (request.Partition is null)
@@ -71,7 +70,7 @@ internal static class SqlOperationCompiler
         var query = new QueryRequest(request.Partition, request.Sql, request.Parameters,
             request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
         var ast = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query, queryOptions, budget, positionalParameterCount, token);
-        return Decode(McpToolNames.QueryAst, ast, maximumPayloadBytes, budget.Check, token);
+        return Typed(McpToolNames.QueryAst, ast, Guid.Empty, budget.Check, token);
     }
     private static McpDecodedOperation Composition(SqlOperationRequest request,
         global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement statement, int maximumPayloadBytes, int? positionalParameterCount, Action checkBudget, CancellationToken token)
@@ -79,9 +78,9 @@ internal static class SqlOperationCompiler
         var command = statement.InsertSpecification.InsertSource is global::Microsoft.SqlServer.TransactSql.ScriptDom.ValuesInsertSource
             ? ScriptDomValuesInsertOperation.Compile(request, statement, maximumPayloadBytes, positionalParameterCount, checkBudget, token)
             : SqlCompositionInsert.Compile(request, statement, positionalParameterCount, checkBudget, token);
-        return Decode(McpToolNames.DocumentsCommit, command, maximumPayloadBytes, checkBudget, token);
+        return Typed(McpToolNames.DocumentsCommit, command, command.CommandId, checkBudget, token);
     }
-    private static McpDecodedOperation Decode<T>(string name, T request, int maximumPayloadBytes,
+    private static McpDecodedOperation Typed(string name, object request, Guid commandId,
         Action checkBudget, CancellationToken token)
     {
         checkBudget();
@@ -91,14 +90,7 @@ internal static class SqlOperationCompiler
         {
             throw ScriptDomOperationErrors.Unsupported();
         }
-        var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        {
-            [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
-        };
-        var operation = descriptor.Decode(arguments, maximumPayloadBytes);
-        checkBudget();
-        token.ThrowIfCancellationRequested();
-        return operation;
+        return new(descriptor.ReadKind, descriptor.CommandKind, commandId, request);
     }
 }
 

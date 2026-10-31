@@ -73,9 +73,9 @@ internal static class VectorReferenceLifetimeFlow
         var position = profile.Source.Store.Position;
         var command = new CommandRequest(Guid.NewGuid(), DropRuntimeProtocol.Partition, [request]);
         var denied = await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch, command.CommandId,
-            PartitionStoreProtocol.AdministratorId, OrleansSerialization.Serialize(command), token);
+            PartitionStoreProtocol.AdministratorId, command, token);
         await Assert.That(denied.Error).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
-        await Assert.That(denied.Payload.IsEmpty).IsTrue();
+        await Assert.That(denied.Result).IsNull();
         await Assert.That(profile.Source.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(profile.Source.Store).SequenceEqual(image)).IsTrue();
     }

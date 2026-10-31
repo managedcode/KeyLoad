@@ -43,7 +43,7 @@ internal static class ResourceAdministrationFlow
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
         var envelope = node.Codec.CreateCommand(requestId, principal.Id, OperationKind.DropTable, commandId,
-            OrleansSerialization.Serialize(request));
+            request);
         var revoked = principal with
         {
             ClusterAdministrator = false,
@@ -60,7 +60,7 @@ internal static class ResourceAdministrationFlow
             new ConfigurePrincipalRequest(repaired), RepairPrincipal, cancellationToken: token).Get<PrincipalRecord>());
         var healthyRequestId = Guid.NewGuid();
         var healthySigned = node.Codec.CreateCommand(healthyRequestId, repaired.Id, OperationKind.DropTable, commandId,
-            OrleansSerialization.Serialize(request));
+            request);
         var reply = await RequestCqrsCommandStream.InvokeAsync(node, healthySigned, repaired,
             healthyRequestId, commandId, TerminalSequence);
         var actual = CommandObservedPolicyAssertions.Value<DropTableResult>(reply);
@@ -111,7 +111,7 @@ internal static class ResourceAdministrationFlow
             requestId, commandId, TerminalSequence, ErrorCode.PermissionDenied);
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(reply.SafeDetail).IsEqualTo(GrainRoutingProtocol.AdministrationRequired);
-        await Assert.That(reply.Payload.IsEmpty).IsTrue();
+        await Assert.That(reply.Result).IsNull();
         foreach (var image in before)
         {
             var database = image.Node.Database;
@@ -136,7 +136,7 @@ internal static class ResourceAdministrationFlow
             await Assert.That(stored.PreparedCommand.UserId).IsEqualTo(Root);
             await Assert.That(stored.PreparedCommand.Value!.Kind).IsEqualTo(OperationKind.DropTable);
             await CommandObservedPolicyAssertions.EqualAsync(request,
-                OrleansSerialization.Deserialize<DropTableRequest>(stored.PreparedCommand.Value.Input.Span));
+                ((DropTableRequest)stored.PreparedCommand.Value.Input));
             await Assert.That(stored.CanonicalSequence).IsEqualTo(actual.Receipt.Token.Position);
             var expected = new DropTableResult(request.TenantId, request.DatabaseId, request.ResourceName,
                 new(commandId, new(node.Database.Store.Identity.Incarnation, CatalogRoute.PartitionId,

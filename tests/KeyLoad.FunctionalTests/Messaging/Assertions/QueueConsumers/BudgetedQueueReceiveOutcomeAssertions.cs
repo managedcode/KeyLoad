@@ -20,7 +20,7 @@ internal static class BudgetedQueueReceiveOutcomeAssertions
         var appended = entry.PreparedCommand ?? throw new InvalidOperationException("The execution receive entry is absent.");
         await Assert.That(appended.Value!.Kind).IsEqualTo(operation.Value!.Kind);
         await Assert.That(appended.UserId!).IsEqualTo(operation.UserId!);
-        await Assert.That(appended.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(appended.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
         await Assert.That(delivery.HeadersJson).IsEqualTo(P.Headers);
         var expected = new ReceiveResult(operation.CommandId,
             [new(messageId, P.Payload, P.Headers, delivery.Token, P.Initial,

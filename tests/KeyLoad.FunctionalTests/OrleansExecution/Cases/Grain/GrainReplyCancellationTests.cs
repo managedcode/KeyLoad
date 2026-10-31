@@ -33,7 +33,7 @@ internal sealed class GrainReplyCancellationTests
         await Assert.That(incoming.IsCancellationRequested).IsEqualTo(callerCancelled);
         await Assert.That(reply.Error).IsEqualTo(expectedCode);
         await Assert.That(reply.SafeDetail).IsEqualTo(expectedDetail);
-        await Assert.That(reply.Payload.Length).IsEqualTo(0);
+        await Assert.That(reply.Result).IsNull();
         await Assert.That(reply.SafeDetail).DoesNotContain(PrivateCanary);
         await VerifyDiagnosticsAsync(output, requestId, expectedCode, GrainFailureCategory.Cancellation);
     }
@@ -47,10 +47,10 @@ internal sealed class GrainReplyCancellationTests
 
         await Assert.That(missing.Error).IsEqualTo(ErrorCode.OwnershipLost);
         await Assert.That(missing.SafeDetail).IsEqualTo(UnavailableDetail);
-        await Assert.That(missing.Payload.Length).IsEqualTo(0);
+        await Assert.That(missing.Result).IsNull();
         await Assert.That(inactive.Error).IsEqualTo(missing.Error);
         await Assert.That(inactive.SafeDetail).IsEqualTo(missing.SafeDetail);
-        await Assert.That(inactive.Payload.Length).IsEqualTo(0);
+        await Assert.That(inactive.Result).IsNull();
     }
 
     [Test]
@@ -70,7 +70,7 @@ internal sealed class GrainReplyCancellationTests
         await Assert.That(incoming.IsCancellationRequested).IsEqualTo(callerCancelled);
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.UnknownWriteOutcome);
         await Assert.That(reply.SafeDetail).IsEqualTo(CommandDetail);
-        await Assert.That(reply.Payload.Length).IsEqualTo(0);
+        await Assert.That(reply.Result).IsNull();
         await Assert.That(reply.SafeDetail).DoesNotContain(PrivateCanary);
         await VerifyDiagnosticsAsync(output, requestId, ErrorCode.UnknownWriteOutcome, GrainFailureCategory.Cancellation);
     }
@@ -95,7 +95,7 @@ internal sealed class GrainReplyCancellationTests
             var (reply, output) = FailureAndCapture(error, command, requestId, incoming.Token);
             await Assert.That(reply.Error).IsEqualTo(code);
             await Assert.That(reply.SafeDetail).IsEqualTo(error.Message);
-            await Assert.That(reply.Payload.Length).IsEqualTo(0);
+            await Assert.That(reply.Result).IsNull();
             await VerifyDiagnosticsAsync(output, requestId, code, GrainFailureCategory.Domain);
         }
         await Assert.That(error.Code).IsEqualTo(code);

@@ -49,7 +49,7 @@ internal sealed class QueueDispatchCasFixture : IDisposable
                 ResourcePolicyUpdateFixture.DatabaseId, Definition);
             owner.Apply(owner.Database.CreateCommand(OperationKind.ConfigureResource,
                 Guid.NewGuid(), ResourcePolicyUpdateFixture.RootId, owner.Database.EvaluationClock.GetUtcNow(),
-                OrleansSerialization.Serialize(seed, ValidationProfile.PublicInputElements))).Get<ResourceDefinition>();
+                seed)).Get<ResourceDefinition>();
             OriginalDocument = owner.DocumentBytes() ?? throw new InvalidOperationException();
             OriginalCollection = owner.ResourceBytes() ?? throw new InvalidOperationException();
         }
@@ -71,7 +71,7 @@ internal sealed class QueueDispatchCasFixture : IDisposable
             ResourcePolicyUpdateFixture.DatabaseId, queue, expected, paused);
         return owner.Database.CreateCommand(OperationKind.SetQueueDispatch, id, principal,
             owner.Database.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(request, ValidationProfile.PublicInputElements));
+            request);
     }
 
     internal Result<object> Apply(Command<DatabaseCommand> operation) => owner.Apply(operation);

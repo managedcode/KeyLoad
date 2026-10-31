@@ -43,7 +43,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         var creator = principal ?? throw Errors.Fail(ErrorCode.Corruption, DueCoordinatorFields.InvalidHint);
         var commandId = DueDispatchCommandIdentity.ForDue(hint, creator);
         var mutation = RecurringDueCommand.Create(hint);
-        var payload = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [mutation]));
+        var payload = new CommandRequest(commandId, hint.Lane.Partition, [mutation]);
         var result = await DispatchWithOneUncertaintyRetry(creator, commandId, payload, token).ConfigureAwait(true);
         return new(result.Error);
     }
@@ -97,8 +97,8 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         PrincipalRecord principal, CancellationToken cancellationToken)
     {
         var commandId = DueDispatchCommandIdentity.ForDue(hint, principal);
-        var payload = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition,
-            [new ExpireSaga(hint.Lane, hint.Id, hint.Revision)]));
+        var payload = new CommandRequest(commandId, hint.Lane.Partition,
+            [new ExpireSaga(hint.Lane, hint.Id, hint.Revision)]);
         return DispatchWithOneUncertaintyRetry(principal, commandId, payload, cancellationToken);
     }
 
@@ -134,7 +134,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
     }
 
     private async Task<GrainOperationReply> DispatchWithOneUncertaintyRetry(PrincipalRecord principal,
-        Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        Guid commandId, object payload, CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
         var first = await Dispatch(principal, requestId, commandId, payload, cancellationToken).ConfigureAwait(true);
@@ -149,7 +149,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
     }
 
     private async Task<GrainOperationReply> Dispatch(PrincipalRecord principal, Guid requestId,
-        Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        Guid commandId, object payload, CancellationToken cancellationToken)
     {
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken, connectionId: connectionId);

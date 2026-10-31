@@ -15,7 +15,7 @@ internal sealed class AuthenticationReaderFailureTests
         {
             Id = PrivateMarker
         };
-        var payload = OrleansSerialization.Serialize(new GrainValue(principal));
+        var payload = new GrainValue(principal);
 
         var shape = McpAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None);
         var actual = McpAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None);
@@ -35,40 +35,26 @@ internal sealed class AuthenticationReaderFailureTests
     }
 
     [Test]
-    public async Task OneByteTruncationReturnsFixedValidationFromInspectAndReadPrincipal()
+    public async Task WrongResultTypeReturnsFixedValidationFromInspectAndReadPrincipal()
     {
-        using var database = new TestDatabase();
-        var principal = McpAuthenticationTests.Principal(database) with
-        {
-            Id = PrivateMarker
-        };
-        var valid = OrleansSerialization.Serialize(new GrainValue(principal));
-        var truncated = valid[..^1];
-
-        await AssertSafeValidationAsync(() => McpAuthentication.Inspect(truncated, UnitMcpOptions.Execution(), CancellationToken.None));
-        await AssertSafeValidationAsync(() => McpAuthentication.ReadPrincipal(truncated, UnitMcpOptions.Execution(), CancellationToken.None));
+        var invalid = new GrainValue(PrivateMarker);
+        await AssertSafeValidationAsync(() => McpAuthentication.Inspect(invalid, UnitMcpOptions.Execution(), CancellationToken.None));
+        await AssertSafeValidationAsync(() => McpAuthentication.ReadPrincipal(invalid, UnitMcpOptions.Execution(), CancellationToken.None));
     }
 
     [Test]
-    public async Task OneByteTruncationFailsAuthenticationWithoutPrivateDetail()
+    public async Task MissingPrincipalFailsAuthenticationWithoutPrivateDetail()
     {
-        using var database = new TestDatabase();
-        var principal = McpAuthenticationTests.Principal(database) with
-        {
-            Id = PrivateMarker
-        };
-        var valid = OrleansSerialization.Serialize(new GrainValue(principal));
-        var truncated = valid[..^1];
-
+        var missing = new GrainValue(null);
         using var state = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
-        await AssertSafeValidationAsync(() => state.Authenticate(truncated, CancellationToken.None));
+        await AssertSafeValidationAsync(() => state.Authenticate(missing, CancellationToken.None));
     }
 
     [Test]
     public async Task PreCancelledAuthenticationRemainsCancellation()
     {
         using var database = new TestDatabase();
-        var payload = OrleansSerialization.Serialize(new GrainValue(McpAuthenticationTests.Principal(database)));
+        var payload = new GrainValue(McpAuthenticationTests.Principal(database));
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
 

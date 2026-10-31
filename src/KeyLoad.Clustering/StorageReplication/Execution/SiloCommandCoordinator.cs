@@ -20,15 +20,15 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
 
     /// <inheritdoc />
     public Task<Result<object>> RuntimeSubmitAsync(OperationKind kind, Guid id, string principalId,
-        ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
+        object input, ReadExecutionBudget? sourcePlanningBudget = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
         var evaluatedAt = database.EvaluationClock.GetUtcNow();
         var operation = sourcePlanningBudget is null
-            ? database.CreateCommand(kind, id, principalId, evaluatedAt, payload)
-            : database.CreateCommand(kind, id, principalId, evaluatedAt, payload, sourcePlanningBudget);
+            ? database.CreateCommand(kind, id, principalId, evaluatedAt, input)
+            : database.CreateCommand(kind, id, principalId, evaluatedAt, input, sourcePlanningBudget);
         return SubmitOperationAsync(operation, cancellationToken);
     }
 

@@ -6,9 +6,9 @@ internal static class PublicNormalizationChecks
 {
     internal static bool HasNullElement(Command<DatabaseCommand> operation, PublicShape shape) => shape switch
     {
-        PublicShape.NullMutation => OrleansSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span, ValidationProfile.PublicInputElements).Mutations[0] is null,
-        PublicShape.NullPatch => ((PatchDocument)OrleansSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span, ValidationProfile.PublicInputElements).Mutations[0]).Patches[0] is null,
-        PublicShape.NullGrant => OrleansSerialization.Deserialize<ConfigurePrincipalRequest>((operation).Value!.Input.Span, ValidationProfile.PublicInputElements).Principal.Grants[0] is null,
+        PublicShape.NullMutation => ((CommandRequest)(operation).Value!.Input).Mutations[0] is null,
+        PublicShape.NullPatch => ((PatchDocument)((CommandRequest)(operation).Value!.Input).Mutations[0]).Patches[0] is null,
+        PublicShape.NullGrant => ((ConfigurePrincipalRequest)(operation).Value!.Input).Principal.Grants[0] is null,
         _ => throw new ArgumentOutOfRangeException(nameof(shape))
     };
 
@@ -16,8 +16,8 @@ internal static class PublicNormalizationChecks
         ErrorCode code, string detail)
     {
         var normalized = database.Database.OwnCommand(operation);
-        await Assert.That(normalized.Value!.Input.IsEmpty).IsFalse();
-        await Assert.That(normalized.Value.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
+        await Assert.That((normalized.Value!.Input is null)).IsFalse();
+        await Assert.That(OrleansSerialization.Serialize(normalized.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
         await Assert.That(normalized.Value.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
         var result = database.Database.Apply(normalized);
         await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);

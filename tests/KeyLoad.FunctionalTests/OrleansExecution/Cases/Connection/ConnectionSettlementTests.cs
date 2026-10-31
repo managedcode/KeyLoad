@@ -47,7 +47,7 @@ internal sealed class ConnectionSettlementTests
             var requestId = Guid.NewGuid();
             var command = scenario.Command("disposed-original");
             var envelope = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
-                command.CommandId, OrleansSerialization.Serialize(command));
+                command.CommandId, command);
             var held = scenario.Observation.Hold(requestId);
             using (new GrainRequestIdentityScope(scenario.Fixture.Cluster.ServiceProvider, principal,
                 requestId, command.CommandId, token, connectionId: scenario.Fixture.ConnectionId))

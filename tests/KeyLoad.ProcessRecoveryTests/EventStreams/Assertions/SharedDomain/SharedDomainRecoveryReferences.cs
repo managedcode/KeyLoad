@@ -18,7 +18,7 @@ internal static class SharedDomainRecoveryReferences
             await Assert.That(commandIds.Add(original.CommandId)).IsTrue();
             await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
             await Assert.That(original.UserId).IsEqualTo(Root);
-            var request = OrleansSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span);
+            var request = ((ConfigureResourceRequest)original.Value.Input);
             var definition = definitions.Single(value => value.Name == request.Definition.Name);
             await SharedDomainRecoveryValues.EqualAsync(request, new ConfigureResourceRequest(Tenant, Database, definition));
             lifetimes.Add(definition.Name, ResourceLifetimeIdentity.Create(original, Tenant, Database, definition));

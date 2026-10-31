@@ -18,7 +18,7 @@ public static class RemoteTransferRepairOriginal
         var partition = stage == QueueTransferRepairStage.Accept ? intent.Destination.Partition : intent.Source.Partition;
         Mutation mutation = stage == QueueTransferRepairStage.Accept ? new AcceptQueueTransfer(intent.Destination, request.IntentToken) : new CompleteQueueTransfer(intent.Source, intent.TransferId, request.ReceiptToken!);
         var command = new CommandRequest(request.AcceptCommandId, partition, [mutation]);
-        var original = engine.CreateCommand(view, OperationKind.Batch, command.CommandId, principal.Id, engine.Clock.GetUtcNow(), OrleansSerialization.Serialize(command));
+        var original = engine.CreateCommand(view, OperationKind.Batch, command.CommandId, principal.Id, engine.Clock.GetUtcNow(), command);
         _ = (engine.AuthorizeOperation(view, principal, original)).Value;
         if (stage == QueueTransferRepairStage.Complete)
         {

@@ -25,8 +25,7 @@ internal static class QueueStoredCapacityReceipts
     {
         var delivery = await Assert.That(actual.Get<ReceiveResult>().Deliveries).HasSingleItem();
         var lane = new QueueLaneRef(partition, QueueEnqueueColdProtocol.Queue);
-        var request = OrleansSerialization.Deserialize<ReceiveRequest>(state.Receive.Value!.Input.Span,
-            ValidationProfile.PublicInputElements);
+        var request = ((ReceiveRequest)state.Receive.Value!.Input);
         var expected = new Delivery(QueueEnqueueColdProtocol.Ready, QueueEnqueueColdProtocol.ReadyJson,
             QueueEnqueueColdProtocol.Headers, delivery.Token, QueueEnqueueAuthorityProtocol.First,
             new DateTimeOffset(state.Receive.Timestamp).AddSeconds(request.LeaseSeconds), QueueEnqueueAuthorityProtocol.First, QueueEnqueueAuthorityProtocol.First);

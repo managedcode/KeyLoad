@@ -34,12 +34,12 @@ internal static class BackupPersistedPolicySeed
     internal static ApiKeyRecord LiveKey => AuthorizationExecution.Credential(LiveKeyId, Reader, LiveSecret);
     internal static ApiKeyRecord RevokedKey => AuthorizationExecution.Credential(RevokedKeyId, Reader, RevokedSecret) with { Revoked = true };
 
-    internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T request, Guid id)
+    internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T request, Guid id) where T : notnull
         => database.CreateCommand(kind, id, Root, database.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(request));
+            request);
 
     internal static Result<object> Send<T>(DatabaseEngine database, OperationKind kind, T request, CancellationToken token)
-        => database.ApplyEmbedded(Create(database, kind, request, Guid.NewGuid()), token);
+        where T : notnull => database.ApplyEmbedded(Create(database, kind, request, Guid.NewGuid()), token);
 
     internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)> RunAsync(
         BackupIndexedDocumentDedupFixture fixture, CancellationToken token)

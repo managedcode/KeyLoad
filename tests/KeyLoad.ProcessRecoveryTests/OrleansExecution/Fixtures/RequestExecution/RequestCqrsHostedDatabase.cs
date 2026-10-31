@@ -26,7 +26,7 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
             ? OrleansSerialization.Deserialize<long>(bytes) : default(long), Store.Position));
 
     internal Result<object> Submit<T>(OperationKind kind, T payload, string principal = RequestCqrsHostedProfile.Root,
-        Guid? id = null, DateTimeOffset? time = null, CancellationToken cancellationToken = default)
+        Guid? id = null, DateTimeOffset? time = null, CancellationToken cancellationToken = default) where T : notnull
     {
         if (time is not null)
         {
@@ -34,7 +34,7 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
         }
         owner.Coordinator.ReadBarrierAsync(cancellationToken).GetAwaiter().GetResult();
         var result = owner.Coordinator.RuntimeSubmitAsync(kind, id ?? Guid.NewGuid(), principal,
-            OrleansSerialization.Serialize(payload), cancellationToken: cancellationToken).GetAwaiter().GetResult();
+            payload, cancellationToken: cancellationToken).GetAwaiter().GetResult();
         owner.Coordinator.ReadBarrierAsync(cancellationToken).GetAwaiter().GetResult();
         return result;
     }
@@ -65,7 +65,7 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
         var payload = original.Value ?? throw new InvalidOperationException(MissingCreation);
         var fingerprint = DatabaseCommandFingerprint.Compute(creation, OperationKind.ConfigureResource,
             RequestCqrsHostedProfile.Root, JsonSerializer.Serialize(expected, JsonDefaults.Options));
-        var body = OrleansSerialization.Deserialize<ConfigureResourceRequest>(payload.Input.Span);
+        var body = ((ConfigureResourceRequest)payload.Input);
         if (retained.Result.IsFailed || original.CommandId != creation || payload.Kind != OperationKind.ConfigureResource
             || original.UserId != RequestCqrsHostedProfile.Root || payload.Fingerprint != fingerprint
             || retained.Fingerprint != fingerprint

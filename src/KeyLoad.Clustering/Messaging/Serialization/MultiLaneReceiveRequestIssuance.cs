@@ -4,7 +4,7 @@ namespace KeyLoad.Clustering;
 internal static class MultiLaneReceiveRequestIssuance
 {
     internal static GrainRequestEnvelope CreateMultiLaneReceiveChild(GrainRequestCodec codec, Guid requestId, string principalId, Guid commandId,
-        byte[] payload, DateTimeOffset expiry)
+        object payload, DateTimeOffset expiry)
     {
         var context = codec.LifetimeReadContext;
         if (expiry <= context.Now || expiry > context.Now + context.Lifetime)

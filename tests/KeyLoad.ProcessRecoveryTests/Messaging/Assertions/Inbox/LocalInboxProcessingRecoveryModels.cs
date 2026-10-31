@@ -17,7 +17,7 @@ internal static class LocalInboxProcessingRecoveryModels
         await Assert.That(original.UserId).IsEqualTo(CrashFixtureValues.Principal);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
         await LocalInboxProcessingRecoveryImage.ExactAsync(
-            OrleansSerialization.Deserialize<ConfigureResourceRequest>(original.Value.Input.Span), request);
+            ((ConfigureResourceRequest)original.Value.Input), request);
         await Assert.That(original.Value.Fingerprint).IsEqualTo(DatabaseCommandFingerprint.Compute(original.CommandId,
             OperationKind.ConfigureResource, CrashFixtureValues.Principal, JsonSerializer.Serialize(request, JsonDefaults.Options)));
         var lifetime = ResourceLifetimeIdentity.Create(original, partition.TenantId, partition.DatabaseId, definition);

@@ -63,7 +63,7 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
                 new EnqueueMessage(P.Queue, P.Second, P.Payload, P.Headers)]);
         var original = Database.Database.OwnCommand(Database.Database.CreateCommand(OperationKind.Batch, command.CommandId, P.Root, Database.Database.EvaluationClock.GetUtcNow(), JsonSerializer.Serialize(command, JsonDefaults.Options)));
         var originalBytes = OrleansSerialization.Serialize(original);
-        var input = OrleansSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
+        var input = ((CommandRequest)(original).Value!.Input);
         await Assert.That(JsonSerializer.Serialize(input, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(command, JsonDefaults.Options));
         var index = checked(Database.ReadCanonicalCut().AppliedPosition + P.Step);
@@ -80,7 +80,7 @@ internal sealed class BudgetedQueueReceiveOutcomeFixture : IDisposable
         var request = new ReceiveRequest(Guid.NewGuid(), Lane, MaxMessages: P.OneMessage,
             LeaseSeconds: Resource.QueuePolicy.MaxLeaseSeconds);
         var operation = Database.Database.CreateCommand(OperationKind.Receive, request.RequestId, P.Worker,
-            Database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            Database.Database.EvaluationClock.GetUtcNow(), request);
         var signedIntent = OrleansSerialization.Serialize(operation);
         var result = Database.SubmitIssued(operation);
         if (!OrleansSerialization.Serialize(operation).SequenceEqual(signedIntent))

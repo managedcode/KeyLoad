@@ -1,3 +1,4 @@
+using KeyLoad.Clustering;
 using Microsoft.Extensions.Options;
 using ModelContextProtocol.Protocol;
 
@@ -45,10 +46,10 @@ internal sealed class McpRequestState : IDisposable
     }
     internal IOptions<McpExecutionOptions> ExecutionOptions => options;
 
-    /// <summary>Decodes the actual persisted principal returned by authentication.</summary>
-    internal void Authenticate(ReadOnlyMemory<byte> reply, CancellationToken cancellationToken)
+    /// <summary>Accepts the actual persisted principal returned by authentication.</summary>
+    internal void Authenticate(GrainValue reply, CancellationToken cancellationToken)
     {
-        var principal = McpAuthentication.ReadPrincipal(payload: reply.Span, cancellationToken: cancellationToken, options: options);
+        var principal = McpAuthentication.ReadPrincipal(payload: reply, cancellationToken: cancellationToken, options: options);
         _ = McpAuthentication.Inspect(principal, options, cancellationToken);
         Principal = principal;
     }

@@ -138,9 +138,9 @@ internal static class RequestCqrsProtocolCases
             Result<GrainRequestProgress>.Succeed(new GrainRequestProgress(requestId)), null, null,
             eventType, null, sequence);
 
-    internal static CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> CompletedChunk(ReadOnlyMemory<byte> payload,
+    internal static CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> CompletedChunk(object payload,
         long sequence = 2)
         => new(CqrsStreamChunkKind.Completed, null,
-            Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = payload }), null,
+            Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(payload) }), null,
             null, null, sequence);
 }

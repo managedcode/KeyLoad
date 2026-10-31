@@ -41,7 +41,7 @@ internal static class CompositionPrefixPrepareAssertions
         {
             await Assert.That(OrleansSerialization.Serialize(command.Original).SequenceEqual(command.OriginalBytes)).IsTrue();
             await Assert.That(OrleansSerialization.Serialize(owner.Retained(command.Original)).SequenceEqual(command.OriginalBytes)).IsTrue();
-            await EqualAsync(command.Request, OrleansSerialization.Deserialize<CommandRequest>((command.Original).Value!.Input.Span));
+            await EqualAsync(command.Request, ((CommandRequest)(command.Original).Value!.Input));
             await ResultAsync(command, owner.Submit(command.Original));
             await ResultAsync(command, owner.Database.ResolveOutcome(command.Original));
             var stored = OutcomeStoreOracle.ReadStored(owner.Store, command.Original)!;

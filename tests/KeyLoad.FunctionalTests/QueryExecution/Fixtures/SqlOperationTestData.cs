@@ -46,7 +46,9 @@ internal static class SqlOperationTestData
         await Assert.That(actual.ReadKind).IsEqualTo(expected.ReadKind);
         await Assert.That(actual.CommandKind).IsEqualTo(expected.CommandKind);
         await Assert.That(actual.CommandId).IsEqualTo(expected.CommandId);
-        await Assert.That(actual.Payload.Span.SequenceEqual(expected.Payload.Span)).IsTrue();
+        await Assert.That(actual.Payload.GetType()).IsEqualTo(expected.Payload.GetType());
+        await Assert.That(JsonSerializer.Serialize(actual.Payload, actual.Payload.GetType(), JsonDefaults.Options))
+            .IsEqualTo(JsonSerializer.Serialize(expected.Payload, expected.Payload.GetType(), JsonDefaults.Options));
     }
 
     internal static async Task Reject(SqlOperationRequest request, ErrorCode code,

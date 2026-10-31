@@ -36,7 +36,7 @@ internal static class TopicPurgeReceiptAssertions
         await Assert.That(stored.Partition).IsEqualTo(TopicPurgeCrashContract.Partition);
         var canonical = "{\"id\":" + JsonSerializer.Serialize(operation.CommandId, JsonDefaults.Options) + ",\"kind\":" +
             JsonSerializer.Serialize(OperationKind.Batch, JsonDefaults.Options) + ",\"payloadJson\":" +
-            JsonSerializer.Serialize(JsonSerializer.Serialize(OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span),
+            JsonSerializer.Serialize(JsonSerializer.Serialize(((CommandRequest)operation.Value!.Input),
                 JsonDefaults.Options), JsonDefaults.Options) + ",\"principalId\":\"root\"}";
         await Assert.That(stored.Fingerprint).IsEqualTo(Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(canonical))));
         await EventAppendReceiptAssertions.SameResultAsync(outcome, stored.Result);

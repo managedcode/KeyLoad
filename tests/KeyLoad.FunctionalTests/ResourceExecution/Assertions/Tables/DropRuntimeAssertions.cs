@@ -17,7 +17,7 @@ internal static class DropRuntimeAssertions
         {
             throw Errors.Fail(error, reply.SafeDetail ?? DropRuntimeProtocol.MissingReply);
         }
-        return GrainPayload.Read<GrainValue>(reply.Payload).Value as T
+        return GrainReplyFactory.RequireValue(reply).Value as T
             ?? throw Errors.Fail(ErrorCode.Corruption, DropRuntimeProtocol.MissingReply);
     }
 
@@ -93,7 +93,7 @@ internal static class DropRuntimeAssertions
             await Assert.That(outcome.PreparedCommand.CommandId).IsEqualTo(commandId);
             await Assert.That(outcome.PreparedCommand.UserId).IsEqualTo(PartitionStoreProtocol.AdministratorId);
             await Assert.That(outcome.PreparedCommand.Value!.Kind).IsEqualTo(OperationKind.DropTable);
-            await Assert.That(outcome.PreparedCommand.Value.Input.Span.SequenceEqual(OrleansSerialization.Serialize(request))).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(outcome.PreparedCommand.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(request))).IsTrue();
             await Assert.That(Errors.Code(outcome.Result.Problem).Value).IsEqualTo(error);
             if (original is not null)
             {

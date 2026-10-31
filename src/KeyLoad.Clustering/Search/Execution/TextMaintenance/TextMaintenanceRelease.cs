@@ -5,7 +5,7 @@ internal static class TextMaintenanceRelease
     private const long InitialSequence = 0;
     private const int EmptyRecords = 0;
 
-    internal static async Task<TextIndexMaintenanceResult> RunAsync(TextMaintenanceChildCalls children,
+    internal static async Task<TextIndexMaintenanceResult> RunAsync(MaintenanceChildCalls children,
         TextIndexMaintenanceRequest request, CancellationToken token)
     {
         var commandId = TextMaintenanceChildIdentity.Create(request.CommandId,

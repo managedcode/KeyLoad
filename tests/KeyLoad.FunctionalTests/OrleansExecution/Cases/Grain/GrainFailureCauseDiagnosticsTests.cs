@@ -127,7 +127,7 @@ internal sealed class GrainFailureCauseDiagnosticsTests
             var output = capture.Text;
             await Assert.That(reply.Error).IsEqualTo(command ? commandCode : readCode);
             await Assert.That(reply.SafeDetail).IsEqualTo(command ? commandDetail : readDetail);
-            await Assert.That(reply.Payload.IsEmpty).IsTrue();
+            await Assert.That(reply.Result).IsNull();
             await Assert.That(output).Contains(requestId.ToString());
             await Assert.That(output).Contains(nameof(GrainFailureStage.CapabilityExecution));
             await Assert.That(output).Contains(category.ToString());
@@ -155,6 +155,6 @@ internal sealed class GrainFailureCauseDiagnosticsTests
         await Assert.That(stream.IsSuccess).IsTrue();
         await Assert.That(stream.Value).IsSameReferenceAs(reply);
         await Assert.That(reply.Error).IsNull();
-        await Assert.That(OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value).IsEqualTo(expected);
+        await Assert.That(GrainReplyFactory.RequireValue(reply).Value).IsEqualTo(expected);
     }
 }

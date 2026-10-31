@@ -24,7 +24,7 @@ internal static class AnalyticsCompositionOutbox
             After: new(anchorReference, 1, D.AnchorJson, new(), time)) };
         foreach (var commit in commits)
         {
-            var request = OrleansSerialization.Deserialize<CommandRequest>((commit.Operation).Value!.Input.Span);
+            var request = ((CommandRequest)(commit.Operation).Value!.Input);
             time = new DateTimeOffset(commit.Operation.Timestamp);
             for (var ordinal = 0; ordinal < request.Mutations.Length; ordinal++)
             {

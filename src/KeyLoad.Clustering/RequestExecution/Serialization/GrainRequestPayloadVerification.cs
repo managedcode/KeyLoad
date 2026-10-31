@@ -28,7 +28,7 @@ internal static class GrainRequestPayloadVerification
         }
 
         codec.ValidateVerifiedScope(request);
-        GrainPayload.Validate(request.Payload.Span);
+        GrainPayload.Validate(request.Payload);
         return new(request, request.Payload);
     }
 }

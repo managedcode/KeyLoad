@@ -11,7 +11,6 @@ internal static class McpPayloadAssertions
     {
         var descriptor = Find(item.Name);
         var decoded = descriptor.Decode(item.Arguments());
-        await Assert.That(decoded.Payload.Length).IsGreaterThan(0);
         return await AssertFullPublicPayload(item, decoded.Payload);
     }
 
@@ -21,14 +20,13 @@ internal static class McpPayloadAssertions
         using var stream = new MemoryStream();
         item.SerializeToStream(decoded, stream);
         await Assert.That(stream.ToArray().AsSpan().SequenceEqual(arrayBytes)).IsTrue();
-        _ = await AssertFullPublicPayload(item, arrayBytes);
+        _ = await AssertFullPublicPayload(item, item.RuntimeDeserialize(arrayBytes));
     }
 
-    internal static async Task<object> AssertFullPublicPayload(McpDecodeCase item, ReadOnlyMemory<byte> payload)
+    internal static async Task<object> AssertFullPublicPayload(McpDecodeCase item, object payload)
     {
-        OrleansSerialization.Validate(payload.Span);
         var expected = item.DeserializePublic(item.Request);
-        var actual = item.RuntimeDeserialize(payload);
+        var actual = payload;
         await Assert.That(actual.GetType()).IsEqualTo(expected.GetType());
         await Assert.That(JsonNode.DeepEquals(JsonNode.Parse(item.Request.GetRawText()),
             JsonNode.Parse(item.SerializePublic(expected).GetRawText()))).IsTrue();
@@ -37,11 +35,10 @@ internal static class McpPayloadAssertions
         return actual;
     }
 
-    internal static async Task<T> AssertTypedPublicPayload<T>(JsonElement request, ReadOnlyMemory<byte> payload)
+    internal static async Task<T> AssertTypedPublicPayload<T>(JsonElement request, object payload)
     {
-        OrleansSerialization.Validate(payload.Span);
         var expected = request.Deserialize<T>(JsonDefaults.Options)!;
-        var actual = OrleansSerialization.Deserialize<T>(payload.Span);
+        var actual = (T)payload;
         await Assert.That(actual!.GetType()).IsEqualTo(expected!.GetType());
         await Assert.That(JsonNode.DeepEquals(JsonNode.Parse(request.GetRawText()),
             JsonNode.Parse(JsonSerializer.Serialize(expected, JsonDefaults.Options)))).IsTrue();

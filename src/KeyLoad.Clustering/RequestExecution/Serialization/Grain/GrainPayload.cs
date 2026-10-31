@@ -2,19 +2,26 @@ using KeyLoad.InternalSerialization;
 
 namespace KeyLoad.Clustering;
 
+/// <summary>Admits and reads the typed operation carried by one Orleans request envelope.</summary>
 internal static class GrainPayload
 {
-    internal static ReadOnlyMemory<byte> Copy(ReadOnlyMemory<byte> payload)
+    internal static object Copy(object payload) => Own(payload, ValidationProfile.PublicInputElements);
+
+    internal static object Strict(object payload) => Own(payload, ValidationProfile.Strict);
+
+    internal static object Own(object payload, ValidationProfile profile)
     {
-        Validate(payload.Span);
-        return payload.ToArray();
+        Validate(payload, profile);
+        return payload;
     }
 
-    internal static void Validate(ReadOnlySpan<byte> payload)
+    internal static void Validate(object payload) => Validate(payload, ValidationProfile.PublicInputElements);
+
+    private static void Validate(object payload, ValidationProfile profile)
     {
         try
         {
-            OrleansSerialization.Validate(payload, typeof(object), ValidationProfile.PublicInputElements);
+            ContractValidation.Validate(payload, profile);
         }
         catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
         {
@@ -22,33 +29,33 @@ internal static class GrainPayload
         }
     }
 
-    internal static T Read<T>(ReadOnlyMemory<byte> payload)
-        => Decode<T>(payload, GrainFailureStage.TypedPayloadDecode);
+    internal static T Read<T>(object payload)
+        => payload is T value ? value : throw GrainFailureDiagnostics.InvalidPayload(GrainFailureStage.TypedPayloadDecode);
 
-    internal static T ReadCommand<T>(ReadOnlyMemory<byte> payload)
-        => Decode<T>(payload, GrainFailureStage.TypedPayloadDecode, ValidationProfile.PublicInputElements);
+    internal static T ReadCommand<T>(object payload) => Exact<T>(payload, GrainFailureStage.TypedPayloadDecode);
 
-    internal static T ReadPublicInput<T>(ReadOnlyMemory<byte> payload)
-        => Decode<T>(payload, GrainFailureStage.TypedPayloadDecode, ValidationProfile.PublicInputElements);
+    internal static T ReadPublicInput<T>(object payload) => Exact<T>(payload, GrainFailureStage.TypedPayloadDecode);
 
-    internal static void RequireNoDto(ReadOnlyMemory<byte> payload)
+    internal static object ReadCommandInput(OperationKind kind, object payload)
     {
-        if (Decode<int>(payload, GrainFailureStage.RequiredNullPayload) != GrainContracts.NoDtoMarker)
+        try
+        {
+            return KeyLoad.Core.DatabaseCommandInputTypes.Require(kind, payload);
+        }
+        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
+        {
+            throw GrainFailureDiagnostics.InvalidPayload(GrainFailureStage.TypedPayloadDecode);
+        }
+    }
+
+    internal static void RequireNoDto(object payload)
+    {
+        if (Exact<int>(payload, GrainFailureStage.RequiredNullPayload) != GrainContracts.NoDtoMarker)
         {
             throw GrainFailureDiagnostics.InvalidPayload(GrainFailureStage.RequiredNullPayload);
         }
     }
 
-    private static T Decode<T>(ReadOnlyMemory<byte> payload, GrainFailureStage stage,
-        ValidationProfile profile = ValidationProfile.Strict)
-    {
-        try
-        {
-            return OrleansSerialization.Deserialize<T>(payload.Span, profile);
-        }
-        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
-        {
-            throw GrainFailureDiagnostics.InvalidPayload(stage);
-        }
-    }
+    private static T Exact<T>(object payload, GrainFailureStage stage)
+        => payload is T value && payload.GetType() == typeof(T) ? value : throw GrainFailureDiagnostics.InvalidPayload(stage);
 }

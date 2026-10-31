@@ -7,17 +7,6 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainBm25CorpusPublicationCommand
 {
-    internal static string Resolve(DecodedGrainRequest request)
-    {
-        var phase = OperationProtocol.Payload<Bm25CorpusPublicationPhaseCommand>(Read(request));
-        var partition = phase.Current.Partition;
-        JsonData.Identifier(partition.TenantId);
-        JsonData.Identifier(partition.DatabaseId);
-        JsonData.Identifier(partition.TransactionDomainId);
-        JsonData.Identifier(partition.PartitionKey);
-        return partition.AtomicPartitionId;
-    }
-
     internal static Task<Result<object>> SubmitAsync(DatabaseEngine database, ICommitCoordinator coordinator,
         DecodedGrainRequest request, PrincipalRecord principal, CancellationToken cancellationToken)
     {

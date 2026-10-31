@@ -14,14 +14,14 @@ internal static class DropRuntimeSeed
                  new(DropRuntimeProtocol.ValueField, RelationalColumnType.Text)])
         };
         var created = await DropPublicSubmission.SubmitAsync(profile, OperationKind.CreateTable, Guid.NewGuid(),
-            PartitionStoreProtocol.AdministratorId, OrleansSerialization.Serialize(new CreateTableRequest(
-                DropRuntimeProtocol.Tenant, DropRuntimeProtocol.Database, definition)), token).ConfigureAwait(false);
+            PartitionStoreProtocol.AdministratorId, new CreateTableRequest(
+                DropRuntimeProtocol.Tenant, DropRuntimeProtocol.Database, definition), token).ConfigureAwait(false);
         _ = DropRuntimeAssertions.Value<ResourceDefinition>(created);
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, DropRuntimeProtocol.Partition,
             [new PutDocument(table, DropRuntimeProtocol.Row, DropRuntimeProtocol.Json)]);
         var written = await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch, id,
-            PartitionStoreProtocol.AdministratorId, OrleansSerialization.Serialize(request), token).ConfigureAwait(false);
+            PartitionStoreProtocol.AdministratorId, request, token).ConfigureAwait(false);
         await Assert.That(DropRuntimeAssertions.Value<CommitReceipt>(written).CommandId).IsEqualTo(id);
     }
 
@@ -32,7 +32,7 @@ internal static class DropRuntimeSeed
             [new PutDocument(DropRuntimeProtocol.OtherTable, DropRuntimeProtocol.OtherRow,
                 DropRuntimeProtocol.OtherJson)]);
         var reply = await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch, id,
-            PartitionStoreProtocol.AdministratorId, OrleansSerialization.Serialize(request), token).ConfigureAwait(false);
+            PartitionStoreProtocol.AdministratorId, request, token).ConfigureAwait(false);
         await Assert.That(DropRuntimeAssertions.Value<CommitReceipt>(reply).CommandId).IsEqualTo(id);
         var row = profile.Source.Database.GetDocument(PartitionStoreProtocol.AdministratorId,
             new(DropRuntimeProtocol.Partition, DropRuntimeProtocol.OtherTable, DropRuntimeProtocol.OtherRow),

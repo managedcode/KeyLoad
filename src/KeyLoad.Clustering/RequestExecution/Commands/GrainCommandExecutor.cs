@@ -110,21 +110,21 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             OperationKind.Bm25CorpusPublicationPhase => await GrainBm25CorpusPublicationCommand.SubmitAsync(
                 database, coordinator, request, principal, operationToken).ConfigureAwait(true),
             _ => await coordinator.RuntimeSubmitAsync(kind, request.Envelope.CommandId, principal.Id,
-                request.Payload, sourcePlanningBudget: budget, cancellationToken: operationToken).ConfigureAwait(true)
+                GrainPayload.ReadCommandInput(kind, request.Payload), sourcePlanningBudget: budget, cancellationToken: operationToken).ConfigureAwait(true)
         };
     }
 
     private Task<Result<object>> SubmitBatchAsync(DecodedGrainRequest request, PrincipalRecord principal,
         ReadExecutionBudget budget, CancellationToken token)
         => coordinator.RuntimeSubmitAsync(OperationKind.Batch, request.Envelope.CommandId,
-                principal.Id, request.Payload, sourcePlanningBudget: budget, cancellationToken: token);
+                principal.Id, GrainPayload.ReadCommandInput(OperationKind.Batch, request.Payload), sourcePlanningBudget: budget, cancellationToken: token);
 
     private Task<Result<object>> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken cancellationToken)
         => (GrainOnlineTextCheckpointCommand.TrySubmit(database, coordinator, request, principal,
             onlineText, clock, cancellationToken)).Value
             ?? coordinator.RuntimeSubmitAsync(OperationKind.CommitProjectionBatch, request.Envelope.CommandId,
-                principal.Id, request.Payload, cancellationToken: cancellationToken);
+                principal.Id, GrainPayload.ReadCommandInput(OperationKind.CommitProjectionBatch, request.Payload), cancellationToken: cancellationToken);
 
     private static Exception MarkFailure(Exception error, GrainFailureStage stage)
     {

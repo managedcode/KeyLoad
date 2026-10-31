@@ -1,3 +1,4 @@
+using KeyLoad.InternalSerialization;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
@@ -52,22 +53,29 @@ public sealed partial class GrainRequestCodec
     /// <param name="requestId">The caller's request identity.</param>
     /// <param name="principalId">The verified principal, or null for authentication.</param>
     /// <param name="kind">The read capability.</param>
-    /// <param name="payload">The exact serialized request payload.</param>
+    /// <param name="payload">The typed request input.</param>
     /// <returns>The scoped envelope.</returns>
-    public GrainRequestEnvelope CreateRead(Guid requestId, string? principalId, GrainReadKind kind, ReadOnlyMemory<byte> payload)
+    public GrainRequestEnvelope CreateRead(Guid requestId, string? principalId, GrainReadKind kind, object payload)
         => Issue(GrainRequestEnvelopeConstruction.Read(requestId, Incarnation,
-            principalId, kind, Encode(payload), clock.GetUtcNow() + settings.RequestLifetime));
+            principalId, kind, GrainPayload.Own(payload, ReadProfile(kind)), clock.GetUtcNow() + settings.RequestLifetime));
 
     /// <summary>Issues a command envelope with its stable command identity.</summary>
     /// <param name="requestId">The caller's request identity.</param>
     /// <param name="principalId">The verified principal.</param>
     /// <param name="kind">The command kind.</param>
     /// <param name="commandId">The stable command identity used for replay.</param>
-    /// <param name="payload">The exact serialized command payload.</param>
+    /// <param name="payload">The typed command input.</param>
     /// <returns>The scoped envelope.</returns>
-    public GrainRequestEnvelope CreateCommand(Guid requestId, string principalId, OperationKind kind, Guid commandId, ReadOnlyMemory<byte> payload)
+    public GrainRequestEnvelope CreateCommand(Guid requestId, string principalId, OperationKind kind, Guid commandId, object payload)
         => Issue(GrainRequestEnvelopeConstruction.Command(requestId, Incarnation,
-            principalId, kind, commandId, Encode(payload), clock.GetUtcNow() + settings.RequestLifetime));
+            principalId, kind, commandId, GrainPayload.Copy(payload), clock.GetUtcNow() + settings.RequestLifetime));
+
+    /// <summary>Public graph and query inputs keep their null elements for owner validation; other reads are strict.</summary>
+    internal static ValidationProfile ReadProfile(GrainReadKind kind)
+        => kind is GrainReadKind.AstQuery or GrainReadKind.LiveQueryStart or GrainReadKind.LiveQueryRead
+            or GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.GraphIncomingEdges
+            or GrainReadKind.SqlGraphPath or GrainReadKind.PartitionQuery
+            ? ValidationProfile.PublicInputElements : ValidationProfile.Strict;
 
     internal DecodedGrainRequest Decode(GrainRequestEnvelope request)
         => GrainRequestPayloadVerification.Decode(this, request);
@@ -91,9 +99,6 @@ public sealed partial class GrainRequestCodec
 
     internal void ObserveProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext? context)
         => GrainRequestPhaseObservation.ProducerDisposed(PhaseObserver, identity, context);
-
-    private static ReadOnlyMemory<byte> Encode(ReadOnlyMemory<byte> payload)
-        => GrainPayload.Copy(payload);
 
     internal GrainRequestEnvelope Issue(GrainRequestEnvelope request)
     {

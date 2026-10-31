@@ -42,7 +42,7 @@ internal static class RequestCqrsActualTextReplayFlow
         var refused = await RequestCqrsActualTextMaintenanceFlow.InvokeAsync(fixture, originalBuild,
             expectWork: false, token);
         await Assert.That(refused.Error).IsEqualTo(ErrorCode.HistoryUnavailable);
-        await Assert.That(refused.Payload.IsEmpty).IsTrue();
+        await Assert.That(refused.Result).IsNull();
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(before)).IsTrue();
         await ReplayAsync(fixture, current, completed, token);
         await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, lifetime, changed: true, token);
@@ -69,7 +69,7 @@ internal static class RequestCqrsActualTextReplayFlow
         var refused = await RequestCqrsActualTextMaintenanceFlow.InvokeAsync(fixture, previous,
             expectWork: false, token);
         await Assert.That(refused.Error).IsEqualTo(ErrorCode.HistoryUnavailable);
-        await Assert.That(refused.Payload.IsEmpty).IsTrue();
+        await Assert.That(refused.Result).IsNull();
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(before)).IsTrue();
         await RequestCqrsActualTextAssertions.VerifyAsync(fixture, current, lifetime, changed: true, FinalRevision, token);
         var noOp = current with

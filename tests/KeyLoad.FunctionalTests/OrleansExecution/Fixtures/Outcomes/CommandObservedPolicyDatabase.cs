@@ -23,7 +23,7 @@ internal sealed class CommandObservedPolicyDatabase(Func<RequestCqrsHostedRuntim
         => OutcomeStoreOracle.ReadStored(Database, commandId, TestContext.Current!.Execution.CancellationToken);
 
     internal async Task<GrainOperationReply> SubmitAsync<T>(OperationKind kind, T payload,
-        CancellationToken token, string principal = P.Root, Guid? id = null, Guid? requestId = null)
+        CancellationToken token, string principal = P.Root, Guid? id = null, Guid? requestId = null) where T : notnull
     {
         token.ThrowIfCancellationRequested();
         var actual = source();
@@ -31,7 +31,7 @@ internal sealed class CommandObservedPolicyDatabase(Func<RequestCqrsHostedRuntim
         var operationId = requestId ?? Guid.NewGuid();
         var subject = Store.Read(view => Database.Principal(view, principal, actual.Clock.GetUtcNow()));
         var envelope = actual.Codec.CreateCommand(operationId, subject.Id, kind, commandId,
-            OrleansSerialization.Serialize(payload));
+            payload);
         var failures = new List<Exception>();
         GrainOperationReply? reply = null;
         await ServerFailureObserver.ObserveAsync(async () =>

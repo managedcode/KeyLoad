@@ -28,7 +28,7 @@ internal static class PartitionStorageReplay
         await owner.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         var database = owner.Database;
         var request = database.CreateCommand(OperationKind.Batch, P.Command, P.Root,
-            source.GetRequiredService<TimeProvider>().GetUtcNow(), OrleansSerialization.Serialize(P.Request()));
+            source.GetRequiredService<TimeProvider>().GetUtcNow(), P.Request());
         var retained = database.ReadStoredCommand(request, token).Value ?? throw new InvalidOperationException(Missing);
         await Assert.That(database.LastApplied).IsGreaterThanOrEqualTo(original.Receipt.Token.Position);
         await Assert.That(retained.Sequence).IsEqualTo(original.Receipt.Token.Position);
@@ -37,7 +37,7 @@ internal static class PartitionStorageReplay
         await Assert.That(retained.Command.UserId).IsEqualTo(P.Root);
         await Assert.That(retained.Command.Timestamp).IsEqualTo(original.Outcome.PreparedCommand.Timestamp);
         await Assert.That(retained.Command.Value!.Kind).IsEqualTo(OperationKind.Batch);
-        var command = OrleansSerialization.Deserialize<CommandRequest>(retained.Command.Value!.Input.Span);
+        var command = ((CommandRequest)retained.Command.Value!.Input);
         await Assert.That(JsonDefaults.Serialize(command).AsSpan().SequenceEqual(JsonDefaults.Serialize(P.Request())))
             .IsTrue();
         await Assert.That(ReadBytes(source, token).AsSpan().SequenceEqual(original.Bytes)).IsTrue();

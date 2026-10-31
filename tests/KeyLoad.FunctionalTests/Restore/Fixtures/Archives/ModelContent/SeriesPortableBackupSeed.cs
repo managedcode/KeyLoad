@@ -19,7 +19,7 @@ internal static class SeriesPortableBackupSeed
     {
         var id = Guid.NewGuid();
         return database.CreateCommand(OperationKind.Batch, id, Root, database.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(new CommandRequest(id, partition, [.. mutations])));
+            new CommandRequest(id, partition, [.. mutations]));
     }
 
     internal static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)[]> RunAsync(
@@ -29,7 +29,7 @@ internal static class SeriesPortableBackupSeed
         var resource = new ConfigureResourceRequest(fixture.Partition.TenantId, fixture.Partition.DatabaseId,
             new ResourceDefinition(Set, ResourceKind.TimeSeries, fixture.Partition.TransactionDomainId));
         var configured = database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), Root,
-            database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(resource));
+            database.EvaluationClock.GetUtcNow(), resource);
         await Assert.That(Errors.Code(database.ApplyEmbedded(configured, token).Problem).Value).IsNull();
         var appended = Batch(database, fixture.Partition,
             new AppendSamples(Set, Series, [Data(1, 0, 1), Data(2, 1, 2), Data(3, 2, 3), Data(4, 3, 4)]));

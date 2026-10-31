@@ -12,7 +12,7 @@ internal static class QueueDeadlineRecoveryAssertions
         var database = QueueLifecycleRecoveryAssertions.Open(store);
         var operation = JsonDefaults.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueDeadlineCrashProtocol.OperationFile), token));
-        var original = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var original = ((CommandRequest)operation.Value!.Input);
         var condition = (AdvanceQueueDeadline)original.Mutations.Single();
         await Assert.That(new DateTimeOffset(operation.Timestamp) >= condition.ExpectedDeadline).IsTrue();
         var outcome = OutcomeStoreOracle.Read(store, operation);

@@ -36,12 +36,12 @@ internal static class QueueLifecycleReceiptAssertions
     {
         if (observation.Operation.Value!.Kind == OperationKind.Delivery)
         {
-            var request = OrleansSerialization.Deserialize<DeliveryCommand>(observation.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
+            var request = ((DeliveryCommand)observation.Operation.Value!.Input);
             var claims = database.Verify<DeliveryClaims>(request.Token);
             return [new(request.Action.ToString(), lane.Queue, claims.MessageId,
                 checked(observation.Before[claims.MessageId].StateVersion + Increment))];
         }
-        var batch = OrleansSerialization.Deserialize<CommandRequest>(observation.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var batch = ((CommandRequest)observation.Operation.Value!.Input);
         var expected = ImmutableArray.CreateBuilder<MutationReceipt>();
         foreach (var mutation in batch.Mutations)
         {
@@ -63,7 +63,7 @@ internal static class QueueLifecycleReceiptAssertions
     private static async Task ReceiveAsync(DatabaseEngine database, QueueLaneRef lane,
         Func<string, EnqueueMessage> literal, QueueLifecycleObservation observation, ReceiveResult actual)
     {
-        var request = OrleansSerialization.Deserialize<ReceiveRequest>(observation.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var request = ((ReceiveRequest)observation.Operation.Value!.Input);
         var expected = ImmutableArray.CreateBuilder<Delivery>();
         foreach (var delivery in actual.Deliveries)
         {

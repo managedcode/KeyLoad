@@ -11,7 +11,7 @@ internal static class AnnMaintenanceParentFlow
         MutationDiscriminatorNames.PatchDocument, MutationDiscriminatorNames.DeleteDocument,
         MutationDiscriminatorNames.PutVector, MutationDiscriminatorNames.ApplyVectorProjection];
 
-    internal static async Task<AnnMaintenanceResult> RunAsync(AnnMaintenanceChildCalls children,
+    internal static async Task<AnnMaintenanceResult> RunAsync(MaintenanceChildCalls children,
         AnnMaintenanceRequest request, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
         AnnMaintenanceOptions options, GrainRoutingOptions routing)
     {
@@ -69,7 +69,7 @@ internal static class AnnMaintenanceParentFlow
         return await CompleteAsync(children, request, configured, result, writer).ConfigureAwait(true);
     }
 
-    private static async Task<ProjectionConsumerInfo> ConfigureOriginalAsync(AnnMaintenanceChildCalls children, AnnMaintenanceRequest request, CancellationToken token)
+    private static async Task<ProjectionConsumerInfo> ConfigureOriginalAsync(MaintenanceChildCalls children, AnnMaintenanceRequest request, CancellationToken token)
     {
         var initial = (await AnnMaintenanceInitialEnrollment.ReadAsync(children, request, token).ConfigureAwait(true)).Value;
         var configureId = AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Configure, EmptySequence);
@@ -84,7 +84,7 @@ internal static class AnnMaintenanceParentFlow
         return configured;
     }
 
-    private static async Task<AnnMaintenanceResult> ReplayOriginalAsync(AnnMaintenanceChildCalls children,
+    private static async Task<AnnMaintenanceResult> ReplayOriginalAsync(MaintenanceChildCalls children,
         AnnMaintenanceRequest request, ProjectionConsumerInfo configured, AnnMaintenanceCapabilityResult state,
         AnnMaintenanceResult retained, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
@@ -93,7 +93,7 @@ internal static class AnnMaintenanceParentFlow
         return retained;
     }
 
-    private static async Task<AnnMaintenanceResult> CompleteAsync(AnnMaintenanceChildCalls children,
+    private static async Task<AnnMaintenanceResult> CompleteAsync(MaintenanceChildCalls children,
         AnnMaintenanceRequest request, ProjectionConsumerInfo configured, AnnMaintenanceResult result,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
@@ -104,7 +104,7 @@ internal static class AnnMaintenanceParentFlow
         return result;
     }
 
-    private static async Task<AnnMaintenanceReplayResult> ReplayAsync(AnnMaintenanceChildCalls children,
+    private static async Task<AnnMaintenanceReplayResult> ReplayAsync(MaintenanceChildCalls children,
         AnnMaintenanceRequest request, AnnMaintenanceCapabilityResult state, ProjectionBatchResult? checkpoint,
         int maximumPages, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
@@ -139,7 +139,7 @@ internal static class AnnMaintenanceParentFlow
         throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
     }
 
-    private static async Task<AnnMaintenanceResult> ReleaseAsync(AnnMaintenanceChildCalls children,
+    private static async Task<AnnMaintenanceResult> ReleaseAsync(MaintenanceChildCalls children,
         AnnMaintenanceRequest request, CancellationToken token)
     {
         var id = AnnMaintenanceChildIdentity.Create(request.CommandId, AnnMaintenancePhase.Release, EmptySequence);
@@ -149,7 +149,7 @@ internal static class AnnMaintenanceParentFlow
         return new(request.CommandId, request.Consumer, request.IndexGeneration, AnnMaintenancePhase.Completed, null, EmptyCount, null, null);
     }
 
-    private static Task<ProjectionBatchResult> CommitAsync(AnnMaintenanceChildCalls children,
+    private static Task<ProjectionBatchResult> CommitAsync(MaintenanceChildCalls children,
         CommitProjectionBatchRequest intent, CancellationToken token)
         => children.CommandAsync<CommitProjectionBatchRequest, ProjectionBatchResult>(OperationKind.CommitProjectionBatch,
             intent, intent.CommandId, token);

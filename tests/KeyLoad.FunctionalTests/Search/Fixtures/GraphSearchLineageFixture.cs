@@ -59,7 +59,7 @@ internal sealed class GraphSearchLineageFixture(bool expansion, bool emptyLabels
     }
 
     internal Command<DatabaseCommand> Operation() => Owner.CreateCommand(OperationKind.Batch, Seed.CommandId,
-        GraphSearchLineageProtocol.Root, default, OrleansSerialization.Serialize(Seed));
+        GraphSearchLineageProtocol.Root, default, Seed);
 
     internal async Task PolicyAsync(long epoch, bool allow)
     {
@@ -71,7 +71,7 @@ internal sealed class GraphSearchLineageFixture(bool expansion, bool emptyLabels
             PolicyEpoch = epoch
         };
         var operation = Owner.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), GraphSearchLineageProtocol.Root,
-            default, OrleansSerialization.Serialize(new ConfigurePrincipalRequest(expected)));
+            default, new ConfigurePrincipalRequest(expected));
         await GraphSearchLineageValues.EqualAsync(Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken).Get<PrincipalRecord>(), expected);
     }
     public void Dispose() => Harness.Dispose();

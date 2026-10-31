@@ -62,8 +62,8 @@ internal static class RecurringSagaSchemaReplay
         var entry = owner.ReadOutcome(command.Operation);
         await SafeProjectorOperationSeed.EqualAsync(entry, command.Outcome);
         var operation = entry.PreparedCommand ?? throw new InvalidOperationException(MissingOperation);
-        await Assert.That(operation.Value!.Input.IsEmpty).IsFalse();
-        await Assert.That(operation.Value!.Input.Span.SequenceEqual(command.Operation.Value!.Input.Span)).IsTrue();
+        await Assert.That((operation.Value!.Input is null)).IsFalse();
+        await Assert.That(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(command.Operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
         await SafeProjectorOperationHistoryImages.UnchangedAsync(owner, command);
     }
 

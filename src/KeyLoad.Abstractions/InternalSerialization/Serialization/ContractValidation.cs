@@ -111,7 +111,8 @@ internal static class ContractValidation
         var height = 0;
         foreach (var member in members)
         {
-            height = Math.Max(height, Visit(member.Read(value), state, member.Value, profile, depth));
+            height = Math.Max(height, Visit(member.Read(value), state, member.Value,
+                member.PublicInput ? ValidationProfile.PublicInputElements : profile, depth));
         }
         return height;
     }
@@ -140,7 +141,8 @@ internal static class ContractValidation
             {
                 if (property.IsDefined(typeof(Orleans.IdAttribute)))
                 {
-                    members.Add(new(property.GetValue, ValueValidation.Create(context.Create(property))));
+                    members.Add(new(property.GetValue, ValueValidation.Create(context.Create(property)),
+                        property.IsDefined(typeof(PublicInputAttribute))));
                 }
             }
             foreach (var field in current.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly))

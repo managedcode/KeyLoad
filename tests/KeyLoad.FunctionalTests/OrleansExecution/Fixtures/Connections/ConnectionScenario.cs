@@ -84,7 +84,7 @@ internal sealed class ConnectionScenario : IAsyncDisposable
         CommandRequest command, CancellationToken cancellationToken)
     {
         var envelope = Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
-            command.CommandId, OrleansSerialization.Serialize(command));
+            command.CommandId, command);
         return InvokeAsync(principal, requestId, command.CommandId, envelope, cancellationToken);
     }
 
@@ -92,7 +92,7 @@ internal sealed class ConnectionScenario : IAsyncDisposable
         string documentId, CancellationToken cancellationToken)
     {
         var envelope = Fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
-            OrleansSerialization.Serialize(new GetDocumentRequest(Reference(documentId))));
+            new GetDocumentRequest(Reference(documentId)));
         return InvokeAsync(principal, requestId, Guid.Empty, envelope, cancellationToken);
     }
 

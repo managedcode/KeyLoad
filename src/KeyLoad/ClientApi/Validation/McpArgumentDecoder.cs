@@ -3,43 +3,35 @@ using KeyLoad.Clustering;
 
 namespace KeyLoad.Server;
 
-/// <summary>Strict execution argument framing, attributed typed execution payloads and stable caller command identity.</summary>
+/// <summary>Strict execution argument framing, typed operation inputs and stable caller command identity.</summary>
 internal static class McpArgumentDecoder
 {
-    internal static McpDecodedOperation Read<TRequest>(IDictionary<string, JsonElement>? arguments, GrainReadKind kind,
-        int maximumPayloadBytes) =>
-        new(kind, null, Guid.Empty,
-            kind is GrainReadKind.AstQuery or GrainReadKind.LiveQueryStart or GrainReadKind.LiveQueryRead
-                or GrainReadKind.Traverse or GrainReadKind.GraphShortestPath or GrainReadKind.GraphIncomingEdges
-                or GrainReadKind.SqlGraphPath
-                or GrainReadKind.PartitionQuery
-                ? InternalPayload.SerializePublicInput(Request<TRequest>(arguments, false), maximumPayloadBytes)
-                : InternalPayload.Serialize(Request<TRequest>(arguments, false), maximumPayloadBytes));
+    internal static McpDecodedOperation Read<TRequest>(IDictionary<string, JsonElement>? arguments, GrainReadKind kind)
+        where TRequest : notnull
+        => new(kind, null, Guid.Empty, Request<TRequest>(arguments, false));
 
-    internal static McpDecodedOperation NoBody(IDictionary<string, JsonElement>? arguments, GrainReadKind kind,
-        int maximumPayloadBytes)
+    internal static McpDecodedOperation NoBody(IDictionary<string, JsonElement>? arguments, GrainReadKind kind)
     {
         const int ArgumentsEmptyCount = 0;
-        const int ValueEmptyCount = 0;
 
         if (arguments is { Count: > ArgumentsEmptyCount })
         {
             throw InvalidArguments();
         }
-        return new McpDecodedOperation(kind, null, Guid.Empty, InternalPayload.Serialize(ValueEmptyCount, maximumPayloadBytes));
+        return new McpDecodedOperation(kind, null, Guid.Empty, GrainContracts.NoDtoMarker);
     }
 
     internal static McpDecodedOperation Command<TRequest>(IDictionary<string, JsonElement>? arguments,
-        OperationKind kind, Func<TRequest, Guid> commandId, int maximumPayloadBytes)
+        OperationKind kind, Func<TRequest, Guid> commandId) where TRequest : notnull
     {
         var request = Request<TRequest>(arguments, false);
         var stableId = commandId(request);
         RequireIdentity(stableId);
-        return new McpDecodedOperation(null, kind, stableId, InternalPayload.SerializePublicInput(request, maximumPayloadBytes));
+        return new McpDecodedOperation(null, kind, stableId, request);
     }
 
-    internal static McpDecodedOperation HeaderCommand<TRequest>(IDictionary<string, JsonElement>? arguments, OperationKind kind,
-        int maximumPayloadBytes)
+    internal static McpDecodedOperation HeaderCommand<TRequest>(IDictionary<string, JsonElement>? arguments, OperationKind kind)
+        where TRequest : notnull
     {
         ValidateKeys(arguments, true);
         var identity = arguments![McpCatalogProtocol.CommandId];
@@ -49,7 +41,7 @@ internal static class McpArgumentDecoder
         }
         RequireIdentity(stableId);
         var request = Request<TRequest>(arguments, true);
-        return new McpDecodedOperation(null, kind, stableId, InternalPayload.SerializePublicInput(request, maximumPayloadBytes));
+        return new McpDecodedOperation(null, kind, stableId, request);
     }
 
     internal static TRequest Request<TRequest>(IDictionary<string, JsonElement>? arguments, bool headerCommand)

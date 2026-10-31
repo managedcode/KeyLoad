@@ -48,7 +48,7 @@ internal static class ResourceIncarnationLiteral
 
     internal static string CreationJson(Command<DatabaseCommand> original)
         => original.Value!.Kind == OperationKind.ConfigureResource ? RawCreate
-            : JsonSerializer.Serialize(OrleansSerialization.Deserialize<CreateTableRequest>(original.Value.Input.Span), JsonDefaults.Options);
+            : JsonSerializer.Serialize(((CreateTableRequest)original.Value.Input), JsonDefaults.Options);
 
     internal static byte[] LifetimeKey(PartitionRef partition, string name = Table)
         => KeyCodec.Encode("resource-lifetime", partition.TenantId, partition.DatabaseId, name);

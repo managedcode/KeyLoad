@@ -92,7 +92,7 @@ internal sealed class FilePublicationTests
 
     private static Result<object> Apply(TestDatabase database, FileMetadataMutation request, string principal = Root)
         => database.SubmitIssued(database.Database.CreateCommand(OperationKind.FileMetadata, request.CommandId,
-            principal, default, OrleansSerialization.Serialize(request)));
+            principal, default, request));
 
     private static FileMetadataState Read(TestDatabase database, FileMetadataMutation request)
         => database.Database.ReadFileMetadata(Root, new(request.Address, Capability.BlobRead, request.UploadId));

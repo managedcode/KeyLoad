@@ -5,7 +5,7 @@ internal static class GrainRequestCapabilityEnvelopes
 {
     internal static GrainRequestEnvelope RemoteRead(GrainRequestCodec scope, DateTimeOffset now,
         TimeSpan requestLifetime, Guid requestId, string principalId, GrainReadKind kind,
-        ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
+        object payload, DateTimeOffset expiresAt)
     {
         if (expiresAt <= now || expiresAt > now + requestLifetime)
         {
@@ -24,7 +24,7 @@ internal static class GrainRequestCapabilityEnvelopes
     }
 
     internal static GrainRequestEnvelope RuntimeJournalRead(GrainRequestCodec scope, TimeProvider clock,
-        TimeSpan requestLifetime, Guid requestId, string principalId, GrainReadKind kind, ReadOnlyMemory<byte> payload)
+        TimeSpan requestLifetime, Guid requestId, string principalId, GrainReadKind kind, object payload)
         => new()
         {
             Purpose = GrainContracts.RuntimeJournalPurpose,
@@ -37,7 +37,7 @@ internal static class GrainRequestCapabilityEnvelopes
         };
 
     internal static GrainRequestEnvelope RuntimeJournalCommand(GrainRequestCodec scope, TimeProvider clock,
-        TimeSpan requestLifetime, Guid requestId, string principalId, Guid commandId, ReadOnlyMemory<byte> payload)
+        TimeSpan requestLifetime, Guid requestId, string principalId, Guid commandId, object payload)
         => new()
         {
             Purpose = GrainContracts.RuntimeJournalPurpose,

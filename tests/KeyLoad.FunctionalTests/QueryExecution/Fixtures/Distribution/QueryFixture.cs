@@ -62,9 +62,9 @@ internal sealed class QueryFixture(DocumentPatchAtomicityOwner source, DocumentP
     }
 
     internal static Command<DatabaseCommand> Operation<T>(DocumentPatchAtomicityOwner owner,
-        OperationKind kind, Guid id, T payload)
+        OperationKind kind, Guid id, T payload) where T : notnull
         => owner.Database.CreateCommand(kind, id, Root, owner.Database.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(payload));
+            payload);
 
     internal static void Principal(DocumentPatchAtomicityOwner owner, PrincipalRecord principal)
         => _ = owner.Submit(Operation(owner, OperationKind.ConfigurePrincipal, Guid.NewGuid(),

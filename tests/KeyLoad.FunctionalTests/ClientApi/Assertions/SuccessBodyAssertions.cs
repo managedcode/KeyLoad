@@ -17,7 +17,7 @@ internal static class SuccessBodyAssertions
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(operation.UserId!).IsEqualTo(state.Principal.Id);
         await DeclaredResponseEofAssertions.EqualAsync(state.Endpoint.Healthy,
-            OrleansSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
+            ((CommandRequest)(operation).Value!.Input));
         var expected = new CommitReceipt(state.Endpoint.Healthy.CommandId, new(placement.Incarnation, state.Endpoint.Healthy.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(D.PutKind, ConnectionProtocol.Collection, D.Document, P.HealthyRevision)], DurabilityProfile.ProcessDurable, 2);
         await DeclaredResponseEofAssertions.EqualAsync(expected, state.Endpoint.HealthyReceipt);
         await DeclaredResponseEofAssertions.EqualAsync(expected, sdk);

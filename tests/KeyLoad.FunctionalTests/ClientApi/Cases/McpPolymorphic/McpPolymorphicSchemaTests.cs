@@ -125,7 +125,7 @@ internal sealed class McpPolymorphicSchemaTests
                 [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
             };
             var payload = Find(McpCatalogExpectations.QueryAst).Decode(arguments).Payload;
-            var decoded = OrleansSerialization.Deserialize<AstQueryRequest>(payload.Span);
+            var decoded = (AstQueryRequest)payload;
             var actualValue = ((Comparison)decoded.Query.Filter!).Right is ValueOperand valueOperand
                 ? valueOperand.Value : throw new InvalidOperationException(ValueKind);
             await Assert.That(actualValue.ValueKind).IsEqualTo(expectedKinds[index]);

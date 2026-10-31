@@ -50,8 +50,7 @@ internal sealed class ConfiguredVectorProfileNullArrayTests
             [McpCatalogProtocol.CommandId] = JsonSerializer.SerializeToElement(id, JsonDefaults.Options)
         };
         var officialBoundary = Assert.ThrowsExactly<KeyLoadException>(() =>
-            McpArgumentDecoder.HeaderCommand<ConfigureResourceRequest>(arguments, OperationKind.ConfigureResource,
-                UnitMcpOptions.CanonicalPayloadBytes));
+            McpArgumentDecoder.HeaderCommand<ConfigureResourceRequest>(arguments, OperationKind.ConfigureResource));
         await Assert.That(officialBoundary.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(officialBoundary.Message).IsEqualTo(InvalidArguments);
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);

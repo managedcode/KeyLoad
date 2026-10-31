@@ -43,7 +43,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         var reply = await InvokeAsync(fixture, request, token);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(reply.SafeDetail).IsNull();
-        var actual = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as ProjectionBatchResult
+        var actual = GrainReplyFactory.RequireValue(reply).Value as ProjectionBatchResult
             ?? throw new InvalidOperationException();
         await RequestCqrsAnnAssertions.EqualAsync(expected, actual);
         await Assert.That(OrleansSerialization.Serialize(actual).AsSpan()
@@ -59,7 +59,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
         var files = AnnFixtureFileSnapshot.Capture(fixture.Database.Directory);
         var reply = await InvokeAsync(fixture, changed, token);
         await Assert.That(reply.Error).IsEqualTo(ErrorCode.Conflict);
-        await Assert.That(reply.Payload.Length).IsEqualTo(0);
+        await Assert.That(reply.Result).IsNull();
         await UnchangedAsync(fixture, image, cut, files);
     }
 
@@ -68,7 +68,7 @@ internal static class RequestCqrsAnnSettlementReplayFlow
     {
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
-            OperationKind.CommitProjectionBatch, request.CommandId, OrleansSerialization.Serialize(request));
+            OperationKind.CommitProjectionBatch, request.CommandId, request);
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
         var connection = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);

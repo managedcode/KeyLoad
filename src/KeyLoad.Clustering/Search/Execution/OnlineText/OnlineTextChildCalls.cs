@@ -63,38 +63,11 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, GrainRequ
         }
     }
 
-    private async Task<TResult> DispatchAsync<TResult>(Func<Guid, string, GrainRequestEnvelope> sign,
+    private Task<TResult> DispatchAsync<TResult>(Func<Guid, string, GrainRequestEnvelope> sign,
         Guid commandId, CancellationToken token) where TResult : class
-    {
-        token.ThrowIfCancellationRequested();
-        codec.ValidateScope(parent.Envelope);
-        GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-        var actorId = Guid.NewGuid();
-        var child = sign(actorId, parent.Envelope.PrincipalId!);
-        var invoked = false;
-        GrainOperationReply reply;
-        try
+        => MaintenanceChildDispatch.CallAsync<TResult>(parent, sign, commandId, (value, cancellation) =>
         {
-            reply = await MaintenanceChildDispatch.ExecuteAsync(parent, child, actorId, commandId,
-                (value, cancellation) =>
-                {
-                    frames.AdmitChildExchange();
-                    invoked = true;
-                    return executeChild(value, cancellation);
-                }, services, codec, binding, null, token).ConfigureAwait(true);
-        }
-        catch (KeyLoadException error) when (invoked && commandId != Guid.Empty)
-        {
-            GrainFailureDiagnostics.Log(diagnostics, error, parent.Envelope.RequestId,
-                GrainFailureStage.CapabilityExecution, ErrorCode.UnknownWriteOutcome);
-            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, TextIndexMaintenanceProtocol.Interrupted);
-        }
-        if (reply.Error is { } failure)
-        {
-            throw Errors.Fail(failure, reply.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);
-        }
-        return OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as TResult
-            ?? throw Errors.Fail(commandId == Guid.Empty ? ErrorCode.Corruption : ErrorCode.UnknownWriteOutcome,
-                TextIndexMaintenanceProtocol.Interrupted);
-    }
+            frames.AdmitChildExchange();
+            return executeChild(value, cancellation);
+        }, services, codec, diagnostics, binding, TextIndexMaintenanceProtocol.Interrupted, token);
 }

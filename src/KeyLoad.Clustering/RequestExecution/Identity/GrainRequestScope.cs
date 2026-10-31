@@ -16,7 +16,7 @@ internal static class GrainRequestScope
     {
         if (request.Incarnation != incarnation
             || request.RequestId == Guid.Empty || request.ExpiresAt <= now || request.ExpiresAt > now + maximumFuture
-            || (request.ReadKind is null) == (request.CommandKind is null) || request.Payload.IsEmpty)
+            || (request.ReadKind is null) == (request.CommandKind is null) || request.Payload is null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

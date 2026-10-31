@@ -57,7 +57,7 @@ internal sealed class CredentialStatusEndpoint(CredentialStatusState state)
         await Assert.That(context.Request.Headers[P.CommandHeader].SingleOrDefault()).IsEqualTo(id.ToString());
         var requestId = Guid.NewGuid();
         var envelope = state.Scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.ConfigureApiKey,
-            id, OrleansSerialization.Serialize(request));
+            id, request);
         var actual = state.Tasks.Retain(state.Scenario.InvokeAsync(principal, requestId, id, envelope, context.RequestAborted));
         var reply = await state.Tasks.CompleteAsync(actual);
         await state.Scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(context.RequestAborted);
@@ -80,7 +80,7 @@ internal sealed class CredentialStatusEndpoint(CredentialStatusState state)
         {
             await Assert.That(reply.Error).IsEqualTo((ErrorCode?)ErrorCode.PermissionDenied);
             await Assert.That(reply.SafeDetail).IsEqualTo(P.DeniedDetail);
-            await Assert.That(reply.Payload.IsEmpty).IsTrue();
+            await Assert.That(reply.Result).IsNull();
             var bytes = JsonSerializer.SerializeToUtf8Bytes(Errors.Problem(ErrorCode.PermissionDenied, P.DeniedDetail), JsonDefaults.Options);
             context.Response.StatusCode = StatusCodes.Status403Forbidden;
             context.Response.ContentType = P.ContentType;
@@ -91,7 +91,7 @@ internal sealed class CredentialStatusEndpoint(CredentialStatusState state)
         await Assert.That(reply.Error).IsNull();
         await Assert.That(reply.SafeDetail).IsNull();
         await Assert.That(ConnectionAssertions.Value<bool>(reply)).IsTrue();
-        await Assert.That(reply.Payload.Span.SequenceEqual(OrleansSerialization.Serialize(new GrainValue(true)))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(reply)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(new GrainValue(true)))).IsTrue();
         if (step == CredentialStatusStep.OriginalBoolean)
         {
             var bytes = Encoding.UTF8.GetBytes(P.BooleanBody);

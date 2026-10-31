@@ -15,9 +15,9 @@ internal static class ProjectionConsumerIdentityFixture
     internal const string Detail = "The committed projection consumer does not match its canonical identity.";
 
     internal static Command<DatabaseCommand> Operation<T>(DatabaseEngine owner, OperationKind kind, Guid id, T request,
-        DateTimeOffset? evaluatedAt = null)
+        DateTimeOffset? evaluatedAt = null) where T : notnull
         => owner.CreateCommand(kind, id, Root, evaluatedAt ?? owner.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(request));
+            request);
 
     internal static async Task<ProjectionConsumerIdentityState> SeedAsync(TestDatabase database, CancellationToken token)
     {

@@ -26,7 +26,7 @@ internal static partial class AnnProjectionObservationRead
         work.AttachResourceLifetimeBinding(binding);
         work.ConstrainLifetime(original.Envelope.ExpiresAt);
         work.ConstrainWork(request.MaximumReadBytes, request.MaximumRecords);
-        work.ChargeBytes(original.Payload.Length);
+        work.ChargeBytes(OrleansSerialization.Measure(request));
         var admitted = AnnProjectionObservationRead.RequireScope(database, services, principal, request, work, metadata, binding);
         var search = services.GetRequiredService<SearchEngine>();
         WaitForAnnIndexResult? waited = null;

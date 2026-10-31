@@ -19,7 +19,7 @@ internal static class RequestCqrsMalformedTextFlow
         var requestId = Guid.NewGuid();
         var commandId = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.MaintainTextIndex,
-            commandId, OrleansSerialization.Serialize(false));
+            commandId, false);
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
         using (var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             requestId, commandId, token, connectionId: fixture.ConnectionId))
@@ -30,7 +30,7 @@ internal static class RequestCqrsMalformedTextFlow
                 requestId, fixture.Clock, fixture.RoutingOptions,
                 new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, requestId)), token);
             await Assert.That(reply.Error).IsEqualTo(ErrorCode.Validation);
-            await Assert.That(reply.Payload.IsEmpty).IsTrue();
+            await Assert.That(reply.Result).IsNull();
             await Assert.That(reply.SafeDetail).IsEqualTo(GrainRoutingProtocol.InvalidRequest);
         }
         await Assert.That(frames.Select(x => x.Kind).SequenceEqual(new[] { CqrsStreamChunkKind.Started, CqrsStreamChunkKind.Failed })).IsTrue();

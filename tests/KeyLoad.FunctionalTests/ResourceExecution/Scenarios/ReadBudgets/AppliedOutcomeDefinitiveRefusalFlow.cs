@@ -115,6 +115,6 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         await Assert.That(db.Apply(Issue(db, OperationKind.Receive, request, request.RequestId)).Get<ReceiveResult>().Deliveries).IsEmpty();
     }
 
-    internal static Command<DatabaseCommand> Issue<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id)
-        => db.CreateCommand(kind, id, Worker, db.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(payload));
+    internal static Command<DatabaseCommand> Issue<T>(DatabaseEngine db, OperationKind kind, T payload, Guid id) where T : notnull
+        => db.CreateCommand(kind, id, Worker, db.EvaluationClock.GetUtcNow(), payload);
 }

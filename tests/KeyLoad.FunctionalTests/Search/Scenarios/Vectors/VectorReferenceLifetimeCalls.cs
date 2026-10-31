@@ -27,14 +27,14 @@ internal static class VectorReferenceLifetimeCalls
     internal static async Task<CommitReceipt> CommitAsync(DropRuntimeProfile profile,
         CommandRequest command, CancellationToken token)
         => DropRuntimeAssertions.Value<CommitReceipt>(await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch,
-            command.CommandId, PartitionStoreProtocol.AdministratorId, OrleansSerialization.Serialize(command), token));
+            command.CommandId, PartitionStoreProtocol.AdministratorId, command, token));
 
     private static async Task ConfigureAsync(DropRuntimeProfile profile, ResourceDefinition definition,
         CancellationToken token)
     {
         var result = await DropPublicSubmission.SubmitAsync(profile, OperationKind.ConfigureResource, Guid.NewGuid(),
-            PartitionStoreProtocol.AdministratorId, OrleansSerialization.Serialize(new ConfigureResourceRequest(
-                DropRuntimeProtocol.Tenant, DropRuntimeProtocol.Database, definition)), token);
+            PartitionStoreProtocol.AdministratorId, new ConfigureResourceRequest(
+                DropRuntimeProtocol.Tenant, DropRuntimeProtocol.Database, definition), token);
         await DropRuntimeAssertions.SameAsync(definition, DropRuntimeAssertions.Value<ResourceDefinition>(result));
     }
 

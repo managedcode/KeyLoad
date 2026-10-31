@@ -28,7 +28,7 @@ internal static class GrainOnlineTextCheckpointCommand
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }
         var operation = database.CreateCommand(OperationKind.CommitProjectionBatch, checkpoint.CommandId,
-            principal.Id, clock.GetUtcNow(), request.Payload);
+            principal.Id, clock.GetUtcNow(), checkpoint);
         _ = work.AdmitOriginal(() => coordinator.SubmitVerifiedAsync(operation, cancellationToken));
         return (true, ((Task<Result<object>>?)(work.AwaitCallerAsync(cancellationToken))));
     }

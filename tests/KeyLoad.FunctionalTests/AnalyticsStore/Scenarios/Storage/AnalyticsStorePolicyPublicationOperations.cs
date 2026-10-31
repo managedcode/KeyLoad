@@ -29,7 +29,7 @@ internal static class AnalyticsStorePolicyPublicationOperations
             [new PutDocument(S.OtherCollection, S.OtherId, S.OtherJson, ExpectedRevision: S.Absent)]);
         var expectedIndex = db.ReadCanonicalCut().AppliedPosition + S.Revision;
         var issued = db.Database.CreateCommand(OperationKind.Batch, command.CommandId, D.Root,
-            db.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(command));
+            db.Database.EvaluationClock.GetUtcNow(), command);
         var outcome = db.SubmitIssuedEmbedded(issued, token);
         await O.EqualAsync(new CommitReceipt(command.CommandId, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, expectedIndex), [new(PutKind, S.OtherCollection, S.OtherId, S.Revision)], DurabilityProfile.ProcessDurable, 1),
             outcome.Get<CommitReceipt>());

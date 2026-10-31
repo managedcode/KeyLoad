@@ -67,7 +67,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
     {
         var reply = await InvokeAsync(fixture, request, expectWork, token);
         await Assert.That(reply.Error).IsNull();
-        return OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as TextIndexMaintenanceResult
+        return GrainReplyFactory.RequireValue(reply).Value as TextIndexMaintenanceResult
             ?? throw new InvalidOperationException();
     }
 
@@ -76,7 +76,7 @@ internal static class RequestCqrsActualTextMaintenanceFlow
     {
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, TextMaintenanceTestValues.Principal,
-            OperationKind.MaintainTextIndex, request.CommandId, OrleansSerialization.Serialize(request));
+            OperationKind.MaintainTextIndex, request.CommandId, request);
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             TextMaintenanceTestValues.Principal, fixture.Clock.GetUtcNow()));
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();

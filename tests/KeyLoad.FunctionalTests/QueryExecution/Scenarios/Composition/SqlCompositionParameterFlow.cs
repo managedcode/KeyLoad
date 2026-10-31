@@ -71,11 +71,11 @@ internal static class SqlCompositionParameterFlow
         await Assert.That(compiled.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(compiled.ReadKind).IsNull();
         await Assert.That(compiled.CommandId).IsEqualTo(command.CommandId);
-        var decoded = OrleansSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
+        var decoded = ((CommandRequest)compiled.Payload);
         await SqlCompositionParameterAssertions.EqualAsync(decoded, command);
         var operation = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, C.Root,
             fixture.Seed.SeedAt.AddSeconds(reverse ? SqlCompositionParameterData.ReverseOperationOffsetSeconds
-                : SqlCompositionParameterData.ForwardOperationOffsetSeconds), OrleansSerialization.Serialize(decoded));
+                : SqlCompositionParameterData.ForwardOperationOffsetSeconds), decoded);
         var expected = new CommitReceipt(command.CommandId, ExpectedCanonicalCommit.Next(fixture.Database, command.Partition), [SqlCompositionParameterData.Receipt(fixture, reverse)], DurabilityProfile.ProcessDurable, 1);
         var actual = fixture.Database.Apply(operation).Get<CommitReceipt>();
         await SqlCompositionParameterAssertions.RuntimeReceiptAsync(actual, expected);

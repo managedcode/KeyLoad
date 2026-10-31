@@ -69,8 +69,15 @@ internal sealed class PublicReadElementsTests
         var request = PublicReadFixture.Signed(database,
             PublicReadFixture.Encode(query, GrainReadKind.Traverse), GrainReadKind.Traverse);
         var principal = GrainRequestAuthority.Reload(database.Database, request.Envelope.PrincipalId!, TimeProvider.System);
-        var execution = (global::KeyLoad.GraphTraversal)new GrainCoreReadCapabilities(database.Database).Execute(GrainReadKind.Traverse,
-            principal.Id, request.Payload, CancellationToken.None)!;
+        await using var owner = new RequestWorkOwner();
+        object? read = null;
+        await KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundCoreOwner.LeaseAsync(database, owner, (lease, _, work) =>
+        {
+            read = GrainCoreReadCapabilities.Execute(database.Database, GrainReadKind.Traverse, principal.Id,
+                request.Payload, work, lease, null);
+            return Task.CompletedTask;
+        }, CancellationToken.None);
+        var execution = (global::KeyLoad.GraphTraversal)read!;
         await Assert.That(execution.Vertices.SequenceEqual(original.Vertices)).IsTrue();
         await Assert.That(execution.Edges.SequenceEqual(original.Edges)).IsTrue();
         await Assert.That(execution.Vertices.Length).IsEqualTo(onlyNull ? 1 : 2);

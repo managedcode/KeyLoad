@@ -19,7 +19,7 @@ internal sealed class SqlTopicRetentionOperationTests
         var decoded = SqlOperationTestData.Compile(SqlOperationTestData.Call("keyload_documents_commit", arguments));
         await Assert.That(decoded.CommandKind).IsEqualTo(OperationKind.Batch);
         await Assert.That(decoded.CommandId).IsEqualTo(command.CommandId);
-        var payload = OrleansSerialization.Deserialize<CommandRequest>(decoded.Payload.Span);
+        var payload = ((CommandRequest)decoded.Payload);
         await Assert.That(payload.Mutations.Single()).IsEqualTo(new PurgeTopic("topic", 2, 1));
         var coordinator = new EmbeddedCoordinator(fixture.Database);
         var receipt = (await coordinator.RuntimeSubmitAsync(OperationKind.Batch, decoded.CommandId, "root", decoded.Payload))

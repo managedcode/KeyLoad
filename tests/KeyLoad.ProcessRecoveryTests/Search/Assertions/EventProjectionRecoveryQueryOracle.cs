@@ -34,7 +34,7 @@ internal static class EventProjectionRecoveryQueryOracle
     internal static async Task AssertChangedPayloadConflictsAsync(ZoneTreeStore store, DatabaseEngine database,
         Command<DatabaseCommand> operation, CommitReceipt receipt)
     {
-        var command = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var command = ((CommandRequest)operation.Value!.Input);
         var projection = (ApplyVectorProjection)command.Mutations.Single();
         var changed = projection with
         {

@@ -68,7 +68,7 @@ internal static class CompositionBoundReferenceFlow
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
         var work = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
         var operation = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
+            owner.Database.EvaluationClock.GetUtcNow(), request, work);
         var receipt = new CommitReceipt(request.CommandId, owner.NextToken(), expectedMutations, DurabilityProfile.ProcessDurable, 1);
         await A.ReceiptAsync(receipt, owner.Submit(operation).Get<CommitReceipt>());
         return new(request, operation, receipt, derived, authorityReferences);

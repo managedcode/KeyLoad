@@ -31,7 +31,7 @@ internal static class OnlineTextProgressFrames
                 await OnlineTextProgress.WriteAsync(writer, accounting, requestId, phase);
             }
             // Opaque terminal bytes are only a execution CQRS grammar control, never an online maintenance result.
-            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = new byte[] { ControlPayload } });
+            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(new byte[] { ControlPayload }) });
         }, TestContext.Current!.Execution.CancellationToken);
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
         await foreach (var frame in stream)

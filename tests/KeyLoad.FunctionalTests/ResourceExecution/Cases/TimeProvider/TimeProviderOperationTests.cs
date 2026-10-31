@@ -84,6 +84,6 @@ internal sealed class TimeProviderOperationTests
 
     private static Task<Result<object>> SubmitAsync(EmbeddedCoordinator coordinator, CommandRequest command, bool execution)
         => execution
-            ? coordinator.RuntimeSubmitAsync(OperationKind.Batch, command.CommandId, Root, OrleansSerialization.Serialize(command))
+            ? coordinator.RuntimeSubmitAsync(OperationKind.Batch, command.CommandId, Root, command)
             : coordinator.SubmitAsync(OperationKind.Batch, command.CommandId, Root, JsonSerializer.Serialize(command, JsonDefaults.Options));
 }

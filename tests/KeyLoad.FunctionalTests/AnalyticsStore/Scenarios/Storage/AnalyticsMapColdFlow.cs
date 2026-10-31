@@ -21,7 +21,7 @@ internal static class AnalyticsMapColdFlow
             await O.EqualAsync(expected, owner.Source.Submit(OperationKind.Batch, request, id: id).Get<CommitReceipt>());
             var original = owner.Source.ReadStoredOutcome(id).PreparedCommand
                 ?? throw new InvalidOperationException("The original execution analytics command was not retained.");
-            var decoded = OrleansSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
+            var decoded = ((CommandRequest)(original).Value!.Input);
             await O.EqualAsync(request, decoded);
             await Assert.That(decoded.Mutations.Single()).IsTypeOf<UpsertAnalyticsEvents>();
             await AnalyticsMapColdReads.VerifyAsync(owner, events, token);

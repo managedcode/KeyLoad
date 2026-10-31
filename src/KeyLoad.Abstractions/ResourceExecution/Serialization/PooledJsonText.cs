@@ -12,7 +12,9 @@ internal static class PooledJsonText
     private static readonly ArrayPool<byte> Buffers = ArrayPool<byte>.Create(
         MaximumRetainedArrayBytes, MaximumArraysPerBucket);
 
-    public static T Deserialize<T>(string value)
+    public static T Deserialize<T>(string value) => (T)Deserialize(value, typeof(T));
+
+    public static object Deserialize(string value, Type type)
     {
         ArgumentNullException.ThrowIfNull(value);
         var byteCount = Encoding.UTF8.GetByteCount(value);
@@ -20,7 +22,7 @@ internal static class PooledJsonText
         try
         {
             var written = Encoding.UTF8.GetBytes(value.AsSpan(), buffer);
-            return JsonDefaults.Deserialize<T>(buffer.AsSpan(0, written));
+            return JsonDefaults.Deserialize(buffer.AsSpan(0, written), type);
         }
         finally
         {

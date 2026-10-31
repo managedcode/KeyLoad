@@ -66,6 +66,6 @@ internal static class DocumentPatchAtomicityTrial
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, owner.Source.Partition, [.. mutations]);
         return owner.Database.CreateCommand(OperationKind.Batch, id, Root,
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            owner.Database.EvaluationClock.GetUtcNow(), request);
     }
 }

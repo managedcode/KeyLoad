@@ -14,7 +14,6 @@ public sealed class GrainRoutingOptions
     internal const string MaximumExecutionLifetime = "00:02:00";
     private const int MaximumFrameCount = 128;
     private const int MaximumReplyBytesCeiling = 16_777_216;
-    private const int MaximumInitialReplyBufferBytes = 4_096;
     private const int MaximumStartedBytesCeiling = 8_192;
     private const int MaximumFailedBytesCeiling = 65_536;
     private const int MaximumCompletedBytesCeiling = 16_842_752;
@@ -40,9 +39,6 @@ public sealed class GrainRoutingOptions
 
     /// <summary>Gets or sets the encoded capability reply bytes.</summary>
     public int MaximumReplyBytes { get; set; } = MaximumReplyBytesCeiling;
-
-    /// <summary>Gets or sets the initial encoded capability reply buffer reservation.</summary>
-    public int InitialReplyBufferBytes { get; set; } = MaximumInitialReplyBufferBytes;
 
     /// <summary>Gets or sets the execution started chunk bytes.</summary>
     public int MaximumStartedBytes { get; set; } = MaximumStartedBytesCeiling;
@@ -78,7 +74,6 @@ public sealed class GrainRoutingOptions
         && MaximumStreamFrames is >= 1 and <= MaximumFrameCount
         && IsBounded(ConnectionIdleTimeout)
         && MaximumReplyBytes is >= 1 and <= MaximumReplyBytesCeiling
-        && InitialReplyBufferBytes is >= 1 and <= MaximumInitialReplyBufferBytes
         && MaximumStartedBytes is >= 1 and <= MaximumStartedBytesCeiling
         && MaximumFailedBytes is >= 1 and <= MaximumFailedBytesCeiling
         && MaximumCompletedBytes is >= 1 and <= MaximumCompletedBytesCeiling

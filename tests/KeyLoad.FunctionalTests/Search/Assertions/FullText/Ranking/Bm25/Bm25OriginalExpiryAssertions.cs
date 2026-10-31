@@ -9,8 +9,8 @@ internal static class Bm25OriginalExpiryAssertions
 {
     internal static async Task PhaseAsync(Command<DatabaseCommand> original, Command<DatabaseCommand> actual)
         => await ReplayResultAssertions.BytesAsync(
-            OrleansSerialization.Serialize(OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span)),
-            OrleansSerialization.Serialize(OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((actual).Value!.Input.Span)));
+            OrleansSerialization.Serialize(((Bm25CorpusPublicationPhaseCommand)(original).Value!.Input)),
+            OrleansSerialization.Serialize(((Bm25CorpusPublicationPhaseCommand)(actual).Value!.Input)));
 
     internal static string[] Family(Bm25OriginalPhaseRecoveryFlow flow)
     {

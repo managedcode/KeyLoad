@@ -18,7 +18,6 @@ internal sealed class GrainRequestEnvelopeWireTests
     [Test]
     public async Task EnvelopeRetainsEveryIdentityFieldAndExactTypedPayload()
     {
-        var payload = OrleansSerialization.Serialize(PayloadJson);
         var envelope = new GrainRequestEnvelope
         {
             Purpose = GrainContracts.RequestPurpose,
@@ -26,7 +25,7 @@ internal sealed class GrainRequestEnvelopeWireTests
             Incarnation = Guid.Parse(IncarnationIdentifier),
             PrincipalId = Principal,
             ReadKind = GrainReadKind.Document,
-            Payload = payload,
+            Payload = PayloadJson,
             ExpiresAt = new DateTimeOffset(ExpiryYear, FirstDay, FirstDay, 0, 0, 0, TimeSpan.FromHours(OffsetHours))
         };
         var encoded = OrleansSerialization.Serialize(envelope);
@@ -39,7 +38,7 @@ internal sealed class GrainRequestEnvelopeWireTests
         await Assert.That(decoded.ReadKind).IsEqualTo(envelope.ReadKind);
         await Assert.That(decoded.CommandKind).IsNull();
         await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
-        await Assert.That(decoded.Payload.Span.SequenceEqual(payload)).IsTrue();
+        await Assert.That(decoded.Payload).IsEqualTo(PayloadJson);
         await Assert.That(decoded.ExpiresAt).IsEqualTo(envelope.ExpiresAt);
         await Assert.That(decoded.ExpiresAt.Offset).IsEqualTo(envelope.ExpiresAt.Offset);
     }
@@ -50,10 +49,10 @@ internal sealed class GrainRequestEnvelopeWireTests
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
-        var payload = OrleansSerialization.Serialize(new GetDocumentRequest(new(fixture.Partition, Principal, Principal)));
+        var payload = new GetDocumentRequest(new(fixture.Partition, Principal, Principal));
         var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.Document, payload);
         var request = codec.DecodeRead(envelope, requestId);
-        await Assert.That(request.Payload.Span.SequenceEqual(payload)).IsTrue();
+        await Assert.That(request.Payload).IsEqualTo(payload);
         await Assert.That(request.Envelope.RequestId).IsEqualTo(requestId);
         await Assert.That(envelope.Incarnation).IsEqualTo(fixture.Store.Identity.Incarnation);
         await Assert.That(envelope.PrincipalId).IsEqualTo(Principal);
@@ -61,18 +60,15 @@ internal sealed class GrainRequestEnvelopeWireTests
     }
 
     [Test]
-    [Arguments(true)]
-    [Arguments(false)]
-    public async Task DefaultOrEmptyPayloadIsRejectedAtTheRealScopeBoundary(bool missing)
+    public async Task MissingPayloadIsRejectedAtTheRealScopeBoundary()
     {
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
-        var invalid = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(NoDtoMarker)) with
+        var invalid = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NoDtoMarker) with
         {
-            Payload = missing ? default : ReadOnlyMemory<byte>.Empty
+            Payload = null!
         };
-        await Assert.That(invalid.Payload.IsEmpty).IsTrue();
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.DecodeRead(invalid, requestId)).Code)
             .IsEqualTo(ErrorCode.TokenInvalidated);
     }
@@ -83,7 +79,7 @@ internal sealed class GrainRequestEnvelopeWireTests
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
-        var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(NoDtoMarker)) with
+        var envelope = codec.CreateRead(requestId, Principal, GrainReadKind.QueryCapabilities, NoDtoMarker) with
         {
             Purpose = UnsupportedPurpose
         };

@@ -1,5 +1,7 @@
 using System.Text.Json;
 
+using KeyLoad.Clustering;
+
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
 internal sealed class ClusterStartupEvidenceTests
@@ -94,7 +96,7 @@ internal sealed class ClusterStartupEvidenceTests
             await Assert.That(replay.Error).IsNull();
             await Assert.That(ConnectionAssertions.Value<CommitReceipt>(original).CommandId)
                 .IsEqualTo(command.CommandId);
-            await Assert.That(original.Payload.Span.SequenceEqual(replay.Payload.Span)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(original)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(replay)))).IsTrue();
             var read = await scenario.ReadAsync(principal, Guid.NewGuid(), Document, token);
             await Assert.That(read.Error).IsNull();
             var document = ConnectionAssertions.Value<DocumentResult>(read);

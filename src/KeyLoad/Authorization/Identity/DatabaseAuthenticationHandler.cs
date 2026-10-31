@@ -24,7 +24,7 @@ internal sealed class DatabaseAuthenticationHandler(IOptionsMonitor<Authenticati
         }
         else
         {
-            principal = McpAuthentication.ReadPrincipal(reply.Span,
+            principal = McpAuthentication.ReadPrincipal(reply,
                 Context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>(), Context.RequestAborted);
         }
         Context.Features.Set(new DatabaseAuthenticatedPrincipal(principal));

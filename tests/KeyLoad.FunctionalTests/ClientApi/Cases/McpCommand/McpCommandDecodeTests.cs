@@ -100,9 +100,9 @@ internal sealed class McpCommandDecodeTests
             {
                 [McpCanonicalTestData.RequestKey] = document.RootElement
             });
-            copiedWhileDocumentWasAlive = decoded.Payload.ToArray();
+            copiedWhileDocumentWasAlive = OrleansSerialization.Serialize(decoded.Payload);
         }
-        await Assert.That(decoded.Payload.Span.SequenceEqual(copiedWhileDocumentWasAlive)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(decoded.Payload).AsSpan().SequenceEqual(copiedWhileDocumentWasAlive)).IsTrue();
         var actual = await McpPayloadAssertions.AssertFullPublicPayload(item, decoded.Payload);
         await Assert.That(((CommandRequest)actual).CommandId).IsEqualTo(item.CommandId);
     }

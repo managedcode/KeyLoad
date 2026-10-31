@@ -118,7 +118,7 @@ internal static class ConnectionCloseAdmissionFlow
             var replay = await ConnectionAwaitedSettlementCalls.CommandForOwnerAsync(scenario, second, Guid.NewGuid(),
                 command, ownerId, token);
             await Assert.That(replay.Error).IsNull();
-            await Assert.That(replay.Payload.Span.SequenceEqual(created.Payload.Span)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(replay)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(created)))).IsTrue();
             await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(position);
         }
         catch (Exception primary) when (global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(primary))

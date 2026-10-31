@@ -19,7 +19,7 @@ internal static class LocalInboxProcessingRecoveryReceipt
         var inbox = store.Read(view => view.GetRecord<InboxRecord>(LocalInboxProcessingRecoveryImage.InboxKey()))!;
         await Assert.That(string.IsNullOrEmpty(inbox.Fingerprint)).IsFalse();
         await LocalInboxProcessingRecoveryImage.ExactAsync(inbox.Receipt, receipt);
-        var request = OrleansSerialization.Deserialize<ProcessingRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var request = ((ProcessingRequest)operation.Value!.Input);
         for (var ordinal = 0; ordinal < request.Effects.Length; ordinal++)
         {
             var sequence = seedTail + ordinal + 1L;

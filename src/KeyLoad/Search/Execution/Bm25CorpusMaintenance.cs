@@ -38,7 +38,7 @@ internal static class Bm25CorpusMaintenance
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, Bm25CorpusProtocol.Administrator);
         }
-        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(verified.Value!.Input.Span);
+        var phase = OperationProtocol.Payload<Bm25CorpusPublicationPhaseCommand>(verified);
         var actual = partition.Database.CreateVerifiedBm25CorpusPublication(verified.UserId!, phase, work);
         var principal = partition.Database.Store.Read(view => partition.Database.Principal(
             work.CreateView(view), actual.UserId!, partition.Database.EvaluationClock.GetUtcNow()));

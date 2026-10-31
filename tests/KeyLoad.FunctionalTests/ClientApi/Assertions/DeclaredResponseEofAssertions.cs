@@ -22,7 +22,7 @@ internal static class DeclaredResponseEofAssertions
         await Assert.That(operation.CommandId).IsEqualTo(command.CommandId);
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(operation.UserId!).IsEqualTo(principal.Id);
-        await EqualAsync(command, OrleansSerialization.Deserialize<CommandRequest>((operation).Value!.Input.Span));
+        await EqualAsync(command, ((CommandRequest)(operation).Value!.Input));
         var expected = new CommitReceipt(command.CommandId, new(placement.Incarnation, command.Partition.AtomicPartitionId, entry.CanonicalSequence), [new(PutKind, ConnectionProtocol.Collection, Document, Revision)], DurabilityProfile.ProcessDurable, 2);
         await EqualAsync(expected, original);
         await Assert.That(original!.Mutations.All(value => value.CompositionReferences.IsEmpty)).IsTrue();

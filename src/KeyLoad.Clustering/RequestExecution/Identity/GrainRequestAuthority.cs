@@ -65,7 +65,7 @@ internal static class GrainRequestAuthority
         return principal;
     }
 
-    internal static PrincipalRecord Authenticate(DatabaseEngine database, ReadOnlyMemory<byte> payload, TimeProvider clock)
+    internal static PrincipalRecord Authenticate(DatabaseEngine database, object payload, TimeProvider clock)
     {
         try
         {

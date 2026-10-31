@@ -23,7 +23,7 @@ internal static class OnlineTextRequestEnvelopes
             PrincipalId = verified.UserId,
             CommandKind = verified.Value!.Kind,
             CommandId = verified.CommandId,
-            Payload = GrainPayload.Copy(OrleansSerialization.Serialize(verified)),
+            Payload = GrainPayload.Strict(verified),
             ExpiresAt = expiry
         };
     }
@@ -35,7 +35,7 @@ internal static class OnlineTextRequestEnvelopes
         RequireExpiry(now, lifetime, expiry);
         return GrainRequestEnvelopeConstruction.Read(requestId, scope.Incarnation,
             principal, GrainReadKind.OnlineTextMaintenance,
-            GrainPayload.Copy(OrleansSerialization.Serialize(request)), expiry)
+            GrainPayload.Strict(request), expiry)
             with
         {
             Purpose = OnlineTextRequestScope.Purpose
@@ -48,7 +48,7 @@ internal static class OnlineTextRequestEnvelopes
         RequireExpiry(now, lifetime, expiry);
         return GrainRequestEnvelopeConstruction.Read(actor, scope.Incarnation, principal,
             GrainReadKind.ProjectionBatch,
-            GrainPayload.Copy(OrleansSerialization.Serialize(request)), expiry)
+            GrainPayload.Strict(request), expiry)
             with
         {
             Purpose = OnlineTextRequestScope.Purpose
@@ -61,7 +61,7 @@ internal static class OnlineTextRequestEnvelopes
         RequireExpiry(now, lifetime, expiry);
         return GrainRequestEnvelopeConstruction.Command(actor, scope.Incarnation, principal,
             OperationKind.CommitProjectionBatch, request.CommandId,
-            GrainPayload.Copy(OrleansSerialization.Serialize(request)), expiry)
+            GrainPayload.Strict(request), expiry)
             with
         {
             Purpose = OnlineTextRequestScope.Purpose

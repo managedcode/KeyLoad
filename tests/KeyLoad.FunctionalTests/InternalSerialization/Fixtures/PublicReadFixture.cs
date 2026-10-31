@@ -40,17 +40,17 @@ internal static class PublicReadFixture
     internal static ErrorCode Code(PublicQueryShape shape)
         => shape == PublicQueryShape.InValues ? ErrorCode.UnsupportedCapability : ErrorCode.Validation;
 
-    internal static ReadOnlyMemory<byte> Encode<T>(T value, GrainReadKind kind)
+    internal static object Encode<T>(T value, GrainReadKind kind) where T : notnull
     {
         // These are real public MCP JSON arguments; only the internal forwarded value becomes execution.
         var arguments = new Dictionary<string, JsonElement>
         {
             [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(value, JsonDefaults.Options)
         };
-        return McpArgumentDecoder.Read<T>(arguments, kind, UnitMcpOptions.CanonicalPayloadBytes).Payload;
+        return McpArgumentDecoder.Read<T>(arguments, kind).Payload;
     }
 
-    internal static ReadOnlyMemory<byte> Encode(AstQueryRequest query, GrainReadKind kind)
+    internal static object Encode(AstQueryRequest query, GrainReadKind kind)
         => kind switch
         {
             GrainReadKind.AstQuery => Encode<AstQueryRequest>(query, kind),
@@ -59,7 +59,7 @@ internal static class PublicReadFixture
             _ => throw new ArgumentOutOfRangeException(nameof(kind))
         };
 
-    internal static DecodedGrainRequest Signed(TestDatabase database, ReadOnlyMemory<byte> payload, GrainReadKind kind,
+    internal static DecodedGrainRequest Signed(TestDatabase database, object payload, GrainReadKind kind,
         string principal = AuthorityFixture.Root)
     {
         var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
@@ -69,8 +69,13 @@ internal static class PublicReadFixture
     internal static async Task<object> ExecuteQueryAsync(TestDatabase database, DecodedGrainRequest request)
     {
         var principal = GrainRequestAuthority.Reload(database.Database, request.Envelope.PrincipalId!, TimeProvider.System);
-        return await new GrainQueryReadCapabilities(new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()), new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()),
-            TimeProvider.System).ExecuteAsync(request.Envelope.ReadKind!.Value, principal.Id,
-            request.Payload, CancellationToken.None).ConfigureAwait(false);
+        var capabilities = new GrainQueryReadCapabilities(new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()),
+            new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()), TimeProvider.System);
+        await using var owner = new RequestWorkOwner();
+        object? result = null;
+        await KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundCoreOwner.LeaseAsync(database, owner, async (lease, _, _) =>
+            result = await capabilities.ExecuteAsync(request.Envelope.ReadKind!.Value, principal.Id, request.Payload, lease,
+                CancellationToken.None).ConfigureAwait(false), CancellationToken.None).ConfigureAwait(false);
+        return result!;
     }
 }

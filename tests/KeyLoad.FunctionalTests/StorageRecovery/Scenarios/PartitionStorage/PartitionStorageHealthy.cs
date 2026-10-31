@@ -14,14 +14,14 @@ internal static class PartitionStorageHealthy
         var definition = new ConfigureResourceRequest(P.Partition.TenantId, P.Partition.DatabaseId,
             new(P.Collection, ResourceKind.Collection, P.Partition.TransactionDomainId));
         var configured = await owner.Coordinator.RuntimeSubmitAsync(OperationKind.ConfigureResource,
-            P.Configure, P.Root, OrleansSerialization.Serialize(definition), cancellationToken: token).ConfigureAwait(false);
+            P.Configure, P.Root, definition, cancellationToken: token).ConfigureAwait(false);
         await Assert.That(Errors.Code(configured.Problem).Value).IsNull();
         await Assert.That(JsonDefaults.Serialize(configured.Get<ResourceDefinition>()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(definition.Definition))).IsTrue();
         await owner.Coordinator.ReadBarrierAsync(token).ConfigureAwait(false);
         var before = PartitionStorageReplay.ReadCut(source);
         var reply = await owner.Coordinator.RuntimeSubmitAsync(OperationKind.Batch, P.Command, P.Root,
-            OrleansSerialization.Serialize(P.Request()), cancellationToken: token).ConfigureAwait(false);
+            P.Request(), cancellationToken: token).ConfigureAwait(false);
         var expected = new CommitReceipt(P.Command,
             new(owner.Database.Store.Identity.Incarnation, P.Partition.AtomicPartitionId,
                 checked(before.AppliedPosition + P.CanonicalStep)),
@@ -41,7 +41,7 @@ internal static class PartitionStorageHealthy
         var before = PartitionStorageReplay.ReadCut(source);
         var owner = source.GetRequiredService<PartitionHostApplicationOwner>().Borrow();
         var reply = await owner.Coordinator.RuntimeSubmitAsync(OperationKind.Batch, P.Command, P.Root,
-            OrleansSerialization.Serialize(P.Request()), cancellationToken: token).ConfigureAwait(false);
+            P.Request(), cancellationToken: token).ConfigureAwait(false);
         await RequireReceiptAsync(reply, original.Receipt).ConfigureAwait(false);
         await PartitionStorageReplay.RequireOriginalAsync(source, original, token).ConfigureAwait(false);
         await PartitionStorageReplay.RequireUnchangedCutAsync(source, before, token).ConfigureAwait(false);

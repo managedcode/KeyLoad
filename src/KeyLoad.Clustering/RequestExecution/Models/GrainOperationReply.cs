@@ -4,9 +4,9 @@ namespace KeyLoad.Clustering;
 [Orleans.GenerateSerializer, Orleans.Alias(GrainRoutingProtocol.ReplyAlias)]
 public sealed record GrainOperationReply
 {
-    /// <summary>Execution GrainValue for a successful operation; empty for a failure.</summary>
-    [Orleans.Id(0)]
-    public ReadOnlyMemory<byte> Payload
+    /// <summary>Generated Orleans value for a successful operation; absent for a failure.</summary>
+    [Orleans.Id(4)]
+    public GrainValue? Result
     {
         get; init;
     }

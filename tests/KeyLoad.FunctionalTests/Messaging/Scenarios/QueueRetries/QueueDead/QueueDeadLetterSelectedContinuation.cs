@@ -99,7 +99,7 @@ internal static class QueueDeadLetterSelectedContinuation
     {
         foreach (var saved in history.Where(saved => saved.Operation.Value!.Kind == OperationKind.Processing))
         {
-            var processing = OrleansSerialization.Deserialize<ProcessingRequest>(saved.Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)!;
+            var processing = ((ProcessingRequest)saved.Operation.Value!.Input)!;
             var id = ((PutDocument)processing.Effects[QueueDeadLetterSelectedProtocol.Zero]).Id;
             await EffectsAsync(database, store, processing, id, saved.Result.Get<CommitReceipt>(), documentLifetime);
         }

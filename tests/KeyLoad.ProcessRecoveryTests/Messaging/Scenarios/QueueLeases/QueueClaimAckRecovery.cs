@@ -128,12 +128,12 @@ internal static class QueueClaimAckRecovery
         await Assert.That(target.Position).IsGreaterThan(0L);
         if (ack)
         {
-            await QueueClaimAckRecoveryAssertions.EqualAsync(OrleansSerialization.Deserialize<DeliveryCommand>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements),
+            await QueueClaimAckRecoveryAssertions.EqualAsync(((DeliveryCommand)operation.Value!.Input),
                 new DeliveryCommand(operation.CommandId, QueueClaimAckCrashProtocol.Lane, delivery!.Token, DeliveryAction.Ack));
         }
         else
         {
-            await QueueClaimAckRecoveryAssertions.EqualAsync(OrleansSerialization.Deserialize<ReceiveRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements), new ReceiveRequest(operation.CommandId,
+            await QueueClaimAckRecoveryAssertions.EqualAsync(((ReceiveRequest)operation.Value!.Input), new ReceiveRequest(operation.CommandId,
                 QueueClaimAckCrashProtocol.Lane, MaxMessages: 1, LeaseSeconds: QueueClaimAckCrashProtocol.LeaseSeconds));
         }
     }

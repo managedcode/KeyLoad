@@ -11,7 +11,7 @@ internal static class QueryHostedSearchRead
         QueryHostedSearchDataset data, Guid requestId, CancellationToken token)
     {
         var envelope = node.Codec.CreateRead(requestId, data.Principal.Id, GrainReadKind.DistributedSearch,
-            OrleansSerialization.Serialize(data.Request));
+            data.Request);
         var local = node.Services.GetRequiredService<ILocalSiloDetails>();
         using var identity = new GrainRequestIdentityScope(node.Services, data.Principal, requestId,
             Guid.Empty, token, placement: local.SiloAddress, connectionId: node.ConnectionId);
@@ -29,7 +29,7 @@ internal static class QueryHostedSearchRead
         {
             throw Errors.Fail(error, reply.SafeDetail ?? "The execution search returned an error.");
         }
-        return OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DistributedSearchPage
+        return GrainReplyFactory.RequireValue(reply).Value as DistributedSearchPage
             ?? throw new InvalidOperationException("The execution search returned no page.");
     }
 }

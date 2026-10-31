@@ -112,7 +112,7 @@ internal static class SubscriptionProcessingAtomicFlow
         }
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(db, group, 3, 3, 3);
         await SubscriptionCheckpointAuthorityAssertions.NoWindowAsync(store, group);
-        var receive = OrleansSerialization.Deserialize<ReceiveSubscriptionRequest>(claim.Value!.Input.Span, ValidationProfile.PublicInputElements)
+        var receive = ((ReceiveSubscriptionRequest)claim.Value!.Input)
             ?? throw new InvalidOperationException("The original Receive request is absent.");
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, store, receive, originalClaim, token);
         await SecondColdAsync(db, store, directory, group, failed, failure, failureBytes, receipts, ackReceipts, receive, originalClaim, source, originalOwner, token);

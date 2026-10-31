@@ -12,7 +12,6 @@ namespace KeyLoad.Clustering;
 internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, IServiceProvider services,
     TimeProvider runtimeClock, GrainRequestCodec codec, IGrainContext context)
 {
-    private readonly GrainCoreReadCapabilities core = new(localDatabase);
     private GrainQueryReadCapabilities? query;
     private GrainQueryReadCapabilities Query => query ??= new(services.GetRequiredService<QueryEngine>(),
         services.GetRequiredService<SearchEngine>(), runtimeClock);
@@ -27,7 +26,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (kind == GrainReadKind.Authenticate)
         {
             return request.Envelope.Purpose == AdministratorAuthenticationProtocol.Purpose
-                ? (true, ((object?)(AdministratorAuthenticationRead.Execute(localDatabase, runtimeClock, codec.ExecutionOptions,
+                ? (true, ((object?)(AdministratorAuthenticationRead.Execute(localDatabase, runtimeClock,
                     request, binding, cancellationToken))))
                 : (true, ((object?)(GrainRequestAuthority.Authenticate(localDatabase, request.Payload, runtimeClock))));
         }
@@ -54,9 +53,9 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return ((object?)(await UserAnalyticsReadExecution.ExecuteAsync(localDatabase, services, principal, kind, request,
                 binding, cancellationToken).ConfigureAwait(true))) is { } outcomeValue5 ? (true, outcomeValue5) : (false, default(object?));
         }
-        if (GrainLifetimeReadCapabilities.Handles(kind))
+        if (kind is GrainReadKind.PartitionQueryLeaf or GrainReadKind.DistributedSearchLeaf)
         {
-            return (true, ((object?)(GrainLifetimeReadCapabilities.Execute(localDatabase, services, runtimeClock,
+            return (true, ((object?)(QueryLifetimeReadCapability.Execute(localDatabase, services, runtimeClock,
                 principal, request, binding, cancellationToken))));
         }
         if (GrainMaintenanceReadCapabilities.Handles(kind))
@@ -114,7 +113,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         {
             var budget = new ReadExecutionBudget(runtimeClock, cancellationToken);
             budget.ConstrainLifetime(request.Envelope.ExpiresAt);
-            return core.ExecuteBound(kind, principal.Id, request.Payload, budget, binding,
+            return GrainCoreReadCapabilities.Execute(localDatabase, kind, principal.Id, request.Payload, budget, binding,
                 kind == GrainReadKind.Stream ? services.GetRequiredService<PhysicalShardRecord>() : null);
         }
 

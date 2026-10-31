@@ -17,7 +17,7 @@ internal static class RequestCqrsTextMaintenanceFlow
         var token = operation.Token;
         var lifetime = await RequestCqrsTextResource.ConfigureAsync(fixture.Database, token);
         var request = (await RequestCqrsHostedMaintenanceData.RequestAsync(fixture.Database, token));
-        var payload = OrleansSerialization.Serialize(false);
+        var payload = false;
         var cut = fixture.Database.Store.Position;
         var bytes = KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         if (fault is not null)
@@ -34,16 +34,16 @@ internal static class RequestCqrsTextMaintenanceFlow
     }
 
     private static async Task<Observed> ConsumeAsync(RequestCqrsHostedRuntimeFixture fixture,
-        TextIndexMaintenanceRequest request, byte[] payload, RequestCqrsTextFault? fault, CancellationToken token)
+        TextIndexMaintenanceRequest request, bool payload, RequestCqrsTextFault? fault, CancellationToken token)
     {
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, TextMaintenanceTestValues.Principal,
-            OperationKind.MaintainTextIndex, request.CommandId, OrleansSerialization.Serialize(request));
+            OperationKind.MaintainTextIndex, request.CommandId, request);
         var purpose = new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id));
         var producer = new RequestCqrsProducerObservation();
         var kinds = new List<CqrsStreamChunkKind>();
         var phases = new List<TextIndexMaintenancePhase>();
-        ReadOnlyMemory<byte> final = default;
+        GrainValue? final = null;
         Exception? failure = null;
         var stream = CqrsStreamLifetime.RunWithPurpose(
             execution => RequestCqrsTextProducer.Run(id, payload, fault, producer, fixture.RoutingOptions.Value.MaximumStreamFrames, execution),
@@ -60,7 +60,7 @@ internal static class RequestCqrsTextMaintenanceFlow
                 }
                 if (chunk.Final?.Value is { } result)
                 {
-                    final = result.Payload;
+                    final = GrainReplyFactory.RequireValue(result);
                 }
             }
         }
@@ -75,5 +75,5 @@ internal static class RequestCqrsTextMaintenanceFlow
     }
 
     private sealed record Observed(CqrsStreamChunkKind[] Kinds, TextIndexMaintenancePhase[] Phases,
-        ReadOnlyMemory<byte> Payload, Exception? Error);
+        GrainValue? Result, Exception? Error);
 }

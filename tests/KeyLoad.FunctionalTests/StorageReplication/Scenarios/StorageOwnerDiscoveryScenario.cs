@@ -68,8 +68,8 @@ internal static class StorageOwnerDiscoveryScenario
     private static Task<Result<object>> SubmitAsync(RequestCqrsHostedRuntimeFixture node, Guid id, string document,
         CancellationToken token)
         => node.Database.Coordinator.RuntimeSubmitAsync(OperationKind.Batch, id, RequestCqrsHostedProfile.Root,
-            OrleansSerialization.Serialize(new CommandRequest(id, node.Database.Partition,
-                [new PutDocument(Collection, document, Json)])), cancellationToken: token);
+            new CommandRequest(id, node.Database.Partition,
+                [new PutDocument(Collection, document, Json)]), cancellationToken: token);
 
     private static async Task RequireCopiesAsync(RequestCqrsHostedCluster cluster, Guid creation, long sequence)
     {

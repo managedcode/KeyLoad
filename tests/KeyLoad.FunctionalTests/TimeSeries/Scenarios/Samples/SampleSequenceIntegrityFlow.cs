@@ -87,7 +87,7 @@ internal static class SampleSequenceIntegrityFlow
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Owner.Partition, [mutation]);
         var cut = fixture.ReadCanonicalCut();
         var issued = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, P.Principal,
-            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(command));
+            TimeProvider.System.GetUtcNow(), command);
         var result = fixture.Database.ApplyEmbedded(issued, token);
         var outcomeBytes = fixture.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.Key(issued)))
             ?? throw new InvalidOperationException(Missing);

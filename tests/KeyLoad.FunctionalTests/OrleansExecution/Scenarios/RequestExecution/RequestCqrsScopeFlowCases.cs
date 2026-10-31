@@ -62,7 +62,7 @@ internal static class RequestCqrsScopeFlowCases
                     fixture.Services.GetRequiredService<Serializer<
                         CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
                     requestId, TimeProvider.System, fixture.RoutingOptions, CancellationToken.None);
-                await Assert.That(reply.Payload.IsEmpty).IsFalse();
+                await Assert.That(reply.Result).IsNotNull();
                 await Assert.That(producerSawScope).IsTrue();
                 await AssertPublishedContextAsync(expectedState, principal.Id);
             }
@@ -97,7 +97,7 @@ internal static class RequestCqrsScopeFlowCases
             arrive();
             await bothReady.Task;
             var token = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.ConfigureResource, commandId,
-                OrleansSerialization.Serialize(0));
+                0);
             var result = await fixture.Grains.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId)
                 .ValidateAsync(token, requestId);
             await Assert.That(result.Accepted).IsTrue();
@@ -122,7 +122,7 @@ internal static class RequestCqrsScopeFlowCases
         try
         {
             await AssertPublishedContextAsync(expectedState, subject);
-            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = new byte[] { 1 } });
+            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(new byte[] { 1 }) });
         }
         finally
         {

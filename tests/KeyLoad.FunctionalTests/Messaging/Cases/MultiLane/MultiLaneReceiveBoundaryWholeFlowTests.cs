@@ -75,8 +75,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         const int replyCeiling = 1024;
         await using var fixture = new RequestCqrsHostedRuntimeFixture(routing: new GrainRoutingOptions
         {
-            MaximumReplyBytes = replyCeiling,
-            InitialReplyBufferBytes = replyCeiling
+            MaximumReplyBytes = replyCeiling
         });
         await fixture.InitializeAsync();
         var prefix = "large-receive-" + Guid.NewGuid().ToString("N");
@@ -123,7 +122,7 @@ internal sealed class MultiLaneReceiveBoundaryWholeFlowTests
         var state = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;
         var retry = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request);
-        await Assert.That(retry.Payload.Span.SequenceEqual(reply.Payload.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(retry)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(reply)))).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);
         await HealthyAsync(fixture);

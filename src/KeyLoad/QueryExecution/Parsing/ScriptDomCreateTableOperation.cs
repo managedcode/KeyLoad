@@ -4,7 +4,7 @@ internal static class ScriptDomCreateTableOperation
 {
     internal static McpDecodedOperation Compile(SqlOperationRequest request,
         global::Microsoft.SqlServer.TransactSql.ScriptDom.CreateTableStatement statement,
-        int maximumPayloadBytes, Action checkBudget, CancellationToken token)
+        Action checkBudget, CancellationToken token)
     {
         checkBudget();
         token.ThrowIfCancellationRequested();
@@ -15,12 +15,7 @@ internal static class ScriptDomCreateTableOperation
         }
         var identity = SqlOriginalMutationIdentity.Required(request.CommandId);
         var definition = ScriptDomCreateTableDefinition.Read(request.Partition, statement, checkBudget, token);
-        var arguments = new Dictionary<string, global::System.Text.Json.JsonElement>(StringComparer.Ordinal)
-        {
-            [McpCatalogProtocol.Request] = global::System.Text.Json.JsonSerializer.SerializeToElement(definition, JsonDefaults.Options),
-            [McpCatalogProtocol.CommandId] = global::System.Text.Json.JsonSerializer.SerializeToElement(identity, JsonDefaults.Options)
-        };
-        var operation = McpArgumentDecoder.HeaderCommand<CreateTableRequest>(arguments, OperationKind.CreateTable, maximumPayloadBytes);
+        var operation = new McpDecodedOperation(null, OperationKind.CreateTable, identity, definition);
         checkBudget();
         token.ThrowIfCancellationRequested();
         return operation;

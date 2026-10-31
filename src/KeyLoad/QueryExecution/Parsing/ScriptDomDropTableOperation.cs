@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Dom = Microsoft.SqlServer.TransactSql.ScriptDom;
 
 namespace KeyLoad.Server;
@@ -8,7 +7,7 @@ internal static class ScriptDomDropTableOperation
 {
     private const int EmptyCount = 0;
 
-    internal static McpDecodedOperation Compile(SqlOperationRequest request, Dom.DropTableStatement statement, int maximumPayloadBytes, Action checkBudget, CancellationToken token)
+    internal static McpDecodedOperation Compile(SqlOperationRequest request, Dom.DropTableStatement statement, Action checkBudget, CancellationToken token)
     {
         checkBudget();
         token.ThrowIfCancellationRequested();
@@ -20,13 +19,7 @@ internal static class ScriptDomDropTableOperation
         var identity = SqlOriginalMutationIdentity.Required(request.CommandId);
         var name = ScriptDomDropTableSyntax.Read(statement, checkBudget, token);
         var table = new DropTableRequest(request.Partition.TenantId, request.Partition.DatabaseId, name);
-        var arguments = new Dictionary<string, JsonElement>(StringComparer.Ordinal)
-        {
-            [McpCatalogProtocol.Request] = JsonSerializer.SerializeToElement(table, JsonDefaults.Options),
-            [McpCatalogProtocol.CommandId] = JsonSerializer.SerializeToElement(identity, JsonDefaults.Options)
-        };
-        var operation = McpArgumentDecoder.HeaderCommand<DropTableRequest>(arguments,
-            OperationKind.DropTable, maximumPayloadBytes);
+        var operation = new McpDecodedOperation(null, OperationKind.DropTable, identity, table);
         checkBudget();
         token.ThrowIfCancellationRequested();
         return operation;

@@ -22,7 +22,7 @@ internal static class CommandWorkAdmission
         }
         var operation = originalIntent ?? (CarriesVerifiedOperation(kind)
             ? database.OwnCommand(GrainPayload.Read<Command<DatabaseCommand>>(request.Payload))
-            : database.CreateCommand(kind, request.Envelope.CommandId, principal.Id, clock.GetUtcNow(), request.Payload, budget));
+            : database.CreateCommand(kind, request.Envelope.CommandId, principal.Id, clock.GetUtcNow(), GrainPayload.ReadCommandInput(kind, request.Payload), budget));
         if (operation.Value!.Kind != kind || operation.CommandId != request.Envelope.CommandId || operation.UserId != principal.Id)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);

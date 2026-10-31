@@ -14,7 +14,7 @@ internal static class SampleSequenceIntegrityRecovery
         var command = new CommandRequest(Guid.NewGuid(), fixture.Source.Owner.Partition,
             [SampleSequenceIntegrityFlow.Append()]);
         var issued = fixture.Database.CreateCommand(OperationKind.Batch, command.CommandId, P.Principal,
-            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(command));
+            TimeProvider.System.GetUtcNow(), command);
         var image = SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store);
         var cut = fixture.ReadCanonicalCut();
         var identity = KeyLoad.FunctionalTests.StorageRecovery.Assertions.ReadCutStoreStateAssertions.SnapshotIdentity(fixture.Store);
@@ -61,12 +61,12 @@ internal static class SampleSequenceIntegrityRecovery
         var expectedSequence = cut.AppliedPosition + 1;
         await Assert.That(recovered.CanonicalSequence).IsEqualTo(expectedSequence);
         await SampleSequenceIntegrityAssertions.EqualAsync(command,
-            OrleansSerialization.Deserialize<CommandRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements));
+            ((CommandRequest)original.Value!.Input));
         await Assert.That(original.CommandId).IsEqualTo(issued.CommandId);
         await Assert.That(original.UserId!).IsEqualTo(P.Principal);
         await Assert.That(original.Timestamp >= issued.Timestamp).IsTrue();
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.Batch);
-        await Assert.That(original.Value.Input.Span.SequenceEqual(issued.Value!.Input.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(original.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(issued.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
         var expected = new CommitReceipt(command.CommandId,
             new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, expectedSequence),
             [new("appendSamples", P.Set, P.Series, 3)], DurabilityProfile.ProcessDurable, 1);

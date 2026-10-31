@@ -101,7 +101,7 @@ internal static class StartedReadPolicyFlow
         await StartedReadPolicyAssertions.DocumentAsync(scenario, await scenario.ReadAsync(reader, healthyId, P.Document, token));
         var replay = await scenario.CommandAsync(writer, Guid.NewGuid(), command, token);
         await Assert.That(replay.Error).IsNull();
-        await Assert.That(replay.Payload.Span.SequenceEqual(receipt.Payload.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(replay)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(receipt)))).IsTrue();
         await ConnectionAssertions.SameOwnerAsync(scenario, requestId, healthyId, token);
         var current = scenario.Fixture.Database.Store.Read(view => view.ReadOwnedValue(
             OutcomeStoreOracle.PartitionKey(command.Partition, writer.Id, command.CommandId)))!;

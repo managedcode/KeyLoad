@@ -15,7 +15,7 @@ internal static class ConnectionFailureDiagnosticAssertions
         GrainOperationReply reply, EventSourceLogCapture capture, CancellationToken token)
     {
         await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(token);
-        await Assert.That(reply.Payload.IsEmpty).IsTrue();
+        await Assert.That(reply.Result).IsNull();
         await Assert.That(reply.SafeDetail).IsEqualTo(SafeUnavailable);
         var rows = capture.Messages.Where(row => row.Contains(RejectedPrefix + requestId,
             StringComparison.Ordinal)).ToArray();
@@ -41,7 +41,7 @@ internal static class ConnectionFailureDiagnosticAssertions
         var replay = await scenario.CommandAsync(principal, replayId, command, token);
         await Assert.That(replay.Error).IsNull();
         await Assert.That(replay.SafeDetail).IsEqualTo(original.SafeDetail);
-        await Assert.That(replay.Payload.Span.SequenceEqual(original.Payload.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(replay)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(original)))).IsTrue();
         await Assert.That(scenario.Fixture.Database.ReadCanonicalCut()).IsEqualTo(before);
         await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(position);
         await ConnectionAssertions.StoredAsync(scenario, "healthy-after-revocation",

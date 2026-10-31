@@ -20,7 +20,7 @@ internal static class Bm25ColdInvalidationTrial
         var result = flow.Publish(original);
         await flow.RequireHealthyAsync(original, result);
         var entry = OrleansSerialization.Serialize(flow.Owner.Entry(original.CommandId));
-        var head = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span).Current;
+        var head = ((Bm25CorpusPublicationPhaseCommand)(original).Value!.Input).Current;
         var rawHead = Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head);
         var tail = Tail(flow);
         var mutations = new (Command<DatabaseCommand> Operation, Result<object> Result, byte[] Entry)[4];
@@ -103,7 +103,7 @@ internal static class Bm25ColdInvalidationTrial
         var result = flow.Publish(fresh);
         await Assert.That(Errors.Code(result.Problem).Value).IsNull();
         await Assert.That(result.Get<CommitReceipt>().CommandId).IsEqualTo(fresh.CommandId);
-        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((fresh).Value!.Input.Span);
+        var phase = ((Bm25CorpusPublicationPhaseCommand)(fresh).Value!.Input);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(4L);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(1);
         await Assert.That(phase.Current.Statistics.TotalLength).IsEqualTo(2L);
@@ -116,9 +116,9 @@ internal static class Bm25ColdInvalidationTrial
             OrleansSerialization.Serialize(owner.Entry(fresh.CommandId)));
     }
 
-    private static Command<DatabaseCommand> Issue<T>(Bm25OriginalPhaseRecoveryFlow flow, OperationKind kind, Guid id, T payload)
+    private static Command<DatabaseCommand> Issue<T>(Bm25OriginalPhaseRecoveryFlow flow, OperationKind kind, Guid id, T payload) where T : notnull
         => flow.Owner.Database.CreateCommand(kind, id, "root",
-            flow.Owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(payload));
+            flow.Owner.Database.EvaluationClock.GetUtcNow(), payload);
 
     private static long Tail(Bm25OriginalPhaseRecoveryFlow flow)
         => flow.Owner.Database.GetOutboxStatus("root", flow.Owner.Source.Partition).Head.Tail;

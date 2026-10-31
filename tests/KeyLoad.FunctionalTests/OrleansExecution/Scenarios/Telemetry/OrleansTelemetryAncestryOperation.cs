@@ -16,7 +16,7 @@ internal static class OrleansTelemetryAncestryOperation
             fixture.Database.Partition);
         var reply = await RequestCqrsCommandStream.InvokeAsync(fixture, principal, requestId, commandId, command);
         await Assert.That(reply.Error).IsNull();
-        var receipt = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as CommitReceipt
+        var receipt = GrainReplyFactory.RequireValue(reply).Value as CommitReceipt
             ?? throw new InvalidOperationException(OrleansTelemetryAncestryProtocol.MissingReceipt);
         var entry = OutcomeStoreOracle.ReadStored(fixture.Database.Database, commandId,
             TestContext.Current!.Execution.CancellationToken);
@@ -30,7 +30,7 @@ internal static class OrleansTelemetryAncestryOperation
         var replay = await RequestCqrsCommandStream.InvokeAsync(fixture, principal,
             Guid.NewGuid(), commandId, command);
         await Assert.That(replay.Error).IsNull();
-        var replayReceipt = OrleansSerialization.Deserialize<GrainValue>(replay.Payload.Span).Value as CommitReceipt
+        var replayReceipt = GrainReplyFactory.RequireValue(replay).Value as CommitReceipt
             ?? throw new InvalidOperationException(OrleansTelemetryAncestryProtocol.MissingReceipt);
         await EqualAsync(expected, replayReceipt);
         await CurrentAsync(fixture, principal, creation, documents, commandId, expected);

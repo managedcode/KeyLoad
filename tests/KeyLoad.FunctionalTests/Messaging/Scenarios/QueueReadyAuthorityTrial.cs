@@ -117,7 +117,7 @@ internal static class QueueReadyAuthorityTrial
         var lane = new QueueLaneRef(fixture.Partition, "jobs");
         var id = Guid.NewGuid();
         var original = fixture.Database.CreateCommand(OperationKind.Receive, id, "worker", now.AddSeconds(2),
-            OrleansSerialization.Serialize(new ReceiveRequest(id, lane)));
+            new ReceiveRequest(id, lane));
         var input = OrleansSerialization.Serialize(original);
         var row = QueueReadyAuthorityFaultRow.Damage(fixture, lane, fault);
         var image = QueueWholeFlowStorage.Bytes(fixture.Store);

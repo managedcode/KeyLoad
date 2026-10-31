@@ -1,4 +1,3 @@
-using KeyLoad.InternalSerialization;
 using KeyLoad.Storage;
 using ManagedCode.Communication.Commands;
 
@@ -33,19 +32,19 @@ public static class CommandExecutionIdentity
     {
         ValidateDatabaseCommandIdentity(operation);
         var input = operation.Value!;
-        _ = OrleansSerialization.Deserialize(input.Input.Span, (DatabaseCommandInputTypes.OperationPayloadType(input.Kind)).Value ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand), ValidationProfile.PublicInputElements);
+        _ = DatabaseCommandInputTypes.Require(input.Kind, input.Input);
     }
 
     private static void ValidateDatabaseCommandIdentity(Command<DatabaseCommand> operation)
     {
         var input = operation.Value;
-        if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId) || operation.CommandType != DatabaseCommandType || operation.Timestamp.Kind != DateTimeKind.Utc || input is null || input.Input.IsEmpty || !Enum.IsDefined(input.Kind) || string.IsNullOrEmpty(input.Fingerprint) || input.Fingerprint.Length != FingerprintCharacters || input.Fingerprint.Any(character => !char.IsAsciiHexDigitLower(character)))
+        if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId) || operation.CommandType != DatabaseCommandType || operation.Timestamp.Kind != DateTimeKind.Utc || input is null || input.Input is null || !Enum.IsDefined(input.Kind) || string.IsNullOrEmpty(input.Fingerprint) || input.Fingerprint.Length != FingerprintCharacters || input.Fingerprint.Any(character => !char.IsAsciiHexDigitLower(character)))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidDatabaseCommand);
         }
     }
 
-    internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, ReadOnlyMemory<byte> input, string fingerprint, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
+    internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input, string fingerprint, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
     {
         var operation = Command<DatabaseCommand>.Create(DatabaseCommandType, new DatabaseCommand(kind, input, fingerprint), id);
         operation.UserId = principalId;

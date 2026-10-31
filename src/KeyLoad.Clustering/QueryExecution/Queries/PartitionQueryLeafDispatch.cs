@@ -1,7 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Query.QueryExecution;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
 
@@ -9,21 +8,19 @@ namespace KeyLoad.Clustering;
 internal sealed class PartitionQueryLeafDispatch(DatabaseEngine database, string principalId, IServiceProvider services,
     GrainRequestCodec codec, DecodedGrainRequest original)
 {
-    private readonly IGrainFactory grains = services.GetRequiredService<IGrainFactory>();
+    private readonly PartitionLeafCalls leaves = new(database, principalId, services, original);
 
     internal async Task<PartitionQueryPreparedLeaf> PrepareAsync(PartitionQueryLeafPlan plan,
         ReadExecutionBudgetReadGrant grant, ReadExecutionBudget parent, CancellationToken token)
     {
         parent.Check();
-        var source = CaptureMetadata(plan, grant, parent);
-        var target = grains.GetGrain<IPartitionQueryGrain>(PartitionQueryGrainIdentity.For(plan.Partition));
-        var selected = await target.ResolveOwnerAsync(database.Store.Identity.Incarnation, token).ConfigureAwait(true);
-        parent.Check();
-        if (selected.Address is null || selected.Owner is null || selected.Owner.PhysicalShardId == Guid.Empty
-            || selected.Owner.Incarnation != database.Store.Identity.Incarnation)
+        PartitionQueryLifetimeMetadata source;
+        using (parent.EnterReadGrant(grant))
         {
-            throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
+            source = leaves.CaptureMetadata(plan.Partition, plan.Request.Query.Collection, parent);
         }
+        var target = leaves.Target(plan.Partition);
+        var selected = await leaves.ResolveOwnerAsync(target, parent, token).ConfigureAwait(true);
         var downward = plan with
         {
             MaxReadBytes = grant.RemainingBytes,
@@ -33,44 +30,11 @@ internal sealed class PartitionQueryLeafDispatch(DatabaseEngine database, string
             source.Definition, source.Coverage, source.Principal);
         parent.ChargeBytes(OrleansSerialization.Measure(metadata));
         var childId = Guid.NewGuid();
-        var child = codec.CreatePartitionQueryLeaf(childId, principalId,
-            OrleansSerialization.Serialize(metadata), parent.ExpiresAt);
+        var child = codec.CreatePartitionQueryLeaf(childId, principalId, metadata, parent.ExpiresAt);
         parent.ChargeBytes(OrleansSerialization.Measure(child));
-        return new(childToken => RunAsync(target, selected.Address, selected.Owner, child, childId, childToken),
-            (result, childToken) => Complete(parent, grant, result, childToken));
-    }
-
-    private PartitionQueryLifetimeMetadata CaptureMetadata(PartitionQueryLeafPlan plan,
-        ReadExecutionBudgetReadGrant grant, ReadExecutionBudget parent)
-    {
-        using var scope = parent.EnterReadGrant(grant);
-        return database.WithQueryView(principalId, plan.Partition, plan.Request.Query.Collection,
-            Capability.None, (view, principal, definition) => new PartitionQueryLifetimeMetadata(definition,
-                parent.BindResourceLifetimes(view, plan.Partition, [definition]), principal), parent);
-    }
-
-    private async Task<PartitionQueryOwnedLeaf> RunAsync(IPartitionQueryGrain target, SiloAddress address,
-        PhysicalShardRecord owner, GrainRequestEnvelope child, Guid childId, CancellationToken token)
-    {
-        using var identity = GrainRequestIdentityScope.ForChild(services, original.Envelope,
-            childId, Guid.Empty, token);
-        var reply = await target.ExecuteAsync(address, child, token).ConfigureAwait(true);
-        token.ThrowIfCancellationRequested();
-        if (reply.Error is { } error)
-        {
-            throw Errors.Fail(error, reply.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);
-        }
-        var result = GrainPayload.Read<GrainValue>(reply.Payload).Value as PartitionQueryLeafResult
-            ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
-        return new(owner, result);
-    }
-
-    private static Task Complete(ReadExecutionBudget parent, ReadExecutionBudgetReadGrant grant,
-        PartitionQueryOwnedLeaf result, CancellationToken token)
-    {
-        token.ThrowIfCancellationRequested();
-        parent.ImportReadGrant(grant, result.Result.ReadBytes, result.Result.ExaminedRecords);
-        parent.Check();
-        return Task.CompletedTask;
+        return new(async childToken => new PartitionQueryOwnedLeaf(selected.Owner,
+                await leaves.RunAsync<PartitionQueryLeafResult>(target, selected.Address, child, childId, childToken).ConfigureAwait(true)),
+            (result, childToken) => PartitionLeafCalls.CompleteAsync(parent, grant, result.Result.ReadBytes,
+                result.Result.ExaminedRecords, childToken));
     }
 }

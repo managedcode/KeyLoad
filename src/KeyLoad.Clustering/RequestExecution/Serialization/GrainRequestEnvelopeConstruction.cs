@@ -1,10 +1,10 @@
 namespace KeyLoad.Clustering;
 
-/// <summary>Constructs owned request envelopes; the existing codec still validates and signs each result.</summary>
+/// <summary>Constructs owned request envelopes; the codec validates each result.</summary>
 internal static class GrainRequestEnvelopeConstruction
 {
     internal static GrainRequestEnvelope Read(Guid requestId, Guid incarnation, string? principalId,
-        GrainReadKind kind, ReadOnlyMemory<byte> payload, DateTimeOffset expiry)
+        GrainReadKind kind, object payload, DateTimeOffset expiry)
     {
         if (AnnProjectionObservationScope.Handles(kind))
         {
@@ -23,7 +23,7 @@ internal static class GrainRequestEnvelopeConstruction
     }
 
     internal static GrainRequestEnvelope Command(Guid requestId, Guid incarnation, string principalId,
-        OperationKind kind, Guid commandId, ReadOnlyMemory<byte> payload, DateTimeOffset expiry)
+        OperationKind kind, Guid commandId, object payload, DateTimeOffset expiry)
     {
         return new()
         {

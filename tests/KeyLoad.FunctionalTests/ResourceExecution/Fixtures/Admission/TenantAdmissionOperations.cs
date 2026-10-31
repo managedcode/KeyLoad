@@ -41,6 +41,6 @@ internal static class TenantAdmissionOperations
         var partition = principal == PrincipalA ? fixture.Partition : PartitionB(fixture);
         var request = new CommandRequest(commandId, partition, [new PutDocument(Collection, id, Body)]);
         return fixture.Database.CreateCommand(OperationKind.Batch, commandId, principal,
-            fixture.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            fixture.Database.EvaluationClock.GetUtcNow(), request);
     }
 }

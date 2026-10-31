@@ -37,11 +37,11 @@ internal sealed class TestDatabaseOriginalResourceCommands
         {
             if (payload.Kind == OperationKind.DropTable)
             {
-                var drop = OrleansSerialization.Deserialize<DropTableRequest>(payload.Input.Span);
+                var drop = ((DropTableRequest)payload.Input);
                 Record((drop.TenantId, drop.DatabaseId, drop.ResourceName), outcome.CanonicalSequence, null);
                 return;
             }
-            var request = OrleansSerialization.Deserialize<ConfigureResourceRequest>(payload.Input.Span);
+            var request = ((ConfigureResourceRequest)payload.Input);
             Record((request.TenantId, request.DatabaseId, request.Definition.Name), outcome.CanonicalSequence,
                 new(database.OwnCommand(command), request));
         }
@@ -54,7 +54,7 @@ internal sealed class TestDatabaseOriginalResourceCommands
             || outcome.PreparedCommand.UserId != command.UserId
             || outcome.PreparedCommand.Value!.Kind != command.Value!.Kind
             || outcome.PreparedCommand.Value.Fingerprint != command.Value.Fingerprint
-            || !outcome.PreparedCommand.Value.Input.Span.SequenceEqual(command.Value.Input.Span))
+            || !OrleansSerialization.Serialize(outcome.PreparedCommand.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(command.Value.Input, ValidationProfile.PublicInputElements).AsSpan()))
         {
             throw new InvalidOperationException(OriginalRequired);
         }

@@ -59,8 +59,8 @@ internal sealed class CanonicalOutcomeFixture
         var database = Source.CreateConfiguredDatabase(reopened);
         var id = Guid.NewGuid();
         _ = database.Apply(database.CreateCommand(OperationKind.Batch, id, AdminId, database.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(new CommandRequest(id, Partition,
-                [new PutDocument(ResourceName, "healthy-follow-up", "{}", 0)])))).Get<CommitReceipt>();
+            new CommandRequest(id, Partition,
+                [new PutDocument(ResourceName, "healthy-follow-up", "{}", 0)]))).Get<CommitReceipt>();
         await Assert.That(database.GetDocument(AdminId, new(Partition, ResourceName, "healthy-follow-up"))!.Json).IsEqualTo("{}");
         var retained = reopened.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(Partition, AdminId, CommandId)));
         var link = reopened.Read(view => view.ReadOwnedValue(KeySpace.OutcomeLocator(Partition, AdminId, CommandId)));

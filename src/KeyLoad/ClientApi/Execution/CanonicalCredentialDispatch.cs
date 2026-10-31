@@ -5,7 +5,7 @@ namespace KeyLoad.Server;
 internal static class CanonicalCredentialDispatch
 {
     internal static GrainRequestEnvelope Prepare(GrainRequestCodec codec, string credential, Guid requestId)
-        => codec.CreateRead(requestId, null, GrainReadKind.Authenticate, OrleansSerialization.Serialize(credential));
+        => codec.CreateRead(requestId, null, GrainReadKind.Authenticate, credential);
 
     internal static async Task<GrainOperationReply> ReadAsync(OrleansNode node, GrainRequestEnvelope envelope,
         ServerConnectionOperation connection, Guid requestId, Action? onStarted = null)

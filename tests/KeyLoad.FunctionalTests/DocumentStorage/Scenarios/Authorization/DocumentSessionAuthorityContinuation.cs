@@ -25,7 +25,7 @@ internal static class DocumentSessionAuthorityContinuation
         var request = new CommandRequest(id, fixture.Source.Partition,
             [new PutDocument(A.Collection, A.Id, A.Json, 1, ExplicitReplacement: true)]);
         var operation = fixture.Database.CreateCommand(OperationKind.Batch, id, A.Root,
-            fixture.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            fixture.Database.EvaluationClock.GetUtcNow(), request);
         var expected = new CommitReceipt(id, new(fixture.Store.Identity.Incarnation,
             fixture.Source.Partition.AtomicPartitionId, next), [new("putDocument", A.Collection, A.Id, 2)],
             DurabilityProfile.ProcessDurable, 1);

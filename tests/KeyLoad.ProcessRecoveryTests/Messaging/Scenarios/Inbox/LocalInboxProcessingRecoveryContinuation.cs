@@ -16,7 +16,7 @@ internal static class LocalInboxProcessingRecoveryContinuation
         Command<DatabaseCommand> original, Result<object> result, (byte[] Key, byte[] Value)[] originalRows, EntityRefLifetime lifetime)
     {
         var history = new List<(Command<DatabaseCommand>, Result<object>)> { (original, result) };
-        var request = OrleansSerialization.Deserialize<ProcessingRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var request = ((ProcessingRequest)original.Value!.Input);
         var duplicate = Operation(database, original, request with
         {
             CommandId = Guid.NewGuid()

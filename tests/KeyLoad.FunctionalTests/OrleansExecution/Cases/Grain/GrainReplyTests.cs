@@ -19,30 +19,39 @@ internal sealed class GrainReplyTests
     {
         var value = new QueryPage([new QueryRow(Entity, Revision, UserJson)], null, CutPosition, AccessPath);
         var reply = GrainReplyFactory.Value(value, UnitRoutingOptions.Routing(), CancellationToken.None);
-        var decoded = (QueryPage)OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value!;
+        var delivered = OrleansSerialization.Deserialize<GrainOperationReply>(OrleansSerialization.Serialize(reply));
+        var decoded = (QueryPage)GrainReplyFactory.RequireValue(delivered).Value!;
         await Assert.That(decoded.Rows.Single().Json).IsEqualTo(UserJson);
         await Assert.That(decoded.Rows.Single().EntityId).IsEqualTo(Entity);
         await Assert.That(decoded.Rows.Single().Revision).IsEqualTo(Revision);
         await Assert.That(decoded.CutPosition).IsEqualTo(CutPosition);
         await Assert.That(decoded.AccessPath).IsEqualTo(AccessPath);
-        await Assert.That(reply.Payload.Length).IsEqualTo(checked((int)OrleansSerialization.Measure(new GrainValue(value))));
+        await Assert.That(GrainReplyFactory.Measure(reply)).IsEqualTo((long)OrleansSerialization.Serialize(new GrainValue(value)).Length);
         await Assert.That(reply.Error).IsNull();
     }
 
     [Test]
-    public async Task ActualStreamAcceptsExactByteLimitAndRejectsOneByteLess()
+    public async Task ActualCounterAcceptsExactByteLimitAndRejectsOneByteLess()
     {
         var options = UnitRoutingOptions.Routing();
         var value = new GrainValue(new BackupReceipt(Entity, CutPosition));
         var expected = OrleansSerialization.Serialize(value);
-        using var exact = new GrainBoundedPayloadStream(expected.Length, options, CancellationToken.None);
-        OrleansSerialization.Serialize(value, exact);
-        await Assert.That(exact.Complete().SequenceEqual(expected)).IsTrue();
+        using var exact = new GrainCountingWriter(expected.Length, options, CancellationToken.None);
+        OrleansSerialization.SerializeToWriter(value, exact);
         await Assert.That(exact.Length).IsEqualTo((long)expected.Length);
-        using var shortBuffer = new GrainBoundedPayloadStream(expected.Length - OneByte, options, CancellationToken.None);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(value, shortBuffer));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        using var shortBuffer = new GrainCountingWriter(expected.Length - OneByte, options, CancellationToken.None);
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.SerializeToWriter(value, shortBuffer));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(shortBuffer.Length <= expected.Length - OneByte).IsTrue();
+        var exactOptions = UnitRoutingOptions.Routing(new() { MaximumReplyBytes = expected.Length });
+        var delivered = GrainReplyFactory.Value(value.Value, exactOptions, CancellationToken.None);
+        await Assert.That(GrainReplyFactory.Measure(delivered)).IsEqualTo((long)expected.Length);
+        var limited = UnitRoutingOptions.Routing(new() { MaximumReplyBytes = expected.Length - OneByte });
+        var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
+            GrainReplyFactory.Value(value.Value, limited, CancellationToken.None));
+        await Assert.That(rejected.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        await Assert.That(GrainReplyFactory.RequireValue(
+            GrainReplyFactory.Value(value.Value, exactOptions, CancellationToken.None)).Value).IsEqualTo(value.Value);
     }
 
     [Test]
@@ -50,30 +59,30 @@ internal sealed class GrainReplyTests
     {
         var value = new BackupReceipt(Entity, CutPosition);
         var reply = GrainReplyFactory.Operation(Result<object>.Succeed(value), UnitRoutingOptions.Routing(), CancellationToken.None);
-        await Assert.That(OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value).IsEqualTo(value);
+        await Assert.That(GrainReplyFactory.RequireValue(reply).Value).IsEqualTo(value);
         Assert.ThrowsExactly<ArgumentNullException>(() => Result<object>.Succeed((object)null!));
         var empty = GrainReplyFactory.Value(null, UnitRoutingOptions.Routing(), CancellationToken.None);
-        await Assert.That(OrleansSerialization.Deserialize<GrainValue>(empty.Payload.Span).Value).IsNull();
+        await Assert.That(GrainReplyFactory.RequireValue(empty).Value).IsNull();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
         var failure = GrainReplyFactory.Operation(Result<object>.Fail(Errors.Problem(ErrorCode.PermissionDenied, Detail)), UnitRoutingOptions.Routing(), cancellation.Token);
         await Assert.That(failure.Error).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(failure.SafeDetail).IsEqualTo(Detail);
-        await Assert.That(failure.Payload.Length).IsEqualTo(0);
+        await Assert.That(failure.Result).IsNull();
         await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() =>
             GrainReplyFactory.Operation(Result<object>.Succeed(value), UnitRoutingOptions.Routing(), cancellation.Token))).IsNotNull();
     }
 
     [Test]
-    public async Task CancelledStreamCannotWriteOrComplete()
+    public async Task CancelledCounterCannotWriteOrBorrowScratch()
     {
         var options = UnitRoutingOptions.Routing();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();
-        using var stream = new GrainBoundedPayloadStream(options.Value.MaximumReplyBytes, options, cancellation.Token);
+        using var stream = new GrainCountingWriter(options.Value.MaximumReplyBytes, options, cancellation.Token);
         await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() =>
-            OrleansSerialization.Serialize(new GrainValue(new BackupReceipt(Entity, CutPosition)), stream))).IsNotNull();
+            OrleansSerialization.SerializeToWriter(new GrainValue(new BackupReceipt(Entity, CutPosition)), stream))).IsNotNull();
         await Assert.That(stream.Length).IsEqualTo(0L);
-        await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() => stream.Complete())).IsNotNull();
+        await Assert.That(Assert.ThrowsExactly<OperationCanceledException>(() => stream.GetMemory())).IsNotNull();
     }
 }

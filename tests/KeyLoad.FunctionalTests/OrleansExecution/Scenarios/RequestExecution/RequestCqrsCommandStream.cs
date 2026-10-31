@@ -15,7 +15,7 @@ internal static class RequestCqrsCommandStream
         Guid requestId, Guid commandId, CommandRequest command, Func<Task>? beforeFirstPull = null)
     {
         var envelope = fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, commandId,
-            OrleansSerialization.Serialize(command));
+            command);
         return InvokeAsync(fixture, envelope, principal, requestId, commandId, CompletedSequence,
             beforeFirstPull: beforeFirstPull);
     }

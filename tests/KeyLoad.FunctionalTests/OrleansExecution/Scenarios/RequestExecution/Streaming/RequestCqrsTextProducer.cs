@@ -8,7 +8,7 @@ namespace KeyLoad.FunctionalTests.OrleansExecution;
 internal static class RequestCqrsTextProducer
 {
     internal static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Run(
-        Guid id, byte[] payload, RequestCqrsTextFault? fault, RequestCqrsProducerObservation observed, int maximumFrames,
+        Guid id, bool payload, RequestCqrsTextFault? fault, RequestCqrsProducerObservation observed, int maximumFrames,
         [EnumeratorCancellation] CancellationToken token)
     {
         var original = CqrsStream.Create<GrainRequestProgress, GrainOperationReply>(
@@ -27,7 +27,7 @@ internal static class RequestCqrsTextProducer
     }
 
     private static async ValueTask<Result<GrainOperationReply>> ProduceAsync(
-        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, Guid id, byte[] payload,
+        ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, Guid id, bool payload,
         RequestCqrsTextFault? fault, RequestCqrsProducerObservation observed, int maximumFrames)
     {
         try
@@ -48,7 +48,7 @@ internal static class RequestCqrsTextProducer
             {
                 await TextMaintenanceProgress.WriteAsync(writer, id, TextIndexMaintenancePhase.Completed);
             }
-            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = payload });
+            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(payload) });
         }
         finally { observed.MarkProducerSettled(writer.CancellationToken.IsCancellationRequested); }
     }

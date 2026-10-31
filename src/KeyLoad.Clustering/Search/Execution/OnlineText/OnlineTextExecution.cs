@@ -19,22 +19,7 @@ internal static class OnlineTextExecution
         var frames = new OnlineTextFrameAccounting(routing);
         var children = new OnlineTextChildCalls(parent, parentEnvelope, executeChild, abort,
             services, codec, diagnostics, frames, context, binding);
-        OnlineTextIndexMaintenanceResult result;
-        try
-        {
-            result = await OnlineTextParentFlow.RunAsync(children, request, frames, writer,
-                services.GetRequiredService<IOptions<TextIndexMaintenanceOptions>>().Value).ConfigureAwait(true);
-        }
-        catch (Exception primary)
-        {
-            try
-            {
-                await children.AbortAsync().ConfigureAwait(true);
-            }
-            catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
-            throw;
-        }
-        await children.AbortAsync().ConfigureAwait(true);
-        return result;
+        return await MaintenanceChildDispatch.RunThenAbortAsync(() => OnlineTextParentFlow.RunAsync(children, request, frames,
+            writer, services.GetRequiredService<IOptions<TextIndexMaintenanceOptions>>().Value), children.AbortAsync).ConfigureAwait(true);
     }
 }

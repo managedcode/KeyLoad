@@ -69,9 +69,9 @@ internal static class ConfigureResourceOriginalLifetimeFlow
             {
                 ExpectedSchemaVersion = previous?.SchemaVersion
             };
-            var payload = createTable
-                ? OrleansSerialization.Serialize(new CreateTableRequest(request.TenantId, request.DatabaseId, expected))
-                : OrleansSerialization.Serialize(request);
+            object payload = createTable
+                ? new CreateTableRequest(request.TenantId, request.DatabaseId, expected)
+                : request;
             original = fixture.Database.CreateCommand(createTable ? OperationKind.CreateTable : OperationKind.ConfigureResource,
                 Guid.NewGuid(), Subject, fixture.Database.EvaluationClock.GetUtcNow(), payload, work);
             var admitted = ResourceEffectAdmissionValidation.Read(original);

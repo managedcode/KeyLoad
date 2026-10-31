@@ -13,7 +13,7 @@ internal static class MultiLaneReceiveFlow
         => InvokeAsync(fixture, OperationKind.ReceiveAcrossLanes, request.RequestId, request, principal, token);
 
     internal static async Task<GrainOperationReply> InvokeAsync<T>(RequestCqrsHostedRuntimeFixture fixture,
-        OperationKind kind, Guid commandId, T request, string principalId, CancellationToken token)
+        OperationKind kind, Guid commandId, T request, string principalId, CancellationToken token) where T : notnull
     {
         var capture = MultiLaneReceiveFailureObservation.Get(fixture);
         var originalCount = capture.Count;
@@ -21,7 +21,7 @@ internal static class MultiLaneReceiveFlow
             fixture.Database.Database.EvaluationClock);
         var actor = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(actor, principal.Id, kind, commandId,
-            OrleansSerialization.Serialize(request));
+            request);
         using var identity = new GrainRequestIdentityScope(fixture.Services, principal,
             actor, commandId, token, connectionId: fixture.ConnectionId);
         var reply = await GrainRequestStreamConsumer.DrainAsync(
@@ -35,7 +35,7 @@ internal static class MultiLaneReceiveFlow
     }
 
     internal static MultiLaneReceiveResult Value(GrainOperationReply reply)
-        => OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as MultiLaneReceiveResult
+        => GrainReplyFactory.RequireValue(reply).Value as MultiLaneReceiveResult
             ?? throw new InvalidOperationException("The execution request returned no complete multi-lane outcome.");
 
     internal static QueueLaneRef[] Seed(RequestCqrsHostedRuntimeFixture fixture, int count)

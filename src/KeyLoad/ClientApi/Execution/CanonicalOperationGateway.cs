@@ -16,7 +16,7 @@ internal static class CanonicalOperationGateway
     /// <param name="cancellationToken">Cancels the caller's wait without asserting write rollback.</param>
     /// <returns>The exact canonical reply and actual execution identity.</returns>
     internal static Task<DispatchedOperationReply> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        OperationKind? commandKind, Guid commandId, object payload, CancellationToken cancellationToken)
         => readKind == GrainReadKind.FileMetadata || commandKind == OperationKind.FileMetadata
             ? throw Errors.Fail(ErrorCode.UnsupportedCapability, global::KeyLoad.Core.BlobStorage.FileStorageProtocol.BoundaryOnly)
             : ExecuteCoreAsync(context, readKind, commandKind, commandId, payload, cancellationToken);
@@ -31,12 +31,12 @@ internal static class CanonicalOperationGateway
         }
         var actual = await RuntimeExecuteAsync(context, query is null ? null : GrainReadKind.FileMetadata,
             mutation is null ? null : OperationKind.FileMetadata, mutation?.CommandId ?? Guid.Empty,
-            query is null ? OrleansSerialization.Serialize(mutation!) : OrleansSerialization.Serialize(query), token);
-        return OrleansSerialization.Deserialize<GrainValue>(actual.Reply.Payload.Span).Value;
+            query is null ? mutation! : query, token);
+        return GrainReplyFactory.RequireValue(actual.Reply).Value;
     }
 
     private static async Task<DispatchedOperationReply> ExecuteCoreAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        OperationKind? commandKind, Guid commandId, object payload, CancellationToken cancellationToken)
     {
         var execution = await RuntimeExecuteAsync(context, readKind, commandKind, commandId, payload,
             cancellationToken);
@@ -44,7 +44,7 @@ internal static class CanonicalOperationGateway
         var reply = execution.Reply;
         try
         {
-            var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span);
+            var value = GrainReplyFactory.RequireValue(reply);
             cancellationToken.ThrowIfCancellationRequested();
             return new(requestId, McpBoundedJson.Serialize((PublicReadResponse.Create(readKind, commandKind, value.Value)).Value,
                 context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
@@ -61,7 +61,7 @@ internal static class CanonicalOperationGateway
     }
 
     private static async Task<RuntimeDispatch> RuntimeExecuteAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        OperationKind? commandKind, Guid commandId, object payload, CancellationToken cancellationToken)
     {
         var actual = CanonicalOperationRequestPreparation.Create(context, readKind, commandKind,
             commandId, payload, cancellationToken);

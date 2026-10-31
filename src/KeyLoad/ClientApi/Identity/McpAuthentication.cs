@@ -7,7 +7,7 @@ internal static class McpAuthentication
 {
     internal const string InvalidReply = "The execution authentication reply is invalid.";
 
-    internal static McpFrameShape Inspect(ReadOnlySpan<byte> payload, IOptions<McpExecutionOptions> options,
+    internal static McpFrameShape Inspect(GrainValue payload, IOptions<McpExecutionOptions> options,
         CancellationToken cancellationToken)
         => Inspect(ReadPrincipal(payload, options, cancellationToken), options, cancellationToken);
 
@@ -15,18 +15,18 @@ internal static class McpAuthentication
         CancellationToken cancellationToken)
         => new McpAuthenticationProjection(true, options).Principal(principal, cancellationToken);
 
-    internal static PrincipalRecord ReadPrincipal(ReadOnlySpan<byte> payload, IOptions<McpExecutionOptions> options,
+    internal static PrincipalRecord ReadPrincipal(GrainValue payload, IOptions<McpExecutionOptions> options,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         options.Value.Validate();
-        if (payload.Length > options.Value.MaximumAuthenticationBytes)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
-        }
         try
         {
-            var value = OrleansSerialization.Deserialize<GrainValue>(payload).Value;
+            if (OrleansSerialization.Measure(payload) > options.Value.MaximumAuthenticationBytes)
+            {
+                throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
+            }
+            var value = payload.Value;
             cancellationToken.ThrowIfCancellationRequested();
             return value as PrincipalRecord ?? throw Errors.Fail(ErrorCode.Validation, InvalidReply);
         }

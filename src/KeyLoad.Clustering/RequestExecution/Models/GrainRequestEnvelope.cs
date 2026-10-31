@@ -46,9 +46,9 @@ public sealed record GrainRequestEnvelope
     {
         get; init;
     }
-    /// <summary>Exact execution typed operation payload.</summary>
+    /// <summary>The typed operation input, serialized once by Orleans with the envelope.</summary>
     [Orleans.Id(GrainContracts.PayloadField)]
-    public required ReadOnlyMemory<byte> Payload
+    public required object Payload
     {
         get; init;
     }

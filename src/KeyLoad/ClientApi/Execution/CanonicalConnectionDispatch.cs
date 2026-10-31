@@ -23,7 +23,7 @@ internal static class CanonicalConnectionDispatch
                 {
                     var reply = await node.ExecuteAsync(actual.RequestId, actual.Envelope, actual.Command,
                         connection.Token);
-                    var value = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value;
+                    var value = GrainReplyFactory.RequireValue(reply).Value;
                     connection.Token.ThrowIfCancellationRequested();
                     result = (PublicReadResponse.Create(operation.ReadKind, operation.CommandKind, value)).Value;
                 }, failures);

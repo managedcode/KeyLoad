@@ -11,7 +11,7 @@ internal static class TextMaintenanceParentFlow
     private static readonly string[] MutationKinds = [MutationDiscriminatorNames.PutDocument,
         MutationDiscriminatorNames.PatchDocument, MutationDiscriminatorNames.DeleteDocument];
 
-    internal static async Task<TextIndexMaintenanceResult> RunAsync(TextMaintenanceChildCalls children,
+    internal static async Task<TextIndexMaintenanceResult> RunAsync(MaintenanceChildCalls children,
         TextIndexMaintenanceRequest request, ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
         TextIndexMaintenanceOptions options, GrainRoutingOptions routing)
     {

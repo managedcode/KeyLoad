@@ -74,7 +74,7 @@ internal sealed class RevokedOutcomeAdmissionFixture : IDisposable
         Harness.Submit(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(principal)).Get<PrincipalRecord>();
     }
     internal Command<DatabaseCommand> Operation(CommandRequest command)
-        => Database.CreateCommand(OperationKind.Batch, command.CommandId, Worker, Epoch, OrleansSerialization.Serialize(command));
+        => Database.CreateCommand(OperationKind.Batch, command.CommandId, Worker, Epoch, command);
     internal CommandRequest Next() => new(Guid.NewGuid(), Harness.Partition,
         [new PutDocument(Documents, "c", "{\"value\":3}", 0),
          new AppendEvents(Events, "stream", [new("healthy", "Created", "{\"event\":2}")], ExpectedStreamRevision.Exact(1)),

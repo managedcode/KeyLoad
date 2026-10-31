@@ -41,9 +41,9 @@ internal sealed class InitialPrincipalEpochFixture : IDisposable
             expired ? DateTimeOffset.UnixEpoch : null);
     internal Command<DatabaseCommand> Configuration(long epoch)
         => Operation(OperationKind.ConfigurePrincipal, new ConfigurePrincipalRequest(Principal(epoch)));
-    internal Command<DatabaseCommand> Operation<T>(OperationKind kind, T payload, string principal = "root", Guid? id = null)
+    internal Command<DatabaseCommand> Operation<T>(OperationKind kind, T payload, string principal = "root", Guid? id = null) where T : notnull
         => Harness.Database.CreateCommand(kind, id ?? Guid.NewGuid(), principal,
-            Harness.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(payload));
+            Harness.Database.EvaluationClock.GetUtcNow(), payload);
     internal EntityRef Reference => new(Harness.Partition, Collection, "record");
     internal static byte[] Outcome(Command<DatabaseCommand> operation)
         => KeySpace.GlobalOutcome(operation.UserId!, operation.CommandId);

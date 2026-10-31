@@ -74,12 +74,11 @@ internal static class AdministratorAuthenticationRequests
             var envelope = codec.CreateAdministratorAuthentication(requestId, input);
             var reply = await AdministratorAuthenticationDispatch.SendAsync(node, requestId,
                 envelope, () => dispatched = true, token);
-            if (reply.Payload.IsEmpty || reply.Payload.Length > resultBytes)
+            if (reply.Result is null || GrainReplyFactory.Measure(reply) > resultBytes)
             {
                 throw Errors.Fail(ErrorCode.BudgetExceeded, AdministratorAuthenticationProtocol.BudgetExceeded);
             }
-            // Execution decoding validates the full bounded syntax before materializing the outer byte payload.
-            var value = GrainPayload.Read<GrainValue>(reply.Payload).Value
+            var value = GrainReplyFactory.RequireValue(reply).Value
                 as AdministratorAuthenticationResult
                 ?? throw Errors.Fail(ErrorCode.Corruption, AdministratorAuthenticationProtocol.Invalid);
             Require(value, codec.ExecutionOptions.Value.MaximumDetailCharacters);
@@ -90,8 +89,7 @@ internal static class AdministratorAuthenticationRequests
                 throw Errors.Fail(denied, value.SafeDetail!);
             }
             work.Check();
-            // The inner wire remains exactly the old principal grammar, admitted before retained principal decode.
-            principal = McpAuthentication.ReadPrincipal(value.PrincipalPayload.Span, options, token);
+            principal = McpAuthentication.ReadPrincipal(new GrainValue(value.Principal), options, token);
             GrainRequestAuthority.RequireAdministrator(principal);
             work.CheckResult(principal);
             work.Check();
@@ -114,9 +112,9 @@ internal static class AdministratorAuthenticationRequests
     private static void Require(AdministratorAuthenticationResult value, int maximumDetailCharacters)
     {
         if (value.ReadBytes < NoReadBytes || value.ExaminedRecords < NoExaminedRecords
-            || value.Error is { } error && (!Enum.IsDefined(error) || !value.PrincipalPayload.IsEmpty
+            || value.Error is { } error && (!Enum.IsDefined(error) || value.Principal is not null
                 || string.IsNullOrEmpty(value.SafeDetail) || value.SafeDetail.Length > maximumDetailCharacters)
-            || value.Error is null && (value.PrincipalPayload.IsEmpty || value.SafeDetail is not null))
+            || value.Error is null && (value.Principal is null || value.SafeDetail is not null))
         {
             throw Errors.Fail(ErrorCode.Corruption, AdministratorAuthenticationProtocol.Invalid);
         }

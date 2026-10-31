@@ -18,9 +18,9 @@ internal static class AnalyticsEntityLinkLifetimeFlow
         {
             await A.RowsAsync(fixture, original, 1, token);
             var retained = fixture.Owner.ReadOutcome(original).PreparedCommand;
-            await Assert.That(retained.Value!.Input.Span.SequenceEqual(original.Value!.Input.Span)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
             var payload = retained.Value!;
-            var input = OrleansSerialization.Deserialize<CommandRequest>(payload.Input.Span);
+            var input = ((CommandRequest)payload.Input);
             await A.EqualAsync(fixture.Plain, ((UpsertAnalyticsEvents)input.Mutations.Single()).Events.Single().Links.Single());
         });
         var bound = await CommitAsync(fixture, fixture.Bound, 1, token);
@@ -59,7 +59,7 @@ internal static class AnalyticsEntityLinkLifetimeFlow
             [new UpsertAnalyticsEvents(D.Store, [value], AnalyticsStoreTestOperations.Revisions((D.First, revision)))]);
         var work = new ReadExecutionBudget(owner.Database.EvaluationClock, token);
         return owner.Database.CreateCommand(OperationKind.Batch, id, D.Root, owner.Database.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(request), work);
+            request, work);
     }
 
     private static async Task<Command<DatabaseCommand>> CommitAsync(F fixture, EntityRef link, long revision, CancellationToken token)

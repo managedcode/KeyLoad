@@ -91,7 +91,7 @@ internal sealed class ProjectionProcessRecoveryTests
     private static async Task AssertRetryReceiptAsync(DatabaseEngine database, Command<DatabaseCommand> original,
         ProjectionBatchResult recovered)
     {
-        var request = OrleansSerialization.Deserialize<CommitProjectionBatchRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var request = ((CommitProjectionBatchRequest)original.Value!.Input);
         var retryId = Guid.NewGuid();
         var retried = database.Apply(database.CreateCommand(OperationKind.CommitProjectionBatch, retryId, "root", TimeProvider.System.GetUtcNow(), JsonSerializer.Serialize(request with
         {

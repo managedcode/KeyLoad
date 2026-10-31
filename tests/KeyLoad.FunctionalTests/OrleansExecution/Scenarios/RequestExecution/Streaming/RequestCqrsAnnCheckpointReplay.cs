@@ -18,7 +18,7 @@ internal static class RequestCqrsAnnCheckpointReplay
         var cut = fixture.Database.Store.Position;
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
-            OperationKind.CommitProjectionBatch, original.CommandId, OrleansSerialization.Serialize(original));
+            OperationKind.CommitProjectionBatch, original.CommandId, original);
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
         var connection = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
@@ -29,7 +29,7 @@ internal static class RequestCqrsAnnCheckpointReplay
             fixture.Services.GetRequiredService<Serializer<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>>(),
             id, fixture.Clock, fixture.RoutingOptions, token);
         await Assert.That(reply.Error).IsNull();
-        var replay = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as ProjectionBatchResult
+        var replay = GrainReplyFactory.RequireValue(reply).Value as ProjectionBatchResult
             ?? throw new InvalidOperationException();
         await Assert.That(OrleansSerialization.Serialize(replay).AsSpan().SequenceEqual(OrleansSerialization.Serialize(checkpoint))).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);

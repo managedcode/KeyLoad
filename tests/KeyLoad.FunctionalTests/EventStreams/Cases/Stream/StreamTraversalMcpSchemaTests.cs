@@ -58,7 +58,7 @@ internal sealed class StreamTraversalMcpSchemaTests
         await Assert.That(decoded.ReadKind).IsEqualTo(GrainReadKind.Stream);
         await Assert.That(decoded.CommandKind).IsNull();
         await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
-        var runtimeRequest = OrleansSerialization.Deserialize<ReadStreamRequest>(decoded.Payload.Span);
+        var runtimeRequest = ((ReadStreamRequest)decoded.Payload);
         await Assert.That(JsonDefaults.Serialize(runtimeRequest).AsSpan().SequenceEqual(JsonDefaults.Serialize(healthyRequest))).IsTrue();
         var result = fixture.Traverse(runtimeRequest);
         await StreamTraversalAssertions.PageAsync(result, [StreamTraversalTestProtocol.Second, StreamTraversalTestProtocol.First],

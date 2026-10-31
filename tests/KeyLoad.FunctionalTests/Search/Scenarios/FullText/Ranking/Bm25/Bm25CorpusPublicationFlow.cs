@@ -54,7 +54,7 @@ internal sealed class Bm25CorpusPublicationFlow(TestDatabase database)
             database.CreateReadWork(Token), UnitExecutionOptions.QueryExecution());
 
     internal static Bm25CorpusPublicationPhaseCommand Phase(Command<DatabaseCommand> operation)
-        => OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((operation).Value!.Input.Span);
+        => ((Bm25CorpusPublicationPhaseCommand)(operation).Value!.Input);
 
     internal CommitReceipt Publish(Command<DatabaseCommand> operation) => database.SubmitIssued(operation).Get<CommitReceipt>();
 

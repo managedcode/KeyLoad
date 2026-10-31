@@ -12,6 +12,7 @@ internal sealed class RuntimeJournalLifecycleTests
     private const string StaleProperty = "other";
     private const string TestOrigin = "test";
     private const string SiloA = "silo-a";
+    private const string ClaimedMetadataETag = "836cfdb997e2d59599eb1c6e5b1308c2959c23f15fbf703e1d1d3ea9467059ba";
     private const string ClosedValue = "true";
     private const string MembershipVersion = "2";
     private const string AdoptedCount = "3";
@@ -70,6 +71,7 @@ internal sealed class RuntimeJournalLifecycleTests
                 [RuntimeJournalProtocol.OwnerProperty] = SiloA
             })).Snapshot!;
         await Assert.That(claimed.OwnerGeneration).IsEqualTo(created.OwnerGeneration + 1);
+        await Assert.That(claimed.MetadataETag).IsEqualTo(ClaimedMetadataETag);
         var staleEtag = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.Run(() => fixture.Submit(
             RuntimeJournalFixture.Mutation(RuntimeJournalAction.UpdateMetadata, created, etag: created.MetadataETag,
                 set: new(StringComparer.Ordinal)

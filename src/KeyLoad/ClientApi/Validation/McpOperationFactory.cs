@@ -7,28 +7,30 @@ namespace KeyLoad.Server;
 internal static class McpOperationFactory
 {
     internal static McpOperationDescriptor Read<TRequest, TResult>(string name, string route, GrainReadKind kind,
-        bool nullableResult = false) =>
+        bool nullableResult = false) where TRequest : notnull =>
         Create(name, route, kind, null, typeof(TRequest), typeof(TResult), nullableResult, false, McpToolHints.ForRead(kind),
-            (arguments, limit) => McpArgumentDecoder.Read<TRequest>(arguments, kind, limit));
+            (arguments, _) => McpArgumentDecoder.Read<TRequest>(arguments, kind));
 
     internal static McpOperationDescriptor Read<TResult>(string name, string route, GrainReadKind kind,
         bool nullableResult = false) =>
         Create(name, route, kind, null, null, typeof(TResult), nullableResult, false, McpToolHints.ForRead(kind),
-            (arguments, limit) => McpArgumentDecoder.NoBody(arguments, kind, limit));
+            (arguments, _) => McpArgumentDecoder.NoBody(arguments, kind));
 
     internal static McpOperationDescriptor Command<TRequest, TResult>(string name, string route, OperationKind kind,
-        Func<TRequest, Guid> commandId)
+        Func<TRequest, Guid> commandId) where TRequest : notnull
     {
         ArgumentNullException.ThrowIfNull(commandId);
         return Create(name, route, null, kind, typeof(TRequest), typeof(TResult), false, false, McpToolHints.ForCommand(kind),
-            (arguments, limit) => McpArgumentDecoder.Command(arguments, kind, commandId, limit));
+            (arguments, _) => McpArgumentDecoder.Command(arguments, kind, commandId));
     }
 
-    internal static McpOperationDescriptor HeaderCommand<TRequest, TResult>(string name, string route, OperationKind kind) =>
+    internal static McpOperationDescriptor HeaderCommand<TRequest, TResult>(string name, string route, OperationKind kind)
+        where TRequest : notnull =>
         Create(name, route, null, kind, typeof(TRequest), typeof(TResult), false, true, McpToolHints.ForCommand(kind),
-            (arguments, limit) => McpArgumentDecoder.HeaderCommand<TRequest>(arguments, kind, limit));
+            (arguments, _) => McpArgumentDecoder.HeaderCommand<TRequest>(arguments, kind));
 
     internal static McpOperationDescriptor HeaderStatusCommand<TRequest>(string name, string route, OperationKind kind)
+        where TRequest : notnull
     {
         if (kind != OperationKind.ConfigureApiKey)
         {
@@ -37,7 +39,7 @@ internal static class McpOperationFactory
         return new(name, route, null, kind, McpToolDescriptions.For(name) + McpToolDescriptions.StableRetry,
             McpSchemaFactory.CreateInput(typeof(TRequest), true),
             McpSchemaFactory.CreateOutput(typeof(object), false, true), McpToolHints.ForCommand(kind),
-            (arguments, limit) => McpArgumentDecoder.HeaderCommand<TRequest>(arguments, kind, limit));
+            (arguments, _) => McpArgumentDecoder.HeaderCommand<TRequest>(arguments, kind));
     }
 
     private static McpOperationDescriptor Create(string name, string route, GrainReadKind? readKind, OperationKind? commandKind,

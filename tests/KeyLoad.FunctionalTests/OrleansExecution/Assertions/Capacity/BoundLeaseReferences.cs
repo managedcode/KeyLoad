@@ -13,7 +13,7 @@ internal static class BoundLeaseReferences
 
     internal static ResourceLifetime ExpectedLifetime(BoundLeaseSeeded state)
     {
-        var request = OrleansSerialization.Deserialize<ConfigureResourceRequest>(state.ResourceCreation.Value!.Input.Span);
+        var request = ((ConfigureResourceRequest)state.ResourceCreation.Value!.Input);
         return ResourceLifetimeIdentity.Create(state.ResourceCreation, request.TenantId, request.DatabaseId, request.Definition);
     }
 }

@@ -76,7 +76,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
         {
             throw new InvalidOperationException("The original BM25 phase command is required.");
         }
-        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(input.Input.Span);
+        var phase = ((Bm25CorpusPublicationPhaseCommand)input.Input);
         if (phase.CommandId != operation.CommandId || phase.Current.Partition != Source.Partition)
         {
             throw new InvalidOperationException("The original BM25 phase partition is inconsistent.");
@@ -89,7 +89,7 @@ internal sealed class Bm25OriginalPhaseRecoveryOwner
             || prepared.CommandId != operation.CommandId || prepared.UserId != operation.UserId
             || prepared.Value is not { } actual || actual.Kind != input.Kind
             || actual.Fingerprint != input.Fingerprint || stored.Fingerprint != input.Fingerprint
-            || !actual.Input.Span.SequenceEqual(input.Input.Span))
+            || !OrleansSerialization.Serialize(actual.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(input.Input, ValidationProfile.PublicInputElements).AsSpan()))
         {
             throw new InvalidOperationException("The exact original BM25 partition outcome is missing or inconsistent.");
         }

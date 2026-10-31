@@ -53,10 +53,10 @@ internal sealed class TextProtectedRebuildColdOwner : IDisposable
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal Retained Send<T>(OperationKind kind, T request, Guid? id = null)
+    internal Retained Send<T>(OperationKind kind, T request, Guid? id = null) where T : notnull
     {
         var operation = Database.CreateCommand(kind, id ?? Guid.NewGuid(), "root",
-            Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            Database.EvaluationClock.GetUtcNow(), request);
         var before = (TestDatabaseOriginalResourceCommands.Begin(Database, operation)).Value;
         var result = Database.ApplyEmbedded(operation, cancellationToken: default);
         originalResources.Observe(Database, operation, result, before);

@@ -88,7 +88,7 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsHostedRuntimeFix
         var state = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var position = fixture.Database.Store.Position;
         var replay = await MultiLaneReceiveFlow.ReceiveAsync(fixture, request, principal.Id);
-        await Assert.That(replay.Payload.Span.SequenceEqual(reply.Payload.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(replay)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(reply)))).IsTrue();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);
         await HealthyAsync();
@@ -118,7 +118,7 @@ internal sealed class MultiLaneReceiveWholeFlowTests(RequestCqrsHostedRuntimeFix
         var rejected = await MultiLaneReceiveFlow.ReceiveAsync(fixture, new(id, entries));
         await Assert.That(rejected.Error).IsEqualTo(kind is >= 4 and <= 5 ? ErrorCode.BudgetExceeded : ErrorCode.Validation);
         await Assert.That(rejected.SafeDetail).IsEqualTo(kind is >= 4 and <= 5 ? MultiLaneReceiveAdmission.Exceeded : MultiLaneReceiveAdmission.Invalid);
-        await Assert.That(rejected.Payload.IsEmpty).IsTrue();
+        await Assert.That(rejected.Result).IsNull();
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store)).IsEquivalentTo(state, CollectionOrdering.Matching);
         await HealthyAsync();

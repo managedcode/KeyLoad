@@ -19,9 +19,9 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
     {
         var requestId = Guid.NewGuid();
         var envelope = codec.CreateRuntimeJournalRead(requestId, GrainReadKind.RuntimeJournalCatalog,
-            OrleansSerialization.Serialize(GrainContracts.NoDtoMarker));
+            GrainContracts.NoDtoMarker);
         var reply = await SendAsync(null, requestId, Guid.Empty, envelope, cancellationToken);
-        var value = GrainPayload.Read<GrainValue>(reply.Payload).Value;
+        var value = GrainReplyFactory.RequireValue(reply).Value;
         return value switch
         {
             null => false,
@@ -37,7 +37,7 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
             Guid.Empty, InitialOwnerGeneration, InitialContentRevision, null, ReadOnlyMemory<byte>.Empty, new(StringComparer.Ordinal), []);
         var requestId = Guid.NewGuid();
         var envelope = codec.CreateRuntimeJournalCommand(requestId, administrator.Id, commandId,
-            OrleansSerialization.Serialize(mutation));
+            mutation);
         _ = await SendAsync(administrator, requestId, commandId, envelope, cancellationToken);
         if (!await TryVerifyAsync(cancellationToken))
         {

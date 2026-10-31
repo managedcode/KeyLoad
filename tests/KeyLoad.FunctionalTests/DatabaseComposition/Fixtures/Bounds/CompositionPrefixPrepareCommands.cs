@@ -12,8 +12,8 @@ internal static class CompositionPrefixPrepareCommands
         var request = new CommandRequest(Guid.NewGuid(), owner.Source.Partition, mutations);
         var work = new ReadExecutionBudget(owner.Database.EvaluationClock, owner.Token);
         var original = owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, principal,
-            evaluatedAt ?? owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
-        var decoded = OrleansSerialization.Deserialize<CommandRequest>((original).Value!.Input.Span);
+            evaluatedAt ?? owner.Database.EvaluationClock.GetUtcNow(), request, work);
+        var decoded = ((CommandRequest)(original).Value!.Input);
         return new(decoded, original, OrleansSerialization.Serialize(original), null, null, null, work);
     }
 

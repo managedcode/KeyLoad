@@ -31,7 +31,7 @@ internal static class RequestCqrsRoutingCases
         await Assert.That(firstReceipt.Mutations.Length).IsEqualTo(1);
         var firstReceiptBytes = OrleansSerialization.Serialize(firstReceipt);
         await AssertDocumentRevisionAsync(fixture, documentId, 1);
-        var firstPayload = firstReply.Payload.ToArray();
+        var firstPayload = OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(firstReply));
         var committedPosition = fixture.Database.Store.Position;
 
         var retryRequest = Guid.NewGuid();
@@ -45,7 +45,7 @@ internal static class RequestCqrsRoutingCases
             });
 
         await Assert.That(retryReply.Error).IsNull();
-        await Assert.That(retryReply.Payload.Span.SequenceEqual(firstPayload)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(retryReply)).AsSpan().SequenceEqual(firstPayload)).IsTrue();
         await Assert.That(OrleansSerialization.Serialize(ReadReceipt(retryReply))
             .SequenceEqual(firstReceiptBytes)).IsTrue();
         await AssertDocumentRevisionAsync(fixture, documentId, 1);
@@ -65,7 +65,7 @@ internal static class RequestCqrsRoutingCases
         var command = Command(commandId, fixture.Database.Partition, documentId);
         var requestId = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(requestId, writer.Id, OperationKind.Batch, commandId,
-            OrleansSerialization.Serialize(command));
+            command);
         var revoked = writer with
         {
             Revoked = true,
@@ -104,7 +104,7 @@ internal static class RequestCqrsRoutingCases
         var requestId = Guid.NewGuid();
         var command = Command(commandId, fixture.Database.Partition, documentId);
         var envelope = fixture.Codec.CreateCommand(requestId, writer.Id, OperationKind.Batch, commandId,
-            OrleansSerialization.Serialize(command));
+            command);
         var beforeMissing = fixture.Database.Store.Position;
         await RequestCqrsCommandStream.AssertPreStreamRefusalAsync(fixture, envelope, null, requestId,
             commandId, ErrorCode.TokenInvalidated);
@@ -118,7 +118,7 @@ internal static class RequestCqrsRoutingCases
         var forgedCommand = Command(forgedCommandId, fixture.Database.Partition,
             forgedDocumentId);
         var forgedToken = fixture.Codec.CreateCommand(forgedRequest, writer.Id, OperationKind.Batch, forgedCommandId,
-            OrleansSerialization.Serialize(forgedCommand));
+            forgedCommand);
         var beforeForged = fixture.Database.Store.Position;
         await RequestCqrsCommandStream.AssertPreStreamRefusalAsync(fixture, forgedToken, forged,
             forgedRequest, forgedCommandId, ErrorCode.Unauthenticated);
@@ -144,7 +144,7 @@ internal static class RequestCqrsRoutingCases
             [new PutDocument(RequestCqrsRoutingTests.Collection, documentId, RequestCqrsRoutingTests.DocumentJson)]);
 
     private static CommitReceipt ReadReceipt(GrainOperationReply reply)
-        => OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as CommitReceipt
+        => GrainReplyFactory.RequireValue(reply).Value as CommitReceipt
             ?? throw new InvalidOperationException("The command reply did not contain its canonical CommitReceipt.");
 
     private static async Task AssertDocumentMissingAsync(RequestCqrsHostedRuntimeFixture fixture, string id)

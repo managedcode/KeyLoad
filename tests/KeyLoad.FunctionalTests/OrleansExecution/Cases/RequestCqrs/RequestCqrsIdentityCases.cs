@@ -68,7 +68,7 @@ internal static class RequestCqrsIdentityCases
         var requestId = Guid.NewGuid();
         var state = new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId);
         var token = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
-            OrleansSerialization.Serialize(0));
+            0);
         using var context = RequestCqrsClientContext.Set(null, false, state);
         var result = await Probe(fixture, requestId, token);
         await Assert.That(result.Accepted).IsTrue();
@@ -80,7 +80,7 @@ internal static class RequestCqrsIdentityCases
     {
         var requestId = Guid.NewGuid();
         var token = fixture.Codec.CreateRead(requestId, null, GrainReadKind.Authenticate,
-            OrleansSerialization.Serialize(0));
+            0);
         var priorCalls = await ProbeGrain(fixture, requestId).CapabilityCallsAsync();
         using var context = RequestCqrsClientContext.Set(null, false,
             new GrainRequestContextState(requestId, Guid.Empty, fixture.ConnectionId), presentNullPrincipal: true);
@@ -127,7 +127,7 @@ internal static class RequestCqrsIdentityCases
 
         var authenticateId = Guid.NewGuid();
         var authenticate = fixture.Codec.CreateRead(authenticateId, null, GrainReadKind.Authenticate,
-            OrleansSerialization.Serialize(0));
+            0);
         using var forged = RequestCqrsClientContext.Set(principal, true,
             new GrainRequestContextState(authenticateId, Guid.Empty, fixture.ConnectionId));
         var rejected = await Probe(fixture, authenticateId, authenticate);
@@ -144,7 +144,7 @@ internal static class RequestCqrsIdentityCases
     }
 
     private static GrainRequestEnvelope IssuedRead(RequestCqrsHostedRuntimeFixture fixture, Guid requestId, string subject)
-        => fixture.Codec.CreateRead(requestId, subject, GrainReadKind.QueryCapabilities, OrleansSerialization.Serialize(0));
+        => fixture.Codec.CreateRead(requestId, subject, GrainReadKind.QueryCapabilities, 0);
 
     private static IRequestCqrsIdentityProbeGrain ProbeGrain(RequestCqrsHostedRuntimeFixture fixture, Guid requestId)
         => fixture.Grains.GetGrain<IRequestCqrsIdentityProbeGrain>(requestId);

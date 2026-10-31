@@ -61,7 +61,7 @@ internal static class SqlCompositionParameterAssertions
     internal static async Task OutboxAsync(SqlCompositionParameterFixture fixture)
     {
         var seed = fixture.Seed;
-        var command = OrleansSerialization.Deserialize<CommandRequest>(seed.Seed.Value!.Input.Span);
+        var command = ((CommandRequest)seed.Seed.Value!.Input);
         var expected = new List<OutboxEntry>
         {
             new(1L, 0, seed.SeedReceipt.Token, new DateTimeOffset(seed.Seed.Timestamp), command.Mutations[0], seed.SeedReceipt.Mutations[0], null, seed.First),

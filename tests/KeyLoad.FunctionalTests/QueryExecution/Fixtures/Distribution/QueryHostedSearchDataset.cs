@@ -35,7 +35,7 @@ internal sealed class QueryHostedSearchDataset(RequestCqrsHostedCluster cluster)
         };
         var resource = new ConfigureResourceRequest(First.TenantId, First.DatabaseId, definition);
         var creation = owner.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(),
-            RequestCqrsHostedProfile.Root, owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(resource));
+            RequestCqrsHostedProfile.Root, owner.Database.EvaluationClock.GetUtcNow(), resource);
         _ = (await owner.Coordinator.SubmitVerifiedAsync(creation, token).ConfigureAwait(false)).Get<ResourceDefinition>();
         Creation = ResourceLifetimeIdentity.Create(creation, resource.TenantId, resource.DatabaseId, definition);
         Principal = new(Reader, First.TenantId,

@@ -29,8 +29,7 @@ public static class OnlineTextCheckpointValidation
                 throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
             }
 
-            var payload = OrleansSerialization.Serialize(intent);
-            var fingerprint = DatabaseCommandFingerprint.Compute(intent.CommandId, OperationKind.CommitProjectionBatch, principal.Id, CommandExecutionExecution.Identity<CommitProjectionBatchRequest>(payload));
+            var fingerprint = DatabaseCommandFingerprint.Compute(intent.CommandId, OperationKind.CommitProjectionBatch, principal.Id, CommandExecutionExecution.Identity(intent));
             if (outcome.Fingerprint != fingerprint)
             {
                 throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.ChangedOriginal);

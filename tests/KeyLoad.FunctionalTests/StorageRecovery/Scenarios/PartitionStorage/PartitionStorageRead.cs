@@ -20,7 +20,7 @@ internal static class PartitionStorageRead
         var principal = database.Store.Read(view => database.Principal(view, P.Root, clock.GetUtcNow()));
         var requestId = Guid.NewGuid();
         var envelope = source.GetRequiredService<GrainRequestCodec>().CreateRead(requestId, principal.Id, GrainReadKind.Document,
-            OrleansSerialization.Serialize(new GetDocumentRequest(P.Reference(), minimum)));
+            new GetDocumentRequest(P.Reference(), minimum));
         var connectionId = source.GetRequiredService<ConnectionOwnerIdentity>().Id;
         using var scope = new GrainRequestIdentityScope(source, principal, requestId, Guid.Empty,
             token, connectionId: connectionId);
@@ -31,7 +31,7 @@ internal static class PartitionStorageRead
             requestId, clock, source.GetRequiredService<IOptions<GrainRoutingOptions>>(), token).ConfigureAwait(false);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(reply.SafeDetail).IsNull();
-        var actual = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentResult;
+        var actual = GrainReplyFactory.RequireValue(reply).Value as DocumentResult;
         var configured = database.Store.Read(view => view.GetRecord<StoredOutcome>(KeySpace.GlobalOutcome(P.Root, P.Configure)));
         await Assert.That(configured).IsNotNull();
         await Assert.That(configured!.PreparedCommand.CommandId).IsEqualTo(P.Configure);
@@ -39,7 +39,7 @@ internal static class PartitionStorageRead
         await Assert.That(Errors.Code(configured.Result.Problem).Value).IsNull();
         var definition = new ResourceDefinition(P.Collection, ResourceKind.Collection, P.Partition.TransactionDomainId);
         var expectedConfiguration = new ConfigureResourceRequest(P.Partition.TenantId, P.Partition.DatabaseId, definition);
-        var originalConfiguration = OrleansSerialization.Deserialize<ConfigureResourceRequest>(configured.PreparedCommand.Value.Input.Span);
+        var originalConfiguration = ((ConfigureResourceRequest)configured.PreparedCommand.Value.Input);
         await Assert.That(JsonDefaults.Serialize(originalConfiguration).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(expectedConfiguration))).IsTrue();
         var creation = ResourceLifetimeIdentity.Create(configured.PreparedCommand,

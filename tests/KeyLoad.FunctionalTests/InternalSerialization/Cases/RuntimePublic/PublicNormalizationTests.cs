@@ -13,9 +13,9 @@ internal sealed class PublicNormalizationTests
         // Strict DTO persistence rejects null elements; the public input retains its owning domain validation.
         await Assert.That(PublicNormalizationFixture.EncodingFailure(operation).Code).IsEqualTo(ErrorCode.Corruption);
         var normalized = database.Database.OwnCommand(operation);
-        await Assert.That(normalized.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(normalized.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
         var verified = database.Database.OwnCommand(normalized);
-        await Assert.That(verified.Value!.Input.IsEmpty).IsFalse();
+        await Assert.That((verified.Value!.Input is null)).IsFalse();
         await Assert.That(PublicNormalizationChecks.HasNullElement(verified, shape)).IsTrue();
         await Assert.That(verified.Value.Fingerprint).IsEqualTo(PublicNormalizationFixture.Fingerprint(operation));
 

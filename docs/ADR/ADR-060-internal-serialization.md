@@ -30,10 +30,17 @@ cryptography and archive formats retain their owning contracts. Binary map outpu
 is not a canonical identity. Unsupported application/storage versions fail before
 effects. No previous-format reader or automatic data conversion is introduced.
 
-MCP authentication uses the decoded generated `PrincipalRecord`. Existing byte
+Grain calls carry generated operation and result values directly. A result is
+not an encoded `GrainValue` buffer nested inside another generated Orleans
+message. Reply counting uses a bounded destination and retains no second encoded
+copy. Replaced byte fields are retired; typed fields use unused IDs without an
+alias, application-version or data-epoch increase.
+
+MCP authentication uses the typed generated `PrincipalRecord`. Existing byte
 limits, structural projection limits, cancellation and fresh persisted
 authorization remain enforced. It does not decode Orleans fields
-or construct an alternative principal from wire references.
+or construct an alternative principal from wire references. Administrator
+authentication returns its principal directly in the typed result.
 
 ## Acceptance
 

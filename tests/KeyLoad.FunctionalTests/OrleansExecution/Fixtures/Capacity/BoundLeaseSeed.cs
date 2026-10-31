@@ -13,7 +13,7 @@ internal static class BoundLeaseSeed
         var request = new ConfigureResourceRequest(K.Partition.TenantId, K.Partition.DatabaseId,
             new(K.Collection, ResourceKind.Collection, K.Partition.TransactionDomainId));
         _ = (await owner.Coordinator.RuntimeSubmitAsync(OperationKind.ConfigureResource, id, K.Root,
-            OrleansSerialization.Serialize(request), cancellationToken: token)).Get<ResourceDefinition>();
+            request, cancellationToken: token)).Get<ResourceDefinition>();
         var creation = OutcomeStoreOracle.ReadStored(owner.Database, id, token).PreparedCommand;
         var writeId = Guid.NewGuid();
         var write = new CommandRequest(writeId, K.Partition,
@@ -22,7 +22,7 @@ internal static class BoundLeaseSeed
         await owner.Coordinator.ReadBarrierAsync(token);
         var next = checked(owner.Database.LastApplied + K.NextIndex);
         var receipt = (await owner.Coordinator.RuntimeSubmitAsync(OperationKind.Batch, writeId, K.Root,
-            OrleansSerialization.Serialize(write), cancellationToken: token)).Get<CommitReceipt>();
+            write, cancellationToken: token)).Get<CommitReceipt>();
         var original = OutcomeStoreOracle.ReadStored(owner.Database, writeId, token).PreparedCommand;
         var physical = fixture.PhysicalServices.GetRequiredService<PhysicalShardRecord>();
         var expected = new CommitReceipt(writeId, new(physical.Incarnation, K.Partition.AtomicPartitionId, next),

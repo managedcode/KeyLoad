@@ -24,7 +24,7 @@ internal static class CommandResultWorkBinding
             var proof = RequireProof(request, reply);
             await BindCurrentAsync(database, coordinator, clock, request, proof, proof.Lifetimes,
                 work, binding, token).ConfigureAwait(true);
-            work.CheckResult(GrainPayload.Read<GrainValue>(reply.Payload).Value);
+            work.CheckResult(GrainReplyFactory.RequireValue(reply).Value);
             work.Check();
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
@@ -47,7 +47,7 @@ internal static class CommandResultWorkBinding
             var proof = RequireProof(request, reply);
             work.CheckResult(proof);
             binding.Bind(proof.Lifetimes);
-            work.CheckResult(GrainPayload.Read<GrainValue>(reply.Payload).Value);
+            work.CheckResult(GrainReplyFactory.RequireValue(reply).Value);
             work.Check();
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))

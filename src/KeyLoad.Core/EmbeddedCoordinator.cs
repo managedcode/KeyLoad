@@ -16,14 +16,14 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
 
     /// <inheritdoc />
     public Task<Result<object>> RuntimeSubmitAsync(OperationKind kind, Guid id, string principalId,
-        ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
+        object input, ReadExecutionBudget? sourcePlanningBudget = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
         var operation = sourcePlanningBudget is null
-            ? database.CreateCommand(kind, id, principalId, database.EvaluationClock.GetUtcNow(), payload)
-            : database.CreateCommand(kind, id, principalId, database.EvaluationClock.GetUtcNow(), payload, sourcePlanningBudget);
+            ? database.CreateCommand(kind, id, principalId, database.EvaluationClock.GetUtcNow(), input)
+            : database.CreateCommand(kind, id, principalId, database.EvaluationClock.GetUtcNow(), input, sourcePlanningBudget);
         return Task.FromResult(database.ApplyEmbedded(operation, cancellationToken));
     }
 

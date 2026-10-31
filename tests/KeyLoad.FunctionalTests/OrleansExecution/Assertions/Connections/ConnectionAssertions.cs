@@ -5,7 +5,7 @@ namespace KeyLoad.FunctionalTests.OrleansExecution;
 internal static class ConnectionAssertions
 {
     internal static T Value<T>(GrainOperationReply reply)
-        => OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value is T result ? result
+        => GrainReplyFactory.RequireValue(reply).Value is T result ? result
             : throw new InvalidOperationException(ConnectionProtocol.UnexpectedReply);
 
     internal static async Task StoredAsync(ConnectionScenario scenario, string id, long revision, string json)

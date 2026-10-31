@@ -13,7 +13,7 @@ internal static class RequestCqrsAnnInvocation
     {
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
-            OperationKind.MaintainAnnIndex, request.CommandId, OrleansSerialization.Serialize(request));
+            OperationKind.MaintainAnnIndex, request.CommandId, request);
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
         var frames = new List<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>();
@@ -27,7 +27,7 @@ internal static class RequestCqrsAnnInvocation
             new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         await Assert.That(reply.Error).IsNull();
         await Assert.That(reply.SafeDetail).IsNull();
-        var result = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as AnnMaintenanceResult
+        var result = GrainReplyFactory.RequireValue(reply).Value as AnnMaintenanceResult
             ?? throw new InvalidOperationException();
         if (retainedReplay)
         {
@@ -37,8 +37,9 @@ internal static class RequestCqrsAnnInvocation
         {
             await RequestCqrsAnnAssertions.FramesAsync(frames, request, id);
         }
-        await Assert.That(OrleansSerialization.Serialize(OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span))
-            .AsSpan().SequenceEqual(reply.Payload.Span)).IsTrue();
+        var delivered = OrleansSerialization.Deserialize<GrainOperationReply>(OrleansSerialization.Serialize(reply));
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(delivered))
+            .AsSpan().SequenceEqual(OrleansSerialization.Serialize(new GrainValue(result)))).IsTrue();
         return (result, reply);
     }
 

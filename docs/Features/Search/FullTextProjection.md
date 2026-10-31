@@ -90,3 +90,17 @@ Connection-owned maintenance Task children publish the existing request-start
 and producer-settlement observations while their signed child identity is bound.
 The original child Task and observations join before identity, cancellation and
 owned payload cleanup; observation failures preserve the original operation failure.
+
+## Open selected-generation qualification
+
+The current embedded selected-generation flow fails its second lookup after a
+successful first lookup. A bounded before/after inventory observed a change only
+to the native `execution/index1/0.json` metadata file. The protected physical
+inventory then refuses the changed digest. This also reproduces without Orleans;
+it is not evidence of corrupted document or posting data.
+
+[ZoneTree issue 209](https://github.com/ZoneTree/ZoneTree/issues/209) retains the
+published package/source identity, original operation flow and the clean-reopen
+metadata rewrite attribution. The existing integrity assertions remain active.
+Selected-generation recovery, release and performance qualification remain open;
+the issue report is not a delivered repair.

@@ -33,7 +33,7 @@ internal static class SqlParserAdmissionModels
         await RememberAsync(fixture, append, [new("appendEvents", Events, "source", 2L)]);
         var id = Guid.NewGuid();
         var compiled = Compile(db.Partition, id, Insert, CancellationToken.None);
-        var request = OrleansSerialization.Deserialize<CommandRequest>(compiled.Payload.Span);
+        var request = ((CommandRequest)compiled.Payload);
         await RequiredProcessingPolicyAssertions.EqualAsync(new CommandRequest(id, db.Partition, [new InsertTypedRow(Table, TypedJson)]), request);
         await RememberAsync(fixture, request, [new("putDocument", Table, "typed-row", 1L)]);
     }

@@ -39,7 +39,7 @@ internal static class ResourcePairBindingBm25
         await Assert.That(source.ReadCanonicalCut()).IsEqualTo(cut);
         ResourcePairBindingFlow.Repair(source.Store, damaged);
         var original = Capture(state, Root, token);
-        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>(original.Value!.Input.Span);
+        var phase = ((Bm25CorpusPublicationPhaseCommand)original.Value!.Input);
         await ResourceIncarnationAssertions.EqualAsync(new DistributedTextStatistics([CorpusTerm], One, One, [One]), phase.Current.Statistics);
         var expectedIndex = source.Store.Position + One;
         var canonical = source.Database.LastApplied;

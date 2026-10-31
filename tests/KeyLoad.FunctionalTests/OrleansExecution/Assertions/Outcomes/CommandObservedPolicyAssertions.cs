@@ -51,7 +51,7 @@ internal static class CommandObservedPolicyAssertions
         await Assert.That(operation.CommandId).IsEqualTo(request.RequestId);
         await Assert.That(operation.UserId!).IsEqualTo(P.Worker);
         _ = fixture.Database.Database.OwnCommand(operation);
-        await EqualAsync(request, OrleansSerialization.Deserialize<ReceiveRequest>((operation).Value!.Input.Span));
+        await EqualAsync(request, ((ReceiveRequest)(operation).Value!.Input));
         var expected = new ReceiveResult(request.RequestId,
             [new(messageId, P.Payload, ExpectedStoredHeadersJson, delivery.Token, P.Initial,
                 new DateTimeOffset(operation.Timestamp).AddSeconds(scenario.Resource.QueuePolicy.MaxLeaseSeconds),
@@ -62,11 +62,11 @@ internal static class CommandObservedPolicyAssertions
     }
 
     internal static T Value<T>(GrainOperationReply reply)
-        => OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value is T result
+        => GrainReplyFactory.RequireValue(reply).Value is T result
             ? result : throw new InvalidOperationException(P.WrongReply);
 
     internal static byte[] RuntimePayloadBytes(CommandObservedPolicyScenario scenario, ReceiveResult actual)
-        => scenario.Fixture.Database.ReadStoredOutcome(actual.RequestId).PreparedCommand.Value!.Input.ToArray();
+        => OrleansSerialization.Serialize(scenario.Fixture.Database.ReadStoredOutcome(actual.RequestId).PreparedCommand.Value!.Input, ValidationProfile.PublicInputElements);
 
     internal static async Task UnchangedAsync(CommandObservedPolicyScenario scenario,
         Guid commandId, Func<Task> execute, CancellationToken token)

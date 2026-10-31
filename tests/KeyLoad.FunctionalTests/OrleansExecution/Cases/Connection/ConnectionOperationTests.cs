@@ -1,3 +1,5 @@
+using KeyLoad.Clustering;
+
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
 internal sealed class ConnectionOperationTests
@@ -29,7 +31,7 @@ internal sealed class ConnectionOperationTests
             var retryId = Guid.NewGuid();
             var retried = await scenario.CommandAsync(principal, retryId, command, token);
             await Assert.That(retried.Error).IsNull();
-            await Assert.That(created.Payload.Span.SequenceEqual(retried.Payload.Span)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(created)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(retried)))).IsTrue();
             await ConnectionAssertions.StoredAsync(scenario, documentId, 1, ConnectionProtocol.FirstJson);
             var updateId = Guid.NewGuid();
             var update = scenario.Command(documentId, ConnectionProtocol.SecondJson, expectedRevision: 1);

@@ -49,12 +49,11 @@ internal sealed class McpReadDecodeTests
             var descriptor = Find(name);
             var absent = descriptor.Decode(null);
             var empty = descriptor.Decode(new Dictionary<string, JsonElement>(StringComparer.Ordinal));
-            await Assert.That(OrleansSerialization.Deserialize<int>(absent.Payload.Span)).IsEqualTo(0);
-            await Assert.That(empty.Payload.Span.SequenceEqual(absent.Payload.Span)).IsTrue();
+            await Assert.That(absent.Payload).IsEqualTo(0);
+            await Assert.That(empty.Payload).IsEqualTo(absent.Payload);
             await Assert.That(absent.CommandId).IsEqualTo(Guid.Empty);
             await Assert.That(absent.CommandKind).IsNull();
             await Assert.That(absent.ReadKind).IsEqualTo(descriptor.ReadKind);
-            await Assert.That(absent.Payload.Span.SequenceEqual(OrleansSerialization.Serialize(0))).IsTrue();
             await Assert.That(empty.CommandId).IsEqualTo(Guid.Empty);
             await Assert.That(empty.CommandKind).IsNull();
             await Assert.That(empty.ReadKind).IsEqualTo(descriptor.ReadKind);

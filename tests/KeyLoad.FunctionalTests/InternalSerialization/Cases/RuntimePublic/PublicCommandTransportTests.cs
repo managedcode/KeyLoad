@@ -48,11 +48,9 @@ internal sealed class PublicCommandTransportTests
         };
         if (operation.Value!.Kind == OperationKind.Batch)
         {
-            return McpArgumentDecoder.Command<CommandRequest>(arguments, operation.Value!.Kind, value => value.CommandId,
-                UnitMcpOptions.CanonicalPayloadBytes);
+            return McpArgumentDecoder.Command<CommandRequest>(arguments, operation.Value!.Kind, value => value.CommandId);
         }
         arguments[McpCatalogProtocol.CommandId] = JsonSerializer.SerializeToElement(operation.CommandId, JsonDefaults.Options);
-        return McpArgumentDecoder.HeaderCommand<ConfigurePrincipalRequest>(arguments, operation.Value!.Kind,
-            UnitMcpOptions.CanonicalPayloadBytes);
+        return McpArgumentDecoder.HeaderCommand<ConfigurePrincipalRequest>(arguments, operation.Value!.Kind);
     }
 }

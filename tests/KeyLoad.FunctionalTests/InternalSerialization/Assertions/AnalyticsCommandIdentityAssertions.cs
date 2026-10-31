@@ -23,7 +23,7 @@ internal static class AnalyticsCommandIdentityAssertions
 
     internal static async Task OrderAsync(Command<DatabaseCommand> operation, bool delete)
     {
-        var request = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span);
+        var request = ((CommandRequest)operation.Value!.Input);
         using var document = JsonSerializer.SerializeToDocument(request, JsonDefaults.Options);
         var work = new ReadExecutionBudget();
         await Assert.That(AnalyticsIdentity.Canonicalize(request, work))
@@ -116,16 +116,15 @@ internal static class AnalyticsCommandIdentityAssertions
             new ConfigureResourceRequest(database.Partition.TenantId, database.Partition.DatabaseId, definition));
     }
 
-    private static async Task RuntimeIdentityAsync<T>(DatabaseEngine database, OperationKind kind, Guid id, T request)
+    private static async Task RuntimeIdentityAsync<T>(DatabaseEngine database, OperationKind kind, Guid id, T request) where T : notnull
     {
         var identity = JsonSerializer.Serialize(request, JsonDefaults.Options);
         var operation = database.CreateCommand(kind, id, D.Root, database.EvaluationClock.GetUtcNow(), identity);
         var work = new ReadExecutionBudget(database.EvaluationClock,
             TestContext.Current!.Execution.CancellationToken);
-        var charged = database.CreateCommand(kind, id, D.Root, new DateTimeOffset(operation.Timestamp), OrleansSerialization.Serialize(request), work);
-        await Assert.That(JsonSerializer.Serialize(OrleansSerialization.Deserialize<T>(charged.Value!.Input.Span,
-            ValidationProfile.PublicInputElements), JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(
-                OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements), JsonDefaults.Options));
+        var charged = database.CreateCommand(kind, id, D.Root, new DateTimeOffset(operation.Timestamp), request, work);
+        await Assert.That(JsonSerializer.Serialize(((T)charged.Value!.Input), JsonDefaults.Options)).IsEqualTo(JsonSerializer.Serialize(
+                ((T)operation.Value!.Input), JsonDefaults.Options));
         await Assert.That(charged.Value.Fingerprint).IsEqualTo(operation.Value.Fingerprint);
         await Assert.That(DatabaseCommandFingerprint.Compute(operation)).IsEqualTo(JsonData.Fingerprint(new
         {

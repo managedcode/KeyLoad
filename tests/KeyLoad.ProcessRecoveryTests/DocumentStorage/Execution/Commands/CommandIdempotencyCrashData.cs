@@ -37,7 +37,7 @@ internal static class CommandIdempotencyCrashData
         const int IndexEmptyCount = 0;
         const int ExpectedRevisionEmptyCount = 0;
 
-        var command = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var command = ((CommandRequest)operation.Value!.Input);
         var changed = command.Mutations.SetItem(IndexEmptyCount,
             new PutDocument(CommandIdempotencyCrashContract.Collection, CommandIdempotencyCrashContract.DocumentId, CommandIdempotencyCrashContract.ChangedDocumentJson, ExpectedRevisionEmptyCount));
         var payload = JsonSerializer.Serialize(command with

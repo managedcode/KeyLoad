@@ -27,7 +27,7 @@ internal static class AnnProviderQualificationHistoryAssertions
         await Assert.That(stored.ScopeKind).IsEqualTo(global ? CommandOutcomeScopeKind.Global : CommandOutcomeScopeKind.Partition);
         await Assert.That(stored.Partition).IsEqualTo(global ? null : owner.Source.Partition);
         await ReplayResultAssertions.Same<T>(stored.Result, result);
-        state.History.Add(new(operation, result, entry.CanonicalSequence, operation.Value!.Input.ToArray(),
+        state.History.Add(new(operation, result, entry.CanonicalSequence, OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements),
             key, outcome, locatorKey, locator));
     }
 
@@ -71,7 +71,7 @@ internal static class AnnProviderQualificationHistoryAssertions
         await Assert.That(operation.UserId!).IsEqualTo(history.Operation.UserId!);
         await Assert.That(new DateTimeOffset(operation.Timestamp)).IsEqualTo(new DateTimeOffset(history.Operation.Timestamp));
         await Assert.That(operation.Value!.Fingerprint).IsEqualTo(history.Operation.Value!.Fingerprint);
-        await Assert.That(operation.Value!.Input.Span.SequenceEqual(history.Payload)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(history.Payload)).IsTrue();
     }
 
     private static async Task LocatorAsync(byte[]? actual, byte[]? expected)

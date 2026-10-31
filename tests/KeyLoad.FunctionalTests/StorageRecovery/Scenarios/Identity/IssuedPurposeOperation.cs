@@ -34,7 +34,7 @@ internal static class IssuedPurposeOperation
         var committed = IssuedPurposeCut.Read(scenario.Fixture.Database);
         var replay = await scenario.CommandAsync(principal, Guid.NewGuid(), command, token);
         await Assert.That(replay.Error).IsNull();
-        await Assert.That(healthy.Payload.Span.SequenceEqual(replay.Payload.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(healthy)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(replay)))).IsTrue();
         await IssuedPurposeCut.RequireAsync(committed, scenario.Fixture.Database);
         var coldSource = new ConnectionColdSource(scenario.Fixture.Source);
         var reference = scenario.Reference(DocumentId);

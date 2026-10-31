@@ -52,8 +52,8 @@ internal sealed record Bm25OriginalPhaseRecoveryState(Guid NodeId, Guid Incarnat
         await Assert.That(actual.PreparedCommand).IsNotNull();
         await Assert.That(actual.PreparedCommand!.Value!.Kind).IsEqualTo(OperationKind.Bm25CorpusPublicationPhase);
         await Assert.That(actual.PreparedCommand.CommandId).IsEqualTo(original.CommandId);
-        await ReplayResultAssertions.BytesAsync(original.Value!.Input.ToArray(),
-            actual.PreparedCommand.Value!.Input.ToArray());
+        await ReplayResultAssertions.BytesAsync(OrleansSerialization.Serialize(original.Value!.Input, ValidationProfile.PublicInputElements),
+            OrleansSerialization.Serialize(actual.PreparedCommand.Value!.Input, ValidationProfile.PublicInputElements));
         await ReplayResultAssertions.BytesAsync(originalEntry, OrleansSerialization.Serialize(actual));
     }
 }

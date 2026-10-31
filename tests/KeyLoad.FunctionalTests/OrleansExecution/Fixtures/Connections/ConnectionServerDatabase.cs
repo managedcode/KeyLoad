@@ -21,7 +21,7 @@ internal sealed class ConnectionServerDatabase(Func<RequestCqrsHostedRuntimeFixt
     internal ICommitCoordinator Coordinator => source().Database.Coordinator;
 
     internal Result<object> Submit<T>(OperationKind kind, T payload,
-        string principal = ConnectionProtocol.Root, Guid? id = null, DateTimeOffset? time = null)
+        string principal = ConnectionProtocol.Root, Guid? id = null, DateTimeOffset? time = null) where T : notnull
     {
         if (time is not null)
         {
@@ -31,7 +31,7 @@ internal sealed class ConnectionServerDatabase(Func<RequestCqrsHostedRuntimeFixt
         var work = new ReadExecutionBudget(source().Clock, token);
         Coordinator.ReadBarrierAsync(token).GetAwaiter().GetResult();
         var result = Coordinator.RuntimeSubmitAsync(kind, id ?? Guid.NewGuid(), principal,
-            OrleansSerialization.Serialize(payload), work, token).GetAwaiter().GetResult();
+            payload, work, token).GetAwaiter().GetResult();
         Coordinator.ReadBarrierAsync(token).GetAwaiter().GetResult();
         return result;
     }
@@ -69,7 +69,7 @@ internal sealed class ConnectionServerDatabase(Func<RequestCqrsHostedRuntimeFixt
             new(collection, ResourceKind.Collection, Partition.TransactionDomainId));
         var original = ReadStoredOutcome(creation).PreparedCommand
             ?? throw new InvalidOperationException(MissingEntry);
-        var body = OrleansSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span);
+        var body = ((ConfigureResourceRequest)(original).Value!.Input);
         if (original.CommandId != creation || original.Value!.Kind != OperationKind.ConfigureResource
             || original.UserId! != ConnectionProtocol.Root
             || !JsonDefaults.Serialize(body).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected)))

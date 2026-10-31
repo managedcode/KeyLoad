@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -10,7 +11,6 @@ namespace KeyLoad.Core;
 /// <summary>Validates JSON and builds stable operation fingerprints and scalar paths.</summary>
 public static class JsonData
 {
-    private const int NoRetainedBytes = 0;
     private const int EmptyElementCount = 0;
     private const int LastComponentFromEnd = 1;
 
@@ -46,13 +46,13 @@ public static class JsonData
             {
                 throw Errors.Fail(ErrorCode.Validation, ObjectRequiredDetail);
             }
-            using var bytes = preserveContent ? null : new MemoryStream();
-            using (var writer = new Utf8JsonWriter(bytes is null ? Stream.Null : bytes))
+            var bytes = preserveContent ? null : new ArrayBufferWriter<byte>();
+            using (var writer = bytes is null ? new Utf8JsonWriter(Stream.Null) : new Utf8JsonWriter(bytes))
             {
                 CanonicalJsonWriter.Write(writer, document.RootElement);
             }
             return bytes is null ? json
-                : Encoding.UTF8.GetString(bytes.GetBuffer().AsSpan(NoRetainedBytes, checked((int)bytes.Length)));
+                : Encoding.UTF8.GetString(bytes.WrittenSpan);
         }
         catch (JsonException)
         {

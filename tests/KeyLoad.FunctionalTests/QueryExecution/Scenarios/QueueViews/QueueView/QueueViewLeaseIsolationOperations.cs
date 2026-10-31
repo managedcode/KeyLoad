@@ -7,17 +7,17 @@ namespace KeyLoad.FunctionalTests.QueryExecution;
 internal static class QueueViewLeaseIsolationOperations
 {
     internal static async Task<QueueViewLeaseIsolationHistory> SendAsync<T>(QueueViewLeaseIsolationState state,
-        OperationKind kind, T request, Guid id, object expected)
+        OperationKind kind, T request, Guid id, object expected) where T : notnull
         => await SendAsync(state, kind, request, id, _ => expected);
 
     internal static async Task<QueueViewLeaseIsolationHistory> SendAsync<T>(QueueViewLeaseIsolationState state,
-        OperationKind kind, T request, Guid id, Func<Command<DatabaseCommand>, object> expected)
+        OperationKind kind, T request, Guid id, Func<Command<DatabaseCommand>, object> expected) where T : notnull
     {
         state.Token.ThrowIfCancellationRequested();
         var owner = state.Owner;
         var index = checked(owner.ReadCut().AppliedPosition + QueueViewLeaseIsolationProtocol.One);
         var operation = owner.Database.CreateCommand(kind, id, QueueViewLeaseIsolationProtocol.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            owner.Database.EvaluationClock.GetUtcNow(), request);
         operation = owner.Database.OwnCommand(operation);
         var predicted = expected(operation);
         var result = owner.Submit(operation);

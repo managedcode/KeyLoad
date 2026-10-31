@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Security.Cryptography;
 using System.Text;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Core.RuntimeJournaling.Contracts;
 
 namespace KeyLoad.Core.RuntimeJournaling.Validation;
@@ -80,7 +81,8 @@ internal static class RuntimeJournalValidation
 
     internal static string NextMetadataETag(string previous, IReadOnlyDictionary<string, string> properties)
     {
-        using var stream = new MemoryStream();
+        using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        using var stream = new CanonicalHashStream(hash);
         using (var writer = new BinaryWriter(stream, StrictUtf8, leaveOpen: true))
         {
             WriteField(writer, previous);
@@ -91,7 +93,7 @@ internal static class RuntimeJournalValidation
                 WriteField(writer, pair.Value);
             }
         }
-        return Convert.ToHexStringLower(SHA256.HashData(stream.ToArray()));
+        return Convert.ToHexStringLower(hash.GetHashAndReset());
     }
 
     private static void WriteField(BinaryWriter writer, string value)

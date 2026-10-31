@@ -104,6 +104,6 @@ internal static class RetainedSubmissionBudgetFlow
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, fixture.Partition, [new PutDocument(Collection, documentId, Content)]);
         return fixture.Database.CreateCommand(OperationKind.Batch, id, Subject,
-            fixture.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            fixture.Database.EvaluationClock.GetUtcNow(), request);
     }
 }

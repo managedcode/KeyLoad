@@ -26,9 +26,9 @@ internal static class CompositionBoundReferenceAssertions
     {
         var retained = owner.ReadOutcome(command.Operation).PreparedCommand!;
         await Assert.That(retained.CommandId).IsEqualTo(command.Operation.CommandId);
-        await Assert.That(retained.Value!.Input.Span.SequenceEqual(command.Operation.Value!.Input.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(command.Operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
         await Assert.That(DatabaseCommandFingerprint.Compute(retained)).IsEqualTo(DatabaseCommandFingerprint.Compute(command.Operation));
-        var request = OrleansSerialization.Deserialize<CommandRequest>(retained.Value!.Input.Span);
+        var request = ((CommandRequest)retained.Value!.Input);
         await EqualAsync(command.Request, request);
         if (!command.Derived)
         {

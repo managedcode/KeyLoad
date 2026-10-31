@@ -54,7 +54,7 @@ internal static class CompositionReverseFinalImageFlow
     {
         work = new(owner.Database.EvaluationClock, token);
         return owner.Database.CreateCommand(OperationKind.Batch, request.CommandId, D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
+            owner.Database.EvaluationClock.GetUtcNow(), request, work);
     }
 
     private static Task VerifyAsync(SafeProjectorOperationDatabase owner, CompositionReverseFinalImageState state)

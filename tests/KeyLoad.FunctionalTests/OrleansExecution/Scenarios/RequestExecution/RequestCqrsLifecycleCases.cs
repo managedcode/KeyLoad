@@ -57,7 +57,7 @@ internal static class RequestCqrsLifecycleCases
             observed.MarkStarted();
             await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, writer.CancellationToken);
             return Result<GrainOperationReply>.Succeed(
-                new GrainOperationReply { Payload = new byte[] { 1 } });
+                new GrainOperationReply { Result = new GrainValue(new byte[] { 1 }) });
         }
         finally
         {

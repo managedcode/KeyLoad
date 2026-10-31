@@ -70,7 +70,7 @@ internal sealed class ResourcePolicyUpdateFixture : IDisposable
             ExpectedSchemaVersion = expectedSchemaVersion
         };
         return Database.CreateCommand(OperationKind.ConfigureResource, operationId ?? Guid.NewGuid(), principalId,
-            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(payload));
+            TimeProvider.System.GetUtcNow(), payload);
     }
 
     internal Result<object> Apply(Command<DatabaseCommand> operation) => Database.Apply(operation);

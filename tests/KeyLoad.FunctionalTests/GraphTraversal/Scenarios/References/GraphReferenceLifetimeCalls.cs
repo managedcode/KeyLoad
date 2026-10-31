@@ -17,8 +17,8 @@ internal static class GraphReferenceLifetimeCalls
         })
         {
             var configured = await DropPublicSubmission.SubmitAsync(profile, OperationKind.ConfigureResource, Guid.NewGuid(),
-                PartitionStoreProtocol.AdministratorId, OrleansSerialization.Serialize(new ConfigureResourceRequest(
-                    DropRuntimeProtocol.Tenant, DropRuntimeProtocol.Database, definition)), token);
+                PartitionStoreProtocol.AdministratorId, new ConfigureResourceRequest(
+                    DropRuntimeProtocol.Tenant, DropRuntimeProtocol.Database, definition), token);
             await DropRuntimeAssertions.SameAsync(definition, DropRuntimeAssertions.Value<ResourceDefinition>(configured));
         }
         _ = await CommitAsync(profile, new(Guid.NewGuid(), DropRuntimeProtocol.Partition,
@@ -28,7 +28,7 @@ internal static class GraphReferenceLifetimeCalls
     internal static async Task<CommitReceipt> CommitAsync(DropRuntimeProfile profile,
         CommandRequest command, CancellationToken token)
         => DropRuntimeAssertions.Value<CommitReceipt>(await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch,
-            command.CommandId, PartitionStoreProtocol.AdministratorId, OrleansSerialization.Serialize(command), token));
+            command.CommandId, PartitionStoreProtocol.AdministratorId, command, token));
 
     internal static EntityRef Reference(DropRuntimeProfile profile, string collection, string id)
         => profile.Source.Database.GetDocument(PartitionStoreProtocol.AdministratorId,

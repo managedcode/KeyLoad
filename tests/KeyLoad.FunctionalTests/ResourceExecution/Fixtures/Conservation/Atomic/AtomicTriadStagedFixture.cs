@@ -66,12 +66,12 @@ internal sealed class AtomicTriadStagedFixture : IDisposable
     }
     internal Command<DatabaseCommand> Operation(CommandRequest command)
         => Owner.CreateCommand(OperationKind.Batch, command.CommandId, AtomicTriadStagedProtocol.Producer,
-            default, OrleansSerialization.Serialize(command));
+            default, command);
     internal PrincipalRecord SetPolicy(long epoch, bool publish)
     {
         var expected = AtomicTriadStagedRecipe.Principal(Partition, epoch, publish);
         var operation = Owner.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), AtomicTriadStagedProtocol.Root,
-            default, OrleansSerialization.Serialize(new ConfigurePrincipalRequest(expected)));
+            default, new ConfigurePrincipalRequest(expected));
         return Owner.ApplyEmbedded(operation, TestContext.Current!.Execution.CancellationToken).Get<PrincipalRecord>();
     }
     public void Dispose() => Harness.Dispose();

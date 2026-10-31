@@ -13,7 +13,7 @@ internal static class RequestCqrsTextResource
             new(TextBilingualAudit.Collection, ResourceKind.Collection, partition.TransactionDomainId));
         var id = Guid.NewGuid();
         var original = database.Database.CreateCommand(OperationKind.ConfigureResource, id,
-            RequestCqrsHostedProfile.Root, database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            RequestCqrsHostedProfile.Root, database.Database.EvaluationClock.GetUtcNow(), request);
         var configured = (await database.Coordinator.SubmitVerifiedAsync(original, token).ConfigureAwait(false))
             .Get<ResourceDefinition>();
         await Assert.That(JsonDefaults.Serialize(configured).AsSpan()
@@ -21,7 +21,7 @@ internal static class RequestCqrsTextResource
         await Assert.That(original.CommandId).IsEqualTo(id);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
         await Assert.That(original.UserId!).IsEqualTo(RequestCqrsHostedProfile.Root);
-        await Assert.That(JsonDefaults.Serialize(OrleansSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span)).AsSpan()
+        await Assert.That(JsonDefaults.Serialize(((ConfigureResourceRequest)(original).Value!.Input)).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(request))).IsTrue();
         return ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, request.Definition);
     }

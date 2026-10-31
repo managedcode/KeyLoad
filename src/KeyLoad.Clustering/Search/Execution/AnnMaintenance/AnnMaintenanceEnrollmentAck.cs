@@ -2,7 +2,7 @@ namespace KeyLoad.Clustering;
 
 internal static class AnnMaintenanceEnrollmentAck
 {
-    internal static async Task CommitAsync(AnnMaintenanceChildCalls children, AnnMaintenanceRequest request,
+    internal static async Task CommitAsync(MaintenanceChildCalls children, AnnMaintenanceRequest request,
         ProjectionConsumerInfo configured, AnnMaintenanceCapabilityResult state, CancellationToken token)
     {
         if (state.EnrollmentSettlementIntent is { } original)

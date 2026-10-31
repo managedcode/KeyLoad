@@ -185,11 +185,6 @@ internal sealed class GroupCommitTests
         Command<DatabaseCommand>[] operations = [GroupCommitCommands.Put(fixture, First, Created),
             GroupCommitCommands.Put(fixture, Second, Created)];
         var token = GroupCommitCommands.Token;
-        var inputs = operations.Select(operation => operation.Value!.Input.ToArray()).ToArray();
-        for (var index = 0; index < operations.Length; index++)
-        {
-            operations[index].Value = operations[index].Value! with { Input = inputs[index] };
-        }
         var originals = operations.Select(OrleansSerialization.Serialize).ToArray();
         clock.Descending = true;
 
@@ -198,7 +193,6 @@ internal sealed class GroupCommitTests
         for (var index = 0; index < operations.Length; index++)
         {
             await Assert.That(OrleansSerialization.Serialize(operations[index]).AsSpan().SequenceEqual(originals[index])).IsTrue();
-            Array.Clear(inputs[index]);
         }
         var batch = fixture.Database.ApplyStorageOperations(prepared, fixture.Database.LastApplied + NextSequence, token);
 

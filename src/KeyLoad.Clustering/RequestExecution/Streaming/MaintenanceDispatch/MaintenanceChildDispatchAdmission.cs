@@ -1,10 +1,9 @@
-using System.Security.Cryptography;
 using KeyLoad.Core.ResourceExecution;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace KeyLoad.Clustering;
 
-internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload) : IDisposable
+internal sealed class MaintenanceChildDispatchAdmission : IDisposable
 {
     private CancellationTokenSource? cancellation;
     private GrainRequestIdentityScope? identity;
@@ -102,10 +101,6 @@ internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload) : 
         disposed = true;
         DisposeIdentity(cleanup);
         DisposeCancellation(cleanup);
-        if (ownedPayload is not null)
-        {
-            Capture(() => CryptographicOperations.ZeroMemory(ownedPayload), cleanup);
-        }
     }
 
     private void DisposeIdentity(List<Exception> cleanup)
@@ -137,22 +132,6 @@ internal sealed class MaintenanceChildDispatchAdmission(byte[]? ownedPayload) : 
         catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
         {
             cleanup.Add(failure);
-        }
-    }
-
-    private static void Capture(Action operation, List<Exception> failures)
-    {
-        try
-        {
-            operation();
-        }
-        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
-        {
-            failures.Add(failure);
-        }
-        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure))
-        {
-            failures.Add(failure);
         }
     }
 }

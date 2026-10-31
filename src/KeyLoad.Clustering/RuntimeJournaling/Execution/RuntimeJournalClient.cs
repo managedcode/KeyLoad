@@ -28,7 +28,7 @@ internal sealed class RuntimeJournalClient(
 
     internal async Task<RuntimeJournalSnapshot?> GetHeaderAsync(string name, CancellationToken cancellationToken)
     {
-        var payload = OrleansSerialization.Serialize(name);
+        var payload = name;
         return await ReadNullableAsync<RuntimeJournalSnapshot>(GrainReadKind.RuntimeJournalHeader, payload,
             cancellationToken);
     }
@@ -36,17 +36,17 @@ internal sealed class RuntimeJournalClient(
     internal Task<RuntimeJournalPage> ReadPageAsync(RuntimeJournalSnapshot snapshot, long offset,
         CancellationToken cancellationToken)
         => ReadAsync<RuntimeJournalPage>(GrainReadKind.RuntimeJournalPage,
-            OrleansSerialization.Serialize(new RuntimeJournalReadRequest(snapshot.JournalName, snapshot.InstanceId,
-                snapshot.OwnerGeneration, snapshot.ContentRevision, offset)), cancellationToken);
+            new RuntimeJournalReadRequest(snapshot.JournalName, snapshot.InstanceId,
+                snapshot.OwnerGeneration, snapshot.ContentRevision, offset), cancellationToken);
 
     internal Task<RuntimeJournalCatalog> GetCatalogAsync(CancellationToken cancellationToken)
         => ReadAsync<RuntimeJournalCatalog>(GrainReadKind.RuntimeJournalCatalog,
-            OrleansSerialization.Serialize(GrainContracts.NoDtoMarker), cancellationToken);
+            GrainContracts.NoDtoMarker, cancellationToken);
 
     internal async Task<RuntimeJournalMutationResult> MutateAsync(RuntimeJournalMutation mutation,
         CancellationToken cancellationToken)
     {
-        var payload = OrleansSerialization.Serialize(mutation);
+        var payload = mutation;
         var commandId = Guid.NewGuid();
         var reply = await SendCommandAsync(payload, commandId, cancellationToken);
         if (reply.Error == ErrorCode.UnknownWriteOutcome
@@ -60,16 +60,16 @@ internal sealed class RuntimeJournalClient(
             ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
     }
 
-    private async Task<T> ReadAsync<T>(GrainReadKind kind, ReadOnlyMemory<byte> payload,
+    private async Task<T> ReadAsync<T>(GrainReadKind kind, object payload,
         CancellationToken cancellationToken) where T : class
         => await ReadCoreAsync<T>(kind, payload, allowNull: false, cancellationToken: cancellationToken)
             ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
 
-    private Task<T?> ReadNullableAsync<T>(GrainReadKind kind, ReadOnlyMemory<byte> payload,
+    private Task<T?> ReadNullableAsync<T>(GrainReadKind kind, object payload,
         CancellationToken cancellationToken) where T : class
         => ReadCoreAsync<T>(kind, payload, allowNull: true, cancellationToken: cancellationToken);
 
-    private async Task<T?> ReadCoreAsync<T>(GrainReadKind kind, ReadOnlyMemory<byte> payload,
+    private async Task<T?> ReadCoreAsync<T>(GrainReadKind kind, object payload,
         bool allowNull, CancellationToken cancellationToken) where T : class
     {
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
@@ -89,7 +89,7 @@ internal sealed class RuntimeJournalClient(
         return (Decode<T>(reply, allowNull)).Value;
     }
 
-    private async Task<GrainOperationReply> SendCommandAsync(ReadOnlyMemory<byte> payload, Guid commandId,
+    private async Task<GrainOperationReply> SendCommandAsync(object payload, Guid commandId,
         CancellationToken cancellationToken)
     {
         using var timeout = new CancellationTokenSource(routingOptions.Value.ExecutionLifetime, clock);
@@ -131,7 +131,7 @@ internal sealed class RuntimeJournalClient(
             throw Errors.Fail(error, reply.SafeDetail ?? RuntimeJournalStoragePolicy.RequestFailed);
         }
 
-        var value = GrainPayload.Read<GrainValue>(reply.Payload).Value;
+        var value = GrainReplyFactory.RequireValue(reply).Value;
         if (value is null && allowNull)
         {
             return (false, default(T?));

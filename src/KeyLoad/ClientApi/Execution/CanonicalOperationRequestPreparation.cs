@@ -8,7 +8,7 @@ internal static class CanonicalOperationRequestPreparation
         GrainRequestEnvelope Envelope, bool Command);
 
     internal static Prepared Create(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, ReadOnlyMemory<byte> payload,
+        OperationKind? commandKind, Guid commandId, object payload,
         CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context);

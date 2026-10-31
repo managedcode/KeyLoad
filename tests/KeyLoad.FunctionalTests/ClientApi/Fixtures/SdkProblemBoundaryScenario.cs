@@ -94,7 +94,7 @@ internal sealed class SdkProblemBoundaryScenario(ConnectionScenario execution, S
         await Assert.That(original.CommandId).IsEqualTo(commandId);
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.ConfigureResource);
         await Assert.That(original.UserId!).IsEqualTo(P.Root);
-        await SdkProblemBoundaryAssertions.EqualAsync(request, OrleansSerialization.Deserialize<ConfigureResourceRequest>((original).Value!.Input.Span));
+        await SdkProblemBoundaryAssertions.EqualAsync(request, ((ConfigureResourceRequest)(original).Value!.Input));
         var lifetime = ResourceLifetimeIdentity.Create(original, request.TenantId, request.DatabaseId, definition);
         Allowed = new(db.Partition, P.Allowed, P.Document)
         {
@@ -129,7 +129,7 @@ internal sealed class SdkProblemBoundaryScenario(ConnectionScenario execution, S
     {
         var requestId = Guid.NewGuid();
         var envelope = execution.Fixture.Codec.CreateRead(requestId, Principal.Id, GrainReadKind.Document,
-            OrleansSerialization.Serialize(new GetDocumentRequest(reference)));
+            new GetDocumentRequest(reference));
         var original = tasks.Retain(execution.InvokeAsync(Principal, requestId, Guid.Empty, envelope, token));
         var reply = await tasks.CompleteAsync(original);
         await execution.Observation.Read(requestId).Disposed.Task.WaitAsync(token);

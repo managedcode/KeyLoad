@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
+using KeyLoad.Clustering;
 using KeyLoad.FunctionalTests.OrleansExecution;
 using Microsoft.AspNetCore.Http;
 
@@ -44,12 +45,13 @@ internal sealed class CommittedResponseEndpoint(ConnectionScenario scenario, Pri
                     JsonDefaults.Options, context.RequestAborted);
                 return;
             }
-            Replies.Enqueue(reply.Payload.ToArray());
+            var encoded = OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(reply));
+            Replies.Enqueue(encoded);
             var receipt = ConnectionAssertions.Value<CommitReceipt>(reply);
             if (first)
             {
                 Original = receipt;
-                OriginalReply = reply.Payload.ToArray();
+                OriginalReply = encoded.ToArray();
                 await InterruptAsync(context, receipt);
             }
             else

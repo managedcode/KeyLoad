@@ -20,11 +20,11 @@ internal sealed class McpUnknownLengthAdmissionTests
     {
         using var database = new TestDatabase();
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(RootPrincipalId)))!;
-        var principalBytes = OrleansSerialization.Serialize(new GrainValue(principal));
+        var principalReply = new GrainValue(principal);
         var wire = Encoding.UTF8.GetBytes(DiscoveryFrame);
 
         using var state = new McpRequestState(DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution());
-        state.Authenticate(principalBytes, CancellationToken.None);
+        state.Authenticate(principalReply, CancellationToken.None);
         using var source = new MemoryStream(wire, writable: false);
         using var body = await McpFrameBody.ReadAsync(source, null, DefaultHttpBodyLimitBytes, UnitMcpOptions.Execution());
         await Assert.That(body.WireBytes).IsEqualTo(wire.Length);

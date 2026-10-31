@@ -43,7 +43,7 @@ internal sealed class ConnectionCallerFactoryCalls(ConnectionIdentityCollisionSt
         CommandRequest command, CancellationToken token)
     {
         var envelope = state.Scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
-            command.CommandId, OrleansSerialization.Serialize(command));
+            command.CommandId, command);
         var expiry = state.Scenario.Fixture.Codec.Decode(envelope).Envelope.ExpiresAt;
         if (!state.OriginalExpiries.TryAdd(requestId, expiry))
         {

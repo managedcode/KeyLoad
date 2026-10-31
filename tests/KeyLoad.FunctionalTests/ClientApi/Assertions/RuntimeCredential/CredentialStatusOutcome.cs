@@ -21,7 +21,7 @@ internal static class CredentialStatusOutcome
         await Assert.That(operation.CommandId).IsEqualTo(id);
         await Assert.That(operation.Value!.Kind).IsEqualTo(OperationKind.ConfigureApiKey);
         await Assert.That(operation.UserId!).IsEqualTo(principal.Id);
-        var execution = OrleansSerialization.Deserialize<ConfigureApiKeyRequest>((operation).Value!.Input.Span);
+        var execution = ((ConfigureApiKeyRequest)(operation).Value!.Input);
         await Assert.That(execution).IsEqualTo(new ConfigureApiKeyRequest(credential));
         var fingerprint = DatabaseCommandFingerprint.Compute(id, OperationKind.ConfigureApiKey, principal.Id, payload);
         await Assert.That(entry.Fingerprint).IsEqualTo(fingerprint);

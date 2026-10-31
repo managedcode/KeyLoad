@@ -19,7 +19,6 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
         var failures = new List<Exception>();
         AnnMaintenanceResult? result = null;
-        byte[]? payload = null;
         try
         {
             if (binding is not IRequestWorkBinding execution
@@ -33,9 +32,8 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
                 throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             }
             execution.OriginalProducer.AdmitPublication();
-            payload = OrleansSerialization.Serialize(original);
             var envelope = codec.Issue(GrainRequestEnvelopeConstruction.Command(requestId, codec.Incarnation,
-                principal.Id, OperationKind.MaintainAnnIndex, original.CommandId, payload,
+                principal.Id, OperationKind.MaintainAnnIndex, original.CommandId, GrainPayload.Strict(original),
                 expiry < context.Now + context.Lifetime ? expiry : context.Now + context.Lifetime));
             using var identity = new GrainRequestIdentityScope(services, principal, requestId,
                 original.CommandId, token, connectionId: connectionId);
@@ -48,23 +46,8 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
         catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        Capture(() =>
-        {
-            if (payload is not null)
-            {
-                System.Security.Cryptography.CryptographicOperations.ZeroMemory(payload);
-            }
-        }, failures);
         AnnProjectionJobFailures.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, InvalidResult);
-    }
-
-    private static void Capture(Action cleanup, List<Exception> failures)
-    {
-        try
-        { cleanup(); }
-        catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
-        catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
     }
 
     private async Task<AnnMaintenanceResult> ReadAsync(global::Orleans.IGrainFactory grains, GrainRequestEnvelope envelope,
@@ -84,7 +67,7 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         {
             throw Errors.Fail(error, reply.SafeDetail ?? InvalidResult);
         }
-        var value = GrainPayload.Read<GrainValue>(reply.Payload).Value;
+        var value = GrainReplyFactory.RequireValue(reply).Value;
         if (value is not AnnMaintenanceResult result || result.CommandId != original.CommandId
             || result.Consumer != original.Consumer || result.IndexGeneration != original.IndexGeneration
             || result.Phase != AnnMaintenancePhase.Completed)

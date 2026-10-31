@@ -28,7 +28,7 @@ internal static class ProgressAdmissionSupport
             TextIndexMaintenanceRequest text => text.CommandId,
             _ => throw new InvalidOperationException(nameof(request))
         };
-        var envelope = fixture.Codec.CreateCommand(id, Root, kind, command, OrleansSerialization.Serialize(request));
+        var envelope = fixture.Codec.CreateCommand(id, Root, kind, command, request);
         return new(Serializer(fixture), id, options ?? fixture.RoutingOptions,
             new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)));
     }

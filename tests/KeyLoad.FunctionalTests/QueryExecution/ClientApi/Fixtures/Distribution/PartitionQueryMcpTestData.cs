@@ -48,7 +48,7 @@ internal static class PartitionQueryMcpTestData
         {
             [McpCanonicalTestData.RequestKey] = JsonSerializer.SerializeToElement(request, JsonDefaults.Options)
         }).Payload;
-        return OrleansSerialization.Deserialize<PartitionQueryRequest>(payload.Span);
+        return (PartitionQueryRequest)payload;
     }
 
     internal static async Task<PartitionQueryPage> ExecuteAsync(TestDatabase fixture,

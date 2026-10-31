@@ -13,5 +13,5 @@ internal static class AuthorityFixture
 
     internal static Command<DatabaseCommand> Create(TestDatabase database)
         => database.Database.CreateCommand(OperationKind.SetDispatch, Guid.NewGuid(), Root,
-            database.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(true));
+            database.Database.EvaluationClock.GetUtcNow(), true);
 }

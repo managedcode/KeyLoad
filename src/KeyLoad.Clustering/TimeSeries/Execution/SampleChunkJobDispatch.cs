@@ -21,8 +21,8 @@ internal sealed class SampleChunkJobDispatch(BackgroundStorageClient storage, Gr
         PrincipalRecord principal, CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
-        var payload = OrleansSerialization.Serialize(new CommandRequest(hint.CommandId, hint.Partition,
-            [SampleChunkJobIdentity.Mutation(hint)]));
+        var payload = new CommandRequest(hint.CommandId, hint.Partition,
+            [SampleChunkJobIdentity.Mutation(hint)]);
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, hint.CommandId, cancellationToken, connectionId: connectionId);
         var envelope = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, hint.CommandId, payload);

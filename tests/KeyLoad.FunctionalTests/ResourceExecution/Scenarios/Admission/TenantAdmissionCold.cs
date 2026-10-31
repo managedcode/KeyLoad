@@ -19,8 +19,7 @@ internal static class TenantAdmissionCold
         var request = new CommandRequest(id, fixture.Partition,
             [new PutDocument(TenantAdmissionOperations.Collection, "cold-healthy", TenantAdmissionOperations.Body)]);
         var fresh = database.CreateCommand(OperationKind.Batch, id,
-            TenantAdmissionOperations.PrincipalA, database.EvaluationClock.GetUtcNow(),
-            global::KeyLoad.OrleansSerialization.Serialize(request));
+            TenantAdmissionOperations.PrincipalA, database.EvaluationClock.GetUtcNow(), request);
         database.Apply(fresh).Get<CommitReceipt>();
         await TenantAdmissionAssertions.RecordAsync(fixture, database, fresh, fixture.Partition, "cold-healthy");
     }

@@ -28,7 +28,7 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var reply = await CanonicalCredentialDispatch.ReadAsync(node, envelope, connection, requestId);
-                principal = McpAuthentication.ReadPrincipal(reply.Payload.Span,
+                principal = McpAuthentication.ReadPrincipal(GrainReplyFactory.RequireValue(reply),
                     services.GetRequiredService<IOptions<McpExecutionOptions>>(), connection.Token);
                 if (!StringComparer.Ordinal.Equals(principal.Id, Subject))
                 {

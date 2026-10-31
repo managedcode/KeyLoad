@@ -60,7 +60,7 @@ internal static class RemoteTransferAttemptCoordination
             hint.TransferId, intentToken, hint.AcceptGeneration, RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept),
             PolicyGeneration: hint.AcceptPolicyGeneration, CompleteGeneration: hint.CompleteGeneration);
         var result = (await execution.ReadAsync<RemoteTransferCoordinationReadResult>(hint.PrincipalId,
-            GrainReadKind.QueueTransferCoordination, OrleansSerialization.Serialize(request), token).ConfigureAwait(true)).Value
+            GrainReadKind.QueueTransferCoordination, request, token).ConfigureAwait(true)).Value
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Unavailable);
         var valid = purpose == RemoteTransferAttemptProtocol.SourceReadPurpose
             ? result.SourceState is not null && result.FailureWitness is null && result.TargetReceipt is null

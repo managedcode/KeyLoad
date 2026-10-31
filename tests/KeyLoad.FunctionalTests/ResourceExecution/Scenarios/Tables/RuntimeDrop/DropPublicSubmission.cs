@@ -16,13 +16,13 @@ internal static class DropPublicSubmission
             PartitionStoreProtocol.AdministratorId, node.Clock.GetUtcNow()));
         var requestId = Guid.NewGuid();
         var envelope = node.Codec.CreateCommand(requestId, principal.Id, OperationKind.DropTable, commandId,
-            OrleansSerialization.Serialize(body));
+            body);
         var original = ExecuteAsync(node, principal, requestId, commandId, envelope, token);
         return new(requestId, commandId, profile.Track(original));
     }
 
     internal static Task<GrainOperationReply> SubmitAsync(DropRuntimeProfile profile, OperationKind kind,
-        Guid commandId, string principalId, ReadOnlyMemory<byte> payload, CancellationToken token)
+        Guid commandId, string principalId, object payload, CancellationToken token)
     {
         var node = profile.Node;
         var principal = profile.Source.Store.Read(view => profile.Source.Database.Principal(view,

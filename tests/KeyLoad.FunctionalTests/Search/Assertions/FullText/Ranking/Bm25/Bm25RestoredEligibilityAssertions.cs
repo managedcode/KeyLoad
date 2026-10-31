@@ -57,8 +57,8 @@ internal static class Bm25RestoredEligibilityAssertions
         var before = Cut(store, database, source ? fixture.Source.ReadCanonicalCut() : fixture.ReadTargetCut(), token);
         var retained = source ? fixture.Source.ReadStoredOutcome(operation.CommandId).PreparedCommand!
             : fixture.ReadTargetIssuedOperation(operation.CommandId);
-        await Assert.That(retained.Value!.Input.Span.SequenceEqual(operation.Value!.Input.Span)).IsTrue();
-        await Assert.That(operation.Value!.Input.IsEmpty).IsFalse();
+        await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
+        await Assert.That((operation.Value!.Input is null)).IsFalse();
         await Assert.That(OrleansSerialization.Serialize(retained).AsSpan()
             .SequenceEqual(OrleansSerialization.Serialize(operation))).IsTrue();
         var actual = fixture.SubmitIssued(database, operation, cancellationToken: token).Get<CommitReceipt>();

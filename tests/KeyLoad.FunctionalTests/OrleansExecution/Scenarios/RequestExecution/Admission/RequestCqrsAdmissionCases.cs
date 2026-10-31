@@ -94,7 +94,7 @@ internal static class RequestCqrsAdmissionCases
     private static CqrsStreamChunk<GrainRequestProgress, GrainOperationReply> InvalidChunk(
         RequestCqrsInvalidChunk invalid, Guid requestId)
     {
-        var successReply = new GrainOperationReply { Payload = new byte[SmallPayloadBytes] };
+        var successReply = new GrainOperationReply { Result = new GrainValue(new byte[SmallPayloadBytes]) };
         var successResult = Result<GrainOperationReply>.Succeed(successReply);
         var problem = GrainRequestStreamProblem.Create(ErrorCode.PermissionDenied, ClosedFailureDetail, UnitRoutingOptions.Routing());
         return invalid switch

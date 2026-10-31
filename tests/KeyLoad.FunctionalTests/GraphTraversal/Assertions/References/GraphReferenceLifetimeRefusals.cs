@@ -48,11 +48,11 @@ internal static class GraphReferenceLifetimeRefusals
         var image = CommandDomain(profile, command.CommandId);
         var position = profile.Source.Store.Position;
         var canonical = profile.Source.Database.LastApplied;
-        var payload = OrleansSerialization.Serialize(command);
+        var payload = command;
         var reply = await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, payload, token);
         await Assert.That(reply.Error).IsEqualTo((ErrorCode?)ErrorCode.OwnershipLost);
-        await Assert.That(reply.Payload.IsEmpty).IsTrue();
+        await Assert.That(reply.Result).IsNull();
         await Assert.That(profile.Source.Store.Position).IsEqualTo(position + 1);
         await Assert.That(profile.Source.Database.LastApplied).IsEqualTo(canonical + 1);
         await Assert.That(CommandDomain(profile, command.CommandId).SequenceEqual(image)).IsTrue();
@@ -64,7 +64,7 @@ internal static class GraphReferenceLifetimeRefusals
         var replay = await DropPublicSubmission.SubmitAsync(profile, OperationKind.Batch, command.CommandId,
             PartitionStoreProtocol.AdministratorId, payload, token);
         await Assert.That(replay.Error).IsEqualTo(reply.Error);
-        await Assert.That(replay.Payload.IsEmpty).IsTrue();
+        await Assert.That(replay.Result).IsNull();
         await SameAsync(profile, committed, position + 1);
     }
 

@@ -42,7 +42,7 @@ internal static class CompositionPrefixPrepareRefusals
         }
         var principal = new PrincipalRecord(D.Reader, owner.Source.Partition.TenantId, [], []);
         var configured = owner.Database.CreateCommand(OperationKind.ConfigurePrincipal, Guid.NewGuid(), D.Root,
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(new ConfigurePrincipalRequest(principal)));
+            owner.Database.EvaluationClock.GetUtcNow(), new ConfigurePrincipalRequest(principal));
         await CompositionPrefixPrepareAssertions.EqualAsync(principal, owner.Submit(configured).Get<PrincipalRecord>());
         var denied = CompositionPrefixPrepareCommands.Issue(owner, [CompositionPrefixPrepareCommands.Forward()], D.Reader);
         var image = CompositionPrefixPrepareAssertions.ModelImage(owner);

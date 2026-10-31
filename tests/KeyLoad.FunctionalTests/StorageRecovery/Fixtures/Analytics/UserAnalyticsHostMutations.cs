@@ -14,8 +14,8 @@ internal static class UserAnalyticsHostMutations
             AnalyticsSchema = new([P.Region], [P.Amount])
         };
         var configure = host.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(),
-            PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(
-                new ConfigureResourceRequest(P.Tenant, P.Database, definition)));
+            PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(),
+            new ConfigureResourceRequest(P.Tenant, P.Database, definition));
         await UserAnalyticsHostAssertions.SameAsync(definition,
             host.Database.ApplyEmbedded(configure, token).Get<ResourceDefinition>());
     }
@@ -27,7 +27,7 @@ internal static class UserAnalyticsHostMutations
             TestContext.Current!.Execution.CancellationToken);
         var command = new CommandRequest(Guid.NewGuid(), P.Partition, [mutation]);
         var operation = host.Database.CreateCommand(OperationKind.Batch, command.CommandId,
-            PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(command), work);
+            PartitionStoreProtocol.AdministratorId, TimeProvider.System.GetUtcNow(), command, work);
         var expected = new CommitReceipt(command.CommandId, new(host.Database.Store.Identity.Incarnation,
             P.Partition.AtomicPartitionId, checked(host.Database.LastApplied + 1)), [new(kind, P.Store, id, generation)], DurabilityProfile.ProcessDurable, 1);
         var actual = host.Database.Apply(operation).Get<CommitReceipt>();

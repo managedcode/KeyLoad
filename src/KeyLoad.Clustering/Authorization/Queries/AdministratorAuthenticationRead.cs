@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Core.RuntimeJournaling.Identity;
-using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Clustering;
 
@@ -10,7 +9,7 @@ namespace KeyLoad.Clustering;
 internal static class AdministratorAuthenticationRead
 {
     internal static AdministratorAuthenticationResult Execute(DatabaseEngine database, TimeProvider clock,
-        IOptions<GrainRoutingOptions> routing, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding,
+        DecodedGrainRequest request, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
         ArgumentNullException.ThrowIfNull(binding);
@@ -26,7 +25,6 @@ internal static class AdministratorAuthenticationRead
         work.ConstrainWork(input.MaximumReadBytes, input.MaximumExaminedRecords);
         work.ConstrainResultBytes(input.MaximumResultBytes);
         binding.Bind(ImmutableArray<ResourceLifetime>.Empty);
-        ReadOnlyMemory<byte> principalPayload = default;
         PrincipalRecord? principal = null;
         KeyLoadException? refusal = null;
         try
@@ -41,9 +39,9 @@ internal static class AdministratorAuthenticationRead
         }
         if (refusal is null)
         {
-            principalPayload = AdministratorAuthenticationEncoding.Principal(principal!, work, routing, token);
+            work.CheckResult(principal!);
         }
-        var reply = new AdministratorAuthenticationResult(principalPayload, work.ReadBytes,
+        var reply = new AdministratorAuthenticationResult(refusal is null ? principal : null, work.ReadBytes,
             work.ConstrainedRecords, refusal?.Code, refusal?.Message);
         _ = ResultByteCounterStream.RuntimeMeasure(work, new GrainValue(reply));
         work.Check();

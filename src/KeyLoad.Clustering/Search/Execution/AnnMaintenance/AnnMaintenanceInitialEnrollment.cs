@@ -4,7 +4,7 @@ internal static class AnnMaintenanceInitialEnrollment
 {
     private const long InitialSequence = 0;
 
-    internal static async Task<(bool HasValue, AnnMaintenanceRequest? Value)> ReadAsync(AnnMaintenanceChildCalls children,
+    internal static async Task<(bool HasValue, AnnMaintenanceRequest? Value)> ReadAsync(MaintenanceChildCalls children,
         AnnMaintenanceRequest request, CancellationToken token)
     {
         if (request.Mode != AnnMaintenanceMode.Build || request.MaintenanceProfile is null)

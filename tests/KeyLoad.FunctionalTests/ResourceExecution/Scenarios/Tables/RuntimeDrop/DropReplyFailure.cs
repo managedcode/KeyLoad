@@ -24,7 +24,7 @@ internal static class DropReplyFailure
             var reply = await call.Original.ConfigureAwait(false);
             await Assert.That(reply.Error).IsEqualTo((ErrorCode?)ErrorCode.UnknownWriteOutcome);
             await Assert.That(reply.SafeDetail).IsEqualTo("The write outcome is unknown. Retry the same command ID.");
-            await Assert.That(reply.Payload.IsEmpty).IsTrue();
+            await Assert.That(reply.Result).IsNull();
             await hold.Disposed.Task.WaitAsync(token).ConfigureAwait(false);
             await DropRuntimeAssertions.SameImageAsync(profile, committed, token).ConfigureAwait(false);
             await DropOperationFlow.ReplayAsync(profile, id, expected, original, token).ConfigureAwait(false);

@@ -66,6 +66,6 @@ internal static class DocumentCommandPrincipalColdReplayTrial
     {
         var request = new CommandRequest(id, owner.Source.Partition, [new PutDocument(Collection, document, json, revision)]);
         return owner.Database.CreateCommand(OperationKind.Batch, id, principal,
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            owner.Database.EvaluationClock.GetUtcNow(), request);
     }
 }

@@ -21,15 +21,15 @@ internal sealed class LocalStorageCommitCoordinator(DatabaseEngine database) : I
     }
 
     public Task<Result<object>> RuntimeSubmitAsync(OperationKind kind, Guid id, string principalId,
-        ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
+        object input, ReadExecutionBudget? sourcePlanningBudget = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
         var now = database.EvaluationClock.GetUtcNow();
         var command = sourcePlanningBudget is null
-            ? database.CreateCommand(kind, id, principalId, now, payload)
-            : database.CreateCommand(kind, id, principalId, now, payload, sourcePlanningBudget);
+            ? database.CreateCommand(kind, id, principalId, now, input)
+            : database.CreateCommand(kind, id, principalId, now, input, sourcePlanningBudget);
         return SubmitVerifiedAsync(command, cancellationToken, sourcePlanningBudget);
     }
 

@@ -9,7 +9,7 @@ internal static class ResourceIncarnationFlow
         token.ThrowIfCancellationRequested();
         var original = ResourceIncarnationLiteral.Creation(fixture, sql, token);
         var fingerprint = original.Value!.Fingerprint;
-        var execution = original.Value.Input.ToArray();
+        var execution = OrleansSerialization.Serialize(original.Value.Input, ValidationProfile.PublicInputElements);
         var created = fixture.Database.Apply(original);
         var definition = ResourceIncarnationLiteral.Definition(sql);
         await ResourceIncarnationAssertions.EqualAsync(definition, created.Get<ResourceDefinition>());
@@ -35,7 +35,7 @@ internal static class ResourceIncarnationFlow
         await ResourceIncarnationRefusals.RunAsync(fixture, state, token);
         await ResourceIncarnationAssertions.ReplayAsync(fixture.Database, fixture.Store, state);
         await Assert.That(original.Value.Fingerprint).IsEqualTo(fingerprint);
-        await Assert.That(original.Value.Input.ToArray()).IsEquivalentTo(execution,
+        await Assert.That(OrleansSerialization.Serialize(original.Value.Input, ValidationProfile.PublicInputElements)).IsEquivalentTo(execution,
             global::TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await ResourceIncarnationCold.RunAsync(fixture, state, token);
     }

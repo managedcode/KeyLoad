@@ -56,7 +56,7 @@ internal static class ProjectionEmptyTailAssertions
         var stored = store.Read(view => OrleansSerialization.Deserialize<StoredOutcome>(view.ReadOwnedValue(key)!));
         await Assert.That(stored.CanonicalSequence).IsEqualTo(owner.LastApplied);
         await Assert.That(stored.PreparedCommand.CommandId).IsEqualTo(rejected.CommandId);
-        await Assert.That(stored.PreparedCommand.Value!.Input.Span.SequenceEqual(rejected.Value!.Input.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(stored.PreparedCommand.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(rejected.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
         await Assert.That(store.Position).IsEqualTo(position + 1L);
         await Assert.That(owner.LastApplied).IsEqualTo(applied + 1L);
         await ExactAsync(OutcomeStoreOracle.ReadPartition(store, partition, Root, rejected.CommandId)!.Value, result);

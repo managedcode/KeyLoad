@@ -5,25 +5,9 @@ namespace KeyLoad.FunctionalTests.ClientApi;
 /// <summary>AC-MCP-004: a payload ceiling bounds accepted bytes without allocating that ceiling for every request.</summary>
 internal sealed class McpBoundedWriteStreamAllocationTests
 {
-    private const int MaximumBytes = 16 * 1024 * 1024;
-    private const int SmallPayloadAllocationLimit = 64 * 1024;
     private const int FirstWriteBytes = 3072;
     private const int SecondWriteBytes = 6144;
     private const byte PrivateByte = 173;
-
-    [Test]
-    public async Task SmallInternalPayloadKeepsExactBytesWithoutAllocatingTheRequestCeiling()
-    {
-        var request = new GetDocumentRequest(new(McpCanonicalTestData.Partition, "orders", "order-1"));
-        var expected = OrleansSerialization.Serialize(request);
-        _ = InternalPayload.Serialize(request, MaximumBytes);
-        var before = GC.GetAllocatedBytesForCurrentThread();
-        var actual = InternalPayload.Serialize(request, MaximumBytes);
-        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
-
-        await Assert.That(actual.AsSpan().SequenceEqual(expected)).IsTrue();
-        await Assert.That(allocated).IsLessThan(SmallPayloadAllocationLimit);
-    }
 
     [Test]
     public async Task GrowingWritesClearRetiredCapacityAndPreserveAcceptedBytesThroughOverflow()

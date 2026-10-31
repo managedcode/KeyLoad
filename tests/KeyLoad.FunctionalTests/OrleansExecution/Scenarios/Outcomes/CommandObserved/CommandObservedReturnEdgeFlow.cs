@@ -100,7 +100,7 @@ internal static class CommandObservedReturnEdgeFlow
             var refused = await original;
             observed = true;
             await Assert.That(refused.Error).IsEqualTo(ErrorCode.UnknownWriteOutcome);
-            await Assert.That(refused.Payload.IsEmpty).IsTrue();
+            await Assert.That(refused.Result).IsNull();
             await Assert.That(refused.SafeDetail).IsEqualTo(business
                 ? CommandObservedReturnEdgeProtocol.Unknown : CommandObservedReturnEdgeProtocol.ClaimUnavailable);
             await scenario.Observation.Read(requestId).Disposed.Task.WaitAsync(operation.Token);

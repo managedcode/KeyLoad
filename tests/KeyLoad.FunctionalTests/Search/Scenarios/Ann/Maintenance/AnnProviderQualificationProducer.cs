@@ -63,7 +63,7 @@ internal static class AnnProviderQualificationProducer
         await Assert.That(owner.ReadStoredOutcome(operation.CommandId).CanonicalSequence).IsEqualTo(next);
     }
 
-    private static Command<DatabaseCommand> Create<T>(AnnProviderQualificationOwner owner, OperationKind kind, Guid id, T request)
+    private static Command<DatabaseCommand> Create<T>(AnnProviderQualificationOwner owner, OperationKind kind, Guid id, T request) where T : notnull
         => owner.Database.CreateCommand(kind, id, Root, owner.Database.EvaluationClock.GetUtcNow(),
-            OrleansSerialization.Serialize(request));
+            request);
 }

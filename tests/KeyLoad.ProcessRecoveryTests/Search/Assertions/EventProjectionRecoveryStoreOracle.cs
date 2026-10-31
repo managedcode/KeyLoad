@@ -128,7 +128,7 @@ internal static class EventProjectionRecoveryStoreOracle
     }
 
     internal static ApplyVectorProjection ReadProjection(Command<DatabaseCommand> operation)
-        => OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
+        => ((CommandRequest)operation.Value!.Input)
             .Mutations.Single() as ApplyVectorProjection
             ?? throw new InvalidOperationException("The persisted projection operation has an unexpected mutation.");
 

@@ -23,7 +23,7 @@ internal static class TextBm25EligibilityPolicy
             ExpectedSchemaVersion = resource.SchemaVersion
         };
         var configuration = owner.Database.CreateCommand(OperationKind.ConfigureResource, Guid.NewGuid(), "root",
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            owner.Database.EvaluationClock.GetUtcNow(), request);
         var changed = owner.Submit(configuration).Get<ResourceDefinition>();
         await Assert.That(changed.SchemaVersion).IsEqualTo(resource.SchemaVersion + 1);
         var revoked = flow.Configure(flow.Reader with
@@ -44,7 +44,7 @@ internal static class TextBm25EligibilityPolicy
         var fresh = flow.Capture(original.CommandId);
         var result = flow.Publish(fresh);
         await Assert.That(Errors.Code(result.Problem).Value).IsNull();
-        var phase = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((fresh).Value!.Input.Span);
+        var phase = ((Bm25CorpusPublicationPhaseCommand)(fresh).Value!.Input);
         await Assert.That(phase.Current.PolicyEpoch).IsEqualTo(3L);
         await Assert.That(phase.Current.Statistics.DocumentCount).IsEqualTo(2);
         await Assert.That(phase.Current.Statistics.TotalLength).IsEqualTo(5L);

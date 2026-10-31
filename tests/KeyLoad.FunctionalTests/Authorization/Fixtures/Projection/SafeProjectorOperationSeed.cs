@@ -30,10 +30,10 @@ internal static class SafeProjectorOperationSeed
     }
 
     internal static SafeProjectorOperationCommand Issue<T>(SafeProjectorOperationDatabase owner, OperationKind kind,
-        Guid id, T request, string principal = SafeProjectorOperationProtocol.Root, long creatorEpoch = SafeProjectorOperationProtocol.RootPolicyEpoch)
+        Guid id, T request, string principal = SafeProjectorOperationProtocol.Root, long creatorEpoch = SafeProjectorOperationProtocol.RootPolicyEpoch) where T : notnull
     {
         var operation = owner.Database.CreateCommand(kind, id, principal,
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request));
+            owner.Database.EvaluationClock.GetUtcNow(), request);
         var expected = owner.NextToken();
         var result = owner.Submit(operation);
         var image = SafeProjectorOperationHistoryImages.Capture(owner, operation);

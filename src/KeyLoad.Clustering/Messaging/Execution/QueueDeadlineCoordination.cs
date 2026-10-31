@@ -11,7 +11,7 @@ internal static class QueueDeadlineCoordination
     internal static async Task<DueDispatchResult> ExecuteAsync(QueueDeadlineHint hint, string partitionId,
         BackgroundStorageClient storage, TimeProvider clock,
         IOptions<DueCoordinationOptions> options, RuntimeJournalAdmission admission,
-        Func<PrincipalRecord, Guid, ReadOnlyMemory<byte>, CancellationToken, Task<GrainOperationReply>> dispatch,
+        Func<PrincipalRecord, Guid, object, CancellationToken, Task<GrainOperationReply>> dispatch,
         CancellationToken cancellationToken)
     {
         if (hint is null || hint.Lane?.Partition is null || hint.Mutation is null
@@ -33,7 +33,7 @@ internal static class QueueDeadlineCoordination
             throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
         }
         var commandId = DueDispatchCommandIdentity.ForDeadline(hint, principal);
-        var body = OrleansSerialization.Serialize(new CommandRequest(commandId, hint.Lane.Partition, [hint.Mutation]));
+        var body = new CommandRequest(commandId, hint.Lane.Partition, [hint.Mutation]);
         var reply = await dispatch(principal, commandId, body, lifetime.Token).ConfigureAwait(true);
         return new(reply.Error);
     }

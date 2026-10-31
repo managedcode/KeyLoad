@@ -28,7 +28,7 @@ internal static class AnalyticsStoreTestOperations
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, db.Partition, [mutation]);
         var issued = db.Database.CreateCommand(OperationKind.Batch, id, D.Root,
-            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(request), work);
+            TimeProvider.System.GetUtcNow(), request, work);
         var next = checked(db.ReadCanonicalCut().AppliedPosition + 1);
         var result = db.SubmitIssuedEmbedded(issued, token);
         var expected = new CommitReceipt(id, new(db.Store.Identity.Incarnation, db.Partition.AtomicPartitionId, next), [new(kind, D.Store, lastId, generation)], DurabilityProfile.ProcessDurable, 1);
@@ -43,7 +43,7 @@ internal static class AnalyticsStoreTestOperations
         var work = new ReadExecutionBudget(db.Database.EvaluationClock, token);
         var id = Guid.NewGuid();
         var issued = db.Database.CreateCommand(OperationKind.Batch, id, D.Root,
-            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(new CommandRequest(id, db.Partition, [mutation])), work);
+            TimeProvider.System.GetUtcNow(), new CommandRequest(id, db.Partition, [mutation]), work);
         var result = db.SubmitIssuedEmbedded(issued, token);
         await EqualAsync(Result<object>.Fail(Errors.Problem(ErrorCode.RevisionConflict, "The expected analytics event revision does not match.")), result);
         await Assert.That(result.Value).IsNull();

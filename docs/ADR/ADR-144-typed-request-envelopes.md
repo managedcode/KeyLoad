@@ -7,9 +7,20 @@ Status: Accepted by owner direction 2026-10-23. In source; Linux qualification p
 Internal requests between KeyLoad grains are `GrainRequestEnvelope` records with
 explicit `[GenerateSerializer]`, `[Id]` and `[Alias]` contracts. `GrainRequestCodec`
 issues an envelope with its purpose, request identity, database incarnation,
-principal, read or command kind, stable command identity, exact payload bytes and
+principal, read or command kind, stable command identity, typed operation value and
 expiry, and every receiving grain decodes it through the same codec, which validates
 that scope against the current incarnation and clock before any effect.
+
+The operation travels as its own generated `[GenerateSerializer]` contract in the
+envelope's `Payload` field. Orleans serializes it once with the envelope; no hop
+encodes the operation into a private byte buffer and decodes it again. The codec
+checks the operation's contract at issuance (public graph and query reads, and all
+commands, keep public null elements for owner validation; other reads are strict),
+and every receiving hop checks it again before effects. Readers cast to the exact
+expected type. Database commands keep the same typed input in
+`DatabaseCommand.Input`, so Core reads it without decoding; one kind-to-type table
+(`DatabaseCommandInputTypes`) admits exactly the declared input type for each
+command kind.
 
 The envelope is not signed. The earlier design serialized it into a `KLT2.`
 string token with an HMAC over the bytes and verified that MAC on every hop. Every
@@ -50,3 +61,12 @@ applied.
   character limit) and the `KLT2.` prefix for grain requests are removed.
 - Scope tests mutate the typed envelope directly instead of re-signing a token;
   tampering tests about MACs no longer apply to grain requests.
+- The former encoded payload field IDs are retired: envelope field 9 and
+  `DatabaseCommand` field 1 are never reused; the typed members use new IDs.
+- MCP and SQL issuance pass typed operations. SQL compiles CREATE/DROP TABLE,
+  SELECT and INSERT straight to the typed operation without a JSON round trip.
+- The ceiling on the encoded size of the decoded MCP operation existed only for
+  the retired encoded payload and is retired with it. Public admission stays
+  bounded by the HTTP body and MCP frame limits, the SQL request bounds and the
+  Orleans message size limit; the accepted input set is not claimed to be
+  byte-for-byte identical to the former one.

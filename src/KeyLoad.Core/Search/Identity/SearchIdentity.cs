@@ -24,8 +24,7 @@ public static class SearchIdentity
             work.ChargeBytes(OrleansSerialization.Measure(phase));
             engine.RequireBm25Subject(view, administrator, phase, evaluatedAt);
             work.ChargeBytes(OrleansSerialization.Measure(phase));
-            var payload = OrleansSerialization.Serialize(phase);
-            return engine.CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId, administrator.Id, evaluatedAt, payload, DatabaseCommandFingerprint.Compute(phase.CommandId, OperationKind.Bm25CorpusPublicationPhase, administrator.Id, CommandExecutionExecution.Identity<Bm25CorpusPublicationPhaseCommand>(payload)), work, view);
+            return engine.CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId, administrator.Id, evaluatedAt, phase, DatabaseCommandFingerprint.Compute(phase.CommandId, OperationKind.Bm25CorpusPublicationPhase, administrator.Id, CommandExecutionExecution.Identity(phase)), work, view);
         });
     }
 

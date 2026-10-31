@@ -95,7 +95,7 @@ internal static class CommandObservedPolicyFlow
                 observed = true;
                 await Assert.That(refused.Error).IsEqualTo(ErrorCode.PermissionDenied);
                 await Assert.That(refused.SafeDetail).IsEqualTo(P.Refusal);
-                await Assert.That(refused.Payload.IsEmpty).IsTrue();
+                await Assert.That(refused.Result).IsNull();
             }, token);
             await scenario.PolicyAsync(repaired: true, token);
             await RepairedAsync(scenario, request, initial, token);

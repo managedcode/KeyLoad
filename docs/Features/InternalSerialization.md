@@ -17,14 +17,24 @@ surrogate. All other active attributed DTOs use generated binary codecs.
 
 Core owns model validation, canonical identity and persisted command outcomes.
 In-memory command snapshots use the native Orleans generated deep copier, with
-contract validation before and after copying. The owned encoded operation input
-is decoded once for its type and public-element validation. Mutable payload bytes
-and metadata remain independent of the caller; copying does not encode a new
-transport envelope or change persisted bytes, field IDs or aliases.
+contract validation before and after copying. Commands and grain requests carry
+typed operation values. Replies carry a generated `GrainValue` directly; their
+callers do not encode and decode a private byte payload inside an Orleans call.
+Counting destinations enforce the existing byte ceilings without retaining a
+second encoded reply. Mutable operation values and metadata remain independent
+of the caller. Replaced binary fields are retired and typed replacements use
+unused field IDs; aliases and application versions are unchanged.
+Only `DatabaseCommand.Input` marks the public-input element policy, so rejected
+public null elements can reach domain validation and remain in original command
+outcomes. Other members retain strict validation, including required references
+and initialized collections. Request admission enforces the real HTTP/MCP frame
+and native Orleans message ceilings; the removed private encoded-operation
+buffer has no independent size ceiling.
 Storage.ZoneTree owns physical metadata, WAL and file recovery. Orleans carries
 grain calls. ClientApi owns actual public JSON and authorized admission. MCP
-checks its actual decoded principal and projection limits rather than parsing
-Orleans wire fields.
+checks its actual typed principal, encoded byte ceiling and projection limits
+rather than parsing Orleans wire fields. Administrator authentication carries
+the principal directly instead of a nested encoded principal buffer.
 
 ## Requirements
 

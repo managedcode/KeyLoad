@@ -15,7 +15,7 @@ internal static class TextBm25EligibilityTrial
         var receipt = flow.Publish(original);
         await Assert.That(Errors.Code(receipt.Problem).Value).IsNull();
         var entry = OrleansSerialization.Serialize(flow.Owner.Entry(original.CommandId));
-        var head = OrleansSerialization.Deserialize<Bm25CorpusPublicationPhaseCommand>((original).Value!.Input.Span).Current;
+        var head = ((Bm25CorpusPublicationPhaseCommand)(original).Value!.Input).Current;
         var raw = Bm25ColdInvalidationAssertions.HeadBytes(flow.Owner, head);
         await Assert.That(head.Statistics.DocumentCount).IsEqualTo(3);
         await Assert.That(head.Statistics.TotalLength).IsEqualTo(4L);
@@ -40,8 +40,8 @@ internal static class TextBm25EligibilityTrial
         var owner = flow.Owner;
         var id = Guid.NewGuid();
         var operation = owner.Database.CreateCommand(OperationKind.Batch, id, "root",
-            owner.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(
-                new CommandRequest(id, owner.Source.Partition, [mutation])));
+            owner.Database.EvaluationClock.GetUtcNow(),
+            new CommandRequest(id, owner.Source.Partition, [mutation]));
         var result = owner.Submit(operation);
         if (Errors.Code(result.Problem).Value is not null)
         {

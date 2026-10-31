@@ -145,7 +145,7 @@ internal sealed class CqrsStreamAdmission(
         {
             var reply = final.Value;
             if (kind != CqrsStreamChunkKind.Completed || final.Problem is not null
-                || reply.Payload.IsEmpty || reply.Payload.Length > options.Value.MaximumReplyBytes
+                || reply.Result is null || GrainReplyFactory.Measure(reply) > options.Value.MaximumReplyBytes
                 || reply.Error is not null || reply.SafeDetail is not null)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);

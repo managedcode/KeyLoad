@@ -71,7 +71,7 @@ internal sealed class ConnectionGraphPolicyTests
         var command = scenario.Command(Document);
         var requestId = Guid.NewGuid();
         var envelope = scenario.Fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch,
-            command.CommandId, OrleansSerialization.Serialize(command));
+            command.CommandId, command);
         var partition = GrainPartitionResolver.Resolve(scenario.Fixture.Codec.Decode(envelope));
         var owner = scenario.Fixture.Source.Services.GetRequiredService<ILocalSiloDetails>().SiloAddress;
         var grains = scenario.Fixture.Cluster.Client;
@@ -104,7 +104,7 @@ internal sealed class ConnectionGraphPolicyTests
         var replay = await scenario.CommandAsync(principal, replayId, command, token);
         await Assert.That(replay.Error).IsNull();
         await Assert.That(replay.SafeDetail).IsEqualTo(original.SafeDetail);
-        await Assert.That(replay.Payload.Span.SequenceEqual(original.Payload.Span)).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(replay)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(original)))).IsTrue();
         await Assert.That(scenario.Fixture.Database.ReadCanonicalCut()).IsEqualTo(cut);
         await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(position);
         await DocumentAsync(scenario);

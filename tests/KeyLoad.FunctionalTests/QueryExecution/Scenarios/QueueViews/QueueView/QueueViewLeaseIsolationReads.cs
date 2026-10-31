@@ -20,7 +20,7 @@ internal static class QueueViewLeaseIsolationReads
             var decoded = SqlOperationTestData.Compile(new(state.Partition,
                 hidden ? HiddenSql : QueueSql, AllowFullScan: true), cancellationToken: state.Token);
             // The SQL gateway lowers SELECT once and ships the typed plan.
-            var request = OrleansSerialization.Deserialize<AstQueryRequest>(decoded.Payload.Span);
+            var request = ((AstQueryRequest)decoded.Payload);
             await ObserveAsync(state, async () => await QueueViewLeaseIsolationRows.SameAsync(
                 queries.ExecuteAst(Reader, request, cancellationToken: state.Token), QueueViewLeaseIsolationRows.Page(state, hidden)));
         }

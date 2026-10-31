@@ -47,7 +47,7 @@ internal static class ConnectionClosedCommandContinuation
             var replay = await ConnectionAwaitedSettlementCalls.CommandForOwnerAsync(scenario, principal,
                 replayId, command, ownerId, token);
             await Assert.That(replay.Error).IsNull();
-            await Assert.That(replay.Payload.Span.SequenceEqual(created.Payload.Span)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(replay)).AsSpan().SequenceEqual(OrleansSerialization.Serialize(GrainReplyFactory.RequireValue(created)))).IsTrue();
             await scenario.Observation.Read(replayId).Disposed.Task.WaitAsync(token);
             await Assert.That(QueueWholeFlowStorage.Bytes(scenario.Fixture.Database.Store).SequenceEqual(image)).IsTrue();
             await Assert.That(scenario.Fixture.Database.Store.Position).IsEqualTo(cut);

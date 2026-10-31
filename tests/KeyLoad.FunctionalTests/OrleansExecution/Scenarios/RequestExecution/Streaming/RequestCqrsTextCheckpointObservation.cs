@@ -21,7 +21,7 @@ internal static class RequestCqrsTextCheckpointObservation
         var original = TextIncrementalMetadata.ReadIntent(Path.Combine(root, leaf), options.Value.MaximumDiskBytes, budget);
         var command = original.CheckpointCommand;
         var issued = database.Database.CreateCommand(OperationKind.CommitProjectionBatch,
-            command.CommandId, TextMaintenanceTestValues.Principal, default, OrleansSerialization.Serialize(command));
+            command.CommandId, TextMaintenanceTestValues.Principal, default, command);
         var outcome = database.Database.ResolveOutcome(issued);
         var actual = outcome.Value as ProjectionBatchResult;
         var applied = database.Store.Read(view => OrleansSerialization.Deserialize<long>(

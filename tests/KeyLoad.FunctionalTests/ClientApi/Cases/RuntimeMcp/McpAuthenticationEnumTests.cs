@@ -19,7 +19,7 @@ internal sealed class McpAuthenticationEnumTests
         await Assert.That(remaining).IsEqualTo(0);
         using var database = new TestDatabase();
         var principal = McpAuthenticationTests.Principal(database);
-        var payload = OrleansSerialization.Serialize(new GrainValue(principal));
+        var payload = new GrainValue(principal);
         var decoded = McpAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None);
         await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
     }

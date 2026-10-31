@@ -6,7 +6,7 @@ internal static class SampleChunkMinimumEnvelopeIssuance
 {
     internal static GrainRequestEnvelope Create(GrainRequestCodec codec, PrincipalRecord reader, Guid requestId,
         ReadSampleChunkWindowRequest request)
-        => codec.CreateRead(requestId, reader.Id, GrainReadKind.SampleChunkWindow, OrleansSerialization.Serialize(request));
+        => codec.CreateRead(requestId, reader.Id, GrainReadKind.SampleChunkWindow, request);
 
     /// <summary>The two scope faults a receiving grain refuses before routing: a foreign incarnation and an expired envelope.</summary>
     internal static IEnumerable<Func<GrainRequestEnvelope, GrainRequestEnvelope>> OutOfScope()

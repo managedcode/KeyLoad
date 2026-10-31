@@ -72,7 +72,7 @@ internal static class DropOperationFlow
         var reply = await DropPublicSubmission.Start(profile, DropRuntimeProtocol.Request, id, token).Original.ConfigureAwait(false);
         await Assert.That(reply.Error).IsEqualTo(expected.Error);
         await Assert.That(reply.SafeDetail).IsEqualTo(expected.SafeDetail);
-        await Assert.That(reply.Payload.IsEmpty).IsTrue();
+        await Assert.That(reply.Result).IsNull();
         var retained = await DropRuntimeAssertions.StoredDropAsync(profile, id, DropRuntimeProtocol.Request,
             ErrorCode.BudgetExceeded, token).ConfigureAwait(false);
         await Assert.That(retained.SequenceEqual(originalOutcome)).IsTrue();

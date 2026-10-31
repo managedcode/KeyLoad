@@ -16,7 +16,7 @@ internal sealed class OperationCoordinatorTests
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, database.Partition, [new PutDocument(Collection, Entity, Json)]);
         var coordinator = new EmbeddedCoordinator(database.Database);
-        var payload = OrleansSerialization.Serialize(request);
+        var payload = request;
         var first = await coordinator.RuntimeSubmitAsync(OperationKind.Batch, id, RootPrincipal, payload);
         var replay = await coordinator.RuntimeSubmitAsync(OperationKind.Batch, id, RootPrincipal, payload);
         await Assert.That(first.Value).IsTypeOf<CommitReceipt>();
@@ -33,7 +33,7 @@ internal sealed class OperationCoordinatorTests
         var before = database.Store.Position;
         var coordinator = new EmbeddedCoordinator(database.Database);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => coordinator.RuntimeSubmitAsync(OperationKind.Batch,
-            Guid.NewGuid(), RootPrincipal, OrleansSerialization.Serialize(true)));
+            Guid.NewGuid(), RootPrincipal, true));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(database.Store.Position).IsEqualTo(before);
     }
@@ -45,12 +45,12 @@ internal sealed class OperationCoordinatorTests
         var id = Guid.NewGuid();
         var request = new CommandRequest(id, database.Partition, [new PutDocument(Collection, Entity, Json)]);
         var operation = database.Database.CreateCommand(OperationKind.Batch, id, RootPrincipal, Time,
-            OrleansSerialization.Serialize(request));
+            request);
         await Assert.That(operation.CommandId).IsEqualTo(id);
         await Assert.That(operation.UserId).IsEqualTo(RootPrincipal);
         await Assert.That(operation.Timestamp).IsEqualTo(Time.UtcDateTime);
-        await Assert.That(operation.Value!.Input.Span.SequenceEqual(OrleansSerialization.Serialize(request))).IsTrue();
-        var restored = OrleansSerialization.Deserialize<CommandRequest>(operation.Value.Input.Span);
+        await Assert.That(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(request))).IsTrue();
+        var restored = ((CommandRequest)operation.Value.Input);
         await Assert.That(((PutDocument)restored.Mutations[0]).Json).IsEqualTo(Json);
     }
 }

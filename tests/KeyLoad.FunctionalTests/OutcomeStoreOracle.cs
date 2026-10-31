@@ -13,7 +13,7 @@ internal static class OutcomeStoreOracle
 
     internal static byte[] Key(Command<DatabaseCommand> operation)
     {
-        if (operation.Value is null || operation.Value.Input.IsEmpty)
+        if (operation.Value is null || (operation.Value.Input is null))
         {
             return UnknownKey(operation.UserId!, operation.CommandId);
         }
@@ -114,21 +114,16 @@ internal static class OutcomeStoreOracle
             _ => false
         };
 
-    private static bool IsBoolean(ReadOnlyMemory<byte> input)
-    {
-        _ = OrleansSerialization.Deserialize<bool>(input.Span);
-        return true;
-    }
+    private static bool IsBoolean(object input) => input is bool;
 
     private static (bool HasValue, PartitionRef? Value) Partition<T>(Command<DatabaseCommand> operation, Func<T, PartitionRef?> select)
         where T : class
     {
-        var request = OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
-        return request is null ? (false, default(PartitionRef?)) : ((PartitionRef?)(select(request))) is { } outcomeValue2 ? (true, outcomeValue2) : (false, default(PartitionRef?));
+        return operation.Value!.Input is T request && select(request) is { } partition ? (true, partition) : (false, default(PartitionRef?));
     }
 
     private static bool IsNonNull<T>(Command<DatabaseCommand> operation) where T : class
-        => OrleansSerialization.Deserialize<T>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements) is not null;
+        => operation.Value!.Input is T;
 
     private static bool Valid(PartitionRef? partition)
         => partition is not null && !string.IsNullOrWhiteSpace(partition.TenantId)

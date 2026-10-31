@@ -109,7 +109,7 @@ internal static class SubscriptionInboxConflictFlow
             }, 2, index == 2 ? 1 : 3, 3, 3, false, null);
         }
         await SubscriptionParkedRecoveryAssertions.NoWindowAsync(cold, group);
-        var current = OrleansSerialization.Deserialize<ReceiveSubscriptionRequest>(claims[1].Operation.Value!.Input.Span, ValidationProfile.PublicInputElements)
+        var current = ((ReceiveSubscriptionRequest)claims[1].Operation.Value!.Input)
             ?? throw new InvalidOperationException("The original current Receive request is absent.");
         await SubscriptionCheckpointAuthorityAssertions.SettledClaimAsync(db, cold, current, claims[1].Result, token);
         await SecondColdAsync(cold, fixture.Directory, group, claims, history, inbox, source, current, fixture, token);

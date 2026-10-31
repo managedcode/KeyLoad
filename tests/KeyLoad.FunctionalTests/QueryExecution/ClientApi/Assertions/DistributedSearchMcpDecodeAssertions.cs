@@ -51,7 +51,7 @@ internal static class DistributedSearchMcpDecodeAssertions
         await Assert.That(decoded.ReadKind).IsEqualTo(GrainReadKind.DistributedSearch);
         await Assert.That(decoded.CommandKind).IsNull();
         await Assert.That(decoded.CommandId).IsEqualTo(Guid.Empty);
-        var actual = OrleansSerialization.Deserialize<DistributedSearchRequest>(decoded.Payload.Span);
+        var actual = ((DistributedSearchRequest)decoded.Payload);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         var json = JsonSerializer.Deserialize<DistributedSearchRequest>(JsonDefaults.Serialize(actual), JsonDefaults.Options);
         var roundtrip = OrleansSerialization.Deserialize<DistributedSearchRequest>(OrleansSerialization.Serialize(json));

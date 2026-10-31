@@ -97,7 +97,7 @@ internal static class GraphReferenceLifetimeTupleIntegrity
             var command = new CommandRequest(Guid.NewGuid(), DropRuntimeProtocol.Partition,
                 [new PutDocument(AnchorCollection, RollbackWitness, Attributes), mutation]);
             var operation = profile.Source.Database.CreateCommand(OperationKind.Batch, command.CommandId,
-                PartitionStoreProtocol.AdministratorId, profile.Node.Clock.GetUtcNow(), OrleansSerialization.Serialize(command));
+                PartitionStoreProtocol.AdministratorId, profile.Node.Clock.GetUtcNow(), command);
             var verified = profile.Source.Database.OwnCommand(operation);
             await RefuseWriteAsync(profile, verified, token);
             await RefuseWriteAsync(profile, verified, token);

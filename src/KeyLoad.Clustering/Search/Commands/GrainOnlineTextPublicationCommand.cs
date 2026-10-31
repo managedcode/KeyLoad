@@ -7,18 +7,6 @@ namespace KeyLoad.Clustering;
 
 internal static class GrainOnlineTextPublicationCommand
 {
-    internal static string Resolve(DecodedGrainRequest request)
-    {
-        var phase = OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(Read(request));
-        var partition = phase.Request.Consumer.Partition;
-        ArgumentNullException.ThrowIfNull(partition);
-        JsonData.Identifier(partition.TenantId);
-        JsonData.Identifier(partition.DatabaseId);
-        JsonData.Identifier(partition.TransactionDomainId);
-        JsonData.Identifier(partition.PartitionKey);
-        return partition.AtomicPartitionId;
-    }
-
     internal static async Task<Result<object>> SubmitAsync(DatabaseEngine database,
         ICommitCoordinator coordinator, DecodedGrainRequest request, PrincipalRecord principal,
         IOnlineTextMaintenance? maintenance, CancellationToken cancellationToken)

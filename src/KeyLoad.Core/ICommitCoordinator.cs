@@ -11,7 +11,7 @@ public interface ICommitCoordinator
     /// <summary>Submits an attributed execution command with an optional original call-local planning budget.</summary>
     /// <returns>The persisted typed command result or an explicit acceptance failure.</returns>
     Task<Result<object>> RuntimeSubmitAsync(OperationKind kind, Guid id, string principalId,
-        ReadOnlyMemory<byte> payload, ReadExecutionBudget? sourcePlanningBudget = null,
+        object input, ReadExecutionBudget? sourcePlanningBudget = null,
         CancellationToken cancellationToken = default);
     /// <summary>Submits a server-bound execution command with its original prepared database facts.</summary>
     /// <param name="operation">Owned execution command whose subject was verified by the server.</param>

@@ -35,7 +35,7 @@ internal sealed class DatabaseCompositionDeterminismTests
                     new GraphToQueueMutation(Queue, Graph, Vertex(left, From), MessagePrefix)]);
             var work = left.CreateReadWork(TestContext.Current!.Execution.CancellationToken);
             var operation = left.Database.CreateCommand(OperationKind.Batch, commandId, "root", fixedEvaluation,
-                OrleansSerialization.Serialize(request), work);
+                request, work);
             var limits = new DatabaseLimits();
             var steady = new DivergentClock(DateTimeOffset.UnixEpoch, timestampStep: 0);
             var jumping = new DivergentClock(DateTimeOffset.UnixEpoch.AddYears(50), TimeSpan.TicksPerHour);

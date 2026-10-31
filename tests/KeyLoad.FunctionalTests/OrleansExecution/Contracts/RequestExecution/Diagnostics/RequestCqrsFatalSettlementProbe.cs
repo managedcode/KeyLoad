@@ -86,7 +86,7 @@ internal static class RequestCqrsFatalSettlementProbe
         {
             await writer.StartedAsync(new GrainRequestProgress(requestId));
             await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System, writer.CancellationToken);
-            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = new byte[] { 1 } });
+            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(new byte[] { 1 }) });
         }
         finally
         {
@@ -102,7 +102,7 @@ internal static class RequestCqrsFatalSettlementProbe
         try
         {
             await writer.StartedAsync(new GrainRequestProgress(requestId));
-            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = new byte[] { 1 } });
+            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(new byte[] { 1 }) });
         }
         finally
         {

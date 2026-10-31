@@ -53,7 +53,7 @@ internal static class RequestCqrsAnnOriginalReplay
         var execution = runtimeRootCore ? AnnFixtureFileSnapshot.Capture(fixture.Database.Directory) : [];
         var id = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(id, RequestCqrsAnnTestData.Principal,
-            OperationKind.MaintainAnnIndex, original.CommandId, OrleansSerialization.Serialize(original));
+            OperationKind.MaintainAnnIndex, original.CommandId, original);
         var principal = fixture.Database.Store.Read(view => fixture.Database.Database.Principal(view,
             RequestCqrsAnnTestData.Principal, fixture.Clock.GetUtcNow()));
         var connection = fixture.Grains.GetGrain<IConnectionGrain>(fixture.ConnectionId);
@@ -65,7 +65,7 @@ internal static class RequestCqrsAnnOriginalReplay
             id, fixture.Clock, fixture.RoutingOptions,
             new CqrsStreamPurpose(() => fixture.Codec.DecodeRequest(envelope, id)), token);
         await Assert.That(reply.Error).IsEqualTo(expected);
-        await Assert.That(reply.Payload.Length).IsEqualTo(0);
+        await Assert.That(reply.Result).IsNull();
         await Assert.That(fixture.Database.ReadCanonicalCut().AppliedPosition).IsEqualTo(journal.AppliedPosition);
         await Assert.That(fixture.Database.ReadCanonicalCut().AppliedPosition).IsEqualTo(journal.AppliedPosition);
         await UnchangedAsync(fixture, canonical, cut, execution, runtimeRootCore);

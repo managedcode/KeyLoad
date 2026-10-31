@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Text.Json;
 using KeyLoad.InternalSerialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -44,6 +45,13 @@ public static class OrleansSerialization
     internal static void Serialize<T>(T value, Stream destination, ValidationProfile profile)
     {
         ContractValidation.Validate(value, profile);
+        ArgumentNullException.ThrowIfNull(destination);
+        Serializer.Serialize(new RuntimePayload { Version = PayloadVersion.Current, Value = value }, destination);
+    }
+
+    internal static void SerializeToWriter<T>(T value, IBufferWriter<byte> destination)
+    {
+        ContractValidation.Validate(value);
         ArgumentNullException.ThrowIfNull(destination);
         Serializer.Serialize(new RuntimePayload { Version = PayloadVersion.Current, Value = value }, destination);
     }

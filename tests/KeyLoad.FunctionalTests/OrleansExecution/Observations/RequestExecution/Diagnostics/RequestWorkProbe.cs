@@ -49,7 +49,7 @@ internal sealed class RequestWorkProbe
             }
             await producerRelease.Task.WaitAsync(writer.CancellationToken).ConfigureAwait(true);
 
-            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Payload = new byte[] { 1 } });
+            return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(new byte[] { 1 }) });
         }
         finally
         {

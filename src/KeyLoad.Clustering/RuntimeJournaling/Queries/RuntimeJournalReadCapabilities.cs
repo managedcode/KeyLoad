@@ -5,7 +5,7 @@ namespace KeyLoad.Clustering;
 internal static class RuntimeJournalReadCapabilities
 {
     internal static object? Execute(DatabaseEngine database, string principalId, GrainReadKind kind,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        object payload, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return kind switch
@@ -20,7 +20,7 @@ internal static class RuntimeJournalReadCapabilities
     }
 
     private static RuntimeJournalCatalog Catalog(DatabaseEngine database, string principalId,
-        ReadOnlyMemory<byte> payload, CancellationToken cancellationToken)
+        object payload, CancellationToken cancellationToken)
     {
         GrainPayload.RequireNoDto(payload);
         return database.ReadRuntimeJournalCatalog(principalId, cancellationToken);

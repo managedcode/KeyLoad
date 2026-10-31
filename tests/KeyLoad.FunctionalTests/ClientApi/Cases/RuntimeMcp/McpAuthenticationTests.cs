@@ -12,7 +12,7 @@ internal sealed class McpAuthenticationTests
     internal const string PrincipalId = "root";
     internal const string SharedValue = "execution-auth-shared-value";
     private const string UnicodePrincipal = "principal-ї-漢-🧭-e\u0301";
-    private const string LegacyPrincipalJson = "{\"id\":\"root\"}";
+    private const string WrongPrincipalJson = "{\"id\":\"root\"}";
     private static readonly uint[] PrincipalIds = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11];
     private static readonly uint[] GrantIds = [0, 1, 2];
 
@@ -35,7 +35,7 @@ internal sealed class McpAuthenticationTests
             OwnerId = SharedValue,
             ExpiresAt = expires ? DateTimeOffset.UnixEpoch : null
         };
-        var payload = OrleansSerialization.Serialize(new GrainValue(principal));
+        var payload = new GrainValue(principal);
         var shape = McpAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None);
         var publicShape = McpFrameBounds.InspectValue(JsonDefaults.Serialize(principal), McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
         await Assert.That(shape).IsEqualTo(publicShape);
@@ -60,17 +60,18 @@ internal sealed class McpAuthenticationTests
             new ConfigurePrincipalRequest(requested)).Get<PrincipalRecord>();
         await Assert.That(JsonDefaults.Serialize(principal).AsSpan().SequenceEqual(JsonDefaults.Serialize(requested))).IsTrue();
         var expected = JsonDefaults.Serialize(requested);
-        var payload = OrleansSerialization.Serialize(new GrainValue(principal));
+        var wire = OrleansSerialization.Serialize(new GrainValue(principal));
+        var payload = OrleansSerialization.Deserialize<GrainValue>(wire);
         using (var state = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution()))
         {
             state.Authenticate(payload, CancellationToken.None);
             await Assert.That(JsonDefaults.Serialize(state.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
-            Array.Clear(payload);
+            Array.Clear(wire);
             await Assert.That(JsonDefaults.Serialize(state.Principal).AsSpan().SequenceEqual(expected)).IsTrue();
         }
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
-        var fresh = OrleansSerialization.Serialize(new GrainValue(principal));
+        var fresh = new GrainValue(principal);
         using (var denied = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution()))
         {
             Assert.ThrowsExactly<OperationCanceledException>(() => denied.Authenticate(fresh, cancelled.Token));
@@ -81,16 +82,16 @@ internal sealed class McpAuthenticationTests
     }
 
     [Test]
-    public async Task CancellationAndLegacyPrincipalJsonDoNotReachTypedAllocation()
+    public async Task CancellationAndWrongPrincipalTypeCannotAdmitIdentity()
     {
         using var database = new TestDatabase();
-        var payload = OrleansSerialization.Serialize(new GrainValue(Principal(database)));
+        var payload = new GrainValue(Principal(database));
         using var cancelled = new CancellationTokenSource();
         await cancelled.CancelAsync();
         Assert.ThrowsExactly<OperationCanceledException>(() => McpAuthentication.Inspect(payload, UnitMcpOptions.Execution(), cancelled.Token));
         Assert.ThrowsExactly<OperationCanceledException>(() => McpAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), cancelled.Token));
-        var legacy = Encoding.UTF8.GetBytes(LegacyPrincipalJson);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpAuthentication.Inspect(legacy, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
+        var invalid = new GrainValue(WrongPrincipalJson);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpAuthentication.Inspect(invalid, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
             .IsEqualTo(ErrorCode.Validation);
     }
 

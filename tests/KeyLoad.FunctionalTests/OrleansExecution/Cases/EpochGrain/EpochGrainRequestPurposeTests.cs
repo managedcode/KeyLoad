@@ -20,7 +20,7 @@ internal sealed class EpochGrainRequestPurposeTests
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System, UnitRoutingOptions.Routing());
         var requestId = Guid.NewGuid();
-        var payload = OrleansSerialization.Serialize(NoDtoMarker);
+        object payload = NoDtoMarker;
         var current = codec.CreateRead(requestId, PrincipalId, GrainReadKind.QueryCapabilities, payload);
         var envelope = codec.DecodeRead(current, requestId).Envelope;
         await Assert.That(envelope.Purpose).IsEqualTo(CurrentPurpose);

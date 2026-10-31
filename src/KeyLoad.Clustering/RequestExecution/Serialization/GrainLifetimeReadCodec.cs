@@ -4,7 +4,7 @@ namespace KeyLoad.Clustering;
 internal static class GrainLifetimeReadCodec
 {
     internal static GrainRequestEnvelope CreatePartitionQueryLeaf(this GrainRequestCodec codec, Guid requestId, string principalId,
-        ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
+        object payload, DateTimeOffset expiresAt)
     {
         var context = codec.LifetimeReadContext;
         return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(context.Scope, context.Now,
@@ -16,7 +16,7 @@ internal static class GrainLifetimeReadCodec
     }
 
     internal static GrainRequestEnvelope CreateDistributedSearchLeaf(this GrainRequestCodec codec, Guid requestId, string principalId,
-        ReadOnlyMemory<byte> payload, DateTimeOffset expiresAt)
+        object payload, DateTimeOffset expiresAt)
     {
         var context = codec.LifetimeReadContext;
         return codec.Issue(GrainRequestCapabilityEnvelopes.RemoteRead(context.Scope, context.Now,

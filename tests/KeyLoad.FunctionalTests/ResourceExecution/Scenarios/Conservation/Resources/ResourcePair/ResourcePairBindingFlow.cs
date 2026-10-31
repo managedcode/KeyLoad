@@ -122,7 +122,7 @@ internal static class ResourcePairBindingFlow
             await Assert.That(original.UserId).IsEqualTo(issued.UserId);
             await Assert.That(original.Value!.Kind).IsEqualTo(issued.Value!.Kind);
             await Assert.That(original.Value.Fingerprint).IsEqualTo(issued.Value.Fingerprint);
-            await Assert.That(original.Value.Input.Span.SequenceEqual(issued.Value.Input.Span)).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(original.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(issued.Value.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
             state.Remember(original, result);
             await ResourcePairBindingAssertions.PairsAsync(state, source.Store);
             return (original, result);

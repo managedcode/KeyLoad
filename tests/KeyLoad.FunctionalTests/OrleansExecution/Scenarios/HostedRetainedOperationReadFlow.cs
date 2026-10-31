@@ -103,7 +103,7 @@ internal static class HostedRetainedOperationReadFlow
         var payload = new CommandRequest(id, fixture.Source.Partition,
             [new PutDocument(Collection, Document + index.ToString(CultureInfo.InvariantCulture), DocumentJson)]);
         return fixture.Database.CreateCommand(OperationKind.Batch, id, Root,
-            fixture.Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(payload));
+            fixture.Database.EvaluationClock.GetUtcNow(), payload);
     }
 
     private static StoredCommand Read(DocumentPatchAtomicityOwner fixture, StoredOutcome original, CancellationToken token)

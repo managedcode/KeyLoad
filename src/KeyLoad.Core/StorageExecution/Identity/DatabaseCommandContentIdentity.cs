@@ -1,4 +1,3 @@
-using KeyLoad.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -19,9 +18,8 @@ public static class DatabaseCommandContentIdentity
             throw Errors.Fail(ErrorCode.Conflict, AtomicCommandCommit.CommandContentConflictMessage);
         }
 
-        var type = (DatabaseCommandInputTypes.OperationPayloadType(input.Kind)).Value ?? throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand);
-        var requested = OrleansSerialization.Deserialize(input.Input.Span, type, ValidationProfile.PublicInputElements);
-        var retained = OrleansSerialization.Deserialize(admitted.Input.Span, type, ValidationProfile.PublicInputElements);
+        var requested = DatabaseCommandInputTypes.Require(input.Kind, input.Input);
+        var retained = DatabaseCommandInputTypes.Require(admitted.Kind, admitted.Input);
         if (JsonData.Fingerprint(requested) != JsonData.Fingerprint(retained))
         {
             throw Errors.Fail(ErrorCode.Conflict, AtomicCommandCommit.CommandContentConflictMessage);

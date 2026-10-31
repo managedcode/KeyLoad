@@ -111,7 +111,7 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
         var request = new CommandRequest(Guid.NewGuid(), source.Partition, [.. mutations]);
         var work = new ReadExecutionBudget(Database.EvaluationClock, token);
         var original = Database.CreateCommand(OperationKind.Batch, request.CommandId, RootPrincipal,
-            Database.EvaluationClock.GetUtcNow(), OrleansSerialization.Serialize(request), work);
+            Database.EvaluationClock.GetUtcNow(), request, work);
         return Database.Apply(original).Get<CommitReceipt>();
     }
 

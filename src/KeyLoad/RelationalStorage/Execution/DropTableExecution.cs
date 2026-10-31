@@ -32,6 +32,6 @@ internal sealed class DropTableExecution(PartitionHost partition, TimeProvider c
             work.CreateView(raw), principalId, clock.GetUtcNow()));
         GrainRequestAuthority.RequireAdministrator(principal);
         return await partition.Coordinator.RuntimeSubmitAsync(OperationKind.DropTable, commandId, principal.Id,
-            OrleansSerialization.Serialize(request), work, deadline.Token);
+            request, work, deadline.Token);
     }
 }

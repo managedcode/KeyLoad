@@ -36,14 +36,14 @@ internal static class MultiLaneConnectionOwnerTrial
     });
 
     private static async Task<GrainOperationReply> InvokeAsync<T>(ConnectionScenario scenario,
-        OperationKind kind, Guid commandId, T request, CancellationToken token)
+        OperationKind kind, Guid commandId, T request, CancellationToken token) where T : notnull
     {
         var fixture = scenario.Fixture;
         var principal = GrainRequestAuthority.Reload(fixture.Database.Database, ConnectionProtocol.Root,
             fixture.Clock);
         var actor = Guid.NewGuid();
         var envelope = fixture.Codec.CreateCommand(actor, principal.Id, kind, commandId,
-            OrleansSerialization.Serialize(request));
+            request);
         return await scenario.InvokeAsync(principal, actor, commandId, envelope, token);
     }
 

@@ -93,11 +93,11 @@ internal static class OrleansRuntimeTelemetryWorkflows
             await OrleansRuntimeTelemetryAssertions.AssertIsolatedParentAsync(parent);
             var requestId = Guid.NewGuid();
             var envelope = fixture.Codec.CreateRead(requestId, principal.Id, GrainReadKind.Document,
-                OrleansSerialization.Serialize(new GetDocumentRequest(new(fixture.Database.Partition,
-                    OrleansRuntimeTelemetryTokens.Collection, documentId))));
+                new GetDocumentRequest(new(fixture.Database.Partition,
+                    OrleansRuntimeTelemetryTokens.Collection, documentId)));
             var reply = await ReadAsync(fixture, principal, requestId, envelope);
-            await Assert.That(reply.Payload.IsEmpty).IsFalse();
-            var record = OrleansSerialization.Deserialize<GrainValue>(reply.Payload.Span).Value as DocumentResult;
+            await Assert.That(reply.Result).IsNotNull();
+            var record = GrainReplyFactory.RequireValue(reply).Value as DocumentResult;
             await Assert.That(record).IsNotNull();
             await Assert.That(record!.Reference.Id).IsEqualTo(documentId);
             await Assert.That(record.Json).IsEqualTo(OrleansRuntimeTelemetryTokens.DocumentJson);
@@ -199,7 +199,7 @@ internal static class OrleansRuntimeTelemetryWorkflows
         var command = new CommandRequest(commandId, fixture.Database.Partition,
             [new PutDocument(OrleansRuntimeTelemetryTokens.Collection, documentId, OrleansRuntimeTelemetryTokens.DocumentJson)]);
         return fixture.Codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, commandId,
-            OrleansSerialization.Serialize(command));
+            command);
     }
 
     private static string NewDocumentId()

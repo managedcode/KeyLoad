@@ -10,7 +10,7 @@ internal static class DatabaseCredentialResolver
     /// <param name="context">The actual authenticated public request and services.</param>
     /// <param name="executionObserver">The optional borrowed execution observer; no credentials are exposed.</param>
     /// <returns>The current persisted principal reply, decoded by the owning adapter.</returns>
-    internal static async Task<ReadOnlyMemory<byte>> ReadAsync(HttpContext context,
+    internal static async Task<GrainValue> ReadAsync(HttpContext context,
         IDatabaseAuthenticationExecutionObserver? executionObserver = null)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -55,6 +55,6 @@ internal static class DatabaseCredentialResolver
                 executionObserver!.Terminal(context.TraceIdentifier, requestId, outcome);
             }
         }
-        return reply.Payload;
+        return GrainReplyFactory.RequireValue(reply);
     }
 }

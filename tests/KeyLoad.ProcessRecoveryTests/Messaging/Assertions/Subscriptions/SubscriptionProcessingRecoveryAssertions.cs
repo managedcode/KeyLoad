@@ -41,7 +41,7 @@ internal static class SubscriptionProcessingRecoveryAssertions
         await Assert.That(actual.Checkpoint).IsEqualTo(committed ? 1L : 0L);
         await Assert.That(actual.Paused).IsFalse();
         await Assert.That(actual.SafeFailureCode).IsNull();
-        var request = OrleansSerialization.Deserialize<SubscriptionProcessingRequest>(original.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var request = ((SubscriptionProcessingRequest)original.Value!.Input);
         var rows = store.Read(view => new
         {
             Window = view.GetRecord<GroupDelivery>(SubscriptionProcessingRecoveryContinuation.Key("subscription-window", group, 1L, 1L)),

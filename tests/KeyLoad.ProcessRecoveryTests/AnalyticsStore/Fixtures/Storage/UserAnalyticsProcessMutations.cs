@@ -52,6 +52,6 @@ internal static class UserAnalyticsProcessMutations
     {
         var work = new ReadExecutionBudget(host.Database.EvaluationClock, token);
         return host.Database.CreateCommand(kind, id, PartitionStoreProtocol.AdministratorId,
-            TimeProvider.System.GetUtcNow(), OrleansSerialization.Serialize(payload), work);
+            TimeProvider.System.GetUtcNow(), payload, work);
     }
 }

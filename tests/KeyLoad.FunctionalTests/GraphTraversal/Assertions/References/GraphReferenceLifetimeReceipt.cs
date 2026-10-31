@@ -19,7 +19,7 @@ internal static class GraphReferenceLifetimeReceipt
             ?? throw new InvalidOperationException(DropRuntimeProtocol.MissingReply);
         await Assert.That(outcome.PreparedCommand.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(outcome.PreparedCommand.CommandId).IsEqualTo(original.CommandId);
-        await Assert.That(outcome.PreparedCommand.Value.Input.Span.SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(outcome.PreparedCommand.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
         var expected = new CommitReceipt(original.CommandId, new(profile.Source.Store.Identity.Incarnation, DropRuntimeProtocol.Partition.AtomicPartitionId,
                 outcome.CanonicalSequence), [new(UpsertMutation, graph, EdgeId, Revision)], DurabilityProfile.ProcessDurable, DropRuntimeProtocol.PersistedCopies);
         await DropRuntimeAssertions.SameAsync(expected, actual);

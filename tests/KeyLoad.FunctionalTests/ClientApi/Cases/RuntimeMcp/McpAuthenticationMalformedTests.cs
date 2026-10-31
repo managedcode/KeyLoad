@@ -5,54 +5,38 @@ namespace KeyLoad.FunctionalTests.ClientApi;
 
 internal sealed class McpAuthenticationMalformedTests
 {
-    private const byte TrailingByte = 0;
     private const string WrongValue = "a principal reply cannot be a string";
 
     [Test]
-    [Arguments(McpAuthenticationArrayFault.Underfilled)]
-    [Arguments(McpAuthenticationArrayFault.Overfilled)]
-    [Arguments(McpAuthenticationArrayFault.WrongType)]
-    [Arguments(McpAuthenticationArrayFault.WrongReferenceType)]
-    [Arguments(McpAuthenticationArrayFault.NullElement)]
-    public async Task MalformedCollectionsRejectAndHealthyPrincipalStillDecodes(McpAuthenticationArrayFault fault)
+    public async Task WrongValuesAndDefaultCollectionsAreRefusedBeforePrincipalAdmission()
     {
         using var database = new TestDatabase();
         var principal = McpAuthenticationTests.Principal(database);
-        var twin = McpAuthenticationMalformedFixture.Valid(principal);
-        var expectedShape = McpFrameBounds.InspectValue(JsonDefaults.Serialize(principal), McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
-        await Assert.That(McpAuthentication.Inspect(twin, UnitMcpOptions.Execution(), CancellationToken.None)).IsEqualTo(expectedShape);
-        var decoded = McpAuthentication.ReadPrincipal(twin, UnitMcpOptions.Execution(), CancellationToken.None);
-        await Assert.That(JsonDefaults.Serialize(decoded).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
-        var payload = McpAuthenticationMalformedFixture.Array(principal, fault);
-        await Assert.That(payload.AsSpan().SequenceEqual(twin)).IsFalse();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpAuthentication.Inspect(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
-            .IsEqualTo(ErrorCode.Validation);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
-            .IsEqualTo(ErrorCode.Validation);
-        var healthy = McpAuthentication.ReadPrincipal(twin, UnitMcpOptions.Execution(), CancellationToken.None);
-        await Assert.That(JsonDefaults.Serialize(healthy).AsSpan().SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
-    }
-
-    [Test]
-    public async Task WrongRootsDefaultCollectionsAndTrailingBytesAreRejected()
-    {
-        using var database = new TestDatabase();
-        var principal = McpAuthenticationTests.Principal(database);
-        var valid = OrleansSerialization.Serialize(new GrainValue(principal));
-        byte[][] malformed =
+        GrainValue[] invalid =
         [
-            OrleansSerialization.Serialize(principal), OrleansSerialization.Serialize(new GrainValue(WrongValue)),
-            OrleansSerialization.Serialize(new GrainValue(null)), McpAuthenticationMalformedFixture.DefaultArray(principal),
-            McpAuthenticationMalformedFixture.DefaultTeams(principal),
-            [.. valid, TrailingByte], valid[..^1]
+            new(WrongValue), new(null), new(principal with { Grants = default }),
+            new(principal with { FieldGrants = default }), new(principal with { Projects = default }),
+            new(principal with { Teams = default }), new(principal with { Id = null! }),
+            new(principal with { Grants = [null!] }), new(principal with { FieldGrants = [null!] }),
+            new(principal with { Projects = [null!] }), new(principal with { Teams = [null!] })
         ];
-        foreach (var payload in malformed)
+        foreach (var result in invalid)
         {
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => McpAuthentication.ReadPrincipal(payload, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
+                McpAuthentication.ReadPrincipal(result, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
                 .IsEqualTo(ErrorCode.Validation);
-            using var state = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => state.Authenticate(payload, CancellationToken.None)).Code)
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
+                McpAuthentication.Inspect(result, UnitMcpOptions.Execution(), CancellationToken.None)).Code)
                 .IsEqualTo(ErrorCode.Validation);
+            using var refused = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>
+                refused.Authenticate(result, CancellationToken.None)).Code).IsEqualTo(ErrorCode.Validation);
+            await Assert.That(refused.Principal).IsNull();
         }
+
+        using var healthy = new McpRequestState(McpFramingProtocol.MaximumDataReplyBytes, UnitMcpOptions.Execution());
+        healthy.Authenticate(new(principal), CancellationToken.None);
+        await Assert.That(JsonDefaults.Serialize(healthy.Principal).AsSpan()
+            .SequenceEqual(JsonDefaults.Serialize(principal))).IsTrue();
     }
 }

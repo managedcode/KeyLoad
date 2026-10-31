@@ -16,7 +16,7 @@ internal static class QueueEnqueueProcessRecovery
         var target = OrleansSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.TargetFile), token));
         var physicalTarget = OrleansSerialization.Deserialize<long>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.PhysicalTargetFile), token));
         var baseline = OrleansSerialization.Deserialize<string[]>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.BaselineFile), token));
-        var command = OrleansSerialization.Deserialize<CommandRequest>(operation.Value!.Input.Span, ValidationProfile.PublicInputElements);
+        var command = ((CommandRequest)operation.Value!.Input);
         var due = command.Mutations.OfType<EnqueueMessage>().Single(message => message.MessageId == QueueEnqueueCrashProtocol.Scheduled).NotBefore;
         await QueueEnqueueProcessValueAssertions.EqualAsync(command, new CommandRequest(QueueEnqueueCrashProtocol.OperationId,
             QueueEnqueueCrashProtocol.Partition,

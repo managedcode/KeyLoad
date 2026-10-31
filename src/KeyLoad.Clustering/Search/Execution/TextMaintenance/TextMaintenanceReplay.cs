@@ -4,7 +4,7 @@ namespace KeyLoad.Clustering;
 
 internal static class TextMaintenanceReplay
 {
-    internal static async Task<ProjectionBatchResult?> RunAsync(TextMaintenanceChildCalls children,
+    internal static async Task<ProjectionBatchResult?> RunAsync(MaintenanceChildCalls children,
         TextIndexMaintenanceRequest request, TextMaintenanceCapabilityResult state,
         ProjectionBatchResult? checkpoint, int maximumPages,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
@@ -42,7 +42,7 @@ internal static class TextMaintenanceReplay
         throw Errors.Fail(ErrorCode.BudgetExceeded, GrainRoutingProtocol.ReplyBudgetExceeded);
     }
 
-    internal static async Task<TextMaintenanceCommittedPage> ApplyAndCommitAsync(TextMaintenanceChildCalls children,
+    internal static async Task<TextMaintenanceCommittedPage> ApplyAndCommitAsync(MaintenanceChildCalls children,
         TextIndexMaintenanceRequest request, CommitProjectionBatchRequest original,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
@@ -78,7 +78,7 @@ internal static class TextMaintenanceReplay
         }
     }
 
-    private static Task<ProjectionBatchResult?> OriginalCheckpointAsync(TextMaintenanceChildCalls children,
+    private static Task<ProjectionBatchResult?> OriginalCheckpointAsync(MaintenanceChildCalls children,
         TextIndexMaintenanceRequest request, TextMaintenanceCapabilityResult state, CancellationToken token)
     {
         var original = state.LastSettledCheckpointRequest;
@@ -90,7 +90,7 @@ internal static class TextMaintenanceReplay
         return ReplayOriginalCheckpointAsync(children, original, token);
     }
 
-    private static async Task<ProjectionBatchResult?> ReplayOriginalCheckpointAsync(TextMaintenanceChildCalls children,
+    private static async Task<ProjectionBatchResult?> ReplayOriginalCheckpointAsync(MaintenanceChildCalls children,
         CommitProjectionBatchRequest original, CancellationToken token)
         => await children.CommandAsync<CommitProjectionBatchRequest, ProjectionBatchResult>(
             OperationKind.CommitProjectionBatch, original, original.CommandId, token).ConfigureAwait(true);
