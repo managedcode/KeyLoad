@@ -10,11 +10,13 @@
   "records": 1000000,
   "operations": 100000,
   "clients": 16,
+  "caseLimitMinutes": 6,
   "error": null,
   "cases": [
     {
       "id": "cycle",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 8.475,

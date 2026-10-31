@@ -29,7 +29,7 @@ internal static class AnalyticsScenario
     internal static Task<CaseResult> GroupByAsync(IAnalyticsDriver driver, BenchmarkSettings settings, CancellationToken token)
     {
         var expected = AnalyticsOracle.ByRegion(0);
-        return OperationLanes.RunAsync(GroupBy, settings.Operations, settings.Clients, async (index, cancellation) =>
+        return OperationLanes.RunAsync(GroupBy, settings.Operations, settings.Clients, settings.CaseLimit, async (index, cancellation) =>
         {
             var first = Window(settings, index);
             var found = await driver.SumByRegionAsync(AnalyticsDataset.At(first),
@@ -45,7 +45,7 @@ internal static class AnalyticsScenario
     internal static Task<CaseResult> FilteredAggregateAsync(IAnalyticsDriver driver, BenchmarkSettings settings, CancellationToken token)
     {
         var expected = Enumerable.Range(0, AnalyticsDataset.Products).Select(product => AnalyticsOracle.ForProduct(0, product)).ToArray();
-        return OperationLanes.RunAsync(FilteredAggregate, settings.Operations, settings.Clients, async (index, cancellation) =>
+        return OperationLanes.RunAsync(FilteredAggregate, settings.Operations, settings.Clients, settings.CaseLimit, async (index, cancellation) =>
         {
             var first = Window(settings, index);
             var product = index % AnalyticsDataset.Products;

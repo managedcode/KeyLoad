@@ -33,24 +33,24 @@ internal static class RelationalScenario
     }
 
     internal static Task<CaseResult> PkSelectAsync(IRelationalDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(PkSelect, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(PkSelect, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => SelectAsync(driver, Stable(settings, index), cancellation), token);
 
     internal static Task<CaseResult> RangeSelectAsync(IRelationalDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(RangeSelect, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(RangeSelect, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => SelectRangeAsync(driver, Stable(settings, index), cancellation), token);
 
     internal static Task<CaseResult> UpdateAsync(IRelationalDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Update, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Update, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => driver.UpdateAmountAsync(index, OrderDataset.Amount(index) + UpdatedBy, cancellation), token);
 
     internal static Task<CaseResult> DeleteAsync(IRelationalDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Delete, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Delete, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => driver.DeleteAsync(settings.Operations + index, cancellation), token);
 
     /// <summary>60% primary-key selects, 20% updates, 10% inserts of new ids and 10% range selects, interleaved.</summary>
     internal static Task<CaseResult> MixedAsync(IRelationalDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Mixed, settings.Operations, settings.Clients, (index, cancellation) =>
+        => OperationLanes.RunAsync(Mixed, settings.Operations, settings.Clients, settings.CaseLimit, (index, cancellation) =>
             (index % MixedShares) switch
             {
                 < 6 => driver.SelectAsync(Stable(settings, index), cancellation),

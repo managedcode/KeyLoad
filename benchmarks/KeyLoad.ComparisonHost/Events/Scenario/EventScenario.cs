@@ -21,16 +21,16 @@ internal static class EventScenario
 
     /// <summary>New streams after the loaded ones.</summary>
     internal static Task<CaseResult> AppendAsync(IEventDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Append, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Append, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => driver.AppendAsync(EventDataset.Create(settings.Records + index, settings.Seed), cancellation), token);
 
     internal static Task<CaseResult> ReadAsync(IEventDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Read, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Read, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => ReadStableAsync(driver, settings, index, cancellation), token);
 
     /// <summary>Half appends to new streams, half reads of loaded streams, interleaved.</summary>
     internal static Task<CaseResult> MixedAsync(IEventDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Mixed, settings.Operations, settings.Clients, (index, cancellation) => index % 2 == 0
+        => OperationLanes.RunAsync(Mixed, settings.Operations, settings.Clients, settings.CaseLimit, (index, cancellation) => index % 2 == 0
             ? driver.AppendAsync(EventDataset.Create(settings.Records + settings.Operations + index, settings.Seed), cancellation)
             : ReadStableAsync(driver, settings, index, cancellation), token);
 

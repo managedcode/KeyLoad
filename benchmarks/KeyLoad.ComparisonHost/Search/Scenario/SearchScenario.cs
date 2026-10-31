@@ -22,7 +22,7 @@ internal static class SearchScenario
 
     /// <summary>One call that makes the whole dataset searchable; its time is the index build time.</summary>
     internal static Task<CaseResult> IndexAsync(ISearchDriver driver, BenchmarkSettings _, CancellationToken token)
-        => OperationLanes.RunAsync(Index, 1, 1, (_, cancellation) => driver.BuildIndexAsync(cancellation), token);
+        => OperationLanes.RunAsync(Index, 1, 1, Timeout.InfiniteTimeSpan, (_, cancellation) => driver.BuildIndexAsync(cancellation), token);
 
     /// <summary>One word of a stable document; results must contain the word.</summary>
     internal static Task<CaseResult> TermQueryAsync(ISearchDriver driver, BenchmarkSettings settings, CancellationToken token)
@@ -34,7 +34,7 @@ internal static class SearchScenario
 
     private static Task<CaseResult> QueryAsync(string id, ISearchDriver driver, BenchmarkSettings settings, int terms,
         CancellationToken token)
-        => OperationLanes.RunAsync(id, settings.Operations, settings.Clients, async (index, cancellation) =>
+        => OperationLanes.RunAsync(id, settings.Operations, settings.Clients, settings.CaseLimit, async (index, cancellation) =>
         {
             var number = settings.Spread(index, 0, settings.Records);
             var words = SearchDataset.Words(number, settings.Seed).Distinct(StringComparer.Ordinal).Take(terms).ToArray();

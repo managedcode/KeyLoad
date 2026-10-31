@@ -30,20 +30,20 @@ internal static class KeyValueScenario
     }
 
     internal static Task<CaseResult> GetAsync(IKeyValueDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Get, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Get, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => ReadAsync(driver, Stable(settings, index), cancellation), token);
 
     internal static Task<CaseResult> SetAsync(IKeyValueDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Set, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Set, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => driver.SetAsync(KeyValueDataset.Create(index, 1), cancellation), token);
 
     internal static Task<CaseResult> DeleteAsync(IKeyValueDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Delete, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Delete, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => driver.DeleteAsync(KeyValueDataset.Key(settings.Operations + index), cancellation), token);
 
     /// <summary>80% reads and 20% overwrites of stable keys, interleaved.</summary>
     internal static Task<CaseResult> MixedAsync(IKeyValueDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Mixed, settings.Operations, settings.Clients, (index, cancellation) =>
+        => OperationLanes.RunAsync(Mixed, settings.Operations, settings.Clients, settings.CaseLimit, (index, cancellation) =>
             index % MixedShares < MixedReads
                 ? ReadAsync(driver, Stable(settings, index), cancellation)
                 : driver.SetAsync(KeyValueDataset.Create(Stable(settings, index), 2), cancellation), token);

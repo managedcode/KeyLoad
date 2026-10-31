@@ -10,11 +10,13 @@
   "records": 1000000,
   "operations": 100000,
   "clients": 16,
+  "caseLimitMinutes": 6,
   "error": null,
   "cases": [
     {
       "id": "load",
       "status": "passed",
+      "planned": 1000000,
       "operations": 1000000,
       "errors": 0,
       "seconds": 24.242,
@@ -28,7 +30,8 @@
     {
       "id": "point-read",
       "status": "passed",
-      "operations": 100000,
+      "planned": 100000,
+      "operations": 41000,
       "errors": 0,
       "seconds": 5.435,
       "opsPerSecond": 18400,
@@ -41,6 +44,7 @@
     {
       "id": "range-query",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 16.34,
@@ -54,6 +58,7 @@
     {
       "id": "update",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 6.579,
@@ -67,6 +72,7 @@
     {
       "id": "delete",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 6.757,
@@ -80,6 +86,7 @@
     {
       "id": "mixed",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 7.722,

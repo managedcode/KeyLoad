@@ -17,6 +17,7 @@ internal static class BenchmarkApplication
     private const string DataRootArgument = "--Benchmarks:DataRoot=";
     private const string DataDirectory = "benchmark-data";
     private const string BootstrapFailed = "The database bootstrap container exited with code ";
+    private const string ContainerLogs = "KeyLoad.LoadTests.AppHost.Resources";
 
     internal static async Task<DistributedApplication> StartAsync(BenchmarkJob job, CancellationToken token)
     {
@@ -24,7 +25,9 @@ internal static class BenchmarkApplication
         string[] arguments = [DatabaseArgument + job.Database, NodesArgument + job.Nodes.ToString(CultureInfo.InvariantCulture),
             ImageArgument + job.KeyLoadImage, DataRootArgument + dataRoot];
         var builder = await DistributedApplicationTestingBuilder.CreateAsync<Projects.KeyLoad_LoadTests_AppHost>(arguments, token);
-        builder.Services.AddLogging(logging => logging.ClearProviders().AddSimpleConsole().SetMinimumLevel(LogLevel.Warning));
+        // Containers write ordinary startup output to stderr, which Aspire logs as errors; their own logs are not job output.
+        builder.Services.AddLogging(logging => logging.ClearProviders().AddSimpleConsole().SetMinimumLevel(LogLevel.Warning)
+            .AddFilter(ContainerLogs, LogLevel.None));
         var application = await builder.BuildAsync(token);
         try
         {

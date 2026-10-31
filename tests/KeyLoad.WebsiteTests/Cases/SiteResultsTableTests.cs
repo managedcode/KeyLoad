@@ -9,6 +9,9 @@ internal sealed class SiteResultsTableTests
 {
     private const string Graph = "graph";
     private const string Traverse = "traverse";
+    private const string Documents = "documents";
+    private const string PointRead = "point-read";
+    private const string StoppedByLimit = "41k of 100k";
 
     [Test]
     public async Task EveryTypeComparesKeyLoadWithItsDatabasesOverTheTypeCases()
@@ -70,6 +73,24 @@ internal sealed class SiteResultsTableTests
         }
 
         await Assert.That(SiteResultsPage.ErrorText(recorded)).IsEqualTo((string)source[SiteTokens.Error]!);
+    }
+
+    [Test]
+    public async Task CaseStoppedByTheTimeLimitShowsHowManyOfItsPlannedOperationsRan()
+    {
+        var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
+        var section = page.Section(Documents);
+        var source = SiteResultFiles.Read("benchmark-keyload-documents-n1")[SiteTokens.Cases]![1]!.AsObject();
+
+        var line = SiteResultsPage.Row(section, SiteTokens.KeyLoad).Cells[PointRead].Single(item => item.Nodes == 1);
+        await Assert.That(line.Status).IsEqualTo(SiteTokens.Passed);
+        await Assert.That(line.Text).Contains(StoppedByLimit);
+        var recorded = SiteResultsPage.Recorded(section, SiteTokens.KeyLoad, 1, PointRead);
+        foreach (var field in new[] { SiteTokens.Planned, SiteTokens.Operations })
+        {
+            await Assert.That(double.Parse(SiteResultsPage.Attribute(SiteResultsPage.Field(recorded, field), "data-value"),
+                CultureInfo.InvariantCulture)).IsEqualTo((double)source[field]!);
+        }
     }
 
     [Test]

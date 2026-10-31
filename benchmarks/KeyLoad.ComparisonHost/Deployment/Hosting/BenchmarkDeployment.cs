@@ -122,7 +122,8 @@ internal sealed class BenchmarkDeployment : IAsyncInitializer, IAsyncDisposable
     private async Task WriteAsync()
     {
         var result = new BenchmarkResult(Job.Database, Job.Type, Job.Nodes, Connection is { Image.Length: > 0 } ? Connection.Image : Job.KeyLoadImage, Job.Commit,
-            Job.RunId, started, finished, Job.Settings.Records, Job.Settings.Operations, Job.Settings.Clients, failure, [.. cases]);
+            Job.RunId, started, finished, Job.Settings.Records, Job.Settings.Operations, Job.Settings.Clients, (int)Job.Settings.CaseLimit.TotalMinutes,
+            failure, [.. cases]);
         Directory.CreateDirectory(Job.Output);
         var temporary = Job.ResultPath + ".tmp";
         await using (var stream = File.Create(temporary))

@@ -64,8 +64,16 @@ function lineTitle(item, line) {
   if (line.status === 'failed') return `${nodesLabel(line.nodes)} · Failed: ${line.error}`;
   const { entry } = line;
   const batch = entry.batchSize > 1 ? ` · ${INTEGER.format(entry.batchSize)} per call` : '';
+  const limited = limitedNote(entry);
   return `${nodesLabel(line.nodes)} · ` + (item.seconds ? `${FINE.format(entry.seconds)} s` : `${INTEGER.format(entry.opsPerSecond)} ops/s · ` +
-    `p50 ${TWO.format(entry.p50Ms)} ms · p95 ${TWO.format(entry.p95Ms)} ms · p99 ${TWO.format(entry.p99Ms)} ms per call${batch}`);
+    `p50 ${TWO.format(entry.p50Ms)} ms · p95 ${TWO.format(entry.p95Ms)} ms · p99 ${TWO.format(entry.p99Ms)} ms per call${batch}`) +
+    (limited === null ? '' : ` · ${limited}`);
+}
+
+// The case time limit stopped the case before every planned operation ran; its rate counts only what ran.
+function limitedNote(entry) {
+  return entry.operations < entry.planned
+    ? `time limit: ${INTEGER.format(entry.operations)} of ${INTEGER.format(entry.planned)} operations ran` : null;
 }
 
 // One line per node count: the value and its change above a full-width bar scaled to the type's best result.
@@ -79,7 +87,9 @@ function pairLine(model, item, line, one, visible) {
   const ratio = !(best > 0 && line.value > 0) ? 0 : item.seconds ? best / line.value : line.value / best;
   const note = line.nodes !== 3 || !(one > 0 && line.value > 0) ? null
     : h('small', null, item.seconds ? change(line.value, one) : change(one, line.value));
-  return h('span', values, h('b', null, item.seconds ? seconds(line.value) : compact(line.value)), note,
+  const limited = line.entry.operations < line.entry.planned
+    ? h('small', { class: 'limited' }, `${compact(line.entry.operations)} of ${compact(line.entry.planned)}`) : null;
+  return h('span', values, h('b', null, item.seconds ? seconds(line.value) : compact(line.value)), note, limited,
     h('i', { style: `--size: ${percent(ratio)}` }));
 }
 
@@ -117,9 +127,9 @@ function comparison(model) {
 
 
 const STATUS = Object.freeze({ passed: 'Passed', failed: 'Failed', missing: 'Not run' });
-const DETAIL_HEAD = Object.freeze([['Case'], ['Status'], ['Operations', 'num'], ['Errors', 'num'], ['Seconds', 'num'],
+const DETAIL_HEAD = Object.freeze([['Case'], ['Status'], ['Planned', 'num'], ['Operations', 'num'], ['Errors', 'num'], ['Seconds', 'num'],
   ['ops/s', 'num'], ['p50 ms', 'num'], ['p95 ms', 'num'], ['p99 ms', 'num'], ['Per call', 'num'], ['Error'], ['Image'], ['Run']]);
-const FIELDS = Object.freeze([['operations', INTEGER], ['errors', INTEGER], ['seconds', FINE], ['opsPerSecond', TWO],
+const FIELDS = Object.freeze([['planned', INTEGER], ['operations', INTEGER], ['errors', INTEGER], ['seconds', FINE], ['opsPerSecond', TWO],
   ['p50Ms', TWO], ['p95Ms', TWO], ['p99Ms', TWO], ['batchSize', INTEGER]]);
 
 // Every recorded case keeps its exact value in the cell title and data attribute; a failed case keeps its partial values.
@@ -160,7 +170,8 @@ function subtitle(model) {
   if (model.results.length === 0) return 'No results in this run.';
   const list = values => unique(values).map(value => INTEGER.format(value)).join(' and ');
   return `${list(model.results.map(result => result.records))} records · ${list(model.results.map(result => result.operations))} ` +
-    `operations per case · ${list(model.results.map(result => result.clients))} clients. Operations per second (records for loads): ` +
+    `operations per case, at most ${list(model.results.map(result => result.caseLimitMinutes))} minutes each · ` +
+    `${list(model.results.map(result => result.clients))} clients. Operations per second (records for loads): ` +
     'top line 1 node, lower line 3 nodes with the change against 1 node.';
 }
 

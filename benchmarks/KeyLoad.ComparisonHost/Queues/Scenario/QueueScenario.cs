@@ -18,7 +18,7 @@ internal static class QueueScenario
     {
         await driver.PrepareAsync(token);
         var deliveries = new int[settings.Operations];
-        var result = await OperationLanes.RunAsync(Cycle, settings.Operations, settings.Clients, async (index, cancellation) =>
+        var result = await OperationLanes.RunAsync(Cycle, settings.Operations, settings.Clients, settings.CaseLimit, async (index, cancellation) =>
         {
             await driver.PublishAsync(QueueDataset.Create(index), cancellation);
             var delivery = await driver.ReceiveAsync(cancellation);
@@ -33,7 +33,8 @@ internal static class QueueScenario
             }
             await driver.AckAsync(delivery, cancellation);
         }, token);
-        var lost = deliveries.Count(count => count == 0);
+        // Only the messages of operations that ran were published; the case time limit may stop the rest.
+        var lost = deliveries.Take((int)result.Operations).Count(count => count == 0);
         return lost == 0 ? result : result.WithVerificationError(Lost + lost, lost);
     }
 }

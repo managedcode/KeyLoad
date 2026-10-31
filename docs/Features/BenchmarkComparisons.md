@@ -11,7 +11,7 @@ decision is [ADR-150](../ADR/ADR-150-per-type-benchmark-jobs.md).
 |---|---|
 | REQ-BC-030: one job per database, data type and node count | `benchmarks.yml` has one `measure` job per row of the [type table](#data-types); a job deploys one database and runs only the TUnit class of its type. |
 | REQ-BC-031: one shared module per data type | The dataset, scenario (cases, schedule, verification) and driver interface of a type exist once; a database implements only the driver. |
-| REQ-BC-032: the same standard size everywhere | Seed 1729, 16 concurrent clients, 100,000 measured operations per case and 1,000,000-record datasets, unless a local run overrides them. |
+| REQ-BC-032: the same standard size everywhere | Seed 1729, 16 concurrent clients, 100,000 planned operations per measured case, at most 6 minutes per measured case, and 1,000,000-record datasets, unless a local run overrides them. Dataset loads are never stopped by the limit. |
 | REQ-BC-033: results survive failure | The job writes its result file after startup, after every case and on disposal, and uploads it whether the job passed or failed. |
 | REQ-BC-034: no invented numbers | A failed case keeps its real first error; a case that never ran, a missing node count or an unsupported database has no number. |
 | REQ-BC-035: the website shows one run | Website publishes the result files of the dispatched run, or of the latest completed run; without result files it publishes nothing and the current Pages stay. |
@@ -122,17 +122,27 @@ temporary name and then renamed, so a reader never sees a partial file.
 | `image` | The image the AppHost published for the database, or the KeyLoad image reference. |
 | `commit`, `runId` | `GITHUB_SHA` and `GITHUB_RUN_ID`; null outside GitHub Actions. |
 | `startedAt`, `finishedAt` | Fixture start and disposal; `finishedAt` is null while the job runs. |
-| `records`, `operations`, `clients` | The dataset size, measured operations per case and concurrent clients used. |
+| `records`, `operations`, `clients` | The dataset size, planned operations per case and concurrent clients used. |
+| `caseLimitMinutes` | The wall time after which a measured case takes no new operation. |
 | `error` | The error that stopped the job before its cases (for example a failed startup), or null. |
 | `cases[]` | One entry per case that ran, in order. |
 
-Each case has `id`, `status` (`passed` or `failed`), `operations` (units
-attempted), `errors` (units that failed), `seconds` (wall time), `opsPerSecond`
+Each case has `id`, `status` (`passed` or `failed`), `planned` (units the
+scenario schedules), `operations` (units attempted; fewer than `planned` when the
+case time limit stopped it), `errors` (units that failed), `seconds` (wall time), `opsPerSecond`
 (successful units per wall second), `p50Ms`, `p95Ms` and `p99Ms` (nearest-rank
 latency per call over successful calls; 0 when no call succeeded), `batchSize`
 (units per call) and `error` (the first error, at most 600 characters). A case
 fails when any unit fails or its after-the-fact verification finds a problem, and
 the TUnit test fails with it. No value is ever estimated or filled in.
+
+The case time limit is the mean measured case time across every database of the
+first per-type run (5.8 minutes, rounded to 6). It applies the same way to every
+database: once it has passed, clients take no new operation, operations already
+started finish, and `opsPerSecond` and the latencies cover only what ran. The
+site shows such a case as "<ran> of <planned>". Loads always finish, because the
+following cases read the loaded data. `Benchmarks__CaseMinutes` overrides the
+limit for a local run.
 
 ## Running one cell locally
 

@@ -31,10 +31,10 @@ export const TYPES = Object.freeze([
 ]);
 
 const RESULT_KEYS = Object.freeze(['database', 'type', 'nodes', 'image', 'commit', 'runId', 'startedAt', 'finishedAt',
-  'records', 'operations', 'clients', 'error', 'cases']);
-const CASE_KEYS = Object.freeze(['id', 'status', 'operations', 'errors', 'seconds', 'opsPerSecond', 'p50Ms', 'p95Ms',
+  'records', 'operations', 'clients', 'caseLimitMinutes', 'error', 'cases']);
+const CASE_KEYS = Object.freeze(['id', 'status', 'planned', 'operations', 'errors', 'seconds', 'opsPerSecond', 'p50Ms', 'p95Ms',
   'p99Ms', 'batchSize', 'error']);
-const COUNTS = Object.freeze(['operations', 'errors']);
+const COUNTS = Object.freeze(['planned', 'operations', 'errors']);
 const MEASURES = Object.freeze(['seconds', 'opsPerSecond', 'p50Ms', 'p95Ms', 'p99Ms']);
 
 export const findType = id => TYPES.find(item => item.id === id);
@@ -65,6 +65,8 @@ function validateCase(value, label, kind) {
   for (const key of COUNTS) check(count(value[key]), label, `${field} ${key}`);
   for (const key of MEASURES) check(measure(value[key]), label, `${field} ${key}`);
   check(count(value.batchSize) && value.batchSize > 0, label, field + ' batchSize');
+  // The case time limit can stop a case before every planned operation ran; it never runs more than planned.
+  check(value.operations <= value.planned || value.status === 'failed', label, field + ' operations');
   check(value.status === 'passed' ? value.error === null : text(value.error), label, field + ' error');
 }
 
@@ -78,6 +80,7 @@ export function validateResult(value, label) {
   for (const key of ['image', 'commit']) check(value[key] === null || typeof value[key] === 'string', label, key);
   check(value.error === null || text(value.error), label, 'error');
   check(value.runId === null || count(value.runId), label, 'runId');
+  check(count(value.caseLimitMinutes) && value.caseLimitMinutes > 0, label, 'caseLimitMinutes');
   check(instant(value.startedAt), label, 'startedAt');
   check(value.finishedAt === null || instant(value.finishedAt), label, 'finishedAt');
   for (const key of ['records', 'operations', 'clients']) check(count(value[key]) && value[key] > 0, label, key);

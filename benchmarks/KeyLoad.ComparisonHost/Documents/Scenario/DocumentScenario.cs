@@ -28,24 +28,24 @@ internal static class DocumentScenario
     }
 
     internal static Task<CaseResult> PointReadAsync(IDocumentDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(PointRead, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(PointRead, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => ReadAsync(driver, Stable(settings, index), cancellation), token);
 
     internal static Task<CaseResult> RangeQueryAsync(IDocumentDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(RangeQuery, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(RangeQuery, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => FindRangeAsync(driver, Stable(settings, index), cancellation), token);
 
     internal static Task<CaseResult> UpdateAsync(IDocumentDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Update, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Update, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => driver.ReplaceAsync(DocumentDataset.Create(index, 1), cancellation), token);
 
     internal static Task<CaseResult> DeleteAsync(IDocumentDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Delete, settings.Operations, settings.Clients,
+        => OperationLanes.RunAsync(Delete, settings.Operations, settings.Clients, settings.CaseLimit,
             (index, cancellation) => driver.DeleteAsync(DocumentDataset.Id(settings.Operations + index), cancellation), token);
 
     /// <summary>60% reads, 20% replacements, 10% inserts of new ids and 10% range queries, interleaved.</summary>
     internal static Task<CaseResult> MixedAsync(IDocumentDriver driver, BenchmarkSettings settings, CancellationToken token)
-        => OperationLanes.RunAsync(Mixed, settings.Operations, settings.Clients, (index, cancellation) =>
+        => OperationLanes.RunAsync(Mixed, settings.Operations, settings.Clients, settings.CaseLimit, (index, cancellation) =>
             (index % MixedShares) switch
             {
                 < 6 => ReadAsync(driver, Stable(settings, index), cancellation),

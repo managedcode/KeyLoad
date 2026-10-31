@@ -30,6 +30,7 @@ internal static class SiteTokens
     public const string BatchSize = "batchSize";
     public const string Load = "load";
     public const string Operations = "operations";
+    public const string Planned = "planned";
     public const string Error = "error";
     public const string KeyLoad = "KeyLoad";
     public const string SingleNode = "Single node";

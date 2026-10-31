@@ -32,7 +32,7 @@ internal static class GraphScenario
     internal static Task<CaseResult> NeighborsAsync(IGraphDriver driver, BenchmarkSettings settings, CancellationToken token)
     {
         var graph = new GraphDataset(settings.Records);
-        return OperationLanes.RunAsync(Neighbors, settings.Operations, settings.Clients, async (index, cancellation) =>
+        return OperationLanes.RunAsync(Neighbors, settings.Operations, settings.Clients, settings.CaseLimit, async (index, cancellation) =>
         {
             var vertex = settings.Spread(index, 0, graph.Vertices);
             var found = await driver.NeighborsAsync(GraphDataset.VertexId(vertex), cancellation);
@@ -47,7 +47,7 @@ internal static class GraphScenario
     internal static Task<CaseResult> TraverseAsync(IGraphDriver driver, BenchmarkSettings settings, CancellationToken token)
     {
         var graph = new GraphDataset(settings.Records);
-        return OperationLanes.RunAsync(Traverse, settings.Operations, settings.Clients, async (index, cancellation) =>
+        return OperationLanes.RunAsync(Traverse, settings.Operations, settings.Clients, settings.CaseLimit, async (index, cancellation) =>
         {
             var vertex = settings.Spread(index, 0, graph.Vertices);
             var count = await driver.CountReachableAsync(GraphDataset.VertexId(vertex), GraphDataset.TraversalDepth, cancellation);

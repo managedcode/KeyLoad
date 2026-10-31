@@ -10,11 +10,13 @@
   "records": 1000000,
   "operations": 100000,
   "clients": 16,
+  "caseLimitMinutes": 6,
   "error": null,
   "cases": [
     {
       "id": "load",
       "status": "passed",
+      "planned": 1000000,
       "operations": 1000000,
       "errors": 0,
       "seconds": 11.312,
@@ -28,6 +30,7 @@
     {
       "id": "get",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 1.399,
@@ -41,6 +44,7 @@
     {
       "id": "set",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 1.443,
@@ -54,6 +58,7 @@
     {
       "id": "delete",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 1.427,
@@ -67,6 +72,7 @@
     {
       "id": "mixed",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 1.558,

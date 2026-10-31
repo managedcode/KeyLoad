@@ -22,7 +22,7 @@ internal static class VectorScenario
     {
         var expected = VectorOracle.Compute(settings.Records, settings.Seed);
         var queries = Enumerable.Range(0, VectorDataset.Queries).Select(query => VectorDataset.Query(query, settings.Records, settings.Seed)).ToArray();
-        return OperationLanes.RunAsync(ExactTop10, settings.Operations, settings.Clients, async (index, cancellation) =>
+        return OperationLanes.RunAsync(ExactTop10, settings.Operations, settings.Clients, settings.CaseLimit, async (index, cancellation) =>
         {
             var query = index % VectorDataset.Queries;
             var found = await driver.NearestAsync(queries[query], VectorDataset.TopK, cancellation);

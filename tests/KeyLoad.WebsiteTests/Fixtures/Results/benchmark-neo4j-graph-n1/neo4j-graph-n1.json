@@ -10,11 +10,13 @@
   "records": 1000000,
   "operations": 100000,
   "clients": 16,
+  "caseLimitMinutes": 6,
   "error": null,
   "cases": [
     {
       "id": "load",
       "status": "passed",
+      "planned": 1000000,
       "operations": 1000000,
       "errors": 0,
       "seconds": 100,
@@ -28,6 +30,7 @@
     {
       "id": "neighbors",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 30,
@@ -41,6 +44,7 @@
     {
       "id": "traverse",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 67.568,

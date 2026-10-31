@@ -15,6 +15,7 @@ internal sealed record BenchmarkJob(string Database, string Type, int Nodes, str
     private const string OutputKey = "Benchmarks:Output";
     private const string RecordsKey = "Benchmarks:Records";
     private const string OperationsKey = "Benchmarks:Operations";
+    private const string CaseMinutesKey = "Benchmarks:CaseMinutes";
     private const string CommitKey = "GITHUB_SHA";
     private const string RunKey = "GITHUB_RUN_ID";
     private const string ResultsDirectory = "results";
@@ -35,7 +36,8 @@ internal sealed record BenchmarkJob(string Database, string Type, int Nodes, str
         var settings = new BenchmarkSettings(
             Number(configuration, RecordsKey, BenchmarkSettings.StandardRecords),
             Number(configuration, OperationsKey, BenchmarkSettings.StandardOperations),
-            BenchmarkSettings.StandardClients, BenchmarkSettings.StandardSeed);
+            BenchmarkSettings.StandardClients, BenchmarkSettings.StandardSeed,
+            TimeSpan.FromMinutes(Number(configuration, CaseMinutesKey, BenchmarkSettings.StandardCaseMinutes)));
         var output = configuration[OutputKey] is { Length: > 0 } configured
             ? Path.GetFullPath(configured) : Path.Combine(AppContext.BaseDirectory, ResultsDirectory);
         var runId = long.TryParse(configuration[RunKey], NumberStyles.None, CultureInfo.InvariantCulture, out var run) ? run : (long?)null;

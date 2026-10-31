@@ -10,11 +10,13 @@
   "records": 1000000,
   "operations": 100000,
   "clients": 16,
+  "caseLimitMinutes": 6,
   "error": null,
   "cases": [
     {
       "id": "load",
       "status": "passed",
+      "planned": 1000000,
       "operations": 1000000,
       "errors": 0,
       "seconds": 14.045,
@@ -28,6 +30,7 @@
     {
       "id": "range-read",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 11.364,
@@ -41,6 +44,7 @@
     {
       "id": "aggregate",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 68.493,
@@ -54,6 +58,7 @@
     {
       "id": "windows",
       "status": "passed",
+      "planned": 100000,
       "operations": 100000,
       "errors": 0,
       "seconds": 108.696,

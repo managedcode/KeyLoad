@@ -74,7 +74,7 @@ internal static class TimeSeriesScenario
         Func<int, int, CancellationToken, Task<bool>> query, CancellationToken token)
     {
         var points = new TimeSeriesDataset(settings.Records).PointsPerSeries;
-        return OperationLanes.RunAsync(id, settings.Operations, settings.Clients, async (index, cancellation) =>
+        return OperationLanes.RunAsync(id, settings.Operations, settings.Clients, settings.CaseLimit, async (index, cancellation) =>
         {
             var series = settings.Spread(index, 0, TimeSeriesDataset.SeriesCount);
             var from = span >= points ? 0 : settings.Spread(index, 0, points - span);
