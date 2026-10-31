@@ -76,6 +76,11 @@ fixtures.
 
 ## Vector, queue and event operations
 
+The complete model-family requirement is [ModelCorpora](ModelCorpora.md).
+The thirteen-case implementation below is partial coverage. KeyLoad must execute
+each family's independent corpus and schedule alongside its specialist engines;
+the engine's `Multi-model` category is not a filter on those comparisons.
+
 The current session retains thirteen original TUnit outcomes: the seven document
 cases, explicit model preparation, exact vector queries, queue cycles, event
 appends, event reads and concurrent event append/read. The same live Aspire
@@ -116,8 +121,7 @@ peer discovery retains container aliases. The writer uses the discovered externa
 seed endpoints; direct-node readers retain redirect and endpoint-identity guards.
 See the [KurrentDB 26.1 networking contract](https://docs.kurrent.io/server/v26.1/configuration/networking).
 
-Native one/three-node controls exercise real databases, cancellation and
-healthy continuation; they do not qualify public figures. Full 100k/1m scale,
+Full 100k/1m scale,
 1/10/500-client ingestion, ANN, filtered/mixed vector, fault/endurance and matched
 hardware requirements retain their distinct open qualification gates.
 
@@ -230,35 +234,10 @@ matrix, restarts or separate benchmark scenario.
 - Contract tests, the actual matrix-to-C# selection and startup verification
   run before the fan-out. Inside a package readiness belongs to Aspire; setup is not
   part of operation latency.
-  Preparation also runs the real external adapter cases in `NativeDatabaseTests`:
-  OpenSearch/MongoDB at one/three nodes, three-node Redis and one-node HelixDB/ClickHouse, with sixteen
-  independently owned clients, complete body readback and healthy continuation.
-  These bounded checks retain original TRX files and do not qualify public figures.
-  They resolve actual container IDs through Aspire notifications after readiness and
-  verify their actual writable-mount mappings. Linux additionally
-  requires the original CPU/RSS and complete resource qualification; desktop checks
-  cannot substitute for that Linux gate.
-  OpenSearch controls cover one million actual documents per topology. The HelixDB
-  and ClickHouse controls also load one million documents and build the session indexes before
-  mutations and complete readback. InfluxDB's million-record control verifies its
-  native JSONL readback, an update, sixteen concurrent point readers, cancellation
-  during streaming and healthy
-  continuation. The eight-control run has a 40-minute timeout;
-  each operation keeps its 30-second deadline and document cleanup keeps its
-  20-minute deadline. All native
-  clients and resource observation wait for the same Aspire health and bootstrap
-  completion contract used by the full workload client.
-  Manual `mode=contracts` runs the same native and harness controls, retaining test
-  diagnostics. Workload fan-out, session measurements
-  and Website dispatch belong to `mode=full` and push runs.
-  Manual `mode=influxdb-readback` runs only the existing InfluxDB million-record
-  native case and terminal diagnostic control, with a five-minute bound on that
-  native case. It retains original Linux resource and test evidence without the
-  other databases, workload fan-out or public figures. This focused check does not
-  qualify the full eight-control gate or complete session suite; those gates stay
-  unchanged for `mode=contracts`, `mode=full` and push runs.
-  All modes share one branch concurrency group. A manual dispatch cancels the
-  superseded run, including when changing between manual modes and full runs.
+  Benchmarks runs no separate adapter control tests: each database job's own
+  measured cases exercise its adapter against the real deployment.
+  All runs share one branch concurrency group. A manual dispatch cancels the
+  superseded run.
   Automatic push runs preserve the active cohort and queue the newest pending
   revision, so another change cannot discard hours of unfinished measurements.
   Intentional replacement after a repair cancels the obsolete run first.

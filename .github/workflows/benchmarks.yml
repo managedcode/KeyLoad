@@ -3,12 +3,6 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
-    inputs:
-      mode:
-        description: Run native controls, focused InfluxDB readback, or the full database suite
-        type: choice
-        options: [contracts, influxdb-readback, full]
-        default: full
 permissions: {contents: read, actions: read}
 concurrency:
   group: keyload-benchmarks-${{ github.ref }}
@@ -77,7 +71,6 @@ jobs:
           docker info --format 'Docker kernel: {{.KernelVersion}}'
       - name: Resolve the latest released KeyLoad server image to one digest
         id: keyload-image
-        if: (github.event_name == 'push' || inputs.mode == 'full')
         env:
           REGISTRY_TOKEN: ${{ github.token }}
           KEYLOAD_IMAGE_REPOSITORY: ghcr.io/managedcode/keyload
@@ -90,10 +83,8 @@ jobs:
           printf 'KeyLoad cells use %s\n' "$reference" >> "$GITHUB_STEP_SUMMARY"
           docker logout ghcr.io
       - name: Pack the compiled benchmark runtime
-        if: (github.event_name == 'push' || inputs.mode == 'full')
         run: node scripts/Features/BenchmarkComparisons/compiled-test-bundle.mjs --pack
       - name: Save compiled runtime identities
-        if: (github.event_name == 'push' || inputs.mode == 'full')
         uses: actions/upload-artifact@v7
         with:
           name: comparison-compiled-runtime-identity
@@ -104,7 +95,6 @@ jobs:
           retention-days: 90
       - name: Save the compiled benchmark runtime
         id: runtime-bundle
-        if: (github.event_name == 'push' || inputs.mode == 'full')
         uses: actions/upload-artifact@v7
         with:
           name: comparison-compiled-test-bundle
@@ -112,15 +102,6 @@ jobs:
           if-no-files-found: error
           compression-level: 0
           retention-days: 90
-      - name: Test external database bulk operations and joined cleanup
-        if: inputs.mode != 'influxdb-readback'
-        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --maximum-parallel-tests 1 --minimum-expected-tests 8 --treenode-filter '/*/*/NativeDatabaseTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/NativeAdapters" --report-trx --timeout 40m
-      - name: Test InfluxDB million-record readback and joined cleanup
-        if: github.event_name == 'workflow_dispatch' && inputs.mode == 'influxdb-readback'
-        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --maximum-parallel-tests 1 --minimum-expected-tests 1 --treenode-filter '/*/*/NativeDatabaseTests/InfluxBulkReadbackPreservesCompleteBodiesAndHealthyContinuation' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/NativeAdapters" --report-trx --timeout 5m
-      - name: Test vector queue and event session operations on real databases
-        if: (github.event_name == 'push' || inputs.mode == 'contracts' || inputs.mode == 'full')
-        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --maximum-parallel-tests 1 --minimum-expected-tests 9 --treenode-filter '/*/*/ModelDatabaseTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/ModelAdapters" --report-trx --timeout 20m
       - name: Test bounded terminal execution diagnostics
         run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --minimum-expected-tests 1 --treenode-filter '/*/*/ComparisonHostCaptureTests/*' --results-directory "$GITHUB_WORKSPACE/benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/TerminalDiagnostics" --report-trx
       - name: Save original preparation diagnostics
@@ -131,9 +112,6 @@ jobs:
           path: |
             TestResults/**
             benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/TestResults/**
-            benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/database-adapters/**/*.log
-            benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/database-adapters/**/resource-observations.json
-            benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/database-adapters/**/host-mountinfo.txt
             artifacts/qualification/**
             artifacts/code-quality/**
             ${{ runner.temp }}/keyload-cell-github/**
@@ -141,7 +119,6 @@ jobs:
           retention-days: 90
   comparison-keyload:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -168,9 +145,6 @@ jobs:
         with:
           runtime-artifact-id: ${{ needs.comparison-runtime.outputs.runtime-artifact-id }}
           keyload-image: ${{ matrix.target == 'KeyLoad' && needs.comparison-runtime.outputs.keyload-image || '' }}
-      - name: Test selected database adapter against real infrastructure
-        if: matrix.nodeCount == 1 && contains(fromJSON('["TimescaleDB","SQL Server","MySQL","ClickHouse","InfluxDB"]'), matrix.target)
-        run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --github-reporter-style full --maximum-parallel-tests 1 --minimum-expected-tests 1 --treenode-filter '/*/*/AdditionalDatabaseTests/*' --results-directory "$KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY/AdapterTestResults" --report-trx --timeout 15m
       - name: Run database workload
         id: workload
         run: dotnet benchmarks/KeyLoad.ComparisonHost/bin/Release/net10.0/KeyLoad.ComparisonHost.dll --output Detailed --github-reporter-style full --maximum-parallel-tests 1 --minimum-expected-tests 1 --treenode-filter '/*/*/BenchmarkSessionTests/*' --results-directory "$KEYLOAD_COMPARISON_EVIDENCE_DIRECTORY/TestResults" --report-trx --timeout 210m
@@ -194,7 +168,6 @@ jobs:
           artifact-name: comparison-case-qualification-session-${{ matrix.id }}
   comparison-postgresql:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -205,7 +178,6 @@ jobs:
     steps: *database-steps
   comparison-qdrant:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -216,7 +188,6 @@ jobs:
     steps: *database-steps
   comparison-rabbitmq:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -227,7 +198,6 @@ jobs:
     steps: *database-steps
   comparison-redis:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -238,7 +208,6 @@ jobs:
     steps: *database-steps
   comparison-neo4j:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -249,7 +218,6 @@ jobs:
     steps: *database-steps
   comparison-mongodb:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -260,7 +228,6 @@ jobs:
     steps: *database-steps
   comparison-opensearch:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -271,7 +238,6 @@ jobs:
     steps: *database-steps
   comparison-kurrentdb:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -282,7 +248,6 @@ jobs:
     steps: *database-steps
   comparison-surrealdb:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -293,7 +258,6 @@ jobs:
     steps: *database-steps
   comparison-helixdb:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -304,7 +268,6 @@ jobs:
     steps: *database-steps
   comparison-timescaledb:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -315,7 +278,6 @@ jobs:
     steps: *database-steps
   comparison-sqlserver:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -326,7 +288,6 @@ jobs:
     steps: *database-steps
   comparison-mysql:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -337,7 +298,6 @@ jobs:
     steps: *database-steps
   comparison-clickhouse:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -348,7 +308,6 @@ jobs:
     steps: *database-steps
   comparison-influxdb:
     name: ${{ matrix.jobName }}
-    if: (github.event_name == 'push' || inputs.mode == 'full')
     needs: [comparison-runtime]
     runs-on: ubuntu-22.04
     timeout-minutes: 240
@@ -360,7 +319,7 @@ jobs:
   comparison-aggregate:
     name: Combine benchmark results
     needs: [comparison-runtime, comparison-keyload, comparison-postgresql, comparison-qdrant, comparison-rabbitmq, comparison-redis, comparison-neo4j, comparison-mongodb, comparison-opensearch, comparison-kurrentdb, comparison-surrealdb, comparison-helixdb, comparison-timescaledb, comparison-sqlserver, comparison-mysql, comparison-clickhouse, comparison-influxdb]
-    if: ${{ always() && !cancelled() && (github.event_name == 'push' || inputs.mode == 'full') && needs.comparison-runtime.result == 'success' }}
+    if: ${{ always() && !cancelled() && needs.comparison-runtime.result == 'success' }}
     runs-on: ubuntu-22.04
     timeout-minutes: 150
     env:
@@ -399,7 +358,6 @@ jobs:
     if: >-
       always() && !cancelled() &&
       needs.comparison-aggregate.result == 'success' &&
-      (github.event_name == 'push' || inputs.mode == 'full') &&
       github.repository == 'managedcode/KeyLoad' && github.event.repository.id == 477801965 &&
       github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04

@@ -79,21 +79,6 @@ and [MongoDB's kernel requirement](https://www.mongodb.com/docs/manual/release-n
 SQL Server uses Developer edition for nonproduction benchmarks and requires the
 Linux x86-64 runner. Its local execution on ARM is not qualified.
 
-`AdditionalDatabaseTests` exercises real native operations, complete-body updates,
-missing reads, independently owned clients, cancellation followed by healthy
-reads, supported deletes, compound predicates and ordered readback through a
-separate Aspire lifecycle. The Linux one-node workers run it before starting the
-fresh measured session. These bounded correctness cases provide no performance
-figures. Complete Debug build, actual native tests, Linux million-record sessions,
-resource observations and authenticated aggregate/site admission remain separate
-open gates until their original results exist. Local development verification on
-2026-10-24 passed the complete Debug solution build with warnings as errors,
-formatter verification, governance, nine parser/admission scenarios (131 altered
-inputs rejected) and four genuine one-node adapter cases: TimescaleDB, MySQL,
-ClickHouse and InfluxDB. SQL Server execution remains pending on Linux x86-64;
-these small correctness cases do not qualify million-record performance or
-replication.
-
 ## Driver adoption
 
 The owner explicitly approved benchmark-only Microsoft.Data.SqlClient 7.1.1 and
