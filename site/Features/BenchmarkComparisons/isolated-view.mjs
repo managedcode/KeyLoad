@@ -72,6 +72,26 @@ function button(document, className, data, value) {
   return node;
 }
 
+// A focusable horizontal scroll region inside the frame that carries its edge shades.
+function scrollRegion(document, className, label, content) {
+  const frame = el(document, 'div', 'scroll-frame');
+  const scroll = frame.appendChild(el(document, 'div', className));
+  scroll.tabIndex = 0;
+  scroll.setAttribute('role', 'region');
+  scroll.setAttribute('aria-label', label);
+  scroll.append(content);
+  return frame;
+}
+
+// The pinned edge shades once columns pass beneath it; the far edge fades while more columns remain.
+export function shadeScrollRegions(container) {
+  for (const frame of container.querySelectorAll('.scroll-frame')) {
+    const scroll = frame.firstElementChild;
+    frame.classList.toggle('more-start', scroll.scrollLeft > 1);
+    frame.classList.toggle('more-end', scroll.scrollWidth - scroll.clientWidth - scroll.scrollLeft > 1);
+  }
+}
+
 // Each family card names the highest 1-node result of this run and doubles as the sort control for the list.
 function leaders(document, model, sort) {
   const grid = el(document, 'div', 'leaders');
@@ -124,11 +144,9 @@ function overview(document, model, sort, type = 'all') {
       (type === 'all' ? 'Click a card or column to sort.' : 'Click a column to sort.'));
   if (type === 'all') section.append(leaders(document, model, sort));
   section.append(el(document, 'p', 'table-scroll-hint', 'Swipe or scroll horizontally to see all columns.'));
-  const scroll = section.appendChild(el(document, 'div', 'comparison-scroll'));
-  scroll.tabIndex = 0;
-  scroll.setAttribute('role', 'region');
-  scroll.setAttribute('aria-label', 'Database comparison table; scroll horizontally to see every operation');
-  const grid = scroll.appendChild(el(document, 'table', 'comparison-grid'));
+  const grid = el(document, 'table', 'comparison-grid');
+  section.append(scrollRegion(document, 'comparison-scroll',
+    'Database comparison table; scroll horizontally to see every operation', grid));
   grid.style.setProperty('--columns', columns.length);
   grid.setAttribute('role', 'table');
   grid.setAttribute('aria-label', type === 'all' ? 'All database comparisons' : type + ' comparisons');
@@ -215,7 +233,8 @@ function tableHead(document, table) {
     Object.assign(cell, span);
   };
   heading(top, 'Engine', 'pin', { rowSpan: 2 });
-  for (const text of ['Nodes', 'Status']) heading(top, text, null, { rowSpan: 2 });
+  heading(top, 'Nodes', 'pin pin-nodes', { rowSpan: 2 });
+  heading(top, 'Status', null, { rowSpan: 2 });
   const mixed = COLUMNS.filter(column => column.id.startsWith('mixed'));
   for (const column of COLUMNS) {
     if (column === mixed[0]) heading(top, 'Mixed test', 'num group', { colSpan: mixed.length });
@@ -227,7 +246,9 @@ function tableHead(document, table) {
 
 function table(document, model, type, cohort) {
   const node = el(document, 'table');
-  node.append(el(document, 'caption', null, 'Recorded values per session · operations per second, time tests in seconds'));
+  // The caption text stays in view while the columns scroll beneath it.
+  node.appendChild(el(document, 'caption'))
+    .append(el(document, 'span', null, 'Recorded values per session · operations per second, time tests in seconds'));
   tableHead(document, node);
   const body = node.appendChild(el(document, 'tbody'));
   for (const engine of model.engines.filter(name => type === 'all' || ENGINE_TYPES[name] === type)) for (const nodes of NODES) {
@@ -235,7 +256,8 @@ function table(document, model, type, cohort) {
       ?? model.cell(engine, 'load-million', nodes);
     const tr = body.appendChild(el(document, 'tr'));
     tr.dataset.workerId = session.id;
-    tr.append(el(document, 'td', 'pin', engine), el(document, 'td', null, String(nodes)), el(document, 'td', null, STATUS[session.status]));
+    tr.append(el(document, 'td', 'pin', engine), el(document, 'td', 'pin pin-nodes', String(nodes)),
+      el(document, 'td', null, STATUS[session.status]));
     for (const column of COLUMNS) {
       const value = model.cell(engine, column.id, nodes).value;
       const td = tr.appendChild(el(document, 'td', null, value === null ? 'No data' : tableValue(column, value)));
@@ -248,12 +270,8 @@ function table(document, model, type, cohort) {
     else links.append(link(document, session.worker.job.conclusion === 'failure' ? 'Failed job' : 'Job', session.worker.job.url),
       link(document, 'Artifact', artifactUrl(cohort, session.worker.artifact)));
   }
-  const scroll = el(document, 'div', 'table-scroll isolated-table-scroll');
-  scroll.tabIndex = 0;
-  scroll.setAttribute('role', 'region');
-  scroll.setAttribute('aria-label', 'Results table; scroll this region horizontally on narrow screens');
-  scroll.append(node);
-  return scroll;
+  return scrollRegion(document, 'table-scroll isolated-table-scroll',
+    'Results table; scroll this region horizontally on narrow screens', node);
 }
 
 function footer(document, catalog, model, type) {

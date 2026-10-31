@@ -33,21 +33,24 @@ export function engineName(document, name, tag = 'span') {
   return node;
 }
 
-// Two stacked bars, one per topology; a missing value states "No data" and its recorded reason.
+// One line per topology: the value and its change above a full-width bar. A missing value states "No data" and its
+// recorded reason; when every topology shares that reason the cell states it once.
 export function pair(document, items) {
   const cell = el(document, 'span', 'pair');
-  for (const item of items) {
+  const shared = items.every(item => item.value === null && item.reason === items[0].reason);
+  items.forEach((item, index) => {
     const line = cell.appendChild(el(document, 'span', 'pair-line n' + item.nodes));
     line.title = `${nodesLabel(item.nodes)} · ${item.title}`;
     line.dataset.value = item.value === null ? '' : String(item.value);
     if (item.value === null) {
-      line.append(el(document, 'small', 'no-data', 'No data · ' + item.reason));
-      continue;
+      if (index === 0 || !shared)
+        line.append(el(document, 'small', 'no-data', 'No data'), el(document, 'small', 'no-data-reason', item.reason));
+      return;
     }
-    line.appendChild(el(document, 'i')).style.setProperty('--size', percent(item.ratio));
     line.append(el(document, 'b', null, item.text));
     if (item.note) line.append(el(document, 'small', null, item.note));
-  }
+    line.appendChild(el(document, 'i')).style.setProperty('--size', percent(item.ratio));
+  });
   return cell;
 }
 

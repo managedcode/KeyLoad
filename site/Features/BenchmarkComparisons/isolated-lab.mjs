@@ -1,6 +1,6 @@
 import { loadIsolatedCatalog, loadIsolatedProjection } from './isolated-loader.mjs';
 import { initializeIsolatedControls, isolatedElements, readIsolatedType, selectIsolatedType } from './isolated-controls.mjs';
-import { isolatedModel, renderIsolatedSummary, renderIsolatedView } from './isolated-view.mjs';
+import { isolatedModel, renderIsolatedSummary, renderIsolatedView, shadeScrollRegions } from './isolated-view.mjs';
 
 function clear(elements) {
   elements.summary.replaceChildren();
@@ -14,7 +14,8 @@ function render(state) {
   if (!state.model || state.disposed) return;
   const type = readIsolatedType(state.elements);
   renderIsolatedView(state.elements.results, state.catalog, state.model, { type, sort: state.sort });
-  const count = state.elements.results.querySelectorAll(type === 'all' ? '.ov-row' : '.db-card').length;
+  shadeScrollRegions(state.elements.results);
+  const count = state.elements.results.querySelectorAll('.ov-row').length;
   state.elements.announcement.textContent = `${type === 'all' ? 'All databases' : type} · ${count} databases.`;
 }
 
@@ -67,9 +68,14 @@ export function mountIsolatedLab({ root, catalogUrl }) {
     change();
   };
   const retry = () => { void load(state); };
+  // Table edge shades follow scrolling, viewport changes and opening the details table.
+  const shade = () => shadeScrollRegions(elements.results);
+  const resize = new ResizeObserver(shade);
   elements.type.addEventListener('change', change);
   elements.results.addEventListener('click', pick);
+  elements.results.addEventListener('scroll', shade, { capture: true, passive: true });
   elements.retry.addEventListener('click', retry);
+  resize.observe(elements.results);
   void load(state);
   return {
     dispose() {
@@ -81,7 +87,9 @@ export function mountIsolatedLab({ root, catalogUrl }) {
       state.model = null;
       elements.type.removeEventListener('change', change);
       elements.results.removeEventListener('click', pick);
+      elements.results.removeEventListener('scroll', shade, { capture: true });
       elements.retry.removeEventListener('click', retry);
+      resize.disconnect();
       clear(elements);
     },
   };

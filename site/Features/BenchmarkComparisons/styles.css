@@ -212,15 +212,18 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .engine-name strong { overflow: hidden; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
 .engine-name small { color: var(--kl-muted); font: .64rem/1.5 var(--kl-font-mono); letter-spacing: .05em; text-transform: uppercase; }
 .no-data { color: var(--kl-faint); font-size: .76rem; font-weight: 500; }
-.pair { display: grid; gap: 5px; min-width: 0; }
-.pair-line { display: flex; align-items: center; gap: .45rem; min-width: 0; height: 18px; white-space: nowrap; }
-.pair-line i { flex: none; width: calc(var(--size) * .6); min-width: 3px; height: 11px; border-radius: 0 4px 4px 0; background: linear-gradient(90deg, var(--c1), var(--c2)); }
-.pair-line:has(.no-data) { height: auto; min-height: 18px; white-space: normal; }
-.pair-line .no-data { line-height: 1.3; }
-.pair-line.n3 i { height: 8px; opacity: .42; }
-.pair-line b { font-size: .86rem; font-variant-numeric: tabular-nums; font-weight: 680; }
-.pair-line.n3 b { color: var(--kl-muted); font-weight: 600; }
-.pair-line small:not(.no-data) { color: var(--kl-muted); font-size: .7rem; font-variant-numeric: tabular-nums; }
+/* A topology line is its value and change over a full-width rail; the bar fills its share of the run's best. */
+.pair { display: grid; gap: .7rem; min-width: 0; }
+.pair-line { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: baseline; gap: .35rem .45rem; min-width: 0; white-space: nowrap; }
+.pair-line:empty { display: none; }
+.pair-line i { grid-column: 1 / -1; height: 6px; border-radius: 3px; background: linear-gradient(90deg, var(--c1), var(--c2)) 0 0 / max(4px, var(--size)) 100% no-repeat, var(--kl-surface-3); }
+.pair-line.n3 i { height: 4px; background-image: linear-gradient(90deg, color-mix(in srgb, var(--c1) 50%, transparent), color-mix(in srgb, var(--c2) 50%, transparent)); }
+.pair-line b { font-size: .9rem; font-variant-numeric: tabular-nums; font-weight: 680; line-height: 1.15; }
+.pair-line.n3 b { color: var(--kl-muted); font-size: .82rem; font-weight: 600; }
+.pair-line small { color: var(--kl-muted); font-size: .7rem; font-variant-numeric: tabular-nums; }
+.pair-line:has(.no-data) { grid-template-columns: minmax(0, 1fr); gap: .1rem; white-space: normal; }
+.pair-line .no-data, .no-data-reason { line-height: 1.3; }
+.pair-line .no-data-reason { color: var(--kl-faint); font-size: .68rem; }
 .leaders { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .8rem; margin-bottom: 2rem; }
 .leader { display: grid; align-content: start; gap: .3rem; min-width: 0; padding: 1.1rem 1.15rem 1.2rem; border: 1px solid var(--kl-line); border-radius: var(--kl-radius-lg); background: rgba(255, 255, 255, .66); color: inherit; font: inherit; text-align: left; cursor: pointer; transition: border-color .2s var(--kl-ease), box-shadow .2s var(--kl-ease), transform .2s var(--kl-ease); }
 .leader:hover { border-color: var(--kl-line-strong); transform: translateY(-1px); }
@@ -236,28 +239,28 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .leader-bars i { width: var(--size); height: 7px; border-radius: 0 4px 4px 0; background: linear-gradient(90deg, var(--c1), var(--c2)); opacity: .55; }
 .leader-bars > span:first-child i { opacity: 1; }
 .leader-bars b { font-variant-numeric: tabular-nums; text-align: right; }
-.ov-head, .ov-row, .cost-row { display: grid; grid-template-columns: minmax(11rem, 14.5rem) repeat(var(--columns, 8), minmax(8rem, 1fr)); align-items: center; gap: 1.1rem; }
-.comparison-scroll { max-width: 100%; overflow-x: auto; padding-bottom: .5rem; }
+.cost-row { display: grid; grid-template-columns: minmax(11rem, 14.5rem) repeat(4, minmax(8rem, 1fr)); align-items: center; gap: 1.1rem; }
 .table-scroll-hint { margin: 0 0 .6rem; color: var(--kl-muted); font-size: .75rem; }
-.comparison-grid { width: 100%; min-width: 90rem; }
+/* Comparison table: the engine column stays pinned; every cell, header line and value starts on the same edges. */
+.comparison-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; padding-bottom: .5rem; scrollbar-color: var(--kl-line-strong) transparent; scrollbar-width: thin; }
+.comparison-grid { --pin: 14.5rem; --col: 9.5rem; width: 100%; min-width: calc(var(--pin) + var(--columns, 8) * var(--col)); border-collapse: separate; border-spacing: 0; font-size: .8rem; }
 .comparison-grid > thead, .comparison-grid > tbody { display: block; }
-.comparison-grid th, .comparison-grid td { padding: 0; border: 0; font: inherit; text-align: left; white-space: normal; }
-.comparison-grid tr > th, .comparison-grid tr > td { min-width: 0; max-width: none; text-align: left; text-transform: none; letter-spacing: normal; }
-.comparison-grid tr > :first-child { position: sticky; left: 0; z-index: 1; background: var(--kl-surface-solid); }
-.cost-row { --columns: 4; }
+.ov-head, .ov-row { display: grid; grid-template-columns: var(--pin) repeat(var(--columns, 8), minmax(var(--col), 1fr)); }
+.comparison-grid th, .comparison-grid td { min-width: 0; padding: .95rem .75rem; font: inherit; text-align: left; }
+.comparison-grid tr > :first-child { position: sticky; left: 0; z-index: 2; padding-left: .5rem; background: var(--row, var(--kl-surface-solid)); box-shadow: inset -1px 0 0 var(--kl-line); }
 .ov-row .engine-name strong { white-space: normal; }
-.ov-head { padding: 0 .4rem .55rem; border-bottom: 1px solid var(--kl-line-strong); }
-.ov-head > th:first-child { padding-left: 1.7rem; }
+.ov-head { border-bottom: 1px solid var(--kl-line-strong); }
+.ov-head > th { padding-top: 0; padding-bottom: .8rem; }
+.ov-head > th:first-child { display: flex; align-items: flex-end; padding-left: 2.2rem; }
 .ov-head > th:first-child, .cost-head span { color: var(--kl-muted); font: 600 .66rem/1.3 var(--kl-font-mono); letter-spacing: .06em; text-transform: uppercase; }
-.ov-head button { display: grid; justify-items: start; gap: .15rem; padding: 0; border: 0; background: none; color: var(--kl-ink); font: 650 .9rem/1.2 var(--kl-font-sans); text-align: left; cursor: pointer; }
-.ov-head button small { color: var(--kl-muted); font-size: .7rem; font-weight: 450; }
+.ov-head button { display: grid; grid-template-rows: auto 1fr auto; justify-items: start; gap: .2rem; width: 100%; height: 100%; padding: .7rem 0 0; border: 0; background: none; box-shadow: inset 0 2px 0 var(--c2); color: var(--kl-ink); font: 650 .9rem/1.2 var(--kl-font-sans); text-align: left; cursor: pointer; }
+.ov-head button small { align-self: start; color: var(--kl-muted); font-size: .7rem; font-weight: 450; line-height: 1.35; }
 .ov-head button::after { content: "↓"; color: var(--kl-faint); font-size: .8rem; }
-.ov-head button { box-shadow: inset 0 2px 0 var(--c2); padding-top: .55rem; }
 .ov-head button.is-sorted::after { color: var(--c2); }
 .ov-head button:hover small { color: var(--kl-ink-2); }
 .ov-list { margin: 0; padding: 0; list-style: none; counter-reset: rank; }
-.ov-row { padding: .75rem .4rem; border-bottom: 1px solid var(--kl-line); transition: background-color .2s var(--kl-ease); }
-.ov-row:hover { background-color: rgba(255, 255, 255, .7); }
+.ov-row { border-bottom: 1px solid var(--kl-line); transition: background-color .2s var(--kl-ease); }
+.ov-row:hover { --row: color-mix(in srgb, #6f5cf0 5%, var(--kl-surface-solid)); background-color: var(--row); }
 .ov-name { display: grid; grid-template-columns: 1.7rem minmax(0, 1fr); justify-items: start; gap: .25rem 0; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
 .ov-name > * { grid-column: 2; }
 .ov-name::before { counter-increment: rank; content: counter(rank, decimal-leading-zero); grid-row: 1 / span 2; padding-top: .15rem; color: var(--kl-faint); font: 600 .74rem/1 var(--kl-font-mono); }
@@ -270,7 +273,7 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .engine-contracts dd { margin: 0; overflow-wrap: anywhere; line-height: 1.4; }
 
 .is-keyload .engine-name strong { color: var(--kl-accent-ink); }
-.is-keyload { background: linear-gradient(90deg, rgba(227, 166, 255, .12), transparent 60%); }
+.is-keyload { --row: color-mix(in srgb, #e3a6ff 12%, var(--kl-surface-solid)); background-image: linear-gradient(90deg, rgba(227, 166, 255, .12), transparent 60%); }
 .bench-duo { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1.5rem, 3vw, 2.5rem); }
 .lat-ticks { position: relative; display: block; height: 1.6rem; color: var(--kl-muted); font: 600 .62rem/1 var(--kl-font-mono); letter-spacing: .06em; text-transform: uppercase; }
 .lat-ticks i { position: absolute; bottom: 0; left: var(--at); transform: translateX(-50%); color: var(--kl-faint); font: 500 .62rem/1 var(--kl-font-mono); font-style: normal; letter-spacing: 0; text-transform: none; white-space: nowrap; }
@@ -314,21 +317,32 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .bench-details summary::after { content: ""; width: 12px; height: 12px; background: currentColor; -webkit-mask: var(--chevron) center / contain no-repeat; mask: var(--chevron) center / contain no-repeat; transition: transform .3s var(--kl-ease); }
 .bench-details[open] summary::after { transform: rotate(180deg); }
 .bench-details[open] summary { margin-bottom: 1rem; }
-/* The engine column stays pinned while values scroll; the right-edge shade shows more columns until the end. */
-.table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid var(--kl-line); border-radius: var(--kl-radius); background: linear-gradient(to left, var(--kl-surface-solid) 40%, transparent) right / 3rem 100% no-repeat local, radial-gradient(farthest-side at 100% 50%, rgba(28, 24, 44, .16), transparent) right / 1rem 100% no-repeat scroll, var(--kl-surface-solid); scrollbar-color: var(--kl-line-strong) transparent; scrollbar-width: thin; }
-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: .8rem; }
-caption { padding: .8rem .9rem; color: var(--kl-muted); font-size: .8rem; text-align: left; }
-th { padding: .6rem .6rem; border-bottom: 1px solid var(--kl-line-strong); color: var(--kl-muted); font: 600 .62rem/1.25 var(--kl-font-mono); letter-spacing: .05em; text-align: left; text-transform: uppercase; vertical-align: bottom; }
-th.num, td[data-test] { text-align: right; }
-th.group { padding-bottom: .35rem; border-bottom-color: var(--kl-line); text-align: center; }
-td { padding: .55rem .6rem; border-bottom: 1px solid var(--kl-line); font-variant-numeric: tabular-nums; white-space: nowrap; transition: background-color .15s var(--kl-ease); }
-.pin { position: sticky; left: 0; z-index: 1; background: var(--kl-surface-solid); box-shadow: inset -1px 0 0 var(--kl-line); }
-td.pin { font-weight: 600; }
-td:nth-child(2) { color: var(--kl-ink-2); text-align: center; }
-td:nth-child(3) { min-width: 10rem; max-width: 10rem; color: var(--kl-ink-2); font-size: .74rem; white-space: normal; }
-tbody tr:hover td { background-color: color-mix(in srgb, #6f5cf0 10%, var(--kl-surface-solid)); }
-tr:last-child td { border-bottom: 0; }
-td[data-value=""] { color: var(--kl-faint); }
+/* Horizontal regions shade the pinned edge once columns pass beneath it and fade the far edge while more columns remain. */
+.scroll-frame { position: relative; min-width: 0; }
+.scroll-frame::after { content: ""; position: absolute; top: 0; right: 0; bottom: 0; z-index: 3; width: 4.5rem; background: linear-gradient(to left, var(--kl-surface-solid) 8%, transparent); opacity: 0; pointer-events: none; transition: opacity .25s var(--kl-ease); }
+.bench-overview .scroll-frame::after { bottom: .5rem; }
+.bench-details .scroll-frame::after { inset: 1px 1px 1px auto; border-radius: 0 var(--kl-radius) var(--kl-radius) 0; }
+.scroll-frame.more-end::after { opacity: 1; }
+.comparison-grid tr > :first-child::after, .pin-nodes::after { content: ""; position: absolute; top: 0; bottom: -1px; left: 100%; width: 1.4rem; background: linear-gradient(90deg, rgba(28, 24, 44, .1), transparent); opacity: 0; pointer-events: none; transition: opacity .25s var(--kl-ease); }
+.more-start .comparison-grid tr > :first-child::after, .more-start .pin-nodes::after { opacity: 1; }
+/* Results table: engine and node count stay pinned while the values scroll. */
+.table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; border: 1px solid var(--kl-line); border-radius: var(--kl-radius); background: var(--kl-surface-solid); scrollbar-color: var(--kl-line-strong) transparent; scrollbar-width: thin; }
+.table-scroll table { --pin-name: 11rem; width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: .8rem; }
+.table-scroll caption { padding: .8rem .9rem; color: var(--kl-muted); font-size: .8rem; text-align: left; }
+.table-scroll caption span { position: sticky; left: .9rem; }
+.table-scroll th { padding: .6rem .6rem; border-bottom: 1px solid var(--kl-line-strong); color: var(--kl-muted); font: 600 .62rem/1.25 var(--kl-font-mono); letter-spacing: .05em; text-align: left; text-transform: uppercase; vertical-align: bottom; }
+.table-scroll th.num, .table-scroll td[data-test] { text-align: right; }
+.table-scroll th.group { padding-bottom: .35rem; border-bottom-color: var(--kl-line); text-align: center; }
+.table-scroll td { padding: .55rem .6rem; border-bottom: 1px solid var(--kl-line); font-variant-numeric: tabular-nums; white-space: nowrap; transition: background-color .15s var(--kl-ease); }
+.pin { position: sticky; left: 0; z-index: 1; background: var(--kl-surface-solid); }
+.pin:first-child { width: var(--pin-name); min-width: var(--pin-name); }
+.pin-nodes { left: var(--pin-name); box-shadow: inset -1px 0 0 var(--kl-line); }
+.table-scroll th.pin-nodes, .table-scroll td.pin-nodes { padding-inline: .8rem; color: var(--kl-ink-2); text-align: center; }
+.table-scroll td.pin:first-child { font-weight: 600; }
+.table-scroll td:nth-child(3) { min-width: 10rem; max-width: 10rem; color: var(--kl-ink-2); font-size: .74rem; white-space: normal; }
+.table-scroll tbody tr:hover td { background-color: color-mix(in srgb, #6f5cf0 10%, var(--kl-surface-solid)); }
+.table-scroll tr:last-child td { border-bottom: 0; }
+.table-scroll td[data-value=""] { color: var(--kl-faint); }
 .table-links { display: flex; gap: .8rem; }
 .table-links a { font-weight: 600; text-decoration-color: var(--kl-line-strong); }
 .load-error { margin: 1rem 0 0; padding: .8rem 1rem; border-radius: 12px; background: var(--kl-bad-bg); color: var(--kl-bad-ink); font-weight: 600; }
@@ -401,7 +415,7 @@ td[data-value=""] { color: var(--kl-faint); }
 }
 
 @media (max-width: 760px) {
-  .comparison-grid .ov-head, .comparison-grid .ov-row { grid-template-columns: 8rem repeat(var(--columns, 8), minmax(8rem, 1fr)); }
+  .comparison-grid { --pin: 8.75rem; --col: 8.75rem; }
   .bench-controls fieldset { padding-left: 0; }
   .bench-legend { position: static; margin-bottom: -1.2rem; }
   .leaders { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(15.5rem, 82%); margin-inline: calc(-1 * clamp(1rem, 2.4vw, 2rem)); padding: .2rem clamp(1rem, 2.4vw, 2rem) .6rem; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; }
