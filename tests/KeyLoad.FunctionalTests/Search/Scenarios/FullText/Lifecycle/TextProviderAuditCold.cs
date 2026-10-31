@@ -16,7 +16,7 @@ internal static class TextProviderAuditCold
         var path = manifests.Single(candidate => TextEnvelopeCodec.Decode<TextManifest>(
             File.ReadAllBytes(candidate)).Scope.Position == owner.Store.Position);
         var original = await File.ReadAllBytesAsync(path, token);
-        await TextProviderAuditImages.ManifestAsync(owner, path, original, token);
+        await TextProviderAuditImages.ManifestAsync(owner, path, original);
         var changed = TextProviderAuditManifestDamage.Encode(original, damage);
         var canonical = TextProviderAuditImages.Capture(owner);
         var failures = new List<Exception>();

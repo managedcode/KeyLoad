@@ -13,7 +13,6 @@ internal sealed class TextExecutionOptions
     private const int MaximumDepthCeiling = 8;
     private const long MaximumDiskByteCeiling = 268_435_456;
     private const int MaximumMutableSegmentItemCeiling = 4_096;
-    private const int MaximumHashBufferByteCeiling = 65_536;
     private const int MaximumFileBufferByteCeiling = 4_096;
     private const int MaximumGenerationCeiling = 3;
     private const int MaximumOwnerReceiptByteCeiling = 65_536;
@@ -24,7 +23,6 @@ internal sealed class TextExecutionOptions
     public int MaximumDepth { get; set; } = MaximumDepthCeiling;
     public long MaximumDiskBytes { get; set; } = MaximumDiskByteCeiling;
     public int MutableSegmentMaximumItems { get; set; } = MaximumMutableSegmentItemCeiling;
-    public int HashBufferBytes { get; set; } = MaximumHashBufferByteCeiling;
     public int FileBufferBytes { get; set; } = MaximumFileBufferByteCeiling;
     public int MaximumGenerations { get; set; } = MaximumGenerationCeiling;
     public int MaximumOwnerReceiptBytes { get; set; } = MaximumOwnerReceiptByteCeiling;
@@ -36,7 +34,6 @@ internal sealed class TextExecutionOptions
         && MaximumDepth is >= 1 and <= MaximumDepthCeiling
         && MaximumDiskBytes is >= 1 and <= MaximumDiskByteCeiling
         && MutableSegmentMaximumItems is >= 1 and <= MaximumMutableSegmentItemCeiling
-        && HashBufferBytes is >= 1 and <= MaximumHashBufferByteCeiling
         && FileBufferBytes is >= 1 and <= MaximumFileBufferByteCeiling
         && MaximumGenerations is >= 1 and <= MaximumGenerationCeiling
         && MaximumOwnerReceiptBytes is >= 1 and <= MaximumOwnerReceiptByteCeiling

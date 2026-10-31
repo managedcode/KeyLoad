@@ -118,11 +118,13 @@ manifest binds the exact scope and ordered identity/revision metadata, format1,
 tokenizer/hash versions and completed source cut. Its generated contracts
 use stable aliases/IDs and an SHA256 payload checksum; no internal JSON fallback.
 Manifest Id5 adds a bounded ordered file inventory. Each generated
-`keyload.server.text.file` record fixes Id0 normalized relative path,
-Id1 byte length and Id2 SHA256. Capture actual files after synchronous
-flush and handle settlement before complete publication; no static guessed
-filename allowlist is used. Restart validates the exact bounded regular
-path/length/digest inventory before cleanup. Reopening a completed generation
+`keyload.server.text.file` record fixes Id0 normalized relative path and
+Id1 byte length at publication. ZoneTree owns the content of these files and
+rewrites its own metadata, so KeyLoad records and checks the owned file set,
+never file content. Capture actual files after synchronous flush and handle
+settlement before complete publication; no static guessed filename allowlist
+is used. Restart validates the exact owned path inventory before cleanup.
+Searches do not re-enumerate or re-read generation files. Reopening a completed generation
 must preserve or atomically refresh its recognized inventory at settlement.
 An owner receipt alone cannot authorize arbitrary recursive deletion. A completed
 generation requires both an exact tracked layout and a verified closed inventory.

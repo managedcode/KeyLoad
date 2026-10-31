@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using KeyLoad.Core;
 using Microsoft.Extensions.Options;
 
@@ -26,9 +25,8 @@ internal static class TextInventory
         }
         for (var index = IndexInitialValue; index < actual.Length; index++)
         {
-            if (actual[index].RelativePath != expected[index].RelativePath || actual[index].Length != expected[index].Length
-                || expected[index].Sha256 is null || expected[index].Sha256.Length != SHA256.HashSizeInBytes
-                || !CryptographicOperations.FixedTimeEquals(actual[index].Sha256, expected[index].Sha256))
+            // ZoneTree owns the content of these files and rewrites its metadata; only the owned file set is checked.
+            if (actual[index].RelativePath != expected[index].RelativePath)
             {
                 throw TextErrors.Corrupt();
             }

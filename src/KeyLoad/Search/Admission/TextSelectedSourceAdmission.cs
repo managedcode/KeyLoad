@@ -54,9 +54,6 @@ internal static class TextSelectedSourceAdmission
             new(selection.Consumer, selection.Generation, request.Collection, request.TextField!, node, enrollment.Placement), budget);
         TextIncrementalSourceValidation.Authority(manifest, maintenance, source, budget);
         TextIncrementalSourceValidation.CompleteCorpus(manifest, source, budget);
-        var owner = TextOwnerFiles.ReadOwner(Path.Combine(generationPath, TextProtocol.OwnerFile),
-            root, selected, node, options);
-        TextInventory.Verify(generationPath, owner.OwnedPaths, manifest.Files, options, budget);
         budget.Check();
         return (selected, manifest);
     }

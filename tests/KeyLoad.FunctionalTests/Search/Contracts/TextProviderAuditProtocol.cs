@@ -47,7 +47,6 @@ internal static class TextProviderAuditProtocol
     internal const ulong NoncontiguousId = 2;
     internal const int InvalidManifestFormat = 2;
     internal const int ScopePositionStep = 1;
-    internal const byte DigestDifference = 0x80;
-    internal const int FirstDigestByte = 0;
+    internal const string UnownedSuffix = ".unowned";
     internal const double SingleBranchScore = 1d / 61d;
 }

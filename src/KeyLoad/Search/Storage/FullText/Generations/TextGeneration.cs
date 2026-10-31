@@ -15,7 +15,6 @@ internal sealed class TextGeneration
     internal TextResourceOwnership? Resources => resources;
     private List<TextRecord>? pendingRecords = [];
     private TextRecord[]? sealedRecords;
-    private TextFile[]? openedFiles;
     private HashSet<EntityRef>? references = [];
 
     internal TextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, TextFileStreamProvider provider, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
@@ -126,7 +125,6 @@ internal sealed class TextGeneration
         if (failures.Count == failuresBeforeDispose)
         {
             CurrentIndex = null;
-            openedFiles = null;
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -149,10 +147,6 @@ internal sealed class TextGeneration
         budget.Check();
         if (CurrentIndex is not null)
         {
-            TextLiveGenerationMetadata.Validate(this, Path, root, Leaf, sourceNodeId, executionOptions);
-            var liveOwner = TextFiles.ReadOwnerForProvider(root, Leaf, sourceNodeId, executionOptions);
-            TextInventory.Verify(Path, liveOwner.OwnedPaths, openedFiles ?? throw TextErrors.Corrupt(),
-                executionOptions, budget);
             return;
         }
         var manifest = TextFiles.ValidatePublishedGeneration(root, Leaf, sourceNodeId, Scope, budget, executionOptions: executionOptions);
@@ -166,8 +160,6 @@ internal sealed class TextGeneration
                 resources: resources, allowReadOnlyInventory: true), executionOptions: executionOptions);
         CurrentIndex.IsReadOnly = true;
         CurrentIndex.WaitForBackgroundThreads();
-        var owner = TextFiles.ReadOwnerForProvider(root, Leaf, sourceNodeId, executionOptions);
-        openedFiles = TextInventory.Capture(Path, owner.OwnedPaths, executionOptions, budget);
     }
 
     internal void MarkPublished()
@@ -185,7 +177,5 @@ internal sealed class TextGeneration
         }
         current.Dispose();
         CurrentIndex = null;
-        openedFiles = null;
     }
-
 }

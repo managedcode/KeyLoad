@@ -66,11 +66,9 @@ internal static class TextProviderAuditManifestDamage
         else
         {
             var files = manifest.Files.ToArray();
-            var digest = files[FirstFile].Sha256.ToArray();
-            digest[FirstDigestByte] ^= DigestDifference;
             files[FirstFile] = files[FirstFile] with
             {
-                Sha256 = digest
+                RelativePath = files[FirstFile].RelativePath + UnownedSuffix
             };
             return manifest with
             {

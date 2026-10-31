@@ -126,7 +126,6 @@ internal static class TextValidation
             if (file is null || string.IsNullOrWhiteSpace(file.RelativePath) || file.RelativePath.StartsWith(SlashCharacter)
                 || file.RelativePath.Contains(ParentDirectorySegment, StringComparison.Ordinal)
                 || file.RelativePath.Contains(BackslashCharacter, StringComparison.Ordinal) || file.Length < FileLengthValidationBoundary
-                || file.Sha256 is null || file.Sha256.Length != System.Security.Cryptography.SHA256.HashSizeInBytes
                 || previous is not null && StringComparer.Ordinal.Compare(previous, file.RelativePath) >= CompareValidationBoundary
                 || file.Length > executionOptions.Value.MaximumDiskBytes - bytes)
             {

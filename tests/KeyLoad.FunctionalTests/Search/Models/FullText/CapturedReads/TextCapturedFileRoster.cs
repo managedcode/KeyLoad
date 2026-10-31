@@ -71,24 +71,11 @@ internal sealed record TextCapturedFileRoster(string Path, TextIncrementalManife
         {
             throw new InvalidOperationException("The complete retained execution file roster changed.");
         }
-        long bytes = 0;
         foreach (var file in manifest.Files)
         {
             budget.Check();
-            var path = System.IO.Path.Combine(generationPath,
-                file.RelativePath.Replace('/', System.IO.Path.DirectorySeparatorChar));
-            TextFileIO.VerifyRegularFile(path);
-            using var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite,
-                runtime.Options.RuntimeText.Value.HashBufferBytes, FileOptions.SequentialScan);
-            var length = input.Length;
-            var digest = TextDigest.HashBounded(input, length,
-                runtime.Options.RuntimeText.Value.MaximumDiskBytes - bytes, budget,
-                executionOptions: runtime.Options.RuntimeText);
-            if (input.Length != length || length != file.Length || !digest.AsSpan().SequenceEqual(file.Sha256))
-            {
-                throw new InvalidOperationException("The complete retained execution file bytes changed.");
-            }
-            bytes += length;
+            TextFileIO.VerifyRegularFile(System.IO.Path.Combine(generationPath,
+                file.RelativePath.Replace('/', System.IO.Path.DirectorySeparatorChar)));
         }
     }
 }

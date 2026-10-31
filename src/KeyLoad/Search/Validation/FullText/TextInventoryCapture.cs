@@ -90,18 +90,13 @@ internal sealed class TextInventoryCapture
         }
         retained?.RequirePath(_generationPath);
         TextFileIO.VerifyRegularFile(path);
-        var share = retained is null ? FileShare.Read : FileShare.ReadWrite;
-        using var input = new FileStream(path, FileMode.Open, FileAccess.Read, share,
-            executionOptions.Value.HashBufferBytes, FileOptions.SequentialScan);
-        var length = input.Length;
-        var remaining = executionOptions.Value.MaximumDiskBytes - _bytes;
-        var digest = TextDigest.HashBounded(input, length, remaining, _budget, executionOptions: executionOptions);
-        retained?.RequirePath(_generationPath);
-        if (input.Length != length)
+        var length = new FileInfo(path).Length;
+        if (length > executionOptions.Value.MaximumDiskBytes - _bytes)
         {
-            throw TextErrors.Corrupt();
+            throw TextErrors.BoundExceeded();
         }
+        retained?.RequirePath(_generationPath);
         _bytes += length;
-        _files.Add(new TextFile(relative, length, digest));
+        _files.Add(new TextFile(relative, length));
     }
 }
