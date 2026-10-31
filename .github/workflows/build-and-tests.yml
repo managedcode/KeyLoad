@@ -2,7 +2,23 @@ name: Build and Tests
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - 'site/**'
+      - 'scripts/Features/BenchmarkComparisons/site-*'
+      - 'scripts/Features/BenchmarkComparisons/composite-site-*'
+      - '.github/workflows/website.yml'
+      - '.github/workflows/Features/BenchmarkComparisons/QualifySite/**'
+      - '.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite/**'
+      - '.github/workflows/Features/BenchmarkComparisons/DeploySite/**'
   pull_request:
+    paths-ignore:
+      - 'site/**'
+      - 'scripts/Features/BenchmarkComparisons/site-*'
+      - 'scripts/Features/BenchmarkComparisons/composite-site-*'
+      - '.github/workflows/website.yml'
+      - '.github/workflows/Features/BenchmarkComparisons/QualifySite/**'
+      - '.github/workflows/Features/BenchmarkComparisons/BuildIsolatedSite/**'
+      - '.github/workflows/Features/BenchmarkComparisons/DeploySite/**'
   workflow_dispatch:
   workflow_call:
 env:

@@ -12,7 +12,8 @@ that change the site or its build, qualification and publication inputs (an expl
 path filter, so database-only pushes do not start it) and on manual dispatch. The
 final job of Benchmarks dispatches it after a successful producer run. Build and
 Tests (`build-and-tests.yml`) builds the complete solution and runs ordinary project
-tests; its result is not a dependency of Website. Benchmarks produces authenticated
+tests; it ignores pushes and pull requests that change only these website inputs, and
+its result is not a dependency of Website. Benchmarks produces authenticated
 JSON. Release remains the prepared manual product-release workflow.
 
 Website selects the latest ready authenticated Benchmarks aggregate. With data,

@@ -331,7 +331,10 @@ measured workload reports do not close that independent gate.
 
 ## Runs and results
 
-A push to main automatically runs the complete set of 32 measurement jobs. A manual run
+A push to main that changes KeyLoad product source (`src/**` or the root
+`Directory.Build.*`, `Directory.Packages.props` and `global.json` build inputs)
+automatically runs the complete set of 32 measurement jobs; pushes that change only
+tests, the benchmark harness, documentation or the website do not start it. A manual run
 chooses the complete set or only the build/harness contracts. Preflight, cancellation,
 malformed-input, permission and provenance checks are TUnit contracts of Benchmarks
 and do not multiply the measurement matrix. The selected load profiles use the same
