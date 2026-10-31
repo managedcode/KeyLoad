@@ -90,13 +90,80 @@ internal sealed class TextFileStreamProviderTests
             ?? throw new InvalidOperationException("The execution generation has no manager root.");
         var leaf = Path.GetFileName(generation);
         var execution = Path.Combine(generation, TextProtocol.RuntimeDirectoryCore);
-        return (new TextFileStreamProvider(root, leaf, database.Store.Identity.NodeId, UnitTextOptions.Execution()), root, execution);
+        var options = UnitTextOptions.Execution();
+        var resources = new TextResourceOwnership(options);
+        resources.RegisterRoot(root, _ => TextRootFiles.VerifyReceipt(root, database.Store.Identity.NodeId, options));
+        return (new TextFileStreamProvider(root, leaf, database.Store.Identity.NodeId, options, resources), root, execution);
     }
 
     private static void WriteOwned(TextFileStreamProvider provider, string path, byte[] value)
     {
         using var file = provider.CreateFileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None);
         file.ToStream().Write(value);
+    }
+
+    [Test]
+    public async Task DurableMetadataCreationMovesOwnedBytesWithoutReplacingExistingContent()
+    {
+        using var database = new TestDatabase();
+        var (provider, root, execution) = CreateProvider(database);
+        var destination = Path.Combine(execution, "metadata.bin");
+        var expected = new byte[] { 0x10, 0x00, 0xFF, 0x80 };
+        provider.GetDurableFileWriter().WriteNewFile(destination, expected);
+        await AssertBytesAsync(destination, expected);
+        await Assert.That(File.Exists(destination + ".tmp")).IsFalse();
+        var before = await TextOwnershipSnapshot.CaptureAsync(root,
+            TestContext.Current!.Execution.CancellationToken);
+
+        Assert.ThrowsExactly<IOException>(() => provider.GetDurableFileWriter().WriteNewFile(destination, [0x20]));
+
+        await AssertBytesAsync(destination, expected);
+        await TextOwnershipSnapshot.AssertUnchangedAsync(root, before,
+            TestContext.Current!.Execution.CancellationToken);
+        var healthy = Path.Combine(execution, "healthy-metadata.bin");
+        provider.GetDurableFileWriter().WriteNewFile(healthy, expected);
+        await AssertBytesAsync(healthy, expected);
+    }
+
+    [Test]
+    public async Task MoveRejectsOccupiedOutsideAndUnownedTargetsBeforeChangingSourceOrLedger()
+    {
+        using var database = new TestDatabase();
+        var (provider, root, execution) = CreateProvider(database);
+        var source = Path.Combine(execution, "move-source.bin");
+        var destination = Path.Combine(execution, "move-occupied.bin");
+        var unowned = Path.Combine(execution, "move-unowned.bin");
+        var outside = Path.Combine(database.Directory, "move-outside.bin");
+        var sourceBytes = new byte[] { 0x21, 0x32 };
+        var occupiedBytes = new byte[] { 0x54, 0x65 };
+        WriteOwned(provider, source, sourceBytes);
+        WriteOwned(provider, destination, occupiedBytes);
+        await File.WriteAllBytesAsync(unowned, occupiedBytes, TestContext.Current!.Execution.CancellationToken);
+        await File.WriteAllBytesAsync(outside, occupiedBytes, TestContext.Current!.Execution.CancellationToken);
+        var before = await TextOwnershipSnapshot.CaptureAsync(root,
+            TestContext.Current!.Execution.CancellationToken);
+
+        Assert.ThrowsExactly<IOException>(() => provider.MoveFile(source, destination));
+        foreach (var target in new[] { outside, unowned })
+        {
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => provider.MoveFile(source, target)).Code)
+                .IsEqualTo(ErrorCode.FormatUnsupported);
+        }
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => provider.MoveFile(outside, source)).Code)
+            .IsEqualTo(ErrorCode.FormatUnsupported);
+
+        await AssertBytesAsync(source, sourceBytes);
+        foreach (var occupied in new[] { destination, unowned, outside })
+        {
+            await AssertBytesAsync(occupied, occupiedBytes);
+        }
+        await TextOwnershipSnapshot.AssertUnchangedAsync(root, before,
+            TestContext.Current!.Execution.CancellationToken);
+        File.Delete(unowned);
+        var healthy = Path.Combine(execution, "move-healthy.bin");
+        provider.MoveFile(source, healthy);
+        await AssertBytesAsync(healthy, sourceBytes);
+        await Assert.That(File.Exists(source)).IsFalse();
     }
 
     private static async Task AssertBytesAsync(string path, byte[] expected)

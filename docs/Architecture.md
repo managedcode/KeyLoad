@@ -156,7 +156,7 @@ volume's locking and flush behavior.
 
 Sources: [Orleans stateless workers](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains),
 [grain directory](https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory),
-and [the pinned ZoneTree WAL open contract](https://github.com/ZoneTree/ZoneTree/blob/bd11bd6d2b6ce022acd009ac5b31a254f09b7655/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs).
+and [the pinned ZoneTree WAL open contract](https://github.com/ZoneTree/ZoneTree/blob/a9953313613337f5ead6c3143e8da77b7103c64f/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs).
 
 Credentials and authorization policies are persisted in the database; callers
 never supply trusted roles. Standard ASP.NET Core authentication admits HTTP,

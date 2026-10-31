@@ -1,7 +1,7 @@
 # Native MVCC storage
 
 [StorageRecovery](../StorageRecovery.md) owns this integration of published
-[ZoneTree 2.0.6](https://github.com/ZoneTree/ZoneTree/releases/tag/release-v2.0.6).
+[ZoneTree 2.0.7](https://github.com/ZoneTree/ZoneTree/releases/tag/release-v2.0.7).
 The silo-local physical owner opens one `ITransactionalZoneTree` through
 `OpenOrCreateTransactional` or the existing-store `OpenTransactional` operation.
 The current data epoch is 8, including internal grain request and runtime-journal

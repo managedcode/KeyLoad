@@ -46613,10 +46613,50 @@
     {
       "className": "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests",
       "reportClassName": "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests",
+      "methodName": "DurableMetadataCreationMovesOwnedBytesWithoutReplacingExistingContent",
+      "instanceName": "DurableMetadataCreationMovesOwnedBytesWithoutReplacingExistingContent",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamProviderTests.cs",
+      "sourceSha256": "d8f50bec03ae8f50c8fbef406da35b47284d6e261a7d8f6a6c8d28c9781a1745",
+      "lineNumber": 105,
+      "endLineNumber": 126,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-FTS-003",
+        "REQ-FTS-004"
+      ],
+      "acceptance": [
+        "AC-FTS-003",
+        "AC-FTS-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests",
+      "methodName": "MoveRejectsOccupiedOutsideAndUnownedTargetsBeforeChangingSourceOrLedger",
+      "instanceName": "MoveRejectsOccupiedOutsideAndUnownedTargetsBeforeChangingSourceOrLedger",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamProviderTests.cs",
+      "sourceSha256": "d8f50bec03ae8f50c8fbef406da35b47284d6e261a7d8f6a6c8d28c9781a1745",
+      "lineNumber": 128,
+      "endLineNumber": 167,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-FTS-003",
+        "REQ-FTS-004"
+      ],
+      "acceptance": [
+        "AC-FTS-003",
+        "AC-FTS-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests",
       "methodName": "OutsideAndUnownedBackupsAreRejectedWithoutChangingFilesOrLedger",
       "instanceName": "OutsideAndUnownedBackupsAreRejectedWithoutChangingFilesOrLedger",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamProviderTests.cs",
-      "sourceSha256": "6e8e165e703adbab353c7f3817b1d950d59d6861642fc00999e619d8272e16a8",
+      "sourceSha256": "d8f50bec03ae8f50c8fbef406da35b47284d6e261a7d8f6a6c8d28c9781a1745",
       "lineNumber": 49,
       "endLineNumber": 82,
       "classification": "functional",
@@ -46636,7 +46676,7 @@
       "methodName": "ReplaceWithOwnedBackupPreservesPreviousDestination",
       "instanceName": "ReplaceWithOwnedBackupPreservesPreviousDestination",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamProviderTests.cs",
-      "sourceSha256": "6e8e165e703adbab353c7f3817b1d950d59d6861642fc00999e619d8272e16a8",
+      "sourceSha256": "d8f50bec03ae8f50c8fbef406da35b47284d6e261a7d8f6a6c8d28c9781a1745",
       "lineNumber": 29,
       "endLineNumber": 47,
       "classification": "functional",
@@ -46656,7 +46696,7 @@
       "methodName": "ReplaceWithoutBackupPreservesReplaceSemantics",
       "instanceName": "ReplaceWithoutBackupPreservesReplaceSemantics",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamProviderTests.cs",
-      "sourceSha256": "6e8e165e703adbab353c7f3817b1d950d59d6861642fc00999e619d8272e16a8",
+      "sourceSha256": "d8f50bec03ae8f50c8fbef406da35b47284d6e261a7d8f6a6c8d28c9781a1745",
       "lineNumber": 8,
       "endLineNumber": 27,
       "classification": "functional",
@@ -68241,6 +68281,8 @@
         "KeyLoad.FunctionalTests.Search.TextFileStreamBufferPolicyTests|ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests|ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests(4, null, 0)",
         "KeyLoad.FunctionalTests.Search.TextFileStreamBufferPolicyTests|InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership|InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership(0)",
         "KeyLoad.FunctionalTests.Search.TextFileStreamBufferPolicyTests|InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership|InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership(4097)",
+        "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests|DurableMetadataCreationMovesOwnedBytesWithoutReplacingExistingContent|DurableMetadataCreationMovesOwnedBytesWithoutReplacingExistingContent",
+        "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests|MoveRejectsOccupiedOutsideAndUnownedTargetsBeforeChangingSourceOrLedger|MoveRejectsOccupiedOutsideAndUnownedTargetsBeforeChangingSourceOrLedger",
         "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests|OutsideAndUnownedBackupsAreRejectedWithoutChangingFilesOrLedger|OutsideAndUnownedBackupsAreRejectedWithoutChangingFilesOrLedger",
         "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests|ReplaceWithOwnedBackupPreservesPreviousDestination|ReplaceWithOwnedBackupPreservesPreviousDestination",
         "KeyLoad.FunctionalTests.Search.TextFileStreamProviderTests|ReplaceWithoutBackupPreservesReplaceSemantics|ReplaceWithoutBackupPreservesReplaceSemantics",

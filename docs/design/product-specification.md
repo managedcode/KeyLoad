@@ -1831,7 +1831,7 @@ The sources describe public capabilities; production qualification uses separate
 
 [S4] ZoneTree production checklist: https://github.com/ZoneTree/ZoneTree/blob/main/docs/operations/production-checklist.md
 
-[S5] ZoneTree native snapshot contract: https://github.com/ZoneTree/ZoneTree/blob/release-v2.0.6/src/ZoneTree/Transactional/IReadTransaction.cs
+[S5] ZoneTree native snapshot contract: https://github.com/ZoneTree/ZoneTree/blob/a9953313613337f5ead6c3143e8da77b7103c64f/src/ZoneTree/Transactional/IReadTransaction.cs
 
 [S6] Microsoft Learn, grain directory: https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory
 

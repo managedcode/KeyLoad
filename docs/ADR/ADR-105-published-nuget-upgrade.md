@@ -1,7 +1,7 @@
 # ADR-105: Published NuGet dependency refresh
 
 Status: Accepted; local dependency integration checked. Complete delivered-source qualification remains open.
-Date: 2026-10-30.
+Date: 2026-10-31.
 Feature: [RepositoryGovernance](../Features/RepositoryGovernance.md).
 
 ## Context and decision
@@ -12,7 +12,7 @@ the configured NuGet.org feed. Use the newest published stable release. Cartogra
 and Cartograph.Catalog have only their existing 0.1.0-alpha release; keep that
 published version. Do not introduce previews into stable package families.
 
-The 2026-10-30 feed audit selects ZoneTree 2.0.6 and Orleans 10.4.2, with Journaling and Durable
+The owner-approved 2026-10-31 update selects ZoneTree 2.0.7; the existing feed audit selects Orleans 10.4.2, with Journaling and Durable
 Jobs at 10.4.2-alpha.1, ManagedCode.Storage.Server/FileSystem 10.1.7 and
 TUnit/TUnit.Aspire 1.76.45. The existing transitive Orleans.Client and
 Orleans.Reminders dependencies are centrally pinned to 10.4.2 so the runtime
@@ -22,6 +22,17 @@ RapidMembership 10.4.6 is rebuilt against Orleans 10.4.1 in its owning repositor
 Its release and all three public NuGet package source commits were verified
 before consumer adoption; package publication and runtime qualification remain
 separate gates.
+
+ZoneTree 2.0.7 is the published MIT package from source
+`a9953313613337f5ead6c3143e8da77b7103c64f`; its dependency groups are unchanged.
+Its WAL and metadata recovery changes require the guarded full-text file provider
+to implement the public non-overwriting `MoveFile` operation used by initial
+durable metadata creation. Resolve and verify both paths, track the destination
+and update the existing physical file ownership ledger after the native move.
+Occupied, unowned and outside targets must preserve the original files and ledger.
+This release does not change the MVCC mutable-leaf point-read implementation;
+the existing leaf-size tuning remains. Engine recovery changes do not establish
+KeyLoad power-loss qualification or a throughput improvement.
 
 Retain central version management, dependency APIs, .NET 10/C# 14,
 warnings-as-errors and SDK-owned Roslyn compiler assets for analyzer tests.
