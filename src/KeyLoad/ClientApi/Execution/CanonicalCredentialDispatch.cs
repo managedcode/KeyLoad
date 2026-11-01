@@ -5,8 +5,14 @@ namespace KeyLoad.Server;
 
 internal static class CanonicalCredentialDispatch
 {
-    /// <summary>Authenticates through the credential's user grain, which reads storage only on its first request.</summary>
+    /// <summary>Authenticates a subject and reads current authority for adapters that consume permission metadata.</summary>
     internal static async Task<PrincipalRecord> AuthenticateAsync(OrleansNode node, string credential,
+        ServerConnectionOperation connection, Guid requestId, Action? onStarted = null)
+        => await ReadCurrentPrincipalAsync(node,
+            await AuthenticateSubjectAsync(node, credential, connection, requestId, onStarted), connection);
+
+    /// <summary>Authenticates a subject; the database operation reloads and enforces current persisted permissions.</summary>
+    internal static async Task<PrincipalRecord> AuthenticateSubjectAsync(OrleansNode node, string credential,
         ServerConnectionOperation connection, Guid requestId, Action? onStarted = null)
     {
         var grains = node.DatabaseReady ? node.Grains!
@@ -24,7 +30,7 @@ internal static class CanonicalCredentialDispatch
                 try
                 {
                     var verified = await user.AuthenticateAsync(credential, connection.Token);
-                    result = await ReadCurrentPrincipalAsync(node, verified, connection);
+                    result = new(verified.Id, verified.TenantId, [], []);
                 }
                 catch (Exception failure) when (failure is OrleansException or TimeoutException
                     && CqrsBoundaryErrors.IsNonFatal(failure))

@@ -40,7 +40,8 @@ internal sealed class AdapterNormalizedPlanWholeFlowTests
             await Assert.That(plan.Cursor).IsNull();
             await Assert.That(plan.CutPosition).IsEqualTo(position);
             using var json = JsonDocument.Parse(plan.Rows.Single().Json);
-            await Assert.That(json.RootElement.EnumerateObject().Count()).IsEqualTo(2);
+            await Assert.That(json.RootElement.EnumerateObject().Count()).IsEqualTo(15);
+            await Assert.That(plan.Rows.Single().Json).IsEqualTo(AdapterPlanWholeFlowFixture.ExpectedPlan(database.Partition, position));
             await Assert.That(json.RootElement.GetProperty(AccessPathProperty).GetString()).IsEqualTo("index:status");
             await Assert.That(json.RootElement.GetProperty(AtomicPartitionProperty).GetString()).IsEqualTo(database.Partition.AtomicPartitionId);
         }

@@ -15,15 +15,15 @@ public static class DocumentReadExecution
             engine.ValidateDocumentSessionToken(view, reference.Partition, minimumToken);
         }
 
-        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
-        reference = EntityReferenceLifetime.Bind(view, reference, resource);
+        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResourcePair(view, reference.Partition, reference.Collection, ResourceKind.Collection);
+        reference = EntityReferenceLifetime.Bind(reference, resource.Lifetime);
         var record = view.GetRecord<DocumentRecord>(DocumentStorageExecutionDocuments.DocumentKey(reference.Partition, reference.Collection, reference.Id));
         if (record is not null)
         {
-            EntityReferenceLifetime.RequireStored(view, record.Reference, resource);
+            EntityReferenceLifetime.RequireStored(record.Reference, resource.Lifetime);
         }
 
-        var result = record is null || record.Deleted || !engine.Authorization.CanReadRow(principal, record.Access) ? null : engine.Project(principal, resource, record);
+        var result = record is null || record.Deleted || !engine.Authorization.CanReadRow(principal, record.Access) ? null : engine.Project(principal, resource.Definition, record);
         cancellationToken.ThrowIfCancellationRequested();
         return result;
     }

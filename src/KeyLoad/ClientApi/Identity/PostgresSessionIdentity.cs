@@ -11,7 +11,7 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
     internal string Subject { get; } = subject;
 
     internal async Task<PrincipalRecord> VerifyAsync(IServiceProvider services, ServerConnectionFeature owner,
-        CancellationToken token)
+        CancellationToken token, bool openingSession = false)
     {
         ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != PostgresProtocol.AllRows, this);
         var node = services.GetRequiredService<OrleansNode>();
@@ -23,8 +23,10 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
             using var connection = owner.Acquire(token);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                principal = await CanonicalCredentialDispatch.AuthenticateAsync(node, Utf8.GetString(credential),
-                    connection, requestId);
+                Func<OrleansNode, string, ServerConnectionOperation, Guid, Action?, Task<PrincipalRecord>> authenticate
+                    = openingSession ? CanonicalCredentialDispatch.AuthenticateAsync : CanonicalCredentialDispatch.AuthenticateSubjectAsync;
+                principal = await authenticate(node, Utf8.GetString(credential),
+                    connection, requestId, null);
                 if (!StringComparer.Ordinal.Equals(principal.Id, Subject))
                 {
                     throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);

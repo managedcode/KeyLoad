@@ -17,6 +17,8 @@ internal sealed class KeyCodecMalformedContractTests
         {
             await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Decode(Convert.FromHexString(vector)),
                 ErrorCode.Corruption, "Invalid encoded key.");
+            await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodecValidation.Validate(Convert.FromHexString(vector)),
+                ErrorCode.Corruption, "Invalid encoded key.");
         }
     }
 
@@ -37,6 +39,8 @@ internal sealed class KeyCodecMalformedContractTests
         foreach (var vector in vectors)
         {
             await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Decode(Convert.FromHexString(vector)),
+                ErrorCode.Corruption, "Invalid encoded key.");
+            await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodecValidation.Validate(Convert.FromHexString(vector)),
                 ErrorCode.Corruption, "Invalid encoded key.");
         }
     }
@@ -59,6 +63,8 @@ internal sealed class KeyCodecMalformedContractTests
         {
             var original = input.ToArray();
             var failure = Assert.ThrowsExactly<KeyLoadException>(() => KeyCodec.Decode(input));
+            await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodecValidation.Validate(input),
+                ErrorCode.Corruption, "Invalid encoded key.");
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(failure.Message).IsEqualTo("Invalid encoded key.");
             await Assert.That(input.SequenceEqual(original)).IsTrue();
@@ -80,6 +86,10 @@ internal sealed class KeyCodecMalformedContractTests
             ErrorCode.FormatUnsupported, "Unknown key codec version.");
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Decode([2]),
             ErrorCode.FormatUnsupported, "Unknown key codec version.");
+        await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodecValidation.Validate([]),
+            ErrorCode.FormatUnsupported, "Unknown key codec version.");
+        await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodecValidation.Validate([2]),
+            ErrorCode.FormatUnsupported, "Unknown key codec version.");
     }
 
     [Test]
@@ -87,7 +97,9 @@ internal sealed class KeyCodecMalformedContractTests
     {
         var values = new object?[] { "a\0b", "é", "ї", "😀", long.MinValue, long.MaxValue,
             decimal.MinValue, decimal.MaxValue, double.Epsilon, double.MaxValue, DateTimeOffset.MaxValue };
-        var decoded = KeyCodec.Decode(KeyCodec.Encode(values));
+        var encoded = KeyCodec.Encode(values);
+        KeyCodecValidation.Validate(encoded);
+        var decoded = KeyCodec.Decode(encoded);
 
         await Assert.That(decoded.Length).IsEqualTo(values.Length);
         for (var index = 0; index < values.Length; index++)

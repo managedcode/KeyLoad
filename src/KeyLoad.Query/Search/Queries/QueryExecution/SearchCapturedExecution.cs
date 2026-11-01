@@ -73,7 +73,12 @@ internal static class SearchCapturedExecution
         }
         if (similarity is not null)
         {
-            fusion.AddBranch(VectorRanker.Rank(database, view, principal, request, similarity, budget, eligibility), request.VectorWeight, SearchBranchKind.Vector);
+            var boundary = (double)request.FusionConstant + request.Limit;
+            // Complete rankings remain necessary for hybrid fusion and ties caused by floating-point underflow.
+            int? retained = request.Text is null && request.VectorWeight / boundary > request.VectorWeight / (boundary + 1d)
+                ? request.Limit : null;
+            fusion.AddBranch(VectorRanker.Rank(database, view, principal, request, similarity, budget, eligibility,
+                retainedLimit: retained), request.VectorWeight, SearchBranchKind.Vector);
         }
         var selected = fusion.Select();
         var result = SearchBranchExecution.ProjectSelected(database, view, principal, resource, selected, budget, fusion);

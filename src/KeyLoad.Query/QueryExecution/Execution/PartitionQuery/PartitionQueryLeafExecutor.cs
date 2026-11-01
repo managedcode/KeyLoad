@@ -46,7 +46,8 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
                 ? engine.Project(principal, resource, document, request.Query.Projection, prepared!.Paths)
                 : QueryRowProjection.ProjectIntersection(database, metadata, principal, resource, document,
                     request.Query.Projection, prepared!.Paths));
-        var reader = new QueryCandidateReader(database, view, principal, resource, request, budget,
+        var reader = new QueryCandidateReader(database, view, principal, resource, request,
+            QueryAccessPlanner.Create(resource, request), budget,
             document =>
             {
                 if (metadata is null || database.Authorization.CanReadRow(metadata.Principal, document.Access))

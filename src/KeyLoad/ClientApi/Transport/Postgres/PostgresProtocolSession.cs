@@ -21,7 +21,7 @@ internal sealed class PostgresProtocolSession(IServiceProvider services, global:
             writer.Integer(PostgresWireWriter.Authentication, PostgresMessageProtocol.PasswordChallenge);
             await writer.FlushAsync(admissionLifetime.Token);
             identity = await ReadIdentityAsync(context, startup.Subject, admissionLifetime.Token);
-            _ = await identity.VerifyAsync(services, owner, admissionLifetime.Token);
+            _ = await identity.VerifyAsync(services, owner, admissionLifetime.Token, openingSession: true);
             backend = cancellations.Register();
             catalog = new PostgresSessionCatalog(configured, admission);
             writer.Integer(PostgresWireWriter.Authentication, PostgresMessageProtocol.AuthenticationOk);

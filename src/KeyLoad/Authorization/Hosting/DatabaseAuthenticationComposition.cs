@@ -7,6 +7,7 @@ namespace KeyLoad.Server;
 internal static class DatabaseAuthenticationComposition
 {
     internal const string Scheme = "KeyLoad.Database";
+    internal const string SubjectPolicy = "KeyLoad.OperationSubject";
     internal const string Forbidden = "The authenticated request is not authorized.";
 
     internal static void Register(IServiceCollection services)
@@ -14,9 +15,16 @@ internal static class DatabaseAuthenticationComposition
         services.AddAuthentication(Scheme)
             .AddScheme<AuthenticationSchemeOptions, DatabaseAuthenticationHandler>(Scheme, configureOptions: null);
         services.AddAuthorization(options =>
+        {
+            options.AddPolicy(SubjectPolicy, policy => policy.RequireAuthenticatedUser());
             options.FallbackPolicy = new AuthorizationPolicyBuilder()
-                .RequireAuthenticatedUser().Build());
+                .RequireAuthenticatedUser().Build();
+        });
     }
+
+    internal static bool AuthorizesAtOperationOwner(HttpContext context)
+        => context.GetEndpoint()?.Metadata.GetOrderedMetadata<IAuthorizeData>()
+            .Any(policy => policy.Policy == SubjectPolicy) == true;
 
     internal static bool IsProtected(HttpRequest request)
         => !AdminStaticAssets.IsPublicRequest(request)

@@ -1,5 +1,6 @@
 using KeyLoad.Core.Authorization;
 using KeyLoad.Core.DocumentStorage;
+using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.GraphTraversal;
@@ -9,7 +10,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
     ReadExecutionBudget budget)
 {
     private const int InitialSchemaVersion = 0;
-    private readonly record struct CollectionDecision(bool Allowed, long SchemaVersion);
+    private readonly record struct CollectionDecision(bool Allowed, long SchemaVersion, ResourceLifetime? Lifetime);
     private const string VertexUnavailable = "The graph vertex is unavailable.";
     private const string VertexMismatch = "A canonical graph vertex record is inconsistent.";
     private readonly Dictionary<EntityRef, bool> visible = [];
@@ -19,7 +20,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
     internal EntityRef RequireStart(EntityRef vertex)
     {
         RequireCollection(vertex);
-        vertex = database.BindEntityReference(budget.CreateView(view), vertex);
+        vertex = EntityReferenceLifetime.Bind(vertex, collections[(vertex.Partition, vertex.Collection)].Lifetime!);
         if (!ReadVisibility(vertex))
         {
             throw Errors.Fail(ErrorCode.NotFound, VertexUnavailable);
@@ -40,7 +41,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         {
             return RememberVertex(vertex, false);
         }
-        database.RequireStoredEntityReference(budget.CreateView(view), vertex);
+        EntityReferenceLifetime.RequireStored(vertex, collections[(vertex.Partition, vertex.Collection)].Lifetime!);
         return RememberVertex(vertex, ReadVisibility(vertex));
     }
 
@@ -68,7 +69,7 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         }
         catch (KeyLoadException exception) when (exception.Code is ErrorCode.NotFound or ErrorCode.PermissionDenied)
         {
-            collections[key] = new(false, InitialSchemaVersion);
+            collections[key] = new(false, InitialSchemaVersion, null);
             return false;
         }
     }
@@ -82,8 +83,8 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         }
         database.Authorization.Require(principal, vertex.Partition, vertex.Collection, Capability.DocumentsRead);
         var resourceView = budget.CreateView(view);
-        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(resourceView, vertex.Partition, vertex.Collection, ResourceKind.Collection);
-        collections[key] = new(true, resource.SchemaVersion);
+        var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResourcePair(resourceView, vertex.Partition, vertex.Collection, ResourceKind.Collection);
+        collections[key] = new(true, resource.Definition.SchemaVersion, resource.Lifetime);
     }
 
     private bool RememberVertex(EntityRef vertex, bool allowed)
@@ -145,7 +146,8 @@ internal sealed class GraphVertexVisibility(DatabaseEngine database, IKeyValueVi
         {
             throw Errors.Fail(ErrorCode.Corruption, VertexMismatch);
         }
-        database.RequireStoredEntityReference(budget.CreateView(view), document.Reference);
+        EntityReferenceLifetime.RequireStored(document.Reference,
+            collections[(vertex.Partition, vertex.Collection)].Lifetime!);
         if (document.Reference != vertex)
         {
             throw Errors.Fail(ErrorCode.Corruption, VertexMismatch);

@@ -81,14 +81,27 @@ internal static class QueryCapabilityVersionClusterPages
             await SqlClusterProtocol.SdkAsync<QueryPage>(reader.Sdk, call, token),
             await SqlClusterProtocol.McpAsync<QueryPage>(reader.Mcp, call, token)
         };
-        var body = JsonSerializer.Serialize(new
-        {
-            accessPath = "bounded-full-scan",
-            atomicPartition = state.Partition.AtomicPartitionId
-        }, JsonDefaults.Options);
         foreach (var page in pages)
         {
             await Assert.That(page.CutPosition).IsGreaterThan(0L);
+            var body = JsonSerializer.Serialize(new
+            {
+                accessPath = "bounded-full-scan",
+                atomicPartition = state.Partition.AtomicPartitionId,
+                ReadCut = page.CutPosition,
+                Scan = "bounded-full-scan",
+                Index = (string?)null,
+                SeekFields = Array.Empty<string>(),
+                HasLowerBound = false,
+                HasUpperBound = false,
+                ResidualFields = new[] { "/active", "/score" },
+                Order = new Ordering[] { new("/order_id", false) },
+                RetainedRows = 1L,
+                Limit = 1,
+                Offset = 0,
+                Projection = new Selection[] { new("/title", "title"), new("/score", "score") },
+                Operators = new[] { "bounded-full-scan", "row-authorization", "residual-filter", "top-n-heap", "projection", "page" }
+            }, JsonDefaults.Options);
             await SqlClusterProtocol.EqualAsync(new QueryPage([new("explain", 0L, body)], null, page.CutPosition, "bounded-full-scan"), page);
         }
     }

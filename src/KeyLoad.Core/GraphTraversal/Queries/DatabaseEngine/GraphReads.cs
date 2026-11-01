@@ -25,16 +25,35 @@ public static class GraphReads
 
     /// <param name = "engine">The shared database execution context.</param>
     public static global::KeyLoad.GraphTraversal Traverse(this DatabaseEngine engine, string principalId, PartitionRef partition, string graph, EntityRef start, int maxDepth = DefaultTraversalDepth, int maxVertices = DefaultTraversalVertices, int maxEdges = DefaultTraversalEdges, string[]? labels = null, CancellationToken cancellationToken = default)
+        => Traverse(engine, principalId, new TraverseRequest(partition, graph, start, maxDepth, maxVertices, maxEdges,
+            labels is null ? null : [.. labels]), cancellationToken);
+
+    /// <summary>Traverses the graph and materializes only the requested authorized projection.</summary>
+    /// <param name="engine">The database execution owner.</param>
+    /// <param name="principalId">Persisted subject whose permissions are read in this operation.</param>
+    /// <param name="request">Traversal scope, work bounds and result projection.</param>
+    /// <param name="cancellationToken">Cancellation throughout the original traversal.</param>
+    /// <returns>The requested visible traversal result.</returns>
+    public static global::KeyLoad.GraphTraversal Traverse(this DatabaseEngine engine, string principalId,
+        TraverseRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
-        return engine.TraverseRead(principalId, partition, graph, start, maxDepth, maxVertices, maxEdges, labels, budget);
+        return engine.TraverseRead(principalId, request.Partition, request.Graph, request.Start, request.MaxDepth,
+            request.MaxVertices, request.MaxEdges, request.Labels?.ToArray(), budget, request.Projection);
     }
 
-    internal static global::KeyLoad.GraphTraversal TraverseRead(this DatabaseEngine engine, string principalId, PartitionRef partition, string graph, EntityRef start, int maxDepth, int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget)
+    internal static global::KeyLoad.GraphTraversal TraverseRead(this DatabaseEngine engine, string principalId, PartitionRef partition, string graph, EntityRef start, int maxDepth, int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget,
+        GraphTraversalProjection projection = GraphTraversalProjection.Full)
     {
         const string InvalidTraversalBudget = "The graph traversal budget is invalid.";
+        const string InvalidProjection = "The graph traversal projection is invalid.";
         budget.Check();
+        if (!Enum.IsDefined(projection))
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidProjection);
+        }
         return engine.Store.Read(view =>
         {
             if (maxDepth < MinimumTraversalDepth || maxDepth > engine.GraphExecution.MaximumDepth || maxVertices < MinimumTraversalVertices || maxVertices > engine.GraphExecution.MaximumVertices || maxEdges < MinimumTraversalEdges || maxEdges > engine.GraphExecution.MaximumEdges || start.Partition != partition)
@@ -51,7 +70,8 @@ public static class GraphReads
                 engine.Authorization.RequireFieldUse(principal, resource, GraphTraversalQueriesGraphShortestPath.LabelField);
             }
 
-            return new GraphTraversalReader(engine, view, principal, resource, partition, graph, start, maxDepth, maxVertices, maxEdges, labels, budget).Read();
+            return new GraphTraversalReader(engine, view, principal, resource, partition, graph, start, maxDepth,
+                maxVertices, maxEdges, labels, budget, projection).Read();
         });
     }
 }

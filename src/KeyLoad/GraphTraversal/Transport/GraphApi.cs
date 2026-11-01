@@ -6,10 +6,13 @@ internal static class GraphApi
     internal static void Map(WebApplication app)
     {
         app.MapPost(TraversePath, (TraverseRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.Traverse, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.Traverse, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(McpToolRoutes.GraphShortestPath, (GraphShortestPathRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.GraphShortestPath, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.GraphShortestPath, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(McpToolRoutes.GraphIncomingEdges, (ReadIncomingGraphEdgesRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.GraphIncomingEdges, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.GraphIncomingEdges, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
     }
 }

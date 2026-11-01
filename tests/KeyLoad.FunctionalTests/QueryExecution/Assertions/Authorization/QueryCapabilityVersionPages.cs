@@ -86,7 +86,20 @@ internal static class QueryCapabilityVersionPages
         var body = JsonSerializer.Serialize(new
         {
             accessPath = "bounded-full-scan",
-            atomicPartition = partition.AtomicPartitionId
+            atomicPartition = partition.AtomicPartitionId,
+            ReadCut = cut,
+            Scan = "bounded-full-scan",
+            Index = (string?)null,
+            SeekFields = Array.Empty<string>(),
+            HasLowerBound = false,
+            HasUpperBound = false,
+            ResidualFields = new[] { "/active", "/score" },
+            Order = new Ordering[] { new("/order_id", false) },
+            RetainedRows = 1L,
+            Limit = 1,
+            Offset = 0,
+            Projection = new Selection[] { new("/title", "title"), new("/score", "score") },
+            Operators = new[] { "bounded-full-scan", "row-authorization", "residual-filter", "top-n-heap", "projection", "page" }
         }, JsonDefaults.Options);
         await RequiredProcessingPolicyAssertions.EqualAsync(new QueryPage([new("explain", 0L, body)], null, cut, "bounded-full-scan"),
             engine.ExecuteAst(QueryCapabilityVersionRequests.Reader, plan, cancellationToken: token));

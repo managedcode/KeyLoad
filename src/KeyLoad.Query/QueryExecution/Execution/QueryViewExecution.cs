@@ -8,8 +8,6 @@ namespace KeyLoad.Query.QueryExecution;
 /// <summary>Executes the authorized captured scalar view and builds its bounded continuation page.</summary>
 internal static class QueryViewExecution
 {
-    private const int InitialSequence = 0;
-
     internal static QueryPage Execute(DatabaseEngine database, TimeSpan cursorLifetime, IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, ReadExecutionBudget budget, TimeProvider clock)
     {
@@ -20,13 +18,18 @@ internal static class QueryViewExecution
         var paged = QueryKeysetPage.Applies(query);
         var cursor = QueryCursorExecution.Resolve(database, view, principal, resource, request, hash, clock,
             coverage.Lifetimes.Single(), paged);
+        var plan = QueryAccessPlanner.Create(resource, request);
+        if (query.Explain)
+        {
+            return QueryPlanDescription.Create(request, plan, cursor.Cut, cursor.Offset);
+        }
         var prepared = new PreparedQuery(query, cursor.Offset, PreparedQuery.CallerSizedCandidates);
         // One accepted row beyond the page proves that another page exists.
         var keyset = paged ? new QueryKeysetPage(cursor.AfterId, () => prepared.EligibleCount > query.Limit) : null;
-        var accessPath = new QueryCandidateReader(database, view, principal, resource, request, budget, document =>
+        var accessPath = new QueryCandidateReader(database, view, principal, resource, request, plan, budget, document =>
         {
             budget.Check();
-            if (query.Explain || keyset?.Follows(document) == false)
+            if (keyset?.Follows(document) == false)
             {
                 return;
             }
@@ -38,13 +41,6 @@ internal static class QueryViewExecution
                 prepared.Consider(document, json.RootElement);
             }
         }, visibilitySourceEpoch: cursor.SourceEpoch, keyset: keyset).Visit();
-        if (query.Explain)
-        {
-            var explain = new QueryPage([new(QueryEngine.ExplainId, InitialSequence, JsonSerializer.Serialize(new { AccessPath = accessPath,
-                AtomicPartition = request.Partition.AtomicPartitionId },
-                JsonDefaults.Options))], null, cursor.Cut, accessPath);
-            return explain;
-        }
         return BuildPage(database, cursorLifetime, principal, resource, request, hash, cursor, prepared, accessPath, budget, clock,
             paged);
     }

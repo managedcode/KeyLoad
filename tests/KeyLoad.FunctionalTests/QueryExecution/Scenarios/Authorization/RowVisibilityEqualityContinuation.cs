@@ -61,24 +61,40 @@ internal static class RowVisibilityEqualityContinuation
             var page = engine.Execute(owner, request);
             await Assert.That(JsonDefaults.Serialize(page.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(rows))).IsTrue();
             await PageAsync(page, cut, path);
+            var query = new SqlParser(request.Sql, UnitExecutionOptions.QueryExecution()).Parse();
             var explain = engine.ExecuteAst(owner, new AstQueryRequest(request.Partition,
-                new SqlParser(request.Sql,
-                    UnitExecutionOptions.QueryExecution()).Parse() with
-                {
-                    Explain = true
-                },
+                query with { Explain = true },
                 request.Parameters, AllowFullScan: request.AllowFullScan));
-            var plan = JsonSerializer.Serialize(new
-            {
-                AccessPath = path,
-                AtomicPartition = db.Partition.AtomicPartitionId
-            }, JsonDefaults.Options);
+            var plan = ExpectedPlan(db.Partition, query, indexed, cut, path);
             QueryRow[] explanation = [new(ExplainId, ExplainRevision, plan)];
             await Assert.That(JsonDefaults.Serialize(explain.Rows).AsSpan().SequenceEqual(JsonDefaults.Serialize(explanation))).IsTrue();
             await PageAsync(explain, cut, path);
         }
         await Assert.That(CanonicalStoreImage.Bytes(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
+    }
+
+    private static string ExpectedPlan(PartitionRef partition, SelectQuery query, bool indexed, long cut, string path)
+    {
+        var scan = indexed ? "index-prefix-seek" : "point-lookup";
+        return JsonSerializer.Serialize(new
+        {
+            AccessPath = path,
+            AtomicPartition = partition.AtomicPartitionId,
+            ReadCut = cut,
+            Scan = scan,
+            Index = indexed ? EqualityAccessPathSupport.StatusIndex : null,
+            SeekFields = indexed ? new[] { EqualityAccessPathSupport.StatusPath } : Array.Empty<string>(),
+            HasLowerBound = false,
+            HasUpperBound = false,
+            ResidualFields = new[] { indexed ? EqualityAccessPathSupport.StatusPath : "/@id" },
+            Order = new Ordering[] { new("/@id", false) },
+            RetainedRows = (long)query.Limit,
+            query.Limit,
+            Offset = 0,
+            Projection = new Selection[] { new("*", "*") },
+            Operators = new[] { scan, "row-authorization", "residual-filter", "top-n-heap", "projection", "page" }
+        }, JsonDefaults.Options);
     }
 
     internal static async Task ReplayAsync(DatabaseEngine engine, ZoneTreeStore store,

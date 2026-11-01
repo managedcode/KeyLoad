@@ -40,15 +40,35 @@ internal static class MetamorphicReferenceOperations
                         }
                     },
                         database.EvaluationClock, token);
-                    var json = System.Text.Json.JsonSerializer.Serialize(new
-                    {
-                        accessPath = path,
-                        atomicPartition = fixture.Harness.Partition.AtomicPartitionId
-                    }, JsonDefaults.Options);
+                    var json = ExpectedPlan(ast, path, store.Position, shape);
                     await MetamorphicReferenceAssertions.PageAsync(page, [new("explain", 0L, json)], store.Position, path, true);
                 });
             }
         }
+    }
+    private static string ExpectedPlan(AstQueryRequest request, string path, long cut, int shape)
+    {
+        var indexed = shape is 0 or 2;
+        var scan = indexed ? "index-prefix-seek" : "bounded-full-scan";
+        var query = request.Query;
+        return System.Text.Json.JsonSerializer.Serialize(new
+        {
+            AccessPath = path,
+            AtomicPartition = request.Partition.AtomicPartitionId,
+            ReadCut = cut,
+            Scan = scan,
+            Index = indexed ? MetamorphicReferenceData.Index : null,
+            SeekFields = indexed ? new[] { "/status" } : Array.Empty<string>(),
+            HasLowerBound = false,
+            HasUpperBound = false,
+            ResidualFields = shape == 2 ? new[] { "/tag", "/score", "/status" } : ["/status", "/score", "/tag"],
+            query.Order,
+            RetainedRows = (long)query.Offset + query.Limit,
+            query.Limit,
+            query.Offset,
+            query.Projection,
+            Operators = new[] { scan, "row-authorization", "residual-filter", "top-n-heap", "projection", "page" }
+        }, JsonDefaults.Options);
     }
     private static async Task PagesAsync(ZoneTreeStore store, ImmutableArray<MetamorphicReferenceRow> expected,
         string path, Func<string?, QueryPage> execute)

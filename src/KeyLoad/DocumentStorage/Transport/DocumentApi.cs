@@ -10,8 +10,10 @@ internal static class DocumentApi
     internal static void Map(WebApplication app)
     {
         app.MapPost(CommandPath, (CommandRequest request, HttpContext context) =>
-            ApiGrainDispatch.SubmitAsync(context, OperationKind.Batch, request.CommandId, request));
+            ApiGrainDispatch.SubmitAsync(context, OperationKind.Batch, request.CommandId, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(GetPath, (GetDocumentRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.Document, request));
+            ApiGrainDispatch.ReadAsync(context, KeyLoad.Clustering.GrainReadKind.Document, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
     }
 }

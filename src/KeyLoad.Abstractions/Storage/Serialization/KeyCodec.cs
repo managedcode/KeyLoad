@@ -8,7 +8,7 @@ public static class KeyCodec
 {
     /// <summary>Gets the version byte written at the start of every encoded key.</summary>
     public const byte Version = 1;
-    private const int MaximumComponents = 256;
+    internal const int MaximumComponents = 256;
     private const string TooManyComponentsMessage = "Key component count exceeds the supported limit.";
     private const int InitialKeyBytes = 256;
 

@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using KeyLoad.ComparisonHost.Deployment;
 
 namespace KeyLoad.ComparisonHost.Graph;
@@ -41,21 +40,22 @@ internal sealed class KeyLoadGraphDriver(BenchmarkConnection connection) : IGrap
 
     public async Task<IReadOnlyList<string>> NeighborsAsync(string vertex, CancellationToken token)
     {
-        var visited = await TraverseAsync(vertex, NeighborDepth, token);
-        return [.. visited.Where(found => found.Id != vertex).Select(found => found.Id)];
+        var visited = await TraverseAsync(vertex, NeighborDepth, GraphTraversalProjection.Vertices, token);
+        return [.. visited.Vertices.Where(found => found.Id != vertex).Select(found => found.Id)];
     }
 
     public async Task<int> CountReachableAsync(string vertex, int depth, CancellationToken token)
-        => (await TraverseAsync(vertex, depth, token)).Count(found => found.Id != vertex);
+        => (await TraverseAsync(vertex, depth, GraphTraversalProjection.Count, token)).VertexCount - 1;
 
     public ValueTask DisposeAsync() => database.DisposeAsync();
 
-    private async Task<ImmutableArray<EntityRef>> TraverseAsync(string vertex, int depth, CancellationToken token)
+    private async Task<GraphTraversal> TraverseAsync(string vertex, int depth, GraphTraversalProjection projection, CancellationToken token)
     {
         var budget = Reach(depth);
         var request = new TraverseRequest(database.Partition, Links, database.Entity(Vertices, vertex), MaxDepth: depth,
-            MaxVertices: budget, MaxEdges: budget * GraphDataset.FanOut);
-        return KeyLoadDatabase.Require(await database.Client.TraverseAsync(request, token), TraverseOperation).Vertices;
+            MaxVertices: budget, MaxEdges: budget * GraphDataset.FanOut)
+        { Projection = projection };
+        return KeyLoadDatabase.Require(await database.Client.TraverseAsync(request, token), TraverseOperation);
     }
 
     private UpsertEdge Edge(GraphEdge edge)

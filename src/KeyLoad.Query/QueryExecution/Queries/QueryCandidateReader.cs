@@ -1,112 +1,54 @@
-using System.Text.Json;
 using KeyLoad.Core;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query.QueryExecution;
 
-/// <summary>Streams one authorized access path through the shared read budget.</summary>
+/// <summary>Executes the selected physical plan through the original authorized read budget.</summary>
 internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
-    ResourceDefinition resource, AstQueryRequest request, ReadExecutionBudget budget, Action<DocumentRecord> accept,
-    long? visibilitySourceEpoch = null, QueryKeysetPage? keyset = null)
+    ResourceDefinition resource, AstQueryRequest request, QueryAccessPlan plan, ReadExecutionBudget budget,
+    Action<DocumentRecord> accept, long? visibilitySourceEpoch = null, QueryKeysetPage? keyset = null)
 {
-    private const string PointPath = "point";
-    private const string IndexPathPrefix = "index:";
-    private const string FullScanPath = "bounded-full-scan";
     private const string DocumentSpace = "document";
-    private const string IndexSpace = "index";
-    private const string IdentifierPath = "/@id";
     private const string CandidateLimitExceeded = "The query access path exceeds its candidate budget.";
-    private const string FullScanDenied = "The query requires an index or explicit full-scan permission.";
 
     internal string Visit()
     {
-        var query = request.Query;
-        var equality = Equalities(query.Filter, request.Parameters).GroupBy(pair => pair.Key, StringComparer.Ordinal)
-            .ToDictionary(group => group.Key, group => group.First().Value, StringComparer.Ordinal);
-        if (equality.TryGetValue(IdentifierPath, out var identifier) && identifier is string id)
+        if (plan.Kind == QueryAccessKind.Point)
         {
-            Read(id);
-            return PointPath;
+            Read(plan.PointId!);
         }
-        if ((IndexPath(equality)).Value is { } indexed)
+        else if (plan.Kind == QueryAccessKind.FullScan)
         {
-            return indexed;
+            FullScan();
         }
-        if (RangePath().Value is { } range)
+        else
         {
-            return range;
+            var result = budget.VisitAll(view, plan.Prefix, (_, value) =>
+            {
+                Read(OrleansSerialization.Deserialize<string>(value));
+                return true;
+            }, plan.AfterKey, plan.UntilKey);
+            if (result.HasMore)
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
+            }
         }
-        if (!request.AllowFullScan)
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, FullScanDenied);
-        }
-        var collection = KeySpace.Partition(DocumentSpace, request.Partition, query.Collection);
+        return plan.AccessPath;
+    }
+
+    private void FullScan()
+    {
         if (keyset is null)
         {
             RowVisibilityFullScan.Visit(database, principal, resource, request, budget, visibilitySourceEpoch,
-                visitor => VisitRange(collection, visitor), accept);
-            return FullScanPath;
+                visitor => budget.VisitAll(view, plan.Prefix, visitor), accept);
+            return;
         }
         var afterKey = keyset.AfterId is null ? null
-            : KeySpace.Partition(DocumentSpace, request.Partition, query.Collection, keyset.AfterId);
+            : KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, keyset.AfterId);
         RowVisibilityFullScan.Visit(database, principal, resource, request, budget, visibilitySourceEpoch,
-            visitor => VisitRange(collection, (key, value) => visitor(key, value) && !keyset.Satisfied(), afterKey),
-            accept, partial: afterKey is not null);
-        return FullScanPath;
-    }
-
-    private (bool HasValue, string? Value) IndexPath(Dictionary<string, object?> equality)
-    {
-        foreach (var index in resource.Indexes.OrderByDescending(item => item.Fields.Length))
-        {
-            var prefixFields = index.Fields.TakeWhile(field => equality.ContainsKey(field)
-                && field is not SqlSyntax.MetadataIdPath and not SqlSyntax.MetadataRevisionPath).ToArray();
-            if (prefixFields.Length == 0
-                || prefixFields.Length < index.Fields.Length && (!index.IncludeNull || !index.IncludeMissing))
-            {
-                continue;
-            }
-            var values = prefixFields.Select(field => equality[field]).ToArray();
-            if (values.Any(value => value is null or MissingValue))
-            {
-                continue;
-            }
-            var prefix = KeySpace.Partition(IndexSpace, request.Partition,
-                new object?[] { request.Query.Collection, index.Name }.Concat(values).ToArray());
-            var result = VisitRange(prefix, (_, value) =>
-            {
-                Read(OrleansSerialization.Deserialize<string>(value));
-                return true;
-            });
-            if (result.HasMore)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
-            }
-            return (true, ((string?)(IndexPathPrefix + index.Name)));
-        }
-        return (false, default(string?));
-    }
-
-    private (bool HasValue, string? Value) RangePath()
-    {
-        foreach (var index in resource.Indexes)
-        {
-            if (QueryIndexRangePlanner.Create(index, request).Value is not { } range)
-            {
-                continue;
-            }
-            var result = budget.VisitAll(view, range.Prefix, (_, value) =>
-            {
-                Read(OrleansSerialization.Deserialize<string>(value));
-                return true;
-            }, range.AfterKey, range.UntilKey);
-            if (result.HasMore)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
-            }
-            return (true, IndexPathPrefix + index.Name);
-        }
-        return (false, default(string?));
+            visitor => budget.VisitAll(view, plan.Prefix,
+                (key, value) => visitor(key, value) && !keyset.Satisfied(), afterKey), accept, partial: afterKey is not null);
     }
 
     private void Candidate(ReadOnlySpan<byte> payload)
@@ -121,46 +63,6 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
     private void Read(string id)
     {
         budget.Check();
-        var key = KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, id);
-        view.ReadValue(key, Candidate);
-    }
-
-    /// <summary>Visits a complete range in storage-sized pages; only the visitor ends it early.</summary>
-    private StorageScanResult VisitRange(byte[] prefix, StorageRecordVisitor visitor, byte[]? afterKey = null)
-    {
-        return budget.VisitAll(view, prefix, visitor, afterKey);
-    }
-
-    private static IEnumerable<KeyValuePair<string, object?>> Equalities(Predicate? predicate,
-        Dictionary<string, JsonElement>? parameters)
-    {
-        if (predicate is Logical { Operator: SqlSyntax.And } conjunction)
-        {
-            foreach (var pair in Equalities(conjunction.Left, parameters).Concat(Equalities(conjunction.Right, parameters)))
-            {
-                yield return pair;
-            }
-            yield break;
-        }
-        if (predicate is not Comparison { Operator: SqlSyntax.Equals } comparison)
-        {
-            yield break;
-        }
-        var field = comparison.Left as FieldOperand ?? comparison.Right as FieldOperand;
-        if (field is null)
-        {
-            yield break;
-        }
-        var operand = comparison.Left is FieldOperand ? comparison.Right : comparison.Left;
-        if (operand is ValueOperand value)
-        {
-            yield return new(field.Path, JsonData.Scalar(value.Value, string.Empty));
-            yield break;
-        }
-        if (operand is ParameterOperand parameter
-            && parameters?.TryGetValue(parameter.Name, out var literal) == true)
-        {
-            yield return new(field.Path, JsonData.Scalar(literal, string.Empty));
-        }
+        view.ReadValue(KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, id), Candidate);
     }
 }

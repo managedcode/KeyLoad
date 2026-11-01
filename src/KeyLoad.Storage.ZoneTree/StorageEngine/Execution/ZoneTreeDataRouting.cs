@@ -5,12 +5,20 @@ internal static class ZoneTreeDataRouting
 {
     internal static bool IsPlain(ZoneTreeStoreRuntime runtime, ReadOnlySpan<byte> key)
     {
-        if (!ResourceStorageKeys.TryCatalog(key, out var catalog))
+        var operation = runtime.CurrentOperation;
+        var familyLength = ResourceStorageKeys.DataFamilyPrefixLength(key);
+        if (operation.TryReadRouting(key, familyLength, out var plain))
+        {
+            return plain;
+        }
+        if (!ResourceStorageKeys.TryCatalog(key, !operation.Writable, out var catalog, out var scope))
         {
             return false;
         }
-        var snapshot = runtime.CurrentOperation.Snapshot.Transaction;
-        return snapshot.TryGet(catalog, out var value)
+        var snapshot = operation.Snapshot.Transaction;
+        plain = snapshot.TryGet(catalog, out var value)
             && !OrleansSerialization.Deserialize<ResourceDefinition>(value.Span).Transactional;
+        operation.BindReadRouting(scope, plain);
+        return plain;
     }
 }

@@ -24,6 +24,7 @@ internal sealed class KeyCodecTypedComponentTests
         var typed = KeyCodec.Encode(Text, Integer, Small, true, false, 1.25m, Real, at, id, Binary, KeyComponent.Null, KeyComponent.Missing);
         var boxed = KeyCodec.Encode(new object?[] { Text, Integer, Small, true, false, 1.25m, Real, at, id, Binary, null, MissingValue.Instance });
         await Assert.That(typed.SequenceEqual(boxed)).IsTrue();
+        KeyCodecValidation.Validate(typed);
         var decoded = KeyCodec.Decode(typed);
         await Assert.That(decoded[0]).IsEqualTo(Text);
         await Assert.That(decoded[1]).IsEqualTo(Integer);
@@ -53,5 +54,17 @@ internal sealed class KeyCodecTypedComponentTests
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
         var nonFinite = Assert.ThrowsExactly<KeyLoadException>(() => KeyCodec.Encode(double.NaN));
         await Assert.That(nonFinite.Code).IsEqualTo(ErrorCode.Validation);
+    }
+
+    [Test]
+    public async Task ValidationKeepsTheCompleteComponentLimitWithoutMaterializingText()
+    {
+        var valid = KeyCodec.Encode(Enumerable.Repeat(KeyComponent.Missing, MaximumComponents).ToArray());
+        KeyCodecValidation.Validate(valid);
+        await Assert.That(KeyCodec.Decode(valid).Length).IsEqualTo(MaximumComponents);
+        var excessive = valid.Concat(new byte[] { 0x10 }).ToArray();
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => KeyCodecValidation.Validate(excessive));
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+        KeyCodecValidation.Validate(KeyCodec.Encode(Text, Binary, 1.25m, DateTimeOffset.MaxValue));
     }
 }

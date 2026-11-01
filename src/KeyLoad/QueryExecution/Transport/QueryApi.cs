@@ -16,24 +16,34 @@ internal static class QueryApi
     internal static void Map(WebApplication app)
     {
         app.MapPost(SearchPath, (SqlGraphSearchRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.SqlGraphSearch, request));
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.SqlGraphSearch, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(McpToolRoutes.QueryGraphPath, (SqlGraphPathRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.SqlGraphPath, request));
-        app.MapPost(SqlOperationProtocol.Route, ExecuteSqlAsync);
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.SqlGraphPath, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
+        app.MapPost(SqlOperationProtocol.Route, ExecuteSqlAsync)
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(DistributedSearchProtocol.Route, (DistributedSearchRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.DistributedSearch, request));
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.DistributedSearch, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(QueryPath, (QueryRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.Query, request));
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.Query, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(AstPath, (AstQueryRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.AstQuery, request));
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.AstQuery, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(McpToolRoutes.QueryPartitions, (PartitionQueryRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.PartitionQuery, request));
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.PartitionQuery, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapGet(CapabilitiesPath, (Func<HttpContext, Task<IResult>>)(context =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.QueryCapabilities)));
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.QueryCapabilities)))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(LiveStartPath, (StartLiveQueryRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.LiveQueryStart, request));
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.LiveQueryStart, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
         app.MapPost(LiveReadPath, (ReadLiveQueryRequest request, HttpContext context) =>
-            ApiGrainDispatch.ReadAsync(context, GrainReadKind.LiveQueryRead, request));
+            ApiGrainDispatch.ReadAsync(context, GrainReadKind.LiveQueryRead, request))
+            .RequireAuthorization(DatabaseAuthenticationComposition.SubjectPolicy);
     }
 
     private static async Task<IResult> ExecuteSqlAsync(SqlOperationRequest request, HttpContext context, IOptions<QueryExecutionOptions> queryOptions, IOptions<ServerExecutionOptions> server)

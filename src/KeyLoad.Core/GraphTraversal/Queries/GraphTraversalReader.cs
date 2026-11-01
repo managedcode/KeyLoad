@@ -8,7 +8,7 @@ namespace KeyLoad.Core.GraphTraversal;
 /// <summary>Runs bounded breadth-first traversal inside a single storage read gate.</summary>
 internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
     ResourceDefinition resource, PartitionRef partition, string graph, EntityRef start, int maxDepth,
-    int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget)
+    int maxVertices, int maxEdges, string[]? labels, ReadExecutionBudget budget, GraphTraversalProjection projection)
 {
     private const int EmptyLabelCount = 0;
 
@@ -21,7 +21,8 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
     private const string InvalidAdjacency = "An outgoing graph adjacency record is inconsistent.";
     private readonly GraphVertexVisibility visibility = new(database, view, principal, budget);
     private readonly HashSet<EntityRef> visited = [];
-    private readonly Dictionary<string, EdgeRecord> edges = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, EdgeRecord>? edges = projection == GraphTraversalProjection.Full
+        ? new(StringComparer.Ordinal) : null;
     private readonly Queue<(EntityRef Vertex, int Depth)> pending = new();
     private readonly HashSet<string>? labelSet = labels is { Length: > EmptyLabelCount } ? new(labels, StringComparer.Ordinal) : null;
     private int examinedEdges;
@@ -42,9 +43,13 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
             }
             VisitAdjacency(item);
         }
-        var result = new GraphTraversalResult(visited.OrderBy(vertex => vertex.Collection, StringComparer.Ordinal)
-            .ThenBy(vertex => vertex.Id, StringComparer.Ordinal).ToImmutableArray(),
-            edges.Values.OrderBy(edge => edge.Id, StringComparer.Ordinal).ToImmutableArray());
+        var vertices = projection == GraphTraversalProjection.Count ? [] : visited.OrderBy(vertex => vertex.Collection, StringComparer.Ordinal)
+            .ThenBy(vertex => vertex.Id, StringComparer.Ordinal).ToImmutableArray();
+        var result = new GraphTraversalResult(vertices, projection == GraphTraversalProjection.Full
+            ? edges!.Values.OrderBy(edge => edge.Id, StringComparer.Ordinal).ToImmutableArray() : [])
+        {
+            VertexCount = visited.Count
+        };
         return result;
     }
 
@@ -93,15 +98,19 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         {
             return true;
         }
-        AddEdge(edge);
+        if (projection == GraphTraversalProjection.Full)
+        {
+            AddEdge(edge);
+        }
         AddVertex(edge.To, depth + HopIncrement);
         return true;
     }
 
     private void AddEdge(EdgeRecord edge)
     {
-        var replacing = edges.ContainsKey(edge.Id);
-        if (edges.Count >= maxEdges && !replacing)
+        var retained = edges!;
+        var replacing = retained.ContainsKey(edge.Id);
+        if (retained.Count >= maxEdges && !replacing)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, EdgeVisitExceeded);
         }
@@ -109,7 +118,7 @@ internal sealed class GraphTraversalReader(DatabaseEngine database, IKeyValueVie
         {
             AttributesJson = database.Authorization.Project(principal, resource.FieldPolicies, edge.AttributesJson, out _)
         };
-        edges[edge.Id] = projected;
+        retained[edge.Id] = projected;
     }
 
     private void AddVertex(EntityRef vertex, int depth)

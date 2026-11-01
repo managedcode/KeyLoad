@@ -4,17 +4,19 @@ Status: bounded same-partition graph mutation and traversal are present in Core 
 
 ## Purpose, actors, and entry points
 
-GraphTraversal owns graph edge records, adjacency maintenance, and authorized bounded directed traversal over document vertices. Actors are database clients and authorized query/search operators. Current writes are `UpsertEdge`/`DeleteEdge` mutations handled by `DatabaseEngine`; current reads call `DatabaseEngine.Traverse` with a `TraverseRequest`. Contracts are in `src/KeyLoad.Abstractions/Contracts.cs` and `Queries.cs`; implementation is in `src/KeyLoad.Core/GraphAndSeries.cs`.
+GraphTraversal owns graph edge records, adjacency maintenance, and authorized bounded directed traversal over document vertices. Actors are database clients and authorized query/search operators. Current writes are `UpsertEdge`/`DeleteEdge` mutations handled by `DatabaseEngine`; current reads call `DatabaseEngine.Traverse` with a `TraverseRequest`. Contracts are in `src/KeyLoad.Abstractions/GraphTraversal/Contracts/`; implementation is in `src/KeyLoad.Core/GraphTraversal/`.
+
+REQ-GRAPH-001/002: `TraverseRequest.Projection` selects `Full`, `Vertices` or `Count` output from the same authorized traversal. `GraphTraversal.VertexCount` counts distinct visible visited vertices including the start. `Count` returns empty vertex/edge arrays; `Vertices` omits edge projection and output. Every mode preserves depth, cycle/parallel-edge uniqueness, hidden-intermediate exclusion, work bounds, lifetime validation and cancellation. `GraphTraversalProjectionTests` covers all modes, current permission changes, serializer round trips and healthy follow-up. The comparison driver's neighbor and reachable-count operations request their required projection without changing the shared graph workload.
 
 ## Canonical slice map and boundaries
 
-| Surface | Current source | Target owner |
+| Surface | Current source | Owner |
 |---|---|---|
-| Contracts | `src/KeyLoad.Abstractions/Contracts.cs`, `Queries.cs` | `src/KeyLoad.Abstractions/GraphTraversal/` |
-| Backend | `src/KeyLoad.Core/GraphAndSeries.cs`, mutation dispatch/authorization in `DatabaseEngine.cs` and `MutationAuthorization.cs` | `src/KeyLoad.Core/GraphTraversal/` |
-| Tests | `tests/KeyLoad.FunctionalTests/GraphAndSearchTests.cs`, `ReadExecutionTests.cs` | `tests/KeyLoad.FunctionalTests/GraphTraversal/` |
+| Contracts | `src/KeyLoad.Abstractions/GraphTraversal/Contracts/` | GraphTraversal |
+| Backend | `src/KeyLoad.Core/GraphTraversal/` | GraphTraversal; shared command dispatch remains in DatabaseComposition |
+| Tests | `tests/KeyLoad.FunctionalTests/GraphTraversal/` | GraphTraversal |
 | Durable specification | This file | `docs/Features/GraphTraversal.md` |
-| HTTP | `src/KeyLoad/ApiEndpoints.cs`: `POST /graph/traverse`; edge mutations enter through shared `POST /commands` | Shared HTTP transport belongs to `src/KeyLoad/ClientApi/`; graph semantics belong to `src/KeyLoad.Core/GraphTraversal/` |
+| HTTP | `src/KeyLoad/GraphTraversal/Transport/GraphApi.cs`: `POST /graph/traverse`; edge mutations enter through shared `POST /commands` | Shared HTTP transport belongs to `src/KeyLoad/ClientApi/`; graph semantics belong to `src/KeyLoad.Core/GraphTraversal/` |
 | .NET SDK | `src/KeyLoad.Client/GraphTraversal/Transport/KeyLoadClient.cs`: `TraverseAsync`; `DatabaseComposition/Commands/KeyLoadClient.cs`: atomic graph mutations | Shared client transport belongs to ClientApi; typed graph traversal belongs to GraphTraversal |
 | Official MCP | The authenticated official C# SDK exposes `keyload_graph_incoming` and shortest-path tools through the shared ClientApi gateway/catalog | Real cluster schema oracles preserve exact properties/required fields and hints; nested `PartitionRef` includes computed `atomicPartitionId` as an optional property |
 | UI | No dedicated graph-management or traversal frontend is specified | N/A: graph traversal is a database/API query capability, not a separate frontend surface |

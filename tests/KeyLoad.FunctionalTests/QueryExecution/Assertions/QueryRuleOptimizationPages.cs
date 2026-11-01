@@ -108,13 +108,45 @@ internal static class QueryRuleOptimizationPages
                 Explain = true
             }
         };
-        var body = System.Text.Json.JsonSerializer.Serialize(new
-        {
-            accessPath = path,
-            atomicPartition = ast.Partition.AtomicPartitionId
-        }, JsonDefaults.Options);
+        var body = ExpectedPlan(ast, path, shape, cut);
         await RequiredProcessingPolicyAssertions.EqualAsync(new QueryPage([new("explain", 0L, body)], null, cut, path),
             engine.ExecuteAst(QueryRuleOptimizationData.Reader, explain, cancellationToken: token));
+    }
+
+    private static string ExpectedPlan(AstQueryRequest ast, string path, int shape, long cut)
+    {
+        var scan = path == QueryRuleOptimizationData.Scan ? QueryRuleOptimizationData.Scan : "index-prefix-seek";
+        string[] seek = path switch
+        {
+            QueryRuleOptimizationData.NestedIndexPath => [QueryRuleOptimizationData.NestedPath],
+            QueryRuleOptimizationData.StatusIndexPath or QueryRuleOptimizationData.MetadataIndexPath => [QueryRuleOptimizationData.StatusPath],
+            _ => []
+        };
+        string[] residual = shape switch
+        {
+            QueryRuleOptimizationData.OpenRevisionOneShape => [QueryRuleOptimizationData.StatusPath, QueryRuleOptimizationData.RevisionPath],
+            QueryRuleOptimizationData.OpenRevisionTwoShape => [QueryRuleOptimizationData.RevisionPath, QueryRuleOptimizationData.StatusPath],
+            QueryRuleOptimizationData.NestedShape => [QueryRuleOptimizationData.NestedPath],
+            _ => [QueryRuleOptimizationData.RevisionPath]
+        };
+        return System.Text.Json.JsonSerializer.Serialize(new
+        {
+            accessPath = path,
+            atomicPartition = ast.Partition.AtomicPartitionId,
+            ReadCut = cut,
+            Scan = scan,
+            Index = path == QueryRuleOptimizationData.Scan ? null : path["index:".Length..],
+            SeekFields = seek,
+            HasLowerBound = false,
+            HasUpperBound = false,
+            ResidualFields = residual,
+            Order = new Ordering[] { new(QueryRuleOptimizationData.RankPath, false) },
+            RetainedRows = 2L,
+            Limit = 2,
+            Offset = 0,
+            Projection = new Selection[] { new(QueryRuleOptimizationData.StatusPath, "status"), new(QueryRuleOptimizationData.RankPath, "rank") },
+            Operators = new[] { scan, "row-authorization", "residual-filter", "top-n-heap", "projection", "page" }
+        }, JsonDefaults.Options);
     }
 
     private static async Task FailureAsync(Func<QueryPage> execute, ErrorCode code, string detail)

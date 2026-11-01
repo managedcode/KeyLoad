@@ -9,7 +9,7 @@ internal static class DatabaseCredentialResolver
     /// <summary>Authenticates through the credential's user grain without publishing an operation execution identity.</summary>
     /// <param name="context">The actual authenticated public request and services.</param>
     /// <param name="executionObserver">The optional borrowed execution observer; no credentials are exposed.</param>
-    /// <returns>The current persisted principal reply, decoded by the owning adapter.</returns>
+    /// <returns>The verified subject or current authority metadata required by the owning adapter.</returns>
     internal static async Task<GrainValue> ReadAsync(HttpContext context,
         IDatabaseAuthenticationExecutionObserver? executionObserver = null)
     {
@@ -29,7 +29,10 @@ internal static class DatabaseCredentialResolver
         {
             var node = context.RequestServices.GetRequiredService<OrleansNode>();
             using var connection = ServerConnectionFeature.Acquire(context, context.RequestAborted);
-            principal = await CanonicalCredentialDispatch.AuthenticateAsync(node, key[ServerProtocol.BearerPrefix.Length..],
+            Func<OrleansNode, string, ServerConnectionOperation, Guid, Action?, Task<PrincipalRecord>> authenticate
+                = DatabaseAuthenticationComposition.AuthorizesAtOperationOwner(context)
+                ? CanonicalCredentialDispatch.AuthenticateSubjectAsync : CanonicalCredentialDispatch.AuthenticateAsync;
+            principal = await authenticate(node, key[ServerProtocol.BearerPrefix.Length..],
                 connection, requestId, () =>
             {
                 if (executionObserver is not null)

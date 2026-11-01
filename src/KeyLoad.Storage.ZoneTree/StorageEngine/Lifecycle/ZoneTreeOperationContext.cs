@@ -9,6 +9,8 @@ internal sealed class ZoneTreeOperationContext : IDisposable
     private const string ExpiredOperation = "The native storage operation is outside its owning callback.";
     private readonly ZoneTreeStoreRuntime runtime;
     private bool active = true;
+    private byte[]? readRoutingScope;
+    private bool readRoutingPlain;
 
     internal ZoneTreeOperationContext(ZoneTreeStoreRuntime runtime, IReadTransaction<Memory<byte>, Memory<byte>> transaction,
         bool ownsTransaction)
@@ -43,6 +45,27 @@ internal sealed class ZoneTreeOperationContext : IDisposable
     internal bool Writable => Snapshot.Transaction is ITransaction<Memory<byte>, Memory<byte>>;
     internal long Position { get; private set; }
     internal void Published(long position) => Position = position;
+
+    internal bool TryReadRouting(ReadOnlySpan<byte> key, int familyLength, out bool plain)
+    {
+        plain = readRoutingPlain;
+        if (Writable || readRoutingScope is null || familyLength == 0
+            || !key[familyLength..].StartsWith(readRoutingScope))
+        {
+            return false;
+        }
+        KeyCodecValidation.Validate(key);
+        return true;
+    }
+
+    internal void BindReadRouting(byte[] scope, bool plain)
+    {
+        if (!Writable)
+        {
+            readRoutingScope = scope;
+            readRoutingPlain = plain;
+        }
+    }
 
     internal void Check()
     {

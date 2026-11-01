@@ -10,7 +10,8 @@ public static class GraphTraversalQueries
         ArgumentNullException.ThrowIfNull(budget);
         ArgumentNullException.ThrowIfNull(binding);
         budget.AttachResourceLifetimeBinding(binding);
-        return engine.TraverseRead(principalId, request.Partition, request.Graph, request.Start, request.MaxDepth, request.MaxVertices, request.MaxEdges, request.Labels?.ToArray(), budget);
+        return engine.TraverseRead(principalId, request.Partition, request.Graph, request.Start, request.MaxDepth,
+            request.MaxVertices, request.MaxEdges, request.Labels?.ToArray(), budget, request.Projection);
     }
 
     internal static GraphShortestPathResult ShortestPathBound(this DatabaseEngine engine, string principalId, GraphShortestPathRequest request, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)

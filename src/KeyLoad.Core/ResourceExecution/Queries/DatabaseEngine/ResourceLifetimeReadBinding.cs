@@ -7,12 +7,17 @@ public static class ResourceLifetimeReadBinding
 {
     /// <summary>Resolves and binds a resource after the caller's fresh coarse authorization in this same cut.</summary>
     internal static ResourceDefinition BindAuthorizedReadResource(IKeyValueView view, PartitionRef partition, string name, ResourceKind? kind = null)
+        => BindAuthorizedReadResourcePair(view, partition, name, kind).Definition;
+
+    /// <summary>Retains the authenticated definition and lifetime for reuse within the caller's existing cut.</summary>
+    internal static (ResourceDefinition Definition, ResourceLifetime Lifetime) BindAuthorizedReadResourcePair(
+        IKeyValueView view, PartitionRef partition, string name, ResourceKind? kind = null)
     {
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(partition);
         var pair = ResourceDefinitionBinding.ReadBoundResourcePair(view, partition, name, kind);
         BindAuthenticatedReadResourceLifetime(view, partition, pair.Definition, pair.Lifetime);
-        return pair.Definition;
+        return pair;
     }
 
     /// <summary>Binds an already authenticated source pair without substituting the target's local catalog.</summary>

@@ -57,7 +57,7 @@ internal static class QueryRuleOptimizationClusterPages
         }
         if (!refused)
         {
-            await ExplainAsync(reader, json, path, token);
+            await ExplainAsync(reader, json, path, shape, token);
             return;
         }
         var plan = json with
@@ -106,7 +106,7 @@ internal static class QueryRuleOptimizationClusterPages
         };
     private static async Task<QueryPage> ReadMcpAsync<T>(RequestCqrsClusterCallers reader, string tool, T request, CancellationToken token)
         => (await McpCallerAssertions.SuccessAsync<QueryPage>(await reader.Mcp.CallAsync(tool, request, token))).Value;
-    private static async Task ExplainAsync(RequestCqrsClusterCallers reader, AstQueryRequest ast, string path, CancellationToken token)
+    private static async Task ExplainAsync(RequestCqrsClusterCallers reader, AstQueryRequest ast, string path, int shape, CancellationToken token)
     {
         var plan = ast with
         {
@@ -120,15 +120,48 @@ internal static class QueryRuleOptimizationClusterPages
             await McpCallerAssertions.SdkSuccessAsync(await reader.Sdk.QueryAstAsync(plan, token)),
             (await McpCallerAssertions.SuccessAsync<QueryPage>(await reader.Mcp.CallAsync(McpCallerTools.QueryAst, plan, token))).Value
         };
-        var body = JsonSerializer.Serialize(new
-        {
-            accessPath = path,
-            atomicPartition = ast.Partition.AtomicPartitionId
-        }, JsonDefaults.Options);
         foreach (var page in pages)
         {
             await Assert.That(page.CutPosition).IsGreaterThan(0L);
+            var body = ExpectedPlan(ast, path, shape, page.CutPosition);
             await SqlClusterProtocol.EqualAsync(new QueryPage([new("explain", 0L, body)], null, page.CutPosition, path), page);
         }
     }
+
+    private static string ExpectedPlan(AstQueryRequest ast, string path, int shape, long cut)
+    {
+        var scan = path == QueryRuleOptimizationClusterData.Scan ? QueryRuleOptimizationClusterData.Scan : "index-prefix-seek";
+        string[] seek = path switch
+        {
+            QueryRuleOptimizationClusterData.NestedIndexPath => [QueryRuleOptimizationClusterData.NestedPath],
+            QueryRuleOptimizationClusterData.StatusIndexPath or QueryRuleOptimizationClusterData.MetadataIndexPath => [QueryRuleOptimizationClusterData.StatusPath],
+            _ => []
+        };
+        string[] residual = shape switch
+        {
+            QueryRuleOptimizationClusterData.OpenRevisionOneShape => [QueryRuleOptimizationClusterData.StatusPath, QueryRuleOptimizationClusterData.RevisionPath],
+            QueryRuleOptimizationClusterData.OpenRevisionTwoShape => [QueryRuleOptimizationClusterData.RevisionPath, QueryRuleOptimizationClusterData.StatusPath],
+            QueryRuleOptimizationClusterData.NestedShape => [QueryRuleOptimizationClusterData.NestedPath],
+            _ => [QueryRuleOptimizationClusterData.RevisionPath]
+        };
+        return System.Text.Json.JsonSerializer.Serialize(new
+        {
+            accessPath = path,
+            atomicPartition = ast.Partition.AtomicPartitionId,
+            ReadCut = cut,
+            Scan = scan,
+            Index = path == QueryRuleOptimizationClusterData.Scan ? null : path["index:".Length..],
+            SeekFields = seek,
+            HasLowerBound = false,
+            HasUpperBound = false,
+            ResidualFields = residual,
+            Order = new Ordering[] { new(QueryRuleOptimizationClusterData.RankPath, false) },
+            RetainedRows = 2L,
+            Limit = 2,
+            Offset = 0,
+            Projection = new Selection[] { new(QueryRuleOptimizationClusterData.StatusPath, "status"), new(QueryRuleOptimizationClusterData.RankPath, "rank") },
+            Operators = new[] { scan, "row-authorization", "residual-filter", "top-n-heap", "projection", "page" }
+        }, JsonDefaults.Options);
+    }
+
 }

@@ -15,6 +15,10 @@ namespace KeyLoad;
 public sealed record TraverseRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Graph, [property: Orleans.Id(2)] EntityRef Start, [property: Orleans.Id(3)] int MaxDepth = TraverseRequest.DefaultMaxDepth,
     [property: Orleans.Id(4)] int MaxVertices = TraverseRequest.DefaultMaxVertices, [property: Orleans.Id(5)] int MaxEdges = TraverseRequest.DefaultMaxEdges, [property: Orleans.Id(6)] ImmutableArray<string>? Labels = null)
 {
+    /// <summary>Gets the requested result projection; work and visibility bounds apply to every projection.</summary>
+    [Orleans.Id(7)]
+    public GraphTraversalProjection Projection { get; init; } = GraphTraversalProjection.Full;
+
     private const int DefaultMaxDepth = 3;
     private const int DefaultMaxVertices = 1_000;
     private const int DefaultMaxEdges = 5_000;

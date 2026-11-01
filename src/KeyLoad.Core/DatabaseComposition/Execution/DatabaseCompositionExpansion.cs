@@ -99,7 +99,8 @@ public static class DatabaseCompositionExpansion
         _ = (engine.AuthorizeComposition(tx, principal, partition, command)).Value;
         var resource = engine.Resource(tx, partition, command.Graph, ResourceKind.Graph);
         var start = engine.VisibleVertex(budget.CreateView(tx), principal, command.Start).Reference;
-        var traversal = new GraphTraversalReader(engine, tx, principal, resource, partition, command.Graph, start, command.MaxDepth, command.MaxVertices, command.MaxEdges, null, budget).Read();
+        var traversal = new GraphTraversalReader(engine, tx, principal, resource, partition, command.Graph, start,
+            command.MaxDepth, command.MaxVertices, command.MaxEdges, null, budget, GraphTraversalProjection.Full).Read();
         var effects = new List<Mutation>(traversal.Edges.Length);
         foreach (var edge in traversal.Edges)
         {

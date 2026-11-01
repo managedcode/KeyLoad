@@ -18,6 +18,8 @@ internal static class ResourceStorageKeys
     internal const string AnalyticsGenerationFamily = "analytics-generation";
     private const int ResourceComponent = 5;
     private const int DatabaseComponent = 2;
+    private const int FirstAddressComponent = 1;
+    private const int AddressEnd = ResourceComponent + 1;
     private static readonly byte[][] DataPrefixes =
     [
         .. new[]
@@ -31,43 +33,56 @@ internal static class ResourceStorageKeys
     internal static byte[] Catalog(string tenant, string database, string resource)
         => KeyCodec.Encode(CatalogFamily, tenant, database, resource);
 
-    internal static bool TryCatalog(ReadOnlySpan<byte> key, out byte[] catalog)
+    internal static bool TryCatalog(ReadOnlySpan<byte> key, bool retainScope, out byte[] catalog, out byte[] scope)
     {
         catalog = [];
-        if (!TryResource(key, out var resource))
+        scope = [];
+        if (!TryComponents(key, out var components))
         {
             return false;
         }
-        catalog = Catalog(resource.Tenant, resource.Database, resource.Resource);
+        catalog = Catalog((string)components[FirstAddressComponent]!, (string)components[DatabaseComponent]!,
+            (string)components[ResourceComponent]!);
+        if (retainScope)
+        {
+            scope = KeyCodec.Encode(components[FirstAddressComponent..AddressEnd])[KeyCodecTokens.VersionBytes..];
+        }
         return true;
     }
 
     internal static bool TryResource(ReadOnlySpan<byte> key, out (string Tenant, string Database, string Resource) resource)
     {
         resource = (string.Empty, string.Empty, string.Empty);
-        if (!IsTableData(key))
+        if (!TryComponents(key, out var components))
         {
             return false;
         }
-        var components = KeyCodec.Decode(key);
-        if (components.Length <= ResourceComponent || components[1] is not string tenant
-            || components[DatabaseComponent] is not string database || components[ResourceComponent] is not string name)
-        {
-            return false;
-        }
-        resource = (tenant, database, name);
+        resource = ((string)components[FirstAddressComponent]!, (string)components[DatabaseComponent]!,
+            (string)components[ResourceComponent]!);
         return true;
     }
 
-    private static bool IsTableData(ReadOnlySpan<byte> key)
+    private static bool TryComponents(ReadOnlySpan<byte> key, out object?[] components)
+    {
+        components = [];
+        if (DataFamilyPrefixLength(key) == 0)
+        {
+            return false;
+        }
+        components = KeyCodec.Decode(key);
+        return components.Length > ResourceComponent && components[FirstAddressComponent] is string
+            && components[DatabaseComponent] is string && components[ResourceComponent] is string;
+    }
+
+    internal static int DataFamilyPrefixLength(ReadOnlySpan<byte> key)
     {
         foreach (var prefix in DataPrefixes)
         {
             if (key.StartsWith(prefix))
             {
-                return true;
+                return prefix.Length;
             }
         }
-        return false;
+        return 0;
     }
 }

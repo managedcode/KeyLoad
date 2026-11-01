@@ -16,6 +16,8 @@ internal static class ProjectRowAuthorityAssertions
     private const long MineRevision = 1;
     private const long ProjectRevision = 2;
     private const long ExplainRevision = 0;
+    private const string IdPath = "/@id";
+    private const string Star = "*";
 
     internal static async Task ReadAsync(TestDatabase db, QueryEngine engine, ZoneTreeStore store,
         bool projectVisible, CancellationToken token)
@@ -31,7 +33,20 @@ internal static class ProjectRowAuthorityAssertions
         var plan = JsonSerializer.Serialize(new
         {
             AccessPath = ScanPath,
-            AtomicPartition = db.Partition.AtomicPartitionId
+            AtomicPartition = db.Partition.AtomicPartitionId,
+            ReadCut = cut,
+            Scan = ScanPath,
+            Index = (string?)null,
+            SeekFields = Array.Empty<string>(),
+            HasLowerBound = false,
+            HasUpperBound = false,
+            ResidualFields = Array.Empty<string>(),
+            Order = new Ordering[] { new(IdPath, false) },
+            RetainedRows = 100L,
+            Limit = 100,
+            Offset = 0,
+            Projection = new Selection[] { new(Star, Star) },
+            Operators = new[] { ScanPath, "row-authorization", "top-n-heap", "projection", "page" }
         }, JsonDefaults.Options);
         var explain = engine.ExecuteAst(Reader, new AstQueryRequest(db.Partition,
             new SqlParser(Sql, UnitExecutionOptions.QueryExecution(),
