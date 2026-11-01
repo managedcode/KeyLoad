@@ -1,4 +1,5 @@
 import { KEYLOAD, NODES, TYPES, resultKey } from './results-contract.mjs';
+import { summaryModel } from './results-summary.mjs';
 
 class Markup {
   constructor(html) { this.html = html; }
@@ -34,17 +35,6 @@ const firstLine = error => {
 };
 const runUrl = runId => `https://github.com/managedcode/KeyLoad/actions/runs/${runId}`;
 const link = (text, href, extra) => h('a', { href, rel: 'noopener noreferrer', ...extra }, text);
-const COLUMNS = Object.freeze([
-  { id: 'load', label: 'Load', kind: 'write', cases: ['load'] },
-  { id: 'write', label: 'Write', kind: 'write', cases: ['update', 'set', 'append'] },
-  { id: 'read', label: 'Read', kind: 'read', cases: ['point-read', 'get', 'pk-select', 'neighbors', 'range-read', 'read'] },
-  { id: 'search', label: 'Search', kind: 'query', cases: ['range-query', 'range-select', 'traverse', 'exact-top10',
-    'term-query', 'and-query', 'aggregate', 'windows', 'group-by', 'filtered-aggregate'] },
-  { id: 'delete', label: 'Delete', kind: 'write', cases: ['delete'] },
-  { id: 'mixed', label: 'Mixed', kind: 'mixed', cases: ['mixed', 'cycle'] },
-  { id: 'index', label: 'Index build', kind: 'build', cases: ['index'], seconds: true },
-]);
-const columnCases = (model, column) => model.type.cases.filter(item => column.cases.includes(item.id));
 
 function typeModel(type, all) {
   const results = all.filter(result => result.type === type.id);
@@ -73,6 +63,8 @@ function typeModel(type, all) {
 function lineTitle(item, line) {
   if (line.status === 'missing') return `${nodesLabel(line.nodes)} · No data: ${line.reason}`;
   if (line.status === 'failed') return `${nodesLabel(line.nodes)} · Failed: ${line.error}`;
+  if (line.summary) return `${nodesLabel(line.nodes)} · ${INTEGER.format(line.operations)} operations / ${FINE.format(line.seconds)} s` +
+    ` · ${line.caseCount} recorded cases · ${INTEGER.format(line.value)} ops/s`;
   const { entry } = line;
   const batch = entry.batchSize > 1 ? ` · ${INTEGER.format(entry.batchSize)} per call` : '';
   const limited = limitedNote(entry);
@@ -91,7 +83,8 @@ function limitedNote(entry) {
 // Time cases count a shorter time as faster, so their change and bar compare speed as well.
 function pairLine(model, item, line, one, visible) {
   const values = { class: 'pair-line n' + line.nodes, 'data-nodes': line.nodes, 'data-status': line.status,
-    'data-value': line.status === 'passed' ? line.value : '', title: lineTitle(item, line) };
+    'data-value': line.status === 'passed' ? line.value : '', 'data-cases': line.summary ? line.caseCount : null,
+    'data-operations': line.operations, 'data-seconds': line.seconds, title: lineTitle(item, line) };
   const label = h('small', { class: 'node-label' }, nodesLabel(line.nodes));
   if (line.status !== 'passed') return h('span', values, label, h('small', { class: 'no-data' },
     line.status === 'failed' ? 'Failed' : 'No data'), visible ? h('small', { class: 'no-data-reason' }, line.reason) : null);
@@ -99,7 +92,8 @@ function pairLine(model, item, line, one, visible) {
   const ratio = !(best > 0 && line.value > 0) ? 0 : item.seconds ? best / line.value : line.value / best;
   const note = line.nodes !== 3 || !(one > 0 && line.value > 0) ? null
     : h('small', { title: 'Speed change against 1 node' }, (item.seconds ? change(line.value, one) : change(one, line.value)) + ' vs 1 node');
-  const limited = line.entry.operations < line.entry.planned
+  const limited = line.summary ? h('small', { class: 'limited' }, `${line.caseCount} ${line.caseCount === 1 ? 'case' : 'cases'}`)
+    : line.entry.operations < line.entry.planned
     ? h('small', { class: 'limited' }, `${compact(line.entry.operations)} of ${compact(line.entry.planned)}`) : null;
   return h('span', values, label, h('b', null, item.seconds ? seconds(line.value) : compact(line.value)), note, limited,
     h('i', { style: `--size: ${percent(ratio)}` }));
@@ -111,48 +105,48 @@ function pair(model, database, item) {
   const [first] = lines;
   const one = first.status === 'passed' ? first.value : null;
   const shared = lines.every(line => line.status !== 'passed' && line.status === first.status && line.reason === first.reason);
-  return h('span', { class: 'pair' }, lines.map((line, index) => pairLine(model, item, line, one, index === 0 || !shared)));
+  return h('span', { class: 'pair' }, lines.map((line, index) => pairLine(model, item, line,
+    line.summary && line.coverage !== first.coverage ? null : one, index === 0 || !shared)));
 }
 
 function rowHead(model, database) {
   const recorded = NODES.filter(count => model.result(database, count) !== undefined);
   const note = recorded.length === 0 ? 'No result' : recorded.length === 2 ? null : recorded[0] === 1 ? 'Single node' : '3 nodes only';
   return h('th', { scope: 'row' }, h('span', { class: 'engine-name' }, h('strong', null, database),
-    h('span', { class: 'engine-type' }, model.type.label), present(note) ? h('small', null, note) : null));
+    present(note) ? h('small', null, note) : null));
 }
 
 function scrollRegion(className, label, content) {
   return h('div', { class: 'scroll-frame' }, h('div', { class: className, tabindex: '0', role: 'region', 'aria-label': label }, content));
 }
 
-function metricCell(model, database, column) {
-  const cases = columnCases(model, column);
-  const first = cases.length === 0 ? null : model.line(database, cases[0], 1);
-  const content = cases.length === 0 ? h('span', { class: 'not-applicable', title: 'No benchmark case for this metric' }, '—')
-    : cases.map(item => h('span', { class: 'metric-case', 'data-case': item.id },
-      h('small', { class: 'case-label' }, item.label), pair(model, database, item)));
-  return h('td', { 'data-metric': column.id, 'data-kind': column.kind,
+function metricCell(model, database, item) {
+  const supported = !model.summary || model.supports(database, item);
+  const first = supported ? model.line(database, item, 1) : null;
+  const content = supported ? pair(model, database, item)
+    : h('span', { class: 'not-applicable', title: 'No benchmark case for this metric' }, '—');
+  return h('td', { 'data-metric': item.id, 'data-kind': item.kind,
     'data-sort-value': first?.status === 'passed' ? first.value : null }, content);
 }
 
-function comparison(models) {
-  const head = h('tr', { class: 'ov-head' }, h('th', { scope: 'col' }, 'Database / data type'), COLUMNS.map(column =>
+function comparison(model) {
+  const columns = model.type.cases;
+  const first = columns[0];
+  const head = h('tr', { class: 'ov-head' }, h('th', { scope: 'col' }, 'Database'), columns.map(column =>
     h('th', { scope: 'col', 'data-metric': column.id, 'data-kind': column.kind, 'data-seconds': String(!!column.seconds),
-      'aria-sort': column.id === 'load' ? 'descending' : 'none' }, h('button',
+      'aria-sort': column === first ? (column.seconds ? 'ascending' : 'descending') : 'none' }, h('button',
       { type: 'button', class: 'sort-case', 'aria-label': `Sort by ${column.label}, fastest first, 1 node` }, column.label,
       h('small', null, column.seconds ? 'seconds' : column.id === 'load' ? 'records/s' : 'ops/s')))));
-  const entries = models.flatMap(model => model.type.databases.map(database => ({ model, database })));
-  const speed = ({ model, database }) => {
-    const item = columnCases(model, COLUMNS[0])[0];
-    const line = item ? model.line(database, item, 1) : null;
+  const speed = database => {
+    const line = model.line(database, first, 1);
     return line?.status === 'passed' ? line.value : -Infinity;
   };
-  entries.sort((a, b) => speed(b) - speed(a));
-  const rows = entries.map(({ model, database }) => h('tr', { class: 'ov-row' + (database === KEYLOAD ? ' is-keyload' : ''),
+  const databases = [...model.type.databases].sort((a, b) => speed(b) - speed(a));
+  const rows = databases.map(database => h('tr', { class: 'ov-row' + (database === KEYLOAD ? ' is-keyload' : ''),
     'data-database': database, 'data-type': model.type.id },
-    rowHead(model, database), COLUMNS.map(column => metricCell(model, database, column))));
-  const grid = h('table', { class: 'comparison-grid', style: `--columns: ${COLUMNS.length}`, role: 'table',
-    'aria-label': 'Database comparisons across data types' }, h('thead', null, head), h('tbody', { class: 'ov-list' }, rows));
+    rowHead(model, database), columns.map(column => metricCell(model, database, column))));
+  const grid = h('table', { class: 'comparison-grid', style: `--columns: ${columns.length}`, role: 'table',
+    'aria-label': model.type.label + ' comparisons' }, h('thead', null, head), h('tbody', { class: 'ov-list' }, rows));
   return scrollRegion('comparison-scroll', 'Comparison table; scroll horizontally to see every metric', grid);
 }
 
@@ -205,13 +199,16 @@ function subtitle(results) {
     'top line 1 node, lower line 3 nodes with the change against 1 node.';
 }
 
-function overview(models, results) {
-  return h('section', { class: 'bench-panel bench-overview', id: 'bench-all', 'aria-labelledby': 'bench-all-title' },
-  h('header', { class: 'bench-panel-head' }, h('h3', { id: 'bench-all-title' }, 'All types'),
-    h('p', null, subtitle(results)), h('p', { class: 'metric-note' },
-      'One row per database and data type. Each metric keeps its original case; bars compare the same case within its data type. No averages across types.')),
-  h('p', { class: 'table-scroll-hint' }, 'Sorted by Load, fastest first (1 node). Select a column to sort. Swipe or scroll horizontally to see all columns.'),
-  comparison(models), details(models));
+function overview(model, models) {
+  const { type } = model;
+  return h('section', { class: 'bench-panel bench-overview', id: 'bench-' + type.id, 'data-type': type.id,
+    'aria-labelledby': `bench-${type.id}-title` },
+  h('header', { class: 'bench-panel-head' }, h('h3', { id: `bench-${type.id}-title` }, type.label),
+    h('p', null, model.results.length === 0 ? 'No results in this run.' : subtitle(model.results)),
+    model.summary ? h('p', { class: 'metric-note' },
+      'Each database appears once. Rates combine recorded cases: total completed operations divided by total measured seconds. Case counts show coverage; type tabs show the original workloads. The 3-node change is shown only for matching case coverage.') : null),
+  h('p', { class: 'table-scroll-hint' }, `Sorted by ${type.cases[0].label}, fastest first (1 node). Select a column to sort. Swipe or scroll horizontally to see all columns.`),
+  comparison(model), details(model.summary ? models : [model]));
 }
 
 function kpis(results) {
@@ -227,7 +224,7 @@ function controls() {
   const chip = (value, label, count) => h('label', { class: 'chip' },
     single('input', { type: 'radio', name: 'bench-type', value, checked: value === 'all' }), h('span', null, label, h('small', null, String(count))));
   return h('div', { class: 'bench-controls', hidden: true }, h('fieldset', { id: 'bench-type', class: 'bench-chips' },
-    h('legend', null, 'Data type'), h('span', { class: 'chip-row' }, chip('all', 'All types', TYPES.length),
+    h('legend', null, 'Data type'), h('span', { class: 'chip-row' }, chip('all', 'All types', unique(TYPES.flatMap(type => type.databases)).length),
       TYPES.map(type => chip(type.id, type.label, type.databases.length)))));
 }
 
@@ -246,7 +243,8 @@ function footer(results) {
 
 export function renderResults({ results }) {
   const legend = h('p', { class: 'bench-legend' }, h('i', { class: 'n1' }), '1 node', h('i', { class: 'n3' }), '3 nodes');
+  const models = TYPES.map(type => typeModel(type, results));
   return h('div', { class: 'instrument' }, kpis(results), controls(), h('div', { class: 'measurement-workspace' },
-    h('div', { id: 'bench-results' }, legend, overview(TYPES.map(type => typeModel(type, results)), results), footer(results)),
+    h('div', { id: 'bench-results' }, legend, overview(summaryModel(results), models), models.map(model => overview(model, models)), footer(results)),
     h('p', { id: 'bench-announcement', class: 'sr-only', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' }))).html;
 }

@@ -210,9 +210,6 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .engine-name small { color: var(--kl-muted); font: .64rem/1.5 var(--kl-font-mono); letter-spacing: .05em; text-transform: uppercase; }
 [hidden] { display: none !important; }
 .engine-type { display: block; margin-top: .25rem; color: var(--kl-muted); font-size: .73rem; font-weight: 450; }
-.metric-case { display: grid; gap: .4rem; }
-.metric-case + .metric-case { margin-top: 1.1rem; padding-top: .8rem; border-top: 1px solid var(--kl-line); }
-.case-label { color: var(--kl-muted); font-size: .7rem; font-weight: 550; }
 .not-applicable { color: var(--kl-faint); }
 .no-data { color: var(--kl-faint); font-size: .76rem; font-weight: 500; }
 /* A topology line is its value and change over a full-width rail; the bar fills its share of the type's best. */
@@ -230,6 +227,7 @@ h1 .kl-mark { background-size: 100% .07em; background-position: 0 98%; }
 .pair-line:has(.no-data) { grid-template-columns: minmax(0, 1fr); gap: .1rem; white-space: normal; }
 .pair-line .no-data, .no-data-reason { line-height: 1.3; }
 .pair-line .no-data-reason { color: var(--kl-faint); font-size: .68rem; }
+#bench-all .no-data-reason { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
 .table-scroll-hint { margin: 0 0 .6rem; color: var(--kl-muted); font-size: .75rem; }
 /* Comparison table: the engine column stays pinned; every cell, header line and value starts on the same edges. */
 .comparison-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-x: contain; padding-bottom: .5rem; scrollbar-color: var(--kl-line-strong) transparent; scrollbar-width: thin; }

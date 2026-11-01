@@ -12,13 +12,13 @@ internal sealed class SiteResultsPage(string html)
     internal static async Task<SiteResultsPage> ReadAsync(string site, CancellationToken cancellationToken)
         => new(await File.ReadAllTextAsync(Path.Combine(site, SiteTokens.IndexFile), cancellationToken));
 
-    // The shared results section is well-formed markup without nested sections.
-    internal XElement Section()
+    // Each comparison section is well-formed markup without nested sections.
+    internal XElement Section(string type = "all")
     {
-        var start = Html.IndexOf("<section class=\"bench-panel bench-overview\" id=\"bench-all\"", StringComparison.Ordinal);
+        var start = Html.IndexOf($"<section class=\"bench-panel bench-overview\" id=\"bench-{type}\"", StringComparison.Ordinal);
         if (start < 0)
         {
-            throw new InvalidDataException("The shared results section is missing.");
+            throw new InvalidDataException($"The {type} results section is missing.");
         }
 
         var end = Html.IndexOf(SectionEnd, start, StringComparison.Ordinal) + SectionEnd.Length;
@@ -34,8 +34,7 @@ internal sealed class SiteResultsPage(string html)
         .Where(row => HasClass(row, "ov-row")).Select(row => new SiteTableRow(Attribute(row, "data-database"),
             Attribute(row, "data-type"),
             row.Element("th")!.Descendants("small").SingleOrDefault()?.Value ?? string.Empty,
-            row.Descendants("span").Where(cell => HasClass(cell, "metric-case"))
-                .ToDictionary(cell => Attribute(cell, "data-case"), Lines)))];
+            row.Elements("td").ToDictionary(cell => Attribute(cell, "data-metric"), Lines)))];
 
     internal static SiteTableRow Row(XElement section, string type, string database)
         => Rows(section).Single(row => row.Database == database && row.Type == type);

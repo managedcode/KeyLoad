@@ -42,17 +42,19 @@ The builder validates the merged file with the same contract, renders the benchm
 
 ## Rendering
 
-`results-view.mjs` renders one comparison table across all data types, with one row per database and data type. Rows have no type groups. The database column stays pinned and identifies the original data type. Shared columns are Load (records/s), Write, Read, Search, Delete, Mixed (ops/s) and Index build (seconds). Each cell retains the name of its original case; a metric containing multiple cases lists them separately. A dash means the type has no case for that metric. Values are never averaged across types or cases.
+`results-view.mjs` renders a global summary and one detailed comparison table per data type. The browser selects one table at a time. All types shows each declared database exactly once, including KeyLoad exactly once. Its shared columns are Load (records/s), Write, Read, Search, Delete and Mixed (ops/s). The type tabs use their own original case columns, including Index build in seconds for Search.
 
-Each measured case explicitly labels its 1-node and 3-node values beside their bars. The 3-node speed change says "vs 1 node". Bars scale to the best result of the same original case within its data type. The index build is measured once, so it shows seconds and treats the shortest time as best.
+`results-summary.mjs` derives each global rate from the original result files: sum of completed operations divided by sum of measured seconds for the recorded cases in that metric and node count. It does not average rounded rates. Each topology line shows the case count used. Different databases can cover different workloads; the type tables retain the matched scenarios and exact recorded values.
 
-- A failed case reads "Failed" with the first line of its error; the full error stays in the line title and the recorded-values table. A case the job never reached after a job-level error reads "Failed" with that job error.
-- A database without a 3-node result shows only its 1-node line and reads "Single node" beside its name.
-- A database without any result file, or a case absent from its result, reads "No data" with the reason. Missing values never become zero.
+The global metrics map load to Load; update/set/append to Write; point-read/get/pk-select/neighbors/range-read/read to Read; range-query/range-select/traverse/exact-top10/term-query/and-query/aggregate/windows/group-by/filtered-aggregate to Search; delete to Delete; and mixed/cycle to Mixed. A queue cycle is not split into invented independent read or write rates. Index build is a one-time duration and remains in the Search type table.
 
-One collapsed recorded-values table lists every case of every recorded job with data type, status, operations, errors, seconds, operations per second, p50/p95/p99 latency per call, units per call, error, image and run link. The page links the GitHub Actions runs and source commits named in the results and the merged file.
+Only recorded jobs contribute to a summary. A recorded job's failed case or job-level error makes that metric read Failed with its error; an absent case within a recorded job reads No data. A metric without a recorded case or a positive measured duration has no number. A dash means the database's declared types have no case for that metric. Missing jobs do not become zero. All original cases and errors remain in the recorded-values tables and the unchanged downloadable results file.
 
-`results-controls.mjs` is the only benchmark browser module. It filters rows by data type in both tables, hides metric columns with no applicable case for the selected type and shades horizontally scrolled table edges. All types share one table. Rows start with the fastest recorded 1-node Load. Selecting another metric sorts fastest first by its first listed original case, using shorter durations for Index build. Failed, missing and inapplicable values follow measured values. The sort basis is visible above the table. Without JavaScript all rows remain visible in their initial speed order.
+Every comparison explicitly labels its 1-node and 3-node values. The 3-node speed change says "vs 1 node" and the global summary shows it only when both topologies cover the same original cases. Global bars scale to the fastest summary rate of that metric; type-table bars scale to the best recorded value of the original case. Shorter Index build durations are faster.
+
+A database without a 3-node result shows only its 1-node line and reads Single node. A database with no results reads No data. Each table has a collapsed recorded-values table listing original case status, counts, duration, throughput, latency, batch size, error, image and run. The global recorded-values table contains all types; type tables contain only their own cases.
+
+`results-controls.mjs` selects the summary or original type table and shades horizontally scrolled table edges. Each table starts with its first metric's fastest 1-node value. Selecting a metric always sorts fastest first, using shorter durations for Index build. Failed, missing and inapplicable values follow measured values. The sort basis is visible above each table. Without JavaScript all tables remain visible in their initial speed order.
 
 ## Tests
 

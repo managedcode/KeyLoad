@@ -20,14 +20,16 @@ inputs, and Website never builds .NET, starts Aspire or runs tests.
    when two files describe the same database, type and node count; the workflow
    then stops and the current Pages stay.
 3. `node site/scripts/build.mjs --results=site-results/results.json --output=_site
-   --site-revision=<sha>` renders one shared comparison table across data types into static
-   HTML at build time and publishes the merged file as `data/results.json`.
+   --site-revision=<sha>` renders a global summary with each database once and the
+   original per-type comparison tables into static HTML at build time and publishes
+   the merged file as `data/results.json`.
 4. The Pages jobs upload `_site` and deploy it.
 
 The HTML, styles and result modules live in `site/Features/BenchmarkComparisons/`
 (`results-contract.mjs`, `results-merge.mjs`, `results-view.mjs`);
-`results-controls.mjs` is the only browser script for the results (row filtering by type, fastest-first metric sorting and
-table edge shading). The [site protocol](../../site/Features/BenchmarkComparisons/protocol.md)
+`results-controls.mjs` is the only browser script for the results (global/type
+table selection, fastest-first metric sorting and table edge shading).
+The [site protocol](../../site/Features/BenchmarkComparisons/protocol.md)
 owns the file shape and cell rendering, and
 [BenchmarkComparisons](../Features/BenchmarkComparisons.md) owns the benchmark
 contract. `tests/KeyLoad.WebsiteTests` runs the real merge and build scripts

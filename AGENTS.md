@@ -339,10 +339,11 @@ Website (`website.yml`) owns only the static landing page. It downloads the
 completed run for a site push or manual dispatch, merges them with
 `node site/scripts/results.mjs`, builds the static site with
 `node site/scripts/build.mjs` and deploys GitHub Pages. The page shows one
-comparison table across data types with shared metric columns and KeyLoad in every
-type; failed cases read as failed with their error and missing results as no data. Without result files the
-merge fails and the current Pages stay. Only GitHub Benchmarks artifacts produce
-public figures; local results never do.
+global comparison table with each database once and shared metric columns.
+Data type tabs retain their original case columns and KeyLoad in every type;
+failed cases read as failed with their error and missing results as no data.
+Without result files the merge fails and the current Pages stay. Only GitHub
+Benchmarks artifacts produce public figures; local results never do.
 
 The landing page has no runtime or qualification dependency on KeyLoad product
 code, .NET, Aspire or AppHost. Never restore/build the solution, start containers,
