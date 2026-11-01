@@ -7,6 +7,7 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 internal sealed class SiteResultsSummaryTests
 {
     private const string Write = "write";
+    private const string Read = "read";
     private const string Search = "search";
     private const string Mixed = "mixed";
 
@@ -38,7 +39,7 @@ internal sealed class SiteResultsSummaryTests
         var sources = SiteResultFiles.Artifacts.Select(SiteResultFiles.Read)
             .Where(result => (string)result[SiteTokens.Database]! == SiteTokens.KeyLoad && (int)result[SiteTokens.Nodes]! == 1)
             .SelectMany(result => result[SiteTokens.Cases]!.AsArray()).Select(item => item!.AsObject())
-            .Where(item => new[] { "update", "set", "append" }.Contains((string)item[SiteTokens.Id]!)).ToArray();
+            .Where(item => new[] { "load", "update", "set", "append", "cycle" }.Contains((string)item[SiteTokens.Id]!)).ToArray();
         var operations = sources.Sum(item => (double)item[SiteTokens.Operations]!);
         var seconds = sources.Sum(item => (double)item[SiteTokens.Seconds]!);
         var row = SiteResultsPage.Row(page.Section(), "all", SiteTokens.KeyLoad);
@@ -62,18 +63,53 @@ internal sealed class SiteResultsSummaryTests
     }
 
     [Test]
-    public async Task QueueSummaryDoesNotInventIndependentReadOrWriteMeasurements()
+    public async Task QueueWritesAndReadsUseCompletedCyclesWithTheFullMeasuredDuration()
     {
         var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
         var row = SiteResultsPage.Row(page.Section(), "all", "RabbitMQ");
 
-        foreach (var metric in new[] { "load", "write", "read", "search", "delete" })
+        foreach (var nodes in new[] { 1, 3 })
         {
-            await Assert.That(row.Cells[metric]).IsEmpty();
+            var source = SiteResultFiles.Read("benchmark-rabbitmq-queue-n" + nodes.ToString(CultureInfo.InvariantCulture))
+                [SiteTokens.Cases]![0]!;
+            var rate = (double)source[SiteTokens.Operations]! / (double)source[SiteTokens.Seconds]!;
+            foreach (var metric in new[] { Write, Read })
+            {
+                var line = row.Cells[metric].Single(line => line.Nodes == nodes);
+                await Assert.That(line.Status).IsEqualTo(SiteTokens.Passed);
+                await Assert.That(double.Parse(line.Value, CultureInfo.InvariantCulture)).IsEqualTo(rate);
+                await Assert.That(line.Text).Contains("Full queue cycle");
+            }
         }
 
         await Assert.That(row.Cells[Mixed].Length).IsEqualTo(2);
         await Assert.That(row.Cells[Mixed].All(line => line.Status == SiteTokens.Passed)).IsTrue();
+    }
+
+    [Test]
+    public async Task EveryDatabaseHasWriteAndReadCasesInTheGlobalComparison()
+    {
+        var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
+
+        foreach (var row in SiteResultsPage.Rows(page.Section()))
+        {
+            await Assert.That(row.Cells[Write].Length).IsGreaterThan(0);
+            await Assert.That(row.Cells[Read].Length).IsGreaterThan(0);
+        }
+    }
+
+    [Test]
+    public async Task VectorLoadingIsWritingAndVectorSearchIsReading()
+    {
+        var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
+        var row = SiteResultsPage.Row(page.Section(), "all", "Qdrant");
+        var write = row.Cells[Write].Single(line => line.Nodes == 1);
+        var read = row.Cells[Read].Single(line => line.Nodes == 1);
+
+        await Assert.That(write.Status).IsEqualTo(SiteTokens.Passed);
+        await Assert.That(read.Status).IsEqualTo(SiteTokens.Passed);
+        await Assert.That(write.Value).IsEqualTo(row.Cells[SiteTokens.Load].Single(line => line.Nodes == 1).Value);
+        await Assert.That(read.Value).IsEqualTo(row.Cells[Search].Single(line => line.Nodes == 1).Value);
     }
 
     [Test]

@@ -64,7 +64,8 @@ function lineTitle(item, line) {
   if (line.status === 'missing') return `${nodesLabel(line.nodes)} · No data: ${line.reason}`;
   if (line.status === 'failed') return `${nodesLabel(line.nodes)} · Failed: ${line.error}`;
   if (line.summary) return `${nodesLabel(line.nodes)} · ${INTEGER.format(line.operations)} operations / ${FINE.format(line.seconds)} s` +
-    ` · ${line.caseCount} recorded cases · ${INTEGER.format(line.value)} ops/s`;
+    ` · ${line.caseCount} recorded cases · ${INTEGER.format(line.value)} ops/s` +
+    (line.basis ? ' · One publish and one receive per completed publish/receive/ACK cycle; full cycle duration included' : '');
   const { entry } = line;
   const batch = entry.batchSize > 1 ? ` · ${INTEGER.format(entry.batchSize)} per call` : '';
   const limited = limitedNote(entry);
@@ -95,7 +96,8 @@ function pairLine(model, item, line, one, visible) {
   const limited = line.summary ? h('small', { class: 'limited' }, `${line.caseCount} ${line.caseCount === 1 ? 'case' : 'cases'}`)
     : line.entry.operations < line.entry.planned
     ? h('small', { class: 'limited' }, `${compact(line.entry.operations)} of ${compact(line.entry.planned)}`) : null;
-  return h('span', values, label, h('b', null, item.seconds ? seconds(line.value) : compact(line.value)), note, limited,
+  const basis = line.basis ? h('small', { class: 'limited' }, line.basis) : null;
+  return h('span', values, label, h('b', null, item.seconds ? seconds(line.value) : compact(line.value)), note, limited, basis,
     h('i', { style: `--size: ${percent(ratio)}` }));
 }
 
@@ -206,7 +208,7 @@ function overview(model, models) {
   h('header', { class: 'bench-panel-head' }, h('h3', { id: `bench-${type.id}-title` }, type.label),
     h('p', null, model.results.length === 0 ? 'No results in this run.' : subtitle(model.results)),
     model.summary ? h('p', { class: 'metric-note' },
-      'Each database appears once. Rates combine recorded cases: total completed operations divided by total measured seconds. Case counts show coverage; type tabs show the original workloads. The 3-node change is shown only for matching case coverage.') : null),
+      'Each database appears once. Write includes data loading and publishing; Read includes queries and receiving. Rates use completed operations divided by measured seconds. Queue write/read rates include the full publish/receive/ACK cycle. Case counts show coverage; type tabs retain the original cases.') : null),
   h('p', { class: 'table-scroll-hint' }, `Sorted by ${type.cases[0].label}, fastest first (1 node). Select a column to sort. Swipe or scroll horizontally to see all columns.`),
   comparison(model), details(model.summary ? models : [model]));
 }

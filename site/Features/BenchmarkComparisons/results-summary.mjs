@@ -1,11 +1,13 @@
 import { NODES, TYPES } from './results-contract.mjs';
 
+const QUERY_CASES = Object.freeze(['range-query', 'range-select', 'traverse', 'exact-top10',
+  'term-query', 'and-query', 'aggregate', 'windows', 'group-by', 'filtered-aggregate']);
 export const SUMMARY_COLUMNS = Object.freeze([
   { id: 'load', label: 'Load', kind: 'write', cases: ['load'] },
-  { id: 'write', label: 'Write', kind: 'write', cases: ['update', 'set', 'append'] },
-  { id: 'read', label: 'Read', kind: 'read', cases: ['point-read', 'get', 'pk-select', 'neighbors', 'range-read', 'read'] },
-  { id: 'search', label: 'Search', kind: 'query', cases: ['range-query', 'range-select', 'traverse', 'exact-top10',
-    'term-query', 'and-query', 'aggregate', 'windows', 'group-by', 'filtered-aggregate'] },
+  { id: 'write', label: 'Write', kind: 'write', cases: ['load', 'update', 'set', 'append', 'cycle'] },
+  { id: 'read', label: 'Read', kind: 'read', cases: ['point-read', 'get', 'pk-select', 'neighbors', 'range-read', 'read',
+    ...QUERY_CASES, 'cycle'] },
+  { id: 'search', label: 'Search', kind: 'query', cases: QUERY_CASES },
   { id: 'delete', label: 'Delete', kind: 'write', cases: ['delete'] },
   { id: 'mixed', label: 'Mixed', kind: 'mixed', cases: ['mixed', 'cycle'] },
 ]);
@@ -30,7 +32,10 @@ function summarize(results, database, column, nodes) {
   const operations = sources.reduce((sum, source) => sum + source.entry.operations, 0);
   const seconds = sources.reduce((sum, source) => sum + source.entry.seconds, 0);
   if (seconds <= 0) return { ...base, status: 'missing', reason: 'no recorded elapsed time' };
-  return { ...base, status: 'passed', value: operations / seconds, operations, seconds };
+  const queue = sources.some(source => source.key === 'queue|cycle');
+  const basis = !queue || !['write', 'read'].includes(column.id) ? null
+    : sources.length === 1 ? 'Full queue cycle' : 'Includes queue cycle';
+  return { ...base, status: 'passed', value: operations / seconds, operations, seconds, basis };
 }
 
 // Rates describe the recorded workload: completed operations divided by its combined measured duration.

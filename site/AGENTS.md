@@ -15,7 +15,9 @@
   renders a global summary with each database once (`results-summary.mjs`) and
   separate tables with each data type's original case columns (`results-view.mjs`).
   The summary uses completed operations divided by total measured seconds per
-  metric and topology; it keeps failures, missing data and case coverage explicit.
+  metric and topology. Loading/publishing are writes; queries/receiving are reads.
+  Queue rates retain the full cycle duration and a visible workload label.
+  The summary keeps failures, missing data and case coverage explicit.
   The merged file is published unchanged as `data/results.json`.
   `results-controls.mjs` selects the global or type table, sorts fastest first and
   shades table edges. Without JavaScript all tables stay visible.
