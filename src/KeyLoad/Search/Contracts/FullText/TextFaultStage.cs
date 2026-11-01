@@ -26,5 +26,7 @@ internal enum TextFaultStage
     /// <summary>The actual retained original canonical35 receipt has joined.</summary>
     CanonicalOnlinePublicationAcknowledged = 10,
     /// <summary>The exact online catalog pending envelope has flushed and passed readback.</summary>
-    OnlineCatalogPendingFlushed = 11
+    OnlineCatalogPendingFlushed = 11,
+    /// <summary>The retired generation's owned files have been deleted.</summary>
+    RetiredGenerationDeleted = 12
 }

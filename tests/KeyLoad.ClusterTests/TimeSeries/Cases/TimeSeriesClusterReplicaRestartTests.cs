@@ -56,6 +56,8 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
             await Assert.That(unavailable.Problem?.ErrorCode is nameof(ErrorCode.OwnershipLost)
                 or nameof(ErrorCode.UnknownWriteOutcome)).IsTrue();
 
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(
+                [.. clients.Where((_, index) => index != selectedIndex)], deadline.Token);
             var initial = ClusterReplicationTestSupport.Success(await clients[survivorIndex].ReadLatestSampleAsync(
                 scenario.Latest(), deadline.Token));
             // OwnershipLost refuses before any copy applies the batch; UnknownWriteOutcome means the surviving copies may

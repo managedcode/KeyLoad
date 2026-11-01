@@ -43777,6 +43777,26 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.Search.TextGenerationRetirementTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextGenerationRetirementTests",
+      "methodName": "CurrentSearchRemainsReadableAtTheRetiredDirectoryDeletionBoundary",
+      "instanceName": "CurrentSearchRemainsReadableAtTheRetiredDirectoryDeletionBoundary",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/ReadCuts/TextGenerationRetirementTests.cs",
+      "sourceSha256": "785d26acb56209042a85876a1e17e1d721f44ea9c37dc5fa2fba4113575fd4ca",
+      "lineNumber": 15,
+      "endLineNumber": 61,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-LEASE-002",
+        "REQ-LEASE-003"
+      ],
+      "acceptance": [
+        "AC-LEASE-002",
+        "AC-LEASE-003"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.Search.TextIncrementalCorruptionTests",
       "reportClassName": "KeyLoad.FunctionalTests.Search.TextIncrementalCorruptionTests",
       "methodName": "DamagedManifestRejectsWithoutCanonicalEffectsThenExactRepairRestoresHealthy",
@@ -63141,6 +63161,7 @@
         "KeyLoad.FunctionalTests.Search.TextGenerationAdmissionTests",
         "KeyLoad.FunctionalTests.Search.TextGenerationCapacityTests",
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests",
+        "KeyLoad.FunctionalTests.Search.TextGenerationRetirementTests",
         "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests",
         "KeyLoad.FunctionalTests.Search.ThreeWayHybridFusionTests",
         "KeyLoad.FunctionalTests.StorageRecovery.ActionStagingTests",
@@ -63614,6 +63635,7 @@
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests|InvalidatedCurrentCanRebuildWhileItsRetiredLeaseRemainsBorrowed|InvalidatedCurrentCanRebuildWhileItsRetiredLeaseRemainsBorrowed",
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests|LivePreflightRejectsUnknownEntryAndPreservesTheBorrowedGeneration|LivePreflightRejectsUnknownEntryAndPreservesTheBorrowedGeneration",
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests|PublishedReplacementKeepsOldReaderUntilItsLastLeaseSettles|PublishedReplacementKeepsOldReaderUntilItsLastLeaseSettles",
+        "KeyLoad.FunctionalTests.Search.TextGenerationRetirementTests|CurrentSearchRemainsReadableAtTheRetiredDirectoryDeletionBoundary|CurrentSearchRemainsReadableAtTheRetiredDirectoryDeletionBoundary",
         "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests|CancellingOnePublishedReaderPreservesAnotherAndFollowingSearch|CancellingOnePublishedReaderPreservesAnotherAndFollowingSearch",
         "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests|InvalidatingOneReaderRetainsOthersAndReleasesThePhysicalReservation|InvalidatingOneReaderRetainsOthersAndReleasesThePhysicalReservation",
         "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests|PublishedReadersOverlapWithoutClosingAnotherLeaseOrRewritingItsManifest|PublishedReadersOverlapWithoutClosingAnotherLeaseOrRewritingItsManifest",

@@ -98,6 +98,7 @@ internal sealed class RuntimeTextProjectionLifecycle
     internal void Retire(TextGenerationSlot slot)
     {
         Exception? failure = null;
+        var retirementRecorded = false;
         try
         {
             var generation = slot.Generation ?? throw TextErrors.Corrupt();
@@ -110,7 +111,10 @@ internal sealed class RuntimeTextProjectionLifecycle
                 generation.DisposeIndex();
                 TextFiles.DeleteOwnedGeneration(Root, generation.Leaf, SourceNodeId, executionOptions: executionOptions, resources: resources);
                 slot.SharedReservation?.CompleteAfterJoinedCleanup();
+                retirementRecorded = true;
+                state.CompleteRetirement(slot, null);
             });
+            faultObserver?.Invoke(TextFaultStage.RetiredGenerationDeleted);
         }
         catch (Exception error)
         {
@@ -119,7 +123,10 @@ internal sealed class RuntimeTextProjectionLifecycle
         }
         finally
         {
-            state.CompleteRetirement(slot, failure);
+            if (!retirementRecorded)
+            {
+                state.CompleteRetirement(slot, failure);
+            }
         }
     }
 
