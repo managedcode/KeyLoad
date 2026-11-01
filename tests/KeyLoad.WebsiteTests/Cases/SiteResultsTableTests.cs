@@ -4,7 +4,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
-/// <summary>Merges the result files, builds the real site and reads the comparison table rendered for each data type.</summary>
+/// <summary>Merges the result files, builds the real site and reads its shared comparison table.</summary>
 internal sealed class SiteResultsTableTests
 {
     private const string Graph = "graph";
@@ -18,14 +18,26 @@ internal sealed class SiteResultsTableTests
     {
         var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
 
+        var section = page.Section();
+        await Assert.That(SiteResultsPage.Title(section)).IsEqualTo("All types");
+        await Assert.That(SiteResultsPage.Columns(section)).IsEquivalentTo(
+            new[] { "load", "write", "read", "search", "delete", "mixed", "index" }, CollectionOrdering.Matching);
+        await Assert.That(section.Descendants("table").Count(table =>
+            SiteResultsPage.Attribute(table, "class") == "comparison-grid")).IsEqualTo(1);
+        var allRows = SiteResultsPage.Rows(section);
+        await Assert.That(allRows.Length).IsEqualTo(SiteResultType.All.Sum(type => type.Databases.Length));
+        var rates = allRows.Select(row => row.Cells.GetValueOrDefault(SiteTokens.Load)?
+            .Single(line => line.Nodes == 1)).Select(line => line?.Status == SiteTokens.Passed
+                ? double.Parse(line.Value, CultureInfo.InvariantCulture) : double.NegativeInfinity).ToArray();
+        await Assert.That(rates).IsEquivalentTo(rates.OrderDescending(), CollectionOrdering.Matching);
         foreach (var type in SiteResultType.All)
         {
-            var section = page.Section(type.Id);
-            await Assert.That(SiteResultsPage.Title(section)).IsEqualTo(type.Label);
-            await Assert.That(SiteResultsPage.Columns(section)).IsEquivalentTo(type.Cases, CollectionOrdering.Matching);
-            var rows = SiteResultsPage.Rows(section);
-            await Assert.That(rows.Select(row => row.Database)).IsEquivalentTo(type.Databases, CollectionOrdering.Matching);
-            await Assert.That(rows.All(row => row.Cells.Keys.SequenceEqual(type.Cases))).IsTrue();
+            var rows = allRows.Where(row => row.Type == type.Id).ToArray();
+            await Assert.That(rows.Select(row => row.Database)).IsEquivalentTo(type.Databases, CollectionOrdering.Any);
+            foreach (var row in rows)
+            {
+                await Assert.That(row.Cells.Keys).IsEquivalentTo(type.Cases, CollectionOrdering.Any);
+            }
         }
     }
 
@@ -36,7 +48,7 @@ internal sealed class SiteResultsTableTests
 
         foreach (var result in SiteResultFiles.Artifacts.Select(SiteResultFiles.Read))
         {
-            var row = SiteResultsPage.Row(page.Section((string)result[SiteTokens.Type]!), (string)result[SiteTokens.Database]!);
+            var row = SiteResultsPage.Row(page.Section(), (string)result[SiteTokens.Type]!, (string)result[SiteTokens.Database]!);
             var nodes = (int)result[SiteTokens.Nodes]!;
             foreach (var item in result[SiteTokens.Cases]!.AsArray().Select(node => node!.AsObject())
                 .Where(item => (string)item[SiteTokens.Status]! == SiteTokens.Passed))
@@ -44,6 +56,7 @@ internal sealed class SiteResultsTableTests
                 var id = (string)item[SiteTokens.Id]!;
                 var line = row.Cells[id].Single(entry => entry.Nodes == nodes);
                 var field = SiteResultType.TimedCases.Contains(id) ? SiteTokens.Seconds : SiteTokens.OpsPerSecond;
+                await Assert.That(line.Text).StartsWith(nodes == 1 ? "1 node" : "3 nodes");
                 await Assert.That(line.Status).IsEqualTo(SiteTokens.Passed);
                 await Assert.That(double.Parse(line.Value, CultureInfo.InvariantCulture)).IsEqualTo((double)item[field]!);
             }
@@ -54,17 +67,17 @@ internal sealed class SiteResultsTableTests
     public async Task FailedCaseIsShownAsFailedWithItsErrorAndRecordedCounts()
     {
         var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
-        var section = page.Section(Graph);
+        var section = page.Section();
         var source = SiteResultFiles.Read("benchmark-keyload-graph-n1")[SiteTokens.Cases]![2]!.AsObject();
 
-        var traverse = SiteResultsPage.Row(section, SiteTokens.KeyLoad).Cells[Traverse];
+        var traverse = SiteResultsPage.Row(section, Graph, SiteTokens.KeyLoad).Cells[Traverse];
         var failed = traverse.Single(line => line.Nodes == 1);
         await Assert.That(failed.Status).IsEqualTo(SiteTokens.Failed);
         await Assert.That(failed.Value).IsEmpty();
         await Assert.That(failed.Text)
-            .IsEqualTo(SiteTokens.FailedText + "TimeoutException: Traverse timed out after the server closed the connection.");
+            .IsEqualTo("1 node" + SiteTokens.FailedText + "TimeoutException: Traverse timed out after the server closed the connection.");
         await Assert.That(traverse.Single(line => line.Nodes == 3).Value).IsEqualTo("1250");
-        var recorded = SiteResultsPage.Recorded(section, SiteTokens.KeyLoad, 1, Traverse);
+        var recorded = SiteResultsPage.Recorded(section, Graph, SiteTokens.KeyLoad, 1, Traverse);
         await Assert.That(SiteResultsPage.Attribute(recorded, "data-status")).IsEqualTo(SiteTokens.Failed);
         foreach (var field in new[] { SiteTokens.Operations, SiteTokens.Errors, SiteTokens.OpsPerSecond })
         {
@@ -79,13 +92,13 @@ internal sealed class SiteResultsTableTests
     public async Task CaseStoppedByTheTimeLimitShowsHowManyOfItsPlannedOperationsRan()
     {
         var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
-        var section = page.Section(Documents);
+        var section = page.Section();
         var source = SiteResultFiles.Read("benchmark-keyload-documents-n1")[SiteTokens.Cases]![1]!.AsObject();
 
-        var line = SiteResultsPage.Row(section, SiteTokens.KeyLoad).Cells[PointRead].Single(item => item.Nodes == 1);
+        var line = SiteResultsPage.Row(section, Documents, SiteTokens.KeyLoad).Cells[PointRead].Single(item => item.Nodes == 1);
         await Assert.That(line.Status).IsEqualTo(SiteTokens.Passed);
         await Assert.That(line.Text).Contains(StoppedByLimit);
-        var recorded = SiteResultsPage.Recorded(section, SiteTokens.KeyLoad, 1, PointRead);
+        var recorded = SiteResultsPage.Recorded(section, Documents, SiteTokens.KeyLoad, 1, PointRead);
         foreach (var field in new[] { SiteTokens.Planned, SiteTokens.Operations })
         {
             await Assert.That(double.Parse(SiteResultsPage.Attribute(SiteResultsPage.Field(recorded, field), "data-value"),
@@ -97,15 +110,15 @@ internal sealed class SiteResultsTableTests
     public async Task JobThatFailedBeforeItsCasesShowsItsErrorInEveryCase()
     {
         var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
-        var section = page.Section(Graph);
+        var section = page.Section();
         var error = (string)SiteResultFiles.Read("benchmark-surrealdb-graph-n1")[SiteTokens.Error]!;
 
-        var surreal = SiteResultsPage.Row(section, "SurrealDB");
+        var surreal = SiteResultsPage.Row(section, Graph, "SurrealDB");
         await Assert.That(surreal.Cells.Values.All(lines => lines.Length == 1 && lines[0].Status == SiteTokens.Failed
-            && lines[0].Text == SiteTokens.FailedText + error)).IsTrue();
+            && lines[0].Text == "1 node" + SiteTokens.FailedText + error)).IsTrue();
         foreach (var caseId in SiteResultType.Find(Graph).Cases)
         {
-            var recorded = SiteResultsPage.Recorded(section, "SurrealDB", 1, caseId);
+            var recorded = SiteResultsPage.Recorded(section, Graph, "SurrealDB", 1, caseId);
             await Assert.That(SiteResultsPage.Attribute(recorded, "data-status")).IsEqualTo(SiteTokens.Failed);
             await Assert.That(SiteResultsPage.ErrorText(recorded)).IsEqualTo(error);
         }
@@ -115,16 +128,16 @@ internal sealed class SiteResultsTableTests
     public async Task DatabaseWithoutAThreeNodeResultIsShownAsSingleNode()
     {
         var page = await BuildAsync(TestContext.Current!.Execution.CancellationToken);
-        var graph = page.Section(Graph);
+        var graph = page.Section();
 
-        var neo4j = SiteResultsPage.Row(graph, "Neo4j");
+        var neo4j = SiteResultsPage.Row(graph, Graph, "Neo4j");
         await Assert.That(neo4j.Note).IsEqualTo(SiteTokens.SingleNode);
         await Assert.That(neo4j.Cells.Values.All(lines => lines.Length == 1 && lines[0].Nodes == 1)).IsTrue();
-        var keyLoad = SiteResultsPage.Row(graph, SiteTokens.KeyLoad);
+        var keyLoad = SiteResultsPage.Row(graph, Graph, SiteTokens.KeyLoad);
         await Assert.That(keyLoad.Note).IsEmpty();
         await Assert.That(keyLoad.Cells.Values.All(lines => lines.Select(line => line.Nodes).SequenceEqual([1, 3]))).IsTrue();
-        await Assert.That(keyLoad.Cells[SiteTokens.Load].Single(line => line.Nodes == 3).Text).IsEqualTo("6,667−20%");
-        await Assert.That(SiteResultsPage.Row(page.Section("key-value"), "Redis").Note).IsEqualTo(SiteTokens.SingleNode);
+        await Assert.That(keyLoad.Cells[SiteTokens.Load].Single(line => line.Nodes == 3).Text).IsEqualTo("3 nodes6,667−20% vs 1 node");
+        await Assert.That(SiteResultsPage.Row(page.Section(), "key-value", "Redis").Note).IsEqualTo(SiteTokens.SingleNode);
     }
 
     [Test]
@@ -134,11 +147,11 @@ internal sealed class SiteResultsTableTests
 
         foreach (var (type, database) in new[] { (Graph, "HelixDB"), ("search", "OpenSearch"), ("events", "KurrentDB") })
         {
-            var row = SiteResultsPage.Row(page.Section(type), database);
+            var row = SiteResultsPage.Row(page.Section(), type, database);
             await Assert.That(row.Note).IsEqualTo(SiteTokens.NoResult);
             var lines = row.Cells.Values.SelectMany(cell => cell).ToArray();
             await Assert.That(lines.All(line => line.Status == SiteTokens.Missing && line.Value.Length == 0)).IsTrue();
-            await Assert.That(lines.Count(line => line.Text.StartsWith(SiteTokens.NoData, StringComparison.Ordinal)))
+            await Assert.That(lines.Count(line => line.Text.Contains(SiteTokens.NoData, StringComparison.Ordinal)))
                 .IsEqualTo(row.Cells.Count);
         }
     }

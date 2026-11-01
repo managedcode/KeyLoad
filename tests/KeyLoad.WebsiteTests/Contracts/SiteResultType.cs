@@ -3,7 +3,7 @@ namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 /// <summary>One data type of the benchmark result contract: its case ids and the databases compared with KeyLoad.</summary>
 internal sealed record SiteResultType(string Id, string Label, string[] Cases, string[] Databases)
 {
-    // The site's declared inventory, stated here independently of the JavaScript contract; KeyLoad leads every type.
+    // The site's declared inventory, stated here independently of the JavaScript contract.
     internal static readonly SiteResultType[] All =
     [
         new("documents", "Documents", ["load", "point-read", "range-query", "update", "delete", "mixed"],

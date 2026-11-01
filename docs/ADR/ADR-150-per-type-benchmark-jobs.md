@@ -40,7 +40,7 @@ resource observations before Website could show a figure. In practice:
   case keeps its real error and no number is invented.
 - **Website renders one run.** Benchmarks dispatches Website with its run id.
   Website downloads that run's `benchmark-*` artifacts (or the latest completed
-  run's), merges them, renders one comparison table per data type with KeyLoad in
+  run's), merges them, renders one shared comparison table across data types with KeyLoad in
   every type and deploys Pages. Without result files the build fails and the
   current Pages stay.
 - **Deleted.** The compiled runtime bundle, hash and identity proofs, resource
@@ -56,7 +56,7 @@ resource observations before Website could show a figure. In practice:
 flowchart LR
     Image[Resolve KeyLoad digest] --> Measure[45 measure jobs]
     Measure --> Files[One result file per job]
-    Files --> Website[Merge and render per-type tables]
+    Files --> Website[Merge and render the shared comparison table]
     Website --> Pages[GitHub Pages]
 ```
 

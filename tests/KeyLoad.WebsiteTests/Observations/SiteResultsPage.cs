@@ -2,7 +2,7 @@ using System.Xml.Linq;
 
 namespace KeyLoad.WebsiteTests.BenchmarkComparisons;
 
-/// <summary>Reads the comparison and recorded-values tables of one data type from a built index.html.</summary>
+/// <summary>Reads the shared comparison and recorded-values tables from a built index.html.</summary>
 internal sealed class SiteResultsPage(string html)
 {
     private const string SectionEnd = "</section>";
@@ -12,13 +12,13 @@ internal sealed class SiteResultsPage(string html)
     internal static async Task<SiteResultsPage> ReadAsync(string site, CancellationToken cancellationToken)
         => new(await File.ReadAllTextAsync(Path.Combine(site, SiteTokens.IndexFile), cancellationToken));
 
-    // Each type section is well-formed markup without nested sections, so it parses as XML on its own.
-    internal XElement Section(string type)
+    // The shared results section is well-formed markup without nested sections.
+    internal XElement Section()
     {
-        var start = Html.IndexOf($"<section class=\"bench-panel bench-overview\" id=\"bench-{type}\"", StringComparison.Ordinal);
+        var start = Html.IndexOf("<section class=\"bench-panel bench-overview\" id=\"bench-all\"", StringComparison.Ordinal);
         if (start < 0)
         {
-            throw new InvalidDataException($"The {type} results section is missing.");
+            throw new InvalidDataException("The shared results section is missing.");
         }
 
         var end = Html.IndexOf(SectionEnd, start, StringComparison.Ordinal) + SectionEnd.Length;
@@ -28,18 +28,21 @@ internal sealed class SiteResultsPage(string html)
     internal static string Title(XElement section) => section.Descendants("h3").Single().Value;
 
     internal static string[] Columns(XElement section) => [.. Comparison(section).Descendants("thead").Single()
-        .Descendants("th").Select(cell => Attribute(cell, "data-case")).Where(value => value.Length > 0)];
+        .Descendants("th").Select(cell => Attribute(cell, "data-metric")).Where(value => value.Length > 0)];
 
     internal static SiteTableRow[] Rows(XElement section) => [.. Comparison(section).Descendants("tr")
         .Where(row => HasClass(row, "ov-row")).Select(row => new SiteTableRow(Attribute(row, "data-database"),
+            Attribute(row, "data-type"),
             row.Element("th")!.Descendants("small").SingleOrDefault()?.Value ?? string.Empty,
-            row.Elements("td").ToDictionary(cell => Attribute(cell, "data-case"), Lines)))];
+            row.Descendants("span").Where(cell => HasClass(cell, "metric-case"))
+                .ToDictionary(cell => Attribute(cell, "data-case"), Lines)))];
 
-    internal static SiteTableRow Row(XElement section, string database) => Rows(section).Single(row => row.Database == database);
+    internal static SiteTableRow Row(XElement section, string type, string database)
+        => Rows(section).Single(row => row.Database == database && row.Type == type);
 
-    internal static XElement Recorded(XElement section, string database, int nodes, string caseId) => section
+    internal static XElement Recorded(XElement section, string type, string database, int nodes, string caseId) => section
         .Descendants("details").Single().Descendants("tbody").Single().Elements("tr").Single(row =>
-            Attribute(row, "data-database") == database && Attribute(row, "data-nodes") == nodes.ToString(
+            Attribute(row, "data-type") == type && Attribute(row, "data-database") == database && Attribute(row, "data-nodes") == nodes.ToString(
                 System.Globalization.CultureInfo.InvariantCulture) && Attribute(row, "data-case") == caseId);
 
     internal static XElement Field(XElement recorded, string field)

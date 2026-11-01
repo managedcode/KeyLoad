@@ -339,8 +339,8 @@ Website (`website.yml`) owns only the static landing page. It downloads the
 completed run for a site push or manual dispatch, merges them with
 `node site/scripts/results.mjs`, builds the static site with
 `node site/scripts/build.mjs` and deploys GitHub Pages. The page shows one
-comparison table per data type with KeyLoad in every type; failed cases read as
-failed with their error and missing results as no data. Without result files the
+comparison table across data types with shared metric columns and KeyLoad in every
+type; failed cases read as failed with their error and missing results as no data. Without result files the
 merge fails and the current Pages stay. Only GitHub Benchmarks artifacts produce
 public figures; local results never do.
 

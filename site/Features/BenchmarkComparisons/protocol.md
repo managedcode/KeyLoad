@@ -42,15 +42,17 @@ The builder validates the merged file with the same contract, renders the benchm
 
 ## Rendering
 
-`results-view.mjs` renders one section per data type with the same comparison table: the database column stays pinned, one column per case, and each cell shows a 1-node line and a 3-node line with operations per second (records per second for loads), a bar scaled to the best result of that case in the type, and the 3-node change against 1 node. The index build is measured once, so it shows seconds and treats the shortest time as best. Every declared database of the type has a row, KeyLoad first.
+`results-view.mjs` renders one comparison table across all data types, with one row per database and data type. Rows have no type groups. The database column stays pinned and identifies the original data type. Shared columns are Load (records/s), Write, Read, Search, Delete, Mixed (ops/s) and Index build (seconds). Each cell retains the name of its original case; a metric containing multiple cases lists them separately. A dash means the type has no case for that metric. Values are never averaged across types or cases.
+
+Each measured case explicitly labels its 1-node and 3-node values beside their bars. The 3-node speed change says "vs 1 node". Bars scale to the best result of the same original case within its data type. The index build is measured once, so it shows seconds and treats the shortest time as best.
 
 - A failed case reads "Failed" with the first line of its error; the full error stays in the line title and the recorded-values table. A case the job never reached after a job-level error reads "Failed" with that job error.
 - A database without a 3-node result shows only its 1-node line and reads "Single node" beside its name.
 - A database without any result file, or a case absent from its result, reads "No data" with the reason. Missing values never become zero.
 
-A collapsed recorded-values table per type lists every case of every job with status, operations, errors, seconds, operations per second, p50/p95/p99 latency per call, units per call, error, image and run link. The page links the GitHub Actions runs and source commits named in the results and the merged file.
+One collapsed recorded-values table lists every case of every recorded job with data type, status, operations, errors, seconds, operations per second, p50/p95/p99 latency per call, units per call, error, image and run link. The page links the GitHub Actions runs and source commits named in the results and the merged file.
 
-`results-controls.mjs` is the only benchmark browser module. It shows the data type filter, hides the other types' sections and shades the edges of horizontally scrolled tables. Without JavaScript every section stays visible.
+`results-controls.mjs` is the only benchmark browser module. It filters rows by data type in both tables, hides metric columns with no applicable case for the selected type and shades horizontally scrolled table edges. All types share one table. Rows start with the fastest recorded 1-node Load. Selecting another metric sorts fastest first by its first listed original case, using shorter durations for Index build. Failed, missing and inapplicable values follow measured values. The sort basis is visible above the table. Without JavaScript all rows remain visible in their initial speed order.
 
 ## Tests
 

@@ -12,11 +12,11 @@
 - `results.mjs` merges the downloaded Benchmarks result files into one sorted
   `results.json` (`results-merge.mjs`); `results-contract.mjs` owns the file shape,
   types, cases, databases and node counts. `build.mjs` validates the merged file and
-  renders one comparison table per data type into static HTML at build time
-  (`results-view.mjs`), then publishes the merged file unchanged as
+  renders one comparison table with shared metric columns into static HTML at
+  build time (`results-view.mjs`), then publishes the merged file unchanged as
   `data/results.json`. `results-controls.mjs` is the only browser script for the
-  results: the type filter and table edge shading. Without JavaScript every table
-  stays visible.
+  results: row filtering by data type, fastest-first metric sorting and table edge
+  shading. Without JavaScript all rows stay visible in the shared table.
 - `bootstrap.mjs` loads the hero Three.js scene: a central database, eight connected
   data models and the agent above it, with the static artwork as its fallback and
   accessible model labels. Bounds are 120,000 triangles, 30 draw calls, 1,000,000

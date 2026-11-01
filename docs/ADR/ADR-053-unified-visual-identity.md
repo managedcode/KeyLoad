@@ -38,7 +38,7 @@ The two surfaces shared no logo, palette, typography or components, so KeyLoad r
   - the anatomy of one agent call: a numbered timeline beside a graphite MCP/SDK terminal;
   - a data-shape bento of eight models with line art;
   - a graphite engine cross-section (callers → connection grain → partition grains → silo-local ZoneTree owners);
-  - the benchmarks: one comparison table per data type with a type filter ([BenchmarkComparisons](../Features/BenchmarkComparisons.md));
+  - the benchmarks: one shared comparison table across data types with a type filter ([BenchmarkComparisons](../Features/BenchmarkComparisons.md));
   - a ledger of "open by default" items and items "not claimed yet";
   - a method rail, a graphite reproduce terminal and an editorial wordmark footer with "Developed by Managed Code".
 

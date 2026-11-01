@@ -236,7 +236,7 @@ NuGet publication follow root policy.
 | benchmarks/KeyLoad.Benchmarks | Program.cs | BenchmarkComparisons; local BenchmarkDotNet executable for development measurements, never published. |
 | benchmarks/KeyLoad.BenchmarkScenarios | Benchmarks/EmbeddedBenchmarks.cs | BenchmarkComparisons; [ADR-047](ADR/ADR-047-embedded-benchmark-host.md) public fixture library for the external generated consumer. |
 | build/KeyLoad.LoadTests.AppHost | Program.cs, Resources/BenchmarkTopology.cs, Configuration/BenchmarkDatabases.cs | BenchmarkComparisons; Aspire deployment of the one database and node count a benchmark job selects. |
-| site | Features/BenchmarkComparisons/index.html, results-merge.mjs, results-view.mjs, results-controls.mjs; scripts/results.mjs, scripts/build.mjs | BenchmarkComparisons; static product page with one comparison table per data type, rendered at build time from one merged results file. |
+| site | Features/BenchmarkComparisons/index.html, results-merge.mjs, results-view.mjs, results-controls.mjs; scripts/results.mjs, scripts/build.mjs | BenchmarkComparisons; static product page with one shared comparison table across data types, rendered at build time from one merged results file. |
 | tests/KeyLoad.WebsiteTests | KeyLoad.WebsiteTests.csproj, Cases/, Fixtures/Results/ | BenchmarkComparisons; TUnit suite that runs the real merge and build scripts through Node on test result files. |
 | .github/workflows | build-and-tests.yml, benchmarks.yml, website.yml, release.yml | RepositoryGovernance, BenchmarkComparisons, ReleaseDelivery; separate build/test, benchmark, website and release workflows. |
 | scripts | Features/RepositoryGovernance/verify.mjs, Features/CodeQuality/, Features/TestInfrastructure/, Features/ReleaseDelivery/ | RepositoryGovernance, CodeQuality, TestInfrastructure and ReleaseDelivery; static repository verification, coverage, test-entry and release tooling. |
@@ -256,7 +256,7 @@ flowchart TB
     Aspire[Aspire Docker lifecycle] --> Owners
     CI[GitHub Actions qualification] --> Aspire
     CI --> JSON[Benchmark result file per job]
-    JSON --> Site[Per-type tables on the Pages site]
+    JSON --> Site[Shared comparison table on the Pages site]
 ```
 
 ## Feature ownership convention
@@ -730,7 +730,7 @@ flowchart LR
     Job --> AppHost[LoadTests AppHost deploys the database]
     AppHost --> Cases[Type scenario cases on one live deployment]
     Cases --> File[Result file after every case]
-    File --> Website[Website merges the run and renders per-type tables]
+    File --> Website[Website merges the run and renders the shared comparison table]
 ```
 
 The graph type shows the shape every type shares:

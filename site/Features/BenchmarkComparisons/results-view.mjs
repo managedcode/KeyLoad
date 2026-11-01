@@ -34,6 +34,17 @@ const firstLine = error => {
 };
 const runUrl = runId => `https://github.com/managedcode/KeyLoad/actions/runs/${runId}`;
 const link = (text, href, extra) => h('a', { href, rel: 'noopener noreferrer', ...extra }, text);
+const COLUMNS = Object.freeze([
+  { id: 'load', label: 'Load', kind: 'write', cases: ['load'] },
+  { id: 'write', label: 'Write', kind: 'write', cases: ['update', 'set', 'append'] },
+  { id: 'read', label: 'Read', kind: 'read', cases: ['point-read', 'get', 'pk-select', 'neighbors', 'range-read', 'read'] },
+  { id: 'search', label: 'Search', kind: 'query', cases: ['range-query', 'range-select', 'traverse', 'exact-top10',
+    'term-query', 'and-query', 'aggregate', 'windows', 'group-by', 'filtered-aggregate'] },
+  { id: 'delete', label: 'Delete', kind: 'write', cases: ['delete'] },
+  { id: 'mixed', label: 'Mixed', kind: 'mixed', cases: ['mixed', 'cycle'] },
+  { id: 'index', label: 'Index build', kind: 'build', cases: ['index'], seconds: true },
+]);
+const columnCases = (model, column) => model.type.cases.filter(item => column.cases.includes(item.id));
 
 function typeModel(type, all) {
   const results = all.filter(result => result.type === type.id);
@@ -81,19 +92,20 @@ function limitedNote(entry) {
 function pairLine(model, item, line, one, visible) {
   const values = { class: 'pair-line n' + line.nodes, 'data-nodes': line.nodes, 'data-status': line.status,
     'data-value': line.status === 'passed' ? line.value : '', title: lineTitle(item, line) };
-  if (line.status !== 'passed') return h('span', values, visible ? [h('small', { class: 'no-data' },
-    line.status === 'failed' ? 'Failed' : 'No data'), h('small', { class: 'no-data-reason' }, line.reason)] : null);
+  const label = h('small', { class: 'node-label' }, nodesLabel(line.nodes));
+  if (line.status !== 'passed') return h('span', values, label, h('small', { class: 'no-data' },
+    line.status === 'failed' ? 'Failed' : 'No data'), visible ? h('small', { class: 'no-data-reason' }, line.reason) : null);
   const best = model.best.get(item.id);
   const ratio = !(best > 0 && line.value > 0) ? 0 : item.seconds ? best / line.value : line.value / best;
   const note = line.nodes !== 3 || !(one > 0 && line.value > 0) ? null
-    : h('small', null, item.seconds ? change(line.value, one) : change(one, line.value));
+    : h('small', { title: 'Speed change against 1 node' }, (item.seconds ? change(line.value, one) : change(one, line.value)) + ' vs 1 node');
   const limited = line.entry.operations < line.entry.planned
     ? h('small', { class: 'limited' }, `${compact(line.entry.operations)} of ${compact(line.entry.planned)}`) : null;
-  return h('span', values, h('b', null, item.seconds ? seconds(line.value) : compact(line.value)), note, limited,
+  return h('span', values, label, h('b', null, item.seconds ? seconds(line.value) : compact(line.value)), note, limited,
     h('i', { style: `--size: ${percent(ratio)}` }));
 }
 
-// Lines sharing one disposition state it once.
+// Matching failure messages appear once; each topology keeps its label and status.
 function pair(model, database, item) {
   const lines = model.nodes(database).map(nodes => model.line(database, item, nodes));
   const [first] = lines;
@@ -105,24 +117,43 @@ function pair(model, database, item) {
 function rowHead(model, database) {
   const recorded = NODES.filter(count => model.result(database, count) !== undefined);
   const note = recorded.length === 0 ? 'No result' : recorded.length === 2 ? null : recorded[0] === 1 ? 'Single node' : '3 nodes only';
-  return h('th', { scope: 'row' }, h('span', { class: 'engine-name' }, h('strong', null, database), present(note) ? h('small', null, note) : null));
+  return h('th', { scope: 'row' }, h('span', { class: 'engine-name' }, h('strong', null, database),
+    h('span', { class: 'engine-type' }, model.type.label), present(note) ? h('small', null, note) : null));
 }
 
 function scrollRegion(className, label, content) {
   return h('div', { class: 'scroll-frame' }, h('div', { class: className, tabindex: '0', role: 'region', 'aria-label': label }, content));
 }
 
-function comparison(model) {
-  const { type } = model;
-  const head = h('tr', { class: 'ov-head' }, h('th', { scope: 'col' }, 'Database'), type.cases.map(item =>
-    h('th', { scope: 'col', 'data-case': item.id, 'data-kind': item.kind }, h('span', null, item.label,
-      h('small', null, item.seconds ? 'seconds' : 'ops/s')))));
-  const rows = type.databases.map(database => h('tr', { class: 'ov-row' + (database === KEYLOAD ? ' is-keyload' : ''),
-    'data-database': database }, rowHead(model, database), type.cases.map(item =>
-    h('td', { 'data-case': item.id, 'data-kind': item.kind }, pair(model, database, item)))));
-  const grid = h('table', { class: 'comparison-grid', style: `--columns: ${type.cases.length}`, role: 'table',
-    'aria-label': type.label + ' comparisons' }, h('thead', null, head), h('tbody', { class: 'ov-list' }, rows));
-  return scrollRegion('comparison-scroll', `${type.label} comparison table; scroll horizontally to see every case`, grid);
+function metricCell(model, database, column) {
+  const cases = columnCases(model, column);
+  const first = cases.length === 0 ? null : model.line(database, cases[0], 1);
+  const content = cases.length === 0 ? h('span', { class: 'not-applicable', title: 'No benchmark case for this metric' }, '—')
+    : cases.map(item => h('span', { class: 'metric-case', 'data-case': item.id },
+      h('small', { class: 'case-label' }, item.label), pair(model, database, item)));
+  return h('td', { 'data-metric': column.id, 'data-kind': column.kind,
+    'data-sort-value': first?.status === 'passed' ? first.value : null }, content);
+}
+
+function comparison(models) {
+  const head = h('tr', { class: 'ov-head' }, h('th', { scope: 'col' }, 'Database / data type'), COLUMNS.map(column =>
+    h('th', { scope: 'col', 'data-metric': column.id, 'data-kind': column.kind, 'data-seconds': String(!!column.seconds),
+      'aria-sort': column.id === 'load' ? 'descending' : 'none' }, h('button',
+      { type: 'button', class: 'sort-case', 'aria-label': `Sort by ${column.label}, fastest first, 1 node` }, column.label,
+      h('small', null, column.seconds ? 'seconds' : column.id === 'load' ? 'records/s' : 'ops/s')))));
+  const entries = models.flatMap(model => model.type.databases.map(database => ({ model, database })));
+  const speed = ({ model, database }) => {
+    const item = columnCases(model, COLUMNS[0])[0];
+    const line = item ? model.line(database, item, 1) : null;
+    return line?.status === 'passed' ? line.value : -Infinity;
+  };
+  entries.sort((a, b) => speed(b) - speed(a));
+  const rows = entries.map(({ model, database }) => h('tr', { class: 'ov-row' + (database === KEYLOAD ? ' is-keyload' : ''),
+    'data-database': database, 'data-type': model.type.id },
+    rowHead(model, database), COLUMNS.map(column => metricCell(model, database, column))));
+  const grid = h('table', { class: 'comparison-grid', style: `--columns: ${COLUMNS.length}`, role: 'table',
+    'aria-label': 'Database comparisons across data types' }, h('thead', null, head), h('tbody', { class: 'ov-list' }, rows));
+  return scrollRegion('comparison-scroll', 'Comparison table; scroll horizontally to see every metric', grid);
 }
 
 
@@ -135,52 +166,52 @@ const FIELDS = Object.freeze([['planned', INTEGER], ['operations', INTEGER], ['e
 // Every recorded case keeps its exact value in the cell title and data attribute; a failed case keeps its partial values.
 // A case the job never reached after a job failure shows that job error.
 function detailRow(result, database, nodes, item, entry) {
-  const jobFailed = entry === undefined && result !== undefined && result.error !== null;
+  const jobFailed = entry === undefined && result.error !== null;
   const status = entry?.status ?? (jobFailed ? 'failed' : 'missing');
   const number = ([field, format]) => {
     const value = entry?.[field] ?? null;
     return h('td', { class: 'num', 'data-field': field, 'data-value': value ?? '', title: value ?? null },
       value === null ? '—' : format.format(value));
   };
-  const run = !(result?.runId > 0) ? '—' : link('Run ' + result.runId, runUrl(result.runId));
-  return h('tr', { 'data-database': database, 'data-nodes': nodes, 'data-case': item?.id ?? null, 'data-status': status },
-    h('td', { class: 'pin' }, database), h('td', { class: 'pin pin-nodes' }, String(nodes)),
-    h('td', null, item?.label ?? '—'), h('td', null, result === undefined ? 'No result' : STATUS[status]), FIELDS.map(number),
-    h('td', { class: 'error-text' }, entry?.error ?? (jobFailed ? result.error : '')), h('td', { class: 'image' }, result?.image || '—'),
+  const run = !(result.runId > 0) ? '—' : link('Run ' + result.runId, runUrl(result.runId));
+  return h('tr', { 'data-type': result.type, 'data-database': database, 'data-nodes': nodes, 'data-case': item.id, 'data-status': status },
+    h('td', { class: 'pin' }, database, h('small', { class: 'engine-type' }, TYPES.find(type => type.id === result.type).label)),
+    h('td', { class: 'pin pin-nodes' }, String(nodes)),
+    h('td', null, item.label), h('td', null, STATUS[status]), FIELDS.map(number),
+    h('td', { class: 'error-text' }, entry?.error ?? (jobFailed ? result.error : '')), h('td', { class: 'image' }, result.image || '—'),
     h('td', null, run));
 }
 
-function details(model) {
-  const { type } = model;
-  const rows = type.databases.flatMap(database => {
+function details(models) {
+  const rows = models.flatMap(model => model.type.databases.flatMap(database => {
     const recorded = NODES.filter(count => model.result(database, count) !== undefined);
-    if (recorded.length === 0) return [detailRow(undefined, database, 1, undefined, undefined)];
-    return recorded.flatMap(nodes => type.cases.map(item => detailRow(model.result(database, nodes), database, nodes, item,
+    if (recorded.length === 0) return [];
+    return recorded.flatMap(nodes => model.type.cases.map(item => detailRow(model.result(database, nodes), database, nodes, item,
       model.result(database, nodes).cases.find(candidate => candidate.id === item.id))));
-  });
+  }));
   const head = h('tr', null, h('th', { class: 'pin', scope: 'col' }, 'Database'), h('th', { class: 'pin pin-nodes', scope: 'col' }, 'Nodes'),
     DETAIL_HEAD.map(([label, className]) => h('th', { class: className ?? null, scope: 'col' }, label)));
-  const table = h('table', null, h('caption', null, h('span', null, `${type.label} · every recorded case per job`)),
+  const table = h('table', null, h('caption', null, h('span', null, 'Every recorded case per job; data type shown beside the database')),
     h('thead', null, head), h('tbody', null, rows));
   return h('details', { class: 'bench-details' }, h('summary', null, 'All recorded values'),
-    scrollRegion('table-scroll', `${type.label} recorded values; scroll this region horizontally on narrow screens`, table));
+    scrollRegion('table-scroll', 'Recorded values; scroll this region horizontally on narrow screens', table));
 }
 
-function subtitle(model) {
-  if (model.results.length === 0) return 'No results in this run.';
+function subtitle(results) {
   const list = values => unique(values).map(value => INTEGER.format(value)).join(' and ');
-  return `${list(model.results.map(result => result.records))} records · ${list(model.results.map(result => result.operations))} ` +
-    `operations per case, at most ${list(model.results.map(result => result.caseLimitMinutes))} minutes each · ` +
-    `${list(model.results.map(result => result.clients))} clients. Operations per second (records for loads): ` +
+  return `${list(results.map(result => result.records))} records · ${list(results.map(result => result.operations))} ` +
+    `operations per case, at most ${list(results.map(result => result.caseLimitMinutes))} minutes each · ` +
+    `${list(results.map(result => result.clients))} clients. Operations per second (records for loads): ` +
     'top line 1 node, lower line 3 nodes with the change against 1 node.';
 }
 
-function typeSection(model) {
-  const { type } = model;
-  return h('section', { class: 'bench-panel bench-overview', id: 'bench-' + type.id, 'data-type': type.id,
-    'data-label': type.label, 'aria-labelledby': `bench-${type.id}-title` },
-  h('header', { class: 'bench-panel-head' }, h('h3', { id: `bench-${type.id}-title` }, type.label), h('p', null, subtitle(model))),
-  h('p', { class: 'table-scroll-hint' }, 'Swipe or scroll horizontally to see all columns.'), comparison(model), details(model));
+function overview(models, results) {
+  return h('section', { class: 'bench-panel bench-overview', id: 'bench-all', 'aria-labelledby': 'bench-all-title' },
+  h('header', { class: 'bench-panel-head' }, h('h3', { id: 'bench-all-title' }, 'All types'),
+    h('p', null, subtitle(results)), h('p', { class: 'metric-note' },
+      'One row per database and data type. Each metric keeps its original case; bars compare the same case within its data type. No averages across types.')),
+  h('p', { class: 'table-scroll-hint' }, 'Sorted by Load, fastest first (1 node). Select a column to sort. Swipe or scroll horizontally to see all columns.'),
+  comparison(models), details(models));
 }
 
 function kpis(results) {
@@ -216,6 +247,6 @@ function footer(results) {
 export function renderResults({ results }) {
   const legend = h('p', { class: 'bench-legend' }, h('i', { class: 'n1' }), '1 node', h('i', { class: 'n3' }), '3 nodes');
   return h('div', { class: 'instrument' }, kpis(results), controls(), h('div', { class: 'measurement-workspace' },
-    h('div', { id: 'bench-results' }, legend, TYPES.map(type => typeSection(typeModel(type, results))), footer(results)),
+    h('div', { id: 'bench-results' }, legend, overview(TYPES.map(type => typeModel(type, results)), results), footer(results)),
     h('p', { id: 'bench-announcement', class: 'sr-only', role: 'status', 'aria-live': 'polite', 'aria-atomic': 'true' }))).html;
 }

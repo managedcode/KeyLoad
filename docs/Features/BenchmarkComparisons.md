@@ -32,7 +32,7 @@ flowchart LR
     File --> Artifact[Artifact benchmark-slug-type-nN, also on failure]
     Artifact --> Dispatch[website job dispatches Website with the run id]
     Dispatch --> Merge[results.mjs merges the run's result files]
-    Merge --> Site[build.mjs renders one table per type]
+    Merge --> Site[build.mjs renders one shared comparison table]
     Site --> Pages[GitHub Pages]
 ```
 
