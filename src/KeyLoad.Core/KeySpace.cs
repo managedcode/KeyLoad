@@ -41,7 +41,7 @@ public static class KeySpace
         ArgumentNullException.ThrowIfNull(partition);
         ArgumentNullException.ThrowIfNull(suffix);
         return KeyCodec.Encode([space, partition.TenantId, partition.DatabaseId,
-            partition.TransactionDomainId, partition.PartitionKey, .. suffix]);
+            partition.TransactionDomainId, partition.PartitionKey], suffix);
     }
 
     /// <summary>Creates an owned resource-catalog key within a tenant and database.</summary>

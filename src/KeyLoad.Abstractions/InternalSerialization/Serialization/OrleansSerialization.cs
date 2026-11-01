@@ -14,6 +14,7 @@ public static class OrleansSerialization
 {
     private static readonly ServiceProvider Services = CreateServices();
     internal static Serializer Serializer { get; } = Services.GetRequiredService<Serializer>();
+    private static Serializer<RuntimePayload> PayloadSerializer { get; } = Services.GetRequiredService<Serializer<RuntimePayload>>();
     private static DeepCopier Copier { get; } = Services.GetRequiredService<DeepCopier>();
 
     /// <summary>Encodes one nonnull owned value through the generated Orleans codec.</summary>
@@ -85,7 +86,7 @@ public static class OrleansSerialization
         try
         {
             var reader = Reader.Create(value, session);
-            var payload = Serializer.GetSerializer<RuntimePayload>().Deserialize(ref reader);
+            var payload = PayloadSerializer.Deserialize(ref reader);
             if (payload is null || reader.Remaining != EmptyRemainingBytes)
             {
                 throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);

@@ -60379,6 +60379,50 @@
       "reviewBasis": "Direct encoded-key component-limit and malformed-input validation control; no database operation is invoked. Required ordinary control, not operation contributor."
     },
     {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.KeySpacePartitionEncodingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.KeySpacePartitionEncodingTests",
+      "methodName": "PartitionScopeKeepsLiteralBytesCaseEscapesAndEveryDynamicComponent",
+      "instanceName": "PartitionScopeKeepsLiteralBytesCaseEscapesAndEveryDynamicComponent",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeySpacePartitionEncodingTests.cs",
+      "sourceSha256": "0b4f2b2215bcf1999dfe279b44a7698977c8f9c6021c61b2a0c49a1292b0a02d",
+      "lineNumber": 14,
+      "endLineNumber": 26,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-KEYCODEC-001",
+        "REQ-KEYCODEC-003"
+      ],
+      "acceptance": [
+        "AC-KEYCODEC-001",
+        "AC-KEYCODEC-003"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Direct partition-key byte, scope/suffix component-limit and malformed-input control; no database operation is invoked. Required ordinary control, not operation contributor."
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.KeySpacePartitionEncodingTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.KeySpacePartitionEncodingTests",
+      "methodName": "ScopeAndSuffixShareOneComponentLimitAndPreserveOriginalRefusals",
+      "instanceName": "ScopeAndSuffixShareOneComponentLimitAndPreserveOriginalRefusals",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeySpacePartitionEncodingTests.cs",
+      "sourceSha256": "0b4f2b2215bcf1999dfe279b44a7698977c8f9c6021c61b2a0c49a1292b0a02d",
+      "lineNumber": 28,
+      "endLineNumber": 42,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-KEYCODEC-001",
+        "REQ-KEYCODEC-003"
+      ],
+      "acceptance": [
+        "AC-KEYCODEC-001",
+        "AC-KEYCODEC-003"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "Direct partition-key byte, scope/suffix component-limit and malformed-input control; no database operation is invoked. Required ordinary control, not operation contributor."
+    },
+    {
       "className": "KeyLoad.FunctionalTests.StorageRecovery.NativeMvccStorageTests",
       "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.NativeMvccStorageTests",
       "methodName": "NativeCommitAndRollbackKeepTheCapturedSnapshotAndLiteralValuesExact",

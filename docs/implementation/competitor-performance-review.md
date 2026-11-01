@@ -8,6 +8,8 @@ The confirmed common-path waste is an auxiliary database read of the current pri
 
 Independent request execution activations remain necessary. The real synchronous-concurrency test holds one execution thread and requires another request on the same connection and physical owner to complete. Orleans interleaving cannot preempt synchronous work. Removing request grains failed this design review and is not part of the implementation.
 
+The follow-up active allocation profile attributes repeated list growth and component-array copies to `KeySpace.Partition`, and repeated typed serializer construction to our payload reader. Partition scope and suffix now share one encoder buffer; the reader uses Orleans' registered singleton typed serializer with an independent pooled session per decode. Literal key bytes, malformed envelopes, concurrent round trips and retained native records remain correctness gates. This is consumer API reuse, not a dependency defect or a change to storage formats.
+
 The next targets are actual access and materialization work: scalar index-range seeks, exact vector top-K and graph count/vertex projection. An active allocation profile also identified repeated catalog decoding inside our storage adapter for every candidate point read. One immutable native read operation can reuse its own resource-mode decision while validating every complete key. This introduces no cross-request metadata authority or engine cache.
 
 ## Versions relevant to the repository benchmark

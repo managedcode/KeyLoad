@@ -17,29 +17,7 @@ public static class KeyCodec
     /// <returns>The encoded key bytes.</returns>
     /// <exception cref="KeyLoadException">A component cannot be encoded or the component count exceeds the limit.</exception>
     public static byte[] Encode(params ReadOnlySpan<KeyComponent> components)
-    {
-        if (components.Length > MaximumComponents)
-        {
-            throw Errors.Fail(ErrorCode.ResourceExhausted, TooManyComponentsMessage);
-        }
-
-        Span<byte> initial = stackalloc byte[InitialKeyBytes];
-        var writer = new KeyBufferWriter(initial);
-        try
-        {
-            writer.Write(Version);
-            foreach (ref readonly var component in components)
-            {
-                KeyCodecWritePrimitives.Write(ref writer, in component);
-            }
-
-            return writer.ToArray();
-        }
-        finally
-        {
-            writer.Dispose();
-        }
-    }
+        => Encode(components, []);
 
     /// <summary>Encodes boxed components into a version 1 sortable binary key; the bytes equal the typed overload's.</summary>
     /// <param name="components">The key components, in their comparison order.</param>
@@ -49,7 +27,13 @@ public static class KeyCodec
     public static byte[] Encode(object?[] components)
     {
         ArgumentNullException.ThrowIfNull(components);
-        if (components.Length > MaximumComponents)
+        return Encode([], components);
+    }
+
+    /// <summary>Writes a typed scope and dynamic components directly into the same canonical key buffer.</summary>
+    internal static byte[] Encode(ReadOnlySpan<KeyComponent> prefix, ReadOnlySpan<object?> suffix)
+    {
+        if (prefix.Length > MaximumComponents || suffix.Length > MaximumComponents - prefix.Length)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, TooManyComponentsMessage);
         }
@@ -59,7 +43,11 @@ public static class KeyCodec
         try
         {
             writer.Write(Version);
-            foreach (var component in components)
+            foreach (ref readonly var component in prefix)
+            {
+                KeyCodecWritePrimitives.Write(ref writer, in component);
+            }
+            foreach (var component in suffix)
             {
                 var typed = KeyComponent.From(component);
                 KeyCodecWritePrimitives.Write(ref writer, in typed);
