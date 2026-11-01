@@ -32,6 +32,10 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         {
             return indexed;
         }
+        if (RangePath().Value is { } range)
+        {
+            return range;
+        }
         if (!request.AllowFullScan)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, FullScanDenied);
@@ -79,6 +83,28 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
                 throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
             }
             return (true, ((string?)(IndexPathPrefix + index.Name)));
+        }
+        return (false, default(string?));
+    }
+
+    private (bool HasValue, string? Value) RangePath()
+    {
+        foreach (var index in resource.Indexes)
+        {
+            if (QueryIndexRangePlanner.Create(index, request).Value is not { } range)
+            {
+                continue;
+            }
+            var result = budget.VisitAll(view, range.Prefix, (_, value) =>
+            {
+                Read(OrleansSerialization.Deserialize<string>(value));
+                return true;
+            }, range.AfterKey, range.UntilKey);
+            if (result.HasMore)
+            {
+                throw Errors.Fail(ErrorCode.BudgetExceeded, CandidateLimitExceeded);
+            }
+            return (true, IndexPathPrefix + index.Name);
         }
         return (false, default(string?));
     }

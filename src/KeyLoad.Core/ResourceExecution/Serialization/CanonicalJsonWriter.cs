@@ -14,6 +14,38 @@ internal static class CanonicalJsonWriter
     private const string DecimalRequired = "JSON numbers must fit the decimal numeric policy.";
     private const string DecimalFormat = "G29";
 
+    /// <summary>Checks content policy without sorting properties or encoding output that the caller discards.</summary>
+    /// <param name="element">Parsed JSON within its document lifetime.</param>
+    internal static void Validate(JsonElement element)
+    {
+        switch (element.ValueKind)
+        {
+            case JsonValueKind.Object:
+                var names = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var property in element.EnumerateObject())
+                {
+                    if (!names.Add(property.Name))
+                    {
+                        throw Errors.Fail(ErrorCode.Validation, DuplicateProperty);
+                    }
+                    Validate(property.Value);
+                }
+                break;
+            case JsonValueKind.Array:
+                foreach (var item in element.EnumerateArray())
+                {
+                    Validate(item);
+                }
+                break;
+            case JsonValueKind.Number:
+                if (!element.TryGetDecimal(out _))
+                {
+                    throw Errors.Fail(ErrorCode.Validation, DecimalRequired);
+                }
+                break;
+        }
+    }
+
     /// <summary>Writes a complete canonical JSON value without retaining its complete output.</summary>
     /// <param name="writer">Caller-owned UTF-8 writer and destination.</param>
     /// <param name="element">Parsed JSON value within its document lifetime.</param>

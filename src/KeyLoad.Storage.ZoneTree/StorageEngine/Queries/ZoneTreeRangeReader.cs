@@ -13,7 +13,7 @@ internal static class ZoneTreeRangeReader
         runtime.ReadCounters.RangeAttempt();
         Validate(prefix, maxRecords, visitor, runtime.Options.MaximumRangeRecords, cancellationToken);
         var lower = afterKey is not null && BinaryKeyComparer.Instance.Compare(afterKey, prefix) > 0 ? afterKey : prefix;
-        var prefixSuccessor = reverse ? (ZoneTreeRangeBounds.PrefixSuccessor(prefix)).Value : null;
+        var prefixSuccessor = reverse ? (StorageKeyBounds.PrefixSuccessor(prefix)).Value : null;
         if ((untilKey is not null && BinaryKeyComparer.Instance.Compare(lower, untilKey) >= 0)
             || (reverse && prefixSuccessor is not null
                 && BinaryKeyComparer.Instance.Compare(lower, prefixSuccessor) >= 0))

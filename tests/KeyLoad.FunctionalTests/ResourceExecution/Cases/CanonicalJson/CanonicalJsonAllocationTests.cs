@@ -10,6 +10,24 @@ internal sealed class CanonicalJsonAllocationTests
     private const long FixedAllocationAllowance = 262_144;
 
     [Test]
+    public async Task AcMp006ContentValidationDoesNotEncodeTheRetainedDocumentText()
+    {
+        const int contentCharacters = 1_048_576;
+        var json = "{\"payload\":\"" + new string('é', contentCharacters) + "\",\"values\":[1.2300,true,null]}";
+        for (var index = 0; index < Warmups; index++)
+        {
+            _ = JsonData.ValidateContent(json);
+        }
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var retained = JsonData.ValidateContent(json);
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+        await Assert.That(ReferenceEquals(json, retained)).IsTrue();
+        await Assert.That(allocated).IsLessThan(FixedAllocationAllowance);
+    }
+
+    [Test]
     public async Task AcMp006WarmedFingerprintAvoidsCompleteCanonicalOutputCopies()
     {
         var values = Enumerable.Range(0, Tokens)

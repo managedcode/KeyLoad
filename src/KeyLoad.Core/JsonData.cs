@@ -46,13 +46,17 @@ public static class JsonData
             {
                 throw Errors.Fail(ErrorCode.Validation, ObjectRequiredDetail);
             }
-            var bytes = preserveContent ? null : new ArrayBufferWriter<byte>();
-            using (var writer = bytes is null ? new Utf8JsonWriter(Stream.Null) : new Utf8JsonWriter(bytes))
+            if (preserveContent)
+            {
+                CanonicalJsonWriter.Validate(document.RootElement);
+                return json;
+            }
+            var bytes = new ArrayBufferWriter<byte>();
+            using (var writer = new Utf8JsonWriter(bytes))
             {
                 CanonicalJsonWriter.Write(writer, document.RootElement);
             }
-            return bytes is null ? json
-                : Encoding.UTF8.GetString(bytes.WrittenSpan);
+            return Encoding.UTF8.GetString(bytes.WrittenSpan);
         }
         catch (JsonException)
         {

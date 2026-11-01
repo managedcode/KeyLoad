@@ -53,6 +53,10 @@ internal sealed class DocumentExactContentTests
     [Test]
     [Arguments("{\"a\":1,\"a\":2}")]
     [Arguments("{\"a\":1e1000}")]
+    [Arguments("{\"a\":[{\"x\":1,\"\\u0078\":2}]}")]
+    [Arguments("{\"a\":[{\"x\":1e1000}]}")]
+    [Arguments("{\"a\":[] , \"b\":{\"nested\":true,\"nested\":false}}")]
+    [Arguments("{\"a\":[1e1000]}")]
     public async Task AcDstore008DuplicateMembersAndDecimalOverflowStillFailWithoutDocumentEffects(string json)
     {
         using var database = new TestDatabase();
