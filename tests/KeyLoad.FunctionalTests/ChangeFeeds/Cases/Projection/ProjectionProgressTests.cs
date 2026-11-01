@@ -8,7 +8,7 @@ namespace KeyLoad.FunctionalTests.ChangeFeeds;
 internal sealed class ProjectionProgressTests
 {
     [Test]
-    public async Task TheOriginalReceiptSurvivesCheckpointCompactionAndReopenAndTheNextBatchCommits()
+    public async Task TheOriginalReceiptSurvivesReopenAndTheNextBatchCommits()
     {
         var limits = new DatabaseLimits();
         using var db = new TestDatabase(limits);
@@ -17,9 +17,8 @@ internal sealed class ProjectionProgressTests
         var consumer = ProjectionProgressOperations.Configure(db);
         var first = db.Database.ReadProjectionBatch("root", new(consumer, Limit: 1));
         var original = ProjectionProgressOperations.Complete(db, consumer, first, new PutDocument("derived", "a", "{}", 0)).Get<ProjectionBatchResult>();
-        db.Store.Compact();
         db.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution());
         var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Consumers.Single().Checkpoint).IsEqualTo(1);
         Result<object> Submit(ProjectionBatch batch, Mutation[] effects)

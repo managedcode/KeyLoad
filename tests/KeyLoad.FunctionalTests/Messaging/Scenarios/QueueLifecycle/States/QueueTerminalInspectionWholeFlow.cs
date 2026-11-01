@@ -52,7 +52,7 @@ internal static class QueueTerminalInspectionWholeFlow
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         QueueLifecycleConditionCut? healthy = null;
-        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -76,7 +76,7 @@ internal static class QueueTerminalInspectionWholeFlow
         var healthyCut = healthy
             ?? throw new InvalidOperationException("The terminal inspection cold continuation did not complete.");
         token.ThrowIfCancellationRequested();
-        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             var restored = fixture.CreateConfiguredDatabase(second);

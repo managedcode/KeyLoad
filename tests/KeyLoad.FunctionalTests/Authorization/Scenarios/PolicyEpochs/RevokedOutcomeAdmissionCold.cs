@@ -33,7 +33,7 @@ internal static class RevokedOutcomeAdmissionCold
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             token.ThrowIfCancellationRequested();
-            store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution);
             fixture.Store = store;
             fixture.Database = fixture.Harness.CreateConfiguredDatabase(store);
             await ServerFailureObserver.ObserveAsync(() => RevokedOutcomeAdmissionValues.ConservedAsync(fixture, image, identity, position), failures);

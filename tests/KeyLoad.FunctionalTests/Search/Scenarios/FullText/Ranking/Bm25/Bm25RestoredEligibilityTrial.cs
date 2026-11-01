@@ -1,11 +1,9 @@
 using KeyLoad.FunctionalTests.BackupRestore;
-using KeyLoad.Storage.ZoneTree.Restore;
 
 namespace KeyLoad.FunctionalTests.Search;
 
 internal static class Bm25RestoredEligibilityTrial
 {
-    private const int ArtifactPieceBytes = 4_096;
     private const int FirstCold = 0;
     private const int ColdReopenCount = 2;
 
@@ -57,13 +55,9 @@ internal static class Bm25RestoredEligibilityTrial
     private static async Task<string> RestoreAsync(EventingArtifactFixture fixture, CancellationToken token)
     {
         var backup = Path.Combine(fixture.Root, "restored-eligibility-backup");
-        var archive = Path.Combine(fixture.Root, "restored-eligibility-archive");
-        var unpacked = Path.Combine(fixture.Root, "restored-eligibility-unpacked");
         var target = Path.Combine(fixture.Root, "restored-eligibility-target");
-        var capture = MixedEventingBackupRestore.Capture(fixture.Source, backup, token);
-        BackupArtifact.Pack(backup, archive, ArtifactPieceBytes, fixture.Source.Database.EvaluationClock);
-        BackupArtifact.Unpack(archive, unpacked);
-        var position = await MixedEventingBackupRestore.RestoreAsync(fixture.Source, capture, unpacked, target, token);
+        var capture = await MixedEventingBackupRestore.CaptureAsync(fixture.Source, backup, token);
+        var position = await MixedEventingBackupRestore.RestoreAsync(fixture.Source, capture, backup, target, token);
         fixture.OpenTarget(target);
         await Assert.That(fixture.Target!.Position).IsEqualTo(position);
         return target;

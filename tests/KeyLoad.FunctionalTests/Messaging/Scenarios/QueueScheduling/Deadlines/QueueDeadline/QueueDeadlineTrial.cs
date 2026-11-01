@@ -50,8 +50,7 @@ internal static class QueueDeadlineTrial
         await RefuseDueBodyAsync(fixture.Database, fixture.Store, operation, damaged, position, identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(first);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, damaged, position, identity);
         await RefuseDueBodyAsync(database, first, operation, damaged, position, identity);
@@ -177,7 +176,7 @@ internal static class QueueDeadlineTrial
         await RuntimeQueueDeadlineDiscovery.RequireAsync(fixture, lane, advance, due, token);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(first);
         await QueueDeadlineAssertions.OriginalAsync(database, lane, metadata);
         await QueueDeadlineContinuation.RunAsync(database, first, fixture.Directory, lane, command, seeded,

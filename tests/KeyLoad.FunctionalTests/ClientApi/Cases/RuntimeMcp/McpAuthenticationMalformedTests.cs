@@ -8,18 +8,11 @@ internal sealed class McpAuthenticationMalformedTests
     private const string WrongValue = "a principal reply cannot be a string";
 
     [Test]
-    public async Task WrongValuesAndDefaultCollectionsAreRefusedBeforePrincipalAdmission()
+    public async Task WrongValuesAreRefusedBeforePrincipalAdmission()
     {
         using var database = new TestDatabase();
         var principal = McpAuthenticationTests.Principal(database);
-        GrainValue[] invalid =
-        [
-            new(WrongValue), new(null), new(principal with { Grants = default }),
-            new(principal with { FieldGrants = default }), new(principal with { Projects = default }),
-            new(principal with { Teams = default }), new(principal with { Id = null! }),
-            new(principal with { Grants = [null!] }), new(principal with { FieldGrants = [null!] }),
-            new(principal with { Projects = [null!] }), new(principal with { Teams = [null!] })
-        ];
+        GrainValue[] invalid = [new(WrongValue), new(null)];
         foreach (var result in invalid)
         {
             await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() =>

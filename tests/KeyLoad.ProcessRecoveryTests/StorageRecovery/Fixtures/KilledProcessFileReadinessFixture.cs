@@ -24,7 +24,7 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
         Root = Path.Combine(AppContext.BaseDirectory, "keyload-readiness-" + Guid.NewGuid().ToString("N"));
         try
         {
-            using var store = new ZoneTreeStore(new(Root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(Root), RecoveryExecutionOptions.StorageExecution());
             store.Commit((transaction, position) =>
             {
                 transaction.PutRecord(KeyCodec.Encode(ReadinessKey), true);
@@ -73,7 +73,7 @@ internal sealed class KilledProcessFileReadinessFixture : IAsyncDisposable
 
     internal bool ReopenAndCommit()
     {
-        using var store = new ZoneTreeStore(new(Root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(Root), RecoveryExecutionOptions.StorageExecution());
         var originalRecordExists = store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(ReadinessKey)) is not null);
         store.Commit((transaction, _) =>
         {

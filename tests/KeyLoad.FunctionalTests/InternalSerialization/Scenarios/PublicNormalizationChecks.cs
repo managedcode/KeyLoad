@@ -17,7 +17,7 @@ internal static class PublicNormalizationChecks
     {
         var normalized = database.Database.OwnCommand(operation);
         await Assert.That((normalized.Value!.Input is null)).IsFalse();
-        await Assert.That(OrleansSerialization.Serialize(normalized.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(normalized.Value.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input).AsSpan())).IsTrue();
         var result = database.Database.Apply(normalized);
         await Assert.That(Errors.Code(result.Problem).Value).IsEqualTo(code);
         await Assert.That(result.Problem?.Detail).IsEqualTo(detail);

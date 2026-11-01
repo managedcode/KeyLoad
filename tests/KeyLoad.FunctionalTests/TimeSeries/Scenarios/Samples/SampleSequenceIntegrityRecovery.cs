@@ -31,7 +31,8 @@ internal static class SampleSequenceIntegrityRecovery
         await SampleSequenceIntegrityAssertions.ReadRefusalAsync(fixture, token);
         fixture.PutCounter(counter);
         await SampleSequenceIntegrityAssertions.CounterAsync(fixture, counter);
-        await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store)).IsEqualTo(healthyImage);
+        await Assert.That(SampleChunkCorrectionBoundColdAssertions.Image(fixture.Store))
+            .IsEqualTo(StorageRecovery.NativeStorePositionOracle.AtPosition(healthyImage, cut.StorePosition + 1));
         await Assert.That(fixture.ReadCanonicalCut()).IsEqualTo((cut.AppliedPosition, cut.StorePosition + 1));
         await Assert.That(OutcomeStoreOracle.ReadStored(fixture.Store, issued)).IsNull();
         await FinishAsync(fixture, command, issued, token);
@@ -66,7 +67,7 @@ internal static class SampleSequenceIntegrityRecovery
         await Assert.That(original.UserId!).IsEqualTo(P.Principal);
         await Assert.That(original.Timestamp >= issued.Timestamp).IsTrue();
         await Assert.That(original.Value!.Kind).IsEqualTo(OperationKind.Batch);
-        await Assert.That(OrleansSerialization.Serialize(original.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(issued.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(original.Value.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(issued.Value!.Input).AsSpan())).IsTrue();
         var expected = new CommitReceipt(command.CommandId,
             new(fixture.Store.Identity.Incarnation, command.Partition.AtomicPartitionId, expectedSequence),
             [new("appendSamples", P.Set, P.Series, 3)], DurabilityProfile.ProcessDurable, 1);

@@ -62,7 +62,7 @@ internal sealed class EventingArtifactFixture
     internal void InitializeTime() => Time = Source.Database.EvaluationClock.GetUtcNow();
     internal void OpenTarget(string path)
     {
-        Target = new(new(path), Source.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        Target = new(new(path), Source.StorageExecution);
         Database = Source.CreateConfiguredDatabase(Target);
     }
     internal (long AppliedPosition, long StorePosition) ReadTargetCut()

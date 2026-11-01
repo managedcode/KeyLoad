@@ -24,7 +24,6 @@ internal sealed class ResourceEffectPreparationTransaction : ResourceEffectObser
     public void Put(byte[] key, byte[] value) => inner.Put(key, value);
     public void Delete(byte[] key) => inner.Delete(key);
     public void Reset() => inner.Reset();
-    public void ValidateCommit() => inner.ValidateCommit();
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
     {
         ArgumentNullException.ThrowIfNull(prepare);

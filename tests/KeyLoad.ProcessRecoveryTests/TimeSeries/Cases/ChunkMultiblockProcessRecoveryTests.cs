@@ -6,8 +6,8 @@ internal sealed class ChunkMultiblockProcessRecoveryTests
     private const string RootPrefix = "keyload-execution-multiblock-chunk-recovery-";
 
     [Test]
-    [Arguments(false, CommitStage.JournalFlushed)]
-    [Arguments(true, CommitStage.JournalFlushed)]
+    [Arguments(false, CommitStage.WriteAheadLogSynced)]
+    [Arguments(true, CommitStage.WriteAheadLogSynced)]
     [Arguments(false, CommitStage.MutationApplied)]
     [Arguments(true, CommitStage.MutationApplied)]
     public async Task TwoBlocksRecoverOriginalInterruptedSealOrMergeThenHealthyAndTwoColdOwners(bool merge, CommitStage stage)

@@ -38,14 +38,10 @@ internal sealed class StreamTests
     }
 
     [Test]
-    public async Task AcIs002StreamRejectsMissingRootAndDestination()
+    public async Task AcIs002StreamRejectsMissingDestination()
     {
-        using var destination = new MemoryStream();
-        await Assert.That(((KeyLoadException)Capture(() => OrleansSerialization.Serialize<object>(null!, destination))).Code)
-            .IsEqualTo(ErrorCode.Corruption);
         await Assert.That(Capture(() => OrleansSerialization.Serialize(new OutboxHead(1, 1, 1, 1), null!)).GetType())
             .IsEqualTo(typeof(ArgumentNullException));
-        await Assert.That(destination.Length).IsEqualTo(0L);
     }
 
     private static Exception Capture(Action action)

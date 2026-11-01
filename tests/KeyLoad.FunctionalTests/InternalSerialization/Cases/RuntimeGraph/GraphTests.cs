@@ -15,14 +15,11 @@ internal sealed class GraphTests
     }
 
     [Test]
-    public async Task AcIs002ActiveReferenceCyclesFailInBothDirections()
+    public async Task AcIs002ActiveReferenceCyclesFailAtAdmission()
     {
         var value = new GraphNode();
         value.Next = value;
-        var encoded = GraphFixtures.EncodeUnchecked(value);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(value)).Code)
-            .IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Deserialize<GraphNode>(encoded)).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(value)).Code)
             .IsEqualTo(ErrorCode.Corruption);
     }
 
@@ -33,10 +30,7 @@ internal sealed class GraphTests
         var bytes = OrleansSerialization.Serialize(edge);
         await Assert.That(OrleansSerialization.Deserialize<GraphNode>(bytes)).IsNotNull();
         var excessive = new GraphNode { Next = edge };
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(excessive)).Code)
-            .IsEqualTo(ErrorCode.Corruption);
-        var malformed = GraphFixtures.EncodeUnchecked(excessive);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Deserialize<GraphNode>(malformed)).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(excessive)).Code)
             .IsEqualTo(ErrorCode.Corruption);
     }
 
@@ -50,7 +44,7 @@ internal sealed class GraphTests
         {
             Deep = new GraphNode { Next = edge.Deep }
         };
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(excessive)).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(excessive)).Code)
             .IsEqualTo(ErrorCode.Corruption);
     }
 
@@ -59,13 +53,9 @@ internal sealed class GraphTests
     {
         string[] shared = [null!];
         var value = new GraphCollections(shared, shared);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(value)).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(value)).Code)
             .IsEqualTo(ErrorCode.Corruption);
-        var bytes = GraphFixtures.EncodeUnchecked(value);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Deserialize<GraphCollections>(bytes)).Code)
-            .IsEqualTo(ErrorCode.Corruption);
-        var admitted = OrleansSerialization.Deserialize<GraphCollections>(OrleansSerialization.Serialize(value,
-            ValidationProfile.PublicInputElements), ValidationProfile.PublicInputElements);
+        var admitted = OrleansSerialization.Deserialize<GraphCollections>(OrleansSerialization.Serialize(value), ValidationProfile.PublicInputElements);
         await Assert.That(admitted.RequiredValues[0]).IsNull();
     }
 }

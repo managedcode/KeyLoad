@@ -39,8 +39,8 @@ flowchart LR
 |---|---|
 | [OrleansExecution](Features/OrleansExecution.md) | Orleans does all clustering: one grain per connection, partition grains, calls to the silo-local ZoneTree owner on any node, stateless workers for background work |
 | [StorageReplication](Features/StorageReplication.md) | Copies through Orleans Grain Service calls to `ReplicaCount` silos found through membership, acknowledgement from every configured copy, catch-up through Orleans |
-| [StorageRecovery](Features/StorageRecovery.md) | The silo-local ZoneTree owner: stores, journals, locks, ordered apply, read lifetimes and process recovery |
-| [BackupRestore](Features/BackupRestore.md) | Verified backup of a node's ZoneTree files and clean-target restore |
+| [StorageRecovery](Features/StorageRecovery.md) | The silo-local ZoneTree owner: stores, ZoneTree write-ahead-log durability, locks, ordered apply, read lifetimes and process recovery |
+| [BackupRestore](Features/BackupRestore.md) | ZoneTree live backup of a node's store and empty-target restore under a new paused identity |
 | [InternalSerialization](Features/InternalSerialization.md) | Generated Orleans serialization and the current internal binary formats |
 | [Authorization](Features/Authorization.md) | Persisted credentials and grants, row and field policy, policy epochs |
 | [ClientApi](Features/ClientApi.md) | .NET SDK, CLI and the official MCP server with on-demand tool discovery |

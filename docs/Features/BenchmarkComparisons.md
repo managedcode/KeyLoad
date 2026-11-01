@@ -173,8 +173,8 @@ results are development evidence: Website only reads GitHub Benchmarks artifacts
 `benchmarks/KeyLoad.BenchmarkScenarios` holds BenchmarkDotNet scenarios that help
 find or prove a KeyLoad change, run through the `benchmarks/KeyLoad.Benchmarks`
 executable: the embedded engine scenarios (REQ-BC-022, ADR-047), the ZoneTree raw
-read lane ([ADR-069](../ADR/ADR-069-zonetree-raw-read-lane.md)), commit, journal
-flush and cosine scenarios, and the serialization scenarios of
+read lane ([ADR-069](../ADR/ADR-069-zonetree-raw-read-lane.md)), commit and cosine
+scenarios, and the serialization scenarios of
 [InternalSerialization](InternalSerialization.md). They are never jobs of
 `benchmarks.yml` and never published as comparisons.
 

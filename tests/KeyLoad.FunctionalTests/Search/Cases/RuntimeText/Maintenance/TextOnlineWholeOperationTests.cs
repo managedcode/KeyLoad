@@ -43,7 +43,7 @@ internal sealed class TextOnlineWholeOperationTests
         await TextBilingualAudit.VerifyAsync(runtime.Search, fixture, token);
     }
     [Test]
-    public async Task GenuineCompetingSessionsAreAdmittedWhileOnlyOneCaptureIsLiveThenJoinedAbortAllowsFullHealthyPublication()
+    public async Task IndependentNativeCapturesRemainLiveTogetherThenJoinedAbortAllowsFullHealthyPublication()
     {
         using var fixture = new TestDatabase();
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -64,16 +64,7 @@ internal sealed class TextOnlineWholeOperationTests
                     CommandId = Guid.NewGuid()
                 };
                 _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.ResolveOriginal, token);
-                if (index == 0)
-                {
-                    _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.Capture, token);
-                }
-                else
-                {
-                    var refused = await Assert.ThrowsAsync<KeyLoadException>(() => runtime.PhaseAsync(fixture,
-                        id, competing, OnlineTextCapabilityKind.Capture, token));
-                    await Assert.That((refused ?? throw new InvalidOperationException()).Code).IsEqualTo(ErrorCode.ResourceExhausted);
-                }
+                _ = await runtime.PhaseAsync(fixture, id, competing, OnlineTextCapabilityKind.Capture, token);
             }
         }, failures);
         foreach (var id in owners)

@@ -19,8 +19,8 @@ internal static class QueueLifecycleCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, command, id);
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueLifecycleCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
         boundary.Position = store.Position + QueueLifecycleCrashProtocol.One;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 }

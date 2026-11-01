@@ -39,7 +39,7 @@ internal static class SampleChunkCrashState
             {
                 throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
             }
-            rows.AddRange(page.Records.Select(row =>
+            rows.AddRange(page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row =>
                 new[] { Convert.ToHexString(row.Key.Span), Convert.ToHexString(row.Value.Span) }));
         }
         return Convert.ToHexString(JsonDefaults.Serialize(rows));
@@ -52,6 +52,6 @@ internal static class SampleChunkCrashState
         {
             throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
         }
-        return Convert.ToHexString(JsonDefaults.Serialize(page.Records));
+        return Convert.ToHexString(JsonDefaults.Serialize(page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).ToArray()));
     });
 }

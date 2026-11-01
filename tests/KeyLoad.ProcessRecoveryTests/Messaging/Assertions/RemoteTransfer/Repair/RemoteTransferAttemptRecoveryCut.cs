@@ -18,9 +18,13 @@ internal static class RemoteTransferAttemptRecoveryCut
         var state = cut.Record!.Attempts ?? throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing);
         var committed = cut.Outcome is not null;
         var raw = cut.Raw ?? throw new InvalidOperationException(RemoteTransferAttemptCrashProtocol.Missing);
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         var generation = committed ? RemoteTransferAttemptCrashProtocol.AdvancedGeneration : RemoteTransferAttemptCrashProtocol.OriginalGeneration;
         await Assert.That(state.Generation).IsEqualTo(generation);

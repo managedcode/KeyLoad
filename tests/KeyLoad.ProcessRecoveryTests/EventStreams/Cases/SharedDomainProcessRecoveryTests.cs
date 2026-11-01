@@ -5,9 +5,7 @@ namespace KeyLoad.ProcessRecoveryTests.EventStreams;
 internal sealed class SharedDomainProcessRecoveryTests
 {
     [Test]
-    [Arguments(CommitStage.HeaderWritten, SharedDomainCrashProtocol.FirstMutation)]
-    [Arguments(CommitStage.PayloadWritten, SharedDomainCrashProtocol.FirstMutation)]
-    [Arguments(CommitStage.JournalFlushed, SharedDomainCrashProtocol.FirstMutation)]
+    [Arguments(CommitStage.WriteAheadLogSynced, SharedDomainCrashProtocol.FirstMutation)]
     [Arguments(CommitStage.MutationApplied, SharedDomainCrashProtocol.FirstMutation)]
     [Arguments(CommitStage.MutationApplied, SharedDomainCrashProtocol.MiddleMutation)]
     [Arguments(CommitStage.MutationApplied, SharedDomainCrashProtocol.LaterMutation)]

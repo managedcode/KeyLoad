@@ -48,13 +48,13 @@ internal static class TopicPurgeCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, TopicPurgeCrashContract.Purge(TopicPurgeCrashContract.PurgeId, SecondPublishedPosition), TopicPurgeCrashContract.PurgeId);
         await SaveAsync(directory, publish, publishResult, seed, seedResult, operation, store, pinned, cursor);
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         var result = database.Apply(operation);
         if (pinned ? Errors.Code(result.Problem).Value != ErrorCode.ResourceExhausted : Errors.Code(result.Problem).Value is not null)
         {
             throw new InvalidOperationException(InvalidOutcome);
         }
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
     private static void Configure(DatabaseEngine database)
     {

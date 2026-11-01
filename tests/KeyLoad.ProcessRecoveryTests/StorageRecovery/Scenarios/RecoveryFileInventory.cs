@@ -5,7 +5,6 @@ namespace KeyLoad.ProcessRecoveryTests.StorageRecovery;
 internal static class RecoveryFileInventory
 {
     private const string OwnerLockName = "owner.lock";
-    private const string JournalName = "commands.wal";
     private const string MetadataWalRelativePath = "tree/0.meta.wal";
     private const string AllFilesPattern = "*";
 
@@ -61,10 +60,6 @@ internal static class RecoveryFileInventory
     private static IEnumerable<string> OwnedFiles(string directory)
     {
         foreach (var path in Directory.EnumerateFiles(directory, OwnerLockName, SearchOption.AllDirectories))
-        {
-            yield return path;
-        }
-        foreach (var path in Directory.EnumerateFiles(directory, JournalName, SearchOption.AllDirectories))
         {
             yield return path;
         }

@@ -7,23 +7,14 @@ using Orleans.Journaling;
 namespace KeyLoad.Clustering;
 
 /// <summary>Creates execution journal handles backed by the protected replicated runtime journal.</summary>
-internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, IJournalStorageCatalog, IDisposable
+internal sealed class RuntimeJournalStorageProvider(RuntimeJournalClient client,
+    IOptions<RuntimeJournalOptions> configuredOptions,
+    IOptions<JournaledStateManagerOptions> managerOptions) : IJournalStorageProvider, IJournalStorageCatalog, IDisposable
 {
-    private readonly RuntimeJournalClient client;
-    private readonly IOptions<RuntimeJournalOptions> options;
-    private readonly string format;
-    private readonly SemaphoreSlim[] gates;
+    private readonly RuntimeJournalClient client = client;
+    private readonly IOptions<RuntimeJournalOptions> options = ValidateOptions(configuredOptions);
+    private readonly string format = ValidateFormat(managerOptions.Value.JournalFormatKey);
     private int disposed;
-
-    public RuntimeJournalStorageProvider(RuntimeJournalClient client,
-        IOptions<RuntimeJournalOptions> configuredOptions,
-        IOptions<JournaledStateManagerOptions> managerOptions)
-    {
-        this.client = client;
-        options = ValidateOptions(configuredOptions);
-        format = ValidateFormat(managerOptions.Value.JournalFormatKey);
-        gates = CreateGates(options.Value.MaximumJournals);
-    }
 
     public IJournalStorage CreateStorage(JournalId journalId)
     {
@@ -34,8 +25,7 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
         }
 
         RuntimeJournalStorageValidation.ValidateName(journalId.Value, options.Value);
-        return new RuntimeJournalStorage(client, journalId, options, format, gates,
-            GateIndex(journalId.Value, gates.Length));
+        return new RuntimeJournalStorage(client, journalId, options, format);
     }
 
     public void Dispose()
@@ -46,10 +36,6 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
             return;
         }
 
-        foreach (var gate in gates)
-        {
-            gate.Dispose();
-        }
     }
 
     public async IAsyncEnumerable<JournalCatalogEntry> ListAsync(JournalCatalogListOptions? options = null,
@@ -83,21 +69,6 @@ internal sealed class RuntimeJournalStorageProvider : IJournalStorageProvider, I
             && (maximum is null || string.CompareOrdinal(name, maximum) <= RuntimeJournalStoragePolicy.EqualOrdinalComparison);
 
     private static (bool HasValue, string? Value) FilterValue(JournalId id) => id.IsDefault ? (false, default(string?)) : (true, ((string?)(id.Value)));
-
-    private static SemaphoreSlim[] CreateGates(int count)
-    {
-        var values = new SemaphoreSlim[count];
-        for (var index = RuntimeJournalStoragePolicy.InitialGateIndex; index < count; index++)
-        {
-            values[index] = new(RuntimeJournalStoragePolicy.AvailableHandleGatePermits,
-                RuntimeJournalStoragePolicy.MaximumHandleGatePermits);
-        }
-
-        return values;
-    }
-
-    private static int GateIndex(string journalName, int gateCount)
-        => (int)((uint)StringComparer.Ordinal.GetHashCode(journalName) % (uint)gateCount);
 
     private static IOptions<RuntimeJournalOptions> ValidateOptions(IOptions<RuntimeJournalOptions> configuredOptions)
     {

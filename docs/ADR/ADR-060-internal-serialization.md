@@ -25,8 +25,8 @@ field evolution. No custom preflight parser interprets that representation.
 ## Boundaries
 
 Public HTTP/MCP JSON, exact caller-owned document text, canonical identity hashes,
-sortable keys, raw ZoneTree values and WAL framing, blob payloads, checksums,
-cryptography and archive formats retain their owning contracts. Binary map output
+sortable keys, raw ZoneTree values, blob payloads, checksums, cryptography and
+ZoneTree's own log and backup formats retain their owning contracts. Binary map output
 is not a canonical identity. Unsupported application/storage versions fail before
 effects. No previous-format reader or automatic data conversion is introduced.
 

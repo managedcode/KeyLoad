@@ -1,8 +1,0 @@
-namespace KeyLoad.Storage.ZoneTree;
-
-[global::Orleans.GenerateSerializer, global::Orleans.Alias(ZoneTreeMetadataAliases.CheckpointMetadata)]
-internal sealed record ZoneTreeCheckpointMetadata(
-    [property: global::Orleans.Id(1)] int CodecVersion,
-    [property: global::Orleans.Id(2)] Guid Incarnation,
-    [property: global::Orleans.Id(3)] long Position,
-    [property: global::Orleans.Id(4)] long AppliedPosition);

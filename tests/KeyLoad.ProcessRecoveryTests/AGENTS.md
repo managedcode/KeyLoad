@@ -3,7 +3,7 @@
 ## Purpose, entry points and ownership
 
 - Owns real-process recovery of canonical ZoneTree WAL/files, persisted command outcomes, projections, subscriptions and derived indexes.
-- Main suites include `StorageRecovery/Cases/StorageRecoveryProcessTests.cs`, `StorageRecovery/Cases/StoragePublicationRecoveryTests.cs`, `DocumentStorage/Cases/CommandIdempotencyProcessRecoveryTests.cs`, `EventStreams/Cases/SharedDomainProcessRecoveryTests.cs`, `EventStreams/Cases/ProjectionProcessRecoveryTests.cs` and `Messaging/Cases/Subscription/SubscriptionFilterProcessRecoveryTests.cs`.
+- Main suites include `StorageRecovery/Cases/StorageRecoveryProcessTests.cs`, `DocumentStorage/Cases/CommandIdempotencyProcessRecoveryTests.cs`, `EventStreams/Cases/SharedDomainProcessRecoveryTests.cs`, `EventStreams/Cases/ProjectionProcessRecoveryTests.cs` and `Messaging/Cases/Subscription/SubscriptionFilterProcessRecoveryTests.cs`.
 - Feature cases belong under matching canonical `<SliceName>/` paths; real process-host and shared recovery fixture infrastructure may remain shared.
 - `Program.cs` delegates ordinary arguments to the generated Microsoft.Testing.Platform application helper. The explicit `--recovery-process` argument runs the owning fault scenario in this same test assembly; its exit code, original markers, real abrupt termination, process readers and file-release checks remain part of the test.
 - Use the real `KeyLoad.ProcessRecoveryTests` process where required. Preserve node-local ZoneTree storage ownership (files never move with activations; Orleans does all clustering, ADR-136).

@@ -75,7 +75,7 @@ internal static class SampleRollupProcessRecovery
             UseShellExecute = false
         };
         foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root,
-            CommitStage.JournalFlushed.ToString(), SampleRollupCrashContract.MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
+            CommitStage.WriteAheadLogSynced.ToString(), SampleRollupCrashContract.MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
         {
             start.ArgumentList.Add(argument);
         }

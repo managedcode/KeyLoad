@@ -134,7 +134,7 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
         var committedPosition = oldPosition + 1;
         database.Store.Dispose();
         originalStoreOpen = false;
-        reopened = new(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        reopened = new(new(database.Directory), UnitExecutionOptions.StorageExecution());
         reopenedStoreOpen = true;
         await DocumentIndexCommittedScanOperations.CompleteReopenedAsync(reopened, database.Partition,
             expectedIdentity, committedPosition, oldAppliedPosition + 1);

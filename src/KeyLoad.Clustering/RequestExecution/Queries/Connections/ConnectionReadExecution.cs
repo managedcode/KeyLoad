@@ -8,13 +8,12 @@ namespace KeyLoad.Clustering;
 /// <summary>Establishes a fresh storage read cut and executes one persisted-authorized database capability.</summary>
 /// <param name="codec">Signed request verifier bound to this actor's GUID.</param>
 /// <param name="database">Borrowed canonical database; this actor never owns its files or apply gate.</param>
-/// <param name="coordinator">Execution storage read barrier and canonical apply boundary.</param>
 /// <param name="services">Borrowed capability services resolved only after the authorized operation is selected.</param>
 /// <param name="clock">Runtime system clock for persisted principal expiry and query deadlines.</param>
 /// <param name="workOwner">Silo-local admission and cancellation owner for verified reads.</param>
 /// <param name="diagnostics">Unexpected failure diagnostics; public replies contain only safe typed errors.</param>
 /// <param name="context"></param>
-internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseEngine database, ICommitCoordinator coordinator,
+internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseEngine database,
     IServiceProvider services,
     TimeProvider clock, RequestWorkOwner workOwner,
     ILogger diagnostics, IGrainContext context)
@@ -93,12 +92,6 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
     private async Task<GrainOperationReply> ExecuteReadAsync(DecodedGrainRequest request,
         CapabilityWorkLifetime work)
     {
-        work.Stage = GrainFailureStage.ReadBarrier;
-        var barrier = request.Envelope.ReadKind == GrainReadKind.Authenticate
-            ? DatabasePhaseKind.AuthorizedAuthenticationBarrier : DatabasePhaseKind.AuthorizedOperationBarrier;
-        work.BeginPhase(barrier);
-        await coordinator.ReadBarrierAsync(work.Token).ConfigureAwait(true);
-        work.CompletePhase();
         ValidateFreshRequest(codec, request, work.RequestId, work.Token);
         work.Stage = GrainFailureStage.CapabilityExecution;
         work.BeginPhase(DatabasePhaseKind.AuthorizedReadCapability);

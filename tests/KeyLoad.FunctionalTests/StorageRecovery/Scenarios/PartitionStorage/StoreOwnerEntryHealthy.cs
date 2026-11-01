@@ -48,7 +48,7 @@ internal static class StoreOwnerEntryHealthy
         }
         StoreIdentity? identity = null;
         var store = lifetime.Acquire(() => new(new(directory),
-            UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()), failures);
+            UnitExecutionOptions.StorageExecution()), failures);
         if (store is not null)
         {
             ZoneTreeStore? attempted = null;
@@ -66,7 +66,7 @@ internal static class StoreOwnerEntryHealthy
                 {
                     attemptedOpen = true;
                     attempted = new ZoneTreeStore(new(directory),
-                        UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                        UnitExecutionOptions.StorageExecution());
                     lifetime.Own(attempted);
                 });
                 await Assert.That(failure).IsNotNull();
@@ -113,7 +113,7 @@ internal static class StoreOwnerEntryHealthy
     {
         var failures = new List<Exception>();
         var reopened = lifetime.Acquire(() => new(options,
-            UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()), failures);
+            UnitExecutionOptions.StorageExecution()), failures);
         if (reopened is not null)
         {
             await ServerFailureObserver.ObserveAsync(async () =>

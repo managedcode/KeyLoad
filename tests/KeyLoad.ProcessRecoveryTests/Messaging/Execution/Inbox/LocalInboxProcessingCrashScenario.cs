@@ -41,9 +41,9 @@ internal static class LocalInboxProcessingCrashScenario
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, LocalInboxProcessingCrashContract.TailFile,
             database.GetOutboxStatus(CrashFixtureValues.Principal, LocalInboxProcessingCrashContract.Partition).Head.Tail);
         boundary.Position = store.Position + LocalInboxProcessingCrashContract.Generation;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static Command<DatabaseCommand> Configure(DatabaseEngine database)

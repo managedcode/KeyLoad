@@ -17,7 +17,7 @@ internal static class QueueAccountingFaultTrial
         await QueueAccountingFaultAssertions.RefusedAsync(fixture.Database, fixture.Store, state, damaged, expectedError);
         await QueueAccountingFaultAssertions.RefusedAsync(fixture.Database, fixture.Store, state, damaged, expectedError);
         fixture.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await QueueAccountingFaultAssertions.RefusedAsync(database, reopened, state, damaged, expectedError);
         QueueAccountingFaultSetup.SetCounters(reopened, state.Lane, state.Counters);
@@ -27,7 +27,7 @@ internal static class QueueAccountingFaultTrial
         var healthy = await QueueAccountingFaultHealthy.RunAsync(database, reopened, state);
         var complete = QueueWholeFlowStorage.Bytes(reopened);
         reopened.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
         await ReplayAsync(restored, state, result);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored, OperationKind.Batch,

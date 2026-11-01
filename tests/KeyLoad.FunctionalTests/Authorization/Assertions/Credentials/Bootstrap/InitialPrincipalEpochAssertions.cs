@@ -14,7 +14,7 @@ internal static class InitialPrincipalEpochAssertions
         {
             throw new InvalidOperationException("The complete principal lifecycle image exceeded its bound.");
         }
-        return page.Records.Where(row => omitted is null || !row.Key.Span.SequenceEqual(omitted)
+        return page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(row => omitted is null || !row.Key.Span.SequenceEqual(omitted)
                 && !row.Key.Span.SequenceEqual(KeySpace.ClockBytes)
                 && !row.Key.Span.SequenceEqual(KeySpace.AppliedBytes)
                 && !row.Key.Span.SequenceEqual(KeySpace.LastCommandBytes))

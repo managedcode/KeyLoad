@@ -10,7 +10,6 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
 {
     internal const string OwnerFile = "owner.lock";
     internal const string IdentityFile = "identity.json";
-    internal const string JournalFile = "commands.wal";
     internal const string TreeDirectory = "tree";
     internal const string OuterOwnerFile = "node.owner.lock";
     internal const int UnsupportedFutureFormat = int.MaxValue;
@@ -36,7 +35,7 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
         {
             Incarnation = Guid.NewGuid()
         };
-        using var original = new ZoneTreeStore(Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var original = new ZoneTreeStore(Options, UnitExecutionOptions.StorageExecution());
         Identity = original.Identity;
         original.Commit((transaction, _) => { transaction.Put(Key, Value); return true; });
     }
@@ -61,7 +60,6 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
     internal byte[] Value { get; } = Encoding.UTF8.GetBytes(ValueText);
     internal string IdentityPath => Path.Combine(DirectoryPath, IdentityFile);
     internal string HiddenIdentityPath => IdentityPath + HiddenSuffix;
-    internal string JournalPath => Path.Combine(DirectoryPath, JournalFile);
 
     internal Task<ExistingStoreInspectorExit> InspectAsync(
         ExistingStoreInspectionVariant variant = ExistingStoreInspectionVariant.Normal,

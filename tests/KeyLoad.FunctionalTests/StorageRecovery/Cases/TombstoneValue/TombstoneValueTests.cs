@@ -1,6 +1,3 @@
-using System.Buffers.Binary;
-using System.Security.Cryptography;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -8,27 +5,18 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal sealed class TombstoneValueTests
 {
-    private const int FramePayloadOffset = 52;
-    private const int FrameLengthOffset = 8;
-    private const int SequenceOffset = 12;
-    private const int ChecksumOffset = 20;
-    private const int ChecksumLength = 32;
-    private const long EmptyJournalLength = 0;
-    private const ulong JournalMagic = 0x344C4157444C4BUL;
-    private const string JournalFileName = "commands.wal";
-
     [Test]
-    public async Task AcPsw002EmptyPutAndDeleteRemainDistinctThroughStageCommitCompactAndReopen()
+    public async Task AcPsw002EmptyPutAndDeleteRemainDistinctThroughStageCommitAndReopen()
     {
         var directory = CreateDirectory();
         var prefix = new byte[] { 0xA0 };
         var emptyKey = new byte[] { 0xA0, 0x01 };
         var deletedKey = new byte[] { 0xA0, 0x02 };
         var retainedKey = new byte[] { 0xA0, 0x03 };
-        StorageSnapshot snapshot;
+        long position;
         try
         {
-            using (var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+            using (var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution()))
             {
                 store.Commit((tx, _) =>
                 {
@@ -41,91 +29,20 @@ internal sealed class TombstoneValueTests
                 await AssertCommittedView(store, prefix, emptyKey, deletedKey, retainedKey);
             }
 
-            using (var replayed = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+            using (var replayed = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution()))
             {
                 await AssertCommittedView(replayed, prefix, emptyKey, deletedKey, retainedKey);
-                snapshot = replayed.Compact();
-                await Assert.That(snapshot.RecordCount).IsEqualTo(2L);
-                await AssertCommittedView(replayed, prefix, emptyKey, deletedKey, retainedKey);
+                position = replayed.Position;
             }
 
-            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
             await AssertCommittedView(reopened, prefix, emptyKey, deletedKey, retainedKey);
-            await Assert.That(reopened.Position).IsEqualTo(snapshot.Position);
+            await Assert.That(reopened.Position).IsEqualTo(position);
         }
         finally
         {
             Directory.Delete(directory, recursive: true);
         }
-    }
-
-    [Test]
-    public async Task AcPsw002EmptyPutAndDeleteUseCanonicalPayloadAtExactFrameLimit()
-    {
-        var root = CreateDirectory();
-        var emptyKey = new byte[] { 0x10 };
-        var deletedKey = new byte[] { 0x20 };
-        var payload = CreateBinaryEmptyDeletePayload(emptyKey, deletedKey);
-        try
-        {
-            var directory = Path.Combine(root, "exact");
-            using (var store = new ZoneTreeStore(new(directory)
-            {
-                MaxFrameBytes = payload.Length
-            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
-            {
-                store.Commit((tx, _) =>
-                {
-                    tx.Put(emptyKey, []);
-                    tx.Delete(deletedKey);
-                    return true;
-                });
-
-                var expectedFrame = CreateFrame(payload, 1);
-                await AssertJournalEquals(Path.Combine(directory, JournalFileName), expectedFrame);
-                await AssertBinaryEmptyAndDeletePayload(payload, emptyKey, deletedKey);
-            }
-
-            using var tooSmall = new ZoneTreeStore(new(Path.Combine(root, "short"))
-            {
-                MaxFrameBytes = payload.Length - 1
-            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() => tooSmall.Commit((tx, _) =>
-            {
-                tx.Put(emptyKey, []);
-                tx.Delete(deletedKey);
-                return true;
-            }));
-            await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(tooSmall.Position).IsEqualTo(0L);
-            await Assert.That(new FileInfo(Path.Combine(root, "short", JournalFileName)).Length)
-                .IsEqualTo(EmptyJournalLength);
-        }
-        finally
-        {
-            Directory.Delete(root, recursive: true);
-        }
-    }
-
-    private static byte[] CreateBinaryEmptyDeletePayload(byte[] emptyKey, byte[] deletedKey)
-        => ZoneTreeJournalCodec.Serialize(new StorageMutation[]
-        {
-            new(emptyKey, Array.Empty<byte>()),
-            new(deletedKey, (ReadOnlyMemory<byte>?)null)
-        }, int.MaxValue);
-
-    private static async Task AssertBinaryEmptyAndDeletePayload(byte[] payload, byte[] emptyKey, byte[] deletedKey)
-    {
-        using var serializer = new WalSerializerFixture();
-        var decoded = serializer.Deserialize(payload);
-        await Assert.That(decoded.Length).IsEqualTo(2);
-        await Assert.That(decoded[0].Key.Span.SequenceEqual(emptyKey)).IsTrue();
-        await Assert.That(decoded[0].Kind).IsEqualTo(ZoneTreeJournalMutation.PutKind);
-        await Assert.That(decoded[0].Value.HasValue).IsTrue();
-        await Assert.That(decoded[0].Value!.Value.Length).IsEqualTo(0);
-        await Assert.That(decoded[1].Key.Span.SequenceEqual(deletedKey)).IsTrue();
-        await Assert.That(decoded[1].Kind).IsEqualTo(ZoneTreeJournalMutation.DeleteKind);
-        await Assert.That(decoded[1].Value.HasValue).IsFalse();
     }
 
     private static async Task AssertCommittedView(ZoneTreeStore store, byte[] prefix,
@@ -197,24 +114,5 @@ internal sealed class TombstoneValueTests
             "keyload-tombstone-values-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(directory);
         return directory;
-    }
-
-    private static byte[] CreateFrame(byte[] payload, long position)
-    {
-        var frame = new byte[FramePayloadOffset + payload.Length];
-        BinaryPrimitives.WriteUInt64LittleEndian(frame, JournalMagic);
-        BinaryPrimitives.WriteInt32LittleEndian(frame.AsSpan(FrameLengthOffset), payload.Length);
-        BinaryPrimitives.WriteInt64LittleEndian(frame.AsSpan(SequenceOffset), position);
-        SHA256.HashData(payload, frame.AsSpan(ChecksumOffset, ChecksumLength));
-        payload.CopyTo(frame, FramePayloadOffset);
-        return frame;
-    }
-
-    private static async Task AssertJournalEquals(string path, byte[] expected)
-    {
-        using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        var actual = new byte[file.Length];
-        await file.ReadExactlyAsync(actual);
-        await Assert.That(actual).IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 }

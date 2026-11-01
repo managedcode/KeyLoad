@@ -45,10 +45,10 @@ var directory = args[DirectoryArgument];
 var stage = Enum.Parse<CommitStage>(args[StageArgument]);
 var mutationIndex = int.Parse(args[MutationArgument], CultureInfo.InvariantCulture);
 var mode = args.Length > ModeArgument ? args[ModeArgument] : CrashFixtureValues.CommitMode;
-var boundary = new CanonicalCrashBoundary(stage, mutationIndex, mode == CrashFixtureValues.CommitMode);
+var boundary = new CanonicalCrashBoundary(stage, mutationIndex, initiallyArmed: false);
 using var store = new ZoneTreeStore(new(directory)
 {
     FaultObserver = boundary.Observe
-}, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+}, CrashExecutionOptions.StorageExecution());
 await CrashScenarioDispatcher.RunAsync(directory, store, boundary, mode);
 return Environment.ExitCode;

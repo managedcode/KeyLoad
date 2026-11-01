@@ -50,7 +50,7 @@ internal static class SqlNumericRefusalContinuation
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);

@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server.Search;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -41,8 +40,6 @@ internal static class ServerRuntimeOptionsRegistration
     {
         services.AddOptions<ZoneTreeStorageExecutionOptions>().Bind(configuration.GetSection(ZoneTreeStorageExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage).ValidateOnStart();
-        services.AddOptions<ZoneTreePointCacheExecutionOptions>().Bind(configuration.GetSection(ZoneTreePointCacheExecutionOptions.SectionName))
-            .Validate(options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<AnnExecutionOptions>().Bind(configuration.GetSection(AnnExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), AnnExecutionOptions.ValidationMessage).ValidateOnStart();
         services.AddOptions<TextExecutionOptions>().Bind(configuration.GetSection(TextExecutionOptions.SectionName))

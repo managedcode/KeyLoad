@@ -37,8 +37,7 @@ internal static class UserAnalyticsReadExecution
         using var original = await services.GetRequiredService<IUserAnalytics>()
             .AggregateAsync(snapshot, binding, token).ConfigureAwait(true);
         work.RequireResourceLifetimeBinding(binding);
-        using var linked = CancellationTokenSource.CreateLinkedTokenSource(token, work.Cancellation);
-        await services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync(linked.Token).ConfigureAwait(true);
+        work.Check();
         database.ValidateAnalyticsAggregatePublication(snapshot);
         return original.Result;
     }

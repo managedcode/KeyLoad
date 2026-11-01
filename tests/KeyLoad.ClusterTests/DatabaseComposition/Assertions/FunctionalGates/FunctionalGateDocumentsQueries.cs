@@ -18,13 +18,14 @@ internal static class FunctionalGateDocumentsQueries
         var raw = await context.SdkAsync(context.Reader.Sdk.ExecuteSqlAsync(request, token));
         var sdk = raw.Deserialize<QueryPage>(JsonDefaults.Options) ?? throw new InvalidOperationException("The SQL page is absent.");
         var official = await context.McpAsync<QueryPage>(context.Reader, SqlOperationProtocol.ToolName, request, token);
-        await PageAsync(sdk, reference, revision, json, cut);
-        await PageAsync(official, reference, revision, json, cut);
+        await PageAsync(context, sdk, reference, revision, json, cut, token);
+        await PageAsync(context, official, reference, revision, json, cut, token);
     }
 
-    private static async Task PageAsync(QueryPage actual, EntityRef reference, long revision, string? json, long cut)
+    private static async Task PageAsync(FunctionalGateContext context, QueryPage actual, EntityRef reference,
+        long revision, string? json, long canonicalMinimum, CancellationToken token)
     {
-        await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(cut);
+        await FunctionalGateReadPositions.RequireAsync(context, canonicalMinimum, token, actual.CutPosition);
         QueryRow[] rows = json is null ? [] : [new(reference.Id, revision, json, false, [])];
         await FunctionalGateDocumentsReads.EqualAsync(new QueryPage([.. rows], null,
             actual.CutPosition, "index:by_doc_id"), actual);

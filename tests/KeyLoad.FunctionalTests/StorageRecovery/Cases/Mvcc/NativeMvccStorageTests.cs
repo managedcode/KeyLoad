@@ -8,7 +8,7 @@ internal sealed class NativeMvccStorageTests
     [Test]
     public async Task NativeCommitAndRollbackKeepTheCapturedSnapshotAndLiteralValuesExact()
     {
-        using var files = new WalFileFixture();
+        using var files = new StoreFileFixture();
         using var tree = ZoneTreeTreeFactory.Open(new(files.DirectoryPath));
         Memory<byte> key = new byte[] { 0x10 };
         Memory<byte> value = new byte[] { 0x00, 0xFF, 0x80 };
@@ -51,7 +51,7 @@ internal sealed class NativeMvccStorageTests
     [Test]
     public async Task SerializableRangeConflictRollsBackEveryWriteThenHealthyCommitSucceeds()
     {
-        using var files = new WalFileFixture();
+        using var files = new StoreFileFixture();
         using var tree = ZoneTreeTreeFactory.Open(new(files.DirectoryPath));
         using (var seed = tree.BeginTransaction())
         {

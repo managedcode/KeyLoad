@@ -21,9 +21,13 @@ internal static class TargetInboxRecoveryCut
         var source = database.InspectMessage(CrashFixtureValues.Principal, request.Source, request.MessageId);
         await Assert.That(source!.Metadata.State).IsEqualTo(MessageState.Leased);
         await Assert.That(source.PayloadJson).IsEqualTo(TargetInboxCrashProtocol.Payload);
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         if (!committed)
         {

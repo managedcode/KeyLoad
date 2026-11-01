@@ -40,7 +40,7 @@ internal sealed class AtomicPartitionRosterRestoreFixture
     {
         var fixture = new AtomicPartitionRosterRestoreFixture();
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(fixture.Initialize, failures);
+        await ServerFailureObserver.ObserveAsync(fixture.InitializeAsync, failures);
         if (failures.Count == 0)
         {
             await ServerFailureObserver.ObserveAsync(() => operation(fixture), failures);
@@ -65,7 +65,7 @@ internal sealed class AtomicPartitionRosterRestoreFixture
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private void Initialize()
+    private async Task InitializeAsync()
     {
         Directory.CreateDirectory(Root);
         Source = new();
@@ -78,10 +78,10 @@ internal sealed class AtomicPartitionRosterRestoreFixture
         OriginalOutcome = Source.Store.Read(view => view.ReadOwnedValue(OutcomeStoreOracle.PartitionKey(
             AtomicPartitionRosterFixture.Source, Principal, Original.CommandId)))!;
         var backup = Path.Combine(Root, FirstBackup);
-        sourceCut = Source.Store.CreateBackup(backup);
+        sourceCut = await Source.Store.CreateBackupAsync(backup);
         firstArchive = ArchiveDigests(backup);
         targetPath = Path.Combine(Root, FirstTarget);
-        ZoneTreeStore.Restore(backup, targetPath, UnitExecutionOptions.StorageExecution());
+        await ZoneTreeStore.RestoreAsync(backup, targetPath, UnitExecutionOptions.StorageExecution());
         Open();
     }
 
@@ -101,21 +101,21 @@ internal sealed class AtomicPartitionRosterRestoreFixture
         Open();
     }
 
-    internal void RestoreAgain()
+    internal async Task RestoreAgainAsync()
     {
         var backup = Path.Combine(Root, SecondBackup);
-        Target.CreateBackup(backup);
+        await Target.CreateBackupAsync(backup);
         Target.Dispose();
         Target = null!;
         targetPath = Path.Combine(Root, SecondTarget);
-        ZoneTreeStore.Restore(backup, targetPath, UnitExecutionOptions.StorageExecution());
+        await ZoneTreeStore.RestoreAsync(backup, targetPath, UnitExecutionOptions.StorageExecution());
         Open();
     }
 
     private void Open()
     {
         targetAcquiring = true;
-        Target = new(new(targetPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        Target = new(new(targetPath), UnitExecutionOptions.StorageExecution());
         targetAcquiring = false;
         Database = BackupIndexedDocumentDedupFixture.CreateDatabase(Target);
     }
@@ -138,7 +138,8 @@ internal sealed class AtomicPartitionRosterRestoreFixture
     }
 
     private static Dictionary<string, string> ArchiveDigests(string directory)
-        => Directory.EnumerateFiles(directory).ToDictionary(path => Path.GetFileName(path)!, path =>
+        => Directory.EnumerateFiles(directory, "*", SearchOption.AllDirectories).ToDictionary(
+            path => Path.GetRelativePath(directory, path), path =>
         {
             using var stream = File.OpenRead(path);
             return Convert.ToHexString(SHA256.HashData(stream));

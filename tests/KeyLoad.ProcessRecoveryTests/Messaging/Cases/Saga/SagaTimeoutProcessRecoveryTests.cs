@@ -8,9 +8,7 @@ internal sealed class SagaTimeoutProcessRecoveryTests
     private const int MutationIndex = 0;
 
     [Test]
-    [Arguments(CommitStage.HeaderWritten)]
-    [Arguments(CommitStage.PayloadWritten)]
-    [Arguments(CommitStage.JournalFlushed)]
+    [Arguments(CommitStage.WriteAheadLogSynced)]
     [Arguments(CommitStage.MutationApplied)]
     [Arguments(CommitStage.ApplyCompleted)]
     public Task AcJobs003ProcessKillRecoversOneSagaTimeoutAndStableEnqueueRetry(CommitStage stage)

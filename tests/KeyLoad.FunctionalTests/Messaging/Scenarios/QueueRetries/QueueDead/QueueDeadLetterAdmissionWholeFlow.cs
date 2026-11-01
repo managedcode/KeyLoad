@@ -23,7 +23,7 @@ internal static class QueueDeadLetterAdmissionWholeFlow
         QueueDeadLetterSelectedSaved[] continuation;
         string[] finalImage;
         long finalPosition;
-        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
             await Assert.That(OrleansSerialization.Serialize(cold.Identity).SequenceEqual(identity)).IsTrue();
@@ -39,7 +39,7 @@ internal static class QueueDeadLetterAdmissionWholeFlow
             finalImage = QueueWholeFlowStorage.Bytes(cold);
             finalPosition = cold.Position;
         }
-        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var secondOwner = fixture.CreateConfiguredDatabase(second);
         await Assert.That(OrleansSerialization.Serialize(second.Identity).SequenceEqual(identity)).IsTrue();
         await QueueDeadLetterAdmissionAssertions.Image(second, finalPosition, finalImage);

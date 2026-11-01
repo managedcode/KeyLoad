@@ -5,7 +5,7 @@ namespace KeyLoad.Core;
 /// <summary>Encodes canonical database keys without changing their persisted ordering or scope.</summary>
 public static class KeySpace
 {
-    private const string CatalogSpace = "catalog";
+    private const string CatalogSpace = ResourceStorageKeys.CatalogFamily;
     private const string PrincipalSpace = "principal";
     private const string ApiKeySpace = "api-key";
     private const string ScopedOutcomeSpace = "outcome";
@@ -49,7 +49,7 @@ public static class KeySpace
     /// <param name="database">Owning database identifier.</param>
     /// <param name="resource">Resource identifier.</param>
     /// <returns>The canonical independent catalog key.</returns>
-    public static byte[] Resource(string tenant, string database, string resource) => KeyCodec.Encode(CatalogSpace, tenant, database, resource);
+    public static byte[] Resource(string tenant, string database, string resource) => ResourceStorageKeys.Catalog(tenant, database, resource);
 
     /// <summary>Creates an owned persisted-principal key.</summary>
     /// <param name="principal">Principal identifier.</param>

@@ -31,9 +31,9 @@ internal static class QueueEnqueueCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.PhysicalTargetFile), OrleansSerialization.Serialize(physicalTarget));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueEnqueueCrashProtocol.BaselineFile), OrleansSerialization.Serialize(Capture(store)));
         boundary.Position = physicalTarget;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation);
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static string[] Capture(ZoneTreeStore store) => store.Read(view =>
@@ -43,6 +43,6 @@ internal static class QueueEnqueueCrashScenario
         {
             throw new InvalidOperationException(QueueEnqueueCrashProtocol.BaselineExceeded);
         }
-        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + QueueEnqueueCrashProtocol.ImageSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + QueueEnqueueCrashProtocol.ImageSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 }

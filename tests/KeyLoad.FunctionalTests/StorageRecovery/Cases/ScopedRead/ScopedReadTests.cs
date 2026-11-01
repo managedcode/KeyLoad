@@ -76,7 +76,7 @@ internal sealed class ScopedReadTests
             using (var store = new ZoneTreeStore(new(directory)
             {
                 SigningKey = callerKey.AsMemory()
-            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+            }, UnitExecutionOptions.StorageExecution()))
             {
                 Array.Fill(callerKey, (byte)0);
                 await Assert.That(store.Identity.SigningKey.Span.SequenceEqual(expectedKey)).IsTrue();
@@ -85,7 +85,7 @@ internal sealed class ScopedReadTests
             using var reopened = new ZoneTreeStore(new(directory)
             {
                 SigningKey = expectedKey
-            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            }, UnitExecutionOptions.StorageExecution());
             await Assert.That(reopened.Identity.SigningKey.Span.SequenceEqual(expectedKey)).IsTrue();
         }
         finally

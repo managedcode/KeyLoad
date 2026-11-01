@@ -86,7 +86,7 @@ internal static class StoreOwnerEntryFlow
             var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             {
                 attempted = new ZoneTreeStore(files.Options,
-                    UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                    UnitExecutionOptions.StorageExecution());
                 lifetime.Own(attempted);
             });
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);

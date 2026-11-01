@@ -26,7 +26,7 @@ internal static class QueueRetryColdTrial
         await QueueRetryColdPhases.EmptyAsync(fixture.Database, state, state.Start.AddMilliseconds(QueueRetryColdProtocol.BeforeDueMilliseconds));
         var scheduled = QueueRetryColdAssertions.LaneBytes(fixture.Store, state.Lane);
         fixture.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await Assert.That(QueueRetryColdAssertions.LaneBytes(reopened, state.Lane)).IsEquivalentTo(scheduled, CollectionOrdering.Matching);
         await ReplayAsync(database, state, state.Start.AddMilliseconds(QueueRetryColdProtocol.BeforeDueMilliseconds));
@@ -35,7 +35,7 @@ internal static class QueueRetryColdTrial
         await QueueRetryColdPhases.ExpireAndContinueAsync(database, state, token);
         var terminal = QueueRetryColdAssertions.LaneBytes(reopened, state.Lane);
         reopened.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
         await Assert.That(QueueRetryColdAssertions.LaneBytes(cold, state.Lane)).IsEquivalentTo(terminal, CollectionOrdering.Matching);
         await ReplayAsync(restored, state, state.FinalTime);

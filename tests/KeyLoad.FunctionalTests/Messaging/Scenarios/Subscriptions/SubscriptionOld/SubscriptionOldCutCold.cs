@@ -26,7 +26,7 @@ internal static class SubscriptionOldCutCold
                 var cycle = new List<Exception>();
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
-                    store = new(new(path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                    store = new(new(path), UnitExecutionOptions.StorageExecution());
                     var database = Open(store, state);
                     await SubscriptionOldCutAssertions.ConservedAsync(store, bytes, position, identity);
                     await ServerFailureObserver.ObserveAsync(() => SubscriptionOldCutHealthy.FinalAsync(database, state), cycle);

@@ -21,7 +21,6 @@ internal static class FileStorageComposition
         builder.Services.AddControllers().AddApplicationPart(typeof(FileStorageController).Assembly)
             .ConfigureApplicationPartManager(manager => manager.FeatureProviders.Add(new FileStorageControllerDiscovery()));
         builder.Services.AddScoped<FileStorageResourceFilter>();
-        builder.Services.AddSingleton<FileStorageTransferGate>();
         builder.Services.AddScoped(provider =>
         {
             var context = provider.GetRequiredService<IHttpContextAccessor>().HttpContext

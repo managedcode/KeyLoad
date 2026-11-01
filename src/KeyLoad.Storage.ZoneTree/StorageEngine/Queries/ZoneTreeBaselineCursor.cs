@@ -1,4 +1,3 @@
-using ZoneTree;
 using ZoneTree.Transactional;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -13,10 +12,10 @@ internal sealed class ZoneTreeBaselineCursor : IDisposable
     private readonly ZoneTreeRangeWork work;
     private readonly bool reverse;
 
-    internal ZoneTreeBaselineCursor(ITransactionalZoneTree<Memory<byte>, Memory<byte>> tree, byte[] lower, byte[]? upper,
+    internal ZoneTreeBaselineCursor(ZoneTreeStoreRuntime runtime, byte[] lower, byte[]? upper,
         byte[] prefix, byte[]? afterKey, byte[]? untilKey, ZoneTreeRangeWork work, bool reverse)
     {
-        snapshot = new(tree, reverse);
+        snapshot = new(runtime, reverse);
         var acquired = snapshot.Iterator;
         try
         {

@@ -6,7 +6,7 @@ using Orleans.Journaling;
 namespace KeyLoad.Clustering;
 
 internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, JournalId journalId,
-    IOptions<RuntimeJournalOptions> options, string format, SemaphoreSlim[] gates, int gateIndex)
+    IOptions<RuntimeJournalOptions> options, string format)
 {
     private bool retired;
 
@@ -16,21 +16,6 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
     internal RuntimeJournalSnapshot? Captured
     {
         get; private set;
-    }
-
-    internal async ValueTask<Lease> EnterAsync(CancellationToken cancellationToken)
-    {
-        var lease = new Lease(gates[gateIndex], cancellationToken);
-        try
-        {
-            await lease.AcquireAsync();
-            return lease;
-        }
-        catch (Exception)
-        {
-            lease.Dispose();
-            throw;
-        }
     }
 
     internal async Task<(bool HasValue, RuntimeJournalSnapshot? Value)> CaptureAsync(CancellationToken cancellationToken)
@@ -107,26 +92,5 @@ internal sealed class RuntimeJournalStorageState(RuntimeJournalClient client, Jo
 
     internal void Retire() => retired = true;
 
-    internal sealed class Lease(SemaphoreSlim gate, CancellationToken callerToken) : IDisposable
-    {
-        private bool acquired;
-
-        internal CancellationToken Token => callerToken;
-
-        internal async ValueTask AcquireAsync()
-        {
-            await gate.WaitAsync(callerToken);
-            acquired = true;
-        }
-
-        public void Dispose()
-        {
-            if (acquired)
-            {
-                acquired = false;
-                gate.Release();
-            }
-        }
-    }
 }
 #pragma warning restore ORLEANSEXP005

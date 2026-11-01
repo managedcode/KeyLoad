@@ -45,8 +45,7 @@ internal static class SubscriptionCheckpointAuthorityFlow
         var position = fixture.Store.Position;
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
-        using var firstCold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var firstCold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(firstCold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(firstCold, cut, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.CorruptionAsync(db, firstCold, second, token);
@@ -76,8 +75,7 @@ internal static class SubscriptionCheckpointAuthorityFlow
         var bytes = QueueWholeFlowStorage.Bytes(store);
         var position = store.Position;
         store.Dispose();
-        using var secondCold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var secondCold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(secondCold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(secondCold, bytes, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(cold, group, 3, 3, 3);

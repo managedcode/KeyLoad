@@ -16,14 +16,14 @@ internal static class TargetInboxProcessRecovery
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = TargetInboxRecoveryDatabase.Open(store);
                 await TargetInboxRecoveryCut.AssertAsync(store, database, request, stage);
                 original = database.ApplyEmbedded(operation, token).Get<CommitInboxResult>();
                 await Assert.That(original.AlreadyProcessed).IsFalse();
-                await TargetInboxRecoveryCut.AssertAsync(store, database, request, CommitStage.ApplyCompleted);
+                await TargetInboxRecoveryCut.AssertAsync(store, database, request, CommitStage.WriteAheadLogSynced);
                 var duplicate = request with
                 {
                     CommandId = Guid.NewGuid()

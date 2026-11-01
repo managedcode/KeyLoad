@@ -28,7 +28,7 @@ internal sealed class TargetInboxAtomicProcessingTests
         await TargetInboxAssertions.CapacityAsync(fixture.Store, seed.Request, TargetInboxUnitProtocol.FirstRevision);
         var image = TargetInboxAssertions.Image(fixture.Store, seed.Source.Partition, seed.Target.Partition);
         fixture.Store.Dispose();
-        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(first);
         await ReplayResultAssertions.Same<CommitInboxResult>(TargetInboxSetup.Apply(database, seed.Request, token), originalResult);
         await Assert.That(TargetInboxAssertions.Image(first, seed.Source.Partition, seed.Target.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
@@ -46,7 +46,7 @@ internal sealed class TargetInboxAtomicProcessingTests
             TargetInboxUnitProtocol.Message)!.Metadata.State).IsEqualTo(MessageState.Acked);
         image = TargetInboxAssertions.Image(first, seed.Source.Partition, seed.Target.Partition);
         first.Dispose();
-        using var second = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(second);
         await ReplayResultAssertions.Same<CommitInboxResult>(TargetInboxSetup.Apply(cold, seed.Request, token), originalResult);
         await Assert.That(TargetInboxAssertions.Image(second, seed.Source.Partition, seed.Target.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);

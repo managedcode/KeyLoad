@@ -122,7 +122,7 @@ internal static class SqlCallNoPartialWriteContinuation
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(cold.Identity.NodeId).IsEqualTo(identity.NodeId);

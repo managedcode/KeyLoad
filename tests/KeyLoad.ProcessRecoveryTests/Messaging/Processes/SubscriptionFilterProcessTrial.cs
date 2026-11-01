@@ -38,7 +38,7 @@ internal static class SubscriptionFilterProcessTrial
             }
             if (Directory.Exists(root))
             {
-                await StoragePublicationRecoveryTests.DeleteTrialAsync(root, token);
+                await StorageTrialCleanup.DeleteTrialAsync(root, token);
             }
         }, failures).ConfigureAwait(false);
         ServerFailureObserver.ThrowIfAny(failures);

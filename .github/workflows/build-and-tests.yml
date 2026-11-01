@@ -128,6 +128,7 @@ jobs:
           path: |
             tests/KeyLoad.AnalyzerTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results
             tests/KeyLoad.ProcessRecoveryTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results
+            tests/KeyLoad.ProcessRecoveryTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/TestResults/crash-trials-*
           if-no-files-found: warn
           retention-days: 30
           overwrite: true

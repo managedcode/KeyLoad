@@ -27,7 +27,7 @@ comparable GitHub cluster measurements. [ADR-054](../ADR/ADR-054-central-sql.md)
 and [ADR-055](../ADR/ADR-055-typed-relational-rows.md) define the first SQL
 invocation and typed-row stage; JOIN, foreign-key and declarative-source stages
 follow it. "One server" does not change the number of data copies or the
-node-local journals.
+node-local ZoneTree stores.
 
 ## Cluster and execution concept
 
@@ -47,7 +47,7 @@ membership, transport, placement or movement mechanism of its own.
 - **Partition grains.** A logical partition grain is an ordinary Orleans grain
   that serializes and routes the commands of one logical (atomic) partition.
 - **Physical storage owner.** A silo-local Grain Service owns open ZoneTree
-  stores, WAL, file locks and ordered apply. Isolated volumes use each node's
+  stores (each with ZoneTree's own write-ahead log), file locks and ordered apply. Isolated volumes use each node's
   local files and typed Orleans calls between owners. Shared volumes expose the
   same paths to participating silos and require one open owner per mutable
   physical partition, joined close before reopening and no data copying.
@@ -126,11 +126,11 @@ Separate projects: full PostgreSQL SQL/wire compatibility, Cypher/SPARQL compati
 
 ### ZoneTree
 
-ZoneTree provides ordered persistent key-value storage, seek/range iterators, native MVCC multi-key transactions with consistent snapshots, serializers, comparers, WAL and compaction. The repository states an MIT license. This is enough to build a local storage adapter; KeyLoad designs the document model and the distributed guarantees. [S1][S2]
+ZoneTree provides ordered persistent key-value storage, seek/range iterators, native MVCC multi-key transactions with consistent snapshots, serializers, comparers, a write-ahead log, merge maintenance and live backups. The repository states an MIT license. This is enough to build a local storage adapter; KeyLoad designs the document model and the distributed guarantees. [S1][S2]
 
-`AsyncCompressed` is the default WAL. The documentation describes `SyncCompressed` as having a separate tail writer with a default interval of 500 ms. `Sync` has a synchronous stream write path; full power-loss durability depends on the flush contract and the storage stack. A configuration named Sync is not by itself proof of a durable ACK. [S3]
+`AsyncCompressed` is the default WAL mode and the one KeyLoad uses; KeyLoad awaits its `SyncWALAsync` before an acknowledgement. The documentation describes `SyncCompressed` as having a separate tail writer with a default interval of 500 ms and `Sync` as a synchronous stream write path. Full power-loss durability depends on the flush contract and the storage stack; a mode name is not by itself proof of a durable ACK. [S3]
 
-KeyLoad backs up a consistent cut of its durable command journal and identity under a verified manifest. Restore reconstructs the native MVCC tree through ordered replay. [S4]
+KeyLoad owns no write-ahead log, backup, snapshot or archive format ([ADR-011](../ADR/ADR-011-current-format.md)). ZoneTree's write-ahead log is the only redo log; a commit is one native transaction holding the mutations and the store position, visible when it returns and durable after the write-ahead log sync that every acknowledgement awaits. A backup is the store identity plus one ZoneTree live backup generation of the MVCC tree, holding every commit through the position it returns; restore uses ZoneTree's own restore under a new identity with dispatch paused. [S4]
 
 `BeginReadOnlyTransaction()` retains a native MVCC snapshot for point and range reads. The KeyLoad read-cut owner holds both that transaction and its iterator until joined disposal. Snapshot retention and traversal costs require their own measurements. [S5]
 
@@ -166,7 +166,7 @@ partition command order             planner, bounded fan-out,
                  │  Orleans calls to the local or another node
                  │
    ZoneTree owner (Grain Service) on every silo
-   own files, WAL/journals, file locks, ordered apply
+   own files and ZoneTree logs, file locks, ordered apply
    ReplicaCount copies; ACK after persisted apply on every configured copy
                  │
        ZoneTree storage
@@ -176,7 +176,7 @@ partition command order             planner, bounded fan-out,
      ┌───────────┴───────────────────────┐
      │                                   │
 Derived text index                 Derived ANN index
-version + checkpoint               version + checkpoint
+version + consumer checkpoint      version + consumer checkpoint
 ```
 
 ### Responsibilities
@@ -186,7 +186,7 @@ version + checkpoint               version + checkpoint
 `Partition grain`: an ordinary Orleans grain that serializes and routes the commands of one logical partition to the ZoneTree owners on `ReplicaCount` silos. The number of grains follows the number of operational partitions. A per-document grain may be an optional facade; the base data path works with partition batches. The base architecture creates no grain per edge, sample or ANN node. Orleans may migrate a partition grain; migration does not move files.
 
 `ZoneTree owner`: a silo-local physical owner exposed through an Orleans Grain
-Service. It holds engine instances, file handles, WAL/journals, locks, maintenance,
+Service. It holds engine instances (with ZoneTree's write-ahead logs), file handles, locks, maintenance,
 reader leases and ordered apply. Scoped local services borrow its exact session
 through DI. Isolated volumes open on silo initialization. Shared volumes open
 lazily for an ordinary database activation and close only after that activation's
@@ -266,7 +266,7 @@ Comparers and serializers are part of the persisted data format. There is one cu
 2. The partition owner's ordered apply gate serializes the partition's commands; callers wait for their turn instead of being refused.
 3. A dedup lookup runs; a repeat with the same ID and a different payload ends in an explicit conflict.
 4. In one transaction: all preconditions are checked, index deltas are built, canonical records change, domain events/queue state/inbox receipt are added when the command has them, the outbox event is added, and the outcome and `lastApplied` are written. A shared TransactionDomain is checked before apply.
-5. Acknowledgement depends on the declared durability profile and a verified flush barrier.
+5. Acknowledgement depends on the declared durability profile and waits for the ZoneTree write-ahead log sync of the commit.
 6. Projection workers read only committed outbox records.
 
 All canonical writes go through this path. A direct `Upsert` into the underlying tree would bypass these invariants.
@@ -302,7 +302,7 @@ The safe baseline for bounded scans: a shared read/apply gate, transactions comp
 
 `Buffered` permits loss of acknowledged work and reports zero persisted copies. `ProcessDurable` describes the local process-recovery barrier. `LocalDurable` requires separate filesystem/device flush and fault evidence before it can be advertised. `CommitReceipt.PersistedCopies` independently records the actual acknowledged copies; a profile name never implies extra copies.
 
-The profile is set per database/partition group. Silently weakening guarantees for individual requests is forbidden. The public name Durable is allowed only after the full path is verified: data WAL, transaction log, metadata/manifest, flush ordering and recovery on the specific storage contract.
+The profile is set per database/partition group. Silently weakening guarantees for individual requests is forbidden. The public name Durable is allowed only after the full path is verified: ZoneTree's write-ahead log, the identity metadata, flush ordering and recovery on the specific storage contract.
 
 ## 6. Replication and failover
 
@@ -324,7 +324,7 @@ A copy confirms a write only after its ZoneTree owner's required persistence bar
 
 ### Activations and files
 
-Orleans placement, the distributed grain directory and activation migration/repartitioning manage only activations. Files, WAL/journals and file locks stay with their silo's ZoneTree owner; a migrated grain calls the ZoneTree owners through Orleans again. Grains that need locality use execution `[Immovable]`; the rest keep migration. Orleans does all clustering; KeyLoad adds no coordination protocol of its own.
+Orleans placement, the distributed grain directory and activation migration/repartitioning manage only activations. Files, ZoneTree logs and file locks stay with their silo's ZoneTree owner; a migrated grain calls the ZoneTree owners through Orleans again. Grains that need locality use execution `[Immovable]`; the rest keep migration. Orleans does all clustering; KeyLoad adds no coordination protocol of its own.
 
 ### Recovery and catch-up
 
@@ -485,7 +485,7 @@ Node resources: total managed/memory, WAL backlog, projection lag, compaction wo
 
 Observability: end-to-end p50/p95/p99, allocs/op, GC pause, CPU, RSS/memory, bytes read/written, compaction amplification, copy lag, apply lag, projection lag, retry/conflict rate, recovery time and corruption indicators. By default, logs must not contain document/event/message payloads, raw sensitive headers or secrets. Messaging quotas complement query limits.
 
-Offline backup: stop admission → drain transactions/jobs → flush → close engine/maintainer → copy all authoritative files → manifest/checksum → reopen. Restore is tested into a clean directory, verifying canonical records and index invariants. A replicated cluster is backed up by the same local backup on each silo; a globally consistent cut across silos is not part of the current design.
+Backup: an open store copies its identity and writes one ZoneTree live backup generation of its tree into an empty directory; the returned position bounds the commits it holds. Restore into an empty directory writes a new identity, restores the tree through ZoneTree and commits paused dispatch; it is tested by verifying canonical records and index invariants. The CLI backup opens a closed store offline. A replicated cluster is backed up by the same local backup on each silo; a globally consistent cut across silos is not part of the current design.
 
 ## 15. Performance and correctness matrix
 
@@ -967,7 +967,7 @@ An open chunk accepts appends; sealed chunks have an immutable manifest. Late sa
 | TransactionDomainId | Catalog binding of resources to a shared atomic scope, see Section 41.1 |
 | AtomicPartitionId | Immutable logical boundary of a transactional batch and of partition-unique constraints; identity of the logical partition grain |
 | Partition grain | Ordinary Orleans grain that serializes and routes the commands of one atomic partition |
-| ZoneTree owner | Orleans Grain Service on every silo; owns that node's ZoneTree files, WAL/journals, file locks and ordered apply |
+| ZoneTree owner | Orleans Grain Service on every silo; owns that node's ZoneTree files and logs, file locks and ordered apply |
 | Copy | A partition's data in the ZoneTree owner of one of the `KeyLoad:ReplicaCount` silos |
 | Node / silo | A server process in the Orleans cluster with its own local data directory |
 | Orleans activation | Live actor execution context with its own lifecycle; Orleans may migrate it without moving files |
@@ -1038,7 +1038,7 @@ Admin capabilities are separated: infrastructure operations, schema/index manage
 | field.readRaw / field.use | Specific paths/classifications and allowed usage operations |
 | schema.manage / index.manage | Generation creation, DDL, reindex budgets |
 | data.export / changes.subscribe | Logical export/CDC with the current projection policy |
-| backup.manage / backup.restore | Privileged raw artifacts and a separate target environment |
+| backup.manage / backup.restore | Privileged raw backup files and a separate target environment |
 | query.diagnose / audit.read | Plan explanation, authorized metrics, audit metadata |
 | events.append/read/replay | Stream sets, streams, generations and classified fields |
 | queue.publish/consume/ack/renew | Queues/lanes, delivery tokens and current consumer grants |
@@ -1207,7 +1207,7 @@ For 32 shards × 200 candidates × 3 branches × an assumed 80 bytes per candida
 
 ### 31.4. Memory and disk budget
 
-Node budget = canonical memtables/cache + graph/index structures + query working sets + compaction/rebuild reserves + runtime + WAL/journals. Individual caches must not each treat all RAM as their own limit.
+Node budget = canonical memtables/cache + graph/index structures + query working sets + compaction/rebuild reserves + runtime + ZoneTree write-ahead logs. Individual caches must not each treat all RAM as their own limit.
 
 The copy count multiplies canonical storage; durable logs, projection snapshots and compaction have their own write amplification. Rebuilding two index generations at once is counted in ANN and text disk planning. Low free disk moves the node into read-only or fail-stop before any false durable ACK.
 
@@ -1351,7 +1351,7 @@ ZoneTree documents building event streams from ordered key ranges and queue-like
 | Work queue | Payload plus scheduled/ready/leased/terminal state | Enqueue, Claim, Ack, Nack, Renew |
 | Topic / persistent subscription | Retained log plus independent delivery/checkpoint state per group | Publish, Subscribe, Seek/Replay per permissions |
 
-The Event Store has its own public identities, retention and schema versions. Trimming WAL/journals or the projection outbox preserves business history according to its own contract. Exposing the internal WAL through the public event API is forbidden: its records have different semantics, payload scope and lifecycle.
+The Event Store has its own public identities, retention and schema versions. Trimming the write-ahead log or the projection outbox preserves business history according to its own contract. Exposing the internal WAL through the public event API is forbidden: its records have different semantics, payload scope and lifecycle.
 
 ### 37.3. Source of truth for an entity
 
@@ -1750,9 +1750,9 @@ Complete physical purge covers WAL, copies, compaction, snapshots, backups, exte
 
 ### 44.3. What a backup contains
 
-The authoritative manifest covers domain bindings, stream generations/heads, event records and dedup, stable event sequences, queue bodies/states/ready/scheduled/lease indexes, group configs/checkpoints/gaps, inbox receipts, transfer intents and their retention pins. Rebuildable indexes have a validation/rebuild recipe. Full stream history cannot be restored if its canonical records were not included in the backup.
+A store backup holds the store's whole tree, so it covers domain bindings, stream generations/heads, event records and dedup, stable event sequences, queue bodies/states/ready/scheduled/lease indexes, group configs/checkpoints/gaps, inbox receipts, transfer intents and their retention pins. Rebuildable indexes have a validation/rebuild recipe. Full stream history cannot be restored if its canonical records were not included in the backup.
 
-For an offline backup, all of these records belong to the same closed storage cut. Cross-partition transfer reconciliation must check the source intent and destination dedup of each restored store. External side effects performed before the snapshot are not rolled back with the database.
+All of these records belong to the backup's cut: every commit through its returned position. Cross-partition transfer reconciliation must check the source intent and destination dedup of each restored store. External side effects performed before the backup are not rolled back with the database.
 
 ### 44.4. Restart, failover and restore of an older cut
 
@@ -1770,7 +1770,7 @@ Shutdown first stops new claims while keeping a budget for ACK/renew/drain; it t
 
 KeyLoad's hypothesis: a co-located document/event/queue batch reduces application round trips and duplicated coordination for mixed workflows. Ordered seeks, small delivery state, batching and shared authorization can lower resource cost. Any advantage still requires measurement.
 
-A full queue lifecycle usually includes a persisted enqueue, claim and ACK, plus renew/retry transitions when needed. Group commit can combine the flush of several operations; it does not remove replication, indexing or log bytes. Producer-side accepted-message throughput alone is not used as completed-work throughput.
+A full queue lifecycle usually includes a persisted enqueue, claim and ACK, plus renew/retry transitions when needed. Group commit can combine the write-ahead log sync of several operations; it does not remove replication, indexing or log bytes. Producer-side accepted-message throughput alone is not used as completed-work throughput.
 
 Measured: publish commit p99, claim p99, durable ACK p99, ready-to-start latency, scheduled lateness, unique completed jobs/s, stream append/read/replay throughput, consumer lag, gap memory, bytes/message, write amplification, dedup retention cost and impact on document/search p99. Handler CPU/external API time is measured separately and within the end-to-end workflow.
 

@@ -17,7 +17,7 @@ internal static class FunctionalGateRelational
                 : await FunctionalGateRelationalCalls.SqlMcpAsync<ResourceDefinition>(ctx, ctx.Administrator, request, token);
             var expected = P.Definition(ctx.Partition, table);
             await SqlClusterProtocol.EqualAsync(expected, actual);
-            FunctionalGateCreationLifetime.Expect(ctx, request.CommandId!.Value, expected, table: true);
+            FunctionalGateCreationLifetime.Expect(ctx, request.CommandId!.Value, expected);
         }
         var command = new CommandRequest(Guid.NewGuid(), ctx.Partition,
         [

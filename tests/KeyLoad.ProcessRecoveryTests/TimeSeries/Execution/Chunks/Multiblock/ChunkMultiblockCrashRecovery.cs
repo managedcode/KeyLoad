@@ -3,9 +3,10 @@ namespace KeyLoad.ProcessRecoveryTests;
 
 internal static class ChunkMultiblockCrashRecovery
 {
-    internal static async Task RecoverAsync(string root, DatabaseEngine database, bool merge)
+    internal static async Task RecoverAsync(string root, DatabaseEngine database, bool merge, bool committed)
     {
-        var inflight = await SampleChunkCrashRecovery.ReplayOriginalForMultiblockAsync(root, database).ConfigureAwait(false);
+        var inflight = await SampleChunkCrashRecovery.ReplayOriginalForMultiblockAsync(root, database, committed)
+            .ConfigureAwait(false);
         await ChunkMultiblockCrashState.WriteAsync(root, SampleChunkCrashContract.RecoveredFile, database, merge, inflight).ConfigureAwait(false);
         await RequireAcknowledgedAsync(root, database).ConfigureAwait(false);
         SampleChunkSnapshotFile.CaptureExpectedToken(root, ChunkMultiblockCrashData.FreshCommandId, database, SampleChunkCrashContract.Partition);

@@ -60,8 +60,7 @@ internal static class FilteredPolicyColdContinuation
         SearchRequest request, StoreIdentity identity,
         (long Position, KeyValueRecord[] Records) expected, CancellationToken cancellationToken)
     {
-        using var store = new ZoneTreeStore(new(database.Directory), database.StorageExecution,
-            UnitExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         await Assert.That(store.Identity.NodeId).IsEqualTo(identity.NodeId);
         await Assert.That(store.Identity.Incarnation).IsEqualTo(identity.Incarnation);
         await UnchangedAsync(store, expected);

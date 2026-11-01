@@ -18,13 +18,13 @@ internal static class RemoteTransferRepairProcessRecovery
         RemoteTransferRepairRecovered? result = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = RemoteTransferRepairRecoveryDatabase.Open(store);
                 await RemoteTransferRepairRecoveryCut.AssertAsync(store, database, command, stage);
                 repaired = database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-                await RemoteTransferRepairRecoveryCut.AssertAsync(store, database, command, CommitStage.ApplyCompleted);
+                await RemoteTransferRepairRecoveryCut.AssertAsync(store, database, command, CommitStage.WriteAheadLogSynced);
                 result = await RemoteTransferRepairRecoveryContinuation.CompleteAsync(store, database, command, failed, bytes, token);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);
@@ -36,7 +36,7 @@ internal static class RemoteTransferRepairProcessRecovery
     private static async Task ColdAsync(string root, Command<DatabaseCommand> operation, CommitReceipt repaired,
         CommandRequest failed, byte[] bytes, RemoteTransferRepairRecovered result, CancellationToken token)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = RemoteTransferRepairRecoveryDatabase.Open(store);
         await RemoteTransferRepairRecoveryContinuation.EqualAsync(database.ApplyEmbedded(operation, token).Get<CommitReceipt>(), repaired);
         await RemoteTransferRepairRecoveryContinuation.EqualAsync(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch,

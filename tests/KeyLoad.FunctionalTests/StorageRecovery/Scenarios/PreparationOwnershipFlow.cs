@@ -9,12 +9,11 @@ internal static class PreparationOwnershipFlow
 {
     private const string ClosedChild = "The execution preparation transaction is outside its synchronous owning callback.";
     private const string ClosedParent = "Transaction preparation requires its original synchronous compiler callback.";
-    private const string NestedStore = "Store preparation cannot enter an already owned execution gate.";
+    private const string NestedStore = "Store preparation cannot enter an already owned native operation.";
 
     internal static async Task DiscardAsync(O owner)
     {
         var position = owner.Store.Position;
-        var journal = owner.Journal;
         var image = A.Image(owner);
         var result = owner.Store.Prepare((child, proposed) =>
         {
@@ -25,7 +24,7 @@ internal static class PreparationOwnershipFlow
         await Assert.That(result.Position).IsEqualTo(checked(position + 1));
         await A.BytesAsync(O.ChildValue, result.Value);
         await Assert.That(result.Absent).IsNull();
-        await A.ConservedAsync(owner, position, journal, image);
+        await A.ConservedAsync(owner, position, image);
         var original = new InvalidOperationException("execution-prepare-original-failure");
         var observed = Assert.ThrowsExactly<InvalidOperationException>(() => owner.Store.Prepare<bool>((child, _) =>
         {
@@ -33,7 +32,7 @@ internal static class PreparationOwnershipFlow
             throw original;
         }));
         await Assert.That(ReferenceEquals(original, observed)).IsTrue();
-        await A.ConservedAsync(owner, position, journal, image);
+        await A.ConservedAsync(owner, position, image);
         await A.HealthyAsync(owner);
     }
 
@@ -84,7 +83,6 @@ internal static class PreparationOwnershipFlow
     internal static async Task LifetimeAsync(O owner)
     {
         var position = owner.Store.Position;
-        var journal = owner.Journal;
         var image = A.Image(owner);
         IAtomicTransaction? escapedChild = null;
         IAtomicTransaction? escapedParent = null;
@@ -123,14 +121,13 @@ internal static class PreparationOwnershipFlow
         await Task.Run(() => A.Refuse(() => escapedChild.Prepare(_ => ++callbacks), ClosedChild));
         await Task.Run(() => A.Refuse(() => escapedParent.Prepare(_ => ++callbacks), ClosedParent));
         await Assert.That(callbacks).IsEqualTo(0);
-        await A.ConservedAsync(owner, position, journal, image);
+        await A.ConservedAsync(owner, position, image);
         await A.HealthyAsync(owner);
     }
 
     internal static async Task NestedAsync(O owner)
     {
         var position = owner.Store.Position;
-        var journal = owner.Journal;
         var image = A.Image(owner);
         var callbacks = 0;
         owner.Store.Read(view =>
@@ -144,7 +141,7 @@ internal static class PreparationOwnershipFlow
             return true;
         });
         await Assert.That(callbacks).IsEqualTo(0);
-        await A.ConservedAsync(owner, position, journal, image);
+        await A.ConservedAsync(owner, position, image);
         await A.HealthyAsync(owner);
     }
 }

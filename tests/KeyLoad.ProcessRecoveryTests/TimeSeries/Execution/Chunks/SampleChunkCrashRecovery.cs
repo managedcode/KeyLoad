@@ -36,14 +36,24 @@ internal static class SampleChunkCrashRecovery
             .ConfigureAwait(false);
     }
 
-    internal static Task<string> ReplayOriginalForMultiblockAsync(string root, DatabaseEngine database)
-        => ReplayOriginalAsync(root, database);
+    internal static Task<string> ReplayOriginalForMultiblockAsync(string root, DatabaseEngine database, bool committed = true)
+        => ReplayOriginalAsync(root, database, committed);
 
-    private static async Task<string> ReplayOriginalAsync(string root, DatabaseEngine database)
+    private static async Task<string> ReplayOriginalAsync(string root, DatabaseEngine database, bool committed = true)
     {
         var path = Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile);
         var bytes = await File.ReadAllBytesAsync(path).ConfigureAwait(false);
         var original = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(bytes);
+        if (!committed)
+        {
+            // The original was killed while staged, so it never committed; its first retry commits it exactly once.
+            var staged = database.Store.Position;
+            database.ApplyEmbedded(original, cancellationToken: default).Get<CommitReceipt>();
+            if (database.Store.Position != checked(staged + SampleChunkCrashContract.PositionStep))
+            {
+                throw new InvalidOperationException(SampleChunkCrashContract.Invalid);
+            }
+        }
         var before = SampleChunkCrashState.Complete(database);
         var position = database.Store.Position;
         var replay = database.ApplyEmbedded(original, cancellationToken: default);

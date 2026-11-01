@@ -28,12 +28,10 @@ internal static class BackupPersistedPolicyTrial
             fixture.Partition, BackupPersistedPolicySeed.Root, original.Operation.CommandId);
         var originalApplied = fixture.Source.Store.Read(view => view.ReadOwnedValue(KeySpace.AppliedBytes))
             ?? throw new InvalidOperationException("The original canonical backup cut is missing.");
-        var backupCut = fixture.CreateBackup();
+        var backupCut = await fixture.CreateBackupAsync();
         await Assert.That(backupCut).IsEqualTo(source.Position);
-        var archive = await BackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
-        var verified = KeyLoad.Storage.ZoneTree.ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution(), token);
-        await Assert.That(verified.Position).IsEqualTo(source.Position);
-        await BackupPersistedPolicyAssertions.SameAsync(sourceIdentity, verified.Identity);
+        var archive = await BackupCutAssertions.ArchiveAsync(fixture.BackupDirectory, token);
+        await BackupPersistedPolicyAssertions.SameAsync(sourceIdentity, BackupCutAssertions.BackupIdentity(fixture.BackupDirectory));
         var restore = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),
             ["restore", fixture.BackupDirectory, fixture.TargetDirectory], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(restore);
@@ -56,7 +54,7 @@ internal static class BackupPersistedPolicyTrial
         await BackupPersistedPolicyAssertions.CurrentAsync(fixture, database, false, token);
         await RepairAndColdAsync(fixture, database, token);
         await BackupPersistedPolicyAssertions.UnchangedAsync(fixture.Source.Store, source);
-        await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
+        await BackupCutAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
     }
 
     private static async Task RepairAndColdAsync(BackupIndexedDocumentDedupFixture fixture,

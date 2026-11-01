@@ -17,7 +17,7 @@ internal static class SampleChunkEarlyCrashScenario
         {
             FaultObserver = boundary.Observe
         },
-            CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+            CrashExecutionOptions.StorageExecution());
         var database = SampleChunkEarlyCrashProtocol.IsPrepare(mode)
             ? CrashDatabase.Create(store) : SampleChunkCrashScenario.OpenExisting(store);
         if (SampleChunkEarlyCrashProtocol.IsPrepare(mode))
@@ -26,7 +26,7 @@ internal static class SampleChunkEarlyCrashScenario
             await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile),
                 OrleansSerialization.Serialize(SampleChunkEarlyCrashOperations.Configure(database))).ConfigureAwait(false);
             await SampleChunkEarlyCrashState.WriteAsync(root, SampleChunkCrashContract.PreparedFile, database).ConfigureAwait(false);
-            await RecoveryProcessPause.WaitForKillAsync();
+            await RecoveryProcessPause.WaitForKillAsync(database.Store);
         }
         else if (SampleChunkEarlyCrashProtocol.IsFault(mode))
         {
@@ -48,9 +48,9 @@ internal static class SampleChunkEarlyCrashScenario
             OrleansSerialization.Serialize(operation)).ConfigureAwait(false);
         SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
-        boundary.Armed = true;
+        await boundary.ArmAsync(database.Store);
         database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(database.Store);
     }
 
     private static async Task RecoverAsync(string root, DatabaseEngine database, SampleChunkEarlyCut cut, bool verify)

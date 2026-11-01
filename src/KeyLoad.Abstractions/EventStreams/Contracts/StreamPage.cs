@@ -6,10 +6,10 @@ namespace KeyLoad;
 /// <param name="Stream">Specifies the stream value.</param>
 /// <param name="Head">Reports the stream head observed for this page.</param>
 /// <param name="Events">Lists events to append.</param>
-/// <param name="CutPosition">Identifies the committed read cut.</param>
+/// <param name="CutPosition">Canonical command sequence observed by this page's native snapshot.</param>
 /// <param name="HasMore">Indicates whether more events are available.</param>
 /// <param name="Cursor">The signed continuation for the same captured traversal, or null when exhausted.</param>
-/// <param name="SnapshotCutPosition">The original committed cut captured at the start of this traversal.</param>
+/// <param name="SnapshotCutPosition">Canonical command sequence captured at the start of this traversal.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(ContractAliases.StreamPage)]
 public sealed record StreamPage([property: Orleans.Id(0)] StreamRef Stream, [property: Orleans.Id(1)] StreamHead Head, [property: Orleans.Id(2)] ImmutableArray<EventRecord> Events, [property: Orleans.Id(3)] long CutPosition, [property: Orleans.Id(4)] bool HasMore,

@@ -26,10 +26,11 @@ Its repository metadata binds source5d24bf5f46772facbe4e40e355b2ed1aa6e66c9b.
 The provider now computes the low32 bits of XXH3-64 over its explicit
 little-endian WAL header and exact key/value bytes. Use the published provider
 unchanged. KeyLoad owns no substitute checksum implementation or alternate
-reader. Its own current identity, atomic WAL and unversioned checkpoint contracts, generated
-aliases/field IDs, raw-byte serializers, journal-only durability (engine WAL disabled), uncompressed provider,
-node-local locks/apply ownership, canonical outcomes and required-copy ACK barriers remain
-the existing contract. New qualification creates current stores and reopens those
+reader. The current identity contract, generated aliases/field IDs, raw-byte
+serializers, ZoneTree's own write-ahead log as the only redo log
+([ADR-011](ADR-011-current-format.md)), uncompressed segments and log payloads,
+node-local locks/apply ownership, canonical outcomes and required-copy ACK barriers
+remain the existing contract. New qualification creates current stores and reopens those
 same stores with the same published dependency cohort. An earlier development
 cohort is not converted or presented as this current-format evidence.
 
@@ -46,9 +47,9 @@ cohort is not converted or presented as this current-format evidence.
   exact position, node/incarnation and current generation; afterwards verify
   full original/fresh receipts, changed-body Conflict and cold healthy effects.
   ChecksumProfileRecoveryTests owns these whole operations.
-- REQ-EXECUTION-WAL-PROFILE-002 -> AC-EXECUTION-WAL-PROFILE-002: current journal-only durability,
-  ordinary/scalar operation suites, real process recovery and genuine Aspire cluster
-  snapshot install/ordered tail/public SDK and official MCP replay/cold gates
+- REQ-EXECUTION-WAL-PROFILE-002 -> AC-EXECUTION-WAL-PROFILE-002: ZoneTree write-ahead log
+  durability, ordinary operation suites, real process recovery and genuine Aspire cluster
+  public SDK and official MCP replay/cold gates
   pass with original source/DLL/PDB/package/image identities. checksum
   controls cannot substitute for those cluster or corruption gates.
 - REQ-EXECUTION-WAL-PROFILE-003 -> AC-EXECUTION-WAL-PROFILE-003: solution restore/build,
@@ -65,7 +66,7 @@ cohort is not converted or presented as this current-format evidence.
 
 Integration joins: the closed RecoveryProcess mode dispatch, original child pipe
 owner, central transitive dependency resolution, full current-image Docker build
-and existing snapshot/backup/restore qualification. No new application endpoint,
+and existing backup/restore qualification. No new application endpoint,
 server SIMD setting, database policy or storage authority is introduced.
 
 ```mermaid

@@ -15,7 +15,7 @@ source artifacts own those checks.
 | [ADR-008: Backup cuts and independent log retention](ADR-008-backup-log-retention.md) |
 | [ADR-009: Search provider and projection boundaries](ADR-009-search-provider-boundaries.md) |
 | [ADR-010: Bounded query execution and security barriers](ADR-010-query-budgets-security.md) |
-| [ADR-011: Current format and restore authority](ADR-011-current-format.md) |
+| [ADR-011: Current format, ZoneTree durability and backup restore](ADR-011-current-format.md) |
 | [ADR-012: Versioned KeyLoad SQL subset](ADR-012-sql-dialect.md) |
 | [ADR-013: One authorized query AST across interfaces](ADR-013-authorized-query-ast.md) |
 | [ADR-014: Persisted principals, scoped RBAC, and row policy](ADR-014-principals-rbac-row-policy.md) |
@@ -50,7 +50,6 @@ source artifacts own those checks.
 | [ADR-053: one light KeyLoad visual identity for the console and the site](ADR-053-unified-visual-identity.md) |
 | [ADR-054: Central SQL over canonical database operations](ADR-054-central-sql.md) |
 | [ADR-055: Typed relational rows in canonical entity storage](ADR-055-typed-relational-rows.md) |
-| [ADR-057: Orleans binary atomic WAL](ADR-057-orleans-atomic-wal.md) |
 | [ADR-058: Orleans-coordinated disposable cache memory](ADR-058-orleans-coordinated-cache-memory.md) |
 | [ADR-059: Guarded original-store inspection](ADR-059-guarded-original-store-inspection.md) |
 | [ADR-060: generated internal serialization](ADR-060-internal-serialization.md) |
@@ -90,7 +89,6 @@ source artifacts own those checks.
 | [ADR-110: Orleans primitives used by KeyLoad](ADR-110-orleans-execution-primitives.md) |
 | [ADR-111: Semantic rules for magic runtime values](ADR-111-magic-runtime-values.md) |
 | [ADR-113: General runtime literals and centralized typed options](ADR-113-centralized-runtime-options.md) |
-| [ADR-114: verified backup artifact publication](ADR-114-verified-artifact-publication.md) |
 | [ADR-115: TimeProvider ownership](ADR-115-time-provider.md) |
 | [ADR-116: one current format before the first release](ADR-116-first-release-current-format.md) |
 | [ADR-117: TUnit CI entry](ADR-117-tunit-ci-entry.md) |
@@ -104,7 +102,6 @@ source artifacts own those checks.
 | [ADR-130: Microsoft ScriptDOM owns T-SQL syntax](ADR-130-microsoft-scriptdom-tsql.md) |
 | [ADR-131: Explicit queue dispatch-state compare-and-set](ADR-131-queue-dispatch-state-cas.md) |
 | [ADR-132: CREATE TABLE and caller-stable SQL command identity](ADR-132-create-table-command-identity.md) |
-| [ADR-135: write-through journal admission](ADR-135-write-through-journal-admission.md) |
 | [ADR-136: Orleans is the cluster; every silo owns its own ZoneTree](ADR-136-orleans-partition-ownership.md) |
 | [ADR-137: Schema-visible safe projection and restricted field binding](ADR-137-schema-visible-projection.md) |
 | [ADR-140: Command identity without fingerprints](ADR-140-new-analytics-command-identity.md) |

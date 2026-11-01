@@ -8,7 +8,7 @@ REQ-FIXTURE-CLOSE-003 / AC-FIXTURE-CLOSE-003 requires successful mixed Dispose, 
 
 The private materializer shutdown task is not exposed by this new-only test: original caller task completion, ownership locks and actual source linkage supply the bounded observation, not an invented task counter. Failed-close EDI identity, actual concurrent-close scheduling overlap inside the serialized critical section, OS faults, compiler, repeated full runtime, Recovery/cluster/Linux and full qualification remain OPEN. Source code and deterministic concurrency setup are not runtime evidence. This is not an old-code-failing failure discriminator or a power-loss claim.
 
-The [ResourceExecution](../ResourceExecution.md) feature and [ADR-117](../../ADR/ADR-117-tunit-ci-entry.md) retain TUnit execution and original resource ownership. Existing simple one-close fixture cases and pointcache/stream-owner races are not duplicates of this actual shared fixture operation.
+The [ResourceExecution](../ResourceExecution.md) feature and [ADR-117](../../ADR/ADR-117-tunit-ci-entry.md) retain TUnit execution and original resource ownership. Existing simple one-close fixture cases and native-reader/stream-owner races are not duplicates of this actual shared fixture operation.
 
 ```mermaid
 flowchart LR

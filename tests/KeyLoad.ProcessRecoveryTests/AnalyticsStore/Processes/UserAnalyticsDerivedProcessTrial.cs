@@ -98,7 +98,7 @@ internal static class UserAnalyticsDerivedProcessTrial
             if (failures.Count == SuccessExit)
             {
                 await ServerFailureObserver.ObserveAsync(
-                    () => StoragePublicationRecoveryTests.DeleteTrialAsync(root, deadline.Token), failures);
+                    () => StorageTrialCleanup.DeleteTrialAsync(root, deadline.Token), failures);
             }
         }
         primary?.Data[RetainedRoot] = root;

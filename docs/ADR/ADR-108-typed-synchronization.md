@@ -12,11 +12,12 @@ turn scheduler; reentrancy and escaped callbacks still require review.
 Node-local hosts, storage owners, HTTP services, transport callbacks and test
 collectors are shared outside that scheduling boundary.
 
-Use System.Threading.Lock for short synchronous shared-state transitions. Use
-SemaphoreSlim.WaitAsync with cancellation and finally-release for exclusion that
-must span awaits. Publishing a shared shutdown task is a synchronous transition;
+Orleans owns grain state and ZoneTree owns concurrent database operations.
+Do not add application locks or semaphores around native database calls.
+Use System.Threading.Lock only for a justified shared-service lifetime transition,
+such as joining the same iterator before disposal. Publishing a shared shutdown task is a synchronous transition;
 its actual shutdown work and caller wait remain outside the gate. Do not blindly
-remove lifecycle, ordered apply, journal, storage-reader or admission ownership.
+remove lifecycle, ordered apply, storage-reader or admission ownership.
 Replace Monitor wait/pulse disposal coordination with a dedicated typed disposal
 Lock. RuntimeTextProjection retains its synchronous IDisposable contract and holds
 this gate through reader join/cleanup. Reader settlement uses independent state
@@ -36,7 +37,6 @@ flowchart LR
     State --> Shared[Node-local service or callback state]
     Grain --> Scheduler[Orleans turns]
     Shared --> Short[Short synchronous transition uses Lock]
-    Shared --> Async[Awaited exclusion uses SemaphoreSlim WaitAsync]
     Compiler[KLD0034] --> Forbidden[Reject object Monitor and grain locks]
 ```
 
@@ -55,7 +55,7 @@ Preserve unrelated changes and nearest local policy; same-file OrleansNode edits
 
 Initial inventory found object gates in shared services and test collectors,
 including OrleansNode, the silo-local storage owner and
-ZoneTreePointCacheLifecycle, plus Monitor wait/pulse disposal coordination in
+retained iterator lifecycle, plus disposal coordination in
 RuntimeTextProjection. Typed-gate refactoring covers 64 fields and two helper parameters;
 the new real reader disposal/reopen regression is authored. Local compiler,
 Aspire analyzer and blocker evidence is retained in the

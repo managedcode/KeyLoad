@@ -53,7 +53,7 @@ internal static class TextCrashScenario
         {
             throw new ArgumentOutOfRangeException(nameof(stageText), stageText, RunAsyncMessageText);
         }
-        using var store = new ZoneTreeStore(new(directory), CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(directory), CrashExecutionOptions.StorageExecution());
         var database = CrashDatabase.Create(store);
         var partition = CreatePartition();
         SeedDatabase(database, partition);
@@ -73,6 +73,7 @@ internal static class TextCrashScenario
         var receipt = await CaptureReceiptAsync(directory, store, database, partition, query, expectedIds,
             CanonicalDocumentIds);
         await File.WriteAllBytesAsync(receiptPath, OrleansSerialization.Serialize(receipt));
+        await store.SyncAsync();
         boundary.Armed = true;
         _ = await search.SearchAsync(CrashFixtureValues.Principal,
             new(partition, CrashFixtureValues.Orders, TextPath, query)).ConfigureAwait(false);

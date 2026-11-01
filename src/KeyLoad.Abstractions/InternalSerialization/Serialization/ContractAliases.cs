@@ -155,7 +155,6 @@ internal static class ContractAliases
     internal const string StartLiveQueryRequest = "keyload.contract.start-live-query-request";
     internal const string StorageMutation = "keyload.contract.storage-mutation";
     internal const string StorageScanResult = "keyload.contract.storage-scan-result";
-    internal const string StorageSnapshot = "keyload.contract.storage-snapshot";
     internal const string StoreIdentity = "keyload.contract.store-identity";
     internal const string StreamHead = "keyload.contract.stream-head";
     internal const string StreamPage = "keyload.contract.stream-page";

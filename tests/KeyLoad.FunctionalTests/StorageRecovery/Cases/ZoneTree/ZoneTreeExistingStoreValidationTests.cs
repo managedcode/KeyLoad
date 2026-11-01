@@ -8,7 +8,6 @@ internal sealed class ZoneTreeExistingStoreValidationTests
 {
     private const byte ChecksumCorruptionMask = 0x01;
     private const int NoObservedStages = 0;
-    private const long NoRetainedBytes = 0;
 
     [Test]
     [Arguments(false)]
@@ -66,26 +65,19 @@ internal sealed class ZoneTreeExistingStoreValidationTests
         await AssertInvalidAsync(files, ExistingStoreInspectionVariant.EmptyIncarnation, ExistingStoreInspectionExpectedFailures.Argument);
         await AssertInvalidAsync(files, ExistingStoreInspectionVariant.RelativeDirectory, ExistingStoreInspectionExpectedFailures.Argument);
         await AssertInvalidAsync(files, ExistingStoreInspectionVariant.EmptyDirectory, ExistingStoreInspectionExpectedFailures.Argument);
-        await AssertInvalidAsync(files, ExistingStoreInspectionVariant.ZeroFrameBudget, ExistingStoreInspectionExpectedFailures.ArgumentOutOfRange);
-        await AssertInvalidAsync(files, ExistingStoreInspectionVariant.ZeroSnapshotBudget, ExistingStoreInspectionExpectedFailures.ArgumentOutOfRange);
         await AssertInvalidAsync(files, ExistingStoreInspectionVariant.NonCanonicalDirectory, ExistingStoreInspectionExpectedFailures.Argument);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
         await files.AssertOwnerAvailableAsync();
     }
 
     [Test]
-    public async Task AcSg009001CacheAndObserverAreRejectedWithoutAdmissionOrInvocation()
+    public async Task AcSg009001ObserverIsRejectedWithoutInvocation()
     {
         using var files = new ZoneTreeExistingStoreFixture();
         var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
-        var cache = await files.InspectAsync(ExistingStoreInspectionVariant.Cache);
-        await ExistingStoreInspectionAssertions.FailedAsync(cache, null, ExistingStoreInspectionExpectedFailures.Argument);
-        await Assert.That(cache.Receipt!.ObservedStages).IsEqualTo(NoObservedStages);
-        await Assert.That(cache.Receipt.RetainedBytes).IsEqualTo(NoRetainedBytes);
         var observer = await files.InspectAsync(ExistingStoreInspectionVariant.Observer);
         await ExistingStoreInspectionAssertions.FailedAsync(observer, null, ExistingStoreInspectionExpectedFailures.Argument);
         await Assert.That(observer.Receipt!.ObservedStages).IsEqualTo(NoObservedStages);
-        await Assert.That(observer.Receipt.RetainedBytes).IsEqualTo(NoRetainedBytes);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
         await files.AssertOwnerAvailableAsync();
     }

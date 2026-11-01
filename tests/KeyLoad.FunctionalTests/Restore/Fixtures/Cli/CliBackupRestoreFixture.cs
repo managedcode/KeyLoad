@@ -10,9 +10,7 @@ internal sealed class CliBackupRestoreFixture
     internal const string StoredKey = "cli-backup/seed";
     internal const string StoredValue = "canonical-cli-backup-value";
     internal const string BackupDirectoryName = "backup";
-    internal const string ArtifactFileName = "backup.ctg";
-    internal const string CopiedArtifactDirectoryName = "copied-artifact";
-    internal const string UnpackedDirectoryName = "unpacked";
+    internal const string CopiedBackupDirectoryName = "copied-backup";
     internal const string RestoredDirectoryName = "restored";
     internal const string ExistingDestinationName = "existing-destination";
     internal const string PreservedFileName = "preserved.txt";
@@ -31,10 +29,7 @@ internal sealed class CliBackupRestoreFixture
         RootPrefix + Guid.NewGuid().ToString("N"));
     internal string SourceDirectory => Path.Combine(Root, "source");
     internal string BackupDirectory => Path.Combine(Root, BackupDirectoryName);
-    internal string ArtifactPath => Path.Combine(Root, ArtifactFileName);
-    internal string CopiedArtifactDirectory => Path.Combine(Root, CopiedArtifactDirectoryName);
-    internal string CopiedArtifactPath => Path.Combine(CopiedArtifactDirectory, ArtifactFileName);
-    internal string UnpackedDirectory => Path.Combine(Root, UnpackedDirectoryName);
+    internal string CopiedBackupDirectory => Path.Combine(Root, CopiedBackupDirectoryName);
     internal string RestoredDirectory => Path.Combine(Root, RestoredDirectoryName);
     internal string ExistingDestination => Path.Combine(Root, ExistingDestinationName);
     internal StoreIdentity OriginalIdentity => InitializedIdentity ?? throw new InvalidOperationException(MissingIdentityMessage);
@@ -62,7 +57,7 @@ internal sealed class CliBackupRestoreFixture
 
     internal async Task AssertSeedRemainsAsync()
     {
-        using var store = new ZoneTreeStore(new(SourceDirectory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(SourceDirectory), UnitExecutionOptions.StorageExecution());
         var value = store.Read(view => OrleansSerialization.Deserialize<string>(view.ReadOwnedValue(StoredKeyBytes)!));
         await Assert.That(value).IsEqualTo(StoredValue);
     }
@@ -78,7 +73,7 @@ internal sealed class CliBackupRestoreFixture
         ZoneTreeStore? store = null;
         var failures = new List<Exception>();
         ServerFailureObserver.Observe(() => store = new ZoneTreeStore(new(SourceDirectory),
-            UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()), failures);
+            UnitExecutionOptions.StorageExecution()), failures);
         if (store is not null)
         {
             InitializedIdentity = store.Identity;

@@ -4,15 +4,15 @@ Status: Accepted; replicated-cluster restore and delivery resumption qualificati
 
 ## Context and decision
 
-Feeds, projection rebuilds, consumer groups, inbox deduplication, transfer intents, and receipts depend on retained history for different horizons. Purging beyond an active consumer's required prefix can make recovery silently incomplete. Restoring an older snapshot can roll back leases, checkpoints, and external-delivery receipts, so external work must not resume automatically.
+Feeds, projection rebuilds, consumer groups, inbox deduplication, transfer intents, and receipts depend on retained history for different horizons. Purging beyond an active consumer's required prefix can make recovery silently incomplete. Restoring an older backup can roll back leases, checkpoints, and external-delivery receipts, so external work must not resume automatically.
 
-Persist retention pins for active consumers/rebuilds/transfers and report history loss explicitly. Restore verifies the manifest, creates a new incarnation, invalidates old tokens, and starts with dispatch paused. Operators reconcile group/lease/inbox/transfer state against retained history before explicit resume. This is a fail-closed boundary, not a claim of global consistency for current local backups.
+Persist retention pins for active consumers/rebuilds/transfers and report history loss explicitly. Restore validates the backed-up identity, creates a new node identity, incarnation and signing key that invalidate old tokens, and starts with dispatch paused ([ADR-011](ADR-011-current-format.md)). Operators reconcile group/lease/inbox/transfer state against retained history before explicit resume. This is a fail-closed boundary, not a claim of global consistency for current local backups.
 
 ```mermaid
 flowchart LR
     Consumers[Consumer and rebuild pins] --> GC[Bounded prefix reclamation]
     GC -->|cannot cross active pin| Retain[Keep required history]
-    Backup[Verified backup cut] --> Restore[Clean restore and new incarnation]
+    Backup[Backup through its position] --> Restore[Empty-destination restore and new incarnation]
     Restore --> Paused[Dispatch paused]
     Paused --> Reconcile[Reconcile leases, groups, inbox, transfers]
     Reconcile --> Resume[Explicit operator resume]
@@ -24,12 +24,12 @@ Unpinned time-based deletion is rejected because a slow or rebuilding consumer c
 
 ## Related requirements and implementation contract
 
-Related: `REQ-BACKUP-003..004/AC-BACKUP-003..004`, `REQ-FEED-004..005/AC-FEED-004..005`, `REQ-MSG-003/006`; ADR-008/023/025/026/027. Current local restore is in `src/KeyLoad.Storage.ZoneTree/ZoneTreeStore.cs`; outbox pins are in `src/KeyLoad.Core/ChangeFeeds/Execution/ProjectionOutbox.cs`; detailed feed design is `docs/design/change-feeds.md`.
+Related: `REQ-BACKUP-003..004/AC-BACKUP-003..004`, `REQ-FEED-004..005/AC-FEED-004..005`, `REQ-MSG-003/006`; ADR-008/023/025/026/027. Current local backup and restore are in `src/KeyLoad.Storage.ZoneTree/Restore/Execution/ZoneTreeBackup.cs` behind `ZoneTreeStore`; outbox pins are in `src/KeyLoad.Core/ChangeFeeds/Execution/ProjectionOutbox.cs`; detailed feed design is `docs/design/change-feeds.md`.
 
-1. Freeze which state classes create pins, how pins expire/release, restore cut format, and manual reconciliation responsibilities.
-2. Test pin floor, bounded purge, restore corruption, new incarnation, stale token rejection, paused dispatch, and no automatic external redelivery.
-3. Implement pin and manifest support in owning ChangeFeeds/Messaging/BackupRestore slices.
-4. Roll out restore as paused by default; rollback returns to the prior validated database, not an unverified partially resumed older cut.
+1. Freeze which state classes create pins, how pins expire/release, and manual reconciliation responsibilities.
+2. Test pin floor, bounded purge, unsupported restored identity, new incarnation, stale token rejection, paused dispatch, and no automatic external redelivery.
+3. Implement pin support in the owning ChangeFeeds/Messaging slices; BackupRestore restores pins with the rest of the store.
+4. Roll out restore as paused by default; rollback returns to the prior database, not a partially resumed older cut.
 5. Qualify real process recovery and Docker/Aspire replicated-cluster restore and node-loss scenarios in GitHub. Power-loss and endurance need separate gates.
 
 Current source has local backup restore and outbox retention pins. A cluster-wide consistent cut is not part of the current design; each silo restores its own local backup. No test title alone constitutes a qualification result.

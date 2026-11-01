@@ -31,7 +31,7 @@ committed reads, keys, persisted authority and routing/lifecycle.
 
 The official MCP join also updates ADR-039 and the independent ClientApi name/schema/hint oracle for both shortest-path tools. The current independent canonical inventory has 68 names; that inventory count is distinct from the three public gateway tools and must be checked independently before real cluster discovery qualification. Packages, shared configuration and formats stay unchanged. Neither source presence nor focused passes complete the acceptance; normal/scalar, recovery and full cluster/client gates, including failover/revocation, remain required.
 
-No canonical data, existing alias/ID, journal or acknowledgement
+No canonical data, existing alias/ID, storage format or acknowledgement
 changes occur. The request does not alter canonical stored data. Rollout adds explicit v1 capabilities;
 unknown versions fail closed. Rollback removes new read registration without
 rewriting acknowledged data. Weighted/cross-partition paths, full SQL/protocol

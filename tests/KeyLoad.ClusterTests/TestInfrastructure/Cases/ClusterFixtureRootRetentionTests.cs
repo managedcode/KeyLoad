@@ -39,8 +39,7 @@ internal sealed class ClusterFixtureRootRetentionTests
         {
             Directory.CreateDirectory(root);
             await File.WriteAllTextAsync(Path.Combine(root, SentinelFile), SentinelValue);
-            using (var store = new ZoneTreeStore(new(directory), IntegrationExecutionOptions.StorageExecution(),
-                IntegrationExecutionOptions.PointCacheExecution()))
+            using (var store = new ZoneTreeStore(new(directory), IntegrationExecutionOptions.StorageExecution()))
             {
                 active = store;
                 await ServerFailureObserver.ObserveAsync(async () =>
@@ -60,7 +59,7 @@ internal sealed class ClusterFixtureRootRetentionTests
             using (var reopened = new ZoneTreeStore(new(directory)
             {
                 Incarnation = expected.Incarnation
-            }, IntegrationExecutionOptions.StorageExecution(), IntegrationExecutionOptions.PointCacheExecution()))
+            }, IntegrationExecutionOptions.StorageExecution()))
             {
                 await ServerFailureObserver.ObserveAsync(() => VerifyAsync(root, reopened, expected), failures);
             }

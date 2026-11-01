@@ -1,6 +1,5 @@
 using System.Runtime.ExceptionServices;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -16,7 +15,7 @@ internal sealed class PartitionStores : IDisposable
     private const string OriginalCloseUnjoined = "The original partition stores close has not returned; retain its root.";
 
     internal PartitionStores(IOptions<NodeOptions> nodeOptions, string directory,
-        IOptions<ZoneTreeStorageExecutionOptions> executionOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions,
+        IOptions<ZoneTreeStorageExecutionOptions> executionOptions,
         TimeProvider? clock = null, Action<CommitStage, long, int>? canonicalObserver = null,
         PartitionHostOwnership? ownershipSettlement = null)
     {
@@ -40,7 +39,7 @@ internal sealed class PartitionStores : IDisposable
             {
                 File.SetUnixFileMode(directory, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
             }
-            Canonical = ZoneTreeStore.OpenOwned(canonicalOptions, executionOptions, cacheOptions, settlement.Canonical, clock);
+            Canonical = ZoneTreeStore.OpenOwned(canonicalOptions, executionOptions, settlement.Canonical, clock);
         }
         catch (Exception error)
         {

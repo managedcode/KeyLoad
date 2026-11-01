@@ -19,7 +19,7 @@ flowchart LR
  B -->|nonregular| D[Fixed refusal before identity and provider]
  B -->|missing normal open| E[One exclusive CreateNew]
  B -->|missing existing-only| F[FileNotFound without creation]
- C --> G[Original identity journal tree recovery]
+ C --> G[Original identity and tree recovery]
  E --> G
 ```
 

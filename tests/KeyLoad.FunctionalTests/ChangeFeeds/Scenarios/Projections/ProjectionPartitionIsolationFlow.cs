@@ -46,8 +46,7 @@ internal static class ProjectionPartitionIsolationFlow
         ProjectionPartitionIsolationState? result = null;
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution(), timeProvider: database.Database.EvaluationClock);
+            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, timeProvider: database.Database.EvaluationClock);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () => { result = await action(cold); }, failures);
         }, failures);
         global::KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);

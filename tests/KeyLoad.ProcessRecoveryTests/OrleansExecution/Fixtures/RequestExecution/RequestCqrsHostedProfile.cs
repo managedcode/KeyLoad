@@ -3,7 +3,6 @@ using System.Security.Cryptography;
 using KeyLoad.Clustering;
 using KeyLoad.Core;
 using KeyLoad.Server;
-using ManagedCode.Orleans.Graph;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
@@ -32,7 +31,6 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
     private const string PublicUrls = "--urls=http://127.0.0.1:0";
     private const string WarningLogLevel = "--Logging:LogLevel:Default=Warning";
     private const int SigningKeyBytes = 32;
-    private const string DefaultDenyRequired = "The production host must register its execution default-deny grain policy.";
     internal TimeProvider Clock { get; } = clock;
     internal IOptions<GrainRoutingOptions> Routing { get; } = routing;
     internal IGrainRequestPhaseObserver? Observer { get; } = observer;
@@ -86,31 +84,7 @@ internal sealed class RequestCqrsHostedProfile(TimeProvider clock, IOptions<Grai
         services.AddSingleton<IConfigureGrainTypeComponents>(provider => new RequestCqrsGrainComponentConfigurator(
             provider.GetRequiredService<GrainClassMap>(), provider));
         services.AddSerializer(serialization => serialization.AddAssembly(typeof(RequestCqrsProbeResult).Assembly));
-        ExtendProbePolicy(services);
         configureServices?.Invoke(services, node);
-    }
-
-    private static void ExtendProbePolicy(IServiceCollection services)
-    {
-        var descriptor = services.Single(value => !value.IsKeyedService && value.ServiceType == typeof(GrainTransitionManager));
-        if (descriptor.ImplementationInstance is not GrainTransitionManager current)
-        {
-            throw new InvalidOperationException(DefaultDenyRequired);
-        }
-        var graph = new DirectedGraph(allowSelfLoops: true);
-        foreach (var edge in current.GetPolicyEdges())
-        {
-            foreach (var transition in edge.Transitions)
-            {
-                graph.AddTransition(edge.Source, edge.Target, transition);
-            }
-        }
-        graph.AddTransition(ManagedCode.Orleans.Graph.Interfaces.Constants.ClientCallerId,
-            typeof(IRequestCqrsIdentityProbeGrain).FullName!, new(
-                ManagedCode.Orleans.Graph.Interfaces.Constants.AnyMethod,
-                ManagedCode.Orleans.Graph.Interfaces.Constants.AnyMethod));
-        services.Remove(descriptor);
-        services.AddSingleton(new GrainTransitionManager(graph, allowAllByDefault: false));
     }
 
     private static string Setting(string name, string value) => SettingPrefix + name + Assignment + value;

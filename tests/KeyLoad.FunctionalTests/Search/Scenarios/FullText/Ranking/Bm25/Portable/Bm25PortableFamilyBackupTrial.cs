@@ -1,11 +1,9 @@
 using KeyLoad.FunctionalTests.BackupRestore;
-using KeyLoad.Storage.ZoneTree.Restore;
 
 namespace KeyLoad.FunctionalTests.Search;
 
 internal static class Bm25PortableFamilyBackupTrial
 {
-    private const int ArtifactPieceBytes = 4_096;
     private const int FirstCold = 0;
     private const int ColdReopenCount = 2;
 
@@ -18,14 +16,10 @@ internal static class Bm25PortableFamilyBackupTrial
             fixture.Source.Database.EvaluationClock, token);
         var sourcePosition = fixture.Source.Store.Position;
         var backup = Path.Combine(fixture.Root, "bm25-backup");
-        var archive = Path.Combine(fixture.Root, "bm25-archive");
-        var unpacked = Path.Combine(fixture.Root, "bm25-unpacked");
         var target = Path.Combine(fixture.Root, "bm25-target");
-        var capture = MixedEventingBackupRestore.Capture(fixture.Source, backup, token);
-        BackupArtifact.Pack(backup, archive, ArtifactPieceBytes, fixture.Source.Database.EvaluationClock);
-        BackupArtifact.Unpack(archive, unpacked);
+        var capture = await MixedEventingBackupRestore.CaptureAsync(fixture.Source, backup, token);
         var restoredPosition = await MixedEventingBackupRestore.RestoreAsync(fixture.Source,
-            capture, unpacked, target, token);
+            capture, backup, target, token);
         fixture.OpenTarget(target);
         await Assert.That(fixture.Target!.Position).IsEqualTo(restoredPosition);
         await Assert.That(fixture.Target.Identity.Incarnation).IsNotEqualTo(seeded.Heads[0].Incarnation);

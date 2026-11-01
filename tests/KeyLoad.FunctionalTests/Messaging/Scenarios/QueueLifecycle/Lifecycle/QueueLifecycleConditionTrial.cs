@@ -18,7 +18,7 @@ internal static class QueueLifecycleConditionTrial
         await Assert.That(damaged.Position).IsEqualTo(originalCut.Position + 1);
         fixture.Store.Dispose();
         QueueLifecycleConditionCut healthy;
-        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
             await QueueLifecycleConditionAssertions.Same(cold, damaged);
@@ -71,7 +71,7 @@ internal static class QueueLifecycleConditionTrial
         var initialCut = QueueLifecycleConditionAssertions.Capture(fixture.Store);
         fixture.Store.Dispose();
         QueueLifecycleConditionCut healthy;
-        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
             await QueueLifecycleConditionAssertions.Same(cold, initialCut);
@@ -91,7 +91,7 @@ internal static class QueueLifecycleConditionTrial
     }
     private static async Task SecondCold(TestDatabase fixture, QueueLifecycleTestState state, QueueLifecycleConditionCut healthy)
     {
-        using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var owner = fixture.CreateConfiguredDatabase(cold);
         await QueueLifecycleConditionAssertions.Same(cold, healthy);
         await QueueLifecycleConditionAssertions.Terminal(owner, cold, state);

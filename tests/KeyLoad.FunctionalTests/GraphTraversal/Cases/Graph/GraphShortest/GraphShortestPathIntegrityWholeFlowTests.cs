@@ -26,7 +26,7 @@ internal sealed class GraphShortestPathIntegrityWholeFlowTests
         GraphTraversalIntegrityContinuation continuation;
         string[] continuedImage;
         long continuedPosition;
-        using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution))
         {
             var owner = database.CreateConfiguredDatabase(cold);
             await GraphTraversalIntegrityAssertions.Image(cold, corruptImage, corruptPosition);
@@ -41,7 +41,7 @@ internal sealed class GraphShortestPathIntegrityWholeFlowTests
             continuedImage = CanonicalStoreImage.Bytes(cold);
             continuedPosition = cold.Position;
         }
-        using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var secondOwner = database.CreateConfiguredDatabase(secondCold);
         await GraphTraversalIntegrityAssertions.Image(secondCold, continuedImage, continuedPosition);
         await GraphShortestPathIntegrityAssertions.Healthy(secondOwner, secondCold, state, continuation, filtered, token);

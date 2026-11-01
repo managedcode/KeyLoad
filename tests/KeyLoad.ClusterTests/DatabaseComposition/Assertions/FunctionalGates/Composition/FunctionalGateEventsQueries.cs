@@ -12,15 +12,15 @@ internal static class FunctionalGateEventsQueries
         var request = FunctionalGateEventsProtocol.Query(stream, iteration);
         var sdk = await context.SdkAsync(context.Reader.Sdk.QueryAsync(request, token));
         var mcp = await context.McpAsync<QueryPage>(context.Reader, McpCallerTools.QueryExecute, request, token);
-        await PageAsync(context, sdk, iteration, receipt.Token.Position);
-        await PageAsync(context, mcp, iteration, receipt.Token.Position);
+        await PageAsync(context, sdk, iteration, receipt.Token.Position, token);
+        await PageAsync(context, mcp, iteration, receipt.Token.Position, token);
         await FunctionalGateEventsAssertions.SameAsync(sdk.Rows, mcp.Rows);
     }
 
-    private static async Task PageAsync(FunctionalGateContext context, QueryPage page, int iteration, long minimumCut)
+    private static async Task PageAsync(FunctionalGateContext context, QueryPage page, int iteration, long canonicalMinimum, CancellationToken token)
     {
         await Assert.That(page.Cursor).IsNull();
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(minimumCut);
+        await FunctionalGateReadPositions.RequireAsync(context, canonicalMinimum, token, page.CutPosition);
         await Assert.That(page.AccessPath).IsEqualTo("bounded-event-entity-reference-inner-join");
         await Assert.That(page.Rows.Length).IsEqualTo(1);
         var row = page.Rows.Single();

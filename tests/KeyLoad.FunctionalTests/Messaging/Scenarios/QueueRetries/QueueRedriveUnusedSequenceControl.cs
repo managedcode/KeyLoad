@@ -73,7 +73,7 @@ internal static class QueueRedriveUnusedSequenceControl
         var position = fixture.Store.Position;
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         recorder.Database = database;
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);

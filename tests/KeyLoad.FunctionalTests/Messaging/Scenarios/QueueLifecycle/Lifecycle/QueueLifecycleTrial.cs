@@ -14,14 +14,14 @@ internal static class QueueLifecycleTrial
         await QueueLifecycleBackupRestore.RunAsync(fixture.Store, state, token);
         var initial = QueueLifecycleImage.Capture(fixture.Store, state.Lane);
         fixture.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await QueueLifecycleImage.SameAsync(reopened, state.Lane, initial);
         await QueueLifecycleOperations.ReplayAsync(database, state, QueueLifecycleTestProtocol.Held);
         await QueueLifecycleContinuation.RunAsync(database, reopened, state, token);
         var terminal = QueueLifecycleImage.Capture(reopened, state.Lane);
         reopened.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
         await QueueLifecycleImage.SameAsync(cold, state.Lane, terminal);
         await QueueLifecycleOperations.ReplayAsync(restored, state);

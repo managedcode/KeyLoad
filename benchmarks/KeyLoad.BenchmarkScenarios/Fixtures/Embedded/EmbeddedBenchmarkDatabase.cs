@@ -30,7 +30,7 @@ internal sealed class EmbeddedBenchmarkDatabase(EmbeddedBenchmarkRuntimeOptions 
     /// <summary>Opens the store, bootstraps the administrator and configures one document collection.</summary>
     internal void Initialize(string collection)
     {
-        store = new(new(directory), options.Storage, options.PointCache, timeProvider);
+        store = new(new(directory), options.Storage, timeProvider);
         database = new(store, new AuthorizationPolicy(), options.Database, options.DueWork, options.EventSource,
             options.Messaging, options.GraphExecution, options.ChangeFeedExecution, options.RuntimeClaimsExecution,
             options.TimeSeriesExecution, timeProvider);

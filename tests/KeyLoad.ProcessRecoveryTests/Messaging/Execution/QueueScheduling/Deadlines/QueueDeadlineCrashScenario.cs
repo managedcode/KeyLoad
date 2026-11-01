@@ -30,8 +30,8 @@ internal static class QueueDeadlineCrashScenario
         var operation = database.OwnCommand(CrashDatabase.Operation(database, OperationKind.Batch, request, request.CommandId));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueDeadlineCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
         boundary.Position = store.Position + QueueDeadlineCrashProtocol.First;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 }

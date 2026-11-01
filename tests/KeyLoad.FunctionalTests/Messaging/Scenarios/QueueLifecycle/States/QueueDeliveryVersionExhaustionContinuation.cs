@@ -36,7 +36,7 @@ internal static class QueueDeliveryVersionExhaustionContinuation
         var position = store.Position;
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await ReplayColdAsync(restored, cold, state, failed, terminal, receipts);

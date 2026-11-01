@@ -45,7 +45,7 @@ internal sealed class OperationOwnershipTests
         await Assert.That(verified.Timestamp).IsEqualTo(restamped.Timestamp);
         await Assert.That(verified.Timestamp).IsNotEqualTo(operation.Timestamp);
         await Assert.That(DatabaseCommandContentIdentity.SameContent(verified, operation)).IsTrue();
-        await Assert.That(OrleansSerialization.Serialize(verified.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(verified.Value!.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(operation.Value!.Input))).IsTrue();
     }
 
 }

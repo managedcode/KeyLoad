@@ -65,20 +65,36 @@ public static class AtomicCommandCommit
         var siloLocal = engine.IsSiloLocalOperation(operation);
         cancellationToken.ThrowIfCancellationRequested();
         var committed = engine.Store.Commit((transaction, position) =>
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-            var admitted = selectEmbeddedClock ? engine.EvaluateCommand(operation, engine.EvaluationClock.GetUtcNow()) : operation;
-            if (selectEmbeddedClock)
-            {
-                admitted = engine.PrepareQueueRetryInView(transaction, admitted);
-            }
-
-            var sequence = siloLocal ? StorageOperationApply.InitialCanonicalSequence : canonicalSequence ?? StorageOperationApply.SelectNextCanonicalSequence(transaction);
-            var result = engine.ApplyCommittedCommand(transaction, admitted, position, sequence, siloLocal, cancellationToken);
-            cancellationToken.ThrowIfCancellationRequested();
-            return result;
-        });
+            engine.CompileCommand(transaction, position, operation, canonicalSequence, selectEmbeddedClock, siloLocal, cancellationToken));
         return committed;
+    }
+
+    internal static Task<StorageOperationResult> ApplyCoreAsync(this DatabaseEngine engine, Command<DatabaseCommand> operation,
+        long? canonicalSequence, bool selectEmbeddedClock, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(operation);
+        operation = engine.OwnCommand(operation);
+        var siloLocal = engine.IsSiloLocalOperation(operation);
+        return engine.Store.CommitAsync((transaction, position) =>
+            engine.CompileCommand(transaction, position, operation, canonicalSequence, selectEmbeddedClock, siloLocal, cancellationToken),
+            cancellationToken);
+    }
+
+    private static StorageOperationResult CompileCommand(this DatabaseEngine engine, IAtomicTransaction transaction,
+        long position, Command<DatabaseCommand> operation, long? canonicalSequence, bool selectEmbeddedClock, bool siloLocal,
+        CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var admitted = selectEmbeddedClock ? engine.EvaluateCommand(operation, engine.EvaluationClock.GetUtcNow()) : operation;
+        if (selectEmbeddedClock)
+        {
+            admitted = engine.PrepareQueueRetryInView(transaction, admitted);
+        }
+        var sequence = siloLocal ? StorageOperationApply.InitialCanonicalSequence
+            : canonicalSequence ?? StorageOperationApply.SelectNextCanonicalSequence(transaction);
+        var result = engine.ApplyCommittedCommand(transaction, admitted, position, sequence, siloLocal, cancellationToken);
+        cancellationToken.ThrowIfCancellationRequested();
+        return result;
     }
 
     internal static StorageOperationResult ApplyCommittedCommand(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, long position, long replicationIndex, bool siloLocal, CancellationToken cancellationToken)
@@ -101,8 +117,8 @@ public static class AtomicCommandCommit
             CanonicalSequence = replicationIndex
         };
         CommandOutcomeApplication.PersistCommandOutcome(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
-        var result = CommandOutcomeApplication.ValidateCompiledCommand(rosterTransaction, operation, selection.Key, outcome, replicationIndex, persistOutcome);
-        return new(outcome.CanonicalSequence, result);
+        rosterTransaction.PersistCandidates();
+        return new(outcome.CanonicalSequence, outcome.Result);
     }
 
     internal static StoredOutcome ExecuteAndBuildOutcome(this DatabaseEngine engine, AtomicPartitionRosterTransaction transaction, Command<DatabaseCommand> operation, long position, long replicationIndex, CommandOutcomePartitionScope partitionScope, bool siloLocal, out bool replayed, out CommandOutcomeSelection selection, out bool persistOutcome, CancellationToken cancellationToken)

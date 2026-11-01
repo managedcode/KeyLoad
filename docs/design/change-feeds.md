@@ -1,8 +1,8 @@
 # Committed outbox, document changes and scalar live queries
 
-The system outbox is a logical mutation stream inside one atomic partition. It is separate from the private redo journal, business event streams, retained topics and queue delivery. Each entry stores a monotonically increasing sequence, its command-local ordinal, commit token, evaluation time, accepted mutation and receipt. Document mutations also retain canonical before/after images. The outbox entry, strict indexes, domain effect, command outcome and apply watermark share one compiled redo frame. Failed batches publish no entries; a same-command retry does not append again.
+The system outbox is a logical mutation stream inside one atomic partition. It is separate from ZoneTree's write-ahead log, business event streams, retained topics and queue delivery. Each entry stores a monotonically increasing sequence, its command-local ordinal, commit token, evaluation time, accepted mutation and receipt. Document mutations also retain canonical before/after images. The outbox entry, strict indexes, domain effect, command outcome and apply watermark share one ZoneTree transaction. Failed batches publish no entries; a same-command retry does not append again.
 
-Documents written before a consumer starts are included through a live-query snapshot; the outbox never synthesizes past history. Entries and consumer checkpoints are canonical backup state and are copied with every other write to the `ReplicaCount` ZoneTree owners. Reopening and compaction preserve them; administrative restore changes the incarnation and invalidates old tokens.
+Documents written before a consumer starts are included through a live-query snapshot; the outbox never synthesizes past history. Entries and consumer checkpoints are canonical backup state and are copied with every other write to the `ReplicaCount` ZoneTree owners. Reopening and ZoneTree merge maintenance preserve them; administrative restore changes the incarnation and invalidates old tokens.
 
 ## System projection lifecycle
 

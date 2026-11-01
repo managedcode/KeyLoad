@@ -204,7 +204,7 @@ internal sealed class AggregateReplayFixture : IDisposable
 
     private void Open(DatabaseLimits? limits, TimeProvider? timeProvider)
     {
-        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        store = new(new(directory), UnitExecutionOptions.StorageExecution());
         database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider);
     }
 

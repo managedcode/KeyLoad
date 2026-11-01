@@ -23,7 +23,7 @@ internal static class QueueDeliveryVersionExhaustionTrial
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await QueueDeliveryVersionExhaustionContinuation.RunAsync(QueueWholeFlowStorage.Open(cold), cold,
             fixture.Directory, state, failed, action, identity, token);

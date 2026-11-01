@@ -19,7 +19,7 @@ internal static class SampleRawIntegrityAssertions
             {
                 throw new InvalidOperationException(ImageBound);
             }
-            return JsonSerializer.Serialize(page.Records.Select(record =>
+            return JsonSerializer.Serialize(page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }).ToArray());
         }));
 

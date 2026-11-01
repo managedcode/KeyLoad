@@ -41,7 +41,7 @@ internal sealed class SqlCompositionParameterFixture : IDisposable
         cold = ZoneTreeStore.OpenOwned(new(Source.Directory)
         {
             Incarnation = Source.Store.Identity.Incarnation
-        }, Source.StorageExecution, UnitExecutionOptions.PointCacheExecution(), attempt);
+        }, Source.StorageExecution, attempt);
         closeAttempted = false;
         ColdDatabase = Source.CreateConfiguredDatabase(cold);
     }

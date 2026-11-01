@@ -46,7 +46,7 @@ internal static class CredentialStatusAssertions
             {
                 throw new InvalidOperationException(P.Failure);
             }
-            return page.Records.Select(row => new KeyValuePair<byte[], byte[]>(row.Key.ToArray(), row.Value.ToArray())).ToArray();
+            return page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Select(row => new KeyValuePair<byte[], byte[]>(row.Key.ToArray(), row.Value.ToArray())).ToArray();
         });
         var hashes = rows.ToDictionary(row => Hash(row.Key), row => Hash(row.Value), StringComparer.Ordinal);
         var clock = database.Store.Read(view => OrleansSerialization.Deserialize<DateTimeOffset>(

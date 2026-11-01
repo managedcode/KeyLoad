@@ -23,9 +23,9 @@ internal static class QueueLifecycleBackupRestore
         {
             Directory.CreateDirectory(root);
             var image = QueueLifecycleImage.Capture(source, original.Lane);
-            var position = source.CreateBackup(backup, token);
-            ZoneTreeStore.Restore(backup, target, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
-            restored = new(new(target), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            var position = await source.CreateBackupAsync(backup, token);
+            await ZoneTreeStore.RestoreAsync(backup, target, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
+            restored = new(new(target), UnitExecutionOptions.StorageExecution());
             await Assert.That(restored.Identity.Incarnation).IsNotEqualTo(source.Identity.Incarnation);
             var database = QueueWholeFlowStorage.Open(restored);
             await QueueLifecycleImage.SameAsync(restored, original.Lane, image);
@@ -44,7 +44,7 @@ internal static class QueueLifecycleBackupRestore
             await QueueLifecycleRestoredContinuation.RunAsync(database, restored, state, token);
             var terminal = QueueLifecycleImage.Capture(restored, original.Lane);
             restored.Dispose();
-            restored = new(new(target), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            restored = new(new(target), UnitExecutionOptions.StorageExecution());
             var cold = QueueWholeFlowStorage.Open(restored);
             await QueueLifecycleImage.SameAsync(restored, original.Lane, terminal);
             await QueueLifecycleOperations.ReplayAsync(cold, state);

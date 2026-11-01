@@ -15,6 +15,7 @@ internal sealed class TextIncrementalCrashRuntime : IAsyncDisposable
 {
     private readonly ServiceProvider services;
     private readonly TextIncrementalMaintenanceService owner;
+    private readonly EmbeddedCoordinator coordinator;
     private Guid session = Guid.NewGuid();
     internal ZoneTreeStore Store { get; }
     internal DatabaseEngine Database { get; }
@@ -31,11 +32,12 @@ internal sealed class TextIncrementalCrashRuntime : IAsyncDisposable
         Store = new(new(Path.Combine(root, PartitionStoreProtocol.CanonicalDirectory))
         {
             Incarnation = incarnation
-        }, CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+        }, CrashExecutionOptions.StorageExecution());
         ServiceProvider? openedServices = null;
         try
         {
             Database = CrashDatabase.Create(Store);
+            coordinator = new(Database);
             var registrations = new ServiceCollection().AddRuntimeOptions(new ConfigurationBuilder().Build());
             registrations.AddSingleton(CrashExecutionOptions.DatabaseLimits(Database.Limits));
             services = openedServices = registrations.BuildServiceProvider();
@@ -66,11 +68,11 @@ internal sealed class TextIncrementalCrashRuntime : IAsyncDisposable
         return Task.CompletedTask;
     }
 
-    internal Task<T> CommitAsync<T>(OperationKind kind, object payload, Guid commandId, CancellationToken token)
+    internal async Task<T> CommitAsync<T>(OperationKind kind, object payload, Guid commandId, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         var operation = Database.CreateCommand(kind, commandId, CrashFixtureValues.Principal, default, System.Text.Json.JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options));
-        return Task.FromResult(Database.ApplyEmbedded(operation, token).Get<T>());
+        return (await coordinator.SubmitVerifiedAsync(operation, token)).Get<T>();
     }
 
     internal Task<Result<object>> CommitIssuedAsync(Command<DatabaseCommand> operation, CancellationToken token)
@@ -80,7 +82,7 @@ internal sealed class TextIncrementalCrashRuntime : IAsyncDisposable
         {
             throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
         }
-        return Task.FromResult(Database.ApplyEmbedded(Database.OwnCommand(operation), token));
+        return coordinator.SubmitVerifiedAsync(operation, token);
     }
 
     internal Task<TextMaintenanceCapabilityResult> PhaseAsync(TextIndexMaintenanceRequest request,

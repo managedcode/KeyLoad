@@ -14,8 +14,7 @@ internal static class QueryAdapterNullParityCold
         var captured = new List<(string[] Image, long Position, byte[] Identity)>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = fixture.CreateConfiguredDatabase(store);

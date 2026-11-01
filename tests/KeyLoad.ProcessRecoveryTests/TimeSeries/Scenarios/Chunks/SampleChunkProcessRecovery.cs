@@ -14,11 +14,11 @@ internal static class SampleChunkProcessRecovery
 
     internal static Task RunAsync(string root, bool merge, CancellationToken callerToken)
         => RunOwnedAsync(root, SampleChunkCrashContract.Modes(merge),
-            (mode, token) => SampleChunkProcessAssertions.VerifyAsync(root, mode, merge, token), CommitStage.JournalFlushed, callerToken);
+            (mode, token) => SampleChunkProcessAssertions.VerifyAsync(root, mode, merge, token), CommitStage.WriteAheadLogSynced, callerToken);
 
     internal static Task RunEarlyAsync(string root, SampleChunkEarlyCut cut, CancellationToken callerToken)
         => RunOwnedAsync(root, SampleChunkEarlyCrashProtocol.Modes(cut),
-            (mode, token) => SampleChunkEarlyProcessAssertions.VerifyAsync(root, mode, cut, token), CommitStage.JournalFlushed, callerToken);
+            (mode, token) => SampleChunkEarlyProcessAssertions.VerifyAsync(root, mode, cut, token), CommitStage.WriteAheadLogSynced, callerToken);
 
     internal static Task RunMultiblockAsync(string root, bool merge, CommitStage stage, CancellationToken callerToken)
         => RunOwnedAsync(root, ChunkMultiblockCrashProtocol.Modes(merge),

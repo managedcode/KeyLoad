@@ -20,38 +20,24 @@ public static class OrleansSerialization
     /// <typeparam name="T">The attributed contract or scalar type.</typeparam>
     /// <param name="value">The value to encode.</param>
     /// <returns>The complete generated binary payload.</returns>
-    public static byte[] Serialize<T>(T value) => Serialize(value, ValidationProfile.Strict);
+    // Internal contracts are validated once where public input enters; owned bytes are not re-walked here.
+    public static byte[] Serialize<T>(T value)
+        => Serializer.SerializeToArray(new RuntimePayload { Version = PayloadVersion.Current, Value = value });
 
-    internal static byte[] Serialize<T>(T value, ValidationProfile profile)
-    {
-        ContractValidation.Validate(value, profile);
-        return Serializer.SerializeToArray(new RuntimePayload { Version = PayloadVersion.Current, Value = value });
-    }
-
-    internal static T Copy<T>(T value)
-    {
-        ContractValidation.Validate(value);
-        var owned = Copier.Copy(value);
-        ContractValidation.Validate(owned);
-        return owned!;
-    }
+    internal static T Copy<T>(T value) => Copier.Copy(value)!;
 
     /// <summary>Encodes one owned value into a caller-owned bounded stream.</summary>
     /// <typeparam name="T">The attributed contract or scalar type.</typeparam>
     /// <param name="value">The nonnull value to encode.</param>
     /// <param name="destination">The destination enforcing its write budget and cancellation.</param>
-    public static void Serialize<T>(T value, Stream destination) => Serialize(value, destination, ValidationProfile.Strict);
-
-    internal static void Serialize<T>(T value, Stream destination, ValidationProfile profile)
+    public static void Serialize<T>(T value, Stream destination)
     {
-        ContractValidation.Validate(value, profile);
         ArgumentNullException.ThrowIfNull(destination);
         Serializer.Serialize(new RuntimePayload { Version = PayloadVersion.Current, Value = value }, destination);
     }
 
     internal static void SerializeToWriter<T>(T value, IBufferWriter<byte> destination)
     {
-        ContractValidation.Validate(value);
         ArgumentNullException.ThrowIfNull(destination);
         Serializer.Serialize(new RuntimePayload { Version = PayloadVersion.Current, Value = value }, destination);
     }
@@ -65,21 +51,21 @@ public static class OrleansSerialization
     internal static T Deserialize<T>(ReadOnlySpan<byte> value, ValidationProfile profile)
     {
         using var session = Serializer.SessionPool.GetSession();
-        return (T)DeserializeOwned(value, session, typeof(T), profile == ValidationProfile.PublicInputElements, profile);
+        return (T)DeserializeOwned(value, session, typeof(T), profile == ValidationProfile.PublicInputElements);
     }
 
     internal static T Deserialize<T>(ReadOnlySpan<byte> value, SerializerSession session)
-        => (T)DeserializeOwned(value, session, typeof(T), false, ValidationProfile.Strict);
+        => (T)DeserializeOwned(value, session, typeof(T), false);
 
     internal static object Deserialize(ReadOnlySpan<byte> value, Type expectedType, ValidationProfile profile)
     {
         ArgumentNullException.ThrowIfNull(expectedType);
         using var session = Serializer.SessionPool.GetSession();
-        return DeserializeOwned(value, session, expectedType, profile == ValidationProfile.PublicInputElements, profile);
+        return DeserializeOwned(value, session, expectedType, profile == ValidationProfile.PublicInputElements);
     }
 
     private static object DeserializeOwned(ReadOnlySpan<byte> value, SerializerSession session, Type expectedType,
-        bool exactRoot, ValidationProfile profile)
+        bool exactRoot)
     {
         var payload = ReadGeneratedPayload(value, session);
         if (payload.Version != PayloadVersion.Current)
@@ -91,7 +77,6 @@ public static class OrleansSerialization
         {
             throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
         }
-        ContractValidation.Validate(result, profile);
         return result;
     }
 
@@ -127,7 +112,7 @@ public static class OrleansSerialization
     internal static void Validate(ReadOnlySpan<byte> value, Type expectedRootType, ValidationProfile profile)
     {
         using var session = Serializer.SessionPool.GetSession();
-        _ = DeserializeOwned(value, session, expectedRootType, false, profile);
+        _ = DeserializeOwned(value, session, expectedRootType, profile == ValidationProfile.PublicInputElements);
     }
 
     /// <summary>Measures the generated encoding through a counting destination.</summary>
@@ -142,7 +127,6 @@ public static class OrleansSerialization
 
     internal static long Measure<T>(T value, SerializerSession session)
     {
-        ContractValidation.Validate(value);
         using var buffer = new RuntimeCountingWriter();
         Serializer.Serialize(new RuntimePayload { Version = PayloadVersion.Current, Value = value }, buffer, session);
         return buffer.Length;

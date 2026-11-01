@@ -22,15 +22,18 @@ internal static class EventAppendRecoveryOracle
             EventAppendCrashContract.SeedTailFile, cancellationToken);
         var target = await CommandIdempotencyCrashData.ReadEvidenceAsync<CommitToken>(root,
             EventAppendCrashContract.TargetFile, cancellationToken);
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(),
-            RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = Open(store);
         var recovered = OutcomeStoreOracle.Read(store, original);
         var committed = recovered is not null;
         await Assert.That(store.Position).IsEqualTo(seedPosition + (committed ? PositionStep : 0));
-        if (stage is CommitStage.JournalFlushed or CommitStage.MutationApplied or CommitStage.ApplyCompleted)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         await EventAppendStateAssertions.VerifyAsync(database, new DateTimeOffset(original.Timestamp), seedTail, committed, healthy: false);
         if (recovered is not null)

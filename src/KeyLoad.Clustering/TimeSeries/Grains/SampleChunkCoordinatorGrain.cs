@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.TimeSeries;
-using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
@@ -124,8 +123,7 @@ internal sealed class SampleChunkCoordinatorGrain(IDurableStateManager state,
     }
 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken cancellationToken)
-        => RequestContextHelper.RunWithCurrentCallerAsync(typeof(SampleChunkCoordinatorGrain).FullName!,
-            nameof(IDurableJobHandler.ExecuteJobAsync), () => ExecuteOriginalAsync(context, cancellationToken));
+        => ExecuteOriginalAsync(context, cancellationToken);
 
     private async Task ExecuteOriginalAsync(IJobRunContext context, CancellationToken cancellationToken)
     {

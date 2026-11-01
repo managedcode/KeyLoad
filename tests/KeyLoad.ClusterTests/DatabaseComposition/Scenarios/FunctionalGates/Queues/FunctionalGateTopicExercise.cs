@@ -76,8 +76,7 @@ internal static class FunctionalGateTopicExercise
         await FunctionalGateQueues.EqualAsync(page.Head, official.Head);
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(official.HasMore).IsFalse();
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(published.Token.Position);
-        await Assert.That(official.CutPosition).IsGreaterThanOrEqualTo(published.Token.Position);
+        await FunctionalGateReadPositions.RequireAsync(ctx, published.Token.Position, token, page.CutPosition, official.CutPosition);
         await FunctionalGateQueues.EqualAsync(published, await ctx.SdkAsync(ctx.Writer.Sdk.CommitAsync(command, token)));
     }
 

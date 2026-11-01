@@ -56,13 +56,13 @@ internal static class FunctionalGateEventsAssertions
         await SourceAsync(context, caller, stream, sdk, token);
     }
 
-    private static async Task PageAsync(StreamPage page, StreamRef stream, EventData[] expected, long minimumCut)
+    private static async Task PageAsync(StreamPage page, StreamRef stream, EventData[] expected, long canonicalMinimum)
     {
         await Assert.That(page.Stream).IsEqualTo(stream);
         await Assert.That(page.Head).IsEqualTo(new StreamHead(expected.Length, 1, 1));
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Cursor).IsNull();
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(minimumCut);
+        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(canonicalMinimum);
         await Assert.That(page.SnapshotCutPosition).IsEqualTo(page.CutPosition);
         await Assert.That(page.Events.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
@@ -131,16 +131,16 @@ internal static class FunctionalGateEventsAssertions
             FromBeginning: true, MaximumEvents: 2);
         var sdk = await context.SdkAsync(caller.Sdk.ReadAggregateReplayAsync(request, token));
         var mcp = await context.McpAsync<AggregateReplayPage>(caller, McpCallerTools.StreamsReplay, request, token);
-        await ReplayPageAsync(sdk, full);
-        await ReplayPageAsync(mcp, full);
+        await ReplayPageAsync(context, sdk, full, token);
+        await ReplayPageAsync(context, mcp, full, token);
     }
 
-    private static async Task ReplayPageAsync(AggregateReplayPage actual, StreamPage full)
+    private static async Task ReplayPageAsync(FunctionalGateContext context, AggregateReplayPage actual, StreamPage full, CancellationToken token)
     {
         await Assert.That(actual.Stream).IsEqualTo(full.Stream);
         await Assert.That(actual.Head).IsEqualTo(full.Head);
         await Assert.That(actual.Snapshot).IsNull();
-        await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(full.CutPosition);
+        await FunctionalGateReadPositions.RequireAsync(context, full.CutPosition, token, actual.CutPosition);
         await SameAsync(full.Events, actual.Events);
     }
 
@@ -151,17 +151,17 @@ internal static class FunctionalGateEventsAssertions
         var request = new ReadEventSourceRequest(source, Limit: 2);
         var sdk = await context.SdkAsync(caller.Sdk.ReadEventSourceAsync(request, token));
         var mcp = await context.McpAsync<EventSourcePage>(caller, McpCallerTools.EventsRead, request, token);
-        await SourcePageAsync(sdk, source, full);
-        await SourcePageAsync(mcp, source, full);
+        await SourcePageAsync(context, sdk, source, full, token);
+        await SourcePageAsync(context, mcp, source, full, token);
     }
 
-    private static async Task SourcePageAsync(EventSourcePage actual, EventSourceRef source, StreamPage full)
+    private static async Task SourcePageAsync(FunctionalGateContext context, EventSourcePage actual, EventSourceRef source, StreamPage full, CancellationToken token)
     {
         await Assert.That(actual.Source).IsEqualTo(source);
         await Assert.That(actual.Head).IsEqualTo(new EventSourceHead(full.Events.Length, 1, 1));
         await Assert.That(actual.Cursor.Length).IsGreaterThan(0);
         await Assert.That(actual.HasMore).IsFalse();
-        await Assert.That(actual.CutPosition).IsGreaterThanOrEqualTo(full.CutPosition);
+        await FunctionalGateReadPositions.RequireAsync(context, full.CutPosition, token, actual.CutPosition);
         var expected = full.Events.Select(item => new SourceEventRecord(source, item.Revision,
             item.EventSequence, item.Data, item.RecordedAt)).ToArray();
         await SameAsync<SourceEventRecord[]>(expected, actual.Events.ToArray());

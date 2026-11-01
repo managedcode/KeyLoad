@@ -12,7 +12,7 @@
   </ItemGroup>
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.Orleans.TestingHost" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.Orleans.TestingHost" />
     <InternalsVisibleTo Include="KeyLoad.FunctionalTests" />
     <InternalsVisibleTo Include="KeyLoad.ClusterTests" />
     <ProjectReference Include="../../src/KeyLoad.Cli/KeyLoad.Cli.csproj" />

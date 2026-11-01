@@ -1,4 +1,3 @@
-using KeyLoad.FunctionalTests.InternalSerialization;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.FunctionalTests.TimeSeries;
@@ -53,7 +52,7 @@ internal static class SampleRawIntegrityScenario
                     Value = double.NaN
                 }
             }),
-            SampleRawIntegrityFault.MissingSample => GraphFixtures.EncodeUnchecked(expected with { Sample = null! }),
+            SampleRawIntegrityFault.MissingSample => OrleansSerialization.Serialize(expected with { Sample = null! }),
             SampleRawIntegrityFault.RuntimeWrongRoot => OrleansSerialization.Serialize(WrongRoot),
             SampleRawIntegrityFault.RuntimeMalformed => [byte.MaxValue],
             _ => throw new ArgumentOutOfRangeException(nameof(fault))

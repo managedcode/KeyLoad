@@ -29,7 +29,7 @@ internal sealed class StreamFixtureLifetimeTests
             });
 
             await Assert.That(Directory.Exists(directory)).IsFalse();
-            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
             await Assert.That(Directory.Exists(directory)).IsTrue();
         }
         finally
@@ -69,7 +69,7 @@ internal sealed class StreamFixtureLifetimeTests
         var sentinelPath = Path.Combine(directory, SentinelFileName);
         try
         {
-            using var owner = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var owner = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
             owner.Commit((transaction, _) =>
             {
                 transaction.Put(recordKey, recordBytes);

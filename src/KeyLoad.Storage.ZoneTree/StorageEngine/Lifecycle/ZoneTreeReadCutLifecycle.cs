@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using System.Runtime.ExceptionServices;
 
 namespace KeyLoad.Storage.ZoneTree;
@@ -5,40 +6,28 @@ namespace KeyLoad.Storage.ZoneTree;
 internal sealed class ZoneTreeReadCutLifecycle
 {
     private const string ClosedMessage = "The execution read-cut runtime is closing.";
-    private const string SlotBusyMessage = "The runtime already owns a execution read-cut lease.";
-    private const string TreeReplacementMessage = "The execution tree cannot be replaced while a read-cut lease is active.";
-    private readonly Lock sync = new();
-    private ZoneTreeReadCutLease? active;
-    private bool closed;
+    private readonly ConcurrentDictionary<ZoneTreeReadCutLease, byte> active = new();
+    private int closed;
 
     internal ZoneTreeReadCutLease Capture(ZoneTreeStoreRuntime runtime, ZoneTreeReadCutLimits limits,
         CancellationToken cancellationToken)
     {
         ZoneTreeReadCutValidation.Validate(limits, runtime.Options);
         runtime.Check();
-        ZoneTreeReadCutLease lease;
-        lock (sync)
+        var lease = new ZoneTreeReadCutLease(limits, Release, runtime.Clock, cancellationToken);
+        active.TryAdd(lease, 0);
+        try
         {
-            if (closed)
+            // Registration precedes the close check: closing either joins this capture or it never touches a tree.
+            if (Volatile.Read(ref closed) != 0)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, ClosedMessage);
             }
-            if (active is not null)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, SlotBusyMessage);
-            }
-
-            lease = new ZoneTreeReadCutLease(limits, Release, runtime.Clock, cancellationToken);
-            active = lease;
-        }
-
-        try
-        {
             lease.CheckAfterCapture();
             var identity = runtime.Identity;
             var cut = new ZoneTreeReadCut(identity.FormatVersion, identity.KeyCodecVersion, identity.NodeId,
                 identity.Incarnation, identity.Durability, identity.DispatchPaused, identity.ReadGeneration, runtime.Position);
-            var snapshot = new ZoneTreeSnapshotCursor(runtime.Tree);
+            var snapshot = new ZoneTreeSnapshotCursor(runtime, capturePlain: true);
             lease.Attach(snapshot, cut);
             lease.FinishCapture();
             lease.CheckAfterCapture();
@@ -62,44 +51,25 @@ internal sealed class ZoneTreeReadCutLifecycle
 
     internal void EnsureDisposalCanJoin()
     {
-        ZoneTreeReadCutLease? lease;
-        lock (sync)
+        foreach (var lease in active.Keys)
         {
-            lease = active;
-        }
-        lease?.EnsureDisposalCanJoin();
-    }
-
-    internal void RequireNoActiveLeaseForTreeReplacement()
-    {
-        lock (sync)
-        {
-            if (active is not null)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, TreeReplacementMessage);
-            }
+            lease.EnsureDisposalCanJoin();
         }
     }
 
     internal void CloseAndJoin()
     {
-        ZoneTreeReadCutLease? lease;
-        lock (sync)
+        Interlocked.Exchange(ref closed, 1);
+        var failures = new List<Exception>();
+        foreach (var lease in active.Keys)
         {
-            closed = true;
-            lease = active;
+            ZoneTreeExistingStoreCleanup.Capture(lease.Dispose, failures);
         }
-        lease?.Dispose();
+        ZoneTreeExistingStoreCleanup.ThrowFailures(failures);
     }
 
     private void Release(ZoneTreeReadCutLease lease)
     {
-        lock (sync)
-        {
-            if (ReferenceEquals(active, lease))
-            {
-                active = null;
-            }
-        }
+        active.TryRemove(lease, out _);
     }
 }

@@ -68,7 +68,7 @@ internal static class QueueClaimAckRecoveryContinuation
         var position = store.Position;
         var identity = store.Identity;
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         await QueueClaimAckRecoveryAssertions.EqualAsync(cold.Identity, identity);
         await Assert.That(cold.Position).IsEqualTo(position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
@@ -102,7 +102,7 @@ internal static class QueueClaimAckRecoveryContinuation
         var position = store.Position;
         var identity = store.Identity;
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         await QueueClaimAckRecoveryAssertions.EqualAsync(cold.Identity, identity);
         await Assert.That(cold.Position).IsEqualTo(position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);

@@ -10,7 +10,7 @@ internal static class CommandResultWorkBinding
     private const string Uncertain = "The write outcome is unknown. Retry the same command ID.";
     private const string OriginalFailureKey = "keyload.execution-command-work-binding-failure";
 
-    internal static async Task BindBeforePublicationAsync(DatabaseEngine database, ICommitCoordinator coordinator,
+    internal static async Task BindBeforePublicationAsync(DatabaseEngine database,
         TimeProvider clock, DecodedGrainRequest request, GrainOperationReply reply,
         ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
@@ -22,7 +22,7 @@ internal static class CommandResultWorkBinding
         {
             work.RequireResourceLifetimeBinding(binding);
             var proof = RequireProof(request, reply);
-            await BindCurrentAsync(database, coordinator, clock, request, proof, proof.Lifetimes,
+            await BindCurrentAsync(database, clock, request, proof, proof.Lifetimes,
                 work, binding, token).ConfigureAwait(true);
             work.Check();
         }
@@ -55,13 +55,13 @@ internal static class CommandResultWorkBinding
         }
     }
 
-    private static async Task BindCurrentAsync(DatabaseEngine database, ICommitCoordinator coordinator, TimeProvider clock,
+    private static async Task BindCurrentAsync(DatabaseEngine database, TimeProvider clock,
         DecodedGrainRequest request, CommandWorkProof proof,
         ImmutableArray<ResourceLifetime> lifetimes, ReadExecutionBudget work,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         work.RequireResourceLifetimeBinding(binding);
-        await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
+        token.ThrowIfCancellationRequested();
         GrainIdentityContext.Validate(request.Envelope, request.Envelope.RequestId);
         var principal = GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock);
         database.BindAuthenticatedCommandResultLifetimes(principal.Id, proof.PolicyEpoch,

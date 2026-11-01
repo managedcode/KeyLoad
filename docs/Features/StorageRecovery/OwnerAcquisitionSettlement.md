@@ -2,7 +2,7 @@
 
 The node-local ownership boundary in [StorageRecovery](../StorageRecovery.md)
 keeps the original acquisition, rollback and shutdown outcomes. This
-correction does not change storage bytes, canonical authority, journals or
+correction does not change storage bytes, canonical authority or
 transport schemas. It follows the silo-local owner contract in
 [ADR-136](../../ADR/ADR-136-orleans-partition-ownership.md),
 [ADR-046](../../ADR/ADR-046-storage-private-owners.md)
@@ -33,7 +33,7 @@ flowchart TD
   an unpublished opaque owner. Reusing an acquisition ledger is refused.
 - **REQ-EXECUTION-OWNER-002:** construction cleanup preserves the original
   exception and each independent acquired-handle cleanup exception. It keeps the
-  existing failed-open journal-before-tree and normal tree-before-journal ordering.
+  existing failed-open and normal disposal orderings of the tree and owner lock.
   A failed close never discards its original handle reference as successful release.
 - **REQ-EXECUTION-OWNER-003:** The first admitted store close retains its exact
   terminal failure or actual successful return. Repeated calls observe that original
@@ -66,7 +66,7 @@ provide a new readiness capability. Unknown ownership remains a failed/open gate
 
 | Criterion | Genuine existing operation and preserved oracle |
 | --- | --- |
-| AC-EXECUTION-OWNER-001 — refused bootstrap and healthy recovery | `PartitionHostRecoveryTests` keeps all original missing/modified/valid protected-principal cases, original applied/log cuts and persisted node/read-generation identities across recovery attempts. The staging source and target owners now retain independent failures. |
+| AC-EXECUTION-OWNER-001 — refused bootstrap and healthy recovery | Missing/modified/valid protected-principal bootstrap cases with their applied cuts and persisted node/read-generation identities across recovery attempts have no current owning test; this acceptance is open. |
 | AC-EXECUTION-OWNER-002 — actual same-volume refusal, repair and reopen | `PartitionRootAdmissionTests` and `PartitionRootAdmissionSpecialEntryTests` retain original unknown file/directory/link, wrong-kind, non-directory root, foreign target, held regular owner and FIFO refusals, exact bytes/Unix modes, and healthy writes/reopen. |
 | AC-EXECUTION-OWNER-004 — real concurrent shutdown and reentrant refusal | `ReadCutLifetimeTests.AcCut003ShutdownCancelsAndJoinsTraversalBeforeReopen` waits on the actual original lease cancellation, calls reentrant `Store.Dispose` from that still-active original visitor and requires the existing refusal. The original traversal/disposer tasks must then join, the original record/identity/cut survive, and the healthy write survives the original second cold reopen. Its original ten-second join observation and original tasks remain unchanged. No private hold, clock, synthetic fault or counter is added. |
 | AC-EXECUTION-OWNER-005 — all current application owner paths | Normal `ServerApplication` and its stopped cold owners use the actual asynchronous opening boundary. Original signed/public operations, source identities, shutdown deadlines and replicated-cluster oracles remain separate mandatory execution gates. |

@@ -44,9 +44,9 @@ internal static class QueueClaimAckCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueClaimAckCrashProtocol.PhysicalTargetFile),
             OrleansSerialization.Serialize(physicalTarget));
         boundary.Position = physicalTarget;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation);
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
     private static string[] CaptureBaseline(ZoneTreeStore store) => store.Read(view =>
     {
@@ -55,6 +55,6 @@ internal static class QueueClaimAckCrashScenario
         {
             throw new InvalidOperationException(QueueClaimAckCrashProtocol.BaselineBoundExceeded);
         }
-        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + QueueClaimAckCrashProtocol.ImageRowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + QueueClaimAckCrashProtocol.ImageRowSeparator + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 }

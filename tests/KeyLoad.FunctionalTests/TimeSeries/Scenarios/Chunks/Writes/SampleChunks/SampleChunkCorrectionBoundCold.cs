@@ -42,8 +42,7 @@ internal static class SampleChunkCorrectionBoundCold
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var store = new ZoneTreeStore(new(fixture.Owner.Directory), fixture.Owner.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(fixture.Owner.Directory), fixture.Owner.StorageExecution);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await SampleChunkCorrectionBoundColdAssertions.UnchangedAsync(store, image, position, identity);

@@ -41,7 +41,7 @@ internal static class RuntimeJournalReaderRepairContinuation
 
     private static async Task RequireAuthorityAsync(StoreIdentity expected, StoreIdentity actual)
     {
-        await WalFileFixture.AssertPreservedIdentity(expected, actual).ConfigureAwait(false);
+        await StoreFileFixture.AssertPreservedIdentity(expected, actual).ConfigureAwait(false);
         await Assert.That(actual.FormatVersion).IsEqualTo(expected.FormatVersion);
         await Assert.That(actual.MinimumReaderContract).IsEqualTo(expected.MinimumReaderContract);
         await Assert.That(actual.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);

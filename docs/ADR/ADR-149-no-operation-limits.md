@@ -74,9 +74,9 @@ real physical constraints allow. Internal request envelopes carry no expiry.
   - full-text manifest file reads and writes are bounded by
     `TextExecutionOptions.MaximumDiskBytes`;
   - full-text read cuts (online pins and captured search reads) are clamped to
-    the ZoneTree storage read-cut ceilings;
-  - the group-commit journal frame budget still derives from
-    `ZoneTreeStorageExecutionOptions.MaxFrameBytes`.
+    the ZoneTree storage read-cut ceilings.
+  A storage commit and a group-commit batch carry no frame or byte limit; each is
+  one ZoneTree transaction.
 - **Analytics.** ZoneTree.Analytics generations size their ingestion queue by the
   actual row count, do not truncate dimension values, and have no query timeout
   except the caller's explicit expiry.

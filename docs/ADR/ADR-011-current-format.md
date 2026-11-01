@@ -1,34 +1,110 @@
-# ADR-011: Current format and restore authority
+# ADR-011: Current format, ZoneTree durability and backup restore
 
-Status: Accepted; implementation and exact-source qualification pending.
-Owner: root integration. Related: REQ-STORAGE-006/007 and AC-STORAGE-006/007,
-REQ/AC-BLOB-001–007, REQ/AC-DSTORE-009 and REQ/AC-BACKUP-004.
+Status: Accepted (owner direction 2026-10-31); in source; exact-source Linux
+qualification pending. Owner: root integration. Related: REQ-STORAGE-005/006/007/021
+and AC-STORAGE-005/006/007, AC-EXECUTION-001/002, REQ/AC-BACKUP-001–004 and
+REQ/AC-DSTORE-009. Feature contracts: [StorageRecovery](../Features/StorageRecovery.md),
 [CurrentFormat](../Features/StorageRecovery/CurrentFormat.md) and
-[ADR-116](ADR-116-first-release-current-format.md) define the active format boundary.
+[BackupRestore](../Features/BackupRestore.md). [ADR-116](ADR-116-first-release-current-format.md)
+keeps one current format without migration.
 
 ## Decision
 
-Use one current reader and writer: the current identity, WAL and unversioned checkpoint contracts,
-KeyCodec v1 and the frozen generated Orleans aliases and field IDs. Unknown or
-corrupt mandatory records fail closed before publication, without rewrite,
-alternate-key lookup or loss of the original bytes. One homogeneous current
-cluster uses silo-local ZoneTree owners, ordered commit/apply, persisted
-credentials and authorization, and the original receipt barriers.
+KeyLoad owns no write-ahead log, backup format, snapshot format or archive format.
+Storage, its redo log and its backups are ZoneTree's; KeyLoad keeps thin wrappers
+that add the store identity, the commit position and the restored dispatch pause.
 
-Current reopen, compaction, crash recovery and
-verified backup/restore are supported operations. Restoring a verified current
-backup creates a new authority incarnation; bounded restore normalization changes
-only authority metadata while preserving content provenance. It does not change
-the persisted format. Dispatch stays paused and incomplete restoration fences
-writable service until every required phase completes.
+1. **Store layout.** A store directory holds `owner.lock`, `identity.json` and
+   `tree/` for native MVCC records and `plain-tree/` for non-transactional table
+   records, both in ZoneTree's own layout.
+2. **Native redo logs.** Each native tree owns its ZoneTree write-ahead log in `WriteAheadLogMode.AsyncCompressed`
+   (with uncompressed payloads) supplies redo without a KeyLoad journal. A transactional commit is one ZoneTree
+   MVCC transaction that holds the staged mutations and the store position record
+   under the key `system/position`. `Store.Position` is read back from the tree on
+   open. ZoneTree replays its own log when it opens and drops a transaction whose
+   commit never reached the log.
+3. **Visibility and durability.** A commit is visible when `Commit` returns and
+   durable after the next `IAtomicStore.SyncAsync`, which awaits ZoneTree's
+   `SyncWALAsync`. Every acknowledgement path awaits that sync
+   before it reports success ([ADR-003](ADR-003-durability-ack-barrier.md)).
+   `DatabaseEngine.Apply` itself does not sync. Disposing a store flushes the log.
+   A visible commit that was not yet synced can be lost by a process crash; no
+   acknowledgement is sent for it.
+4. **Backup.** `IAtomicStore.CreateBackupAsync(directory)` requires an empty or
+   absent directory (otherwise `Conflict`), checks cancellation before it creates
+   anything, copies `identity.json` and writes a ZoneTree `LiveBackup`
+   generation per native tree (in-memory mode `Snapshot`) of the MVCC tree's storage into
+   `<directory>/tree` and `<directory>/plain-tree`. Captures of the two trees
+   are independent. It returns the store position read before the generation:
+   the backup holds every commit through that position and may also hold later
+   ones. There is no manifest, checksum list or archive.
+5. **Restore.** `ZoneTreeStore.RestoreAsync(backup, destination, ...)` requires an
+   empty or absent destination (otherwise `Conflict`) and checks cancellation
+   before it creates the destination. It writes a new identity — new `NodeId`, a
+   new or caller-supplied incarnation and signing key, `DispatchPaused = true` — to
+   `<destination>/identity.json`, restores both native trees with ZoneTree's
+   `RestoreFromLatestLiveBackup` into `<destination>/tree` and `<destination>/plain-tree`, then opens the
+   restored store, commits `system/dispatch-paused = true` and syncs. The
+   restored store reads its own position from the tree: the MVCC generation's position plus the pause commit. Canonical records, sequences, clocks and stored outcomes are
+   restored unchanged; the default new incarnation and signing key fence old outcomes,
+   cursors, leases and signed tokens. Dispatch resumes only through the authorized
+   dispatch operation. Explicit overrides can preserve configured group authority
+   for a replica; unchanged authority does not fence its old tokens.
+6. **Copy.** `ZoneTreeBackupCopy.CopyToFileStorageAsync` copies every backup file
+   into ManagedCode.Storage `FileSystemStorage` at its relative path; the copy root
+   is itself a restorable backup directory. Missing sources, overlapping paths,
+   occupied destinations and pre-cancellation are refused before writing.
+7. **Format admission.** `identity.json` is a magic-tagged generated Orleans
+   envelope with a SHA-256 payload checksum, the current data epoch 8, KeyCodec v1
+   and reader capability 1. An unknown magic, epoch, codec version or capability
+   fails `FormatUnsupported`; a checksum mismatch or an invalid identity domain
+   (empty node or incarnation, wrong signing-key length, negative read
+   generation, undefined durability) fails `Corruption`. Both fail before ZoneTree
+   opens or changes the tree. ZoneTree validates its own files. There is no
+   alternate reader, conversion or runtime fallback.
 
-## Backup scope
+```mermaid
+flowchart LR
+    Commit[One MVCC transaction: mutations and system/position] --> Visible[Visible when Commit returns]
+    Visible --> Sync[SyncAsync awaits ZoneTree SyncWALAsync]
+    Sync --> Ack[Acknowledgement]
+    Store[Open store] --> Backup[identity.json and a LiveBackup generation per tree]
+    Backup --> Restore[New identity, RestoreFromLatestLiveBackup]
+    Restore --> Pause[Commit dispatch-paused and sync]
+    Pause --> Resume[Explicit authorized dispatch resume]
+    Unsupported[Unknown or corrupt identity] --> Reject[Fail before the tree opens]
+```
 
-Each silo-local ZoneTree owner backs up and restores its own current-format files
-through the local operation in [BackupRestore](../Features/BackupRestore.md)
-(REQ/AC-BACKUP-004). Unsupported, negative, future or contradictory coordinates
-fail closed before effects; current snapshot copies retain exact row bytes. A
-globally consistent cut across silos is not part of the current design.
+## Native concurrency and plain tables
+
+ZoneTree owns read snapshots, optimistic commit conflicts, thread-safe physical
+writes, cache cleanup and merges. KeyLoad adds no database writer semaphore,
+reader/writer lock, point-value cache or second maintenance timer. The physical
+owner joins borrowers before closing handles; a retained iterator joins its visitor
+before disposal.
+
+`Transactional=false` is an immutable table setting for document tables, time
+series and analytics tables. One command cannot write both table modes. Plain
+records use native `Upsert` and deletion without MVCC versions. Their WAL sync
+finishes before their transactional outcome is committed, and acknowledgements
+also await native WAL sync. Plain multi-record effects are not atomic: interruption
+can leave data without an outcome. A failure after plain publication is an unknown
+outcome and requires reopen; KeyLoad does not retry those physical effects.
+See [NonTransactionalTables](../Features/RelationalStorage/NonTransactionalTables.md).
+
+## Consequences
+
+- For transactional data, a process kill observed at the crash stages behaves as follows: after
+  `MutationApplied` the transaction is absent; after `ApplyCompleted` it is wholly
+  present or wholly absent; after `WriteAheadLogSynced` it is present. Process kill
+  does not prove power-loss durability.
+- Each silo-local ZoneTree owner backs up and restores its own files; a globally
+  consistent cut across silos is not part of the design (REQ/AC-BACKUP-004).
+- A backup records physical-file metadata and references, not the payloads that
+  ManagedCode.Storage holds ([ADR-038](ADR-038-chunked-blob-storage.md)).
+- A KeyLoad-owned journal or archive format is rejected: it duplicated ZoneTree's
+  log and fsync under the commit gate and added a second format to admit, verify
+  and qualify.
 
 ## Current scoped command outcomes
 
@@ -36,132 +112,20 @@ globally consistent cut across silos is not part of the current design.
 operation-aware identity and replay contract. Current outcome partition keys
 contain the complete PartitionRef; Global and Unknown have distinct explicit
 identities. A partition locator contains its exact matching outcome key.
-StoredOutcome's alias, Id0..7, fingerprints, policy epochs, incarnation checks,
-error semantics and atomic effect/watermark/clock transaction remain fixed.
-Unknown is a persisted failed-operation scope with no locator or inferred
-partition; an authorized retry of that same normalized operation can replay it.
-Corrupt scope, orphan/mismatched locator or malformed bytes fail closed without
-repair. Authorization precedes outcome decoding. A denied operation cannot
-validate, overwrite or expose an existing corrupt result. Every actual caller
-carries the original normalized operation and current server-authenticated identity.
+StoredOutcome's alias, Id0..7, policy epochs, incarnation checks, error semantics
+and atomic effect/watermark/clock transaction remain fixed. Unknown is a persisted
+failed-operation scope with no locator or inferred partition; an authorized retry
+of that same normalized operation can replay it. Corrupt scope, orphan/mismatched
+locator or malformed bytes fail closed without repair. Authorization precedes
+outcome decoding. A denied operation cannot validate, overwrite or expose an
+existing corrupt result. Every actual caller carries the original normalized
+operation and current server-authenticated identity. Outcomes from another
+incarnation after restore remain invalid and are not rebound.
 
-## Current blob outcome and lifetime contract
+## Verification
 
-
-The existing private StoredOutcome remains its current fingerprint/incarnation/
-policyEpoch/result shape for nonblob commands. The current optional private BlobAuthority is
-omitted when null. Its format is version1, immutable BeginCommandId and creator
-PrincipalRecord.Id. Blob version state includes the same immutable BeginCommandId.
-The lifetime is not a second command result log and is not inferred from UploadId,
-clock, current head or caller roles.
-
-Capture authority after current authorization and before command effects so final
-reclaim can delete state without losing the original stamp. Successful Begin
-captures its own command ID/creator; Write/Complete/Abort and a present-state
-Reclaim capture the selected state's lifetime. Persist it in the same effects/
-outcome/watermark transaction. Domain-failed operations store no blob stamp.
-Replay of a successful upload-target operation requires current capability, row,
-creator and PolicyEpoch checks plus the exact current lifetime stamp. Different or
-missing lifetime is TokenInvalidated. Unknown stamp version is FormatUnsupported;
-a missing stamp on an otherwise successful state-dependent blob outcome is a
-mandatory-format failure. Cached failed Begin does not create phantom authority.
-
-Final Reclaim may return its original Complete receipt when that selected state
-is still absent and the current head does not reference UploadId. Empty/absent
-Reclaim has no stamp. If that UploadId has a new state, an old null/different stamp
-is TokenInvalidated; never return an obsolete cleanup success against a new
-lifetime. A partial reclaim whose state is gone is TokenInvalidated. Reclaim
-checks actual head reference even when state is missing (Corruption if referenced).
-Outcomes from another incarnation after restore remain invalid and are not rebound.
-
-## Current-format backup restoration
-
-
-ZoneTree backup Restore copies the journal, changes authority incarnation/
-signing key and clears applied/clock state. It does not rewrite feature
-records; DispatchPaused is delivery-only. The server invokes the
-Core BlobStorage normalizer with borrowed IAtomicStore before the silo-local ZoneTree owner
-starts serving requests or background data work. It also resumes
-an interrupted marker before writable startup. No provider->Core dependency.
-
-Private state stores current authority Incarnation separately from immutable
-IntegrityIncarnation. Published/retired raw bytes, head revisions, part hashes and
-final chain hashes retain their original content provenance. New uploads seed
-from the new incarnation. A version1 restore marker stores source/target authority,
-phase and bounded exclusive cursor. Its singleton key is KeyCodec.Encode of the
-named prefix `blob-restore-v1`; fields are FormatVersion1, SourceIncarnation,
-TargetIncarnation, phase, exclusive cursor and checked fixed-size aggregate counts
-(reserved bytes, object keys, versions, active uploads, resources). Resource
-accounting uses bounded separate scratch rows under `blob-restore-account-v1`
-(tenant/database/domain/resource) with format1, target incarnation and those
-resource counters; do not put an unbounded resource dictionary in the marker.
-Committed page effects/scratch/cursor are atomic; final quota verification removes
-each scratch row and compares exact aggregated global accounting before removing
-the marker. Unknown/orphan scratch rows fail closed.
-Incomplete/mismatched marker fences all blob
-reads/commands/configuration with RecoveryRequired; the reader rejects an
-unknown marker version. This is an actual feature fence, not dispatch pause.
-
-Ordered phases, each committed with its cursor:
-1. Initialize the marker after validating source global authority and the new execution
-   store identity. Never infer a fresh database from missing counters.
-2. Visit bounded metadata pages (at most128 records), collect owned records inside
-   Read, then mutate only after traversal has ended inside Commit. Validate scope,
-   state/head pairing, counts and supported versions before changes. Rebind state
-   authority; Active becomes Aborted with restore invalidation. Release unused
-   reservation and active-upload slots exactly once at resource/global levels;
-   accepted bytes and version slots remain for ordinary reclaim. Preserve immutable
-   BeginCommandId/IntegrityIncarnation/chain/raw bytes. Cursor and effects are atomic.
-   Head/state records have the ADR-038 encoded16384-byte ceiling. Collection also
-   uses a4MiB normal page byte budget before copying another record. One larger
-   catalog record may form a page alone under the examined-byte ceiling;
-   VerifyResources writes only marker progress, never that catalog payload.
-   A candidate not added to the page is revisited from the last accepted cursor.
-3. Rebind remaining authority-bearing heads and resource/global counters, validating
-   their accounting and state pairing in bounded resumable passes. Retain tombstone
-   identity history. Source/target authority is accepted only by this restore phase,
-   not by ordinary operations. No full-file or full-store payload materialization.
-4. Follow the fixed sequence States -> Heads -> Quotas -> VerifyStates ->
-   VerifyHeads -> VerifyResources -> Complete. VerifyResources visits bounded
-   catalog metadata pages, checks every configured BlobStore's target-incarnation
-   quota and transaction domain, and consumes exactly one checked Resources count
-   per configured resource. Missing or orphan quota/account rows fail closed;
-   resources are never collected in an unbounded marker dictionary.
-5. Validate all phases and atomically remove the marker/publish completion with
-   counters at the target incarnation. Only then enable writable service.
-
-Every committed phase survives same-incarnation process restart and resumes from
-its cursor. A second whole-store restore of an unfinished normalization is rejected
-until the source normalization completes; there is no ambiguous nested transition.
-Failure leaves destination fenced, current published bytes retained and backup
-untouched. Genuine process cuts must prove every phase and counter adjustment.
-
-## Retention and implementation
-
-Current shared outcome expiry/pruning remains a required owning workstream under
-ADR-002. Upload TTL must not erase command outcomes. Freeze bounded retry and
-retirement semantics and prove failure, lost-reply, late-retry and recovery flows;
-payload quotas alone do not bound outcome metadata. This ADR does not claim those
-gates passed.
-
-Core BlobStorage normalization and real unit/process/replicated-cluster tests follow the feature
-contracts. Start the cluster only after validating all stores and
-completing required current-format restoration. Rollback restores a coherent
-source checkpoint and a verified compatible current-format cut; it cannot reset
-quotas or discard acknowledged outcomes.
-
-Required evidence: enabled Release build/format/governance, current execution
-record/enum goldens, exact scope/lifetime/permission/error flows, bounded quota
-and corruption rejection, real reopen/kill restore phases and counters,
-actual Aspire SDK/official MCP cluster, functional
-coverage and exact-source Linux qualification. Compilation alone closes no gate.
-
-```mermaid
-flowchart LR
-    Backup[Verified current backup] --> Restore[New authority incarnation]
-    Restore --> Fence[Persisted restore fence]
-    Fence --> Normalize[Bounded authority metadata phases]
-    Normalize --> Verify[Verify accounts and content provenance]
-    Verify --> Serve[Current homogeneous cluster]
-    Unsupported[Unknown or corrupt mandatory format] --> Reject[Fail before publication]
-```
+Required evidence: the strict solution build, formatter and governance; the
+current-format, backup and restore real-store cases named in the feature
+contracts; the process-recovery crash matrix; the Aspire cluster administrator
+backup through the SDK and official MCP; functional coverage; and exact-source
+Linux qualification. Compilation alone closes no gate.

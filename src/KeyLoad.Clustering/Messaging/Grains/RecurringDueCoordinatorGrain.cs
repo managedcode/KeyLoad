@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Core.Messaging;
-using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Placement;
@@ -55,9 +54,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
             clock, options, runtimeJournalAdmission, cancellationToken);
 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
-        => RequestContextHelper.RunWithCurrentCallerAsync(typeof(RecurringDueCoordinatorGrain).FullName!,
-            nameof(IDurableJobHandler.ExecuteJobAsync),
-            () => ExecuteTimeoutAsync(context, attemptCancellationToken));
+        => ExecuteTimeoutAsync(context, attemptCancellationToken);
 
     private async Task ExecuteTimeoutAsync(IJobRunContext context, CancellationToken attemptCancellationToken)
     {

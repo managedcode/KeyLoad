@@ -47,7 +47,7 @@ internal static class QueueDeadlineSignedRetry
         var bytes = QueueRetryColdAssertions.LaneBytes(fixture.Store, lane);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         await ReplayResultAssertions.Same<CommitReceipt>(database.Apply(operation), result);
         await Assert.That(QueueRetryColdAssertions.LaneBytes(cold, lane)).IsEquivalentTo(bytes, CollectionOrdering.Matching);

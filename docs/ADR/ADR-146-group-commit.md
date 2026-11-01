@@ -4,25 +4,23 @@ Status: Accepted by owner direction 2026-10-24 ("fix KeyLoad's write path first"
 
 ## Context
 
-Every acknowledged canonical command paid for one journal flush on every copy. The
-database grain was non-reentrant, so one command at a time ran its preparation, its
-apply on each owner and that owner's `Flush(true)`. On macOS one 1 KiB journal
-append with its flush takes about 4.1 ms and one complete embedded commit about
-5.0 ms (`JournalFlushBenchmarks` and `CommitThroughputBenchmarks`, 2026-10-24).
-Sixteen concurrent writers did not change the per-commit time (4.6 ms), because
-each commit still waited for its own flush. The Linux benchmark cells measured
-about 265 acknowledged writes per second. Durability must stay equal to the other
-databases in the comparison, so the flush itself stays.
+Every acknowledged canonical command paid for one durable log sync on every copy.
+The database grain was non-reentrant, so one command at a time ran its preparation,
+its apply on each owner and that owner's sync. On macOS one complete embedded commit
+took about 5.0 ms (`CommitThroughputBenchmarks`, 2026-10-24), and sixteen concurrent
+writers did not change the per-commit time, because each commit still waited for its
+own sync. The Linux benchmark cells measured about 265 acknowledged writes per
+second. Durability must stay equal to the other databases in the comparison, so the
+sync itself stays.
 
 ## Decision
 
-Concurrent canonical commands share one commit and one journal flush per copy.
+Concurrent canonical commands share one commit and one write-ahead log sync per copy.
 
 - `DatabaseCommitGrain` is `[Reentrant]`. `ApplyAsync` queues the command and
   returns when its batch decides it. One drain at a time takes every queued
   command, in submission order, as one batch. Commands that arrive while a batch
-  persists form the next batch. Nothing limits the queue or the batch; the shared
-  journal frame decides how many commands one commit holds.
+  persists form the next batch. Nothing limits the queue or the batch.
 - `ISiloDatabaseService.PrepareBatchAsync` prepares the batch at the owner with the
   highest cut, the same owner as before. For a command that already committed it
   returns the retained original, as `ReadStoredCommandAsync` did. Business time never
@@ -32,17 +30,16 @@ Concurrent canonical commands share one commit and one journal flush per copy.
   preparation records queue retry decisions, or whose preparation fails. That command
   is then prepared first in the next batch, exactly as it would be alone.
 - `ISiloDatabaseService.ApplyBatchAsync` applies the prepared commands, in order, as
-  one ZoneTree commit and one journal frame on every owner. Each command is one
+  one ZoneTree transaction on every owner and then awaits one `IAtomicStore.SyncAsync`
+  before it returns ([ADR-011](ADR-011-current-format.md)). Each command is one
   action of that commit (`IAtomicActionStaging`):
   - It sees the writes of the actions before it.
-  - Its `Reset`, `ValidateCommit`, candidate validation and frame budget cover only
-    its own writes.
+  - Its `Reset` covers only its own writes.
   - It takes the next canonical sequence when it persists a new outcome. A retry
     of a command earlier in the batch replays that outcome and takes no sequence.
 
-  A later command does not run in the batch if it would overflow the shared frame,
-  or if it fails outside its own persisted outcome. It then runs first in a later
-  commit. The first command of a batch always runs, so it behaves as a commit of its
+  A later command does not run in the batch if it fails outside its own persisted
+  outcome. It then runs first in a later commit. The first command of a batch always runs, so it behaves as a commit of its
   own.
 - The grain acknowledges each command only after every owner returned the same
   sequence and result for it. It then advances the cached cut once for the batch.
@@ -72,14 +69,14 @@ Concurrent canonical commands share one commit and one journal flush per copy.
 
 ## Consequences
 
-- With many concurrent writers, one flush on each copy acknowledges many commands.
+- With many concurrent writers, one sync on each copy acknowledges many commands.
   The latency of a single write is unchanged: its batch holds only that command.
-- Durability is unchanged. Every acknowledged command is in a flushed journal frame
-  on every copy before its caller sees success, and a frame either replays whole or
-  not at all.
+- Durability is unchanged. Every acknowledged command is in a synced ZoneTree
+  transaction on every copy before its caller sees success, and ZoneTree replays a
+  transaction whole or drops it.
 - Readers wait only for a batch's apply, as they waited for one command's apply.
-- The journal format is unchanged: a batch is one ordinary frame. The `last-batch`
-  row is a new system row, written only by commits that persist several outcomes.
+- A batch is one ordinary ZoneTree transaction. The `last-batch` row is a system
+  row, written only by commits that persist several outcomes.
 - Interleaved reads (`ReadCutAsync`, `GetReadOwnerAsync`, background reads) never
   replace the owners a batch is using. A cut read that a batch overtook is not
   cached.

@@ -12,8 +12,7 @@ internal static class QueryAdapterCollectionCold
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await SqlOffsetRefusals.UnchangedAsync(store, image, position, identity);

@@ -93,7 +93,6 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
     {
         if (ConnectionParentExecution.Handles(request.Envelope.CommandKind))
         {
-            await services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync(work.Token).ConfigureAwait(true);
             ConnectionReadExecution.ValidateFreshRequest(codec, request, request.Envelope.RequestId, work.Token);
             ConnectionParentExecution.Authorize(database, request, clock);
             return GrainReplyFactory.Value(true);
@@ -102,8 +101,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest);
         }
-        var reader = new ConnectionReadExecution(codec, database,
-            services.GetRequiredService<Func<ICommitCoordinator>>()(), services, clock, workOwner, diagnostics, context);
+        var reader = new ConnectionReadExecution(codec, database, services, clock, workOwner, diagnostics, context);
         return await reader.ExecuteAsync(request, work, error => work.PrimaryError = error, work.Token).ConfigureAwait(true);
     }
 

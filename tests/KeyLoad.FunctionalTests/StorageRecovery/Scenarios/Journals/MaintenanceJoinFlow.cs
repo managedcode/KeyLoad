@@ -32,21 +32,13 @@ internal static class MaintenanceJoinFlow
                 var identity = store.Identity.Incarnation;
                 runtime.Tree.Maintenance.ZoneTree.Maintenance.OnDiskSegmentCreated += barrier.DiskCreated;
                 runtime.Tree.Maintenance.ZoneTree.Maintenance.OnMergeOperationEnded += barrier.MergeEnded;
-                runtime.Maintainer.ThresholdForMergeOperationStart = int.MaxValue;
-                runtime.Maintainer.MaximumReadOnlySegmentCount = int.MaxValue;
-                runtime.Maintainer.EvictToDisk();
+                var maintainer = runtime.Maintainer!;
+                maintainer.ThresholdForMergeOperationStart = int.MaxValue;
+                maintainer.MaximumReadOnlySegmentCount = int.MaxValue;
+                maintainer.EvictToDisk();
                 var merger = await barrier.Created.Task.WaitAsync(caller.Token);
-                store.Read(_ =>
-                {
-                    disposal = Task.Run(store.Dispose, CancellationToken.None);
-                    if (!SpinWait.SpinUntil(() => runtime.Gate.WaitingWriteCount > 0,
-                        TimeSpan.FromSeconds(MaintenanceBarrier.DeadlineSeconds)))
-                    {
-                        throw new TimeoutException("The original owner disposal did not reach its execution writer gate.");
-                    }
-                    return true;
-                });
-                await ObserveAcquiredWriterAsync(runtime, disposal!, caller.Token);
+                disposal = Task.Run(store.Dispose, CancellationToken.None);
+                await ObserveClosingAsync(runtime, disposal, caller.Token);
                 await Assert.That(disposal!.IsCompleted).IsFalse();
                 barrier.Release();
                 await disposal.WaitAsync(caller.Token);
@@ -122,7 +114,7 @@ internal static class MaintenanceJoinFlow
         });
     }
 
-    internal static async Task ObserveAcquiredWriterAsync(ZoneTreeStoreRuntime runtime, Task disposal, CancellationToken token)
+    internal static async Task ObserveClosingAsync(ZoneTreeStoreRuntime runtime, Task disposal, CancellationToken token)
     {
         while (true)
         {
@@ -132,21 +124,15 @@ internal static class MaintenanceJoinFlow
                 await disposal;
                 throw new InvalidOperationException("Owner disposal completed before the held execution merge settled.");
             }
-            if (!runtime.Gate.TryEnterReadLock(0))
+            if (runtime.IsDisposed)
             {
-                if (runtime.Gate.WaitingWriteCount == 0)
-                {
-                    return;
-                }
-                await Task.Yield();
-                continue;
+                return;
             }
-            runtime.Gate.ExitReadLock();
             await Task.Yield();
         }
     }
 
-    private static ZoneTreeStore Open(string root) => new(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+    private static ZoneTreeStore Open(string root) => new(new(root), UnitExecutionOptions.StorageExecution());
 
     private static async Task SettleOwnerAsync(MaintenanceBarrier barrier, Task? disposal,
         ZoneTreeStore? store, string root, List<Exception> failures)

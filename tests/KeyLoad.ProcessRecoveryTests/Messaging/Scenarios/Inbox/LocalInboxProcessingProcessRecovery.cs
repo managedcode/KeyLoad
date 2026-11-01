@@ -30,14 +30,18 @@ internal static class LocalInboxProcessingProcessRecovery
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             RequireOriginalRoot(root);
-            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = TargetInboxRecoveryDatabase.Open(store);
                 var outcome = OutcomeStoreOracle.Read(store, original);
-                if (stage >= CommitStage.JournalFlushed)
+                if (stage == CommitStage.WriteAheadLogSynced)
                 {
                     await Assert.That(outcome).IsNotNull();
+                }
+                if (stage == CommitStage.MutationApplied)
+                {
+                    await Assert.That(outcome).IsNull();
                 }
                 await LocalInboxProcessingRecoveryImage.CutAsync(database, store, original, input, position, tail, outcome is not null, lifetime);
                 var reconciled = database.Apply(original);
@@ -73,7 +77,7 @@ internal static class LocalInboxProcessingProcessRecovery
             {
                 Incarnation = identity.Incarnation,
                 SigningKey = identity.SigningKey
-            }, RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            }, RecoveryExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await LocalInboxProcessingRecoveryImage.ExactAsync(store.Identity, identity);

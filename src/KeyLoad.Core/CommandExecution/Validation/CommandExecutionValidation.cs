@@ -25,7 +25,7 @@ public static class CommandExecutionValidation
             throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedDatabaseCommand);
         }
 
-        var input = DatabaseCommandInputTypes.Require(kind, Normalize(payloadJson, DatabaseCommandInputTypes.For(kind)));
+        var input = DatabaseCommandInputTypes.Admit(kind, Normalize(payloadJson, DatabaseCommandInputTypes.For(kind)));
         return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, input, null);
     }
 

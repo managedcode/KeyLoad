@@ -1,4 +1,5 @@
 using KeyLoad.FunctionalTests.ResourceExecution;
+using KeyLoad.FunctionalTests.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication.Commands;
@@ -8,8 +9,6 @@ namespace KeyLoad.FunctionalTests.BackupRestore;
 internal sealed class BackupIndexedDocumentDedupCases
 {
     private const string RootPrincipal = "root";
-    private const string SystemNamespace = ZoneTreePersistenceFormat.SystemNamespace;
-    private const string DispatchPausedKey = ZoneTreePersistenceFormat.DispatchPausedKey;
     private static readonly Guid SeedCommandId = Guid.Parse("fbeb87ad-22a1-4bce-86c0-74948a9a7da0");
     private static readonly Guid ReplaceCommandId = Guid.Parse("448a6eb4-46b0-4f2e-9d40-f6cb1f8b64a0");
     private static readonly Guid DeleteCommandId = Guid.Parse("16f08c15-51a3-4420-a8cc-4a09c86fded6");
@@ -24,17 +23,14 @@ internal sealed class BackupIndexedDocumentDedupCases
         var firstOperation = await SeedAndMutate(fixture);
         await BackupIndexedDocumentDedupAssertions.AssertPreRestoreContent(fixture.Source.Database, fixture.Source);
         var sourceIdentity = fixture.Source.Store.Identity;
-        var sourceCut = fixture.CreateBackup();
-        var manifest = await MetadataTestFiles.ReadManifestAsync(fixture.BackupDirectory);
+        var sourceCut = await fixture.CreateBackupAsync();
         var archive = await fixture.CaptureArchiveAsync();
         var originalOutcome = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
             fixture.Partition, RootPrincipal, SeedCommandId);
-        await Assert.That(manifest.Position).IsEqualTo(sourceCut);
         await Assert.That(fixture.Source.Store.Position).IsEqualTo(sourceCut);
-        var restoredIdentity = fixture.Restore();
+        var restoredIdentity = await fixture.RestoreAsync();
         var database = fixture.OpenRestored();
-        await AssertRestoreAuthority(fixture, restoredIdentity, sourceIdentity,
-            sourceCut, manifest.Position);
+        await AssertRestoreAuthority(fixture, restoredIdentity, sourceIdentity, sourceCut);
         await BackupIndexedDocumentDedupAssertions.AssertOldOutcomePreserved(fixture.TargetStore,
             fixture.Partition, SeedCommandId, originalOutcome);
         await AssertPreRestoreReplayFence(fixture, database, firstOperation, sourceCut + 1,
@@ -104,7 +100,7 @@ internal sealed class BackupIndexedDocumentDedupCases
     }
 
     private static async Task AssertRestoreAuthority(BackupIndexedDocumentDedupFixture fixture,
-        StoreIdentity restored, StoreIdentity source, long sourceCut, long manifestPosition)
+        StoreIdentity restored, StoreIdentity source, long sourceCut)
     {
         await Assert.That(fixture.TargetStore.Identity.NodeId).IsEqualTo(restored.NodeId);
         await Assert.That(fixture.TargetStore.Identity.Incarnation).IsEqualTo(restored.Incarnation);
@@ -112,9 +108,8 @@ internal sealed class BackupIndexedDocumentDedupCases
         await Assert.That(restored.NodeId).IsNotEqualTo(source.NodeId);
         await Assert.That(restored.Incarnation).IsNotEqualTo(source.Incarnation);
         await Assert.That(restored.DispatchPaused).IsTrue();
-        await Assert.That(manifestPosition).IsEqualTo(sourceCut);
         await Assert.That(fixture.TargetStore.Position).IsEqualTo(sourceCut + 1);
-        foreach (var key in new[] { ZoneTreePersistenceFormat.LastAppliedKey, ZoneTreePersistenceFormat.ClockKey })
+        foreach (var key in new[] { KeySpace.Applied.ToArray(), KeySpace.Clock.ToArray() })
         {
             await Assert.That(ReadSystem(fixture.TargetStore, key)).IsNotNull();
             await Assert.That(ReadSystem(fixture.TargetStore, key)!.AsSpan()
@@ -125,13 +120,13 @@ internal sealed class BackupIndexedDocumentDedupCases
         await Assert.That(System.Text.Json.JsonSerializer.Serialize(metadata, JsonDefaults.Options)).IsEqualTo(
             System.Text.Json.JsonSerializer.Serialize(new ResourceDefinition(BackupIndexedDocumentDedupFixture.AuthorityResource,
                 ResourceKind.Collection, fixture.Partition.TransactionDomainId), JsonDefaults.Options));
-        var paused = ReadSystem(fixture.TargetStore, DispatchPausedKey);
+        var paused = ReadSystem(fixture.TargetStore, StoreFileFixture.DispatchPausedKey);
         await Assert.That(paused).IsNotNull();
         await Assert.That(OrleansSerialization.Deserialize<bool>(paused!)).IsTrue();
     }
 
-    private static byte[]? ReadSystem(ZoneTreeStore store, string key)
-        => store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, key)));
+    private static byte[]? ReadSystem(ZoneTreeStore store, byte[] key)
+        => store.Read(view => view.ReadOwnedValue(key));
 
     private static async Task AssertPreRestoreReplayFence(BackupIndexedDocumentDedupFixture fixture,
         DatabaseEngine database, Command<DatabaseCommand> original, long expectedPosition, byte[] originalOutcome)

@@ -18,7 +18,7 @@ internal static class AnalyticsEntityLinkLifetimeFlow
         {
             await A.RowsAsync(fixture, original, 1, token);
             var retained = fixture.Owner.ReadOutcome(original).PreparedCommand;
-            await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
+            await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(original.Value!.Input).AsSpan())).IsTrue();
             var payload = retained.Value!;
             var input = ((CommandRequest)payload.Input);
             await A.EqualAsync(fixture.Plain, ((UpsertAnalyticsEvents)input.Mutations.Single()).Events.Single().Links.Single());

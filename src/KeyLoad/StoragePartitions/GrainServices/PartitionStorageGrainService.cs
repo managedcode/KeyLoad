@@ -36,9 +36,15 @@ internal sealed partial class PartitionStorageGrainService(GrainId grainId, Silo
     public Task<ImmutableArray<StoredCommand>> ReadLastCommittedCommandsAsync(CancellationToken cancellationToken)
         => Task.FromResult(Isolated.Host.Database.ReadLastCommittedCommands(cancellationToken));
 
-    public Task<StorageBatchResult> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations, long firstSequence,
-        CancellationToken cancellationToken)
-        => Task.FromResult(Isolated.Host.Database.ApplyStorageOperations(operations, firstSequence, cancellationToken));
+    public async Task<StorageBatchResult> ApplyBatchAsync(ImmutableArray<Command<DatabaseCommand>> operations,
+        long firstSequence, CancellationToken cancellationToken)
+    {
+        var database = Isolated.Host.Database;
+        var applied = await database.ApplyStorageOperationsAsync(operations, firstSequence, cancellationToken).ConfigureAwait(true);
+        // The copy acknowledges only what ZoneTree's write-ahead log holds durably: one sync for the whole batch.
+        await database.Store.SyncAsync(CancellationToken.None).ConfigureAwait(true);
+        return applied;
+    }
 
     public Task AbortMaintenanceAsync(GrainReadKind kind, Guid sessionId)
         => UsesSharedVolume ? Shared.AbortSharedMaintenanceAsync(kind, sessionId) : Isolated.AbortMaintenanceAsync(kind, sessionId);

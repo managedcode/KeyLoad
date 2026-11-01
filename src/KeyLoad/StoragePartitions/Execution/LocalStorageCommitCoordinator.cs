@@ -33,16 +33,23 @@ internal sealed class LocalStorageCommitCoordinator(DatabaseEngine database) : I
         return SubmitVerifiedAsync(command, cancellationToken, sourcePlanningBudget);
     }
 
-    public Task<Result<object>> SubmitVerifiedAsync(Command<DatabaseCommand> operation,
+    public async Task<Result<object>> SubmitVerifiedAsync(Command<DatabaseCommand> operation,
         CancellationToken cancellationToken, ReadExecutionBudget? sourcePlanningBudget = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
-        var owned = database.OwnCommand(operation);
+        var result = await ApplyAsync(database.OwnCommand(operation), cancellationToken).ConfigureAwait(true);
+        // The shared file copy acknowledges only what ZoneTree's write-ahead log holds durably.
+        await database.Store.SyncAsync(CancellationToken.None).ConfigureAwait(true);
+        return result;
+    }
+
+    private async Task<Result<object>> ApplyAsync(Command<DatabaseCommand> owned, CancellationToken cancellationToken)
+    {
         if (database.IsSiloLocalOperation(owned))
         {
-            var local = database.PrepareStorageOperation(owned, cancellationToken);
-            return Task.FromResult(database.ApplyLocalStorageOperation(local, cancellationToken));
+            return (await database.ApplyCoreAsync(database.PrepareStorageOperation(owned, cancellationToken), null,
+                selectEmbeddedClock: false, cancellationToken).ConfigureAwait(true)).Result;
         }
         var retained = database.ReadStoredCommand(owned, cancellationToken).Value;
         var prepared = retained?.Command ?? database.PrepareStorageOperation(owned, cancellationToken);
@@ -51,8 +58,8 @@ internal sealed class LocalStorageCommitCoordinator(DatabaseEngine database) : I
             throw Errors.Fail(ErrorCode.ResourceExhausted, SequenceExhausted);
         }
         var sequence = retained?.Sequence ?? checked(database.LastApplied + NextSequence);
-        var result = database.ApplyStorageOperation(prepared, sequence, cancellationToken).Result;
-        return Task.FromResult(StorageCopyAcknowledgements.Attach(result, SharedFileCopies));
+        var result = (await database.ApplyStorageOperationsAsync([prepared], sequence, cancellationToken).ConfigureAwait(true)).Applied[0].Result;
+        return StorageCopyAcknowledgements.Attach(result, SharedFileCopies);
     }
 
     public Task ReadBarrierAsync(CancellationToken cancellationToken = default)

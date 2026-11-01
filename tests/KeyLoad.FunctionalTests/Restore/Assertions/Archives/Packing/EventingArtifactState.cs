@@ -65,7 +65,8 @@ internal static class EventingArtifactState
         {
             throw new InvalidOperationException(Overflow);
         }
-        return page.Records.Select(item => Convert.ToHexString(item.Key.Span) + Separator + Convert.ToHexString(item.Value.Span)).ToArray();
+        return page.Records.Where(item => !CanonicalStoreImage.IsStorePosition(item.Key.Span))
+            .Select(item => Convert.ToHexString(item.Key.Span) + Separator + Convert.ToHexString(item.Value.Span)).ToArray();
     });
     internal static async Task SameResultAsync(Result<object> expected, Result<object> actual)
         => await Assert.That(Convert.ToHexString(OrleansSerialization.Serialize(actual)))

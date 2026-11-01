@@ -26,7 +26,7 @@ internal static class GraphIncomingVertexAuthorityFlow
         CommitReceipt receipt;
         string[] finalImage;
         long finalCut;
-        using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution))
         {
             var owner = database.CreateConfiguredDatabase(cold);
             await GraphTraversalIntegrityAssertions.Image(cold, dirtyImage, dirtyCut);
@@ -42,7 +42,7 @@ internal static class GraphIncomingVertexAuthorityFlow
             finalImage = CanonicalStoreImage.Bytes(cold);
             finalCut = cold.Position;
         }
-        using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var secondOwner = database.CreateConfiguredDatabase(secondCold);
         await GraphTraversalIntegrityAssertions.Image(secondCold, finalImage, finalCut);
         await GraphIncomingVertexAuthorityAssertions.Healthy(secondOwner, secondCold, state, next, token);

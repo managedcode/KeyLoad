@@ -93,7 +93,7 @@ internal static class TextAuthorityContinuation
     }
 
     private static ZoneTreeStore OpenStore(TestDatabase database)
-        => new(new(database.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        => new(new(database.Directory), UnitExecutionOptions.StorageExecution());
 
     private static RuntimeTextProjection OpenProjection(TestDatabase database)
         => new(Path.Combine(database.Directory, ProjectionDirectory),

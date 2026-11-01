@@ -1,6 +1,5 @@
 using KeyLoad.Query;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.FunctionalTests;
@@ -15,13 +14,6 @@ internal static partial class UnitExecutionOptions
     internal static IOptions<ZoneTreeStorageExecutionOptions> StorageExecution(ZoneTreeStorageExecutionOptions? configured = null)
     {
         var value = configured ?? new ZoneTreeStorageExecutionOptions();
-        value.Validate();
-        return Options.Create(value);
-    }
-
-    internal static IOptions<ZoneTreePointCacheExecutionOptions> PointCacheExecution(ZoneTreePointCacheExecutionOptions? configured = null)
-    {
-        var value = configured ?? new ZoneTreePointCacheExecutionOptions();
         value.Validate();
         return Options.Create(value);
     }

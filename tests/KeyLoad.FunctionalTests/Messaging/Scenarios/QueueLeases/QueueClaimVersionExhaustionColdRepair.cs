@@ -33,7 +33,7 @@ internal static class QueueClaimVersionExhaustionColdRepair
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(database, store, state, failed);
         await QueueReadyAuthorityColdContinuation.RunAsync(database, store, root, state.Lane,
             result.Get<ReceiveResult>(), false, operation, state.Producer, state.Produced, identity, token);
-        using var final = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var final = new ZoneTreeStore(new(root), UnitExecutionOptions.StorageExecution());
         var completed = QueueWholeFlowStorage.Open(final);
         await QueueClaimVersionExhaustionAssertions.ReplayAsync(completed, final, state, failed);
         await Assert.That(completed.InspectMessage(QueueClaimVersionExhaustionProtocol.Root, state.Lane, state.Body.Id))

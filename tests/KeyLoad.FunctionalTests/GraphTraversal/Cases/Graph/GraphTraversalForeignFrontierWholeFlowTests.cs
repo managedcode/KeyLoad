@@ -17,7 +17,7 @@ internal sealed class GraphTraversalForeignFrontierWholeFlowTests
         var position = database.Store.Position;
         database.Store.Dispose();
         GraphTraversalIntegrityContinuation continuation;
-        using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution))
         {
             var owner = database.CreateConfiguredDatabase(cold);
             await GraphTraversalIntegrityAssertions.Image(cold, image, position);
@@ -27,7 +27,7 @@ internal sealed class GraphTraversalForeignFrontierWholeFlowTests
             image = CanonicalStoreImage.Bytes(cold);
             position = cold.Position;
         }
-        using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var secondCold = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var secondOwner = database.CreateConfiguredDatabase(secondCold);
         await GraphTraversalIntegrityAssertions.Image(secondCold, image, position);
         await GraphTraversalForeignFrontierAssertions.Healthy(secondOwner, secondCold, state, continuation, token);

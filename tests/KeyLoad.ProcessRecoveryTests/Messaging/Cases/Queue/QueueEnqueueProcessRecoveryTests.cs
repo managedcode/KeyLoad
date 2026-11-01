@@ -5,9 +5,7 @@ namespace KeyLoad.ProcessRecoveryTests.Messaging;
 internal sealed class QueueEnqueueProcessRecoveryTests
 {
     [Test]
-    [Arguments(CommitStage.HeaderWritten, 0)]
-    [Arguments(CommitStage.PayloadWritten, 0)]
-    [Arguments(CommitStage.JournalFlushed, 0)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0)]
     [Arguments(CommitStage.MutationApplied, 0)]
     [Arguments(CommitStage.MutationApplied, 3)]
     [Arguments(CommitStage.MutationApplied, 6)]

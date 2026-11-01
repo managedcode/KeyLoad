@@ -11,9 +11,7 @@ internal sealed class SampleRetentionProcessRecoveryTests
     private const int MutationIndex = 0;
 
     [Test]
-    [Arguments(CommitStage.HeaderWritten)]
-    [Arguments(CommitStage.PayloadWritten)]
-    [Arguments(CommitStage.JournalFlushed)]
+    [Arguments(CommitStage.WriteAheadLogSynced)]
     [Arguments(CommitStage.MutationApplied)]
     [Arguments(CommitStage.ApplyCompleted)]
     public async Task AcSeries013015016ProcessKillRecoversOldOrCompleteRetentionPage(CommitStage stage)
@@ -71,7 +69,7 @@ internal sealed class SampleRetentionProcessRecoveryTests
         }
         if (Directory.Exists(root))
         {
-            await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
+            await StorageTrialCleanup.DeleteTrialAsync(root, cancellationToken);
         }
     }
 }

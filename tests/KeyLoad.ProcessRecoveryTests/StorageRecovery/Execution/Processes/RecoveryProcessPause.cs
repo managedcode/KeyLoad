@@ -1,3 +1,5 @@
+using KeyLoad.Storage;
+
 namespace KeyLoad.ProcessRecoveryTests;
 
 internal static class RecoveryProcessPause
@@ -22,8 +24,10 @@ internal static class RecoveryProcessPause
         await StandardOutput.FlushAsync();
     }
 
-    internal static async Task WaitForKillAsync()
+    /// <summary>Acknowledges the completed operation once ZoneTree's write-ahead log holds it, then waits for the kill.</summary>
+    internal static async Task WaitForKillAsync(IAtomicStore store)
     {
+        await store.SyncAsync();
         await WriteAcknowledgementAsync();
         await Task.Delay(Timeout.InfiniteTimeSpan, TimeProvider.System);
     }

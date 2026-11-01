@@ -51,9 +51,9 @@ internal static class SharedDomainCrashScenario
         await SaveAsync(directory, store, progress, originalOperation, operations.ToArray(), results.ToArray(), creations);
         progress.Record(SharedDomainChildProgressPhase.ArmingOriginalBoundary);
         boundary.Position = store.Position + FirstRevision;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(originalOperation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static async Task SaveAsync(string directory, ZoneTreeStore store, SharedDomainChildProgressRecorder progress,

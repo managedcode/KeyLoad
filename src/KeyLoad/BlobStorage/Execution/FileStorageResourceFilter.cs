@@ -4,8 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class FileStorageResourceFilter(IOptions<FileStorageOptions> options, IOptions<NodeOptions> node,
-    FileStorageTransferGate transfers)
+internal sealed class FileStorageResourceFilter(IOptions<FileStorageOptions> options, IOptions<NodeOptions> node)
     : IAsyncResourceFilter
 {
     private const string TenantRoute = "tenant";
@@ -27,19 +26,7 @@ internal sealed class FileStorageResourceFilter(IOptions<FileStorageOptions> opt
         var physicalNamespace = FilePhysicalIdentity.Resource(address, state.Incarnation);
         http.Features.Set(new FileStorageScope(address, state.Incarnation, physicalNamespace,
             Path.Combine(options.Value.ResolveRoot(node.Value), physicalNamespace)));
-        using var admitted = await transfers.EnterAsync(http.RequestAborted);
-        using var deadline = new CancellationTokenSource(options.Value.TransferTimeout);
-        var original = http.RequestAborted;
-        using var joined = CancellationTokenSource.CreateLinkedTokenSource(original, deadline.Token);
-        http.RequestAborted = joined.Token;
-        try
-        {
-            await next();
-        }
-        finally
-        {
-            http.RequestAborted = original;
-        }
+        await next();
     }
 
     private static string Value(RouteValueDictionary routes, string key)

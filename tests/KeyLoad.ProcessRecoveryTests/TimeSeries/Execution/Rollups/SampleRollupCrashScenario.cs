@@ -21,7 +21,7 @@ internal static class SampleRollupCrashScenario
                 await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.AcknowledgedReceiptFile), OrleansSerialization.Serialize(receipt));
                 await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.RawFile), SampleRollupCrashState.Raw(database));
                 await SampleRollupCrashState.WriteAsync(directory, SampleRollupCrashContract.PreparedFile, database);
-                await RecoveryProcessPause.WaitForKillAsync();
+                await RecoveryProcessPause.WaitForKillAsync(database.Store);
                 break;
             case SampleRollupCrashContract.RefreshFaultMode:
             case SampleRollupCrashContract.DropFaultMode:
@@ -51,9 +51,9 @@ internal static class SampleRollupCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, SampleRollupCrashContract.OperationFile), OrleansSerialization.Serialize(operation));
         SampleChunkSnapshotFile.CaptureExpectedToken(directory, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleRollupCrashContract.PositionStep);
-        boundary.Armed = true;
+        await boundary.ArmAsync(database.Store);
         database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(database.Store);
     }
 
     private static DatabaseEngine OpenExisting(ZoneTreeStore store)

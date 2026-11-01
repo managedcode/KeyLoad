@@ -9,15 +9,19 @@ internal static class QueueLifecycleRecoveryAssertions
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = Open(store);
         var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueLifecycleCrashProtocol.OperationFile), token));
         var outcome = OutcomeStoreOracle.Read(store, operation);
         var committed = outcome is not null;
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         await QueueLifecycleRecoveryImage.AssertAsync(database, store, committed);
         var receipt = database.Apply(operation).Get<CommitReceipt>();

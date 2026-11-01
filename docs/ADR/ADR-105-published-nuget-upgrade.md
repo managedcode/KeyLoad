@@ -8,9 +8,8 @@ Feature: [RepositoryGovernance](../Features/RepositoryGovernance.md).
 
 Every NuGet dependency is updated to its latest published version. Inspect every central
 PackageVersion, including transitive pins, and the Aspire.AppHost.Sdk pin against
-the configured NuGet.org feed. Use the newest published stable release. Cartograph
-and Cartograph.Catalog have only their existing 0.1.0-alpha release; keep that
-published version. Do not introduce previews into stable package families.
+the configured NuGet.org feed. Use the newest published stable release. Do not
+introduce previews into stable package families.
 
 The owner-approved 2026-10-31 update selects ZoneTree 2.0.7; the existing feed audit selects Orleans 10.4.2, with Journaling and Durable
 Jobs at 10.4.2-alpha.1, ManagedCode.Storage.Server/FileSystem 10.1.7 and

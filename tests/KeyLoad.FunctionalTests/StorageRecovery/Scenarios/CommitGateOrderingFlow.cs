@@ -6,13 +6,11 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 internal static class CommitGateOrderingFlow
 {
     private const int BoundSeconds = 5;
-    private const int SettleMilliseconds = 50;
     private static readonly TimeSpan Bound = TimeSpan.FromSeconds(BoundSeconds);
-    private static readonly TimeSpan Settle = TimeSpan.FromMilliseconds(SettleMilliseconds);
     private const string WriterNotCompiling = "The writer did not enter its compiler callback.";
     private const string WriterNotReleased = "The compiling writer was not released.";
     private const string ReaderBlocked = "A reader waited for a writer that was still compiling.";
-    private const string ReadNotEntered = "The held read did not enter the store gate.";
+    private const string ReadNotEntered = "The held read did not enter its native snapshot.";
     private const string ReadNotReleased = "The held read was not released.";
 
     internal static async Task RunAsync(O owner)
@@ -60,8 +58,7 @@ internal static class CommitGateOrderingFlow
                 throw new TimeoutException(ReadNotEntered);
             }
             releaseWriter.Set();
-            await Task.Delay(Settle, TimeProvider.System);
-            await Assert.That(writer.IsCompleted).IsFalse();
+            await Assert.That(await writer.WaitAsync(Bound)).IsTrue();
             releaseReader.Set();
             await Assert.That(await held).IsNull();
         }

@@ -128,7 +128,7 @@ internal sealed class TopicRetentionFixture : IDisposable
     internal void Reopen()
     {
         Store.Dispose();
-        Store = new(new(Owner.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        Store = new(new(Owner.Directory), UnitExecutionOptions.StorageExecution());
         Database = QueueWholeFlowStorage.Open(Store);
     }
     public void Dispose()

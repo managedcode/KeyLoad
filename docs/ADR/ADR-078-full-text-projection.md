@@ -48,7 +48,7 @@ The generation scope binds source physical NodeId, Incarnation, current storage 
 ReadGeneration, committed Position, logical PartitionRef, collection, exact JSON
 field, principal ID, policy epoch, schema version, tokenizer and hash versions.
 Capture it within `WithQueryView`, after persisted capability/row/field-use checks.
-Every canonical write, authority/schema change, snapshot installation or source
+Every canonical write, authority/schema change, restore or source
 cut change invalidates reuse. No grant, role, scope or trusted source cut comes
 from an external client. An empty/missing field still participates in the exact
 visible corpus statistics; hidden/deleted rows never enter the generation.
@@ -154,7 +154,7 @@ Process recovery compares the complete logical key/value authority in one gated
 scan, using a length-framed SHA256 and record count with maximum4096 records
 and1MiB examined bytes. The receipt retains only this count/digest, alongside exact
 selected raw document/policy bytes, credential digest and immutable top-level
-journal/identity checks. Compare the complete logical digest before and after
+identity checks. Compare the complete logical digest before and after
 derived-index reconstruction. canonical tree files may legitimately change
 through reopen and maintenance; their physical byte identity is not the logical
 authority oracle, and no claim of immutable file layout follows.

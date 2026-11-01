@@ -18,7 +18,7 @@ internal sealed class JournalPrincipalPolicyTests
     private static readonly DateTimeOffset OperationTime = new(2026, 10, 1, 0, 0, 0, TimeSpan.Zero);
 
     [Test]
-    public async Task AcAuth002InitializationSeedsAnIdempotentProtectedPrincipalAndSnapshotCopiesIt()
+    public async Task AcAuth002InitializationSeedsAnIdempotentProtectedPrincipalAndBackupCopiesIt()
     {
         using var database = new TestDatabase();
         JournalAuthorityTestBootstrap.Initialize(database.Database);
@@ -47,16 +47,12 @@ internal sealed class JournalPrincipalPolicyTests
             .ToArray());
         await Assert.That(storedCredentials).IsEmpty();
 
-        var snapshotPath = Path.Combine(database.Directory, "authorization.snapshot");
-        var originalAppliedPosition = database.Database.LastApplied;
-        database.Database.Store.CreateSnapshot(snapshotPath, expectedAppliedPosition: originalAppliedPosition);
+        var backupDirectory = Path.Combine(database.Directory, "authorization-backup");
+        await database.Store.CreateBackupAsync(backupDirectory);
         var replicaDirectory = Path.Combine(database.Directory, "replica");
-        using var replica = new ZoneTreeStore(new ZoneTreeStoreOptions(replicaDirectory)
-        {
-            Incarnation = database.Store.Identity.Incarnation,
-            SigningKey = database.Store.Identity.SigningKey
-        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        replica.InstallSnapshot(snapshotPath, expectedAppliedPosition: originalAppliedPosition);
+        await ZoneTreeStore.RestoreAsync(backupDirectory, replicaDirectory, UnitExecutionOptions.StorageExecution());
+        using var replica = new ZoneTreeStore(new ZoneTreeStoreOptions(replicaDirectory),
+            UnitExecutionOptions.StorageExecution());
         var replicatedPrincipal = replica.Read(view => view.GetRecord<PrincipalRecord>(
             KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId)));
         await Assert.That(replicatedPrincipal).IsNotNull();

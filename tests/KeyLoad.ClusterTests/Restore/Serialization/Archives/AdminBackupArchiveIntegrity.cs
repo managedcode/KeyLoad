@@ -3,34 +3,35 @@ using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.ClusterTests.BackupRestore.Helpers;
 
-/// <summary>Captures a bounded digest of the verified fixture-owned backup manifest.</summary>
+/// <summary>Captures one digest over every fixture-owned backup file and its relative path.</summary>
 internal static class AdminBackupArchiveIntegrity
 {
-    private const string BackupManifestName = "backup.json";
-    private const string InvalidManifestLength = "The fixture backup manifest exceeds its execution file bound.";
-    private const string ChangedManifestLength = "The fixture backup manifest changed while its digest was captured.";
+    private const string AllFiles = "*";
+    private const string ChangedFileLength = "A fixture backup file changed while its digest was captured.";
 
-    internal static async Task<byte[]> CaptureManifestDigestAsync(string directory,
+    internal static async Task<byte[]> CaptureArchiveDigestAsync(string directory,
         ZoneTreeStorageExecutionOptions policy, CancellationToken cancellationToken)
     {
-        using var manifest = new FileStream(Path.Combine(directory, BackupManifestName), new FileStreamOptions
+        using var digest = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
+        foreach (var path in Directory.EnumerateFiles(directory, AllFiles, SearchOption.AllDirectories)
+            .Order(StringComparer.Ordinal))
         {
-            Mode = FileMode.Open,
-            Access = FileAccess.Read,
-            Share = FileShare.Read,
-            BufferSize = policy.StreamBufferBytes,
-            Options = FileOptions.Asynchronous | FileOptions.SequentialScan
-        });
-        var length = manifest.Length;
-        if (length <= 0 || length > policy.MaximumBackupManifestBytes)
-        {
-            throw new InvalidDataException(InvalidManifestLength);
+            digest.AppendData(System.Text.Encoding.UTF8.GetBytes(Path.GetRelativePath(directory, path)));
+            using var file = new FileStream(path, new FileStreamOptions
+            {
+                Mode = FileMode.Open,
+                Access = FileAccess.Read,
+                Share = FileShare.Read,
+                BufferSize = policy.StreamBufferBytes,
+                Options = FileOptions.Asynchronous | FileOptions.SequentialScan
+            });
+            var length = file.Length;
+            digest.AppendData(await SHA256.HashDataAsync(file, cancellationToken).ConfigureAwait(false));
+            if (file.Position != length || file.Length != length)
+            {
+                throw new InvalidDataException(ChangedFileLength);
+            }
         }
-        var digest = await SHA256.HashDataAsync(manifest, cancellationToken).ConfigureAwait(false);
-        if (manifest.Position != length || manifest.Length != length)
-        {
-            throw new InvalidDataException(ChangedManifestLength);
-        }
-        return digest;
+        return digest.GetHashAndReset();
     }
 }

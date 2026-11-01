@@ -71,7 +71,7 @@ internal sealed class TextProtectedRebuildColdOwner : IDisposable
         {
             Directory.Delete(ProjectionRoot, recursive: true);
         }
-        Store = new(new(Source.Directory), Source.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        Store = new(new(Source.Directory), Source.StorageExecution);
         Database = Source.CreateConfiguredDatabase(Store);
         if (!OrleansSerialization.Serialize(Store.Identity).SequenceEqual(
             OrleansSerialization.Serialize(original)))

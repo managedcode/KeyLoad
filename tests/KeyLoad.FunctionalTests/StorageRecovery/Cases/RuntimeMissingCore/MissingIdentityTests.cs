@@ -7,6 +7,8 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 internal sealed class MissingIdentityTests
 {
     private const string TreeDirectoryName = "tree";
+    private const string PlainTreeDirectoryName = "plain-tree";
+    private const string IdentityFileName = "identity.json";
     private const string OwnerLockFileName = "owner.lock";
     private const string UnexpectedFileName = "unexpected.data";
     private const string UnexpectedLockFileName = "unexpected.lock";
@@ -17,20 +19,14 @@ internal sealed class MissingIdentityTests
     private const int OwnerOnlyDirectory = 2;
 
     [Test]
-    [Arguments(false)]
-    [Arguments(true)]
-    public async Task AcIs004And008MissingIdentityPreservesActualTreeAndJournal(bool checkpoint)
+    public async Task AcIs004And008MissingIdentityPreservesActualTree()
     {
-        using var files = new WalFileFixture();
+        using var files = new StoreFileFixture();
         StoreIdentity originalIdentity;
         long originalPosition;
-        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+        using (var store = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution()))
         {
             store.Commit((transaction, _) => { transaction.Put([0x10], [0x30]); return true; });
-            if (checkpoint)
-            {
-                store.Compact();
-            }
             originalIdentity = store.Identity;
             originalPosition = store.Position;
         }
@@ -42,25 +38,8 @@ internal sealed class MissingIdentityTests
         await File.WriteAllBytesAsync(files.IdentityPath, identityBytes, token);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath, token))
             .IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
-        await CurrentCheckpointRepairContinuation.RequireCurrentAsync(files, originalIdentity, originalPosition,
+        await IdentityRepairContinuation.RequireCurrentAsync(files, originalIdentity, originalPosition,
             token).ConfigureAwait(false);
-    }
-
-    [Test]
-    [Arguments(0)]
-    [Arguments(7)]
-    [Arguments(51)]
-    [Arguments(WalFileFixture.HeaderBytes)]
-    public async Task AcIs004And008MissingIdentityNeverTruncatesShortUnsupportedJournal(int length)
-    {
-        using var files = new WalFileFixture();
-        Directory.CreateDirectory(files.DirectoryPath);
-        await File.WriteAllBytesAsync(Path.Combine(files.DirectoryPath, OwnerLockFileName), []);
-        var frame = WalFileFixture.CreateFrame([0x10, 0x30], magic: WalFileFixture.UnsupportedMagic);
-        await File.WriteAllBytesAsync(files.JournalPath, frame[..length]);
-
-        await AssertRejectedUnchangedAsync(files);
-        await Assert.That(Directory.Exists(Path.Combine(files.DirectoryPath, TreeDirectoryName))).IsFalse();
     }
 
     [Test]
@@ -69,7 +48,7 @@ internal sealed class MissingIdentityTests
     [Arguments(TemporaryIdentityFileName, false)]
     public async Task AcIs008MissingIdentityRejectsEveryAmbiguousEntry(string name, bool directory)
     {
-        using var files = new WalFileFixture();
+        using var files = new StoreFileFixture();
         Directory.CreateDirectory(files.DirectoryPath);
         await File.WriteAllBytesAsync(Path.Combine(files.DirectoryPath, OwnerLockFileName), []);
         var path = Path.Combine(files.DirectoryPath, name);
@@ -88,7 +67,7 @@ internal sealed class MissingIdentityTests
     [Test]
     public async Task AcIs008OwnerNameWithUnexpectedContentsIsNotAnEmptyStore()
     {
-        using var files = new WalFileFixture();
+        using var files = new StoreFileFixture();
         Directory.CreateDirectory(files.DirectoryPath);
         await File.WriteAllBytesAsync(Path.Combine(files.DirectoryPath, OwnerLockFileName), [0x80, 0xFF]);
 
@@ -100,7 +79,7 @@ internal sealed class MissingIdentityTests
     [Arguments(true)]
     public async Task AcIs008IdentityCreationRequiresTheLiveCanonicalOwnerHandle(bool disposed)
     {
-        using var files = new WalFileFixture();
+        using var files = new StoreFileFixture();
         Directory.CreateDirectory(files.DirectoryPath);
         var name = disposed ? OwnerLockFileName : UnexpectedLockFileName;
         await using var ownership = new FileStream(Path.Combine(files.DirectoryPath, name),
@@ -125,7 +104,7 @@ internal sealed class MissingIdentityTests
     [Arguments(OwnerOnlyDirectory)]
     public async Task AcIs004BrandNewDirectoryCreatesCurrentIdentityAndPreservesReopen(int initialState)
     {
-        using var files = new WalFileFixture();
+        using var files = new StoreFileFixture();
         if (initialState != NoDirectory)
         {
             Directory.CreateDirectory(files.DirectoryPath);
@@ -136,23 +115,24 @@ internal sealed class MissingIdentityTests
         }
         var identity = files.Initialize();
 
-        await Assert.That(identity.FormatVersion).IsEqualTo(WalFileFixture.CurrentIdentityVersion);
-        await Assert.That(File.Exists(files.IdentityPath)).IsTrue();
-        await Assert.That(File.Exists(files.JournalPath)).IsTrue();
+        await Assert.That(identity.FormatVersion).IsEqualTo(StoreFileFixture.CurrentIdentityVersion);
+        await Assert.That(Directory.EnumerateFileSystemEntries(files.DirectoryPath)
+            .Select(path => Path.GetFileName(path)!).Order(StringComparer.Ordinal))
+            .IsEquivalentTo([IdentityFileName, OwnerLockFileName, PlainTreeDirectoryName, TreeDirectoryName], CollectionOrdering.Matching);
         await Assert.That(Directory.Exists(Path.Combine(files.DirectoryPath, TreeDirectoryName))).IsTrue();
-        using var reopened = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        await WalFileFixture.AssertPreservedIdentity(identity, reopened.Identity);
+        using var reopened = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution());
+        await StoreFileFixture.AssertPreservedIdentity(identity, reopened.Identity);
         await Assert.That(reopened.Position).IsEqualTo(0);
     }
 
-    private static async Task AssertRejectedUnchangedAsync(WalFileFixture files)
+    private static async Task AssertRejectedUnchangedAsync(StoreFileFixture files)
     {
         var before = await files.CaptureFilesAsync();
         var directories = Directory.EnumerateDirectories(files.DirectoryPath, AllEntriesPattern,
             SearchOption.AllDirectories).ToArray();
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
-            using var attempted = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var attempted = new ZoneTreeStore(new(files.DirectoryPath), UnitExecutionOptions.StorageExecution());
         });
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.FormatUnsupported);

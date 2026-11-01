@@ -51,8 +51,7 @@ internal static class SubscriptionProcessingAtomicFlow
         position = fixture.Store.Position;
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(first);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, cut, position, identity);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(db, first, group, failed, failure, failureBytes);
@@ -130,8 +129,7 @@ internal static class SubscriptionProcessingAtomicFlow
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(second);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, cut, position, identity);
         await SubscriptionProcessingAtomicAssertions.FailureReplayAsync(cold, second, group, failed, failure, failureBytes);

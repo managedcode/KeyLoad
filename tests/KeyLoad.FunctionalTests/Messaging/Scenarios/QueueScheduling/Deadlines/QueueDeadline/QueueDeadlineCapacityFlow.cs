@@ -17,7 +17,7 @@ internal static class QueueDeadlineCapacityFlow
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await QueueDeadlineCapacityContinuation.RunAsync(database, cold, fixture.Directory, state, token);
@@ -47,7 +47,7 @@ internal static class QueueDeadlineCapacityFlow
         var position = fixture.Store.Position;
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await QueueDeadlineCapacityRefusal.RequireAsync(database, cold, state, result, token);

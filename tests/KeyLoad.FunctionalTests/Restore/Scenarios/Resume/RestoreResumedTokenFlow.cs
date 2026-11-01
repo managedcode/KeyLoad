@@ -24,11 +24,11 @@ internal static class RestoreResumedTokenFlow
             var sourceImage = EventingArtifactState.FullBytes(fixture.Source.Store);
             var backup = Path.Combine(fixture.Root, Backup);
             var target = Path.Combine(fixture.Root, Target);
-            var cut = fixture.Source.Store.CreateBackup(backup);
-            var files = Directory.GetFiles(backup).Order(StringComparer.Ordinal).ToArray();
-            var archive = files.Select(path => Convert.ToHexString(File.ReadAllBytes(path))).ToArray();
+            var cut = await fixture.Source.Store.CreateBackupAsync(backup, token);
+            var archive = await RestoreCancellationFlow.ArchiveAsync(backup, token);
             token.ThrowIfCancellationRequested();
-            var identity = ZoneTreeStore.Restore(backup, target, UnitExecutionOptions.StorageExecution());
+            var identity = await ZoneTreeStore.RestoreAsync(backup, target, UnitExecutionOptions.StorageExecution(),
+                cancellationToken: token);
             fixture.OpenTarget(target);
             await Assert.That(identity.DispatchPaused).IsTrue();
             await Assert.That(identity.Incarnation).IsNotEqualTo(fixture.Source.Store.Identity.Incarnation);
@@ -59,10 +59,7 @@ internal static class RestoreResumedTokenFlow
             await Assert.That(fixture.Source.Store.Position).IsEqualTo(cut);
             await Assert.That(EventingArtifactState.FullBytes(fixture.Source.Store))
                 .IsEquivalentTo(sourceImage, CollectionOrdering.Matching);
-            await Assert.That(Directory.GetFiles(backup).Order(StringComparer.Ordinal).ToArray())
-                .IsEquivalentTo(files, CollectionOrdering.Matching);
-            await Assert.That(files.Select(path => Convert.ToHexString(File.ReadAllBytes(path))).ToArray())
-                .IsEquivalentTo(archive, CollectionOrdering.Matching);
+            await BackupIndexedDocumentDedupAssertions.AssertArchiveUnchanged(backup, archive);
         });
     }
 

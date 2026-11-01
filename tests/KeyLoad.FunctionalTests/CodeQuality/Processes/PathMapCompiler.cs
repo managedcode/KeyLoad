@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using KeyLoad.FunctionalTests.CodeQuality.Assertions;
 using KeyLoad.FunctionalTests.CodeQuality.Helpers;
 
@@ -8,9 +7,9 @@ namespace KeyLoad.FunctionalTests.CodeQuality.Processes;
 internal static class PathMapCompiler
 {
     private const string Dotnet = "dotnet";
-    private const string VersionArgument = "--version";
+    private const string InfoArgument = "--info";
+    private const string BasePathLabel = "Base Path:";
     private const string ExecArgument = "exec";
-    private const string SdkDirectory = "sdk";
     private const string RoslynDirectory = "Roslyn";
     private const string CompilerDirectory = "bincore";
     private const string CompilerFileName = "csc.dll";
@@ -31,12 +30,12 @@ internal static class PathMapCompiler
         IReadOnlyList<string> additionalSources, CancellationToken cancellationToken)
     {
         await File.WriteAllBytesAsync(fixture.SourcePath, PathMapFixture.OriginalSourceBytes, cancellationToken);
-        var versionStart = CreateStartInfo(ProductionSourceManifestProcess.RepositoryRoot);
-        versionStart.ArgumentList.Add(VersionArgument);
+        var infoStart = CreateStartInfo(ProductionSourceManifestProcess.RepositoryRoot);
+        infoStart.ArgumentList.Add(InfoArgument);
         var discovered = await ProductionSourceManifestProcess.RunAsync(fixture.ExecutionOptions,
-            versionStart, cancellationToken);
+            infoStart, cancellationToken);
         await PathMapAssertions.SuccessfulProcessAsync(discovered);
-        var compiler = ResolveCompiler(discovered.StandardOutput.Trim());
+        var compiler = ResolveCompiler(discovered.StandardOutput);
         var start = CreateStartInfo(fixture.Root);
         start.ArgumentList.Add(ExecArgument);
         start.ArgumentList.Add(compiler);
@@ -62,16 +61,17 @@ internal static class PathMapCompiler
         }
     }
 
-    private static string ResolveCompiler(string version)
+    /// <summary>Resolves the compiler of the SDK that the repository's global.json selects, independent of the
+    /// runtime that launched the test process.</summary>
+    private static string ResolveCompiler(string info)
     {
-        var runtime = new DirectoryInfo(RuntimeEnvironment.GetRuntimeDirectory());
-        var runtimeRoot = runtime.Parent?.Parent?.Parent?.FullName;
-        if (runtimeRoot is null || string.IsNullOrWhiteSpace(version)
-            || version.IndexOfAny([Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar]) >= 0)
+        var basePath = info.Split('\n').Select(static line => line.Trim())
+            .FirstOrDefault(static line => line.StartsWith(BasePathLabel, StringComparison.Ordinal))?[BasePathLabel.Length..].Trim();
+        if (string.IsNullOrEmpty(basePath))
         {
             throw new InvalidOperationException(MissingCompiler);
         }
-        var compiler = Path.Combine(runtimeRoot, SdkDirectory, version, RoslynDirectory, CompilerDirectory, CompilerFileName);
+        var compiler = Path.Combine(basePath, RoslynDirectory, CompilerDirectory, CompilerFileName);
         return File.Exists(compiler) ? compiler : throw new FileNotFoundException(MissingCompiler);
     }
 

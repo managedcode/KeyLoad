@@ -7,21 +7,17 @@ internal sealed class PublicElementProfileTests
     private const string Content = "{}";
 
     [Test]
-    public async Task PublicElementsUseTheSameBytesAndKeepOrdinaryPersistenceStrict()
+    public async Task OwnedBytesAreNotReWalkedAndPublicElementsRequireAnExactRoot()
     {
         using var database = new TestDatabase();
         var value = new CommandRequest(Guid.NewGuid(), database.Partition, [null!]);
-        var bytes = OrleansSerialization.Serialize(value, ValidationProfile.PublicInputElements);
+        var bytes = OrleansSerialization.Serialize(value);
         using var destination = new MemoryStream();
-        OrleansSerialization.Serialize(value, destination, ValidationProfile.PublicInputElements);
+        OrleansSerialization.Serialize(value, destination);
         await Assert.That(destination.ToArray().AsSpan().SequenceEqual(bytes)).IsTrue();
         await Assert.That(OrleansSerialization.Deserialize<CommandRequest>(bytes,
             ValidationProfile.PublicInputElements).Mutations[0]).IsNull();
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(value)).Code)
-            .IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Deserialize<CommandRequest>(bytes)).Code)
-            .IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Measure(value)).Code)
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(value)).Code)
             .IsEqualTo(ErrorCode.Corruption);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Deserialize<object>(bytes,
             ValidationProfile.PublicInputElements)).Code).IsEqualTo(ErrorCode.Corruption);
@@ -46,8 +42,7 @@ internal sealed class PublicElementProfileTests
                 [null!, new PatchDocument(Collection, Entity, default, 1)]),
             _ => throw new ArgumentOutOfRangeException(nameof(shape))
         };
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(command,
-            ValidationProfile.PublicInputElements));
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(command));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(OutcomeStoreOracle.ReadPartition(database.Store, database.Partition, "root", id)).IsNull();
     }
@@ -57,8 +52,8 @@ internal sealed class PublicElementProfileTests
     {
         using var database = new TestDatabase();
         var command = new CommandRequest(Guid.NewGuid(), database.Partition, [null!]);
-        var bytes = OrleansSerialization.Serialize(command, ValidationProfile.PublicInputElements);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize<CommandRequest>(null!,
+        var bytes = OrleansSerialization.Serialize(command);
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate<CommandRequest>(null!,
             ValidationProfile.PublicInputElements)).Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Deserialize<CommandRequest>(bytes.AsSpan(0, bytes.Length - 1),
             ValidationProfile.PublicInputElements)).Code).IsEqualTo(ErrorCode.Corruption);

@@ -14,8 +14,9 @@ internal sealed class DocumentMutationImageReadTests
     private const long PlacementWitnessBorrowedPoints = 3;
     private const long ReplacementLifetimeBindingBorrowedPoints = 1;
     private const long ResourceLifetimeBorrowedPoints = 3;
+    private const long TableWriteModeBorrowedPoints = 1;
     private const long NewPutBorrowedPoints = MutationAndOutcomeBorrowedPoints
-        + PlacementWitnessBorrowedPoints + ResourceLifetimeBorrowedPoints;
+        + PlacementWitnessBorrowedPoints + ResourceLifetimeBorrowedPoints + TableWriteModeBorrowedPoints;
 
     [Test]
     public async Task AcDstore005NewPutHasOneDocumentMissAndNoPayloadSizedPointRead()

@@ -74,31 +74,4 @@ internal static class CommandOutcomeApplication
             transaction.PutRecord(KeySpace.ClockBytes, (DateTimeOffset)operation.Timestamp);
         }
     }
-
-    internal static Result<object> ValidateCompiledCommand(AtomicPartitionRosterTransaction transaction, Command<DatabaseCommand> operation, byte[] resultKey, StoredOutcome outcome, long replicationIndex, bool persistOutcome)
-    {
-        try
-        {
-            transaction.PersistCandidates();
-            transaction.ValidateCommit();
-            return outcome.Result;
-        }
-        catch (KeyLoadException exception) when (exception.Code == ErrorCode.ResourceExhausted)
-        {
-            // Indexes, images and outbox can expand a small request beyond its frame.
-            // Reject at this same apply position without leaving an unapplicable entry.
-            transaction.Reset();
-            var failure = ManagedCode.Communication.Result<object>.Fail(Errors.Problem(exception.Code, exception.Message));
-            var actualFailure = outcome with
-            {
-                Result = failure,
-                CompositionAuthority = null,
-                RemoteTransferFailureAuthority = null
-            };
-            CommandOutcomeApplication.PersistCommandOutcome(transaction, operation, resultKey, actualFailure, replicationIndex, persistOutcome);
-            transaction.PersistCandidates();
-            transaction.ValidateCommit();
-            return failure;
-        }
-    }
 }

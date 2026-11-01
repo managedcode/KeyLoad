@@ -121,7 +121,7 @@ internal static class FullPartitionOutcomeIdentityScenario
     {
         var directory = database.Directory;
         database.Store.Dispose();
-        using var reopenedStore = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopenedStore = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var reopened = new DatabaseEngine(reopenedStore, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         await FullPartitionOutcomeIdentityAssertions.AssertReceiptAsync(reopened.ResolveOutcome(committed.First),
             committed.FirstReceipt);

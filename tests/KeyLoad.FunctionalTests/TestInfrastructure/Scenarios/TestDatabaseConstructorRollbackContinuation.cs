@@ -15,7 +15,7 @@ internal static class TestDatabaseConstructorRollbackContinuation
         var failures = new List<Exception>();
         var lifetime = new StorageFailureOwnerLifetime();
         var reopened = lifetime.Acquire(() => new ZoneTreeStore(new(directory),
-            UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()), failures);
+            UnitExecutionOptions.StorageExecution()), failures);
         if (reopened is not null)
         {
             await ServerFailureObserver.ObserveAsync(async () =>

@@ -22,7 +22,7 @@ internal static class PartialCurrentNodeLayoutPrefix
                     Incarnation = fixture.Options.Incarnation,
                     SigningKey = key
                 },
-                    UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                    UnitExecutionOptions.StorageExecution());
                 await ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await Assert.That(store.Position).IsEqualTo(0L);
@@ -51,7 +51,7 @@ internal static class PartialCurrentNodeLayoutPrefix
                     Incarnation = fixture.Options.Incarnation,
                     SigningKey = key
                 },
-                    UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                    UnitExecutionOptions.StorageExecution());
                 await ServerFailureObserver.ObserveAsync(async () =>
                     await Assert.That(JsonSerializer.Serialize(store.Identity, JsonDefaults.Options)).IsEqualTo(identity), failures);
             }, failures);

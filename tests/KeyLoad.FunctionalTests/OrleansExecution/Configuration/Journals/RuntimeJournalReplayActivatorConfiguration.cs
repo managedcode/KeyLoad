@@ -1,6 +1,3 @@
-using KeyLoad.Clustering;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
 using Orleans.Metadata;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
@@ -19,18 +16,6 @@ internal sealed class RuntimeJournalReplayActivatorConfiguration(
         {
             shared.SetComponent<IGrainActivator>(new CqrsGrainActivator(
                 static () => new RuntimeJournalReplayGrain(),
-                new DefaultGrainActivator(services, grainClass)));
-        }
-        else if (grainClass == typeof(RuntimeJournalGraphCallerProbeGrain))
-        {
-            shared.SetComponent<IGrainActivator>(new CqrsGrainActivator(
-                () => new RuntimeJournalGraphCallerProbeGrain(
-                    services.GetRequiredService<IGrainFactory>(),
-                    services.GetRequiredService<GrainRequestCodec>(),
-                    services.GetRequiredService<RuntimeJournalClient>(),
-                    services.GetRequiredService<IOptions<RuntimeTestOptions>>(),
-                    services.GetRequiredService<ConnectionOwnerIdentity>(),
-                    services.GetRequiredService<ILocalSiloDetails>()),
                 new DefaultGrainActivator(services, grainClass)));
         }
     }

@@ -91,6 +91,9 @@ ad-hoc concatenation. Do not change user entity casing implicitly.
 - Use ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics through their
   public APIs. Await their asynchronous APIs, such as `CommitDurableAsync` and
   `SyncWALAsync`, so engine waits never block a grain or thread-pool thread.
+  ZoneTree owns read snapshots, commit conflicts, native cache maintenance and
+  thread-safe physical writes. Do not serialize database operations with KeyLoad
+  locks or semaphores, duplicate the engine cache, or schedule a second maintainer.
   Blocking on their tasks (`.Result`, `.Wait()`, `.GetAwaiter().GetResult()`) and
   dispatching engine work through `Task.Run`, `Task.Factory.StartNew` or a
   thread-pool callback are compiler errors (`KLD0039`). The rule makes no claim

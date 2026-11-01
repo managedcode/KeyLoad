@@ -1,4 +1,3 @@
-using ManagedCode.Orleans.Graph.Extensions;
 
 namespace KeyLoad.Clustering;
 
@@ -73,8 +72,7 @@ public sealed partial class DatabaseCommitGrain
 
     /// <inheritdoc />
     public Task<GrainOperationReply> ExecuteSharedAsync(GrainRequestEnvelope envelope, string? actorKey, CancellationToken cancellationToken)
-        => this.WithCallChainReentrancyAsync(() => Shared.ExecuteAsync(envelope, actorKey,
-            ((IGrainBase)this).GrainContext, cancellationToken));
+        => Shared.ExecuteAsync(envelope, actorKey, ((IGrainBase)this).GrainContext, cancellationToken);
 
     /// <inheritdoc />
     public Task AbortSharedMaintenanceAsync(GrainReadKind kind, Guid sessionId)
@@ -94,7 +92,7 @@ public sealed partial class DatabaseCommitGrain
 
     private Task<T> ExecuteBackgroundAsync<T>(SiloAddress? target,
         Func<IBackgroundStorageOperations, Task<T>> execute, CancellationToken cancellationToken)
-        => this.WithCallChainReentrancyAsync(() => ExecuteBackgroundCoreAsync(target, execute, cancellationToken));
+        => ExecuteBackgroundCoreAsync(target, execute, cancellationToken);
 
     private async Task<T> ExecuteBackgroundCoreAsync<T>(SiloAddress? target,
         Func<IBackgroundStorageOperations, Task<T>> execute, CancellationToken cancellationToken)

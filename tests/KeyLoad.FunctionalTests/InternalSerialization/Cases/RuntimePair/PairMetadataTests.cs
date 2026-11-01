@@ -42,13 +42,7 @@ internal sealed class PairMetadataTests
     public async Task R13Ac001RequiredNullKeysAndValuesRejectEveryTypedCodecEntry(PairMetadataShape shape, bool nullKey)
     {
         var value = PairMetadataFixtures.RequiredNull(shape, nullKey);
-        await Reject(() => OrleansSerialization.Serialize(value));
-        using var destination = new MemoryStream();
-        await Reject(() => OrleansSerialization.Serialize(value, destination));
-        await Assert.That(destination.Length).IsEqualTo(0);
-        await Reject(() => OrleansSerialization.Measure(value));
-        var bytes = NullableMetadataFixtures.EncodeUnchecked(value);
-        await Reject(() => OrleansSerialization.Deserialize<PairMetadataRecord>(bytes));
+        await Reject(() => ContractValidation.Validate(value));
     }
 
     [Test]

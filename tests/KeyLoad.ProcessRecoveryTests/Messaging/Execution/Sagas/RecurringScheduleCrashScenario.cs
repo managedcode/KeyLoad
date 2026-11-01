@@ -50,9 +50,9 @@ internal static class RecurringScheduleCrashScenario
         var tail = database.GetOutboxStatus(CrashFixtureValues.Principal, Partition).Head.Tail;
         var operation = CreateEmitOperation(database, lane);
         await SaveOperationAsync(directory, tail, operation);
-        ArmBoundary(store, boundary);
+        await ArmBoundaryAsync(store, boundary);
         _ = database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     internal static string OccurrenceId(long generation, long ordinal)
@@ -91,11 +91,11 @@ internal static class RecurringScheduleCrashScenario
         await File.WriteAllTextAsync(Path.Combine(directory, SeedTailFile), tail.ToString(CultureInfo.InvariantCulture));
     }
 
-    private static void ArmBoundary(ZoneTreeStore store, CanonicalCrashBoundary boundary)
+    private static async Task ArmBoundaryAsync(ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
         const int PositionStep = 1;
 
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
     }
 }

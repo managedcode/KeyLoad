@@ -78,8 +78,7 @@ internal sealed class SqlModelParserOperationFixture : IDisposable
     internal void Reopen()
     {
         Store.Dispose();
-        var next = new ZoneTreeStore(new(original.Directory), original.StorageExecution,
-            UnitExecutionOptions.PointCacheExecution(), timeProvider: Owner.EvaluationClock);
+        var next = new ZoneTreeStore(new(original.Directory), original.StorageExecution, timeProvider: Owner.EvaluationClock);
         opened.Add(next);
         Store = next;
         Owner = original.CreateConfiguredDatabase(next);

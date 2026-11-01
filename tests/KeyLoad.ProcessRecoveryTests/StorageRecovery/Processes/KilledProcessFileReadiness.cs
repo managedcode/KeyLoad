@@ -6,7 +6,7 @@ internal static class KilledProcessFileReadiness
     private const string MetadataWalPath = "tree/0.meta.wal";
     private static readonly TimeSpan ReadinessTimeout = RecoveryExecutionOptions.ProcessReadiness().Value.OwnershipTimeout;
     private static readonly TimeSpan PollInterval = RecoveryExecutionOptions.ProcessReadiness().Value.OwnershipPollInterval;
-    private static readonly string[] RequiredLockedFiles = ["owner.lock", "commands.wal"];
+    private static readonly string[] RequiredLockedFiles = ["owner.lock"];
 
     internal static async Task WaitAsync(string root, CancellationToken cancellationToken)
     {

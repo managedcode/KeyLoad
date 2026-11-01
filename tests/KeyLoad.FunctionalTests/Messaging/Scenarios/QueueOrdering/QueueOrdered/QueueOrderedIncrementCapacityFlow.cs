@@ -48,7 +48,7 @@ internal static class QueueOrderedIncrementCapacityFlow
         var position = fixture.Store.Position;
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         recorder.Database = database;
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
@@ -81,7 +81,7 @@ internal static class QueueOrderedIncrementCapacityFlow
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         recorder.Database = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await TerminalAsync(recorder.Database, state, fault);

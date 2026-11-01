@@ -2,7 +2,6 @@ using KeyLoad.Core;
 using KeyLoad.Query;
 using KeyLoad.Server.Search;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.ProcessRecoveryTests;
@@ -72,13 +71,6 @@ internal static class RecoveryExecutionOptions
     internal static IOptions<QueryExecutionOptions> QueryExecution()
     {
         var settings = new QueryExecutionOptions();
-        settings.Validate();
-        return Options.Create(settings);
-    }
-
-    internal static IOptions<ZoneTreePointCacheExecutionOptions> PointCacheExecution(ZoneTreePointCacheExecutionOptions? configured = null)
-    {
-        var settings = configured ?? new ZoneTreePointCacheExecutionOptions();
         settings.Validate();
         return Options.Create(settings);
     }

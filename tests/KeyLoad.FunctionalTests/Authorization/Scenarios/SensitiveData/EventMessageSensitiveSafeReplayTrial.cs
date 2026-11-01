@@ -26,7 +26,7 @@ internal static class EventMessageSensitiveSafeReplayTrial
         await SameAsync(fixture.Database, fixture.Store, state, token);
         var identity = fixture.Store.Identity;
         fixture.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await Assert.That(reopened.Identity.NodeId).IsEqualTo(identity.NodeId);
         await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);

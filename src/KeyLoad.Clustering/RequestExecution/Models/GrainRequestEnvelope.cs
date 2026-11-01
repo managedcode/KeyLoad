@@ -1,7 +1,7 @@
 namespace KeyLoad.Clustering;
 
 /// <summary>Signed server authority and exact payload for one independently identified Orleans request.</summary>
-[Orleans.GenerateSerializer, Orleans.Alias(GrainContracts.EnvelopeAlias)]
+[Orleans.GenerateSerializer, Orleans.Alias(GrainContracts.EnvelopeAlias), Orleans.Immutable]
 public sealed record GrainRequestEnvelope
 {
     /// <summary>Versioned purpose preventing cross-protocol token reuse.</summary>

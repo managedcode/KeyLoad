@@ -48,7 +48,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         var position = fixture.Store.Position;
         var identity = fixture.Store.Identity;
         fixture.Store.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var owner = fixture.CreateConfiguredDatabase(cold);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position);
         await QueueStoredCapacityAssertions.ImageAsync(cold, position, image);
@@ -59,7 +59,7 @@ internal static class QueueEnqueueSequenceWholeFlow
         var final = QueueWholeFlowStorage.Bytes(cold);
         var finalPosition = cold.Position;
         cold.Dispose();
-        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var restored = fixture.CreateConfiguredDatabase(second);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);
         await QueueStoredCapacityAssertions.ImageAsync(second, finalPosition, final);

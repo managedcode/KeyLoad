@@ -39,7 +39,7 @@ internal static class QueueLiveInspectionAuthorityTrial
         QueuePendingAuthorityCut terminal;
         Result<object> processed;
         QueueLeaseAuthorityHealthyState healthy;
-        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
             await QueuePendingAuthorityHistory.SameAsync(cold, damaged);
@@ -60,7 +60,7 @@ internal static class QueueLiveInspectionAuthorityTrial
             await QueueLeaseAuthorityHealthy.ReplayAsync(owner, cold, state, healthy);
             terminal = QueuePendingAuthorityHistory.Capture(cold);
         }
-        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var reopened = fixture.CreateConfiguredDatabase(second);
         await QueuePendingAuthorityHistory.SameAsync(second, terminal);
         await QueueLiveInspectionAuthorityAssertions.PositiveAsync(reopened, second, state, positive);

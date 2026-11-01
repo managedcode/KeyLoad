@@ -86,11 +86,12 @@ internal sealed class SampleRetentionLifecycleTests
     }
 
     [Test]
-    public async Task AcSeries016ExpiryWaitsForTheRealStoreReadGate()
+    public async Task AcSeries016ExpiryCommitsWhileTheNativeReaderKeepsItsOriginalRetentionSnapshot()
     {
         using var db = new TestDatabase();
         SampleAggregateTestData.Configure(db);
         var cutoff = SampleAggregateTestData.Start.AddHours(1);
+        var retentionKey = SampleRetentionStateReader.Key(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series);
         using var entered = new ManualResetEventSlim();
         using var release = new ManualResetEventSlim();
         using var commitStarted = new ManualResetEventSlim();
@@ -102,7 +103,7 @@ internal sealed class SampleRetentionLifecycleTests
                 throw new TimeoutException("The held read was not released.");
             }
 
-            return 0;
+            return view.ReadOwnedValue(retentionKey);
         }), CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default);
         if (!entered.Wait(TimeSpan.FromSeconds(5)))
         {
@@ -123,8 +124,7 @@ internal sealed class SampleRetentionLifecycleTests
             {
                 throw new TimeoutException("The expiry command did not start.");
             }
-            await Task.Delay(TimeSpan.FromMilliseconds(50), TimeProvider.System);
-            await Assert.That(expiry.IsCompleted).IsFalse();
+            await expiry.WaitAsync(TimeSpan.FromSeconds(5));
         }
         finally
         {
@@ -132,6 +132,7 @@ internal sealed class SampleRetentionLifecycleTests
         }
 
         await Task.WhenAll(heldRead, expiry);
+        await Assert.That(await heldRead).IsNull();
         var healthy = db.Database.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,
             new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series));
         await Assert.That(healthy.Before).IsEqualTo(cutoff);
@@ -144,7 +145,7 @@ internal sealed class SampleRetentionLifecycleTests
         ZoneTreeStore? store = null;
         try
         {
-            store = new(new ZoneTreeStoreOptions(path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            store = new(new ZoneTreeStoreOptions(path), UnitExecutionOptions.StorageExecution());
             var first = Bootstrap(store);
             var start = SampleAggregateTestData.Start;
             var floor = start.AddSeconds(1);
@@ -154,7 +155,7 @@ internal sealed class SampleRetentionLifecycleTests
             store.Dispose();
             store = null;
 
-            store = new(new ZoneTreeStoreOptions(path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            store = new(new ZoneTreeStoreOptions(path), UnitExecutionOptions.StorageExecution());
             var reopened = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
             var status = reopened.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,
                 new(new("tenant", "database", "orders", CustomerId),

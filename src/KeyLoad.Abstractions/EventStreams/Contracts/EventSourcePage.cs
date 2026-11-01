@@ -7,7 +7,7 @@ namespace KeyLoad;
 /// <param name="Head">The source head observed for the page.</param>
 /// <param name="Events">The events in this page.</param>
 /// <param name="Cursor">The continuation cursor.</param>
-/// <param name="CutPosition">The committed position at which this page was read.</param>
+/// <param name="CutPosition">Physical storage position of the native snapshot, distinct from canonical command sequences.</param>
 /// <param name="HasMore">Whether additional events are available.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(ContractAliases.EventSourcePage)]

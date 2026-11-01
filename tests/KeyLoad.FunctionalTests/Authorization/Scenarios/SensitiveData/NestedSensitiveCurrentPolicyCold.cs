@@ -16,8 +16,7 @@ internal static class NestedSensitiveCurrentPolicyCold
         var failures = new List<Exception>();
         try
         {
-            using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution(), timeProvider: db.Database.EvaluationClock);
+            using var cold = new ZoneTreeStore(new(db.Directory), db.StorageExecution, timeProvider: db.Database.EvaluationClock);
             try
             {
                 var database = db.CreateConfiguredDatabase(cold);

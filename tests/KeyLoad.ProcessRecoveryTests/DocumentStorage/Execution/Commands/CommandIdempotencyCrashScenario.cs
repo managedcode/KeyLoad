@@ -22,7 +22,7 @@ internal static class CommandIdempotencyCrashScenario
         await SaveEvidenceAsync(directory, receipt, seedTail);
         CommandIdempotencyCrashAssertions.AssertCanonicalEffects(database, store, receipt, seedTail + InitialOutboxTail, seedTail);
         CommandIdempotencyCrashAssertions.AssertRetriesAndConflict(database, store, operation, receipt, seedTail + InitialOutboxTail, seedTail);
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     internal static async Task RunReplayAsync(string directory, ZoneTreeStore store)

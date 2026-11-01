@@ -40,9 +40,9 @@ The centrally pinned ZoneTree package is bound to source commit
 `dea002a935e0de8ed6bae98b526556c440b6b467`. Its ordinary
 [loader](https://github.com/ZoneTree/ZoneTree/blob/dea002a935e0de8ed6bae98b526556c440b6b467/src/ZoneTree/Core/ZoneTreeLoader.cs)
 opens writable metadata/recovery state; it exposes no qualified whole-tree
-read-only open for concurrent independent processes. The selected execution
-[sync WAL](https://github.com/ZoneTree/ZoneTree/blob/dea002a935e0de8ed6bae98b526556c440b6b467/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs)
-uses `FileAccess.ReadWrite` with `FileShare.None`. Individual segment read sharing
+read-only open for concurrent independent processes. The selected
+`AsyncCompressed` write-ahead log is likewise a writable log of one open tree.
+Individual segment read sharing
 does not establish a coherent cross-process database contract. KeyLoad acquires
 its exclusive `node.owner.lock` before opening identity, either store or recovery.
 

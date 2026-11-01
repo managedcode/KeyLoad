@@ -28,7 +28,7 @@ internal static class QueueLifecycleControlCold
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         recorder.Database = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await terminal(recorder.Database);

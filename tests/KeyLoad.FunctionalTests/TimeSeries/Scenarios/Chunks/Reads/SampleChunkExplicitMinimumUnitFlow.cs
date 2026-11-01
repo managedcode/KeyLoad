@@ -116,8 +116,7 @@ internal static class SampleChunkExplicitMinimumUnitFlow
             ZoneTreeStore? reopened = null;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                reopened = new(new(fixture.Owner.Directory), UnitExecutionOptions.StorageExecution(),
-                    UnitExecutionOptions.PointCacheExecution());
+                reopened = new(new(fixture.Owner.Directory), UnitExecutionOptions.StorageExecution());
                 var database = fixture.Owner.CreateConfiguredDatabase(reopened);
                 await SampleChunkExplicitMinimumUnitReads.RunAsync(database, reopened, fixture.Request, minimum, ReaderId, token);
                 await ReplayAsync(database, reopened, fixture, commands, token);

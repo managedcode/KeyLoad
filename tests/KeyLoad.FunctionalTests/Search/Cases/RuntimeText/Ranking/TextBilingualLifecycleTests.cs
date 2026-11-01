@@ -43,8 +43,7 @@ internal sealed class TextBilingualLifecycleTests
             await TextBilingualAudit.VerifyDeletedAsync(search, database, token);
         }
         database.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution());
         var owner = TextBilingualAudit.Owner(reopened);
         using var restoredProjection = TextBilingualAudit.Open(database);
         var restored = new SearchEngine(owner, UnitExecutionOptions.QueryExecution(), restoredProjection);

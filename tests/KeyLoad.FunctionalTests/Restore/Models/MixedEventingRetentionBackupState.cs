@@ -22,7 +22,7 @@ internal sealed class MixedEventingRetentionBackupState
         get; set;
     }
     internal string[] CutRows { get; set; } = [];
-    internal byte[] ArchiveBytes { get; set; } = [];
+    internal IReadOnlyDictionary<string, byte[]> BackupFiles { get; set; } = new Dictionary<string, byte[]>();
     internal long Cut
     {
         get; set;

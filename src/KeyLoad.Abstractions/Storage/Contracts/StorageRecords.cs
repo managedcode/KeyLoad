@@ -1,6 +1,6 @@
 namespace KeyLoad.Storage;
 
-/// <summary>Serializes typed records through the canonical gated storage contract.</summary>
+/// <summary>Serializes typed records through the canonical storage contract.</summary>
 public static class StorageRecords
 {
     /// <summary>Decodes a typed record from borrowed storage bytes without a raw copy.</summary>

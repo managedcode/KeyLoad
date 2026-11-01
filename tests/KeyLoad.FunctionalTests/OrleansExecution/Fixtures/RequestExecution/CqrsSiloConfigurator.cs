@@ -1,5 +1,4 @@
 using ManagedCode.Communication.Orleans.Extensions;
-using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Orleans.Metadata;
 using Orleans.TestingHost;
@@ -19,7 +18,6 @@ internal sealed class CqrsSiloConfigurator : ISiloConfigurator
                 services.GetRequiredService<GrainClassMap>(),
                 services));
         siloBuilder
-            .AddOrleansGraph()
             .UseOrleansCommunication();
     }
 }

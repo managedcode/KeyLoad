@@ -20,8 +20,4 @@ internal static class NullableMetadataFixtures
 
     internal static NullableMetadataCollections Collections(bool present)
         => present ? new([Text], [null, ImmutableArray.Create(Text)]) : new(null, null);
-
-    internal static byte[] EncodeUnchecked<T>(T value)
-        => OrleansSerialization.Serializer.SerializeToArray(
-            new RuntimePayload { Version = PayloadVersion.Current, Value = value });
 }

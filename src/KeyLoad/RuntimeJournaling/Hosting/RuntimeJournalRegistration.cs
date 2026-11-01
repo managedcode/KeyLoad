@@ -30,7 +30,6 @@ internal static class RuntimeJournalRegistration
             (options, settings, clock) => Configure(options, settings.Value, clock));
         silo.UseJournaledDurableJobs();
         RequestDrainRegistration.Register(services);
-        JobGraphRegistration.Extend(services);
     }
 
     private static RuntimeJournalClient CreateClient(IServiceProvider provider)

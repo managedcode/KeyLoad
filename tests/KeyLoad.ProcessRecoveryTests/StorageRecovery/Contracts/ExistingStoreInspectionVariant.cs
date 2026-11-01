@@ -10,9 +10,6 @@ internal enum ExistingStoreInspectionVariant
     RelativeDirectory,
     EmptyDirectory,
     NonCanonicalDirectory,
-    ZeroFrameBudget,
-    ZeroSnapshotBudget,
-    Cache,
     Observer,
     WaitBeforeOpen
 }

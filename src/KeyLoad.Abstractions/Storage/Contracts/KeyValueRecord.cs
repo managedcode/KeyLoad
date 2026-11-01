@@ -1,6 +1,6 @@
 namespace KeyLoad.Storage;
 
-/// <summary>Owns one independent key and value copied from a gated storage view.</summary>
+/// <summary>Owns one independent key and value copied from a storage view.</summary>
 /// <param name="Key">Encoded record key owned by this result.</param>
 /// <param name="Value">Logical record bytes owned by this result.</param>
 [Orleans.GenerateSerializer]

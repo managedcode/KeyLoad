@@ -25,6 +25,29 @@ public static class StorageOperationBatchApply
     public static StorageBatchResult ApplyStorageOperations(this DatabaseEngine engine,
         IReadOnlyList<Command<DatabaseCommand>> operations, long firstSequence, CancellationToken cancellationToken)
     {
+        var verified = Verify(engine, operations, firstSequence);
+        cancellationToken.ThrowIfCancellationRequested();
+        return engine.Store.Commit((transaction, position)
+            => engine.ApplyInOrder(transaction, position, verified, firstSequence, cancellationToken));
+    }
+
+    /// <summary>Applies ordered commands, durably publishing plain table data before their transactional outcomes.</summary>
+    /// <param name="engine">The shared execution context.</param>
+    /// <param name="operations">Prepared canonical commands.</param>
+    /// <param name="firstSequence">The first newly persisted canonical sequence.</param>
+    /// <param name="cancellationToken">Cancellation before physical publication.</param>
+    /// <returns>The applied results; acknowledgements require the store WAL sync.</returns>
+    public static Task<StorageBatchResult> ApplyStorageOperationsAsync(this DatabaseEngine engine,
+        IReadOnlyList<Command<DatabaseCommand>> operations, long firstSequence, CancellationToken cancellationToken)
+    {
+        var verified = Verify(engine, operations, firstSequence);
+        return engine.Store.CommitAsync((transaction, position)
+            => engine.ApplyInOrder(transaction, position, verified, firstSequence, cancellationToken), cancellationToken);
+    }
+
+    private static Command<DatabaseCommand>[] Verify(DatabaseEngine engine,
+        IReadOnlyList<Command<DatabaseCommand>> operations, long firstSequence)
+    {
         ArgumentNullException.ThrowIfNull(engine);
         ArgumentNullException.ThrowIfNull(operations);
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(firstSequence);
@@ -43,9 +66,7 @@ public static class StorageOperationBatchApply
             }
         }
 
-        cancellationToken.ThrowIfCancellationRequested();
-        return engine.Store.Commit((transaction, position)
-            => engine.ApplyInOrder(transaction, position, verified, firstSequence, cancellationToken));
+        return verified;
     }
 
     private static StorageBatchResult ApplyInOrder(this DatabaseEngine engine, IAtomicTransaction transaction,
@@ -67,12 +88,6 @@ public static class StorageOperationBatchApply
                     cancellationToken);
             }
             catch (Exception error) when (applied.Count > 0 && CqrsRuntimeFailures.FindFatal(error) is null)
-            {
-                transaction.Reset();
-                break;
-            }
-
-            if (applied.Count > 0 && staging is { FitsOneFrame: false })
             {
                 transaction.Reset();
                 break;

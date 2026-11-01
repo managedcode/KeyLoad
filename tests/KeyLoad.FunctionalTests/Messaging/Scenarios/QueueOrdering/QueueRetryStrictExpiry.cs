@@ -34,7 +34,7 @@ internal static class QueueRetryStrictExpiry
         await QueueOrderedRetryOperations.ReplayAsync(database, state);
         var image = QueueOrderedRetryImage.Capture(store, state.Lane);
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var reopened = QueueWholeFlowStorage.Open(cold);
         await QueueOrderedRetryImage.SameAsync(cold, state.Lane, image);
         await QueueOrderedRetryOperations.ReplayAsync(reopened, state);

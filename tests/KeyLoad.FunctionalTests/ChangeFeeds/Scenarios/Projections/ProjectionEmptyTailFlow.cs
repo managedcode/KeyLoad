@@ -48,8 +48,7 @@ internal static class ProjectionEmptyTailFlow
         var failures = new List<Exception>();
         try
         {
-            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution(), timeProvider: database.Database.EvaluationClock);
+            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, timeProvider: database.Database.EvaluationClock);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(
                 () => VerifyAsync(database.CreateConfiguredDatabase(cold), cold, state, token), failures);
         }

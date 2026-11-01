@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 
 namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
@@ -31,8 +30,6 @@ internal static class EmbeddedBenchmarkRuntimeRegistration
             BenchmarkScenarioOptionsRegistration.Read<TimeSeriesExecutionOptions>(configuration, TimeSeriesExecutionOptions.SectionName,
                 settings => settings.IsValid(), TimeSeriesExecutionOptions.ValidationMessage),
             BenchmarkScenarioOptionsRegistration.Read<ZoneTreeStorageExecutionOptions>(configuration, ZoneTreeStorageExecutionOptions.SectionName,
-                settings => settings.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage),
-            BenchmarkScenarioOptionsRegistration.Read<ZoneTreePointCacheExecutionOptions>(configuration, ZoneTreePointCacheExecutionOptions.SectionName,
-                settings => settings.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage));
+                settings => settings.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage));
     }
 }

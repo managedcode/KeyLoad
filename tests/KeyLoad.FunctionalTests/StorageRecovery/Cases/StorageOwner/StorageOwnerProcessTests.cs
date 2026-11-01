@@ -17,15 +17,14 @@ internal sealed class StorageOwnerProcessTests
     {
         using var files = new ZoneTreeExistingStoreFixture();
         var expectedValue = Encoding.UTF8.GetBytes(UpdatedValueText);
-        using var store = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution());
         var identity = store.Identity;
         var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
-        var initialJournalBytes = await File.ReadAllBytesAsync(files.JournalPath);
 
         await AssertParentStateAsync(store, files, files.Value, InitialPosition);
         var firstDenial = await files.InspectAsync();
         await AssertDeniedAsync(firstDenial);
-        await AssertCanonicalBytesAsync(files, identityBytes, initialJournalBytes);
+        await AssertCanonicalBytesAsync(files, identityBytes);
         await AssertParentStateAsync(store, files, files.Value, InitialPosition);
 
         var commitPosition = store.Commit((transaction, position) =>
@@ -36,21 +35,20 @@ internal sealed class StorageOwnerProcessTests
         await Assert.That(commitPosition).IsEqualTo(UpdatedPosition);
         await AssertParentStateAsync(store, files, expectedValue, UpdatedPosition);
 
-        var updatedJournalBytes = await File.ReadAllBytesAsync(files.JournalPath);
         var secondDenial = await files.InspectAsync();
         await AssertDeniedAsync(secondDenial);
-        await AssertCanonicalBytesAsync(files, identityBytes, updatedJournalBytes);
+        await AssertCanonicalBytesAsync(files, identityBytes);
         await AssertParentStateAsync(store, files, expectedValue, UpdatedPosition);
 
         store.Dispose();
         var healthyChild = await files.InspectAsync();
         await ExistingStoreInspectionAssertions.SucceededAsync(healthyChild, identity, expectedValue, UpdatedPosition);
-        await AssertCanonicalBytesAsync(files, identityBytes, updatedJournalBytes);
+        await AssertCanonicalBytesAsync(files, identityBytes);
 
-        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution());
         await AssertIdentityMatchesAsync(identity, reopened.Identity);
         await AssertParentStateAsync(reopened, files, expectedValue, UpdatedPosition);
-        await AssertCanonicalBytesAsync(files, identityBytes, updatedJournalBytes);
+        await AssertCanonicalBytesAsync(files, identityBytes);
     }
 
     private static async Task AssertDeniedAsync(ExistingStoreInspectorExit result)
@@ -59,14 +57,9 @@ internal sealed class StorageOwnerProcessTests
         await Assert.That(result.Receipt!.Success).IsFalse();
     }
 
-    private static async Task AssertCanonicalBytesAsync(ZoneTreeExistingStoreFixture files,
-        byte[] expectedIdentity, byte[] expectedJournal)
-    {
-        await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath))
+    private static async Task AssertCanonicalBytesAsync(ZoneTreeExistingStoreFixture files, byte[] expectedIdentity)
+        => await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath))
             .IsEquivalentTo(expectedIdentity, CollectionOrdering.Matching);
-        await Assert.That(await File.ReadAllBytesAsync(files.JournalPath))
-            .IsEquivalentTo(expectedJournal, CollectionOrdering.Matching);
-    }
 
     private static async Task AssertParentStateAsync(ZoneTreeStore store, ZoneTreeExistingStoreFixture files,
         byte[] expectedValue, long expectedPosition)

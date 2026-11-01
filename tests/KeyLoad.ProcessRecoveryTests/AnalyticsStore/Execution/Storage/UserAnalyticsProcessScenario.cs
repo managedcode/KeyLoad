@@ -42,7 +42,7 @@ internal static class UserAnalyticsProcessScenario
                 {
                     throw new InvalidOperationException(P.Invalid);
                 }
-                await RecoveryProcessPause.WaitForKillAsync();
+                await RecoveryProcessPause.WaitForKillAsync(host.Database.Store);
                 GC.KeepAlive(generation);
             }, failures);
         }

@@ -20,19 +20,6 @@ internal static class McpAuthentication
     {
         cancellationToken.ThrowIfCancellationRequested();
         options.Value.Validate();
-        try
-        {
-            if (OrleansSerialization.Measure(payload) > options.Value.MaximumAuthenticationBytes)
-            {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);
-            }
-            var value = payload.Value;
-            cancellationToken.ThrowIfCancellationRequested();
-            return value as PrincipalRecord ?? throw Errors.Fail(ErrorCode.Validation, InvalidReply);
-        }
-        catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
-        {
-            throw Errors.Fail(ErrorCode.Validation, InvalidReply);
-        }
+        return payload.Value as PrincipalRecord ?? throw Errors.Fail(ErrorCode.Validation, InvalidReply);
     }
 }

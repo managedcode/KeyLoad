@@ -1,15 +1,7 @@
-using System.Text.Json;
-using KeyLoad.Core.Authorization;
-using KeyLoad.FunctionalTests.Messaging;
-using KeyLoad.Storage.ZoneTree;
-using ManagedCode.Communication;
-
 namespace KeyLoad.FunctionalTests.ResourceExecution;
 
 internal sealed class TransactionProtocolTests
 {
-    private const string PartitionId = "partition";
-
     [Test]
     [Arguments("mutation")]
     [Arguments("patch")]
@@ -44,67 +36,5 @@ internal sealed class TransactionProtocolTests
         await Assert.That(db.Database.GetOutboxStatus("root", db.Partition).Head.Tail).IsEqualTo(0);
         db.Commit(new PutDocument("orders", "valid-after-rejection", "{}", 0));
         await Assert.That(db.Database.GetDocument("root", new(db.Partition, "orders", "valid-after-rejection"))).IsNotNull();
-    }
-    [Test]
-    public async Task OversizedCompiledFrameRetainsFailureReplayBeforeHealthyCommitAndColdOpen()
-    {
-        var root = Path.Combine(AppContext.BaseDirectory, "keyload-frame-budget-" + Guid.NewGuid().ToString("N"));
-        try
-        {
-            Guid rejectedId;
-            using (var store = new ZoneTreeStore(new(root)
-            {
-                MaxFrameBytes = 4_096
-            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
-            {
-                var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-                database.Bootstrap(new("root", "system", [new("*", "*", Capability.All)], ["*"])
-                {
-                    ClusterAdministrator = true
-                },
-                    AuthorizationExecution.Credential("root", "root", "root.frame-test-credential-32-characters"));
-                Result<object> Submit<T>(OperationKind kind, Guid id, T payload)
-                    => database.ApplyEmbedded(database.CreateCommand(kind, id, "root", TimeProvider.System.GetUtcNow(),
-                        JsonSerializer.Serialize(payload, JsonDefaults.Options)), TestContext.Current!.Execution.CancellationToken);
-                var partition = new PartitionRef("tenant", "database", "orders", PartitionId);
-                Submit(OperationKind.ConfigureResource, Guid.NewGuid(), new ConfigureResourceRequest("tenant", "database", new("orders", ResourceKind.Collection, "orders"))).Get<ResourceDefinition>();
-                rejectedId = Guid.NewGuid();
-                var rejected = new CommandRequest(rejectedId, partition,
-                    [new PutDocument("orders", "too-big", "{\"data\":\"" + new string('x', 2_000) + "\"}", 0)]);
-                var original = Submit(OperationKind.Batch, rejectedId, rejected);
-                await Assert.That(Errors.Code(original.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
-                await Assert.That(database.LastApplied).IsEqualTo(2);
-                await Assert.That(database.GetOutboxStatus("root", partition).Head.Tail).IsEqualTo(0);
-                await Assert.That(database.GetDocument("root", new(partition, "orders", "too-big"))).IsNull();
-                var image = QueueWholeFlowStorage.Bytes(store);
-                var position = store.Position;
-                var replay = Submit(OperationKind.Batch, rejectedId, rejected);
-                await Assert.That(OrleansSerialization.Serialize(replay).SequenceEqual(OrleansSerialization.Serialize(original))).IsTrue();
-                await Assert.That(QueueWholeFlowStorage.Bytes(store).SequenceEqual(image)).IsTrue();
-                await Assert.That(store.Position).IsEqualTo(position);
-                await Assert.That(database.LastApplied).IsEqualTo(2);
-                var nextId = Guid.NewGuid();
-                Submit(OperationKind.Batch, nextId, new CommandRequest(nextId, partition, [new PutDocument("orders", "valid", "{}", 0)])).Get<CommitReceipt>();
-                await Assert.That(database.LastApplied).IsEqualTo(3);
-                await Assert.That(database.GetOutboxStatus("root", partition).Head.Tail).IsEqualTo(1);
-            }
-            using var reopened = new ZoneTreeStore(new(root)
-            {
-                MaxFrameBytes = 4_096
-            }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-            var recovered = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
-            await Assert.That(recovered.LastApplied).IsEqualTo(3);
-            var retained = OutcomeStoreOracle.ReadPartition(reopened,
-                new PartitionRef("tenant", "database", "orders", PartitionId), "root", rejectedId)
-                ?? throw new InvalidOperationException("The cold command outcome is missing.");
-            await Assert.That(Errors.Code(retained.Problem).Value).IsEqualTo(ErrorCode.ResourceExhausted);
-        }
-        finally
-        {
-            if (Directory.Exists(root))
-            {
-                Directory.Delete(root, true);
-            }
-        }
     }
 }

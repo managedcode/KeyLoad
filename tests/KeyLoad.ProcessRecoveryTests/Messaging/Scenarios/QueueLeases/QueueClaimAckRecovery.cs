@@ -11,7 +11,7 @@ internal static class QueueClaimAckRecovery
     internal static async Task VerifyAsync(string root, CommitStage stage, bool ack, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = QueueLifecycleRecoveryAssertions.Open(store);
         var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueClaimAckCrashProtocol.OperationFile), token));
@@ -30,7 +30,7 @@ internal static class QueueClaimAckRecovery
         var identity = store.Identity;
         token.ThrowIfCancellationRequested();
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         await QueueClaimAckRecoveryAssertions.EqualAsync(cold.Identity, identity);
         await Assert.That(cold.Position).IsEqualTo(position);
         await Assert.That(QueueClaimAckRecoveryAssertions.Capture(cold)).IsEquivalentTo(image, CollectionOrdering.Matching);
@@ -51,9 +51,13 @@ internal static class QueueClaimAckRecovery
         {
             await Assert.That(QueueClaimAckRecoveryAssertions.Capture(store)).IsEquivalentTo(baseline, CollectionOrdering.Matching);
         }
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(outcome).IsNotNull();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(outcome).IsNull();
         }
         var delivery = original;
         if (!ack && outcome is not null)

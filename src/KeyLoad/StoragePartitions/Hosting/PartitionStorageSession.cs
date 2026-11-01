@@ -19,8 +19,6 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
     private readonly Lock lifecycle = new();
     private Task? closing;
     private PartitionStorageOwnerContext? ownerContext;
-    private IGrainTimer? maintenanceTimer;
-    private ILogger? maintenanceLogger;
     private const string OwnerContextRequired = "Physical storage must open and execute on its Orleans owner context.";
 
     internal PartitionStorageSession(PartitionHostOwnership ownership)
@@ -33,7 +31,6 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
         IGrainFactory grains, IServiceScopeFactory? scopeFactory, PartitionStorageOwnerContext context)
     {
         ownerContext = context;
-        maintenanceLogger = logger;
         if (!ReferenceEquals(context.Current, context.Context))
         {
             throw new InvalidOperationException(OwnerContextRequired);
@@ -50,31 +47,6 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
                 Services.GetRequiredService<TimeProvider>(),
                 Services.GetRequiredService<ILogger<PartitionStorageGrainService>>());
         }
-        var interval = options.StorageExecution.Value.MaintenanceInterval;
-        maintenanceTimer = ownerContext.Context.ActivationServices.GetRequiredService<global::Orleans.Timers.ITimerRegistry>()
-            .RegisterGrainTimer(ownerContext.Context, static (session, token) => session.SweepMaintenanceAsync(token), this,
-                new GrainTimerCreationOptions { DueTime = interval, Period = interval });
-    }
-
-    private Task SweepMaintenanceAsync(CancellationToken cancellationToken)
-    {
-        if (!cancellationToken.IsCancellationRequested)
-        {
-            if (!ReferenceEquals(ownerContext!.Current, ownerContext.Context))
-            {
-                throw new InvalidOperationException(OwnerContextRequired);
-            }
-            try
-            {
-                Host.SweepMaintenance();
-            }
-            catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
-            {
-                // The timer keeps running so cache release resumes on the next tick.
-                PartitionStorageDiagnostics.MaintenanceSweepFailed(maintenanceLogger!, failure);
-            }
-        }
-        return Task.CompletedTask;
     }
 
     internal IServiceProvider Services => scope?.ServiceProvider ?? throw new InvalidOperationException(ServicesUnavailable);
@@ -125,7 +97,6 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
     private async Task CloseAsync()
     {
         await Task.Yield();
-        maintenanceTimer?.Dispose();
         var failures = new List<Exception>();
         if (work is not null)
         {

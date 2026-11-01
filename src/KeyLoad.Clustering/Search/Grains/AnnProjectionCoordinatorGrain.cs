@@ -1,5 +1,4 @@
 using KeyLoad.Core;
-using ManagedCode.Orleans.Graph.Extensions;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using Orleans.Journaling;
@@ -69,10 +68,8 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
     }
 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken cancellationToken)
-        => RequestContextHelper.RunWithCurrentCallerAsync(typeof(AnnProjectionCoordinatorGrain).FullName!,
-            nameof(IDurableJobHandler.ExecuteJobAsync), () => AnnProjectionJobOperation.RunAsync(
-                services,
-                (binding) => ExecuteOriginalAsync(context, binding), cancellationToken));
+        => AnnProjectionJobOperation.RunAsync(services,
+            (binding) => ExecuteOriginalAsync(context, binding), cancellationToken);
 
     private async Task ExecuteOriginalAsync(IJobRunContext context, CapabilityWorkLifetime binding)
     {

@@ -66,7 +66,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
         await AppliedOutcomeDefinitiveRefusalAssertions.CurrentAsync(db, cold, lane, false);
@@ -85,7 +85,7 @@ internal static class AppliedOutcomeDefinitiveRefusalFlow
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
         await AppliedOutcomeDefinitiveRefusalAssertions.CurrentAsync(db, cold, lane, true);

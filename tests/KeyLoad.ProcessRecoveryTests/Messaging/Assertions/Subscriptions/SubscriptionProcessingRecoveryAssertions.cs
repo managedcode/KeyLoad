@@ -12,14 +12,13 @@ internal static class SubscriptionProcessingRecoveryAssertions
     {
         var original = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(path, CrashFixtureValues.ProcessingCommandFile), token));
-        using var store = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution(),
-            RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution());
         var db = TargetInboxRecoveryDatabase.Open(store);
         var group = SubscriptionCrashScenario.Subscription;
         var checkpoint = db.GetSubscription(CrashFixtureValues.Principal, group).Checkpoint;
         await Assert.That(checkpoint is 0 or 1).IsTrue();
         await PrefixAsync(db, store, original, checkpoint == 1, token);
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(checkpoint).IsEqualTo(1L);
         }

@@ -39,7 +39,7 @@ internal static class QueueOrderedRetryEmptyProfile
         await QueueOrderedRetryOperations.ReplayAsync(database, state);
         var terminal = QueueOrderedRetryImage.Capture(store, state.Lane);
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var reopened = QueueWholeFlowStorage.Open(cold);
         await Assert.That(JsonDefaults.Serialize(cold.Read(view => view.GetRecord<ResourceDefinition>(key))).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();

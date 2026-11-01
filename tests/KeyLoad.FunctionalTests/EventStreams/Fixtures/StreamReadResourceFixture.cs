@@ -169,7 +169,7 @@ internal sealed class StreamReadResourceFixture : IDisposable
 
     private void Open(DatabaseLimits limits)
     {
-        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(), timeProvider: clock);
+        store = new(new(directory), UnitExecutionOptions.StorageExecution(), timeProvider: clock);
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), eventSourceOptions, UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), clock);
     }
 

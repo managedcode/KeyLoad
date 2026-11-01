@@ -63,7 +63,6 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
         {
             Selected = default
         };
-        await QueryLifetimeAssertions.RefusedAsync(() => _ = OrleansSerialization.Serialize(missing), ErrorCode.Corruption);
         await QueryLifetimeAssertions.RefusedAsync(() => DistributedSearchOwnedLeafValidation.Require(
             missing, options.Value, budget), ErrorCode.Corruption);
         if (phase != DistributedSearchPhase.Projection)

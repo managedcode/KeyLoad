@@ -57,9 +57,13 @@ internal static class EventProjectionRecoveryStoreOracle
         {
             await AssertNoCopiedPayloadAsync(cut);
         }
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
     }
 

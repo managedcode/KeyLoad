@@ -39,8 +39,8 @@ internal static class RemoteTransferRepairCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferRepairCrashProtocol.OriginalFile), JsonDefaults.Serialize(failed.Original));
         await File.WriteAllBytesAsync(Path.Combine(directory, RemoteTransferRepairCrashProtocol.FailureFile), failureBytes);
         boundary.Position = store.Position + RemoteTransferRepairCrashProtocol.Step;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 }

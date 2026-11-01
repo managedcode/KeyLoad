@@ -27,8 +27,7 @@ internal sealed class GraphShortestPathCorruptionTests
         var corruptPosition = database.Store.Position;
         database.Store.Dispose();
 
-        using var reopened = new ZoneTreeStore(new(database.Directory), database.StorageExecution,
-            UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
         var owner = database.CreateConfiguredDatabase(reopened);
         await Assert.That(reopened.Position).IsEqualTo(corruptPosition);
         await Assert.That(CanonicalStoreImage.Bytes(reopened).SequenceEqual(corruptImage)).IsTrue();

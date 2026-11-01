@@ -11,7 +11,7 @@ internal static class RecurringScheduleRecoveryAssertions
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var operation = await ReadOperationAsync(root, cancellationToken);
         var seedTail = await ReadSeedTailAsync(root, cancellationToken);
@@ -70,9 +70,13 @@ internal static class RecurringScheduleRecoveryAssertions
             await Assert.That(entry.Receipt.Revision).IsEqualTo(1L);
             await Assert.That(entry.Commit).IsEqualTo(outcome!.Token);
         }
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         var counters = ReadQueueCounters(store, new(RecurringScheduleCrashScenario.Partition,
             RecurringScheduleCrashScenario.Queue));

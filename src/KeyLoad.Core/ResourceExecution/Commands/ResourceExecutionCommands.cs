@@ -19,6 +19,7 @@ public static class ResourceExecutionCommands
     internal const string InvalidIndexFieldsMessage = "An index requires one to eight fields.";
     internal const string InvalidEventQuotaMessage = "The retained event quota is invalid.";
     internal const string InvalidQueuePolicyMessage = "The queue policy is invalid.";
+    private const string NonTransactionalKind = "Only document tables, time series and analytics tables support non-transactional data.";
     internal static Result<object> ExecuteConfigureResource(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = OperationProtocol.Payload<ConfigureResourceRequest>(operation);
@@ -44,6 +45,11 @@ public static class ResourceExecutionCommands
         JsonData.Identifier(request.Definition.Name);
         JsonData.Identifier(request.Definition.TransactionDomainId);
         var definition = request.Definition;
+        if (!definition.Transactional && (definition.Kind is not (ResourceKind.Collection or ResourceKind.TimeSeries or ResourceKind.AnalyticsStore)
+            || definition.Authority != DocumentAuthority.Document))
+        {
+            throw Errors.Fail(ErrorCode.Validation, NonTransactionalKind);
+        }
         RelationalStorage.RelationalRowValidation.ValidateSchema(definition);
         AnalyticsStore.AnalyticsStoreValidation.ValidateSchema(definition);
         Search.VectorFieldProfiles.Validate(definition);

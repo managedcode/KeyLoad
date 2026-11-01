@@ -47,7 +47,7 @@ flowchart LR
     credentials.
   - The value edge returns the complete 256-byte record and rejects a 257-byte
     record as `InvalidDataException`, without truncation; after settlement an
-    ordinary reopen preserves the original identity, journal bytes and record data.
+    ordinary reopen preserves the original identity and record data.
   - The child suppresses ordinary console writers for the whole inspection; only
     the fixed readiness marker and the safe receipt use the captured writers. Parent
     stdout and stderr readers each retain at most 8,192 characters, and one child is

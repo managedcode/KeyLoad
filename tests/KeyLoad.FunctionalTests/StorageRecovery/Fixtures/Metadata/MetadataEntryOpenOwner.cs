@@ -42,7 +42,7 @@ internal sealed class MetadataEntryOpenOwner
             throw new InvalidOperationException(Unsettled);
         }
         return stores.Acquire(() => new ZoneTreeStore(Files.Options,
-            UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()), failures);
+            UnitExecutionOptions.StorageExecution()), failures);
     }
 
     internal void CloseStore(ZoneTreeStore store, List<Exception> failures) => stores.Close(store, failures);

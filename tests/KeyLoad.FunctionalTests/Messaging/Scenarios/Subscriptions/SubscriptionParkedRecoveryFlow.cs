@@ -54,8 +54,7 @@ internal static class SubscriptionParkedRecoveryFlow
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, policy, 1, 0, 3, 3, true, "AttemptsExhausted");
@@ -131,8 +130,7 @@ internal static class SubscriptionParkedRecoveryFlow
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, bytes, position, identity);
         await SubscriptionParkedRecoveryAssertions.StatusAsync(db, group, policy, 2, 3, 3, 3, false, null);

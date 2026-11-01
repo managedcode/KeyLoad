@@ -1,6 +1,5 @@
 using KeyLoad.Core;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.BenchmarkScenarios.BenchmarkComparisons;
@@ -12,5 +11,4 @@ internal sealed record EmbeddedBenchmarkRuntimeOptions(IOptions<DatabaseLimits> 
     IOptions<ChangeFeedExecutionOptions> ChangeFeedExecution,
     IOptions<ClaimsExecutionOptions> RuntimeClaimsExecution,
     IOptions<TimeSeriesExecutionOptions> TimeSeriesExecution,
-    IOptions<ZoneTreeStorageExecutionOptions> Storage,
-    IOptions<ZoneTreePointCacheExecutionOptions> PointCache);
+    IOptions<ZoneTreeStorageExecutionOptions> Storage);

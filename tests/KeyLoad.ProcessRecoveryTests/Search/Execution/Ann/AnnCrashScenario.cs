@@ -46,8 +46,9 @@ internal static class AnnCrashScenario
         if (mode == AnnCrashContract.Fault)
         {
             boundary.Position = checked(database.Store.Position + AnnCrashContract.Version);
-            boundary.Armed = true;
+            await boundary.ArmAsync(database.Store);
             _ = AnnCrashOperations.Commit(commands, intent);
+            await database.Store.SyncAsync();
             throw new InvalidOperationException(AnnCrashContract.Invalid);
         }
         if (mode == AnnCrashContract.Recover)
@@ -92,7 +93,7 @@ internal static class AnnCrashScenario
                     throw new InvalidOperationException(AnnCrashContract.Invalid);
                 }
                 await File.WriteAllBytesAsync(Path.Combine(directory, AnnCrashContract.IntentFile), OrleansSerialization.Serialize(intent));
-                await RecoveryProcessPause.WaitForKillAsync();
+                await RecoveryProcessPause.WaitForKillAsync(database.Store);
             }, failures);
         }
         catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null) { failures.Add(error); }

@@ -14,8 +14,8 @@ internal static class QueueWholeFlowStorage
         {
             throw new InvalidOperationException("Whole store state exceeded the fixture bound.");
         }
-        return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ":" +
-            Convert.ToHexString(record.Value.Span)).ToArray();
+        return page.Records.Where(record => !CanonicalStoreImage.IsStorePosition(record.Key.Span))
+            .Select(record => Convert.ToHexString(record.Key.Span) + ":" + Convert.ToHexString(record.Value.Span)).ToArray();
     });
 
     internal static DateTimeOffset Clock(ZoneTreeStore store) => store.Read(view =>

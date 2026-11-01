@@ -30,9 +30,9 @@ internal static class SubscriptionCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.SubscriptionProcessing, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, CrashFixtureValues.ProcessingCommandFile), OrleansSerialization.Serialize(operation));
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         database.Apply(operation).Get<SubscriptionProcessingResult>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static void Configure(DatabaseEngine database)

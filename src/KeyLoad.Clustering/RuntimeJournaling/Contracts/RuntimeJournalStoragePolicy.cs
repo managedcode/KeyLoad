@@ -19,9 +19,6 @@ internal static class RuntimeJournalStoragePolicy
     internal const long InitialReadOffset = 0;
     internal const int NoBufferedBytes = 0;
     internal const int MissingCharacterIndex = -1;
-    internal const int AvailableHandleGatePermits = 1;
-    internal const int MaximumHandleGatePermits = 1;
-    internal const int InitialGateIndex = 0;
     internal const int NoDisposedProvider = 0;
     internal const int DisposedProvider = 1;
     internal const int EqualOrdinalComparison = 0;

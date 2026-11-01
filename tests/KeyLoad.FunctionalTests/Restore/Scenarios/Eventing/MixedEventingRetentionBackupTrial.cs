@@ -40,7 +40,7 @@ internal static class MixedEventingRetentionBackupTrial
             fixture.ApplyInbox(fixture.Database, state.HealthyInbox, token).Get<CommitInboxResult>());
         await MixedEventingRetentionBackupPrivacy.RequireAsync(fixture.Database, state);
         await ColdHealthyAsync(fixture);
-        await MixedEventingRetentionBackupArchive.SourceAsync(fixture, state, token);
+        await MixedEventingRetentionBackupArchive.SourceAsync(fixture, state);
     });
 
     private static async Task ColdHealthyAsync(EventingArtifactFixture fixture)

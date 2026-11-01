@@ -19,7 +19,7 @@ internal sealed class ScopedRangeStoreFixture : IDisposable
         get;
     }
 
-    public ScopedRangeStoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+    public ScopedRangeStoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution());
 
     public void Dispose()
     {

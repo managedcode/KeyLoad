@@ -14,8 +14,7 @@ internal static class QueueDeadlineColdHealthyContinuation
         var position = store.Position;
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(second);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueDeadlineOperations.Apply(database,

@@ -52,7 +52,7 @@ internal sealed class PartitionHost : IAsyncDisposable
 
     private void OpenDatabase(ServerRuntimeOptions runtimeOptions, IAuthorizationPolicy authorization, TimeProvider clock)
     {
-        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution, runtimeOptions.PointCache,
+        stores = new(runtimeOptions.Node, DirectoryPath, runtimeOptions.StorageExecution,
             clock, null, ownership);
         ownership.Host.BeginOpen();
         ownership.Host.BeginConstructor();
@@ -88,7 +88,6 @@ internal sealed class PartitionHost : IAsyncDisposable
     {
         get; private set;
     } = null!;
-    internal void SweepMaintenance() => stores.Canonical.SweepMaintenance();
 
     internal bool CurrentCapabilityValidated
         => stores.Canonical.Identity.MinimumReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal;

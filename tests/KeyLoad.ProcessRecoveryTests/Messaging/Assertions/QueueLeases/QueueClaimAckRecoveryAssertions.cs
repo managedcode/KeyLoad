@@ -46,7 +46,7 @@ internal static class QueueClaimAckRecoveryAssertions
         await Assert.That(page.HasMore).IsFalse();
         string[] expected = expectedKey is null ? []
             : [Convert.ToHexString(expectedKey) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(id))];
-        var actual = page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":"
+        var actual = page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":"
             + Convert.ToHexString(row.Value.Span)).ToArray();
         await Assert.That(actual).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
@@ -74,6 +74,6 @@ internal static class QueueClaimAckRecoveryAssertions
         {
             throw new InvalidOperationException("The complete claim/ACK image exceeded its admitted test bound.");
         }
-        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 }

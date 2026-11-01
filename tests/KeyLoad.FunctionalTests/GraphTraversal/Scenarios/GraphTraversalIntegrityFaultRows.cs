@@ -1,4 +1,3 @@
-using KeyLoad.FunctionalTests.InternalSerialization;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
@@ -34,7 +33,7 @@ internal static class GraphTraversalIntegrityFaultRows
             }
             else if (fault == GraphTraversalIntegrityFault.NullTarget)
             {
-                transaction.Put(key, GraphFixtures.EncodeUnchecked(edge with
+                transaction.Put(key, OrleansSerialization.Serialize(edge with
                 {
                     To = null!
                 }));

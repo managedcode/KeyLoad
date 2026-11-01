@@ -13,8 +13,6 @@ internal static class ChecksumProfileProtocol
     internal const string FirstAppend = "first-append";
     internal const string SecondAppend = "second-append";
     internal const string Cold = "cold";
-    internal const string CorruptionRefusal = "corruption-refusal";
-    internal const string CorruptionRefusedSignal = "execution-checksum-corruption-refused:Corruption";
     internal const string CutFile = "execution-checksum-profile-cut.bin";
     internal const string FollowUpCommandFile = "execution-checksum-profile-follow-up-command.bin";
     internal const string FollowUpReceiptFile = "execution-checksum-profile-follow-up.bin";

@@ -37,7 +37,7 @@ internal static class CatalogIdentityLifetime
             ZoneTreeStore? cold = null;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                cold = new(new(db.Directory), db.StorageExecution, UnitExecutionOptions.PointCacheExecution(),
+                cold = new(new(db.Directory), db.StorageExecution,
                     timeProvider: db.Database.EvaluationClock);
                 await ServerFailureObserver.ObserveAsync(async () =>
                     await Assert.That(OrleansSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue(), failures);

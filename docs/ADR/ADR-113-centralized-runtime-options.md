@@ -246,11 +246,10 @@ semantics. SerializationExecutionPolicyTests checks exact bytes and Unicode
 boundaries; source inspection does not qualify allocation or performance claims.
 
 Storage stream buffering is distinct from transfer/chunk buffering. The execution
-storage options group owns StreamBufferBytes 1..4096, default 4096, for metadata,
-backup and checkpoint FileStream owners, including FileStream entry points
-that otherwise select an implicit
-buffer. Preserve existing 65536-byte transfer/chunk defaults, original frame and
-manifest bytes, recovery validation and synchronous Flush(true) barriers.
+storage options group owns StreamBufferBytes 1..4096, default 4096, for the identity
+metadata FileStream owners, including FileStream entry points that otherwise select an
+implicit buffer. Preserve existing 65536-byte transfer/chunk defaults, the identity
+bytes and the identity writer's synchronous Flush(true) barrier.
 
 text file providers apply the bound FileBufferBytes ceiling to actual
 ZoneTree stream creation, including calls that omit the interface's
@@ -298,15 +297,11 @@ qualified gates. Do not mark this decision Implemented until complete build, for
 Aspire full analyzer/unit/scalar/recovery/cluster, coverage and exact-source evidence
 exist. Local compiler previews and passing focused tests remain development proof.
 
-This options stage also covers the CLI archive policy. A cohesive
-`CliBackupExecutionOptions` is ly bound at `CliStorageConfiguration` from
-`KEYLOAD_BACKUP__`, eagerly validated before file ownership and passed as the same
-`IOptions<T>` to `CliBackupRestore`. `PieceBytes` defaults to 268435456 and accepts
-1024 through the existing archive format ceiling of 1073741824. The archive API
-requires its explicit piece-size operand; it must not restore an implicit static
-default. Actual CLI process tests use 1024-byte pieces, independently verify all
-piece counts and exact extracted backup bytes, and prove invalid settings reject
-before archive creation while a following configured invocation remains healthy.
+The standalone CLI binds only the storage and point-cache option groups, from
+`KEYLOAD_STORAGE__` and `KEYLOAD_POINTCACHE__` at `CliStorageConfiguration`, eagerly
+validated before file ownership and passed as the same `IOptions<T>` to
+`CliBackupRestore`. Actual CLI process tests prove an invalid storage budget rejects
+before the backup source opens while a following invocation remains healthy.
 
 The raw storage slack regression observes the genuine initialized ZoneTree
 owner through a narrow internal forwarding of `Maintenance.CloneOptions()` at
@@ -532,18 +527,6 @@ shared feature evidence. Every run retains its original failure evidence. A sour
 rollback restores the preceding checkpoint; binary/storage/public API formats and
 dependencies remain unchanged. Full and delivered-source Linux verification
 remain open.
-
-The REQ/AC-BACKUP-002 input-rejection contract applies to the owning ZoneTree
-manifest reader and its two real missing/empty-directory cases. Only FileNotFoundException or
-DirectoryNotFoundException from the manifest read becomes the existing bounded
-FormatUnsupported Problem. Canonical data, identity, backup bytes and a healthy
-following restore are asserted; no storage format, resource limit, broad catch or
-dependency replacement is introduced. Focused runtime and admission regressions
-execute through the test-owned Aspire
-entry point and retain their original reports. Source review or a previous local
-run does not qualify the current source checkpoint. Full execution
-unit/scalar/recovery/cluster, source-bound functional coverage and delivered Linux
-acceptance remain mandatory and open.
 
 ### Independent delivered-source analyzer coverage join
 

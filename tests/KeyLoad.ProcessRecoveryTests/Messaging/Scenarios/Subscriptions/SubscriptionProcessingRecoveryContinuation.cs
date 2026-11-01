@@ -41,8 +41,7 @@ internal static class SubscriptionProcessingRecoveryContinuation
         var inbox = store.Read(view => view.ReadOwnedValue(inboxKey))!;
         var source = db.ReadEventSource(CrashFixtureValues.Principal, new(group.Source), token).Events;
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution(),
-            RecoveryExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution());
         var reopened = TargetInboxRecoveryDatabase.Open(cold);
         await Assert.That(cold.Position).IsEqualTo(position);
         await Assert.That(OrleansSerialization.Serialize(cold.Identity).AsSpan().SequenceEqual(identity)).IsTrue();

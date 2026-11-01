@@ -61,7 +61,7 @@ cleanup has no exposed original-shutdown witness. This is a concrete owning
 criterion requiring a separate coherent lifecycle correction. This packet does not
 change its API, treat root retention as success, infer a close from lock availability,
 or add a synchronous wait. Directory-only fixtures (`CurrentStorageFixture`,
-`RuntimeJournalReaderFixture`, `WalFileFixture`) expose paths/options or owners
+`RuntimeJournalReaderFixture`, `StoreFileFixture`) expose paths/options or owners
 to external scopes; this bounded inventory does not qualify their entire caller
 lifecycle. `MetadataEntryOpenOwner` already uses a sticky uncertainty ledger and
 refuses directory cleanup when its existing owner/inspection settlement is unknown.

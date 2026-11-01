@@ -80,7 +80,7 @@ internal static class FunctionalGateSearch
             ctx.Administrator.Sdk.ConfigureResourceAsync(commandId, request, token)));
         await SqlClusterProtocol.EqualAsync(definition, await ctx.McpHeaderAsync<ResourceDefinition>(
             ctx.Administrator, McpCallerTools.ResourcesConfigure, request, commandId, token));
-        FunctionalGateCreationLifetime.Expect(ctx, commandId, definition, table: false);
+        FunctionalGateCreationLifetime.Expect(ctx, commandId, definition);
     }
 
     internal static async Task<CommitReceipt> CommitAsync(FunctionalGateContext ctx, Mutation[] mutations,

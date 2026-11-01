@@ -1,6 +1,6 @@
 namespace KeyLoad.Storage;
 
-/// <summary>Stages atomic writes while preserving the same gated read view.</summary>
+/// <summary>Stages writes while preserving the owning native transactional snapshot.</summary>
 public interface IAtomicTransaction : IKeyValueView
 {
     /// <summary>Runs synchronous discard-only preparation over this transaction's staged image.</summary>
@@ -18,7 +18,4 @@ public interface IAtomicTransaction : IKeyValueView
     void Delete(byte[] key);
     /// <summary>Discards this action's staged writes without changing committed data.</summary>
     void Reset();
-    /// <summary>Validates the complete staged commit before any durable write.</summary>
-    /// <remarks>Callers may reset rejected effects and persist a bounded rejection outcome.</remarks>
-    void ValidateCommit();
 }

@@ -54,7 +54,7 @@ internal sealed class TestDatabaseOriginalResourceCommands
             || outcome.PreparedCommand.UserId != command.UserId
             || outcome.PreparedCommand.Value!.Kind != command.Value!.Kind
             || !DatabaseCommandContentIdentity.SameContent(outcome.PreparedCommand, command)
-            || !OrleansSerialization.Serialize(outcome.PreparedCommand.Value.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(command.Value.Input, ValidationProfile.PublicInputElements).AsSpan()))
+            || !OrleansSerialization.Serialize(outcome.PreparedCommand.Value.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(command.Value.Input).AsSpan()))
         {
             throw new InvalidOperationException(OriginalRequired);
         }

@@ -23,9 +23,9 @@ internal static class QueueOrderedRetryBackupRestore
         {
             Directory.CreateDirectory(root);
             var image = QueueOrderedRetryImage.Capture(source, original.Lane);
-            var position = source.CreateBackup(backup);
-            ZoneTreeStore.Restore(backup, target, UnitExecutionOptions.StorageExecution());
-            restored = new(new(target), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            var position = await source.CreateBackupAsync(backup, token);
+            await ZoneTreeStore.RestoreAsync(backup, target, UnitExecutionOptions.StorageExecution(), cancellationToken: token);
+            restored = new(new(target), UnitExecutionOptions.StorageExecution());
             await Assert.That(restored.Identity.Incarnation).IsNotEqualTo(source.Identity.Incarnation);
             var database = QueueWholeFlowStorage.Open(restored);
             await QueueOrderedRetryImage.SameAsync(restored, original.Lane, image);
@@ -36,7 +36,7 @@ internal static class QueueOrderedRetryBackupRestore
             await QueueOrderedRetryRestoredAssertions.TerminalAsync(database, state, healthy: false);
             var terminal = QueueOrderedRetryImage.Capture(restored, state.Lane);
             restored.Dispose();
-            restored = new(new(target), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            restored = new(new(target), UnitExecutionOptions.StorageExecution());
             var cold = QueueWholeFlowStorage.Open(restored);
             await QueueOrderedRetryImage.SameAsync(restored, state.Lane, terminal);
             await QueueOrderedRetryRestoreAuthority.RequireAsync(cold, state);

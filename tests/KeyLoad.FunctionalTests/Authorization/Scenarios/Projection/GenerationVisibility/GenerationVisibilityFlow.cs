@@ -41,7 +41,6 @@ internal static class GenerationVisibilityFlow
             await GenerationVisibilityAdmissionFlow.ControlsAsync(db, queries, cache, memory, token);
         }
         await GenerationVisibilityAssertions.HealthyAsync(db, db.Database, queries, db.Store, InitialRevision, TeamRowPolicyFlow.OriginalJson, token);
-        await GenerationVisibilitySnapshotFlow.RunAsync(db, queries, cache, token);
         var writes = await GenerationVisibilityWriteFlow.RunAsync(db, queries, cache, token);
         using var held = GenerationVisibilityAssertions.Hold(db, cache);
         await GenerationVisibilityCrossTenant.RunAsync(db, queries, token);

@@ -7,7 +7,9 @@ internal sealed class StorageRangePagingTests
 {
     private const int PageRecords = 3;
     private const int StoredRecords = 7;
-    private const int RecordBytes = 2;
+    private const int RecordBytes = 3;
+    private const byte RangePrefix = 0x80;
+    private static readonly byte[] Prefix = [RangePrefix];
 
     [Test]
     [Arguments(0)]
@@ -22,9 +24,9 @@ internal sealed class StorageRangePagingTests
         using var store = Open(fixture, records);
         var visited = new List<byte>();
         var before = store.GetReadDiagnostics();
-        var result = store.Read(view => view.VisitAll([], (key, _) =>
+        var result = store.Read(view => view.VisitAll(Prefix, (key, _) =>
         {
-            visited.Add(key[0]);
+            visited.Add(key[1]);
             return true;
         }));
         var after = store.GetReadDiagnostics();
@@ -48,31 +50,30 @@ internal sealed class StorageRangePagingTests
         using var fixture = new CurrentStorageFixture();
         using var store = Open(fixture, StoredRecords);
         var visited = new List<byte>();
-        var result = store.Read(view => view.VisitAll([], (key, _) =>
+        var result = store.Read(view => view.VisitAll(Prefix, (key, _) =>
         {
-            visited.Add(key[0]);
+            visited.Add(key[1]);
             return visited.Count < stopAfter;
         }));
         await Assert.That(visited.SequenceEqual(Enumerable.Range(0, stopAfter).Select(value => (byte)value))).IsTrue();
         await Assert.That(result.Records).IsEqualTo(stopAfter);
         await Assert.That(result.ReadBytes).IsEqualTo((long)stopAfter * RecordBytes);
         await Assert.That(result.StoppedByVisitor).IsTrue();
-        var healthy = store.Read(view => view.ScanAll([]));
+        var healthy = store.Read(view => view.ScanAll(Prefix));
         await Assert.That(healthy.Length).IsEqualTo(StoredRecords);
     }
 
     private static ZoneTreeStore Open(CurrentStorageFixture fixture, int records)
     {
         var store = new ZoneTreeStore(fixture.SourceOptions,
-            UnitExecutionOptions.StorageExecution(new() { MaximumRangeRecords = PageRecords }),
-            UnitExecutionOptions.PointCacheExecution());
+            UnitExecutionOptions.StorageExecution(new() { MaximumRangeRecords = PageRecords }));
         try
         {
             store.Commit((transaction, _) =>
             {
                 for (var index = 0; index < records; index++)
                 {
-                    transaction.Put([(byte)index], [(byte)index]);
+                    transaction.Put([RangePrefix, (byte)index], [(byte)index]);
                 }
                 return true;
             });

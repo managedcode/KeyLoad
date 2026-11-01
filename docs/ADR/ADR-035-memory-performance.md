@@ -11,7 +11,7 @@ Superseded in part by [ADR-149](ADR-149-no-operation-limits.md): the `DatabaseLi
 ## Decision and invariant
 
 The atomic partition remains the business consistency identity. A local physical
-session owns mutable ZoneTree state, journals, file locks and apply gates. Isolated
+session owns mutable ZoneTree state, file locks and apply gates. Isolated
 storage binds it to a silo-local Grain Service; shared storage binds it to one
 ordinary owner's activation lifetime. Orleans can move an activation only by
 closing and reopening its session; file handles never move between processes.

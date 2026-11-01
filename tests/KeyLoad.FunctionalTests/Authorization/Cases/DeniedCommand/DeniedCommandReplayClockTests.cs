@@ -105,7 +105,7 @@ internal sealed class DeniedCommandReplayClockTests
         var sequence = fixture.Database.LastApplied;
 
         var prepared = fixture.Database.PrepareStorageOperations([original], token);
-        var denied = fixture.Database.ApplyStorageOperations(prepared, sequence + 1, token).Applied.Single();
+        var denied = (await fixture.Database.ApplyStorageOperationsAsync(prepared, sequence + 1, token)).Applied.Single();
 
         await Assert.That(Errors.Code(denied.Result.Problem).Value).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(denied.Sequence).IsEqualTo(sequence + 1);

@@ -62,7 +62,7 @@ internal sealed class EventQueueStateEnvelopeFixture : IDisposable
         {
             Incarnation = identity.Incarnation,
             SigningKey = identity.SigningKey
-        }, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        }, UnitExecutionOptions.StorageExecution());
         Database = Owner.CreateConfiguredDatabase(Store);
     }
 

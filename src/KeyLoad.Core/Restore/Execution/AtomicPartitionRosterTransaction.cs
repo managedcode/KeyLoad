@@ -16,6 +16,9 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
     private readonly long storePosition;
     private readonly long appliedIndex;
     private readonly Dictionary<PartitionRef, byte[]> candidates = [];
+    private readonly Dictionary<(string Tenant, string Database, string Resource), bool> resourceModes = [];
+    private bool? transactionalData;
+    private const string MixedTableModes = "One command cannot write both transactional and non-transactional tables.";
     private readonly record struct Candidate(PartitionRef Partition, byte[] Key);
 
     internal AtomicPartitionRosterTransaction(IAtomicTransaction inner,
@@ -46,6 +49,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
     public void Put(byte[] key, byte[] value)
     {
+        RequireWriteMode(key);
         var candidate = (PrepareCandidate(key)).Value;
         inner.Put(key, value);
         RetainCandidate(candidate);
@@ -53,6 +57,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
     public void Delete(byte[] key)
     {
+        RequireWriteMode(key);
         var candidate = (PrepareCandidate(key)).Value;
         inner.Delete(key);
         RetainCandidate(candidate);
@@ -60,16 +65,39 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
     public void Reset()
     {
+        transactionalData = null;
+        resourceModes.Clear();
         candidates.Clear();
         inner.Reset();
+    }
+
+    private void RequireWriteMode(byte[] key)
+    {
+        if (!ResourceStorageKeys.TryResource(key, out var resource))
+        {
+            return;
+        }
+        if (!resourceModes.TryGetValue(resource, out var transactional))
+        {
+            var catalog = ResourceStorageKeys.Catalog(resource.Tenant, resource.Database, resource.Resource);
+            if (inner.GetRecord<ResourceDefinition>(catalog) is not { } definition)
+            {
+                return;
+            }
+            transactional = definition.Transactional;
+            resourceModes.Add(resource, transactional);
+        }
+        if (transactionalData is { } previous && previous != transactional)
+        {
+            throw Errors.Fail(ErrorCode.Validation, MixedTableModes);
+        }
+        transactionalData = transactional;
     }
 
     void IResourceEffectCompletion.RequireCompleteResourceEffects() => EffectAdmission.RequireComplete();
 
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
         => AtomicPartitionRosterPreparation.Prepare(inner, storePosition, appliedIndex, prepare);
-
-    public void ValidateCommit() => inner.ValidateCommit();
 
     void IResourceEffectObservation.ObserveLifetime(ResourceLifetime lifetime)
         => EffectAdmission.ObserveLifetime(lifetime);

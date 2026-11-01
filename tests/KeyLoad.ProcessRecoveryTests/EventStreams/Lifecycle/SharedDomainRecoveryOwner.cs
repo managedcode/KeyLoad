@@ -21,7 +21,7 @@ internal static class SharedDomainRecoveryOwner
             {
                 Incarnation = expectedDigest.Incarnation
             },
-                RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+                RecoveryExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await SharedDomainRecoveryImage.IdentityAsync(store, expectedDigest);

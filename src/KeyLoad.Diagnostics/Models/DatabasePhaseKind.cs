@@ -7,13 +7,9 @@ public enum DatabasePhaseKind
     PublicAuthenticationDispatch = 0,
     /// <summary>The operation gateway's real node dispatch.</summary>
     PublicOperationDispatch = 1,
-    /// <summary>The authorized authentication branch's execution read barrier.</summary>
-    AuthorizedAuthenticationBarrier = 2,
-    /// <summary>The authorized operation branch's separate execution read barrier.</summary>
-    AuthorizedOperationBarrier = 3,
     /// <summary>The authorized read capability invocation.</summary>
     AuthorizedReadCapability = 4,
-    /// <summary>The provider Commit upgrade to the exclusive apply lock after the journal flush; readers waited only here.</summary>
+    /// <summary>The provider Commit upgrade to the exclusive lock for the ZoneTree commit; readers waited only here.</summary>
     ProviderApplyGateWait = 26,
     /// <summary>The provider's actual Read reader-lock acquisition.</summary>
     ProviderReadGateWait = 27,
@@ -21,8 +17,6 @@ public enum DatabasePhaseKind
     ProviderWriteGateWait = 28,
     /// <summary>The provider Commit hold from writer-ordering acquisition through release, including no-change calls.</summary>
     ProviderWriteGateHold = 29,
-    /// <summary>Existing atomic redo writes through their Flush(true).</summary>
-    AtomicJournalWriteFlush = 30,
-    /// <summary>Actual cache/value/execution Sync-WAL/tree mutation work.</summary>
+    /// <summary>Actual mutation work staged into the ZoneTree transaction.</summary>
     TreeMutation = 31
 }

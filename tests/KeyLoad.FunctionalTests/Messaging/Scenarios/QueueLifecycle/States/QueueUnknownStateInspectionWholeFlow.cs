@@ -50,7 +50,7 @@ internal static class QueueUnknownStateInspectionWholeFlow
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         QueueLifecycleConditionCut? healthy = null;
-        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
@@ -70,7 +70,7 @@ internal static class QueueUnknownStateInspectionWholeFlow
         }
         KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
         token.ThrowIfCancellationRequested();
-        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         await KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
             var restored = fixture.CreateConfiguredDatabase(second);

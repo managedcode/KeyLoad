@@ -49,7 +49,7 @@ internal sealed class OperationCoordinatorTests
         await Assert.That(operation.CommandId).IsEqualTo(id);
         await Assert.That(operation.UserId).IsEqualTo(RootPrincipal);
         await Assert.That(operation.Timestamp).IsEqualTo(Time.UtcDateTime);
-        await Assert.That(OrleansSerialization.Serialize(operation.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(request))).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(operation.Value!.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(request))).IsTrue();
         var restored = ((CommandRequest)operation.Value.Input);
         await Assert.That(((PutDocument)restored.Mutations[0]).Json).IsEqualTo(Json);
     }

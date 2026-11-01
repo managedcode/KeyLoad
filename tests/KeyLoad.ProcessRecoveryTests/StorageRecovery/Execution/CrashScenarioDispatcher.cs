@@ -53,13 +53,12 @@ internal static class CrashScenarioDispatcher
             ScalarIndexCrashContract.PrepareMode or ScalarIndexCrashContract.FaultMode
                 or ScalarIndexCrashContract.RecoverMode or ScalarIndexCrashContract.VerifyMode
                 => ScalarIndexCrashScenario.RunAsync(directory, store, boundary, mode),
-            _ => RunCanonicalAsync(directory, store, boundary, mode)
+            _ => RunCanonicalAsync(store, boundary)
         };
 
-    private static async Task RunCanonicalAsync(string directory, ZoneTreeStore store,
-        CanonicalCrashBoundary boundary, string mode)
+    private static async Task RunCanonicalAsync(ZoneTreeStore store, CanonicalCrashBoundary boundary)
     {
-        CanonicalCrashScenario.Run(directory, store, boundary, mode);
-        await RecoveryProcessPause.WaitForKillAsync();
+        await CanonicalCrashScenario.RunAsync(store, boundary);
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 }

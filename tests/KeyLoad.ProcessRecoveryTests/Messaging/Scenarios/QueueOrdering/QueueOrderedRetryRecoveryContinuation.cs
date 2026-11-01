@@ -20,7 +20,7 @@ internal static class QueueOrderedRetryRecoveryContinuation
         await ReplayAsync(database, outcomes);
         var image = Capture(store);
         store.Dispose();
-        using var reopened = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var cold = QueueLifecycleRecoveryAssertions.Open(reopened);
         await Assert.That(Capture(reopened)).IsEquivalentTo(image, CollectionOrdering.Matching);
         await ReplayAsync(cold, outcomes);

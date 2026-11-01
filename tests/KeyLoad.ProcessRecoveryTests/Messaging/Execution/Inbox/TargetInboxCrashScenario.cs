@@ -28,9 +28,9 @@ internal static class TargetInboxCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, TargetInboxCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, TargetInboxCrashProtocol.DeliveryFile), JsonDefaults.Serialize(delivery));
         boundary.Position = store.Position + TargetInboxCrashProtocol.PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitInboxResult>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
     private static void Configure(DatabaseEngine database)
     {

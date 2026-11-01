@@ -51,9 +51,9 @@ internal static class DatabaseCompositionCrashScenario
         await File.WriteAllTextAsync(Path.Combine(directory, SeedOutboxTailFile),
             tail.ToString(CultureInfo.InvariantCulture));
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static void Seed(DatabaseEngine database)

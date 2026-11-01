@@ -13,9 +13,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
 {
     private const string OutboxSpace = "outbox";
     [Test]
-    [Arguments(CommitStage.HeaderWritten, 0)]
-    [Arguments(CommitStage.PayloadWritten, 0)]
-    [Arguments(CommitStage.JournalFlushed, 0)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0)]
     [Arguments(CommitStage.MutationApplied, 0)]
     [Arguments(CommitStage.MutationApplied, 3)]
     [Arguments(CommitStage.MutationApplied, 6)]
@@ -45,7 +43,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
             }
             if (Directory.Exists(root))
             {
-                await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
+                await StorageTrialCleanup.DeleteTrialAsync(root, cancellationToken);
             }
         }
     }
@@ -68,7 +66,7 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
 
     private static async Task AssertRecoveredAndRetriedAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var tail = long.Parse(await File.ReadAllTextAsync(Path.Combine(root,
             DatabaseCompositionCrashScenario.SeedOutboxTailFile), cancellationToken), CultureInfo.InvariantCulture);
@@ -117,9 +115,13 @@ internal sealed class DatabaseCompositionProcessRecoveryTests
             await Assert.That(outbox[1]!.Mutation).IsTypeOf<EnqueueMessage>();
             await Assert.That(outbox[0]!.Commit).IsEqualTo(outbox[1]!.Commit);
         }
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         return committed;
     }

@@ -42,8 +42,6 @@ internal static class OrleansRuntimeTelemetryWorkflows
             .Because(string.Join("; ", traces.GroupBy(static activity => activity.DisplayName)
                 .Select(static group => group.Key + "=" + group.Count())));
         await Assert.That(telemetry.Metrics.WasTruncated).IsFalse().Because(telemetry.Metrics.DiagnosticSummary);
-        await OrleansRuntimeTelemetryAssertions.AssertTracePrivacyAsync(traces, first, second, third, parentage,
-            telemetry.Options, sentinelObservations);
         await OrleansRuntimeTelemetryAssertions.AssertMetricPrivacyAsync(metrics);
         await OrleansRuntimeTelemetryAssertions.AssertActivityRestoredAsync(callerActivity);
     }

@@ -4,11 +4,11 @@ Status: Accepted; full backup/restore and cluster qualification pending. Product
 
 ## Context and decision
 
-WAL/transaction journals, domain event history, queue state, subscription checkpoints, inbox outcomes, and rebuildable projections have different authority and retention. Trimming a recovery log must not silently delete public event history. A backup of one silo-local store records an internally consistent manifest and the committed cut of every authoritative resource needed to restore that state. Derived indexes may use a documented rebuild recipe. Restoring an older cut starts with delivery paused and a new store incarnation until reviewed and resumed.
+ZoneTree's write-ahead log, domain event history, queue state, subscription checkpoints, inbox outcomes and rebuildable projections have different authority and retention. ZoneTree owns its log and segment lifecycle; that lifecycle never deletes public event history. A backup of one silo-local store is `identity.json` plus one ZoneTree live-backup generation of the store's MVCC tree ([ADR-011](ADR-011-current-format.md)). It holds every commit through the position `CreateBackupAsync` returns, and with it every authoritative record of that store: documents, events, queue and subscription state, inbox outcomes, stored command outcomes, sequences and clocks. Derived indexes are rebuilt by their owners. Restoring a backup starts with delivery paused and a new store incarnation until reviewed and resumed.
 
 ## Rationale and consequences
 
-Separate lifecycles prevent log compaction from changing customer-visible history and make restore scope explicit. A backup is not valid if it omits metadata required to interpret data or if it silently replays external effects. Retention pins may consume storage; physical purge across the ReplicaCount copies, snapshots and archives needs its own measured and operational contract.
+Separate lifecycles keep ZoneTree maintenance from changing customer-visible history and make restore scope explicit. Because the backup is the store's own tree, no record class can be omitted from it, and restore replays no external effect: dispatch stays paused and the new incarnation fences old tokens and outcomes. Retention pins may consume storage; physical purge across the ReplicaCount copies and backups needs its own measured and operational contract.
 
 ## Related requirements
 
@@ -16,22 +16,19 @@ StorageRecovery `REQ-STORAGE-004`, EventStreams `REQ-EVENT-005..007`, and Messag
 
 ## Implementation contract
 
-1. Freeze authoritative manifest, committed store cut, retention pins, event-history guarantees, paused restore, and external-effect reconciliation.
-2. Add real-store tests for current-format backup consistency, interruption, corruption, retention pins, restore-old-cut token invalidation, and absence of automatic dispatch.
-3. Implement in `src/KeyLoad.Core/Restore/` and `src/KeyLoad.Storage.ZoneTree/Restore/`; each silo-local ZoneTree owner backs up and restores its own local files.
-4. Validate the current manifest version and every resource before restore. Reject unsupported versions and preserve original archive bytes; stop dispatch if any resource/cut is unknown.
-5. GitHub CI runs TUnit, recovery, and replicated-cluster restore drills.
+1. `IAtomicStore.CreateBackupAsync` writes the backup into an empty directory and returns its position; `ZoneTreeStore.RestoreAsync` restores it into an empty destination under a new identity with dispatch paused; `ZoneTreeBackupCopy` copies a backup into ManagedCode.Storage file storage.
+2. Real-store tests cover the backup position, new restored identity, paused dispatch, refused nonempty destinations, cancellation before any destination exists, the file-storage copy, restored retention pins, old-token invalidation and the absence of automatic dispatch.
+3. The implementation lives in `src/KeyLoad.Storage.ZoneTree/Restore/`; each silo-local ZoneTree owner backs up and restores its own local files.
+4. Restore validates the backed-up identity before it writes anything and rejects an unsupported identity format.
+5. GitHub CI runs the TUnit, process-recovery and replicated-cluster suites.
 
 Dependencies: [ADR-003](ADR-003-durability-ack-barrier.md), [ADR-004](ADR-004-committed-read-views.md), [ADR-005](ADR-005-canonical-keyspace-codec.md), and [ADR-030](ADR-030-retention-paused-restore.md). Stop if any authoritative message/history state is omitted or restore would automatically invoke an external side effect.
 
-Capture requires the complete current-format set of the store's live partition families; canonical data records remain authoritative. A partial capture is never reinterpreted as ready, and rollback preserves the original rows and withholds capture (REQ/AC-BACKUP-004 in [BackupRestore](../Features/BackupRestore.md)).
-
 ```mermaid
 flowchart LR
-    Sources[Canonical data events queue and cursor state] --> Cut[Consistent catalog and partition cuts]
-    Cut --> Manifest[Versioned authoritative manifest]
-    Manifest --> Validate[Verify resources and checksums]
-    Validate --> Restore[Restore paused with new incarnation]
+    Sources[Canonical data events queue and cursor state] --> Tree[One store MVCC tree]
+    Tree --> Backup[identity.json and one live-backup generation]
+    Backup --> Restore[Restore paused with new incarnation]
     Restore --> Review[Reconcile external outcomes]
     Review --> Resume[Explicit authorized dispatch resume]
 ```

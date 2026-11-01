@@ -1,7 +1,7 @@
 namespace KeyLoad.Clustering;
 
 /// <summary>Bounded exact execution response or typed safe rejection across the Orleans boundary.</summary>
-[Orleans.GenerateSerializer, Orleans.Alias(GrainRoutingProtocol.ReplyAlias)]
+[Orleans.GenerateSerializer, Orleans.Alias(GrainRoutingProtocol.ReplyAlias), Orleans.Immutable]
 public sealed record GrainOperationReply
 {
     /// <summary>Generated Orleans value for a successful operation; absent for a failure.</summary>

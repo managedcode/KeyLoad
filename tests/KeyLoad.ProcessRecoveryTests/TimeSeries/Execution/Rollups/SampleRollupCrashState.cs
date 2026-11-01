@@ -35,7 +35,7 @@ internal static class SampleRollupCrashState
             {
                 throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
             }
-            records.AddRange(page.Records.Select(record =>
+            records.AddRange(page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(record =>
                 new[] { Convert.ToHexString(record.Key.Span), Convert.ToHexString(record.Value.Span) }));
         }
         return JsonSerializer.SerializeToUtf8Bytes(records, JsonDefaults.Options);
@@ -48,6 +48,6 @@ internal static class SampleRollupCrashState
         {
             throw new InvalidOperationException(SampleRollupCrashContract.Invalid);
         }
-        return JsonDefaults.Serialize(page.Records);
+        return JsonDefaults.Serialize(page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).ToArray());
     });
 }

@@ -94,6 +94,6 @@ internal static class CompositeIndexReplayAssertions
         {
             throw new InvalidOperationException(Invalid);
         }
-        return JsonDefaults.Serialize(page.Records);
+        return JsonDefaults.Serialize(page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).ToArray());
     });
 }

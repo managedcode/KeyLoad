@@ -13,7 +13,7 @@ internal static class QueueLeaseAuthorityProcessImage
         {
             throw new InvalidOperationException("The lease authority process image exceeded its original row bound.");
         }
-        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 
     internal static async Task SameAsync(ZoneTreeStore store, string[] image, long position, byte[] identity)

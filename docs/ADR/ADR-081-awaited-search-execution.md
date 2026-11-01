@@ -48,7 +48,7 @@ await SearchAsync. Vector-only sync execution and context-free callers retain
 their contract. No scalar fallback, alternative provider or duplicate ranking.
 
 Preserve the connection-owned execution grain, fresh canonical-cut read and persisted authorization
-reload, the silo-local ZoneTree owner files/journals/apply gate, exact source cuts,
+reload, the silo-local ZoneTree owner files/write-ahead log/apply gate, exact source cuts,
 generation bounds, primary-plus-cleanup failure reporting and acknowledgement from every configured copy.
 Neither scheduling nor activation movement transfers storage ownership.
 SearchRequest/output/aliases and the HTTP/SDK/MCP protocol remain

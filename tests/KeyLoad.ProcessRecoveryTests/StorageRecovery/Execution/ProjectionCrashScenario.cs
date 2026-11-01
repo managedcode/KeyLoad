@@ -26,9 +26,9 @@ internal static class ProjectionCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.CommitProjectionBatch, request, request.CommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, CrashFixtureValues.ProcessingCommandFile), OrleansSerialization.Serialize(operation));
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         database.Apply(operation).Get<ProjectionBatchResult>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static void Configure(DatabaseEngine database)

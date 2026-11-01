@@ -11,7 +11,7 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return Task.FromResult(database.ApplyEmbedded(database.CreateCommand(kind, id, principalId, database.EvaluationClock.GetUtcNow(), payloadJson), cancellationToken));
+        return ApplyAsync(database.CreateCommand(kind, id, principalId, database.EvaluationClock.GetUtcNow(), payloadJson), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -24,7 +24,7 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
         var operation = sourcePlanningBudget is null
             ? database.CreateCommand(kind, id, principalId, database.EvaluationClock.GetUtcNow(), input)
             : database.CreateCommand(kind, id, principalId, database.EvaluationClock.GetUtcNow(), input, sourcePlanningBudget);
-        return Task.FromResult(database.ApplyEmbedded(operation, cancellationToken));
+        return ApplyAsync(operation, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -33,8 +33,15 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
-        var verified = database.OwnCommand(operation);
-        return Task.FromResult(database.ApplyEmbedded(verified, cancellationToken));
+        return ApplyAsync(database.OwnCommand(operation), cancellationToken);
+    }
+
+    /// <summary>Applies the command and acknowledges it once ZoneTree's write-ahead log holds it durably.</summary>
+    private async Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+    {
+        var result = (await database.ApplyCoreAsync(operation, null, selectEmbeddedClock: true, cancellationToken)).Result;
+        await database.Store.SyncAsync(CancellationToken.None);
+        return result;
     }
 
     /// <inheritdoc />

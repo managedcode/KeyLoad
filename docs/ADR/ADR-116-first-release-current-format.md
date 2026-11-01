@@ -10,20 +10,19 @@ The root [data rules](../../AGENTS.md#data-authorization-and-integrations)
 exclude persisted-data migration and legacy readers. Product completion
 does not authorize adding such a path.
 
-Deliver one strict current format. Remove obsolete old-format execution,
-tests, preparation resources, settings, routes and active documentation together.
-Checkpoint metadata has one current schema without a format-version field.
-Its writer emits that schema and its reader requires its exact canonical encoding;
-there is no alternate reader or conversion. Preserve current identity and WAL bytes,
-Orleans aliases and the remaining stable field IDs. Preserve node-local ownership, current backup/restore, corrupt-format
-rejection, signed-purpose fencing, process recovery and genuine Aspire cluster SDK/MCP.
-Current stores are created with reader capability1 and magic `0x364449444C4B`;
-reject an absent/zero/unknown capability and remove unmarked-store conversion.
-Keep current outcome identity and locator integrity without old-key/old-frame
-fallbacks. Remove configuration migration commands and prior-KeyLoad binary/image
-compatibility fixtures; preserve external SQL protocol and actual current cluster
-failure/authorization/lifetime operations. Qualification must bind current source,
-runtime and original operation reports.
+Deliver one strict current format: the store identity envelope and ZoneTree's own
+tree, write-ahead log and backup layout ([ADR-011](ADR-011-current-format.md)).
+Remove obsolete old-format execution, tests, preparation resources, settings, routes
+and active documentation together. Preserve the current identity bytes, Orleans
+aliases and stable field IDs, node-local ownership, current backup/restore,
+corrupt-format rejection, signed-purpose fencing, process recovery and genuine
+Aspire cluster SDK/MCP. Current stores are created with reader capability 1 and
+identity magic `0x364449444C4B`; reject an absent/zero/unknown capability and
+remove unmarked-store conversion. Keep current outcome identity and locator
+integrity without old-key fallbacks. Remove configuration migration commands and
+prior-KeyLoad binary/image compatibility fixtures; preserve external SQL protocol
+and actual current cluster failure/authorization/lifetime operations.
+Qualification must bind current source, runtime and original operation reports.
 
 The linked feature is the implementation contract: ordered stages, exact module ownership, consumer audit, bounded whole-operation tests.
 
@@ -36,7 +35,7 @@ or unknown reader capability is rejected before any mutation.
 
 Rollout uses the current unreleased source on the intended current cluster topology.
 No user stores are converted or deleted. Rollback restores a coherent source
-checkpoint; it never opens current data with an unsupported reader. Future
+revision; it never opens current data with an unsupported reader. Future
 released-format migration requires separate owner direction and an explicit ADR.
 
 The complete current file no-mutation oracle is preserved under AC-EXECUTION-002/006. The test controls its live owner; the internal Storage.IO observation handle is read-only, validates regular-file identity and never acquires or releases the owner's advisory lock. It uses the validated storage buffer and reads all actual file bytes. The linked feature freezes this deterministic test boundary, original lock checks and full healthy follow-up. Concurrent-writer snapshot semantics and production lock bypasses are outside this contract.
@@ -49,29 +48,27 @@ Accepted until implementation, all mapped tests and delivery evidence exist.
 ```mermaid
 flowchart LR
   Scope[First release] --> Current[One current format]
-  Current --> Recovery[Current WAL backup checkpoint recovery]
+  Current --> Recovery[ZoneTree log recovery and backup restore]
   Current --> Cluster[Aspire cluster SDK MCP]
   Unsupported[Unknown or corrupt input] --> Reject[Reject before mutation]
 ```
 
-## Verification: local-store corruption and repair
+## Verification: local-store rejection and repair
 
-REQ-STORAGE-007/021 → AC-EXECUTION-001/002/005. Whole operations on real current stores
-corrupt or alter one fixture-owned input, require the exact strict refusal
-(Corruption or FormatUnsupported) with the complete recursive file inventory unchanged,
-then restore only the captured original bytes after the rejected owner has settled. The
-covered faults are a corrupt compacted checkpoint checksum, a missing identity file, an
-unsupported identity version, an invalid or unsupported-signature journal frame and
-checksummed invalid binary payloads of every typed shape. After each repair the same
-owner must reopen with its exact original identity, reader capability and committed
-position, return the literal original record, accept a distinct healthy write with a
-one-position increment, and survive close/reopen with the complete raw key/value
-inventory. The continuation then pauses dispatch, takes a backup, compares the complete
-backup files before and after a restore through the unchanged API with a
-genuinely new incarnation, signing authority and node identity, reopens the restored
-owner twice, and rereads the original source authority. A successful snapshot install
-retains source authority and increments only the read generation. No conversion, repair
-API, adoption, alternative checksum or identity regeneration is introduced; no
-production format, alias, field ID, default or quota changes. Process recovery and
-cluster flows are independent mandatory gates, and local store evidence
+REQ-STORAGE-007/021 → AC-EXECUTION-001/002/005. Whole operations on real current
+stores alter one fixture-owned identity input, require the exact strict refusal
+(Corruption or FormatUnsupported) with the complete recursive file inventory
+unchanged, then restore only the captured original bytes after the rejected owner has
+settled. The covered faults are a missing identity file, an unsupported identity
+version, a zero, unknown or omitted reader capability and an unsupported identity
+magic. After each repair the same owner must reopen with its exact original identity,
+reader capability and committed position, return the literal original record, accept
+a distinct healthy write with a one-position increment, and survive close/reopen with
+the complete raw key/value inventory. The reader-capability continuations then take a
+backup, compare the complete backup files before and after a restore through the
+current API with a genuinely new incarnation, signing authority and node identity,
+reopen the restored owner twice, and reread the original source authority. No
+conversion, repair API, adoption, alternative checksum or identity regeneration is
+introduced; no production format, alias, field ID, default or quota changes. Process
+recovery and cluster flows are independent mandatory gates, and local store evidence
 qualifies neither them nor power-loss durability.

@@ -49,7 +49,7 @@ internal sealed class ReadCutBudgetTests
     }
 
     [Test]
-    public async Task AcCut002InvalidLimitsAndForeignViewDoNotReserveTheSlot()
+    public async Task AcCut002InvalidLimitsAndForeignViewLeaveIndependentCapturesAvailable()
     {
         using var fixture = new ReadCutFixture();
         var invalid = new[]
@@ -76,8 +76,8 @@ internal sealed class ReadCutBudgetTests
         await Assert.That(outside.Code).IsEqualTo(ErrorCode.Validation);
         using var healthy = fixture.Capture(ReadCutFixture.Limits(1, 1));
         await Assert.That(healthy.Cut.Position).IsEqualTo(fixture.Store.Position);
-        var busy = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Capture(ReadCutFixture.Limits(1, 1)));
-        await Assert.That(busy.Code).IsEqualTo(ErrorCode.ResourceExhausted);
+        using var independent = fixture.Capture(ReadCutFixture.Limits(1, 1));
+        await Assert.That(independent.Cut.Position).IsEqualTo(healthy.Cut.Position);
     }
 
     [Test]

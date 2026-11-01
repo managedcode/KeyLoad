@@ -18,7 +18,7 @@ internal static class QueueDeadlineCapacityCold
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var owner = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await QueueDeadlineCapacityImage.RequireAsync(owner, state.Lane, messages, sequence,

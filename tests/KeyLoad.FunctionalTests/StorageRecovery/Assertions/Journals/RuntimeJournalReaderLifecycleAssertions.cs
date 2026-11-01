@@ -6,14 +6,12 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal static class RuntimeJournalReaderLifecycleAssertions
 {
-    internal static async Task AssertBackupRestoreAsync(ZoneTreeStore compacted, RuntimeJournalReaderFixture fixture)
+    internal static async Task AssertBackupRestoreAsync(ZoneTreeStore source, RuntimeJournalReaderFixture fixture)
     {
-        var backupPosition = compacted.CreateBackup(fixture.BackupPath);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupPath, UnitExecutionOptions.StorageExecution());
-        await Assert.That(verified.Position).IsEqualTo(backupPosition);
-        await Assert.That(verified.Identity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
+        var backupPosition = await source.CreateBackupAsync(fixture.BackupPath);
+        await Assert.That(backupPosition).IsEqualTo(source.Position);
 
-        var restoredIdentity = ZoneTreeStore.Restore(fixture.BackupPath, fixture.RestorePath,
+        var restoredIdentity = await ZoneTreeStore.RestoreAsync(fixture.BackupPath, fixture.RestorePath,
             UnitExecutionOptions.StorageExecution());
         await Assert.That(restoredIdentity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
         using var restored = fixture.Open(fixture.RestorePath, restoredIdentity.Incarnation);

@@ -46,7 +46,6 @@ internal sealed class McpExecutionOptions
     public int MaximumDataReplyBytes { get; set; } = MaximumDataReplyByteCeiling;
     public int MaximumControlReplyBytes { get; set; } = MaximumControlReplyByteCeiling;
     public int EnvelopeAllowanceBytes { get; set; } = MaximumEnvelopeByteCeiling;
-    public int MaximumAuthenticationBytes { get; set; } = MaximumDataReplyByteCeiling;
     public int MaximumRequestCapacityBytes { get; set; } = MaximumRequestByteCeiling;
     public int MaximumCanonicalPayloadBytes { get; set; } = MaximumRequestByteCeiling;
     public int IngressScratchBytes { get; set; } = MaximumScratchByteCeiling;
@@ -79,7 +78,6 @@ internal sealed class McpExecutionOptions
         && Bounded(MaximumControlReplyBytes, MaximumControlReplyByteCeiling)
         && MaximumControlReplyBytes <= MaximumDataReplyBytes
         && Bounded(EnvelopeAllowanceBytes, MaximumEnvelopeByteCeiling)
-        && Bounded(MaximumAuthenticationBytes, MaximumDataReplyByteCeiling)
         && Bounded(MaximumRequestCapacityBytes, MaximumRequestByteCeiling)
         && Bounded(MaximumCanonicalPayloadBytes, MaximumRequestByteCeiling)
         && MaximumCanonicalPayloadBytes <= MaximumRequestCapacityBytes

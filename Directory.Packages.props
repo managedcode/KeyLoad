@@ -5,8 +5,6 @@
     <KeyLoadCoverageToolVersion>18.12.0</KeyLoadCoverageToolVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="Cartograph" Version="0.1.0-alpha" />
-    <PackageVersion Include="Cartograph.Catalog" Version="0.1.0-alpha" />
     <PackageVersion Include="ZoneTree" Version="2.0.8" />
     <PackageVersion Include="ZoneTree.Analytics" Version="1.0.2" />
     <PackageVersion Include="ZoneTree.FullTextSearch" Version="1.1.0" />
@@ -16,7 +14,6 @@
     <PackageVersion Include="ManagedCode.TimeSeries" Version="10.1.2" />
     <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.7" />
     <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.7" />
-    <PackageVersion Include="ManagedCode.Orleans.Graph" Version="10.4.9" />
     <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.2" />
     <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.3" />
     <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.18" />

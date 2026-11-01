@@ -15,8 +15,8 @@ internal static class QueueOrderedRetryCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueOrderedRetryCrashProtocol.OperationFile), OrleansSerialization.Serialize(operation));
         await File.WriteAllBytesAsync(Path.Combine(directory, QueueOrderedRetryCrashProtocol.DeliveryFile), OrleansSerialization.Serialize(delivery));
         boundary.Position = store.Position + QueueOrderedRetryCrashProtocol.One;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 }

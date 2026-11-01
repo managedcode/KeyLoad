@@ -24,9 +24,13 @@ internal static class TopicPurgeRecoveryOracle
             var database = Open(store);
             var recovered = OutcomeStoreOracle.Read(store, operation);
             await Assert.That(store.Position).IsEqualTo(seedPosition + (recovered is null ? 0 : 1));
-            if (stage is CommitStage.JournalFlushed or CommitStage.MutationApplied or CommitStage.ApplyCompleted)
+            if (stage == CommitStage.WriteAheadLogSynced)
             {
                 await Assert.That(recovered).IsNotNull();
+            }
+            if (stage == CommitStage.MutationApplied)
+            {
+                await Assert.That(recovered).IsNull();
             }
             await TopicPurgeModelAssertions.VerifyAsync(database, await ReadAsync<Command<DatabaseCommand>>(root,
                 TopicPurgeCrashContract.PublishOperationFile, cancellationToken), pinned || recovered is null ? 2 : 3, pinned, cursor);
@@ -82,7 +86,7 @@ internal static class TopicPurgeRecoveryOracle
     }
     private static Task<T> ReadAsync<T>(string root, string file, CancellationToken token)
         => CommandIdempotencyCrashData.ReadEvidenceAsync<T>(root, file, token);
-    private static ZoneTreeStore NewStore(string root) => new(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+    private static ZoneTreeStore NewStore(string root) => new(new(root), RecoveryExecutionOptions.StorageExecution());
     internal static DatabaseEngine Open(ZoneTreeStore store) => new(store, new AuthorizationPolicy(),
         RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(),
         RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(),

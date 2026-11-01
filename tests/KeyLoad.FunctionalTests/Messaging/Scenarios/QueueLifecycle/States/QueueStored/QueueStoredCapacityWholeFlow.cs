@@ -26,7 +26,7 @@ internal static class QueueStoredCapacityWholeFlow
         await QueueStoredCapacityAssertions.RefuseAsync(fixture.Database, fixture.Store, fixture.Partition, state, fault, position + QueueEnqueueAuthorityProtocol.First, damagedImage);
         await QueueStoredCapacityAssertions.RefuseAsync(fixture.Database, fixture.Store, fixture.Partition, state, fault, position + QueueEnqueueAuthorityProtocol.First, damagedImage);
         fixture.Store.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var owner = fixture.CreateConfiguredDatabase(cold);
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(cold, identity, position + QueueEnqueueAuthorityProtocol.First);
         await QueueStoredCapacityAssertions.RefuseAsync(owner, cold, fixture.Partition, state, fault, position + QueueEnqueueAuthorityProtocol.First, damagedImage);
@@ -92,7 +92,7 @@ internal static class QueueStoredCapacityWholeFlow
         var finalImage = QueueWholeFlowStorage.Bytes(cold);
         var finalPosition = cold.Position;
         cold.Dispose();
-        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var secondOwner = fixture.CreateConfiguredDatabase(second);
         token.ThrowIfCancellationRequested();
         await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(second, identity, finalPosition);

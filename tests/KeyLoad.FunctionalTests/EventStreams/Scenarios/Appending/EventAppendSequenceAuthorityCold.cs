@@ -27,8 +27,7 @@ internal static class EventAppendSequenceAuthorityCold
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             token.ThrowIfCancellationRequested();
-            using var store = new ZoneTreeStore(new(fixture.Database.Directory), fixture.Database.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution(), timeProvider: fixture.Database.Database.EvaluationClock);
+            using var store = new ZoneTreeStore(new(fixture.Database.Directory), fixture.Database.StorageExecution, timeProvider: fixture.Database.Database.EvaluationClock);
             var database = fixture.Database.CreateConfiguredDatabase(store);
             await ServerFailureObserver.ObserveAsync(async () =>
             {

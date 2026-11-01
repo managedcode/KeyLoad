@@ -27,7 +27,7 @@ internal static class SampleChunkCrashScenario
         {
             FaultObserver = boundary.Observe
         },
-            CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+            CrashExecutionOptions.StorageExecution());
         var prepare = mode is SampleChunkCrashContract.PrepareSeal or SampleChunkCrashContract.PrepareMerge;
         var database = prepare ? CrashDatabase.Create(store) : OpenExisting(store);
         if (prepare)
@@ -37,7 +37,7 @@ internal static class SampleChunkCrashScenario
                 OrleansSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database)))
                 .ConfigureAwait(false);
             await SampleChunkCrashState.WriteAsync(root, SampleChunkCrashContract.PreparedFile, database).ConfigureAwait(false);
-            await RecoveryProcessPause.WaitForKillAsync();
+            await RecoveryProcessPause.WaitForKillAsync(database.Store);
         }
         else if (mode is SampleChunkCrashContract.FaultSeal or SampleChunkCrashContract.FaultMerge)
         {
@@ -64,9 +64,9 @@ internal static class SampleChunkCrashScenario
             OrleansSerialization.Serialize(operation)).ConfigureAwait(false);
         SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
-        boundary.Armed = true;
+        await boundary.ArmAsync(database.Store);
         database.ApplyEmbedded(operation, cancellationToken: default).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(database.Store);
     }
 
     internal static DatabaseEngine OpenExisting(ZoneTreeStore store)

@@ -72,5 +72,5 @@ internal static class QueueLeaseAuthorityProcessTrial
     }
 
     private static ZoneTreeStore Open(string root) => new(new(root),
-        RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        RecoveryExecutionOptions.StorageExecution());
 }

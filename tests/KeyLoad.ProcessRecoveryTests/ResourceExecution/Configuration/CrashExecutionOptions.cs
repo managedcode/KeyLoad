@@ -5,7 +5,6 @@ using KeyLoad.Query;
 using KeyLoad.Server;
 using KeyLoad.Server.Search;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -81,13 +80,6 @@ internal static class CrashExecutionOptions
     internal static IOptions<QueryExecutionOptions> QueryExecution()
     {
         var settings = new QueryExecutionOptions();
-        settings.Validate();
-        return Compose(settings, static value => value.Validate());
-    }
-
-    internal static IOptions<ZoneTreePointCacheExecutionOptions> PointCacheExecution(ZoneTreePointCacheExecutionOptions? configured = null)
-    {
-        var settings = configured ?? new ZoneTreePointCacheExecutionOptions();
         settings.Validate();
         return Compose(settings, static value => value.Validate());
     }

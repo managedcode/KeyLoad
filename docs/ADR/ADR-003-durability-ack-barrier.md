@@ -24,6 +24,17 @@ to confirm ordered persisted apply; the returned copy count must match those
 actual acknowledgements. Missing copies refuse success. A timeout after possible
 effects is an unknown outcome and retains the stable command ID for retry.
 
+The local barrier of each owner is ZoneTree's write-ahead log
+([ADR-011](ADR-011-current-format.md)). A commit is visible when
+`IAtomicStore.Commit` returns and durable only after the next
+`IAtomicStore.SyncAsync`, which awaits ZoneTree's `SyncWALAsync`. Every
+acknowledgement path awaits that sync before it reports success: the silo-local
+storage service after a batch, the silo command coordinator, the local storage
+commit coordinator and the embedded coordinator. One sync covers every commit
+returned before it, so a batch of commands pays one sync per owner. A visible
+commit that was not yet synced can be lost by a process crash and is never
+acknowledged.
+
 ## Implementation and evidence
 
 Each local atomic transaction records the canonical sequence, result,

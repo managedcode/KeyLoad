@@ -4,7 +4,7 @@ namespace KeyLoad.FunctionalTests.TimeSeries;
 internal sealed class SampleRollupLeaseDropTests
 {
     [Test]
-    public async Task AcSeries022QueuedDropWaitsForRealReadLeaseThenReplaysAndRecreatesHealthyBucket()
+    public async Task AcSeries022NativeSnapshotDoesNotBlockDropThenReplaysAndRecreatesHealthyBucket()
     {
         using var db = new TestDatabase();
         SampleRollupWholeFlow.Seed(db);
@@ -27,7 +27,6 @@ internal sealed class SampleRollupLeaseDropTests
         await Assert.That(SampleRollupWholeFlow.Outcome(retry)).IsEqualTo(SampleRollupWholeFlow.Outcome(outcome));
         await Assert.That(SampleRollupWholeFlow.Image(db)).IsEqualTo(image);
         await Assert.That(db.Store.Position).IsEqualTo(position);
-        await Assert.That(db.Store.GateDiagnostics.WaitingWriters).IsEqualTo(0);
         db.Commit(SampleRollupWholeFlow.Refresh(2));
         await SampleRollupWholeFlow.Literal(SampleRollupWholeFlow.Read(db), 3, 6, 3, 12, 2, 6, 4);
         await Assert.That(SampleRollupWholeFlow.Raw(db)).IsEqualTo(raw);

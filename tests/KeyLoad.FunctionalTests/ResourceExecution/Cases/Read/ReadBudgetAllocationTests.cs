@@ -63,7 +63,7 @@ internal sealed class ReadBudgetAllocationTests
         {
             get;
         }
-        public StoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        public StoreFixture() => Store = new(new(directory), UnitExecutionOptions.StorageExecution());
         public void Dispose()
         {
             Store.Dispose();

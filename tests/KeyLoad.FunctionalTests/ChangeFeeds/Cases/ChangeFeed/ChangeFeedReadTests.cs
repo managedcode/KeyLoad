@@ -83,7 +83,7 @@ internal sealed class ChangeFeedReadTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadProjectionBatch("reader", new(Consumer(db)))).Code).IsEqualTo(ErrorCode.PermissionDenied);
     }
     [Test]
-    public async Task OutboxAndConsumerReceiptsRecoverAfterReopenAndCompaction()
+    public async Task OutboxAndConsumerReceiptsRecoverAfterReopen()
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
@@ -93,9 +93,8 @@ internal sealed class ChangeFeedReadTests
         Configure(db, consumer);
         var batch = db.Database.ReadProjectionBatch("root", new(consumer));
         var original = Complete(db, consumer, batch, new PutDocument("projection", "a", "{}", 0));
-        db.Store.Compact();
         db.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution());
         var engine = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         await Assert.That(engine.GetOutboxStatus("root", db.Partition).Consumers.Single().Checkpoint).IsEqualTo(1);
         await Assert.That(engine.ReadChangeFeed("root", new(db.Partition, "orders")).Changes).HasSingleItem();

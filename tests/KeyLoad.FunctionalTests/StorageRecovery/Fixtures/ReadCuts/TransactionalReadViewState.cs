@@ -52,11 +52,10 @@ internal sealed class TransactionalReadViewState : IDisposable
         CloseCurrent();
         var options = new ZoneTreeStoreOptions(Harness.Directory);
         var execution = UnitExecutionOptions.StorageExecution();
-        var cache = UnitExecutionOptions.PointCacheExecution();
         acquisitionPending = true;
         try
         {
-            coldStore = new(options, execution, cache);
+            coldStore = new(options, execution);
         }
         catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))
         {

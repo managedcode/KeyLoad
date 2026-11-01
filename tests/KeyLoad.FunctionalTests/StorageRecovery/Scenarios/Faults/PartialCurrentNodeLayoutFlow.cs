@@ -46,9 +46,12 @@ internal static class PartialCurrentNodeLayoutFlow
                             transaction.Put(Key, Value);
                             return true;
                         })).IsTrue();
-                        expected = before.Append(Convert.ToHexString(Key) + Separator + Convert.ToHexString(Value))
-                            .Order(StringComparer.Ordinal).ToArray();
                         position = checked(start + 1);
+                        var positionRow = Convert.ToHexString(StoreFileFixture.PositionKey) + Separator;
+                        expected = before.Where(row => !row.StartsWith(positionRow, StringComparison.Ordinal))
+                            .Append(positionRow + Convert.ToHexString(StoreFileFixture.PositionValue(position)))
+                            .Append(Convert.ToHexString(Key) + Separator + Convert.ToHexString(Value))
+                            .Order(StringComparer.Ordinal).ToArray();
                         identity = JsonSerializer.Serialize(store.Identity, JsonDefaults.Options);
                     }
                     await Assert.That(store.Position).IsEqualTo(position);

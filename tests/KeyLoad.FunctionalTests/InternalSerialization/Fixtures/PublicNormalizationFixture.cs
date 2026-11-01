@@ -44,10 +44,10 @@ internal static class PublicNormalizationFixture
 
     internal static KeyLoadException EncodingFailure(Command<DatabaseCommand> operation)
         => operation.Value!.Kind == OperationKind.Batch
-            ? Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(
-                ((CommandRequest)operation.Value.Input)))
-            : Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(
-                ((ConfigurePrincipalRequest)operation.Value.Input)));
+            ? Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(
+                (CommandRequest)operation.Value.Input))
+            : Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(
+                (ConfigurePrincipalRequest)operation.Value.Input));
 
     internal static StoredOutcome Stored(TestDatabase database, Command<DatabaseCommand> operation)
         => OutcomeStoreOracle.ReadStored(database.Store, operation)!;

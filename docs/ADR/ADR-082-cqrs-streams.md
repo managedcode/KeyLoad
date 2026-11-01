@@ -38,9 +38,8 @@ flowchart LR
 | `ManagedCode.Communication` | `CqrsStream.Create`, typed progress and results, sequence assignment, terminal outcome, capacity-one producer backpressure, cancellation-aware producer settlement and fatal failure classification. Use `CqrsStream.Normalize` when adapting an existing chunk stream. |
 | `ManagedCode.Communication.Orleans` | generated Orleans serialization of Communication contracts. |
 | Microsoft Orleans | Grain execution, response enumeration, batching, cancellation propagation and enumerator disposal. |
-| `ManagedCode.Orleans.Graph` | Allowed grain-call transitions and their context across response enumeration. |
 | `ManagedCode.Communication.AspNetCore` | CQRS HTTP stream results when an external HTTP streaming endpoint is exposed. |
-| KeyLoad | Fresh persisted authorization; request/result identity; operation-specific progress and stream-shape validation; request expiry; database effects and storage shutdown ordering. Chunks carry no byte or frame cap and concurrent operations no count limit ([ADR-145](ADR-145-no-request-throttling.md), [ADR-149](ADR-149-no-operation-limits.md)). |
+| KeyLoad | Fresh persisted authorization; request/result identity; operation-specific progress and stream-shape validation; database effects and storage shutdown ordering. Chunks carry no byte or frame cap and concurrent operations no count limit ([ADR-145](ADR-145-no-request-throttling.md), [ADR-149](ADR-149-no-operation-limits.md)). |
 
 `ConnectionGrain` creates its shared operation producer with `CqrsStream.Create`.
 Its KeyLoad adapters must remain limited to the last row;

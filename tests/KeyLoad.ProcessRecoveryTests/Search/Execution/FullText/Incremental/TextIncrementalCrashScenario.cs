@@ -55,7 +55,7 @@ internal static class TextIncrementalCrashScenario
             var original = await TextIncrementalCrashSeed.PrepareAsync(actual, CancellationToken.None);
             await TextIncrementalEvidenceFiles.WriteAsync(root, TextIncrementalCrashProtocol.OriginalFile,
                 original, CancellationToken.None);
-            await RecoveryProcessPause.WaitForKillAsync();
+            await RecoveryProcessPause.WaitForKillAsync(actual.Store);
             return;
         }
         var retained = await TextIncrementalEvidenceFiles.ReadAsync<TextIncrementalCrashOriginal>(root,

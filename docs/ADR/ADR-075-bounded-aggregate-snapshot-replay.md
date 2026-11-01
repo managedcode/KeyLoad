@@ -30,8 +30,8 @@ AggregateSnapshotState with Checksum="". This exact frozen JSON identity,
 including original state text, is independent of serializer output.
 A private generated
 envelope includes FormatVersion=1. Preserve original state JSON bytes
-after bounded valid-JSON validation; Orleans serializers and the existing
-atomic journals persist the envelope. Never persist executable reducer code.
+after bounded valid-JSON validation; Orleans serializers and the store's
+ZoneTree transaction persist the envelope. Never persist executable reducer code.
 
 `StoreAggregateSnapshot` is a normal atomic Batch mutation. It requires persisted
 EventsSnapshotsManage plus EventsRead and complete raw worker-input grants.
@@ -102,7 +102,7 @@ assembly/plugin installation.
 1. The ADR and ACs precede the Abstractions Features/EventStreams DTOs/aliases, appended dedicated capability bits, mutation discriminator and canonical protocol joins.
 2. Core Features/EventStreams owns the private snapshot codec/checksum, bounded CAS writer and same-cut complete reader, tested on real ZoneTree stores. The Orleans read kind, Server route and official MCP catalog carry the replay read.
 3. Client Features/EventStreams provides the typed replay call and the pure versioned reducer helper with genuine reducer regressions.
-4. RecoveryProcess persists its frozen Command<DatabaseCommand> through OrleansSerialization before arming the existing commit observer. HeaderWritten, PayloadWritten, JournalFlushed, MutationApplied and ApplyCompleted exercise the existing real-process recovery path. Actual Aspire Docker tests use the existing owned ClusterFixture and real .NET/official MCP clients; the replay result equals the independent reference, both transports agree, persisted worker/raw grants and revocation are enforced.
+4. RecoveryProcess persists its frozen Command<DatabaseCommand> through OrleansSerialization before arming the existing commit observer. MutationApplied, ApplyCompleted and WriteAheadLogSynced exercise the existing real-process recovery path: absent after MutationApplied, either whole cut after ApplyCompleted and committed after WriteAheadLogSynced. Actual Aspire Docker tests use the existing owned ClusterFixture and real .NET/official MCP clients; the replay result equals the independent reference, both transports agree, persisted worker/raw grants and revocation are enforced.
 5. Verification: strict build, formatter, governance, Aspire TUnit and exact-source Linux recovery/cluster/fault receipts. Escalate contract or dependency defects; no invented fallback.
 
 ## Rollback and qualification
@@ -110,7 +110,7 @@ assembly/plugin installation.
 Run the accepted cluster topology and recovery gates before treating snapshot
 behavior as qualified. Rebuild a missing snapshot explicitly only while its
 complete source history is retained. Deleting derived state never permits erasing
-events, ID receipts or journals. Roll back code only through a reviewed deployment
+events, ID receipts or the write-ahead log. Roll back code only through a reviewed deployment
 change that preserves the current stored contract. UI N/A: programmable
 EventStreams/worker infrastructure. Process-kill evidence does not qualify
 power-loss durability; required fault/endurance gates remain.

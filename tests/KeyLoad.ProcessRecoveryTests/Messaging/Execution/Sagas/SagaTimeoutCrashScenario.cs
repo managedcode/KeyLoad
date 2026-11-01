@@ -60,9 +60,9 @@ internal static class SagaTimeoutCrashScenario
         var operation = CreateExpiryOperation(database, lane);
         await SaveOperationAsync(directory, tail, operation);
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     internal static string TimeoutMessageId()

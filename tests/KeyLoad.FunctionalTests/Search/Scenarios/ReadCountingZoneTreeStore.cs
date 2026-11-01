@@ -21,7 +21,7 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
     internal ReadCountingZoneTreeStore()
     {
         directory = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-        inner = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        inner = new(new(directory), UnitExecutionOptions.StorageExecution());
         Database = new(this, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
         Database.Bootstrap(new(RootPrincipal, Tenant, [new("*", "*", Capability.All)], ["*"])
         {
@@ -52,15 +52,11 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
     public T Prepare<T>(Func<IAtomicTransaction, long, T> prepare) => inner.Prepare(prepare);
 
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile) => inner.Commit(compile);
-    public void SetDispatchPaused(bool paused) => inner.SetDispatchPaused(paused);
-    public long CreateBackup(string path, CancellationToken cancellationToken = default)
-        => inner.CreateBackup(path, cancellationToken);
-    public StorageSnapshot CreateSnapshot(string path, long? expectedAppliedPosition = null)
-        => inner.CreateSnapshot(path, expectedAppliedPosition);
-    public StorageSnapshot VerifySnapshot(string path) => inner.VerifySnapshot(path);
-    public StorageSnapshot InstallSnapshot(string path, long expectedAppliedPosition)
-        => inner.InstallSnapshot(path, expectedAppliedPosition);
-    public StorageSnapshot Compact() => inner.Compact();
+    public Task<T> CommitAsync<T>(Func<IAtomicTransaction, long, T> compile, CancellationToken cancellationToken = default)
+        => inner.CommitAsync(compile, cancellationToken);
+    public Task SyncAsync(CancellationToken cancellationToken = default) => inner.SyncAsync(cancellationToken);
+    public Task<long> CreateBackupAsync(string directory, CancellationToken cancellationToken = default)
+        => inner.CreateBackupAsync(directory, cancellationToken);
 
     internal void ResetReadCalls() => Interlocked.Exchange(ref readCalls, 0);
 

@@ -30,7 +30,7 @@ internal static class ProjectionConcurrentCommitFlow
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, UnitExecutionOptions.PointCacheExecution(), timeProvider: database.Database.EvaluationClock);
+            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, timeProvider: database.Database.EvaluationClock);
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 var owner = database.CreateConfiguredDatabase(cold);

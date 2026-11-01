@@ -13,10 +13,4 @@ internal static class UnitAdmissionOptions
         return Options.Create(value);
     }
 
-    internal static IOptions<CacheReadPermitOptions> Permit(CacheReadPermitOptions? configured = null)
-    {
-        var value = configured ?? new CacheReadPermitOptions();
-        value.Validate();
-        return Options.Create(value);
-    }
 }

@@ -29,7 +29,7 @@ internal static class TestDatabaseDeleteFailureFiles
             var relative = Path.GetRelativePath(fixture.Directory, path);
             modes.Add(relative, File.GetUnixFileMode(path));
             var value = (attributes & FileAttributes.Directory) != default ? null
-                : await ReadAsync(path, remaining, fixture.StorageExecution.Value.FileBufferBytes, token);
+                : await ReadAsync(path, remaining, fixture.StorageExecution.Value.StreamBufferBytes, token);
             bytes.Add(relative, value);
             remaining = checked(remaining - (value?.LongLength ?? default));
         }

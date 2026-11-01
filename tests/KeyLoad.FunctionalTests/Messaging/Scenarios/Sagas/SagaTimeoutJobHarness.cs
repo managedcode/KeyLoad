@@ -8,7 +8,7 @@ namespace KeyLoad.FunctionalTests.Messaging;
 internal sealed class SagaTimeoutJobHarness(
     IGrainFactory grains,
     IServiceProvider services,
-    RuntimeTestOptions profile)
+    RuntimeTestOptions profile, SagaTimeoutLog log)
 {
     private const string JobsDidNotSettle = "Execution job shards retained scheduled jobs beyond the test bound.";
 
@@ -76,7 +76,12 @@ internal sealed class SagaTimeoutJobHarness(
         }
         catch (OperationCanceledException) when (deadline.IsCancellationRequested && !cancellationToken.IsCancellationRequested)
         {
-            throw new TimeoutException(JobsDidNotSettle);
+            var remaining = new List<string>();
+            foreach (var shard in shards)
+            {
+                remaining.Add($"{shard.Id}: {await shard.GetJobCountAsync()} jobs ({shard.StartTime:O}..{shard.EndTime:O})");
+            }
+            throw new TimeoutException($"{JobsDidNotSettle}{Environment.NewLine}{string.Join(Environment.NewLine, remaining)}{Environment.NewLine}{log.Capture()}");
         }
     }
 

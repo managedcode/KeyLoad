@@ -96,8 +96,7 @@ internal static class SubscriptionPendingCounterAuthorityContinuation
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await SubscriptionContinuationAssertions.TerminalAsync(db, cold, group, original, time);

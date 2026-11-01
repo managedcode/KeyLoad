@@ -12,7 +12,7 @@ internal static class AtomicPartitionScopeLifecycleCold
         var failures = new List<Exception>();
         ZoneTreeStore? store = null;
         ServerFailureObserver.Observe(() => store = new ZoneTreeStore(new(directory),
-            UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()), failures);
+            UnitExecutionOptions.StorageExecution()), failures);
         if (store is not null)
         {
             DatabaseEngine? database = null;

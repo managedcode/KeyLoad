@@ -35,8 +35,7 @@ internal static class AnnLineageColdContinuation
         var failures = new List<Exception>();
         try
         {
-            using var store = new ZoneTreeStore(new(database.Directory), database.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(database.Directory), database.StorageExecution);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 await Assert.That(OrleansSerialization.Serialize(store.Identity).AsSpan()

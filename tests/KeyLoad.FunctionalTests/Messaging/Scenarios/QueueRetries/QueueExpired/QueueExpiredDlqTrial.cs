@@ -27,7 +27,7 @@ internal static class QueueExpiredDlqTrial
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var reopened = new ZoneTreeStore(new(fixture.Directory),
-                UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                UnitExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = QueueWholeFlowStorage.Open(reopened);
@@ -52,7 +52,7 @@ internal static class QueueExpiredDlqTrial
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var cold = new ZoneTreeStore(new(fixture.Directory),
-                UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                UnitExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = QueueWholeFlowStorage.Open(cold);

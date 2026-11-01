@@ -8,9 +8,7 @@ internal sealed class QueueLifecycleProcessRecoveryTests
     private const int FirstMutation = 0;
 
     [Test]
-    [Arguments(CommitStage.HeaderWritten)]
-    [Arguments(CommitStage.PayloadWritten)]
-    [Arguments(CommitStage.JournalFlushed)]
+    [Arguments(CommitStage.WriteAheadLogSynced)]
     [Arguments(CommitStage.MutationApplied)]
     [Arguments(CommitStage.ApplyCompleted)]
     public Task CancelParkRedriveProcessKillHasOneCompleteCutAndSameIdHealthyContinuation(CommitStage stage)

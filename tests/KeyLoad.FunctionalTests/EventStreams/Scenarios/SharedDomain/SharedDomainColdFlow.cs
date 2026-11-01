@@ -34,7 +34,7 @@ internal static class SharedDomainColdFlow
                 Incarnation = cut.Identity.Incarnation,
                 SigningKey = cut.Identity.SigningKey
             },
-                fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+                fixture.StorageExecution);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 result = await ExecuteAsync(fixture.CreateConfiguredDatabase(store), store, state, cut, continueHealthy, token);

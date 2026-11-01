@@ -5,9 +5,7 @@ internal sealed class TargetInboxProcessRecoveryTests
 {
     private const string TrialPrefix = "keyload-target-inbox-crash-";
     [Test]
-    [Arguments(CommitStage.HeaderWritten, 0)]
-    [Arguments(CommitStage.PayloadWritten, 0)]
-    [Arguments(CommitStage.JournalFlushed, 0)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0)]
     [Arguments(CommitStage.MutationApplied, 0)]
     [Arguments(CommitStage.MutationApplied, 1)]
     [Arguments(CommitStage.MutationApplied, 2)]

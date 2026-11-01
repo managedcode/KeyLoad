@@ -27,7 +27,7 @@ internal static class QueueRetryLeaseRaceTrial
         await QueueOrderedRetryOperations.ReplayAsync(fixture.Database, state);
         var image = QueueOrderedRetryImage.Capture(fixture.Store, state.Lane);
         fixture.Store.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(cold);
         await QueueOrderedRetryImage.SameAsync(cold, state.Lane, image);
         await QueueOrderedRetryOperations.ReplayAsync(database, state);

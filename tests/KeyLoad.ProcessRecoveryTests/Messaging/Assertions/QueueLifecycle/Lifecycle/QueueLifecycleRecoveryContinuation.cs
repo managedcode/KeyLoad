@@ -24,7 +24,7 @@ internal static class QueueLifecycleRecoveryContinuation
         await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, database.Apply(original).Get<CommitReceipt>());
         var image = Capture(store, lane);
         store.Dispose();
-        using var reopened = new ZoneTreeStore(new(directory), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(directory), RecoveryExecutionOptions.StorageExecution());
         var cold = QueueLifecycleRecoveryAssertions.Open(reopened);
         await Assert.That(Capture(reopened, lane)).IsEquivalentTo(image, TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, cold.Apply(original).Get<CommitReceipt>());

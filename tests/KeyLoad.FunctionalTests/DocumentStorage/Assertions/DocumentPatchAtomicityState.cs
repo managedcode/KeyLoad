@@ -49,7 +49,7 @@ internal sealed record DocumentPatchAtomicityState(long Position, long Applied, 
     {
         await Assert.That(actual.Position).IsEqualTo(Position);
         await Assert.That(actual.Applied).IsEqualTo(Applied);
-        await DocumentPatchAtomicityAssertions.BytesAsync(Rows, actual.Rows);
+        await DocumentPatchAtomicityAssertions.BytesAsync(StorageRecovery.NativeStorePositionOracle.AtPosition(Rows, Position), actual.Rows);
         await DocumentPatchAtomicityAssertions.BytesAsync(Identity, actual.Identity);
         await RequireDomainAsync(actual);
     }

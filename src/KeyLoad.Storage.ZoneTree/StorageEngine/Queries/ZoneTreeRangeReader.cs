@@ -24,7 +24,7 @@ internal static class ZoneTreeRangeReader
         var upper = reverse ? ZoneTreeRangeBounds.Minimum(untilKey, prefixSuccessor) : untilKey;
         var work = new ZoneTreeRangeWork(runtime.ReadCounters, observer, runtime.Options.MaximumRangeRecords,
             runtime.Options.MaximumRangeWorkBytes, cancellationToken);
-        using var baseline = new ZoneTreeBaselineCursor(runtime.Tree, lower, upper, prefix, afterKey, untilKey, work, reverse);
+        using var baseline = new ZoneTreeBaselineCursor(runtime, lower, upper, prefix, afterKey, untilKey, work, reverse);
         using var staged = new ZoneTreeStagedCursor(changes, lower, upper, prefix, afterKey, untilKey, work, reverse);
         return VisitMerged(baseline, staged, work, maxRecords, visitor, reverse);
     }

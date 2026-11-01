@@ -2,14 +2,14 @@
 
 Status: Typed-row and first Q2 join source present; local operation evidence
 recorded below, complete original Linux/cluster qualification pending.
-Relational data lives within one linked AI database.
+Relational data lives within one linked AI database. `ResourceDefinition.Transactional` defaults to `true`; explicitly non-transactional table data uses a separate plain ZoneTree under the [non-transactional table contract](RelationalStorage/NonTransactionalTables.md).
 [ADR-055](../ADR/ADR-055-typed-relational-rows.md) owns the typed-row stage;
 [ADR-054](../ADR/ADR-054-central-sql.md) owns central SQL.
 
 | Requirement | Acceptance | Test/task/evidence |
 |---|---|---|
 | REQ-REL-001: bounded persisted column schema and primary entity identity | AC-AISQL-002/003 | Real ZoneTree schema/row tests + replicated-cluster tests |
-| REQ-REL-002: unique/revision/security checks and mixed-model atomicity | AC-AISQL-004 | Transactional negative/rollback/reopen tests |
+| REQ-REL-002: unique/revision/security checks and mixed-model atomicity for transactional tables | AC-AISQL-004 | Transactional negative/rollback/reopen tests |
 | REQ-REL-003: typed rows share canonical query/graph/vector/workflow identity | AC-AISQL-004/006 | SDK/MCP/SQL cluster linked rows and real-store linkage tests |
 | REQ-REL-004: bounded joins and relational FK/check/default/cascade semantics | AC-REL-004: explicit future contract + real atomicity/authorization/budget/fault tests before capability advertisement | PLANNED subsequent ADR/stage; not satisfied by typed rows |
 | REQ-REL-005: indexed correctness and comparable cluster performance | AC-AISQL-008/009/010 | Exact-SHA GitHub qualification and future dedicated table/CALL measurements; no inferred speed result |

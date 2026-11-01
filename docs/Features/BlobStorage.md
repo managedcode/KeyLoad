@@ -17,7 +17,7 @@ separate public KeyLoad raw-part API is removed by the replacement.
 ZoneTree is authoritative for file metadata, access policy, quota reservations,
 version publication, integrity hashes and physical-storage references. Binary
 content lives in a selected ManagedCode.Storage physical provider outside
-ZoneTree. Database commands, outcomes and replica journals contain metadata only.
+ZoneTree. Database commands, outcomes and copies sent to ZoneTree owners contain metadata only.
 Provider support, including S3, belongs to ManagedCode.Storage.
 
 ```mermaid
@@ -43,7 +43,7 @@ sequenceDiagram
 | Requirement | Observable acceptance |
 |---|---|
 | REQ-BLOB-001: storage contract | AC-BLOB-001: Real Storage server/client upload, metadata, listing, streaming and deletion use the same file resource. |
-| REQ-BLOB-002: physical content separation | AC-BLOB-002: Original payload bytes are present in the configured provider and absent from ZoneTree records, persisted command envelopes and replica journals. |
+| REQ-BLOB-002: physical content separation | AC-BLOB-002: Original payload bytes are present in the configured provider and absent from ZoneTree records, persisted command envelopes and copies sent to ZoneTree owners. |
 | REQ-BLOB-003: fresh authorization | AC-BLOB-003: Cross-tenant/resource requests, revoked credentials and denied rows cannot publish or read physical content. Chunk session identities are isolated by verified caller and resource. |
 | REQ-BLOB-004: explicit publication | AC-BLOB-004: Failed provider writes do not publish; revision conflicts and unknown outcomes preserve recoverable physical content and do not delete a published version. |
 | REQ-BLOB-005: bounded work | AC-BLOB-005: Reservations, concurrent uploads, stream buffers, metadata pages, physical reads and joined cleanup remain bounded under rejection and cancellation. |

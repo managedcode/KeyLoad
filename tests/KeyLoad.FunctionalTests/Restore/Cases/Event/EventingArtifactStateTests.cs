@@ -1,5 +1,4 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.Restore;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.FunctionalTests.BackupRestore;
@@ -17,14 +16,11 @@ internal sealed class EventingArtifactStateTests
         => await RestoreCancellationFlow.RunAsync(existingEmpty,
             TestContext.Current!.Execution.CancellationToken).ConfigureAwait(false);
 
-    private const int PieceBytes = 1_024;
     private const string Backup = "backup";
-    private const string Artifact = "eventing.ctg";
-    private const string Unpacked = "unpacked";
     private const string Target = "restored";
 
     [Test]
-    public async Task AcBackup004LocalEventingArtifactRetainsGroupInboxQueueCutAndRequiresExplicitResume()
+    public async Task AcBackup004LocalEventingBackupRetainsGroupInboxQueueCutAndRequiresExplicitResume()
     {
         var token = TestContext.Current!.Execution.CancellationToken;
         await EventingArtifactFixture.RunAsync(async fixture =>
@@ -35,16 +31,12 @@ internal sealed class EventingArtifactStateTests
             var identity = source.Identity;
             var outcome = BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(source, fixture.Source.Partition,
                 EventingArtifactFixture.Principal, fixture.Original.CommandId);
-            var cut = source.CreateBackup(Path.Combine(fixture.Root, Backup));
-            var manifest = await MetadataTestFiles.ReadManifestAsync(Path.Combine(fixture.Root, Backup));
-            await Assert.That(manifest.Position).IsEqualTo(cut);
+            var backup = Path.Combine(fixture.Root, Backup);
+            var cut = await source.CreateBackupAsync(backup, token);
             await Assert.That(source.Position).IsEqualTo(cut);
-            var archive = Path.Combine(fixture.Root, Artifact);
-            BackupArtifact.Pack(Path.Combine(fixture.Root, Backup), archive, pieceBytes: PieceBytes);
-            var originalBytes = await File.ReadAllBytesAsync(archive, token);
-            BackupArtifact.Unpack(archive, Path.Combine(fixture.Root, Unpacked));
-            var restored = ZoneTreeStore.Restore(Path.Combine(fixture.Root, Unpacked),
-                Path.Combine(fixture.Root, Target), UnitExecutionOptions.StorageExecution());
+            var archive = await RestoreCancellationFlow.ArchiveAsync(backup, token);
+            var restored = await ZoneTreeStore.RestoreAsync(backup, Path.Combine(fixture.Root, Target),
+                UnitExecutionOptions.StorageExecution(), cancellationToken: token);
             await Assert.That(restored.Incarnation).IsNotEqualTo(identity.Incarnation);
             await Assert.That(restored.DispatchPaused).IsTrue();
             fixture.OpenTarget(Path.Combine(fixture.Root, Target));
@@ -70,7 +62,7 @@ internal sealed class EventingArtifactStateTests
                 .IsEqualTo(new EventSourceHead(4, 1, 1));
             await EventingArtifactState.AssertSeedAsync(fixture, fixture.Source.Database);
             await Assert.That(source.Position).IsEqualTo(cut);
-            await Assert.That(await File.ReadAllBytesAsync(archive, token)).IsEquivalentTo(originalBytes, CollectionOrdering.Matching);
+            await BackupIndexedDocumentDedupAssertions.AssertArchiveUnchanged(backup, archive);
         });
     }
 }

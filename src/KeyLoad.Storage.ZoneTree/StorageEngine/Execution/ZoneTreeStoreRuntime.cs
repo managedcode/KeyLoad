@@ -1,7 +1,6 @@
 using System.Runtime.ExceptionServices;
 using System.Runtime.InteropServices;
 using KeyLoad.Diagnostics.ResourceExecution;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using ZoneTree;
 using ZoneTree.Transactional;
 using static KeyLoad.Storage.ZoneTree.ZoneTreePersistenceFormat;
@@ -21,9 +20,8 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
     }
     internal void MarkDisposed()
     {
-        disposed = true;
+        Volatile.Write(ref disposed, true);
     }
-    private long position;
     private readonly bool guarded;
 
     internal ZoneTreeStoreRuntime(ZoneTreeStoreOptions options, Guid? expectedNodeId = null, TimeProvider? timeProvider = null,
@@ -37,10 +35,7 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
         OwnershipSettlement.BeginOpen();
         try
         {
-            CacheLifecycle = new(this);
             View = new(this);
-            Checkpoints = new(this);
-            Backups = new(this);
             if (expectedNodeId is { } nodeId)
             {
                 ZoneTreeStoreInitializer.OpenExisting(this, nodeId);
@@ -48,7 +43,6 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
             else
             {
                 ZoneTreeStoreInitializer.Open(this);
-                EmbeddedPointCache = (ZoneTreeStorePointCacheOpening.Open(this)).Value;
             }
         }
         catch (Exception failure)
@@ -67,45 +61,38 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
         get;
     }
 
-    internal ReaderWriterLockSlim Gate { get; } = new();
+    internal AsyncLocal<ZoneTreeOperationContext?> Operation { get; } = new();
+    internal ZoneTreeOperationContext CurrentOperation
+    {
+        get
+        {
+            var current = Operation.Value ?? throw new InvalidOperationException(ZoneTreeStorePreparationExecution.OutsideTransactionCallback);
+            current.Check();
+            return current;
+        }
+    }
     internal ZoneTreeReadCutLifecycle RuntimeReadCuts { get; } = new();
     internal FileStream Ownership { get; set; } = null!;
-    internal FileStream Journal { get; set; } = null!;
     internal ITransactionalZoneTree<Memory<byte>, Memory<byte>> Tree { get; set; } = null!;
-    internal ZoneTreeMaintenanceLifetime? Maintenance
+    internal IZoneTree<Memory<byte>, global::ZoneTree.PresetTypes.Deletable<Memory<byte>>> PlainTree { get; set; } = null!;
+    internal IMaintainer? PlainMaintainer { get; set; }
+    internal IMaintainer? Maintainer
     {
         get; set;
     }
-    internal IMaintainer Maintainer => Maintenance!.Maintainer;
     internal StoreIdentity Identity { get; set; } = null!;
     internal ZoneTreeReadCounters ReadCounters { get; } = new();
-    internal ZoneTreePointCache? EmbeddedPointCache
-    {
-        get;
-    }
-    internal ZoneTreePointCacheLifecycle CacheLifecycle
-    {
-        get;
-    }
-    internal ZoneTreePointCache? PointCache => CacheLifecycle.MaintenanceCache;
     internal ZoneTreeReadView View
     {
         get;
     }
-    internal ZoneTreeCheckpointManager Checkpoints
-    {
-        get;
-    }
-    internal ZoneTreeBackupRestore Backups
-    {
-        get;
-    }
+    private volatile bool poisoned;
     internal bool Poisoned
     {
-        get; set;
+        get => poisoned;
+        set => poisoned = value;
     }
-    internal long Position => Interlocked.Read(ref position);
-    internal void SetPosition(long value) => position = value;
+    internal long Position => Operation.Value?.Position ?? ZoneTreeStorePosition.Read(Tree);
 
     internal void Check()
     {
@@ -116,12 +103,11 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
         }
     }
 
-    internal void Apply(ITransaction<Memory<byte>, Memory<byte>> transaction, StorageMutation mutation)
+    internal static void Apply(ITransaction<Memory<byte>, Memory<byte>> transaction, StorageMutation mutation)
     {
         var started = DatabasePhaseTelemetry.Begin();
         try
         {
-            PointCache?.Invalidate(mutation.Key.Span);
             var key = MemoryMarshal.AsMemory(mutation.Key);
             if (mutation.Value is null)
             {
@@ -142,12 +128,15 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
         DatabasePhaseTelemetry.End(DatabasePhaseKind.TreeMutation, DatabasePhaseOutcome.Completed, started);
     }
 
-    internal bool IsDisposed => disposed;
+    internal bool IsDisposed => Volatile.Read(ref disposed);
 
     public void Dispose()
     {
         RuntimeReadCuts.EnsureDisposalCanJoin();
-        ZoneTreePointCacheStoreGate.RequireNotInOperation(this, CacheLifecycle);
+        if (Operation.Value is not null)
+        {
+            throw new InvalidOperationException(OriginalCloseUnjoined);
+        }
         lock (disposalGate)
         {
             if (closeAttempted)
@@ -160,10 +149,6 @@ internal sealed class ZoneTreeStoreRuntime : IDisposable
                 return;
             }
             RuntimeReadCuts.EnsureDisposalCanJoin();
-            if (!ZoneTreePointCacheStoreGate.CanBeginDisposal(this, CacheLifecycle))
-            {
-                throw new InvalidOperationException(OriginalCloseUnjoined);
-            }
             closeAttempted = true;
             try
             {

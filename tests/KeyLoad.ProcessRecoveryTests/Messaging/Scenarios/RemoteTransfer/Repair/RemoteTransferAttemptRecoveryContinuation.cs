@@ -43,7 +43,7 @@ internal static class RemoteTransferAttemptRecoveryContinuation
     internal static async Task ColdAsync(string root, Command<DatabaseCommand> operation, CommitReceipt advanced,
         CommandRequest failedAccept, byte[] failedBytes, RemoteTransferAttemptRecovered result, CancellationToken token)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = RemoteTransferAttemptRecoveryDatabase.Open(store);
         await EqualAsync(database.ApplyEmbedded(operation, token).Get<CommitReceipt>(), advanced);
         await EqualAsync(database.ApplyEmbedded(CrashDatabase.Operation(database, OperationKind.Batch, result.Accept, result.Accept.CommandId), token).Get<CommitReceipt>(), result.Accepted);

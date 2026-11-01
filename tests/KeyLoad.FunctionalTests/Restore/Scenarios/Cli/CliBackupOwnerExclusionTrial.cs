@@ -5,6 +5,7 @@ using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using Microsoft.Extensions.Options;
+using TUnit.Assertions.Enums;
 
 namespace KeyLoad.FunctionalTests.BackupRestore;
 
@@ -23,7 +24,7 @@ internal static class CliBackupOwnerExclusionTrial
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var fixture = new BackupCutFixture();
+            using var fixture = await BackupCutFixture.CreateAsync(token);
             await ServerFailureObserver.ObserveAsync(() => ExerciseAsync(fixture, token), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -33,26 +34,25 @@ internal static class CliBackupOwnerExclusionTrial
     {
         var options = CliBackupRestoreProcess.CaptureExecutionOptions();
         var destination = Path.Combine(Path.GetDirectoryName(fixture.Source)!, AdditionalBackupName);
-        var archive = await BackupJournalRepairAssertions.ArchiveAsync(fixture.Backup, token);
-        var source = BackupJournalRepairAssertions.Read(fixture.Source, token);
+        var archive = await BackupCutAssertions.ArchiveAsync(fixture.Backup, token);
+        var source = BackupCutAssertions.Read(fixture.Source, token);
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var owner = new ZoneTreeStore(new(fixture.Source), UnitExecutionOptions.StorageExecution(),
-                UnitExecutionOptions.PointCacheExecution());
+            using var owner = new ZoneTreeStore(new(fixture.Source), UnitExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                await BackupJournalRepairAssertions.SameCutAsync(source, Read(owner, token));
+                await BackupCutAssertions.SameCutAsync(source, Read(owner, token));
                 await RefuseAsync(options, owner, fixture, destination, token);
                 await RefuseAsync(options, owner, fixture, destination, token);
-                await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
+                await BackupCutAssertions.SameArchiveAsync(archive, fixture.Backup, token);
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         await HealthyAsync(options, fixture, destination, token);
-        await BackupJournalRepairAssertions.SameCutAsync(source,
-            BackupJournalRepairAssertions.Read(fixture.Source, token));
-        await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.Backup, token);
+        await BackupCutAssertions.SameCutAsync(source,
+            BackupCutAssertions.Read(fixture.Source, token));
+        await BackupCutAssertions.SameArchiveAsync(archive, fixture.Backup, token);
     }
 
     private static async Task RefuseAsync(IOptions<TestExecutionOptions> options, ZoneTreeStore owner,
@@ -73,7 +73,7 @@ internal static class CliBackupOwnerExclusionTrial
         await Assert.That(problem.StatusCode).IsEqualTo(UnavailableSourceStatusCode);
         await Assert.That(result.StandardOutput).IsEmpty();
         await Assert.That(Directory.Exists(destination) || File.Exists(destination)).IsFalse();
-        await BackupJournalRepairAssertions.SameCutAsync(source, Read(owner, token));
+        await BackupCutAssertions.SameCutAsync(source, Read(owner, token));
     }
 
     private static async Task HealthyAsync(IOptions<TestExecutionOptions> options,
@@ -82,22 +82,22 @@ internal static class CliBackupOwnerExclusionTrial
         var created = await CliBackupRestoreProcess.RunAsync(options,
             ["backup", fixture.Source, backup], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(created);
-        var verified = ZoneTreeStore.VerifyBackup(backup, UnitExecutionOptions.StorageExecution(), token);
-        await Assert.That(verified.Position).IsEqualTo(fixture.Position);
-        await Assert.That(OrleansSerialization.Serialize(verified.Identity)
-            .SequenceEqual(OrleansSerialization.Serialize(fixture.Identity))).IsTrue();
-        var archive = await BackupJournalRepairAssertions.ArchiveAsync(backup, token);
+        var archive = await BackupCutAssertions.ArchiveAsync(backup, token);
+        await CliBackupRestoreAssertions.BackupLayoutAsync(archive);
+        await Assert.That(archive[ZoneTreePersistenceFormat.IdentityFileName])
+            .IsEquivalentTo(await File.ReadAllBytesAsync(Path.Combine(fixture.Source, ZoneTreePersistenceFormat.IdentityFileName), token),
+                CollectionOrdering.Matching);
         var result = await CliBackupRestoreProcess.RunAsync(options,
             ["restore", backup, fixture.Destination], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(result);
-        var restored = BackupJournalRepairAssertions.Read(fixture.Destination, token);
-        await CliBackupJournalRepairAssertions.ReceiptAsync(result, restored.Identity);
-        await BackupJournalRepairAssertions.RestoredAsync(fixture, restored.Identity, restored);
-        await BackupJournalRepairAssertions.SameCutAsync(restored,
-            BackupJournalRepairAssertions.Read(fixture.Destination, token));
-        await BackupJournalRepairAssertions.SameCutAsync(restored,
-            BackupJournalRepairAssertions.Read(fixture.Destination, token));
-        await BackupJournalRepairAssertions.SameArchiveAsync(archive, backup, token);
+        var restored = BackupCutAssertions.Read(fixture.Destination, token);
+        await CliBackupRestoreAssertions.ReceiptAsync(result, restored.Identity);
+        await BackupCutAssertions.RestoredAsync(fixture, restored.Identity, restored);
+        await BackupCutAssertions.SameCutAsync(restored,
+            BackupCutAssertions.Read(fixture.Destination, token));
+        await BackupCutAssertions.SameCutAsync(restored,
+            BackupCutAssertions.Read(fixture.Destination, token));
+        await BackupCutAssertions.SameArchiveAsync(archive, backup, token);
     }
 
     private static (StoreIdentity Identity, long Position, string[] Rows) Read(ZoneTreeStore owner,

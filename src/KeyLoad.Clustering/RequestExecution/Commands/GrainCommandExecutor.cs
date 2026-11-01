@@ -46,7 +46,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             {
                 budget.AttachResourceLifetimeBinding(work);
             }
-            var principal = await CommandCapabilityAuthorization.AuthorizeAsync(database, coordinator,
+            var principal = await CommandCapabilityAuthorization.AuthorizeAsync(database,
                 clock, codec, request, context, operationToken).ConfigureAwait(true);
             var kind = request.Envelope.CommandKind
                 ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
@@ -65,7 +65,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             {
                 WorkProof = CommandWorkAdmission.Capture(request, work, principal.PolicyEpoch)
             };
-            await CommandResultWorkBinding.BindBeforePublicationAsync(database, coordinator, clock,
+            await CommandResultWorkBinding.BindBeforePublicationAsync(database, clock,
                 request, reply, budget, work, operationToken).ConfigureAwait(true);
             if (original is not null && kind is OperationKind.Receive or OperationKind.ReceiveSubscription)
             {

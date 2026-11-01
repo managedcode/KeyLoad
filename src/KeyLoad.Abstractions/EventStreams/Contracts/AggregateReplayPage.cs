@@ -7,7 +7,7 @@ namespace KeyLoad;
 /// <param name="Head">The same-cut head and retained floor.</param>
 /// <param name="Snapshot">The compatible latest snapshot, or null for complete history.</param>
 /// <param name="Events">Every subsequent revision through the captured tail.</param>
-/// <param name="CutPosition">The committed storage position under the read gate.</param>
+/// <param name="CutPosition">Physical storage position of the native snapshot, distinct from canonical command sequences.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(ContractAliases.AggregateReplayPage)]
 public sealed record AggregateReplayPage([property: Orleans.Id(0)] StreamRef Stream,

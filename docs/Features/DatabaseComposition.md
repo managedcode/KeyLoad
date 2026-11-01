@@ -37,7 +37,7 @@ lives in the existing BenchmarkComparisons landing entry (global presentation
 join); no composition editor is delivered (N/A: API-first stage). Client DTOs are
 the shared Abstractions contracts; separate client facade N/A because CommitAsync
 already carries these typed mutations. Storage N/A for a new engine: every derived
-effect uses existing node-local ZoneTree/WAL, atomic and cluster journals.
+effect uses the existing node-local ZoneTree store, its write-ahead log and the copies sent to ZoneTree owners.
 
 QueueToGraph and GraphToQueue expand to ordinary UpsertEdge and EnqueueMessage
 effects inside the ordered existing transaction. The source payload is a

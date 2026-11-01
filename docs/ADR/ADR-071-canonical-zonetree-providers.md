@@ -10,11 +10,11 @@ Use [ZoneTree](https://github.com/ZoneTree/ZoneTree) as the canonical storage fo
 all KeyLoad models and
 [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) as
 the full-text derived-index provider. Package/source/license identities
-are centrally pinned. byte serializers and synchronous WAL remain below
-the ordered atomic and replication journals. Vector/ANN algorithm choices retain
+are centrally pinned. Byte serializers and ZoneTree's own write-ahead log
+sit below ordered atomic commits and copies sent to ZoneTree owners. Vector/ANN algorithm choices retain
 their own correctness, resource and performance contracts.
 
-Each silo-local ZoneTree owner (an Orleans Grain Service) owns every handle, journal, lock and apply gate of its node ([ADR-136](ADR-136-orleans-partition-ownership.md)).
+Each silo-local ZoneTree owner (an Orleans Grain Service) owns every handle, write-ahead log, lock and apply gate of its node ([ADR-136](ADR-136-orleans-partition-ownership.md)).
 Orleans connection and partition grains route authorized operations to that owner;
 activation movement never moves its open storage handles. Canonical records and
 persisted authorization remain authoritative. Full-text generations are disposable,
@@ -39,11 +39,11 @@ validate its complete cut and exact independent ranking oracle, then publish the
 verified generation. A failed build leaves the previous verified current generation
 or exact fallback search usable under the same authority; it never publishes partial
 results. Rollback drains derived work and restores one coherent source/generation
-checkpoint. Canonical ZoneTree data and acknowledged journals remain intact.
+checkpoint. Canonical ZoneTree data and acknowledged commits remain intact.
 
 ```mermaid
 flowchart LR
-    Owner[Silo-local ZoneTree and journals] --> Records[Canonical committed records]
+    Owner[Silo-local ZoneTree and its write-ahead log] --> Records[Canonical committed records]
     Records --> Projection[Bounded full text generation]
     Policy[Persisted authorization and scoped read cut] --> Projection
     Projection --> Verify[Exact rank privacy and recovery oracle]

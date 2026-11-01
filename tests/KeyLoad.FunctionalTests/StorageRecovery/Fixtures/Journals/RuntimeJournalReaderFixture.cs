@@ -129,7 +129,7 @@ internal sealed class RuntimeJournalReaderFixture : IDisposable
     internal ZoneTreeStore Open(string directory, Guid? incarnation = null)
     {
         var options = new ZoneTreeStoreOptions(directory) { Incarnation = incarnation ?? Incarnation };
-        return new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        return new ZoneTreeStore(options, UnitExecutionOptions.StorageExecution());
     }
 
     internal static void WriteRuntimeRecord(ZoneTreeStore store, byte[] key, byte[] value)

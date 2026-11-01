@@ -1,4 +1,3 @@
-using System.Buffers.Binary;
 using System.Text;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
@@ -8,11 +7,7 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal sealed class StoreLifetimeTests
 {
-    private const int JournalPayloadLengthOffset = sizeof(ulong);
-    private const int CorruptPayloadLength = int.MaxValue;
-    private const byte CurrentJournalPayload = 0x10;
     private const string GuidFormat = "N";
-    private const string JournalFileName = "commands.wal";
     private const string OwnerLockFileName = "owner.lock";
     private const string TemporaryDirectoryPrefix = "keyload-store-lifetime-";
     private const string StoreKeyText = "lifetime/committed";
@@ -23,7 +18,7 @@ internal sealed class StoreLifetimeTests
     public async Task AcSq001FacadeImplementsStoreAndViewAndReadReceivesTheSameFacade()
     {
         using var directory = new StoreDirectoryFixture();
-        using var store = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution());
         var key = Encoding.UTF8.GetBytes(StoreKeyText);
         var expected = Encoding.UTF8.GetBytes(StoreValueText);
 
@@ -40,7 +35,7 @@ internal sealed class StoreLifetimeTests
         using var directory = new StoreDirectoryFixture();
         var key = Encoding.UTF8.GetBytes(StoreKeyText);
         var expected = Encoding.UTF8.GetBytes(StoreValueText);
-        using var store = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution());
         var identity = store.Identity;
         store.Commit((transaction, _) =>
         {
@@ -51,57 +46,14 @@ internal sealed class StoreLifetimeTests
         await Assert.That(File.Exists(Path.Combine(directory.Path, OwnerLockFileName))).IsTrue();
         var lockFailure = Assert.ThrowsExactly<IOException>(() =>
         {
-            using var attempted = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var attempted = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution());
         });
         await Assert.That(lockFailure).IsNotNull();
 
         store.Dispose();
         store.Dispose();
-        using var reopened = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution());
         await AssertIdentityMatches(identity, reopened.Identity);
-        await Assert.That(reopened.Read(view => view.ReadOwnedValue(key)))
-            .IsEquivalentTo(expected, CollectionOrdering.Matching);
-        await Assert.That(reopened.Position).IsEqualTo(1);
-    }
-
-    [Test]
-    public async Task AcSq002CorruptCurrentJournalLengthReleasesOwnershipForRepairedReopen()
-    {
-        using var directory = new StoreDirectoryFixture();
-        StoreIdentity originalIdentity;
-        using (var initial = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
-        {
-            originalIdentity = initial.Identity;
-        }
-
-        var journalPath = Path.Combine(directory.Path, JournalFileName);
-        var corruptJournal = WalFileFixture.CreateFrame([CurrentJournalPayload]);
-        BinaryPrimitives.WriteInt32LittleEndian(
-            corruptJournal.AsSpan(JournalPayloadLengthOffset), CorruptPayloadLength);
-        await File.WriteAllBytesAsync(journalPath, corruptJournal);
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-        {
-            using var attempted = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        });
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
-
-        using (var releasedOwnership = new FileStream(Path.Combine(directory.Path, OwnerLockFileName),
-                   FileMode.Open, FileAccess.ReadWrite, FileShare.None))
-        {
-        }
-
-        await Task.Run(() => TruncateJournalAndFlushToDisk(journalPath));
-
-        using var reopened = new ZoneTreeStore(new(directory.Path), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        await AssertIdentityMatches(originalIdentity, reopened.Identity);
-        var key = Encoding.UTF8.GetBytes(StoreKeyText);
-        var expected = Encoding.UTF8.GetBytes(StoreValueText);
-        reopened.Commit((transaction, _) =>
-        {
-            transaction.Put(key, expected);
-            return true;
-        });
-
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(key)))
             .IsEquivalentTo(expected, CollectionOrdering.Matching);
         await Assert.That(reopened.Position).IsEqualTo(1);
@@ -134,12 +86,6 @@ internal sealed class StoreLifetimeTests
         });
 
         return (actual, atomicStore.Position);
-    }
-
-    private static void TruncateJournalAndFlushToDisk(string journalPath)
-    {
-        using var repairedJournal = new FileStream(journalPath, FileMode.Create, FileAccess.Write, FileShare.None);
-        repairedJournal.Flush(true);
     }
 
     private sealed class StoreDirectoryFixture : IDisposable

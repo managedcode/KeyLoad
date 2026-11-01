@@ -51,9 +51,9 @@ internal static class AggregateReplayCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, request, SnapshotCommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static void Seed(DatabaseEngine database)

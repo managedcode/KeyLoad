@@ -1,21 +1,23 @@
 using System.Security.Cryptography;
 using KeyLoad.FunctionalTests.Authorization;
+using KeyLoad.FunctionalTests.StorageRecovery;
 using KeyLoad.Server;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.FunctionalTests.DatabaseComposition;
 
-/// <summary>Installs the original execution source image into a distinct, same-group physical store.</summary>
+/// <summary>Restores a backup of the original execution source into a distinct, same-group physical store.</summary>
 internal sealed class DatabaseCompositionReplicaCut : IDisposable
 {
     private const string TargetSuffix = "-composition-replica-cut";
-    private const string SnapshotName = "composition-replica-cut.snapshot";
+    private const string BackupSuffix = "-composition-replica-backup";
     private const string RootPrincipal = "root";
     private const string ReplicaCutMismatch = "The execution replica image differs from its original identity and source cut.";
     private const int NoCleanupFailures = 0;
+    private const long RestoreCommits = 1;
     private const bool DeleteOwnedTreeRecursively = true;
     private readonly TestDatabase source;
-    private readonly string snapshot;
+    private readonly string backup;
     private readonly string directory;
     private readonly TestDatabaseCloseState close = new();
     internal ZoneTreeStore Store
@@ -27,11 +29,11 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
         get;
     }
 
-    private DatabaseCompositionReplicaCut(TestDatabase source, ZoneTreeStore store, string directory, string snapshot)
+    private DatabaseCompositionReplicaCut(TestDatabase source, ZoneTreeStore store, string directory, string backup)
     {
         this.source = source;
         this.directory = directory;
-        this.snapshot = snapshot;
+        this.backup = backup;
         Store = store;
         Database = source.CreateConfiguredDatabase(store);
     }
@@ -45,7 +47,7 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             source = seed();
-            target = Create(source);
+            target = await CreateAsync(source);
             await body(source, target);
         }, failures);
         if (target is not null)
@@ -59,31 +61,27 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static DatabaseCompositionReplicaCut Create(TestDatabase source)
+    private static async Task<DatabaseCompositionReplicaCut> CreateAsync(TestDatabase source)
     {
-        var snapshot = Path.Combine(source.Directory, SnapshotName);
+        var backup = source.Directory + BackupSuffix;
         var directory = source.Directory + TargetSuffix;
         ZoneTreeStore? target = null;
         try
         {
-            var captured = source.Store.CreateSnapshot(snapshot, source.Database.LastApplied);
-            target = new(new(directory)
-            {
-                Incarnation = source.Store.Identity.Incarnation,
-                SigningKey = source.Store.Identity.SigningKey
-            }, source.StorageExecution, UnitExecutionOptions.PointCacheExecution());
-            var installed = target.InstallSnapshot(snapshot, source.Database.LastApplied);
-            if (installed != captured || captured.Incarnation != source.Store.Identity.Incarnation
-                || captured.AppliedPosition != source.Database.LastApplied
+            var captured = await source.Store.CreateBackupAsync(backup);
+            await ZoneTreeStore.RestoreAsync(backup, directory, source.StorageExecution,
+                source.Store.Identity.Incarnation, source.Store.Identity.SigningKey.ToArray());
+            target = new(new(directory), source.StorageExecution);
+            if (captured != source.Store.Position
                 || target.Identity.NodeId == source.Store.Identity.NodeId
                 || target.Identity.Incarnation != source.Store.Identity.Incarnation
                 || !CryptographicOperations.FixedTimeEquals(target.Identity.SigningKey.Span, source.Store.Identity.SigningKey.Span)
-                || target.Position != source.Store.Position
-                || !TeamRowPolicyAssertions.Image(target).SequenceEqual(TeamRowPolicyAssertions.Image(source.Store), StringComparer.Ordinal))
+                || target.Position != source.Store.Position + RestoreCommits
+                || !ReplicatedImage(target).SequenceEqual(ReplicatedImage(source.Store), StringComparer.Ordinal))
             {
                 throw new InvalidOperationException(ReplicaCutMismatch);
             }
-            return new(source, target, directory, snapshot);
+            return new(source, target, directory, backup);
         }
         catch (Exception primary)
         {
@@ -98,7 +96,7 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
             }
             if (joined)
             {
-                ServerFailureObserver.Observe(() => Delete(directory, snapshot), failures);
+                ServerFailureObserver.Observe(() => Delete(directory, backup), failures);
             }
             ServerFailureObserver.ThrowIfAny(failures);
             throw;
@@ -126,20 +124,31 @@ internal sealed class DatabaseCompositionReplicaCut : IDisposable
                 close.CompleteJoin(failures);
             }
         }
-        close.Delete(() => Delete(directory, snapshot));
+        close.Delete(() => Delete(directory, backup));
     }
 
-    private static void Delete(string directory, string snapshot)
+    /// <summary>Returns canonical replicated records, excluding the restore pause and physical owner's local position.</summary>
+    internal static string[] ReplicatedImage(ZoneTreeStore store)
+    {
+        var paused = Convert.ToHexString(StoreFileFixture.DispatchPausedKey) + ":";
+        var position = Convert.ToHexString(NativeStorePositionOracle.Key) + ":";
+        return TeamRowPolicyAssertions.Image(store).Where(row => !row.StartsWith(paused, StringComparison.Ordinal)
+            && !row.StartsWith(position, StringComparison.Ordinal)).ToArray();
+    }
+
+    private static void Delete(string directory, string backup)
     {
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() =>
+        foreach (var owned in new[] { directory, backup })
         {
-            if (Directory.Exists(directory))
+            ServerFailureObserver.Observe(() =>
             {
-                Directory.Delete(directory, DeleteOwnedTreeRecursively);
-            }
-        }, failures);
-        ServerFailureObserver.Observe(() => File.Delete(snapshot), failures);
+                if (Directory.Exists(owned))
+                {
+                    Directory.Delete(owned, DeleteOwnedTreeRecursively);
+                }
+            }, failures);
+        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 }

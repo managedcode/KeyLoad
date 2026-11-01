@@ -48,7 +48,7 @@ internal static class QueueDeadlineContinuation
         var bytes = QueueRetryColdAssertions.LaneBytes(first, lane);
         first.Dispose();
         token.ThrowIfCancellationRequested();
-        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(second);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueDeadlineOperations.Batch(cold, command, due), result);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueDeadlineOperations.Batch(cold, seed, due,

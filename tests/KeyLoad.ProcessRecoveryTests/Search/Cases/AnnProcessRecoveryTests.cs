@@ -8,7 +8,7 @@ internal sealed class AnnProcessRecoveryTests
     private const string GuidFormat = "N";
 
     [Test]
-    public async Task AcAnn007PendingPublicationAndJournalFlushedCheckpointRecoverArraysAndHealthyReplay()
+    public async Task AcAnn007PendingPublicationAndWalSyncedCheckpointRecoverArraysAndHealthyReplay()
     {
         var root = Path.Combine(AppContext.BaseDirectory, Prefix + Guid.NewGuid().ToString(GuidFormat));
         var token = TestContext.Current!.Execution.CancellationToken;

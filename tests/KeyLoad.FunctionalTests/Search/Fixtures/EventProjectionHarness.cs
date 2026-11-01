@@ -87,7 +87,7 @@ internal sealed class EventProjectionHarness : IDisposable
         {
             throw new InvalidOperationException("The projection fixture must own a fresh directory.");
         }
-        Store = new(new(DirectoryPath), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        Store = new(new(DirectoryPath), UnitExecutionOptions.StorageExecution());
         Database = new(Store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());
     }
 }

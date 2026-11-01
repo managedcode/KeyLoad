@@ -18,7 +18,7 @@ internal static class QueueDeadLetterSelectedTrial
         await QueueDeadLetterSelectedRefusal.RequireAsync(fixture.Database, fixture.Store, state, damaged);
         await QueueDeadLetterSelectedRefusal.RequireAsync(fixture.Database, fixture.Store, state, damaged);
         fixture.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await Assert.That(reopened.Position).IsEqualTo(originalPosition + QueueDeadLetterSelectedProtocol.One);
         await QueueDeadLetterSelectedRefusal.RequireAsync(database, reopened, state, damaged);
@@ -39,7 +39,7 @@ internal static class QueueDeadLetterSelectedTrial
         await QueueDeadLetterSelectedHistory.ReplayAsync(database, reopened, state, history);
         var completed = QueueWholeFlowStorage.Bytes(reopened);
         reopened.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
         await Assert.That(QueueWholeFlowStorage.Bytes(cold)).IsEquivalentTo(completed, CollectionOrdering.Matching);
         await QueueDeadLetterSelectedHistory.ReplayAsync(restored, cold, state, history);

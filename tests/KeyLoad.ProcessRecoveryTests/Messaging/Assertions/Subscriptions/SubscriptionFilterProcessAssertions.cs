@@ -18,7 +18,7 @@ internal static class SubscriptionFilterProcessAssertions
 
     internal static async Task RecoverAsync(string path, CommitStage stage, CancellationToken token)
     {
-        using var store = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(path), RecoveryExecutionOptions.StorageExecution());
         var db = Open(store);
         var group = SubscriptionFilterCrashScenario.Subscription;
         var actual = db.GetSubscription(Root, group);
@@ -32,7 +32,7 @@ internal static class SubscriptionFilterProcessAssertions
         await Assert.That(rows.Records.Length).IsEqualTo(actual.Generation == UpdatedGeneration ? 0 : 2);
         var retained = store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(group.Source.Partition, Root, SubscriptionFilterCrashScenario.CommandId)));
         await Assert.That(retained is not null).IsEqualTo(actual.Generation == UpdatedGeneration);
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(actual.Generation).IsEqualTo(UpdatedGeneration);
         }

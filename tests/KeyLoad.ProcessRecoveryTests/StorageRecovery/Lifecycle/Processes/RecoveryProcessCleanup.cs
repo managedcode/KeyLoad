@@ -55,7 +55,7 @@ internal static class RecoveryProcessCleanup
         }
         if (allowDelete && processSettled && failures.Count == NoCleanupFailures && Directory.Exists(root))
         {
-            await ObserveAsync(() => StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken), failures);
+            await ObserveAsync(() => StorageTrialCleanup.DeleteTrialAsync(root, cancellationToken), failures);
         }
         CommandIdempotencyProcessFailureHandling.ThrowFailures(failures);
     }

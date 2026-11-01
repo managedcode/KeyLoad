@@ -32,7 +32,7 @@ All decisions occur inside the existing ordered atomic command path.
    partition, set and series. It stores format1, Before UTC ticks, cumulative
    PurgedCount and HasMore. Stable Alias/Id contracts are mandatory. Absent state
    means no retention; unknown format or corrupt state fails closed. Existing
-   sample/sequence/ID bytes, WAL and recovery journals are preserved.
+   sample/sequence/ID bytes and ZoneTree's write-ahead log are preserved.
 4. Validate positive MaximumDeletes <=256 and configured MaxScanRecords. Traverse
    using ordered range APIs, charge examined key/value bytes, copy only
    at most that many keys, and mutate only after traversal finishes. Persist
@@ -47,7 +47,7 @@ All decisions occur inside the existing ordered atomic command path.
 
 ### Recovery and cluster verification
 
-The frozen Command<DatabaseCommand> is persisted as binary before arming the real commit observer, and the actual child is terminated at HeaderWritten, PayloadWritten, JournalFlushed, MutationApplied and ApplyCompleted. Reopen observes either the old floor and all old points with no outcome, or the complete new floor, bounded deleted page and matching durable outcome; JournalFlushed and later recover committed. Retrying the same command returns the original receipt without purging a second page, and a new command at the same floor resumes exactly the next page. Sample-ID receipts, sequence and surviving point bytes are preserved, and range/latest/aggregate/windows/status match an independent ordered raw reference. Process kill does not prove power-loss durability.
+The frozen Command<DatabaseCommand> is persisted as binary before arming the real commit observer, and the actual child is terminated at MutationApplied, ApplyCompleted and WriteAheadLogSynced. Reopen observes either the old floor and all old points with no outcome, or the complete new floor, bounded deleted page and matching durable outcome; MutationApplied recovers the old floor, ApplyCompleted may recover either whole cut and WriteAheadLogSynced recovers committed. Retrying the same command returns the original receipt without purging a second page, and a new command at the same floor resumes exactly the next page. Sample-ID receipts, sequence and surviving point bytes are preserved, and range/latest/aggregate/windows/status match an independent ordered raw reference. Process kill does not prove power-loss durability.
 
 Actual Aspire-owned SDK and official MCP clients verify partial purge, replay and complete logical hiding across all nodes. Stop an owned node and verify exact authorized reads from an available current copy. A new expiry page must refuse when fewer than the configured copies are available. Restart the same container, await Orleans routing, then apply the bounded expiry page with a fresh command ID and verify its complete persisted-copy receipt and public state. Cover persisted SeriesManage/SeriesRead denial and late new versus identical retained IDs through existing APIs. Every stopped container is restored and every actual process joined in finally; no direct Docker launch, mock, skip, changed numerical contract or assertion weakening. This stage does not implement rollup buckets or physical chunks. Forbidden: storage ownership changes, outcome pruning, provider substitutions, cross-partition atomicity or claims of power-loss qualification.
 

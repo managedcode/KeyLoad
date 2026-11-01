@@ -50,8 +50,7 @@ internal static class SubscriptionGroupProgressAuthorityFlow
         var position = fixture.Store.Position;
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
-        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(first);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, image, position, identity);
         await SubscriptionGroupProgressAuthorityAssertions.RefuseAsync(db, first, fresh, request, emptyRequest, ack, token);

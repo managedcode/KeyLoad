@@ -93,8 +93,6 @@ internal sealed class QueryLifetimeTests
                 {
                     Coverage = null!
                 };
-                await QueryLifetimeAssertions.RefusedAsync(() => _ = flow.Query(captured: missing), ErrorCode.Corruption);
-                await QueryLifetimeAssertions.RefusedAsync(() => _ = flow.Statistics(missing), ErrorCode.Corruption);
                 await QueryLifetimeAssertions.RefusedAsync(() => _ = flow.Query(captured: missing, runtimeRoundTrip: false),
                     ErrorCode.OwnershipLost);
                 await QueryLifetimeAssertions.RefusedAsync(() => _ = flow.Statistics(missing, runtimeRoundTrip: false),

@@ -26,7 +26,7 @@ internal static class QueueVisibilityBoundaryWholeFlow
         var failures = new List<Exception>();
         try
         {
-            using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
             try
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);
@@ -108,7 +108,7 @@ internal static class QueueVisibilityBoundaryWholeFlow
         var failures = new List<Exception>();
         try
         {
-            using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            using var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
             try
             {
                 var owner = fixture.CreateConfiguredDatabase(cold);

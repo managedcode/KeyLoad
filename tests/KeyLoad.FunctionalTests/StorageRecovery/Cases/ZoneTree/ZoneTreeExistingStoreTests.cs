@@ -1,4 +1,3 @@
-using System.Buffers.Binary;
 using System.Text.Json;
 using KeyLoad.ProcessRecoveryTests;
 using KeyLoad.Storage.ZoneTree;
@@ -22,8 +21,6 @@ internal sealed class ZoneTreeExistingStoreTests
     private const char OversizedJsonCharacter = ' ';
     private const int MaximumProtocolCharacters = 4096;
     private const int ProtocolFailureExitCode = 2;
-    private const int JournalPayloadLengthOffset = sizeof(ulong);
-    private const int CorruptPayloadLength = int.MaxValue;
 
     [Test]
     public async Task AcSg009P001NonCanonicalDotAndDotDotDirectoryAreRejectedBeforeGuard()
@@ -54,7 +51,7 @@ internal sealed class ZoneTreeExistingStoreTests
         await Assert.That(result.Stderr).Contains(ExistingStoreInspectorProcess.ReadyMarker);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
         await files.AssertOwnerAvailableAsync();
-        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution());
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
     }
 
@@ -90,7 +87,7 @@ internal sealed class ZoneTreeExistingStoreTests
         }
 
         await files.AssertStoreEntriesUnchangedAsync(originalFiles);
-        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution());
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
     }
 
@@ -127,7 +124,6 @@ internal sealed class ZoneTreeExistingStoreTests
     private static string ReplaceVariant(string json, string replacement)
         => json.Replace(NormalVariantJson, replacement, StringComparison.Ordinal);
     private const long CommittedPosition = 1;
-    private const byte IncompleteTailByte = 0xA5;
 
     [Test]
     public async Task AcSg009002OriginalIdentityDataPositionAndDoubleDisposePermitNormalReopen()
@@ -137,41 +133,7 @@ internal sealed class ZoneTreeExistingStoreTests
         var result = await files.InspectAsync();
         await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, CommittedPosition);
         await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
-        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        await Assert.That(reopened.Position).IsEqualTo(CommittedPosition);
-        await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
-    }
-
-    [Test]
-    public async Task AcSg009002IncompleteCanonicalTailRecoversWithoutChangingIdentityOrCommittedData()
-    {
-        using var files = new ZoneTreeExistingStoreFixture();
-        var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
-        var journalBytes = await File.ReadAllBytesAsync(files.JournalPath);
-        await File.WriteAllBytesAsync(files.JournalPath, [.. journalBytes, IncompleteTailByte]);
-        var result = await files.InspectAsync();
-        await ExistingStoreInspectionAssertions.SucceededAsync(result, files.Identity, files.Value, CommittedPosition);
-        await Assert.That(await File.ReadAllBytesAsync(files.JournalPath)).IsEquivalentTo(journalBytes, CollectionOrdering.Matching);
-        await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
-        await files.AssertOwnerAvailableAsync();
-    }
-
-    [Test]
-    public async Task AcSg009003CurrentJournalLengthCorruptionReleasesOwnerAndAllowsRepairedReopen()
-    {
-        using var files = new ZoneTreeExistingStoreFixture();
-        var identityBytes = await File.ReadAllBytesAsync(files.IdentityPath);
-        var journalBytes = await File.ReadAllBytesAsync(files.JournalPath);
-        var corruptedJournal = journalBytes.ToArray();
-        BinaryPrimitives.WriteInt32LittleEndian(
-            corruptedJournal.AsSpan(JournalPayloadLengthOffset), CorruptPayloadLength);
-        await File.WriteAllBytesAsync(files.JournalPath, corruptedJournal);
-        var result = await files.InspectAsync();
-        await ExistingStoreInspectionAssertions.FailedAsync(result, ExistingStoreInspectionExpectedFailures.Corruption, ExistingStoreInspectionExpectedFailures.KeyLoad);
-        await Assert.That(await File.ReadAllBytesAsync(files.IdentityPath)).IsEquivalentTo(identityBytes, CollectionOrdering.Matching);
-        await files.AssertOwnerAvailableAsync();
-        await File.WriteAllBytesAsync(files.JournalPath, journalBytes);
-        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(files.Options, UnitExecutionOptions.StorageExecution());
         await Assert.That(reopened.Position).IsEqualTo(CommittedPosition);
         await Assert.That(reopened.Read(view => view.ReadOwnedValue(files.Key))).IsEquivalentTo(files.Value, CollectionOrdering.Matching);
     }

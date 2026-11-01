@@ -16,15 +16,19 @@ internal static class SampleRetentionRecoveryAssertions
     internal static async Task VerifyRecoveredPageAsync(string root, CommitStage stage,
         CancellationToken cancellationToken)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, SampleRetentionCrashScenario.OperationFile), cancellationToken));
         var recoveredStatus = database.ReadSampleRetention(Principal, RetentionRequest(), cancellationToken);
         var committed = recoveredStatus.Before == SampleRetentionCrashScenario.Cutoff;
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         var oldOutcome = OutcomeStoreOracle.Read(database.Store, operation);
         await Assert.That(oldOutcome is not null).IsEqualTo(committed);

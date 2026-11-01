@@ -10,7 +10,4 @@ internal sealed class TextCapturedPublicOperationTests
     [Test]
     public async Task RevokedOriginalPublicReaderReturnsNoPrivateRowsThenPersistedRepairRequiresFreshPublicationAndColdHealthyOperation()
         => await TextCapturedPolicyFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
-    [Test]
-    public async Task GenuineSameOwnerSnapshotReplacementWhileOriginalPublicFtsReaderRemainsHeldRefusesOldCutThenFreshRebindCompletesFullReplayAndCold()
-        => await TextCapturedSnapshotFlow.RunAsync(TestContext.Current!.Execution.CancellationToken);
 }

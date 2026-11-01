@@ -22,7 +22,7 @@ internal static class ChunkMultiblockCrashScenario
             {
                 FaultObserver = boundary.Observe
             },
-                CrashExecutionOptions.StorageExecution(), CrashExecutionOptions.PointCacheExecution());
+                CrashExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(() => RunAsync(args, store, boundary), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
@@ -41,7 +41,7 @@ internal static class ChunkMultiblockCrashScenario
             await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalReceiptFile),
                 OrleansSerialization.Serialize(SampleChunkCrashOperations.OriginalAcknowledged(database))).ConfigureAwait(false);
             await ChunkMultiblockCrashState.WriteAsync(root, SampleChunkCrashContract.PreparedFile, database, merge).ConfigureAwait(false);
-            await RecoveryProcessPause.WaitForKillAsync();
+            await RecoveryProcessPause.WaitForKillAsync(database.Store);
         }
         else if (ChunkMultiblockCrashProtocol.IsFault(mode))
         {
@@ -53,7 +53,8 @@ internal static class ChunkMultiblockCrashScenario
         }
         else
         {
-            await ChunkMultiblockCrashRecovery.RecoverAsync(root, database, merge).ConfigureAwait(false);
+            var committed = Enum.Parse<CommitStage>(args[ChunkMultiblockCrashProtocol.StageArgument]) != CommitStage.MutationApplied;
+            await ChunkMultiblockCrashRecovery.RecoverAsync(root, database, merge, committed).ConfigureAwait(false);
         }
     }
 
@@ -65,8 +66,8 @@ internal static class ChunkMultiblockCrashScenario
         await File.WriteAllBytesAsync(Path.Combine(root, SampleChunkCrashContract.OriginalOperationFile), OrleansSerialization.Serialize(original)).ConfigureAwait(false);
         SampleChunkSnapshotFile.CaptureExpectedToken(root, request.CommandId, database, request.Partition);
         boundary.Position = checked(database.Store.Position + SampleChunkCrashContract.PositionStep);
-        boundary.Armed = true;
+        await boundary.ArmAsync(database.Store);
         database.ApplyEmbedded(original, cancellationToken: default).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(database.Store);
     }
 }

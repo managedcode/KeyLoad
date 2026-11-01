@@ -70,4 +70,8 @@ public sealed record ResourceDefinition([property: Orleans.Id(0)] string Name, [
     /// <summary>Gets file metadata and physical-object reservation limits.</summary>
     [Orleans.Id(16)]
     public FileStoragePolicy FilePolicy { get; init; } = new();
+
+    /// <summary>Gets whether table data uses atomic MVCC writes; false selects the plain storage tree.</summary>
+    [Orleans.Id(17)]
+    public bool Transactional { get; init; } = true;
 }

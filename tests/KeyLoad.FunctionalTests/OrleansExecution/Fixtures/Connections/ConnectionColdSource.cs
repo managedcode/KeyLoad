@@ -36,7 +36,7 @@ internal sealed class ConnectionColdSource
     }
 
     internal PartitionStores OpenStores()
-        => new(options.Node, directory, options.StorageExecution, options.PointCache, Clock);
+        => new(options.Node, directory, options.StorageExecution, Clock);
 
     internal DatabaseEngine CreateDatabase(ZoneTreeStore store)
     {

@@ -8,7 +8,7 @@ internal static class QueueDeadlineRecoveryAssertions
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = QueueLifecycleRecoveryAssertions.Open(store);
         var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueDeadlineCrashProtocol.OperationFile), token));
@@ -17,9 +17,13 @@ internal static class QueueDeadlineRecoveryAssertions
         await Assert.That(new DateTimeOffset(operation.Timestamp) >= condition.ExpectedDeadline).IsTrue();
         var outcome = OutcomeStoreOracle.Read(store, operation);
         var committed = outcome is not null;
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         await QueueDeadlineRecoveryImage.RequireAsync(database, committed, condition.ExpectedDeadline);
         var receipt = database.Apply(operation).Get<CommitReceipt>();
@@ -36,7 +40,7 @@ internal static class QueueDeadlineRecoveryAssertions
         await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, database.ResolveOutcome(operation).Get<CommitReceipt>());
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var coldStore = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var coldStore = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var cold = QueueLifecycleRecoveryAssertions.Open(coldStore);
         await MessagingRecoveryReceiptAssertions.AssertSameValueAsync(receipt, cold.Apply(operation).Get<CommitReceipt>());
         await QueueDeadlineRecoveryImage.RequireAsync(cold, true, condition.ExpectedDeadline);

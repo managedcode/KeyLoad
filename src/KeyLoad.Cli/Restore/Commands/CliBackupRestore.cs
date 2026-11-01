@@ -1,12 +1,8 @@
-using System.ComponentModel;
 using System.Diagnostics;
 using System.Globalization;
 using System.Resources;
 using System.Text.Json;
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
-using KeyLoad.Storage.ZoneTree.Restore;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Cli.BackupRestore;
@@ -15,70 +11,39 @@ internal static class CliBackupRestore
 {
     private const int DestinationArgumentIndex = 2;
     private const string MessagesBaseName = "KeyLoad.Cli.Restore.CliBackupRestoreMessages";
-    private const string BackupVerifiedMessageKey = "BackupVerified";
-    private const string ArchiveCreatedMessageKey = "ArchiveCreated";
-    private const string ArchiveTransferFailedMessageKey = "ArchiveTransferFailed";
-    private const string ArchiveCopiedMessageKey = "ArchiveCopied";
-    private const string BackupExtractedMessageKey = "BackupExtracted";
-    private const string BackupMissingRequiredFileMessageKey = "BackupMissingRequiredFile";
+    private const string BackupCreatedMessageKey = "BackupCreated";
+    private const string BackupCopiedMessageKey = "BackupCopied";
     private const string BackupSourceUnavailableDetail = "The offline backup source could not be opened.";
-    private const int RequiredRestoreAccessDeniedErrno = 13;
-    private const string FileAccessFailure = "Offline filesystem operation failed.";
-    private const string RestoreInputUnavailableDetail = "A required restore file could not be read.";
     private static readonly ResourceManager Messages = new(
         MessagesBaseName,
         typeof(CliBackupRestore).Assembly);
 
     public static Task RunAsync(CliCommandDispatcher.CliCommand command, string[] args,
-        IOptions<ZoneTreeStorageExecutionOptions> storageOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions,
-        IOptions<CliBackupExecutionOptions> backupOptions)
-    {
-        switch (command)
+        IOptions<ZoneTreeStorageExecutionOptions> storageOptions)
+        => command switch
         {
-            case CliCommandDispatcher.CliCommand.Backup:
-                CreateBackup(args, storageOptions, cacheOptions);
-                break;
-            case CliCommandDispatcher.CliCommand.Compact:
-                Compact(args, storageOptions, cacheOptions);
-                break;
-            case CliCommandDispatcher.CliCommand.Restore:
-                Restore(args, storageOptions);
-                break;
-            case CliCommandDispatcher.CliCommand.PackBackup:
-                PackBackup(args, backupOptions);
-                break;
-            case CliCommandDispatcher.CliCommand.InspectArtifact:
-                InspectArtifact(args);
-                break;
-            case CliCommandDispatcher.CliCommand.CopyArtifact:
-                return CopyArtifactAsync(args);
-            case CliCommandDispatcher.CliCommand.UnpackBackup:
-                UnpackBackup(args);
-                break;
-            default:
-                throw new UnreachableException();
+            CliCommandDispatcher.CliCommand.Backup => CreateBackupAsync(args, storageOptions),
+            CliCommandDispatcher.CliCommand.Restore => RestoreAsync(args, storageOptions),
+            CliCommandDispatcher.CliCommand.CopyBackup => CopyBackupAsync(args),
+            _ => throw new UnreachableException()
+        };
+
+    private static async Task CreateBackupAsync(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions)
+    {
+        using (var store = OpenBackupSource(Path.GetFullPath(args[1]), storageOptions))
+        {
+            await store.CreateBackupAsync(Path.GetFullPath(args[DestinationArgumentIndex]));
         }
 
-        return Task.CompletedTask;
-    }
-
-    private static void CreateBackup(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions,
-        IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
-    {
-        using (var store = OpenBackupSource(Path.GetFullPath(args[1]), storageOptions, cacheOptions))
-        {
-            store.CreateBackup(Path.GetFullPath(args[DestinationArgumentIndex]));
-        }
-
-        Console.WriteLine(GetMessage(BackupVerifiedMessageKey));
+        Console.WriteLine(GetMessage(BackupCreatedMessageKey));
     }
 
     private static ZoneTreeStore OpenBackupSource(string source,
-        IOptions<ZoneTreeStorageExecutionOptions> storageOptions, IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
+        IOptions<ZoneTreeStorageExecutionOptions> storageOptions)
     {
         try
         {
-            return new ZoneTreeStore(new(source), storageOptions, cacheOptions);
+            return new ZoneTreeStore(new(source), storageOptions);
         }
         catch (IOException original)
         {
@@ -86,36 +51,10 @@ internal static class CliBackupRestore
         }
     }
 
-    private static void Compact(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions,
-        IOptions<ZoneTreePointCacheExecutionOptions> cacheOptions)
+    private static async Task RestoreAsync(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions)
     {
-        using var store = new ZoneTreeStore(new(Path.GetFullPath(args[1])), storageOptions, cacheOptions);
-        Console.WriteLine(JsonSerializer.Serialize(store.Compact(), JsonDefaults.Options));
-    }
-
-    private static void Restore(string[] args, IOptions<ZoneTreeStorageExecutionOptions> storageOptions)
-    {
-        var backup = Path.GetFullPath(args[1]);
-        var destination = Path.GetFullPath(args[DestinationArgumentIndex]);
-        StoreIdentity identity;
-        try
-        {
-            identity = ZoneTreeStore.Restore(backup, destination, storageOptions);
-        }
-        catch (FileNotFoundException)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, GetMessage(BackupMissingRequiredFileMessageKey));
-        }
-        catch (DirectoryNotFoundException)
-        {
-            throw Errors.Fail(ErrorCode.Corruption, GetMessage(BackupMissingRequiredFileMessageKey));
-        }
-        catch (IOException original) when (original.InnerException is Win32Exception
-        { NativeErrorCode: RequiredRestoreAccessDeniedErrno }
-            && string.Equals(original.Message, FileAccessFailure, StringComparison.Ordinal))
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, RestoreInputUnavailableDetail, original);
-        }
+        var identity = await ZoneTreeStore.RestoreAsync(Path.GetFullPath(args[1]),
+            Path.GetFullPath(args[DestinationArgumentIndex]), storageOptions);
         Console.WriteLine(JsonSerializer.Serialize(
             new
             {
@@ -126,31 +65,10 @@ internal static class CliBackupRestore
             JsonDefaults.Options));
     }
 
-    private static void PackBackup(string[] args, IOptions<CliBackupExecutionOptions> backupOptions)
+    private static async Task CopyBackupAsync(string[] args)
     {
-        BackupArtifact.Pack(args[1], args[DestinationArgumentIndex], backupOptions.Value.PieceBytes);
-        Console.WriteLine(GetMessage(ArchiveCreatedMessageKey));
-    }
-
-    private static void InspectArtifact(string[] args) => Console.WriteLine(JsonSerializer.Serialize(
-        BackupArtifact.Inspect(args[1]).Select(item => new { item.Name, item.Bytes, item.Pieces }),
-        JsonDefaults.Options));
-
-    private static async Task CopyArtifactAsync(string[] args)
-    {
-        var copied = await ArtifactTransfer.CopyToFileStorageAsync(args[1], args[DestinationArgumentIndex]);
-        if (copied.IsFailed)
-        {
-            throw Errors.Fail(ErrorCode.RecoveryRequired, GetMessage(ArchiveTransferFailedMessageKey));
-        }
-
-        Console.WriteLine(GetMessage(ArchiveCopiedMessageKey));
-    }
-
-    private static void UnpackBackup(string[] args)
-    {
-        BackupArtifact.Unpack(args[1], args[DestinationArgumentIndex]);
-        Console.WriteLine(GetMessage(BackupExtractedMessageKey));
+        await ZoneTreeBackupCopy.CopyToFileStorageAsync(args[1], args[DestinationArgumentIndex]);
+        Console.WriteLine(GetMessage(BackupCopiedMessageKey));
     }
 
     private static string GetMessage(string key) => Messages.GetString(key, CultureInfo.InvariantCulture)!;

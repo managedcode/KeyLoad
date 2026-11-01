@@ -18,25 +18,16 @@ internal static class TransactionalReadViewRefusals
             await Assert.That(concurrent.Message).IsEqualTo("A execution read-cut lease permits only one active traversal.");
             await Assert.That(callbacks).IsEqualTo(0);
         }, failures);
-        await ServerFailureObserver.ObserveAsync(() => SecondCaptureAsync(state), failures);
+        await ServerFailureObserver.ObserveAsync(() => IndependentCaptureAsync(state), failures);
         await ServerFailureObserver.ObserveAsync(() => TransactionalReadViewValues.ConservedAsync(state, image, position), failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
-    private static async Task SecondCaptureAsync(TransactionalReadViewState state)
+    private static async Task IndependentCaptureAsync(TransactionalReadViewState state)
     {
-        ZoneTreeReadCutLease? unexpected = null;
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
-        {
-            var error = Assert.ThrowsExactly<KeyLoadException>(() => unexpected = state.Capture());
-            await Assert.That(error.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-            await Assert.That(error.Message).IsEqualTo("The runtime already owns a execution read-cut lease.");
-        }, failures);
-        if (unexpected is not null)
-        {
-            ServerFailureObserver.Observe(unexpected.Dispose, failures);
-        }
-        ServerFailureObserver.ThrowIfAny(failures);
+        using var independent = state.Capture();
+        await Assert.That(independent.Cut.Position).IsEqualTo(state.Store.Position);
+        await Assert.That(TransactionalReadViewValues.Read(independent))
+            .IsEquivalentTo(TransactionalReadViewCommands.QueueImage(state.Store), TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
     internal static async Task DisposedAsync(ZoneTreeReadCutLease lease)
     {

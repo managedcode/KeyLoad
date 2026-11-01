@@ -103,7 +103,7 @@ matched read/create/update/delete and fault/performance tests determine the choi
 This stage adds grammar/internal SDK classification only; it does not change data,
 serializer, SQL envelope version, API route, package, or persisted storage format.
 Roll back the shared reader and all consumers together. Preserve canonical execution
-and WAL/atomic journals. transport or broader AST work needs its
+and ZoneTree's write-ahead log. transport or broader AST work needs its
 own implementation contract and recovery proof before implementation.
 
 First-author TUnit/MTP tests from AC; no mocks/doubles. Unit real-store/Kestrel,

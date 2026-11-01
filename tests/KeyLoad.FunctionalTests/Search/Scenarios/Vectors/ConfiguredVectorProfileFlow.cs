@@ -93,7 +93,7 @@ internal static class ConfiguredVectorProfileFlow
         var outcome = global ? OutcomeStoreOracle.GlobalKey(principal, commandId)
             : OutcomeStoreOracle.PartitionKey(database.Partition, principal, commandId);
         var locator = global ? null : KeySpace.OutcomeLocator(database.Partition, principal, commandId);
-        return page.Records.Where(record => !record.Key.Span.SequenceEqual(outcome)
+        return page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(record => !record.Key.Span.SequenceEqual(outcome)
             && (locator is null || !record.Key.Span.SequenceEqual(locator))
             && !record.Key.Span.SequenceEqual(KeySpace.ClockBytes)
             && !record.Key.Span.SequenceEqual(KeySpace.AppliedBytes)

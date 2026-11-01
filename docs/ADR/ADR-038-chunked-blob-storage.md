@@ -17,8 +17,8 @@ KeyLoad public binary upload protocol is not part of the approved design.
 ZoneTree stores file metadata, policy, version/publication state, quotas, physical
 provider references, lengths and integrity hashes. File payload bytes and binary
 parts live outside ZoneTree, through the selected ManagedCode.Storage provider.
-Neither a persisted database command, its outcome nor a replica journal carries
-file content. Physical provider choice is separate from the public file contract;
+Neither a persisted database command, its outcome nor a copy sent to a ZoneTree
+owner carries file content. Physical provider choice is separate from the public file contract;
 S3 support uses the existing ManagedCode.Storage provider implementation.
 
 ```mermaid

@@ -6,17 +6,35 @@ namespace KeyLoad.Storage.ZoneTree;
 /// <summary>Owns one native MVCC snapshot and its single traversal cursor.</summary>
 internal sealed class ZoneTreeSnapshotCursor : IDisposable
 {
-    private readonly IReadTransaction<Memory<byte>, Memory<byte>> snapshot;
+    private readonly ZoneTreeNativeSnapshot snapshot;
     private bool iteratorDisposed;
     private bool snapshotDisposed;
 
-    internal ZoneTreeSnapshotCursor(ITransactionalZoneTree<Memory<byte>, Memory<byte>> tree, bool reverse = false)
+    internal ZoneTreeSnapshotCursor(ZoneTreeStoreRuntime runtime, bool reverse = false, bool capturePlain = false)
     {
-        snapshot = tree.BeginReadOnlyTransaction();
+        snapshot = runtime.CurrentOperation.Snapshot.Retain();
         try
         {
             var options = new TransactionIteratorOptions { ContributeToTheBlockCache = false };
-            Iterator = reverse ? snapshot.CreateReverseIterator(options) : snapshot.CreateIterator(options);
+            var transactional = reverse ? snapshot.Transaction.CreateReverseIterator(options) : snapshot.Transaction.CreateIterator(options);
+            try
+            {
+                var mode = capturePlain ? IteratorType.Snapshot : IteratorType.NoRefresh;
+                var plain = reverse ? runtime.PlainTree.CreateReverseIterator(mode) : runtime.PlainTree.CreateIterator(mode);
+                Iterator = new ZoneTreeMergedIterator(transactional, plain, reverse);
+            }
+            catch (Exception original)
+            {
+                try
+                {
+                    transactional.Dispose();
+                }
+                catch (Exception cleanup)
+                {
+                    throw new AggregateException(original, cleanup);
+                }
+                throw;
+            }
         }
         catch (Exception original)
         {

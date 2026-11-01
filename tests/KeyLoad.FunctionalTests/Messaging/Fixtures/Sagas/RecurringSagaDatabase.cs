@@ -45,7 +45,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
         limits = databaseLimits ?? new();
         this.timeProvider = timeProvider;
         directory = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
-        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        store = new(new(directory), UnitExecutionOptions.StorageExecution());
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider: timeProvider);
         Database.Bootstrap(new(RootPrincipal, TenantId, [new("*", "*", Capability.All)], ["*"])
         {
@@ -97,7 +97,7 @@ internal sealed class RecurringSagaDatabase : IDisposable
     internal void Reopen()
     {
         store.Dispose();
-        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        store = new(new(directory), UnitExecutionOptions.StorageExecution());
         Database = new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(limits), UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution(), timeProvider: timeProvider);
     }
 

@@ -16,7 +16,7 @@ internal static class RetainedAppendIdentityCold
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             token.ThrowIfCancellationRequested();
-            store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution);
             var database = fixture.Harness.CreateConfiguredDatabase(store);
             await ServerFailureObserver.ObserveAsync(() => RetainedAppendIdentityOperations.RefuseAsync(database,
                 store, command, damaged, position + 1, identity), failures);
@@ -49,7 +49,7 @@ internal static class RetainedAppendIdentityCold
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             token.ThrowIfCancellationRequested();
-            store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution);
             var database = fixture.Harness.CreateConfiguredDatabase(store);
             await RetainedAppendIdentityAssertions.ConservedAsync(store, fixture.ColdImage,
                 fixture.ColdPosition, fixture.ColdIdentity);

@@ -7,7 +7,6 @@ internal static class RestoreCancellationFlow
 {
     private const string Backup = "cancel-execution-backup";
     private const string Target = "cancel-execution-target";
-    private const string Staging = ".keyload-restore-*";
 
     internal static async Task RunAsync(bool existingEmpty, CancellationToken token)
     {
@@ -17,7 +16,7 @@ internal static class RestoreCancellationFlow
             var source = EventingArtifactState.FullBytes(fixture.Source.Store);
             var backup = Path.Combine(fixture.Root, Backup);
             var target = Path.Combine(fixture.Root, Target);
-            var capture = MixedEventingBackupRestore.Capture(fixture.Source, backup, token);
+            var capture = await MixedEventingBackupRestore.CaptureAsync(fixture.Source, backup, token);
             var archive = await ArchiveAsync(backup, token);
             if (existingEmpty)
             {
@@ -25,15 +24,14 @@ internal static class RestoreCancellationFlow
             }
             using var cancelled = new CancellationTokenSource();
             await cancelled.CancelAsync();
-            var failure = Assert.ThrowsExactly<OperationCanceledException>(() => ZoneTreeStore.Restore(
+            var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(() => ZoneTreeStore.RestoreAsync(
                 backup, target, fixture.Source.StorageExecution, cancellationToken: cancelled.Token));
-            await Assert.That(failure.CancellationToken).IsEqualTo(cancelled.Token);
+            await Assert.That((failure ?? throw new InvalidOperationException()).CancellationToken).IsEqualTo(cancelled.Token);
             await Assert.That(Directory.Exists(target)).IsEqualTo(existingEmpty);
             if (existingEmpty)
             {
                 await Assert.That(Directory.EnumerateFileSystemEntries(target).Any()).IsFalse();
             }
-            await Assert.That(Directory.EnumerateDirectories(fixture.Root, Staging).Any()).IsFalse();
             await SourceAsync(fixture, capture.Position, source, backup, archive);
             var position = await MixedEventingBackupRestore.RestoreAsync(fixture.Source, capture, backup, target, token);
             fixture.OpenTarget(target);

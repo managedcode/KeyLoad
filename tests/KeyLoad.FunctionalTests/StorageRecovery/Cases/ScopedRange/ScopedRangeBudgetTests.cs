@@ -14,7 +14,7 @@ internal sealed class ScopedRangeBudgetTests
         var directory = Path.Combine(AppContext.BaseDirectory, "keyload-scoped-budget-" + Guid.NewGuid().ToString("N"));
         try
         {
-            using var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
             var key = Encoding.UTF8.GetBytes(DocumentPrefix + "large");
             store.Commit((tx, _) => { tx.Put(key, new byte[LargeValueBytes]); return true; });
             var visits = 0;

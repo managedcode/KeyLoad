@@ -73,7 +73,7 @@ internal static class SubscriptionInboxConflictFlow
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
         await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source, fixture);
@@ -125,7 +125,7 @@ internal static class SubscriptionInboxConflictFlow
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, cut, position, identity);
         await SubscriptionInboxConflictAssertions.PreservedAsync(db, cold, group, inbox, source, originalOwner);

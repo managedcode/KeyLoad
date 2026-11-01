@@ -81,9 +81,9 @@ internal static class EventProjectionCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, command, commandId);
         await PreserveBeforeCutAsync(directory, store, database, operation);
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     internal static ApplyVectorProjection ProjectionRequest()

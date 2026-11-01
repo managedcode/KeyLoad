@@ -95,6 +95,7 @@ internal sealed class AnnWaitAuthorityTests
             }
             KeyLoad.Server.ServerFailureObserver.ThrowIfAny(failures);
             var repairedCut = database.Store.Position;
+            originalImage = StorageRecovery.NativeStorePositionOracle.AtPosition(originalImage, repairedCut);
             await AnnPublicWholeFlow.UnchangedAsync(database, originalImage, repairedCut);
             await AnnWaitWholeFlow.HealthyAsync(database, runtime, request, TestContext.Current!.Execution.CancellationToken);
             var page = await AnnPublicWholeFlow.Engine(database, runtime).ApproximateSearchAsync(AnnWaitWholeFlow.Root,

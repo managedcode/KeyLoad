@@ -73,16 +73,18 @@ own; scaling means adding silos to the Orleans cluster.
   The connection grain never caches trusted roles and never owns storage; it
   admits each operation and hands it to that operation's request grain.
 - **Request grains.** One `RequestGrain` per admitted operation, keyed by its
-  request identity and placed on the connection's silo, coordinates the
-  operation: it resolves the storage owner, runs the work in place when its silo
-  owns the data or through a `RequestExecutionGrain` on the owner's silo, fans
-  partitioned queries, searches and composed maintenance out to the owners and
-  gathers the results.
+  request identity, coordinates the operation. It is a single-worker
+  `[StatelessWorker(1)]` activation: always on the connection's silo, never
+  registered in the grain directory, and the only target of the call's
+  cancellation and stream messages. It resolves the storage owner, runs the
+  work in place when its silo owns the data or through a
+  `RequestExecutionGrain` on the owner's silo, fans partitioned queries,
+  searches and composed maintenance out to the owners and gathers the results.
 - **Partition grains.** A logical partition grain is an ordinary Orleans grain
   that serializes and routes the commands of one logical (atomic) partition.
 - **Silo-local ZoneTree owner.** Each silo hosts a Grain Service; typed Orleans
-  calls can address it on another silo. The physical owner retains ZoneTree,
-  WAL/journals, locks and ordered apply. Local scoped services borrow that exact
+  calls can address it on another silo. The physical owner retains ZoneTree
+  (with ZoneTree's own write-ahead log), locks and ordered apply. Local scoped services borrow that exact
   open session through DI. Isolated stores open during silo startup.
   Shared storage opens lazily for its ordinary database grain and closes after
   that activation's original work and borrowers join. Open handles never move
@@ -142,9 +144,8 @@ Two storage modes are required. With a **shared volume**, all silos can reach th
 configured partition paths without copying data. One ordinary Orleans grain owns
 each open physical partition; the other silos call it. Orleans owns activation
 placement and movement. The storage owner closes its actual handles before another
-activation reopens that partition. The store's owner lock and `commands.wal` open with
-exclusive file sharing, so several live writable instances over the same files are
-unsupported.
+activation reopens that partition. The store's owner lock opens with exclusive file
+sharing, so several live writable instances over the same files are unsupported.
 The actual filesystem must preserve the required locking and flush semantics.
 
 With **isolated volumes**, typed Orleans calls reach the owners of the required
@@ -162,9 +163,8 @@ implement a partition-to-disk sharding scheme. Both modes still require complete
 runtime and exact-source Linux qualification, including the deployed shared
 volume's locking and flush behavior.
 
-Sources: [Orleans stateless workers](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains),
-[grain directory](https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory),
-and [the pinned ZoneTree WAL open contract](https://github.com/ZoneTree/ZoneTree/blob/a9953313613337f5ead6c3143e8da77b7103c64f/src/ZoneTree/WAL/Sync/SyncFileSystemWriteAheadLog.cs).
+Sources: [Orleans stateless workers](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains)
+and [grain directory](https://learn.microsoft.com/en-us/dotnet/orleans/host/grain-directory).
 
 Credentials and authorization policies are persisted in the database; callers
 never supply trusted roles. Standard ASP.NET Core authentication admits HTTP,
@@ -187,7 +187,7 @@ Abstractions (shared contracts), Client (external SDK), Cli (operator
 executable), Core (database semantics and authorization evaluation), Query (SQL
 compilation, search and change feeds), Clustering (Orleans grains, routing and
 copies through calls to `ReplicaCount` silo-local ZoneTree owners),
-Storage.ZoneTree (physical storage, local archive transfer and file IO),
+Storage.ZoneTree (physical storage, its ZoneTree backup/restore wrapper and file IO),
 Server (host composition, public API, health, service discovery, resilience and
 OpenTelemetry) and Diagnostics (BCL-only bounded phase telemetry shared by
 storage and replication). Diagnostics stays independent so low-level storage
@@ -222,7 +222,7 @@ NuGet publication follow root policy.
 | src/KeyLoad.Abstractions | CommandRequest.cs, PartitionRef.cs, Mutation.cs and `<SliceName>/` contract folders | Shared public and storage contracts for every canonical slice. |
 | src/KeyLoad.Core | DatabaseEngine.cs, AtomicCommandCommit.cs, CommandOutcomeApplication.cs, DocumentStorage/Execution/DocumentStorageExecutionDocuments.cs, Messaging/Execution/MessagingExecutionMessaging.cs, GraphTraversal/, TimeSeries/, Search/ | Shared node-local execution context and feature-owned operation components; authorization and model effects share the ordered atomic commit. |
 | src/KeyLoad.Diagnostics | Models/DatabasePhaseKind.cs, Models/DatabasePhaseSnapshot.cs | BCL-only scalar phase observations, with no database state, public control endpoint or framework dependency. |
-| src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageEngine/Execution/ZoneTreeStoreRuntime.cs, StorageEngine/Recovery/ZoneTreeCheckpointManager.cs | StorageEngine, PointCache and Restore; files, WAL, checkpoints and local archives stay with the silo-local ZoneTree owner. |
+| src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageEngine/Execution/ZoneTreeStoreRuntime.cs, StorageEngine/Execution/ZoneTreeCommitPublication.cs, Restore/Execution/ZoneTreeBackup.cs | StorageEngine and Restore; files, ZoneTree's write-ahead log and local backups stay with the silo-local ZoneTree owner. |
 | src/KeyLoad.Query | QueryExecution/Queries/QueryEngine.cs, QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs, ChangeFeeds/Queries/LiveQueryExecutor.cs | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
 | src/KeyLoad.Clustering | RequestExecution/Grains/ConnectionGrain.cs, RequestExecution/Grains/RequestExecutionGrain.cs, RequestExecution/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | OrleansExecution; connection and independent request grains route through Orleans to the silo-local ZoneTree owners. |
 | src/KeyLoad | Program.cs, NodeOptions.cs, ClientApi/, OrleansHosting/Hosting/OrleansNode.Composition.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
@@ -251,7 +251,7 @@ flowchart TB
     Server --> Orleans[Connection and partition grains]
     Orleans --> Owners[Silo-local ZoneTree owner on every silo]
     Owners --> Core[Atomic engine and ordered apply]
-    Core --> Storage[ZoneTree journals and files]
+    Core --> Storage[ZoneTree tree and write-ahead log]
     Core --> Models[Documents events queues graph search series blobs]
     Aspire[Aspire Docker lifecycle] --> Owners
     CI[GitHub Actions qualification] --> Aspire
@@ -401,8 +401,8 @@ existing cursors and index fences, and physical schema changes stay separate.
 
 File API contracts and server transfers use ManagedCode.Storage. ZoneTree stores
 file metadata, access policy, publication state and physical-storage references;
-provider-owned physical files contain the payload bytes. Database command and
-replica journals carry metadata, never file content. See
+provider-owned physical files contain the payload bytes. Database commands and
+copies sent to ZoneTree owners carry metadata, never file content. See
 [ADR-038](ADR/ADR-038-chunked-blob-storage.md) and
 [BlobStorage](Features/BlobStorage.md) for the publication boundary and open
 physical-provider qualification gates.
@@ -412,12 +412,18 @@ ZoneTree is the canonical storage for every KeyLoad-owned model and
 ZoneTree.FullTextSearch is the selected derived text index
 ([ADR-071](ADR/ADR-071-canonical-zonetree-providers.md),
 [FullTextProjection](Features/Search/FullTextProjection.md)). The
-silo-local ZoneTree owner keeps WAL, ordered apply and file ownership on
-its node. Current storage accepts only the formats in
-[CurrentFormat](Features/StorageRecovery/CurrentFormat.md) and rejects
-unsupported or corrupt versions before effects
-([ADR-011](ADR/ADR-011-current-format.md),
-[ADR-116](ADR/ADR-116-first-release-current-format.md)). Process-kill recovery
+silo-local ZoneTree owner keeps ordered apply and file ownership on its node.
+KeyLoad owns no write-ahead log, snapshot or archive format
+([ADR-011](ADR/ADR-011-current-format.md)): a commit is one ZoneTree MVCC
+transaction holding the mutations and the `system/position` record, ZoneTree's
+write-ahead log (`AsyncCompressed`) is the only redo log, and a commit is
+visible when it returns and durable after `IAtomicStore.SyncAsync`, which every
+acknowledgement awaits. Backups are ZoneTree live backups of the tree plus the
+store identity, restored under a new identity with dispatch paused
+([BackupRestore](Features/BackupRestore.md)). Current storage accepts only the
+identity format in [CurrentFormat](Features/StorageRecovery/CurrentFormat.md) and
+rejects unsupported or corrupt versions before effects
+([ADR-116](ADR/ADR-116-first-release-current-format.md)). Process-kill recovery
 tests do not prove power-loss durability.
 
 Document CRUD handlers and transaction-scoped image carriers belong to
@@ -448,10 +454,10 @@ classDiagram
 
 ```mermaid
 classDiagram
-    ZoneTreeTransaction --> ZoneTreeJournalCodec : prepares binary payload
-    ZoneTreeJournalPublication --> ZoneTreeJournalCodec : validated payload
-    ZoneTreeJournalRecovery --> ZoneTreeJournalCodec : complete checked decode
-    ZoneTreeJournalCodec --> ZoneTreeJournalMutation : stable generated fields
+    ZoneTreeStoreCommitExecution --> ZoneTreeTransaction : compiles staged mutations
+    ZoneTreeStoreCommitExecution --> ZoneTreeCommitPublication : one ZoneTree transaction
+    ZoneTreeCommitPublication --> ZoneTreeStorePosition : system/position in the same transaction
+    ZoneTreeStoreCommitExecution --> ZoneTreeStoreRuntime : SyncAsync awaits SyncWALAsync
     ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : current format writer fence
 ```
 
@@ -474,8 +480,8 @@ classDiagram
 
 Public chunked blobs and partial reads belong to
 [BlobStorage](Features/BlobStorage.md) and
-[ADR-038](ADR/ADR-038-chunked-blob-storage.md); backup archive pieces are a
-separate storage protocol.
+[ADR-038](ADR/ADR-038-chunked-blob-storage.md); store backups are ZoneTree
+backup files, not a blob protocol.
 
 ## Internal serialization
 
@@ -484,7 +490,7 @@ separate storage protocol.
 generated Orleans payloads with stable aliases and field IDs across owned
 persistence, grain requests/replies, copies sent to ZoneTree owners and signed
 claims. Public HTTP/MCP JSON, exact user content, frozen canonical fingerprint
-identities, sortable keys, raw ZoneTree values, fixed checksum framing and blob
+identities, sortable keys, raw ZoneTree values, the identity envelope checksum and blob
 bytes keep their concrete protocols. Grain requests and replies carry generated
 typed values directly. Requests retain their HTTP/MCP frame limits and Orleans
 keeps its default message size limits; replies are not measured
@@ -498,7 +504,7 @@ flowchart LR
     Execution --> Records[Typed records and versioned metadata]
     Execution --> Calls[Grain call payloads and copies]
     Execution --> Claims[Signed claims]
-    Records --> Files[Node local ZoneTree and atomic WAL]
+    Records --> Files[Node local ZoneTree and its write-ahead log]
     Typed --> Identity[Frozen canonical fingerprint material]
 ```
 
@@ -539,9 +545,8 @@ classDiagram
     class ZoneTreeStore
     class ZoneTreeStoreRuntime
     class ZoneTreeTransaction
-    class ZoneTreeCheckpointManager
-    class ZoneTreeCheckpointReader
-    class ZoneTreeBackupRestore
+    class ZoneTreeCommitPublication
+    class ZoneTreeBackup
     KeyLoadClient --> QueryEngine : public HTTP operation
     QueryEngine --> ReadExecutionBudget : scoped budget
     QueryEngine --> LiveQueryExecutor : live public facade
@@ -557,9 +562,8 @@ classDiagram
     ZoneTreeStore ..|> IKeyValueView : gate scoped implementation
     ZoneTreeStore --> ZoneTreeStoreRuntime : sole node local owner
     ZoneTreeStoreRuntime --> ZoneTreeTransaction : staged atomic work
-    ZoneTreeStoreRuntime --> ZoneTreeCheckpointManager : generation replacement
-    ZoneTreeCheckpointManager --> ZoneTreeCheckpointReader : strict format
-    ZoneTreeStoreRuntime --> ZoneTreeBackupRestore : verified local backup
+    ZoneTreeTransaction --> ZoneTreeCommitPublication : one ZoneTree transaction
+    ZoneTreeStoreRuntime --> ZoneTreeBackup : live backup and restore
 ```
 
 search scheduling follows
@@ -623,40 +627,19 @@ classDiagram
 
 ## Memory and caches
 
-[ADR-058](ADR/ADR-058-orleans-coordinated-cache-memory.md) keeps RAM acceleration
-under the ResourceExecution slice. The common retained pool and the embedded
-positive point-value cache are disposable node-local state over committed
-ZoneTree data. Cached state never replaces persisted authorization, committed
-ZoneTree state or the acknowledgement from every configured copy of copies, and it never moves
-files or handles.
+ZoneTree owns physical caches and maintenance for the MVCC and plain trees.
+KeyLoad uses native read snapshots, native serializable conflict retries and native
+WAL synchronization. Independent database operations have no application writer
+semaphore or reader/writer lock. Derived indexes can use the common retained-memory
+budget; they never own canonical records or persisted authorization.
 
 ```mermaid
-classDiagram
-    class ICacheMemoryBudget {
-        TryReserve(bytes, entries)
-        GetSnapshot()
-    }
-    class ICacheMemoryReservation {
-        Bytes
-        Entries
-        Dispose()
-    }
-    class CacheMemoryBudget
-    class CacheMemoryLimits
-    CacheMemoryBudget ..|> ICacheMemoryBudget
-    ICacheMemoryBudget --> ICacheMemoryReservation
-    CacheMemoryBudget --> CacheMemoryLimits
-    class ICacheReadPermit {
-        IsCurrentAcceptance(receipt)
-    }
-    ZoneTreeStore --> ZoneTreeStoreRuntime
-    ZoneTreeStoreRuntime --> ZoneTreePointCacheLifecycle
-    ZoneTreePointCacheLifecycle --> ZoneTreePointCacheControl
-    ZoneTreePointCacheControl --> ZoneTreePointCacheControlState
-    ZoneTreePointCacheControlState --> ICacheReadPermit
-    ZoneTreePointCacheControlState --> ZoneTreePointCacheBinding
-    ZoneTreePointCacheBinding --> ZoneTreePointCache
-    ZoneTreePointCache --> ICacheMemoryBudget
+flowchart LR
+    Store[ZoneTreeStore] --> MVCC[Native MVCC snapshots and transactions]
+    Store --> Plain[Native plain table Upsert and delete]
+    MVCC --> Maintainer[Native CreateMaintainer]
+    Plain --> Maintainer
+    Store --> Lifetime[Joined physical owner and iterator lifetime]
 ```
 
 ## Diagnostics

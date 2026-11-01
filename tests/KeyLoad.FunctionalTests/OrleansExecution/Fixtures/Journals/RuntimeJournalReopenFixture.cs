@@ -86,12 +86,11 @@ internal sealed class RuntimeJournalReopenFixture : IDisposable
     {
         var storageOptions = new ZoneTreeStoreOptions(directory);
         var execution = UnitExecutionOptions.StorageExecution();
-        var cache = UnitExecutionOptions.PointCacheExecution();
         runtimeAcquisitionPending = true;
         ZoneTreeStore opened;
         try
         {
-            opened = new ZoneTreeStore(storageOptions, execution, cache);
+            opened = new ZoneTreeStore(storageOptions, execution);
             store = opened;
         }
         catch (Exception failure) when (KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))

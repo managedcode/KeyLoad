@@ -4,16 +4,12 @@ internal static class CrashFixtureValues
 {
     internal const string ProcessMode = "--recovery-process";
     internal const string CommitMode = "commit";
-    internal const string CompactMode = "compact";
-    internal const string InstallMode = "install";
     internal const string ProjectionMode = "projection-processing";
     internal const string SubscriptionMode = "subscription-processing";
     // Fixed child-process protocol tokens. They are machine signals, not localized console text.
     internal const string CrashMarker = "crash-point";
     internal const string Acknowledgement = "ack";
     internal const string ProcessingCommandFile = "processing-command.bin";
-    internal const string IncomingSnapshotFile = "incoming.snapshot";
-    internal const string SnapshotSourceDirectory = "snapshot-source";
     internal const string Principal = "root";
     internal const string System = "system";
     internal const string Wildcard = "*";
@@ -35,11 +31,7 @@ internal static class CrashFixtureValues
     internal const string EmptyJson = "{}";
     internal const string EffectJson = "{\"complete\":true}";
     internal const string ItemKey = "item";
-    internal const string ObsoleteKey = "obsolete";
-    internal const string AppliedKey = "last-applied";
     internal const int ItemCount = 3;
     internal const int LeaseSeconds = 300;
     internal const long InitialCrashPosition = 2;
-    internal const long SnapshotPreviousCut = 8;
-    internal const long SnapshotCut = 9;
 }

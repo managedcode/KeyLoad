@@ -12,7 +12,6 @@ internal static class ZoneTreeExistingStoreCleanup
     {
         var failures = new List<Exception> { original };
         CloseRegistered(runtime, failures);
-        Capture(runtime.Gate.Dispose, failures);
         ThrowFailures(failures);
     }
 
@@ -27,7 +26,7 @@ internal static class ZoneTreeExistingStoreCleanup
     {
         // A null Tree does not establish provider partial-open settlement; the inspector process remains required.
         Capture(() => runtime.Tree?.Dispose(), failures);
-        Capture(() => runtime.Journal?.Dispose(), failures);
+        Capture(() => runtime.PlainTree?.Dispose(), failures);
         Capture(() => runtime.Ownership?.Dispose(), failures);
     }
 

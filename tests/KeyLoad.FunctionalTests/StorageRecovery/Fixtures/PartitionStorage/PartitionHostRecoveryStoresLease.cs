@@ -13,7 +13,7 @@ internal sealed class PartitionHostRecoveryStoresLease : IDisposable
         try
         {
             Stores = new(runtime.Node, options.DataDirectory, runtime.StorageExecution,
-                runtime.PointCache, ownershipSettlement: attempt.Ownership);
+                ownershipSettlement: attempt.Ownership);
         }
         catch (Exception failure)
         {

@@ -114,7 +114,7 @@ transport method inference remain unchanged. `BackupAsync(CancellationToken)`
 sends one authenticated bodyless `POST /admin/backup` through the current
 transport, returns the canonical `BackupReceipt`, and classifies interrupted
 writes as `UnknownWriteOutcome`. It has no command ID or automatic retry: a
-further explicit call may create another archive. `SetDispatchAsync(Guid
+further explicit call may create another backup. `SetDispatchAsync(Guid
 commandId, bool paused, CancellationToken)` requires a nonempty caller-owned ID,
 sends bodyless `POST /admin/dispatch?paused=true|false` with that exact
 `X-KeyLoad-Command-Id`, and returns the canonical boolean. The server's persisted
@@ -137,7 +137,7 @@ REQ-MSG-007 / AC-MSG-007 and ADR-026 freeze the new bounded ordered queue receiv
 
 REQ-SERIES-024 / AC-SERIES-024 in [TimeSeries](TimeSeries.md) and [ADR120](../ADR/ADR-120-bounded-persisted-series-rollups.md) add only canonical typed `ReadSampleRollupRequest -> SampleRollupResult` at `/series/rollups/read`, SDK ReadSampleRollupAsync and underlying on-demand `keyload_series_read_rollup` schema/read-only hints. Initial discovery catalog remains bounded under ADR114; grants are checked fresh by the owning request/read cut. RefreshSampleRollup / DropSampleRollup use the existing authorized CommitAsync / keyload_documents_commit Batch mutation schema, connection grain and replicated acknowledgement path. SampleRollupClusterTests uses persisted credentials and literal SDK/official-MCP/shared-SQL parity.
 
-[REQ/AC-EVENT-RETENTION-001–003](EventStreams.md) and [ADR-030](../ADR/ADR-030-retention-paused-restore.md) govern PurgeTopic through existing Batch. SDK CommitAsync, official MCP keyload_documents_commit and the selected canonical SQL adapter for keyload_documents_commit use the same typed mutation decoder and fresh authorized operation on its connection grain; no operation catalog/route/SQL dialect expansion. Canonical mutation schema now includes the explicitly frozen purgeTopic discriminator (28 total after the rollup and purge join) with topic, throughPosition and generation. Current raw backup/snapshot includes bounded identity tombstones inside existing topic-event-id family without a format migration. Read-cut/restore authority, receipts, paused groups and other models remain unchanged. Existing AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder plus real TopicRetentionClusterTests and TopicRetentionOperationTests bind this join.
+[REQ/AC-EVENT-RETENTION-001–003](EventStreams.md) and [ADR-030](../ADR/ADR-030-retention-paused-restore.md) govern PurgeTopic through existing Batch. SDK CommitAsync, official MCP keyload_documents_commit and the selected canonical SQL adapter for keyload_documents_commit use the same typed mutation decoder and fresh authorized operation on its connection grain; no operation catalog/route/SQL dialect expansion. Canonical mutation schema now includes the explicitly frozen purgeTopic discriminator (28 total after the rollup and purge join) with topic, throughPosition and generation. A store backup holds bounded identity tombstones inside the existing topic-event-id family with the rest of the tree. Read-cut/restore authority, receipts, paused groups and other models remain unchanged. Existing AcMcp001EveryCanonicalMutationIsRepresentedAndRoundTripsThroughTypedDecoder plus real TopicRetentionClusterTests and TopicRetentionOperationTests bind this join.
 
 ### Document minimum-token reads
 

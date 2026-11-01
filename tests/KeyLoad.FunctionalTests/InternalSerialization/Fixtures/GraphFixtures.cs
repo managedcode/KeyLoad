@@ -31,8 +31,4 @@ internal static class GraphFixtures
         }
         return tail!;
     }
-
-    internal static byte[] EncodeUnchecked<T>(T value)
-        => OrleansSerialization.Serializer.SerializeToArray(
-            new RuntimePayload { Version = PayloadVersion.Current, Value = value });
 }

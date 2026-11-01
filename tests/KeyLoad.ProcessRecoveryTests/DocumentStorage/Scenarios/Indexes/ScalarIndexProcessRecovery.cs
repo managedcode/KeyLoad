@@ -83,7 +83,7 @@ internal static class ScalarIndexProcessRecovery
         };
         foreach (var argument in new[]
         {
-            typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, CommitStage.JournalFlushed.ToString(),
+            typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root, CommitStage.WriteAheadLogSynced.ToString(),
             0.ToString(CultureInfo.InvariantCulture), mode
         })
         {

@@ -1,5 +1,4 @@
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 
@@ -10,17 +9,11 @@ namespace KeyLoad.Cli.BackupRestore;
 internal static class CliStorageConfiguration
 {
     private const string EnvironmentPrefix = "KEYLOAD_STORAGE__";
-    private const string CacheEnvironmentPrefix = "KEYLOAD_POINTCACHE__";
-    private const string BackupEnvironmentPrefix = "KEYLOAD_BACKUP__";
     internal static CliStorageRuntimeOptions Read()
     {
         return new(
         Bind(EnvironmentPrefix, static () => new ZoneTreeStorageExecutionOptions(),
-            options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage),
-        Bind(CacheEnvironmentPrefix, static () => new ZoneTreePointCacheExecutionOptions(),
-            options => options.IsValid(), ZoneTreePointCacheExecutionOptions.ValidationMessage),
-        Bind(BackupEnvironmentPrefix, static () => new CliBackupExecutionOptions(),
-            options => options.IsValid(), CliBackupExecutionOptions.ValidationMessage));
+            options => options.IsValid(), ZoneTreeStorageExecutionOptions.ValidationMessage));
     }
 
     internal static OptionsManager<T> Bind<T>(string prefix, Func<T> initialize, Func<T, bool> validate, string message)

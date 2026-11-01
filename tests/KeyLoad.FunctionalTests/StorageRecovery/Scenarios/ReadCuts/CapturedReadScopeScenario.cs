@@ -103,6 +103,8 @@ internal static class CapturedReadScopeScenario
         {
             expected = [.. expected, Row(Healthy, HealthyValue)];
         }
+        expected = [.. expected, Encoding.UTF8.GetString(StoreFileFixture.PositionKey) + RecordSeparator
+            + Encoding.UTF8.GetString(StoreFileFixture.PositionValue(position))];
         Array.Sort(expected, StringComparer.Ordinal);
         var actual = store.Read(ReadRows);
         await Assert.That(actual).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);

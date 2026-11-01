@@ -89,13 +89,13 @@ internal static class ScalarIndexCrashOperations
         CanonicalCrashBoundary boundary)
     {
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = Apply(database, ScalarIndexCrashContract.Partition, ScalarIndexCrashContract.FaultCommandText,
             new PutDocument(ScalarIndexCrashContract.Collection, ScalarIndexCrashContract.ConflictId,
                 ScalarIndexCrashContract.FaultInsertJson, EmptyRevision),
             new PatchDocument(ScalarIndexCrashContract.Collection, ScalarIndexCrashContract.SecondId,
                 [new(ScalarIndexCrashContract.LabelPath, PatchKind.Set, JsonSerializer.Serialize(ScalarIndexCrashContract.ValueTheta))], SecondRevision));
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     internal static void ApplyHealthyFollowUp(DatabaseEngine database)

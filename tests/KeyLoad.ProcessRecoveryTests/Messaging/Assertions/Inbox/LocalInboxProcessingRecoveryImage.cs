@@ -22,7 +22,7 @@ internal static class LocalInboxProcessingRecoveryImage
         {
             throw new InvalidOperationException("The complete local processing fixture exceeded its bounded execution inventory.");
         }
-        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 
     internal static async Task ExactAsync<T>(T actual, T expected)

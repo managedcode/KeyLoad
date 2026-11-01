@@ -1,61 +1,41 @@
 # ADR-048: bounded owned storage metadata
 
-Status: Accepted; implementation and qualification pending.
-Related: REQ-BACKUP-005, REQ-STORAGE-011, AC-BSM-001..005, AC-MP-006/012;
-ADR008/011/033/035/046. This ADR's implementation contract defines exact
-tasks and tests, accepted before writes.
+Status: Accepted; exact-source qualification pending.
+Related: REQ-BACKUP-005, REQ-STORAGE-011, AC-BSM-001/003/005, AC-MP-006/012;
+ADR-008/011/033/035/046.
 
-Private manifest/identity readers must not allocate according to untrusted file
-size. Restore also must parse the same identity bytes whose outer manifest hash
-was verified. Choose inclusive16KiB manifest and4KiB identity-envelope limits;
-normal compact schemas fit below512/1024bytes respectively. Default
-[System.Text.Json byte-array representation](https://learn.microsoft.com/en-us/dotnet/standard/serialization/system-text-json/supported-types)
-is base64; signing-key memory uses the existing strict converter. Existing JSON
-case/depth/unknown-member/null/constructor policies remain unchanged.
+The store identity file is the only KeyLoad-owned storage metadata
+([ADR-011](ADR-011-current-format.md)); ZoneTree owns the format of its tree and
+backup files. The identity reader must not allocate according to untrusted file
+size. Its inclusive limit is the validated `MaximumIdentityFileBytes` storage
+option, 4 KiB by default; the current envelope fits well below it.
 
 ```mermaid
 flowchart LR
-    Operator[Public backup restore] --> Empty[Destination conflict first]
-    Empty --> Manifest[Bounded manifest bytes]
-    Manifest --> Files[Outer files verified in manifest order]
-    Files --> Identity[Same owned bounded identity bytes]
-    Identity --> Inner[Envelope and inner checksum]
-    Inner --> Create[New identity and paused restore]
-    Startup[Node local lock then startup] --> Reader[Shared finite file reader]
-    Reader --> Identity
+    Startup[Node-local lock then startup] --> Reader[Shared finite regular-file reader]
+    Restore[Restore from a backup] --> Reader
+    Reader --> Envelope[Magic, envelope and SHA-256 checksum]
+    Envelope --> Identity[Current identity validation]
+    Identity --> Open[Open tree or write the restored identity]
 ```
 
 Implementation contract:
 
-1. Exactly two private ZoneTreePersistenceFormat budget constants and the named identity/backup readers/restore change, with NEW finite reader/Metadata* tests. Archive before and author real public/filesystem regressions
-   before production writes.
-2. Reader opens one real FileStream, rejects length above budget before allocating,
-   and reads at most budget+1 bytes into one finite owned region. An authoritative
-   count and final length reject growth above limit. Return a memory slice without
-   a second buffer copy; scoped stream disposal is unconditional. Oversize is
-   existing file-specific FormatUnsupported, not a silent truncation.
-3. Capture identity region while verifying manifest-listed files. Check its outer
-   length/SHA over that region, stream WAL verification as before, and parse the
-   captured identity only after every outer verification. Return StoreIdentity to
-   the restore recipe; remove its identity reread. Startup Read reuses the reader
-   after physical lock acquisition. Preserve all format bytes, ordinary error
-   precedence, lock cleanup, destination check and flush/write/copy/commit order.
-4. Lead and V inspect complete dataflow and independent real-file tests, including
-   inclusive/overlimit, JSON/checksum/missing/error precedence, absent/nonempty
-   destination, owner-lock release and managed allocation. Static proof is an
-   explicit supplement for deterministic growth bounds and single-owned-region
-   read; no fake stream/seam or racy test substitutes for actual runtime evidence.
-5. Normal strict storage/UnitTests/full builds,400/200/64/3, canonical formatter,
-   governance/import/diff, then stable exact-SHA GitHub TUnit/recovery/cluster SDK/MCP
-   and all required gates. Collector/raw numeric coverage remains separately
-   unfinished until configured and verified. Record source versus executed proof
-   before this ADR can become Implemented.
+1. One reader (`ZoneTreeMetadataFile.Read`) opens the existing regular file through
+   the no-follow regular-file primitive, rejects a length above the limit before
+   allocating and reads at most limit+1 bytes into one owned region. An
+   authoritative count and final length reject growth above the limit. Oversize is
+   `FormatUnsupported`, never a silent truncation; stream disposal is
+   unconditional.
+2. Store startup reads the identity after physical lock acquisition. Restore reads
+   the backed-up identity with the same reader and limit before it creates the
+   destination. Preserve error precedence and lock cleanup.
+3. `MetadataEntryOpenTests` exercise the exact-length read, the one-under refusal,
+   missing input and invalid entry kinds with unchanged files and a healthy reopen.
+4. Strict builds, numeric gates, formatter and governance, then exact-SHA GitHub
+   TUnit/recovery/cluster SDK/MCP and all required gates. Record source versus
+   executed proof.
 
-Current input limits are explicit: excessive whitespace or metadata above budgets
-fails. The current stored schema/version and writer output remain exact; persisted
-data, public signatures and dependencies are unchanged.
-Rollout is the coherent private reader/restore/test unit. Rollback reverts it and
-its constants, never changes durable files or introduces a fallback. Whole-backup
-concurrent modification, multi-silo restore, power loss, endurance and measured
-physical I/O remain outside this private optimization. Dependency ownership and
-node-local storage/grain-routing boundaries remain mandatory.
+The current stored schema and writer output remain exact; persisted data, public
+signatures and dependencies are unchanged. Multi-silo restore, power loss, endurance
+and measured physical I/O remain outside this contract.

@@ -40,7 +40,7 @@ public static class CommandExecutionExecution
             throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand);
         }
 
-        var admitted = DatabaseCommandInputTypes.Require(kind, input);
+        var admitted = DatabaseCommandInputTypes.Admit(kind, input);
         return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, admitted, work, admissionView);
     }
 }

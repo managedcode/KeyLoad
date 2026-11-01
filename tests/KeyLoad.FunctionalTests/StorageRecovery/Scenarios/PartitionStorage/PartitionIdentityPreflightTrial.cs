@@ -12,8 +12,6 @@ internal static class PartitionIdentityPreflightTrial
                 PartitionHostRecoveryFixture.CanonicalDirectory);
             var identityPath = RuntimeJournalReaderFixture.IdentityPath(path);
             var identityBytes = await File.ReadAllBytesAsync(identityPath, token).ConfigureAwait(false);
-            await PartitionIdentityPreparation.AppendTornTailAsync(fixture, original.Position, token)
-                .ConfigureAwait(false);
             await RuntimeJournalReaderFixture.RewriteCapabilityAsync(path, capability).ConfigureAwait(false);
             var before = await PartitionIdentityInventory.CaptureAsync(fixture.Options.DataDirectory).ConfigureAwait(false);
             var failure = await Assert.ThrowsExactlyAsync<KeyLoadException>(fixture.OpenAndDisposeHostAsync);

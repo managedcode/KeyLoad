@@ -77,7 +77,7 @@ internal static class TenantAdmissionAssertions
         ArgumentNullException.ThrowIfNull(committed);
         await Assert.That(committed.CommandId).IsEqualTo(issued.CommandId);
         await Assert.That(committed.UserId!).IsEqualTo(issued.UserId!);
-        await Assert.That(OrleansSerialization.Serialize(committed.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(issued.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(committed.Value!.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(issued.Value!.Input).AsSpan())).IsTrue();
         await Assert.That(DatabaseCommandContentIdentity.SameContent(committed, issued)).IsTrue();
         return committed;
     }

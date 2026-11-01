@@ -1,7 +1,7 @@
 namespace KeyLoad.Storage.ZoneTree;
 
 /// <summary>A callback-scoped real execution child; its inherited staged image and all changes are privately owned.</summary>
-internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction, IAtomicCommitCandidateValidation
+internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction
 {
     private const string OutsideCallback = "The execution preparation transaction is outside its synchronous owning callback.";
     private readonly ZoneTreeStoreRuntime runtime;
@@ -14,7 +14,7 @@ internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction, IAtom
         IEnumerable<ZoneTreeStagedEntry> action)
     {
         this.runtime = runtime;
-        transaction = new(runtime, preparing: true);
+        transaction = new(runtime);
         var shared = earlier.Select(Copy).ToArray();
         inherited = [.. action.Select(Copy)];
         if (shared.Length > 0)
@@ -43,8 +43,7 @@ internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction, IAtom
 
     private void Check()
     {
-        if (!active || Environment.CurrentManagedThreadId != thread
-            || !runtime.Gate.IsReadLockHeld && !runtime.Gate.IsWriteLockHeld && !runtime.Gate.IsUpgradeableReadLockHeld)
+        if (!active || Environment.CurrentManagedThreadId != thread || runtime.Operation.Value is null)
         {
             throw new InvalidOperationException(OutsideCallback);
         }
@@ -135,17 +134,5 @@ internal sealed class ZoneTreePreparationTransaction : IAtomicTransaction, IAtom
                 transaction.Delete(row.Key);
             }
         }
-    }
-
-    public void ValidateCommit()
-    {
-        Check();
-        transaction.ValidateCommit();
-    }
-
-    public void ValidateCandidate(IReadOnlyList<StorageMutation> mutations)
-    {
-        Check();
-        transaction.ValidateCandidate(mutations);
     }
 }

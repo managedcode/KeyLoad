@@ -82,7 +82,7 @@ internal static class EventAppendStateAssertions
         {
             throw new InvalidOperationException(FixtureOverflow);
         }
-        return page.Records.Select(record => Convert.ToHexString(record.Key.Span) + ByteSeparator +
+        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(record => Convert.ToHexString(record.Key.Span) + ByteSeparator +
             Convert.ToHexString(record.Value.Span)).ToArray();
     });
 

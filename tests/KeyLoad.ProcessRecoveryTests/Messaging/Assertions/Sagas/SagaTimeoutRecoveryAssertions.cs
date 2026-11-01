@@ -14,7 +14,7 @@ internal static class SagaTimeoutRecoveryAssertions
 
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken cancellationToken)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var operation = await ReadOperationAsync(root, cancellationToken);
         var seedTail = await ReadSeedTailAsync(root, cancellationToken);
@@ -77,9 +77,13 @@ internal static class SagaTimeoutRecoveryAssertions
             await Assert.That(entry.Receipt.Revision).IsEqualTo(SagaTimeoutCrashScenario.TimedOutRevision);
             await Assert.That(entry.Commit).IsEqualTo(outcome!.Token);
         }
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         await Assert.That(waiting.Deadline).IsEqualTo(recovered.Deadline);
         var counters = ReadQueueCounters(store, timeoutLane);

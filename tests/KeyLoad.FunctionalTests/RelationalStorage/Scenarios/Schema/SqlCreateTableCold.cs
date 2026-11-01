@@ -23,7 +23,7 @@ internal static class SqlCreateTableCold
             var failures = new List<Exception>();
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
-                using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+                using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
                 await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
                 {
                     await Assert.That(store.Identity.NodeId).IsEqualTo(identity.NodeId);

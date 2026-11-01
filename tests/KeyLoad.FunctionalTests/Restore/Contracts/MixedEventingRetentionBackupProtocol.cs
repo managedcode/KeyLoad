@@ -11,10 +11,7 @@ internal static class MixedEventingRetentionBackupProtocol
     internal const string Second = "mixed-two";
     internal const string Third = "mixed-three";
     internal const string Backup = "mixed-backup";
-    internal const string Archive = "mixed-backup.ctg";
-    internal const string Unpacked = "mixed-unpacked";
     internal const string Target = "mixed-target";
-    internal const int PieceBytes = 1_024;
     internal const long PurgePosition = 2;
     internal const long LastPosition = 3;
     internal const long FirstSequence = 4;

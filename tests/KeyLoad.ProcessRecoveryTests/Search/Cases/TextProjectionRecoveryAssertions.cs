@@ -17,7 +17,7 @@ internal static class TextProjectionRecoveryAssertions
     {
         await AssertAuthorityFilesUnchangedAsync(source, receipt, cancellationToken);
         var indexDirectory = Path.Combine(source, "search-indexes");
-        using (var store = new ZoneTreeStore(new(source), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution()))
+        using (var store = new ZoneTreeStore(new(source), RecoveryExecutionOptions.StorageExecution()))
         {
             await AssertCanonicalCutAsync(store, receipt);
             var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());

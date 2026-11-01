@@ -32,17 +32,14 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
     internal static readonly PartitionRef Destination = new(TenantId, DatabaseId, TransactionDomainId, DestinationPartitionKey);
     private readonly string directory = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)), DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private readonly DatabaseLimits limits;
-    private readonly int? maxFrameBytes;
     private readonly TimeProvider timeProvider = TimeProvider.System;
 
     internal ZoneTreeStore Store { get; private set; } = null!;
     internal DatabaseEngine Database { get; private set; } = null!;
-    internal string JournalPath => Path.Combine(directory, ZoneTreePersistenceFormat.JournalFileName);
 
-    internal AtomicPartitionRosterFixture(DatabaseLimits? configuredLimits = null, int? configuredMaxFrameBytes = null)
+    internal AtomicPartitionRosterFixture(DatabaseLimits? configuredLimits = null)
     {
         limits = configuredLimits ?? new DatabaseLimits();
-        maxFrameBytes = configuredMaxFrameBytes;
         var acquiring = true;
         try
         {
@@ -130,10 +127,7 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
 
     private void OpenStore()
     {
-        var options = maxFrameBytes is { } frameBytes
-            ? new ZoneTreeStoreOptions(directory) { MaxFrameBytes = frameBytes }
-            : new ZoneTreeStoreOptions(directory);
-        Store = new(options, UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution(),
+        Store = new(new(directory), UnitExecutionOptions.StorageExecution(),
             timeProvider: timeProvider);
     }
 
@@ -161,7 +155,6 @@ internal sealed class AtomicPartitionRosterFixture : IDisposable
             roster.Put(KeySpace.Partition(PartitionRecordFamilies.Document, partition, Collection, id),
                 OrleansSerialization.Serialize(record));
             roster.PersistCandidates();
-            roster.ValidateCommit();
             return true;
         });
     }

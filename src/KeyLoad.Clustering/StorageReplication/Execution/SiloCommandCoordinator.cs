@@ -56,7 +56,15 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     {
         cancellationToken.ThrowIfCancellationRequested();
         return database.IsSiloLocalOperation(operation)
-            ? Task.FromResult(database.ApplyLocalStorageOperation(database.PrepareStorageOperation(operation, cancellationToken), cancellationToken))
+            ? ApplyLocalAsync(operation, cancellationToken)
             : Owner.ApplyAsync(operation, cancellationToken);
+    }
+
+    private async Task<Result<object>> ApplyLocalAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+    {
+        var result = (await database.ApplyCoreAsync(database.PrepareStorageOperation(operation, cancellationToken), null,
+            selectEmbeddedClock: false, cancellationToken).ConfigureAwait(true)).Result;
+        await database.Store.SyncAsync(CancellationToken.None).ConfigureAwait(true);
+        return result;
     }
 }

@@ -14,9 +14,6 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
     private const string RootPrincipal = "root";
     internal const string AuthorityResource = "backup-authority-metadata";
     private long expectedApplied;
-    private const string SystemNamespace = ZoneTreePersistenceFormat.SystemNamespace;
-    private const string LastAppliedKey = ZoneTreePersistenceFormat.LastAppliedKey;
-    private const string ClockKey = ZoneTreePersistenceFormat.ClockKey;
     private readonly string root = Path.Combine(AppContext.BaseDirectory, DirectoryPrefix + Guid.NewGuid().ToString(GuidFormat));
     private ZoneTreeStore? restoredStore;
 
@@ -106,8 +103,8 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
 
     internal void AssertSourceAuthority()
     {
-        var applied = Source.Store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, LastAppliedKey)));
-        var clock = Source.Store.Read(view => view.ReadOwnedValue(KeyCodec.Encode(SystemNamespace, ClockKey)));
+        var applied = Source.Store.Read(view => view.ReadOwnedValue(KeySpace.Applied.ToArray()));
+        var clock = Source.Store.Read(view => view.ReadOwnedValue(KeySpace.Clock.ToArray()));
         var metadata = Source.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             Partition.TenantId, Partition.DatabaseId, AuthorityResource)));
         if (applied is null || OrleansSerialization.Deserialize<long>(applied) != expectedApplied
@@ -118,15 +115,14 @@ internal sealed class BackupIndexedDocumentDedupFixture : IDisposable
         }
     }
 
-    internal long CreateBackup() => Source.Store.CreateBackup(BackupDirectory);
+    internal Task<long> CreateBackupAsync() => Source.Store.CreateBackupAsync(BackupDirectory);
 
-    internal StoreIdentity Restore() => ZoneTreeStore.Restore(BackupDirectory, TargetDirectory,
+    internal Task<StoreIdentity> RestoreAsync() => ZoneTreeStore.RestoreAsync(BackupDirectory, TargetDirectory,
         UnitExecutionOptions.StorageExecution());
 
     internal DatabaseEngine OpenRestored()
     {
-        restoredStore = new(new ZoneTreeStoreOptions(TargetDirectory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        restoredStore = new(new ZoneTreeStoreOptions(TargetDirectory), UnitExecutionOptions.StorageExecution());
         RestoredDatabase = CreateDatabase(restoredStore);
         return RestoredDatabase;
     }

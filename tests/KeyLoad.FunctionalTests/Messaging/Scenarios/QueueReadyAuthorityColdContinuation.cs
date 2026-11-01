@@ -45,7 +45,7 @@ internal static class QueueReadyAuthorityColdContinuation
         store.Dispose();
         token.ThrowIfCancellationRequested();
         using var second = new global::KeyLoad.Storage.ZoneTree.ZoneTreeStore(new(directory),
-            UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(second);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
         foreach (var (command, result) in receipts)

@@ -3,7 +3,7 @@ namespace KeyLoad;
 /// <summary>Reports this physical store, execution Orleans membership count and configured data-copy requirement.</summary>
 /// <param name="NodeId">Persisted physical store identifier.</param>
 /// <param name="Incarnation">Persisted database incarnation.</param>
-/// <param name="Position">Local ZoneTree position; positions on different stores are not interchangeable read tokens.</param>
+/// <param name="Position">Last applied canonical command sequence on this store, distinct from physical snapshot positions.</param>
 /// <param name="SiloCount">Active silos observed by execution Orleans membership.</param>
 /// <param name="ReplicaCount">Required persisted copies for a successful write.</param>
 /// <param name="Durability">Actual database durability contract.</param>

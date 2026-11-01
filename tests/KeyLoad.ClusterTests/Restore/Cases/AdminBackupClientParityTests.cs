@@ -12,7 +12,7 @@ namespace KeyLoad.ClusterTests.BackupRestore;
 internal sealed class AdminBackupClientParityTests(ClusterFixture fixture)
 {
     [Test]
-    public async Task AcClient004SdkAndOfficialMcpCreateDistinctAdministratorBackups()
+    public async Task AcClient004SdkAndOfficialMcpCreateConcurrentDistinctAdministratorBackups()
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await McpDocumentScenario.CreateAsync(fixture, deadline.Token);
@@ -29,9 +29,12 @@ internal sealed class AdminBackupClientParityTests(ClusterFixture fixture)
         var tool = await mcp.Client.DiscoverKeyLoadToolAsync(McpCallerTools.AdminBackup, deadline.Token);
         await McpDiscoveryAssertions.VerifyAsync(tool);
         var local = await McpCallerAssertions.SdkSuccessAsync(await sdk.StatusAsync(deadline.Token));
-        var sdkReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdk.BackupAsync(deadline.Token));
+        var sdkPending = sdk.BackupAsync(deadline.Token);
+        var mcpPending = mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.AdminBackup, cancellationToken: deadline.Token).AsTask();
+        await Task.WhenAll(sdkPending, mcpPending);
+        var sdkReceipt = await McpCallerAssertions.SdkSuccessAsync(await sdkPending);
         var mcpReceipt = await McpCallerAssertions.SuccessAsync<BackupReceipt>(
-            await mcp.Client.InvokeKeyLoadToolAsync(McpCallerTools.AdminBackup, cancellationToken: deadline.Token));
+            await mcpPending);
         await VerifyReceiptAsync(sdkReceipt);
         await VerifyReceiptAsync(mcpReceipt.Value);
         await Assert.That(sdkReceipt.Id).IsNotEqualTo(mcpReceipt.Value.Id);

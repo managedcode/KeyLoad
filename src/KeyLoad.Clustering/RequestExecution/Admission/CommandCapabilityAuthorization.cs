@@ -5,23 +5,19 @@ namespace KeyLoad.Clustering;
 /// <summary>Performs fresh command authority reads inside the original target observation budget.</summary>
 internal static class CommandCapabilityAuthorization
 {
-    internal static async Task<PrincipalRecord> AuthorizeAsync(DatabaseEngine database,
-        ICommitCoordinator coordinator, TimeProvider clock,
+    internal static async Task<PrincipalRecord> AuthorizeAsync(DatabaseEngine database, TimeProvider clock,
         GrainRequestCodec? codec, DecodedGrainRequest request, IGrainContext? context, CancellationToken token)
     {
-        var stage = GrainFailureStage.ReadBarrier;
         try
         {
-            await coordinator.ReadBarrierAsync(token).ConfigureAwait(true);
             ValidateFresh(database, request, token);
-            stage = GrainFailureStage.Authorization;
             await ObserveAndValidateAsync(database, codec, request,
                 GrainRequestPhase.AuthorizationReload, context, token).ConfigureAwait(true);
             return GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
-            GrainFailureDiagnostics.Mark(error, stage);
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
             throw;
         }
     }

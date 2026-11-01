@@ -46,7 +46,7 @@ internal sealed class SampleSequenceIntegrityFixture : IDisposable
         cold = ZoneTreeStore.OpenOwned(new(Source.Owner.Directory)
         {
             Incarnation = Source.Owner.Store.Identity.Incarnation
-        }, Source.Owner.StorageExecution, UnitExecutionOptions.PointCacheExecution(), attempt);
+        }, Source.Owner.StorageExecution, attempt);
         closeAttempted = false;
         ColdDatabase = Source.Owner.CreateConfiguredDatabase(cold);
     }

@@ -133,8 +133,7 @@ internal static class QueueLeaseExpiryEqualityTrial
         return (producer, produced, ack, receipt);
     }
 
-    private static ZoneTreeStore Open(string root) => new(new(root), UnitExecutionOptions.StorageExecution(),
-        UnitExecutionOptions.PointCacheExecution());
+    private static ZoneTreeStore Open(string root) => new(new(root), UnitExecutionOptions.StorageExecution());
     private static Result<object> Apply(DatabaseEngine database, DeliveryCommand command, DateTimeOffset time)
         => QueueWholeFlowStorage.Apply(database, OperationKind.Delivery, command, command.CommandId, time);
     private static Result<object> Batch(DatabaseEngine database, CommandRequest command, DateTimeOffset time)

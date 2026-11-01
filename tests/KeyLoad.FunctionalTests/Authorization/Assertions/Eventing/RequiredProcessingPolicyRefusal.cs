@@ -13,7 +13,7 @@ internal static class RequiredProcessingPolicyRefusal
         {
             throw new InvalidOperationException("The complete required-processing image exceeded its bound.");
         }
-        return page.Records.Where(row => !row.Key.Span.SequenceEqual(outcome) && !row.Key.Span.SequenceEqual(locator)
+        return page.Records.Where(stored => !CanonicalStoreImage.IsStorePosition(stored.Key.Span)).Where(row => !row.Key.Span.SequenceEqual(outcome) && !row.Key.Span.SequenceEqual(locator)
             && !row.Key.Span.SequenceEqual(KeySpace.ClockBytes) && !row.Key.Span.SequenceEqual(KeySpace.AppliedBytes)
                 && !row.Key.Span.SequenceEqual(KeySpace.LastCommandBytes))
             .Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();

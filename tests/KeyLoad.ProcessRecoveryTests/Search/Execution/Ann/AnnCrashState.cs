@@ -16,7 +16,7 @@ internal static class AnnCrashState
         {
             throw new InvalidOperationException(AnnCrashContract.Invalid);
         }
-        return string.Join(Environment.NewLine, page.Records.Select(row =>
+        return string.Join(Environment.NewLine, page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row =>
             Convert.ToHexString(row.Key.Span) + ByteSeparator + Convert.ToHexString(row.Value.Span)));
     });
     internal static async Task<AnnMaintenanceCapabilityResult> PhaseAsync(DatabaseEngine database,

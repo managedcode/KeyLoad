@@ -10,8 +10,7 @@ internal static class TenantAdmissionCold
         List<Result<object>> results, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
-        using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution,
-            UnitExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var database = fixture.CreateConfiguredDatabase(store);
         await ReplayAsync(fixture, database, store, database.Apply,
             operations, results, fixture.Partition, token);

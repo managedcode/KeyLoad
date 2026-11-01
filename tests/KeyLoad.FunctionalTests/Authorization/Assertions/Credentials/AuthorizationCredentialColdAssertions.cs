@@ -19,8 +19,7 @@ internal static class AuthorizationCredentialColdAssertions
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var store = new ZoneTreeStore(new(fixture.Database.Directory), fixture.Database.StorageExecution,
-            UnitExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(fixture.Database.Directory), fixture.Database.StorageExecution);
             await ServerFailureObserver.ObserveAsync(() => VerifyAsync(fixture, repair,
                 original, identity, applied, store, cancellationToken), failures);
         }, failures);

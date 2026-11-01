@@ -32,7 +32,7 @@ internal sealed class AtomicPartitionRosterRestoreTests
             await ReplayResultAssertions.Same<CommitReceipt>(fixture.Database.Apply(operation), result);
             await Assert.That(fixture.Target.Position).IsEqualTo(position);
             await AtomicPartitionRosterRestoreAssertions.LiteralDocumentAsync(fixture, AtomicPartitionRosterRestoreFixture.NewId);
-            fixture.RestoreAgain();
+            await fixture.RestoreAgainAsync();
             await AtomicPartitionRosterRestoreAssertions.LiteralDocumentAsync(fixture, AtomicPartitionRosterRestoreFixture.SeedId);
             var second = AtomicPartitionRosterRestoreFixture.Operation(fixture.Database, AtomicPartitionRosterRestoreFixture.SecondId);
             await Assert.That(Errors.Code(fixture.Database.Apply(second).Problem).Value).IsNull();

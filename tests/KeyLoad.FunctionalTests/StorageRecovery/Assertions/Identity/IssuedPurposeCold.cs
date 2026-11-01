@@ -17,7 +17,7 @@ internal static class IssuedPurposeCold
                 token.ThrowIfCancellationRequested();
                 stores = fixture.OpenStores();
                 var store = stores.Canonical;
-                await WalFileFixture.AssertPreservedIdentity(fixture.Identity, store.Identity);
+                await StoreFileFixture.AssertPreservedIdentity(fixture.Identity, store.Identity);
                 await Assert.That(store.Position).IsEqualTo(expected.Position);
                 var rows = store.Read(view => view.Scan([], view.MaximumRangeRecords));
                 await Assert.That(rows.HasMore).IsFalse();

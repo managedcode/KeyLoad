@@ -16,7 +16,7 @@ internal static class AggregateSnapshotRaceCold
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             token.ThrowIfCancellationRequested();
-            store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+            store = new(new(fixture.Harness.Directory), fixture.Harness.StorageExecution);
             fixture.Store = store;
             fixture.Database = fixture.Harness.CreateConfiguredDatabase(store);
             await ServerFailureObserver.ObserveAsync(() => AggregateSnapshotRaceValues.ConservedAsync(fixture, image, identity, position), failures);

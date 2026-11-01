@@ -17,8 +17,7 @@ internal static class TopicPublicationCold
         fixture.JoinOwnedResources();
         for (var cycle = 0; cycle < 2; cycle++)
         {
-            using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
             var owner = fixture.CreateConfiguredDatabase(store);
             await ReadCutStoreStateAssertions.AssertIdentityAndPositionAsync(store, identity, position);
             var earliest = owner.EvaluationClock.GetUtcNow() + lifetime;

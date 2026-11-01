@@ -17,8 +17,8 @@ workstream changes no authorized cut, database state, WAL or acknowledgement.
 
 The additive TimeSeries readers under
 [ADR-052](../ADR/ADR-052-timeseries-bounded-aggregates.md) map REQ-MP-002/005 and
-AC-MP-002/005/011/012 to AC-SERIES-011 and AC-RANGE-REV-003. One original read
-gate and one budgeted view read metadata/data/lookahead exactly once, enforce
+AC-MP-002/005/011/012 to AC-SERIES-011 and AC-RANGE-REV-003. One original native read
+snapshot and one view read metadata/data/lookahead exactly once, enforce
 deadline/cancellation and exact full JSON results, and preserve healthy
 following operations after failure. Architecture choices do not establish
 maximum throughput, physical I/O, process RSS or numeric coverage.
@@ -35,114 +35,32 @@ Status: Accepted contract; implementation and qualification in progress.
 [ADR-035](../ADR/ADR-035-memory-performance.md) owns scoped read/resource/lifetime
 decisions. Full requirements and test strategy: [acceptance](../ADR/ADR-035-memory-performance.md).
 
-## Disposable cache layer
+## Native storage ownership
 
-The staged disposable-cache contract is accepted in
-[ADR-058](../ADR/ADR-058-orleans-coordinated-cache-memory.md). The shared pool and
-the explicit embedded positive-point stage are approved scopes; cache policy
-coordination uses ordinary Orleans calls. These durable requirements and the ADR
-are the reviewable source of truth. No cache or performance capability is
-qualified yet. UI/HTTP/SDK/MCP cache administration is N/A in this stage; existing
-public database operations remain the visible boundary.
+ZoneTree owns its mutable segments, disk caches, version retention and cache
+maintenance through `CreateMaintainer()`. KeyLoad keeps no separate point-value
+cache, cache read permit or periodic engine-cache sweep. Independent transactional
+operations use native MVCC snapshots and conflict detection without an application
+reader/writer gate or writer semaphore. Plain tables use the native non-transactional
+tree described in [NonTransactionalTables](RelationalStorage/NonTransactionalTables.md).
 
-| Cache requirement | Acceptance | Automated proof |
-|---|---|---|
-| REQ-CACHE-001: shared validated retained-byte/entry reservations and lifetime | AC-CACHE-001/002 | real CacheMemoryBudget capacity/overflow/index/concurrent/disposal TUnit |
-| REQ-CACHE-002: exact-key coherence and store-generation/recovery fencing | AC-CACHE-003/004 | actual ZoneTree transactions/snapshots/reopen |
-| REQ-CACHE-003: owned/scoped buffers and bounded local work | AC-CACHE-005/006 | real pins/callbacks/eviction/logical-charge tests |
-| REQ-CACHE-004: bounded node-local cache policy coordination through ordinary Orleans calls | AC-CACHE-007/011 | Orleans grain/service restart and activation-movement tests on a replicated cluster |
-| REQ-CACHE-005: current grants, barriers and field/tenant decisions | AC-CACHE-008 | current public SDK/MCP authorization flows |
-| REQ-CACHE-006: honest closed resource metrics and comparable benefit | AC-CACHE-009 | repeated GitHub cache-on/off resource JSON |
-| REQ-CACHE-007: complete delivered-source/qualification | AC-CACHE-010 | build/format/analyzers/complexity/governance + unit/scalar/recovery/cluster and real coverage |
+Fresh persisted authorization remains mandatory on every operation. Native caches
+contain physical records, never a reusable authorization decision. The complete
+classification, revocation, redaction, cancellation and two-reopen operation is
+specified in [NativePolicyEpochQualification](ResourceExecution/NativePolicyEpochQualification.md).
 
-### Cache acceptance and testing methodology
+REQ-CACHE-001 / AC-CACHE-001 and AC-CACHE-002 retain exact byte/entry
+reservation accounting for actual derived-memory consumers, including invalid
+requests, overflow, concurrent reservations and idempotent release. REQ-CACHE-002
+keeps ownership charged until retained readers release their bytes. The
+`CacheMemoryBudget*Tests` exercise that common budget; these requirements do not
+add a cache or admission limit to native database operations.
 
-AC-CACHE-011 adds the exact local provider binding under ADR-058. An actual
-opened store creates one configured-cold control with no index charge. Embedded
-or existing owners reject another configuration; held/same-thread storage gates
-return Busy, and permanent close cannot reopen. Real one-index-budget and
-pressure-release cases must progress without lost data. Withdraw in an actual
-observer must perform one lookup/charge/callback and publish no candidate;
-already admitted pinned readers retain charges until completion or exception.
-Actual Dispose publishes admission-close before draining its held reader; all
-owned charges release after the real drain. Dispose inside the same
-thread's actual Read/Commit callback is rejected with LockRecursionException before closing
-publication. Rejection leaves current eligibility, data and charges intact;
-external close and same-directory reopen must then succeed. The exact preserving
-repair, ownership and regression sequence are in ADR-058.
-Tests use genuine ZoneTree/files and
-CacheMemoryBudget in new
-`ZoneTreeCoordinatedPointCache*Tests.cs` and real fixture/support files under
-UnitTests/ResourceExecution, executed only by GitHub unit normal/scalar.
-
-Coordinated snapshots report effective eligibility and configured-cold state.
-Closed means permanent admission closure; retained pinned/index bytes remain
-visible until actual release. Current-helper counters reset on cold replacement
-and have no-helper gaps; Hits counts successful pins, including rejected pins.
-Store diagnostics remain cumulative logical read work across both cache hits and
-reads. Production composition remains cold.
-
-- AC-CACHE-001 passes only when one shared node pool atomically reserves validated
-  positive modeled bytes/nonnegative entries before optional owned allocations;
-  exact byte/entry caps succeed, one-over and overflow fail without mutation, and
-  real concurrent consumers cannot exceed either ceiling. Positive index charges
-  may reserve zero entries. Invalid limits/requests must reject explicitly.
-- AC-CACHE-002 requires idempotent/concurrent reservation release and coherent
-  snapshots after closure. Closing admission or retiring an entry cannot release
-  any charge while a reader/candidate still owns its bytes. Real public pool tests
-  and genuine pinned-store callbacks prove cleanup on success and exceptions.
-- AC-CACHE-003 requires privately owned positive bytes keyed by complete encoded
-  content, physical runtime and ReadGeneration. Every Apply invalidates before
-  mutation; unrelated commits retain coherent entries. Real staged
-  put/delete/reset/rejection, multi-key commits, tombstones/reinsert and replay
-  tests fail if staged or old data appears as a committed hit.
-- AC-CACHE-004 requires independent Clear before authority/tree replacement,
-  including warm keys absent from a snapshot and interrupted install. Corrupt or
-  stale snapshots preserve existing typed failure/authority behavior; known poison
-  cannot be bypassed. Same-cut compaction/export may retain entries. Real files,
-  recovery observers and cold reopen/disposal prove unchanged durable results.
-- AC-CACHE-005 requires caller-owned output copies, the existing scoped readonly
-  borrowing boundary and no allocated hit lease. Index/live/retired-pinned/fill
-  ownership stays charged; immutable key binding precedes callbacks. Observer and
-  consumer execute outside cache/budget locks, with finally release on throw,
-  cancellation and eviction. Real synchronized readers prove pin/duplicate-fill
-  lifetime rather than inferring it from final occupancy.
-- AC-CACHE-006 requires the sole StoreGate -> CacheGate -> budget order and no
-  cross-store callbacks/eviction. Admission checks current revision/generation,
-  makes at most16 local victim attempts and preserves results when full,
-  oversized, disabled, pin-limited or unavailable. Logical charges/observer order
-  and typed errors remain exact; unexpected invalidation failures fail closed.
-  Real diagnostics and shared-store pressure cases prove these conditions.
-- AC-CACHE-007 requires cache policy to reach each silo through ordinary Orleans
-  calls. Every silo-local cache starts cold, stays bounded and disposable, and
-  is never the authority for data, files or access. A silo without the current
-  policy stays cold; restart and activation movement start cold and neither move
-  data/files nor grant access. Every request still uses the original fresh
-  persisted authorization path. Instant atomic cache activation or revocation
-  across all silos is not promised. Actual grain/service SDK/MCP tests on a
-  replicated cluster are mandatory; embedded opt-in is separate.
-- AC-CACHE-008 requires fresh current authentication, credential time/revocation,
-  available canonical read cut, row/field policy and command replay fingerprint/incarnation checks on
-  every public operation. Coherent raw principal/StoredOutcome bytes may be
-  retained; grants, final authorized objects and negative lookups may not. Real
-  authority changes and cross-tenant/hidden-field/error flows must keep exact results.
-- AC-CACHE-009 requires closed data-free counters and repeated matched exact-SHA
-  on/off cold/warm/mixed/pressure GitHub profiles with the same topology/ACK/read
-  contracts. Retained modeled bytes, allocations/GC, per-node RSS, lookups,
-  latency, throughput, contention and backlog remain distinct. Missing or mixed
-  measurements fail any speed/RSS claim; a build is never measurement evidence.
-- AC-CACHE-010 requires the delivered-SHA full build/format/governance/analyzer,
-  normal/scalar TUnit, real process recovery and Docker/Aspire cluster SDK/MCP gates,
-  plus actual compatible coverage before claiming numeric thresholds. Skipped
-  suites, fake providers, local load or unpublished packages cannot count as pass.
-
-Automated sources live in matching ResourceExecution tests; storage/domain tests
-retain their original owners. Unit execution is through `build-and-tests.yml` normal/scalar;
-recovery and cluster execute their real process/container projects in that workflow.
-Lock order, secret-free metadata and physical ownership have a source-review
-exception requiring independent inspection; it does not replace cases.
-Rollback disables ephemeral admission, drains readers and removes optional joins
-together. No persisted format, authorization, ACK or production cluster migration.
+The generic retained-memory budget remains available to derived index owners.
+It does not sit between database callers and ZoneTree. Physical file ownership,
+joining active borrowers before closing native handles, and joining visitors before
+disposing their iterator are lifecycle obligations. They do not serialize independent
+database operations. See [NativeMvcc](StorageRecovery/NativeMvcc.md).
 
 ## Memory and performance requirements
 
@@ -166,7 +84,6 @@ qualify the current delivered source.
 | REQ-MP-006 / AC-MP-006; REQ-MP-002 / AC-MP-003 | `CanonicalJsonTests`; `CanonicalJsonAllocationTests`; `JsonPathTests`; `JsonTextProtocolTests`; `JsonTextAllocationTests`; `PreparedScalarTests` | Exact canonical bytes/fingerprints, pointer/scalar behavior, strict text/byte decoding, malformed-input cleanup, persisted retry and bounded allocation cases. These cover named serializer paths, not all public API transports. |
 | REQ-MP-006 / AC-MP-006; REQ-MSG-001 / AC-MSG-001; REQ-MSG-003 / AC-MSG-003 | `JsonTextQueueReplayTests` and `JsonTextSubscriptionReplayTests` | Actual receive/replay preserves delivery identity, rejects changed raw request/result data, rechecks current principal or subscription generation, and rejects stale lease/token use. This is a replay/lease subset, not the full messaging API or official-client proof. |
 | REQ-ROC-001..004 / AC-ROC-001..004 | `ReadOnlyCollectionContractTests`; `ReadOnlyCollectionValidationTests`; `ReadOnlyCollectionWireTests`; `CanonicalKeyContractTests`; relevant `ReadBudgetAllocationTests` typed owned-read case | Reflection/API shape, exact wire/fingerprint bytes, required collection validation and real independent owned buffers/read results. AC-ROC-005/006 caller-wide build/delivery gates remain separate. |
-| REQ-CACHE-001..004 / AC-CACHE-001..008, AC-CACHE-011 (only per-method subset) | `CacheMemoryBudget*Tests`; `CacheReadPermit*Tests`; `ZoneTreeCoordinatedPointCache*Tests`; `ZoneTreePointCache*Tests` | Actual budget, permit, ZoneTree cache, owner-gate, coherence, authorization and pin/retirement subflows as enumerated per case. No unit case here proves cross-node cache enablement on a replicated cluster, AC-CACHE-009 measured benefit or AC-CACHE-010 full qualification. |
 | REQ-RESOURCE-003/004 / AC-DBPROF-001..004 | `DatabasePhaseSchemaTests`; `DatabasePhaseBankTests`; `DatabasePhaseBankConcurrencyTests`; `DatabasePhaseArithmeticTests`; `DatabasePhaseAllocationTests` | Fixed bank shape, independent lanes, bounded arithmetic/contention/saturation, detached snapshots and configured primitive allocation. These do not prove all production phase boundaries, private capture or overhead/benefit (AC-DBPROF-005..008). |
 | REQ-RESOURCE-003 / REQ-CQ-013; AC-DBPROF-002 / AC-CQ-034/035 | `DatabasePhaseExecutionOptionsTests` | Actual central options binding/validation and bank-construction ordering, including malformed/unknown/scalar settings and allowed bounds. This does not qualify enabled production startup or profiling output. |
 | REQ-AISQL-003 / AC-AISQL-007 | `SqlToolDiscoveryTests.AcAiSql007SqlDiscoveryReportsDynamicEffectsAndCannotBeCalledRecursively` | The generic SQL tool is a catalog adapter with no fixed read or command kind, reports non-read-only, non-idempotent and destructive hints, and cannot be resolved as a canonical operation that SQL could call recursively. Unit evidence does not replace the official .NET/MCP cluster flow. |
@@ -179,7 +96,7 @@ AC; `ReadGateLifetimeTests.AcCq016_DisposalObservesRealGateBeforeLaterStoreUse`
 `ResourceProtocolFailureTests.AcRoc003*` (the body tests persisted invalid-resource
 outcome/replay, while AC-ROC-003 governs owned results/dense-vector efficiency).
 Do not resolve these by prefix or filename inference. The AC-RESOURCE-002 measured
-operation/resource requirement, cache-on benefit, DB phase
+operation/resource requirement, DB phase
 capture and all full delivered-source qualification remain open even when their
 unit subflows pass.
 

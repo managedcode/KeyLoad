@@ -10,7 +10,6 @@ internal sealed class KilledProcessFileReadinessTests
 
     [Test]
     [Arguments("owner.lock")]
-    [Arguments("commands.wal")]
     [Arguments(MetadataWalPath)]
     public async Task AcStorage012_WaitsUntilEachRealStoreFileHolderReleases(string relativePath)
     {
@@ -105,7 +104,6 @@ internal sealed class KilledProcessFileReadinessTests
     [Test]
     [NotInParallel]
     [Arguments("owner.lock")]
-    [Arguments("commands.wal")]
     public async Task AcStorage012_MissingRequiredOwnershipFileStillFails(string relativePath)
     {
         await using var fixture = new KilledProcessFileReadinessFixture();

@@ -17,7 +17,7 @@ internal static class SubscriptionCurrentEventIdentityTrial
         await Assert.That(originalReceipt.Mutations[0].Kind).IsEqualTo("appendEvents");
         db.Store.Dispose();
 
-        using var store = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(db.Directory), UnitExecutionOptions.StorageExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(),
             UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());

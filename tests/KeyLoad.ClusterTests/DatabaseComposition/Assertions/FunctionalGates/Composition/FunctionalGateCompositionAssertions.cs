@@ -32,7 +32,7 @@ internal static class FunctionalGateCompositionAssertions
         await SqlClusterProtocol.EqualAsync(new QueryRow[] { new(id, revision, json, false, []) }, page.Rows.ToArray());
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo(P.Point);
-        await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(minimum.Token.Position);
+        await FunctionalGateReadPositions.RequireAsync(context, minimum.Token.Position, token, page.CutPosition);
     }
 
     internal static async Task MissingAsync(FunctionalGateContext context, FunctionalGateCompositionState state,
@@ -45,7 +45,7 @@ internal static class FunctionalGateCompositionAssertions
             await Assert.That(page.Rows).IsEmpty();
             await Assert.That(page.Cursor).IsNull();
             await Assert.That(page.AccessPath).IsEqualTo(P.Point);
-            await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(minimum.Token.Position);
+            await FunctionalGateReadPositions.RequireAsync(context, minimum.Token.Position, token, page.CutPosition);
         }
         await AnchorAsync(context, token);
     }

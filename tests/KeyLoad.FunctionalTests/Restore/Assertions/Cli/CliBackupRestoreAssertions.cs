@@ -1,17 +1,16 @@
 using System.Text.Json;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 
 namespace KeyLoad.FunctionalTests.BackupRestore;
 
 internal static class CliBackupRestoreAssertions
 {
-    private const string EntryNameProperty = "name";
-    private const string EntryBytesProperty = "bytes";
-    private const string EntryPiecesProperty = "pieces";
     private const string RestoreNodeProperty = "nodeId";
     private const string RestoreIncarnationProperty = "incarnation";
     private const string RestoreDispatchPausedProperty = "dispatchPaused";
-    private static readonly string[] CanonicalEntryNames = ["backup.json", "commands.wal", "identity.json"];
+    private const string TreeDirectoryName = "tree";
+    private const string PlainTreeDirectoryName = "plain-tree";
 
     internal static async Task SuccessfulProcessAsync(CliBackupRestoreProcessResult result)
     {
@@ -33,24 +32,26 @@ internal static class CliBackupRestoreAssertions
         await Assert.That(result.ProcessDisposed).IsTrue();
     }
 
-    internal static async Task InspectionAsync(string json, IReadOnlyDictionary<string, byte[]> expectedFiles)
+    /// <summary>Requires the ZoneTree backup layout: the store identity plus the backed-up tree.</summary>
+    internal static async Task BackupLayoutAsync(IReadOnlyDictionary<string, byte[]> files)
     {
-        using var document = JsonDocument.Parse(json);
-        var entries = document.RootElement.EnumerateArray().ToArray();
-        var names = entries.Select(entry => entry.GetProperty(EntryNameProperty).GetString()).ToArray();
-        await Assert.That(names.SequenceEqual(CanonicalEntryNames)).IsTrue();
-        await Assert.That(expectedFiles.Keys.SequenceEqual(CanonicalEntryNames, StringComparer.Ordinal)).IsTrue();
-        foreach (var entry in entries)
-        {
-            var name = entry.GetProperty(EntryNameProperty).GetString();
-            var expected = name is null ? null : expectedFiles.GetValueOrDefault(name);
-            await Assert.That(expected is not null).IsTrue();
-            if (expected is not null)
-            {
-                await Assert.That(entry.GetProperty(EntryBytesProperty).GetInt64()).IsEqualTo(expected.LongLength);
-            }
-            await Assert.That(entry.GetProperty(EntryPiecesProperty).GetInt32() > 0).IsTrue();
-        }
+        await Assert.That(files.ContainsKey(ZoneTreePersistenceFormat.IdentityFileName)).IsTrue();
+        await Assert.That(files.Keys.Where(name => name != ZoneTreePersistenceFormat.IdentityFileName)
+            .All(name => name.StartsWith(TreeDirectoryName + Path.DirectorySeparatorChar, StringComparison.Ordinal)
+                || name.StartsWith(PlainTreeDirectoryName + Path.DirectorySeparatorChar, StringComparison.Ordinal)))
+            .IsTrue();
+        await Assert.That(files.Keys.Any(name => name.StartsWith(PlainTreeDirectoryName + Path.DirectorySeparatorChar,
+            StringComparison.Ordinal))).IsTrue();
+        await Assert.That(files.Count > 1).IsTrue();
+    }
+
+    internal static async Task ReceiptAsync(CliBackupRestoreProcessResult result, StoreIdentity identity)
+    {
+        using var receipt = JsonDocument.Parse(result.StandardOutput);
+        await Assert.That(receipt.RootElement.GetProperty(RestoreNodeProperty).GetGuid()).IsEqualTo(identity.NodeId);
+        await Assert.That(receipt.RootElement.GetProperty(RestoreIncarnationProperty).GetGuid()).IsEqualTo(identity.Incarnation);
+        await Assert.That(receipt.RootElement.GetProperty(RestoreDispatchPausedProperty).GetBoolean()).IsTrue();
+        await Assert.That(identity.DispatchPaused).IsTrue();
     }
 
     internal static async Task RestoredStoreAsync(CliBackupRestoreFixture fixture,
@@ -61,7 +62,7 @@ internal static class CliBackupRestoreAssertions
         var restoredIncarnation = receipt.RootElement.GetProperty(RestoreIncarnationProperty).GetGuid();
         await Assert.That(receipt.RootElement.GetProperty(RestoreDispatchPausedProperty).GetBoolean()).IsTrue();
         await Assert.That(restoredIncarnation).IsNotEqualTo(fixture.OriginalIdentity.Incarnation);
-        using var reopened = new ZoneTreeStore(new(destination), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(destination), UnitExecutionOptions.StorageExecution());
         await Assert.That(reopened.Identity.NodeId).IsEqualTo(restoredNode);
         await Assert.That(reopened.Identity.Incarnation).IsEqualTo(restoredIncarnation);
         await Assert.That(reopened.Identity.DispatchPaused).IsTrue();

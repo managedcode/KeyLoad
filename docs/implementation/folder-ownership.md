@@ -17,8 +17,7 @@ under its project root. Test themes belong below their role folders.
 | `CommandOutcomes` | Persisted command result records, partition selection and outcome keys | [Orleans execution](../Features/OrleansExecution.md) |
 | `BackgroundExecution` | Shared bounded worker contracts, storage reads and host registration | [Execution primitives](../Features/OrleansExecution/ExecutionPrimitives.md) |
 | `StorageReplication` | Storage copy contracts and coordination through Orleans calls | [Storage replication](../Features/StorageReplication.md) |
-| `StorageEngine` | ZoneTree configuration, reads, commits, WAL, checkpoints and joined disposal | [Storage recovery](../Features/StorageRecovery.md) |
-| `PointCache` | Bounded ZoneTree point-read cache and its admission/lifetime | [Resource execution](../Features/ResourceExecution.md) |
+| `StorageEngine` | ZoneTree configuration, reads, commits, write-ahead log sync and joined disposal | [Storage recovery](../Features/StorageRecovery.md) |
 | `StorageExecution` | Core storage apply and stored-command access | [Storage recovery](../Features/StorageRecovery.md) |
 | `CommandExecution` | Core command creation, input selection, fingerprints and validation | [Internal serialization](../Features/InternalSerialization.md) |
 
@@ -45,7 +44,7 @@ structural naming review, not a behavioral audit of every implementation.
 | `Messaging`, `EventStreams`, `ChangeFeeds` | Queues and workflows, durable event records, change cursors and projection delivery |
 | `ClientApi`, `QueryExecution`, `DatabaseComposition` | Public transports, query compilation/execution and cross-model operations |
 | `ResourceExecution`, `Storage`, `InternalSerialization` | Shared resource admission/effects, storage interfaces/codecs and internal binary serialization |
-| `Restore` | Backup archive creation, verification and restoration; the existing specification is `BackupRestore.md` |
+| `Restore` | ZoneTree backup creation, restoration and file-storage copy; the existing specification is `BackupRestore.md` |
 | `StorageRecovery` in tests and specifications | Fault, recovery and storage correctness qualification; the implementation owners are listed above |
 | `BenchmarkComparisons`, `TestInfrastructure`, `CodeQuality`, `ReleaseDelivery`, `RepositoryGovernance` | Comparison workloads, test orchestration, compiler/quality rules, publication tooling and repository checks |
 

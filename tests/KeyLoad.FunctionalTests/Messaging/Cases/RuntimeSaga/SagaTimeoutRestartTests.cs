@@ -41,6 +41,12 @@ internal sealed class SagaTimeoutRestartTests(SagaTimeoutFixture fixture)
         await SagaTimeoutRestartWork.WaitForShardsToSettleAsync(fixture,
             [recovered.Shard], cancellationToken);
         await AssertTimeoutEffectAsync(saga);
+        var following = SagaTimeoutTestData.CreateWaitingSaga(fixture, SagaTimeoutTestData.SagaPrincipalId);
+        var nextJob = await fixture.JobHarness.ScheduleAsync(following.Hint, following.Deadline, cancellationToken);
+        var nextShards = await fixture.JobHarness.CaptureOwnedShardsAsync(nextJob.DueTime, cancellationToken);
+        await SagaTimeoutRestartWork.WaitForTimeoutAsync(fixture, following, nextJob, cancellationToken);
+        await SagaTimeoutRestartWork.WaitForShardsToSettleAsync(fixture, nextShards, cancellationToken);
+        await AssertTimeoutEffectAsync(following);
     }
 
     private async Task AssertTimeoutEffectAsync(SagaTimeoutCase saga)

@@ -19,10 +19,9 @@ internal static class PreparationOwnershipAssertions
         return rows.ToArray();
     });
 
-    internal static async Task ConservedAsync(O owner, long position, byte[] journal, string[] image)
+    internal static async Task ConservedAsync(O owner, long position, string[] image)
     {
         await Assert.That(owner.Store.Position).IsEqualTo(position);
-        await Assert.That(owner.Journal.SequenceEqual(journal)).IsTrue();
         await Assert.That(Image(owner).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
     }
 

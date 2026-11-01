@@ -6,8 +6,8 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal static class RuntimeJournalReaderRepairBackupContinuation
 {
-    private const int SourceRows = 2;
-    private const int RestoredRows = 3;
+    private const int SourceRows = 3;
+    private const int RestoredRows = 4;
     private const long RestoreIncrement = 1;
     private const long HealthyIncrement = 1;
     private static byte[] RestoredValue => [0x52, 0x4A, 0x33, 0xC9];
@@ -17,20 +17,13 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
     {
         token.ThrowIfCancellationRequested();
         await RequireRowsAsync(source, restored: false, continued: false);
-        source.SetDispatchPaused(true);
-        var paused = original with
-        {
-            DispatchPaused = true
-        };
-        await RequireIdentityAsync(paused, source.Identity);
+        await RequireIdentityAsync(original, source.Identity);
         await Assert.That(source.Position).IsEqualTo(position);
-        await Assert.That(source.CreateBackup(fixture.BackupPath, token)).IsEqualTo(position);
+        await Assert.That(await source.CreateBackupAsync(fixture.BackupPath, token)).IsEqualTo(position);
         var backup = await RuntimeJournalReaderFixture.ReadInventoryAsync(fixture.BackupPath);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupPath, UnitExecutionOptions.StorageExecution(), token);
-        await Assert.That(verified.Position).IsEqualTo(position);
-        await RequireIdentityAsync(paused, verified.Identity);
         var incarnation = Guid.NewGuid();
-        var restored = ZoneTreeStore.Restore(fixture.BackupPath, fixture.RestorePath, UnitExecutionOptions.StorageExecution(), incarnation, cancellationToken: token);
+        var restored = await ZoneTreeStore.RestoreAsync(fixture.BackupPath, fixture.RestorePath,
+            UnitExecutionOptions.StorageExecution(), incarnation, cancellationToken: token);
         await Assert.That(restored.NodeId).IsNotEqualTo(original.NodeId);
         await Assert.That(restored.Incarnation).IsEqualTo(incarnation);
         await Assert.That(restored.SigningKey.Span.SequenceEqual(original.SigningKey.Span)).IsFalse();
@@ -40,7 +33,7 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
         await ColdAsync(fixture, restored, position + RestoreIncrement + HealthyIncrement);
         await ColdAsync(fixture, restored, position + RestoreIncrement + HealthyIncrement);
         await RequireBackupAsync(fixture, backup, token);
-        await RequireIdentityAsync(paused, source.Identity);
+        await RequireIdentityAsync(original, source.Identity);
         await Assert.That(source.Position).IsEqualTo(position);
         await RequireRowsAsync(source, restored: false, continued: false);
     }
@@ -68,7 +61,7 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
 
     private static async Task RequireIdentityAsync(StoreIdentity expected, StoreIdentity actual)
     {
-        await WalFileFixture.AssertPreservedIdentity(expected, actual);
+        await StoreFileFixture.AssertPreservedIdentity(expected, actual);
         await Assert.That(actual.FormatVersion).IsEqualTo(expected.FormatVersion);
         await Assert.That(actual.MinimumReaderContract).IsEqualTo(expected.MinimumReaderContract);
     }
@@ -82,9 +75,9 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
         };
         if (restored)
         {
-            expected.Add(Convert.ToHexString(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.DispatchPausedKey)), OrleansSerialization.Serialize(true));
+            expected.Add(Convert.ToHexString(StoreFileFixture.DispatchPausedKey), OrleansSerialization.Serialize(true));
         }
+        expected.Add(Convert.ToHexString(StoreFileFixture.PositionKey), StoreFileFixture.PositionValue(store.Position));
         var page = store.Read(view => view.Scan([], RestoredRows + 1));
         await Assert.That(page.HasMore).IsFalse();
         await Assert.That(page.Records.Length).IsEqualTo(restored ? RestoredRows : SourceRows);

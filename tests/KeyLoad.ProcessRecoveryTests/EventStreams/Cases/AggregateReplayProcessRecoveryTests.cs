@@ -10,9 +10,7 @@ namespace KeyLoad.ProcessRecoveryTests.EventStreams;
 internal sealed class AggregateReplayProcessRecoveryTests
 {
     [Test]
-    [Arguments(CommitStage.HeaderWritten, 0)]
-    [Arguments(CommitStage.PayloadWritten, 0)]
-    [Arguments(CommitStage.JournalFlushed, 0)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0)]
     [Arguments(CommitStage.MutationApplied, 0)]
     [Arguments(CommitStage.ApplyCompleted, 0)]
     public async Task AcEvent008SnapshotAndOutcomeRecoverAtomicallyWithStableRetry(CommitStage stage, int index)
@@ -62,7 +60,7 @@ internal sealed class AggregateReplayProcessRecoveryTests
     private static async Task AssertRecoveredSnapshotAndRetryAsync(string root, CommitStage stage,
         CancellationToken cancellationToken)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = new DatabaseEngine(store, new AuthorizationPolicy(), RecoveryExecutionOptions.DatabaseLimits(), RecoveryExecutionOptions.DueWork(), RecoveryExecutionOptions.EventSource(), RecoveryExecutionOptions.Messaging(), RecoveryExecutionOptions.GraphExecution(), RecoveryExecutionOptions.ChangeFeedExecution(), RecoveryExecutionOptions.RuntimeClaimsExecution(), RecoveryExecutionOptions.TimeSeriesExecution());
         var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, AggregateReplayCrashScenario.OperationFile), cancellationToken));
@@ -70,9 +68,13 @@ internal sealed class AggregateReplayProcessRecoveryTests
         var recoveredOutcome = OutcomeStoreOracle.Read(database.Store, operation)?.Get<CommitReceipt>();
         var observedCommitted = before.Snapshot is not null;
         await Assert.That(recoveredOutcome is not null).IsEqualTo(observedCommitted);
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(observedCommitted).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(observedCommitted).IsFalse();
         }
         if (before.Snapshot is not null)
         {
@@ -153,7 +155,7 @@ internal sealed class AggregateReplayProcessRecoveryTests
         }
         if (Directory.Exists(root))
         {
-            await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
+            await StorageTrialCleanup.DeleteTrialAsync(root, cancellationToken);
         }
     }
 }

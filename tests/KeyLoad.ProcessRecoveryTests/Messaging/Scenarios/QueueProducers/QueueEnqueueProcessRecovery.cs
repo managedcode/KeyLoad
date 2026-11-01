@@ -10,7 +10,7 @@ internal static class QueueEnqueueProcessRecovery
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var owner = QueueLifecycleRecoveryAssertions.Open(store);
         var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.OperationFile), token));
         var target = OrleansSerialization.Deserialize<CommitToken>(await File.ReadAllBytesAsync(Path.Combine(root, QueueEnqueueCrashProtocol.TargetFile), token));
@@ -43,9 +43,13 @@ internal static class QueueEnqueueProcessRecovery
             await QueueEnqueueProcessAssertions.ReceiptAsync(outcome.Value, command, target);
             await QueueEnqueueProcessAssertions.InitialAsync(owner, store, command);
         }
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(outcome).IsNotNull();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(outcome).IsNull();
         }
         var result = owner.Apply(operation);
         await Assert.That(store.Position).IsEqualTo(physicalTarget);
@@ -66,7 +70,7 @@ internal static class QueueEnqueueProcessRecovery
         var position = store.Position;
         var identity = store.Identity;
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var owner = QueueLifecycleRecoveryAssertions.Open(cold);
         await QueueEnqueueProcessValueAssertions.IdentityAsync(cold.Identity, identity);
         await Assert.That(cold.Position).IsEqualTo(position);

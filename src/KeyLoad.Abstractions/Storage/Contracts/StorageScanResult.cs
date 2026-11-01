@@ -1,6 +1,6 @@
 namespace KeyLoad.Storage;
 
-/// <summary>Describes a completed gate-scoped range visit without retaining record buffers.</summary>
+/// <summary>Describes a completed callback-scoped range visit without retaining record buffers.</summary>
 /// <param name="Records">Number of logical records delivered to the visitor.</param>
 /// <param name="HasMore">Whether a record-limit lookahead found another logical record.</param>
 /// <param name="StoppedByVisitor">Whether the visitor explicitly stopped the traversal.</param>

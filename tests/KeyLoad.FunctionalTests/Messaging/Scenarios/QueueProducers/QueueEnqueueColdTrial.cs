@@ -27,8 +27,7 @@ internal static class QueueEnqueueColdTrial
         await QueueEnqueueColdAssertions.RequireInitialAsync(fixture.Database, fixture.Partition, scheduledAt);
         var image = QueueEnqueueColdAssertions.LaneBytes(fixture.Store, fixture.Partition);
         fixture.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await ReplayResultAssertions.Same<CommitReceipt>(Apply(database, command, QueueEnqueueColdProtocol.Root, token), original);
         await Assert.That(QueueEnqueueColdAssertions.LaneBytes(reopened, fixture.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);
@@ -49,7 +48,7 @@ internal static class QueueEnqueueColdTrial
         await QueueEnqueueColdAssertions.RequireHealthyAsync(database, fixture.Partition, scheduledAt);
         var healthyImage = QueueEnqueueColdAssertions.LaneBytes(reopened, fixture.Partition);
         reopened.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
         await ReplayResultAssertions.Same<CommitReceipt>(Apply(restored, command, QueueEnqueueColdProtocol.Root, token), original);
         await ReplayResultAssertions.Same<CommitReceipt>(Apply(restored, healthy, QueueEnqueueColdProtocol.Publisher, token), healthyResult);

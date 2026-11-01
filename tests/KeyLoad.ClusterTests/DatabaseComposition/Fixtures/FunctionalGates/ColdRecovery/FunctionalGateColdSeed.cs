@@ -42,7 +42,7 @@ internal static class FunctionalGateColdSeed
             var topic = await context.SdkAsync(context.Reader.Sdk.ReadEventSourceAsync(new(source, Limit: 2), token));
             var message = await context.SdkAsync(context.Reader.Sdk.InspectAsync(new(new(context.Partition,
                 FunctionalGateColdProtocol.Resource("queue", index)), FunctionalGateColdProtocol.Id), token));
-            await FunctionalGateColdReadAssertions.InitialHistoryAsync(context, index, reference, stream, topic, message, receipt.Token.Position, beforeWrite);
+            await FunctionalGateColdReadAssertions.InitialHistoryAsync(context, index, reference, stream, topic, message, receipt.Token.Position, beforeWrite, token);
             models.Add(new(index, command, receipt, create, definition, insert, inserted, blob,
                 stream.Events.Single(), topic.Events.Single(), message));
         }

@@ -73,14 +73,14 @@ internal static class CompositeIndexCrashOperations
         CanonicalCrashBoundary boundary)
     {
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = Apply(database, CompositeIndexCrashContract.Partition, CompositeIndexCrashContract.FaultCommandText,
             new PutDocument(CompositeIndexCrashContract.Collection, CompositeIndexCrashContract.ConflictId,
                 CompositeIndexCrashContract.FaultInsertJson, EmptyRevision),
             new PatchDocument(CompositeIndexCrashContract.Collection, CompositeIndexCrashContract.SecondId,
                 [new(CompositeIndexCrashContract.LabelPath, PatchKind.Set, JsonSerializer.Serialize(CompositeIndexCrashContract.ValueTheta)),
                 new(CompositeIndexCrashContract.RankPath, PatchKind.Set, InflightRankPatchJson)], SecondRevision)).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     internal static void ApplyHealthyFollowUp(DatabaseEngine database)

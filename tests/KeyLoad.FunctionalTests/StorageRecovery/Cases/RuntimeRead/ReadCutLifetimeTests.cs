@@ -178,13 +178,13 @@ internal sealed class ReadCutLifetimeTests
             tx.Put(ReadCutFixture.Key(RecordId), ReadCutFixture.Value(RecordValue));
             return true;
         });
-        var failure = Assert.ThrowsExactly<LockRecursionException>(() => fixture.Store.Read(_ =>
+        var failure = Assert.ThrowsExactly<InvalidOperationException>(() => fixture.Store.Read(_ =>
         {
             fixture.Store.Dispose();
             return true;
         }));
         await Assert.That(failure.Message.Length).IsGreaterThan(0);
-        var writeFailure = Assert.ThrowsExactly<LockRecursionException>(() => fixture.Store.Commit((_, _) =>
+        var writeFailure = Assert.ThrowsExactly<InvalidOperationException>(() => fixture.Store.Commit((_, _) =>
         {
             fixture.Store.Dispose();
             return true;

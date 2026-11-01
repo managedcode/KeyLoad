@@ -42,8 +42,7 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         var identity = OrleansSerialization.Serialize(fixture.Store.Identity);
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(first);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, bytes, position, identity);
         await SubscriptionReceiveSlotAuthorityAssertions.RefusalAsync(db, first, request, token);
@@ -79,8 +78,7 @@ internal static class SubscriptionReceiveSlotAuthorityFlow
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
         token.ThrowIfCancellationRequested();
-        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(second);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, bytes, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.SourceAsync(cold, second, group.Source, source);

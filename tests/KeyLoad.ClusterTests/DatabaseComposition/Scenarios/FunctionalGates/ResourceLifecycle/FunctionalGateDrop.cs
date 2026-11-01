@@ -37,8 +37,7 @@ internal static class FunctionalGateDrop
             await SqlClusterProtocol.EqualAsync(P.Definition(context.Partition, index),
                 await FunctionalGateRelationalCalls.SqlSdkAsync<ResourceDefinition>(context,
                     context.Administrator, create, token));
-            var expectedLifetime = FunctionalGateCreationLifetime.Create(context, create.CommandId!.Value,
-                P.Definition(context.Partition, index), table: true);
+            var expectedLifetime = FunctionalGateCreationLifetime.Create(create.CommandId!.Value);
             tables.Add(await RecreateAsync(context, index, references[index], parents[index], drops[index], expectedLifetime, token));
         }
         var state = new FunctionalGateDropState(original, receipt, tables.ToImmutable());

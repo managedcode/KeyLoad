@@ -61,7 +61,7 @@ internal static class TextOnlineCrashScenario
                 seeded.Request.Collection, seeded.Request.Field, seeded.Request.IndexGeneration,
                 seeded.Request.NodeId, seeded.Request.Placement), seeded.Receipt, seeded.Mutation);
             await TextIncrementalEvidenceFiles.WriteAsync(root, OriginalFile, original, CancellationToken.None);
-            await RecoveryProcessPause.WaitForKillAsync();
+            await RecoveryProcessPause.WaitForKillAsync(runtime.Canonical.Store);
             return;
         }
         var retained = await TextIncrementalEvidenceFiles.ReadAsync<TextOnlineCrashOriginal>(root,

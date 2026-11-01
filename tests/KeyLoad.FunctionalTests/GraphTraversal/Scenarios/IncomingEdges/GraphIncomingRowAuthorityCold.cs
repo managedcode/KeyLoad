@@ -19,8 +19,7 @@ internal static class GraphIncomingRowAuthorityCold
         var failures = new List<Exception>();
         try
         {
-            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution,
-                UnitExecutionOptions.PointCacheExecution(), timeProvider: database.Database.EvaluationClock);
+            using var cold = new ZoneTreeStore(new(database.Directory), database.StorageExecution, timeProvider: database.Database.EvaluationClock);
             try
             {
                 var engine = CreateOriginalEngine(database, cold);

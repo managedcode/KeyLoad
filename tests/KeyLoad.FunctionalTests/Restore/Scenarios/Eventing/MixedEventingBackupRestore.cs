@@ -5,17 +5,20 @@ namespace KeyLoad.FunctionalTests.BackupRestore;
 
 internal static class MixedEventingBackupRestore
 {
-    internal static (StoreIdentity Identity, long Position) Capture(TestDatabase source, string backup, CancellationToken token)
+    internal static async Task<(StoreIdentity Identity, long Position)> CaptureAsync(TestDatabase source, string backup,
+        CancellationToken token)
     {
-        source.Store.CreateBackup(backup, token);
-        return ZoneTreeStore.VerifyBackup(backup, source.StorageExecution, token);
+        var identity = source.Store.Identity;
+        var position = await source.Store.CreateBackupAsync(backup, token);
+        await Assert.That(position).IsEqualTo(source.Store.Position);
+        return (identity, position);
     }
 
     internal static async Task<long> RestoreAsync(TestDatabase source, (StoreIdentity Identity, long Position) capture,
-        string unpacked, string destination, CancellationToken token)
+        string backup, string destination, CancellationToken token)
     {
         await Assert.That(capture.Identity.NodeId).IsEqualTo(source.Store.Identity.NodeId);
-        var identity = ZoneTreeStore.Restore(unpacked, destination, source.StorageExecution, cancellationToken: token);
+        var identity = await ZoneTreeStore.RestoreAsync(backup, destination, source.StorageExecution, cancellationToken: token);
         await Assert.That(identity.Incarnation).IsNotEqualTo(capture.Identity.Incarnation);
         await Assert.That(identity.NodeId).IsNotEqualTo(capture.Identity.NodeId);
         await Assert.That(identity.SigningKey.Span.SequenceEqual(capture.Identity.SigningKey.Span)).IsFalse();

@@ -1,13 +1,7 @@
 using ManagedCode.Communication.CQRS;
-using ManagedCode.Orleans.Graph.Attributes;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
-[AllowClientCall]
-[AllowGrainCall(typeof(ICqrsLeafGrain), AllowAllMethods = false,
-    SourceMethods = new string[] { nameof(AllowedAsync) },
-    TargetMethods = new string[] { nameof(ICqrsLeafGrain.ObserveAsync) })]
-[AllowGrainCall(typeof(ICqrsObservationSinkGrain), AllowAllMethods = true)]
 [global::Orleans.CodeGeneration.Version(1)]
 internal interface ICqrsStreamGrain : global::Orleans.IGrainWithGuidKey
 {

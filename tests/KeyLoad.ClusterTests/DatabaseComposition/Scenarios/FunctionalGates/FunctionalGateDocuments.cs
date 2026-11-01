@@ -30,7 +30,7 @@ internal static class FunctionalGateDocuments
             var actual = await context.SdkAsync(context.Administrator.Sdk.ConfigureResourceAsync(commandId,
                 new(context.Partition.TenantId, context.Partition.DatabaseId, resource), token));
             await FunctionalGateDocumentsReads.EqualAsync(resource, actual);
-            FunctionalGateCreationLifetime.Expect(context, commandId, resource, table: false);
+            FunctionalGateCreationLifetime.Expect(context, commandId, resource);
         }
         await FunctionalGateDocumentsReads.EqualAsync(new EntityRef(context.Partition, "gate_docs_0", "anchor"), context.Anchor);
         var mutation = new PutDocument(context.Anchor.Collection, context.Anchor.Id,

@@ -27,9 +27,13 @@ internal static class SharedDomainRecoveryOracle
         var original = SharedDomainCorpus.Create(Tenant, Database)[FirstIndex];
         var recovered = OutcomeStoreOracle.Read(store, input.Original);
         var committed = recovered is not null;
-        if (stage is CommitStage.JournalFlushed or CommitStage.MutationApplied or CommitStage.ApplyCompleted)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(committed).IsTrue();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(committed).IsFalse();
         }
         await Assert.That(store.Position).IsEqualTo(input.SeedPosition + (committed ? FirstRevision : NoRevision));
         await Assert.That(database.LastApplied).IsEqualTo(SharedDomainRecoverySeed.AppliedPosition(input)

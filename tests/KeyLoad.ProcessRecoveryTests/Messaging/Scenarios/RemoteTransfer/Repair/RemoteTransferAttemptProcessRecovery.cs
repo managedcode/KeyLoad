@@ -18,13 +18,13 @@ internal static class RemoteTransferAttemptProcessRecovery
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var database = RemoteTransferAttemptRecoveryDatabase.Open(store);
                 await RemoteTransferAttemptRecoveryCut.AssertAsync(store, database, advance, stage);
                 advanced = database.ApplyEmbedded(operation, token).Get<CommitReceipt>();
-                await RemoteTransferAttemptRecoveryCut.AssertAsync(store, database, advance, CommitStage.ApplyCompleted);
+                await RemoteTransferAttemptRecoveryCut.AssertAsync(store, database, advance, CommitStage.WriteAheadLogSynced);
                 result = await RemoteTransferAttemptRecoveryContinuation.CompleteAsync(store, database, advance, failedAccept, failedBytes, token);
             }, failures).ConfigureAwait(false);
         }, failures).ConfigureAwait(false);

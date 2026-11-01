@@ -72,8 +72,7 @@ internal sealed class SampleChunkPartialRetentionFixture : IDisposable
     internal void Reopen()
     {
         Store.Dispose();
-        var next = new ZoneTreeStore(new(original.Directory), original.StorageExecution,
-            UnitExecutionOptions.PointCacheExecution(), timeProvider: Clock);
+        var next = new ZoneTreeStore(new(original.Directory), original.StorageExecution, timeProvider: Clock);
         opened.Add(next);
         Store = next;
         Owner = original.CreateConfiguredDatabase(next);

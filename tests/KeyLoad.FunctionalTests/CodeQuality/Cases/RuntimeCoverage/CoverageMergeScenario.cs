@@ -10,11 +10,11 @@ internal static class CoverageMergeScenario
     private const string RepeatedInputProperty = "repeatedInputInvariant";
     private const string ProductQualificationProperty = "productQualification";
     private const string BackupReportName = "backup.coverage";
-    private const string PackReportName = "pack.coverage";
+    private const string CopyReportName = "copy.coverage";
     private const string RestoreReportName = "restore.coverage";
     private const string MergeOutputName = "merge-output";
     private const string BackupCliImageName = "backup-cli";
-    private const string PackCliImageName = "pack-cli";
+    private const string CopyCliImageName = "copy-cli";
     private const string RestoreCliImageName = "restore-cli";
     private const string CliDeploymentDirectoryName = "cli-deployment";
 
@@ -46,31 +46,29 @@ internal static class CoverageMergeScenario
         var coverageRoot = Path.Combine(fixture.Root, CoverageDirectoryName);
         Directory.CreateDirectory(coverageRoot);
         var backupReport = Path.Combine(coverageRoot, BackupReportName);
-        var packReport = Path.Combine(coverageRoot, PackReportName);
+        var copyReport = Path.Combine(coverageRoot, CopyReportName);
         var restoreReport = Path.Combine(coverageRoot, RestoreReportName);
-        var backupFiles = await RunBackupAndPackAsync(fixture, options, ownedRoot, source,
-            backupReport, packReport, cancellationToken).ConfigureAwait(false);
+        var backupFiles = await RunBackupAndCopyAsync(fixture, options, ownedRoot, source,
+            backupReport, copyReport, cancellationToken).ConfigureAwait(false);
         await RunRestoreAsync(fixture, options, ownedRoot, source, restoreReport, cancellationToken).ConfigureAwait(false);
         await MergeAndAssertAsync(fixture, options, coverageRoot,
-            [backupReport, packReport, restoreReport], backupFiles, cancellationToken);
+            [backupReport, copyReport, restoreReport], backupFiles, cancellationToken);
     }
 
-    private static async Task<SortedDictionary<string, byte[]>> RunBackupAndPackAsync(CliBackupRestoreFixture fixture,
+    private static async Task<SortedDictionary<string, byte[]>> RunBackupAndCopyAsync(CliBackupRestoreFixture fixture,
         CoverageMergeProcess.ToolingOptions options, string ownedRoot,
-        CoverageDeploymentSnapshot source, string backupReport, string packReport,
+        CoverageDeploymentSnapshot source, string backupReport, string copyReport,
         CancellationToken cancellationToken)
     {
         var backup = await CoverageCliCollector.CollectCliAsync(options, ownedRoot, source, BackupCliImageName,
             ["backup", fixture.SourceDirectory, fixture.BackupDirectory], backupReport, cancellationToken);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(backup.AsCliResult());
         var backupFiles = await CliBackupRestoreAssertions.CaptureFilesAsync(fixture.BackupDirectory, cancellationToken);
-        var pack = await CoverageCliCollector.CollectCliAsync(options, ownedRoot, source, PackCliImageName,
-            ["pack-backup", fixture.BackupDirectory, fixture.ArtifactPath], packReport, cancellationToken);
-        await CliBackupRestoreAssertions.SuccessfulProcessAsync(pack.AsCliResult());
-        var inspect = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),
-            ["inspect-artifact", fixture.ArtifactPath], cancellationToken);
-        await CliBackupRestoreAssertions.SuccessfulProcessAsync(inspect);
-        await CliBackupRestoreAssertions.InspectionAsync(inspect.StandardOutput, backupFiles);
+        await CliBackupRestoreAssertions.BackupLayoutAsync(backupFiles);
+        var copy = await CoverageCliCollector.CollectCliAsync(options, ownedRoot, source, CopyCliImageName,
+            ["copy-backup", fixture.BackupDirectory, fixture.CopiedBackupDirectory], copyReport, cancellationToken);
+        await CliBackupRestoreAssertions.SuccessfulProcessAsync(copy.AsCliResult());
+        await CliBackupRestoreAssertions.FilesEqualAsync(backupFiles, fixture.CopiedBackupDirectory, cancellationToken);
         return backupFiles;
     }
 

@@ -28,7 +28,7 @@ internal static class QueueScheduledAuthorityTrial
         var damaged = await DamageAndRefuseAsync(fixture, state, original, exact, due, key);
         fixture.Store.Dispose();
         QueuePendingAuthorityCut terminal;
-        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution()))
+        using (var cold = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution))
         {
             var owner = fixture.CreateConfiguredDatabase(cold);
             await QueuePendingAuthorityHistory.SameAsync(cold, damaged);
@@ -54,7 +54,7 @@ internal static class QueueScheduledAuthorityTrial
             await QueueScheduledAuthorityHistory.ReplayAsync(owner, cold, state);
             terminal = QueuePendingAuthorityHistory.Capture(cold);
         }
-        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), fixture.StorageExecution);
         var reopened = fixture.CreateConfiguredDatabase(second);
         await QueuePendingAuthorityHistory.SameAsync(second, terminal);
         await QueueScheduledAuthorityImage.TerminalAsync(reopened, second, state, healthy: true);

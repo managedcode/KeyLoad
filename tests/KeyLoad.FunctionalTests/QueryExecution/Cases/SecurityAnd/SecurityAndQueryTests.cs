@@ -88,28 +88,6 @@ internal sealed class SecurityAndQueryTests
         await ProjectRowAuthorityContinuation.RunAsync(db, TestContext.Current!.Execution.CancellationToken);
     }
     [Test]
-    public async Task CompactionPreservesCursorAndReplicaInstallInvalidatesItsGeneration()
-    {
-        using var db = new TestDatabase();
-        db.Configure("orders", ResourceKind.Collection);
-        db.Commit(new PutDocument("orders", "a", "{}"), new PutDocument("orders", "b", "{}"));
-        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
-        var request = new QueryRequest(db.Partition, "SELECT TOP (1) * FROM orders", AllowFullScan: true);
-        var first = engine.Execute("root", request);
-        await Assert.That(first.Cursor).IsNotNull();
-        var path = Path.Combine(db.Directory, "replica.snapshot");
-        var applied = db.Database.LastApplied;
-        db.Store.CreateSnapshot(path);
-        db.Store.Compact();
-        await Assert.That(System.Linq.Enumerable.Single(engine.Execute("root", request with
-        {
-            Cursor = first.Cursor
-        }).Rows).EntityId).IsEqualTo("b");
-        db.Store.InstallSnapshot(path, applied);
-        await Assert.That(db.Store.Position).IsEqualTo(first.CutPosition);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", request with { Cursor = first.Cursor })).Code).IsEqualTo(ErrorCode.CursorExpired);
-    }
-    [Test]
     public async Task SqlUsesTypedParametersThreeValuedNullAndDeterministicOrdering()
     {
         using var db = new TestDatabase();

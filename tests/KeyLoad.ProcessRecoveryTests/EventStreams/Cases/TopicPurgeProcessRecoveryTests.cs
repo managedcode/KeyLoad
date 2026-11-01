@@ -4,14 +4,10 @@ namespace KeyLoad.ProcessRecoveryTests.EventStreams;
 internal sealed class TopicPurgeProcessRecoveryTests
 {
     [Test]
-    [Arguments(CommitStage.HeaderWritten, 0, false)]
-    [Arguments(CommitStage.PayloadWritten, 0, false)]
-    [Arguments(CommitStage.JournalFlushed, 0, false)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0, false)]
     [Arguments(CommitStage.MutationApplied, 0, false)]
     [Arguments(CommitStage.ApplyCompleted, 0, false)]
-    [Arguments(CommitStage.HeaderWritten, 0, true)]
-    [Arguments(CommitStage.PayloadWritten, 0, true)]
-    [Arguments(CommitStage.JournalFlushed, 0, true)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0, true)]
     [Arguments(CommitStage.MutationApplied, 0, true)]
     [Arguments(CommitStage.ApplyCompleted, 0, true)]
     public async Task AcEventRetention004AdmittedPurgeRecoversOneWholeSuccessOrPinnedReceipt(CommitStage stage, int index, bool pinned)

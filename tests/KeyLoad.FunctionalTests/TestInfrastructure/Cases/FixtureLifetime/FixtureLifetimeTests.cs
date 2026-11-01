@@ -83,7 +83,7 @@ internal sealed class FixtureLifetimeTests
         var sentinel = Path.Combine(directory, SentinelFileName);
         try
         {
-            using var owner = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var owner = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
             await File.WriteAllTextAsync(sentinel, SentinelContent);
             owner.Commit((transaction, _) =>
             {

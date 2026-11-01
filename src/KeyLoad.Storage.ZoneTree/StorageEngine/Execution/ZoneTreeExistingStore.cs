@@ -48,9 +48,7 @@ internal static class ZoneTreeExistingStore
         {
             throw new ArgumentException(InvalidScope, nameof(options));
         }
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.MaxFrameBytes);
-        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(options.MaxSnapshotBytes);
-        if (options.EmbeddedPointCache is not null || options.FaultObserver is not null)
+        if (options.FaultObserver is not null)
         {
             throw new ArgumentException(InvalidOptions, nameof(options));
         }

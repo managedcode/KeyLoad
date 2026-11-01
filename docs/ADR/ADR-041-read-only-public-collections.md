@@ -42,9 +42,9 @@ AC-ROC-002/004/005 and AC-PSW-002..004 restore the nullable-null contract at the
 owning producer: Delete is projected by ZoneTreeTransaction.PrepareChanges as an
 explicit nullable null, never a live empty value (real-store
 StorageRecovery/TombstoneValueTests). Keep legitimate empty Put, reader/replay/
-format/version, cache/copy and flush/apply order, and null frame overhead=2
-identical. WAL byte equality, borrowed/owned absence, range, empty value,
-reopen and snapshot counts are mandatory. Rollback reverts the projection and
+format/version, cache/copy and apply order, and null value overhead=2
+identical. Borrowed/owned absence, range, empty value and reopen checks are
+mandatory. Rollback reverts the projection and
 keeps regressions.
 
 Strict converter registration lives in JsonDefaults and new Abstractions

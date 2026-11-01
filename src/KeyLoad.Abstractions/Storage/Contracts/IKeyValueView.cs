@@ -22,14 +22,14 @@ public interface IKeyValueView
     /// <returns>Owned key/value copies and whether another live record exists.</returns>
     ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null);
 
-    /// <summary>Reads borrowed bytes inside the current storage gate, without an intermediate value copy.</summary>
+    /// <summary>Reads borrowed bytes inside the current storage callback, without an intermediate value copy.</summary>
     /// <param name="key">Owned lookup key supplied by the caller.</param>
     /// <param name="reader">Callback that cannot retain the borrowed span.</param>
     /// <param name="observer">Optional work charge before invoking the reader, including missing lookups.</param>
     /// <returns>True when a stored value was found.</returns>
     bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null);
 
-    /// <summary>Visits ordered records inside the current storage gate and checks work before copying.</summary>
+    /// <summary>Visits ordered records inside the current storage callback and checks work before copying.</summary>
     /// <param name="prefix">Required key prefix.</param>
     /// <param name="maxRecords">Maximum logical records delivered before lookahead.</param>
     /// <param name="visitor">Read-only borrowed-record callback; false stops before another advance. Do not mutate the transaction from this callback.</param>
@@ -42,7 +42,7 @@ public interface IKeyValueView
         byte[]? afterKey = null, byte[]? untilKey = null, StorageReadObserver? observer = null,
         CancellationToken cancellationToken = default);
 
-    /// <summary>Visits descending encoded keys inside the same storage gate without materializing the range.</summary>
+    /// <summary>Visits descending encoded keys inside the same native snapshot without materializing the range.</summary>
     /// <param name="prefix">Required key prefix.</param>
     /// <param name="maxRecords">Maximum live records delivered before charged lookahead.</param>
     /// <param name="visitor">Read-only borrowed callback; false stops before another advance. Do not mutate the transaction.</param>

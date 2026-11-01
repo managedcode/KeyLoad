@@ -69,7 +69,7 @@ internal static class DeniedCommandRepairContinuation
         try
         {
             using var reopened = new ZoneTreeStore(new(fixture.Directory),
-                UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+                UnitExecutionOptions.StorageExecution());
             try
             {
                 await Assert.That(reopened.Identity.NodeId).IsEqualTo(identity.NodeId);

@@ -8,8 +8,7 @@ internal sealed class RemoteTransferAttemptProcessRecoveryTests
     private const int FirstMutation = 0;
 
     [Test]
-    [Arguments(CommitStage.HeaderWritten)]
-    [Arguments(CommitStage.JournalFlushed)]
+    [Arguments(CommitStage.WriteAheadLogSynced)]
     [Arguments(CommitStage.ApplyCompleted)]
     public Task ActualSourceAttemptCrashRetainsAtomicHistoryFailureAndCompletesOriginalTransferThenCold(CommitStage stage)
         => MessagingCrashTrial.RunAsync(TrialPrefix, RemoteTransferAttemptCrashProtocol.Mode, stage, FirstMutation,

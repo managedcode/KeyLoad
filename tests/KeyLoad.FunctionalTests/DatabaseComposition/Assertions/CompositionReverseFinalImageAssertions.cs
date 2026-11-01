@@ -26,7 +26,7 @@ internal static class CompositionReverseFinalImageAssertions
         await Assert.That(retained.CommandId).IsEqualTo(state.Request.CommandId);
         await Assert.That(retained.Value!.Kind).IsEqualTo(OperationKind.Batch);
         await Assert.That(retained.UserId!).IsEqualTo(D.Root);
-        await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input, ValidationProfile.PublicInputElements).AsSpan().SequenceEqual(OrleansSerialization.Serialize(state.Original.Value!.Input, ValidationProfile.PublicInputElements).AsSpan())).IsTrue();
+        await Assert.That(OrleansSerialization.Serialize(retained.Value!.Input).AsSpan().SequenceEqual(OrleansSerialization.Serialize(state.Original.Value!.Input).AsSpan())).IsTrue();
         await Assert.That(DatabaseCommandContentIdentity.SameContent(retained, state.Original)).IsTrue();
         await A.EqualAsync(state.Request, ((CommandRequest)retained.Value!.Input));
         await OutcomeAsync(owner, state.Seed, state.SeedReceipt, null);

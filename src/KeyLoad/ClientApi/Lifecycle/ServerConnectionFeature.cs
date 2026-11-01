@@ -37,6 +37,15 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
     }
 
     internal Guid Id { get; } = Guid.NewGuid();
+
+    /// <summary>The principal this connection authenticated, with the credential header that proved it.</summary>
+    internal ServerConnectionPrincipal? Principal
+    {
+        get => Volatile.Read(ref principal);
+        set => Volatile.Write(ref principal, value);
+    }
+
+    private ServerConnectionPrincipal? principal;
     internal TaskCompletionSource Completion { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
 
     internal static ServerConnectionOperation Acquire(HttpContext context, CancellationToken cancellationToken)

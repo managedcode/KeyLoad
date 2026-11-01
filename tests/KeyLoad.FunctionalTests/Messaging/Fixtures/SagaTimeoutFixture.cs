@@ -2,6 +2,7 @@ using KeyLoad.Clustering;
 using KeyLoad.Core.Messaging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Orleans.DurableJobs;
 using IAsyncInitializer = TUnit.Core.Interfaces.IAsyncInitializer;
@@ -28,7 +29,11 @@ internal sealed class SagaTimeoutFixture : IAsyncInitializer, IAsyncDisposable
             RetryDelay = TestProfile.RetryDelay
         });
         runtime = new(configureServices: (services, _) =>
-            services.Replace(ServiceDescriptor.Singleton(jobs)));
+        {
+            services.Replace(ServiceDescriptor.Singleton(jobs));
+            services.AddLogging(logging => logging.AddProvider(Logs)
+                .AddFilter<SagaTimeoutLog>("Orleans.DurableJobs", LogLevel.Debug));
+        });
     }
 
     internal RequestCqrsHostedDatabase Database => runtime.Database;
@@ -39,6 +44,7 @@ internal sealed class SagaTimeoutFixture : IAsyncInitializer, IAsyncDisposable
     internal IOptions<GrainRoutingOptions> Routing => runtime.RoutingOptions;
     internal RuntimeTestOptions TestProfile { get; } = new();
     internal SagaTimeoutJobHarness JobHarness { get; private set; } = null!;
+    internal SagaTimeoutLog Logs { get; } = new();
 
     public async Task InitializeAsync()
     {
@@ -82,5 +88,5 @@ internal sealed class SagaTimeoutFixture : IAsyncInitializer, IAsyncDisposable
         BindJobs();
     }
 
-    private void BindJobs() => JobHarness = new(runtime.Grains, runtime.Services, TestProfile);
+    private void BindJobs() => JobHarness = new(runtime.Grains, runtime.Services, TestProfile, Logs);
 }

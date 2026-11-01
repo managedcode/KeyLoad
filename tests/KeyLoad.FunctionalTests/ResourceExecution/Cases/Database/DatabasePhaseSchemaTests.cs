@@ -4,27 +4,24 @@ namespace KeyLoad.FunctionalTests.ResourceExecution;
 
 internal sealed class DatabasePhaseSchemaTests
 {
-    private const int CurrentPhaseCount = 11;
+    private const int CurrentPhaseCount = 8;
 
     [Test]
-    public async Task PhaseNamesAndIdsMatchTheElevenCurrentBoundariesWithinThirtyTwoSlots()
+    public async Task PhaseNamesAndIdsMatchTheEightCurrentBoundariesWithinThirtyTwoSlots()
     {
         DatabasePhaseKind[] expected =
         [
             DatabasePhaseKind.PublicAuthenticationDispatch,
             DatabasePhaseKind.PublicOperationDispatch,
-            DatabasePhaseKind.AuthorizedAuthenticationBarrier,
-            DatabasePhaseKind.AuthorizedOperationBarrier,
             DatabasePhaseKind.AuthorizedReadCapability,
             DatabasePhaseKind.ProviderApplyGateWait,
             DatabasePhaseKind.ProviderReadGateWait,
             DatabasePhaseKind.ProviderWriteGateWait,
             DatabasePhaseKind.ProviderWriteGateHold,
-            DatabasePhaseKind.AtomicJournalWriteFlush,
             DatabasePhaseKind.TreeMutation
         ];
 
-        int[] expectedIds = [0, 1, 2, 3, 4, 26, 27, 28, 29, 30, 31];
+        int[] expectedIds = [0, 1, 4, 26, 27, 28, 29, 31];
         var actual = Enum.GetValues<DatabasePhaseKind>();
         await Assert.That(actual.SequenceEqual(expected)).IsTrue();
         await Assert.That(actual.Length).IsEqualTo(CurrentPhaseCount);

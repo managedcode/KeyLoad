@@ -40,7 +40,7 @@ internal static class ModelRootPolicyLifetime
             ZoneTreeStore? cold = null;
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                cold = new(new(db.Directory), db.StorageExecution, UnitExecutionOptions.PointCacheExecution(),
+                cold = new(new(db.Directory), db.StorageExecution,
                     timeProvider: db.Database.EvaluationClock);
                 await ServerFailureObserver.ObserveAsync(() => ConserveAsync(cold, image, cut, identity), failures);
                 var database = db.CreateConfiguredDatabase(cold);

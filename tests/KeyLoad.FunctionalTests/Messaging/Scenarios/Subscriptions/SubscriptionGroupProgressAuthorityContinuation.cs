@@ -36,8 +36,7 @@ internal static class SubscriptionGroupProgressAuthorityContinuation
         var position = store.Position;
         var identity = OrleansSerialization.Serialize(store.Identity);
         store.Dispose();
-        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var reopened = QueueWholeFlowStorage.Open(cold);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
         await SubscriptionCheckpointAuthorityAssertions.StatusAsync(reopened, group, 3, 3, 3);

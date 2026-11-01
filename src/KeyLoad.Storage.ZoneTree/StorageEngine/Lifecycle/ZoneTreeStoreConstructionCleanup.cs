@@ -13,9 +13,8 @@ internal static class ZoneTreeStoreConstructionCleanup
         }
         else
         {
-            ZoneTreeExistingStoreCleanup.Capture(() => ZoneTreeStoreHandleDisposal.FailedOpen(runtime), failures);
+            ZoneTreeExistingStoreCleanup.Capture(() => ZoneTreeStoreHandleDisposal.Close(runtime), failures);
         }
-        ZoneTreeExistingStoreCleanup.Capture(runtime.Gate.Dispose, failures);
         if (failures.Count == EmptyFailureCount)
         {
             runtime.OwnershipSettlement.ReleaseReturned();

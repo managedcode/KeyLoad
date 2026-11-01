@@ -64,9 +64,9 @@ internal static class SampleRetentionCrashScenario
         var operation = CrashDatabase.Operation(database, OperationKind.Batch, command, ExpiryCommandId);
         await File.WriteAllBytesAsync(Path.Combine(directory, OperationFile), OrleansSerialization.Serialize(operation));
         boundary.Position = checked(store.Position + PositionStep);
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         _ = database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static void Seed(DatabaseEngine database)

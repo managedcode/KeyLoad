@@ -9,7 +9,7 @@ internal static class QueueOrderedRetryRecovery
 {
     internal static async Task VerifyAsync(string root, CommitStage stage, CancellationToken token)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = QueueLifecycleRecoveryAssertions.Open(store);
         var operation = OrleansSerialization.Deserialize<Command<DatabaseCommand>>(await File.ReadAllBytesAsync(
             Path.Combine(root, QueueOrderedRetryCrashProtocol.OperationFile), token));
@@ -19,9 +19,13 @@ internal static class QueueOrderedRetryRecovery
         var decisions = OrleansSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
         await QueueOrderedRetryRecoveryChoice.AssertAsync(store, operation, decisions);
         var outcome = OutcomeStoreOracle.Read(store, operation);
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(outcome).IsNotNull();
+        }
+        if (stage == CommitStage.MutationApplied)
+        {
+            await Assert.That(outcome).IsNull();
         }
         await QueueOrderedRetryRecoveryImage.AssertAsync(database, delivery, decisions.Items.Single(), outcome is not null);
         var receipt = database.Apply(operation).Get<CommitReceipt>();

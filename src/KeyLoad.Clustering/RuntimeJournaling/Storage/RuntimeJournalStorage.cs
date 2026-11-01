@@ -13,10 +13,9 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     private readonly RuntimeJournalStorageOperations operations;
 
     internal RuntimeJournalStorage(RuntimeJournalClient client, JournalId journalId,
-        Microsoft.Extensions.Options.IOptions<RuntimeJournalOptions> options, string format, SemaphoreSlim[] gates,
-        int gateIndex)
+        Microsoft.Extensions.Options.IOptions<RuntimeJournalOptions> options, string format)
     {
-        state = new(client, journalId, options, format, gates, gateIndex);
+        state = new(client, journalId, options, format);
         operations = new(client, state);
     }
 
@@ -25,24 +24,22 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     public async ValueTask<bool> CreateIfNotExistsAsync(IReadOnlyDictionary<string, string>? metadata = null,
         CancellationToken cancellationToken = default)
     {
-        using var lease = await state.EnterAsync(cancellationToken);
         var properties = RuntimeJournalStorageValidation.CopyProperties(metadata, state.Options.Value);
-        var observed = (await state.ObserveAsync(lease.Token)).Value;
+        var observed = (await state.ObserveAsync(cancellationToken)).Value;
         if (observed is not null || state.Captured is not null)
         {
             return false;
         }
 
         operations.EnsureAvailable();
-        var result = await operations.CreateAsync(properties, lease.Token);
+        var result = await operations.CreateAsync(properties, cancellationToken);
         state.CaptureInitial(result.Snapshot);
         return result.Applied;
     }
 
     public async ValueTask<IJournalMetadata?> GetMetadataAsync(CancellationToken cancellationToken = default)
     {
-        using var lease = await state.EnterAsync(cancellationToken);
-        var snapshot = (await state.ObserveAsync(lease.Token)).Value;
+        var snapshot = (await state.ObserveAsync(cancellationToken)).Value;
         return snapshot is null ? null : operations.Metadata(snapshot);
     }
 
@@ -50,9 +47,8 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
         IEnumerable<string>? remove = null, string? expectedETag = null,
         CancellationToken cancellationToken = default)
     {
-        using var lease = await state.EnterAsync(cancellationToken);
         operations.EnsureAvailable();
-        var current = (await state.CaptureAsync(lease.Token)).Value;
+        var current = (await state.CaptureAsync(cancellationToken)).Value;
         if (current is null)
         {
             return null;
@@ -60,14 +56,13 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
 
         var properties = RuntimeJournalStorageValidation.CopyProperties(set, state.Options.Value);
         var removals = RuntimeJournalStorageValidation.CopyRemovals(remove, properties, state.Options.Value);
-        return (await operations.UpdateMetadataAsync(current, properties, removals, expectedETag, lease.Token)).Value;
+        return (await operations.UpdateMetadataAsync(current, properties, removals, expectedETag, cancellationToken)).Value;
     }
 
     public async ValueTask ReadAsync(IJournalStorageConsumer consumer, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(consumer);
-        using var lease = await state.EnterAsync(cancellationToken);
-        var snapshot = (await state.CaptureAsync(lease.Token)).Value;
+        var snapshot = (await state.CaptureAsync(cancellationToken)).Value;
         if (snapshot is null)
         {
             consumer.Complete(JournalMetadata.Empty);
@@ -84,8 +79,8 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
         var offset = RuntimeJournalStoragePolicy.InitialReadOffset;
         while (true)
         {
-            lease.Token.ThrowIfCancellationRequested();
-            var page = await operations.ReadPageAsync(snapshot, offset, lease.Token);
+            cancellationToken.ThrowIfCancellationRequested();
+            var page = await operations.ReadPageAsync(snapshot, offset, cancellationToken);
             if (!page.Data.IsEmpty)
             {
                 buffer.Write(page.Data.Span);
@@ -119,13 +114,12 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
 
     public async ValueTask DeleteAsync(CancellationToken cancellationToken)
     {
-        using var lease = await state.EnterAsync(cancellationToken);
         if (state.IsRetired)
         {
             return;
         }
 
-        var current = (await state.CaptureAsync(lease.Token)).Value;
+        var current = (await state.CaptureAsync(cancellationToken)).Value;
         if (current is null)
         {
             return;
@@ -133,7 +127,7 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
 
         var result = await operations.MutateBodyAsync(
             RuntimeJournalStorageOperations.BodyMutation(RuntimeJournalAction.Delete, current, ReadOnlyMemory<byte>.Empty),
-            lease.Token);
+            cancellationToken);
         if (result.Applied)
         {
             state.Retire();
@@ -143,8 +137,7 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
     private async ValueTask WriteBodyAsync(ReadOnlySequence<byte> value, RuntimeJournalAction action,
         CancellationToken cancellationToken)
     {
-        using var lease = await state.EnterAsync(cancellationToken);
-        await operations.WriteBodyAsync(value, action, lease.Token);
+        await operations.WriteBodyAsync(value, action, cancellationToken);
     }
 }
 #pragma warning restore ORLEANSEXP005

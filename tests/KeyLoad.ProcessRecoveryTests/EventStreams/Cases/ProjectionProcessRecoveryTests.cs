@@ -11,9 +11,7 @@ namespace KeyLoad.ProcessRecoveryTests;
 internal sealed class ProjectionProcessRecoveryTests
 {
     [Test]
-    [Arguments(CommitStage.HeaderWritten, 0)]
-    [Arguments(CommitStage.PayloadWritten, 0)]
-    [Arguments(CommitStage.JournalFlushed, 0)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0)]
     [Arguments(CommitStage.MutationApplied, 0)]
     [Arguments(CommitStage.MutationApplied, 3)]
     [Arguments(CommitStage.MutationApplied, 6)]
@@ -32,7 +30,7 @@ internal sealed class ProjectionProcessRecoveryTests
             process.Kill();
             await process.WaitForExitAsync(timeout.Token);
             await StorageRecoveryProcessTests.WaitForKilledProcessFilesAsync(root, timeout.Token);
-            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+            using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
             var database = ProjectionRecoveryDatabase.Open(store);
             await AssertRecoveredProcessCutAsync(database, stage);
             await RetryRecoveredCommandAsync(root, database, timeout.Token);
@@ -46,7 +44,7 @@ internal sealed class ProjectionProcessRecoveryTests
             }
             if (Directory.Exists(root))
             {
-                await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
+                await StorageTrialCleanup.DeleteTrialAsync(root, cancellationToken);
             }
         }
     }
@@ -73,7 +71,7 @@ internal sealed class ProjectionProcessRecoveryTests
         await Assert.That(status.Head.Tail).IsEqualTo(checkpoint + 1);
         await Assert.That(database.Store.Read(view => view.ReadOwnedValue(KeySpace.PartitionOutcome(ProjectionCrashScenario.Partition,
             "root", ProjectionCrashScenario.CommandId))) is null).IsEqualTo(checkpoint == 0);
-        if (stage >= CommitStage.JournalFlushed)
+        if (stage == CommitStage.WriteAheadLogSynced)
         {
             await Assert.That(checkpoint).IsEqualTo(1);
         }

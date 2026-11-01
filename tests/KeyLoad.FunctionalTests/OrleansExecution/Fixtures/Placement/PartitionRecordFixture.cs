@@ -24,7 +24,7 @@ internal sealed class PartitionRecordFixture : IDisposable
         var creationCompleted = false;
         KeyLoad.Server.ServerFailureObserver.Observe(() =>
         {
-            store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            store = new(new(directory), UnitExecutionOptions.StorageExecution());
             creationCompleted = true;
         }, failures);
         if (failures.Count == 0)
@@ -90,7 +90,7 @@ internal sealed class PartitionRecordFixture : IDisposable
     {
         Store.Dispose();
         store = null;
-        store = new(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        store = new(new(directory), UnitExecutionOptions.StorageExecution());
     }
 
     public void Dispose()

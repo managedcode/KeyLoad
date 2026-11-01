@@ -8,19 +8,16 @@ namespace KeyLoad.ProcessRecoveryTests;
 
 internal sealed class StorageRecoveryProcessTests
 {
+    private static readonly CommitStage[] CommitStages =
+        [CommitStage.MutationApplied, CommitStage.ApplyCompleted, CommitStage.WriteAheadLogSynced];
+
     public static IEnumerable<int> Batches => Enumerable.Range(0, 20);
     [Test]
     [MethodDataSource(nameof(Batches))]
     public async Task FiftySeededRealProcessCrashesPreserveAtomicTransactions(int batch)
     {
         var random = new SeededCrashChoice(1701 + batch);
-        var repository = new DirectoryInfo(AppContext.BaseDirectory);
-        while (repository.Parent is not null && !File.Exists(Path.Combine(repository.FullName, "KeyLoad.slnx")))
-        {
-            repository = repository.Parent;
-        }
-        var reports = Path.Combine(File.Exists(Path.Combine(repository.FullName, "KeyLoad.slnx"))
-            ? repository.FullName : AppContext.BaseDirectory, "artifacts", "qualification");
+        var reports = Path.Combine(AppContext.BaseDirectory, "TestResults", "crash-trials-" + Guid.NewGuid().ToString("N"));
         Directory.CreateDirectory(reports);
         using var evidence = new StreamWriter(Path.Combine(reports, $"crash-trials-{batch:D2}.jsonl"), false);
         for (var trial = 0; trial < 50; trial++)
@@ -33,7 +30,7 @@ internal sealed class StorageRecoveryProcessTests
         StreamWriter evidence, CancellationToken cancellationToken)
     {
         var root = Path.Combine(AppContext.BaseDirectory, $"keyload-crash-{batch}-{trial}-{Guid.NewGuid():N}");
-        var stage = (CommitStage)random.Next(5);
+        var stage = CommitStages[random.Next(CommitStages.Length)];
         var mutationIndex = random.Next(3);
         using var admission = await StorageTrialLease.AcquireAsync(cancellationToken);
         using var process = Process.Start(CreateRecoveryProcessStart(root, stage, mutationIndex))!;
@@ -84,7 +81,7 @@ internal sealed class StorageRecoveryProcessTests
 
     private static int[] ReadRecoveredValues(string root)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         return store.Read(view => Enumerable.Range(0, 3)
             .Select(i => OrleansSerialization.Deserialize<int>(view.ReadOwnedValue(KeyCodec.Encode("item", (long)i))!)).ToArray());
     }
@@ -113,12 +110,17 @@ internal sealed class StorageRecoveryProcessTests
     {
         await Assert.That(values.All(value => value == 0) || values.All(value => value == 1))
             .IsTrue().Because($"Non-atomic recovery at seed {batch}, trial {trial}, stage {stage}.");
-        if (stage >= CommitStage.JournalFlushed)
+        // A transaction killed before its commit is absent; a committed one is visible before the write-ahead log
+        // sync and may or may not survive; a synced one survives.
+        var expected = stage switch
         {
-            foreach (var value in values)
-            {
-                await Assert.That(value).IsEqualTo(1);
-            }
+            CommitStage.MutationApplied => 0,
+            CommitStage.WriteAheadLogSynced => 1,
+            _ => values[0]
+        };
+        foreach (var value in values)
+        {
+            await Assert.That(value).IsEqualTo(expected).Because($"Seed {batch}, trial {trial}, stage {stage}.");
         }
     }
 
@@ -131,7 +133,7 @@ internal sealed class StorageRecoveryProcessTests
         }
         if (Directory.Exists(root))
         {
-            await StoragePublicationRecoveryTests.DeleteTrialAsync(root, cancellationToken);
+            await StorageTrialCleanup.DeleteTrialAsync(root, cancellationToken);
         }
     }
     internal static Task WaitForKilledProcessFilesAsync(string root, CancellationToken cancellationToken) =>

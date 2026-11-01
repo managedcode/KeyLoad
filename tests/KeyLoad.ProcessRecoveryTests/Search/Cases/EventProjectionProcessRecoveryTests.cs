@@ -9,9 +9,7 @@ internal sealed class EventProjectionProcessRecoveryTests
     private const int MarkerOutputLimit = 8_192;
 
     [Test]
-    [Arguments(CommitStage.HeaderWritten, 0)]
-    [Arguments(CommitStage.PayloadWritten, 0)]
-    [Arguments(CommitStage.JournalFlushed, 0)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0)]
     [Arguments(CommitStage.MutationApplied, 0)]
     [Arguments(CommitStage.ApplyCompleted, 0)]
     public async Task AcLineage001002003ProjectionAndReceiptRecoverAsOneCanonicalCut(

@@ -14,7 +14,6 @@ internal static class ExistingStoreInspectorOperation
         const int FormatInitialValue = 0;
         const int PositionInitialValue = 0;
         const int SuccessEmptyCount = 0;
-        const int RetainedBytesEmptyCount = 0;
 
         var failures = new List<Exception>();
         var inputs = new ExistingStoreInspectorInputs(request);
@@ -40,11 +39,10 @@ internal static class ExistingStoreInspectorOperation
         finally
         {
             ZoneTreeExistingStoreCleanup.Capture(() => store?.Dispose(), failures);
-            ZoneTreeExistingStoreCleanup.Capture(() => inputs.Budget?.Dispose(), failures);
         }
         var (types, code) = ExistingStoreInspectorFailures.Collect(failures);
         return new(ExistingStoreInspectorProtocol.SchemaVersion, failures.Count == SuccessEmptyCount, nodeId, incarnation,
-            format, position, value, types, code, inputs.ObservedStages, inputs.Budget?.GetSnapshot().RetainedBytes ?? RetainedBytesEmptyCount);
+            format, position, value, types, code, inputs.ObservedStages);
     }
 
     private static byte[]? ReadValue(ZoneTreeStore store)

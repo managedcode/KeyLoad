@@ -9,7 +9,7 @@ internal static class TargetInboxRecoveryCold
     internal static async Task VerifyAsync(string root, Command<DatabaseCommand> operation, CommitInboxRequest request,
         CommitInboxResult original, CancellationToken token)
     {
-        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution(), RecoveryExecutionOptions.PointCacheExecution());
+        using var store = new ZoneTreeStore(new(root), RecoveryExecutionOptions.StorageExecution());
         var database = TargetInboxRecoveryDatabase.Open(store);
         var position = store.Position;
         var before = Image(store);
@@ -34,6 +34,6 @@ internal static class TargetInboxRecoveryCold
         {
             throw new InvalidOperationException("Target inbox recovery exceeded its fixture row bound.");
         }
-        return page.Records.Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
+        return page.Records.Where(stored => !StorePositionRecord.Is(stored.Key.Span)).Select(row => Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span)).ToArray();
     });
 }

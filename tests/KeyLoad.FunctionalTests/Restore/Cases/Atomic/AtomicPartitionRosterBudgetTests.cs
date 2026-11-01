@@ -33,7 +33,6 @@ internal sealed class AtomicPartitionRosterBudgetTests
             bounded.Put(KeySpace.Partition(PartitionRecordFamilies.Document, second,
                 AtomicPartitionRosterFixture.Collection, CandidateDocumentId), OrleansSerialization.Serialize(secondRecord));
             bounded.PersistCandidates();
-            bounded.ValidateCommit();
             return true;
         });
         await Assert.That(fixture.ReadEntry(first)).IsNull();

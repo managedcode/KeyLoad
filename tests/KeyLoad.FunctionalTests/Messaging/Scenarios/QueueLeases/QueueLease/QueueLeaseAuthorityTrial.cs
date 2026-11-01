@@ -17,7 +17,7 @@ internal static class QueueLeaseAuthorityTrial
         await QueueLeaseAuthorityRefusals.RequireAsync(fixture.Database, fixture.Store, state, fault, damaged);
         await QueueLeaseAuthorityRefusals.RequireAsync(fixture.Database, fixture.Store, state, fault, damaged);
         fixture.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(reopened);
         await QueueLeaseAuthorityRefusals.RequireAsync(database, reopened, state, fault, damaged);
         reopened.Commit((tx, _) => { tx.Put(state.FaultKey, state.OriginalBytes); return true; });
@@ -29,7 +29,7 @@ internal static class QueueLeaseAuthorityTrial
         var healthy = await QueueLeaseAuthorityHealthy.RunAsync(database, reopened, state);
         var completed = QueueWholeFlowStorage.Bytes(reopened);
         reopened.Dispose();
-        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var cold = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var restored = QueueWholeFlowStorage.Open(cold);
         await ReplayResultAssertions.Same<CommitReceipt>(restored.Apply(state.Original), original);
         await ReplayResultAssertions.Same<CommitReceipt>(QueueWholeFlowStorage.Apply(restored, OperationKind.Batch,

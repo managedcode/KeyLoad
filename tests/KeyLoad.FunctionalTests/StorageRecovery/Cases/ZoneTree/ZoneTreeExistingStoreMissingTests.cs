@@ -7,7 +7,6 @@ internal sealed class ZoneTreeExistingStoreMissingTests
     [Test]
     [Arguments(ZoneTreeExistingStoreFixture.OwnerFile)]
     [Arguments(ZoneTreeExistingStoreFixture.IdentityFile)]
-    [Arguments(ZoneTreeExistingStoreFixture.JournalFile)]
     public async Task AcSg009001MissingOriginalFileIsRejectedWithoutReplacement(string name)
     {
         using var files = new ZoneTreeExistingStoreFixture();

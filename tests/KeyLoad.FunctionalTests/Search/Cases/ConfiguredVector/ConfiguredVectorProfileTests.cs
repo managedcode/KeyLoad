@@ -57,8 +57,7 @@ internal sealed class ConfiguredVectorProfileTests
         await Assert.That(QueueWholeFlowStorage.Bytes(database.Store)).IsEquivalentTo(complete, CollectionOrdering.Matching);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         database.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution());
         var owner = QueueWholeFlowStorage.Open(reopened);
         await ConfiguredVectorProfileFlow.HealthyAsync(owner, database, token);
         await Assert.That(QueueWholeFlowStorage.Bytes(reopened)).IsEquivalentTo(complete, CollectionOrdering.Matching);

@@ -8,9 +8,7 @@ internal sealed class EventAppendProcessRecoveryTests
     private const int LaterMutation = 6;
 
     [Test]
-    [Arguments(CommitStage.HeaderWritten, 0)]
-    [Arguments(CommitStage.PayloadWritten, 0)]
-    [Arguments(CommitStage.JournalFlushed, 0)]
+    [Arguments(CommitStage.WriteAheadLogSynced, 0)]
     [Arguments(CommitStage.MutationApplied, 0)]
     [Arguments(CommitStage.MutationApplied, IntermediateMutation)]
     [Arguments(CommitStage.MutationApplied, LaterMutation)]

@@ -33,7 +33,7 @@ internal static class QueueReadyAuthorityTrial
         fixture.Store.Dispose();
         token.ThrowIfCancellationRequested();
         using var first = new global::KeyLoad.Storage.ZoneTree.ZoneTreeStore(new(fixture.Directory),
-            UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            UnitExecutionOptions.StorageExecution());
         var database = QueueWholeFlowStorage.Open(first);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, damaged, position, identity);
         await CounterRefusalAsync(database, first, operation, lane, damaged, position, identity, detail);
@@ -158,7 +158,7 @@ internal static class QueueReadyAuthorityTrial
         {
             token.ThrowIfCancellationRequested();
             using var cold = new global::KeyLoad.Storage.ZoneTree.ZoneTreeStore(new(fixture.Directory),
-                fixture.StorageExecution, UnitExecutionOptions.PointCacheExecution());
+                fixture.StorageExecution);
             var owner = fixture.CreateConfiguredDatabase(cold);
             await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(cold, image, position, identity);
             var stored = OutcomeStoreOracle.Read(cold, original)

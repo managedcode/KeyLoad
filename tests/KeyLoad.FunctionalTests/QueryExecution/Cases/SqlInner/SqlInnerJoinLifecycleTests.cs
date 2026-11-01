@@ -126,8 +126,7 @@ internal sealed class SqlInnerJoinLifecycleTests
         Configure(database);
         var seed = database.Commit(new PutDocument(Left, "a", LeftRow(7)), new PutDocument(Right, "c1", RightRow(7)));
         database.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution());
         var owner = new DatabaseEngine(reopened, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(),
             UnitExecutionOptions.DueWork(), UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(),
             UnitExecutionOptions.GraphExecution(), UnitExecutionOptions.ChangeFeedExecution(), UnitExecutionOptions.RuntimeClaimsExecution(), UnitExecutionOptions.TimeSeriesExecution());

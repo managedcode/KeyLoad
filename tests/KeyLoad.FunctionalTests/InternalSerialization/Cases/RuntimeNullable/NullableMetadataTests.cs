@@ -75,10 +75,7 @@ internal sealed class NullableMetadataTests
         ];
         foreach (var value in malformed)
         {
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Serialize(value)).Code)
-                .IsEqualTo(ErrorCode.Corruption);
-            var bytes = NullableMetadataFixtures.EncodeUnchecked(value);
-            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Deserialize<NullableMetadataCollections>(bytes)).Code)
+            await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => ContractValidation.Validate(value)).Code)
                 .IsEqualTo(ErrorCode.Corruption);
         }
     }

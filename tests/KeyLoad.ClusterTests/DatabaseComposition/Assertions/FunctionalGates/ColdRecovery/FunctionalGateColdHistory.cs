@@ -27,7 +27,7 @@ internal static class FunctionalGateColdHistory
             await SqlClusterProtocol.EqualAsync(model.TopicEvent.Source, page.Source);
             await SqlClusterProtocol.EqualAsync(new EventSourceHead(1, 1, 1), page.Head);
             await SqlClusterProtocol.EqualAsync(new[] { model.TopicEvent }, page.Events.ToArray());
-            await Assert.That(page.CutPosition).IsGreaterThanOrEqualTo(model.Receipt.Token.Position);
+            await FunctionalGateReadPositions.RequireAsync(context, model.Receipt.Token.Position, token, page.CutPosition);
             await Assert.That(page.HasMore).IsFalse();
         }
         var queue = new InspectMessageRequest(new(context.Partition, FunctionalGateColdProtocol.Resource("queue", model.Index)), FunctionalGateColdProtocol.Id);

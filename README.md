@@ -185,7 +185,7 @@ for ownership, distributed queries and open qualification gates.
 |---|---|
 | [.NET 10](https://github.com/dotnet/runtime) | C# end to end, pooled buffers, `Span<T>` and SIMD intrinsics; speedups need measurements |
 | [Orleans](https://github.com/dotnet/orleans) | The whole cluster: membership, routing, placement, migration, communication, data copies through grain calls and generated binary serialization |
-| [ZoneTree](https://github.com/ZoneTree/ZoneTree) | Native MVCC transactions and consistent snapshots over each node's ordered data |
+| [ZoneTree](https://github.com/ZoneTree/ZoneTree) | Native MVCC transactions, plain non-transactional tables, snapshot reads, WALs and live backups over each node's ordered data |
 | [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) | full-text indexing on the same storage foundation |
 | [Aspire](https://github.com/dotnet/aspire) | Owns server startup, required infrastructure, readiness and cleanup |
 
@@ -437,13 +437,12 @@ A special thanks to **[ZoneTree](https://github.com/ZoneTree/ZoneTree)** and **[
 | [ZoneTree.FullTextSearch](https://github.com/ZoneTree/ZoneTree.FullTextSearch) | Full-text search index |
 | [MCP C# SDK](https://github.com/modelcontextprotocol/csharp-sdk) | Built-in MCP server and real MCP clients in tests |
 | [ManagedCode.Communication](https://github.com/managedcode/Communication) | Typed operation results and ASP.NET Core/Orleans integration |
-| [ManagedCode.Storage](https://github.com/managedcode/Storage) | File-system storage and backup transfer support |
+| [ManagedCode.Storage](https://github.com/managedcode/Storage) | File storage, including copies of store backups |
 | [ManagedCode.TimeSeries](https://github.com/managedcode/TimeSeries) | Time-series aggregation |
 | [ManagedCode.Orleans.Graph](https://github.com/managedcode/Orleans.Graph) | Grain call relationship policies |
 | [ManagedCode.Orleans.Identity](https://github.com/managedcode/Orleans.Identity) | Orleans request identity context |
 | [ManagedCode.MCPGateway](https://github.com/managedcode/MCPGateway) | Agent authentication and on-demand tool discovery |
 | [ManagedCode.MarkdownLd.Kb](https://github.com/managedcode/markdown-ld-kb) | Knowledge-graph search over tool metadata |
-| [Cartograph](https://github.com/angelhernandezm/Cartograph) | Segmented backup archives and catalogs |
 | [OpenTelemetry .NET](https://github.com/open-telemetry/opentelemetry-dotnet) | Logs, metrics and traces |
 
 | Development & presentation | Contribution |

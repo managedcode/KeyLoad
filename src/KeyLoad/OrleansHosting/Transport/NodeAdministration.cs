@@ -8,38 +8,48 @@ internal sealed class NodeAdministration(PartitionHost partition, IServiceProvid
     : INodeAdministration, IAsyncDisposable
 {
     private const string BackupDirectory = "backups";
-    private const string BackupBusy = "The node already has a backup in progress.";
     private const string AdministrationStopping = "Node administration is stopping.";
     private readonly Lock lifecycle = new();
-    private Task? backup;
+    private readonly HashSet<Task> backups = [];
     private Task? shutdown;
 
     /// <inheritdoc />
     public Task<BackupReceipt> BackupAsync(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (lifecycle)
         {
             if (shutdown is not null)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, AdministrationStopping);
             }
-            if (backup is { IsCompleted: false })
+            backups.Add(completion.Task);
+        }
+        return RunBackupAsync(completion, cancellationToken);
+    }
+
+    private async Task<BackupReceipt> RunBackupAsync(TaskCompletionSource completion, CancellationToken cancellationToken)
+    {
+        try
+        {
+            return await CreateBackupAsync(cancellationToken);
+        }
+        finally
+        {
+            lock (lifecycle)
             {
-                throw Errors.Fail(ErrorCode.ResourceExhausted, BackupBusy);
+                backups.Remove(completion.Task);
             }
-            var operation = Task.FromResult(CreateBackup(cancellationToken));
-            backup = operation;
-            return operation.WaitAsync(cancellationToken);
+            completion.TrySetResult();
         }
     }
 
-    private BackupReceipt CreateBackup(CancellationToken cancellationToken)
+    private async Task<BackupReceipt> CreateBackupAsync(CancellationToken cancellationToken)
     {
-        cancellationToken.ThrowIfCancellationRequested();
         var id = Guid.NewGuid().ToString(OrleansNodeProtocol.GuidFormat);
-        var position = partition.Database.Store.CreateBackup(Path.Combine(partition.DirectoryPath, BackupDirectory, id),
-            cancellationToken);
+        var position = await partition.Database.Store.CreateBackupAsync(
+            Path.Combine(partition.DirectoryPath, BackupDirectory, id), cancellationToken).ConfigureAwait(true);
         return new(id, position);
     }
 
@@ -60,23 +70,16 @@ internal sealed class NodeAdministration(PartitionHost partition, IServiceProvid
             services.GetRequiredService<OrleansNode>().DatabaseReady, Environment.ProcessId, identity.ReadGeneration));
     }
 
-    /// <summary>Joins the accepted backup before the silo-local owner closes its store.</summary>
+    /// <summary>Joins all accepted backups before the silo-local owner closes its store.</summary>
     public async ValueTask DisposeAsync()
     {
         Task stopping;
         lock (lifecycle)
         {
-            shutdown ??= DrainAcceptedAsync(backup);
+            shutdown ??= Task.WhenAll(backups);
             stopping = shutdown;
         }
         await stopping;
     }
 
-    private static async Task DrainAcceptedAsync(Task? accepted)
-    {
-        if (accepted is not null)
-        {
-            await accepted.ConfigureAwait(ConfigureAwaitOptions.SuppressThrowing | ConfigureAwaitOptions.ContinueOnCapturedContext);
-        }
-    }
 }

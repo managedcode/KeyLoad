@@ -31,14 +31,12 @@ internal static class OrleansSiloConfiguration
         PartitionStorageRegistration.Register(silo);
         silo.Services.AddSingleton<OrleansNodeLifecycle>();
         silo.Services.AddSingleton<ILifecycleParticipant<ISiloLifecycle>>(provider => provider.GetRequiredService<OrleansNodeLifecycle>());
-        silo.AddActivityPropagation();
 #pragma warning disable ORLEANSEXP003
         silo.AddDistributedGrainDirectory();
 #pragma warning restore ORLEANSEXP003
 #pragma warning disable ORLEANSEXP001
         silo.AddActivationRepartitioner();
 #pragma warning restore ORLEANSEXP001
-        ConnectionGrainGraphRegistration.Register(silo);
         RuntimeJournalRegistration.Register(silo);
     }
 }

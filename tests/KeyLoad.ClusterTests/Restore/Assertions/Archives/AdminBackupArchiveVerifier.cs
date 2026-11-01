@@ -14,7 +14,7 @@ namespace KeyLoad.ClusterTests.BackupRestore.Helpers;
 internal static class AdminBackupArchiveVerifier
 {
     private const string BackupDirectoryName = "backups";
-    private const string BackupManifestName = "backup.json";
+    private const string BackupIdentityName = "identity.json";
     private const string BackupCategory = "backup";
     private const string RestoreDirectoryPrefix = "keyload-sdk-backup-restore-";
     private const string RelativePathSeparator = "/";
@@ -38,11 +38,11 @@ internal static class AdminBackupArchiveVerifier
         ArgumentNullException.ThrowIfNull(reference);
         var archiveDirectory = await LocateArchiveAsync(fixture, receipt, cancellationToken).ConfigureAwait(false);
         var policy = IntegrationExecutionOptions.StorageExecution();
-        var (originalIdentity, verifiedPosition) = ZoneTreeStore.VerifyBackup(archiveDirectory, policy, cancellationToken);
-        var originalManifestDigest = await AdminBackupArchiveIntegrity.CaptureManifestDigestAsync(
+        var originalIdentity = ZoneTreeIdentityFile.Read(Path.Combine(archiveDirectory, BackupIdentityName),
+            policy.Value.MaximumIdentityFileBytes, policy.Value.StreamBufferBytes);
+        var originalArchiveDigest = await AdminBackupArchiveIntegrity.CaptureArchiveDigestAsync(
             archiveDirectory, policy.Value, cancellationToken).ConfigureAwait(false);
-        await Assert.That(verifiedPosition).IsEqualTo(receipt.Position);
-        await Assert.That(verifiedPosition).IsGreaterThanOrEqualTo(minimumLocalPosition);
+        await Assert.That(receipt.Position).IsGreaterThanOrEqualTo(minimumLocalPosition);
 
         var restoreDirectory = Path.GetFullPath(Path.Combine(fixture.Root, string.Concat(RestoreDirectoryPrefix,
             Guid.NewGuid().ToString(McpCallerProtocol.GuidFormat))));
@@ -55,11 +55,13 @@ internal static class AdminBackupArchiveVerifier
         ZoneTreeStore? restoredStore = null;
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            var restoredIdentity = ZoneTreeStore.Restore(archiveDirectory, restoreDirectory, policy);
+            var restoredIdentity = await ZoneTreeStore.RestoreAsync(archiveDirectory, restoreDirectory, policy,
+                cancellationToken: cancellationToken);
+            await Assert.That(restoredIdentity.NodeId).IsNotEqualTo(originalIdentity.NodeId);
             await Assert.That(restoredIdentity.Incarnation).IsNotEqualTo(originalIdentity.Incarnation);
             await Assert.That(restoredIdentity.DispatchPaused).IsTrue();
-            restoredStore = new(new ZoneTreeStoreOptions(restoreDirectory), policy,
-                IntegrationExecutionOptions.PointCacheExecution());
+            restoredStore = new(new ZoneTreeStoreOptions(restoreDirectory), policy);
+            await Assert.That(restoredStore.Position).IsGreaterThan(receipt.Position);
             var storedRecord = restoredStore.Read(view => view.GetRecord<DocumentRecord>(
                 DocumentStorageKeys.RecordKey(reference)));
             await Assert.That(storedRecord).IsNotNull();
@@ -68,15 +70,9 @@ internal static class AdminBackupArchiveVerifier
             await Assert.That(record.Revision).IsEqualTo(expectedRevision);
             await Assert.That(record.Json).IsEqualTo(expectedJson);
             await Assert.That(record.Deleted).IsFalse();
-            var (verifiedIdentityAfterRestore, verifiedPositionAfterRestore) =
-                ZoneTreeStore.VerifyBackup(archiveDirectory, policy);
-            var unchangedIdentity = OrleansSerialization.Serialize(verifiedIdentityAfterRestore).AsSpan()
-                .SequenceEqual(OrleansSerialization.Serialize(originalIdentity));
-            await Assert.That(unchangedIdentity).IsTrue();
-            await Assert.That(verifiedPositionAfterRestore).IsEqualTo(receipt.Position);
-            var manifestDigestAfterRestore = await AdminBackupArchiveIntegrity.CaptureManifestDigestAsync(
+            var archiveDigestAfterRestore = await AdminBackupArchiveIntegrity.CaptureArchiveDigestAsync(
                 archiveDirectory, policy.Value, cancellationToken).ConfigureAwait(false);
-            await Assert.That(manifestDigestAfterRestore.AsSpan().SequenceEqual(originalManifestDigest)).IsTrue();
+            await Assert.That(archiveDigestAfterRestore.AsSpan().SequenceEqual(originalArchiveDigest)).IsTrue();
         }, failures).ConfigureAwait(false);
 
         if (restoredStore is not null)
@@ -95,7 +91,7 @@ internal static class AdminBackupArchiveVerifier
         await Assert.That(id.ToString(McpCallerProtocol.GuidFormat)).IsEqualTo(receipt.Id);
         await Assert.That(receipt.Position).IsGreaterThanOrEqualTo(0);
         var archivePrefix = string.Concat(BackupDirectoryName, RelativePathSeparator, receipt.Id, RelativePathSeparator);
-        var expectedManifest = string.Concat(archivePrefix, BackupManifestName);
+        var expectedIdentity = string.Concat(archivePrefix, BackupIdentityName);
         var archiveDirectories = new List<string>();
         foreach (var node in Nodes)
         {
@@ -108,23 +104,22 @@ internal static class AdminBackupArchiveVerifier
             var silo = snapshot.SiloName
                 ?? throw new InvalidOperationException(MissingSiloIdentity);
             await Assert.That(snapshot.ActiveSilos.Contains(silo, StringComparer.Ordinal)).IsTrue();
-            var manifests = snapshot.Storage.Files.Where(file => file.Category == BackupCategory
-                && string.Equals(file.Path, expectedManifest, StringComparison.Ordinal)).ToArray();
-            if (manifests.Length == 0)
+            var identities = snapshot.Storage.Files.Where(file => file.Category == BackupCategory
+                && string.Equals(file.Path, expectedIdentity, StringComparison.Ordinal)).ToArray();
+            if (identities.Length == 0)
             {
                 continue;
             }
-            await Assert.That(manifests.Length).IsEqualTo(1);
-            var manifest = manifests.Single();
-            await Assert.That(manifest.Bytes).IsGreaterThan(0);
+            await Assert.That(identities.Length).IsEqualTo(1);
+            var identity = identities.Single();
+            await Assert.That(identity.Bytes).IsGreaterThan(0);
             var siloDirectory = ResolveSiloDirectory(fixture, silo);
             var archiveDirectory = ResolveArchiveDirectory(fixture.Root, siloDirectory, receipt.Id);
             await VerifyRetainedArchiveFilesAsync(snapshot.Storage.Files, archivePrefix, fixture.Root,
                 siloDirectory, cancellationToken).ConfigureAwait(false);
-            var manifestPath = Path.Combine(archiveDirectory, BackupManifestName);
-            var manifestFile = new FileInfo(manifestPath);
-            await Assert.That(manifestFile.Exists).IsTrue();
-            await Assert.That(manifestFile.Length).IsEqualTo(manifest.Bytes);
+            var identityFile = new FileInfo(Path.Combine(archiveDirectory, BackupIdentityName));
+            await Assert.That(identityFile.Exists).IsTrue();
+            await Assert.That(identityFile.Length).IsEqualTo(identity.Bytes);
             archiveDirectories.Add(archiveDirectory);
         }
         await Assert.That(archiveDirectories.Count).IsEqualTo(1);

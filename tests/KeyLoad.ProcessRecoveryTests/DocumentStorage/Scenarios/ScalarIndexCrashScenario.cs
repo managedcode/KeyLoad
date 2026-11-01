@@ -16,7 +16,7 @@ internal static class ScalarIndexCrashScenario
             case ScalarIndexCrashContract.PrepareMode:
                 Prepare(database);
                 await ScalarIndexCrashOperations.WriteSnapshotAsync(directory, ScalarIndexCrashContract.PreparedFile, database);
-                await RecoveryProcessPause.WaitForKillAsync();
+                await RecoveryProcessPause.WaitForKillAsync(store);
                 break;
             case ScalarIndexCrashContract.FaultMode:
                 await ScalarIndexCrashOperations.WriteSnapshotAsync(directory, ScalarIndexCrashContract.BeforeCutFile, database);

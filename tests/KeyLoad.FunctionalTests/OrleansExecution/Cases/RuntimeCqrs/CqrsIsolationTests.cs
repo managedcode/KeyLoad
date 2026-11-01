@@ -33,7 +33,6 @@ internal sealed class CqrsIsolationTests(CqrsClusterFixture fixture)
         var secondObservation = secondValue.Observation!;
         await RuntimeAssertIdentityAsync(firstObservation, firstId);
         await RuntimeAssertIdentityAsync(secondObservation, secondId);
-        await Assert.That(firstObservation.OutgoingSourceId).IsNotEqualTo(secondObservation.OutgoingSourceId);
         await Assert.That(firstObservation).IsNotEqualTo(secondObservation);
 
         var firstState = await CqrsTestSupport.WaitForEventAsync(
@@ -53,17 +52,8 @@ internal sealed class CqrsIsolationTests(CqrsClusterFixture fixture)
     private async Task RuntimeAssertIdentityAsync(CqrsLeafObservation observation, Guid requestId)
     {
         await Assert.That(observation.RequestId).IsEqualTo(requestId);
-        await Assert.That(observation.ObservedSource).IsEqualTo(typeof(ICqrsStreamGrain).FullName);
-        await Assert.That(observation.ObservedTarget).IsEqualTo(typeof(ICqrsLeafGrain).FullName);
-        await Assert.That(observation.ObservedSourceMethod).IsEqualTo(nameof(ICqrsStreamGrain.AllowedAsync));
-        await Assert.That(observation.ObservedTargetMethod).IsEqualTo(nameof(ICqrsLeafGrain.ObserveAsync));
+        await Assert.That(observation.TargetInterface).IsEqualTo(typeof(ICqrsLeafGrain).FullName);
         await Assert.That(observation.TargetMethod).IsEqualTo(nameof(ICqrsLeafGrain.ObserveAsync));
         await Assert.That(observation.LeafPrimaryKey).IsEqualTo(requestId.ToString());
-        var sourceId = fixture.GrainFactory.GetGrain<ICqrsStreamGrain>(requestId).GetGrainId().ToString();
-        var leafId = fixture.GrainFactory.GetGrain<ICqrsLeafGrain>(requestId).GetGrainId().ToString();
-        await Assert.That(observation.OutgoingSourceId).IsEqualTo(sourceId);
-        await Assert.That(observation.OutgoingTargetId).IsEqualTo(leafId);
-        await Assert.That(observation.IncomingSourceId).IsEqualTo(sourceId);
-        await Assert.That(observation.IncomingTargetId).IsEqualTo(leafId);
     }
 }

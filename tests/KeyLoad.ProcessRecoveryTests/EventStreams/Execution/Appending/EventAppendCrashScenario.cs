@@ -32,9 +32,9 @@ internal static class EventAppendCrashScenario
         await CommandIdempotencyCrashData.SaveEvidenceAsync(directory, EventAppendCrashContract.SeedTailFile,
             database.GetOutboxStatus(EventAppendCrashContract.Principal, EventAppendCrashContract.Partition).Head.Tail);
         boundary.Position = store.Position + PositionStep;
-        boundary.Armed = true;
+        await boundary.ArmAsync(store);
         database.Apply(operation).Get<CommitReceipt>();
-        await RecoveryProcessPause.WaitForKillAsync();
+        await RecoveryProcessPause.WaitForKillAsync(store);
     }
 
     private static void Configure(DatabaseEngine database, string name, ResourceKind kind, string id)

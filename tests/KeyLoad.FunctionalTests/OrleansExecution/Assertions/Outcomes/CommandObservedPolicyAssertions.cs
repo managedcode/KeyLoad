@@ -66,7 +66,7 @@ internal static class CommandObservedPolicyAssertions
             ? result : throw new InvalidOperationException(P.WrongReply);
 
     internal static byte[] RuntimePayloadBytes(CommandObservedPolicyScenario scenario, ReceiveResult actual)
-        => OrleansSerialization.Serialize(scenario.Fixture.Database.ReadStoredOutcome(actual.RequestId).PreparedCommand.Value!.Input, ValidationProfile.PublicInputElements);
+        => OrleansSerialization.Serialize(scenario.Fixture.Database.ReadStoredOutcome(actual.RequestId).PreparedCommand.Value!.Input);
 
     internal static async Task UnchangedAsync(CommandObservedPolicyScenario scenario,
         Guid commandId, Func<Task> execute, CancellationToken token)

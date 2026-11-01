@@ -36,7 +36,7 @@ internal static class SubscriptionFilterColdTrial
         Apply(fixture.Database, OperationKind.SetSubscriptionPaused, pause, pause.CommandId, token).Get<SubscriptionInfo>();
         var cut = SubscriptionFilterAssertions.Image(fixture.Store, fixture.Partition);
         fixture.Store.Dispose();
-        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var db = QueueWholeFlowStorage.Open(first);
         await Assert.That(SubscriptionFilterAssertions.Image(first, fixture.Partition)).IsEquivalentTo(cut, CollectionOrdering.Matching);
         await SubscriptionFilterAssertions.StatusAsync(db, group, SubscriptionFilterProtocol.FirstGeneration, SubscriptionFilterProtocol.GapCheckpoint, true);
@@ -53,7 +53,7 @@ internal static class SubscriptionFilterColdTrial
         await SubscriptionFilterContinuation.RunAsync(db, group, independent, received, token);
         var image = SubscriptionFilterAssertions.Image(first, fixture.Partition);
         first.Dispose();
-        using var second = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(second);
         await ReplayResultAssertions.Same<SubscriptionInfo>(Apply(cold, OperationKind.ConfigureSubscription, replacement, replacement.CommandId, token), original);
         await Assert.That(SubscriptionFilterAssertions.Image(second, fixture.Partition)).IsEquivalentTo(image, CollectionOrdering.Matching);

@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 
 namespace KeyLoad.Storage.ZoneTree;
 
+/// <summary>Reads logical bytes directly from the owning native snapshot and the plain data tree.</summary>
 internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValueView
 {
     public int MaximumRangeRecords => runtime.Options.MaximumRangeRecords;
@@ -9,85 +10,36 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
     public byte[]? ReadOwnedValue(byte[] key)
     {
         ArgumentNullException.ThrowIfNull(key);
-        var admission = runtime.CacheLifecycle.CaptureReadAdmission();
-        var generation = runtime.Identity.ReadGeneration;
-        if (admission.TryPin(key, generation, out var entry))
-        {
-            try
-            {
-                runtime.ReadCounters.Point(owned: true, (long)key.Length + entry.Value.Length);
-                return entry.Value.ToArray();
-            }
-            finally
-            {
-                admission.Unpin(entry);
-            }
-        }
-
-        Memory<byte> memory = key;
-        using var snapshot = runtime.Tree.BeginReadOnlyTransaction();
-        var found = snapshot.TryGet(memory, out var value);
-        admission.RecordLookup(found);
-        if (!found)
-        {
-            runtime.ReadCounters.Point(owned: true, key.Length);
-            return null;
-        }
-
-        var borrowed = value.Span;
-        runtime.ReadCounters.Point(owned: true, (long)key.Length + borrowed.Length);
-        using var candidate = (admission.TryPrepare(key, borrowed.Length, generation)).Value;
-        if (candidate is not null)
-        {
-            admission.Publish(candidate, borrowed, generation);
-        }
-
-        return borrowed.ToArray();
+        var found = Read(key, out var value);
+        runtime.ReadCounters.Point(owned: true, (long)key.Length + (found ? value.Length : 0));
+        return found ? value.ToArray() : null;
     }
 
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(reader);
-        var admission = runtime.CacheLifecycle.CaptureReadAdmission();
-        var generation = runtime.Identity.ReadGeneration;
-        if (admission.TryPin(key, generation, out var entry))
+        var found = Read(key, out var value);
+        var bytes = (long)key.Length + (found ? value.Length : 0);
+        runtime.ReadCounters.Point(owned: false, bytes);
+        observer?.Invoke(bytes);
+        if (found)
         {
-            try
-            {
-                runtime.ReadCounters.Point(owned: false, (long)key.Length + entry.Value.Length);
-                observer?.Invoke((long)key.Length + entry.Value.Length);
-                reader(entry.Value);
-                return true;
-            }
-            finally
-            {
-                admission.Unpin(entry);
-            }
+            reader(value.Span);
         }
+        return found;
+    }
 
-        Memory<byte> memory = key;
-        using var snapshot = runtime.Tree.BeginReadOnlyTransaction();
-        var found = snapshot.TryGet(memory, out var value);
-        admission.RecordLookup(found);
-        if (!found)
+    private bool Read(byte[] key, out Memory<byte> value)
+    {
+        var snapshot = runtime.CurrentOperation.Snapshot.Transaction;
+        if (!ZoneTreeDataRouting.IsPlain(runtime, key))
         {
-            runtime.ReadCounters.Point(owned: false, key.Length);
-            observer?.Invoke(key.Length);
-            return false;
+            return snapshot.TryGet(key, out value);
         }
-
-        var borrowed = value.Span;
-        runtime.ReadCounters.Point(owned: false, (long)key.Length + borrowed.Length);
-        using var candidate = (admission.TryPrepare(key, borrowed.Length, generation)).Value;
-        observer?.Invoke((long)key.Length + borrowed.Length);
-        if (candidate is not null)
-        {
-            admission.Publish(candidate, borrowed, generation);
-        }
-
-        reader(borrowed);
-        return true;
+        var found = runtime.PlainTree.TryGet(key, out var plain);
+        value = plain.Value;
+        return found;
     }
 
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)

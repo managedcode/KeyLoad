@@ -4,10 +4,14 @@ using KeyLoad.Storage.ZoneTree;
 namespace KeyLoad.FunctionalTests;
 
 /// <summary>Complete bounded execution pagination under one canonical store read cut.</summary>
+/// <remarks>The image leaves out the store's own position record; callers assert <c>Position</c> explicitly.</remarks>
 internal static class CanonicalStoreImage
 {
     private const int PageRecords = 4_096;
     private const int MaximumPages = 16;
+
+    /// <summary>Whether a key is the position record that every store commit rewrites.</summary>
+    internal static bool IsStorePosition(ReadOnlySpan<byte> key) => ProcessRecoveryTests.StorePositionRecord.Is(key);
 
     internal static string[] Bytes(ZoneTreeStore store) => store.Read(Bytes);
 
@@ -24,7 +28,10 @@ internal static class CanonicalStoreImage
                 {
                     throw new InvalidOperationException("The execution full-store continuation did not advance.");
                 }
-                image.Add(Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
+                if (!IsStorePosition(row.Key.Span))
+                {
+                    image.Add(Convert.ToHexString(row.Key.Span) + ":" + Convert.ToHexString(row.Value.Span));
+                }
                 after = row.Key.ToArray();
             }
             if (!page.HasMore)

@@ -144,7 +144,7 @@ only exact optional-schema conformance assertions in the existing Integration
 QueryExecution/ClientApi slices may join the additive metadata changes. All
 other expansion requires root source-map review before code.
 
-Rollout is one homogeneous current-source cluster image and the existing public routes, with explicit language/AST selection. Rollback removes this operator, new optional members/profiles and matching tests together; no persisted data, replication/atomic journal format or deployment topology changes. No old-format reader, migration, compatibility fallback, FK promise, full SQL or SQL client protocol qualification is introduced.
+Rollout is one homogeneous current-source cluster image and the existing public routes, with explicit language/AST selection. Rollback removes this operator, new optional members/profiles and matching tests together; no persisted data, replication or storage format or deployment topology changes. No old-format reader, migration, compatibility fallback, FK promise, full SQL or SQL client protocol qualification is introduced.
 
 ## Superseding finite extension: Q2.InnerJoin.LeftPredicate
 

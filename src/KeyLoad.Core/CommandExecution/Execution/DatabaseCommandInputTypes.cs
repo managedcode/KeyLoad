@@ -42,7 +42,7 @@ public static class DatabaseCommandInputTypes
     internal static bool TryFind(OperationKind kind, [System.Diagnostics.CodeAnalysis.NotNullWhen(true)] out Type? type)
         => Inputs.TryGetValue(kind, out type);
 
-    /// <summary>Admits exactly the declared input contract of one command kind.</summary>
+    /// <summary>Requires exactly the declared input contract of one command kind.</summary>
     internal static object Require(OperationKind kind, object? input)
     {
         var type = For(kind);
@@ -50,7 +50,14 @@ public static class DatabaseCommandInputTypes
         {
             throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
         }
-        ContractValidation.Validate(input, ValidationProfile.PublicInputElements);
         return input;
+    }
+
+    /// <summary>Admits a new command's input where it enters: its declared contract and a complete contract walk.</summary>
+    internal static object Admit(OperationKind kind, object? input)
+    {
+        var admitted = Require(kind, input);
+        ContractValidation.Validate(admitted, ValidationProfile.PublicInputElements);
+        return admitted;
     }
 }

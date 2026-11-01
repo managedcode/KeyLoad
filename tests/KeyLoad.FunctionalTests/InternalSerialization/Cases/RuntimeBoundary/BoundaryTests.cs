@@ -1,5 +1,4 @@
 using System.Collections.Immutable;
-using KeyLoad.Storage;
 
 namespace KeyLoad.FunctionalTests.InternalSerialization;
 
@@ -27,9 +26,8 @@ internal sealed class BoundaryTests
     }
 
     [Test]
-    public async Task AcIs002RequiredReferencesAndDefaultCollectionsAreRejectedInBothDirections()
+    public async Task AcIs002RequiredReferencesAndDefaultCollectionsAreRejectedAtAdmission()
     {
-        using var serializer = new SerializerFixture();
         PrincipalRecord[] malformed =
         [
             new(null!, Tenant, [], []),
@@ -38,8 +36,7 @@ internal sealed class BoundaryTests
         ];
         foreach (var value in malformed)
         {
-            await Assert.That(Capture(() => OrleansSerialization.Serialize(value)).Code).IsEqualTo(ErrorCode.Corruption);
-            await Assert.That(Capture(() => OrleansSerialization.Deserialize<PrincipalRecord>(serializer.Encode(value))).Code).IsEqualTo(ErrorCode.Corruption);
+            await Assert.That(Capture(() => ContractValidation.Validate(value)).Code).IsEqualTo(ErrorCode.Corruption);
         }
         var empty = OrleansSerialization.Deserialize<PrincipalRecord>(OrleansSerialization.Serialize(new PrincipalRecord(Principal, Tenant, [], [])));
         await Assert.That(empty.Grants.IsDefault).IsFalse();
@@ -49,10 +46,8 @@ internal sealed class BoundaryTests
     [Test]
     public async Task AcIs002RequiredMutationElementsCannotBeNull()
     {
-        using var serializer = new SerializerFixture();
         var malformed = new CommandRequest(Guid.NewGuid(), ContractCases.Partition, [null!]);
-        await Assert.That(Capture(() => OrleansSerialization.Serialize(malformed)).Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(Capture(() => OrleansSerialization.Deserialize<CommandRequest>(serializer.Encode(malformed))).Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(Capture(() => ContractValidation.Validate(malformed)).Code).IsEqualTo(ErrorCode.Corruption);
     }
 
     [Test]
@@ -78,13 +73,11 @@ internal sealed class BoundaryTests
         await Assert.That(actualAbsent.RedactedFields).IsNull();
         await Assert.That(actualEmpty.RedactedFields!.Value.IsDefault).IsFalse();
         await Assert.That(actualEmpty.RedactedFields!.Value.IsEmpty).IsTrue();
-        using var serializer = new SerializerFixture();
         var malformed = absent with
         {
             RedactedFields = [null!]
         };
-        await Assert.That(Capture(() => OrleansSerialization.Serialize(malformed)).Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(Capture(() => OrleansSerialization.Deserialize<QueryRow>(serializer.Encode(malformed))).Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(Capture(() => ContractValidation.Validate(malformed)).Code).IsEqualTo(ErrorCode.Corruption);
     }
 
     [Test]
@@ -92,8 +85,8 @@ internal sealed class BoundaryTests
     {
         // Execution evolution permits zero/default scalars. Authority and cut validators must reject
         // invalid domain values before effects; attributes do not grant an authority incarnation.
-        var value = new StorageSnapshot(Guid.Empty, 0, 0, 0);
-        var actual = OrleansSerialization.Deserialize<StorageSnapshot>(OrleansSerialization.Serialize(value));
+        var value = new CommitToken(Guid.Empty, string.Empty, 0);
+        var actual = OrleansSerialization.Deserialize<CommitToken>(OrleansSerialization.Serialize(value));
         await Assert.That(actual).IsEqualTo(value);
     }
 

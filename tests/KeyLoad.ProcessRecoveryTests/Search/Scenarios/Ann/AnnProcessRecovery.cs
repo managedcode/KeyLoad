@@ -75,7 +75,7 @@ internal static class AnnProcessRecovery
             UseShellExecute = false
         };
         foreach (var argument in new[] { typeof(CrashScenarioDispatcher).Assembly.Location, CrashFixtureValues.ProcessMode, root,
-            CommitStage.JournalFlushed.ToString(), MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
+            CommitStage.WriteAheadLogSynced.ToString(), MutationIndex.ToString(CultureInfo.InvariantCulture), mode })
         {
             start.ArgumentList.Add(argument);
         }

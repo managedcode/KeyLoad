@@ -1,5 +1,4 @@
 using KeyLoad.Server;
-using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 using TUnit.Assertions.Enums;
@@ -28,11 +27,10 @@ internal static class SeriesPortableBackupTrial
         var outcomes = originals.Select(original => BackupIndexedDocumentDedupFixture.ReadOutcomeBytes(fixture.Source.Store,
             fixture.Partition, SeriesPortableBackupSeed.Root, original.Operation.CommandId)).ToArray();
         await SeriesPortableBackupAssertions.ReplayAsync(fixture.Source.Database, originals, token);
-        await Assert.That(fixture.CreateBackup()).IsEqualTo(source.Position);
-        var archive = await BackupJournalRepairAssertions.ArchiveAsync(fixture.BackupDirectory, token);
-        var verified = ZoneTreeStore.VerifyBackup(fixture.BackupDirectory, UnitExecutionOptions.StorageExecution(), token);
-        await BackupPersistedPolicyAssertions.SameAsync(fixture.Source.Store.Identity, verified.Identity);
-        await Assert.That(verified.Position).IsEqualTo(source.Position);
+        await Assert.That(await fixture.CreateBackupAsync()).IsEqualTo(source.Position);
+        var archive = await BackupCutAssertions.ArchiveAsync(fixture.BackupDirectory, token);
+        await BackupPersistedPolicyAssertions.SameAsync(fixture.Source.Store.Identity,
+            BackupCutAssertions.BackupIdentity(fixture.BackupDirectory));
         var restore = await CliBackupRestoreProcess.RunAsync(CliBackupRestoreProcess.CaptureExecutionOptions(),
             ["restore", fixture.BackupDirectory, fixture.TargetDirectory], token);
         await CliBackupRestoreAssertions.SuccessfulProcessAsync(restore);
@@ -53,7 +51,7 @@ internal static class SeriesPortableBackupTrial
         var target = await ContinueAsync(fixture, database, token);
         await ColdAsync(fixture, database, originals, outcomes, target, token);
         await BackupPersistedPolicyAssertions.UnchangedAsync(fixture.Source.Store, source);
-        await BackupJournalRepairAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
+        await BackupCutAssertions.SameArchiveAsync(archive, fixture.BackupDirectory, token);
     }
 
     private static async Task<(Command<DatabaseCommand> Operation, Result<object> Result)[]> ContinueAsync(

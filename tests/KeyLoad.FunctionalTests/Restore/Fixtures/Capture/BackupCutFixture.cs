@@ -1,115 +1,72 @@
-using System.Buffers.Binary;
 using KeyLoad.ProcessRecoveryTests.StorageRecovery;
 using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
-using TUnit.Assertions.Enums;
 
 namespace KeyLoad.FunctionalTests.BackupRestore;
 
+/// <summary>Owns a closed source store with two commits and one backup of that cut.</summary>
 internal sealed class BackupCutFixture : IDisposable
 {
+    internal const string StoredKey = "metadata/key";
+    internal const string StoredValue = "metadata-value";
+    internal const long InitialAuthorityValue = 1L;
     private const string RootPrefix = "keyload-execution-backup-cut-";
-    private const string AllFiles = "*";
+    private const string SourceDirectoryName = "source";
+    private const string BackupDirectoryName = "backup";
+    private const string RestoredDirectoryName = "restored";
     private readonly string root = Path.Combine(StorageTrialDirectory.ResolveExistingDirectory(new(AppContext.BaseDirectory)),
         RootPrefix + Guid.NewGuid().ToString("N"));
 
-    internal string Source => Path.Combine(root, MetadataTestContract.SourceDirectoryName);
-    internal string Backup => Path.Combine(root, MetadataTestContract.BackupDirectoryName);
-    internal string Destination => Path.Combine(root, MetadataTestContract.RestoredDirectoryName);
-    internal string Journal => Path.Combine(Backup, MetadataTestContract.JournalFileName);
+    internal string Source => Path.Combine(root, SourceDirectoryName);
+    internal string Backup => Path.Combine(root, BackupDirectoryName);
+    internal string Destination => Path.Combine(root, RestoredDirectoryName);
+    internal static byte[] StoredKeyBytes => KeyCodec.Encode(StoredKey);
     internal StoreIdentity Identity
     {
-        get;
-    }
+        get; private set;
+    } = null!;
     internal long Position
     {
-        get;
+        get; private set;
     }
 
-    internal BackupCutFixture(bool checkpoint = false, bool empty = false)
+    private BackupCutFixture()
     {
-        using var store = new ZoneTreeStore(new(Source), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
-        Identity = store.Identity;
-        if (empty)
-        {
-            Position = store.CreateBackup(Backup);
-            return;
-        }
-        store.Commit((tx, _) =>
-        {
-            tx.PutRecord(MetadataBackupFixture.StoredKeyBytes, MetadataBackupFixture.ExpectedValue);
-            tx.PutRecord(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.LastAppliedKey), 1L);
-            return true;
-        });
-        if (checkpoint)
-        {
-            store.Compact();
-        }
-        store.Commit((tx, _) =>
-        {
-            tx.PutRecord(KeyCodec.Encode(ZoneTreePersistenceFormat.SystemNamespace,
-                ZoneTreePersistenceFormat.ClockKey), 1L);
-            return true;
-        });
-        Position = store.CreateBackup(Backup);
     }
 
-    internal async Task RewriteJournalAsync(byte[] bytes)
+    internal static async Task<BackupCutFixture> CreateAsync(CancellationToken token)
     {
-        await File.WriteAllBytesAsync(Journal, bytes);
-        await MetadataTestFiles.UpdateManifestFileAsync(Backup, MetadataTestContract.JournalFileName);
+        var fixture = new BackupCutFixture();
+        try
+        {
+            using var store = new ZoneTreeStore(new(fixture.Source), UnitExecutionOptions.StorageExecution());
+            fixture.Identity = store.Identity;
+            store.Commit((tx, _) =>
+            {
+                tx.PutRecord(StoredKeyBytes, StoredValue);
+                tx.PutRecord(KeySpace.Applied.ToArray(), InitialAuthorityValue);
+                return true;
+            });
+            store.Commit((tx, _) =>
+            {
+                tx.PutRecord(KeySpace.Clock.ToArray(), InitialAuthorityValue);
+                return true;
+            });
+            fixture.Position = await store.CreateBackupAsync(fixture.Backup, token);
+            return fixture;
+        }
+        catch (Exception)
+        {
+            fixture.Dispose();
+            throw;
+        }
     }
 
-    internal static int LastFrameOffset(byte[] bytes)
+    public void Dispose()
     {
-        var offset = 0;
-        var last = 0;
-        while (offset < bytes.Length)
+        if (Directory.Exists(root))
         {
-            last = offset;
-            offset += ZoneTreePersistenceFormat.HeaderLength + BinaryPrimitives.ReadInt32LittleEndian(
-                bytes.AsSpan(offset + ZoneTreePersistenceFormat.PayloadLengthOffset));
+            Directory.Delete(root, true);
         }
-        return last;
     }
-
-    internal async Task AssertRejectedUnchangedAsync(ErrorCode expected, bool existingEmpty = false)
-    {
-        if (existingEmpty)
-        {
-            Directory.CreateDirectory(Destination);
-        }
-        var before = await CaptureBackupAsync();
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => ZoneTreeStore.Restore(Backup, Destination, UnitExecutionOptions.StorageExecution()));
-        await Assert.That(failure.Code).IsEqualTo(expected);
-        await Assert.That(Directory.Exists(Destination)).IsEqualTo(existingEmpty);
-        if (existingEmpty)
-        {
-            await Assert.That(Directory.EnumerateFileSystemEntries(Destination).Any()).IsFalse();
-        }
-        var after = await CaptureBackupAsync();
-        await Assert.That(after.Keys).IsEquivalentTo(before.Keys);
-        foreach (var entry in before)
-        {
-            await Assert.That(after[entry.Key]).IsEquivalentTo(entry.Value, CollectionOrdering.Matching);
-        }
-        await Assert.That(Directory.EnumerateDirectories(root).Select(path => Path.GetFileName(path)!))
-            .IsEquivalentTo(existingEmpty
-                ? new[] { MetadataTestContract.SourceDirectoryName, MetadataTestContract.BackupDirectoryName,
-                    MetadataTestContract.RestoredDirectoryName }
-                : new[] { MetadataTestContract.SourceDirectoryName, MetadataTestContract.BackupDirectoryName });
-    }
-
-    private async Task<Dictionary<string, byte[]>> CaptureBackupAsync()
-    {
-        var captured = new Dictionary<string, byte[]>(StringComparer.Ordinal);
-        foreach (var path in Directory.EnumerateFiles(Backup, AllFiles, SearchOption.AllDirectories))
-        {
-            captured.Add(Path.GetRelativePath(Backup, path), await File.ReadAllBytesAsync(path));
-        }
-        return captured;
-    }
-
-    public void Dispose() => Directory.Delete(root, true);
 }

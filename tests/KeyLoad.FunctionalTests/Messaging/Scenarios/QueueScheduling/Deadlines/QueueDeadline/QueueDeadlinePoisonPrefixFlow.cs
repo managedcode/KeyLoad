@@ -56,7 +56,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
         var retainedPosition = fixture.Store.Position;
         token.ThrowIfCancellationRequested();
         fixture.Store.Dispose();
-        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var first = new ZoneTreeStore(new(fixture.Directory), UnitExecutionOptions.StorageExecution());
         var cold = QueueWholeFlowStorage.Open(first);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(first, retained, retainedPosition, identity);
         await Assert.That(cold.InspectMessage(QueueDeadlinePoisonPrefixProtocol.Root, lane, blocked)).IsEqualTo(blockedImage);
@@ -87,7 +87,7 @@ internal static class QueueDeadlinePoisonPrefixFlow
         var finalPosition = first.Position;
         first.Dispose();
         token.ThrowIfCancellationRequested();
-        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        using var second = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
         var final = QueueWholeFlowStorage.Open(second);
         await QueueLeaseExpiryEqualityAssertions.ColdImageAsync(second, complete, finalPosition, identity);
         await ReplayAsync(final, second, outcomes, token);

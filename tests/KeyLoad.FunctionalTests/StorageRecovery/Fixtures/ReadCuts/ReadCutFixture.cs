@@ -67,12 +67,11 @@ internal sealed class ReadCutFixture : IDisposable
         }
         var options = new ZoneTreeStoreOptions(DirectoryPath);
         var execution = UnitExecutionOptions.StorageExecution();
-        var cache = UnitExecutionOptions.PointCacheExecution();
         var attempt = new StorageOwnerSettlement();
         attempts.Add(attempt);
         try
         {
-            return Publish(ZoneTreeStore.OpenOwned(options, execution, cache, attempt, clock));
+            return Publish(ZoneTreeStore.OpenOwned(options, execution, attempt, clock));
         }
         catch (Exception failure)
         {

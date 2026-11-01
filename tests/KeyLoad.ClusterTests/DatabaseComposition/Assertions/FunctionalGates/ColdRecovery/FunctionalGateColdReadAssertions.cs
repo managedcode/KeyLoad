@@ -63,7 +63,7 @@ internal static class FunctionalGateColdReadAssertions
     }
 
     internal static async Task InitialHistoryAsync(FunctionalGateContext context, int index, EntityRef reference,
-        StreamPage stream, EventSourcePage topic, MessageInspectionResult message, long minimum, DateTimeOffset beforeWrite)
+        StreamPage stream, EventSourcePage topic, MessageInspectionResult message, long minimum, DateTimeOffset beforeWrite, CancellationToken token)
     {
         reference = context.Bind(reference);
         var expectedStream = new StreamRef(context.Partition, FunctionalGateColdProtocol.Resource("events", index), FunctionalGateColdProtocol.Id);
@@ -89,7 +89,7 @@ internal static class FunctionalGateColdReadAssertions
         await Assert.That(publication.RecordedAt.Offset).IsEqualTo(TimeSpan.Zero);
         await Assert.That(publication.RecordedAt).IsGreaterThanOrEqualTo(beforeWrite);
         await Assert.That(publication.RecordedAt).IsLessThanOrEqualTo(TimeProvider.System.GetUtcNow());
-        await Assert.That(topic.CutPosition).IsGreaterThanOrEqualTo(minimum);
+        await FunctionalGateReadPositions.RequireAsync(context, minimum, token, topic.CutPosition);
         await Assert.That(topic.HasMore).IsFalse();
         await Assert.That(message.Message).IsNotNull();
         var original = message.Message!;

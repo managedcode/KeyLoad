@@ -50,8 +50,7 @@ internal sealed class GraphStorageMutationReferenceTests
             await GraphStorageReferenceAssertions.VerifyAsync(database.Database, database, reference);
         }
         database.Store.Dispose();
-        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution(),
-            UnitExecutionOptions.PointCacheExecution());
+        using var reopened = new ZoneTreeStore(new(database.Directory), UnitExecutionOptions.StorageExecution());
         var owner = GraphStorageReferenceFixture.ReopenedOwner(reopened);
         await GraphStorageReferenceAssertions.VerifyAsync(owner, database, reference);
         var healthy = GraphStorageReferenceFixture.Command(database.Partition,

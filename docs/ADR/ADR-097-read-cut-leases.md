@@ -18,13 +18,10 @@ cluster topology or acknowledged-write authority changes. Leases are disposable 
 material. Rollback drains the actual
 leases after stopping admission and removes only runtime helpers.
 
-Whole-tree replacement must reject ResourceExhausted while a cut is leased.
-InstallSnapshot checks under its existing write gate after health/stale validation
-and before staging, fault callbacks or publication. No waiting or poison-on-failure
-replacement path is entered for this rejection. The gate also excludes a new
-capture until replacement completes. Ordinary Compact does not replace the execution
-tree and remains allowed. Prove unchanged current health/identity after rejection,
-successful installation after disposal, and exact old-cut reads after compaction.
+The live tree is never replaced while the store is open; commits, ZoneTree merge
+maintenance and backups leave it in place, and a leased cut's read-only snapshot
+keeps reading its original versions. Prove exact old-cut reads after later commits
+and after merge maintenance.
 
 disposal failure retains the actual unsettled iterator and active slot;
 later attempts retry that same handle and concurrent callers join the actual
@@ -56,4 +53,4 @@ flowchart TD
 
 
 ### Bounded read-only frozen lookup under the original one-slot ceiling
-The accepted public retained-reader successor maps original CUT-001..004 to the public retained reader in [OnlineGenerationLifetime](../Features/Search/OnlineGenerationLifetime.md). Storage owns internal IScopedReadCapture and ZoneTreeCapturedReadBuilder/View/Lookup, not Query live-view emulation. Complete the admitted canonical lookup/range/metadata closure with original examined-work and separate retained-buffer/capacity admission, join that SAME snapshot before releasing its single slot, then retain the SAME independent selected FTS reader through actual posting/ranking. Public IAtomicStore/IKeyValueView are unchanged; no live view, snapshot iterator, span or missing-key fallback escapes. Scope completion/observed absence are exact, keys use bounded owned sorted lookup, and no unbounded database copy/new quota exists. All original snapshot cancellation/disposal/InstallSnapshot rules remain mandatory. Source integration/rollback and real positive/denied/cancel/file/cold tests are defined in the linked feature contract; measured heap/resource/runtime gates remain open.
+The accepted public retained-reader successor maps original CUT-001..004 to the public retained reader in [OnlineGenerationLifetime](../Features/Search/OnlineGenerationLifetime.md). Storage owns internal IScopedReadCapture and ZoneTreeCapturedReadBuilder/View/Lookup, not Query live-view emulation. Complete the admitted canonical lookup/range/metadata closure with original examined-work and separate retained-buffer/capacity admission, join that SAME snapshot before releasing its single slot, then retain the SAME independent selected FTS reader through actual posting/ranking. Public IAtomicStore/IKeyValueView are unchanged; no live view, snapshot iterator, span or missing-key fallback escapes. Scope completion/observed absence are exact, keys use bounded owned sorted lookup, and no unbounded database copy/new quota exists. All original snapshot cancellation and disposal rules remain mandatory. Source integration/rollback and real positive/denied/cancel/file/cold tests are defined in the linked feature contract; measured heap/resource/runtime gates remain open.

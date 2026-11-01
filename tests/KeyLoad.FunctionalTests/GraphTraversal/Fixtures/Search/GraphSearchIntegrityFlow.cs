@@ -98,7 +98,7 @@ internal sealed class GraphSearchIntegrityFlow : IDisposable
             using (var store = new ZoneTreeStore(new(database.Directory)
             {
                 Incarnation = database.Store.Identity.Incarnation
-            }, database.StorageExecution, UnitExecutionOptions.PointCacheExecution(), database.Database.EvaluationClock))
+            }, database.StorageExecution, database.Database.EvaluationClock))
             {
                 await ServerFailureObserver.ObserveAsync(() => body(store), failures);
             }

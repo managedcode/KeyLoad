@@ -4,6 +4,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 internal sealed class CommitGateOrderingTests
 {
     [Test]
-    public Task ReadersProceedWhileAWriterCompilesAndFlushesThenWaitOnlyForApply()
+    public Task NativeReaderAndWriterProceedIndependentlyAndTheReaderKeepsItsOriginalSnapshot()
         => PreparationOwnershipOwner.RunAsync(CommitGateOrderingFlow.RunAsync);
 }

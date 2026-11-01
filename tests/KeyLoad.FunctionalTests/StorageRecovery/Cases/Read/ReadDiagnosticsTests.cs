@@ -85,13 +85,13 @@ internal sealed class ReadDiagnosticsTests
         try
         {
             Guid priorSession;
-            using (var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution()))
+            using (var store = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution()))
             {
                 store.Commit((tx, _) => { tx.Put(Key(PointKey), Key(OldValue)); return true; });
                 store.Read(view => view.ReadOwnedValue(Key(PointKey)));
                 priorSession = store.GetReadDiagnostics().SessionId;
             }
-            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+            using var reopened = new ZoneTreeStore(new(directory), UnitExecutionOptions.StorageExecution());
             var current = reopened.GetReadDiagnostics();
             await Assert.That(current.SessionId).IsNotEqualTo(priorSession);
             await Assert.That(current.OwnedPointLookups).IsEqualTo(0L);
@@ -130,7 +130,7 @@ internal sealed class ReadDiagnosticsTests
         {
             get;
         }
-        public StoreFixture() => Store = new(new(Directory), UnitExecutionOptions.StorageExecution(), UnitExecutionOptions.PointCacheExecution());
+        public StoreFixture() => Store = new(new(Directory), UnitExecutionOptions.StorageExecution());
         public void Dispose()
         {
             Store.Dispose();

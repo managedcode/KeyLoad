@@ -13,7 +13,6 @@
     <PackageReference Include="Microsoft.Orleans.CodeGenerator" PrivateAssets="all" />
     <PackageReference Include="ZoneTree" />
     <PackageReference Include="ManagedCode.Storage.FileSystem" />
-    <PackageReference Include="Cartograph.Catalog" />
     <InternalsVisibleTo Include="KeyLoad.AppHost" />
   </ItemGroup>
   <ItemGroup>

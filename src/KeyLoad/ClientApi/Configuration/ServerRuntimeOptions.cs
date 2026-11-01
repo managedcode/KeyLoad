@@ -1,7 +1,6 @@
 using KeyLoad.Clustering;
 using KeyLoad.Server.Search;
 using KeyLoad.Storage.ZoneTree;
-using KeyLoad.Storage.ZoneTree.ResourceExecution;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
@@ -14,7 +13,6 @@ internal sealed record ServerRuntimeOptions(
     IOptions<RuntimeDurableJobOptions> DurableJobs,
     IOptions<McpExecutionOptions> McpExecution,
     IOptions<ZoneTreeStorageExecutionOptions> StorageExecution,
-    IOptions<ZoneTreePointCacheExecutionOptions> PointCache,
     IOptions<GrainRoutingOptions> GrainRouting,
     IOptions<AdminObservationOptions> AdminObservation,
     IOptions<TextExecutionOptions> RuntimeText,
@@ -31,7 +29,6 @@ internal sealed record ServerRuntimeOptions(
         _ = DurableJobs.Value;
         _ = McpExecution.Value;
         _ = StorageExecution.Value;
-        _ = PointCache.Value;
         _ = GrainRouting.Value;
         _ = AdminObservation.Value;
         _ = RuntimeText.Value;

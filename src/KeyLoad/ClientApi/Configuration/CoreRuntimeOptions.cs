@@ -19,7 +19,6 @@ internal sealed record CoreRuntimeOptions(
     IOptions<KeyLoad.Query.Search.PackedAnnStorageOptions> PackedAnnStorage,
     IOptions<QueryExecutionOptions> QueryExecution,
     IOptions<CacheMemoryLimits> CacheMemory,
-    IOptions<CacheReadPermitOptions> CacheReadPermit,
     IOptions<RuntimeJournalOptions> RuntimeJournal)
 {
     internal void ValidateBeforePhysicalOwnership()
@@ -37,7 +36,6 @@ internal sealed record CoreRuntimeOptions(
         _ = PackedAnnStorage.Value;
         _ = QueryExecution.Value;
         _ = CacheMemory.Value;
-        _ = CacheReadPermit.Value;
         _ = RuntimeJournal.Value;
     }
 

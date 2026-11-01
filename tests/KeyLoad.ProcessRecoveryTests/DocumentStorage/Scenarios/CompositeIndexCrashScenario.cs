@@ -16,7 +16,7 @@ internal static class CompositeIndexCrashScenario
             case CompositeIndexCrashContract.PrepareMode:
                 await PrepareAsync(directory, database);
                 await CompositeIndexCrashOperations.WriteSnapshotAsync(directory, CompositeIndexCrashContract.PreparedFile, database);
-                await RecoveryProcessPause.WaitForKillAsync();
+                await RecoveryProcessPause.WaitForKillAsync(store);
                 break;
             case CompositeIndexCrashContract.FaultMode:
                 await CompositeIndexCrashOperations.WriteSnapshotAsync(directory, CompositeIndexCrashContract.BeforeCutFile, database);

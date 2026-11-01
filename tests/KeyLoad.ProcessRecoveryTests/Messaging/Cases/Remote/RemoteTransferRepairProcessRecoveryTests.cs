@@ -8,11 +8,9 @@ internal sealed class RemoteTransferRepairProcessRecoveryTests
     private const int FirstMutation = 0;
 
     [Test]
-    [Arguments(CommitStage.HeaderWritten, QueueTransferRepairStage.Accept)]
-    [Arguments(CommitStage.JournalFlushed, QueueTransferRepairStage.Accept)]
+    [Arguments(CommitStage.WriteAheadLogSynced, QueueTransferRepairStage.Accept)]
     [Arguments(CommitStage.ApplyCompleted, QueueTransferRepairStage.Accept)]
-    [Arguments(CommitStage.HeaderWritten, QueueTransferRepairStage.Complete)]
-    [Arguments(CommitStage.JournalFlushed, QueueTransferRepairStage.Complete)]
+    [Arguments(CommitStage.WriteAheadLogSynced, QueueTransferRepairStage.Complete)]
     [Arguments(CommitStage.ApplyCompleted, QueueTransferRepairStage.Complete)]
     public Task OriginalSourceRepairCasCrashRetainsExactDeniedOutcomeAtomicHistoryAndColdHealthy(
         CommitStage stage, QueueTransferRepairStage transferStage)

@@ -80,21 +80,14 @@ internal sealed class GrainRequestCodecTests
             new PrincipalRecord(Principal, Principal, [], []) { ClusterAdministrator = true })).Code).IsEqualTo(ErrorCode.Validation);
     }
 
-    /// <summary>AC-ROUTE-001: a payload that violates its contract is denied at issuance and at every receiving hop.</summary>
+    /// <summary>AC-ROUTE-001: a payload that violates its contract is denied at issuance, where public input enters.</summary>
     [Test]
-    public async Task ContractInvalidPayloadIsDeniedAtIssuanceAndDecode()
+    public async Task ContractInvalidPayloadIsDeniedAtIssuance()
     {
         using var fixture = new TestDatabase();
         var codec = new GrainRequestCodec(fixture.Database.Store.Identity.Incarnation, TimeProvider.System);
-        var id = Guid.NewGuid();
         var invalid = new GetDocumentRequest(null!);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(id, Principal,
+        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.CreateRead(Guid.NewGuid(), Principal,
             GrainReadKind.Document, invalid)).Code).IsEqualTo(ErrorCode.Validation);
-        var request = codec.DecodeRead(codec.CreateRead(id, Principal, GrainReadKind.QueryCapabilities, NoDtoMarker), id).Envelope;
-        var changed = request with
-        {
-            Payload = invalid
-        };
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => codec.DecodeRead(changed, id)).Code).IsEqualTo(ErrorCode.Validation);
     }
 }
