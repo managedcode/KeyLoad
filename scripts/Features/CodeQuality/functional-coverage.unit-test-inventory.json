@@ -24773,7 +24773,7 @@
       "methodName": "ScheduleDoesNotPersistAmbientCallerTraceState",
       "instanceName": "ScheduleDoesNotPersistAmbientCallerTraceState",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Messaging/Cases/RuntimeSaga/SagaTimeoutTraceIsolationTests.cs",
-      "sourceSha256": "50bb1825139b68e415507964c93299abdf91ad116fd7170ee5969aac923741b3",
+      "sourceSha256": "5eaf789fe52bf7a80d49b1a77ad14fbdefe27920aee6bc634b903db9f912f4cb",
       "lineNumber": 16,
       "endLineNumber": 47,
       "classification": "functional",
@@ -35153,6 +35153,42 @@
       ],
       "acceptance": [
         "AC-REL-NT-005"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTreeAdmissionTests",
+      "reportClassName": "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTreeAdmissionTests",
+      "methodName": "MissingNativeTreeRefusesReplacementThenOriginalFilesAllowColdHealthyWork",
+      "instanceName": "MissingNativeTreeRefusesReplacementThenOriginalFilesAllowColdHealthyWork(plain-tree)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/RelationalStorage/Cases/NonTransactional/NonTransactionalTreeAdmissionTests.cs",
+      "sourceSha256": "45bb9f63d13a83ca5dfa7220320c19a6db17a9435b6f6010556bad683aca59e9",
+      "lineNumber": 5,
+      "endLineNumber": 37,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REL-NT-010"
+      ],
+      "acceptance": [
+        "AC-REL-NT-010"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTreeAdmissionTests",
+      "reportClassName": "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTreeAdmissionTests",
+      "methodName": "MissingNativeTreeRefusesReplacementThenOriginalFilesAllowColdHealthyWork",
+      "instanceName": "MissingNativeTreeRefusesReplacementThenOriginalFilesAllowColdHealthyWork(tree)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/RelationalStorage/Cases/NonTransactional/NonTransactionalTreeAdmissionTests.cs",
+      "sourceSha256": "45bb9f63d13a83ca5dfa7220320c19a6db17a9435b6f6010556bad683aca59e9",
+      "lineNumber": 5,
+      "endLineNumber": 37,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-REL-NT-010"
+      ],
+      "acceptance": [
+        "AC-REL-NT-010"
       ]
     },
     {
@@ -62343,6 +62379,7 @@
         "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalBackupTests",
         "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalPublicationTests",
         "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTableTests",
+        "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTreeAdmissionTests",
         "KeyLoad.FunctionalTests.RelationalStorage.RelationalSchemaNameTests",
         "KeyLoad.FunctionalTests.RelationalStorage.RelationalSchemaTests",
         "KeyLoad.FunctionalTests.ResourceExecution.AtomicTriadStagedWholeFlowTests",
@@ -62733,6 +62770,8 @@
         "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTableTests|PlainRowsAndTransactionalOutcomesKeepTheirNativeTreesAndSurviveColdOpen|PlainRowsAndTransactionalOutcomesKeepTheirNativeTreesAndSurviveColdOpen",
         "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTableTests|TableModeCannotChangeThroughResourcePolicyUpdates|TableModeCannotChangeThroughResourcePolicyUpdates(False)",
         "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTableTests|TableModeCannotChangeThroughResourcePolicyUpdates|TableModeCannotChangeThroughResourcePolicyUpdates(True)",
+        "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTreeAdmissionTests|MissingNativeTreeRefusesReplacementThenOriginalFilesAllowColdHealthyWork|MissingNativeTreeRefusesReplacementThenOriginalFilesAllowColdHealthyWork(plain-tree)",
+        "KeyLoad.FunctionalTests.RelationalStorage.NonTransactionalTreeAdmissionTests|MissingNativeTreeRefusesReplacementThenOriginalFilesAllowColdHealthyWork|MissingNativeTreeRefusesReplacementThenOriginalFilesAllowColdHealthyWork(tree)",
         "KeyLoad.FunctionalTests.RelationalStorage.RelationalSchemaNameTests|AcAisql002ReservedMetadataNamesCannotShadowTypedColumns|AcAisql002ReservedMetadataNamesCannotShadowTypedColumns(*)",
         "KeyLoad.FunctionalTests.RelationalStorage.RelationalSchemaNameTests|AcAisql002ReservedMetadataNamesCannotShadowTypedColumns|AcAisql002ReservedMetadataNamesCannotShadowTypedColumns(@id)",
         "KeyLoad.FunctionalTests.RelationalStorage.RelationalSchemaNameTests|AcAisql002ReservedMetadataNamesCannotShadowTypedColumns|AcAisql002ReservedMetadataNamesCannotShadowTypedColumns(@private)",
