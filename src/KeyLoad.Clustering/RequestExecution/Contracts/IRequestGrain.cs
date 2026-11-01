@@ -2,7 +2,7 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
 
-/// <summary>One stateless grain per admitted operation: it finds the storage owners, executes or fans out, and returns.</summary>
+/// <summary>One ordinary grain per admitted operation: it finds the storage owners, executes or fans out, and returns.</summary>
 [Orleans.Alias(GrainRoutingProtocol.RequestGrainAlias), Orleans.CodeGeneration.Version(GrainRoutingProtocol.RequestGrainInterfaceVersion)]
 public interface IRequestGrain : Orleans.IGrainWithGuidKey
 {

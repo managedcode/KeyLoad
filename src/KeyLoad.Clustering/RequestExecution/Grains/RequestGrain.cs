@@ -1,14 +1,14 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Logging;
-using Orleans.Concurrency;
+using Orleans.Placement;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Coordinates one operation: resolves its storage owner, runs it there or beside it, and joins every child.</summary>
-/// <remarks>A single-worker stateless activation per request: always on the caller's silo, never registered in the grain
-/// directory, and the only target of the call's cancellation and stream messages.</remarks>
-[StatelessWorker(1)]
+/// <remarks>Each request has its own ordinary Orleans activation, placed beside the connection when possible.
+/// Cancellation and stream messages address that request's activation.</remarks>
+[PreferLocalPlacement]
 public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient storage, ILocalDatabaseRuntime runtime,
     ILocalSiloDetails local, ILogger<RequestGrain> diagnostics, TimeProvider clock,
     Func<RequestWorkOwner> borrowWorkOwner, IServiceProvider services)

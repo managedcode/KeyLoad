@@ -77,14 +77,14 @@ The repository's Kurrent driver uses one persistent gRPC client, multi-stream ap
 ## Exact KeyLoad paths requiring redesign
 
 1. `DatabaseAuthenticationHandler.HandleAuthenticateAsync` calls `DatabaseCredentialResolver.ReadAsync` for protected HTTP requests.
-2. `CanonicalCredentialDispatch.AuthenticateAsync` calls `IUserGrain.AuthenticateAsync`, then `ReadCurrentPrincipalAsync`.
-3. `UserGrain` already loads the credential from storage once and reuses it. The confirmed issue is the surrounding repeated operation path, not an assertion that every call re-reads the secret from disk.
-4. `ReadCurrentPrincipalAsync` creates its own request id/envelope and executes `GrainReadKind.CurrentPrincipal` through the connection.
-5. `ConnectionGrain.Request(requestId)` obtains a different `IRequestGrain` identity for each operation. `RequestGrain` is `[StatelessWorker(1)]` and asks for deactivation after completion. The principal operation and the document operation therefore have separate request-grain identities.
+2. `CanonicalCredentialDispatch.AuthenticateAsync` calls `IUserGrain.AuthenticateAsync`; audited operation-owner-authorized endpoints use its verified subject without a second principal operation.
+3. `UserGrain` loads the credential from storage once and reuses it. Business authorization remains a fresh persisted operation check.
+4. Endpoints which consume principal metadata still use `ReadCurrentPrincipalAsync`, with its own request id/envelope and `GrainReadKind.CurrentPrincipal` operation through the connection.
+5. `ConnectionGrain.Request(requestId)` obtains a different ordinary `IRequestGrain` identity for each operation. `RequestGrain` uses `PreferLocalPlacement` and asks for deactivation after completion. A request is individually addressable; it does not create a stateless worker pool.
 6. Each request producer resolves the storage owner through the database grain, then invokes local runtime or a remote owner execution path. Typed payloads, linked cancellation and CQRS settlement pass through multiple boundaries.
-7. `DocumentReadExecution.ReadDocumentAtCut` obtains a bound resource/lifetime pair, then `EntityReferenceLifetime.Bind(view, ...)` and `RequireStored(view, ...)` each read the lifetime again inside the same captured view. Reusing that authenticated pair within the cut avoids those reads without introducing a cache.
+7. `DocumentReadExecution.ReadDocumentAtCut` reuses its authenticated resource/lifetime pair within the same captured read cut, without introducing a cache.
 
-The source confirms redundant layers and repeated work. It does not yet quantify how much throughput each contributes. The diagnostic trace includes these paths, but parked-thread stack frequency must not be presented as running-CPU cost.
+The remaining request and transport boundaries require matched measurements. The diagnostic trace includes these paths, but parked-thread stack frequency must not be presented as running-CPU cost. Microsoft's [stateless worker documentation](https://learn.microsoft.com/en-us/dotnet/orleans/grains/stateless-worker-grains) defines one logical pool per grain id, with automatically created activations that are not individually addressable. Independently addressed requests therefore use ordinary grains; scalable background work uses stable pool identities.
 
 ## Applied changes and acceptance
 

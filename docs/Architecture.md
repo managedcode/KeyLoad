@@ -73,10 +73,10 @@ own; scaling means adding silos to the Orleans cluster.
   The connection grain never caches trusted roles and never owns storage; it
   admits each operation and hands it to that operation's request grain.
 - **Request grains.** One `RequestGrain` per admitted operation, keyed by its
-  request identity, coordinates the operation. It is a single-worker
-  `[StatelessWorker(1)]` activation: always on the connection's silo, never
-  registered in the grain directory, and the only target of the call's
-  cancellation and stream messages. It resolves the storage owner, runs the
+  request identity, coordinates the operation. It is an ordinary Orleans
+  grain with `PreferLocalPlacement`, registered in the grain directory.
+  Cancellation and stream messages target that request's activation.
+  It resolves the storage owner, runs the
   work in place when its silo owns the data or through a
   `RequestExecutionGrain` on the owner's silo, fans partitioned queries,
   searches and composed maintenance out to the owners and gathers the results.

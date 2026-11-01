@@ -30,7 +30,7 @@ SQL operation invocations (written as CALL in the model contracts below) are adm
 
 ## Persistent connection ownership
 
-KeyLoad uses one Orleans grain per actual client connection, with parallel operations and commands and no separately activated request/read grains. [ADR-125](../ADR/ADR-125-connection-owned-execution.md) freezes Kestrel connection identity, typed limits, call isolation and joined teardown. Current HTTP and stateless official MCP execution use the physical transport; SQL sessions remain a separate target under [ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md).
+KeyLoad uses one Orleans grain per actual client connection and a separate ordinary request grain per operation, with parallel operations and commands. [ADR-125](../ADR/ADR-125-connection-owned-execution.md) freezes Kestrel connection identity, typed limits, call isolation and joined teardown. Current HTTP and stateless official MCP execution use the physical transport; SQL sessions remain a separate target under [ADR-065](../ADR/ADR-065-full-sql-client-compatibility.md).
 
 | Requirement | Measurable acceptance | Automated proof / current state |
 |---|---|---|

@@ -28,6 +28,10 @@ internal static class ConnectionAssertions
         await Assert.That(initial.ActivationId).IsEqualTo(following.ActivationId);
         await Assert.That(initial.ActivationId.IsDefault).IsFalse();
         await Assert.That(initial.Identity.RequestId).IsNotEqualTo(following.Identity.RequestId);
+        await Assert.That(initial.ProducerContext.GetComponent<PlacementStrategy>() is { IsUsingGrainDirectory: true }).IsTrue();
+        await Assert.That(following.ProducerContext.GetComponent<PlacementStrategy>() is { IsUsingGrainDirectory: true }).IsTrue();
+        await Assert.That(initial.ProducerContext.GrainId).IsNotEqualTo(following.ProducerContext.GrainId);
+        await Assert.That(initial.ProducerContext.ActivationId).IsNotEqualTo(following.ProducerContext.ActivationId);
         await scenario.AssertActivationCountAsync(ConnectionProtocol.OneConnection, cancellationToken);
     }
 

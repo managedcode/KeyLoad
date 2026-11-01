@@ -4,7 +4,7 @@ Status: Accepted (owner decision 2026-10-09, simplified 2026-10-18 under [ADR-13
 
 ## Decision
 
-Every connected client gets one Orleans `ConnectionGrain`. It owns only the connection: admission, the duplicate-request check, close and the join of its live operations. Each admitted operation runs in its own `RequestGrain`, keyed by the operation's request identity and placed on the connection's silo. The request grain is the coordinator: it reloads authority, resolves the storage owner through Orleans, runs the operation beside that owner (in place when its own silo owns the data, otherwise through a `RequestExecutionGrain` placed on the owner's silo), fans composed and partitioned work out to the owners of the required partitions, gathers the results and returns them.
+Every connected client gets one Orleans `ConnectionGrain`. It owns only the connection: admission, the duplicate-request check, close and the join of its live operations. Each admitted operation runs in its own ordinary Orleans `RequestGrain`, keyed by the operation's request identity and using `PreferLocalPlacement`. Orleans registers it in the grain directory; its cancellation and stream messages target the same activation. A request is not a stateless worker pool. The request grain is the coordinator: it reloads authority, resolves the storage owner through Orleans, runs the operation beside that owner (in place when its own silo owns the data, otherwise through a `RequestExecutionGrain` placed on the owner's silo), fans composed and partitioned work out to the owners of the required partitions, gathers the results and returns them.
 
 ```mermaid
 flowchart LR

@@ -9,6 +9,7 @@ This specification states which Orleans 10.4 primitive KeyLoad uses for each kin
 | Work | Primitive | Key and identity |
 |---|---|---|
 | A connected client's operations | `ConnectionGrain`, `[Immovable]`, `[PreferLocalPlacement]` | Server-issued connection id |
+| One admitted request | Ordinary `RequestGrain`, `[PreferLocalPlacement]` | Independent server-issued request id; one addressable activation |
 | Commands of one logical partition | Partition grain | Canonical partition id from the shared ID helper |
 | A node's ZoneTree files | Storage host DI singleton (lifecycle participant) plus one storage Grain Service per silo | One per silo; remote callers use `GetGrainService(SiloAddress)` |
 | Copies of a write | Grain Service calls to the target silos | Target silos from `IClusterMembershipService` |
@@ -21,7 +22,8 @@ This specification states which Orleans 10.4 primitive KeyLoad uses for each kin
 ```mermaid
 flowchart LR
     Api[SDK MCP SQL] --> Conn[ConnectionGrain]
-    Conn --> Part[Partition grain]
+    Conn --> Request[Ordinary request grain]
+    Request --> Part[Partition grain]
     Part -->|Orleans call| Svc[Storage Grain Service on a chosen silo]
     Svc --> Host[Storage host singleton]
     Host --> Zt[(ZoneTree)]
@@ -31,7 +33,7 @@ flowchart LR
 
 ## Connection and request lifetimes
 
-One Orleans grain per accepted client connection runs that connection's independent operations in parallel within typed bounds (ADR-125). Each operation keeps its own request envelope id, fresh persisted authorization, cancellation and cleanup. No grain is created per request and no completed-request history is kept. Disconnect or idle expiry stops admission, joins the original operations and requests `DeactivateOnIdle`.
+One Orleans grain per accepted client connection admits independent operations (ADR-125). Each operation runs on its own ordinary request grain with a separate request id, fresh persisted authorization, cancellation and cleanup. This grain requests deactivation after its operation settles. Completed-request history is not retained in the connection grain. Disconnect or idle expiry stops admission, joins the original operations and requests `DeactivateOnIdle`.
 
 ## Background work
 
