@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Query;
 using KeyLoad.Storage;
@@ -34,11 +33,7 @@ internal static class GenerationVisibilityWriteAssertions
             : [new(TeamRowPolicyFlow.Row, rowRevision, rowJson, false, [])];
         var request = new QueryRequest(partition, GenerationVisibilityAssertions.Sql, AllowFullScan: true);
         await PageAsync(queries.Execute(TeamRowPolicyFlow.Reader, request, cancellationToken: token), expected, cut);
-        var plan = JsonSerializer.Serialize(new
-        {
-            AccessPath = Scan,
-            AtomicPartition = partition.AtomicPartitionId
-        }, JsonDefaults.Options);
+        var plan = TeamRowPolicyAssertions.ExplainPlan(partition, cut);
         var explanation = new global::KeyLoad.Query.AstQueryRequest(partition,
             new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.QueryExecution.SqlSyntax.Star,
                 global::KeyLoad.Query.QueryExecution.SqlSyntax.Star)], null,

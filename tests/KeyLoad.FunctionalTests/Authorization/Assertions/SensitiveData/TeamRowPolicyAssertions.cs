@@ -44,11 +44,7 @@ internal static class TeamRowPolicyAssertions
         await Assert.That(page.CutPosition).IsEqualTo(cut);
         await Assert.That(page.Cursor).IsNull();
         await Assert.That(page.AccessPath).IsEqualTo(Scan);
-        var plan = JsonSerializer.Serialize(new
-        {
-            AccessPath = Scan,
-            AtomicPartition = db.Partition.AtomicPartitionId
-        }, JsonDefaults.Options);
+        var plan = ExplainPlan(db.Partition, cut);
         QueryRow[] explanation = [new("explain", AbsentRevision, plan)];
         var explanationRequest = new AstQueryRequest(db.Partition,
             new(TeamRowPolicyFlow.Collection, null, [new(global::KeyLoad.Query.QueryExecution.SqlSyntax.Star,
@@ -153,4 +149,23 @@ internal static class TeamRowPolicyAssertions
         await Assert.That(Image(store).SequenceEqual(image, StringComparer.Ordinal)).IsTrue();
         await Assert.That(store.Position).IsEqualTo(cut);
     }
+
+    internal static string ExplainPlan(PartitionRef partition, long cut) => JsonSerializer.Serialize(new
+    {
+        AccessPath = Scan,
+        AtomicPartition = partition.AtomicPartitionId,
+        ReadCut = cut,
+        Scan,
+        Index = (string?)null,
+        SeekFields = Array.Empty<string>(),
+        HasLowerBound = false,
+        HasUpperBound = false,
+        ResidualFields = Array.Empty<string>(),
+        Order = new Ordering[] { new("/@id", false) },
+        RetainedRows = 100L,
+        Limit = 100,
+        Offset = 0,
+        Projection = new Selection[] { new("*", "*") },
+        Operators = new[] { Scan, "row-authorization", "top-n-heap", "projection", "page" }
+    }, JsonDefaults.Options);
 }
