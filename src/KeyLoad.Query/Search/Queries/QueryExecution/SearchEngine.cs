@@ -46,13 +46,13 @@ public sealed partial class SearchEngine
     /// <param name="request">Search fields, query and result limit.</param>
     /// <param name="cancellationToken">Caller cancellation for admission and the complete worker.</param>
     /// <returns>Ranked and authorized documents after complete lease settlement.</returns>
-    public Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
+    public async Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return Task.FromResult(SearchCore(principalId, request, budget));
+        return await TextProjectionAdmission.ExecuteAsync(() => SearchCore(principalId, request, budget), budget, cancellationToken);
     }
 
     /// <summary>Executes graph scope, retrieval and expansion inside one authorized search cut.</summary>
@@ -68,14 +68,15 @@ public sealed partial class SearchEngine
         return GraphSearchAsync(principalId, request, budget, cancellationToken);
     }
 
-    internal Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
+    internal async Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
         ReadExecutionBudget budget, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(budget);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return Task.FromResult(GraphSearchExecutor.Execute(database, textProjection, principalId, request, budget, execution));
+        return await TextProjectionAdmission.ExecuteAsync(() => GraphSearchExecutor.Execute(database, textProjection,
+            principalId, request, budget, execution), budget, cancellationToken);
     }
 
     private RankedDocument[] SearchCore(string principalId, SearchRequest request, ReadExecutionBudget budget)

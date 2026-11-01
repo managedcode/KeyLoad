@@ -21,10 +21,34 @@ internal static class CanonicalCredentialDispatch
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 onStarted?.Invoke();
-                result = await user.AuthenticateAsync(credential, connection.Token);
+                try
+                {
+                    var verified = await user.AuthenticateAsync(credential, connection.Token);
+                    result = await ReadCurrentPrincipalAsync(node, verified, connection);
+                }
+                catch (Exception failure) when (failure is OrleansException or TimeoutException
+                    && CqrsBoundaryErrors.IsNonFatal(failure))
+                {
+                    throw OrleansRpcFailure.Translate(failure, false, requestId,
+                        node.RuntimeServices.GetRequiredService<ILogger<OrleansNode>>(),
+                        OrleansRpcFailureStage.Consumption,
+                        new(Guid.Empty, GrainReadKind.Authenticate, null), connection.Token);
+                }
             }, failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
         return result ?? throw Errors.Fail(ErrorCode.Corruption, PostgresProtocol.Invalid);
+    }
+
+    private static async Task<PrincipalRecord> ReadCurrentPrincipalAsync(OrleansNode node,
+        PrincipalRecord verified, ServerConnectionOperation connection)
+    {
+        var requestId = Guid.NewGuid();
+        var envelope = node.CatalogRequestCodec().CreateRead(requestId, verified.Id,
+            GrainReadKind.CurrentPrincipal, GrainContracts.NoDtoMarker);
+        using var identity = node.OpenRequestContext(verified, requestId, Guid.Empty, connection.Token, connection.Id);
+        var reply = await node.ExecuteAsync(requestId, envelope, false, connection.Token);
+        return GrainReplyFactory.RequireValue(reply).Value is PrincipalRecord current && current.Id == verified.Id
+            ? current : throw Errors.Fail(ErrorCode.Corruption, McpAuthentication.InvalidReply);
     }
 }

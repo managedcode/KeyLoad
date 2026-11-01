@@ -110,7 +110,7 @@ public static class KeyCodec
                 DoubleTag => ReadDouble(key, ref offset),
                 TimestampTag => ReadTimestamp(key, ref offset),
                 TextTag => ReadText(key, ref offset),
-                BinaryTag => ReadEscaped(key, ref offset),
+                BinaryTag => ReadEscaped(key, ref offset).ToArray(),
                 _ => throw BadKey()
             };
             values.Add(value);

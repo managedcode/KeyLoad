@@ -19,12 +19,6 @@ internal static class DatabaseCredentialResolver
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
         }
-        // A client authenticates once per connection; later requests carrying the same credential reuse it.
-        var feature = context.Features.Get<ServerConnectionFeature>();
-        if (feature?.Principal is { } connected && string.Equals(connected.Credential, key, StringComparison.Ordinal))
-        {
-            return new GrainValue(connected.Value);
-        }
         var requestId = Guid.NewGuid();
         RequestFailureDiagnostic.MarkCredentialDispatch(context);
         var started = DatabasePhaseTelemetry.Begin();
@@ -59,7 +53,6 @@ internal static class DatabaseCredentialResolver
                 executionObserver!.Terminal(context.TraceIdentifier, requestId, outcome);
             }
         }
-        feature?.Principal = new(key, principal);
         return new GrainValue(principal);
     }
 }

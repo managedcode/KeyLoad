@@ -75,23 +75,35 @@ internal static class KeyCodecReadPrimitives
         }
     }
 
-    internal static byte[] ReadEscaped(ReadOnlySpan<byte> key, ref int offset)
+    internal static ReadOnlySpan<byte> ReadEscaped(ReadOnlySpan<byte> key, ref int offset)
     {
-        var bytes = new ArrayBufferWriter<byte>();
+        if ((uint)offset > (uint)key.Length)
+        {
+            throw BadKey();
+        }
+
+        ArrayBufferWriter<byte>? bytes = null;
         while (offset < key.Length)
         {
-            var value = ReadByte(key, ref offset);
-            if (value != EscapedZeroByte)
+            var start = offset;
+            var length = key[offset..].IndexOf((byte)EscapedZeroByte);
+            if (length < 0)
             {
-                bytes.GetSpan(1)[0] = value;
-                bytes.Advance(1);
-                continue;
+                offset = key.Length;
+                throw BadKey();
             }
 
+            offset += length + 1;
             var escape = ReadByte(key, ref offset);
             if (escape == EscapedZeroByte)
             {
-                return bytes.WrittenSpan.ToArray();
+                if (bytes is null)
+                {
+                    return key.Slice(start, length);
+                }
+
+                bytes.Write(key.Slice(start, length));
+                return bytes.WrittenSpan;
             }
 
             if (escape != ZeroEscapeMarker)
@@ -99,6 +111,8 @@ internal static class KeyCodecReadPrimitives
                 throw BadKey();
             }
 
+            bytes ??= new ArrayBufferWriter<byte>();
+            bytes.Write(key.Slice(start, length));
             bytes.GetSpan(1)[0] = EscapedZeroByte;
             bytes.Advance(1);
         }

@@ -42,6 +42,11 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
 
         var principal = await ReloadPrincipalAsync(request, requestId, null, cancellationToken).ConfigureAwait(true);
+        if (kind == GrainReadKind.CurrentPrincipal)
+        {
+            GrainPayload.RequireNoDto(request.Payload);
+            return (true, principal);
+        }
         if (kind == GrainReadKind.FileMetadata)
         {
             return (true, ((object?)(localDatabase.ReadFileMetadataBound(principal.Id,

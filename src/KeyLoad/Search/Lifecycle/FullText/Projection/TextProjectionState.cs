@@ -35,7 +35,7 @@ internal sealed class TextProjectionState
                 || slots.Building || slots.HasUnleasedRetired
                 || slots.Count >= executionOptions.Value.MaximumGenerations)
             {
-                throw TextErrors.Busy();
+                throw work.IsQuiet ? TextErrors.Busy() : TextProjectionAdmission.Busy(TextProtocol.ProjectionBusy, work.Signal);
             }
             var staged = slots.Reserve();
             ReserveLease(staged);

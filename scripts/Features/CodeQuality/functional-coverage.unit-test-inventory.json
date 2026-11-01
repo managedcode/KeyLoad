@@ -43581,6 +43581,42 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.Search.TextGenerationAdmissionTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextGenerationAdmissionTests",
+      "methodName": "ColdBuildWaitCancelsWithoutClosingItsOwnerThenHealthyReadCompletes",
+      "instanceName": "ColdBuildWaitCancelsWithoutClosingItsOwnerThenHealthyReadCompletes",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/ReadCuts/TextGenerationAdmissionTests.cs",
+      "sourceSha256": "95674d25d72b97d6042e617690e4f9668c62f74c81eb716df234c7ca2fc41fac",
+      "lineNumber": 18,
+      "endLineNumber": 19,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-LEASE-002"
+      ],
+      "acceptance": [
+        "AC-LEASE-002"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Search.TextGenerationAdmissionTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextGenerationAdmissionTests",
+      "methodName": "ColdBuildWaitStartsAFreshReadAfterTheCurrentWrite",
+      "instanceName": "ColdBuildWaitStartsAFreshReadAfterTheCurrentWrite",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/ReadCuts/TextGenerationAdmissionTests.cs",
+      "sourceSha256": "95674d25d72b97d6042e617690e4f9668c62f74c81eb716df234c7ca2fc41fac",
+      "lineNumber": 15,
+      "endLineNumber": 16,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-LEASE-002"
+      ],
+      "acceptance": [
+        "AC-LEASE-002"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.Search.TextGenerationCapacityTests",
       "reportClassName": "KeyLoad.FunctionalTests.Search.TextGenerationCapacityTests",
       "methodName": "RestartPreflightsAllThreeLeavesBeforeAnyRetirement",
@@ -45354,10 +45390,46 @@
     {
       "className": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
       "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
+      "methodName": "DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes",
+      "instanceName": "DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes(False)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeyCodecInputContractTests.cs",
+      "sourceSha256": "ca52e7f5fc83ba571de91223aa2933d03506a9d9bafcf8a08cd9593348e0179f",
+      "lineNumber": 56,
+      "endLineNumber": 76,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-KEYCODEC-005"
+      ],
+      "acceptance": [
+        "AC-KEYCODEC-005"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
+      "methodName": "DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes",
+      "instanceName": "DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes(True)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeyCodecInputContractTests.cs",
+      "sourceSha256": "ca52e7f5fc83ba571de91223aa2933d03506a9d9bafcf8a08cd9593348e0179f",
+      "lineNumber": 56,
+      "endLineNumber": 76,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-KEYCODEC-005"
+      ],
+      "acceptance": [
+        "AC-KEYCODEC-005"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
       "methodName": "ExcessArityFailsBeforeEncodingUnsupportedFinalComponent",
       "instanceName": "ExcessArityFailsBeforeEncodingUnsupportedFinalComponent",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeyCodecInputContractTests.cs",
-      "sourceSha256": "33f027aeac96c6fe6de7d706fbe7a1582031f0918aa26208a040d2a31aeef946",
+      "sourceSha256": "ca52e7f5fc83ba571de91223aa2933d03506a9d9bafcf8a08cd9593348e0179f",
       "lineNumber": 22,
       "endLineNumber": 30,
       "classification": "functional",
@@ -45375,7 +45447,7 @@
       "methodName": "ExcessPersistedArityDoesNotLeakFinalTimestampOverflow",
       "instanceName": "ExcessPersistedArityDoesNotLeakFinalTimestampOverflow",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeyCodecInputContractTests.cs",
-      "sourceSha256": "33f027aeac96c6fe6de7d706fbe7a1582031f0918aa26208a040d2a31aeef946",
+      "sourceSha256": "ca52e7f5fc83ba571de91223aa2933d03506a9d9bafcf8a08cd9593348e0179f",
       "lineNumber": 32,
       "endLineNumber": 43,
       "classification": "functional",
@@ -45390,10 +45462,28 @@
     {
       "className": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
       "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
+      "methodName": "OrdinaryCompositeTextDecodeStaysWithinItsOwnedResultAllocationBudget",
+      "instanceName": "OrdinaryCompositeTextDecodeStaysWithinItsOwnedResultAllocationBudget",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeyCodecInputContractTests.cs",
+      "sourceSha256": "ca52e7f5fc83ba571de91223aa2933d03506a9d9bafcf8a08cd9593348e0179f",
+      "lineNumber": 78,
+      "endLineNumber": 99,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-KEYCODEC-005"
+      ],
+      "acceptance": [
+        "AC-KEYCODEC-005"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests",
       "methodName": "UnsupportedAndInvalidClrValuesUseFrozenTypedErrors",
       "instanceName": "UnsupportedAndInvalidClrValuesUseFrozenTypedErrors",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeyCodecInputContractTests.cs",
-      "sourceSha256": "33f027aeac96c6fe6de7d706fbe7a1582031f0918aa26208a040d2a31aeef946",
+      "sourceSha256": "ca52e7f5fc83ba571de91223aa2933d03506a9d9bafcf8a08cd9593348e0179f",
       "lineNumber": 45,
       "endLineNumber": 54,
       "classification": "functional",
@@ -45411,7 +45501,7 @@
       "methodName": "ZeroOneAndMaximumComponentCountsAreSupported",
       "instanceName": "ZeroOneAndMaximumComponentCountsAreSupported",
       "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeyCodecInputContractTests.cs",
-      "sourceSha256": "33f027aeac96c6fe6de7d706fbe7a1582031f0918aa26208a040d2a31aeef946",
+      "sourceSha256": "ca52e7f5fc83ba571de91223aa2933d03506a9d9bafcf8a08cd9593348e0179f",
       "lineNumber": 7,
       "endLineNumber": 20,
       "classification": "functional",
@@ -60837,8 +60927,11 @@
         "KeyLoad.FunctionalTests.Search.TextWaitForIndexTests|RejectedMinimumPrefixRetainsCompleteStoreThenPublicationReturnsLiteralHealthy|RejectedMinimumPrefixRetainsCompleteStoreThenPublicationReturnsLiteralHealthy(True)",
         "KeyLoad.FunctionalTests.Search.TextWaitObservedWorkTests|ActualPublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy|ActualPublicationWorkCancellationOrDeadlineSettlesWithoutPartialThenLiteralHealthy(True)",
         "KeyLoad.FunctionalTests.Search.VectorReferenceLifetimeTests|GenuineDropRecreateRefusesStoredAndSubmittedOldVectorSourceThenFreshLineageSurvivesTwoColdOwners|GenuineDropRecreateRefusesStoredAndSubmittedOldVectorSourceThenFreshLineageSurvivesTwoColdOwners",
+        "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests|DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes|DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes(False)",
+        "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests|DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes|DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes(True)",
         "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests|ExcessArityFailsBeforeEncodingUnsupportedFinalComponent|ExcessArityFailsBeforeEncodingUnsupportedFinalComponent",
         "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests|ExcessPersistedArityDoesNotLeakFinalTimestampOverflow|ExcessPersistedArityDoesNotLeakFinalTimestampOverflow",
+        "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests|OrdinaryCompositeTextDecodeStaysWithinItsOwnedResultAllocationBudget|OrdinaryCompositeTextDecodeStaysWithinItsOwnedResultAllocationBudget",
         "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests|UnsupportedAndInvalidClrValuesUseFrozenTypedErrors|UnsupportedAndInvalidClrValuesUseFrozenTypedErrors",
         "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecInputContractTests|ZeroOneAndMaximumComponentCountsAreSupported|ZeroOneAndMaximumComponentCountsAreSupported",
         "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecMalformedContractTests|PersistedMalformedScalarsPreserveBytesAndHealthyCompositeRoundTrips|PersistedMalformedScalarsPreserveBytesAndHealthyCompositeRoundTrips",
@@ -63045,6 +63138,7 @@
         "KeyLoad.FunctionalTests.Search.TextAsyncAdmissionTests",
         "KeyLoad.FunctionalTests.Search.TextAsyncProjectionTests",
         "KeyLoad.FunctionalTests.Search.TextCapturedCommitAuthorityTests",
+        "KeyLoad.FunctionalTests.Search.TextGenerationAdmissionTests",
         "KeyLoad.FunctionalTests.Search.TextGenerationCapacityTests",
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests",
         "KeyLoad.FunctionalTests.Search.TextProjectionLeaseTests",
@@ -63511,6 +63605,8 @@
         "KeyLoad.FunctionalTests.Search.TextAsyncAdmissionTests|AcFts007PreCancelledAsyncSearchCreatesNoReservationOrGeneration|AcFts007PreCancelledAsyncSearchCreatesNoReservationOrGeneration",
         "KeyLoad.FunctionalTests.Search.TextAsyncProjectionTests|AcFts007AsyncSearchPublishesReusesAndReplacesFromCanonicalCuts|AcFts007AsyncSearchPublishesReusesAndReplacesFromCanonicalCuts",
         "KeyLoad.FunctionalTests.Search.TextCapturedCommitAuthorityTests|OriginalUnconfiguredFtsReadSurvivesCanonicalCommitThenFreshSearchAndSameIdReplay|OriginalUnconfiguredFtsReadSurvivesCanonicalCommitThenFreshSearchAndSameIdReplay",
+        "KeyLoad.FunctionalTests.Search.TextGenerationAdmissionTests|ColdBuildWaitCancelsWithoutClosingItsOwnerThenHealthyReadCompletes|ColdBuildWaitCancelsWithoutClosingItsOwnerThenHealthyReadCompletes",
+        "KeyLoad.FunctionalTests.Search.TextGenerationAdmissionTests|ColdBuildWaitStartsAFreshReadAfterTheCurrentWrite|ColdBuildWaitStartsAFreshReadAfterTheCurrentWrite",
         "KeyLoad.FunctionalTests.Search.TextGenerationCapacityTests|RestartPreflightsAllThreeLeavesBeforeAnyRetirement|RestartPreflightsAllThreeLeavesBeforeAnyRetirement",
         "KeyLoad.FunctionalTests.Search.TextGenerationCapacityTests|ThreeOwnedLeavesAreAcceptedAndFourthIsRejectedWithoutDeletingThem|ThreeOwnedLeavesAreAcceptedAndFourthIsRejectedWithoutDeletingThem",
         "KeyLoad.FunctionalTests.Search.TextGenerationLifetimeTests|AggregateCensusCanRunWhileASecondGenerationIsPausedBetweenPostings|AggregateCensusCanRunWhileASecondGenerationIsPausedBetweenPostings",

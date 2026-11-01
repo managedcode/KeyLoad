@@ -7,25 +7,25 @@ namespace KeyLoad.Query;
 
 public sealed partial class SearchEngine
 {
-    internal Task<RankedDocument[]> SearchBoundAsync(string principalId, SearchRequest request,
+    internal async Task<RankedDocument[]> SearchBoundAsync(string principalId, SearchRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var budget = SearchLifetimeWorkBudget.Create(database, binding, token);
         using var reservation = database.AdmitQuery(token);
-        return Task.FromResult(SearchCore(principalId, request, budget));
+        return await TextProjectionAdmission.ExecuteAsync(() => SearchCore(principalId, request, budget), budget, token);
     }
 
     internal Task<GraphSearchResult> GraphSearchBoundAsync(string principalId, GraphSearchRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
         => GraphSearchAsync(principalId, request, SearchLifetimeWorkBudget.Create(database, binding, token), token);
 
-    internal Task<WaitForIndexResult> WaitForIndexBoundAsync(string principalId, WaitForIndexRequest request,
+    internal async Task<WaitForIndexResult> WaitForIndexBoundAsync(string principalId, WaitForIndexRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
         var budget = SearchLifetimeWorkBudget.Create(database, binding, token);
         using var reservation = database.AdmitQuery(token);
-        return Task.FromResult(TextIndexWaitExecution.Execute(database, textProjection, execution,
-            readCutObserver, principalId, request, budget));
+        return await TextProjectionAdmission.ExecuteAsync(() => TextIndexWaitExecution.Execute(database, textProjection, execution,
+            readCutObserver, principalId, request, budget), budget, token);
     }
 
     internal Task<WaitForAnnIndexResult> WaitForAnnIndexBoundAsync(string principalId, WaitForAnnIndexRequest request,

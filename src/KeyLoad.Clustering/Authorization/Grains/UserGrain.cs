@@ -34,7 +34,7 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
         }
         var now = clock.GetUtcNow();
         if (!CryptographicOperations.FixedTimeEquals(credential.Digest, witness.Digest.Span)
-            || credential.ExpiresAt <= now || credential.Principal.ExpiresAt <= now)
+            || credential.ExpiresAt <= now)
         {
             throw Unavailable();
         }
@@ -55,6 +55,8 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
         var state = RequestContext.Get(GrainRequestStreamProtocol.ContextKey) as GrainRequestContextState
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         var envelope = codec.CreateRead(state.RequestId, null, GrainReadKind.Authenticate, secret);
+        using var placement = GrainRequestIdentityScope.ForPlacement(envelope,
+            GrainIdentityContext.RequireOriginSilo(), cancellationToken);
         var reply = await GrainFactory.GetGrain<IConnectionGrain>(state.ConnectionId)
             .ExecuteAsync(envelope, cancellationToken).ConfigureAwait(true);
         if (reply.Error is { } error)

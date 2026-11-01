@@ -119,7 +119,7 @@ internal static class McpCatalogExpectations
             ["tenantId", "databaseId", "queue", "expectedSchemaVersion", "paused"],
             ["name", "kind", "transactionDomainId", "indexes", "fieldPolicies", "headerPolicies",
                 "queuePolicy", "eventRetention", "authority", "schemaVersion", "paused", "filePolicy",
-                "relationalSchema", "vectorProfiles", "inboxPolicy", "analyticsSchema"],
+                "relationalSchema", "vectorProfiles", "inboxPolicy", "analyticsSchema", "transactional"],
             BodyPropertyFields: ["tenantId", "databaseId", "queue", "expectedSchemaVersion", "paused"]),
         new(McpCallerTools.ResourcesConfigure, false, true, false, McpExpectedBody.Object, true,
             [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId, McpDiscoveryProtocol.Definition]),

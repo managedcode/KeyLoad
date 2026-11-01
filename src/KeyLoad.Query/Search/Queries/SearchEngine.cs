@@ -10,15 +10,15 @@ public sealed partial class SearchEngine
     /// <param name="request">Collection, field and acknowledged minimum token.</param>
     /// <param name="cancellationToken">Original admission and complete worker cancellation.</param>
     /// <returns>The observed applied cut after joined execution generation settlement.</returns>
-    public Task<WaitForIndexResult> WaitForIndexAsync(string principalId, WaitForIndexRequest request,
+    public async Task<WaitForIndexResult> WaitForIndexAsync(string principalId, WaitForIndexRequest request,
         CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(request);
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return Task.FromResult(TextIndexWaitExecution.Execute(database, textProjection, execution, readCutObserver,
-            principalId, request, budget));
+        return await TextProjectionAdmission.ExecuteAsync(() => TextIndexWaitExecution.Execute(database, textProjection,
+            execution, readCutObserver, principalId, request, budget), budget, cancellationToken);
     }
 
 }

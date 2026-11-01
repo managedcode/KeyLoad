@@ -52,4 +52,49 @@ internal sealed class KeyCodecInputContractTests
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Encode("invalid-\uD800"),
             ErrorCode.Validation, "Key text is not valid Unicode.");
     }
+
+    [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task DecodedBinaryOwnsItsBytesBesideLongUnicodeAndConsecutiveZeroEscapes(bool escapedBinary)
+    {
+        var text = new string('x', 257) + "ї\0\0😀" + new string('y', 513);
+        byte[] binary = escapedBinary ? [0, 0xA5, 0, 0xFF] : [0xA5, 0xFF, 1, 42];
+        object?[] values = [string.Empty, "\0", text, Array.Empty<byte>(), binary, "after"];
+        var key = KeyCodec.Encode(values);
+        var decoded = KeyCodec.Decode(key);
+        await Assert.That(decoded.Length).IsEqualTo(values.Length);
+        for (var index = 0; index < values.Length; index++)
+        {
+            await KeyCodecNormalizedAssertions.AssertEquivalentAsync(values[index], decoded[index]);
+        }
+
+        Array.Fill(key, byte.MaxValue);
+        await Assert.That((byte[])decoded[4]!).IsEquivalentTo(binary);
+        Array.Fill((byte[])decoded[4]!, (byte)1);
+        await Assert.That(binary).IsEquivalentTo(escapedBinary ? new byte[] { 0, 0xA5, 0, 0xFF } : [0xA5, 0xFF, 1, 42]);
+    }
+
+    [Test]
+    public async Task OrdinaryCompositeTextDecodeStaysWithinItsOwnedResultAllocationBudget()
+    {
+        const int repetitions = 512;
+        const int maximumBytesPerDecode = 1024;
+        var key = KeyCodec.Encode("tenant", "database", "domain", "partition", "resource", "record");
+        for (var index = 0; index < repetitions; index++)
+        {
+            _ = KeyCodec.Decode(key);
+        }
+
+        var before = GC.GetAllocatedBytesForCurrentThread();
+        var components = 0;
+        for (var index = 0; index < repetitions; index++)
+        {
+            components += KeyCodec.Decode(key).Length;
+        }
+        var allocated = GC.GetAllocatedBytesForCurrentThread() - before;
+
+        await Assert.That(components).IsEqualTo(repetitions * 6);
+        await Assert.That(allocated).IsLessThan((long)repetitions * maximumBytesPerDecode);
+    }
 }

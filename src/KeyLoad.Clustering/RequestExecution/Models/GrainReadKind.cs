@@ -114,5 +114,7 @@ public enum GrainReadKind
     /// <summary>Aggregates a bounded authorized user analytics source cut through the execution derived engine.</summary>
     AnalyticsAggregate = 95,
     /// <summary>Reads authorized file metadata without physical payload bytes.</summary>
-    FileMetadata = 97
+    FileMetadata = 97,
+    /// <summary>Reload the current persisted principal identified by an already verified credential.</summary>
+    CurrentPrincipal = 98
 }

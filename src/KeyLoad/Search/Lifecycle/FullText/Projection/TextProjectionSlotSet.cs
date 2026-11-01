@@ -12,7 +12,8 @@ internal sealed class TextProjectionSlotSet
     internal bool Building => staged is not null;
     internal TextGenerationSlot? Current => current;
     internal bool Transition => transition;
-    internal bool ReplacementWaitingForRetiredLease => staged is not null && retired?.LeaseActive == true;
+    internal bool ReplacementWaitingForRetiredLease => retired?.LeaseActive == true
+        && (staged is not null || current?.LeaseActive == true);
     internal bool CleanupActive => current?.CleanupActive == true || retired?.CleanupActive == true
         || staged?.CleanupActive == true;
     internal bool HasUnleasedRetired => retired is { LeaseActive: false };
