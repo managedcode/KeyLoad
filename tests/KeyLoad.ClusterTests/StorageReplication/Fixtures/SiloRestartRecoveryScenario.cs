@@ -33,8 +33,7 @@ internal static class SiloRestartRecoveryScenario
         await Task.WhenAll(nodes.Select(node => fixture.RestartServerAsync(node, cancellationToken)));
         stoppedProcesses.Clear();
 
-        await ClusterReplicationTestSupport.EventuallyAsync(
-            async () => (await surviving.StatusAsync(cancellationToken)).IsSuccess, cancellationToken);
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(state.Clients, cancellationToken);
         var restored = ClusterReplicationTestSupport.Success(await ClusterReplicationTestSupport.RetryDuringSiloRecoveryAsync(
             () => surviving.CommitAsync(pending, cancellationToken), cancellationToken));
         await Assert.That(restored.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
@@ -68,11 +67,6 @@ internal static class SiloRestartRecoveryScenario
     {
         foreach (var index in Enumerable.Range(0, NodeCount))
         {
-            await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-            {
-                var current = await state.Clients[index].StatusAsync(cancellationToken);
-                return current.IsSuccess && current.Value.RoutingReady;
-            }, cancellationToken);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(
                 ClusterReplicationTestSupport.NodeName(index + 1), WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
             await Assert.That(ClusterReplicationTestSupport.Success(

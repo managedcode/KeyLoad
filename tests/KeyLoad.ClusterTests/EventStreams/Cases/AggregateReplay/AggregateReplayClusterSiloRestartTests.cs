@@ -48,7 +48,8 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
             stoppedNode = nodes[selectedIndex];
             await fixture.KillServerAsync(stoppedNode, AggregateReplayClusterTokens.FailureScenario, cancellationToken);
             var survivorIndex = Enumerable.Range(0, nodes.Length).First(index => index != selectedIndex);
-            await WaitUntilReadyAsync(administrators[survivorIndex], cancellationToken);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(
+                administrators.Where((_, index) => index != selectedIndex).ToArray(), cancellationToken);
             var frozen = scenario.FailoverCommand(Guid.NewGuid());
             await ClusterReplicationTestSupport.MissingCopiesAsync(await clients[survivorIndex].CommitAsync(frozen, cancellationToken));
 
@@ -66,7 +67,7 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
             }
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
-            await WaitForClusterReadyAsync(nodes, administrators, cancellationToken);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(administrators, cancellationToken);
             var receipt = ClusterReplicationTestSupport.Success(await ClusterReplicationTestSupport.RetryDuringSiloRecoveryAsync(
                 () => clients[survivorIndex].CommitAsync(frozen, cancellationToken), cancellationToken));
             await Assert.That(receipt.Durability).IsEqualTo(DurabilityProfile.ProcessDurable);
@@ -92,7 +93,7 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
             if (stoppedNode is not null && !restarted)
             {
                 using var recovery = new CancellationTokenSource(TimeSpan.FromSeconds(45), TimeProvider.System);
-                await RestoreSiloAsync(stoppedNode, nodes, administrators, originalFailure, recovery.Token);
+                await RestoreSiloAsync(stoppedNode, administrators, originalFailure, recovery.Token);
             }
         }
     }
@@ -144,7 +145,7 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
         }
     }
 
-    private async Task RestoreSiloAsync(string stoppedNode, string[] nodes, KeyLoadClient[] administrators,
+    private async Task RestoreSiloAsync(string stoppedNode, KeyLoadClient[] administrators,
         Exception? originalFailure, CancellationToken cancellationToken)
     {
         try
@@ -153,7 +154,7 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(stoppedNode,
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
             await Assert.That(Directory.Exists(Path.Combine(fixture.Root, stoppedNode))).IsTrue();
-            await WaitForClusterReadyAsync(nodes, administrators, cancellationToken);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(administrators, cancellationToken);
         }
         catch (Exception recoveryFailure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(recoveryFailure))
         {
@@ -163,22 +164,6 @@ internal sealed class AggregateReplayClusterSiloRestartTests(ClusterFixture fixt
                 return;
             }
             throw;
-        }
-    }
-
-    private static async Task WaitUntilReadyAsync(KeyLoadClient client, CancellationToken cancellationToken)
-        => await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-        {
-            var status = await client.StatusAsync(cancellationToken);
-            return status.IsSuccess && status.Value.RoutingReady;
-        }, cancellationToken);
-
-    private static async Task WaitForClusterReadyAsync(string[] nodes, KeyLoadClient[] clients,
-        CancellationToken cancellationToken)
-    {
-        foreach (var index in Enumerable.Range(0, nodes.Length))
-        {
-            await WaitUntilReadyAsync(clients[index], cancellationToken);
         }
     }
 

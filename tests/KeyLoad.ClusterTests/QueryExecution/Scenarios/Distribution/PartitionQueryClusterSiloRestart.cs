@@ -59,11 +59,6 @@ internal static class PartitionQueryClusterSiloRestart
             .First(node => !string.Equals(node, selectedSilo, StringComparison.Ordinal));
         using var http = McpCallerHttp.Create(fixture, survivor);
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-        await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-        {
-            var status = await sdk.StatusAsync(cancellationToken).ConfigureAwait(false);
-            return status.IsSuccess && status.Value.RoutingReady;
-        }, cancellationToken).ConfigureAwait(false);
         var target = scenario.Partitions[1];
         var row = new PartitionQueryClusterInputRow(target, AddedId, 0, AddedValue);
         var payload = System.Text.Json.JsonSerializer.Serialize(new Dictionary<string, object?>(StringComparer.Ordinal)
@@ -100,7 +95,9 @@ internal static class PartitionQueryClusterSiloRestart
             {
                 await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(selectedSilo,
                     WaitBehavior.WaitOnResourceUnavailable, recovery.Token).ConfigureAwait(false);
-                await VerifyAllNodesReadyAsync(fixture, recovery.Token).ConfigureAwait(false);
+                await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture,
+                    [McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3], recovery.Token)
+                    .ConfigureAwait(false);
             }, failures).ConfigureAwait(false);
         }
         if (failures.Count == 0)
@@ -115,18 +112,4 @@ internal static class PartitionQueryClusterSiloRestart
         throw new AggregateException("Partition query silo-restart cleanup failed.", failures);
     }
 
-    private static async Task VerifyAllNodesReadyAsync(ClusterFixture fixture,
-        CancellationToken cancellationToken)
-    {
-        foreach (var node in new[] { McpCallerProtocol.Node1, McpCallerProtocol.Node2, McpCallerProtocol.Node3 })
-        {
-            using var http = McpCallerHttp.Create(fixture, node);
-            var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
-            await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-            {
-                var status = await sdk.StatusAsync(cancellationToken).ConfigureAwait(false);
-                return status.IsSuccess && status.Value.RoutingReady;
-            }, cancellationToken).ConfigureAwait(false);
-        }
-    }
 }

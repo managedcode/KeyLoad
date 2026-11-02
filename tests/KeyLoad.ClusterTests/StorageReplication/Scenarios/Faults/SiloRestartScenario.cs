@@ -100,12 +100,14 @@ internal static class SiloRestartScenario
             SiloFailure, cancellationToken);
         var survivors = Enumerable.Range(0, NodeCount).Where(index => index != selectedIndex).ToArray();
         var surviving = state.Clients[survivors[0]];
-        await EventuallyAsync(async () => (await surviving.StatusAsync(cancellationToken)).IsSuccess, cancellationToken);
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(
+            survivors.Select(index => state.Clients[index]).ToArray(), cancellationToken);
         await VerifyInitialReplicasAsync(survivors.Select(index => state.Clients[index]).ToArray(),
             state.Partition, state.Subscription, cancellationToken);
         await MissingCopiesAsync(await surviving.CommitAsync(state.Command, cancellationToken));
         await fixture.RestartServerAsync(selectedNode, cancellationToken);
         await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(selectedNode, cancellationToken);
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(state.Clients, cancellationToken);
         stoppedProcesses.Remove(selectedNode);
         return state with
         {
@@ -133,20 +135,13 @@ internal static class SiloRestartScenario
         {
             return;
         }
-        foreach (var client in clients)
+        try
         {
-            try
-            {
-                await EventuallyAsync(async () =>
-                {
-                    var status = await client.StatusAsync(recoveryTimeout.Token);
-                    return status.IsSuccess && status.Value.RoutingReady;
-                }, recoveryTimeout.Token);
-            }
-            catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))
-            {
-                failure.Data[ClusterReadinessFailureKey] = readinessFailure;
-            }
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(clients, recoveryTimeout.Token);
+        }
+        catch (Exception readinessFailure) when (IsNonFatalCleanupFailure(readinessFailure))
+        {
+            failure.Data[ClusterReadinessFailureKey] = readinessFailure;
         }
     }
 

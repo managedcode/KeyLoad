@@ -22,7 +22,8 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
             await fixture.KillServerAsync(stoppedNode, EventProjectionClusterScenario.FailureScenario,
                 cancellationToken);
             var survivor = Enumerable.Range(0, nodes.Length).First(index => index != selectedIndex);
-            await WaitReadyAsync(clients.Administrators[survivor], cancellationToken);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(
+                clients.Administrators.Where((_, index) => index != selectedIndex).ToArray(), cancellationToken);
             await ReplayAndCheckSurvivorAsync(scenario, clients, survivor, nodes[survivor],
                 cancellationToken);
             await RestartAndCheckClusterAsync(stoppedNode, nodes, clients.Administrators, cancellationToken);
@@ -102,20 +103,13 @@ internal sealed class EventProjectionClusterSiloRestart(ClusterFixture fixture)
     private async Task WaitForClusterAsync(string[] nodes, KeyLoadClient[] administrators,
         CancellationToken cancellationToken)
     {
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(administrators, cancellationToken);
         foreach (var index in Enumerable.Range(0, nodes.Length))
         {
-            await WaitReadyAsync(administrators[index], cancellationToken);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(nodes[index],
                 WaitBehavior.WaitOnResourceUnavailable, cancellationToken);
         }
     }
-
-    private static async Task WaitReadyAsync(KeyLoadClient administrator, CancellationToken cancellationToken)
-        => await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-        {
-            var status = await administrator.StatusAsync(cancellationToken);
-            return status.IsSuccess && status.Value.RoutingReady;
-        }, cancellationToken);
 
     private async Task RestoreStoppedNodeAsync(string stoppedNode, string[] nodes,
         KeyLoadClient[] administrators, Exception? primaryFailure)

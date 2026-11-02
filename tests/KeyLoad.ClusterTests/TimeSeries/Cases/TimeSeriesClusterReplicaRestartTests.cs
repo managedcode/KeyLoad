@@ -154,21 +154,13 @@ internal sealed class TimeSeriesClusterReplicaRestartTests(ClusterFixture fixtur
         try
         {
             await fixture.RestartServerAsync(node, recovery.Token);
-            var index = NodeIndex(node);
-            await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-            {
-                var status = await clients[index].StatusAsync(recovery.Token);
-                return status.IsSuccess && status.Value.RoutingReady;
-            }, recovery.Token);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(clients, recovery.Token);
         }
         catch (Exception recoveryFailure) when (ClusterReplicationTestSupport.IsNonFatalCleanupFailure(recoveryFailure))
         {
             failure.Data[RestartFailureKey] = recoveryFailure;
         }
     }
-
-    private static int NodeIndex(string node) => int.Parse(node.AsSpan("node".Length),
-        System.Globalization.CultureInfo.InvariantCulture) - FirstNode;
 
     private static string NodeName(int number) => "node" + number.ToString(System.Globalization.CultureInfo.InvariantCulture);
 }
