@@ -383,6 +383,14 @@ and impact; distinguish verified facts from hypotheses and exclude secrets.
 Tell the user about the finding and provide a clickable link to that local file.
 The user forwards the report to the project author personally.
 
+Keep each report concise and focused on one finding. Start with a short title,
+one category (`Bug`, `Feature request`, `Performance`, or `Question`), and a
+one-to-two-sentence summary with the specific action requested from the author.
+Use `Bug` for a reproduced contract violation, `Feature request` for a missing
+capability, `Performance` for measured cost, and `Question` for unresolved behavior.
+Include the smallest reproducer and only the evidence needed to act; omit
+investigation chronology, repeated explanations and full diagnostic logs.
+
 Keep these reports and their sensitive reproduction details local. Do not commit,
 push or upload them, include them in public documentation or CI artifacts, open
 or comment on public issues, or contact maintainers on the user's behalf.
