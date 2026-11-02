@@ -46,6 +46,6 @@ public sealed class LiteralMachineKeyAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, literal.GetLocation(), literal.Token.ValueText));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, literal.GetLocation(), literal.Token.ValueText) /* KLD0041: Roslyn requires object message arguments to name this machine-key literal at its original source location. */);
     }
 }

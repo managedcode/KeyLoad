@@ -47,7 +47,7 @@ public sealed class ProgramEndpointMappingAnalyzer : DiagnosticAnalyzer
         if (!string.Equals(Path.GetFileName(context.Node.SyntaxTree.FilePath),
                 CodeQualitySourceNames.ProgramFile,
                 StringComparison.OrdinalIgnoreCase) ||
-            !context.Node.Ancestors().OfType<GlobalStatementSyntax>().Any() ||
+            !context.Node.Ancestors().Any(static ancestor => ancestor is GlobalStatementSyntax) ||
             context.Node is not InvocationExpressionSyntax invocation ||
             !TryGetInvokedMethodName(invocation, out var methodName) ||
             !methodName.StartsWith(CodeQualitySourceNames.MapMethodPrefix, StringComparison.Ordinal) ||
@@ -59,7 +59,7 @@ public sealed class ProgramEndpointMappingAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(Rule,
             invocation.GetLocation(),
             AggregateMethodName,
-            methodName));
+            methodName) /* KLD0041: Roslyn requires object message arguments for the approved aggregate method and this disallowed endpoint method. */);
     }
 
     private static bool TryGetInvokedMethodName(

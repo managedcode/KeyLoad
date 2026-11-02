@@ -77,7 +77,7 @@ public sealed class AggregateTypeCodeLineCountAnalyzer : DiagnosticAnalyzer
             if (measurement.CodeLines > MaximumTypeCodeLines)
             {
                 context.ReportDiagnostic(Diagnostic.Create(
-                    Rules[0], measurement.Location, measurement.Type.Name, measurement.CodeLines));
+                    Rules[0], measurement.Location, measurement.Type.Name, measurement.CodeLines /* KLD0042: Roslyn retains this numeric aggregate count for culture-aware diagnostic formatting. */) /* KLD0041: Roslyn formats the aggregate type name and measured line count through its fixed diagnostic argument array. */);
             }
         }
     }

@@ -9,7 +9,7 @@ internal static class PartitionQueryOrder
     private const int FirstElementIndex = 0;
     private const int BeforeOrder = -1;
     private const int AfterOrder = 1;
-    private static readonly byte[] NullKey = KeyCodec.Encode((object?)null);
+    private static readonly byte[] NullKey = KeyCodec.Encode(KeyComponent.Null);
 
     internal static int ComparePartition(PartitionRef left, PartitionRef right)
     {

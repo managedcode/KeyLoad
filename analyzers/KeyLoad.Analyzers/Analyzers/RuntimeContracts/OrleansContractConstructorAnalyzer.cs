@@ -58,7 +58,7 @@ public sealed class OrleansContractConstructorAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(
             Rule,
             constructor.Identifier.GetLocation(),
-            containingType.Name));
+            containingType.Name) /* KLD0041: Roslyn requires object message arguments to identify the serialized contract that declares this constructor. */);
     }
 
     private static bool IsException(INamedTypeSymbol type, SyntaxNodeAnalysisContext context)

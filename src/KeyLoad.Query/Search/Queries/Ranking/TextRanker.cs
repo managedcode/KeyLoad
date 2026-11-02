@@ -70,7 +70,7 @@ internal sealed class TextRanker
         var value = (JsonData.Scalar(json.RootElement, path)).Value.Value;
         var counts = new Dictionary<int, int>();
         var length = EmptyElementCount;
-        if (value is string content)
+        if (value is { Kind: KeyLoad.Storage.KeyComponentKind.Text, Text: var content })
         {
             foreach (var term in SearchTerms.Enumerate(content, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters))
             {

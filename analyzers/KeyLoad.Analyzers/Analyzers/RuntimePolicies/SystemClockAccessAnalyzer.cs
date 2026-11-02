@@ -59,7 +59,7 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
         context.ReportDiagnostic(Diagnostic.Create(
             Rule,
             context.Operation.Syntax.GetLocation(),
-            property.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+            property.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)) /* KLD0041: Roslyn requires object message arguments to identify this direct clock property instead of TimeProvider. */);
     }
 
     private static bool IsCurrentTimeProperty(IPropertySymbol property)
@@ -88,7 +88,7 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
         if (IsStopwatch(field.ContainingType))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rule, context.Operation.Syntax.GetLocation(),
-                field.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+                field.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)) /* KLD0041: Roslyn requires object message arguments to identify this direct Stopwatch field instead of TimeProvider. */);
         }
     }
 
@@ -98,7 +98,7 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
         if (IsStopwatch(method.ContainingType))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rule, context.Operation.Syntax.GetLocation(),
-                method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+                method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)) /* KLD0041: Roslyn requires object message arguments to identify this direct Stopwatch method instead of TimeProvider. */);
         }
     }
 
@@ -108,7 +108,7 @@ public sealed class SystemClockAccessAnalyzer : DiagnosticAnalyzer
         if (creation.Type is INamedTypeSymbol type && IsStopwatch(type))
         {
             context.ReportDiagnostic(Diagnostic.Create(Rule, context.Operation.Syntax.GetLocation(),
-                type.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+                type.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)) /* KLD0041: Roslyn requires object message arguments to identify this direct Stopwatch construction instead of TimeProvider. */);
         }
     }
 

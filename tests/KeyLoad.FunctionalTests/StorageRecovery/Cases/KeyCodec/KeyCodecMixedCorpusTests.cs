@@ -12,7 +12,7 @@ internal sealed class KeyCodecMixedCorpusTests
 
         foreach (var entry in corpus)
         {
-            var decoded = KeyCodec.Decode(KeyCodec.Encode(entry.Components));
+            var decoded = KeyCodec.Decode(KeyCodec.Encode(KeyCodecMixedCorpus.Typed(entry.Components)));
             await Assert.That(decoded.Length).IsEqualTo(entry.Components.Length);
             for (var index = 0; index < decoded.Length; index++)
             {
@@ -28,7 +28,7 @@ internal sealed class KeyCodecMixedCorpusTests
         var corpus = KeyCodecMixedCorpus.Create();
         var expected = corpus.OrderBy(entry => entry, Comparer<KeyCodecCorpusEntry>.Create(KeyCodecMixedCorpus.Compare))
             .Select(entry => entry.Index).ToArray();
-        var actual = corpus.OrderBy(entry => KeyCodec.Encode(entry.Components), BinaryKeyComparer.Instance)
+        var actual = corpus.OrderBy(entry => KeyCodec.Encode(KeyCodecMixedCorpus.Typed(entry.Components)), BinaryKeyComparer.Instance)
             .Select(entry => entry.Index).ToArray();
 
         await Assert.That(actual.SequenceEqual(expected)).IsTrue();

@@ -75,7 +75,7 @@ public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, value.Syntax.GetLocation(), value.Syntax.ToString()));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, value.Syntax.GetLocation(), value.Syntax.ToString()) /* KLD0041: Roslyn requires object message arguments to display the exact synchronization expression rejected here. */);
     }
 
     private static void AnalyzeInvocation(
@@ -113,7 +113,7 @@ public sealed class TypedSynchronizationAnalyzer : DiagnosticAnalyzer
         }
 
         context.ReportDiagnostic(Diagnostic.Create(Rule, context.Operation.Syntax.GetLocation(),
-            method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+            method.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)) /* KLD0041: Roslyn requires object message arguments to identify this blocking synchronization method. */);
     }
 
     private static bool IsGrainMember(OperationAnalysisContext context, INamedTypeSymbol? grainType)

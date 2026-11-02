@@ -41,11 +41,11 @@ internal static class ResourceStorageKeys
         {
             return false;
         }
-        catalog = Catalog((string)components[FirstAddressComponent]!, (string)components[DatabaseComponent]!,
-            (string)components[ResourceComponent]!);
+        catalog = Catalog(components[FirstAddressComponent].Text, components[DatabaseComponent].Text,
+            components[ResourceComponent].Text);
         if (retainScope)
         {
-            scope = KeyCodec.Encode(components[FirstAddressComponent..AddressEnd])[KeyCodecTokens.VersionBytes..];
+            scope = KeyCodec.Encode(components.AsSpan(FirstAddressComponent, AddressEnd - FirstAddressComponent))[KeyCodecTokens.VersionBytes..];
         }
         return true;
     }
@@ -57,12 +57,12 @@ internal static class ResourceStorageKeys
         {
             return false;
         }
-        resource = ((string)components[FirstAddressComponent]!, (string)components[DatabaseComponent]!,
-            (string)components[ResourceComponent]!);
+        resource = (components[FirstAddressComponent].Text, components[DatabaseComponent].Text,
+            components[ResourceComponent].Text);
         return true;
     }
 
-    private static bool TryComponents(ReadOnlySpan<byte> key, out object?[] components)
+    private static bool TryComponents(ReadOnlySpan<byte> key, out KeyComponent[] components)
     {
         components = [];
         if (DataFamilyPrefixLength(key) == 0)
@@ -70,8 +70,8 @@ internal static class ResourceStorageKeys
             return false;
         }
         components = KeyCodec.Decode(key);
-        return components.Length > ResourceComponent && components[FirstAddressComponent] is string
-            && components[DatabaseComponent] is string && components[ResourceComponent] is string;
+        return components.Length > ResourceComponent && components[FirstAddressComponent].Kind is KeyComponentKind.Text
+            && components[DatabaseComponent].Kind is KeyComponentKind.Text && components[ResourceComponent].Kind is KeyComponentKind.Text;
     }
 
     internal static int DataFamilyPrefixLength(ReadOnlySpan<byte> key)

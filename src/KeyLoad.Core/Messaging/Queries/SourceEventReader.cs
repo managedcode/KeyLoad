@@ -8,8 +8,6 @@ internal static class SourceEventReader
 {
     private const string EventUnavailableMessage = "The requested event is unavailable.";
     private const string EventRecordCorruptMessage = "The persisted event record does not match its source position.";
-    private const string TopicEventSpace = "topic-event";
-    private const string StreamEventSpace = "event";
 
     /// <summary>Reads and validates one topic or stream record without an intermediate value copy.</summary>
     /// <param name="view">The storage view valid for the current read or transaction action.</param>
@@ -24,21 +22,13 @@ internal static class SourceEventReader
         ArgumentNullException.ThrowIfNull(view);
         ArgumentNullException.ThrowIfNull(source);
         SourceEventRecord? result = null;
-        var key = EventKey(source, position);
+        var key = EventSources.SourceKey(source, position);
         var found = view.ReadValue(key, bytes => result = Decode(bytes, source, position), observer);
         if (!found)
         {
             throw Errors.Fail(ErrorCode.HistoryUnavailable, EventUnavailableMessage);
         }
         return result ?? throw Errors.Fail(ErrorCode.Corruption, EventRecordCorruptMessage);
-    }
-
-    private static byte[] EventKey(EventSourceRef source, long position)
-    {
-        object?[] suffix = source.Kind == EventSourceKind.Topic
-            ? [source.Resource, source.Generation, position]
-            : [source.Resource, source.StreamId, source.Generation, position];
-        return KeySpace.Partition(source.Kind == EventSourceKind.Topic ? TopicEventSpace : StreamEventSpace, source.Partition, suffix);
     }
 
     private static SourceEventRecord Decode(ReadOnlySpan<byte> bytes, EventSourceRef source, long position)

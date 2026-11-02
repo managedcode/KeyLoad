@@ -17,7 +17,7 @@ public static class MessagingExecutionMessaging
     internal const int MessagingMinimumPositiveCount = 1;
     internal const string MessagingMessageMetadataKeySpace = "message-meta";
     internal const string MessagingMessageBodyKeySpace = "message-body";
-    internal static byte[] QueueKey(string space, QueueLaneRef lane, params object?[] tail) => KeySpace.Partition(space, lane.Partition, new object?[] { lane.Queue }.Concat(tail).ToArray());
+    internal static byte[] QueueKey(string space, QueueLaneRef lane, params ReadOnlySpan<KeyComponent> tail) => KeySpace.Partition(space, lane.Partition, [lane.Queue, .. tail]);
     internal static QueueCounters Counters(IKeyValueView view, QueueLaneRef lane)
     {
         var counters = view.GetRecord<QueueCounters>(QueueKey(MessagingQueueCountersKeySpace, lane));

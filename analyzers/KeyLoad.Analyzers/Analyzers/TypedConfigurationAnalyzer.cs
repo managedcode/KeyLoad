@@ -77,10 +77,12 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
         {
             IInvocationOperation invocation when MagicRuntimeOperations.IsType(context.Compilation,
                 invocation.TargetMethod.ContainingType, MagicRuntimeMetadataNames.TimeSpan) =>
-                invocation.Arguments.All(argument => MagicRuntimeOperations.IsNumeric(argument.Value.Type) && argument.Value.ConstantValue.HasValue),
+                invocation.Arguments.All(argument => MagicRuntimeOperations.IsNumeric(argument.Value.Type) &&
+                    argument.Value.ConstantValue /* KLD0041: Roslyn exposes numeric duration argument constants through Optional<object>; only HasValue is needed. */.HasValue),
             IObjectCreationOperation creation when MagicRuntimeOperations.IsType(context.Compilation,
                 creation.Type, MagicRuntimeMetadataNames.TimeSpan) =>
-                creation.Arguments.All(argument => MagicRuntimeOperations.IsNumeric(argument.Value.Type) && argument.Value.ConstantValue.HasValue),
+                creation.Arguments.All(argument => MagicRuntimeOperations.IsNumeric(argument.Value.Type) &&
+                    argument.Value.ConstantValue /* KLD0041: Roslyn exposes numeric duration constructor constants through Optional<object>; only HasValue is needed. */.HasValue),
             _ => false
         };
 
@@ -181,5 +183,5 @@ public sealed class TypedConfigurationAnalyzer : DiagnosticAnalyzer
     }
 
     private static void Report(Action<Diagnostic> report, Location location, string subject) =>
-        report(Diagnostic.Create(Rule, location, subject));
+        report(Diagnostic.Create(Rule, location, subject) /* KLD0041: Roslyn requires object message arguments for the unowned configuration or policy subject resolved by this rule. */);
 }

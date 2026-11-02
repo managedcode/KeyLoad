@@ -67,7 +67,7 @@ internal static class RuntimeJournalCatalogReader
         ImmutableArray<RuntimeJournalHeader>.Builder headers, Dictionary<string, int> nextIndices,
         RuntimeJournalOptions options)
     {
-        object?[] components;
+        KeyComponent[] components;
         try
         {
             components = KeyCodec.Decode(key);
@@ -77,11 +77,11 @@ internal static class RuntimeJournalCatalogReader
             throw Errors.Fail(ErrorCode.RecoveryRequired, RuntimeJournalProtocol.InvalidState);
         }
         if (components.Length != RuntimeJournalProtocol.ChunkKeyComponentCount
-            || components[RuntimeJournalProtocol.ChunkKeySpaceComponent] is not string space || space != RuntimeJournalProtocol.Space
-            || components[RuntimeJournalProtocol.ChunkKeyVersionComponent] is not long version || version != RuntimeJournalProtocol.CurrentVersion
-            || components[RuntimeJournalProtocol.ChunkKeyKindComponent] is not string kind || kind != RuntimeJournalProtocol.ChunkKey
-            || components[RuntimeJournalProtocol.ChunkKeyNameComponent] is not string name
-            || components[RuntimeJournalProtocol.ChunkKeyIndexComponent] is not long index
+            || components[RuntimeJournalProtocol.ChunkKeySpaceComponent] is not { Kind: KeyComponentKind.Text, Text: var space } || space != RuntimeJournalProtocol.Space
+            || components[RuntimeJournalProtocol.ChunkKeyVersionComponent] is not { Kind: KeyComponentKind.WholeNumber, Integer: var version } || version != RuntimeJournalProtocol.CurrentVersion
+            || components[RuntimeJournalProtocol.ChunkKeyKindComponent] is not { Kind: KeyComponentKind.Text, Text: var kind } || kind != RuntimeJournalProtocol.ChunkKey
+            || components[RuntimeJournalProtocol.ChunkKeyNameComponent] is not { Kind: KeyComponentKind.Text, Text: var name }
+            || components[RuntimeJournalProtocol.ChunkKeyIndexComponent] is not { Kind: KeyComponentKind.WholeNumber, Integer: var index }
             || index < RuntimeJournalProtocol.EmptyGeneration)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, RuntimeJournalProtocol.InvalidState);

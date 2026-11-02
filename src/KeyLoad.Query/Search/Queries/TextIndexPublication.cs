@@ -12,7 +12,7 @@ internal static class TextIndexPublication
         budget.Check();
         lease.BeginRecord(document.Reference, document.Revision);
         using var json = JsonDocument.Parse(document.Json);
-        if ((JsonData.Scalar(json.RootElement, path)).Value.Value is string content)
+        if ((JsonData.Scalar(json.RootElement, path)).Value.Value is { Kind: KeyLoad.Storage.KeyComponentKind.Text, Text: var content })
         {
             foreach (var term in SearchTerms.Enumerate(content, budget, execution.TextBudgetCheckInterval,
                 execution.MaximumDocumentWords, execution.MaximumWordCharacters))

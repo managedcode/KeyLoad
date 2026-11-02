@@ -18,7 +18,7 @@ internal static class AtomicPartitionRosterKeyValidation
     {
         var components = KeyCodec.Decode(key);
         partition = null;
-        if (components.Length == 0 || components[0] is not string family)
+        if (components.Length == 0 || components[0] is not { Kind: KeyComponentKind.Text, Text: var family })
         {
             return false;
         }
@@ -37,13 +37,13 @@ internal static class AtomicPartitionRosterKeyValidation
         return false;
     }
 
-    private static PartitionRef ReadScopedPartition(object?[] components, ReadOnlySpan<byte> key)
+    private static PartitionRef ReadScopedPartition(KeyComponent[] components, ReadOnlySpan<byte> key)
     {
         if (components.Length < MinimumScopedComponentCount
-            || components[1] is not string tenant
-            || components[DatabaseComponentIndex] is not string database
-            || components[DomainComponentIndex] is not string domain
-            || components[PartitionKeyComponentIndex] is not string partitionKey)
+            || components[1] is not { Kind: KeyComponentKind.Text, Text: var tenant }
+            || components[DatabaseComponentIndex] is not { Kind: KeyComponentKind.Text, Text: var database }
+            || components[DomainComponentIndex] is not { Kind: KeyComponentKind.Text, Text: var domain }
+            || components[PartitionKeyComponentIndex] is not { Kind: KeyComponentKind.Text, Text: var partitionKey })
         {
             throw Errors.Fail(ErrorCode.Corruption, AtomicPartitionRosterProtocol.MalformedScopedKey);
         }
@@ -53,11 +53,11 @@ internal static class AtomicPartitionRosterKeyValidation
         return candidate;
     }
 
-    private static bool IsCanonicalGlobalOutcome(object?[] components, ReadOnlySpan<byte> key)
+    private static bool IsCanonicalGlobalOutcome(KeyComponent[] components, ReadOnlySpan<byte> key)
     {
         if (components.Length != GlobalOutcomeComponentCount
-            || components[GlobalOutcomePrincipalComponentIndex] is not string principal
-            || components[GlobalOutcomeCommandComponentIndex] is not string commandText
+            || components[GlobalOutcomePrincipalComponentIndex] is not { Kind: KeyComponentKind.Text, Text: var principal }
+            || components[GlobalOutcomeCommandComponentIndex] is not { Kind: KeyComponentKind.Text, Text: var commandText }
             || !Guid.TryParse(commandText, out var commandId))
         {
             return false;
@@ -67,7 +67,7 @@ internal static class AtomicPartitionRosterKeyValidation
             || KeySpace.UnknownOutcome(principal, commandId).AsSpan().SequenceEqual(key);
     }
 
-    private static void ValidateCanonicalPartition(PartitionRef candidate, object?[] components, ReadOnlySpan<byte> key)
+    private static void ValidateCanonicalPartition(PartitionRef candidate, KeyComponent[] components, ReadOnlySpan<byte> key)
     {
         ValidatePartition(candidate, AtomicPartitionRosterProtocol.MalformedScopedKey);
         if (!KeyCodec.Encode(components).AsSpan().SequenceEqual(key))

@@ -15,7 +15,7 @@ internal static class RemoteTransferAttemptIdentity
         RequireGeneration(generation);
         var domain = generation == RemoteTransferAttemptProtocol.FirstGeneration
             ? RemoteTransferCoordinationProtocol.CommandDomain : RemoteTransferAttemptProtocol.AttemptDomain;
-        object?[] components = [domain, RemoteTransferCoordinationProtocol.AcceptStage,
+        KeyComponent[] components = [domain, RemoteTransferCoordinationProtocol.AcceptStage,
             source.Partition.TenantId, source.Partition.DatabaseId, source.Partition.TransactionDomainId,
             source.Partition.PartitionKey, source.Queue, destination.Partition.TenantId,
             destination.Partition.DatabaseId, destination.Partition.TransactionDomainId,

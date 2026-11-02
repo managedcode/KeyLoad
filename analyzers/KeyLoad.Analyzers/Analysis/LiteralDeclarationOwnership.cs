@@ -42,7 +42,7 @@ internal static class LiteralDeclarationOwnership
 
     private static bool IsTemporalArgument(SyntaxNodeAnalysisContext context, SyntaxNode literal)
     {
-        if (literal.Ancestors().OfType<ArgumentSyntax>().FirstOrDefault()?.Parent?.Parent is not ExpressionSyntax target ||
+        if (literal.Ancestors().FirstOrDefault(static ancestor => ancestor is ArgumentSyntax)?.Parent?.Parent is not ExpressionSyntax target ||
             context.SemanticModel.GetSymbolInfo(target, context.CancellationToken).Symbol is not IMethodSymbol method)
         {
             return false;
@@ -57,7 +57,7 @@ internal static class LiteralDeclarationOwnership
         node.Ancestors().Any(static ancestor => ancestor is AttributeArgumentSyntax or EnumMemberDeclarationSyntax);
 
     internal static bool IsAssemblyIdentity(SyntaxNodeAnalysisContext context) =>
-        context.Node.Ancestors().OfType<AttributeSyntax>().FirstOrDefault() is { } attribute &&
+        context.Node.Ancestors().FirstOrDefault(static ancestor => ancestor is AttributeSyntax) is AttributeSyntax attribute &&
         context.SemanticModel.GetSymbolInfo(attribute, context.CancellationToken).Symbol is IMethodSymbol constructor &&
         MagicRuntimeOperations.IsType(context.Compilation, constructor.ContainingType, MagicRuntimeMetadataNames.FriendAssemblyAttribute);
 
@@ -80,8 +80,8 @@ internal static class LiteralDeclarationOwnership
 
     private static bool IsConstructorDefault(Compilation compilation, SyntaxNode node, ISymbol? containingSymbol)
     {
-        var assignment = node.Ancestors().OfType<AssignmentExpressionSyntax>().FirstOrDefault();
-        if (assignment is null || !assignment.IsKind(SyntaxKind.SimpleAssignmentExpression) ||
+        if (node.Ancestors().FirstOrDefault(static ancestor => ancestor is AssignmentExpressionSyntax) is not AssignmentExpressionSyntax assignment ||
+            !assignment.IsKind(SyntaxKind.SimpleAssignmentExpression) ||
             !assignment.Right.Span.Contains(node.Span))
         {
             return false;

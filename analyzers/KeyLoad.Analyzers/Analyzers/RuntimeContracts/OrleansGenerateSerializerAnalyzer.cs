@@ -80,7 +80,7 @@ public sealed class OrleansGenerateSerializerAnalyzer : DiagnosticAnalyzer
             context.ReportDiagnostic(Diagnostic.Create(
                 Rule,
                 location,
-                type.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)));
+                type.ToDisplayString(SymbolDisplayFormat.CSharpErrorMessageFormat)) /* KLD0041: Roslyn requires object message arguments to identify this contract missing serializer metadata. */);
         }
     }
 }

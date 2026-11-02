@@ -84,7 +84,7 @@ public static class JsonData
     /// <param name="document">JSON root inside its owning document lifetime.</param>
     /// <param name="pathText">JSON pointer to a scalar, or empty text for the root.</param>
     /// <returns>An owned scalar, null, or the distinct missing-value marker.</returns>
-    public static object? Scalar(JsonElement document, string pathText)
+    public static KeyComponent Scalar(JsonElement document, string pathText)
         => (Scalar(document, PathSegments(pathText))).Value.Value;
 
     /// <summary>Reads a scalar with path segments prepared once by the operation.</summary>
@@ -107,16 +107,16 @@ public static class JsonData
             }
             else
             {
-                return global::ManagedCode.Communication.Result<JsonScalarValue>.Succeed(new JsonScalarValue(MissingValue.Instance));
+                return global::ManagedCode.Communication.Result<JsonScalarValue>.Succeed(new JsonScalarValue(KeyComponent.Missing));
             }
         }
         var value = current.ValueKind switch
         {
-            JsonValueKind.Null => (object?)null,
-            JsonValueKind.String => current.GetString(),
-            JsonValueKind.True => true,
-            JsonValueKind.False => false,
-            JsonValueKind.Number when current.TryGetDecimal(out var number) => number,
+            JsonValueKind.Null => KeyComponent.Null,
+            JsonValueKind.String => KeyComponent.FromString(current.GetString()),
+            JsonValueKind.True => KeyComponent.FromBoolean(true),
+            JsonValueKind.False => KeyComponent.FromBoolean(false),
+            JsonValueKind.Number when current.TryGetDecimal(out var number) => KeyComponent.FromDecimal(number),
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedScalarFieldDetail)
         };
         return global::ManagedCode.Communication.Result<JsonScalarValue>.Succeed(new JsonScalarValue(value));

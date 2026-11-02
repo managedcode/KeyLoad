@@ -12,7 +12,8 @@ internal static class OperationalPolicyBindings
         MagicRuntimeOperations.IsType(compilation, invocation.TargetMethod.ContainingType, MagicRuntimeMetadataNames.Semaphore) &&
         invocation.Arguments.Length == 2 && invocation.Arguments[0] is var timeout && invocation.Arguments[1] is var cancellation &&
         timeout.Value.Type?.SpecialType == SpecialType.System_Int32 &&
-        timeout.Value.ConstantValue is { HasValue: true, Value: int milliseconds } &&
+        timeout.Value.ConstantValue /* KLD0041: Roslyn exposes the timeout constant through Optional<object>; only an integer nonblocking wait is accepted. */ is
+        { HasValue: true, Value /* KLD0041: The boxed compiler timeout is checked as an integer before accepting this nonblocking wait. */: int milliseconds } &&
         milliseconds == OperationalPolicyMetadataNames.NonblockingWaitMilliseconds &&
         MagicRuntimeOperations.IsType(compilation, cancellation.Parameter?.Type, OperationalPolicyMetadataNames.CancellationToken) &&
         invocation.TargetMethod.ReturnType is INamedTypeSymbol { TypeArguments.Length: 1 } returned && returned.TypeArguments[0] is var result &&
@@ -20,8 +21,8 @@ internal static class OperationalPolicyBindings
 
     internal static bool IsCoalescedWakeSignal(Compilation compilation, IObjectCreationOperation creation) =>
         MagicRuntimeOperations.IsType(compilation, creation.Type, OperationalPolicyMetadataNames.BoundedChannel) &&
-        creation.Arguments.Length == 1 && creation.Arguments[0] is var capacity && capacity.Value.ConstantValue is
-        { HasValue: true, Value: int slots } && slots == OperationalPolicyMetadataNames.WakeSignalCapacity &&
+        creation.Arguments.Length == 1 && creation.Arguments[0] is var capacity && capacity.Value.ConstantValue /* KLD0041: Roslyn exposes channel capacity through Optional<object>; only a validated integer signal capacity is accepted. */ is
+        { HasValue: true, Value /* KLD0041: The boxed capacity constant is inspected only to validate this coalesced wake channel. */: int slots } && slots == OperationalPolicyMetadataNames.WakeSignalCapacity &&
         creation.Parent is IArgumentOperation { Parent: IInvocationOperation invocation } &&
         invocation.TargetMethod.Name == OperationalPolicyMetadataNames.CreateBounded &&
         MagicRuntimeOperations.IsType(compilation, invocation.TargetMethod.ContainingType, OperationalPolicyMetadataNames.Channel) &&
@@ -32,7 +33,8 @@ internal static class OperationalPolicyBindings
             MagicRuntimeOperations.IsType(compilation, mode.Field.ContainingType, OperationalPolicyMetadataNames.ChannelFullMode)) == true &&
         creation.Initializer.Initializers.OfType<ISimpleAssignmentOperation>().Any(static assignment =>
             assignment.Target is IPropertyReferenceOperation property && property.Property.Name == OperationalPolicyMetadataNames.SingleReader &&
-            assignment.Value.ConstantValue is { HasValue: true, Value: true });
+            assignment.Value.ConstantValue /* KLD0041: Roslyn exposes the SingleReader constant through Optional<object>; the pattern requires true. */ is
+            { HasValue: true, Value /* KLD0041: The compiler constant is checked only for the required boolean SingleReader setting. */: true });
 
     internal static bool IsCapacityMethod(Compilation compilation, IMethodSymbol method,
         ImmutableArray<IArgumentOperation> arguments)
@@ -86,8 +88,8 @@ internal static class OperationalPolicyBindings
 
     private static bool IsStructuralMutex(ImmutableArray<IArgumentOperation> arguments) =>
         arguments.Length == OperationalPolicyMetadataNames.MutexConstructorArguments &&
-        arguments.All(static argument => argument.Value.ConstantValue is
-        { HasValue: true, Value: int permits } && permits == OperationalPolicyMetadataNames.MutexPermits);
+        arguments.All(static argument => argument.Value.ConstantValue /* KLD0041: Roslyn exposes semaphore constructor constants through Optional<object>; the pattern requires integer permits. */ is
+        { HasValue: true, Value /* KLD0041: This boxed constructor constant is inspected only to recognize structural mutex permits. */: int permits } && permits == OperationalPolicyMetadataNames.MutexPermits);
 
     private static bool IsHttpHandler(Compilation compilation, ITypeSymbol type) =>
         MagicRuntimeOperations.IsType(compilation, type, OperationalPolicyMetadataNames.SocketsHttpHandler) ||

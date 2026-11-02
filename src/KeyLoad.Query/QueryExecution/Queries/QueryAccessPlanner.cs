@@ -18,7 +18,7 @@ internal static class QueryAccessPlanner
     {
         var equality = Equalities(request.Query.Filter, request.Parameters).GroupBy(pair => pair.Key, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => group.First().Value, StringComparer.Ordinal);
-        if (equality.TryGetValue(SqlSyntax.MetadataIdPath, out var identifier) && identifier is string id)
+        if (equality.TryGetValue(SqlSyntax.MetadataIdPath, out var identifier) && identifier is { Kind: KeyComponentKind.Text, Text: var id })
         {
             return new(QueryAccessKind.Point, PointPath, [], PointId: id);
         }
@@ -31,12 +31,12 @@ internal static class QueryAccessPlanner
                 continue;
             }
             var values = fields.Select(field => equality[field]).ToArray();
-            if (values.Any(value => value is null or MissingValue))
+            if (values.Any(value => value.Kind is KeyComponentKind.Null or KeyComponentKind.Missing))
             {
                 continue;
             }
             var prefix = KeySpace.Partition(IndexSpace, request.Partition,
-                new object?[] { request.Query.Collection, index.Name }.Concat(values).ToArray());
+                [request.Query.Collection, index.Name, .. values]);
             return new(QueryAccessKind.IndexPrefix, IndexPathPrefix + index.Name, prefix, index.Name, fields);
         }
         foreach (var index in resource.Indexes)
@@ -55,7 +55,7 @@ internal static class QueryAccessPlanner
             KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection));
     }
 
-    private static IEnumerable<KeyValuePair<string, object?>> Equalities(Predicate? predicate,
+    private static IEnumerable<KeyValuePair<string, KeyComponent>> Equalities(Predicate? predicate,
         Dictionary<string, JsonElement>? parameters)
     {
         if (predicate is Logical { Operator: SqlSyntax.And } conjunction)

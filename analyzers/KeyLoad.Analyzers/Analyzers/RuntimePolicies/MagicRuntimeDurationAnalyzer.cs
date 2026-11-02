@@ -45,6 +45,6 @@ public sealed class MagicRuntimeDurationAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, literal.GetLocation(), literal.ToString()));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, literal.GetLocation(), literal.ToString()) /* KLD0041: Roslyn requires object message arguments to display the rejected duration literal exactly as written. */);
     }
 }

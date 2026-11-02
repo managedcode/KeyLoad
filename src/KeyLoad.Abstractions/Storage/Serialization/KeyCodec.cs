@@ -19,19 +19,8 @@ public static class KeyCodec
     public static byte[] Encode(params ReadOnlySpan<KeyComponent> components)
         => Encode(components, []);
 
-    /// <summary>Encodes boxed components into a version 1 sortable binary key; the bytes equal the typed overload's.</summary>
-    /// <param name="components">The key components, in their comparison order.</param>
-    /// <returns>The encoded key bytes.</returns>
-    /// <exception cref="ArgumentNullException"><paramref name="components"/> is null.</exception>
-    /// <exception cref="KeyLoadException">A component is unsupported or cannot be encoded.</exception>
-    public static byte[] Encode(object?[] components)
-    {
-        ArgumentNullException.ThrowIfNull(components);
-        return Encode([], components);
-    }
-
     /// <summary>Writes a typed scope and dynamic components directly into the same canonical key buffer.</summary>
-    internal static byte[] Encode(ReadOnlySpan<KeyComponent> prefix, ReadOnlySpan<object?> suffix)
+    internal static byte[] Encode(ReadOnlySpan<KeyComponent> prefix, ReadOnlySpan<KeyComponent> suffix)
     {
         if (prefix.Length > MaximumComponents || suffix.Length > MaximumComponents - prefix.Length)
         {
@@ -47,10 +36,9 @@ public static class KeyCodec
             {
                 KeyCodecWritePrimitives.Write(ref writer, in component);
             }
-            foreach (var component in suffix)
+            foreach (ref readonly var component in suffix)
             {
-                var typed = KeyComponent.From(component);
-                KeyCodecWritePrimitives.Write(ref writer, in typed);
+                KeyCodecWritePrimitives.Write(ref writer, in component);
             }
 
             return writer.ToArray();
@@ -61,48 +49,36 @@ public static class KeyCodec
         }
     }
 
-    /// <summary>Encodes one boxed component, such as a query value whose runtime type is only known when it is read.</summary>
-    /// <param name="component">The boxed component, or null for the null component.</param>
-    /// <returns>The encoded key bytes.</returns>
-    /// <exception cref="KeyLoadException">The component is unsupported or cannot be encoded.</exception>
-    public static byte[] Encode(object? component) => Encode(KeyComponent.From(component));
-
     /// <summary>Decodes a version 1 sortable binary key into its components.</summary>
     /// <param name="key">The encoded key bytes.</param>
     /// <returns>The decoded components in their original order.</returns>
     /// <exception cref="KeyLoadException">The key is unsupported or malformed.</exception>
-    public static object?[] Decode(ReadOnlySpan<byte> key)
+    public static KeyComponent[] Decode(ReadOnlySpan<byte> key)
     {
-        if (key.IsEmpty || key[VersionOffset] != Version)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, UnknownVersion);
-        }
-
-        var values = new List<object?>();
+        var values = new KeyComponent[KeyCodecValidation.Validate(key)];
         var offset = VersionBytes;
-        while (offset < key.Length)
+        for (var index = 0; index < values.Length; index++)
         {
-            if (values.Count == MaximumComponents)
-            {
-                throw BadKey();
-            }
-
             var tag = key[offset++];
-            object? value = tag switch
+            values[index] = tag switch
             {
-                MissingTag => MissingValue.Instance,
-                NullTag => null,
-                BooleanTag => ReadByte(key, ref offset) switch { FalsePayload => false, TruePayload => true, _ => throw BadKey() },
-                Int64Tag => unchecked((long)(ReadUInt64(key, ref offset) ^ SortableSignMask)),
-                DecimalTag => KeyCodecDecimal.Read(key, ref offset),
-                DoubleTag => ReadDouble(key, ref offset),
-                TimestampTag => ReadTimestamp(key, ref offset),
-                TextTag => ReadText(key, ref offset),
-                BinaryTag => ReadEscaped(key, ref offset).ToArray(),
+                MissingTag => KeyComponent.Missing,
+                NullTag => KeyComponent.Null,
+                BooleanTag => KeyComponent.FromBoolean(ReadByte(key, ref offset) switch
+                {
+                    FalsePayload => false,
+                    TruePayload => true,
+                    _ => throw BadKey()
+                }),
+                Int64Tag => KeyComponent.FromInt64(unchecked((long)(ReadUInt64(key, ref offset) ^ SortableSignMask))),
+                DecimalTag => KeyComponent.FromDecimal(KeyCodecDecimal.Read(key, ref offset)),
+                DoubleTag => KeyComponent.FromDouble(ReadDouble(key, ref offset)),
+                TimestampTag => KeyComponent.FromDateTimeOffset(ReadTimestamp(key, ref offset)),
+                TextTag => KeyComponent.FromString(ReadText(key, ref offset)),
+                BinaryTag => KeyComponent.FromByteArray(ReadEscaped(key, ref offset).ToArray()),
                 _ => throw BadKey()
             };
-            values.Add(value);
         }
-        return values.ToArray();
+        return values;
     }
 }

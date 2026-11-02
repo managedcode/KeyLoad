@@ -20,10 +20,10 @@ public static class PredicateEvaluator
     /// <param name="json">Parsed document JSON.</param>
     /// <param name="parameters">Optional bound scalar parameters.</param>
     /// <returns>The resolved scalar value or the missing sentinel.</returns>
-    public static object? Value(Operand operand, DocumentRecord document, JsonElement json, Dictionary<string, JsonElement>? parameters)
+    public static KeyComponent Value(Operand operand, DocumentRecord document, JsonElement json, Dictionary<string, JsonElement>? parameters)
         => Value(operand, document, json, parameters, null);
 
-    internal static object? Value(Operand operand, DocumentRecord document, JsonElement json,
+    internal static KeyComponent Value(Operand operand, DocumentRecord document, JsonElement json,
         Dictionary<string, JsonElement>? parameters, IReadOnlyDictionary<string, string[]>? paths)
         => operand switch
         {
@@ -35,11 +35,11 @@ public static class PredicateEvaluator
             _ => throw Errors.Fail(ErrorCode.Validation, OperandIsInvalidDetail)
         };
 
-    internal static object? FieldValue(string path, DocumentRecord document, JsonElement json,
+    internal static KeyComponent FieldValue(string path, DocumentRecord document, JsonElement json,
         IReadOnlyDictionary<string, string[]>? paths) => path switch
         {
-            SqlSyntax.MetadataIdPath => document.Reference.Id,
-            SqlSyntax.MetadataRevisionPath => (decimal)document.Revision,
+            SqlSyntax.MetadataIdPath => KeyComponent.FromString(document.Reference.Id),
+            SqlSyntax.MetadataRevisionPath => KeyComponent.FromDecimal(document.Revision),
             _ => paths is null ? JsonData.Scalar(json, path) : (JsonData.Scalar(json, paths[path])).Value.Value
         };
     /// <summary>Evaluates a typed predicate with SQL-style unknown results.</summary>
@@ -54,19 +54,19 @@ public static class PredicateEvaluator
     internal static bool? Evaluate(Predicate predicate, DocumentRecord document, JsonElement json,
         Dictionary<string, JsonElement>? parameters, IReadOnlyDictionary<string, string[]>? paths)
     {
-        object? Get(Operand value) => Value(value, document, json, parameters, paths);
+        KeyComponent Get(Operand value) => Value(value, document, json, parameters, paths);
         return predicate switch
         {
             Comparison comparison => (Compare(Get(comparison.Left), comparison.Operator, Get(comparison.Right))).Value,
             Logical { Operator: SqlSyntax.And } logical => (And(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths))).Value,
             Logical logical => (Or(Evaluate(logical.Left, document, json, parameters, paths), Evaluate(logical.Right, document, json, parameters, paths))).Value,
             Negation negation => !Evaluate(negation.Inner, document, json, parameters, paths),
-            NullTest test => (test.Missing ? Get(test.Value) is MissingValue : Get(test.Value) is null) != test.Negated,
+            NullTest test => (Get(test.Value).Kind == (test.Missing ? KeyComponentKind.Missing : KeyComponentKind.Null)) != test.Negated,
             InPredicate list => In(Get(list.Value), list.Values.Select(Get), list.Negated),
             _ => throw Errors.Fail(ErrorCode.Validation, PredicateIsInvalidDetail)
         };
     }
-    private static bool? In(object? value, IEnumerable<object?> values, bool negated)
+    private static bool? In(KeyComponent value, IEnumerable<KeyComponent> values, bool negated)
     {
         bool? found = false;
         foreach (var candidate in values)
@@ -90,13 +90,13 @@ public static class PredicateEvaluator
     /// <param name="operation">Supported comparison operator.</param>
     /// <param name="right">Right scalar.</param>
     /// <returns>True, false, or unknown.</returns>
-    public static (bool HasValue, bool? Value) Compare(object? left, string operation, object? right)
+    public static (bool HasValue, bool? Value) Compare(KeyComponent left, string operation, KeyComponent right)
     {
-        if (left is null or MissingValue || right is null or MissingValue)
+        if (left.Kind is KeyComponentKind.Null or KeyComponentKind.Missing || right.Kind is KeyComponentKind.Null or KeyComponentKind.Missing)
         {
             return (false, default(bool?));
         }
-        if (left.GetType() != right.GetType())
+        if (left.Kind != right.Kind)
         {
             throw Errors.Fail(ErrorCode.Validation, QueryComparisonsRequireValuesOfTheSameScalarTypeDetail);
         }

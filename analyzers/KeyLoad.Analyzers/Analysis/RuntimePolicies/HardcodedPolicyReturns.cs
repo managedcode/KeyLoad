@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -28,10 +27,9 @@ internal static class HardcodedPolicyReturns
                 yield return operation;
             }
             foreach (var statement in declaration.DescendantNodes(descendIntoChildren: node =>
-                         node == declaration || node is not AnonymousFunctionExpressionSyntax and not LocalFunctionStatementSyntax)
-                         .OfType<ReturnStatementSyntax>())
+                         node == declaration || node is not AnonymousFunctionExpressionSyntax and not LocalFunctionStatementSyntax))
             {
-                if (statement.Expression is { } value && model.GetOperation(value, cancellationToken) is { } returned)
+                if (statement is ReturnStatementSyntax { Expression: { } value } && model.GetOperation(value, cancellationToken) is { } returned)
                 {
                     yield return returned;
                 }

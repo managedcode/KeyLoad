@@ -71,7 +71,7 @@ internal sealed class KeyCodecMalformedContractTests
         }
 
         object?[] expected = ["healthy\0key", 42L, -1234.50m, new byte[] { 0, 0xA5 }];
-        var decoded = KeyCodec.Decode(KeyCodec.Encode(expected));
+        var decoded = KeyCodec.Decode(KeyCodec.Encode(KeyCodecMixedCorpus.Typed(expected)));
         await Assert.That(decoded.Length).IsEqualTo(expected.Length);
         for (var index = 0; index < expected.Length; index++)
         {
@@ -97,7 +97,7 @@ internal sealed class KeyCodecMalformedContractTests
     {
         var values = new object?[] { "a\0b", "é", "ї", "😀", long.MinValue, long.MaxValue,
             decimal.MinValue, decimal.MaxValue, double.Epsilon, double.MaxValue, DateTimeOffset.MaxValue };
-        var encoded = KeyCodec.Encode(values);
+        var encoded = KeyCodec.Encode(KeyCodecMixedCorpus.Typed(values));
         KeyCodecValidation.Validate(encoded);
         var decoded = KeyCodec.Decode(encoded);
 

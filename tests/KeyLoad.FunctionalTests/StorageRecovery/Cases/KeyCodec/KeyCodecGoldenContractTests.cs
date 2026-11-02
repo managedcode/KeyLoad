@@ -8,7 +8,7 @@ internal sealed class KeyCodecGoldenContractTests
     public async Task EveryFrozenV1TagRetainsItsLiteralBytes()
     {
         await AssertHexAsync("0110", KeyCodec.Encode(MissingValue.Instance));
-        await AssertHexAsync("0111", KeyCodec.Encode((object?)null));
+        await AssertHexAsync("0111", KeyCodec.Encode(KeyComponent.Null));
         await AssertHexAsync("012000", KeyCodec.Encode(false));
         await AssertHexAsync("012001", KeyCodec.Encode(true));
         await AssertHexAsync("01308000000000000000", KeyCodec.Encode(0L));

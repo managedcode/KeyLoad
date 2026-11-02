@@ -21,7 +21,7 @@ internal sealed class HardcodedPolicySearch(Compilation compilation, Cancellatio
         {
             return false;
         }
-        if (operation.ConstantValue.HasValue && (includeOtherConstants || MagicRuntimeOperations.IsNumeric(operation.Type)))
+        if (operation.ConstantValue /* KLD0041: Roslyn exposes constant presence through Optional<object>; this search reads only HasValue. */.HasValue && (includeOtherConstants || MagicRuntimeOperations.IsNumeric(operation.Type)))
         {
             return true;
         }

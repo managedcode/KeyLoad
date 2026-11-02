@@ -71,7 +71,7 @@ public sealed class UnauthorizedImplementationTermAnalyzer : DiagnosticAnalyzer
             context.CancellationToken.ThrowIfCancellationRequested();
             if (!permissions.Allows(match.Term, text, node, context.CancellationToken))
             {
-                context.ReportDiagnostic(Diagnostic.Create(Rule, location, match.Text));
+                context.ReportDiagnostic(Diagnostic.Create(Rule, location, match.Text) /* KLD0041: Roslyn requires object message arguments to identify this exact unapproved implementation term. */);
             }
         }
     }

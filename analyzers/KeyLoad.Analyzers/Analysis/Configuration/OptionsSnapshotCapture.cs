@@ -50,16 +50,19 @@ internal static class OptionsSnapshotCapture
     private static bool HasSingleCapture(Compilation compilation, ISymbol symbol, CancellationToken cancellationToken)
     {
         var values = symbol.DeclaringSyntaxReferences.Select(reference => reference.GetSyntax(cancellationToken))
-            .OfType<VariableDeclaratorSyntax>().Select(variable => variable.Initializer?.Value)
-            .OfType<ExpressionSyntax>().ToList();
+            .Where(static node => node is VariableDeclaratorSyntax { Initializer.Value: not null })
+            .Select(static node => ((VariableDeclaratorSyntax)node).Initializer!.Value).ToList();
         foreach (var reference in symbol.ContainingType.DeclaringSyntaxReferences)
         {
             var owner = reference.GetSyntax(cancellationToken);
             var model = compilation.GetSemanticModel(owner.SyntaxTree);
-            foreach (var assignment in owner.DescendantNodes().OfType<AssignmentExpressionSyntax>().Where(candidate =>
-                candidate.IsKind(SyntaxKind.SimpleAssignmentExpression) &&
-                SymbolEqualityComparer.Default.Equals(model.GetSymbolInfo(candidate.Left, cancellationToken).Symbol, symbol)))
+            foreach (var node in owner.DescendantNodes())
             {
+                if (node is not AssignmentExpressionSyntax assignment || !assignment.IsKind(SyntaxKind.SimpleAssignmentExpression) ||
+                    !SymbolEqualityComparer.Default.Equals(model.GetSymbolInfo(assignment.Left, cancellationToken).Symbol, symbol))
+                {
+                    continue;
+                }
                 if (!assignment.Ancestors().Any(static ancestor => ancestor is ConstructorDeclarationSyntax))
                 {
                     return false;
@@ -96,9 +99,9 @@ internal static class OptionsSnapshotCapture
             initializer.Span.End < expression.SpanStart &&
             variable.Ancestors().FirstOrDefault(static ancestor => ancestor is BaseMethodDeclarationSyntax) is { } owner)
         {
-            var reassigned = owner.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(assignment =>
+            var reassigned = owner.DescendantNodes().Any(node => node is AssignmentExpressionSyntax assignment &&
                 SymbolEqualityComparer.Default.Equals(model.GetSymbolInfo(assignment.Left, cancellationToken).Symbol, local.Local));
-            var passedByReference = owner.DescendantNodes().OfType<ArgumentSyntax>().Any(argument =>
+            var passedByReference = owner.DescendantNodes().Any(node => node is ArgumentSyntax argument &&
                 !argument.RefKindKeyword.IsKind(SyntaxKind.None) &&
                 SymbolEqualityComparer.Default.Equals(model.GetSymbolInfo(argument.Expression, cancellationToken).Symbol, local.Local));
             return !reassigned && !passedByReference && IsOptionsValue(compilation, initializer, cancellationToken);

@@ -50,6 +50,6 @@ public sealed class MagicRuntimeStringAnalyzer : DiagnosticAnalyzer
         var location = context.Node is InterpolationFormatClauseSyntax format
             ? format.FormatStringToken.GetLocation()
             : context.Node.GetLocation();
-        context.ReportDiagnostic(Diagnostic.Create(Rule, location, context.Node.ToString()));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, location, context.Node.ToString()) /* KLD0041: Roslyn requires object message arguments to display this unnamed runtime text at its source location. */);
     }
 }

@@ -23,7 +23,7 @@ internal static class ObjectConversionAnalysis
         {
             context.ReportDiagnostic(Diagnostic.Create(rule, conversion.Syntax.GetLocation(),
                 boxing ? BoxingKind(source) : UntypedContractPolicy.ObjectCast,
-                source.ToDisplayString(), target.ToDisplayString()));
+                source.ToDisplayString(), target.ToDisplayString()) /* KLD0041: Roslyn requires object message arguments to report the conversion kind and its two resolved type names. */);
         }
     }
 
@@ -44,7 +44,7 @@ internal static class ObjectConversionAnalysis
             && !Scalar(target))
         {
             context.ReportDiagnostic(Diagnostic.Create(rule, operation.Syntax.GetLocation(),
-                UntypedContractPolicy.ObjectCast, source.ToDisplayString(), target.ToDisplayString()));
+                UntypedContractPolicy.ObjectCast, source.ToDisplayString(), target.ToDisplayString()) /* KLD0041: Roslyn requires object message arguments to report this captured pattern and its resolved source and target types. */);
         }
     }
 

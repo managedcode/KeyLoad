@@ -11,10 +11,10 @@ internal sealed class KeyCodecTests
     [Test]
     public async Task GoldenKeysRemainStable()
     {
-        await Assert.That(Convert.ToHexString(KeyCodec.Encode((object?)null))).IsEqualTo("0111");
+        await Assert.That(Convert.ToHexString(KeyCodec.Encode(KeyComponent.Null))).IsEqualTo("0111");
         await Assert.That(Convert.ToHexString(KeyCodec.Encode(0L))).IsEqualTo("01308000000000000000");
         await Assert.That(Convert.ToHexString(KeyCodec.Encode("a"))).IsEqualTo("0150610000");
-        await Assert.That(KeyCodec.Encode(MissingValue.Instance)).IsNotEquivalentTo(KeyCodec.Encode((object?)null), CollectionOrdering.Matching);
+        await Assert.That(KeyCodec.Encode(MissingValue.Instance)).IsNotEquivalentTo(KeyCodec.Encode(KeyComponent.Null), CollectionOrdering.Matching);
     }
 
     [Test]
@@ -36,9 +36,8 @@ internal sealed class KeyCodecTests
         {
             var decoded = KeyCodec.Decode(KeyCodec.Encode(number));
             var decodedValue = System.Linq.Enumerable.Single(decoded);
-            await Assert.That(decodedValue).IsNotNull();
-            await Assert.That(decodedValue).IsTypeOf<decimal>();
-            await Assert.That((decimal)decodedValue!).IsEqualTo(number);
+            await Assert.That(decodedValue.Kind).IsEqualTo(KeyComponentKind.FixedPoint);
+            await Assert.That(decodedValue.ExactNumber).IsEqualTo(number);
         }
 
         var encodedOrder = numbers.OrderBy(number => KeyCodec.Encode(number), BinaryKeyComparer.Instance).ToArray();
@@ -51,7 +50,7 @@ internal sealed class KeyCodecTests
         var values = new[] { "", "a", "a\0", "a\0b", "aa", "b", "é", "ї", "😀", "\uffff" };
         foreach (var value in values)
         {
-            await Assert.That(KeyCodec.Decode(KeyCodec.Encode(value))[0]).IsEqualTo(value);
+            await Assert.That(KeyCodec.Decode(KeyCodec.Encode(value))[0].Text).IsEqualTo(value);
         }
 
         var expected = values.OrderBy(System.Text.Encoding.UTF8.GetBytes, BinaryKeyComparer.Instance).ToArray();

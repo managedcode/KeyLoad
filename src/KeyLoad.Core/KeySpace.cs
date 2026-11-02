@@ -36,10 +36,9 @@ public static class KeySpace
     /// <param name="partition">Complete atomic partition identity.</param>
     /// <param name="suffix">Feature-specific ordered key components.</param>
     /// <returns>The canonical independent key buffer.</returns>
-    public static byte[] Partition(string space, PartitionRef partition, params object?[] suffix)
+    public static byte[] Partition(string space, PartitionRef partition, params ReadOnlySpan<KeyComponent> suffix)
     {
         ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(suffix);
         return KeyCodec.Encode([space, partition.TenantId, partition.DatabaseId,
             partition.TransactionDomainId, partition.PartitionKey], suffix);
     }

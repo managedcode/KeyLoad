@@ -12,14 +12,14 @@ internal static class ImplementationSourceIdentity
     internal static bool Allows(string term, SyntaxNode node, SemanticModel model,
         Lazy<HashSet<INamedTypeSymbol>> testOwners, CancellationToken token)
     {
-        var attribute = node.AncestorsAndSelf().OfType<AttributeSyntax>().FirstOrDefault();
+        var attribute = node.AncestorsAndSelf().FirstOrDefault(static candidate => candidate is AttributeSyntax) as AttributeSyntax;
         if (attribute?.ArgumentList is not { Arguments.Count: 2 } arguments ||
             model.GetSymbolInfo(attribute, token).Symbol is not IMethodSymbol constructor ||
             constructor.ContainingType.ToDisplayString() != "System.Reflection.AssemblyMetadataAttribute" ||
             !ImplementationTermSymbols.Execution(constructor) ||
-            model.GetConstantValue(arguments.Arguments[0].Expression, token).Value is not
+            (model.GetConstantValue(arguments.Arguments[0].Expression, token) /* KLD0041: Roslyn returns Optional<object> for the assembly-metadata key; only the canonical identity key is accepted. */).Value /* KLD0041: This compiler constant is inspected only to match the canonical source-identity metadata key. */ is not
                 "KeyLoad.FunctionalCompileIdentity.Source" ||
-            model.GetConstantValue(arguments.Arguments[1].Expression, token).Value is not string identity)
+            ((model.GetConstantValue(arguments.Arguments[1].Expression, token) /* KLD0041: Roslyn returns Optional<object> for the assembly-metadata identity; only a validated string is accepted. */).Value /* KLD0041: This compiler constant is inspected only to validate the source path and hash identity string. */ is not string identity /* KLD0042: AssemblyMetadataAttribute defines string metadata; this pattern validates its source-identity argument before parsing. */))
         {
             return false;
         }
@@ -49,15 +49,15 @@ internal static class ImplementationSourceIdentity
         Lazy<HashSet<INamedTypeSymbol>> owners, CancellationToken token)
     {
         var model = compilation.GetSemanticModel(source);
-        return source.GetRoot(token).DescendantNodes().OfType<TypeDeclarationSyntax>().Any(declaration =>
+        return source.GetRoot(token).DescendantNodes().Any(node => node is TypeDeclarationSyntax declaration &&
             model.GetDeclaredSymbol(declaration, token) is INamedTypeSymbol type && owners.Value.Contains(type.OriginalDefinition));
     }
 
     private static bool HasDomainRecords(SyntaxTree source, Compilation compilation, CancellationToken token)
     {
         var model = compilation.GetSemanticModel(source);
-        return source.GetRoot(token).DescendantNodes().OfType<TypeDeclarationSyntax>().Any(declaration =>
-            ImplementationTermSymbols.Measurement(model.GetDeclaredSymbol(declaration, token)) ||
-            ImplementationTermSymbols.TimeSeries(model.GetDeclaredSymbol(declaration, token), compilation));
+        return source.GetRoot(token).DescendantNodes().Any(node => node is TypeDeclarationSyntax declaration &&
+            (ImplementationTermSymbols.Measurement(model.GetDeclaredSymbol(declaration, token)) ||
+             ImplementationTermSymbols.TimeSeries(model.GetDeclaredSymbol(declaration, token), compilation)));
     }
 }

@@ -18,7 +18,7 @@ internal static class QueryIndexRangePlanner
         var prefix = KeySpace.Partition(IndexSpace, request.Partition, request.Query.Collection, index.Name);
         byte[]? lower = null;
         byte[]? upper = null;
-        Type? scalarType = null;
+        KeyComponentKind? scalarType = null;
         var found = false;
         foreach (var comparison in Comparisons(request.Query.Filter))
         {
@@ -34,15 +34,15 @@ internal static class QueryIndexRangePlanner
             }
             var operand = comparison.Left is FieldOperand ? comparison.Right : comparison.Left;
             var value = Value(operand, request.Parameters).Value;
-            if (value is null or MissingValue)
+            if (value.Kind is KeyComponentKind.Null or KeyComponentKind.Missing)
             {
                 continue;
             }
-            if (scalarType is not null && scalarType != value.GetType())
+            if (scalarType is not null && scalarType != value.Kind)
             {
                 return (false, default(QueryIndexRange?));
             }
-            scalarType = value.GetType();
+            scalarType = value.Kind;
             var key = KeySpace.Partition(IndexSpace, request.Partition, request.Query.Collection, index.Name, value);
             if (operation is SqlSyntax.Greater or SqlSyntax.GreaterOrEqual)
             {
@@ -60,13 +60,13 @@ internal static class QueryIndexRangePlanner
         return found ? (true, new(prefix, lower, upper)) : (false, default(QueryIndexRange?));
     }
 
-    private static (bool HasValue, object? Value) Value(Operand operand, Dictionary<string, JsonElement>? parameters)
+    private static (bool HasValue, KeyComponent Value) Value(Operand operand, Dictionary<string, JsonElement>? parameters)
         => operand switch
         {
             ValueOperand value => (true, JsonData.Scalar(value.Value, string.Empty)),
             ParameterOperand parameter when parameters?.TryGetValue(parameter.Name, out var value) == true
                 => (true, JsonData.Scalar(value, string.Empty)),
-            _ => (false, default(object?))
+            _ => (false, default(KeyComponent))
         };
 
     private static string Reverse(string operation) => operation switch

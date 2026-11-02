@@ -47,10 +47,11 @@ public sealed class NullReturnAnalyzer : DiagnosticAnalyzer
         {
             return;
         }
-        if (value.ConstantValue is { HasValue: true, Value: null } ||
+        if (value.ConstantValue /* KLD0041: Roslyn exposes constant return values through Optional<object>; this rule checks the explicit null case. */ is
+            { HasValue: true, Value /* KLD0041: The boxed compiler constant is inspected only for a null operation outcome. */: null } ||
             value is IDefaultValueOperation { Type.OriginalDefinition.SpecialType: SpecialType.System_Nullable_T })
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, value.Syntax.GetLocation()));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, value.Syntax.GetLocation()) /* KLD0041: This null-outcome diagnostic has no substitutions, but Roslyn still requires its object argument-array reporting API. */);
             return;
         }
         switch (value)

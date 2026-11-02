@@ -40,7 +40,7 @@ public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
             ZoneTreeAccessPolicy.Dispatch(method) && ZoneTreeDispatchAnalysis.ContainsAccess(invocation, context,
                 new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default)))
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.Syntax.GetLocation(), method.ToDisplayString()));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, invocation.Syntax.GetLocation(), method.ToDisplayString()) /* KLD0041: Roslyn requires object message arguments to identify this blocking or dispatched engine method. */);
         }
     }
 
@@ -50,7 +50,7 @@ public sealed class SynchronousZoneTreeAccessAnalyzer : DiagnosticAnalyzer
         if (reference.Property.Name == "Result" && ZoneTreeAccessPolicy.Awaitable(reference.Property.ContainingType)
             && ZoneTreeDispatchAnalysis.FromEngine(reference.Instance))
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, reference.Syntax.GetLocation(), reference.Property.ToDisplayString()));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, reference.Syntax.GetLocation(), reference.Property.ToDisplayString()) /* KLD0041: Roslyn requires object message arguments to identify the blocking task property reached from the engine. */);
         }
     }
 }

@@ -62,7 +62,7 @@ public sealed class GrainInterfaceVersionAnalyzer : DiagnosticAnalyzer
         var location = type.Locations.FirstOrDefault(static candidate => candidate.IsInSource);
         if (location is not null)
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, location, type.Name));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, location, type.Name) /* KLD0041: Roslyn requires object message arguments to identify this grain interface missing a positive version. */);
         }
     }
 
@@ -73,7 +73,7 @@ public sealed class GrainInterfaceVersionAnalyzer : DiagnosticAnalyzer
                 OrleansMetadataNames.VersionAttribute,
                 StringComparison.Ordinal));
         return attribute is { ConstructorArguments.Length: 1 } &&
-               attribute.ConstructorArguments[0].Value is ushort version &&
+               (attribute.ConstructorArguments[0].Value /* KLD0041: Roslyn stores the resolved Orleans version constructor argument as a boxed constant. */ is ushort version /* KLD0042: The resolved VersionAttribute fixes the argument as ushort; the pattern validates that exact metadata type. */) &&
                version > 0;
     }
 }

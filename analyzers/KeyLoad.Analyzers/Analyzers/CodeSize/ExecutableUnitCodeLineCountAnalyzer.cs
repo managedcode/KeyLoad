@@ -40,7 +40,7 @@ public sealed class ExecutableUnitCodeLineCountAnalyzer : DiagnosticAnalyzer
         if (count > MaximumExecutableUnitCodeLines)
         {
             context.ReportDiagnostic(Diagnostic.Create(
-                Rules[0], unit.GetLocation(), count));
+                Rules[0], unit.GetLocation(), count /* KLD0042: Roslyn retains this executable line count for culture-aware diagnostic formatting. */) /* KLD0041: Roslyn formats this executable unit line count through its fixed diagnostic argument array. */);
         }
     }
 }

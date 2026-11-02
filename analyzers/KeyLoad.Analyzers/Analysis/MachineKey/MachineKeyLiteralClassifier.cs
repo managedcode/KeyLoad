@@ -62,7 +62,7 @@ internal static class MachineKeyLiteralClassifier
         SyntaxNodeAnalysisContext context,
         LiteralExpressionSyntax literal)
     {
-        var argument = literal.Ancestors().OfType<ArgumentSyntax>().FirstOrDefault();
+        var argument = literal.Ancestors().FirstOrDefault(static ancestor => ancestor is ArgumentSyntax) as ArgumentSyntax;
         if (argument?.Parent is not ArgumentListSyntax { Parent: InvocationExpressionSyntax invocation })
         {
             return false;

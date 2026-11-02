@@ -155,12 +155,11 @@ internal static class EventQueueStateEnvelopeKeyAssertions
         await ScopeAndOrderAsync(fixture.Partition);
     }
 
-    private static async Task KeyAsync(byte[] actual, object?[] components, string expectedHex)
+    private static async Task KeyAsync(byte[] actual, KeyComponent[] components, string expectedHex)
     {
         await Assert.That(Convert.ToHexString(actual)).IsEqualTo(expectedHex);
         var decoded = KeyCodec.Decode(actual);
-        await Assert.That(JsonSerializer.Serialize(decoded, JsonDefaults.Options))
-            .IsEqualTo(JsonSerializer.Serialize(components, JsonDefaults.Options));
+        await Assert.That(decoded.SequenceEqual(components)).IsTrue();
         await Assert.That(KeyCodec.Encode(decoded).AsSpan().SequenceEqual(actual)).IsTrue();
     }
 

@@ -17,7 +17,7 @@ public static class EventStreamsValidation
         try
         {
             var parts = KeyCodec.Decode(key);
-            if (parts.Length != TopicPurgeGroupKeyComponents || parts[TopicPurgeGroupIdIndex] is not string id || !KeyCodec.Encode(parts).AsSpan().SequenceEqual(key))
+            if (parts.Length != TopicPurgeGroupKeyComponents || parts[TopicPurgeGroupIdIndex] is not { Kind: KeyComponentKind.Text, Text: var id } || !KeyCodec.Encode(parts).AsSpan().SequenceEqual(key))
             {
                 throw Errors.Fail(ErrorCode.Corruption, EventSources.EventSourceRetainedHistoryDetail);
             }

@@ -97,6 +97,6 @@ internal static class QueuePendingAuthorityOperations
         state.Processed.Add(new(id, processing, receipt));
     }
 
-    internal static byte[] Key(QueueLifecycleTestState state, string space, params object[] rest)
-        => KeySpace.Partition(space, state.Partition, new object[] { state.Lane.Queue }.Concat(rest).ToArray());
+    internal static byte[] Key(QueueLifecycleTestState state, string space, params ReadOnlySpan<KeyComponent> rest)
+        => KeySpace.Partition(space, state.Partition, [state.Lane.Queue, .. rest]);
 }

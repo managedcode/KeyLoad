@@ -54,7 +54,7 @@ public static class QueueSweepTransitions
         foreach (var item in page.Records)
         {
             var components = KeyCodec.Decode(item.Key.Span);
-            if ((DateTimeOffset)components[^QueueSweepTransitionsNamespaceComponentFromEnd]! > now)
+            if (components[^QueueSweepTransitionsNamespaceComponentFromEnd].Timestamp > now)
             {
                 break;
             }

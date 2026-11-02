@@ -2,7 +2,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.FunctionalTests.StorageRecovery;
 
-/// <summary>AC-KEYCODEC-001: typed components encode to exactly the bytes of the boxed components they replace.</summary>
+/// <summary>AC-KEYCODEC-001: closed scalar components preserve the canonical bytes and decoded values.</summary>
 internal sealed class KeyCodecTypedComponentTests
 {
     private const string Text = "tenant/\u0000zero☃";
@@ -17,38 +17,43 @@ internal sealed class KeyCodecTypedComponentTests
     private static readonly byte[] Binary = [0, 1, 0, 255];
 
     [Test]
-    public async Task TypedComponentsMatchBoxedBytesForEverySupportedShape()
+    public async Task TypedComponentsPreserveEverySupportedDecodedShape()
     {
         var id = Guid.NewGuid();
         var at = new DateTimeOffset(Year, Month, Day, 0, 0, 0, TimeSpan.Zero);
         var typed = KeyCodec.Encode(Text, Integer, Small, true, false, 1.25m, Real, at, id, Binary, KeyComponent.Null, KeyComponent.Missing);
-        var boxed = KeyCodec.Encode(new object?[] { Text, Integer, Small, true, false, 1.25m, Real, at, id, Binary, null, MissingValue.Instance });
-        await Assert.That(typed.SequenceEqual(boxed)).IsTrue();
         KeyCodecValidation.Validate(typed);
         var decoded = KeyCodec.Decode(typed);
-        await Assert.That(decoded[0]).IsEqualTo(Text);
-        await Assert.That(decoded[1]).IsEqualTo(Integer);
-        await Assert.That(decoded[2]).IsEqualTo((long)Small);
-        await Assert.That(decoded[8]).IsEqualTo(id.ToString("N"));
-        await Assert.That(decoded[10]).IsNull();
-        await Assert.That(decoded[11]).IsEqualTo(MissingValue.Instance);
+        await Assert.That(decoded[0].Text).IsEqualTo(Text);
+        await Assert.That(decoded[1].Integer).IsEqualTo(Integer);
+        await Assert.That(decoded[2].Integer).IsEqualTo((long)Small);
+        await Assert.That(decoded[3].Boolean).IsTrue();
+        await Assert.That(decoded[4].Boolean).IsFalse();
+        await Assert.That(decoded[5].ExactNumber).IsEqualTo(1.25m);
+        await Assert.That(decoded[6].RealNumber).IsEqualTo(Real);
+        await Assert.That(decoded[7].Timestamp).IsEqualTo(at);
+        await Assert.That(decoded[9].Bytes.Span.SequenceEqual(Binary)).IsTrue();
+        await Assert.That(decoded[8].Text).IsEqualTo(id.ToString("N"));
+        await Assert.That(decoded[10].Kind).IsEqualTo(KeyComponentKind.Null);
+        await Assert.That(decoded[11].Kind).IsEqualTo(KeyComponentKind.Missing);
     }
 
     [Test]
-    public async Task LongTextGrowsPastTheStackBufferAndStillMatchesBoxedBytes()
+    public async Task LongTextGrowsPastTheStackBufferAndKeepsLiteralUtf8Bytes()
     {
         var text = new string('é', LongTextLength);
         var typed = KeyCodec.Encode(text, text);
-        await Assert.That(typed.SequenceEqual(KeyCodec.Encode([text, text]))).IsTrue();
-        await Assert.That(KeyCodec.Decode(typed)[1]).IsEqualTo(text);
+        var scalar = string.Concat(Enumerable.Repeat("C3A9", LongTextLength));
+        await Assert.That(Convert.ToHexString(typed)).IsEqualTo("0150" + scalar + "000050" + scalar + "0000");
+        await Assert.That(KeyCodec.Decode(typed)[1].Text).IsEqualTo(text);
     }
 
     [Test]
-    public async Task NullReferencesAndComponentBoundsAreTheSameInBothOverloads()
+    public async Task NullReferencesAndComponentBoundsKeepTheirCanonicalContract()
     {
         string? missingText = null;
         byte[]? missingBytes = null;
-        await Assert.That(KeyCodec.Encode(missingText, missingBytes).SequenceEqual(KeyCodec.Encode(new object?[] { null, null }))).IsTrue();
+        await Assert.That(Convert.ToHexString(KeyCodec.Encode(missingText, missingBytes))).IsEqualTo("011111");
         var tooMany = new KeyComponent[MaximumComponents + 1];
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => KeyCodec.Encode(tooMany));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.ResourceExhausted);

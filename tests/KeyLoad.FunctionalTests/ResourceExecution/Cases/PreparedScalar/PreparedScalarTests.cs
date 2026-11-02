@@ -20,11 +20,11 @@ internal sealed class PreparedScalarTests
         using var json = JsonDocument.Parse(DocumentJson);
         var root = json.RootElement;
 
-        await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(StringPath))).Value.Value).IsEqualTo(Target);
-        await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(NullPath))).Value.Value).IsNull();
-        await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(NumberPath))).Value.Value).IsEqualTo(12.5m);
-        await Assert.That((bool)(JsonData.Scalar(root, JsonData.PathSegments(BooleanPath))).Value.Value!).IsTrue();
-        await Assert.That((JsonData.Scalar(root, JsonData.PathSegments(MissingPath))).Value.Value).IsEqualTo(MissingValue.Instance);
+        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(StringPath)).Value.Value.Text).IsEqualTo(Target);
+        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(NullPath)).Value.Value.Kind).IsEqualTo(KeyComponentKind.Null);
+        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(NumberPath)).Value.Value.ExactNumber).IsEqualTo(12.5m);
+        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(BooleanPath)).Value.Value.Boolean).IsTrue();
+        await Assert.That(JsonData.Scalar(root, JsonData.PathSegments(MissingPath)).Value.Value.Kind).IsEqualTo(KeyComponentKind.Missing);
     }
 
     [Test]

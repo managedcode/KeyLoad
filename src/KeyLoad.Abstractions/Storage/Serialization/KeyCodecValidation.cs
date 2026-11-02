@@ -7,7 +7,7 @@ namespace KeyLoad.Storage;
 /// <summary>Validates the complete encoded key without materializing its decoded components.</summary>
 internal static class KeyCodecValidation
 {
-    internal static void Validate(ReadOnlySpan<byte> key)
+    internal static int Validate(ReadOnlySpan<byte> key)
     {
         if (key.IsEmpty || key[VersionOffset] != KeyCodec.Version)
         {
@@ -23,6 +23,7 @@ internal static class KeyCodecValidation
             }
             Component(key, ref offset);
         }
+        return components;
     }
 
     private static void Component(ReadOnlySpan<byte> key, ref int offset)

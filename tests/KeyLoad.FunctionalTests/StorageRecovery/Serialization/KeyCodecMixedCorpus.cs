@@ -167,6 +167,24 @@ internal static class KeyCodecMixedCorpus
 
     private static double NormalizeDouble(double value) => value == 0 ? 0d : value;
 
+    internal static KeyComponent[] Typed(IEnumerable<object?> values) => values.Select(Component).ToArray();
+
+    private static KeyComponent Component(object? value) => value switch
+    {
+        null => KeyComponent.Null,
+        MissingValue => KeyComponent.Missing,
+        bool flag => KeyComponent.FromBoolean(flag),
+        int integer => KeyComponent.FromInt32(integer),
+        long integer => KeyComponent.FromInt64(integer),
+        decimal number => KeyComponent.FromDecimal(number),
+        double number => KeyComponent.FromDouble(number),
+        string text => KeyComponent.FromString(text),
+        Guid id => KeyComponent.FromGuid(id),
+        DateTimeOffset time => KeyComponent.FromDateTimeOffset(time),
+        byte[] bytes => KeyComponent.FromByteArray(bytes),
+        _ => throw new InvalidOperationException("The independent CLR corpus contains an unsupported key input.")
+    };
+
     private static int CompareUtf8(string left, string right)
         => Utf8.GetBytes(left).AsSpan().SequenceCompareTo(Utf8.GetBytes(right));
 

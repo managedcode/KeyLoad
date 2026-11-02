@@ -77,15 +77,15 @@ public static class DocumentStorageExecutionDocuments
         }
     }
 
-    internal static (bool HasValue, object?[]? Value) IndexValues(string json, IndexDefinition index)
+    internal static (bool HasValue, KeyComponent[]? Value) IndexValues(string json, IndexDefinition index)
     {
         using var document = JsonDocument.Parse(json);
         var values = index.Fields.Select(f => JsonData.Scalar(document.RootElement, f)).ToArray();
-        return ((object?[]?)(values.Any(v => v is null && !index.IncludeNull || v is MissingValue && !index.IncludeMissing) ? null : values)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(object?[]?));
+        return ((KeyComponent[]?)(values.Any(v => v.Kind == KeyComponentKind.Null && !index.IncludeNull || v.Kind == KeyComponentKind.Missing && !index.IncludeMissing) ? null : values)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(KeyComponent[]?));
     }
 
-    internal static byte[] IndexKey(PartitionRef partition, string collection, IndexDefinition index, object?[] values, string id) => KeySpace.Partition(nameof(index), partition, new object?[] { collection, index.Name }.Concat(values).Append(id).ToArray());
-    internal static byte[] UniqueKey(PartitionRef partition, string collection, IndexDefinition index, object?[] values) => KeySpace.Partition(UniqueIndexSpace, partition, new object?[] { collection, index.Name }.Concat(values).ToArray());
+    internal static byte[] IndexKey(PartitionRef partition, string collection, IndexDefinition index, KeyComponent[] values, string id) => KeySpace.Partition(nameof(index), partition, [collection, index.Name, .. values, id]);
+    internal static byte[] UniqueKey(PartitionRef partition, string collection, IndexDefinition index, KeyComponent[] values) => KeySpace.Partition(UniqueIndexSpace, partition, [collection, index.Name, .. values]);
     /// <summary>Reads one document after row and field authorization.</summary>
     /// <param name = "principalId">Persisted principal identifier.</param>
     /// <param name = "reference">Document identity.</param>

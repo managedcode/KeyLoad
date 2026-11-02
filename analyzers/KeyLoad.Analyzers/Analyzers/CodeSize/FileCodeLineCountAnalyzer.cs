@@ -35,7 +35,7 @@ public sealed class FileCodeLineCountAnalyzer : DiagnosticAnalyzer
         if (count > MaximumFileCodeLines)
         {
             context.ReportDiagnostic(Diagnostic.Create(
-                Rules[0], root.GetLocation(), count));
+                Rules[0], root.GetLocation(), count /* KLD0042: Roslyn retains this physical file line count for culture-aware diagnostic formatting. */) /* KLD0041: Roslyn formats this physical file line count through its fixed diagnostic argument array. */);
         }
     }
 }

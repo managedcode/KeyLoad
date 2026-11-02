@@ -60,7 +60,7 @@ public static class QueueRetryInputs
         foreach (var row in page.Records)
         {
             var key = KeyCodec.Decode(row.Key.Span);
-            if ((DateTimeOffset)key[^QueueSweepTransitions.QueueSweepTransitionsNamespaceComponentFromEnd]! > now)
+            if (key[^QueueSweepTransitions.QueueSweepTransitionsNamespaceComponentFromEnd].Timestamp > now)
             {
                 break;
             }

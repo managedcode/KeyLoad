@@ -21,12 +21,12 @@ public static class MessagingValidationQueueLifecycle
             }
 
             var item = OrleansSerialization.Deserialize<MessageMetadata>(value);
-            if (item.Id != (string)parts[QueueOrderProtocol.MessageKeyComponent]!)
+            if (item.Id != parts[QueueOrderProtocol.MessageKeyComponent].Text)
             {
                 throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
             }
 
-            var lane = new QueueLaneRef(new(request.TenantId, request.DatabaseId, (string)parts[QueueOrderProtocol.DomainKeyComponent]!, (string)parts[QueueOrderProtocol.PartitionKeyComponent]!), request.Definition.Name);
+            var lane = new QueueLaneRef(new(request.TenantId, request.DatabaseId, parts[QueueOrderProtocol.DomainKeyComponent].Text, parts[QueueOrderProtocol.PartitionKeyComponent].Text), request.Definition.Name);
             _ = MessagingExecutionMessaging.Counters(view, lane);
             if (view.ReadValue(MessagingExecutionMessaging.QueueKey(QueueSweepTransitions.MessageBodySpace, lane, item.Id), static _ =>
             {
@@ -67,9 +67,9 @@ public static class MessagingValidationQueueLifecycle
         }
     }
 
-    internal static bool QueuePolicyResourceKey(object?[] parts, string resource)
+    internal static bool QueuePolicyResourceKey(KeyComponent[] parts, string resource)
     {
-        if (parts.Length != QueueOrderProtocol.MessageKeyComponents || parts[QueueOrderProtocol.ResourceKeyComponent] is not string queue || parts[QueueOrderProtocol.DomainKeyComponent] is not string || parts[QueueOrderProtocol.PartitionKeyComponent] is not string || parts[QueueOrderProtocol.MessageKeyComponent] is not string)
+        if (parts.Length != QueueOrderProtocol.MessageKeyComponents || parts[QueueOrderProtocol.ResourceKeyComponent] is not { Kind: KeyComponentKind.Text, Text: var queue } || parts[QueueOrderProtocol.DomainKeyComponent].Kind is not KeyComponentKind.Text || parts[QueueOrderProtocol.PartitionKeyComponent].Kind is not KeyComponentKind.Text || parts[QueueOrderProtocol.MessageKeyComponent].Kind is not KeyComponentKind.Text)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, QueueOrderProtocol.InvalidAuthority);
         }

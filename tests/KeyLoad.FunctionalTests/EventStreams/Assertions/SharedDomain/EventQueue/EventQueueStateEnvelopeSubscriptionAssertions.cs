@@ -41,9 +41,9 @@ internal static class EventQueueStateEnvelopeSubscriptionAssertions
         }
     }
 
-    internal static byte[] Key(EventQueueStateEnvelopeFixture fixture, string family, params object?[] suffix)
+    internal static byte[] Key(EventQueueStateEnvelopeFixture fixture, string family, params ReadOnlySpan<KeyLoad.Storage.KeyComponent> suffix)
     {
         return KeySpace.Partition(family, fixture.Partition,
-            new object?[] { Topic, nameof(EventSourceKind.Topic), null, InitialGeneration, Group }.Concat(suffix).ToArray());
+            [Topic, nameof(EventSourceKind.Topic), KeyLoad.Storage.KeyComponent.Null, InitialGeneration, Group, .. suffix]);
     }
 }

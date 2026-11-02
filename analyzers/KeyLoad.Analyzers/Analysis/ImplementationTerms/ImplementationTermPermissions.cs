@@ -24,7 +24,7 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
         {
             return true;
         }
-        var owner = node.AncestorsAndSelf().OfType<MemberDeclarationSyntax>().FirstOrDefault();
+        var owner = node.AncestorsAndSelf().FirstOrDefault(static candidate => candidate is MemberDeclarationSyntax) as MemberDeclarationSyntax;
         ImplementationTermSymbols.Resolve(model, owner, cancellationToken, out var ownerSymbol);
         if (IsVocabulary(ownerSymbol))
         {
@@ -79,9 +79,13 @@ internal sealed class ImplementationTermPermissions(SemanticModel model,
         {
             return allowed;
         }
-        foreach (var name in owner.DescendantNodes().OfType<SimpleNameSyntax>())
+        foreach (var node in owner.DescendantNodes())
         {
             cancellationToken.ThrowIfCancellationRequested();
+            if (node is not SimpleNameSyntax name)
+            {
+                continue;
+            }
             ImplementationTermSymbols.Resolve(model, name, cancellationToken, out var candidate);
             if (accepts(candidate, model.Compilation))
             {

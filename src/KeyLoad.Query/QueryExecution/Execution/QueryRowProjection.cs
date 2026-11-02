@@ -41,7 +41,7 @@ internal static class QueryRowProjection
         foreach (var selection in selections)
         {
             var value = PredicateEvaluator.FieldValue(selection.Path, document, json.RootElement, paths);
-            result[selection.Alias] = value is MissingValue ? null : JsonSerializer.SerializeToNode(value, JsonDefaults.Options);
+            result[selection.Alias] = new JsonScalarValue(value).ToNode();
         }
         var selected = QueryProjectionRedactions.Selected(database, resource, safe,
             projection.CompleteOmittedPaths, selections, additionalResource: sourceResource);

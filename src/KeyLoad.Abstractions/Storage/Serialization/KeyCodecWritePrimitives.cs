@@ -26,14 +26,14 @@ internal static class KeyCodecWritePrimitives
                 writer.Write((byte)BooleanTag);
                 writer.Write(component.Boolean ? (byte)TruePayload : (byte)FalsePayload);
                 break;
-            case KeyComponentKind.Int64:
-                WriteInt64(ref writer, component.Int64);
+            case KeyComponentKind.WholeNumber:
+                WriteInt64(ref writer, component.Integer);
                 break;
-            case KeyComponentKind.Decimal:
-                KeyCodecDecimal.Write(ref writer, component.Decimal);
+            case KeyComponentKind.FixedPoint:
+                KeyCodecDecimal.Write(ref writer, component.ExactNumber);
                 break;
-            case KeyComponentKind.Double:
-                WriteDouble(ref writer, component.Double);
+            case KeyComponentKind.FloatingPoint:
+                WriteDouble(ref writer, component.RealNumber);
                 break;
             case KeyComponentKind.Timestamp:
                 WriteOrdered(ref writer, (byte)TimestampTag, unchecked((ulong)component.UtcTicks) ^ SortableSignMask);

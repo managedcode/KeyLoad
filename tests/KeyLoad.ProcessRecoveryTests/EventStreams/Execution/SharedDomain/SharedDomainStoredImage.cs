@@ -32,9 +32,9 @@ internal static class SharedDomainStoredImage
     internal static bool Owns(ReadOnlySpan<byte> key, PartitionRef partition)
     {
         var values = KeyCodec.Decode(key);
-        return (values.Length >= ScopeComponentCount && Equals(values[1], partition.TenantId)
-            && Equals(values[DatabaseComponent], partition.DatabaseId) && Equals(values[DomainComponent], partition.TransactionDomainId)
-            && Equals(values[PartitionKeyComponent], partition.PartitionKey))
+        return (values.Length >= ScopeComponentCount && values[1] == KeyLoad.Storage.KeyComponent.FromString(partition.TenantId)
+            && values[DatabaseComponent] == KeyLoad.Storage.KeyComponent.FromString(partition.DatabaseId) && values[DomainComponent] == KeyLoad.Storage.KeyComponent.FromString(partition.TransactionDomainId)
+            && values[PartitionKeyComponent] == KeyLoad.Storage.KeyComponent.FromString(partition.PartitionKey))
             || key.SequenceEqual(AtomicPartitionRosterKeys.Partition(partition));
     }
 }

@@ -17,7 +17,7 @@ internal static class ContractValidation
         {
             throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
         }
-        if (!IsScalar(value))
+        if (!IsScalar(typeof(T)) && !IsScalar(value.GetType()))
         {
             _ = Visit(value, new GraphValidationState(), null, profile, 1);
         }
@@ -36,7 +36,7 @@ internal static class ContractValidation
             return 0;
         }
         var type = value.GetType();
-        if (IsScalar(value))
+        if (IsScalar(type))
         {
             return 0;
         }
@@ -94,10 +94,11 @@ internal static class ContractValidation
         return VisitMembers(value, type, state, validation, profile, depth);
     }
 
-    private static bool IsScalar(object value)
-        => value.GetType().IsPrimitive || value.GetType().IsEnum
-            || value is string or decimal or DateTime or DateTimeOffset or TimeSpan or Guid or JsonElement
-                or ReadOnlyMemory<byte> or Memory<byte> or byte[];
+    private static bool IsScalar(Type type)
+        => type.IsPrimitive || type.IsEnum || type == typeof(string) || type == typeof(decimal)
+            || type == typeof(DateTime) || type == typeof(DateTimeOffset) || type == typeof(TimeSpan)
+            || type == typeof(Guid) || type == typeof(JsonElement) || type == typeof(ReadOnlyMemory<byte>)
+            || type == typeof(Memory<byte>) || type == typeof(byte[]);
 
     private static int VisitMembers(object value, Type type, GraphValidationState state,
         ValueValidation? validation, ValidationProfile profile, int depth)

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Storage;
 using KeyLoad.Query.QueryExecution;
 
 namespace KeyLoad.Query;
@@ -8,15 +9,15 @@ namespace KeyLoad.Query;
 internal sealed class RelationalQueryOperandBinding(Dictionary<string, RelationalColumn> columns,
     Dictionary<string, JsonElement>? parameters)
 {
-    internal Type Field(string path)
+    internal KeyComponentKind Field(string path)
     {
         if (path == SqlSyntax.MetadataIdPath)
         {
-            return typeof(string);
+            return KeyComponentKind.Text;
         }
         if (path == SqlSyntax.MetadataRevisionPath)
         {
-            return typeof(decimal);
+            return KeyComponentKind.FixedPoint;
         }
         var segments = JsonData.PathSegments(path);
         if (segments.Length != 1 || !columns.TryGetValue(segments[0], out var column))
@@ -25,14 +26,14 @@ internal sealed class RelationalQueryOperandBinding(Dictionary<string, Relationa
         }
         return column.Type switch
         {
-            RelationalColumnType.Text or RelationalColumnType.UtcTimestamp => typeof(string),
-            RelationalColumnType.WholeNumber or RelationalColumnType.FixedPoint => typeof(decimal),
-            RelationalColumnType.Boolean => typeof(bool),
+            RelationalColumnType.Text or RelationalColumnType.UtcTimestamp => KeyComponentKind.Text,
+            RelationalColumnType.WholeNumber or RelationalColumnType.FixedPoint => KeyComponentKind.FixedPoint,
+            RelationalColumnType.Boolean => KeyComponentKind.Boolean,
             _ => throw Errors.Fail(ErrorCode.Validation, RelationalQueryBinding.InvalidDetail)
         };
     }
 
-    internal Type? Infer(Operand operand) => operand switch
+    internal KeyComponentKind? Infer(Operand operand) => operand switch
     {
         FieldOperand field => Field(field.Path),
         ValueOperand value => Scalar(value.Value),
@@ -43,7 +44,7 @@ internal sealed class RelationalQueryOperandBinding(Dictionary<string, Relationa
 
     internal void Compare(Operand left, Operand right) => RequireComparable(Infer(left), Infer(right));
 
-    internal static void RequireComparable(Type? left, Type? right)
+    internal static void RequireComparable(KeyComponentKind? left, KeyComponentKind? right)
     {
         if (left is not null && right is not null && left != right)
         {
@@ -51,5 +52,9 @@ internal sealed class RelationalQueryOperandBinding(Dictionary<string, Relationa
         }
     }
 
-    private static Type? Scalar(JsonElement value) => (JsonData.Scalar(value, ReadOnlySpan<string>.Empty)).Value.Value?.GetType();
+    private static KeyComponentKind? Scalar(JsonElement value)
+    {
+        var kind = JsonData.Scalar(value, ReadOnlySpan<string>.Empty).Value.Value.Kind;
+        return kind is KeyComponentKind.Null or KeyComponentKind.Missing ? default(KeyComponentKind?) : kind;
+    }
 }

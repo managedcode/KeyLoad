@@ -26,11 +26,11 @@ internal static class QueueDeadlineRecordDecoder
     {
         var parts = KeyCodec.Decode(key);
         if (parts.Length is not (MetadataFields or IndexFields)
-            || parts[SpaceField] is not string space
+            || parts[SpaceField] is not { Kind: KeyComponentKind.Text, Text: var space }
             || space is not (Scheduled or Leased or Metadata)
-            || parts[TenantField] is not string tenant || parts[DatabaseField] is not string db
-            || parts[DomainField] is not string domain || parts[PartitionField] is not string partition
-            || parts[QueueField] is not string queue || parts[^LastField] is not string id)
+            || parts[TenantField] is not { Kind: KeyComponentKind.Text, Text: var tenant } || parts[DatabaseField] is not { Kind: KeyComponentKind.Text, Text: var db }
+            || parts[DomainField] is not { Kind: KeyComponentKind.Text, Text: var domain } || parts[PartitionField] is not { Kind: KeyComponentKind.Text, Text: var partition }
+            || parts[QueueField] is not { Kind: KeyComponentKind.Text, Text: var queue } || parts[^LastField] is not { Kind: KeyComponentKind.Text, Text: var id })
         {
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
         }
@@ -44,14 +44,14 @@ internal static class QueueDeadlineRecordDecoder
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
         }
         if (space == Metadata && parts.Length != MetadataFields
-            || space != Metadata && (parts.Length != IndexFields || parts[DeadlineField] is not DateTimeOffset))
+            || space != Metadata && (parts.Length != IndexFields || parts[DeadlineField].Kind is not KeyComponentKind.Timestamp))
         {
             throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);
         }
         if (space != Metadata)
         {
             var expected = space == Leased ? metadata.LeaseUntil : metadata.NotBefore;
-            if (expected is null || parts[DeadlineField] is not DateTimeOffset indexed
+            if (expected is null || parts[DeadlineField] is not { Kind: KeyComponentKind.Timestamp, Timestamp: var indexed }
                 || indexed != expected)
             {
                 throw Errors.Fail(ErrorCode.Corruption, DueWorkProtocol.InvalidRecord);

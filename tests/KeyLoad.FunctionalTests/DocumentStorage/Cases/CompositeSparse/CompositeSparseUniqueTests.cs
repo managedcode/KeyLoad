@@ -22,10 +22,10 @@ internal sealed class CompositeSparseUniqueTests
             new PutDocument(CompositeSparseUniqueAssertions.Collection, CompositeSparseUniqueAssertions.MissingId, CompositeSparseUniqueAssertions.MissingJson, 0)).Get<CommitReceipt>();
         await CompositeSparseUniqueAssertions.DocumentAsync(db, CompositeSparseUniqueAssertions.NullId, CompositeSparseUniqueAssertions.NullJson, 1);
         await CompositeSparseUniqueAssertions.DocumentAsync(db, CompositeSparseUniqueAssertions.MissingId, CompositeSparseUniqueAssertions.MissingJson, 1);
-        var included = new List<(string Id, object? Rank)>();
+        var included = new List<(string Id, KeyComponent Rank)>();
         if (includeNull)
         {
-            included.Add((CompositeSparseUniqueAssertions.NullId, null));
+            included.Add((CompositeSparseUniqueAssertions.NullId, KeyComponent.Null));
         }
         if (includeMissing)
         {

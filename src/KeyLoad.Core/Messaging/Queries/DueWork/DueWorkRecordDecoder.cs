@@ -156,7 +156,7 @@ internal static class DueWorkRecordDecoder
     private static void ValidateKey(ReadOnlySpan<byte> key, string space, QueueLaneRef lane, Guid id)
     {
         var components = KeyCodec.Decode(key);
-        var expected = new object?[] { space, lane.Partition.TenantId, lane.Partition.DatabaseId,
+        var expected = new KeyComponent[] { space, lane.Partition.TenantId, lane.Partition.DatabaseId,
             lane.Partition.TransactionDomainId, lane.Partition.PartitionKey, lane.Queue,
             id.ToString(DueWorkFields.GuidFormat) };
         if (components.Length != expected.Length || !components.SequenceEqual(expected))

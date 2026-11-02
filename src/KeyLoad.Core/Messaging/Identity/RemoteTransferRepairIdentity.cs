@@ -34,11 +34,11 @@ internal static class RemoteTransferRepairIdentity
             hint.AcceptPolicyGeneration, hint.CompleteGeneration, outcomeDigest);
     }
 
-    private static Guid Hash(RemoteTransferCoordinationHint hint, string domain, params object?[] suffix)
+    private static Guid Hash(RemoteTransferCoordinationHint hint, string domain, params KeyComponent[] suffix)
     {
         var source = hint.Source.Partition;
         var target = hint.Destination.Partition;
-        object?[] identity = [domain, source.TenantId, source.DatabaseId, source.TransactionDomainId,
+        KeyComponent[] identity = [domain, source.TenantId, source.DatabaseId, source.TransactionDomainId,
             source.PartitionKey, hint.Source.Queue, target.TenantId, target.DatabaseId, target.TransactionDomainId,
             target.PartitionKey, hint.Destination.Queue, hint.TransferId, hint.PrincipalId, hint.Fingerprint,
             hint.IntentDigest, hint.SourceCut.Incarnation, .. suffix];

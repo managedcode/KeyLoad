@@ -24,7 +24,7 @@ internal static class UntypedUseAnalysis
             || operation is IInvocationOperation call && HasErasedInput(call, facts, context.CancellationToken))
         {
             context.ReportDiagnostic(Diagnostic.Create(rule, operation.Syntax.GetLocation(), Kind(operation),
-                Name(operation)));
+                Name(operation)) /* KLD0041: Roslyn requires object message arguments for this use kind and the resolved API member identity. */);
         }
     }
 

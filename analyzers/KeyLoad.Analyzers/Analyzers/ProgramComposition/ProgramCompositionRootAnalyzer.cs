@@ -49,13 +49,13 @@ public sealed class ProgramCompositionRootAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        var statements = compilationUnit.Members.OfType<GlobalStatementSyntax>().ToArray();
+        var statements = compilationUnit.Members.Where(static member => member is GlobalStatementSyntax).ToArray();
         if (statements.Length != 1)
         {
             return;
         }
 
-        var statement = statements[0].Statement;
+        var statement = ((GlobalStatementSyntax)statements[0]).Statement;
         var expression = statement switch
         {
             ExpressionStatementSyntax expressionStatement => expressionStatement.Expression,
@@ -72,7 +72,7 @@ public sealed class ProgramCompositionRootAnalyzer : DiagnosticAnalyzer
             expression = configuration.Expression;
         }
         if (expression is not InvocationExpressionSyntax forwarded || forwarded.Expression is not MemberAccessExpressionSyntax invocation
-            || forwarded.DescendantNodes().OfType<InvocationExpressionSyntax>().Any())
+            || forwarded.DescendantNodes().Any(static node => node is InvocationExpressionSyntax))
         {
             return;
         }
@@ -82,6 +82,6 @@ public sealed class ProgramCompositionRootAnalyzer : DiagnosticAnalyzer
             return;
         }
 
-        context.ReportDiagnostic(Diagnostic.Create(Rule, statement.GetLocation(), invocation.ToString()));
+        context.ReportDiagnostic(Diagnostic.Create(Rule, statement.GetLocation(), invocation.ToString()) /* KLD0041: Roslyn requires object message arguments to identify the forwarding call rejected in this process entry point. */);
     }
 }

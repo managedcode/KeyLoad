@@ -42,7 +42,7 @@ public sealed class UntypedCatchAnalyzer : DiagnosticAnalyzer
         var clause = (CatchClauseSyntax)context.Node;
         if (clause.Declaration is null)
         {
-            context.ReportDiagnostic(Diagnostic.Create(Rule, clause.CatchKeyword.GetLocation()));
+            context.ReportDiagnostic(Diagnostic.Create(Rule, clause.CatchKeyword.GetLocation()) /* KLD0041: This catch diagnostic has no substitutions, but Roslyn still requires its object argument-array reporting API. */);
         }
     }
 }

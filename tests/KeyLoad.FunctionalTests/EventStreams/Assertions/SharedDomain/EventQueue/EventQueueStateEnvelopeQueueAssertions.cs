@@ -124,7 +124,7 @@ internal static class EventQueueStateEnvelopeQueueAssertions
                 }
                 if (family == LeaseFamily && metadata.State == MessageState.Leased)
                 {
-                    expected.Add((KeySpace.Partition(family, fixture.Partition, Queue, metadata.LeaseUntil, metadata.Id), metadata.Id));
+                    expected.Add((KeySpace.Partition(family, fixture.Partition, Queue, metadata.LeaseUntil is { } at ? KeyLoad.Storage.KeyComponent.FromDateTimeOffset(at) : KeyLoad.Storage.KeyComponent.Null, metadata.Id), metadata.Id));
                 }
             }
             var page = fixture.Store.Read(view => view.Scan(KeySpace.Partition(family, fixture.Partition, Queue), ScanBound));

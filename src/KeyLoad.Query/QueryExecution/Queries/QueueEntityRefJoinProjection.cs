@@ -27,7 +27,7 @@ internal static class QueueEntityRefJoinProjection
         {
             var root = selection.SourceAlias == query.Alias ? leftJson.RootElement : rightJson.RootElement;
             var value = JsonData.Scalar(root, selection.Path);
-            json[selection.Alias] = value is MissingValue ? null : JsonSerializer.SerializeToNode(value, JsonDefaults.Options);
+            json[selection.Alias] = new JsonScalarValue(value).ToNode();
         }
         var leftFields = QueryProjectionRedactions.Selected(database, queue, leftSafe,
             leftProjection.CompleteOmittedPaths, query.Projection, query.Alias);

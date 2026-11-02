@@ -17,7 +17,7 @@ internal static class UntypedDeclarationAnalysis
         if (facts.Contains(type, context.CancellationToken))
         {
             context.ReportDiagnostic(Diagnostic.Create(rule, syntax.GetLocation(), UntypedContractPolicy.Declaration,
-                type!.ToDisplayString()));
+                type!.ToDisplayString()) /* KLD0041: Roslyn requires object message arguments for this declaration role and its resolved erased type name. */);
         }
     }
 

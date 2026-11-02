@@ -13,7 +13,8 @@ internal static class ConfiguredCountingSignal
     internal static bool IsConfigured(Compilation compilation, IObjectCreationOperation creation, CancellationToken cancellationToken) =>
         MagicRuntimeOperations.IsType(compilation, creation.Type, MagicRuntimeMetadataNames.Semaphore) &&
         creation.Arguments.Length == 2 && creation.Arguments[0] is var initial && creation.Arguments[1] is var maximum &&
-        initial.Value.ConstantValue is { HasValue: true, Value: int count } && count == OperationalPolicyMetadataNames.EmptySignalCount &&
+        initial.Value.ConstantValue /* KLD0041: Roslyn exposes the initial semaphore constant through Optional<object>; the pattern requires an integer. */ is
+        { HasValue: true, Value /* KLD0041: The boxed compiler constant is inspected only to validate the empty semaphore count. */: int count } && count == OperationalPolicyMetadataNames.EmptySignalCount &&
         IsCapacity(compilation, maximum.Value, new HashSet<ISymbol>(SymbolEqualityComparer.Default), cancellationToken);
 
     private static bool IsCapacity(Compilation compilation, IOperation operation, HashSet<ISymbol> visited, CancellationToken cancellationToken)
@@ -53,8 +54,10 @@ internal static class ConfiguredCountingSignal
     };
 
     private static bool IsWakeUnit(IOperation operation) =>
-        operation.ConstantValue is { HasValue: true, Value: int count } && count == OperationalPolicyMetadataNames.StopWakeCount ||
-        operation.ConstantValue is { HasValue: true, Value: long wideCount } && wideCount == OperationalPolicyMetadataNames.StopWakeCount;
+        operation.ConstantValue /* KLD0041: Roslyn exposes this wake operand constant through Optional<object>; the pattern requires an integer. */ is
+        { HasValue: true, Value /* KLD0041: The boxed compiler constant is inspected only to validate the integer stop-wake unit. */: int count } && count == OperationalPolicyMetadataNames.StopWakeCount ||
+        operation.ConstantValue /* KLD0041: Roslyn exposes this wider wake operand through Optional<object>; the pattern requires a long. */ is
+        { HasValue: true, Value /* KLD0041: The boxed compiler constant is inspected only to validate the long stop-wake unit. */: long wideCount } && wideCount == OperationalPolicyMetadataNames.StopWakeCount;
 
     private static int WakeUnits(IOperation operation) => operation switch
     {
@@ -88,7 +91,7 @@ internal static class ConfiguredCountingSignal
     private static bool FindReturn(MethodDeclarationSyntax method, out ExpressionSyntax? expression)
     {
         expression = method.ExpressionBody?.Expression ??
-            (method.Body?.Statements.OfType<ReturnStatementSyntax>().Take(2).ToArray() is { Length: 1 } statements ? statements[0].Expression : null);
+            (method.Body?.Statements.Where(static statement => statement is ReturnStatementSyntax).Take(2).ToArray() is { Length: 1 } statements ? ((ReturnStatementSyntax)statements[0]).Expression : null);
         return expression is not null;
     }
 
@@ -111,15 +114,15 @@ internal static class ConfiguredCountingSignal
         if (local.Local.DeclaringSyntaxReferences.SingleOrDefault()?.GetSyntax(cancellationToken) is not
             VariableDeclaratorSyntax { Initializer.Value: { } initializer } variable ||
             initializer.Span.End >= local.Syntax.SpanStart ||
-            variable.Ancestors().OfType<MethodDeclarationSyntax>().FirstOrDefault() is not { } owner)
+            variable.Ancestors().FirstOrDefault(static ancestor => ancestor is MethodDeclarationSyntax) is not MethodDeclarationSyntax owner)
         {
             return false;
         }
 
         var model = compilation.GetSemanticModel(initializer.SyntaxTree);
-        return !owner.DescendantNodes().OfType<AssignmentExpressionSyntax>().Any(assignment =>
+        return !owner.DescendantNodes().Any(node => node is AssignmentExpressionSyntax assignment &&
             SymbolEqualityComparer.Default.Equals(model.GetSymbolInfo(assignment.Left, cancellationToken).Symbol, local.Local)) &&
-            !owner.DescendantNodes().OfType<ArgumentSyntax>().Any(argument =>
+            !owner.DescendantNodes().Any(node => node is ArgumentSyntax argument &&
                 !argument.RefKindKeyword.IsKind(SyntaxKind.None) &&
                 SymbolEqualityComparer.Default.Equals(model.GetSymbolInfo(argument.Expression, cancellationToken).Symbol, local.Local)) &&
             model.GetOperation(initializer, cancellationToken) is { } value && IsSnapshot(compilation, value, cancellationToken);

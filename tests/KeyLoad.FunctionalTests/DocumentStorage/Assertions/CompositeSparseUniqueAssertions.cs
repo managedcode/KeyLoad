@@ -55,13 +55,13 @@ internal static class CompositeSparseUniqueAssertions
         }
     }
 
-    internal static async Task ImagesAsync(TestDatabase db, (string Id, object? Rank)[] rows)
+    internal static async Task ImagesAsync(TestDatabase db, (string Id, KeyComponent Rank)[] rows)
     {
         foreach (var space in new[] { "index", "unique" })
         {
             var expected = rows.Select(row =>
             {
-                object?[] parts = [Collection, Index, "shared", row.Rank];
+                KeyComponent[] parts = [Collection, Index, "shared", row.Rank];
                 var key = KeySpace.Partition(space, db.Partition, space == "index" ? [.. parts, row.Id] : parts);
                 return new KeyValuePair<string, string>(Convert.ToHexString(key), Convert.ToHexString(OrleansSerialization.Serialize(row.Id)));
             }).OrderBy(row => row.Key, StringComparer.Ordinal).ToArray();

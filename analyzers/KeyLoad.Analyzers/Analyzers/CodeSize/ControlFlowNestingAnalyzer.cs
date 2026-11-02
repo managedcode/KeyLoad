@@ -45,7 +45,7 @@ public sealed class ControlFlowNestingAnalyzer : DiagnosticAnalyzer
         if (depth > MaximumControlFlowDepth)
         {
             context.ReportDiagnostic(Diagnostic.Create(
-                Rules[0], unit.GetLocation(), depth));
+                Rules[0], unit.GetLocation(), depth /* KLD0042: Roslyn retains this numeric nesting measurement for culture-aware diagnostic formatting. */) /* KLD0041: Roslyn formats the measured nesting depth through the diagnostic API object argument array. */);
         }
     }
 }

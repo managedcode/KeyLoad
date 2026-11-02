@@ -26,7 +26,7 @@ internal static class SampleChunkTagPredicate
             return true;
         }
         using var document = JsonDocument.Parse(json);
-        return (JsonData.Scalar(document.RootElement, path)).Value.Value is string text
+        return (JsonData.Scalar(document.RootElement, path)).Value.Value is { Kind: KeyLoad.Storage.KeyComponentKind.Text, Text: var text }
             && string.Equals(text, expected, StringComparison.Ordinal);
     }
 }

@@ -24,8 +24,8 @@ dotnet_diagnostic.ORLEANS0012.severity = error
 dotnet_diagnostic.KLD0038.severity = error
 dotnet_diagnostic.KLD0039.severity = error
 dotnet_diagnostic.KLD0040.severity = error
-dotnet_diagnostic.KLD0041.severity = warning
-dotnet_diagnostic.KLD0042.severity = warning
+dotnet_diagnostic.KLD0041.severity = none
+dotnet_diagnostic.KLD0042.severity = none
 
 # Don't use this. qualifier
 dotnet_style_qualification_for_field = false:warning
@@ -504,6 +504,11 @@ dotnet_diagnostic.CA1822.severity = none
 dotnet_diagnostic.CA1823.severity = none
 dotnet_diagnostic.IDE0044.severity = none
 dotnet_diagnostic.IDE0051.severity = none
+
+# Untyped data review belongs to product execution code. Compiler tests run these rules explicitly.
+[src/**/*.cs]
+dotnet_diagnostic.KLD0041.severity = warning
+dotnet_diagnostic.KLD0042.severity = warning
 
 # Verify settings for test files
 [*.{received,verified}.{txt,xml,json}]

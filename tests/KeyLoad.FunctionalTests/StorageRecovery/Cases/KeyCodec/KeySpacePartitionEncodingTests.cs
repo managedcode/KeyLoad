@@ -16,9 +16,9 @@ internal sealed class KeySpacePartitionEncodingTests
     {
         await Assert.That(KeySpace.Partition(Space, Partition, "items", "ID\0é")
             .SequenceEqual(Convert.FromHexString(LiteralKey))).IsTrue();
-        object?[] suffix = ["items", long.MinValue, 1.25m, double.MaxValue, DateTimeOffset.MaxValue,
-            Guid.Parse("01234567-89ab-cdef-0123-456789abcdef"), true, null, MissingValue.Instance, new byte[] { 0, 255 }];
-        object?[] complete = [Space, "tenant", "database", "domain", PartitionKey, .. suffix];
+        KeyComponent[] suffix = ["items", long.MinValue, 1.25m, double.MaxValue, DateTimeOffset.MaxValue,
+            Guid.Parse("01234567-89ab-cdef-0123-456789abcdef"), true, KeyComponent.Null, MissingValue.Instance, new byte[] { 0, 255 }];
+        KeyComponent[] complete = [Space, "tenant", "database", "domain", PartitionKey, .. suffix];
         var actual = KeySpace.Partition(Space, Partition, suffix);
         await Assert.That(actual.SequenceEqual(KeyCodec.Encode(complete))).IsTrue();
         KeyCodecValidation.Validate(actual);
@@ -26,17 +26,16 @@ internal sealed class KeySpacePartitionEncodingTests
     }
 
     [Test]
-    public async Task ScopeAndSuffixShareOneComponentLimitAndPreserveOriginalRefusals()
+    public async Task ScopeAndSuffixShareComponentLimitsAndRejectMissingPartition()
     {
-        object?[] suffix = [.. Enumerable.Repeat<object?>(MissingValue.Instance, MaximumComponents - ScopeComponents)];
+        KeyComponent[] suffix = [.. Enumerable.Repeat(KeyComponent.Missing, MaximumComponents - ScopeComponents)];
         var maximum = KeySpace.Partition(Space, Partition, suffix);
         await Assert.That(KeyCodec.Decode(maximum).Length).IsEqualTo(MaximumComponents);
-        var excessive = Assert.ThrowsExactly<KeyLoadException>(() => KeySpace.Partition(Space, Partition, [.. suffix, null]));
+        var excessive = Assert.ThrowsExactly<KeyLoadException>(() => KeySpace.Partition(Space, Partition, [.. suffix, KeyComponent.Null]));
         await Assert.That(excessive.Code).IsEqualTo(ErrorCode.ResourceExhausted);
-        var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => KeySpace.Partition(Space, Partition, new object()));
-        await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         _ = Assert.ThrowsExactly<ArgumentNullException>(() => KeySpace.Partition(Space, null!, suffix));
-        _ = Assert.ThrowsExactly<ArgumentNullException>(() => KeySpace.Partition(Space, Partition, (object?[])null!));
+        await Assert.That(KeySpace.Partition(Space, Partition, ReadOnlySpan<KeyComponent>.Empty))
+            .IsEquivalentTo(KeyCodec.Encode(Space, "tenant", "database", "domain", PartitionKey));
         await Assert.That(KeySpace.Partition(Space, Partition, "items", "ID\0é")
             .SequenceEqual(Convert.FromHexString(LiteralKey))).IsTrue();
     }

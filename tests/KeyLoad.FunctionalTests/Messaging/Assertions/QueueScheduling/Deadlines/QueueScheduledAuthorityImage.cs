@@ -1,3 +1,4 @@
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -95,7 +96,7 @@ internal static class QueueScheduledAuthorityImage
         }
     }
 
-    private static string Row<T>(QueueScheduledAuthorityState state, string space, T value, params object[] rest)
+    private static string Row<T>(QueueScheduledAuthorityState state, string space, T value, params ReadOnlySpan<KeyComponent> rest)
         => Convert.ToHexString(KeySpace.Partition(space, state.Flow.Partition,
-            new object[] { state.Flow.Lane.Queue }.Concat(rest).ToArray())) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(value));
+            [state.Flow.Lane.Queue, .. rest])) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(value));
 }

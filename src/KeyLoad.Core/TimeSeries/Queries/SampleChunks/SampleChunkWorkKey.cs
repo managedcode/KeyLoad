@@ -17,12 +17,12 @@ internal static class SampleChunkWorkKey
     internal static (PartitionRef Partition, string Set, string Series, Guid Id) Decode(ReadOnlySpan<byte> key)
     {
         var parts = KeyCodec.Decode(key);
-        if (parts.Length != ComponentCount || parts[SampleChunkLifecycleProtocol.FirstIndex] is not string family
+        if (parts.Length != ComponentCount || parts[SampleChunkLifecycleProtocol.FirstIndex] is not { Kind: KeyComponentKind.Text, Text: var family }
             || family != PartitionRecordFamilies.SampleChunkWindow
-            || parts[1] is not string tenant || parts[DatabaseIndex] is not string database
-            || parts[DomainIndex] is not string domain || parts[PartitionIndex] is not string partition
-            || parts[SetIndex] is not string set || parts[SeriesIndex] is not string series
-            || parts[WindowIndex] is not string id || !Guid.TryParseExact(id, GuidFormat, out var windowId)
+            || parts[1] is not { Kind: KeyComponentKind.Text, Text: var tenant } || parts[DatabaseIndex] is not { Kind: KeyComponentKind.Text, Text: var database }
+            || parts[DomainIndex] is not { Kind: KeyComponentKind.Text, Text: var domain } || parts[PartitionIndex] is not { Kind: KeyComponentKind.Text, Text: var partition }
+            || parts[SetIndex] is not { Kind: KeyComponentKind.Text, Text: var set } || parts[SeriesIndex] is not { Kind: KeyComponentKind.Text, Text: var series }
+            || parts[WindowIndex] is not { Kind: KeyComponentKind.Text, Text: var id } || !Guid.TryParseExact(id, GuidFormat, out var windowId)
             || windowId == Guid.Empty || !KeyCodec.Encode(parts).AsSpan().SequenceEqual(key))
         {
             throw Errors.Fail(ErrorCode.Corruption, SampleChunkLifecycleProtocol.Corrupt);

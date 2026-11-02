@@ -70,13 +70,15 @@ public static class EventSources
     {
         const string TopicEventSpace = "topic-event";
         const string EventRecordSpace = "event";
-        object?[] suffix = source.Kind == EventSourceKind.Topic ? [source.Resource, source.Generation] : [source.Resource, source.StreamId, source.Generation];
-        if (position is { } value)
+        if (source.Kind == EventSourceKind.Topic)
         {
-            suffix = [.. suffix, value];
+            return position is { } topicPosition
+                ? KeySpace.Partition(TopicEventSpace, source.Partition, source.Resource, source.Generation, topicPosition)
+                : KeySpace.Partition(TopicEventSpace, source.Partition, source.Resource, source.Generation);
         }
-
-        return KeySpace.Partition(source.Kind == EventSourceKind.Topic ? TopicEventSpace : EventRecordSpace, source.Partition, suffix);
+        return position is { } streamPosition
+            ? KeySpace.Partition(EventRecordSpace, source.Partition, source.Resource, source.StreamId, source.Generation, streamPosition)
+            : KeySpace.Partition(EventRecordSpace, source.Partition, source.Resource, source.StreamId, source.Generation);
     }
 
     internal static SourceEventRecord SourceRecord(IKeyValueView view, EventSourceRef source, long position) => SourceEventReader.Read(view, source, position);

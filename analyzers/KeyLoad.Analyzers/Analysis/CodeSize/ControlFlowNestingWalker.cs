@@ -31,7 +31,7 @@ internal sealed class ControlFlowNestingWalker : CSharpSyntaxWalker
     public override void Visit(SyntaxNode? node)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (node is null || (!ReferenceEquals(node, executableUnit) &&
+        if (node is null || (!(ReferenceEquals(node, executableUnit) /* KLD0041: Syntax roots require reference identity so only separate nested executable nodes stop this walk. */) &&
             ExecutableUnitSyntax.IsNestedUnit(node)))
         {
             return;

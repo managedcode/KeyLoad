@@ -18,10 +18,10 @@ internal static class ImplementationTestOwnership
         foreach (var tree in compilation.SyntaxTrees.Where(tree => ExecutionPath(tree.FilePath)))
         {
             var model = compilation.GetSemanticModel(tree);
-            foreach (var declaration in tree.GetRoot(token).DescendantNodes().OfType<TypeDeclarationSyntax>())
+            foreach (var node in tree.GetRoot(token).DescendantNodes())
             {
                 token.ThrowIfCancellationRequested();
-                if (model.GetDeclaredSymbol(declaration, token) is INamedTypeSymbol type &&
+                if (node is TypeDeclarationSyntax declaration && model.GetDeclaredSymbol(declaration, token) is INamedTypeSymbol type &&
                     (ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestPath) &&
                      ImplementationTermSymbols.HasPath(type, ImplementationTermCatalog.TestOwnerPath) || RuntimeExecution(type) ||
                      runtimeAspire && AspireCallback(type)))
@@ -101,7 +101,7 @@ internal static class ImplementationTestOwnership
         {
             if (tree.GetRoot(token) is CompilationUnitSyntax root)
             {
-                foreach (var statement in root.Members.OfType<GlobalStatementSyntax>())
+                foreach (var statement in root.Members.Where(static member => member is GlobalStatementSyntax))
                 {
                     AddReferences(compilation, statement, pending, token);
                 }
@@ -130,8 +130,9 @@ internal static class ImplementationTestOwnership
             ImplementationTermSymbols.PathContains(tree.FilePath, path)))
         {
             var model = compilation.GetSemanticModel(tree);
-            var calls = tree.GetRoot(token).ChildNodes().OfType<GlobalStatementSyntax>()
-                .SelectMany(static statement => statement.DescendantNodes().OfType<InvocationExpressionSyntax>());
+            var calls = tree.GetRoot(token).ChildNodes().Where(static node => node is GlobalStatementSyntax)
+                .SelectMany(static statement => statement.DescendantNodes())
+                .Where(static node => node is InvocationExpressionSyntax);
             foreach (var call in calls)
             {
                 token.ThrowIfCancellationRequested();
@@ -159,9 +160,13 @@ internal static class ImplementationTestOwnership
         Queue<INamedTypeSymbol> pending, CancellationToken token)
     {
         var model = compilation.GetSemanticModel(source.SyntaxTree);
-        foreach (var name in source.DescendantNodesAndSelf().OfType<SimpleNameSyntax>())
+        foreach (var node in source.DescendantNodesAndSelf())
         {
             token.ThrowIfCancellationRequested();
+            if (node is not SimpleNameSyntax name)
+            {
+                continue;
+            }
             var symbol = model.GetSymbolInfo(name, token).Symbol;
             var type = symbol as INamedTypeSymbol ?? symbol?.ContainingType;
             if (type is not null && type.DeclaringSyntaxReferences.Any(reference => ExecutionPath(reference.SyntaxTree.FilePath)))
