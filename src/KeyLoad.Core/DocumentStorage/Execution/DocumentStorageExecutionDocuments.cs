@@ -48,7 +48,16 @@ public static class DocumentStorageExecutionDocuments
                 engine.Authorization.RequireFieldUse(principal, resource, field);
             }
 
-            if (before is not null && (IndexValues(before.Json, index)).Value is { } oldValues)
+            var oldValues = before is null ? null : IndexValues(before.Json, index).Value;
+            var values = after is null ? null : IndexValues(after.Json, index).Value;
+            if (before is not null && after is not null
+                && before.Reference.Partition == after.Reference.Partition && before.Reference.Id == after.Reference.Id
+                && oldValues is not null && values is not null && oldValues.AsSpan().SequenceEqual(values))
+            {
+                continue;
+            }
+
+            if (before is not null && oldValues is not null)
             {
                 tx.Delete(IndexKey(before.Reference.Partition, resource.Name, index, oldValues, before.Reference.Id));
                 if (index.Unique)
@@ -57,7 +66,7 @@ public static class DocumentStorageExecutionDocuments
                 }
             }
 
-            if (after is null || (IndexValues(after.Json, index)).Value is not { } values)
+            if (after is null || values is null)
             {
                 continue;
             }

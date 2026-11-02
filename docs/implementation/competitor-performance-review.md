@@ -34,6 +34,16 @@ Version declarations come from `build/KeyLoad.LoadTests.AppHost/Resources/`. Pub
 
 KeyLoad implication: keep the verified subject on the server-owned connection and carry operation identity separately. Perform fresh policy checks at their actual execution owner. Avoid an auxiliary full database operation solely to reconstruct the current principal before every operation. Reuse metadata inside its existing consistent cut; do not replace fresh policy authority with an unbounded or uninvalidateable cache.
 
+[PostgreSQL HOT](https://www.postgresql.org/docs/18/storage-hot.html) avoids new
+index entries when indexed columns remain unchanged and the heap-page conditions
+allow it. KeyLoad's scalar index entries contain the entity ID. Its update path
+now retains those entries when the entity identity and indexed components remain
+equal, including unique-index ownership. Field-use authorization still runs;
+changed values, deletion and uniqueness conflicts retain their existing atomic
+behavior. Whole-operation controls compare native mutation counts with an
+unindexed update and retain conflict, healthy-follow-up and cold-open checks.
+Released-image throughput qualification remains open.
+
 ## Qdrant: batch exact scoring, retain top-K, preprocess cosine
 
 [plain_vector_index.rs](https://github.com/qdrant/qdrant/blob/v1.17.1/lib/segment/src/index/plain_vector_index.rs) routes exact scanning through a batch searcher over vector storage and deletion/filter state. [point_scorer.rs](https://github.com/qdrant/qdrant/blob/v1.17.1/lib/segment/src/index/hnsw_index/point_scorer.rs) reuses chunk/score buffers and feeds a fixed-length priority queue. [metric_query_scorer.rs](https://github.com/qdrant/qdrant/blob/v1.17.1/lib/segment/src/vector_storage/query_scorer/metric_query_scorer.rs) scores borrowed dense batches. [simple.rs](https://github.com/qdrant/qdrant/blob/v1.17.1/lib/segment/src/spaces/simple.rs) preprocesses cosine vectors and uses hardware-specific dot-product kernels.

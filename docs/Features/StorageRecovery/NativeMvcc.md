@@ -14,13 +14,15 @@ transaction; native serializable conflicts retry the complete effect-free body. 
 the existing unknown-outcome and replay contract. The operation compiler retains
 its per-action preparation semantics.
 
-ZoneTree's write-ahead log, in `AsyncCompressed` mode, is the only redo log and
+ZoneTree's write-ahead log, in `SyncCompressed` mode, is the only redo log and
 supplies ordered recovery: on open ZoneTree replays it and drops a transaction whose
 commit never reached the log ([ADR-011](../../ADR/ADR-011-current-format.md)).
-`Commit()` supplies atomic visibility; `IAtomicStore.SyncAsync` awaits
-`SyncWALAsync` and supplies acknowledgement durability. Native merge maintenance
-owns physical version retention. This contract does not claim power-loss
-qualification.
+Native commit supplies atomic visibility and synchronous process-persistent WAL
+publication before acknowledgement. ZoneTree owns periodic disk sync;
+`IAtomicStore.SyncAsync` awaits `SyncWALAsync` for an explicit disk barrier.
+Ordinary commits do not request a disk sync for each command or batch. Native
+merge maintenance owns physical version retention. This contract does not claim
+power-loss qualification.
 
 REQ-STORAGE-MVCC-002 / AC-STORAGE-MVCC-002: reads use native read-only transactions.
 Range cursors and retained read cuts own both the snapshot transaction and its

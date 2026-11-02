@@ -106,7 +106,8 @@ internal static class Bm25PrivateAdmissionFlow
             .IsEqualTo(database.Partition.AtomicPartitionId);
         var principal = database.Store.Read(view =>
             database.Database.Principal(view, Root, database.Database.EvaluationClock.GetUtcNow()));
-        return await KeyLoad.Clustering.GrainBm25CorpusPublicationCommand.SubmitAsync(database.Database,
+        var result = await KeyLoad.Clustering.GrainBm25CorpusPublicationCommand.SubmitAsync(database.Database,
             new global::KeyLoad.Core.EmbeddedCoordinator(database.Database), decoded, principal, token);
+        return result.IsFailed ? Result<object>.Fail(result.Problem) : Result<object>.Succeed(result.Value);
     }
 }

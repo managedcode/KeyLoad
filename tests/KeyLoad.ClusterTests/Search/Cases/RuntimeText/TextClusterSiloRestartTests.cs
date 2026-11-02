@@ -38,7 +38,8 @@ internal sealed class TextClusterSiloRestartTests(ClusterFixture fixture)
             stoppedNode = nodes[selectedIndex];
             await fixture.KillServerAsync(stoppedNode, TextClusterScenario.FailureScenario, cancellationToken);
             var survivorIndex = Enumerable.Range(0, nodes.Length).First(index => index != selectedIndex);
-            await WaitReadyAsync(clients.Administrators[survivorIndex], cancellationToken);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(
+                clients.Administrators.Where((_, index) => index != selectedIndex).ToArray(), cancellationToken);
             await VerifyUpdatedSearchAsync(scenario, clients.Callers[survivorIndex], clients.Secret,
                 nodes[survivorIndex], cancellationToken);
             await ClusterReplicationTestSupport.MissingCopiesAsync(
@@ -118,19 +119,9 @@ internal sealed class TextClusterSiloRestartTests(ClusterFixture fixture)
     private async Task WaitForClusterAsync(string[] nodes, KeyLoadClient[] administrators,
         CancellationToken cancellationToken)
     {
-        foreach (var administrator in administrators)
-        {
-            await WaitReadyAsync(administrator, cancellationToken);
-        }
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(administrators, cancellationToken);
         await Assert.That(nodes.All(node => Directory.Exists(Path.Combine(fixture.Root, node)))).IsTrue();
     }
-
-    private static async Task WaitReadyAsync(KeyLoadClient administrator, CancellationToken cancellationToken)
-        => await ClusterReplicationTestSupport.EventuallyAsync(async () =>
-        {
-            var status = await administrator.StatusAsync(cancellationToken);
-            return status.IsSuccess && status.Value.RoutingReady;
-        }, cancellationToken);
 
     private async Task RestoreStoppedNodeAsync(string stoppedNode, string[] nodes,
         KeyLoadClient[] administrators, Exception? primaryFailure)
