@@ -25,6 +25,8 @@ internal sealed class DiagnosticContractTests
     private const string ImplementationTermId = "KLD0038";
     private const string ZoneTreeAccessId = "KLD0039";
     private const string NullReturnId = "KLD0040";
+    private const string UntypedContractId = "KLD0041";
+    private const string ObjectConversionId = "KLD0042";
 
     /// <summary>Verifies all rules have unique enabled ids and expected severities.</summary>
     [Test]
@@ -51,7 +53,9 @@ internal sealed class DiagnosticContractTests
             [TypedConfigurationId] = DiagnosticSeverity.Error,
             [ImplementationTermId] = DiagnosticSeverity.Error,
             [ZoneTreeAccessId] = DiagnosticSeverity.Error,
-            [NullReturnId] = DiagnosticSeverity.Error
+            [NullReturnId] = DiagnosticSeverity.Error,
+            [UntypedContractId] = DiagnosticSeverity.Warning,
+            [ObjectConversionId] = DiagnosticSeverity.Warning
         };
         var analyzers = typeof(LiteralMachineKeyAnalyzer).Assembly.GetTypes()
             .Where(static type => !type.IsAbstract &&

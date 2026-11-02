@@ -303,6 +303,42 @@
     {
       "path": "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/ExternalNullReturnContract.cs",
       "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedTypeFacts.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedSiteReason.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedDeclarationAnalysis.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedUseAnalysis.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/ObjectConversionAnalysis.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedOperationSite.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/UntypedDataContractAnalyzer.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/ObjectValueConversionAnalyzer.cs",
+      "classification": "executable"
+    },
+    {
+      "path": "analyzers/KeyLoad.Analyzers/Contracts/UntypedContractPolicy.cs",
+      "classification": "executable"
     }
   ],
   "configuration": [
@@ -486,6 +522,28 @@
       "sources": [
         "analyzers/KeyLoad.Analyzers/Analyzers/RuntimePolicies/NullReturnAnalyzer.cs",
         "analyzers/KeyLoad.Analyzers/Analysis/RuntimePolicies/ExternalNullReturnContract.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0041",
+      "sources": [
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/UntypedDataContractAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedDeclarationAnalysis.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedUseAnalysis.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedTypeFacts.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedSiteReason.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedOperationSite.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/UntypedContractPolicy.cs"
+      ]
+    },
+    {
+      "diagnostic": "KLD0042",
+      "sources": [
+        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/ObjectValueConversionAnalyzer.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/ObjectConversionAnalysis.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedSiteReason.cs",
+        "analyzers/KeyLoad.Analyzers/Analysis/UntypedContracts/UntypedOperationSite.cs",
+        "analyzers/KeyLoad.Analyzers/Contracts/UntypedContractPolicy.cs"
       ]
     }
   ],

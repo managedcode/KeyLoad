@@ -23,3 +23,5 @@ KLD0037 | Architecture | Error | Repository code quality
 KLD0038 | Architecture | Error | Repository code quality
 KLD0039 | Architecture | Error | Repository code quality
 KLD0040 | Reliability | Error | Explicit results instead of null returns
+KLD0041 | Architecture | Warning | Typed data contracts and exact-site boundary reasons
+KLD0042 | Architecture | Warning | Object boxing and runtime conversion review

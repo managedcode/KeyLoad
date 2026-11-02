@@ -24,6 +24,8 @@ dotnet_diagnostic.ORLEANS0012.severity = error
 dotnet_diagnostic.KLD0038.severity = error
 dotnet_diagnostic.KLD0039.severity = error
 dotnet_diagnostic.KLD0040.severity = error
+dotnet_diagnostic.KLD0041.severity = warning
+dotnet_diagnostic.KLD0042.severity = warning
 
 # Don't use this. qualifier
 dotnet_style_qualification_for_field = false:warning

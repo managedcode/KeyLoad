@@ -54,7 +54,7 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 | Requirement | Acceptance (pass condition) | Verified by |
 |---|---|---|
 | REQ-CQ-001: the repository EditorConfig is the source of truth and every project builds with strict SDK/style analysis | AC-CQ-001: `TreatWarningsAsErrors`, `CodeAnalysisTreatWarningsAsErrors`, `EnableNETAnalyzers`, `EnforceCodeStyleInBuild`, all `RunAnalyzers*` switches, `AnalysisLevel=latest-all` and XML documentation are on; the shared build properties configure these policies; every project explicitly references the analyzer, and the analyzer project checks its own compiled source | Debug solution build with `-warnaserror`; Linux CI records delivered-source qualification separately |
-| REQ-CQ-002: KeyLoad-owned Roslyn rules are editable and proven by real compilations | AC-CQ-002: compiler cases assert diagnostic ID, severity and exact span for the rules they exercise. AC-CQ-004: nineteen rules have unique enabled IDs and expected severities. Each rule selects its generated-code contract; KLD0038, KLD0039 and KLD0040 analyze generated code. | `DiagnosticContractTests` (`AllRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync`) and the existing compiler case folders; focused compiler execution evidence for KLD0038/KLD0039 remains open. |
+| REQ-CQ-002: KeyLoad-owned Roslyn rules are editable and proven by real compilations | AC-CQ-002: compiler cases assert diagnostic ID, severity and exact span for the rules they exercise. AC-CQ-004: twenty-one rules have unique enabled IDs and expected severities. Each rule selects its generated-code contract; KLD0038, KLD0039 and KLD0040 analyze generated code. | `DiagnosticContractTests` (`AllRulesHaveUniqueEnabledIdsAndExpectedSeveritiesAsync`) and the existing compiler case folders; focused compiler execution evidence for KLD0038/KLD0039 remains open. |
 | REQ-CQ-003: compiler SARIF is retained, including for failed builds | AC-CQ-003: each project writes `artifacts/code-quality/<project>/<configuration>/<framework>/diagnostics.sarif`; CI uploads `code-quality-<os>` even when the build fails, and an upload never turns a failed build green | Workflow review of `Directory.Build.targets` and the `Save build diagnostics` step (explicit review exception) |
 | REQ-CQ-004: quality gates are enforced and qualification is stated honestly | AC-CQ-005: no required gate is skipped, disabled or downgraded to pass. AC-CQ-006: documentation and status record source configuration, local checks and exact-source Linux evidence separately. AC-CQ-022: the complete solution passes the strict Release build and `dotnet format --verify-no-changes`; repairs preserve public signatures, persisted bytes, signed identities, cancellation and lifetime rules. AC-CQ-023: every source-bound method with cyclomatic complexity above 20 is reviewed and, where it helps, split along a real responsibility | Governance check `node scripts/Features/RepositoryGovernance/verify.mjs`; review of `docs/implementation/status.json`; Release build and formatter gates (AC-CQ-022) |
 | REQ-CQ-006: maintainability limits are executable | AC-CQ-008: KLD0030..KLD0033 accept the boundary and reject one past it (file 400, type 200, executable unit 64 including the 63/64/65 edge, nesting 3). AC-CQ-009: the analyzer module reaches the coverage thresholds below from the analyzer suite | `FileCodeLineCountAnalyzerTests`, `AggregateTypeCodeLineCountAnalyzerTests`, `ExecutableUnitCodeLineCountAnalyzerTests`, `ExecutableUnitSpanAndTriviaAnalyzerTests`, `ControlFlowNestingAnalyzerTests`, `ControlFlowNestingExtendedConstructTests`, `NumericAnalyzerSelfInventoryTests`, `SiteAnalyzerCoverage*Tests` |
@@ -120,6 +120,8 @@ unique and never reused.
 | KLD0038 | Implementation terminology requires explicit owner approval; only narrowly approved runtime, domain and testing meanings are allowed | Error |
 | KLD0039 | ZoneTree, ZoneTree.FullTextSearch and ZoneTree.Analytics work is awaited: no blocking on their tasks and no thread-pool dispatch of engine access | Error |
 | KLD0040 | Return explicit `ManagedCode.Communication.Result` / `Result<T>` outcomes instead of null; preserve resolved nullable contracts from another project or API | Error |
+| KLD0041 | Keep data declarations and API inputs/outputs typed; an unavoidable erased boundary requires a reason at each exact declaration or use | Warning, promoted to error by the build |
+| KLD0042 | Review value boxing, potential generic boxing and runtime conversions from object at each conversion | Warning, promoted to error by the build |
 
 Rule fixtures (all under `Cases/`): KLD0001 `LiteralMachineKey/`, KLD0013
 `Program/ProgramEndpointMappingTests`, KLD0014 `Grain/GrainInterfaceVersionTests`,
@@ -135,6 +137,34 @@ execution evidence for their rejected and permitted cases remains open.
 
 Rule behaviour follows these constraints:
 
+- KLD0041 resolves actual `System.Object`, aliases, nullable forms, `dynamic`,
+  CLR non-generic collections and nested generic, array, tuple and delegate
+  shapes. It checks returns, parameters, fields, properties and explicit or
+  inferred local declarations. An invocation is checked against its constructed
+  return and parameter types and its actual receiver, including reduced
+  extensions. Member access and erased value creation are checked independently.
+  A typed return does not conceal an erased input. The rule reports loss of type
+  information, not proof of allocation or a measured performance defect.
+- KLD0042 distinguishes value boxing and potential boxing of unconstrained
+  generic values from runtime object conversions. A reference upcast is not
+  reported as boxing. Captured typed patterns from object are conversions;
+  pure type tests and identity patterns are not. Neither rule performs whole
+  program flow analysis or claims to identify every runtime allocation.
+- An unavoidable site uses a trailing block comment on the exact type or
+  expression: `/* KLD0041: ICloneable fixes this return type; callers inspect the concrete clone type. */`.
+  Conversions use their own `KLD0042` marker. A reason must contain at least
+  sixteen non-whitespace characters and a letter; source review must establish
+  why this particular boundary is necessary. A declaration's reason never
+  authorizes callers, a caller's reason never authorizes its conversion, and
+  outer expressions never authorize nested expressions. Parenthesize nested
+  casts to attach independent reasons. Method, file and namespace comments do
+  not authorize their contents. Do not add blanket explanations or automatic
+  reasons to silence existing debt.
+- KLD0041 and KLD0042 use Roslyn's standard generated-code exclusion to avoid
+  duplicating warnings in generated codecs. Authored Orleans contracts remain
+  checked even when decorated with serialization attributes. `nameof` and
+  `typeof` do not evaluate erased data and do not produce use warnings. The
+  real-compilation controls live in `Cases/UntypedContracts/`.
 - KLD0040 checks explicit null-valued returns in ordinary and generated source.
   Nullable annotations on locally owned methods do not authorize null outcomes.
   Exceptions require a nullable contract resolved from a referenced assembly:

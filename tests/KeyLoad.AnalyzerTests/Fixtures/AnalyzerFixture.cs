@@ -32,7 +32,8 @@ internal static class AnalyzerFixture
         string assemblyName = ClusteringAssembly,
         string path = ContractPath,
         bool executable = false,
-        string? additionalSource = null)
+        string? additionalSource = null,
+        ImmutableDictionary<string, ReportDiagnostic>? diagnosticOptions = null)
     {
         var tree = CSharpSyntaxTree.ParseText(
             source,
@@ -49,7 +50,8 @@ internal static class AnalyzerFixture
             References.Value,
             new CSharpCompilationOptions(executable
                 ? OutputKind.ConsoleApplication
-                : OutputKind.DynamicallyLinkedLibrary));
+                : OutputKind.DynamicallyLinkedLibrary).WithSpecificDiagnosticOptions(
+                    diagnosticOptions ?? ImmutableDictionary<string, ReportDiagnostic>.Empty));
         var errors = compilation.GetDiagnostics()
             .Where(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error)
             .Select(static diagnostic => diagnostic.ToString())
@@ -91,6 +93,7 @@ internal static class AnalyzerFixture
                 typeof(Orleans.Runtime.IPersistentState<>).Assembly.Location,
                 typeof(Microsoft.AspNetCore.Builder.WebApplication).Assembly.Location,
                 typeof(KeyLoad.ConfigurationOptionsAttribute).Assembly.Location,
+                typeof(ManagedCode.Communication.Result<>).Assembly.Location,
                 typeof(KeyLoad.Diagnostics.ResourceExecution.DatabasePhaseBank).Assembly.Location,
                 typeof(Microsoft.Extensions.Options.IOptions<>).Assembly.Location,
                 typeof(Microsoft.Extensions.Configuration.IConfiguration).Assembly.Location,
