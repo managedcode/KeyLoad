@@ -2,7 +2,7 @@
 
 Status: Accepted by owner direction 2026-10-31. Source rewritten; the first
 per-type Linux Benchmarks run is pending.
-Feature: [BenchmarkComparisons](../Features/BenchmarkComparisons.md), REQ-BC-030..036.
+Feature: [BenchmarkComparisons](../Features/BenchmarkComparisons.md), REQ-BC-030..037.
 
 ## Context
 
@@ -28,6 +28,9 @@ resource observations before Website could show a figure. In practice:
   `benchmarks/KeyLoad.ComparisonHost` in Release, starts its database through
   `build/KeyLoad.LoadTests.AppHost` from the TUnit fixture and runs the TUnit class
   of its type.
+- **Run after publication.** Benchmarks starts automatically after Release
+  succeeds on `main`, with manual dispatch also available. Failed or cancelled
+  releases start no measurement jobs or Website dispatch.
 - **One shared module per type.** Ten types (documents, key-value, relational,
   graph, vector, search, time-series, analytics, queue, events) each have one
   dataset, one scenario with its cases, schedule and verification, and one driver

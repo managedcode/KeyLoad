@@ -16,6 +16,7 @@ decision is [ADR-150](../ADR/ADR-150-per-type-benchmark-jobs.md).
 | REQ-BC-034: no invented numbers | A failed case keeps its real first error; a case that never ran, a missing node count or an unsupported database has no number. |
 | REQ-BC-035: the website shows one run | Website publishes the result files of the dispatched run, or of the latest completed run; without result files it publishes nothing and the current Pages stay. |
 | REQ-BC-036: the released KeyLoad image | KeyLoad jobs run `ghcr.io/managedcode/keyload:latest`, resolved once per run to one digest; Benchmarks never builds a KeyLoad image. |
+| REQ-BC-037: measurements follow publication | Benchmarks starts automatically only after Release succeeds on `main`, or by manual dispatch. A failed or cancelled Release starts no measurement jobs or Website dispatch. |
 | REQ-BC-022: embedded microbenchmarks | BenchmarkDotNet's generated child consumes the public scenario library with all source rules and real fixture lifetimes ([ADR-047](../ADR/ADR-047-embedded-benchmark-host.md), AC-EM-001..004). |
 | REQ-BC-029: shared visual identity | The website uses the shared KeyLoad identity of [ADR-053](../ADR/ADR-053-unified-visual-identity.md) and the hero scene of [ADR-040](../ADR/ADR-040-static-site-threejs.md). |
 
@@ -23,7 +24,10 @@ decision is [ADR-150](../ADR/ADR-150-per-type-benchmark-jobs.md).
 
 ```mermaid
 flowchart LR
-    Push[Push to main or manual run] --> Image[image job: latest KeyLoad image to one digest]
+    Push[Push to main] --> Tests[Build and Tests succeeds]
+    Tests --> Release[Release succeeds after publishing the image]
+    Release --> Image[image job: latest KeyLoad image to one digest]
+    Manual[Manual Benchmarks dispatch] --> Image
     Image --> Jobs[45 measure jobs: database x type x nodes]
     Jobs --> Build[Build ComparisonHost in Release]
     Build --> Fixture[BenchmarkDeployment starts the database through LoadTests AppHost]
@@ -36,12 +40,15 @@ flowchart LR
     Site --> Pages[GitHub Pages]
 ```
 
-- **Benchmarks** (`.github/workflows/benchmarks.yml`) runs on pushes to `main` and
-  on manual dispatch. The `image` job resolves the KeyLoad image digest. Each
+- **Benchmarks** (`.github/workflows/benchmarks.yml`) runs after Release succeeds
+  on `main` and on manual dispatch. A push starts Build and Tests, then Release;
+  Benchmarks waits for publication instead of racing it. Failed or cancelled
+  releases skip the benchmark jobs and Website dispatch. The `image` job resolves
+  the KeyLoad image digest. Each
   `measure` job checks out the source, sets up .NET, builds
   `benchmarks/KeyLoad.ComparisonHost` in Release with warnings as errors and runs
   the TUnit class of its type. The final `website` job dispatches Website with the
-  run id, also when some measure jobs failed.
+  run id, also when some measure jobs failed, provided image resolution succeeded.
 - **The job's database.** The shared TUnit fixture
   `Deployment/Hosting/BenchmarkDeployment.cs` starts `build/KeyLoad.LoadTests.AppHost`
   through `Aspire.Hosting.Testing` with the job's database, node count, KeyLoad

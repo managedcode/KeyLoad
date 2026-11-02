@@ -17,7 +17,9 @@ and macOS on x64 and ARM64. SDK `PublishContainer` publishes the Linux x64 serve
 image to `ghcr.io/managedcode/keyload` with the source SHA and moving `latest`
 tags; only that job holds `packages: write`. Central source
 configuration retains package and assembly versions. Actions artifacts carry the
-archives and the published server image reference with its digest. Benchmarks
+archives and the published server image reference with its digest. A successful
+Release on `main` automatically starts Benchmarks; manual benchmark dispatch
+remains available. Benchmarks
 measures the server image that `latest` resolves to, pinned by digest for the run.
 
 The [ReleaseDelivery contract](../Features/ReleaseDelivery.md) owns the target

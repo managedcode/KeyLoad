@@ -1,8 +1,11 @@
 name: Benchmarks
 # One job per database, data type and node count. Each job starts the database with Aspire, runs the type's
-# shared scenario and saves its result file whether or not the run passed. Website then renders the results.
+# shared scenario and saves its result file whether or not the run passed. A successful Release starts
+# benchmarks after publishing the image; Website then renders the results.
 on:
-  push:
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
     branches: [main]
   workflow_dispatch:
 permissions: {contents: read}
@@ -12,7 +15,9 @@ concurrency:
 jobs:
   image:
     name: Resolve the KeyLoad image
-    if: github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
+    if: >-
+      github.repository == 'managedcode/KeyLoad' && github.ref == 'refs/heads/main'
+      && (github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     permissions: {contents: read, packages: read}
@@ -144,8 +149,8 @@ jobs:
           retention-days: 90
   website:
     name: Trigger Website
-    needs: [measure]
-    if: always() && !cancelled() && github.ref == 'refs/heads/main'
+    needs: [image, measure]
+    if: always() && !cancelled() && needs.image.result == 'success' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-22.04
     timeout-minutes: 5
     permissions: {actions: write}

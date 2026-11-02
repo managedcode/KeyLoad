@@ -233,6 +233,8 @@ SDK `PublishContainer` to `ghcr.io/managedcode/keyload` (commit SHA and `latest`
 tags). The separate `build/KeyLoad.LoadTests.AppHost` owns selected comparison
 database infrastructure and runs the KeyLoad cells from the latest released image,
 pinned by digest; its workload client runs outside the Aspire resource graph.
+Benchmarks starts automatically after Release succeeds on `main`; manual
+benchmark runs remain available.
 
 Membership discovers localhost and reachable local IPv4 interfaces automatically.
 Aspire supplies one independent `KeyLoad:RapidMembership:SharedSecret` (at least

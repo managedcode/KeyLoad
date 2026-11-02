@@ -21,11 +21,12 @@ failed case, keeps its real outcome; an unsupported cell has no number.
 ```mermaid
 flowchart LR
     Source[Current source] --> Tests[Build and Tests]
-    Source --> Benchmarks[One job per database, type and nodes]
+    Release --> Benchmarks[One job per database, type and nodes]
+    Manual[Manual Benchmarks dispatch] --> Benchmarks
     Benchmarks --> Trigger[Final Website dispatch with the run id]
     Trigger --> Website[Merge result files, build and deploy]
     Source --> Website
-    Tests --> Release[Owner admitted source bound Release]
+    Tests --> Release[Successful Release publishes the server image]
 ```
 
 ## Implementation and acceptance
