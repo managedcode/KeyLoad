@@ -221,6 +221,8 @@ jobs:
         run: |
           tar -xzf artifacts/compiled-solution.tar.gz -C "$GITHUB_WORKSPACE"
           dotnet restore KeyLoad.slnx
+      - name: Prepare Aspire runtime
+        run: dotnet msbuild build/KeyLoad.AppHost/KeyLoad.AppHost.csproj -target:ResolveAspireCliBundlePaths -property:Configuration="$KEYLOAD_TEST_CONFIGURATION" -warnaserror
       - name: Install administration browser
         if: ${{ matrix.playwright }}
         shell: pwsh
