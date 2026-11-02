@@ -110,8 +110,9 @@ internal sealed class DocumentIndexCommittedScanScenario : IAsyncDisposable
         {
             throw new TimeoutException("The production document writer did not reach its operation boundary.");
         }
-        await Assert.That(writerTask.IsCompleted).IsFalse();
-        await Assert.That(database.Store.Position).IsEqualTo(oldPosition);
+        await writerTask.WaitAsync(OperationDeadline, TimeProvider.System, cancellation.Token);
+        await Assert.That(scanTask!.IsCompleted).IsFalse();
+        await Assert.That(database.Store.Position).IsEqualTo(oldPosition + 1);
         releaseScan.Set();
     }
 

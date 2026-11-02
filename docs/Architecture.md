@@ -416,9 +416,10 @@ silo-local ZoneTree owner keeps ordered apply and file ownership on its node.
 KeyLoad owns no write-ahead log, snapshot or archive format
 ([ADR-011](ADR/ADR-011-current-format.md)): a commit is one ZoneTree MVCC
 transaction holding the mutations and the `system/position` record, ZoneTree's
-write-ahead log (`AsyncCompressed`) is the only redo log, and a commit is
-visible when it returns and durable after `IAtomicStore.SyncAsync`, which every
-acknowledgement awaits. Backups are ZoneTree live backups of the tree plus the
+write-ahead log (`SyncCompressed`, ZoneTree 2.0.9) is the only redo log, and a
+returned commit survives process termination. Acknowledgements await that native
+publication; ZoneTree owns periodic disk sync and MVCC commit-state retirement.
+`IAtomicStore.SyncAsync` requests an explicit disk barrier. Backups are ZoneTree live backups of the tree plus the
 store identity, restored under a new identity with dispatch paused
 ([BackupRestore](Features/BackupRestore.md)). Current storage accepts only the
 identity format in [CurrentFormat](Features/StorageRecovery/CurrentFormat.md) and
@@ -457,7 +458,7 @@ classDiagram
     ZoneTreeStoreCommitExecution --> ZoneTreeTransaction : compiles staged mutations
     ZoneTreeStoreCommitExecution --> ZoneTreeCommitPublication : one ZoneTree transaction
     ZoneTreeCommitPublication --> ZoneTreeStorePosition : system/position in the same transaction
-    ZoneTreeStoreCommitExecution --> ZoneTreeStoreRuntime : SyncAsync awaits SyncWALAsync
+    ZoneTreeStoreCommitExecution --> ZoneTreeStoreRuntime : explicit disk sync awaits SyncWALAsync
     ZoneTreeStoreInitializer --> ZoneTreeIdentityFile : current format writer fence
 ```
 

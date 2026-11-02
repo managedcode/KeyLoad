@@ -36,11 +36,10 @@ public sealed class EmbeddedCoordinator(DatabaseEngine database) : ICommitCoordi
         return ApplyAsync(database.OwnCommand(operation), cancellationToken);
     }
 
-    /// <summary>Applies the command and acknowledges it once ZoneTree's write-ahead log holds it durably.</summary>
+    /// <summary>Acknowledges the command after native process-persistent WAL publication.</summary>
     private async Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         var result = (await database.ApplyCoreAsync(operation, null, selectEmbeddedClock: true, cancellationToken)).Result;
-        await database.Store.SyncAsync(CancellationToken.None);
         return result;
     }
 

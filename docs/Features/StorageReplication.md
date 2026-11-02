@@ -20,8 +20,8 @@ moving an activation never moves a file or open storage handle.
 The public API enters one connection grain per connected client. Database grains
 order canonical commands into batches and request operations from the required
 silo-local owners. Every queued command joins the next batch. Each owner applies a
-batch as one ZoneTree transaction with one write-ahead log sync, so concurrent
-writers share that sync. Each command keeps its own canonical sequence and the outcome it would
+batch as one process-persistent native ZoneTree transaction; disk sync is
+periodic work owned by ZoneTree. Each command keeps its own canonical sequence and the outcome it would
 have alone. Intensive reads and background batches use stateless workers.
 Every operation retains fresh persisted authorization, bounded resources,
 cancellation and joined cleanup.
@@ -84,7 +84,7 @@ cached canonical sequence from before the acknowledged batch.
 | REQ-REP-005: every serving owner enforces current persisted authorization. | AC-REP-005: unauthorized and protected-field SDK/MCP reads refuse before and after restart, with unchanged records and healthy follow-up. | [Authorization](Authorization.md) owns these assertions. |
 | REQ-REP-006: admission, cancellation and shutdown bound all admitted work. | AC-REP-006: saturation explicitly refuses excess work; cancellation settles retained identities, joins producers and preserves earlier acknowledged data. | Unit ownership mechanisms and real cluster fault flows remain distinct. |
 | REQ-REP-007: startup validates independent positive silo/copy counts without an artificial maximum. | AC-REP-007: 1/1, 2/1, 2/2, 3/2, 5/3 and 5/5 are valid counts; zero counts and copies exceeding silos refuse before resources start. | Configuration acceptance does not qualify a topology's runtime or durability. |
-| REQ-REP-008: concurrent canonical commands share one commit and one write-ahead log sync per copy. | AC-REP-008: commands of one batch receive their own ordered sequences and the outcomes they would have alone. A retry inside a batch replays the first outcome without another sequence. A command that fails outside its own persisted outcome commits first in the next batch. Business time never decreases along a batch. Reset discards only the current command's writes. A copy that missed the last batch completes from its retained commands. | `GroupCommitTests` and `ActionStagingTests` own the engine and store contracts; the cluster batch path and its throughput are qualified by the Aspire suites and the benchmark cells. |
+| REQ-REP-008: concurrent canonical commands share one process-persistent native commit per copy. | AC-REP-008: commands of one batch receive their own ordered sequences and the outcomes they would have alone. A retry inside a batch replays the first outcome without another sequence. A command that fails outside its own persisted outcome commits first in the next batch. Business time never decreases along a batch. Reset discards only the current command's writes. A copy that missed the last batch completes from its retained commands. | `GroupCommitTests` and `ActionStagingTests` own the engine and store contracts; the cluster batch path and its throughput are qualified by the Aspire suites and the benchmark cells. |
 | REQ-REP-009: retained interrupted copy work is completed without requiring a new write. | AC-REP-009: interrupt one actual copy RPC, observe the background repair RPC, keep a read barrier available while repair is held, then verify the original document and sequence on both copies, exact retry and healthy continuation with joined cleanup. | `CopySynchronizationTests.InterruptedCopyCompletesWithoutAnotherWriteAndReadBarriersContinueDuringRepair`; local and delivered-source qualification remain separate. |
 
 ## Source and verification

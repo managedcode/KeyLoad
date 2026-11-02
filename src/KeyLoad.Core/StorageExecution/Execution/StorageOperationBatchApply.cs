@@ -5,7 +5,7 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Core;
 
-/// <summary>Applies consecutive canonical commands in one atomic storage commit with one durable journal flush.</summary>
+/// <summary>Applies consecutive canonical commands in one native process-persistent atomic storage commit.</summary>
 public static class StorageOperationBatchApply
 {
     internal const string EmptyBatch = "A storage batch requires at least one command.";
@@ -31,12 +31,12 @@ public static class StorageOperationBatchApply
             => engine.ApplyInOrder(transaction, position, verified, firstSequence, cancellationToken));
     }
 
-    /// <summary>Applies ordered commands, durably publishing plain table data before their transactional outcomes.</summary>
+    /// <summary>Applies ordered commands, publishing process-persistent plain data before their transactional outcomes.</summary>
     /// <param name="engine">The shared execution context.</param>
     /// <param name="operations">Prepared canonical commands.</param>
     /// <param name="firstSequence">The first newly persisted canonical sequence.</param>
     /// <param name="cancellationToken">Cancellation before physical publication.</param>
-    /// <returns>The applied results; acknowledgements require the store WAL sync.</returns>
+    /// <returns>The applied results after process-persistent native WAL publication.</returns>
     public static Task<StorageBatchResult> ApplyStorageOperationsAsync(this DatabaseEngine engine,
         IReadOnlyList<Command<DatabaseCommand>> operations, long firstSequence, CancellationToken cancellationToken)
     {

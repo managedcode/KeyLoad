@@ -24,16 +24,20 @@ to confirm ordered persisted apply; the returned copy count must match those
 actual acknowledgements. Missing copies refuse success. A timeout after possible
 effects is an unknown outcome and retains the stable command ID for retry.
 
-The local barrier of each owner is ZoneTree's write-ahead log
-([ADR-011](ADR-011-current-format.md)). A commit is visible when
-`IAtomicStore.Commit` returns and durable only after the next
-`IAtomicStore.SyncAsync`, which awaits ZoneTree's `SyncWALAsync`. Every
-acknowledgement path awaits that sync before it reports success: the silo-local
-storage service after a batch, the silo command coordinator, the local storage
-commit coordinator and the embedded coordinator. One sync covers every commit
-returned before it, so a batch of commands pays one sync per owner. A visible
-commit that was not yet synced can be lost by a process crash and is never
-acknowledged.
+The local barrier is ZoneTree 2.0.9's `SyncCompressed` WAL publication
+([ADR-011](ADR-011-current-format.md)). Native writes publish into the mapped
+local WAL tail before returning. `IAtomicStore.Commit` and `CommitAsync` return
+after the native transaction's commit record, so data and persisted outcomes
+already survive process termination. Coordinators await that publication and
+report `ProcessDurable`; they do not request a disk sync per operation or batch.
+
+ZoneTree owns periodic disk sync. The MVCC tree uses its native
+`AutoSyncInterval`, which also retires durable commit state; its lower-level tail
+job is disabled to avoid duplicating that work. The plain tree uses its native
+tail job. Both use the engine's default interval. `IAtomicStore.SyncAsync` remains
+an explicit disk barrier and awaits `SyncWALAsync` for plain data before MVCC
+outcomes. Disk sync completion alone does not qualify `LocalDurable` or power-loss
+behavior. Backup and restore retain their independently defined barriers.
 
 ## Implementation and evidence
 
@@ -53,3 +57,10 @@ Related requirements: Messaging REQ-MSG-001/005, EventStreams REQ-EVENT-004 and
 StorageReplication REQ-REP-002/003. Committed read cuts follow
 [ADR-004](ADR-004-committed-read-views.md); backup retention follows
 [ADR-008](ADR-008-backup-log-retention.md).
+
+
+Opening checks the actual mutable WAL writer through ZoneTree's public APIs for
+both trees before serving operations. Configuration alone does not establish the
+publication contract of an existing native WAL. An incompatible opened writer
+refuses with `FormatUnsupported`; KeyLoad does not reinterpret the mode or select
+another acknowledgement contract at runtime.

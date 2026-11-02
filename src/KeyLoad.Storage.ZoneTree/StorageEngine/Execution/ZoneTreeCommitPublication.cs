@@ -30,6 +30,19 @@ internal static class ZoneTreeCommitPublication
         }
     }
 
+    internal static bool TryCommit(ZoneTreeStoreRuntime runtime, ITransaction<Memory<byte>, Memory<byte>> transaction)
+    {
+        try
+        {
+            return transaction.TryCommit();
+        }
+        catch (Exception original)
+        {
+            runtime.Poisoned = true;
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, UnknownWriteOutcome, original);
+        }
+    }
+
     internal static void Committed(ZoneTreeStoreRuntime runtime, long position, int mutations)
     {
         runtime.Operation.Value?.Published(position);

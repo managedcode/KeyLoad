@@ -76,7 +76,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     public T Prepare<T>(Func<IAtomicTransaction, long, T> prepare)
         => ZoneTreeStorePreparationExecution.Prepare(runtime, prepare);
 
-    /// <summary>Compiles and publishes one atomic ZoneTree transaction; <see cref="SyncAsync"/> makes it durable.</summary>
+    /// <summary>Compiles one atomic ZoneTree transaction and publishes it into the native process-persistent WAL.</summary>
     /// <typeparam name="T">Owned result returned by the transaction compiler.</typeparam>
     /// <param name="compile">Synchronous compiler receiving the staged transaction and proposed position.</param>
     /// <returns>The compiler result after the ZoneTree transaction is committed.</returns>

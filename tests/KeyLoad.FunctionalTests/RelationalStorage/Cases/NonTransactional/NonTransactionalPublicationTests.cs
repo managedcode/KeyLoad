@@ -5,13 +5,13 @@ namespace KeyLoad.FunctionalTests.RelationalStorage;
 internal sealed class NonTransactionalPublicationTests
 {
     [Test]
-    public async Task FailureAfterPlainWalSyncRetainsDataWithoutOutcomeThenColdOwnerContinues()
+    public async Task FailureAfterPlainWalPublicationRetainsDataWithoutOutcomeThenColdOwnerContinues()
     {
         var armed = false;
-        var original = new IOException("The original plain WAL boundary failure.");
+        var original = new IOException("The original plain WAL publication failure.");
         using var fixture = new NonTransactionalTableFixture((stage, _, _) =>
         {
-            if (armed && stage == CommitStage.PlainWriteAheadLogSynced)
+            if (armed && stage == CommitStage.PlainWriteAheadLogPublished)
             {
                 throw original;
             }

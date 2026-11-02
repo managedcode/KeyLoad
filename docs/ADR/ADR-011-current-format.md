@@ -17,19 +17,20 @@ that add the store identity, the commit position and the restored dispatch pause
 1. **Store layout.** A store directory holds `owner.lock`, `identity.json` and
    `tree/` for native MVCC records and `plain-tree/` for non-transactional table
    records, both in ZoneTree's own layout.
-2. **Native redo logs.** Each native tree owns its ZoneTree write-ahead log in `WriteAheadLogMode.AsyncCompressed`
+2. **Native redo logs.** Each native tree owns its ZoneTree write-ahead log in `WriteAheadLogMode.SyncCompressed`
    (with uncompressed payloads) supplies redo without a KeyLoad journal. A transactional commit is one ZoneTree
    MVCC transaction that holds the staged mutations and the store position record
    under the key `system/position`. `Store.Position` is read back from the tree on
    open. ZoneTree replays its own log when it opens and drops a transaction whose
    commit never reached the log.
-3. **Visibility and durability.** A commit is visible when `Commit` returns and
-   durable after the next `IAtomicStore.SyncAsync`, which awaits ZoneTree's
-   `SyncWALAsync`. Every acknowledgement path awaits that sync
-   before it reports success ([ADR-003](ADR-003-durability-ack-barrier.md)).
-   `DatabaseEngine.Apply` itself does not sync. Disposing a store flushes the log.
-   A visible commit that was not yet synced can be lost by a process crash; no
-   acknowledgement is sent for it.
+3. **Visibility and durability.** ZoneTree 2.0.9 publishes native writes into
+   its mapped WAL tail before returning. A returned commit and its command
+   outcome survive process termination; coordinators acknowledge `ProcessDurable`
+   after publication ([ADR-003](ADR-003-durability-ack-barrier.md)). ZoneTree owns
+   periodic disk sync and MVCC commit-state retirement. `IAtomicStore.SyncAsync`
+   explicitly awaits native disk sync for both trees. Store disposal joins native
+   maintenance and flushes the log. Process recovery and power-loss qualification
+   remain separate.
 4. **Backup.** `IAtomicStore.CreateBackupAsync(directory)` requires an empty or
    absent directory (otherwise `Conflict`), checks cancellation before it creates
    anything, copies `identity.json` and writes a ZoneTree `LiveBackup`
@@ -65,9 +66,9 @@ that add the store identity, the commit position and the restored dispatch pause
 
 ```mermaid
 flowchart LR
-    Commit[One MVCC transaction: mutations and system/position] --> Visible[Visible when Commit returns]
-    Visible --> Sync[SyncAsync awaits ZoneTree SyncWALAsync]
-    Sync --> Ack[Acknowledgement]
+    Commit[One MVCC transaction: mutations and system/position] --> Visible[Process-persistent when Commit returns]
+    Visible --> Ack[ProcessDurable acknowledgement]
+    Visible --> Sync[Explicit SyncAsync awaits native disk sync]
     Store[Open store] --> Backup[identity.json and a LiveBackup generation per tree]
     Backup --> Restore[New identity, RestoreFromLatestLiveBackup]
     Restore --> Pause[Commit dispatch-paused and sync]
@@ -85,9 +86,9 @@ before disposal.
 
 `Transactional=false` is an immutable table setting for document tables, time
 series and analytics tables. One command cannot write both table modes. Plain
-records use native `Upsert` and deletion without MVCC versions. Their WAL sync
-finishes before their transactional outcome is committed, and acknowledgements
-also await native WAL sync. Plain multi-record effects are not atomic: interruption
+records use native `Upsert` and deletion without MVCC versions. Each plain write reaches its process-persistent WAL
+before the transactional outcome is committed. Acknowledgement requires no
+additional disk sync. Plain multi-record effects are not atomic: interruption
 can leave data without an outcome. A failure after plain publication is an unknown
 outcome and requires reopen; KeyLoad does not retry those physical effects.
 See [NonTransactionalTables](../Features/RelationalStorage/NonTransactionalTables.md).

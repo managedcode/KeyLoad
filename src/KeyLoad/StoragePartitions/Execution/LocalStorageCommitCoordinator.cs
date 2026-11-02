@@ -33,15 +33,12 @@ internal sealed class LocalStorageCommitCoordinator(DatabaseEngine database) : I
         return SubmitVerifiedAsync(command, cancellationToken, sourcePlanningBudget);
     }
 
-    public async Task<Result<object>> SubmitVerifiedAsync(Command<DatabaseCommand> operation,
+    public Task<Result<object>> SubmitVerifiedAsync(Command<DatabaseCommand> operation,
         CancellationToken cancellationToken, ReadExecutionBudget? sourcePlanningBudget = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
-        var result = await ApplyAsync(database.OwnCommand(operation), cancellationToken).ConfigureAwait(true);
-        // The shared file copy acknowledges only what ZoneTree's write-ahead log holds durably.
-        await database.Store.SyncAsync(CancellationToken.None).ConfigureAwait(true);
-        return result;
+        return ApplyAsync(database.OwnCommand(operation), cancellationToken);
     }
 
     private async Task<Result<object>> ApplyAsync(Command<DatabaseCommand> owned, CancellationToken cancellationToken)

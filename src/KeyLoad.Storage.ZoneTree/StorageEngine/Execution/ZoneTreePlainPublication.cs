@@ -4,18 +4,17 @@ using PlainValue = ZoneTree.PresetTypes.Deletable<System.Memory<byte>>;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-/// <summary>Publishes plain Upserts and durably orders them before the transactional command outcome.</summary>
+/// <summary>Publishes plain Upserts into the native process-persistent WAL before the transactional outcome.</summary>
 internal static class ZoneTreePlainPublication
 {
-    internal static async Task PublishAsync(ZoneTreeStoreRuntime runtime, ITransaction<Memory<byte>, Memory<byte>> transaction,
+    internal static void Publish(ZoneTreeStoreRuntime runtime, ITransaction<Memory<byte>, Memory<byte>> transaction,
         StorageMutation[] plain, StorageMutation[] metadata, long position)
     {
         try
         {
             Apply(runtime, plain, position);
-            // No durable outcome may precede the data it reports, even if the transactional WAL flushes on its own.
-            await runtime.PlainTree.SyncWALAsync(CancellationToken.None);
-            runtime.Options.FaultObserver?.Invoke(CommitStage.PlainWriteAheadLogSynced, position, plain.Length);
+            // Every native Upsert has reached the mapped WAL before the command outcome can be published.
+            runtime.Options.FaultObserver?.Invoke(CommitStage.PlainWriteAheadLogPublished, position, plain.Length);
             ZoneTreeCommitPublication.Stage(runtime, transaction, metadata, position);
             transaction.Commit();
             ZoneTreeCommitPublication.Committed(runtime, position, plain.Length + metadata.Length);

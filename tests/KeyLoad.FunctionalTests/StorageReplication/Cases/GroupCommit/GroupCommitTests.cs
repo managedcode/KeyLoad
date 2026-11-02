@@ -5,7 +5,7 @@ using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.FunctionalTests.StorageReplication;
 
-/// <summary>AC-REP-008: consecutive canonical commands share one commit and one write-ahead log sync, each with its own
+/// <summary>AC-REP-008: consecutive canonical commands share one process-persistent native commit, each with its own
 /// ordered sequence and the outcome it would have alone.</summary>
 internal sealed class GroupCommitTests
 {

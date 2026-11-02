@@ -34,11 +34,11 @@ internal static class ZoneTreeTreeFactory
             throw new DirectoryNotFoundException(OriginalTreeMissing);
         }
         var factory = Create(directory);
-        if (!requireExisting)
-        {
-            return factory.OpenOrCreateTransactional();
-        }
-        return factory.OpenTransactional();
+        var tree = requireExisting ? factory.OpenTransactional() : factory.OpenOrCreateTransactional();
+        // Native commit sync also retires MVCC commit state; the engine owns its timer and joined shutdown.
+        tree.AutoSyncInterval = TimeSpan.FromMilliseconds(new WriteAheadLogOptions()
+            .SyncCompressedModeOptions.TailWriterJobInterval);
+        return tree;
     }
 
     /// <summary>Configures the plain tree that stores the MVCC tree's versions exactly as ZoneTree's transactional
@@ -65,15 +65,19 @@ internal static class ZoneTreeTreeFactory
             .SetDataDirectory(directory).SetComparer(new KeyComparer())
             .SetKeySerializer(new ByteArraySerializer()).SetValueSerializer(new ByteArraySerializer())
             .Configure(o => o.BTreeLeafSize = MutableLeafSize)
-            .ConfigureWriteAheadLogOptions(ConfigureWriteAheadLog)
+            .ConfigureWriteAheadLogOptions(options =>
+            {
+                ConfigureWriteAheadLog(options);
+                // The transactional tree's native AutoSyncInterval syncs its complete WAL and commit state.
+                options.SyncCompressedModeOptions.EnableTailWriterJob = false;
+            })
             .ConfigureDiskSegmentOptions(o => o.CompressionMethod = CompressionMethod.None);
 
-    // ZoneTree's write-ahead log is the only redo log: MVCC recovery drops a transaction whose commit never reached
-    // it. Its writer thread batches concurrent SyncWALAsync calls into one fsync without blocking the callers, which
-    // acknowledge only after that sync.
+    // ZoneTree 2.0.9 synchronously publishes records into the native mapped WAL tail before returning.
+    // This is the ProcessDurable acknowledgement boundary; disk sync remains engine-owned background work.
     private static void ConfigureWriteAheadLog(WriteAheadLogOptions options)
     {
-        options.WriteAheadLogMode = WriteAheadLogMode.AsyncCompressed;
+        options.WriteAheadLogMode = WriteAheadLogMode.SyncCompressed;
         options.CompressionMethod = CompressionMethod.None;
     }
 

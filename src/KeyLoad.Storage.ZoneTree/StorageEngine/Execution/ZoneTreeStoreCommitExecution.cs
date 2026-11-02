@@ -2,7 +2,7 @@ using ZoneTree;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-/// <summary>Compiles transactional writes with native conflict retries and plain writes with ordered native WAL sync.</summary>
+/// <summary>Compiles native process-persistent publications and supports explicit disk sync.</summary>
 internal static class ZoneTreeStoreCommitExecution
 {
     private const string AsyncRequired = "Non-transactional table writes require the asynchronous commit API.";
@@ -12,8 +12,13 @@ internal static class ZoneTreeStoreCommitExecution
         RequireOutsideOperation(runtime);
         long position = 0;
         var mutations = 0;
-        var result = runtime.Tree.Execute(transaction =>
+        var compiling = false;
+        T result;
+        try
         {
+            result = runtime.Tree.Execute(transaction =>
+        {
+            compiling = true;
             using var operation = new ZoneTreeOperationContext(runtime, transaction, ownsTransaction: false);
             var compiled = ZoneTreeCommitCompilation.Compile(runtime, compile);
             if (compiled.Changes.Any(change => ZoneTreeDataRouting.IsPlain(runtime, change.Key.Span)))
@@ -26,8 +31,15 @@ internal static class ZoneTreeStoreCommitExecution
             {
                 ZoneTreeCommitPublication.Stage(runtime, transaction, compiled.Changes, position);
             }
+            compiling = false;
             return compiled.Result;
         });
+        }
+        catch (Exception original) when (!compiling)
+        {
+            runtime.Poisoned = true;
+            throw Errors.Fail(ErrorCode.UnknownWriteOutcome, ZoneTreePersistenceFormat.UnknownWriteOutcome, original);
+        }
         if (mutations > 0)
         {
             ZoneTreeCommitPublication.Committed(runtime, position, mutations);
@@ -35,7 +47,11 @@ internal static class ZoneTreeStoreCommitExecution
         return result;
     }
 
-    internal static async Task<T> CommitAsync<T>(ZoneTreeStoreRuntime runtime,
+    internal static Task<T> CommitAsync<T>(ZoneTreeStoreRuntime runtime,
+        Func<IAtomicTransaction, long, T> compile, CancellationToken cancellationToken)
+        => Task.FromResult(Publish(runtime, compile, cancellationToken));
+
+    private static T Publish<T>(ZoneTreeStoreRuntime runtime,
         Func<IAtomicTransaction, long, T> compile, CancellationToken cancellationToken)
     {
         RequireOutsideOperation(runtime);
@@ -52,11 +68,11 @@ internal static class ZoneTreeStoreCommitExecution
             if (plain.Length > 0)
             {
                 var metadata = compiled.Changes.Where(change => !ZoneTreeDataRouting.IsPlain(runtime, change.Key.Span)).ToArray();
-                await ZoneTreePlainPublication.PublishAsync(runtime, transaction, plain, metadata, compiled.Position);
+                ZoneTreePlainPublication.Publish(runtime, transaction, plain, metadata, compiled.Position);
                 return compiled.Result;
             }
             ZoneTreeCommitPublication.Stage(runtime, transaction, compiled.Changes, compiled.Position);
-            if (transaction.TryCommit())
+            if (ZoneTreeCommitPublication.TryCommit(runtime, transaction))
             {
                 ZoneTreeCommitPublication.Committed(runtime, compiled.Position, compiled.Changes.Length);
                 return compiled.Result;
@@ -74,7 +90,7 @@ internal static class ZoneTreeStoreCommitExecution
         }
     }
 
-    /// <summary>Waits for ZoneTree's write-ahead log sync, which covers every commit published before the call. A failed
+    /// <summary>Requests an explicit disk sync, which covers every commit published before the call. A failed
     /// sync leaves those outcomes unknown, so the store refuses work until it is reopened.</summary>
     internal static async Task SyncAsync(ZoneTreeStoreRuntime runtime, CancellationToken cancellationToken)
     {
@@ -82,6 +98,7 @@ internal static class ZoneTreeStoreCommitExecution
         var covered = runtime.Position;
         try
         {
+            // Process acknowledgements require no disk sync. An explicit disk barrier orders plain data first.
             await runtime.PlainTree.SyncWALAsync(cancellationToken);
             await runtime.Tree.SyncWALAsync(cancellationToken);
             runtime.Options.FaultObserver?.Invoke(CommitStage.WriteAheadLogSynced, covered, 0);

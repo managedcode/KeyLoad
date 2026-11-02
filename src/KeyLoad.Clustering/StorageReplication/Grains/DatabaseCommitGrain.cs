@@ -8,7 +8,7 @@ namespace KeyLoad.Clustering;
 
 /// <summary>Orders canonical commands into batches and owns the shared-file activation when configured.</summary>
 /// <remarks>Calls interleave: each command joins the queue and one drain applies every queued command as one commit on
-/// every copy, so commands that arrive while a batch persists share the next batch's single journal flush.</remarks>
+/// every copy, so commands that arrive during publication share the next native process-persistent commit.</remarks>
 [Reentrant]
 public sealed partial class DatabaseCommitGrain(SiloDatabaseClient storage, IClusterMembershipService membership,
     IOptions<ReplicaCopyOptions> options, ILogger<DatabaseCommitGrain> diagnostics, ILocalDatabaseRuntime? localRuntime = null)

@@ -34,10 +34,12 @@ internal static class ZoneTreeStoreInitializer
         runtime.OwnershipSettlement.BeginConstructor();
         runtime.Tree = ZoneTreeTreeFactory.Open(runtime.Options, requireExisting);
         runtime.OwnershipSettlement.ConstructorReturned();
+        ZoneTreeWriteAheadLogAdmission.RequireProcessPersistence(runtime.Tree.Maintenance.ZoneTree);
         runtime.OwnershipSettlement.BeginConstructor();
         var factory = ZoneTreeTreeFactory.Plain(plainDirectory);
         runtime.PlainTree = requireExisting ? factory.Open() : factory.OpenOrCreate();
         runtime.OwnershipSettlement.ConstructorReturned();
+        ZoneTreeWriteAheadLogAdmission.RequireProcessPersistence(runtime.PlainTree);
     }
 
     private static void EnsureStoreDirectory(string directory)

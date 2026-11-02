@@ -64,7 +64,6 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     {
         var result = (await database.ApplyCoreAsync(database.PrepareStorageOperation(operation, cancellationToken), null,
             selectEmbeddedClock: false, cancellationToken).ConfigureAwait(true)).Result;
-        await database.Store.SyncAsync(CancellationToken.None).ConfigureAwait(true);
         return result;
     }
 }

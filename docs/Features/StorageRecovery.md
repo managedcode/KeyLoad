@@ -4,7 +4,7 @@ REQ-KEYCODEC-001/003: partition scopes and dynamic suffixes are written directly
 
 Storage mode selects physical ownership. With `IsolatedVolumes`, a silo-local Orleans Grain Service owns that node's ZoneTree stores (each with ZoneTree's own write-ahead log), file locks and ordered apply gate; copies use typed Orleans calls to those owners. With `SharedVolume`, all silos use the configured shared paths and one ordinary database grain activation acquires the physical session; other silos call that owner. Shared storage requires `ReplicaCount=1` and never permits concurrent writers to the same ZoneTree files. The local runtime retains handles until actual borrowers join and the session closes. Orleans owns placement and activation movement; deployed shared-filesystem locking and flush behavior remain unqualified.
 
-This feature specifies the canonical key codec, physical ownership and lifetime, ZoneTree write-ahead-log durability and recovery, scoped read cuts, the current format and process-kill recovery qualification. With isolated storage, a successful persisted receipt requires every configured copy to confirm its synced local apply and reports the actual `PersistedCopies` ([ADR-136](../ADR/ADR-136-orleans-partition-ownership.md), [ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)); storage mode adds no format here. Backup and restore of a store are specified in [BackupRestore](BackupRestore.md).
+This feature specifies the canonical key codec, physical ownership and lifetime, ZoneTree write-ahead-log durability and recovery, scoped read cuts, the current format and process-kill recovery qualification. With isolated storage, a successful persisted receipt requires every configured copy to confirm its process-persistent local apply and reports the actual `PersistedCopies` ([ADR-136](../ADR/ADR-136-orleans-partition-ownership.md), [ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)); storage mode adds no format here. Backup and restore of a store are specified in [BackupRestore](BackupRestore.md).
 
 Detailed contracts by topic:
 
@@ -18,29 +18,29 @@ REQ-STORAGE-HOST-COMPOSITION-001 / AC-STORAGE-HOST-COMPOSITION-001: PartitionDat
 
 KeyLoad owns no write-ahead log, snapshot or archive format; storage and its redo log are ZoneTree's ([ADR-011](../ADR/ADR-011-current-format.md)). A store directory holds `owner.lock`, `identity.json` and the ZoneTree MVCC tree under `tree/`.
 
-- **One redo log.** ZoneTree's write-ahead log in `WriteAheadLogMode.AsyncCompressed`, with uncompressed payloads, is the only redo log. It is configured once in `ZoneTreeTreeFactory`.
+- **One redo log.** ZoneTree's write-ahead log in `WriteAheadLogMode.SyncCompressed`, with uncompressed payloads, is the only redo log. It is configured once in `ZoneTreeTreeFactory`.
 - **One transaction per commit.** `ZoneTreeStoreCommitExecution` compiles against a native snapshot and uses ZoneTree's serializable conflict handling; `ZoneTreeCommitPublication` stages one ZoneTree MVCC transaction that holds the staged mutations and the store position record under `system/position`. A commit with no mutations publishes nothing and keeps the position. `Store.Position` is read back from the tree on open. ZoneTree replays its own log when it opens and drops a transaction whose commit never reached the log.
-- **Visible, then durable.** A commit is visible when `Commit` returns and durable only after the next `IAtomicStore.SyncAsync`, which awaits ZoneTree's `SyncWALAsync`. `DatabaseEngine.Apply` does not sync. Every acknowledgement path awaits the sync before it reports success: `PartitionStorageGrainService.ApplyBatchAsync` (one sync per batch), the silo-local `SiloCommandCoordinator` path, `LocalStorageCommitCoordinator` and `EmbeddedCoordinator`. Disposing a store flushes ZoneTree's log.
-- **Honest read cuts.** A read may observe a visible commit that is not yet synced. A process crash before its sync can lose that commit; no acknowledgement was sent for it.
+- **Process-persistent publication.** ZoneTree 2.0.9's native mapped WAL holds each completed write before it returns. A returned atomic commit and its outcome survive process termination. The storage service and all coordinators acknowledge after that publication, without requesting a disk sync for each command or batch. ZoneTree owns periodic disk sync and MVCC commit-state retirement. `IAtomicStore.SyncAsync` remains an explicit disk barrier; disposing the store joins native work and flushes its log.
+- **Honest read cuts.** A read can observe a native committed cut before a periodic disk sync. That completed publication survives process termination; power-loss durability is not advertised.
 - **Failure.** A failed commit publication or sync leaves an unknown outcome: the store answers `UnknownWriteOutcome`, refuses later reads and commits with `RecoveryRequired` and recovers by reopening. The same command ID retries safely.
 
-The crash observer reports three stages (`CommitStage`): `MutationApplied` after each mutation is staged into the ZoneTree transaction and before its commit; `ApplyCompleted` after the transaction committed and the position was published (visible, not yet durable); and `WriteAheadLogSynced`, emitted by `SyncAsync` after the sync with the position it covered. A real process kill at `MutationApplied` recovers the transaction absent; at `ApplyCompleted` it recovers wholly present or wholly absent; at `WriteAheadLogSynced` it recovers present. Process kill is not power-loss proof.
+The crash observer reports `MutationApplied` before native transaction commit, `ApplyCompleted` after process-persistent commit publication and `WriteAheadLogSynced` after an explicit disk sync. `PlainWriteAheadLogPublished` marks plain publication before its transactional outcome. A real process kill at `MutationApplied` recovers the transaction absent; at either completed commit boundary it recovers present. Process kill is not power-loss proof.
 
 ```mermaid
 flowchart LR
     Compile[Compile against native snapshot] --> Stage[Stage mutations: MutationApplied]
     Stage --> Commit[One ZoneTree transaction with system/position]
-    Commit --> Visible[ApplyCompleted: visible, not durable]
-    Visible --> Sync[SyncAsync awaits SyncWALAsync]
-    Sync --> Synced[WriteAheadLogSynced: durable]
-    Synced --> Ack[Acknowledgement]
+    Commit --> Visible[ApplyCompleted: process-persistent]
+    Visible --> Ack[ProcessDurable acknowledgement]
+    Visible --> Sync[Explicit SyncAsync awaits native disk sync]
+    Sync --> Synced[WriteAheadLogSynced: explicit disk barrier]
     Reopen[Reopen] --> Replay[ZoneTree replays its log and drops uncommitted transactions]
     Replay --> Position[Position read from system/position]
 ```
 
 | Requirement | Acceptance / flows | Test mapping |
 |---|---|---|
-| REQ-STORAGE-005: ZoneTree write-ahead-log recovery preserves one whole cut and every acknowledged commit | AC-STORAGE-005: a real process kill at each crash stage recovers one whole cut without a partial transaction: absent after `MutationApplied`, either whole cut after `ApplyCompleted`, committed after `WriteAheadLogSynced`; acknowledgements are sent only after the sync | `StorageRecoveryProcessTests.FiftySeededRealProcessCrashesPreserveAtomicTransactions` (20 batches of 50 seeded trials over the three stages and three mutation indices) in [StorageRecoveryProcessTests](../../tests/KeyLoad.ProcessRecoveryTests/StorageRecovery/Cases/StorageRecoveryProcessTests.cs); the domain process-recovery suites below |
+| REQ-STORAGE-005: ZoneTree write-ahead-log recovery preserves one whole cut and every acknowledged commit | AC-STORAGE-005: a real process kill at each crash stage recovers one whole cut without a partial transaction: absent after `MutationApplied`, committed after `ApplyCompleted` and `WriteAheadLogSynced`; acknowledgements follow process-persistent publication | `StorageRecoveryProcessTests.FiftySeededRealProcessCrashesPreserveAtomicTransactions` (20 batches of 50 seeded trials over the three stages and three mutation indices) in [StorageRecoveryProcessTests](../../tests/KeyLoad.ProcessRecoveryTests/StorageRecovery/Cases/StorageRecoveryProcessTests.cs); the domain process-recovery suites below |
 | REQ-STORAGE-006: the canonical key/envelope/owned-value format has stable ordering and scope | AC-STORAGE-006: golden keys, escaped UTF-8 components, signed/decimal ordering and scope do not collide; an invalid or corrupt format is rejected and borrowed spans never escape the gate | Existing `GoldenKeysRemainStable`, `TenThousandSeededDecimalKeysRoundTripAndSortNumerically`, `StringsUseUtf8OrdinalOrderingAndEscapedComponentsDoNotCollide` in [KeyCodecTests](../../tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/KeyCodec/KeyCodecTests.cs); scoped-read cases AC-MP-002 |
 | REQ-STORAGE-007: current-format readers reject an unsupported or corrupt store identity before effects | AC-STORAGE-007: real current-format open, recovery and backup/restore accept current stores; an unknown or corrupt identity fails closed with the original bytes and authority unchanged; no conversion or alternate reader is invoked | `StoreIdentityVersionRejectionTests`, `RuntimeJournalReaderFenceTests`, `MissingIdentityTests` and the BackupRestore `ZoneTreeBackupTests` under [CurrentFormat](StorageRecovery/CurrentFormat.md), [ADR-011](../ADR/ADR-011-current-format.md) and [ADR-116](../ADR/ADR-116-first-release-current-format.md) |
 
@@ -277,3 +277,10 @@ open.
 ## Qualification gates
 
 Source review, authored cases and local development runs are not qualification. The required evidence is the exact-source Linux run of the unit suites, the process-recovery suite and the Aspire replicated-cluster SDK/MCP suite through the TUnit test entry, with original reports; Linux GitHub qualification of the ZoneTree write-ahead-log and backup design is pending. Process-kill and restart tests do not establish power-loss durability; endurance, power-loss and performance gates remain separately open until their own evidence exists. A suite failure elsewhere does not erase an independently verified mapped criterion, and a mapped criterion does not close the whole feature.
+
+
+Opening checks the actual mutable WAL writer through ZoneTree's public APIs for
+both trees before serving operations. Configuration alone does not establish the
+publication contract of an existing native WAL. An incompatible opened writer
+refuses with `FormatUnsupported`; KeyLoad does not reinterpret the mode or select
+another acknowledgement contract at runtime.

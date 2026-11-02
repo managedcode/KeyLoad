@@ -95,3 +95,33 @@ The request-grain execution and original concurrency tests remain. Credential ro
 Focused operation tests, a strict solution build and separate clean local timings with matched active allocation captures qualify the individual changes. Full Linux functional, recovery, cluster and exact-once gates remain required for delivery. A released-image Benchmarks run supplies public measurements. Source comparisons and local captures do not establish competitive superiority, a cost-based optimizer, distributed serializability, power-loss durability or a new engine contract.
 
 The earlier validator checkpoint passed 111 focused tests and reduced its matched one-million-call allocation from 5,427.766 to 624.003 bytes per call (88.5%). This is a validator allocation result, not a database throughput multiplier. Time-series chunk/partition pruning, prepared-plan invalidation and vector storage layout remain research directions, without an implementation or performance claim in this change.
+
+
+## WAL publication, group commit and disk flush
+
+[PostgreSQL 18 XLogFlush](https://github.com/postgres/postgres/blob/REL_18_0/src/backend/access/transam/xlog.c)
+rechecks the flushed WAL position so a follower can be covered by another writer.
+Its optional commit delay lets more transactions join a flush, with a latency
+tradeoff. [KurrentDB 26.1.2 StorageWriterService](https://github.com/kurrent-io/KurrentDB/blob/v26.1.2/src/KurrentDB.Core/Services/Storage/StorageWriterService.cs)
+considers queued flushable messages and elapsed flush time before requesting a
+flush. These implementations distinguish a command from the flush covering it.
+
+[Qdrant 1.17.1 update_worker](https://github.com/qdrant/qdrant/blob/v1.17.1/lib/collection/src/update_workers/update_worker.rs)
+explicitly flushes the WAL before a waited update. Its
+[flush_workers](https://github.com/qdrant/qdrant/blob/v1.17.1/lib/collection/src/update_workers/flush_workers.rs)
+separately flush segments and only acknowledge WAL truncation through their
+persisted version. A periodic segment flush therefore does not establish that a
+waited update skips WAL persistence.
+
+[TimescaleDB 2.30.2 copy.c](https://github.com/timescale/timescaledb/blob/2.30.2/src/copy.c)
+uses tuple and byte limits for buffered multi-insert and groups heap insertion
+while preserving per-row index and trigger work. This is a bulk-load path, not
+permission to acknowledge individual writes before their selected durability
+boundary.
+
+KeyLoad retains ordered group commit, native MVCC atomicity, per-command outcomes
+and actual copy acknowledgements. Its approved ProcessDurable path now uses the
+published ZoneTree 2.0.9 synchronous WAL publication contract, with periodic disk
+sync owned by the engine. Explicit disk sync is separate. Current source still
+requires its own process-recovery, full solution, replicated SDK/MCP and released
+Linux benchmark qualification; native diagnostics establish no competitive gain.

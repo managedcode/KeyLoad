@@ -3,9 +3,9 @@ namespace KeyLoad.Storage;
 /// <summary>Owns native read snapshots, record publication and write-ahead log durability.</summary>
 /// <remarks>
 /// Inside a read callback, Position and the scalar Identity fields describe the same protected cut as the view.
-/// Effective record publications advance Position. A publication is visible when it returns and durable after the next
-/// <see cref="SyncAsync"/>; acknowledgements wait for that sync. Uncertain or failed live publication or sync must
-/// reject subsequent reads until recovery.
+/// Effective record publications advance Position. A returned publication survives process termination; acknowledgements
+/// require no additional disk sync. Explicit <see cref="SyncAsync"/> requests a stronger disk barrier. Uncertain or failed
+/// live publication or explicit sync rejects subsequent reads until recovery.
 /// Pure validation or compile rejection before publication preserves the unchanged healthy cut.
 /// Canonical read cuts and persisted copy acknowledgements depend on these provider guarantees.
 /// </remarks>
@@ -38,15 +38,15 @@ public interface IAtomicStore : IDisposable
     /// <param name="compile">Action receiving the staged transaction and proposed local position.</param>
     /// <returns>The result after successful commit publication.</returns>
     T Commit<T>(Func<IAtomicTransaction, long, T> compile);
-    /// <summary>Publishes compiled writes, syncing plain table data before committing transactional command outcomes.</summary>
+    /// <summary>Publishes compiled writes, ordering process-persistent plain data before transactional command outcomes.</summary>
     /// <typeparam name="T">Owned result type.</typeparam>
     /// <param name="compile">Synchronous compiler; table data may be non-transactional.</param>
     /// <param name="cancellationToken">Cancellation before physical publication starts.</param>
-    /// <returns>The result after publication; acknowledgement still requires <see cref="SyncAsync"/>.</returns>
+    /// <returns>The result after process-persistent publication of its data and command outcome.</returns>
     Task<T> CommitAsync<T>(Func<IAtomicTransaction, long, T> compile, CancellationToken cancellationToken = default);
-    /// <summary>Makes every publication returned before the call durable in the provider's write-ahead log.</summary>
+    /// <summary>Explicitly syncs every preceding publication to the provider's disk boundary.</summary>
     /// <param name="cancellationToken">Cancellation of the wait; the publications themselves stay published.</param>
-    /// <returns>Completion once those publications are durable.</returns>
+    /// <returns>Completion of the native disk sync; device and power-loss qualification remain separate.</returns>
     Task SyncAsync(CancellationToken cancellationToken = default);
     /// <summary>Writes one provider backup generation of a consistent cut into an empty directory.</summary>
     /// <param name="directory">Destination directory owned by the backup caller.</param>

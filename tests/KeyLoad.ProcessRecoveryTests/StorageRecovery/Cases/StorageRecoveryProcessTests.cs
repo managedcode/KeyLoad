@@ -110,13 +110,13 @@ internal sealed class StorageRecoveryProcessTests
     {
         await Assert.That(values.All(value => value == 0) || values.All(value => value == 1))
             .IsTrue().Because($"Non-atomic recovery at seed {batch}, trial {trial}, stage {stage}.");
-        // A transaction killed before its commit is absent; a committed one is visible before the write-ahead log
-        // sync and may or may not survive; a synced one survives.
+        // An uncommitted transaction is absent. Native WAL publication survives process termination before
+        // any explicit disk sync; the independently synced boundary must survive as well.
         var expected = stage switch
         {
             CommitStage.MutationApplied => 0,
             CommitStage.WriteAheadLogSynced => 1,
-            _ => values[0]
+            _ => 1
         };
         foreach (var value in values)
         {
