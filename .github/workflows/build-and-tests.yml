@@ -16,11 +16,10 @@ env:
 permissions:
   contents: read
 # Shards and lanes come from scripts/Features/TestInfrastructure/ci-test-shards.json (ADR-148).
-# Test jobs build the whole solution: unit CodeQuality checks read every project's compiled image and
-# the cold bootstrap topology test launches src/KeyLoad.Cli, which the test projects do not reference.
+# Build owns the complete solution outputs. Test jobs consume that same build after it succeeds.
 jobs:
   build:
-    name: Strict Release build and compiled test inventory
+    name: Build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -30,6 +29,11 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            global.json
+            **/*.csproj
       - name: Check repository rules
         run: node scripts/Features/RepositoryGovernance/verify.mjs
       - name: Check test shard partition
@@ -55,8 +59,35 @@ jobs:
           if-no-files-found: warn
           retention-days: 30
 
+      - name: Archive the built solution
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import tarfile
+          import xml.etree.ElementTree as ET
+
+          Path('artifacts').mkdir(exist_ok=True)
+          with tarfile.open('artifacts/compiled-solution.tar.gz', 'w:gz', compresslevel=1) as archive:
+              for project in ET.parse('KeyLoad.slnx').findall('.//Project'):
+                  directory = Path(project.attrib['Path']).parent
+                  for output in (directory / 'bin' / 'Release', directory / 'obj'):
+                      if not output.is_dir():
+                          raise FileNotFoundError(output)
+                      archive.add(output, arcname=output.as_posix())
+          PY
+      - name: Save the built solution
+        uses: actions/upload-artifact@v7
+        with:
+          name: compiled-solution
+          path: artifacts/compiled-solution.tar.gz
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
+          overwrite: true
+
   shards:
     name: Plan named test groups
+    needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 5
     outputs:
@@ -73,7 +104,7 @@ jobs:
 
   functional:
     name: Functional tests – ${{ matrix.name }}
-    needs: shards
+    needs: [build, shards]
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     strategy:
@@ -88,8 +119,20 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - name: Build
-        run: dotnet build KeyLoad.slnx --configuration "$KEYLOAD_TEST_CONFIGURATION" -warnaserror
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            global.json
+            **/*.csproj
+      - name: Download the built solution
+        uses: actions/download-artifact@v8
+        with:
+          name: compiled-solution
+          path: artifacts
+      - name: Prepare the built solution
+        run: |
+          tar -xzf artifacts/compiled-solution.tar.gz -C "$GITHUB_WORKSPACE"
+          dotnet restore KeyLoad.slnx
       - name: Test functional operations
         run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.FunctionalTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results"
       - name: Save test results
@@ -104,6 +147,7 @@ jobs:
 
   analyzers-recovery:
     name: Analyzers and process recovery
+    needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -113,8 +157,20 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - name: Build
-        run: dotnet build KeyLoad.slnx --configuration "$KEYLOAD_TEST_CONFIGURATION" -warnaserror
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            global.json
+            **/*.csproj
+      - name: Download the built solution
+        uses: actions/download-artifact@v8
+        with:
+          name: compiled-solution
+          path: artifacts
+      - name: Prepare the built solution
+        run: |
+          tar -xzf artifacts/compiled-solution.tar.gz -C "$GITHUB_WORKSPACE"
+          dotnet restore KeyLoad.slnx
       - name: Test code analyzers
         run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run compiler-analyzers --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.AnalyzerTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results"
       - name: Test process recovery
@@ -135,7 +191,7 @@ jobs:
 
   cluster:
     name: Cluster tests – ${{ matrix.name }}
-    needs: shards
+    needs: [build, shards]
     runs-on: ubuntu-24.04
     timeout-minutes: 55
     strategy:
@@ -151,8 +207,20 @@ jobs:
         uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
-      - name: Build
-        run: dotnet build KeyLoad.slnx --configuration "$KEYLOAD_TEST_CONFIGURATION" -warnaserror
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            global.json
+            **/*.csproj
+      - name: Download the built solution
+        uses: actions/download-artifact@v8
+        with:
+          name: compiled-solution
+          path: artifacts
+      - name: Prepare the built solution
+        run: |
+          tar -xzf artifacts/compiled-solution.tar.gz -C "$GITHUB_WORKSPACE"
+          dotnet restore KeyLoad.slnx
       - name: Install administration browser
         if: ${{ matrix.playwright }}
         shell: pwsh
@@ -187,8 +255,8 @@ jobs:
 
   verify-partition:
     name: Verify every required test ran exactly once
-    needs: [functional, analyzers-recovery, cluster]
-    if: ${{ !cancelled() }}
+    needs: [build, functional, analyzers-recovery, cluster]
+    if: ${{ !cancelled() && needs.build.result == 'success' }}
     runs-on: ubuntu-24.04
     timeout-minutes: 10
     steps:
