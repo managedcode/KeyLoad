@@ -6,6 +6,10 @@ decision and acceptance criteria in [ADR-035](../ADR/ADR-035-memory-performance.
 (REQ-MP-001..006, AC-MP-001..012). It states what each path has to do. It records
 no measured improvement, and no entry here is closed by a build or a review.
 
+[Native ZoneTree measurements](zonetree-native-measurements.md) records the
+upstream transaction workload, WAL and isolation distinctions, reproducible
+commands and the evidence needed before comparing engine cost with KeyLoad.
+
 A repair counts only when an operation test on a real store shows the same outcome,
 the same read cut and the same errors, and the bounded work is asserted (examined
 entries, copied bytes, allocations). A speed or memory claim additionally needs
