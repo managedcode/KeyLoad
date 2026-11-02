@@ -4,10 +4,11 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Query.QueryExecution;
 
-/// <summary>Seeks scalar inequalities through the same ordered index used by equality queries.</summary>
+/// <summary>Seeks scalar inequalities through primary document keys or a declared secondary index.</summary>
 internal static class QueryIndexRangePlanner
 {
     private const string IndexSpace = "index";
+    private const string DocumentSpace = "document";
 
     internal static (bool HasValue, QueryIndexRange? Value) Create(IndexDefinition index, AstQueryRequest request)
     {
@@ -15,7 +16,16 @@ internal static class QueryIndexRangePlanner
         {
             return (false, default(QueryIndexRange?));
         }
-        var prefix = KeySpace.Partition(IndexSpace, request.Partition, request.Query.Collection, index.Name);
+        return Create(index.Fields[0], index.Name, request);
+    }
+
+    internal static (bool HasValue, QueryIndexRange? Value) CreatePrimary(AstQueryRequest request)
+        => Create(SqlSyntax.MetadataIdPath, null, request);
+
+    private static (bool HasValue, QueryIndexRange? Value) Create(string fieldPath, string? indexName, AstQueryRequest request)
+    {
+        var prefix = indexName is null ? KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection)
+            : KeySpace.Partition(IndexSpace, request.Partition, request.Query.Collection, indexName);
         byte[]? lower = null;
         byte[]? upper = null;
         KeyComponentKind? scalarType = null;
@@ -23,7 +33,7 @@ internal static class QueryIndexRangePlanner
         foreach (var comparison in Comparisons(request.Query.Filter))
         {
             var field = comparison.Left as FieldOperand ?? comparison.Right as FieldOperand;
-            if (field?.Path != index.Fields[0])
+            if (field?.Path != fieldPath)
             {
                 continue;
             }
@@ -38,15 +48,20 @@ internal static class QueryIndexRangePlanner
             {
                 continue;
             }
+            if (indexName is null && value.Kind != KeyComponentKind.Text)
+            {
+                return (false, default(QueryIndexRange?));
+            }
             if (scalarType is not null && scalarType != value.Kind)
             {
                 return (false, default(QueryIndexRange?));
             }
             scalarType = value.Kind;
-            var key = KeySpace.Partition(IndexSpace, request.Partition, request.Query.Collection, index.Name, value);
+            var key = indexName is null ? KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, value)
+                : KeySpace.Partition(IndexSpace, request.Partition, request.Query.Collection, indexName, value);
             if (operation is SqlSyntax.Greater or SqlSyntax.GreaterOrEqual)
             {
-                var bound = operation == SqlSyntax.Greater ? StorageKeyBounds.PrefixSuccessor(key).Value : key;
+                var bound = LowerBound(key, operation == SqlSyntax.GreaterOrEqual, indexName is null);
                 lower = lower is null || bound is not null && lower.AsSpan().SequenceCompareTo(bound) < 0 ? bound : lower;
                 found = true;
             }
@@ -58,6 +73,16 @@ internal static class QueryIndexRangePlanner
             }
         }
         return found ? (true, new(prefix, lower, upper)) : (false, default(QueryIndexRange?));
+    }
+
+    private static byte[]? LowerBound(byte[] key, bool inclusive, bool primary)
+    {
+        if (!primary)
+        {
+            return inclusive ? key : StorageKeyBounds.PrefixSuccessor(key).Value;
+        }
+        // Text keys end in zero: no encoded key lies between this prefix and the complete key.
+        return inclusive ? key[..^1] : key;
     }
 
     private static (bool HasValue, KeyComponent Value) Value(Operand operand, Dictionary<string, JsonElement>? parameters)

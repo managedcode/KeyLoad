@@ -4,6 +4,37 @@
 
 The flag is immutable for a resource lifetime (`NonTransactionalTableTests.TableModeCannotChangeThroughResourcePolicyUpdates`). Policy updates cannot change it. There is no conversion of an existing table or alternate stored-data reader.
 
+Choose the mode when creating the resource:
+
+| Data contract | `Transactional` | Physical data path |
+| --- | --- | --- |
+| Multi-key atomic effects and stable transactional snapshots | `true` | Native MVCC |
+| Independent analytics events or time-series points accepting the plain-write contract below | `false` | Native raw operations |
+
+The existing SDK resource definition selects the mode explicitly:
+
+```csharp
+var table = new ResourceDefinition("measurements", ResourceKind.Collection, transactionDomainId)
+{
+    Transactional = false
+};
+```
+
+Use `Transactional = true` when the table needs MVCC. Both choices retain the
+native WAL. These are creation settings; the API refuses changes to an existing
+resource's storage mode.
+
+Transaction selection and disk durability are separate decisions. Turning off
+transactions does not turn off WAL or completed-command outcomes. A stronger native
+durable-commit API does not make raw multi-key writes atomic. The current
+`ProcessDurable` acknowledgement and the published Shared WAL adoption status are
+defined in [NativeMvcc](../StorageRecovery/NativeMvcc.md).
+
+The analytics and time-series comparison drivers explicitly create their resources
+with `Transactional=false`. Document and relational comparisons retain their
+transactional data contract. Comparisons with earlier transactional analytics or
+time-series runs therefore include this change of data semantics.
+
 ## Native storage and command boundary
 
 Each physical owner opens `tree/` with `OpenOrCreateTransactional` and `plain-tree/` with `OpenOrCreate`. Catalog, persisted authority, command outcomes, canonical watermarks and the local store position stay in the transactional tree. Table rows and their resource data families, including indexes, use the tree selected by their canonical catalog definition. The plain tree uses native `Upsert`/`ForceDelete`, native deletion serialization and its own ZoneTree WAL; it has no MVCC versions or transaction-status records.

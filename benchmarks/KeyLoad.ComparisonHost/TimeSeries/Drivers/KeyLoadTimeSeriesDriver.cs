@@ -20,7 +20,7 @@ internal sealed class KeyLoadTimeSeriesDriver(BenchmarkConnection connection) : 
     public int BatchSize => Batch;
 
     public Task PrepareAsync(CancellationToken token)
-        => database.ConfigureAsync(database.Resource(Set, ResourceKind.TimeSeries), token);
+        => database.ConfigureAsync(database.Resource(Set, ResourceKind.TimeSeries) with { Transactional = false }, token);
 
     public async Task AppendAsync(string series, IReadOnlyList<TimePoint> points, CancellationToken token)
     {

@@ -31393,6 +31393,240 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning('d125' <= id AND 'd127' >= id, d125,d126,d127)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id < 'd001', d000)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id <= 'd001', d000,d001)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id > 'd127', )",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id > @from AND id <= @to, d126,d127)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd125' AND id <= 'd125', d125)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd125' AND id <= 'd127' AND amount <> 126, d125,d127)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd125' AND id >= 'd126' AND id < 'd127', d126)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd127' AND id <= 'd125', )",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd127', d127)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning",
+      "instanceName": "AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id BETWEEN @from AND @to, d125,d126,d127)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 25,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryRangePagesKeepFreshVisibilityCancellationAndPolicy",
+      "instanceName": "AcAisql008PrimaryRangePagesKeepFreshVisibilityCancellationAndPolicy",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 68,
+      "endLineNumber": 105,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
+      "methodName": "AcAisql008PrimaryRangePrefixUnicodeAndDeletedRowsSurviveTwoColdOpens",
+      "instanceName": "AcAisql008PrimaryRangePrefixUnicodeAndDeletedRowsSurviveTwoColdOpens",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/EqualityAccess/PrimaryKeyRangeAccessPathTests.cs",
+      "sourceSha256": "15592703f70945227df116545414bcc57644896e8eda9bc68fc40c7f93698530",
+      "lineNumber": 107,
+      "endLineNumber": 132,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-AISQL-004"
+      ],
+      "acceptance": [
+        "AC-AISQL-008"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.QueryExecution.Q2CapabilityWholeFlowTests",
       "reportClassName": "KeyLoad.FunctionalTests.QueryExecution.Q2CapabilityWholeFlowTests",
       "methodName": "PreservedJsonAndAst2FixturesExecuteCompleteLiteralJoin",
@@ -62262,7 +62496,7 @@
     },
     {
       "groupId": "unit-functional-02",
-      "selector": "/KeyLoad.FunctionalTests/*/(AdminQ*)|(AggregateReplayWorkerP*)|(Analytica*)|(AnalyticsE*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AnnWaitG*)|(AnnWaitO*)|(AtomicPartitionRosterRes*)|(BackupI*)|(Bm25CorpusO*)|(Bm25Po*)|(Bounda*)|(Bu*)|(CapturedReadSe*)|(Cha*)|(CommandObservedR*)|(ConnectionO*)|(ConnectionSy*)|(CoreM*)|(CqrsL*)|(CredentialS*)|(DatabaseCompositionV*)|(DistributedSearchH*)|(DocumentC*)|(DocumentPu*)|(DocumentSe*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventAppendS*)|(EventFeedPubSubF*)|(EventFeedPubSubS*)|(EventProjectionR*)|(FeedD*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(GrainFailureD*)|(GrainR*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphSearchL*)|(GraphShortestPathB*)|(GraphShortestPathS*)|(GraphTraversalP*)|(GraphTraversalR*)|(GraphTraversalT*)|(Ins*)|(Is*)|(JournalPrincipalA*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpAg*)|(McpGatewayG*)|(McpTransportG*)|(McpV*)|(Mes*)|(Metad*)|(Mix*)|(OperationO*)|(OutboxD*)|(PartitionQueryPublicA*)|(PartitionStorageA*)|(ProjectionConc*)|(PublicE*)|(QueryAdapterV*)|(QueryRu*)|(QueueB*)|(QueueDeadlineW*)|(QueueRetr*)|(ReadCutB*)|(ReadCutCo*)|(RelationalA*)|(RemoteTransferRepairC*)|(RequestCqrsB*)|(RequestCqrsPu*)|(RequestD*)|(ResourceA*)|(ResourceIncarnationQ*)|(ResourceLifetimeC*)|(SagaTimeoutJ*)|(SampleAggregateI*)|(SampleChunkA*)|(SampleChunkCanonicalL*)|(SampleChunkCor*)|(SampleChunkEn*)|(SampleChunkExp*)|(SampleM*)|(SampleRetentionM*)|(SampleS*)|(SearchS*)|(Serie*)|(Sh*)|(SqlClientC*)|(SqlF*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlLex*)|(SqlModelViewA*)|(SqlOperationR*)|(SqlQ*)|(SqlTy*)|(Sta*)|(SubscriptionC*)|(SubscriptionO*)|(Suc*)|(TextBm25C*)|(TextCapturedP*)|(TextF*)|(TextProjectionD*)|(TextProjectionRes*)|(TextProjectionS*)|(TextWaitObserva*)|(TopicSqlT*)|(TransactionA*)|(TransactionR*)|(TypedQueueGraphP*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!AliasesAndFieldIdsRemainExact*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!OwnedSnapshotPreservesIndependentMetadataAndBusinessTime*)&(!ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AdminQ*)|(AggregateReplayWorkerP*)|(Analytica*)|(AnalyticsE*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AnnWaitG*)|(AnnWaitO*)|(AtomicPartitionRosterRes*)|(BackupI*)|(Bm25CorpusO*)|(Bm25Po*)|(Bounda*)|(Bu*)|(CapturedReadSe*)|(Cha*)|(CommandObservedR*)|(ConnectionO*)|(ConnectionSy*)|(CoreM*)|(CqrsL*)|(CredentialS*)|(DatabaseCompositionV*)|(DistributedSearchH*)|(DocumentC*)|(DocumentPu*)|(DocumentSe*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventAppendS*)|(EventFeedPubSubF*)|(EventFeedPubSubS*)|(EventProjectionR*)|(FeedD*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(GrainFailureD*)|(GrainR*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphSearchL*)|(GraphShortestPathB*)|(GraphShortestPathS*)|(GraphTraversalP*)|(GraphTraversalR*)|(GraphTraversalT*)|(Ins*)|(Is*)|(JournalPrincipalA*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpAg*)|(McpGatewayG*)|(McpTransportG*)|(McpV*)|(Mes*)|(Metad*)|(Mix*)|(OperationO*)|(OutboxD*)|(PartitionQueryPublicA*)|(PartitionStorageA*)|(Pri*)|(ProjectionConc*)|(PublicE*)|(QueryAdapterV*)|(QueryRu*)|(QueueB*)|(QueueDeadlineW*)|(QueueRetr*)|(ReadCutB*)|(ReadCutCo*)|(RelationalA*)|(RemoteTransferRepairC*)|(RequestCqrsB*)|(RequestCqrsPu*)|(RequestD*)|(ResourceA*)|(ResourceIncarnationQ*)|(ResourceLifetimeC*)|(SagaTimeoutJ*)|(SampleAggregateI*)|(SampleChunkA*)|(SampleChunkCanonicalL*)|(SampleChunkCor*)|(SampleChunkEn*)|(SampleChunkExp*)|(SampleM*)|(SampleRetentionM*)|(SampleS*)|(SearchS*)|(Serie*)|(Sh*)|(SqlClientC*)|(SqlF*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlLex*)|(SqlModelViewA*)|(SqlOperationR*)|(SqlQ*)|(SqlTy*)|(Sta*)|(SubscriptionC*)|(SubscriptionO*)|(Suc*)|(TextBm25C*)|(TextCapturedP*)|(TextF*)|(TextProjectionD*)|(TextProjectionRes*)|(TextProjectionS*)|(TextWaitObserva*)|(TopicSqlT*)|(TransactionA*)|(TransactionR*)|(TypedQueueGraphP*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!AliasesAndFieldIdsRemainExact*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!OwnedSnapshotPreservesIndependentMetadataAndBusinessTime*)&(!ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminQueueTests",
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsEntityLinkLifetimeTests",
@@ -62343,6 +62577,7 @@
         "KeyLoad.FunctionalTests.QueryExecution.DistributedSearchHybridTests",
         "KeyLoad.FunctionalTests.QueryExecution.EqualityAccessPathSecurityTests",
         "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryPublicAuthorizationTests",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests",
         "KeyLoad.FunctionalTests.QueryExecution.QueryAdapterValidationTests",
         "KeyLoad.FunctionalTests.QueryExecution.QueryRuleOptimizationWholeFlowTests",
         "KeyLoad.FunctionalTests.QueryExecution.SqlClientCancellationTests",
@@ -62752,6 +62987,19 @@
         "KeyLoad.FunctionalTests.QueryExecution.EqualityAccessPathSecurityTests|AcAisql008ReversedPointAndIndexPredicatesPreservePersistedRowOwnership|AcAisql008ReversedPointAndIndexPredicatesPreservePersistedRowOwnership(True, True)",
         "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryPublicAuthorizationTests|ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies|ExpectedOwnerMismatchFailsClosedAndProtectedFieldUseStillApplies",
         "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryPublicAuthorizationTests|LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore|LaterPartitionDenialReturnsNoPartialPageAndDoesNotMutateStore",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning('d125' <= id AND 'd127' >= id, d125,d126,d127)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id < 'd001', d000)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id <= 'd001', d000,d001)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id > 'd127', )",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id > @from AND id <= @to, d126,d127)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd125' AND id <= 'd125', d125)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd125' AND id <= 'd127' AND amount <> 126, d125,d127)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd125' AND id >= 'd126' AND id < 'd127', d126)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd127' AND id <= 'd125', )",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id >= 'd127', d127)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning|AcAisql008PrimaryKeyRangesSeekExactBoundsAndExplainWithoutScanning(id BETWEEN @from AND @to, d125,d126,d127)",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryRangePagesKeepFreshVisibilityCancellationAndPolicy|AcAisql008PrimaryRangePagesKeepFreshVisibilityCancellationAndPolicy",
+        "KeyLoad.FunctionalTests.QueryExecution.PrimaryKeyRangeAccessPathTests|AcAisql008PrimaryRangePrefixUnicodeAndDeletedRowsSurviveTwoColdOpens|AcAisql008PrimaryRangePrefixUnicodeAndDeletedRowsSurviveTwoColdOpens",
         "KeyLoad.FunctionalTests.QueryExecution.QueryAdapterValidationTests|AcMp003SqlCancellationInterruptsAnUnterminatedLongLiteralBeforeSyntaxFailure|AcMp003SqlCancellationInterruptsAnUnterminatedLongLiteralBeforeSyntaxFailure",
         "KeyLoad.FunctionalTests.QueryExecution.QueryAdapterValidationTests|AstRejectsUnknownVersionOperatorsAndNonScalarParametersBeforeScanning|AstRejectsUnknownVersionOperatorsAndNonScalarParametersBeforeScanning",
         "KeyLoad.FunctionalTests.QueryExecution.QueryAdapterValidationTests|CatalogAndOtherCollectionWritesPreserveTheCursorButSourceWritesInvalidateIt|CatalogAndOtherCollectionWritesPreserveTheCursorButSourceWritesInvalidateIt",

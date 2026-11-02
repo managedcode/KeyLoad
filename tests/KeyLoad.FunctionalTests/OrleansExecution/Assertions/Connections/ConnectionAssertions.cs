@@ -24,6 +24,8 @@ internal static class ConnectionAssertions
         var following = scenario.Observation.Read(second);
         await initial.Disposed.Task.WaitAsync(cancellationToken);
         await following.Disposed.Task.WaitAsync(cancellationToken);
+        await initial.ProducerContext.Deactivated.WaitAsync(cancellationToken);
+        await following.ProducerContext.Deactivated.WaitAsync(cancellationToken);
         await Assert.That(initial.GrainId).IsEqualTo(following.GrainId);
         await Assert.That(initial.ActivationId).IsEqualTo(following.ActivationId);
         await Assert.That(initial.ActivationId.IsDefault).IsFalse();

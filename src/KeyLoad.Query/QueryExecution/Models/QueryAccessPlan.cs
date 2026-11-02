@@ -1,6 +1,6 @@
 namespace KeyLoad.Query.QueryExecution;
 
-internal enum QueryAccessKind { Point, IndexPrefix, IndexRange, FullScan }
+internal enum QueryAccessKind { Point, IndexPrefix, IndexRange, PrimaryRange, FullScan }
 
 /// <summary>Owns the exact storage access selected once for planning and execution.</summary>
 internal sealed record QueryAccessPlan(QueryAccessKind Kind, string AccessPath, byte[] Prefix,

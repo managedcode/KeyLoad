@@ -5,6 +5,7 @@ namespace KeyLoad.Query.QueryExecution;
 internal static class QueryPlanDescription
 {
     private const string PointLookup = "point-lookup";
+    private const string PrimaryRange = "primary-key-range-seek";
     private const string IndexPrefix = "index-prefix-seek";
     private const string IndexRange = "index-range-seek";
     private const string FullScan = "bounded-full-scan";
@@ -21,6 +22,7 @@ internal static class QueryPlanDescription
         var scan = access.Kind switch
         {
             QueryAccessKind.Point => PointLookup,
+            QueryAccessKind.PrimaryRange => PrimaryRange,
             QueryAccessKind.IndexPrefix => IndexPrefix,
             QueryAccessKind.IndexRange => IndexRange,
             _ => FullScan

@@ -31,7 +31,11 @@ internal sealed class KeyLoadAnalyticsDriver(BenchmarkConnection connection) : I
     public int BatchSize => Batch;
 
     public Task PrepareAsync(CancellationToken token)
-        => database.ConfigureAsync(database.Resource(Store, ResourceKind.AnalyticsStore) with { AnalyticsSchema = Schema }, token);
+        => database.ConfigureAsync(database.Resource(Store, ResourceKind.AnalyticsStore) with
+        {
+            AnalyticsSchema = Schema,
+            Transactional = false
+        }, token);
 
     public async Task InsertAsync(IReadOnlyList<AnalyticsEvent> events, CancellationToken token)
     {

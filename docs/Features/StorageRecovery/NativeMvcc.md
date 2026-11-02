@@ -55,5 +55,22 @@ gates.
 
 ZoneTree owns periodic cache cleanup and merges through `CreateMaintainer()`.
 KeyLoad schedules no second cleanup timer and owns no logical point-value cache.
+Both native MVCC and plain iterators explicitly enable `ContributeToTheBlockCache`
+for forward and reverse reads. This lets repeated disk traversal reuse the
+engine's block buffers, including when the block compression method is `None`.
 See [NonTransactionalTables](../RelationalStorage/NonTransactionalTables.md) for the
 second native tree, WAL ordering and independent backup cuts.
+
+## Shared WAL publication status
+
+[ZoneTree PR #215](https://github.com/ZoneTree/ZoneTree/pull/215), merged on
+2026-11-02, introduces `Shared` and `AsyncShared` journals with ordered recovery
+across segments. Its durable commit APIs synchronize before publishing visibility;
+concurrent commits can share that synchronization. Ordinary `Commit()` still
+publishes without awaiting a disk barrier. Failed durable synchronization retains
+an uncertain transaction outcome.
+
+The published package checked on 2026-11-02 remains 2.1.0. The merged PR is not part
+of KeyLoad's pinned dependency yet. Adopting a published package containing it still
+requires native API, WAL, recovery and performance checks. Current process-crash
+tests do not establish power-loss durability or financial-system qualification.

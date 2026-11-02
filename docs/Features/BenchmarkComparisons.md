@@ -110,6 +110,16 @@ Every type has one module in `benchmarks/KeyLoad.ComparisonHost/<Type>/`
 gives every KeyLoad driver the same SDK clients and partition). `Measurement/`
 owns the settings, the concurrent `OperationLanes` and the result records.
 
+The document drivers create their numeric secondary index before loading.
+MongoDB range queries require that named index through the native query hint;
+KeyLoad range queries require the declared index without full-scan permission.
+KeyLoad relational ranges use the table's native primary-key access path.
+Analytics and time-series resources explicitly select `Transactional=false`;
+documents and relational tables keep MVCC. See
+[NonTransactionalTables](RelationalStorage/NonTransactionalTables.md) for the
+different write and observation guarantees. Comparisons against earlier analytics
+or time-series runs must account for this data-contract change.
+
 A change to a dataset or a scenario is made once and applies to every database of
 the type. Adding a database to a type adds one driver, its factory entry, its
 AppHost resource in `BenchmarkDatabases` and its workflow matrix rows. Adding a

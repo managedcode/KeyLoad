@@ -8,6 +8,7 @@ namespace KeyLoad.Query.QueryExecution;
 internal static class QueryAccessPlanner
 {
     private const string PointPath = "point";
+    private const string PrimaryRangePath = "primary-key-range";
     private const string IndexPathPrefix = "index:";
     private const string FullScanPath = "bounded-full-scan";
     private const string DocumentSpace = "document";
@@ -46,6 +47,11 @@ internal static class QueryAccessPlanner
                 return new(QueryAccessKind.IndexRange, IndexPathPrefix + index.Name, range.Prefix,
                     index.Name, [.. index.Fields], AfterKey: range.AfterKey, UntilKey: range.UntilKey);
             }
+        }
+        if (QueryIndexRangePlanner.CreatePrimary(request).Value is { } primary)
+        {
+            return new(QueryAccessKind.PrimaryRange, PrimaryRangePath, primary.Prefix,
+                IndexFields: [SqlSyntax.MetadataIdPath], AfterKey: primary.AfterKey, UntilKey: primary.UntilKey);
         }
         if (!request.AllowFullScan)
         {

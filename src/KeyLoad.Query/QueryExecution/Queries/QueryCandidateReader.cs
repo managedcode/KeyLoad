@@ -17,9 +17,9 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         {
             Read(plan.PointId!);
         }
-        else if (plan.Kind == QueryAccessKind.FullScan)
+        else if (plan.Kind is QueryAccessKind.FullScan or QueryAccessKind.PrimaryRange)
         {
-            FullScan();
+            DocumentRange();
         }
         else
         {
@@ -36,19 +36,21 @@ internal sealed class QueryCandidateReader(DatabaseEngine database, IKeyValueVie
         return plan.AccessPath;
     }
 
-    private void FullScan()
+    private void DocumentRange()
     {
-        if (keyset is null)
+        var afterKey = plan.AfterKey;
+        if (keyset?.AfterId is { } afterId)
         {
-            RowVisibilityFullScan.Visit(database, principal, resource, request, budget, visibilitySourceEpoch,
-                visitor => budget.VisitAll(view, plan.Prefix, visitor), accept);
-            return;
+            var cursorKey = KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, afterId);
+            if (afterKey is null || BinaryKeyComparer.Instance.Compare(afterKey, cursorKey) < 0)
+            {
+                afterKey = cursorKey;
+            }
         }
-        var afterKey = keyset.AfterId is null ? null
-            : KeySpace.Partition(DocumentSpace, request.Partition, request.Query.Collection, keyset.AfterId);
         RowVisibilityFullScan.Visit(database, principal, resource, request, budget, visibilitySourceEpoch,
             visitor => budget.VisitAll(view, plan.Prefix,
-                (key, value) => visitor(key, value) && !keyset.Satisfied(), afterKey), accept, partial: afterKey is not null);
+                (key, value) => visitor(key, value) && keyset?.Satisfied() != true, afterKey, plan.UntilKey), accept,
+            partial: plan.Kind == QueryAccessKind.PrimaryRange || afterKey is not null);
     }
 
     private void Candidate(ReadOnlySpan<byte> payload)

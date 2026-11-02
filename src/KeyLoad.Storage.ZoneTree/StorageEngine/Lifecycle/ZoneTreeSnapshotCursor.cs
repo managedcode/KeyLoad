@@ -15,12 +15,13 @@ internal sealed class ZoneTreeSnapshotCursor : IDisposable
         snapshot = runtime.CurrentOperation.Snapshot.Retain();
         try
         {
-            var options = new TransactionIteratorOptions { ContributeToTheBlockCache = false };
+            var options = new TransactionIteratorOptions { ContributeToTheBlockCache = true };
             var transactional = reverse ? snapshot.Transaction.CreateReverseIterator(options) : snapshot.Transaction.CreateIterator(options);
             try
             {
                 var mode = capturePlain ? IteratorType.Snapshot : IteratorType.NoRefresh;
-                var plain = reverse ? runtime.PlainTree.CreateReverseIterator(mode) : runtime.PlainTree.CreateIterator(mode);
+                var plainOptions = new IteratorOptions { IteratorType = mode, ContributeToTheBlockCache = true };
+                var plain = reverse ? runtime.PlainTree.CreateReverseIterator(plainOptions) : runtime.PlainTree.CreateIterator(plainOptions);
                 Iterator = new ZoneTreeMergedIterator(transactional, plain, reverse);
             }
             catch (Exception original)

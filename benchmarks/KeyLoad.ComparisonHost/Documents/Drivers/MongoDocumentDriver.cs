@@ -20,6 +20,7 @@ internal sealed class MongoDocumentDriver : IDocumentDriver
     private const string CollectionName = "documents";
     private const string IdField = "_id";
     private const string NumberField = DocumentDataset.NumberProperty;
+    private const string NumberIndex = "number_asc";
     private const string MissingDocument = "MongoDB has no document ";
     private const int Batch = 256;
     private const int PreferredPrimary = 0;
@@ -43,7 +44,8 @@ internal sealed class MongoDocumentDriver : IDocumentDriver
     public async Task PrepareAsync(CancellationToken token)
     {
         await database.CreateCollectionAsync(CollectionName, cancellationToken: token);
-        var index = new CreateIndexModel<BsonDocument>(Builders<BsonDocument>.IndexKeys.Ascending(NumberField));
+        var index = new CreateIndexModel<BsonDocument>(Builders<BsonDocument>.IndexKeys.Ascending(NumberField),
+            new CreateIndexOptions { Name = NumberIndex });
         await collection.Indexes.CreateOneAsync(index, cancellationToken: token);
     }
 
@@ -59,7 +61,7 @@ internal sealed class MongoDocumentDriver : IDocumentDriver
     public async Task<IReadOnlyList<string>> FindRangeAsync(long from, long to, CancellationToken token)
     {
         var filter = Builders<BsonDocument>.Filter.Gte(NumberField, from) & Builders<BsonDocument>.Filter.Lte(NumberField, to);
-        var rows = await collection.Find(filter).Project(OnlyId).ToListAsync(token);
+        var rows = await collection.Find(filter, new FindOptions { Hint = NumberIndex }).Project(OnlyId).ToListAsync(token);
         return [.. rows.Select(row => row[IdField].AsString)];
     }
 

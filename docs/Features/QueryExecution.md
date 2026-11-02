@@ -42,6 +42,15 @@ Complete range traversal stops its internal visitor at the provider's record cei
 
 Single-field scalar indexes also serve conjunctive `<`, `<=`, `>` and `>=` predicates, including reversed operands and bound parameters. The planner selects the tightest encoded lower and upper bounds and seeks through the existing storage range API. Strict bounds exclude every document sharing the boundary value; inclusive bounds retain them. The full predicate, persisted row/field authorization, original read cut and cursor fences still apply to every selected document. Disjunctions do not select just one branch. Composite inequality planning remains unsupported. `IndexRangeAccessPathTests` checks SQL/AST parity, exact endpoints, duplicate values, residuals, physical examined-entry bounds, protected fields, cancellation and cursor invalidation.
 
+Text primary-key inequalities use the existing canonical document-key ordering
+without requiring a duplicate secondary index or full-scan permission. `EXPLAIN`
+reports `primary-key-range-seek`, and execution reports `primary-key-range`.
+Residual predicates and fresh authorization still apply; a bounded range never
+populates the complete collection visibility cache. `PrimaryKeyRangeAccessPathTests`
+checks inclusive/exclusive and reversed bounds, parameters, Unicode and prefix
+keys, SQL/AST parity, bounded physical visits, paging, revocation, cancellation,
+deleted rows and two cold opens.
+
 Q1 provides typed adapter validation, authorization, deterministic scalar order, a bounded current-cut query and cursor, and a capability manifest. A global serializable snapshot, arbitrary joins and user delegates, and cross-shard execution are not declared implemented. [Search](Search.md) and [ChangeFeeds](ChangeFeeds.md) have their own behavior contracts; a live scalar query uses the same safe query boundary.
 
 Decisions: [ADR-147 id continuation](../ADR/ADR-147-id-ordered-query-continuation.md), [ADR-149 no operation limits](../ADR/ADR-149-no-operation-limits.md), [ADR-004](../ADR/ADR-004-committed-read-views.md), [ADR-010](../ADR/ADR-010-query-budgets-security.md), [ADR-013 AST](../ADR/ADR-013-authorized-query-ast.md), [ADR-020 contexts](../ADR/ADR-020-independent-query-contexts.md), [ADR-022 policy epoch](../ADR/ADR-022-policy-epoch-revocation.md). One integration owner holds the shared AST, codec, security and cursor contracts. Qualification comes only from the TUnit, recovery and Aspire cluster SDK/MCP runs.
