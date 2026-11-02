@@ -358,6 +358,11 @@ least-privilege permissions.
 
 Version increases require the owner's explicit permission for that specific increase. This includes packages, releases, grain interfaces, protocol versions, serializer aliases and persisted/public contracts. Cleanup, refactoring, contract changes and standing delivery authorization do not authorize a version increase.
 
+Published `ZoneTree` package updates have standing owner authorization; apply them
+without asking for permission again. Review the release and public API changes,
+then run the affected build, WAL, recovery and performance checks. This exception
+does not authorize unrelated package or KeyLoad contract version increases.
+
 `ManagedCode.*` projects and packages are ours. A confirmed defect is fixed in its
 owning sibling repository after reading its policy. Do not replace the dependency,
 copy its implementation or hide the defect with a consumer workaround.
