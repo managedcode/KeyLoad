@@ -11,7 +11,7 @@ public interface IConnectionGrain : Orleans.IGrainWithGuidKey
     /// <param name="cancellationToken">Caller cancellation propagated through Orleans and joined cleanup.</param>
     /// <returns>The original terminal reply after complete stream settlement.</returns>
     [Orleans.Alias(GrainRoutingProtocol.ExecuteAlias), Orleans.Concurrency.AlwaysInterleave,
-        Orleans.ResponseTimeout(GrainRoutingOptions.MaximumExecutionLifetime)]
+        Orleans.ResponseTimeout(GrainRoutingOptions.RequestResponseTimeout)]
     Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope request, CancellationToken cancellationToken);
 
     /// <summary>Validate trusted scope and invoke the required database capability.</summary>

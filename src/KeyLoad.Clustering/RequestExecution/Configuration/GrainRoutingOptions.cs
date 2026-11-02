@@ -11,8 +11,8 @@ public sealed class GrainRoutingOptions
     /// <summary>The startup failure for unsafe request and execution lifetimes.</summary>
     public const string ValidationMessage = "The idle connection timeout must be positive and at most two minutes.";
 
-    internal const string MaximumExecutionLifetime = "00:02:00";
-    private static readonly TimeSpan MaximumDuration = TimeSpan.Parse(MaximumExecutionLifetime, System.Globalization.CultureInfo.InvariantCulture);
+    internal const string RequestResponseTimeout = "10675199.02:48:05.4775807";
+    private static readonly TimeSpan MaximumDuration = TimeSpan.FromMinutes(2);
 
     /// <summary>Gets or sets idle physical transport expiry while no operation is active.</summary>
     public TimeSpan ConnectionIdleTimeout { get; set; } = MaximumDuration;

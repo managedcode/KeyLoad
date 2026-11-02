@@ -10,7 +10,7 @@ public interface IRequestGrain : Orleans.IGrainWithGuidKey
     /// <param name="request">Authenticated server envelope with its typed operation.</param>
     /// <param name="cancellationToken">Caller cancellation propagated through Orleans and joined cleanup.</param>
     /// <returns>The original terminal reply after complete stream settlement.</returns>
-    [Orleans.Alias(GrainRoutingProtocol.ExecuteAlias), Orleans.ResponseTimeout(GrainRoutingOptions.MaximumExecutionLifetime)]
+    [Orleans.Alias(GrainRoutingProtocol.ExecuteAlias), Orleans.ResponseTimeout(GrainRoutingOptions.RequestResponseTimeout)]
     Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope request, CancellationToken cancellationToken);
 
     /// <summary>Runs the operation as a bounded progress stream.</summary>

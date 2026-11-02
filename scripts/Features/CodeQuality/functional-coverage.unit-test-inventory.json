@@ -27078,6 +27078,26 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.OrleansExecution.ConnectionRequestLifetimeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.ConnectionRequestLifetimeTests",
+      "methodName": "AcCrs051ActiveRequestOutlivesConnectionIdleTimeoutUntilCallerCancels",
+      "instanceName": "AcCrs051ActiveRequestOutlivesConnectionIdleTimeoutUntilCallerCancels",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/Connection/ConnectionRequestLifetimeTests.cs",
+      "sourceSha256": "5e083741db97cb9bf2679a0683031c68265bed0ebe1fb1b90c5565bb9b57a0d9",
+      "lineNumber": 5,
+      "endLineNumber": 42,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CLIENT-CONNECTION-001",
+        "REQ-CLIENT-CONNECTION-002"
+      ],
+      "acceptance": [
+        "AC-CLIENT-CONNECTION-001",
+        "AC-CLIENT-CONNECTION-002"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.OrleansExecution.ConnectionSettlementTests",
       "reportClassName": "KeyLoad.FunctionalTests.OrleansExecution.ConnectionSettlementTests",
       "methodName": "AcCrs056NeverPulledStreamDoesNotActivateAndEarlyDisposalJoinsWithoutEffects",
@@ -63902,7 +63922,7 @@
     },
     {
       "groupId": "unit-functional-04",
-      "selector": "/KeyLoad.FunctionalTests/*/(Ada*)|(AdminC*)|(AggregateReplayA*)|(AggregateReplayWorkerB*)|(AnalyticsBoundC*)|(AnalyticsSh*)|(AnalyticsStoreP*)|(AnnProjectionPinB*)|(AnnProv*)|(AnnSeedM*)|(AnnWaitPi*)|(AnnWaitR*)|(AtomicPartitionRosterP*)|(AtomicT*)|(BackupP*)|(Bm25I*)|(Bm25Pu*)|(BoundL*)|(Cac*)|(Cal*)|(CanonicalO*)|(CatalogI*)|(ChunkG*)|(ChunkMultiblockP*)|(ChunkSelectedB*)|(CliBackupO*)|(CommandOutcomeA*)|(Commi*)|(Compose*)|(ConnectionC*)|(ConnectionSe*)|(CoreAc*)|(DatabaseCompositionD*)|(DatabaseCompositionR*)|(Disk*)|(DocumentF*)|(DocumentI*)|(DocumentLif*)|(DocumentPa*)|(DropF*)|(Ep*)|(EventAppendW*)|(EventProjectionC*)|(FilteredSearchO*)|(GraphCrossPartitionMu*)|(GraphCrossPartitionRep*)|(GraphM*)|(GraphRef*)|(GraphSearchA*)|(GraphSearchC*)|(GraphShortestPathA*)|(GraphTe*)|(HybridQualityR*)|(JournalPrincipalI*)|(JsonP*)|(JsonTextP*)|(KeyCodecTe*)|(LiveR*)|(Ma*)|(McpAuthenticationM*)|(McpAuthenticationP*)|(McpGatewayC*)|(McpI*)|(No*)|(OperationC*)|(PackedAnnOwnedSimilarityT*)|(PackedAnnReb*)|(PackedAnnV*)|(PartitionI*)|(PartitionRecordP*)|(PartitionStoragePro*)|(Prepara*)|(ProjectionCa*)|(ProjectionCons*)|(PublicC*)|(QueryAdapterT*)|(QueryCu*)|(QueryE*)|(QueryL*)|(QueryRes*)|(QueueDeadLetterA*)|(QueueDeadlineC*)|(QueueDel*)|(QueueDispatchC*)|(QueueI*)|(QueueLiv*)|(QueuePe*)|(QueueReta*)|(QueueS*)|(ReadCutCl*)|(Reader*)|(RecurringO*)|(RelationalS*)|(RemoteTransferC*)|(RemoteTransferD*)|(RemoteTransferI*)|(RequestCqrsAnnEnrollmentT*)|(RequestCqrsT*)|(RequestW*)|(Requi*)|(Reve*)|(RuntimeJournalR*)|(RuntimeJournalS*)|(Saf*)|(SagaTimeoutF*)|(SampleAggregateW*)|(SampleChunkCanonicalR*)|(SampleChunkMix*)|(SampleChunkStoreR*)|(SampleChunkW*)|(SampleRa*)|(SampleRollupR*)|(Sp*)|(SqlBetweenRa*)|(SqlBetweenS*)|(SqlComp*)|(SqlInnerJoinO*)|(SqlJ*)|(SqlModelE*)|(SqlNullO*)|(StoreI*)|(StreamC*)|(SubscriptionF*)|(SubscriptionG*)|(SubscriptionLeaseA*)|(SubscriptionPa*)|(TargetInboxP*)|(Tes*)|(TextIncrementalE*)|(TextOnlineF*)|(TextProjectionF*)|(TextProt*)|(TimeSeriesC*)|(TopicRetentionI*)|(TopicRetentionO*)|(VectorA*)|(ZoneTreeB*)/(*)&(!AcChunk004InvalidUtf8AndNoncanonicalUtf16RejectWithValidChecksum*)&(!AcMp006StoredErrorPrecedesWrongValueAndAbsentResultRemainsCorruption*)&(!AcR14ReplayComparisonRejectsChangedInternalCompositionReferences*)&(!CommandRetainsExactInputAndOpaqueUserJson*)&(!FunctionExposesExactCanonicalNameDescriptionAndSchemas*)&(!StaticCatalogFitsOperationAndMetadataCaps*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(Ada*)|(AdminC*)|(AggregateReplayA*)|(AggregateReplayWorkerB*)|(AnalyticsBoundC*)|(AnalyticsSh*)|(AnalyticsStoreP*)|(AnnProjectionPinB*)|(AnnProv*)|(AnnSeedM*)|(AnnWaitPi*)|(AnnWaitR*)|(AtomicPartitionRosterP*)|(AtomicT*)|(BackupP*)|(Bm25I*)|(Bm25Pu*)|(BoundL*)|(Cac*)|(Cal*)|(CanonicalO*)|(CatalogI*)|(ChunkG*)|(ChunkMultiblockP*)|(ChunkSelectedB*)|(CliBackupO*)|(CommandOutcomeA*)|(Commi*)|(Compose*)|(ConnectionC*)|(ConnectionR*)|(ConnectionSe*)|(CoreAc*)|(DatabaseCompositionD*)|(DatabaseCompositionR*)|(Disk*)|(DocumentF*)|(DocumentI*)|(DocumentLif*)|(DocumentPa*)|(DropF*)|(Ep*)|(EventAppendW*)|(EventProjectionC*)|(FilteredSearchO*)|(GraphCrossPartitionMu*)|(GraphCrossPartitionRep*)|(GraphM*)|(GraphRef*)|(GraphSearchA*)|(GraphSearchC*)|(GraphShortestPathA*)|(GraphTe*)|(HybridQualityR*)|(JournalPrincipalI*)|(JsonP*)|(JsonTextP*)|(KeyCodecTe*)|(LiveR*)|(Ma*)|(McpAuthenticationM*)|(McpAuthenticationP*)|(McpGatewayC*)|(McpI*)|(No*)|(OperationC*)|(PackedAnnOwnedSimilarityT*)|(PackedAnnReb*)|(PackedAnnV*)|(PartitionI*)|(PartitionRecordP*)|(PartitionStoragePro*)|(Prepara*)|(ProjectionCa*)|(ProjectionCons*)|(PublicC*)|(QueryAdapterT*)|(QueryCu*)|(QueryE*)|(QueryL*)|(QueryRes*)|(QueueDeadLetterA*)|(QueueDeadlineC*)|(QueueDel*)|(QueueDispatchC*)|(QueueI*)|(QueueLiv*)|(QueuePe*)|(QueueReta*)|(QueueS*)|(ReadCutCl*)|(Reader*)|(RecurringO*)|(RelationalS*)|(RemoteTransferC*)|(RemoteTransferD*)|(RemoteTransferI*)|(RequestCqrsAnnEnrollmentT*)|(RequestCqrsT*)|(RequestW*)|(Requi*)|(Reve*)|(RuntimeJournalR*)|(RuntimeJournalS*)|(Saf*)|(SagaTimeoutF*)|(SampleAggregateW*)|(SampleChunkCanonicalR*)|(SampleChunkMix*)|(SampleChunkStoreR*)|(SampleChunkW*)|(SampleRa*)|(SampleRollupR*)|(Sp*)|(SqlBetweenRa*)|(SqlBetweenS*)|(SqlComp*)|(SqlInnerJoinO*)|(SqlJ*)|(SqlModelE*)|(SqlNullO*)|(StoreI*)|(StreamC*)|(SubscriptionF*)|(SubscriptionG*)|(SubscriptionLeaseA*)|(SubscriptionPa*)|(TargetInboxP*)|(Tes*)|(TextIncrementalE*)|(TextOnlineF*)|(TextProjectionF*)|(TextProt*)|(TimeSeriesC*)|(TopicRetentionI*)|(TopicRetentionO*)|(VectorA*)|(ZoneTreeB*)/(*)&(!AcChunk004InvalidUtf8AndNoncanonicalUtf16RejectWithValidChecksum*)&(!AcMp006StoredErrorPrecedesWrongValueAndAbsentResultRemainsCorruption*)&(!AcR14ReplayComparisonRejectsChangedInternalCompositionReferences*)&(!CommandRetainsExactInputAndOpaqueUserJson*)&(!FunctionExposesExactCanonicalNameDescriptionAndSchemas*)&(!StaticCatalogFitsOperationAndMetadataCaps*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminCatalogTests",
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundCoreReadTests",
@@ -63980,6 +64000,7 @@
         "KeyLoad.FunctionalTests.OrleansExecution.CommandOutcomeAuthorizationOrderTests",
         "KeyLoad.FunctionalTests.OrleansExecution.ConnectionCallerFactoryTests",
         "KeyLoad.FunctionalTests.OrleansExecution.ConnectionCloseAdmissionTests",
+        "KeyLoad.FunctionalTests.OrleansExecution.ConnectionRequestLifetimeTests",
         "KeyLoad.FunctionalTests.OrleansExecution.ConnectionSettlementTests",
         "KeyLoad.FunctionalTests.OrleansExecution.EpochGrainRequestPurposeTests",
         "KeyLoad.FunctionalTests.OrleansExecution.PartitionRecordPageBoundsTests",
@@ -64324,6 +64345,7 @@
         "KeyLoad.FunctionalTests.OrleansExecution.CommandOutcomeAuthorizationOrderTests|DeniedOperationDoesNotValidateCorruptCurrentOutcomeBeforeAuthorization|DeniedOperationDoesNotValidateCorruptCurrentOutcomeBeforeAuthorization",
         "KeyLoad.FunctionalTests.OrleansExecution.ConnectionCallerFactoryTests|DuplicateRegistrationDoesNotStartLosingCallerAndBothOriginalAndFreshFactoriesSettle|DuplicateRegistrationDoesNotStartLosingCallerAndBothOriginalAndFreshFactoriesSettle",
         "KeyLoad.FunctionalTests.OrleansExecution.ConnectionCloseAdmissionTests|SignedCloseRetainsOriginalCallbackLeaseThenFreshOwnerAndSecondPrincipalReplaySucceed|SignedCloseRetainsOriginalCallbackLeaseThenFreshOwnerAndSecondPrincipalReplaySucceed",
+        "KeyLoad.FunctionalTests.OrleansExecution.ConnectionRequestLifetimeTests|AcCrs051ActiveRequestOutlivesConnectionIdleTimeoutUntilCallerCancels|AcCrs051ActiveRequestOutlivesConnectionIdleTimeoutUntilCallerCancels",
         "KeyLoad.FunctionalTests.OrleansExecution.ConnectionSettlementTests|AcCrs056NeverPulledStreamDoesNotActivateAndEarlyDisposalJoinsWithoutEffects|AcCrs056NeverPulledStreamDoesNotActivateAndEarlyDisposalJoinsWithoutEffects",
         "KeyLoad.FunctionalTests.OrleansExecution.EpochGrainRequestPurposeTests|AcEpoch005UnsupportedRequestPurposeFailsBeforeActorRouting|AcEpoch005UnsupportedRequestPurposeFailsBeforeActorRouting(unsupported-grain-purpose-one)",
         "KeyLoad.FunctionalTests.OrleansExecution.EpochGrainRequestPurposeTests|AcEpoch005UnsupportedRequestPurposeFailsBeforeActorRouting|AcEpoch005UnsupportedRequestPurposeFailsBeforeActorRouting(unsupported-grain-purpose-three)",
