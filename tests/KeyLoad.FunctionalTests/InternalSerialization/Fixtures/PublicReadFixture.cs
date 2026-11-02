@@ -74,8 +74,8 @@ internal static class PublicReadFixture
         await using var owner = new RequestWorkOwner();
         object? result = null;
         await KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundCoreOwner.LeaseAsync(database, owner, async (lease, _, _) =>
-            result = await capabilities.ExecuteAsync(request.Envelope.ReadKind!.Value, principal.Id, request.Payload, lease,
-                CancellationToken.None).ConfigureAwait(false), CancellationToken.None).ConfigureAwait(false);
+            result = (await capabilities.ExecuteAsync(request.Envelope.ReadKind!.Value, principal.Id, request, lease,
+                CancellationToken.None).ConfigureAwait(false)).Value, CancellationToken.None).ConfigureAwait(false);
         return result!;
     }
 }

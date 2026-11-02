@@ -11,19 +11,19 @@ internal static class UserAnalyticsReadExecution
     internal static bool Handles(GrainReadKind kind)
         => kind is GrainReadKind.AnalyticsEvents or GrainReadKind.AnalyticsAggregate;
 
-    internal static async Task<object?> ExecuteAsync(DatabaseEngine database, IServiceProvider services,
+    internal static async Task<GrainValue> ExecuteAsync(DatabaseEngine database, IServiceProvider services,
         PrincipalRecord principal, GrainReadKind kind, DecodedGrainRequest request, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         var work = new ReadExecutionBudget(database.EvaluationClock, token);
         work.AttachResourceLifetimeBinding(binding);
         return kind switch
         {
-            GrainReadKind.AnalyticsEvents => database.ReadAnalyticsEventsBound(principal.Id,
-                GrainPayload.Read<ReadAnalyticsEventsRequest>(request.Payload), work, binding),
-            GrainReadKind.AnalyticsAggregate => await AggregateAsync(database, services, principal,
-                GrainPayload.Read<AggregateAnalyticsRequest>(request.Payload), work, binding, token).ConfigureAwait(true),
+            GrainReadKind.AnalyticsEvents => new GrainValue(database.ReadAnalyticsEventsBound(principal.Id,
+                (GrainPayload.Read<ReadAnalyticsEventsRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.ReadAnalyticsEventsRequest at this closed operation boundary before executing typed code. */), work, binding)) /* KLD0041: The current GrainValue wire slot carries this AnalyticsEvents response with its generated runtime type header. */,
+            GrainReadKind.AnalyticsAggregate => new GrainValue(await AggregateAsync(database, services, principal,
+                (GrainPayload.Read<AggregateAnalyticsRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.AggregateAnalyticsRequest at this closed operation boundary before executing typed code. */), work, binding, token).ConfigureAwait(true)) /* KLD0041: The current GrainValue wire slot carries this AnalyticsAggregate response with its generated runtime type header. */,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
     }

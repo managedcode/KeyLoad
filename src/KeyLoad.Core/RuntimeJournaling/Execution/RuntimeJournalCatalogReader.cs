@@ -67,7 +67,7 @@ internal static class RuntimeJournalCatalogReader
         ImmutableArray<RuntimeJournalHeader>.Builder headers, Dictionary<string, int> nextIndices,
         RuntimeJournalOptions options)
     {
-        KeyComponent[] components;
+        DecodedKey components;
         try
         {
             components = KeyCodec.Decode(key);
@@ -78,10 +78,10 @@ internal static class RuntimeJournalCatalogReader
         }
         if (components.Length != RuntimeJournalProtocol.ChunkKeyComponentCount
             || components[RuntimeJournalProtocol.ChunkKeySpaceComponent] is not { Kind: KeyComponentKind.Text, Text: var space } || space != RuntimeJournalProtocol.Space
-            || components[RuntimeJournalProtocol.ChunkKeyVersionComponent] is not { Kind: KeyComponentKind.WholeNumber, Integer: var version } || version != RuntimeJournalProtocol.CurrentVersion
+            || components[RuntimeJournalProtocol.ChunkKeyVersionComponent] is not { Kind: KeyComponentKind.WholeNumber, WholeNumber: var version } || version != RuntimeJournalProtocol.CurrentVersion
             || components[RuntimeJournalProtocol.ChunkKeyKindComponent] is not { Kind: KeyComponentKind.Text, Text: var kind } || kind != RuntimeJournalProtocol.ChunkKey
             || components[RuntimeJournalProtocol.ChunkKeyNameComponent] is not { Kind: KeyComponentKind.Text, Text: var name }
-            || components[RuntimeJournalProtocol.ChunkKeyIndexComponent] is not { Kind: KeyComponentKind.WholeNumber, Integer: var index }
+            || components[RuntimeJournalProtocol.ChunkKeyIndexComponent] is not { Kind: KeyComponentKind.WholeNumber, WholeNumber: var index }
             || index < RuntimeJournalProtocol.EmptyGeneration)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, RuntimeJournalProtocol.InvalidState);

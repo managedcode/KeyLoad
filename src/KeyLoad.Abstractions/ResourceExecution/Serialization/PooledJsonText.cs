@@ -14,7 +14,7 @@ internal static class PooledJsonText
 
     public static T Deserialize<T>(string value)
     {
-        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(value) /* KLD0041: The standard CLR guard checks the typed JSON string reference before renting its UTF-8 loan. */;
         var buffer = Buffers.Rent(Encoding.UTF8.GetByteCount(value));
         try
         {
@@ -28,15 +28,15 @@ internal static class PooledJsonText
         }
     }
 
-    public static object Deserialize(string value, Type type)
+    public static object /* KLD0041: The registry-selected runtime Type requires the native JSON object result; the generic overload remains fully typed. */ Deserialize(string value, Type type)
     {
-        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(value) /* KLD0041: The standard CLR guard checks the runtime-Type JSON input string before a bounded UTF-8 loan. */;
         var byteCount = Encoding.UTF8.GetByteCount(value);
         var buffer = Buffers.Rent(byteCount);
         try
         {
             var written = Encoding.UTF8.GetBytes(value.AsSpan(), buffer);
-            return JsonDefaults.Deserialize(buffer.AsSpan(0, written), type);
+            return JsonDefaults.Deserialize(buffer.AsSpan(0, written), type) /* KLD0041: The runtime-Type JSON entry point consumes the borrowed bytes while retaining its native decoded result. */;
         }
         finally
         {

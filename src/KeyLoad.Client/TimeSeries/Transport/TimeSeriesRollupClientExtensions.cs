@@ -13,8 +13,8 @@ public static class TimeSeriesRollupClientExtensions
     public static Task<Result<SampleRollupResult>> ReadSampleRollupAsync(this KeyLoadClient client,
         ReadSampleRollupRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<SampleRollupResult>(SampleRollupProtocol.ReadRoute, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ReadSampleRollupRequest reference through its object parameter. */;
+        return client.Send<SampleRollupResult, ReadSampleRollupRequest>(SampleRollupProtocol.ReadRoute, request, false, null, cancellationToken);
     }
 }

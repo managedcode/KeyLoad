@@ -55,7 +55,7 @@ internal sealed class AnnPublicReadLease : IAnnProjectionLease
         {
             lock (gate)
             {
-                ObjectDisposedException.ThrowIf(disposed, this);
+                ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnPublicReadLease instance through object to preserve its runtime owner type. */;
                 return current.Manifest.Source.AppliedPosition;
             }
         }
@@ -66,7 +66,7 @@ internal sealed class AnnPublicReadLease : IAnnProjectionLease
         {
             lock (gate)
             {
-                ObjectDisposedException.ThrowIf(disposed, this);
+                ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnPublicReadLease instance through object to preserve its runtime owner type. */;
                 return current.Manifest.IndexGeneration;
             }
         }
@@ -80,7 +80,7 @@ internal sealed class AnnPublicReadLease : IAnnProjectionLease
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
+            ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnPublicReadLease instance through object to preserve its runtime owner type. */;
             return current.Index.Search(query, limit, eligible, budget);
         }
     }

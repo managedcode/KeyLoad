@@ -15,7 +15,7 @@ internal static class SampleRetentionStateReader
     internal static (bool HasValue, SampleRetentionState? Value) Read(IKeyValueView view, PartitionRef partition, string set,
         string seriesId, ReadExecutionBudget? budget = null)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var key = Key(partition, set, seriesId);
         SampleRetentionState? state = null;
         var found = view.ReadValue(key, value => state = Decode(value));

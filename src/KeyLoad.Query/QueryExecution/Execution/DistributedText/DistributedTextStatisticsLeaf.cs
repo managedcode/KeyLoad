@@ -14,11 +14,11 @@ internal static class DistributedTextStatisticsLeaf
         SearchRequest request, PhysicalShardRecord owner, string tenant,
         IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget, PartitionQueryLifetimeMetadata? metadata = null)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(owner);
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: BCL null validation accepts the database DatabaseEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(owner) /* KLD0041: BCL null validation accepts the owner PhysicalShardRecord reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         var execution = options.Value;
         execution.Validate();

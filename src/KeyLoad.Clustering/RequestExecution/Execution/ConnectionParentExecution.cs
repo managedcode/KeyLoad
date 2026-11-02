@@ -24,15 +24,15 @@ internal static class ConnectionParentExecution
         switch (request.Envelope.CommandKind)
         {
             case OperationKind.MaintainAnnIndex:
-                var ann = GrainPayload.ReadCommand<AnnMaintenanceRequest>(request.Payload);
+                var ann = (GrainPayload.ReadCommand<AnnMaintenanceRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.AnnMaintenanceRequest at this closed operation boundary before executing typed code. */);
                 RequireTarget(database, request, ann.CommandId, ann.NodeId, Enum.IsDefined(ann.Mode));
                 break;
             case OperationKind.MaintainTextIndex:
-                var text = GrainPayload.ReadCommand<TextIndexMaintenanceRequest>(request.Payload);
+                var text = (GrainPayload.ReadCommand<TextIndexMaintenanceRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.TextIndexMaintenanceRequest at this closed operation boundary before executing typed code. */);
                 RequireTarget(database, request, text.CommandId, text.NodeId, Enum.IsDefined(text.Mode));
                 break;
             case OperationKind.MaintainOnlineTextIndex:
-                var online = GrainPayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(request.Payload);
+                var online = (GrainPayload.ReadCommand<OnlineTextIndexMaintenanceRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.OnlineTextIndexMaintenanceRequest at this closed operation boundary before executing typed code. */);
                 RequireTarget(database, request, online.CommandId, online.NodeId,
                     online.ConsumerGeneration > UnallocatedConsumerGeneration);
                 break;

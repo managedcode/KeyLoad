@@ -14,8 +14,8 @@ internal sealed class PartitionStorageScope
 
     internal void Bind(PartitionHost actualHost, RequestWorkOwner actualWork)
     {
-        ArgumentNullException.ThrowIfNull(actualHost);
-        ArgumentNullException.ThrowIfNull(actualWork);
+        ArgumentNullException.ThrowIfNull(actualHost) /* KLD0041: BCL null validation accepts the actualHost PartitionHost reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(actualWork) /* KLD0041: BCL null validation accepts the actualWork RequestWorkOwner reference through its object parameter. */;
         if (host is not null || work is not null)
         {
             throw new InvalidOperationException(Unbound);

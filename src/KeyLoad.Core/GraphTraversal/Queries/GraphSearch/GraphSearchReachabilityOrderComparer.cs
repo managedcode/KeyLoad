@@ -41,7 +41,7 @@ internal sealed class GraphSearchReachabilityOrderComparer(ReadExecutionBudget b
 
     internal void RethrowOwnedBudgetFailure(InvalidOperationException wrapper)
     {
-        if (budgetFailure is { } failure && ReferenceEquals(wrapper.InnerException, failure.SourceException))
+        if (budgetFailure is { } failure && (ReferenceEquals(wrapper.InnerException, failure.SourceException) /* KLD0041: This comparison requires CLR reference identity rather than an overridden value-equality implementation. */))
         {
             failure.Throw();
         }

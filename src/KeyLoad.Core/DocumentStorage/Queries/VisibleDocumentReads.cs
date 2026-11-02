@@ -11,11 +11,11 @@ internal static class VisibleDocumentReads
     internal static void Visit(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, ReadExecutionBudget budget, Action<DocumentRecord> visitor)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(visitor);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         var metadata = budget.CreateView(view);
         var definition = ResourceDefinitionBinding.BindResourceDefinition(metadata, partition, collection, ResourceKind.Collection);

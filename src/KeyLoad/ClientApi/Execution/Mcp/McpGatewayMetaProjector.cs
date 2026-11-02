@@ -11,7 +11,7 @@ internal static class McpGatewayMetaProjector
 
     internal static McpGatewaySearchProjection Search(McpGatewaySearchResult result, int maximumMatches)
     {
-        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(result) /* KLD0041: BCL null validation accepts the result McpGatewaySearchResult reference through its object parameter. */;
         if (result.Matches is null || result.Matches.Count > maximumMatches)
         {
             throw RuntimeInvalidResult();
@@ -35,7 +35,7 @@ internal static class McpGatewayMetaProjector
     {
         const int ToolsCountValidationBoundary = 0;
 
-        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(result) /* KLD0041: BCL null validation accepts the result McpGatewayToolRouteResult reference through its object parameter. */;
         if (result.Categories is null || result.Categories.Count > maximumCategories)
         {
             throw RuntimeInvalidResult();

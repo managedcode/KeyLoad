@@ -16,7 +16,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
     internal void Attach(IResourceLifetimeWorkBinding value)
     {
         work.Check();
-        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(value) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (binding is not null)
         {
             Require(value);
@@ -40,8 +40,8 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
     internal void Require(IResourceLifetimeWorkBinding value)
     {
         work.Check();
-        ArgumentNullException.ThrowIfNull(value);
-        if (!ReferenceEquals(binding, value) || !ReferenceEquals(resultRetention, value.ResultRetention))
+        ArgumentNullException.ThrowIfNull(value) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        if (!(ReferenceEquals(binding, value) /* KLD0041: This comparison requires CLR reference identity rather than an overridden value-equality implementation. */) || !(ReferenceEquals(resultRetention, value.ResultRetention) /* KLD0041: This comparison requires CLR reference identity rather than an overridden value-equality implementation. */))
         {
             throw new InvalidOperationException(MissingBinding);
         }
@@ -75,7 +75,7 @@ internal sealed class ReadExecutionBudgetLifetimeBindings(ReadExecutionBudget wo
         ImmutableArray<ResourceDefinition> definitions, bool requireBinding)
     {
         work.Check();
-        ArgumentNullException.ThrowIfNull(authorizedView);
+        ArgumentNullException.ThrowIfNull(authorizedView) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (requireBinding && binding is null)
         {
             throw new InvalidOperationException(MissingBinding);

@@ -15,7 +15,7 @@ public sealed class AdminCatalogReader(DatabaseEngine database)
     /// <returns>Metadata only, with the applied position from the same gated cut.</returns>
     public AdminResourcesPage Read(string principalId, AdminResourcesRequest request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         JsonData.Identifier(request.TenantId);
         JsonData.Identifier(request.DatabaseId);
         AdminReadAuthority.ValidatePage(request.Limit, request.AfterName);

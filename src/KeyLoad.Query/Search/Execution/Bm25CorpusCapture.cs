@@ -11,9 +11,9 @@ internal static class Bm25CorpusCapture
         string subjectId, SearchRequest request, Guid commandId, Guid? expectedGeneration,
         ReadExecutionBudget work, IOptions<QueryExecutionOptions> options)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(work);
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: BCL null validation accepts the database DatabaseEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: BCL null validation accepts the work ReadExecutionBudget reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
         var execution = options.Value;
         execution.Validate();
         SearchRequestValidation.Validate(request, false, execution);

@@ -23,7 +23,7 @@ internal static class McpTransportDiagnostics
     /// <param name="error">The original guard rejection.</param>
     /// <returns>True only when the metadata is an owned enum value.</returns>
     internal static bool HasStage(KeyLoadException error) =>
-        error.Data[StageMetadataKey] is McpTransportStage stage && Enum.IsDefined(stage);
+        (((error.Data /* KLD0041: Read only the owned transport-stage key in the original exception's native Data dictionary; never log arbitrary exception metadata. */)[StageMetadataKey] /* KLD0041: Read only the owned transport-stage key in the original exception's native Data dictionary; never log arbitrary exception metadata. */) is McpTransportStage stage /* KLD0042: Read only an owned McpTransportStage enum from the native exception metadata and validate its defined value before sanitized logging. */) && Enum.IsDefined(stage);
 
     /// <summary>Logs only sanitized enum metadata and never passes the original exception to the provider.</summary>
     /// <param name="logger">The optional application logger.</param>
@@ -33,15 +33,15 @@ internal static class McpTransportDiagnostics
     internal static void Log(ILogger? logger, KeyLoadException error, IHeaderDictionary headers,
         IOptions<McpExecutionOptions> executionOptions)
     {
-        ArgumentNullException.ThrowIfNull(error);
-        ArgumentNullException.ThrowIfNull(headers);
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(error) /* KLD0041: BCL null validation accepts the error KeyLoadException reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(headers) /* KLD0041: BCL null validation accepts the headers IHeaderDictionary reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         if (logger is null)
         {
             return;
         }
 
-        var stage = error.Data[StageMetadataKey] is McpTransportStage marked && Enum.IsDefined(marked)
+        var stage = (((error.Data /* KLD0041: Read only the owned transport-stage key in the original exception's native Data dictionary; never log arbitrary exception metadata. */)[StageMetadataKey] /* KLD0041: Read only the owned transport-stage key in the original exception's native Data dictionary; never log arbitrary exception metadata. */) is McpTransportStage marked /* KLD0042: Read only an owned McpTransportStage enum from the native exception metadata and validate its defined value before sanitized logging. */) && Enum.IsDefined(marked)
             ? marked
             : McpTransportStage.Unknown;
         LogRejected(logger, stage, MethodCategory(headers, executionOptions.Value.MaximumTransportMethodCharacters), null);

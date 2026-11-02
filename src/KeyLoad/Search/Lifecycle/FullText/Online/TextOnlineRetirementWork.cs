@@ -34,7 +34,7 @@ internal static class TextOnlineRetirementWork
             }
             lock (generationGate)
             {
-                if (retirements.TryGetValue(original.Key, out var actual) && ReferenceEquals(actual, original.Value))
+                if (retirements.TryGetValue(original.Key, out var actual) && (ReferenceEquals(actual, original.Value) /* KLD0041: Remove only the original retirement task instance through CLR reference identity. */))
                 {
                     retirements.Remove(original.Key);
                 }

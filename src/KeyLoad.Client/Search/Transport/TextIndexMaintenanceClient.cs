@@ -13,8 +13,8 @@ public static class TextIndexMaintenanceClient
     public static Task<Result<TextIndexMaintenanceResult>> MaintainTextIndexAsync(this KeyLoadClient client,
         TextIndexMaintenanceRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<TextIndexMaintenanceResult>(TextIndexMaintenanceProtocol.Route, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request TextIndexMaintenanceRequest reference through its object parameter. */;
+        return client.Send<TextIndexMaintenanceResult, TextIndexMaintenanceRequest>(TextIndexMaintenanceProtocol.Route, request, true, request.CommandId, cancellationToken);
     }
 }

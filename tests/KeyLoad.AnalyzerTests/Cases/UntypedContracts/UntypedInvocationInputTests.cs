@@ -3,6 +3,41 @@ namespace KeyLoad.AnalyzerTests.CodeQuality;
 internal sealed class UntypedInvocationInputTests
 {
     [Test]
+    public async Task AConcreteCreatedTypeDoesNotHideItsErasedConstructorInput()
+    {
+        const string source = """
+            internal sealed class Subject
+            {
+                internal Subject(object /* KLD0041: This constructor admits a CLR metadata value whose type is inspected by its owner. */ value) { }
+                internal static void Run()
+                {
+                    _ = new Subject("text");
+                    Subject owned = new("text");
+                }
+            }
+            """;
+        var findings = await UntypedContractAnalyzerFixture.ContractsAsync(source);
+        await UntypedContractAnalyzerFixture.LocatedAsync(findings, UntypedContractAnalyzerFixture.ContractId,
+            source, "new Subject(\"text\")", "new(\"text\")");
+    }
+
+    [Test]
+    public async Task ConstructorUsesRequireTheirOwnExactReasons()
+    {
+        const string source = """
+            internal sealed class Subject
+            {
+                internal Subject(object /* KLD0041: This constructor admits a CLR metadata value whose type is inspected by its owner. */ value) { }
+                internal static void Run()
+                {
+                    _ = (new Subject("text") /* KLD0041: This individual constructor takes the current native metadata value without serialization or copying. */);
+                }
+            }
+            """;
+        await Assert.That(await UntypedContractAnalyzerFixture.ContractsAsync(source)).IsEmpty();
+    }
+
+    [Test]
     public async Task TypedReturnDoesNotHideAnErasedParameter()
     {
         const string source = """

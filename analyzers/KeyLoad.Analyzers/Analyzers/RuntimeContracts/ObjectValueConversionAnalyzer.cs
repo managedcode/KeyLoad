@@ -30,5 +30,7 @@ public sealed class ObjectValueConversionAnalyzer : DiagnosticAnalyzer
             Microsoft.CodeAnalysis.OperationKind.Conversion);
         context.RegisterOperationAction(operation => ObjectConversionAnalysis.AnalyzePattern(operation, Rule),
             Microsoft.CodeAnalysis.OperationKind.IsPattern);
+        context.RegisterOperationAction(operation => ObjectConversionAnalysis.AnalyzeSwitchPattern(operation, Rule),
+            Microsoft.CodeAnalysis.OperationKind.DeclarationPattern);
     }
 }

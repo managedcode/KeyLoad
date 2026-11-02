@@ -19,7 +19,7 @@ internal static class ResourceLifetimeCatalog
     internal static (bool HasValue, ResourceLifetime? Value) Read(IKeyValueView view, string tenantId, string databaseId,
         string resourceName, ResourceDefinition? definition)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var lifetime = view.GetRecord<ResourceLifetime>(Key(tenantId, databaseId, resourceName));
         if (definition is null && lifetime is null)
         {
@@ -38,8 +38,8 @@ internal static class ResourceLifetimeCatalog
     internal static ResourceLifetime Create(IAtomicTransaction transaction, Command<DatabaseCommand> original,
         string tenantId, string databaseId, ResourceDefinition definition)
     {
-        ArgumentNullException.ThrowIfNull(transaction);
-        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(transaction) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(definition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var previous = transaction.GetRecord<ResourceDefinition>(KeySpace.Resource(tenantId, databaseId, definition.Name));
         if ((Read(transaction, tenantId, databaseId, definition.Name, previous)).Value is not null)
         {

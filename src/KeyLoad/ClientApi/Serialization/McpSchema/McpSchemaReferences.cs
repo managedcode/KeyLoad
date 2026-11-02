@@ -23,7 +23,7 @@ internal static class McpSchemaReferences
     /// <param name="prefix">Root-local pointer at which the graph will be embedded.</param>
     internal static void Rebase(JsonNode schema, string prefix)
     {
-        ArgumentNullException.ThrowIfNull(schema);
+        ArgumentNullException.ThrowIfNull(schema) /* KLD0041: BCL null validation accepts the schema JsonNode reference through its object parameter. */;
         ArgumentException.ThrowIfNullOrWhiteSpace(prefix);
         if (schema is not JsonObject node)
         {

@@ -21,7 +21,7 @@ public static class ProjectionBatchExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static ProjectionBatch ReadProjectionBatch(this DatabaseEngine engine, string principalId, ReadProjectionBatchRequest request)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Store.Read(view => engine.ReadProjectionBatchRead(view, principalId, request));
     }
 

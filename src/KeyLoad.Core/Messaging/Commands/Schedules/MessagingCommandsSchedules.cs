@@ -17,7 +17,7 @@ public static class MessagingCommandsSchedules
     internal const long MaximumIntervalTicks = 365L * TimeSpan.TicksPerDay;
     internal static MutationReceipt ApplyConfigureRecurringSchedule(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ConfigureRecurringSchedule request, DateTimeOffset now)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var definition = RecurringScheduleValidation.NormalizeScheduleDefinition(request.Definition);
         RecurringScheduleValidation.ValidateScheduleScope(definition.Lane, definition.ScheduleId, partition);
         var resource = engine.Resource(tx, partition, definition.Lane.Queue, ResourceKind.WorkQueue);
@@ -41,7 +41,7 @@ public static class MessagingCommandsSchedules
 
     internal static MutationReceipt ApplyCancelRecurringSchedule(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, CancelRecurringSchedule request, DateTimeOffset now)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         RecurringScheduleValidation.ValidateScheduleScope(request.Lane, request.ScheduleId, partition);
         var resource = engine.Resource(tx, partition, request.Lane.Queue, ResourceKind.WorkQueue);
         engine.RequireScheduleWriteAuthority(principal, request.Lane, resource);
@@ -67,7 +67,7 @@ public static class MessagingCommandsSchedules
 
     internal static MutationReceipt ApplyEmitRecurringOccurrences(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, EmitRecurringOccurrences request, DateTimeOffset now)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         RecurringScheduleValidation.ValidateScheduleScope(request.Lane, request.ScheduleId, partition);
         if (request.MaxOccurrences < MessagingCommandsSchedules.RecurringScheduleCommandsMinimumPositiveCount || request.MaxOccurrences > engine.MessagingExecution.MaximumOccurrenceCatchUp)
         {

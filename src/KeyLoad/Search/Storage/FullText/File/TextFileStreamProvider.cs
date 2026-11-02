@@ -162,7 +162,7 @@ internal sealed partial class TextFileStreamProvider(string root, string leaf, G
 
     private static int ReadFileBufferBytes(IOptions<TextExecutionOptions> executionOptions)
     {
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         var snapshot = executionOptions.Value;
         snapshot.Validate();
         return snapshot.FileBufferBytes;

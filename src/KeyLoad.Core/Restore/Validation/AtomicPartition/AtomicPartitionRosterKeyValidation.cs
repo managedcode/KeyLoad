@@ -37,7 +37,7 @@ internal static class AtomicPartitionRosterKeyValidation
         return false;
     }
 
-    private static PartitionRef ReadScopedPartition(KeyComponent[] components, ReadOnlySpan<byte> key)
+    private static PartitionRef ReadScopedPartition(DecodedKey components, ReadOnlySpan<byte> key)
     {
         if (components.Length < MinimumScopedComponentCount
             || components[1] is not { Kind: KeyComponentKind.Text, Text: var tenant }
@@ -53,7 +53,7 @@ internal static class AtomicPartitionRosterKeyValidation
         return candidate;
     }
 
-    private static bool IsCanonicalGlobalOutcome(KeyComponent[] components, ReadOnlySpan<byte> key)
+    private static bool IsCanonicalGlobalOutcome(DecodedKey components, ReadOnlySpan<byte> key)
     {
         if (components.Length != GlobalOutcomeComponentCount
             || components[GlobalOutcomePrincipalComponentIndex] is not { Kind: KeyComponentKind.Text, Text: var principal }
@@ -67,7 +67,7 @@ internal static class AtomicPartitionRosterKeyValidation
             || KeySpace.UnknownOutcome(principal, commandId).AsSpan().SequenceEqual(key);
     }
 
-    private static void ValidateCanonicalPartition(PartitionRef candidate, KeyComponent[] components, ReadOnlySpan<byte> key)
+    private static void ValidateCanonicalPartition(PartitionRef candidate, DecodedKey components, ReadOnlySpan<byte> key)
     {
         ValidatePartition(candidate, AtomicPartitionRosterProtocol.MalformedScopedKey);
         if (!KeyCodec.Encode(components).AsSpan().SequenceEqual(key))

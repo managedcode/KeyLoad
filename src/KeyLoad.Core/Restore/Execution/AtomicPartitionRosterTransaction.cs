@@ -142,7 +142,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
     private (bool HasValue, Candidate? Value) PrepareCandidate(byte[] key)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (!AtomicPartitionRosterKeyValidation.TryReadCandidate(key, out var partition)
             || partition is null)
         {

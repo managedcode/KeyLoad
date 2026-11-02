@@ -23,7 +23,7 @@ that add the store identity, the commit position and the restored dispatch pause
    under the key `system/position`. `Store.Position` is read back from the tree on
    open. ZoneTree replays its own log when it opens and drops a transaction whose
    commit never reached the log.
-3. **Visibility and durability.** ZoneTree 2.0.9 publishes native writes into
+3. **Visibility and durability.** ZoneTree 2.1.0 publishes native writes into
    its mapped WAL tail before returning. A returned commit and its command
    outcome survive process termination; coordinators acknowledge `ProcessDurable`
    after publication ([ADR-003](ADR-003-durability-ack-barrier.md)). ZoneTree owns

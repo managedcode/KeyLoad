@@ -52,7 +52,7 @@ internal static class CanonicalJsonWriter
     /// <param name="decimalNumbers">Normalize decimals for validation; preserve raw spelling for fingerprints.</param>
     internal static void Write(Utf8JsonWriter writer, JsonElement element, bool decimalNumbers = true)
     {
-        ArgumentNullException.ThrowIfNull(writer);
+        ArgumentNullException.ThrowIfNull(writer) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         WriteValue(writer, element, decimalNumbers);
     }
 

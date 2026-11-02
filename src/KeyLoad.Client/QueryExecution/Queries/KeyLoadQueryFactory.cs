@@ -17,9 +17,9 @@ public static class KeyLoadQuery
     public static KeyLoadQuery<T> From<T>(PartitionRef partition, string collection,
         IOptions<QueryTranslationOptions> translationOptions)
     {
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(collection);
-        ArgumentNullException.ThrowIfNull(translationOptions);
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: BCL null validation accepts the partition PartitionRef reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(collection) /* KLD0041: BCL null validation accepts the collection string reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(translationOptions) /* KLD0041: BCL null validation accepts the translationOptions IOptions reference through its object parameter. */;
         var query = new SelectQuery(collection, null, [new(DefaultProjectionPath, DefaultProjectionPath)], null,
             [], translationOptions.Value.DefaultQueryLimit);
         return new(partition, query, translationOptions);

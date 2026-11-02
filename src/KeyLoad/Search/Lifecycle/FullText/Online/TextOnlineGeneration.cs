@@ -59,7 +59,7 @@ internal sealed class TextOnlineGeneration(string root, OnlineTextCurrentPublica
         }
         catch (Exception cleanup)
         {
-            if (!failures.Any(originalFailure => ReferenceEquals(originalFailure, cleanup)))
+            if (!failures.Any(originalFailure => (ReferenceEquals(originalFailure, cleanup) /* KLD0041: Deduplicate the same generation cleanup exception instance through CLR reference identity. */)))
             {
                 failures.Add(cleanup);
             }

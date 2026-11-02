@@ -56,7 +56,7 @@ internal static class TextOnlineManifestDigest
         {
             failures.Add(primary);
         }
-        if (!ReferenceEquals(primary, observed))
+        if (!(ReferenceEquals(primary, observed) /* KLD0041: Retain distinct primary and observed exception instances through CLR reference identity. */))
         {
             failures.Add(observed);
         }

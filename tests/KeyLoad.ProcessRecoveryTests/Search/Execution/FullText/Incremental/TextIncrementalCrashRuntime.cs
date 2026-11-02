@@ -72,17 +72,17 @@ internal sealed class TextIncrementalCrashRuntime : IAsyncDisposable
     {
         token.ThrowIfCancellationRequested();
         var operation = Database.CreateCommand(kind, commandId, CrashFixtureValues.Principal, default, System.Text.Json.JsonSerializer.Serialize(payload, payload.GetType(), JsonDefaults.Options));
-        return (await coordinator.SubmitVerifiedAsync(operation, token)).Get<T>();
+        return (await coordinator.SubmitVerifiedAsync<T>(operation, token)).Get<T>();
     }
 
-    internal Task<Result<object>> CommitIssuedAsync(Command<DatabaseCommand> operation, CancellationToken token)
+    internal Task<Result<OnlineTextIndexMaintenanceResult>> CommitIssuedAsync(Command<DatabaseCommand> operation, CancellationToken token)
     {
         token.ThrowIfCancellationRequested();
         if (operation.Value!.Kind != OperationKind.OnlineTextPublicationPhase || operation.CommandId == Guid.Empty)
         {
             throw new InvalidOperationException(TextIncrementalCrashProtocol.Invalid);
         }
-        return coordinator.SubmitVerifiedAsync(operation, token);
+        return coordinator.SubmitVerifiedAsync<OnlineTextIndexMaintenanceResult>(operation, token);
     }
 
     internal Task<TextMaintenanceCapabilityResult> PhaseAsync(TextIndexMaintenanceRequest request,

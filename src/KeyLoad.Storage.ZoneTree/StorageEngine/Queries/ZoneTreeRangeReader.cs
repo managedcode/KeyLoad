@@ -94,8 +94,8 @@ internal static class ZoneTreeRangeReader
     private static void Validate(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         int maximumRecords, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(prefix);
-        ArgumentNullException.ThrowIfNull(visitor);
+        ArgumentNullException.ThrowIfNull(prefix) /* KLD0041: BCL null validation accepts the prefix byte[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: BCL null validation accepts the visitor StorageRecordVisitor reference through its object parameter. */;
         cancellationToken.ThrowIfCancellationRequested();
         if (maxRecords < 1 || maxRecords > maximumRecords)
         {

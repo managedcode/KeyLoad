@@ -92,7 +92,7 @@ internal static class CqrsStreamSettlement
             return cleanup is null ? (false, default(Exception?)) : (true, (Exception?)(new AggregateException(distinctPrimary, cleanup)));
         }
 
-        if (disposal is not null && ReferenceEquals(disposal, activation))
+        if (disposal is not null && (ReferenceEquals(disposal, activation) /* KLD0041: Recognize the same disposal and activation exception instance through CLR reference identity. */))
         {
             return (true, ((Exception?)(disposal)));
         }
@@ -107,7 +107,7 @@ internal static class CqrsStreamSettlement
 
     private static bool Contains(Exception? error, Exception candidate)
     {
-        if (ReferenceEquals(error, candidate))
+        if ((ReferenceEquals(error, candidate) /* KLD0041: Recognize the exact requested exception instance through CLR reference identity. */))
         {
             return true;
         }
@@ -119,7 +119,7 @@ internal static class CqrsStreamSettlement
 
         foreach (var inner in aggregate.InnerExceptions)
         {
-            if (ReferenceEquals(inner, candidate))
+            if ((ReferenceEquals(inner, candidate) /* KLD0041: Recognize the exact requested inner exception instance through CLR reference identity. */))
             {
                 return true;
             }

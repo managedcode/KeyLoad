@@ -29,8 +29,8 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
     /// <returns>A bounded safe reply from the requested persisted-authorized capability.</returns>
     internal async Task<GrainOperationReply> ExecuteAsync(DecodedGrainRequest request, IResourceLifetimeWorkBinding originalBinding, Action<Exception> observeOriginalFailure, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(originalBinding);
-        ArgumentNullException.ThrowIfNull(observeOriginalFailure);
+        ArgumentNullException.ThrowIfNull(originalBinding) /* KLD0041: BCL null validation accepts the originalBinding IResourceLifetimeWorkBinding reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(observeOriginalFailure) /* KLD0041: BCL null validation accepts the observeOriginalFailure Action reference through its object parameter. */;
         await using var work = new CapabilityWorkLifetime(cancellationToken);
         try
         {
@@ -95,10 +95,10 @@ internal sealed class ConnectionReadExecution(GrainRequestCodec codec, DatabaseE
         ValidateFreshRequest(codec, request, work.RequestId, work.Token);
         work.Stage = GrainFailureStage.CapabilityExecution;
         work.BeginPhase(DatabasePhaseKind.AuthorizedReadCapability);
-        var result = (await capabilities.ReadAsync(request, work.RequestId, work, work.Token).ConfigureAwait(true)).Value;
+        var result = await capabilities.ReadAsync(request, work.RequestId, work, work.Token).ConfigureAwait(true);
         work.CompletePhase();
         work.Stage = GrainFailureStage.ReplyEncoding;
-        return GrainReplyFactory.Value(result);
+        return new GrainOperationReply { Result = result };
     }
 
     internal static void ValidateFreshRequest(GrainRequestCodec codec, DecodedGrainRequest request,

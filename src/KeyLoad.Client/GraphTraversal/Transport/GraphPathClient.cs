@@ -15,8 +15,8 @@ public static class GraphPathClient
     public static Task<Result<GraphShortestPathResult>> ShortestPathAsync(this KeyLoadClient client,
         GraphShortestPathRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<GraphShortestPathResult>(ShortestPathRoute, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request GraphShortestPathRequest reference through its object parameter. */;
+        return client.Send<GraphShortestPathResult, GraphShortestPathRequest>(ShortestPathRoute, request, false, null, cancellationToken);
     }
 }

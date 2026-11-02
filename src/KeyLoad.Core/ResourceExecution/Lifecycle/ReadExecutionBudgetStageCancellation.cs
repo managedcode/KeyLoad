@@ -28,7 +28,7 @@ internal sealed class ReadExecutionBudgetStageCancellation
     {
         lock (gate)
         {
-            if (!ReferenceEquals(current, lease))
+            if (!(ReferenceEquals(current, lease) /* KLD0041: This comparison requires CLR reference identity rather than an overridden value-equality implementation. */))
             {
                 throw new InvalidOperationException(StageOwnerMismatch);
             }

@@ -14,13 +14,13 @@ public static class CommandExecutionIdentity
     /// <param name = "engine">The shared database execution context.</param>
     public static Command<DatabaseCommand> OwnCommand(this DatabaseEngine engine, Command<DatabaseCommand> operation)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return SnapshotCommand(operation);
     }
 
     internal static Command<DatabaseCommand> SnapshotCommand(Command<DatabaseCommand> operation)
     {
-        ArgumentNullException.ThrowIfNull(operation);
+        ArgumentNullException.ThrowIfNull(operation) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ValidateDatabaseCommandIdentity(operation);
         var owned = OrleansSerialization.Copy(operation);
         ValidateDatabaseCommand(owned);
@@ -31,21 +31,21 @@ public static class CommandExecutionIdentity
     {
         ValidateDatabaseCommandIdentity(operation);
         var input = operation.Value!;
-        _ = DatabaseCommandInputTypes.Require(input.Kind, input.Input);
+        _ = (DatabaseCommandInputTypes.Require(input.Kind, input.Input /* KLD0041: The existing persisted command slot contains the exact runtime input selected and validated by its closed Kind discriminator. */) /* KLD0041: The closed operation-kind map validates the exact runtime contract held by the existing persisted input slot. */);
     }
 
     private static void ValidateDatabaseCommandIdentity(Command<DatabaseCommand> operation)
     {
         var input = operation.Value;
-        if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId) || operation.CommandType != DatabaseCommandType || operation.Timestamp.Kind != DateTimeKind.Utc || input is null || input.Input is null || !Enum.IsDefined(input.Kind))
+        if (operation.CommandId == Guid.Empty || string.IsNullOrWhiteSpace(operation.UserId) || operation.CommandType != DatabaseCommandType || operation.Timestamp.Kind != DateTimeKind.Utc || input is null || input.Input /* KLD0041: The existing persisted command slot contains the exact runtime input selected and validated by its closed Kind discriminator. */ is null || !Enum.IsDefined(input.Kind))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidDatabaseCommand);
         }
     }
 
-    internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
+    internal static Command<DatabaseCommand> CreatePreparedCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ input, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
     {
-        var operation = Command<DatabaseCommand>.Create(DatabaseCommandType, new DatabaseCommand(kind, input), id);
+        var operation = Command<DatabaseCommand>.Create(DatabaseCommandType, new DatabaseCommand(kind, input) /* KLD0041: This constructor creates the existing persisted command envelope with its exact Kind-selected native input. */, id);
         operation.UserId = principalId;
         operation.Timestamp = evaluatedAt.UtcDateTime;
         byte[] admission;

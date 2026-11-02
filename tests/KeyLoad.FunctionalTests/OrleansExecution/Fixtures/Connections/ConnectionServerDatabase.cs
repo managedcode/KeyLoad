@@ -30,7 +30,7 @@ internal sealed class ConnectionServerDatabase(Func<RequestCqrsHostedRuntimeFixt
         var token = originalToken();
         var work = new ReadExecutionBudget(source().Clock, token);
         Coordinator.ReadBarrierAsync(token).GetAwaiter().GetResult();
-        var result = Coordinator.RuntimeSubmitAsync(kind, id ?? Guid.NewGuid(), principal,
+        var result = Coordinator.RuntimeSubmitAsync<object>(kind, id ?? Guid.NewGuid(), principal,
             payload, work, token).GetAwaiter().GetResult();
         Coordinator.ReadBarrierAsync(token).GetAwaiter().GetResult();
         return result;

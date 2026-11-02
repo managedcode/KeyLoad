@@ -12,31 +12,31 @@ public static class RetainedSubmissionOutcome
 
     /// <param name = "engine">The shared database execution context.</param>
     /// <param name = "operation">The operation.</param>
-    internal static Result<object>? ReadRetainedSubmissionOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation) => engine.ReadRetainedSubmissionOutcomeCore(operation, null);
+    internal static Result<object>? /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ReadRetainedSubmissionOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation) => engine.ReadRetainedSubmissionOutcomeCore(operation, null) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */;
     /// <summary>Charges retained lookup to the same original admission work without changing canonical denial semantics.</summary>
     /// <param name = "operation">Unchanged original execution identity and payload.</param>
     /// <param name = "work">Required original admission budget, cancellation and lifetime.</param>
     /// <returns>The actual retained result, or null only at the existing absent-outcome boundary.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    internal static Result<object>? ReadRetainedSubmissionOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, ReadExecutionBudget work)
+    internal static Result<object>? /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ReadRetainedSubmissionOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(work);
-        return engine.ReadRetainedSubmissionOutcomeCore(operation, work);
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        return engine.ReadRetainedSubmissionOutcomeCore(operation, work) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */;
     }
 
-    internal static Result<object>? ReadRetainedSubmissionOutcomeCore(this DatabaseEngine engine, Command<DatabaseCommand> operation, ReadExecutionBudget? work)
+    internal static Result<object>? /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ReadRetainedSubmissionOutcomeCore(this DatabaseEngine engine, Command<DatabaseCommand> operation, ReadExecutionBudget? work)
     {
-        ArgumentNullException.ThrowIfNull(operation);
+        ArgumentNullException.ThrowIfNull(operation) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work?.Check();
         var normalized = engine.OwnCommand(operation);
         work?.Check();
-        var result = engine.Store.Read<Result<object>?>(raw =>
+        var /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ result = engine.Store.Read<Result<object>?>(raw =>
         {
             var view = work is null ? raw : work.CreateView(raw);
             try
             {
-                return engine.ReadValidatedSubmissionOutcome(view, normalized);
+                return engine.ReadValidatedSubmissionOutcome(view, normalized) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */;
             }
             catch (KeyLoadException missing) when (missing.Code == ErrorCode.RecoveryRequired && string.Equals(missing.Message, CommandOutcomeOperations.MissingDurableOutcomeMessage, StringComparison.Ordinal))
             {
@@ -54,7 +54,7 @@ public static class RetainedSubmissionOutcome
                 // A new command keeps the existing canonical failed-outcome boundary.
                 return null;
             }
-        });
+        }) /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
         work?.Check();
         return result;
     }

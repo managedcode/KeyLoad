@@ -39,7 +39,7 @@ internal sealed class PreparedQuery
         this.projectCandidate = projectCandidate;
         if (ordinalFullReferenceOrder)
         {
-            ArgumentNullException.ThrowIfNull(projectCandidate);
+            ArgumentNullException.ThrowIfNull(projectCandidate) /* KLD0041: BCL null validation accepts the projectCandidate Func reference through its object parameter. */;
             partitionRows = new PreparedRow?[capacity + AdjacentElementOffset];
         }
         else

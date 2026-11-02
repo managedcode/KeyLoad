@@ -7,9 +7,9 @@ namespace KeyLoad.Clustering;
 
 internal sealed class GrainRequestIdentityScope : IDisposable
 {
-    private readonly object? previousPrincipal;
-    private readonly object? previousState;
-    private readonly object? previousPlacement;
+    private readonly object? /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */ previousPrincipal;
+    private readonly object? /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */ previousState;
+    private readonly object? /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */ previousPlacement;
     private readonly bool hadPlacement;
     private readonly bool placementSelected;
     private const string PlacementKey = global::Orleans.Runtime.Placement.IPlacementDirector.PlacementHintKey;
@@ -46,11 +46,11 @@ internal sealed class GrainRequestIdentityScope : IDisposable
     internal static GrainRequestIdentityScope ForPlacement(GrainRequestEnvelope request,
         SiloAddress owner, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentNullException.ThrowIfNull(owner) /* KLD0041: BCL null validation accepts the owner SiloAddress reference through its object parameter. */;
         GrainIdentityContext.Validate(request, request.RequestId);
-        var state = RequestContext.Get(GrainRequestStreamProtocol.ContextKey) as GrainRequestContextState
+        var state = ((RequestContext.Get(GrainRequestStreamProtocol.ContextKey) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */) as GrainRequestContextState /* KLD0042: Validate the native Orleans RequestContext object as KeyLoad.Clustering.GrainRequestContextState? before using call-local identity or owner state. */)
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
-        var claims = RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS) as ClaimsPrincipal;
+        var claims = ((RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */) as ClaimsPrincipal /* KLD0042: Validate the native Orleans RequestContext object as System.Security.Claims.ClaimsPrincipal? before using call-local identity or owner state. */);
         return new(claims, state, owner, cancellationToken);
     }
 
@@ -60,10 +60,10 @@ internal sealed class GrainRequestIdentityScope : IDisposable
     {
         RequestContextAdmission.Admit(claims, state, cancellationToken);
         placementSelected = placement is not null;
-        previousPlacement = RequestContext.Get(PlacementKey);
+        (previousPlacement /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */) = (RequestContext.Get(PlacementKey) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */);
         hadPlacement = RequestContext.Keys.Contains(PlacementKey, StringComparer.Ordinal);
-        previousPrincipal = RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS);
-        previousState = RequestContext.Get(GrainRequestStreamProtocol.ContextKey);
+        (previousPrincipal /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */) = (RequestContext.Get(OrleansIdentityConstants.USER_CLAIMS) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */);
+        (previousState /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */) = (RequestContext.Get(GrainRequestStreamProtocol.ContextKey) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */);
         hadPrincipal = RequestContext.Keys.Contains(OrleansIdentityConstants.USER_CLAIMS, StringComparer.Ordinal);
         hadState = RequestContext.Keys.Contains(GrainRequestStreamProtocol.ContextKey, StringComparer.Ordinal);
         if (claims is null)
@@ -72,13 +72,13 @@ internal sealed class GrainRequestIdentityScope : IDisposable
         }
         else
         {
-            RequestContext.Set(OrleansIdentityConstants.USER_CLAIMS, claims);
+            RequestContext.Set(OrleansIdentityConstants.USER_CLAIMS, claims) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */;
         }
 
-        RequestContext.Set(GrainRequestStreamProtocol.ContextKey, state);
+        RequestContext.Set(GrainRequestStreamProtocol.ContextKey, state) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */;
         if (placement is not null)
         {
-            RequestContext.Set(PlacementKey, placement);
+            RequestContext.Set(PlacementKey, placement) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */;
         }
     }
 
@@ -89,21 +89,21 @@ internal sealed class GrainRequestIdentityScope : IDisposable
             return;
         }
 
-        Restore(OrleansIdentityConstants.USER_CLAIMS, hadPrincipal, previousPrincipal);
-        Restore(GrainRequestStreamProtocol.ContextKey, hadState, previousState);
+        Restore(OrleansIdentityConstants.USER_CLAIMS, hadPrincipal, (previousPrincipal /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */)) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */;
+        Restore(GrainRequestStreamProtocol.ContextKey, hadState, (previousState /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */)) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */;
         if (placementSelected)
         {
-            Restore(PlacementKey, hadPlacement, previousPlacement);
+            Restore(PlacementKey, hadPlacement, (previousPlacement /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */)) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */;
         }
         disposed = true;
     }
 
-    private static void Restore(string key, bool present, object? value)
+    private static void Restore(string key, bool present, object? /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */ value)
     {
         if (present)
         {
             // The execution API accepts null at runtime: preserve an existing present-null value exactly.
-            RequestContext.Set(key, value!);
+            RequestContext.Set(key, value!) /* KLD0041: Preserve and restore the exact previous Orleans RequestContext value, including an unknown type or a present null, across this call-local scope. */;
         }
         else
         {

@@ -43,7 +43,7 @@ internal sealed partial class TextOnlineSession
     {
         get;
     }
-    internal OnlineTextPublicationWork Publication
+    internal OnlineTextPublicationWork<OnlineTextIndexMaintenanceResult> Publication
     {
         get;
     }

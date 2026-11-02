@@ -13,7 +13,7 @@ internal static class AnnPublicSearchExecutor
         string principalId, ApproximateSearchRequest request, IOptions<QueryExecutionOptions> configured,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ApproximateSearchRequest reference through its object parameter. */;
         var execution = configured.Value;
         if (!execution.EnableApproximateSearch)
         {
@@ -29,8 +29,8 @@ internal static class AnnPublicSearchExecutor
         string principalId, ApproximateSearchRequest request, IOptions<QueryExecutionOptions> configured,
         ReadExecutionBudget budget, CancellationToken cancellationToken, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ApproximateSearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         var execution = configured.Value;
         if (!execution.EnableApproximateSearch)
         {

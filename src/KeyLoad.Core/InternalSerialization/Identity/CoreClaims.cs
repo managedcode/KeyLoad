@@ -9,7 +9,7 @@ internal static class CoreClaims
     /// <summary>Character bound for server-issued tokens retained in canonical state; only the record that carries them bounds their size.</summary>
     internal const int UnboundedCharacters = int.MaxValue;
     private const string InvalidToken = "The signed token is invalid.";
-    private const char Separator = '.';
+    private const string Separator = ".";
     private const char Padding = '=';
     private const char StandardPlus = '+';
     private const char StandardSlash = '/';
@@ -87,7 +87,7 @@ internal static class CoreClaims
     {
         const int MinimumTokenCharacters = 1;
 
-        ArgumentNullException.ThrowIfNull(token);
+        ArgumentNullException.ThrowIfNull(token) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentOutOfRangeException.ThrowIfLessThan(maximumCharacters, MinimumTokenCharacters);
         if (token.Length > maximumCharacters || !token.StartsWith(Prefix, StringComparison.Ordinal))
         {

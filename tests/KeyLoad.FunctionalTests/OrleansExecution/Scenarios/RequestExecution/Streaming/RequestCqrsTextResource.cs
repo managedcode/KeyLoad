@@ -14,7 +14,7 @@ internal static class RequestCqrsTextResource
         var id = Guid.NewGuid();
         var original = database.Database.CreateCommand(OperationKind.ConfigureResource, id,
             RequestCqrsHostedProfile.Root, database.Database.EvaluationClock.GetUtcNow(), request);
-        var configured = (await database.Coordinator.SubmitVerifiedAsync(original, token).ConfigureAwait(false))
+        var configured = (await database.Coordinator.SubmitVerifiedAsync<object>(original, token).ConfigureAwait(false))
             .Get<ResourceDefinition>();
         await Assert.That(JsonDefaults.Serialize(configured).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(request.Definition))).IsTrue();

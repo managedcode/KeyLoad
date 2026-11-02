@@ -38,7 +38,7 @@ internal static class McpGatewayCatalogValidation
     {
         const int OperationsCountEmptyCount = 0;
 
-        ArgumentNullException.ThrowIfNull(operations);
+        ArgumentNullException.ThrowIfNull(operations) /* KLD0041: BCL null validation accepts the operations IReadOnlyList reference through its object parameter. */;
         if (operations.Count == OperationsCountEmptyCount || operations.Count > executionOptions.Value.MaximumCatalogOperations)
         {
             throw new InvalidOperationException(MetadataBoundFailure);

@@ -8,7 +8,7 @@ internal static class SearchLifetimeWorkBudget
     internal static ReadExecutionBudget Create(DatabaseEngine database,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         var budget = new ReadExecutionBudget(database.EvaluationClock, token);
         budget.AttachResourceLifetimeBinding(binding);
         budget.Check();

@@ -12,7 +12,7 @@ internal sealed class AnnWorker : IAsyncDisposable
         TaskCompletionSource original;
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnWorker instance through object to preserve its runtime owner type. */;
             if (active is not null)
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProtocol.Bound);

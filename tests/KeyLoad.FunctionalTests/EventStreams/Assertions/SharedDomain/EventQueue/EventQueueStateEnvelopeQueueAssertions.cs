@@ -112,21 +112,8 @@ internal static class EventQueueStateEnvelopeQueueAssertions
             LeaseFamily, InboxFamily, DeadLetterFamily, PendingFamily, ParkedFamily, OrderFamily })
         {
             var expected = new List<(byte[] Key, string Id)>();
-            foreach (var metadata in new[] { ready, scheduled })
-            {
-                if (family == ReadyFamily && metadata.State == MessageState.Ready)
-                {
-                    expected.Add((KeySpace.Partition(family, fixture.Partition, Queue, metadata.ReadySequence, metadata.Id), metadata.Id));
-                }
-                if (family == ScheduledFamily && metadata.State == MessageState.Scheduled)
-                {
-                    expected.Add((KeySpace.Partition(family, fixture.Partition, Queue, fixture.ScheduledAt, metadata.Id), metadata.Id));
-                }
-                if (family == LeaseFamily && metadata.State == MessageState.Leased)
-                {
-                    expected.Add((KeySpace.Partition(family, fixture.Partition, Queue, metadata.LeaseUntil is { } at ? KeyLoad.Storage.KeyComponent.FromDateTimeOffset(at) : KeyLoad.Storage.KeyComponent.Null, metadata.Id), metadata.Id));
-                }
-            }
+            AddExpectedIndexes(fixture, family, ready, expected);
+            AddExpectedIndexes(fixture, family, scheduled, expected);
             var page = fixture.Store.Read(view => view.Scan(KeySpace.Partition(family, fixture.Partition, Queue), ScanBound));
             await Assert.That(page.HasMore).IsFalse();
             var count = ExpectedCount(family, stage, retained, expected.Count);
@@ -135,6 +122,24 @@ internal static class EventQueueStateEnvelopeQueueAssertions
             {
                 await EventQueueStateEnvelopeSourceAssertions.EqualAsync(fixture.Store.Read(view => view.GetRecord<string>(entry.Key)), entry.Id);
             }
+        }
+    }
+
+    private static void AddExpectedIndexes(EventQueueStateEnvelopeFixture fixture, string family,
+        MessageMetadata metadata, List<(byte[] Key, string Id)> expected)
+    {
+        if (family == ReadyFamily && metadata.State == MessageState.Ready)
+        {
+            expected.Add((KeySpace.Partition(family, fixture.Partition, Queue, metadata.ReadySequence, metadata.Id), metadata.Id));
+        }
+        if (family == ScheduledFamily && metadata.State == MessageState.Scheduled)
+        {
+            expected.Add((KeySpace.Partition(family, fixture.Partition, Queue, fixture.ScheduledAt, metadata.Id), metadata.Id));
+        }
+        if (family == LeaseFamily && metadata.State == MessageState.Leased)
+        {
+            var deadline = metadata.LeaseUntil is { } at ? KeyComponent.FromDateTimeOffset(at) : KeyComponent.Null;
+            expected.Add((KeySpace.Partition(family, fixture.Partition, Queue, deadline, metadata.Id), metadata.Id));
         }
     }
 }

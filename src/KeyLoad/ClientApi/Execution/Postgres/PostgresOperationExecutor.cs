@@ -48,10 +48,10 @@ internal static class PostgresOperationExecutor
                 throw Errors.Fail(ErrorCode.UnsupportedCapability, PostgresProtocol.Unsupported);
             }
             result.PossibleWrite = operation.CommandKind is OperationKind.Batch or OperationKind.CreateTable or OperationKind.DropTable;
-            var value = await CanonicalConnectionDispatch.ExecuteAsync(services, owner, principal, operation, token);
+            var /* KLD0041: Retain the terminal public DTO only between joined connection/context cleanup and the following bounded PostgreSQL JSON encoding. */ value = await (CanonicalConnectionDispatch.ExecuteAsync(services, owner, principal, operation, token) /* KLD0041: Complete DTO mapping and joined connection/context cleanup before bounded PostgreSQL JSON encoding; preserve possible-write failure classification. */);
             try
             {
-                result.Payload = McpBoundedJson.Serialize(value, maximumJsonBytes);
+                result.Payload = (McpBoundedJson.Serialize(value, maximumJsonBytes) /* KLD0041: Encode the final heterogeneous public DTO with the configured byte bound; an encoding failure after a possible write remains an unknown write outcome. */);
                 token.ThrowIfCancellationRequested();
             }
             catch (Exception failure) when (result.PossibleWrite && global::KeyLoad.Clustering.CqrsBoundaryErrors.IsNonFatal(failure))

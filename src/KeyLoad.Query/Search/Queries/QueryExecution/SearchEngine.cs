@@ -18,8 +18,8 @@ public sealed partial class SearchEngine
     /// <param name="textProjection">Optional execution derived text projection.</param>
     public SearchEngine(DatabaseEngine database, IOptions<QueryExecutionOptions> options, ITextProjection? textProjection = null)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: BCL null validation accepts the database DatabaseEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
         configuration = options;
         execution = options.Value;
         execution.Validate();
@@ -34,7 +34,7 @@ public sealed partial class SearchEngine
     /// <returns>Ranked and authorized documents.</returns>
     public RankedDocument[] Search(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SearchRequest reference through its object parameter. */;
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -48,7 +48,7 @@ public sealed partial class SearchEngine
     /// <returns>Ranked and authorized documents after complete lease settlement.</returns>
     public async Task<RankedDocument[]> SearchAsync(string principalId, SearchRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SearchRequest reference through its object parameter. */;
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
@@ -63,7 +63,7 @@ public sealed partial class SearchEngine
     public Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request GraphSearchRequest reference through its object parameter. */;
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         return GraphSearchAsync(principalId, request, budget, cancellationToken);
     }
@@ -71,8 +71,8 @@ public sealed partial class SearchEngine
     internal async Task<GraphSearchResult> GraphSearchAsync(string principalId, GraphSearchRequest request,
         ReadExecutionBudget budget, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request GraphSearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
         return await TextProjectionAdmission.ExecuteAsync(() => GraphSearchExecutor.Execute(database, textProjection,
@@ -89,9 +89,9 @@ public sealed partial class SearchEngine
     /// <returns>Similarity score; Euclidean distance is negated.</returns>
     public static double Similarity(float[] left, float[] right, DistanceMetric metric)
     {
-        ArgumentNullException.ThrowIfNull(left);
+        ArgumentNullException.ThrowIfNull(left) /* KLD0041: BCL null validation accepts the left float[] reference through its object parameter. */;
         var prepared = PreparedSimilarity.Create(left.AsMemory(), metric);
-        ArgumentNullException.ThrowIfNull(right);
+        ArgumentNullException.ThrowIfNull(right) /* KLD0041: BCL null validation accepts the right float[] reference through its object parameter. */;
         return prepared.Score(right.AsMemory());
     }
 }

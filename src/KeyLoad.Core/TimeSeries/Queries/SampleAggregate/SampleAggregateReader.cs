@@ -11,8 +11,8 @@ internal static class SampleAggregateReader
     internal static SampleAggregate Read(DatabaseEngine database, IKeyValueView view, string principalId,
         AggregateSamplesRequest request, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ValidateRange(request.From, request.UntilExclusive);
         ValidateSampleLimit(request.MaxSamples);
         var scope = SampleReadScope.Open(database, view, principalId, request.Partition, request.Set, request.SeriesId);

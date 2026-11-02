@@ -68,8 +68,8 @@ internal sealed class McpToolDispatcher(HttpContext context, McpRequestState sta
                 ? SqlMcpCatalog.Decode(arguments, state.MaximumPayloadBytes,
                     context.RequestServices.GetRequiredService<IOptions<QueryExecutionOptions>>(), cancellationToken)
                 : descriptor.Decode(arguments, state.MaximumPayloadBytes);
-            var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
-                operation.CommandKind, operation.CommandId, operation.Payload, cancellationToken);
+            var reply = await (CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
+                operation.CommandKind, operation.CommandId, (operation.Payload /* KLD0041: The decoded operation input is already selected and validated by the closed MCP/SQL descriptor before this single gateway dispatch. */), cancellationToken) /* KLD0041: Dispatch the already validated descriptor input into the current generated envelope; the gateway itself retains concrete payload types for typed callers. */);
             return state.Success(reply, cancellationToken);
         }
         catch (KeyLoadException error)

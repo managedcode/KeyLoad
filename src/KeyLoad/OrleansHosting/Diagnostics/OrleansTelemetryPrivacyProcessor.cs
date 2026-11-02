@@ -112,21 +112,21 @@ internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetry
 
     private static bool HasNoEventTags(ActivityEvent activityEvent)
     {
-        using var tags = activityEvent.Tags.GetEnumerator();
-        return !tags.MoveNext();
+        using var /* KLD0041: The native ActivityEvent tag enumerator is object-valued; inspect only whether any tag exists and dispose it immediately. */ tags = ((activityEvent.Tags /* KLD0041: Inspect only whether the native ActivityEvent object-valued tags are empty before admitting the safe event shape. */).GetEnumerator() /* KLD0041: Inspect only whether the native ActivityEvent object-valued tags are empty before admitting the safe event shape. */);
+        return !(tags.MoveNext() /* KLD0041: Probe the native ActivityEvent tag enumerator once; reject tagged events without reading their runtime values. */);
     }
 
     private static void Suppress(Activity activity, string reason)
     {
         activity.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
-        SuppressedSpans.Add(SuppressedSpanIncrement, new KeyValuePair<string, object?>(
-            OrleansTelemetryPolicy.SuppressionReasonTag, reason));
+        SuppressedSpans.Add(SuppressedSpanIncrement, (new KeyValuePair<string, object?>(
+            OrleansTelemetryPolicy.SuppressionReasonTag, reason) /* KLD0041: The native metrics pair holds only the closed telemetry suppression-reason string, with no scalar boxing. */)) /* KLD0041: Emit the native suppression counter with one bounded closed reason tag; arbitrary Activity tag values are never forwarded. */;
     }
 
     private bool SuppressExcessTags(Activity activity)
     {
         var count = InitialItemCount;
-        foreach (var _ in activity.TagObjects)
+        foreach (var _ in (activity.TagObjects /* KLD0041: Bound the native Activity object-valued tag count before allowing any span export. */))
         {
             if (++count <= Options.MaximumTags)
             {

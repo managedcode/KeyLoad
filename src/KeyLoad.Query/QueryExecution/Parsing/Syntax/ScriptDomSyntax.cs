@@ -15,8 +15,8 @@ internal static class ScriptDomSyntax
     internal static Dom.TSqlStatement Parse(string sql,
         Action checkBudget, Action<IList<Dom.TSqlParserToken>, Action>? validateTokens, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(sql);
-        ArgumentNullException.ThrowIfNull(checkBudget);
+        ArgumentNullException.ThrowIfNull(sql) /* KLD0041: BCL null validation accepts the sql string reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(checkBudget) /* KLD0041: BCL null validation accepts the checkBudget Action reference through its object parameter. */;
         void Check()
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -64,8 +64,8 @@ internal static class ScriptDomSyntax
     internal static void ValidateSessionSlots(Dom.TSqlStatement statement, int positionalParameterCount,
         Action checkBudget, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(statement);
-        ArgumentNullException.ThrowIfNull(checkBudget);
+        ArgumentNullException.ThrowIfNull(statement) /* KLD0041: BCL null validation accepts the statement TSqlStatement reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(checkBudget) /* KLD0041: BCL null validation accepts the checkBudget Action reference through its object parameter. */;
         if (positionalParameterCount < EmptyCount)
         {
             throw ScriptDomErrors.Invalid();

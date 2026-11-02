@@ -19,7 +19,7 @@ internal sealed class FileStorageRequest(IHttpContextAccessor accessor, IFileSys
     internal IFileSystemStorage Storage => storage;
     internal string PrincipalId => Principal.Id;
     internal long PolicyEpoch => Principal.PolicyEpoch;
-    private PrincipalRecord Principal => Context.Items[ServerProtocol.PrincipalItem] as PrincipalRecord
+    private PrincipalRecord Principal => (((Context.Items /* KLD0041: Read the authentication-owned PrincipalRecord reference from the native ASP.NET request-local Items slot. */)[ServerProtocol.PrincipalItem] /* KLD0041: Read the authentication-owned PrincipalRecord reference from the native ASP.NET request-local Items slot. */) as PrincipalRecord /* KLD0042: Require the verified PrincipalRecord placed by authentication before file permissions and policy epoch are used. */)
         ?? throw Errors.Fail(ErrorCode.Unauthenticated, FileStorageProtocol.Invalid);
 
     internal FileAddress Address(string path)
@@ -34,9 +34,8 @@ internal sealed class FileStorageRequest(IHttpContextAccessor accessor, IFileSys
     internal async Task<FileMetadataState> ReadAsync(string path, Capability capability, Guid uploadId, CancellationToken token,
         bool list = false, string? after = null)
     {
-        var result = await CanonicalOperationGateway.ExecuteFileMetadataAsync(Context,
-            new(Scope.Address with { Path = path }, capability, uploadId, list, after), null, token) as FileMetadataState
-            ?? throw Errors.Fail(ErrorCode.Corruption, FileStorageProtocol.Invalid);
+        var result = await CanonicalOperationGateway.ExecuteFileMetadataAsync<FileMetadataState>(Context,
+            new(Scope.Address with { Path = path }, capability, uploadId, list, after), null, token);
         if (result.Incarnation != Scope.Incarnation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, FileStorageProtocol.Invalid);
@@ -76,11 +75,8 @@ internal sealed class FileStorageRequest(IHttpContextAccessor accessor, IFileSys
         => ChangeAsync<FileEntry>(new(Guid.NewGuid(), Address(path), FileMetadataAction.Delete,
             Guid.Empty, Guid.Empty, FileStorageProtocol.EmptyCount, string.Empty, string.Empty, Access(), node.Value.SiloName), token);
 
-    private async Task<T> ChangeAsync<T>(FileMetadataMutation mutation, CancellationToken token)
-    {
-        var value = await CanonicalOperationGateway.ExecuteFileMetadataAsync(Context, null, mutation, token);
-        return value is T actual ? actual : throw Errors.Fail(ErrorCode.Corruption, FileStorageProtocol.Invalid);
-    }
+    private Task<T> ChangeAsync<T>(FileMetadataMutation mutation, CancellationToken token)
+        => CanonicalOperationGateway.ExecuteFileMetadataAsync<T>(Context, null, mutation, token);
 
     private FileMetadataMutation Mutation(FileUpload upload, FileMetadataAction action, Guid objectId)
         => new(CommandId(upload.UploadId, action, objectId), upload.Address, action, upload.UploadId, objectId,
@@ -88,7 +84,7 @@ internal sealed class FileStorageRequest(IHttpContextAccessor accessor, IFileSys
 
     private Guid CommandId(Guid upload, FileMetadataAction action, Guid objectId)
         => FilePhysicalIdentity.Upload(Scope.PhysicalNamespace, PrincipalId,
-            string.Join(CommandSeparator, upload.ToString(FileStorageProtocol.GuidFormat), action, objectId.ToString(FileStorageProtocol.GuidFormat)));
+            string.Join(CommandSeparator, upload.ToString(FileStorageProtocol.GuidFormat), action.ToString(), objectId.ToString(FileStorageProtocol.GuidFormat)));
 
     private RowAccess Access() => new(Context.Request.Headers[FileStorageHeaders.Owner].FirstOrDefault() ?? Principal.OwnerId,
         Context.Request.Headers[FileStorageHeaders.Project].FirstOrDefault(),

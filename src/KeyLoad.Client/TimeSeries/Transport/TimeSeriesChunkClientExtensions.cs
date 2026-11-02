@@ -13,9 +13,9 @@ public static class TimeSeriesChunkClientExtensions
     public static Task<Result<SampleChunkWindowResult>> ReadSampleChunkWindowAsync(this KeyLoadClient client,
         ReadSampleChunkWindowRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<SampleChunkWindowResult>(SampleChunkProtocol.ReadRoute, request, false, null,
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ReadSampleChunkWindowRequest reference through its object parameter. */;
+        return client.Send<SampleChunkWindowResult, ReadSampleChunkWindowRequest>(SampleChunkProtocol.ReadRoute, request, false, null,
             cancellationToken);
     }
 }

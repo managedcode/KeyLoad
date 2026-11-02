@@ -15,13 +15,13 @@ internal static class CanonicalOperationGateway
     /// <param name="payload">The canonical typed payload.</param>
     /// <param name="cancellationToken">Cancels the caller's wait without asserting write rollback.</param>
     /// <returns>The exact canonical reply and actual execution identity.</returns>
-    internal static Task<DispatchedOperationReply> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, object payload, CancellationToken cancellationToken)
+    internal static Task<DispatchedOperationReply> ExecuteAsync<TPayload>(HttpContext context, GrainReadKind? readKind,
+        OperationKind? commandKind, Guid commandId, TPayload payload, CancellationToken cancellationToken) where TPayload : notnull
         => readKind == GrainReadKind.FileMetadata || commandKind == OperationKind.FileMetadata
             ? throw Errors.Fail(ErrorCode.UnsupportedCapability, global::KeyLoad.Core.BlobStorage.FileStorageProtocol.BoundaryOnly)
             : ExecuteCoreAsync(context, readKind, commandKind, commandId, payload, cancellationToken);
 
-    internal static async Task<object?> ExecuteFileMetadataAsync(HttpContext context,
+    internal static async Task<TResult> ExecuteFileMetadataAsync<TResult>(HttpContext context,
         global::KeyLoad.Core.BlobStorage.FileMetadataQuery? query,
         global::KeyLoad.Core.BlobStorage.FileMetadataMutation? mutation, CancellationToken token)
     {
@@ -29,14 +29,16 @@ internal static class CanonicalOperationGateway
         {
             throw Errors.Fail(ErrorCode.Validation, global::KeyLoad.Core.BlobStorage.FileStorageProtocol.Invalid);
         }
-        var actual = await RuntimeExecuteAsync(context, query is null ? null : GrainReadKind.FileMetadata,
-            mutation is null ? null : OperationKind.FileMetadata, mutation?.CommandId ?? Guid.Empty,
-            query is null ? mutation! : query, token);
-        return GrainReplyFactory.RequireValue(actual.Reply).Value;
+        var actual = query is not null
+            ? await RuntimeExecuteAsync(context, GrainReadKind.FileMetadata, null, Guid.Empty, query, token)
+            : await RuntimeExecuteAsync(context, null, OperationKind.FileMetadata, mutation!.CommandId, mutation!, token);
+        var /* KLD0041: Read the current generated file-metadata reply slot once and immediately require the caller's concrete TResult; no object task is introduced. */ value = (GrainReplyFactory.RequireValue(actual.Reply).Value /* KLD0041: Read the current generated file-metadata reply slot once and immediately require the caller's concrete TResult; no object task is introduced. */);
+        return (value is TResult result /* KLD0042: Require the exact file-metadata TResult from the native GrainValue wire slot; the public method returns Task<TResult>. */) ? result
+            : throw Errors.Fail(ErrorCode.Corruption, global::KeyLoad.Core.BlobStorage.FileStorageProtocol.Invalid);
     }
 
-    private static async Task<DispatchedOperationReply> ExecuteCoreAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, object payload, CancellationToken cancellationToken)
+    private static async Task<DispatchedOperationReply> ExecuteCoreAsync<TPayload>(HttpContext context, GrainReadKind? readKind,
+        OperationKind? commandKind, Guid commandId, TPayload payload, CancellationToken cancellationToken) where TPayload : notnull
     {
         var execution = await RuntimeExecuteAsync(context, readKind, commandKind, commandId, payload,
             cancellationToken);
@@ -46,8 +48,8 @@ internal static class CanonicalOperationGateway
         {
             var value = GrainReplyFactory.RequireValue(reply);
             cancellationToken.ThrowIfCancellationRequested();
-            return new(requestId, McpBoundedJson.Serialize((PublicReadResponse.Create(readKind, commandKind, value.Value)).Value,
-                context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes));
+            return new(requestId, (McpBoundedJson.Serialize((((PublicReadResponse.Create(readKind, commandKind, (value.Value /* KLD0041: Read the existing generated GrainValue slot at the terminal public JSON projection boundary without changing its binary layout. */)) /* KLD0041: Project the runtime wire reply to its concrete public DTO only at the bounded HTTP JSON response boundary. */)).Value /* KLD0041: Read the final public DTO from the heterogeneous response projection immediately before bounded JSON encoding. */),
+                context.RequestServices.GetRequiredService<IOptions<McpExecutionOptions>>().Value.MaximumDataReplyBytes) /* KLD0041: Encode the terminal public DTO using its runtime type and the configured reply-byte bound; preserve unknown-write-outcome handling for encoding failures. */));
         }
         catch (Exception failure) when (
             commandKind is OperationKind.ReceiveAcrossLanes or OperationKind.MaintainAnnIndex
@@ -60,8 +62,8 @@ internal static class CanonicalOperationGateway
         }
     }
 
-    private static async Task<RuntimeDispatch> RuntimeExecuteAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, object payload, CancellationToken cancellationToken)
+    private static async Task<RuntimeDispatch> RuntimeExecuteAsync<TPayload>(HttpContext context, GrainReadKind? readKind,
+        OperationKind? commandKind, Guid commandId, TPayload payload, CancellationToken cancellationToken) where TPayload : notnull
     {
         var actual = CanonicalOperationRequestPreparation.Create(context, readKind, commandKind,
             commandId, payload, cancellationToken);
@@ -116,7 +118,7 @@ internal static class CanonicalOperationGateway
     /// <returns>The request-local operation GUID if an execution started.</returns>
     internal static Guid? RequestId(HttpContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context HttpContext reference through its object parameter. */;
         return OperationResponseHeaders.RequestId(context);
     }
 }

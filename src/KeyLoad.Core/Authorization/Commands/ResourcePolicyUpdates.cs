@@ -20,7 +20,7 @@ internal static class ResourcePolicyUpdates
     {
         const int SchemaVersionStep = 1;
 
-        ArgumentNullException.ThrowIfNull(replacement);
+        ArgumentNullException.ThrowIfNull(replacement) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (previous is null)
         {
             if (expectedVersion is not null)

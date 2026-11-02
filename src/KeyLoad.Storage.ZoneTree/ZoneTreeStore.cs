@@ -50,7 +50,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
 
     internal ZoneTreeStore(ZoneTreeStoreRuntime runtime, Guid expectedNodeId)
     {
-        ArgumentNullException.ThrowIfNull(runtime);
+        ArgumentNullException.ThrowIfNull(runtime) /* KLD0041: BCL null validation accepts the runtime ZoneTreeStoreRuntime reference through its object parameter. */;
         if (expectedNodeId == Guid.Empty || runtime.Identity.NodeId != expectedNodeId)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, IdentityScopeInvalid);
@@ -67,7 +67,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     /// <returns>The callback's result after releasing the native read transaction.</returns>
     public T Read<T>(Func<IKeyValueView, T> read)
     {
-        ArgumentNullException.ThrowIfNull(read);
+        ArgumentNullException.ThrowIfNull(read) /* KLD0041: BCL null validation accepts the read Func reference through its object parameter. */;
         using var operation = new ZoneTreeOperationContext(runtime, runtime.Tree.BeginReadOnlyTransaction(), ownsTransaction: true);
         return read(this);
     }
@@ -109,7 +109,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(backup);
         ArgumentException.ThrowIfNullOrWhiteSpace(destination);
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         return ZoneTreeBackup.RestoreAsync(backup, destination, executionOptions, newIncarnation, newSigningKey,
             cancellationToken);
     }
@@ -126,7 +126,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     internal ZoneTreeReadCutLease CaptureReadCut(IKeyValueView view, ZoneTreeReadCutLimits limits,
         CancellationToken cancellationToken)
     {
-        if (!ReferenceEquals(view, this) || runtime.Operation.Value is not { Writable: false })
+        if (!(ReferenceEquals(view, this) /* KLD0041: Require this store instance to own the active read cut through CLR reference identity. */) || runtime.Operation.Value is not { Writable: false })
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidReadCutContextMessage);
         }

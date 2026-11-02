@@ -90,7 +90,7 @@ internal sealed class TextProjectionState
     {
         lock (sync)
         {
-            return slots.Publish(generation);
+            return slots.Publish(generation, work.Signal);
         }
     }
 

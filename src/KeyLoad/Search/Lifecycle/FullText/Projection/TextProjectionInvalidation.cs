@@ -7,7 +7,7 @@ internal sealed class TextProjectionInvalidation(Lock sync, TextProjectionSlotSe
         lock (sync)
         {
             var current = slots.Current;
-            if (!ReferenceEquals(current?.Generation, generation))
+            if (!(ReferenceEquals(current?.Generation, generation) /* KLD0041: Invalidate only the currently published generation instance through CLR reference identity. */))
             {
                 return false;
             }

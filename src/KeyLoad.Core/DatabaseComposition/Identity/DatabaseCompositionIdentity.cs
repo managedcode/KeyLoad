@@ -12,7 +12,7 @@ public static class DatabaseCompositionIdentity
 {
     internal const string MissingCompositionAuthority = "The composition outcome has no saved row authority.";
     internal const string InvalidCompositionAuthority = "The composition outcome row authority is invalid.";
-    internal static (bool HasValue, CompositionOutcomeAuthority? Value) CaptureCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, Result<object> result)
+    internal static (bool HasValue, CompositionOutcomeAuthority? Value) CaptureCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ result)
     {
         const int EmptyReverseLength = 0;
         if (Errors.Code(result.Problem).Value is not null || !TryCompositionInput(operation, out var partition, out var mutations))
@@ -26,7 +26,7 @@ public static class DatabaseCompositionIdentity
             return (false, default(CompositionOutcomeAuthority?));
         }
 
-        var receipt = result.Get<CommitReceipt>();
+        var receipt = result.Get<CommitReceipt>() /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
         var references = ImmutableArray.CreateBuilder<EntityRef>();
         var distinct = new HashSet<EntityRef>();
         foreach (var mutation in reverse)
@@ -86,7 +86,7 @@ public static class DatabaseCompositionIdentity
 
     internal static void ValidateCompositionOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, StoredOutcome previous)
     {
-        if (Errors.Code(previous.Result.Problem).Value is not null || !TryCompositionInput(operation, out var partition, out var mutations) || !mutations.Any(mutation => mutation is QueueToGraph or GraphToQueueMutation))
+        if (Errors.Code(previous.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Problem).Value is not null || !TryCompositionInput(operation, out var partition, out var mutations) || !mutations.Any(mutation => mutation is QueueToGraph or GraphToQueueMutation))
         {
             return;
         }

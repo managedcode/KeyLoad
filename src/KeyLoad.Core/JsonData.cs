@@ -14,7 +14,7 @@ public static class JsonData
     private const int EmptyElementCount = 0;
     private const int LastComponentFromEnd = 1;
 
-    private const string UnsupportedScalarFieldDetail = "This field is not a scalar value.";
+    internal const string UnsupportedScalarFieldDetail = "This field is not a scalar value.";
     private const string ObjectRequiredDetail = "The JSON payload must be an object.";
     private const string InvalidPayloadDetail = "The JSON payload is invalid or too deeply nested.";
     private const string InvalidDocumentDetail = "A document must be an object.";
@@ -38,7 +38,7 @@ public static class JsonData
 
     private static string ValidateCore(string json, bool requireObject, bool preserveContent)
     {
-        ArgumentNullException.ThrowIfNull(json);
+        ArgumentNullException.ThrowIfNull(json) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         try
         {
             using var document = JsonDocument.Parse(json);
@@ -144,8 +144,8 @@ public static class JsonData
     /// <returns>Owned canonical object JSON after all patches.</returns>
     public static string Patch(string json, IReadOnlyList<FieldPatch> patches)
     {
-        ArgumentNullException.ThrowIfNull(json);
-        ArgumentNullException.ThrowIfNull(patches);
+        ArgumentNullException.ThrowIfNull(json) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(patches) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var root = JsonNode.Parse(json) as JsonObject ?? throw Errors.Fail(ErrorCode.Validation, InvalidDocumentDetail);
         foreach (var patch in patches)
         {

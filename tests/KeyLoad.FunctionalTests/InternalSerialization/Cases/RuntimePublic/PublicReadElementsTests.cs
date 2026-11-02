@@ -74,7 +74,7 @@ internal sealed class PublicReadElementsTests
         await KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsBoundCoreOwner.LeaseAsync(database, owner, (lease, _, work) =>
         {
             read = GrainCoreReadCapabilities.Execute(database.Database, GrainReadKind.Traverse, principal.Id,
-                request.Payload, work, lease, null);
+                request, work, lease, null).Value;
             return Task.CompletedTask;
         }, CancellationToken.None);
         var execution = (global::KeyLoad.GraphTraversal)read!;

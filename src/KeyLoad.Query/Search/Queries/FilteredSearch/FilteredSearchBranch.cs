@@ -7,9 +7,9 @@ internal static class FilteredSearchBranch
     internal static SearchScore[] Apply(SearchScore[] ranked, FilteredSearchEligibility eligibility,
         ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(ranked);
-        ArgumentNullException.ThrowIfNull(eligibility);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(ranked) /* KLD0041: BCL null validation accepts the ranked SearchScore[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(eligibility) /* KLD0041: BCL null validation accepts the eligibility FilteredSearchEligibility reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         if (eligibility.IsUnrestricted)
         {
             return ranked;

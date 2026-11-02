@@ -9,8 +9,8 @@ internal static class SqlGraphSearchParser
     internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, ReadExecutionBudget budget,
         int maximumParameters)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SqlGraphSearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         ValidateEnvelope(request);
         SqlGraphSearchRequestSizer.EnsureBounded(request, maximumParameters, budget.Cancellation);
         budget.Check();

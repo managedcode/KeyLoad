@@ -1,7 +1,7 @@
 using System.Text.Json;
 using KeyLoad.Core;
-using KeyLoad.Storage;
 using KeyLoad.Query.QueryExecution;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Query;
 
@@ -33,7 +33,7 @@ internal sealed class RelationalQueryOperandBinding(Dictionary<string, Relationa
         };
     }
 
-    internal KeyComponentKind? Infer(Operand operand) => operand switch
+    internal KeyComponentKind Infer(Operand operand) => operand switch
     {
         FieldOperand field => Field(field.Path),
         ValueOperand value => Scalar(value.Value),
@@ -44,17 +44,15 @@ internal sealed class RelationalQueryOperandBinding(Dictionary<string, Relationa
 
     internal void Compare(Operand left, Operand right) => RequireComparable(Infer(left), Infer(right));
 
-    internal static void RequireComparable(KeyComponentKind? left, KeyComponentKind? right)
+    internal static void RequireComparable(KeyComponentKind left, KeyComponentKind right)
     {
-        if (left is not null && right is not null && left != right)
+        if (left is not (KeyComponentKind.Null or KeyComponentKind.Missing)
+            && right is not (KeyComponentKind.Null or KeyComponentKind.Missing) && left != right)
         {
             throw Errors.Fail(ErrorCode.Validation, RelationalQueryBinding.InvalidDetail);
         }
     }
 
-    private static KeyComponentKind? Scalar(JsonElement value)
-    {
-        var kind = JsonData.Scalar(value, ReadOnlySpan<string>.Empty).Value.Value.Kind;
-        return kind is KeyComponentKind.Null or KeyComponentKind.Missing ? default(KeyComponentKind?) : kind;
-    }
+    private static KeyComponentKind Scalar(JsonElement value)
+        => JsonData.Scalar(value, ReadOnlySpan<string>.Empty).Value.Value.Kind;
 }

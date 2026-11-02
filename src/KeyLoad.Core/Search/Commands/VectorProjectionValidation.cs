@@ -13,15 +13,15 @@ internal static class VectorProjectionValidation
         const int ReducerGenerationValidationBoundary = 1;
         const int DimensionFirstCount = 1;
         const int DimensionValidationBound = 4_096;
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.SourceStream);
-        ArgumentNullException.ThrowIfNull(request.SourceDocument);
-        ArgumentNullException.ThrowIfNull(request.Target);
-        ArgumentNullException.ThrowIfNull(request.Target.Space);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request.SourceStream) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request.SourceDocument) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request.Target) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request.Target.Space) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ProtocolValidation.ValidateMutationStructure(request.Target);
         EngineResourceAccess.ValidatePartition(partition);
-        ArgumentNullException.ThrowIfNull(request.SourceStream.Partition);
-        ArgumentNullException.ThrowIfNull(request.SourceDocument.Partition);
+        ArgumentNullException.ThrowIfNull(request.SourceStream.Partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request.SourceDocument.Partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (request.SourceStream.Partition != partition || request.SourceDocument.Partition != partition || request.SourceStream.Generation < GenerationValidationBoundary || request.SourceEventRevision < SourceEventRevisionValidationBoundary || request.SourceDocumentRevision < SourceDocumentRevisionValidationBoundary || request.ReducerGeneration < ReducerGenerationValidationBoundary)
         {
             throw Errors.Fail(ErrorCode.Validation, VectorProjectionApply.InvalidProjectionMessage);

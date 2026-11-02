@@ -17,7 +17,7 @@ public static class RelationalRowValidation
     /// <param name="definition">Resource definition to validate before catalog publication.</param>
     public static void ValidateSchema(ResourceDefinition definition)
     {
-        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(definition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (definition.RelationalSchema is null)
         {
             return;
@@ -31,7 +31,7 @@ public static class RelationalRowValidation
     /// <param name="json">Original final-image JSON, preserving numeric precision.</param>
     public static void ValidateRow(ResourceDefinition definition, string id, string json)
     {
-        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(definition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (definition.RelationalSchema is null)
         {
             return;
@@ -61,7 +61,7 @@ public static class RelationalRowValidation
         const int ColumnPathSegments = 1;
         const int ColumnPathIndex = 0;
 
-        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(definition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (definition.RelationalSchema is null)
         {
             return;
@@ -129,7 +129,7 @@ public static class RelationalRowValidation
 
     private static JsonDocument Parse(string json)
     {
-        ArgumentNullException.ThrowIfNull(json);
+        ArgumentNullException.ThrowIfNull(json) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         try
         {
             return JsonDocument.Parse(json);

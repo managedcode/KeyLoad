@@ -16,7 +16,7 @@ internal sealed class AnnMaintenanceAdmissions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnMaintenanceAdmissions instance through object to preserve its runtime owner type. */;
             if (retainedWork is { } original)
             {
                 if (original.Id != request.SessionId || original.Principal != principal
@@ -70,7 +70,7 @@ internal sealed class AnnMaintenanceAdmissions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnMaintenanceAdmissions instance through object to preserve its runtime owner type. */;
             var lease = new AnnMaintenanceAdmissionLease(this);
             active++;
             return lease;

@@ -9,7 +9,7 @@ internal static class EventFeedPubSubRowEncoding
 
     internal static EventFeedPubSubRow Create<T>(IServiceProvider originalServices, GrainId grainId, T state)
     {
-        ArgumentNullException.ThrowIfNull(originalServices);
+        ArgumentNullException.ThrowIfNull(originalServices) /* KLD0041: BCL null validation accepts the originalServices IServiceProvider reference through its object parameter. */;
         if (state is null)
         {
             throw Errors.Fail(ErrorCode.Validation, EventFeedPubSubProtocol.Invalid);

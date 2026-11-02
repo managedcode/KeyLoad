@@ -13,8 +13,8 @@ public static class ApproximateSearchClient
     public static Task<Result<AnnSearchPage>> ApproximateSearchAsync(this KeyLoadClient client,
         ApproximateSearchRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<AnnSearchPage>(AnnSearchProtocol.Route, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ApproximateSearchRequest reference through its object parameter. */;
+        return client.Send<AnnSearchPage, ApproximateSearchRequest>(AnnSearchProtocol.Route, request, false, null, cancellationToken);
     }
 }

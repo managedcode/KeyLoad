@@ -23,7 +23,7 @@ internal static class FileMetadataKeys
 
     internal static void Validate(FileAddress address, bool allowEmpty = false)
     {
-        ArgumentNullException.ThrowIfNull(address);
+        ArgumentNullException.ThrowIfNull(address) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(address.Partition);
         JsonData.Identifier(address.Resource);
         var path = address.Path;

@@ -52,7 +52,7 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
         OnlineTextCapabilityRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         return worker.RunAsync(() => ExecuteOwnedAsync(principal, request, binding, token));
     }
 
@@ -132,7 +132,7 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
         session.Current = fresh;
     }
 
-    public OnlineTextPublicationWork RequirePublicationWork(Guid sessionId,
+    public OnlineTextPublicationWork<OnlineTextIndexMaintenanceResult> RequirePublicationWork(Guid sessionId,
         OnlineTextIndexMaintenanceRequest request, string principalId)
     {
         var session = sessions.Require(sessionId);
@@ -143,7 +143,7 @@ internal sealed partial class TextOnlineMaintenanceService : IOnlineTextMaintena
         }
     }
 
-    public OnlineTextPublicationWork? TryRequireCheckpointWork(CommitProjectionBatchRequest request,
+    public OnlineTextPublicationWork<ProjectionBatchResult>? TryRequireCheckpointWork(CommitProjectionBatchRequest request,
         string principalId)
         => (sessions.TryMatchCheckpoint(request, principalId)).Value;
 

@@ -12,7 +12,7 @@ internal sealed class TextIncrementalSessions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextIncrementalSessions instance through object to preserve its runtime owner type. */;
             if (!work.TryAdd(id, original))
             {
                 throw TextErrors.BoundExceeded();
@@ -24,7 +24,7 @@ internal sealed class TextIncrementalSessions
     {
         lock (gate)
         {
-            if (!ReferenceEquals(work.GetValueOrDefault(actual.Id), actual.Work) || !sessions.TryAdd(actual.Id, actual))
+            if (!(ReferenceEquals(work.GetValueOrDefault(actual.Id), actual.Work) /* KLD0041: Require the exact work instance registered for this incremental session through CLR reference identity. */) || !sessions.TryAdd(actual.Id, actual))
             {
                 throw TextErrors.Ownership();
             }
@@ -43,17 +43,17 @@ internal sealed class TextIncrementalSessions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextIncrementalSessions instance through object to preserve its runtime owner type. */;
             if (actual.GenerationLeaf is null)
             {
                 throw TextErrors.Mismatch();
             }
-            if (sessions.Values.Any(current => !ReferenceEquals(current, actual) &&
+            if (sessions.Values.Any(current => !(ReferenceEquals(current, actual) /* KLD0041: Distinguish incremental session instances when checking generation ownership through CLR reference identity. */) &&
                 string.Equals(current.GenerationLeaf, actual.GenerationLeaf, StringComparison.Ordinal)))
             {
                 throw TextErrors.BoundExceeded();
             }
-            if (!sessions.TryGetValue(actual.Id, out var owned) || !ReferenceEquals(owned, actual))
+            if (!sessions.TryGetValue(actual.Id, out var owned) || !(ReferenceEquals(owned, actual) /* KLD0041: Require the exact registered incremental session instance through CLR reference identity. */))
             {
                 throw TextErrors.Mismatch();
             }
@@ -64,7 +64,7 @@ internal sealed class TextIncrementalSessions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextIncrementalSessions instance through object to preserve its runtime owner type. */;
             return sessions.TryGetValue(id, out var actual) ? actual : throw TextErrors.Mismatch();
         }
     }

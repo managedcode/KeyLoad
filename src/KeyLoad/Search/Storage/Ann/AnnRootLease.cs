@@ -43,7 +43,7 @@ internal sealed class AnnRootLease : IDisposable
 
     private void RequireStable()
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnRootLease instance through object to preserve its runtime owner type. */;
         if (uncertainOriginal)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, AnnProtocol.Interrupted);
@@ -167,7 +167,7 @@ internal sealed class AnnRootLease : IDisposable
     /// <summary>Persists the next receipt on the caller's write gate; the receipt gate is taken only to swap the reference.</summary>
     private void SaveOriginal(AnnRootReceipt next, AnnExecutionOptions options)
     {
-        if (ReferenceEquals(Receipt, next))
+        if ((ReferenceEquals(Receipt, next) /* KLD0041: Keep the exact original ANN receipt instance without replacing it through CLR reference identity. */))
         {
             return;
         }

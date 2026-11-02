@@ -17,7 +17,7 @@ public static class AggregateReplayReduction
         IOptions<AggregateReplayWorkerLimits> limitsOptions,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(limitsOptions);
+        ArgumentNullException.ThrowIfNull(limitsOptions) /* KLD0041: BCL null validation accepts the limitsOptions IOptions reference through its object parameter. */;
         var limits = limitsOptions.Value;
         cancellationToken.ThrowIfCancellationRequested();
         AggregateReplayValidation.ValidateLimits(limits);

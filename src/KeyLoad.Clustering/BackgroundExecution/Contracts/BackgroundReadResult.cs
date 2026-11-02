@@ -11,7 +11,7 @@ public sealed record BackgroundReadResult
 
     /// <summary>The original domain result.</summary>
     [Id(0)]
-    public required Result<object> Result
+    public required Result<object> /* KLD0041: Keep the current generated background-read Result field ID and its Result<object> wire shape carrying the original GrainValue response. */ Result
     {
         get; init;
     }

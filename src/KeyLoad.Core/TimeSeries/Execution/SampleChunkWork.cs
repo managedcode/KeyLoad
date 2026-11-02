@@ -12,7 +12,7 @@ internal readonly struct SampleChunkWork
 
     internal static SampleChunkWork Observe(ReadExecutionBudget original)
     {
-        ArgumentNullException.ThrowIfNull(original);
+        ArgumentNullException.ThrowIfNull(original) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return new(original);
     }
 

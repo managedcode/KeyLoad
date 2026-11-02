@@ -29,7 +29,7 @@ internal static class Bm25CorpusMaintenance
         Command<DatabaseCommand> original, ReadExecutionBudget work,
         CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(original);
+        ArgumentNullException.ThrowIfNull(original) /* KLD0041: BCL null validation accepts the original Command reference through its object parameter. */;
         token.ThrowIfCancellationRequested();
         var verified = partition.Database.OwnCommand(original);
         if (verified.Value!.Kind != OperationKind.Bm25CorpusPublicationPhase)

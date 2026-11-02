@@ -38,7 +38,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         {
             lock (lifecycle)
             {
-                ObjectDisposedException.ThrowIf(stopping, this);
+                ObjectDisposedException.ThrowIf(stopping, this) /* KLD0041: BCL disposal diagnostics accept the this PartitionHostApplicationOwner instance through object to preserve its runtime owner type. */;
                 return published && session is not null ? session : throw new InvalidOperationException(Unpublished);
             }
         }
@@ -52,8 +52,8 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         await original.WaitAsync(cancellationToken);
         lock (lifecycle)
         {
-            ObjectDisposedException.ThrowIf(stopping, this);
-            if (!published || !ReferenceEquals(original, opening))
+            ObjectDisposedException.ThrowIf(stopping, this) /* KLD0041: BCL disposal diagnostics accept the this PartitionHostApplicationOwner instance through object to preserve its runtime owner type. */;
+            if (!published || !(ReferenceEquals(original, opening) /* KLD0041: Publish only the original partition opening task instance through CLR reference identity. */))
             {
                 throw new InvalidOperationException(Unpublished);
             }
@@ -72,10 +72,10 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
 
     internal Task OpenAsync(IGrainContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context IGrainContext reference through its object parameter. */;
         lock (lifecycle)
         {
-            ObjectDisposedException.ThrowIf(stopping, this);
+            ObjectDisposedException.ThrowIf(stopping, this) /* KLD0041: BCL disposal diagnostics accept the this PartitionHostApplicationOwner instance through object to preserve its runtime owner type. */;
             if (options.Node.Value.StorageMode == StorageAccessMode.SharedVolume)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, Unpublished);
@@ -108,14 +108,14 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
 
     public async Task<ISharedDatabaseSession> OpenSharedAsync(IGrainContext owner, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentNullException.ThrowIfNull(owner) /* KLD0041: BCL null validation accepts the owner IGrainContext reference through its object parameter. */;
         cancellationToken.ThrowIfCancellationRequested();
         Task original;
         lock (lifecycle)
         {
-            ObjectDisposedException.ThrowIf(stopping, this);
+            ObjectDisposedException.ThrowIf(stopping, this) /* KLD0041: BCL disposal diagnostics accept the this PartitionHostApplicationOwner instance through object to preserve its runtime owner type. */;
             if (options.Node.Value.StorageMode != StorageAccessMode.SharedVolume
-                || sharedOwner is not null && !ReferenceEquals(sharedOwner, owner))
+                || sharedOwner is not null && !(ReferenceEquals(sharedOwner, owner) /* KLD0041: Require the same shared partition owner instance through CLR reference identity. */))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, Unpublished);
             }
@@ -151,7 +151,7 @@ internal sealed class PartitionHostApplicationOwner(ServerRuntimeOptions options
         PartitionStorageSession physical;
         lock (lifecycle)
         {
-            if (!ReferenceEquals(session, expected) || session is null || sharedOwner is null)
+            if (!(ReferenceEquals(session, expected) /* KLD0041: Close only the exact expected physical storage session instance through CLR reference identity. */) || session is null || sharedOwner is null)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, Unpublished);
             }

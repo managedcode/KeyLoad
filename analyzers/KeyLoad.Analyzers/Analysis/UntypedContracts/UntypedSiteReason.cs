@@ -35,6 +35,10 @@ internal static class UntypedSiteReason
     {
         for (var parent = node.Parent; parent is not null && parent.Span.End == node.Span.End; parent = parent.Parent)
         {
+            if (parent is ConditionalAccessExpressionSyntax conditional && conditional.WhenNotNull == node)
+            {
+                continue;
+            }
             if (parent is ExpressionSyntax)
             {
                 return true;

@@ -11,8 +11,8 @@ public static class AnalyticsStoreQueries
     /// <param name = "engine">The shared database execution context.</param>
     public static void ValidateAnalyticsAggregatePublication(this DatabaseEngine engine, AnalyticsAggregateSnapshot snapshot)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(snapshot);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(snapshot) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         snapshot.Work.Check();
         engine.Store.Read(raw =>
         {

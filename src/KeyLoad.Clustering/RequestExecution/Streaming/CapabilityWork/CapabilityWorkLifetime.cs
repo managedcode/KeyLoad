@@ -114,7 +114,7 @@ internal sealed class CapabilityWorkLifetime : IDisposable, IAsyncDisposable, IR
 
     internal static Exception CombinePrimary(Exception? primary, Exception additional)
     {
-        if (primary is null || ReferenceEquals(primary, additional))
+        if (primary is null || (ReferenceEquals(primary, additional) /* KLD0041: Avoid aggregating the same primary exception instance twice through CLR reference identity. */))
         {
             return additional;
         }

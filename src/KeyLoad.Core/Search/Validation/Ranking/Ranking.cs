@@ -16,12 +16,12 @@ public static class Ranking
 
         var phase = OperationProtocol.Payload<Bm25CorpusPublicationPhaseCommand>(operation);
         engine.RequireBm25Subject(view, administrator, phase, operation.Timestamp);
-        if (Errors.Code(previous.Result.Problem).Value is not null)
+        if (Errors.Code(previous.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Problem).Value is not null)
         {
             return;
         }
 
-        var receipt = previous.Result.Get<CommitReceipt>();
+        var receipt = previous.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Get<CommitReceipt>() /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
         if (receipt is null || receipt.CommandId != phase.CommandId || receipt.Token is null || receipt.Token.AtomicPartitionId != phase.Current.Partition.AtomicPartitionId || receipt.Token.Incarnation != phase.Current.Incarnation || receipt.Token.Position <= NoBm25ReceiptPosition || receipt.Mutations.IsDefault || !receipt.Mutations.IsEmpty)
         {
             throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);

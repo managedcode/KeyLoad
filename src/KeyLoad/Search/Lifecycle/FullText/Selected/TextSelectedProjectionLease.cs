@@ -49,7 +49,7 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
 
     public void ObserveOriginalPosting(Func<CancellationToken, ValueTask> callback)
     {
-        ArgumentNullException.ThrowIfNull(callback);
+        ArgumentNullException.ThrowIfNull(callback) /* KLD0041: BCL null validation accepts the callback Func reference through its object parameter. */;
         if (disposed || completed || postingObservation is not null)
         {
             throw TextErrors.Corrupt();

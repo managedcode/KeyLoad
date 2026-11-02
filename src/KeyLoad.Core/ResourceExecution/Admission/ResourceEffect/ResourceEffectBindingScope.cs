@@ -42,7 +42,7 @@ internal sealed class ResourceEffectBindingScope
     internal void ActivateOriginalBindings(IKeyValueView view, ResourceEffectAdmission value,
         Action<ResourceLifetime> authorizeUnobservedCollection)
     {
-        ArgumentNullException.ThrowIfNull(authorizeUnobservedCollection);
+        ArgumentNullException.ThrowIfNull(authorizeUnobservedCollection) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (!observed.IsSubsetOf(value.Bindings))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Changed);

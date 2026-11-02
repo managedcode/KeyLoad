@@ -1,7 +1,6 @@
 using KeyLoad.Core.Authorization;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -20,7 +19,7 @@ public static class ResourceExecutionCommands
     internal const string InvalidEventQuotaMessage = "The retained event quota is invalid.";
     internal const string InvalidQueuePolicyMessage = "The queue policy is invalid.";
     private const string NonTransactionalKind = "Only document tables, time series and analytics tables support non-transactional data.";
-    internal static Result<object> ExecuteConfigureResource(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation)
+    internal static ResourceDefinition ExecuteConfigureResource(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = OperationProtocol.Payload<ConfigureResourceRequest>(operation);
         ValidateResource(request);
@@ -35,7 +34,7 @@ public static class ResourceExecutionCommands
         }
 
         transaction.PutRecord(key, request.Definition);
-        return OperationProtocol.Result(request.Definition);
+        return request.Definition;
     }
 
     internal static void ValidateResource(ConfigureResourceRequest request)

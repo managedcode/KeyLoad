@@ -109,12 +109,12 @@ internal static class AdminStaticAssets
     {
         if (!Assets.TryGetValue(context.Request.Path.Value ?? string.Empty, out var asset))
         {
-            return Results.NotFound();
+            return TypedResults.NotFound();
         }
         var content = typeof(AdminStaticAssets).Assembly.GetManifestResourceStream(ResourcePrefix + asset.File);
         if (content is null)
         {
-            return Results.NotFound();
+            return TypedResults.NotFound();
         }
         Headers(context);
         return Results.Stream(content, asset.Type);

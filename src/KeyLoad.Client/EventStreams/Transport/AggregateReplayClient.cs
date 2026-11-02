@@ -15,8 +15,8 @@ public static class AggregateReplayClient
         ReadAggregateReplayRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<AggregateReplayPage>(global::KeyLoad.AggregateReplayProtocol.Route, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ReadAggregateReplayRequest reference through its object parameter. */;
+        return client.Send<AggregateReplayPage, ReadAggregateReplayRequest>(global::KeyLoad.AggregateReplayProtocol.Route, request, false, null, cancellationToken);
     }
 }

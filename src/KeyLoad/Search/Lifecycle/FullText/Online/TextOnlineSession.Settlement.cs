@@ -15,7 +15,7 @@ internal sealed partial class TextOnlineSession
         expectedPublication = OrleansSerialization.Serialize(expected);
     }
 
-    internal OnlineTextPublicationWork RequirePreparedPublication()
+    internal OnlineTextPublicationWork<OnlineTextIndexMaintenanceResult> RequirePreparedPublication()
     {
         if (expectedPublication is null || Issued is null)
         {
@@ -30,6 +30,6 @@ internal sealed partial class TextOnlineSession
         commandsJoined = true;
     }
 
-    private void RequirePublicationReceipt(Result<object> original)
+    private void RequirePublicationReceipt(Result<OnlineTextIndexMaintenanceResult> original)
         => JoinedPublicationReceipt = TextOnlineSessionWork.RequireReceipt(original, ref expectedPublication, Request.CommandId);
 }

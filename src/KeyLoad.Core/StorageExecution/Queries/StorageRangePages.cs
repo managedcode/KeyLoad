@@ -24,8 +24,8 @@ internal static class StorageRangePages
         byte[]? afterKey = null)
     {
         ArgumentOutOfRangeException.ThrowIfLessThan(pageRecords, FirstRecord);
-        ArgumentNullException.ThrowIfNull(visit);
-        ArgumentNullException.ThrowIfNull(visitor);
+        ArgumentNullException.ThrowIfNull(visit) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var records = 0;
         var bytes = 0L;
         var after = afterKey;
@@ -65,7 +65,7 @@ internal static class StorageRangePages
     internal static StorageScanResult VisitAll(this IKeyValueView view, byte[] prefix, StorageRecordVisitor visitor,
         byte[]? afterKey = null, byte[]? untilKey = null)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return VisitAll(view.MaximumRangeRecords,
             (maxRecords, pageVisitor, after) => view.VisitRange(prefix, maxRecords, pageVisitor, after, untilKey),
             visitor, afterKey);

@@ -31,7 +31,7 @@ internal sealed partial class FileStorageController(IFileSystemStorage storage, 
     [FileStorageCapability(Capability.BlobWrite)]
     public override async Task<Result<BlobMetadata>> UploadAsync([FromForm] IFormFile file, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(file);
+        ArgumentNullException.ThrowIfNull(file) /* KLD0041: BCL null validation accepts the file IFormFile reference through its object parameter. */;
         if (serverOptions.EnableFileSizeValidation && file.Length > serverOptions.MaxFileSize)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, FileStorageProtocol.Invalid);

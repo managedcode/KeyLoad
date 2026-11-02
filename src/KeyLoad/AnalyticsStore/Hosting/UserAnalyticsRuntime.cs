@@ -30,7 +30,7 @@ internal sealed class UserAnalyticsRuntime() : IUserAnalytics, IAsyncDisposable
     {
         lock (lifecycle)
         {
-            ObjectDisposedException.ThrowIf(stopping, this);
+            ObjectDisposedException.ThrowIf(stopping, this) /* KLD0041: BCL disposal diagnostics accept the this UserAnalyticsRuntime instance through object to preserve its runtime owner type. */;
             if (host is not null)
             {
                 throw new InvalidOperationException(Unavailable);
@@ -43,14 +43,14 @@ internal sealed class UserAnalyticsRuntime() : IUserAnalytics, IAsyncDisposable
     public Task<RuntimeAnalyticsAggregate> AggregateAsync(AnalyticsAggregateSnapshot snapshot,
         IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(snapshot);
+        ArgumentNullException.ThrowIfNull(snapshot) /* KLD0041: BCL null validation accepts the snapshot AnalyticsAggregateSnapshot reference through its object parameter. */;
         snapshot.Work.RequireResourceLifetimeBinding(binding);
         cancellationToken.ThrowIfCancellationRequested();
         UserAnalyticsGenerationExecution execution;
         var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
         lock (lifecycle)
         {
-            ObjectDisposedException.ThrowIf(stopping, this);
+            ObjectDisposedException.ThrowIf(stopping, this) /* KLD0041: BCL disposal diagnostics accept the this UserAnalyticsRuntime instance through object to preserve its runtime owner type. */;
             var physical = host ?? throw new InvalidOperationException(Unavailable);
             operations.RemoveAll(work => work.Original.IsCompleted && !work.Execution.HasUnjoinedEngine
                 && work.Execution.CleanupFailures.Count == NoCleanupFailures);

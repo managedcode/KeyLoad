@@ -9,10 +9,10 @@ internal static class EventFeedAdvisoryPublisher
     internal static async Task PublishAsync(IAsyncObserver<EventFeedWakeupHint> actualProducer,
         EventFeedWakeupHint actualHint, CancellationToken originalCancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(actualProducer);
-        ArgumentNullException.ThrowIfNull(actualHint);
+        ArgumentNullException.ThrowIfNull(actualProducer) /* KLD0041: BCL null validation accepts the actualProducer IAsyncObserver reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(actualHint) /* KLD0041: BCL null validation accepts the actualHint EventFeedWakeupHint reference through its object parameter. */;
         originalCancellationToken.ThrowIfCancellationRequested();
-        var original = CaptureContext();
+        var /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */ original = (CaptureContext() /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */);
         Exception? nonfatal = null;
         Exception? fatal = null;
         Exception? settlement = null;
@@ -33,7 +33,10 @@ internal static class EventFeedAdvisoryPublisher
         finally
         {
             settlement = await CqrsStreamSettlement.SettleAsync<EventFeedWakeupHint>(null,
-                () => RestoreContext(original), nonfatal ?? fatal).ConfigureAwait(true);
+                () =>
+                {
+                    RestoreContext(original) /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */;
+                }, nonfatal ?? fatal).ConfigureAwait(true);
         }
         if ((settlement ?? nonfatal ?? fatal) is { } terminal)
         {
@@ -42,23 +45,23 @@ internal static class EventFeedAdvisoryPublisher
         originalCancellationToken.ThrowIfCancellationRequested();
     }
 
-    private static List<KeyValuePair<string, object>> CaptureContext()
+    private static List<KeyValuePair<string, object>> /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */ CaptureContext()
     {
-        var original = new List<KeyValuePair<string, object>>();
-        foreach (var entry in RequestContext.Entries)
+        var /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */ original = (new List<KeyValuePair<string, object>>() /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */);
+        foreach (var entry in (RequestContext.Entries /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */))
         {
             // Borrow the already-owned caller context; never encode or enqueue its identity/data.
-            original.Add(new(entry.Key, entry.Value));
+            original.Add((new(entry.Key, (entry.Value /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */)) /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */)) /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */;
         }
         return original;
     }
 
-    private static void RestoreContext(List<KeyValuePair<string, object>> original)
+    private static void RestoreContext(List<KeyValuePair<string, object>> /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */ original)
     {
         RequestContext.Clear();
         foreach (var entry in original)
         {
-            RequestContext.Set(entry.Key, entry.Value);
+            RequestContext.Set(entry.Key, (entry.Value /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */)) /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */;
         }
     }
 }

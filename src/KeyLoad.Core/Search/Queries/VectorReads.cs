@@ -17,7 +17,7 @@ public static class VectorReads
     /// <param name = "engine">The shared database execution context.</param>
     public static T WithVectors<T>(this DatabaseEngine engine, string principalId, PartitionRef partition, string collection, string field, Func<PrincipalRecord, ResourceDefinition, (DocumentRecord Document, VectorRecord Vector)[], T> read)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Store.Read(view =>
         {
             var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
@@ -40,7 +40,7 @@ public static class VectorReads
     /// <param name = "engine">The shared database execution context.</param>
     public static (DocumentRecord Document, VectorRecord Vector)[] ReadVisibleVectors(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection, string field, ReadExecutionBudget? budget = null)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget ??= new(timeProvider: engine.Clock);
         var eligible = new List<(DocumentRecord, VectorRecord)>();
         engine.VisitVisibleVectors(view, principal, partition, collection, field, budget, (document, vector) => eligible.Add((document, vector)));
@@ -59,7 +59,7 @@ public static class VectorReads
     /// <param name = "engine">The shared database execution context.</param>
     public static void VisitVisibleVectors(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection, string field, ReadExecutionBudget budget, Action<DocumentRecord, VectorRecord> visitor)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         VisibleVectorReads.Visit(engine, view, principal, partition, collection, field, budget, visitor);
     }
 }

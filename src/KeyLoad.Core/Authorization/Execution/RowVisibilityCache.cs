@@ -125,7 +125,7 @@ internal sealed class RowVisibilityCache : IDisposable
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(pinReleased, this);
+            ObjectDisposedException.ThrowIf(pinReleased, this) /* KLD0041: The BCL disposal guard accepts this owner as object to report its runtime type name. */;
             return entry.Contains(id);
         }
     }

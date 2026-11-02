@@ -29,24 +29,24 @@ public sealed class DatabaseEngine
     /// <param name = "timeProvider">Optional business clock; hosting runtime time is unaffected.</param>
     public DatabaseEngine(IAtomicStore store, IAuthorizationPolicy authorization, IOptions<DatabaseLimits> limits, IOptions<DueWorkExecutionOptions> dueWorkOptions, IOptions<EventSourceExecutionOptions> eventSourceOptions, IOptions<MessagingExecutionOptions> messagingOptions, IOptions<GraphExecutionOptions> graphOptions, IOptions<ChangeFeedExecutionOptions> changeFeedOptions, IOptions<ClaimsExecutionOptions> claimsOptions, IOptions<TimeSeriesExecutionOptions> timeSeriesOptions, TimeProvider? timeProvider = null)
     {
-        ArgumentNullException.ThrowIfNull(store);
-        ArgumentNullException.ThrowIfNull(authorization);
-        ArgumentNullException.ThrowIfNull(limits);
-        ArgumentNullException.ThrowIfNull(dueWorkOptions);
-        ArgumentNullException.ThrowIfNull(eventSourceOptions);
-        ArgumentNullException.ThrowIfNull(messagingOptions);
+        ArgumentNullException.ThrowIfNull(store) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(authorization) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(limits) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(dueWorkOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(eventSourceOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(messagingOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         messagingExecution = messagingOptions.Value;
         messagingExecution.Validate();
-        ArgumentNullException.ThrowIfNull(graphOptions);
+        ArgumentNullException.ThrowIfNull(graphOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         graphExecution = graphOptions.Value;
         graphExecution.Validate();
-        ArgumentNullException.ThrowIfNull(changeFeedOptions);
+        ArgumentNullException.ThrowIfNull(changeFeedOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         changeFeedExecution = changeFeedOptions.Value;
         changeFeedExecution.Validate();
-        ArgumentNullException.ThrowIfNull(claimsOptions);
+        ArgumentNullException.ThrowIfNull(claimsOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ClaimsExecution = claimsOptions.Value;
         ClaimsExecution.Validate();
-        ArgumentNullException.ThrowIfNull(timeSeriesOptions);
+        ArgumentNullException.ThrowIfNull(timeSeriesOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         TimeSeriesOptions = timeSeriesOptions;
         timeSeriesExecution = timeSeriesOptions.Value;
         timeSeriesExecution.Validate();

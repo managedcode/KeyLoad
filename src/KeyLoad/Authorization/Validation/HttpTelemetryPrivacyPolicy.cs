@@ -54,7 +54,7 @@ internal static class HttpTelemetryPrivacyPolicy
             if (activity.Source.Name != ClientSource || activity.OperationName != ClientOperation || activity.Kind != ActivityKind.Client
                 || link.Context.TraceId == default || link.Context.SpanId == default || link.Context.IsRemote
                 || link.Context.TraceState is not null || link.Context.TraceFlags is not (ActivityTraceFlags.None or ActivityTraceFlags.Recorded)
-                || (link.Tags?.Any() ?? false))
+                || ((link.Tags /* KLD0041: Inspect only whether the native ActivityLink object-valued tag collection is empty; linked caller metadata is never exported. */)?.Any() /* KLD0041: Accept the native Activity HTTP protocol tag only to validate its runtime string type, bound its length and map it to a closed safe value. */ ?? false))
             {
                 return (true, ((string?)(UnsafeStateReason)));
             }
@@ -66,7 +66,7 @@ internal static class HttpTelemetryPrivacyPolicy
         return (false, default(string?));
     }
     internal static bool IsHttp(string source) => source is ServerSource or ClientSource;
-    internal static string NormalizeMethod(object? value) => value is string { Length: <= MaximumMethodCharacters } text ? text switch
+    internal static string NormalizeMethod(object? /* KLD0041: Accept the native Activity HTTP method tag only to validate its runtime string type, bound its length and map it to a closed safe value. */ value) => value is string { Length: <= MaximumMethodCharacters } text ? text switch
     {
         MethodGet => MethodGet,
         MethodPost => MethodPost,
@@ -79,7 +79,7 @@ internal static class HttpTelemetryPrivacyPolicy
         MethodTrace => MethodTrace,
         _ => OtherMethod
     } : OtherMethod;
-    internal static (bool HasValue, string? Value) NormalizeProtocol(object? value) => value is string { Length: <= MaximumProtocolCharacters } text ? text switch
+    internal static (bool HasValue, string? Value) NormalizeProtocol(object? /* KLD0041: Accept the native Activity HTTP protocol tag only to validate its runtime string type, bound its length and map it to a closed safe value. */ value) => value is string { Length: <= MaximumProtocolCharacters } text ? text switch
     {
         Protocol10 => (true, ((string?)(Protocol10))),
         Protocol11 => (true, ((string?)(Protocol11))),

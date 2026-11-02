@@ -8,4 +8,4 @@ namespace KeyLoad.Server;
 /// <param name="CommandId">Caller stable write identity; empty for read-dispatch operations.</param>
 /// <param name="Payload">The typed operation input, independent of the public argument document.</param>
 internal sealed record McpDecodedOperation(GrainReadKind? ReadKind, OperationKind? CommandKind,
-    Guid CommandId, object Payload);
+    Guid CommandId, object /* KLD0041: This decoded descriptor carries one already validated MCP or SQL operation input selected by its closed kind, including the public boolean administrative input; serialize only at the existing generated envelope boundary. */ Payload);

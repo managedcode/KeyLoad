@@ -18,8 +18,8 @@ internal static class PackedAnnSearch
     internal static AnnSearchResult Run(PackedAnnState state, ReadOnlyMemory<float> query, int limit,
         ReadOnlyMemory<ulong>? eligibility, AnnWorkBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(state);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(state) /* KLD0041: BCL null validation accepts the state PackedAnnState reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget AnnWorkBudget reference through its object parameter. */;
         budget.Check();
         var startedWork = budget.WorkUnits;
         var startedDistances = budget.DistanceEvaluations;

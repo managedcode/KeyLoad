@@ -1,7 +1,6 @@
 using KeyLoad.Core.RelationalStorage;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -10,7 +9,7 @@ public static class DropTableExecution
 {
     internal const string TableRemovalMissing = "The table resource is not configured.";
     internal const string TableRemovalKind = "The resource is not a canonical typed table.";
-    internal static Result<object> ExecuteDropTable(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, long position, CancellationToken cancellationToken)
+    internal static DropTableResult ExecuteDropTable(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, long position, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         var request = OperationProtocol.Payload<DropTableRequest>(operation);
@@ -38,6 +37,6 @@ public static class DropTableExecution
         work.Check();
         transaction.Delete(ResourceLifetimeCatalog.Key(request.TenantId, request.DatabaseId, request.ResourceName));
         var token = new CommitToken(engine.Store.Identity.Incarnation, CatalogRoute.PartitionId, position);
-        return OperationProtocol.Result(new DropTableResult(request.TenantId, request.DatabaseId, request.ResourceName, new(operation.CommandId, token, [], engine.Durability, engine.AcknowledgedPersistedCopies)));
+        return new DropTableResult(request.TenantId, request.DatabaseId, request.ResourceName, new(operation.CommandId, token, [], engine.Durability, engine.AcknowledgedPersistedCopies));
     }
 }

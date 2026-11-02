@@ -9,7 +9,7 @@ internal static class SqlGraphSearchExecutor
         string principalId, SqlGraphSearchRequest request, QueryExecutionOptions execution, CancellationToken cancellationToken,
         IResourceLifetimeWorkBinding? binding = null)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SqlGraphSearchRequest reference through its object parameter. */;
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         if (binding is not null)
         {

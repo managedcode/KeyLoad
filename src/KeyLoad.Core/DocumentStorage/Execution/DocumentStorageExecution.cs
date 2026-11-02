@@ -6,16 +6,16 @@ public static class DocumentStorageExecution
 {
     internal static DocumentResult? GetDocumentBound(this DatabaseEngine engine, string principalId, EntityRef reference, CommitToken? minimumToken, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
         return engine.GetDocumentBound(principalId, new GetDocumentRequest(reference, minimumToken), work, binding);
     }
 
     internal static DocumentResult? GetDocumentBound(this DatabaseEngine engine, string principalId, GetDocumentRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(work);
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.AttachResourceLifetimeBinding(binding);
         var cancellationToken = work.Cancellation;
         using var admission = engine.AdmitQuery(cancellationToken);

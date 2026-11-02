@@ -120,5 +120,28 @@ internal static class KeyCodecReadPrimitives
         throw BadKey();
     }
 
+    internal static void SkipEscaped(ReadOnlySpan<byte> key, ref int offset)
+    {
+        while (offset < key.Length)
+        {
+            var length = key[offset..].IndexOf((byte)EscapedZeroByte);
+            if (length < 0)
+            {
+                throw BadKey();
+            }
+            offset += length + 1;
+            var escape = ReadByte(key, ref offset);
+            if (escape == EscapedZeroByte)
+            {
+                return;
+            }
+            if (escape != ZeroEscapeMarker)
+            {
+                throw BadKey();
+            }
+        }
+        throw BadKey();
+    }
+
     internal static KeyLoadException BadKey() => Errors.Fail(ErrorCode.Corruption, InvalidEncodedKey);
 }

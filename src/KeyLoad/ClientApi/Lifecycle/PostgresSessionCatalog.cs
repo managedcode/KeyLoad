@@ -51,7 +51,7 @@ internal sealed class PostgresSessionCatalog(global::Microsoft.Extensions.Option
 
     private void ReplaceStatement(string name, PostgresPreparedStatement? previous, PostgresPreparedStatement? next)
     {
-        var dependent = portals.Where(pair => ReferenceEquals(pair.Value.Statement, previous))
+        var dependent = portals.Where(pair => (ReferenceEquals(pair.Value.Statement, previous) /* KLD0041: Find portals bound to this exact prepared statement instance through CLR reference identity. */))
             .Select(pair => pair.Key).ToArray();
         var released = previous?.RetainedBytes ?? PostgresProtocol.EmptyBytes;
         foreach (var key in dependent)

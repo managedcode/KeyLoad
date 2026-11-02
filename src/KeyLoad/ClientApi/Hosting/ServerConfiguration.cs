@@ -113,7 +113,7 @@ internal static class ServerConfiguration
         var phases = runtime.DatabasePhaseExecution.Value;
         DatabasePhaseTelemetry.Initialize(phases.Enabled, phases.StripeCount, phases.MaximumCasAttempts,
             TimeProvider.System);
-        app.UseMiddleware<AdminHttpMetricsMiddleware>();
+        app.UseMiddleware<AdminHttpMetricsMiddleware>() /* KLD0041: The native ASP.NET middleware registration uses params object[]; this registration has no explicit arguments and reuses the empty array. */;
         app.Use(next => new ServerErrorMiddleware(next,
             app.Services.GetRequiredService<ILogger<ServerErrorMiddleware>>(), app.Services.GetRequiredService<TimeProvider>()).InvokeAsync);
         AdminStaticAssets.UseHeaders(app);
@@ -214,7 +214,7 @@ internal static class ServerConfiguration
         services.AddSingleton<AdminHttpMetrics>();
         services.AddSingleton<IAuthorizationPolicy, AuthorizationPolicy>();
         services.AddSingleton<PartitionHostApplicationOwner>();
-        services.AddSingleton(provider => ActivatorUtilities.CreateInstance<OrleansNode>(provider));
+        services.AddSingleton(provider => (ActivatorUtilities.CreateInstance<OrleansNode>(provider) /* KLD0041: Native DI activation uses params object[]; OrleansNode is composed from registered services with no explicit object arguments. */));
     }
 
 }

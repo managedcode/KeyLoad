@@ -15,8 +15,8 @@ internal sealed class KeyLoadClientTransport
     private readonly IOptions<KeyLoadClientExecutionOptions> execution;
     internal KeyLoadClientTransport(HttpClient http, string apiKey, IOptions<KeyLoadClientExecutionOptions> executionOptions)
     {
-        ArgumentNullException.ThrowIfNull(http);
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(http) /* KLD0041: BCL null validation accepts the http HttpClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         execution = KeyLoadClientExecutionOptions.Snapshot(executionOptions);
         this.http = http;
         this.apiKey = apiKey;
@@ -24,11 +24,17 @@ internal sealed class KeyLoadClientTransport
 
     internal KeyLoadClientExecutionOptions ExecutionOptions => execution.Value;
 
-    internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken,
-        HttpMethod? method = null)
-        => SendCore<T>(path, request, write, id, method ?? (request is null ? HttpMethod.Get : HttpMethod.Post), cancellationToken);
+    internal Task<Result<T>> Send<T, TRequest>(string path, TRequest request, bool write, Guid? id, CancellationToken cancellationToken,
+        HttpMethod? method = null) where TRequest : class
+        => SendCore<T>(path, request is null ? null : JsonContent.Create(request, options: JsonDefaults.Options),
+            write, id, method ?? (request is null ? HttpMethod.Get : HttpMethod.Post), cancellationToken);
 
-    internal async Task<Result> SendStatus(string path, object request, Guid id, CancellationToken cancellationToken)
+    internal Task<Result<T>> Send<T>(string path, bool write, Guid? id, CancellationToken cancellationToken,
+        HttpMethod? method = null)
+        => SendCore<T>(path, null, write, id, method ?? HttpMethod.Get, cancellationToken);
+
+    internal async Task<Result> SendStatus<TRequest>(string path, TRequest request, Guid id, CancellationToken cancellationToken)
+        where TRequest : class
     {
         using var message = new HttpRequestMessage(HttpMethod.Post, path)
         {
@@ -37,7 +43,7 @@ internal sealed class KeyLoadClientTransport
         };
         message.Headers.Authorization = new AuthenticationHeaderValue(ClientTransportMessages.BearerScheme, apiKey);
         message.Headers.Add(CommandIdHeader, id.ToString());
-        message.Content = JsonContent.Create(request, request.GetType(), options: JsonDefaults.Options);
+        message.Content = JsonContent.Create(request, options: JsonDefaults.Options);
         try
         {
             using var response = await http.SendAsync(message, HttpCompletionOption.ResponseHeadersRead, cancellationToken)
@@ -60,22 +66,19 @@ internal sealed class KeyLoadClientTransport
         }
     }
 
-    private async Task<Result<T>> SendCore<T>(string path, object? request, bool write, Guid? id,
+    private async Task<Result<T>> SendCore<T>(string path, HttpContent? content, bool write, Guid? id,
         HttpMethod method, CancellationToken cancellationToken)
     {
         using var message = new HttpRequestMessage(method, path)
         {
             Version = http.DefaultRequestVersion,
-            VersionPolicy = http.DefaultVersionPolicy
+            VersionPolicy = http.DefaultVersionPolicy,
+            Content = content
         };
         message.Headers.Authorization = new AuthenticationHeaderValue(ClientTransportMessages.BearerScheme, apiKey);
         if (id is { } command)
         {
             message.Headers.Add(CommandIdHeader, command.ToString());
-        }
-        if (request is not null)
-        {
-            message.Content = JsonContent.Create(request, request.GetType(), options: JsonDefaults.Options);
         }
         try
         {

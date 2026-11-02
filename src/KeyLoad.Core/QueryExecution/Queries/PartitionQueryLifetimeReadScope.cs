@@ -9,7 +9,7 @@ public static class PartitionQueryLifetimeReadScope
     internal const string PartitionQueryReceivingIdentityChanged = "The partition query receiving identity changed.";
     internal static T WithPartitionQueryLifetimeView<T>(this DatabaseEngine engine, string principalId, PartitionRef partition, string collection, ReadExecutionBudget budget, PartitionQueryLifetimeMetadata metadata, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, string, T> read)
     {
-        ArgumentNullException.ThrowIfNull(metadata);
+        ArgumentNullException.ThrowIfNull(metadata) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         ResourceLifetimeCoverageValidation.Require(metadata.Coverage, partition, [metadata.Definition]);
         if (metadata.Principal is null || metadata.Principal.Id != principalId || metadata.Definition.Name != collection || metadata.Definition.Kind != ResourceKind.Collection)

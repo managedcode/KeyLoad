@@ -28,7 +28,7 @@ internal static class AdministratorAuthenticationRequests
         {
             var reply = await AdministratorAuthenticationDispatch.SendAsync(node, requestId,
                 envelope, () => dispatched = true, token);
-            value = GrainReplyFactory.RequireValue(reply).Value as AdministratorAuthenticationResult
+            value = ((GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue runtime-typed reply slot once before validating the administrator authentication result. */) as AdministratorAuthenticationResult /* KLD0042: Require AdministratorAuthenticationResult from the current generated reply slot before interpreting denied or authenticated administrator state. */)
                 ?? throw Errors.Fail(ErrorCode.Corruption, AdministratorAuthenticationProtocol.Invalid);
         }
         catch (Exception original) when (dispatched && CqrsBoundaryErrors.IsNonFatal(original))
@@ -42,7 +42,7 @@ internal static class AdministratorAuthenticationRequests
             throw Errors.Fail(denied, value.SafeDetail!);
         }
         work.Check();
-        var principal = McpAuthentication.ReadPrincipal(new GrainValue(value.Principal), options, token);
+        var principal = McpAuthentication.ReadPrincipal((new GrainValue(value.Principal) /* KLD0041: The existing generated GrainValue reply slot carries this verified PrincipalRecord reference; reuse the canonical principal validation path. */), options, token);
         GrainRequestAuthority.RequireAdministrator(principal);
         work.Check();
         return principal;

@@ -57,9 +57,9 @@ internal sealed class RequestWorkLease : IDisposable, IAsyncDisposable, IRequest
         ?? throw Errors.Fail(ErrorCode.OwnershipLost, RequestWorkLimits.LeaseIdentityMessage);
     internal void AttachResultRetention(ResourceLifetimeWorkResultRetention original)
     {
-        ArgumentNullException.ThrowIfNull(original);
+        ArgumentNullException.ThrowIfNull(original) /* KLD0041: BCL null validation accepts the original ResourceLifetimeWorkResultRetention reference through its object parameter. */;
         var existing = Interlocked.CompareExchange(ref resultRetention, original, null);
-        if (existing is not null && !ReferenceEquals(existing, original))
+        if (existing is not null && !(ReferenceEquals(existing, original) /* KLD0041: Accept only the original result retention owner instance through CLR reference identity. */))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, RequestWorkLimits.LeaseIdentityMessage);
         }

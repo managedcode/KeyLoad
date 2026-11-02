@@ -13,7 +13,7 @@ internal static class ApiEndpoints
     /// <returns>The same application for continued composition.</returns>
     public static WebApplication MapKeyLoadApi(this WebApplication app)
     {
-        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(app) /* KLD0041: BCL null validation accepts the app WebApplication reference through its object parameter. */;
         DocumentApi.Map(app);
         RelationalStorageApi.Map(app);
         EventStreamApi.Map(app);

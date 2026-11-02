@@ -13,8 +13,8 @@ internal static class McpResponseReplacement
     /// <param name="result">The fixed safe result held by its response owner.</param>
     internal static void Apply(JsonRpcResponse response, CallToolResult result)
     {
-        ArgumentNullException.ThrowIfNull(response);
-        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(response) /* KLD0041: BCL null validation accepts the response JsonRpcResponse reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(result) /* KLD0041: BCL null validation accepts the result CallToolResult reference through its object parameter. */;
         var replacement = JsonSerializer.SerializeToNode(result, McpJsonUtilities.DefaultOptions) as JsonObject
             ?? throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
         if (response.Result is JsonObject discarded

@@ -16,13 +16,13 @@ public static class QueueDispatchClient
     public static Task<Result<ResourceDefinition>> SetQueueDispatchAsync(this KeyLoadClient client,
         Guid commandId, QueueDispatchControlRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request QueueDispatchControlRequest reference through its object parameter. */;
         if (commandId == Guid.Empty)
         {
             throw new ArgumentException(InvalidCommandId, nameof(commandId));
         }
-        return client.Send<ResourceDefinition>(QueueDispatchControlProtocol.Route, request,
+        return client.Send<ResourceDefinition, QueueDispatchControlRequest>(QueueDispatchControlProtocol.Route, request,
             true, commandId, cancellationToken, HttpMethod.Post);
     }
 }

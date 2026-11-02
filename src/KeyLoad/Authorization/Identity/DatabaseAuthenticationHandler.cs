@@ -17,7 +17,7 @@ internal sealed class DatabaseAuthenticationHandler(IOptionsMonitor<Authenticati
         }
         var reply = await DatabaseCredentialResolver.ReadAsync(Context, executionObserver);
         PrincipalRecord principal;
-        if (Context.Items[McpHttpPipeline.StateItem] is McpRequestState state)
+        if ((((Context.Items /* KLD0041: ASP.NET HttpContext.Items is the native per-request handoff of the admitted MCP state to authentication; no scalar value is boxed. */)[McpHttpPipeline.StateItem] /* KLD0041: ASP.NET HttpContext.Items is the native per-request handoff of the admitted MCP state to authentication; no scalar value is boxed. */) is McpRequestState state /* KLD0042: Require this request's concrete McpRequestState before consuming its authenticated principal. */))
         {
             state.Authenticate(reply, Context.RequestAborted);
             principal = state.Principal;

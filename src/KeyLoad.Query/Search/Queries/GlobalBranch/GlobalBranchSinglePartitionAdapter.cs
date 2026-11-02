@@ -8,7 +8,7 @@ internal static class GlobalBranchSinglePartitionAdapter
 
     internal static SearchScore[] Prepare(SearchScore[] branch)
     {
-        ArgumentNullException.ThrowIfNull(branch);
+        ArgumentNullException.ThrowIfNull(branch) /* KLD0041: BCL null validation accepts the branch SearchScore[] reference through its object parameter. */;
         return branch;
     }
 

@@ -35,13 +35,13 @@ internal static partial class GrainFailureDiagnostics
     /// <returns>The same exception for use in a throw expression.</returns>
     internal static Exception Mark(Exception error, GrainFailureStage stage)
     {
-        ArgumentNullException.ThrowIfNull(error);
-        if (error.Data[StageMetadataKey] is GrainFailureStage marked && Enum.IsDefined(marked))
+        ArgumentNullException.ThrowIfNull(error) /* KLD0041: BCL null validation accepts the error Exception reference through its object parameter. */;
+        if ((((error.Data /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */)[StageMetadataKey] /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */) is GrainFailureStage marked /* KLD0042: The CLR Exception.Data slot stores the closed failure-stage enum only on the error path; validate that exact enum when reading it. */) && Enum.IsDefined(marked))
         {
             return error;
         }
 
-        error.Data[StageMetadataKey] = ValidStage(stage);
+        ((error.Data /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */)[StageMetadataKey] /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */) = (ValidStage(stage) /* KLD0042: The CLR Exception.Data slot stores the closed failure-stage enum only on the error path; validate that exact enum when reading it. */);
         return error;
     }
 
@@ -63,13 +63,13 @@ internal static partial class GrainFailureDiagnostics
     /// <param name="code">The public typed error code.</param>
     internal static void Log(ILogger? logger, Exception error, Guid requestId, GrainFailureStage callSiteStage, ErrorCode code)
     {
-        ArgumentNullException.ThrowIfNull(error);
+        ArgumentNullException.ThrowIfNull(error) /* KLD0041: BCL null validation accepts the error Exception reference through its object parameter. */;
         if (logger is null)
         {
             return;
         }
 
-        var stage = error.Data[StageMetadataKey] is GrainFailureStage marked && Enum.IsDefined(marked) ? marked : ValidStage(callSiteStage);
+        var stage = (((error.Data /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */)[StageMetadataKey] /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */) is GrainFailureStage marked /* KLD0042: The CLR Exception.Data slot stores the closed failure-stage enum only on the error path; validate that exact enum when reading it. */) && Enum.IsDefined(marked) ? marked : ValidStage(callSiteStage);
         var category = Category(error, stage);
         var safeCode = Enum.IsDefined(code) ? code : ErrorCode.OwnershipLost;
         var causeKind = CauseKind(error, category);

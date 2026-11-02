@@ -156,7 +156,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
             }
         }
         ownersEpoch++;
-        if (cachedOwners is { } published && !ReferenceEquals(published, owners))
+        if (cachedOwners is { } published && !(ReferenceEquals(published, owners) /* KLD0041: Invalidate only a different published storage owner roster instance through CLR reference identity. */))
         {
             cachedOwners = null;
         }

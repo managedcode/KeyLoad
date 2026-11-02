@@ -101,7 +101,7 @@ internal static class TextHostSearch
 
     private static void RetainCleanup(Exception cleanup, List<Exception> failures)
     {
-        if (!failures.Any(originalFailure => ReferenceEquals(originalFailure, cleanup)))
+        if (!failures.Any(originalFailure => (ReferenceEquals(originalFailure, cleanup) /* KLD0041: Deduplicate the same cleanup exception instance through CLR reference identity. */)))
         {
             failures.Add(cleanup);
         }

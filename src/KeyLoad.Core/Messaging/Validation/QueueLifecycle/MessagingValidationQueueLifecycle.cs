@@ -67,7 +67,7 @@ public static class MessagingValidationQueueLifecycle
         }
     }
 
-    internal static bool QueuePolicyResourceKey(KeyComponent[] parts, string resource)
+    internal static bool QueuePolicyResourceKey(DecodedKey parts, string resource)
     {
         if (parts.Length != QueueOrderProtocol.MessageKeyComponents || parts[QueueOrderProtocol.ResourceKeyComponent] is not { Kind: KeyComponentKind.Text, Text: var queue } || parts[QueueOrderProtocol.DomainKeyComponent].Kind is not KeyComponentKind.Text || parts[QueueOrderProtocol.PartitionKeyComponent].Kind is not KeyComponentKind.Text || parts[QueueOrderProtocol.MessageKeyComponent].Kind is not KeyComponentKind.Text)
         {

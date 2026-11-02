@@ -19,7 +19,7 @@ internal sealed class TextPostingObservation : IDisposable
 
     internal static TextPostingObservation Enter(Func<CancellationToken, ValueTask> callback)
     {
-        ArgumentNullException.ThrowIfNull(callback);
+        ArgumentNullException.ThrowIfNull(callback) /* KLD0041: BCL null validation accepts the callback Func reference through its object parameter. */;
         return new(callback);
     }
 
@@ -30,7 +30,7 @@ internal sealed class TextPostingObservation : IDisposable
         {
             return (false, default(Func<CancellationToken, ValueTask>?));
         }
-        ObjectDisposedException.ThrowIf(original.disposed, original);
+        ObjectDisposedException.ThrowIf(original.disposed, original) /* KLD0041: BCL disposal diagnostics accept the original TextPostingObservation instance through object to preserve its runtime owner type. */;
         return (true, ((Func<CancellationToken, ValueTask>?)(original.callback)));
     }
 
@@ -40,7 +40,7 @@ internal sealed class TextPostingObservation : IDisposable
         {
             return;
         }
-        if (!ReferenceEquals(Current.Value, this))
+        if (!(ReferenceEquals(Current.Value, this) /* KLD0041: Dispose only the exact current posting observation scope instance through CLR reference identity. */))
         {
             throw new InvalidOperationException(NonCurrentScope);
         }

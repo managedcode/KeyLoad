@@ -71,7 +71,7 @@ internal sealed class McpFrameBody : IDisposable
         const int DeclaredLengthEmptyCount = 0;
         const int StartEmptyCount = 0;
 
-        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(source) /* KLD0041: BCL null validation accepts the source Stream reference through its object parameter. */;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
         if (declaredLength is < DeclaredLengthEmptyCount || declaredLength > maximumBytes)
         {
@@ -193,5 +193,5 @@ internal sealed class McpFrameBody : IDisposable
         retained.Dispose();
     }
 
-    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(disposed, this);
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this McpFrameBody instance through object to preserve its runtime owner type. */;
 }

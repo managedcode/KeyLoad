@@ -11,7 +11,7 @@ internal sealed class GrainRequestPhaseSettlement(GrainRequestCodec codec)
     internal void SetIdentity(DecodedGrainRequest request)
     {
         identity = GrainRequestProbeIdentity.From(request.Envelope);
-        if (global::Orleans.Runtime.RequestContext.Get(GrainRequestStreamProtocol.ContextKey) is GrainRequestContextState context
+        if (((global::Orleans.Runtime.RequestContext.Get(GrainRequestStreamProtocol.ContextKey) /* KLD0041: The native Orleans RequestContext API uses object; validate or restore this call-local request identity value without changing its original type. */) is GrainRequestContextState context /* KLD0042: Validate the native Orleans RequestContext object as KeyLoad.Clustering.GrainRequestContextState before using call-local identity or owner state. */)
             && context.RequestId == request.Envelope.RequestId && context.CommandId == request.Envelope.CommandId)
         {
             connectionId = context.ConnectionId;
@@ -65,7 +65,7 @@ internal sealed class GrainRequestPhaseSettlement(GrainRequestCodec codec)
             return;
         }
 
-        if (deactivationFailure is null || ReferenceEquals(probeFailure, deactivationFailure))
+        if (deactivationFailure is null || (ReferenceEquals(probeFailure, deactivationFailure) /* KLD0041: Avoid repeating the same probe and deactivation exception instance through CLR reference identity. */))
         {
             Rethrow(probeFailure);
             return;

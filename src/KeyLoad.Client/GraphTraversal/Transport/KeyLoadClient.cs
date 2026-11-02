@@ -9,5 +9,5 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The typed graph traversal result.</returns>
     public Task<Result<GraphTraversal>> TraverseAsync(TraverseRequest request, CancellationToken cancellationToken = default)
-        => Send<GraphTraversal>(ApiRoutes.GraphTraverse, request, false, null, cancellationToken);
+        => Send<GraphTraversal, TraverseRequest>(ApiRoutes.GraphTraverse, request, false, null, cancellationToken);
 }

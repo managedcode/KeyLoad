@@ -39,7 +39,7 @@ public static class JsonDefaults
     public static T Deserialize<T>(ReadOnlySpan<byte> value) => JsonSerializer.Deserialize<T>(value, Options)
         ?? throw Errors.Fail(ErrorCode.Corruption, MissingRecordMessage);
 
-    internal static object Deserialize(ReadOnlySpan<byte> value, Type type) => JsonSerializer.Deserialize(value, type, Options)
+    internal static object /* KLD0041: The command registry supplies a runtime Type; the native Type-based JSON API returns that selected value as object. */ Deserialize(ReadOnlySpan<byte> value, Type type) => JsonSerializer.Deserialize(value, type, Options) /* KLD0041: The native runtime-Type overload preserves canonical JSON options for registry-selected command types. */
         ?? throw Errors.Fail(ErrorCode.Corruption, MissingRecordMessage);
 
     /// <summary>Deserializes canonical JSON text with a scoped, cleared UTF-8 input loan.</summary>
@@ -50,5 +50,5 @@ public static class JsonDefaults
     /// <exception cref="KeyLoadException">The serialized value is missing or corrupt.</exception>
     public static T Deserialize<T>(string value) => PooledJsonText.Deserialize<T>(value);
 
-    internal static object Deserialize(string value, Type type) => PooledJsonText.Deserialize(value, type);
+    internal static object /* KLD0041: Runtime-Type command admission retains the native JSON result until its operation-specific type boundary. */ Deserialize(string value, Type type) => PooledJsonText.Deserialize(value, type) /* KLD0041: Runtime-Type admission uses the same bounded UTF-8 loan and native JSON result contract. */;
 }

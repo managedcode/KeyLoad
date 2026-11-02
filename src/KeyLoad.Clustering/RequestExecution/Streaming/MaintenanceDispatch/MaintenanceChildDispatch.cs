@@ -78,7 +78,7 @@ internal static class MaintenanceChildDispatch
         }
         try
         {
-            return GrainReplyFactory.RequireValue(reply).Value as TResult
+            return ((GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue field only to validate the concrete RPC response or its permitted absence. */) as TResult /* KLD0042: Validate the current generated GrainValue slot as TResult? before accepting the concrete response from this RPC. */)
                 ?? throw Errors.Fail(command ? ErrorCode.UnknownWriteOutcome : ErrorCode.Corruption, interrupted);
         }
         catch (Exception error) when (command && error is KeyLoadException or ArgumentException)

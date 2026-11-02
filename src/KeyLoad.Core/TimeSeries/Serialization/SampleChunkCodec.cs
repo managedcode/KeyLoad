@@ -11,7 +11,7 @@ internal static class SampleChunkCodec
         int maximumBytes = MaximumEncodedBytes)
     {
         var execution = ReadExecution(executionOptions);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return EncodeCore(records, SampleChunkWork.Observe(budget), execution, maximumBytes);
     }
 
@@ -57,7 +57,7 @@ internal static class SampleChunkCodec
         int maximumBytes = MaximumEncodedBytes)
     {
         var execution = ReadExecution(executionOptions);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return DecodeCore(bytes, SampleChunkWork.Observe(budget), execution, maximumBytes);
     }
 
@@ -96,7 +96,7 @@ internal static class SampleChunkCodec
 
     private static TimeSeriesExecutionOptions ReadExecution(IOptions<TimeSeriesExecutionOptions> executionOptions)
     {
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var execution = executionOptions.Value;
         execution.Validate();
         return execution;

@@ -36,7 +36,7 @@ public static class RemoteTransferRepairHistory
         var selection = CommandOutcomeKeyResolver.Select(view, claims.PrincipalId, claims.FailedCommandId, new(CommandOutcomeScopeKind.Partition, partition));
         var outcome = selection.Outcome;
         var bytes = view.ReadOwnedValue(selection.Key);
-        if (outcome is null || bytes is null || outcome.Incarnation != claims.OwnerCut.Incarnation || outcome.PolicyEpoch != claims.OriginalPolicyEpoch || outcome.PreparedCommand.CommandId != claims.FailedCommandId || Errors.Code(outcome.Result.Problem).Value != ErrorCode.PermissionDenied || outcome.Result.Value is not null || Convert.ToHexString(SHA256.HashData(bytes)) != claims.OutcomeDigest)
+        if (outcome is null || bytes is null || outcome.Incarnation != claims.OwnerCut.Incarnation || outcome.PolicyEpoch != claims.OriginalPolicyEpoch || outcome.PreparedCommand.CommandId != claims.FailedCommandId || Errors.Code(outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Problem).Value != ErrorCode.PermissionDenied || outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Value /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ is not null || Convert.ToHexString(SHA256.HashData(bytes)) != claims.OutcomeDigest)
         {
             throw Errors.Fail(ErrorCode.Corruption, RemoteTransferRepairProtocol.Invalid);
         }

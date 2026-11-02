@@ -50,7 +50,7 @@ internal static class McpServerComposition
     private static Task ConfigureAsync(HttpContext context, McpServerOptions options, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        var state = context.Items[McpHttpPipeline.StateItem] as McpRequestState
+        var state = (((context.Items /* KLD0041: ASP.NET HttpContext.Items supplies this request's admitted MCP state to the native server-options callback. */)[McpHttpPipeline.StateItem] /* KLD0041: ASP.NET HttpContext.Items supplies this request's admitted MCP state to the native server-options callback. */) as McpRequestState /* KLD0042: Require the admitted McpRequestState before attaching native MCP handlers to this HTTP request. */)
             ?? throw Errors.Fail(ErrorCode.Unauthenticated, ServerProtocol.MissingCredential);
         var dispatcher = new McpToolDispatcher(context, state);
         options.Handlers.ListToolsHandler = dispatcher.ListAsync;

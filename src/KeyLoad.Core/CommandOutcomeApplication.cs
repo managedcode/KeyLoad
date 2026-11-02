@@ -10,15 +10,15 @@ namespace KeyLoad.Core;
 /// <summary>Owns the CommandOutcomeApplication operation contract.</summary>
 internal static class CommandOutcomeApplication
 {
-    internal static StoredOutcome BuildStoredOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, long policyEpoch, Result<object> result, global::KeyLoad.Core.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority, CommandOutcomePartitionScope partitionScope, global::KeyLoad.Core.Search.OnlineTextOutcomeAuthority? onlineTextAuthority, global::KeyLoad.Core.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence) => new(engine.Store.Identity.Incarnation, policyEpoch, result, operation)
+    internal static StoredOutcome BuildStoredOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, long policyEpoch, Result<object> /* KLD0041: This persistence writer preserves the original mixed-operation outcome schema and native payload metadata. */ result, global::KeyLoad.Core.DatabaseComposition.CompositionOutcomeAuthority? compositionAuthority, CommandOutcomePartitionScope partitionScope, global::KeyLoad.Core.Search.OnlineTextOutcomeAuthority? onlineTextAuthority, global::KeyLoad.Core.Messaging.RemoteTransferAcceptFailureAuthority? transferFailure, long canonicalSequence) => new(engine.Store.Identity.Incarnation, policyEpoch, result, operation)
     {
         CompositionAuthority = Errors.Code(result.Problem).Value is null ? compositionAuthority : null,
         ScopeKind = partitionScope.Kind,
         Partition = partitionScope.Partition,
         CanonicalSequence = canonicalSequence,
         OnlineTextAuthority = onlineTextAuthority,
-        RemoteTransferFailureAuthority = RemoteTransferFailureCapture.HasRemoteTransferCapacityFailure(result) ? transferFailure : null
-    };
+        RemoteTransferFailureAuthority = RemoteTransferFailureCapture.HasRemoteTransferCapacityFailure(result.Problem) ? transferFailure : null
+    } /* KLD0041: This constructor preserves the original native mixed-operation result in its existing persisted storage contract. */;
     internal static StoredOutcome ReplayCommand(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation, StoredOutcome previous, CommandOutcomeSelection selection, bool siloLocal)
     {
         StorageOperationApply.RequireStoredCanonicalSequence(transaction, previous, siloLocal);

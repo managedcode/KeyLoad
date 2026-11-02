@@ -12,7 +12,7 @@ public sealed partial class SearchEngine
         ITextProjection? textProjection, IAnnProjection annProjection)
         : this(database, options, textProjection)
     {
-        ArgumentNullException.ThrowIfNull(annProjection);
+        ArgumentNullException.ThrowIfNull(annProjection) /* KLD0041: BCL null validation accepts the annProjection IAnnProjection reference through its object parameter. */;
         this.annProjection = annProjection;
     }
 

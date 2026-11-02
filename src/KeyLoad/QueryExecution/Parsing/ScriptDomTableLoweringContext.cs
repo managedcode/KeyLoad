@@ -9,7 +9,7 @@ internal sealed class ScriptDomTableLoweringContext
     internal ScriptDomTableLoweringContext(Action checkBudget,
         CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(checkBudget);
+        ArgumentNullException.ThrowIfNull(checkBudget) /* KLD0041: BCL null validation accepts the checkBudget Action reference through its object parameter. */;
         this.checkBudget = checkBudget;
         this.token = token;
     }

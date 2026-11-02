@@ -19,10 +19,10 @@ internal static class McpHttpPipeline
         McpFrameBody? pendingBody = null;
         try
         {
-            context.Items[StateItem] = state;
+            ((context.Items /* KLD0041: ASP.NET Items is the native request-local handoff for this pipeline's admitted McpRequestState and authenticated principal references. */)[StateItem] /* KLD0041: ASP.NET Items is the native request-local handoff for this pipeline's admitted McpRequestState and authenticated principal references. */) = state;
             _ = await DatabaseAuthenticationComposition.AuthenticateAsync(context);
             var headers = McpTransportGuard.ReadHeaders(context.Request.Headers, executionOptions);
-            context.Items[ServerProtocol.PrincipalItem] = state.Principal;
+            ((context.Items /* KLD0041: ASP.NET Items is the native request-local handoff for this pipeline's admitted McpRequestState and authenticated principal references. */)[ServerProtocol.PrincipalItem] /* KLD0041: Publish only the authenticated PrincipalRecord reference in the native per-request ASP.NET Items slot for downstream authorization. */) = state.Principal;
             if (HttpMethods.IsPost(context.Request.Method))
             {
                 SetBodyLimit(context, maximumBodyBytes);
@@ -49,7 +49,7 @@ internal static class McpHttpPipeline
         finally
         {
             context.Request.Body = originalBody;
-            context.Items.Remove(StateItem);
+            (context.Items /* KLD0041: ASP.NET Items is the native request-local handoff for this pipeline's admitted McpRequestState and authenticated principal references. */).Remove(StateItem) /* KLD0041: Remove this pipeline's admitted MCP state from native HttpContext.Items during joined request cleanup. */;
             pendingBody?.Dispose();
         }
     }

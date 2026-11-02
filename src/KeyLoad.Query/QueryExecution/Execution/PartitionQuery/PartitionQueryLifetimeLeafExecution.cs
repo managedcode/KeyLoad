@@ -13,7 +13,7 @@ internal static class PartitionQueryLifetimeLeafExecution
         PartitionQueryOwnedLeafRequest request, PhysicalShardRecord actualOwner, TimeProvider clock,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         return Execute(engine, principalId, request, actualOwner, clock, token, binding);
     }
 

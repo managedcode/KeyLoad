@@ -7,7 +7,7 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 public sealed record StorageOperationResult(
     [property: Orleans.Id(StorageOperationResult.SequenceField)] long Sequence,
-    [property: Orleans.Id(StorageOperationResult.ResultField)] Result<object> Result)
+    [property: Orleans.Id(StorageOperationResult.ResultField)] Result<object> /* KLD0041: An ordered storage batch contains different operation kinds and returns each original native persisted outcome in this existing slot. */ Result)
 {
     internal const int SequenceField = 0;
     internal const int ResultField = 1;

@@ -41,7 +41,7 @@ public static class RemoteTransferTargetFailureRead
     internal static RemoteTransferAcceptFailureAuthority RequireRemoteTransferFailedAuthority(this DatabaseEngine engine, StoredOutcome outcome, RemoteTransferIntentClaims intent, RemoteTransferCoordinationReadRequest request)
     {
         var stamp = outcome.RemoteTransferFailureAuthority;
-        if (stamp is null || !RemoteTransferDependencyShape.Valid(stamp.Dependency) || !RemoteTransferFailureCapture.HasRemoteTransferCapacityFailure(outcome.Result) || (outcome.Result.Value is not null))
+        if (stamp is null || !RemoteTransferDependencyShape.Valid(stamp.Dependency) || !RemoteTransferFailureCapture.HasRemoteTransferCapacityFailure(outcome.Result /* KLD0041: This field is the existing native persisted outcome slot, whose payload type depends on its original operation kind. */.Problem) || (outcome.Result /* KLD0041: This field is the existing native persisted outcome slot, whose payload type depends on its original operation kind. */.Value /* KLD0041: A failed native persisted result must have no value in its erased payload slot. */ is not null))
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferAttemptProtocol.Unavailable);
         }

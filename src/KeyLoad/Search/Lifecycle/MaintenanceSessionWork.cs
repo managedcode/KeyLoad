@@ -21,7 +21,7 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
     {
         get
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
+            ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this MaintenanceSessionWork instance through object to preserve its runtime owner type. */;
             return retention;
         }
     }
@@ -49,7 +49,7 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(disposed || closed, this);
+            ObjectDisposedException.ThrowIf(disposed || closed, this) /* KLD0041: BCL disposal diagnostics accept the this MaintenanceSessionWork instance through object to preserve its runtime owner type. */;
             if (current is not null)
             {
                 throw TextErrors.Ownership();
@@ -125,7 +125,7 @@ internal sealed class MaintenanceSessionWork : IDisposable, IResourceLifetimeWor
     {
         lock (gate)
         {
-            if (!ReferenceEquals(current, original))
+            if (!(ReferenceEquals(current, original) /* KLD0041: Require the exact admitted maintenance work instance through CLR reference identity. */))
             {
                 throw TextErrors.Ownership();
             }

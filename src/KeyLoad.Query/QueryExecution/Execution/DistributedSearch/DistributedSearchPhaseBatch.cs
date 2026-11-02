@@ -13,9 +13,9 @@ internal static class DistributedSearchPhaseBatch
         Func<DistributedSearchPhaseWork, ReadExecutionBudget, CancellationToken, Task<DistributedSearchPreparedLeaf>> prepare,
         CancellationTokenSource execution)
     {
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(prepare);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(prepare) /* KLD0041: BCL null validation accepts the prepare Func reference through its object parameter. */;
         budget.Check();
         var policy = options.Value;
         policy.Validate();

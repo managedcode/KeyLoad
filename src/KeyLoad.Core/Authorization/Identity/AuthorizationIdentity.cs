@@ -13,7 +13,7 @@ public static class AuthorizationIdentity
     internal const string CredentialRequired = "An API key is required.";
     internal static DatabaseCredentialWitness IssueCredentialWitness(string secret)
     {
-        ArgumentNullException.ThrowIfNull(secret);
+        ArgumentNullException.ThrowIfNull(secret) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var separator = secret.IndexOf(CredentialIdentitySeparator, StringComparison.Ordinal);
         if (secret.Length is < CredentialMinimumCharacters or > CredentialMaximumCharacters || separator <= CredentialFirstIdentityCharacter)
         {

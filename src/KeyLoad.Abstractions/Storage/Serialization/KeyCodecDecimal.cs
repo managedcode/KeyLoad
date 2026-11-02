@@ -75,6 +75,28 @@ internal static class KeyCodecDecimal
         return value;
     }
 
+    /// <summary>Skips decimal framing without converting its coefficient; the decoder validates the number itself.</summary>
+    internal static void Skip(ReadOnlySpan<byte> key, ref int offset)
+    {
+        var sign = ReadByte(key, ref offset);
+        if (sign == ZeroSign)
+        {
+            return;
+        }
+        if (sign is not (NegativeSign or PositiveSign))
+        {
+            throw BadKey();
+        }
+        _ = ReadByte(key, ref offset);
+        var terminator = sign == NegativeSign ? byte.MaxValue : (byte)DigitTerminator;
+        var length = key[offset..].IndexOf(terminator);
+        if (length is <= EmptyDigitCount or > MaximumEncodedDigits)
+        {
+            throw BadKey();
+        }
+        offset += length + 1;
+    }
+
     private static bool IsRepresentableMagnitude(string digits, int exponent, int scale)
     {
         if (exponent is < MinimumExponent or > MaximumExponent || scale > MaximumScale)

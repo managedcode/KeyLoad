@@ -77,7 +77,7 @@ internal sealed class TextOnlineSourcePin : IDisposable
         {
             lock (sync)
             {
-                ObjectDisposedException.ThrowIf(disposed, this);
+                ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineSourcePin instance through object to preserve its runtime owner type. */;
                 return metadata;
             }
         }
@@ -87,7 +87,7 @@ internal sealed class TextOnlineSourcePin : IDisposable
     {
         lock (sync)
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
+            ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineSourcePin instance through object to preserve its runtime owner type. */;
             if (visited)
             {
                 throw Errors.Fail(ErrorCode.Conflict, AlreadyVisited);

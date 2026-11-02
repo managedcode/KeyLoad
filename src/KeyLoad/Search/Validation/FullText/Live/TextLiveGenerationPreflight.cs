@@ -29,7 +29,7 @@ internal static class TextLiveGenerationPreflight
             {
                 return;
             }
-            if (found is not null && !ReferenceEquals(found, generation))
+            if (found is not null && !(ReferenceEquals(found, generation) /* KLD0041: Reject a different live generation instance for the same identity through CLR reference identity. */))
             {
                 throw TextErrors.Ownership();
             }

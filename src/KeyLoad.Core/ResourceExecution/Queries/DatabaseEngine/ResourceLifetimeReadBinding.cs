@@ -13,8 +13,8 @@ public static class ResourceLifetimeReadBinding
     internal static (ResourceDefinition Definition, ResourceLifetime Lifetime) BindAuthorizedReadResourcePair(
         IKeyValueView view, PartitionRef partition, string name, ResourceKind? kind = null)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var pair = ResourceDefinitionBinding.ReadBoundResourcePair(view, partition, name, kind);
         BindAuthenticatedReadResourceLifetime(view, partition, pair.Definition, pair.Lifetime);
         return pair;
@@ -23,9 +23,9 @@ public static class ResourceLifetimeReadBinding
     /// <summary>Binds an already authenticated source pair without substituting the target's local catalog.</summary>
     internal static void BindAuthenticatedReadResourceLifetime(IKeyValueView view, PartitionRef partition, ResourceDefinition definition, ResourceLifetime lifetime)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(definition);
-        ArgumentNullException.ThrowIfNull(lifetime);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(definition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(lifetime) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(partition);
         ResourceLifetimeIdentity.Validate(lifetime, partition.TenantId, partition.DatabaseId, definition);
         if (partition.TransactionDomainId != lifetime.TransactionDomainId)

@@ -13,7 +13,7 @@ internal static class OrleansNodeAddressResolver
         var addresses = IPAddress.TryParse(siloAddress, out var literal) ? [literal]
             : await Dns.GetHostAddressesAsync(siloAddress, cancellationToken);
         return addresses.FirstOrDefault(address => address.AddressFamily == AddressFamily.InterNetwork
-            && !address.Equals(IPAddress.Any))
+            && !(address.Equals(IPAddress.Any) /* KLD0041: IPAddress exposes value equality through Equals(object); compare existing address references to reject the wildcard address without scalar boxing. */))
             ?? throw new InvalidOperationException(OrleansNodeProtocol.InvalidSiloAddress);
     }
 

@@ -27,7 +27,7 @@ internal sealed partial class FileStorageController
     public override async Task<Result<ChunkUploadCompleteResponse>> CompleteChunksAsync([FromBody] ChunkUploadCompleteRequest request,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ChunkUploadCompleteRequest reference through its object parameter. */;
         var uploadId = Files.UploadId(request.UploadId);
         var state = await Files.ReadAsync(string.Empty, Capability.BlobWrite, uploadId, cancellationToken);
         var reserved = state.Upload ?? throw Errors.Fail(ErrorCode.NotFound, FileStorageProtocol.Invalid);

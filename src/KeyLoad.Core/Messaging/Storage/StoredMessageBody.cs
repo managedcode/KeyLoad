@@ -15,8 +15,8 @@ internal readonly record struct StoredMessageBody(
     /// <summary>Decodes borrowed bytes once without retaining the storage-owned span.</summary>
     internal static (bool HasValue, StoredMessageBody? Value) Read(IKeyValueView view, byte[] key)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         MessageBody? body = null;
         long bytes = NoRetainedBytes;
         if (!view.ReadValue(key, borrowed =>

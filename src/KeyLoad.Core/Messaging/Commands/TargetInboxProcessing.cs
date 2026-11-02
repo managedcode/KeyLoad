@@ -1,13 +1,12 @@
 using KeyLoad.Core.Messaging;
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
 /// <summary>Executes TargetInboxProcessing operations against the caller's database context.</summary>
 public static class TargetInboxProcessing
 {
-    internal static Result<object> ExecuteTargetInbox(this DatabaseEngine engine, IAtomicTransaction transaction, PrincipalRecord principal, Command<DatabaseCommand> operation, long position)
+    internal static CommitInboxResult ExecuteTargetInbox(this DatabaseEngine engine, IAtomicTransaction transaction, PrincipalRecord principal, Command<DatabaseCommand> operation, long position)
     {
         var request = OperationProtocol.Payload<CommitInboxRequest>(operation);
         if (request.CommandId != operation.CommandId)
@@ -15,7 +14,7 @@ public static class TargetInboxProcessing
             throw Errors.Fail(ErrorCode.Validation, TargetInboxProtocol.Invalid);
         }
 
-        return OperationProtocol.Result(engine.CompleteTargetInbox(transaction, principal, request, operation.Timestamp, position));
+        return engine.CompleteTargetInbox(transaction, principal, request, operation.Timestamp, position);
     }
 
     internal static CommitInboxResult CompleteTargetInbox(this DatabaseEngine engine, IAtomicTransaction transaction, PrincipalRecord principal, CommitInboxRequest request, DateTimeOffset now, long position)

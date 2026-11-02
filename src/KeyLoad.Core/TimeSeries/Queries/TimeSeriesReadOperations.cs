@@ -15,7 +15,7 @@ public static class TimeSeriesReadOperations
     public static LatestSampleResult ReadLatestSample(this DatabaseEngine database, string principalId,
         ReadLatestSampleRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return Read(database, (view, budget) => SampleLatestReader.Read(database, view, principalId, request, budget), cancellationToken);
     }
 
@@ -28,7 +28,7 @@ public static class TimeSeriesReadOperations
     public static SampleAggregate AggregateSamples(this DatabaseEngine database, string principalId,
         AggregateSamplesRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return Read(database, (view, budget) => SampleAggregateReader.Read(database, view, principalId, request, budget), cancellationToken);
     }
 
@@ -41,7 +41,7 @@ public static class TimeSeriesReadOperations
     public static SampleAggregateWindowsResult AggregateSampleWindows(this DatabaseEngine database, string principalId,
         AggregateSampleWindowsRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return Read(database, (view, budget) => SampleAggregateWindowReader.Read(database, view, principalId, request, budget), cancellationToken);
     }
 
@@ -54,7 +54,7 @@ public static class TimeSeriesReadOperations
     public static SampleRetentionStatus ReadSampleRetention(this DatabaseEngine database, string principalId,
         ReadSampleRetentionRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return Read(database, (view, budget) => SampleRetentionStatusReader.Read(database, view, principalId, request, budget), cancellationToken);
     }
 
@@ -67,14 +67,14 @@ public static class TimeSeriesReadOperations
     public static SampleRollupResult ReadSampleRollup(this DatabaseEngine database, string principalId,
         ReadSampleRollupRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return Read(database, (view, budget) => SampleRollupReader.Read(database, view, principalId, request, budget), cancellationToken);
     }
 
     private static T Read<T>(DatabaseEngine database, Func<IKeyValueView, ReadExecutionBudget, T> read,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         return database.Store.Read(view =>

@@ -22,7 +22,7 @@ internal sealed record McpOperationDescriptor
         }
         if (!adapter)
         {
-            ArgumentNullException.ThrowIfNull(decoder);
+            ArgumentNullException.ThrowIfNull(decoder) /* KLD0041: BCL null validation accepts the decoder Func reference through its object parameter. */;
         }
         if (adapter ? readKind.HasValue || commandKind.HasValue : readKind.HasValue == commandKind.HasValue)
         {

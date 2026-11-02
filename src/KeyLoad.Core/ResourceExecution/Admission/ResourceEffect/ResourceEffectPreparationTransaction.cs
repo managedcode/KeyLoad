@@ -26,7 +26,7 @@ internal sealed class ResourceEffectPreparationTransaction : ResourceEffectObser
     public void Reset() => inner.Reset();
     public T Prepare<T>(Func<IAtomicTransaction, T> prepare)
     {
-        ArgumentNullException.ThrowIfNull(prepare);
+        ArgumentNullException.ThrowIfNull(prepare) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return inner.Prepare(child => prepare(new ResourceEffectPreparationTransaction(child, scope, Work)));
     }
 

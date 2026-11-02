@@ -48,8 +48,8 @@ public static class StorageOperationBatchApply
     private static Command<DatabaseCommand>[] Verify(DatabaseEngine engine,
         IReadOnlyList<Command<DatabaseCommand>> operations, long firstSequence)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(operations);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(operations) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(firstSequence);
         if (operations.Count == 0)
         {

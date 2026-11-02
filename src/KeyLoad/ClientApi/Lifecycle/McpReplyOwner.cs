@@ -100,5 +100,5 @@ internal sealed class McpReplyOwner : IDisposable
         }
     }
 
-    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != 0, this);
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != 0, this) /* KLD0041: BCL disposal diagnostics accept the this McpReplyOwner instance through object to preserve its runtime owner type. */;
 }

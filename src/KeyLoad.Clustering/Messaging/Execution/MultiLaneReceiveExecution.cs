@@ -16,8 +16,8 @@ internal static class MultiLaneReceiveExecution
         ILogger diagnostics, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
-        var request = GrainPayload.ReadCommand<MultiLaneReceiveRequest>(parent.Payload);
-        ArgumentNullException.ThrowIfNull(binding);
+        var request = (GrainPayload.ReadCommand<MultiLaneReceiveRequest>((parent.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.MultiLaneReceiveRequest at this closed operation boundary before executing typed code. */);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         MultiLaneReceiveAdmission.Validate(request, parent.Envelope.CommandId,
             services.GetRequiredService<IOptions<MessagingExecutionOptions>>().Value, token);
         var outcomes = ImmutableArray.CreateBuilder<QueueLaneReceiveOutcome>(request.Requests.Length);
@@ -81,7 +81,7 @@ internal static class MultiLaneReceiveExecution
         }
         try
         {
-            var result = GrainReplyFactory.RequireValue(reply).Value as ReceiveResult
+            var result = ((GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue field only to validate the concrete RPC response or its permitted absence. */) as ReceiveResult /* KLD0042: Validate the current generated GrainValue slot as KeyLoad.ReceiveResult? before accepting the concrete response from this RPC. */)
                 ?? throw Errors.Fail(ErrorCode.UnknownWriteOutcome, GrainRoutingProtocol.InvalidRequest);
             if (result.RequestId != leaf.RequestId)
             {

@@ -14,8 +14,8 @@ public static class QueryTranslationOptionsRegistration
     public static IServiceCollection AddKeyLoadQueryTranslationOptions(this IServiceCollection services,
         IConfiguration configuration)
     {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(services) /* KLD0041: BCL null validation accepts the services IServiceCollection reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(configuration) /* KLD0041: BCL null validation accepts the configuration IConfiguration reference through its object parameter. */;
         services.AddOptions<QueryTranslationOptions>()
             .Bind(configuration.GetSection(QueryTranslationOptions.SectionName))
             .Validate(options => options.IsValid(), QueryTranslationOptions.ValidationMessage)

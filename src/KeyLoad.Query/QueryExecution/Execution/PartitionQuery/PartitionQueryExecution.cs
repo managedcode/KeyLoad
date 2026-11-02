@@ -10,7 +10,7 @@ internal static class PartitionQueryExecution
         ImmutableArray<PartitionRef> partitions, TimeProvider? timeProvider = null,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: BCL null validation accepts the engine QueryEngine reference through its object parameter. */;
         var budget = new ReadExecutionBudget(timeProvider ?? engine.PartitionQueryOwner.EvaluationClock, cancellationToken);
         return engine.ExecutePartitionQuery(principalId, request, partitions, budget);
     }
@@ -18,8 +18,8 @@ internal static class PartitionQueryExecution
     internal static PartitionQueryResult ExecutePartitionQuery(this QueryEngine engine, string principalId, AstQueryRequest request,
         ImmutableArray<PartitionRef> partitions, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: BCL null validation accepts the engine QueryEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         var database = engine.PartitionQueryOwner;
         budget.Check();
         using var admission = database.AdmitQuery(budget.Cancellation);
@@ -31,8 +31,8 @@ internal static class PartitionQueryExecution
     internal static PartitionQueryResult ExecutePartitionQuery(this QueryEngine engine, string principalId,
         PartitionQueryRequest request, ReadExecutionBudget budget, PhysicalShardRecord expectedOwner)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: BCL null validation accepts the engine QueryEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         var prepared = PartitionQueryPublicValidation.Prepare(request, engine.Execution);
         return ExecuteNormalized(engine, principalId, prepared.Request, prepared.Partitions,

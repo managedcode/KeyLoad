@@ -12,7 +12,7 @@ Both trees use the native maintainer. KeyLoad has no writer semaphore, read/writ
 
 A command that writes both transactional and non-transactional tables fails `Validation` before physical publication. Schema, authorization, row and index validation run over staged changes before publication. A rejected command may persist its failed outcome and advance the canonical sequence; it must not publish partial domain changes.
 
-For a non-transactional write, `CommitAsync` publishes plain changes through ZoneTree 2.0.9's native `SyncCompressed` WAL before committing the outcome and metadata in MVCC. Both publications survive process termination when they return; acknowledgement needs no per-command disk sync. Thus a durable success outcome cannot precede the plain data it reports. Source entry points are `ZoneTreePlainPublication`, `StorageOperationBatchApply.ApplyStorageOperationsAsync` and the existing commit coordinators. The synchronous atomic-store commit rejects plain data writes explicitly.
+For a non-transactional write, `CommitAsync` publishes plain changes through ZoneTree 2.1.0's native `SyncCompressed` WAL before committing the outcome and metadata in MVCC. Both publications survive process termination when they return; acknowledgement needs no per-command disk sync. Thus a durable success outcome cannot precede the plain data it reports. Source entry points are `ZoneTreePlainPublication`, `StorageOperationBatchApply.ApplyStorageOperationsAsync` and the existing commit coordinators. The synchronous atomic-store commit rejects plain data writes explicitly.
 
 ## Failure and observation contract
 

@@ -12,7 +12,7 @@ public static class SagaCommands
     internal const long MaximumTimeoutTtlTicks = RecurringSagaProtocol.MaximumMessageTimeToLiveTicks;
     internal static MutationReceipt ApplyCompareExchangeSaga(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, CompareExchangeSaga request, DateTimeOffset now)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         RecurringScheduleValidation.ValidateScheduleScope(request.Lane, request.SagaId, partition);
         request = SagaDefinitionValidation.NormalizeSagaRequest(engine.AuthorizeSagaWrite(tx, principal, request, partition), partition, now);
         var key = RecurringSagaStorage.SagaKey(request.Lane, request.SagaId);
@@ -34,7 +34,7 @@ public static class SagaCommands
 
     internal static MutationReceipt ApplyExpireSaga(this DatabaseEngine engine, IAtomicTransaction tx, PrincipalRecord principal, PartitionRef partition, ExpireSaga request, DateTimeOffset now)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         RecurringScheduleValidation.ValidateScheduleScope(request.Lane, request.SagaId, partition);
         var record = SagaCommands.RequireSaga(tx, request.Lane, request.SagaId);
         SagaCommands.RequireSagaRevision(request.ExpectedRevision, record);

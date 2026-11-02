@@ -9,7 +9,7 @@ public static class RuntimeJournalIdentity
     /// <summary>Requires the exact persisted journal-only principal contract.</summary>
     public static void RequireProtected(PrincipalRecord principal)
     {
-        ArgumentNullException.ThrowIfNull(principal);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (principal.Id != ProtectedPrincipalId || principal.TenantId != Contracts.RuntimeJournalProtocol.SystemTenant
             || !principal.Grants.IsDefaultOrEmpty || !principal.FieldGrants.IsDefaultOrEmpty || !principal.Projects.IsDefaultOrEmpty
             || !principal.Teams.IsDefaultOrEmpty
@@ -40,7 +40,7 @@ public static class RuntimeJournalIdentity
     public static void RequireOperation(PrincipalRecord principal, OperationKind kind,
         RuntimeJournalMutation? mutation = null)
     {
-        ArgumentNullException.ThrowIfNull(principal);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var protectedPrincipal = principal.Id == ProtectedPrincipalId;
         if (protectedPrincipal)
         {

@@ -22,7 +22,7 @@ internal sealed class SqlTopicRetentionOperationTests
         var payload = ((CommandRequest)decoded.Payload);
         await Assert.That(payload.Mutations.Single()).IsEqualTo(new PurgeTopic("topic", 2, 1));
         var coordinator = new EmbeddedCoordinator(fixture.Database);
-        var receipt = (await coordinator.RuntimeSubmitAsync(OperationKind.Batch, decoded.CommandId, "root", decoded.Payload))
+        var receipt = (await coordinator.RuntimeSubmitAsync<object>(OperationKind.Batch, decoded.CommandId, "root", decoded.Payload))
             .Get<CommitReceipt>();
         await Assert.That(receipt.Mutations.Single()).IsEqualTo(new MutationReceipt("purgeTopic", "topic", "2", 2));
         await TopicRetentionAssertions.RetainedTail(fixture);

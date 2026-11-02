@@ -18,7 +18,7 @@ internal sealed class TextOnlineWorker : IAsyncDisposable
             Task? pending;
             lock (gate)
             {
-                ObjectDisposedException.ThrowIf(closed, this);
+                ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineWorker instance through object to preserve its runtime owner type. */;
                 pending = active?.Task;
                 if (pending is null)
                 {

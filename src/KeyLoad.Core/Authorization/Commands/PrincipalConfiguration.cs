@@ -1,5 +1,4 @@
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -12,7 +11,7 @@ public static class PrincipalConfiguration
     internal const string PolicyEpochMustAdvanceMessage = "A policy update must advance its epoch.";
     internal const string CredentialSha256RequiredMessage = "An API key requires a SHA-256 verifier.";
     internal const string InvalidConfiguredCredentialVerifierMessage = "The credential verifier is invalid.";
-    internal static Result<object> ExecuteConfigurePrincipal(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
+    internal static PrincipalRecord ExecuteConfigurePrincipal(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var principal = OperationProtocol.Payload<ConfigurePrincipalRequest>(operation).Principal;
         global::KeyLoad.Core.RuntimeJournaling.Identity.RuntimeJournalIdentity.RequireMutablePrincipal(principal.Id);
@@ -31,10 +30,10 @@ public static class PrincipalConfiguration
         }
 
         transaction.PutRecord(KeySpace.Principal(principal.Id), principal);
-        return OperationProtocol.Result(principal);
+        return principal;
     }
 
-    internal static Result<object> ExecuteConfigureApiKey(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation)
+    internal static bool ExecuteConfigureApiKey(this DatabaseEngine engine, IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var credential = OperationProtocol.Payload<ConfigureApiKeyRequest>(operation).ApiKey;
         global::KeyLoad.Core.RuntimeJournaling.Identity.RuntimeJournalIdentity.RequirePublicCredential(credential.PrincipalId);
@@ -51,6 +50,6 @@ public static class PrincipalConfiguration
         }
 
         transaction.PutRecord(KeySpace.ApiKey(credential.Id), credential);
-        return OperationProtocol.Result(true);
+        return true;
     }
 }

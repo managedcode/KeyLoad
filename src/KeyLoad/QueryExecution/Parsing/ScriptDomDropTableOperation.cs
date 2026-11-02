@@ -19,7 +19,7 @@ internal static class ScriptDomDropTableOperation
         var identity = SqlOriginalMutationIdentity.Required(request.CommandId);
         var name = ScriptDomDropTableSyntax.Read(statement, checkBudget, token);
         var table = new DropTableRequest(request.Partition.TenantId, request.Partition.DatabaseId, name);
-        var operation = new McpDecodedOperation(null, OperationKind.DropTable, identity, table);
+        var operation = (new McpDecodedOperation(null, OperationKind.DropTable, identity, table) /* KLD0041: Carry the parsed concrete DropTableRequest in the existing decoded-operation slot selected by DropTable; preserve the common authorized execution path. */);
         checkBudget();
         token.ThrowIfCancellationRequested();
         return operation;

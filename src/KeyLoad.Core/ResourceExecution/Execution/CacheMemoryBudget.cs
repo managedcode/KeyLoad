@@ -24,7 +24,7 @@ public sealed class CacheMemoryBudget : ICacheMemoryBudget, IDisposable
     /// <param name="options">Centrally validated modeled retained-byte and entry ceilings.</param>
     public CacheMemoryBudget(IOptions<CacheMemoryLimits> options)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var limits = options.Value;
         limits.Validate();
         maxRetainedBytes = limits.MaxRetainedBytes;
@@ -99,12 +99,12 @@ public sealed class CacheMemoryBudget : ICacheMemoryBudget, IDisposable
     {
         if (bytes <= NoRetainedBytes)
         {
-            throw new ArgumentOutOfRangeException(nameof(bytes), bytes, InvalidBytes);
+            throw new ArgumentOutOfRangeException(nameof(bytes), bytes /* KLD0042: ArgumentOutOfRangeException.ActualValue requires the invalid numeric budget as object on this failure path. */, InvalidBytes) /* KLD0041: The CLR exception constructor retains the invalid numeric budget as ActualValue on this failure path. */;
         }
 
         if (entries < NoRetainedBytes)
         {
-            throw new ArgumentOutOfRangeException(nameof(entries), entries, InvalidEntries);
+            throw new ArgumentOutOfRangeException(nameof(entries), entries /* KLD0042: ArgumentOutOfRangeException.ActualValue requires the invalid numeric budget as object on this failure path. */, InvalidEntries) /* KLD0041: The CLR exception constructor retains the invalid numeric budget as ActualValue on this failure path. */;
         }
     }
 }

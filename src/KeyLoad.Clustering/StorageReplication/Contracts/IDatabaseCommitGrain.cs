@@ -9,7 +9,7 @@ namespace KeyLoad.Clustering;
 public partial interface IDatabaseCommitGrain : IGrainWithGuidKey
 {
     /// <summary>Returns only after every configured data copy has persisted the same operation.</summary>
-    Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
+    Task<Result<TResult>> ApplyAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
     /// <summary>Returns the committed canonical cut from an available execution storage service.</summary>
     Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken);
     /// <summary>Returns an actual execution address only after verifying the durable data-copy cut.</summary>

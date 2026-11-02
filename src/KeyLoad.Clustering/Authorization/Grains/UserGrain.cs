@@ -26,7 +26,7 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
         }
         catch (Exception) when (current.IsFaulted || current.IsCanceled)
         {
-            if (ReferenceEquals(loaded, current))
+            if ((ReferenceEquals(loaded, current) /* KLD0041: Clear only the failed user load task instance still cached by this grain through CLR reference identity. */))
             {
                 loaded = null;
             }
@@ -52,7 +52,7 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
     private async Task<UserCredential> LoadAsync(string secret, DatabaseCredentialWitness witness,
         CancellationToken cancellationToken)
     {
-        var state = RequestContext.Get(GrainRequestStreamProtocol.ContextKey) as GrainRequestContextState
+        var state = ((RequestContext.Get(GrainRequestStreamProtocol.ContextKey) /* KLD0041: The native Orleans RequestContext API uses object; validate or restore this call-local request identity value without changing its original type. */) as GrainRequestContextState /* KLD0042: Validate the native Orleans RequestContext object as KeyLoad.Clustering.GrainRequestContextState? before using call-local identity or owner state. */)
             ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         var envelope = codec.CreateRead(state.RequestId, null, GrainReadKind.Authenticate, secret);
         using var placement = GrainRequestIdentityScope.ForPlacement(envelope,
@@ -63,7 +63,7 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
         {
             throw Errors.Fail(error, reply.SafeDetail ?? DatabaseCredentialValidation.UnavailableCredentialDetail);
         }
-        var authenticated = GrainReplyFactory.RequireValue(reply).Value as CredentialAuthentication
+        var authenticated = ((GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue field only to validate the concrete RPC response or its permitted absence. */) as CredentialAuthentication /* KLD0042: Validate the current generated GrainValue slot as KeyLoad.Clustering.CredentialAuthentication? before accepting the concrete response from this RPC. */)
             ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         return new(witness.Digest.ToArray(), authenticated.Principal, authenticated.ExpiresAt);
     }

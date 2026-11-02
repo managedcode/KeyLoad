@@ -21,7 +21,7 @@ internal sealed class QueueWorkerSession : IDisposable
 
     internal QueueWorkerSession(IOptions<QueueWorkerOptions> configured, CancellationToken caller)
     {
-        ArgumentNullException.ThrowIfNull(configured);
+        ArgumentNullException.ThrowIfNull(configured) /* KLD0041: BCL null validation accepts the configured IOptions reference through its object parameter. */;
         Policy = configured.Value;
         Lifetime = CancellationTokenSource.CreateLinkedTokenSource(caller);
         cancellation = caller.Register(() => Stop(QueueWorkerStopReason.Cancelled));
@@ -134,7 +134,7 @@ internal sealed class QueueWorkerSession : IDisposable
     {
         lock (gate)
         {
-            if (!failures.Contains(original, ReferenceEqualityComparer.Instance))
+            if (!failures.Contains<Exception>(original, ReferenceEqualityComparer.Instance))
             {
                 failures.Add(original);
             }

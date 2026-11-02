@@ -62,7 +62,7 @@ internal sealed partial class TextOnlineCatalogOwner(DatabaseEngine database, Te
             ServerFailureObserver.Observe(proof.Dispose, failures);
         }
         ServerFailureObserver.ThrowIfAny(failures);
-        if (previous is not null && !ReferenceEquals(previous, generation))
+        if (previous is not null && !(ReferenceEquals(previous, generation) /* KLD0041: Retire only a distinct online text generation instance through CLR reference identity. */))
         {
             BeginRetirement(previous);
         }

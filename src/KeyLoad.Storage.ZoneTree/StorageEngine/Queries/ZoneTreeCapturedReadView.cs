@@ -32,8 +32,8 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
 
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(reader) /* KLD0041: BCL null validation accepts the reader StorageValueReader reference through its object parameter. */;
         RequireLookup(key);
         var location = ZoneTreeCapturedReadLookup.Find(records, key, records.Count);
         if (location >= 0)
@@ -92,8 +92,8 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
         byte[]? afterKey, byte[]? untilKey, StorageReadObserver? observer, bool reverse,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(prefix);
-        ArgumentNullException.ThrowIfNull(visitor);
+        ArgumentNullException.ThrowIfNull(prefix) /* KLD0041: BCL null validation accepts the prefix byte[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: BCL null validation accepts the visitor StorageRecordVisitor reference through its object parameter. */;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxRecords);
         RequireRange(prefix);
         var delivered = 0;
@@ -130,7 +130,7 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
 
     private void RequireLookup(byte[] key)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this ZoneTreeCapturedReadView instance through object to preserve its runtime owner type. */;
         foreach (var prefix in prefixes)
         {
             if (key.AsSpan().StartsWith(prefix))
@@ -147,7 +147,7 @@ internal sealed class ZoneTreeCapturedReadView : IKeyValueView, IDisposable
 
     private void RequireRange(byte[] prefix)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this ZoneTreeCapturedReadView instance through object to preserve its runtime owner type. */;
         foreach (var admitted in prefixes)
         {
             if (prefix.AsSpan().StartsWith(admitted))

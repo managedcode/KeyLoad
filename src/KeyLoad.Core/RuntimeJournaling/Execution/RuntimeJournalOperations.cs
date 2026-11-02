@@ -19,8 +19,8 @@ public sealed class RuntimeJournalOperations
     /// <summary>Creates operations using one validated immutable policy snapshot.</summary>
     public RuntimeJournalOperations(DatabaseEngine database, IOptions<RuntimeJournalOptions> configured)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(configured);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(configured) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         options = configured.Value with
         {
         };
@@ -35,9 +35,9 @@ public sealed class RuntimeJournalOperations
     public RuntimeJournalMutationResult Execute(IAtomicTransaction transaction, PrincipalRecord principal,
         RuntimeJournalMutation mutation)
     {
-        ArgumentNullException.ThrowIfNull(transaction);
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(mutation);
+        ArgumentNullException.ThrowIfNull(transaction) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(mutation) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         RuntimeJournalMutationValidation.RequireCollections(mutation);
         RuntimeJournalIdentity.RequireOperation(principal, OperationKind.RuntimeJournal, mutation);
         return mutation.Action == RuntimeJournalAction.BootstrapIdentity
@@ -64,7 +64,7 @@ public sealed class RuntimeJournalOperations
     public RuntimeJournalPage Read(string principalId, RuntimeJournalReadRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         cancellationToken.ThrowIfCancellationRequested();
         RuntimeJournalValidation.Name(request.JournalName, options);
         return database.Store.Read(view =>

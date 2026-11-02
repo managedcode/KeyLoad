@@ -10,7 +10,7 @@ internal sealed class TextOnlineGenerationPin(TextOnlineGeneration owner) : IDis
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
+            ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineGenerationPin instance through object to preserve its runtime owner type. */;
             owner.RequireActive();
         }
     }

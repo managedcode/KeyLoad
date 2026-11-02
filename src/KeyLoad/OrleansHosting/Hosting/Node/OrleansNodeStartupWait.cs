@@ -20,7 +20,7 @@ internal sealed class OrleansNodeStartupWait
         {
             foreach (var failure in fault.InnerExceptions)
             {
-                if (!failures.Contains(failure, ReferenceEqualityComparer.Instance))
+                if (!failures.Contains<Exception>(failure, ReferenceEqualityComparer.Instance))
                 {
                     failures.Add(failure);
                 }

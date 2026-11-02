@@ -11,8 +11,8 @@ internal static class GlobalBranchValidation
 
     internal static HashSet<string> ValidateRequest(GlobalBranchMergeRequest request, ImmutableArray<GlobalBranchWindow> windows, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request GlobalBranchMergeRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         if (!Enum.IsDefined(request.Kind) || request.Scope is null || request.ExpectedWindowIds.IsDefault
             || windows.IsDefault || request.Limit < 1)
         {

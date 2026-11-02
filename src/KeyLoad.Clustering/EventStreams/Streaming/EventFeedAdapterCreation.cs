@@ -11,7 +11,7 @@ internal static class EventFeedAdapterCreation
 {
     internal static IQueueAdapterFactory Create(IServiceProvider services, string providerName)
     {
-        ArgumentNullException.ThrowIfNull(services);
+        ArgumentNullException.ThrowIfNull(services) /* KLD0041: BCL null validation accepts the services IServiceProvider reference through its object parameter. */;
         if (providerName != EventFeedPubSubProtocol.ProviderName)
         {
             throw Errors.Fail(ErrorCode.Validation, EventFeedPubSubProtocol.Invalid);

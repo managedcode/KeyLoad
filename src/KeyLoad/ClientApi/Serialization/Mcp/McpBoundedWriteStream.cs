@@ -181,5 +181,5 @@ internal sealed class McpBoundedWriteStream : Stream
         buffer = next;
     }
 
-    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(disposed, this);
+    private void ThrowIfDisposed() => ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this McpBoundedWriteStream instance through object to preserve its runtime owner type. */;
 }

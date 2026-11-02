@@ -18,7 +18,7 @@ internal static class GlobalBranchWindowMerger
     internal static GlobalBranchMergeResult Merge(GlobalBranchMergeRequest request,
         ImmutableArray<GlobalBranchWindow> windows, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         var received = GlobalBranchValidation.ValidateRequest(request, windows, budget);
         budget.Check();
         var candidateCount = PreflightWindows(windows, budget);

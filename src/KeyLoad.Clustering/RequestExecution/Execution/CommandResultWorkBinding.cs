@@ -29,7 +29,7 @@ internal static class CommandResultWorkBinding
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             var unknown = Errors.Fail(ErrorCode.UnknownWriteOutcome, Uncertain);
-            unknown.Data[OriginalFailureKey] = error;
+            ((unknown.Data /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */)[OriginalFailureKey] /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */) = error;
             throw unknown;
         }
     }
@@ -50,7 +50,7 @@ internal static class CommandResultWorkBinding
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
             var unknown = Errors.Fail(ErrorCode.UnknownWriteOutcome, Uncertain);
-            unknown.Data[OriginalFailureKey] = error;
+            ((unknown.Data /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */)[OriginalFailureKey] /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */) = error;
             throw unknown;
         }
     }

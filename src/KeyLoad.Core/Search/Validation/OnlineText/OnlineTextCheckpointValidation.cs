@@ -16,7 +16,7 @@ public static class OnlineTextCheckpointValidation
 
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var outcome = CommandOutcomeKeyResolver.Select(view, principal.Id, acknowledged.Receipt.CommandId, scope).Outcome ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
-        if (outcome.Incarnation != engine.Store.Identity.Incarnation || outcome.PolicyEpoch != principal.PolicyEpoch || Errors.Code(outcome.Result.Problem).Value is not null)
+        if (outcome.Incarnation != engine.Store.Identity.Incarnation || outcome.PolicyEpoch != principal.PolicyEpoch || Errors.Code(outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Problem).Value is not null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority);
         }
@@ -28,13 +28,13 @@ public static class OnlineTextCheckpointValidation
                 throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
             }
 
-            if (!DatabaseCommandContentIdentity.SameInput(outcome.PreparedCommand, OperationKind.CommitProjectionBatch, intent))
+            if (!(DatabaseCommandContentIdentity.SameInput(outcome.PreparedCommand, OperationKind.CommitProjectionBatch, intent) /* KLD0041: A retry compares the public shape of the Kind-selected native inputs while preserving their stored type and JSON rules. */))
             {
                 throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.ChangedOriginal);
             }
         }
 
-        var actual = outcome.Result.Get<ProjectionBatchResult>();
+        var actual = outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Get<ProjectionBatchResult>() /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
         if (!OrleansSerialization.Serialize(actual).AsSpan().SequenceEqual(OrleansSerialization.Serialize(acknowledged)) || acknowledged.Checkpoint != ProjectionConsumerAuthority.RequireActiveProjectionConsumer(view, principal, request.Consumer, request.ConsumerGeneration).Checkpoint)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);

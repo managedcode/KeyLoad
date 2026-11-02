@@ -136,7 +136,7 @@ public static class EventStreamsExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static StreamPage ReadStream(this DatabaseEngine engine, string principalId, StreamRef stream, long afterRevision = DefaultStreamAfterRevision, int limit = DefaultStreamReadLimit, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.ReadStream(principalId, new ReadStreamRequest(stream, afterRevision, limit), cancellationToken);
     }
 }

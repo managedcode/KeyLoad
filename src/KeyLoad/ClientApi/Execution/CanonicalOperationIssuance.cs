@@ -4,9 +4,9 @@ namespace KeyLoad.Server;
 
 internal static class CanonicalOperationIssuance
 {
-    internal static CanonicalOperationRequestPreparation.Prepared Create(IServiceProvider services,
+    internal static CanonicalOperationRequestPreparation.Prepared Create<TPayload>(IServiceProvider services,
         PrincipalRecord principal, GrainReadKind? readKind, OperationKind? commandKind,
-        Guid commandId, object payload, CancellationToken token)
+        Guid commandId, TPayload payload, CancellationToken token) where TPayload : notnull
     {
         token.ThrowIfCancellationRequested();
         var requestId = Guid.NewGuid();

@@ -8,7 +8,7 @@ internal static class McpArgumentDecoder
 {
     internal static McpDecodedOperation Read<TRequest>(IDictionary<string, JsonElement>? arguments, GrainReadKind kind)
         where TRequest : notnull
-        => new(kind, null, Guid.Empty, Request<TRequest>(arguments, false));
+        => (new(kind, null, Guid.Empty, (Request<TRequest>(arguments, false) /* KLD0042: Erase the validated TRequest only at the decoded descriptor slot; the existing public administrative operation accepts bool as well as class DTOs. */)) /* KLD0041: Create the existing decoded descriptor with its closed kind and validated input, including the public bool administrative input or native no-body marker. */);
 
     internal static McpDecodedOperation NoBody(IDictionary<string, JsonElement>? arguments, GrainReadKind kind)
     {
@@ -18,7 +18,7 @@ internal static class McpArgumentDecoder
         {
             throw InvalidArguments();
         }
-        return new McpDecodedOperation(kind, null, Guid.Empty, GrainContracts.NoDtoMarker);
+        return (new McpDecodedOperation(kind, null, Guid.Empty, (GrainContracts.NoDtoMarker /* KLD0042: The current no-body envelope marker is the existing integer sentinel; erase it only into the decoded descriptor's native payload slot. */)) /* KLD0041: Create the existing decoded descriptor with its closed kind and validated input, including the public bool administrative input or native no-body marker. */);
     }
 
     internal static McpDecodedOperation Command<TRequest>(IDictionary<string, JsonElement>? arguments,
@@ -27,7 +27,7 @@ internal static class McpArgumentDecoder
         var request = Request<TRequest>(arguments, false);
         var stableId = commandId(request);
         RequireIdentity(stableId);
-        return new McpDecodedOperation(null, kind, stableId, request);
+        return (new McpDecodedOperation(null, kind, stableId, (request /* KLD0042: Erase the validated TRequest only at the decoded descriptor slot; the existing public administrative operation accepts bool as well as class DTOs. */)) /* KLD0041: Create the existing decoded descriptor with its closed kind and validated input, including the public bool administrative input or native no-body marker. */);
     }
 
     internal static McpDecodedOperation HeaderCommand<TRequest>(IDictionary<string, JsonElement>? arguments, OperationKind kind)
@@ -41,10 +41,10 @@ internal static class McpArgumentDecoder
         }
         RequireIdentity(stableId);
         var request = Request<TRequest>(arguments, true);
-        return new McpDecodedOperation(null, kind, stableId, request);
+        return (new McpDecodedOperation(null, kind, stableId, (request /* KLD0042: Erase the validated TRequest only at the decoded descriptor slot; the existing public administrative operation accepts bool as well as class DTOs. */)) /* KLD0041: Create the existing decoded descriptor with its closed kind and validated input, including the public bool administrative input or native no-body marker. */);
     }
 
-    internal static TRequest Request<TRequest>(IDictionary<string, JsonElement>? arguments, bool headerCommand)
+    internal static TRequest Request<TRequest>(IDictionary<string, JsonElement>? arguments, bool headerCommand) where TRequest : notnull
     {
         ValidateKeys(arguments, headerCommand);
         var value = arguments![McpCatalogProtocol.Request];

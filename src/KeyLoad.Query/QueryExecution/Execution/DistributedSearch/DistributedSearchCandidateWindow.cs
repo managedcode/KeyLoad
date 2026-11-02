@@ -15,9 +15,9 @@ internal static class DistributedSearchCandidateWindow
         PartitionRef partition, string collection, string branchName, GlobalBranchKind kind,
         string sourceWindowId, GlobalBranchScope scope, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(scores);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: BCL null validation accepts the view IKeyValueView reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(scores) /* KLD0041: BCL null validation accepts the scores SearchScore[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         GlobalBranchOrder.SortScores(scores, budget);
         var candidates = ImmutableArray.CreateBuilder<GlobalBranchCandidate>(scores.Length);

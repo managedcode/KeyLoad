@@ -48,6 +48,20 @@ internal static class ObjectConversionAnalysis
         }
     }
 
+    internal static void AnalyzeSwitchPattern(OperationAnalysisContext context, DiagnosticDescriptor rule)
+    {
+        var pattern = (IDeclarationPatternOperation)context.Operation;
+        if (pattern.Parent is not (ISwitchExpressionArmOperation or IPatternCaseClauseOperation)
+            || pattern.InputType is not { } source || !Scalar(source)
+            || pattern.DeclaredSymbol is null || pattern.MatchedType is not { } target || Scalar(target)
+            || !UntypedOperationSite.IsRuntime(pattern) || UntypedSiteReason.Present(pattern.Syntax, rule.Id))
+        {
+            return;
+        }
+        context.ReportDiagnostic(Diagnostic.Create(rule, pattern.Syntax.GetLocation(),
+            UntypedContractPolicy.ObjectCast, source.ToDisplayString(), target.ToDisplayString()) /* KLD0041: Roslyn requires object message arguments for this captured native switch pattern and its resolved source and target types. */);
+    }
+
     private static string BoxingKind(ITypeSymbol source)
         => source.IsValueType ? UntypedContractPolicy.Boxing : UntypedContractPolicy.PotentialBoxing;
 

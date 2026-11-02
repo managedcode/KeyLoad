@@ -10,7 +10,7 @@ internal sealed class DropTableExecution(PartitionHost partition, TimeProvider c
 {
     private const string InvalidRequest = "The table deletion request identity is invalid.";
 
-    public async Task<Result<object>> ExecuteAsync(Guid requestId, Guid commandId, string principalId,
+    public async Task<Result<DropTableResult>> ExecuteAsync(Guid requestId, Guid commandId, string principalId,
         DropTableRequest request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -23,7 +23,7 @@ internal sealed class DropTableExecution(PartitionHost partition, TimeProvider c
         var principal = partition.Database.Store.Read(raw => partition.Database.Principal(
             work.CreateView(raw), principalId, clock.GetUtcNow()));
         GrainRequestAuthority.RequireAdministrator(principal);
-        return await partition.Coordinator.RuntimeSubmitAsync(OperationKind.DropTable, commandId, principal.Id,
-            request, work, cancellationToken);
+        return await (partition.Coordinator.RuntimeSubmitAsync<DropTableResult>(OperationKind.DropTable, commandId, principal.Id,
+            request, work, cancellationToken) /* KLD0041: The existing coordinator creates the current DatabaseCommand.Input wire slot from this concrete DropTableRequest; the asynchronous result remains Result<DropTableResult> throughout. */);
     }
 }

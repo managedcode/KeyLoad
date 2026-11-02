@@ -46,7 +46,7 @@ internal sealed class TextOpenFileGroups
             return;
         }
         if (group.LinkedPath is { } path && linked.TryGetValue(path, out var current)
-            && ReferenceEquals(current, group))
+            && (ReferenceEquals(current, group) /* KLD0041: Remove only the registered linked file group instance through CLR reference identity. */))
         {
             linked.Remove(path);
         }
@@ -65,7 +65,7 @@ internal sealed class TextOpenFileGroups
     {
         foreach (var path in linked.Keys.ToArray())
         {
-            if (!path.StartsWith(directory + Path.DirectorySeparatorChar, StringComparison.Ordinal))
+            if (!path.StartsWith(string.Concat(directory.AsSpan(), [Path.DirectorySeparatorChar]), StringComparison.Ordinal))
             {
                 continue;
             }
@@ -122,13 +122,13 @@ internal sealed class TextOpenFileGroups
         }
     }
 
-    internal void Check(Dictionary<object, TextResourceFileReservation> reservations,
+    internal void Check(Dictionary<object, TextResourceFileReservation> /* KLD0041: One reservation ledger preserves string value equality for canonical paths and reference identity for TextOpenFileGroup instances; both keys are existing references. */ reservations,
         ref int files, ref long bytes, IOptions<TextExecutionOptions> options)
     {
         foreach (var group in owned)
         {
             var actual = group.ObserveLength();
-            if (reservations.TryGetValue(group, out var reservation))
+            if ((reservations.TryGetValue(group, out var reservation) /* KLD0041: Locate the reservation using its canonical path value or existing shared open-file group identity before release or byte accounting. */))
             {
                 actual = Math.Max(actual, reservation.TargetLength);
             }

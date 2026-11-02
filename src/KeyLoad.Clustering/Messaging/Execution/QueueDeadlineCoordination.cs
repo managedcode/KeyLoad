@@ -11,7 +11,7 @@ internal static class QueueDeadlineCoordination
     internal static async Task<DueDispatchResult> ExecuteAsync(QueueDeadlineHint hint, string partitionId,
         BackgroundStorageClient storage, TimeProvider clock,
         IOptions<DueCoordinationOptions> options, RuntimeJournalAdmission admission,
-        Func<PrincipalRecord, Guid, object, CancellationToken, Task<GrainOperationReply>> dispatch,
+        Func<PrincipalRecord, Guid, CommandRequest, CancellationToken, Task<GrainOperationReply>> dispatch,
         CancellationToken cancellationToken)
     {
         if (hint is null || hint.Lane?.Partition is null || hint.Mutation is null

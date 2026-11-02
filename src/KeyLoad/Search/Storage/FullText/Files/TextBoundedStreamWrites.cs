@@ -19,7 +19,7 @@ internal sealed class TextBoundedStreamWrites(IFileStream original, TextResource
         TextResourceFileReservation? reservation = null;
         ServerFailureObserver.Observe(() =>
         {
-            ObjectDisposedException.ThrowIf(closing, this);
+            ObjectDisposedException.ThrowIf(closing, this) /* KLD0041: BCL disposal diagnostics accept the this TextBoundedStreamWrites instance through object to preserve its runtime owner type. */;
             if (retained is not null)
             {
                 throw new AggregateException(retained);
@@ -41,7 +41,7 @@ internal sealed class TextBoundedStreamWrites(IFileStream original, TextResource
         T result = default!;
         ServerFailureObserver.Observe(() =>
         {
-            ObjectDisposedException.ThrowIf(closing, this);
+            ObjectDisposedException.ThrowIf(closing, this) /* KLD0041: BCL disposal diagnostics accept the this TextBoundedStreamWrites instance through object to preserve its runtime owner type. */;
             if (retained is not null)
             {
                 throw new AggregateException(retained);
@@ -80,7 +80,7 @@ internal sealed class TextBoundedStreamWrites(IFileStream original, TextResource
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closing, this);
+            ObjectDisposedException.ThrowIf(closing, this) /* KLD0041: BCL disposal diagnostics accept the this TextBoundedStreamWrites instance through object to preserve its runtime owner type. */;
             if (active is not null)
             {
                 throw TextErrors.Busy();

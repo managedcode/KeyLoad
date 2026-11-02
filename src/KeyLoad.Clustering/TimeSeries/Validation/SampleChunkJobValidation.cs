@@ -7,8 +7,8 @@ internal static class SampleChunkJobValidation
 {
     internal static void Require(SampleChunkWorkHint hint, string partition)
     {
-        ArgumentNullException.ThrowIfNull(hint);
-        ArgumentNullException.ThrowIfNull(hint.Partition);
+        ArgumentNullException.ThrowIfNull(hint) /* KLD0041: BCL null validation accepts the hint SampleChunkWorkHint reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(hint.Partition) /* KLD0041: BCL null validation accepts the hint.Partition PartitionRef reference through its object parameter. */;
         EngineResourceAccess.ValidatePartition(hint.Partition);
         JsonData.Identifier(hint.Set);
         JsonData.Identifier(hint.Series);

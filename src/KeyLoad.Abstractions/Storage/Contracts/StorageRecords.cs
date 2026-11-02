@@ -11,8 +11,8 @@ public static class StorageRecords
     /// <returns>The decoded owned record, or null when no value is stored.</returns>
     public static T? GetRecord<T>(this IKeyValueView view, byte[] key, StorageReadObserver? observer = null) where T : class
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The standard CLR guard validates the borrowed storage-view reference without boxing a record value. */;
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: The standard CLR guard validates the encoded read-key byte-array reference before the borrowed lookup. */;
         T? record = null;
         view.ReadValue(key, value => record = OrleansSerialization.Deserialize<T>(value), observer);
         return record;
@@ -24,8 +24,8 @@ public static class StorageRecords
     /// <param name="value">Value to serialize, including null when the value type allows it.</param>
     public static void PutRecord<T>(this IAtomicTransaction tx, byte[] key, T value)
     {
-        ArgumentNullException.ThrowIfNull(tx);
-        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(tx) /* KLD0041: The standard CLR guard validates the owning transaction reference before staging its typed record. */;
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: The standard CLR guard validates the encoded write-key byte-array reference before staging the typed record. */;
         tx.Put(key, OrleansSerialization.Serialize(value));
     }
 }

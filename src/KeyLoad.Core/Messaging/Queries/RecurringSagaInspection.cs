@@ -20,7 +20,7 @@ public static class RecurringSagaInspection
     /// <param name = "cancellationToken">The cancellation Token.</param>
     public static RecurringScheduleInspection? InspectRecurringSchedule(this DatabaseEngine engine, string principalId, QueueLaneRef lane, Guid scheduleId, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.InspectRecurringScheduleRead(principalId, lane, scheduleId, budget);
     }
@@ -50,7 +50,7 @@ public static class RecurringSagaInspection
     /// <param name = "cancellationToken">The cancellation Token.</param>
     public static SagaInspection? InspectSaga(this DatabaseEngine engine, string principalId, QueueLaneRef lane, Guid sagaId, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.InspectSagaRead(principalId, lane, sagaId, budget);
     }
@@ -89,7 +89,7 @@ public static class RecurringSagaInspection
 
     internal static void ValidateRecurringReadIdentity(QueueLaneRef lane, Guid id)
     {
-        ArgumentNullException.ThrowIfNull(lane);
+        ArgumentNullException.ThrowIfNull(lane) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(lane.Partition);
         JsonData.Identifier(lane.Queue);
         if (id == Guid.Empty)

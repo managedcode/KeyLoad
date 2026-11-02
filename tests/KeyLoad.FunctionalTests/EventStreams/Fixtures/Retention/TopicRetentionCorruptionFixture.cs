@@ -1,9 +1,11 @@
+using KeyLoad.Storage;
+
 namespace KeyLoad.FunctionalTests.EventStreams;
 
 internal static class TopicRetentionCorruptionFixture
 {
     internal static byte[] GroupKey(TopicRetentionFixture fixture) => KeySpace.Partition("subscription", fixture.Owner.Partition,
-        "topic", "Topic", null, 1L, "first");
+        "topic", "Topic", KeyComponent.Null, 1L, "first");
     internal static byte[] DigestKey(TopicRetentionFixture fixture, string id) => KeySpace.Partition("topic-event-id", fixture.Owner.Partition,
         "topic", 1L, id, "retained-digest");
     internal static void Write(TopicRetentionFixture fixture, byte[] key, byte[] value)

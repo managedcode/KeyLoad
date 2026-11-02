@@ -37,8 +37,8 @@ public static class GraphReads
     public static global::KeyLoad.GraphTraversal Traverse(this DatabaseEngine engine, string principalId,
         TraverseRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.TraverseRead(principalId, request.Partition, request.Graph, request.Start, request.MaxDepth,
             request.MaxVertices, request.MaxEdges, request.Labels?.ToArray(), budget, request.Projection);

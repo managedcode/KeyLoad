@@ -77,7 +77,7 @@ internal static class RemoteTransferCoordination
     private static async Task<QueueTransferInspection?> SourceAsync(RemoteTransferEnvelopeExecution execution,
         RemoteTransferCoordinationHint hint, CancellationToken token)
     {
-        var source = (await execution.ReadAsync<QueueTransferInspection>(hint.PrincipalId, GrainReadKind.QueueTransfer,
+        var source = (await execution.ReadAsync<QueueTransferInspection, InspectQueueTransferRequest>(hint.PrincipalId, GrainReadKind.QueueTransfer,
             new InspectQueueTransferRequest(hint.Source, hint.TransferId), token).ConfigureAwait(true)).Value;
         if (source is not null && (source.SourceQueue != hint.Source || source.Destination != hint.Destination
             || source.TransferId != hint.TransferId || RemoteTransferCoordinationIdentity.IntentDigest(source.IntentToken) != hint.IntentDigest))
@@ -90,7 +90,7 @@ internal static class RemoteTransferCoordination
     private static async Task<QueueTransferReceiptInspection?> TargetAsync(RemoteTransferEnvelopeExecution execution,
         RemoteTransferCoordinationHint hint, CancellationToken token)
     {
-        var receipt = (await execution.ReadAsync<QueueTransferReceiptInspection>(hint.PrincipalId, GrainReadKind.QueueTransferReceipt,
+        var receipt = (await execution.ReadAsync<QueueTransferReceiptInspection, InspectQueueTransferReceiptRequest>(hint.PrincipalId, GrainReadKind.QueueTransferReceipt,
             new InspectQueueTransferReceiptRequest(hint.Destination, hint.Source, hint.TransferId), token).ConfigureAwait(true)).Value;
         if (receipt is not null && (receipt.SourceQueue != hint.Source || receipt.DestinationQueue != hint.Destination || receipt.TransferId != hint.TransferId))
         {

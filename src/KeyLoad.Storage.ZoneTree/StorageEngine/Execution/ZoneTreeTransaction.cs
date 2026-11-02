@@ -36,7 +36,7 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime)
 
     public byte[]? ReadOwnedValue(byte[] key)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
         if (!Changes.TryGetValue(new(key, null), out var entry))
         {
             return runtime.View.ReadOwnedValue(key);
@@ -48,8 +48,8 @@ internal sealed class ZoneTreeTransaction(ZoneTreeStoreRuntime runtime)
 
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(reader) /* KLD0041: BCL null validation accepts the reader StorageValueReader reference through its object parameter. */;
         if (!Changes.TryGetValue(new(key, null), out var staged))
         {
             return runtime.View.ReadValue(key, reader, observer);

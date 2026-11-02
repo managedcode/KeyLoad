@@ -31,7 +31,7 @@ internal sealed class RequestCqrsHostedDatabase(PartitionHost owner)
             throw new ArgumentException(RequestCqrsHostedProtocol.CoordinatorEvaluationTime, nameof(time));
         }
         owner.Coordinator.ReadBarrierAsync(cancellationToken).GetAwaiter().GetResult();
-        var result = owner.Coordinator.RuntimeSubmitAsync(kind, id ?? Guid.NewGuid(), principal,
+        var result = owner.Coordinator.RuntimeSubmitAsync<object>(kind, id ?? Guid.NewGuid(), principal,
             payload, cancellationToken: cancellationToken).GetAwaiter().GetResult();
         owner.Coordinator.ReadBarrierAsync(cancellationToken).GetAwaiter().GetResult();
         return result;

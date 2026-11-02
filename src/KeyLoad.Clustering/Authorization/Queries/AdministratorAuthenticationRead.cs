@@ -12,14 +12,14 @@ internal static class AdministratorAuthenticationRead
         DecodedGrainRequest request, IResourceLifetimeWorkBinding binding,
         CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         var work = new ReadExecutionBudget(clock, token);
         work.AttachResourceLifetimeBinding(binding);
         if (!AdministratorAuthenticationScope.Validate(request.Envelope))
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var input = GrainPayload.Read<AdministratorAuthenticationRequest>(request.Payload);
+        var input = (GrainPayload.Read<AdministratorAuthenticationRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.Clustering.AdministratorAuthenticationRequest at this closed operation boundary before executing typed code. */);
         Require(input);
         binding.Bind(ImmutableArray<ResourceLifetime>.Empty);
         PrincipalRecord? principal = null;

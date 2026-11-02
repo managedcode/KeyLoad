@@ -13,6 +13,6 @@ public readonly record struct JsonScalarValue(KeyLoad.Storage.KeyComponent Value
         KeyLoad.Storage.KeyComponentKind.Text => System.Text.Json.Nodes.JsonValue.Create(Value.Text),
         KeyLoad.Storage.KeyComponentKind.Boolean => System.Text.Json.Nodes.JsonValue.Create(Value.Boolean),
         KeyLoad.Storage.KeyComponentKind.FixedPoint => System.Text.Json.Nodes.JsonValue.Create(Value.ExactNumber),
-        _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, "This field is not a scalar value.")
+        _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, JsonData.UnsupportedScalarFieldDetail)
     };
 }

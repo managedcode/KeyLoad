@@ -26,7 +26,7 @@ internal static class TextOnlineWholeFlow
         var prepared = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.IssuePublication, token);
         var operation = prepared.IssuedPublication ?? throw new InvalidOperationException("Actual execution publication was not issued.");
         var originalWork = runtime.Owner.RequirePublicationWork(session, request, TextMaintenanceTestValues.Principal);
-        var actual = await originalWork.AdmitOriginal(() => Task.Run(() => fixture.SubmitIssued(operation), token));
+        var actual = await originalWork.AdmitOriginal(() => Task.Run(() => ManagedCode.Communication.Result<OnlineTextIndexMaintenanceResult>.Succeed(fixture.SubmitIssued(operation).Get<OnlineTextIndexMaintenanceResult>()), token));
         var result = actual.Get<OnlineTextIndexMaintenanceResult>();
         var committed = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.ReconcileCommitted, token);
         await Assert.That(OrleansSerialization.Serialize(committed.OriginalResult).SequenceEqual(OrleansSerialization.Serialize(result))).IsTrue();
@@ -48,7 +48,7 @@ internal static class TextOnlineWholeFlow
             _ = await runtime.PhaseAsync(fixture, session, request, OnlineTextCapabilityKind.ApplyIntent, token);
             var work = runtime.Owner.TryRequireCheckpointWork(intent, TextMaintenanceTestValues.Principal)
                 ?? throw new InvalidOperationException("Actual original checkpoint registration is absent.");
-            var applied = await work.AdmitOriginal(() => Task.Run(() => fixture.Submit(OperationKind.CommitProjectionBatch, intent, id: id), token));
+            var applied = await work.AdmitOriginal(() => Task.Run(() => ManagedCode.Communication.Result<ProjectionBatchResult>.Succeed(fixture.Submit(OperationKind.CommitProjectionBatch, intent, id: id).Get<ProjectionBatchResult>()), token));
             var receipt = applied.Get<ProjectionBatchResult>();
             await Assert.That(receipt.Receipt.CommandId).IsEqualTo(id);
             await Assert.That(receipt.Receipt.Mutations).IsEmpty();

@@ -1,6 +1,5 @@
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
@@ -9,7 +8,7 @@ public static class RelationalStorageCommands
 {
     internal const string TableCreationInvalid = "The canonical table definition is invalid.";
     internal const string TableCreationExists = "The table resource already exists.";
-    internal static Result<object> ExecuteCreateTable(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
+    internal static ResourceDefinition ExecuteCreateTable(IAtomicTransaction transaction, Command<DatabaseCommand> operation)
     {
         var request = OperationProtocol.Payload<CreateTableRequest>(operation);
         if (request is null || request.Definition is null || request.Definition.Kind != ResourceKind.Collection || request.Definition.Authority != DocumentAuthority.Document || request.Definition.RelationalSchema is null)
@@ -29,6 +28,6 @@ public static class RelationalStorageCommands
 
         _ = ResourceLifetimeCatalog.Create(transaction, operation, request.TenantId, request.DatabaseId, request.Definition);
         transaction.PutRecord(key, request.Definition);
-        return OperationProtocol.Result(request.Definition);
+        return request.Definition;
     }
 }

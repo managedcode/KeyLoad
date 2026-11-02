@@ -25,7 +25,7 @@ internal sealed class MaintenanceChildDispatchAdmission : IDisposable
         var verified = codec.DecodeRequest(child, actorId);
         if (verified.Envelope.PrincipalId != parent.Envelope.PrincipalId || verified.Envelope.CommandId != commandId
             || binding is not IRequestWorkBinding execution
-            || !ReferenceEquals(binding.ResultRetention, execution.OriginalProducer.ResultRetention))
+            || !(ReferenceEquals(binding.ResultRetention, execution.OriginalProducer.ResultRetention) /* KLD0041: Require child dispatch to retain the original producer retention owner instance through CLR reference identity. */))
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         }

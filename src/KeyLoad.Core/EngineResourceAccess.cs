@@ -20,9 +20,9 @@ public static class EngineResourceAccess
     /// <param name = "engine">The shared database execution context.</param>
     public static ResourceDefinition Resource(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, string name, ResourceKind? kind = null)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return ResourceDefinitionBinding.BindResourceDefinition(view, partition, name, kind);
     }
 
@@ -35,17 +35,17 @@ public static class EngineResourceAccess
     /// <param name = "engine">The shared database execution context.</param>
     internal static CommitToken Token(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, long position)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var owner = engine.ReadPlacementWitness(view, partition);
         return new(owner.Incarnation, partition.AtomicPartitionId, position);
     }
 
     internal static void ValidateCommitToken(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, CommitToken token, ErrorCode failureCode, string safeDetail)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(token);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(token) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var owner = engine.ReadPlacementWitness(view, partition);
         if (token.Incarnation != owner.Incarnation || token.AtomicPartitionId != partition.AtomicPartitionId || token.Position < DatabaseEngineMinimumPositiveCount)
         {
@@ -57,7 +57,7 @@ public static class EngineResourceAccess
     /// <param name = "partition">Complete identity to validate.</param>
     public static void ValidatePartition(PartitionRef partition)
     {
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         JsonData.Identifier(partition.TenantId);
         JsonData.Identifier(partition.DatabaseId);
         JsonData.Identifier(partition.TransactionDomainId);

@@ -60,7 +60,7 @@ internal sealed class TextIncrementalMaintenanceService : ITextMaintenance, ISel
         TextMaintenanceCapabilityRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         return worker.RunAsync(() => ExecuteExclusiveAsync(principal, request, binding, token));
     }
 

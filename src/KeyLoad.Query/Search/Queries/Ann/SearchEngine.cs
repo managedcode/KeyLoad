@@ -18,7 +18,7 @@ public sealed partial class SearchEngine
         WaitForAnnIndexRequest request, ReadExecutionBudget originalBudget, AnnReadLifetimeMetadata sourceMetadata,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(sourceMetadata);
+        ArgumentNullException.ThrowIfNull(sourceMetadata) /* KLD0041: BCL null validation accepts the sourceMetadata AnnReadLifetimeMetadata reference through its object parameter. */;
         return global::KeyLoad.Query.Search.AnnWaitExecution.ExecuteAsync(database, annProjection, principalId, request,
             configuration, originalBudget, cancellationToken, sourceMetadata);
     }
@@ -27,7 +27,7 @@ public sealed partial class SearchEngine
         ApproximateSearchRequest request, ReadExecutionBudget originalBudget, AnnReadLifetimeMetadata sourceMetadata,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(sourceMetadata);
+        ArgumentNullException.ThrowIfNull(sourceMetadata) /* KLD0041: BCL null validation accepts the sourceMetadata AnnReadLifetimeMetadata reference through its object parameter. */;
         return global::KeyLoad.Query.Search.AnnPublicSearchExecutor.ExecuteAsync(database, annProjection, principalId, request,
             configuration, originalBudget, cancellationToken, sourceMetadata);
     }

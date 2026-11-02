@@ -50,8 +50,8 @@ internal static class QueryApi
     {
         var operation = SqlOperationCompiler.Compile(request, server.Value.MaximumBodyBytes, queryOptions,
             context.RequestAborted);
-        var reply = await CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
-            operation.CommandKind, operation.CommandId, operation.Payload, context.RequestAborted);
+        var reply = await (CanonicalOperationGateway.ExecuteAsync(context, operation.ReadKind,
+            operation.CommandKind, operation.CommandId, (operation.Payload /* KLD0041: The SQL compiler already selected and validated this input against the closed operation kind before gateway issuance. */), context.RequestAborted) /* KLD0041: Issue the validated heterogeneous SQL descriptor through the same generated envelope and bounded HTTP response path as typed API operations. */);
         return new GrainJsonResult(reply.Payload);
     }
 }

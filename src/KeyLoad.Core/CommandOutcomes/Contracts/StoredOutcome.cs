@@ -9,7 +9,7 @@ namespace KeyLoad.Core;
 internal sealed record StoredOutcome(
     [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.StoredOutcomeFields.Incarnation)] Guid Incarnation,
     [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.StoredOutcomeFields.PolicyEpoch)] long PolicyEpoch,
-    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.StoredOutcomeFields.Result)] Result<object> Result,
+    [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.StoredOutcomeFields.Result)] Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ Result,
     [property: global::Orleans.Id(global::KeyLoad.Core.InternalSerialization.StoredOutcomeFields.PreparedCommand)] Command<DatabaseCommand> PreparedCommand)
 {
     [JsonIgnore]

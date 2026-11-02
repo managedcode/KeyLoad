@@ -18,9 +18,9 @@ public sealed partial class ReadExecutionBudget(TimeProvider? timeProvider = nul
     /// <returns>A read-only view that must not escape that same action.</returns>
     public IKeyValueView CreateView(IKeyValueView view)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         Check();
-        return view is ResourceEffectPreparationTransaction prepared && ReferenceEquals(prepared.Work, this)
+        return view is ResourceEffectPreparationTransaction prepared && (ReferenceEquals(prepared.Work, this) /* KLD0041: This comparison requires CLR reference identity rather than an overridden value-equality implementation. */)
             ? view : new BudgetedReadView(view, this);
     }
 

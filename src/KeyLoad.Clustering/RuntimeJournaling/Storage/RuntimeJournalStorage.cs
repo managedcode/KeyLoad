@@ -61,7 +61,7 @@ internal sealed class RuntimeJournalStorage : IJournalStorage
 
     public async ValueTask ReadAsync(IJournalStorageConsumer consumer, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(consumer);
+        ArgumentNullException.ThrowIfNull(consumer) /* KLD0041: BCL null validation accepts the consumer IJournalStorageConsumer reference through its object parameter. */;
         var snapshot = (await state.CaptureAsync(cancellationToken)).Value;
         if (snapshot is null)
         {

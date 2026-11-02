@@ -19,6 +19,28 @@ public static class KeyCodec
     public static byte[] Encode(params ReadOnlySpan<KeyComponent> components)
         => Encode(components, []);
 
+    /// <summary>Encodes a decoded key without a temporary component array.</summary>
+    /// <param name="components">The decoded components in their comparison order.</param>
+    /// <returns>The canonical key bytes.</returns>
+    public static byte[] Encode(DecodedKey components)
+    {
+        Span<byte> initial = stackalloc byte[InitialKeyBytes];
+        var writer = new KeyBufferWriter(initial);
+        try
+        {
+            writer.Write(Version);
+            foreach (var component in components)
+            {
+                KeyCodecWritePrimitives.Write(ref writer, in component);
+            }
+            return writer.ToArray();
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
+
     /// <summary>Writes a typed scope and dynamic components directly into the same canonical key buffer.</summary>
     internal static byte[] Encode(ReadOnlySpan<KeyComponent> prefix, ReadOnlySpan<KeyComponent> suffix)
     {
@@ -53,32 +75,32 @@ public static class KeyCodec
     /// <param name="key">The encoded key bytes.</param>
     /// <returns>The decoded components in their original order.</returns>
     /// <exception cref="KeyLoadException">The key is unsupported or malformed.</exception>
-    public static KeyComponent[] Decode(ReadOnlySpan<byte> key)
+    public static DecodedKey Decode(ReadOnlySpan<byte> key)
     {
-        var values = new KeyComponent[KeyCodecValidation.Validate(key)];
+        var /* KLD0041: This decoder materializes the closed native scalar set into compact reference-sized slots, exposed through DecodedKey. */ values = new object?[KeyCodecValidation.Count(key)] /* KLD0041: Native scalar slots avoid a large per-component struct array for text-heavy keys. */;
         var offset = VersionBytes;
-        for (var index = 0; index < values.Length; index++)
+        for (var index = 0; index < values /* KLD0041: This is only the owned native slot count. */.Length; index++)
         {
             var tag = key[offset++];
-            values[index] = tag switch
+            values /* KLD0041: Only the validated native tag writes this private compact scalar slot. */[index] = tag switch
             {
-                MissingTag => KeyComponent.Missing,
-                NullTag => KeyComponent.Null,
-                BooleanTag => KeyComponent.FromBoolean(ReadByte(key, ref offset) switch
+                MissingTag => MissingValue.Instance,
+                NullTag => null,
+                BooleanTag => (ReadByte(key, ref offset) switch
                 {
                     FalsePayload => false,
                     TruePayload => true,
                     _ => throw BadKey()
-                }),
-                Int64Tag => KeyComponent.FromInt64(unchecked((long)(ReadUInt64(key, ref offset) ^ SortableSignMask))),
-                DecimalTag => KeyComponent.FromDecimal(KeyCodecDecimal.Read(key, ref offset)),
-                DoubleTag => KeyComponent.FromDouble(ReadDouble(key, ref offset)),
-                TimestampTag => KeyComponent.FromDateTimeOffset(ReadTimestamp(key, ref offset)),
-                TextTag => KeyComponent.FromString(ReadText(key, ref offset)),
-                BinaryTag => KeyComponent.FromByteArray(ReadEscaped(key, ref offset).ToArray()),
+                } /* KLD0042: The native boolean occupies one compact heterogeneous key slot; the public view restores its exact scalar type. */),
+                Int64Tag => unchecked((long)(ReadUInt64(key, ref offset) ^ SortableSignMask) /* KLD0042: The native integer occupies one compact heterogeneous slot before typed access. */),
+                DecimalTag => KeyCodecDecimal.Read(key, ref offset) /* KLD0042: The native decimal occupies one compact heterogeneous slot before typed access. */,
+                DoubleTag => ReadDouble(key, ref offset) /* KLD0042: The native floating-point value occupies one compact heterogeneous slot before typed access. */,
+                TimestampTag => ReadTimestamp(key, ref offset) /* KLD0042: The native timestamp occupies one compact heterogeneous slot before typed access. */,
+                TextTag => ReadText(key, ref offset),
+                BinaryTag => ReadEscaped(key, ref offset).ToArray(),
                 _ => throw BadKey()
             };
         }
-        return values;
+        return new(values) /* KLD0041: The typed collection owns the decoded native scalar slots without another heap wrapper. */;
     }
 }

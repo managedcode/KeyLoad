@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
 using KeyLoad.Storage;
 using static KeyLoad.FunctionalTests.EventStreams.EventQueueStateEnvelopeProtocol;
 
@@ -140,12 +139,12 @@ internal static class EventQueueStateEnvelopeKeyAssertions
             [ParkedSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Queue, Item], ParkedHex);
         await KeyAsync(KeySpace.Partition(EdgeSpace, fixture.Partition, Graph, Item),
             [EdgeSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Graph, Item], EdgeHex);
-        await KeyAsync(KeySpace.Partition(GroupSpace, fixture.Partition, Topic, nameof(EventSourceKind.Topic), null, InitialGeneration, Group),
-            [GroupSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Topic, nameof(EventSourceKind.Topic), null, InitialGeneration, Group], GroupHex);
-        await KeyAsync(KeySpace.Partition(WindowSpace, fixture.Partition, Topic, nameof(EventSourceKind.Topic), null, InitialGeneration, Group, InitialGeneration, InitialRevision),
-            [WindowSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Topic, nameof(EventSourceKind.Topic), null, InitialGeneration, Group, InitialGeneration, InitialRevision], WindowHex);
-        await KeyAsync(KeySpace.Partition(CompletionSpace, fixture.Partition, Topic, nameof(EventSourceKind.Topic), null, InitialGeneration, Group, InitialGeneration, InitialRevision),
-            [CompletionSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Topic, nameof(EventSourceKind.Topic), null, InitialGeneration, Group, InitialGeneration, InitialRevision], CompletionHex);
+        await KeyAsync(KeySpace.Partition(GroupSpace, fixture.Partition, Topic, nameof(EventSourceKind.Topic), KeyComponent.Null, InitialGeneration, Group),
+            [GroupSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Topic, nameof(EventSourceKind.Topic), KeyComponent.Null, InitialGeneration, Group], GroupHex);
+        await KeyAsync(KeySpace.Partition(WindowSpace, fixture.Partition, Topic, nameof(EventSourceKind.Topic), KeyComponent.Null, InitialGeneration, Group, InitialGeneration, InitialRevision),
+            [WindowSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Topic, nameof(EventSourceKind.Topic), KeyComponent.Null, InitialGeneration, Group, InitialGeneration, InitialRevision], WindowHex);
+        await KeyAsync(KeySpace.Partition(CompletionSpace, fixture.Partition, Topic, nameof(EventSourceKind.Topic), KeyComponent.Null, InitialGeneration, Group, InitialGeneration, InitialRevision),
+            [CompletionSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Topic, nameof(EventSourceKind.Topic), KeyComponent.Null, InitialGeneration, Group, InitialGeneration, InitialRevision], CompletionHex);
         await KeyAsync(KeySpace.Partition(InboxSpace, fixture.Partition, Queue, Item, Handler, InitialGeneration),
             [InboxSpace, GoldenTenant, GoldenDatabase, GoldenDomain, GoldenKey, Queue, Item, Handler, InitialGeneration], InboxHex);
         await KeyAsync(KeySpace.Partition(ScheduledSpace, fixture.Partition, Queue, GoldenDeadline, Item),

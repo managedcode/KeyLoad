@@ -22,8 +22,8 @@ public sealed partial class DatabaseCommitGrain(SiloDatabaseClient storage, IClu
     private bool UsesSharedVolume => options.Value.StorageMode == StorageAccessMode.SharedVolume;
 
     /// <inheritdoc />
-    public Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
-        => UsesSharedVolume ? Shared.ApplyAsync(operation, cancellationToken) : Commands.Submit(operation, cancellationToken);
+    public Task<Result<TResult>> ApplyAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+        => UsesSharedVolume ? Shared.ApplyAsync<TResult>(operation, cancellationToken) : Commands.Submit<TResult>(operation, cancellationToken);
 
     /// <inheritdoc />
     public Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)

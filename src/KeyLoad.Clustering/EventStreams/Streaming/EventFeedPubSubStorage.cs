@@ -17,7 +17,7 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices) 
     public Task ReadStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> state,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(state) /* KLD0041: BCL null validation accepts the state IGrainState reference through its object parameter. */;
         EventFeedPubSubIdentity.Require(stateName, grainId);
         lock (gate)
         {
@@ -47,7 +47,7 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices) 
     public Task WriteStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> state,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(state) /* KLD0041: BCL null validation accepts the state IGrainState reference through its object parameter. */;
         EventFeedPubSubIdentity.Require(stateName, grainId);
         lock (gate)
         {
@@ -73,7 +73,7 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices) 
     public Task ClearStateAsync<T>(string stateName, GrainId grainId, IGrainState<T> state,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(state);
+        ArgumentNullException.ThrowIfNull(state) /* KLD0041: BCL null validation accepts the state IGrainState reference through its object parameter. */;
         EventFeedPubSubIdentity.Require(stateName, grainId);
         lock (gate)
         {
@@ -103,7 +103,7 @@ internal sealed class EventFeedPubSubStorage(IServiceProvider originalServices) 
     private void RequireOpen(CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ObjectDisposedException.ThrowIf(closed, this);
+        ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this EventFeedPubSubStorage instance through object to preserve its runtime owner type. */;
     }
 
     private static void RequireRevision(string? expected, EventFeedPubSubRow? row)

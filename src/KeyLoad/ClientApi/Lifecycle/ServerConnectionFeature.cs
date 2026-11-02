@@ -30,10 +30,10 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         settings = options.Value;
         this.clock = clock;
         lastIdleTimestamp = clock.GetTimestamp();
-        idle = clock.CreateTimer(static state => ((ServerConnectionFeature)state!).ExpireIdle(),
-            this, settings.ConnectionIdleTimeout, Timeout.InfiniteTimeSpan);
-        transportClosed = transport.ConnectionClosed.Register(static state =>
-            ((ServerConnectionFeature)state!).RequestClose(), this);
+        idle = (clock.CreateTimer(static state => (((ServerConnectionFeature)state! /* KLD0042: Recover this exact ServerConnectionFeature reference from native timer callback state; keep the callback static without a captured closure. */)).ExpireIdle(),
+            this, settings.ConnectionIdleTimeout, Timeout.InfiniteTimeSpan) /* KLD0041: TimeProvider.CreateTimer requires object state; pass the existing connection owner reference to its static idle-expiry callback. */);
+        transportClosed = (transport.ConnectionClosed.Register(static state =>
+            (((ServerConnectionFeature)state! /* KLD0042: Recover this exact ServerConnectionFeature reference from native cancellation callback state; keep the callback static without a captured closure. */)).RequestClose(), this) /* KLD0041: CancellationToken.Register requires object state; pass this existing connection owner reference to the static transport-close callback. */);
     }
 
     internal Guid Id { get; } = Guid.NewGuid();

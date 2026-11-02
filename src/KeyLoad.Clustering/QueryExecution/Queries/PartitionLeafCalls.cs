@@ -40,7 +40,7 @@ internal sealed class PartitionLeafCalls(DatabaseEngine database, string princip
         {
             throw Errors.Fail(error, reply.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);
         }
-        return GrainReplyFactory.RequireValue(reply).Value as TResult
+        return ((GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue field only to validate the concrete RPC response or its permitted absence. */) as TResult /* KLD0042: Validate the current generated GrainValue slot as TResult? before accepting the concrete response from this RPC. */)
             ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
     }
 

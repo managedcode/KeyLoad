@@ -10,7 +10,7 @@ public sealed partial class KeyLoadClient
     /// <returns>The actual execution target receipt and explicit replay status.</returns>
     public Task<Result<CommitInboxResult>> CommitInboxAsync(CommitInboxRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<CommitInboxResult>(ApiRoutes.InboxCommit, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request CommitInboxRequest reference through its object parameter. */;
+        return Send<CommitInboxResult, CommitInboxRequest>(ApiRoutes.InboxCommit, request, true, request.CommandId, cancellationToken);
     }
 }

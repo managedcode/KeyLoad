@@ -19,8 +19,8 @@ internal static class SourceEventReader
     public static SourceEventRecord Read(IKeyValueView view, EventSourceRef source, long position,
         StorageReadObserver? observer = null)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(source) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         SourceEventRecord? result = null;
         var key = EventSources.SourceKey(source, position);
         var found = view.ReadValue(key, bytes => result = Decode(bytes, source, position), observer);

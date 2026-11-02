@@ -13,7 +13,7 @@ internal static partial class DistributedSearchCoordinator
         Func<CancellationToken, Task>? statisticsCaptured, IResourceLifetimeWorkBinding binding,
         CancellationToken original)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         return ExecuteAsync(database, request, options, prepare, sourceBarrier, clock,
             original, statisticsCaptured, binding);
     }

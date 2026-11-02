@@ -3,6 +3,26 @@ namespace KeyLoad.AnalyzerTests.CodeQuality;
 internal sealed class UntypedEnclosingExpressionReasonTests
 {
     [Test]
+    public async Task ConditionalAccessReasonCoversItsMemberWithoutAuthorizingAnOuterConditional()
+    {
+        const string source = """
+            internal sealed class Subject
+            {
+                internal object /* KLD0041: This persisted slot contains the business contract selected by its operation kind. */ Value { get; } = string.Empty;
+                internal void Run(Subject? owner, bool choose)
+                {
+                    _ = (owner?.Value /* KLD0041: This individual nullable member read preserves the native stored payload before typed validation. */);
+                    _ = owner?.Value;
+                    _ = choose ? owner?.Value : owner?.Value /* KLD0041: This outer conditional does not justify either individual member read. */;
+                }
+            }
+            """;
+        var findings = await UntypedContractAnalyzerFixture.ContractsAsync(source);
+        await UntypedContractAnalyzerFixture.LocatedAsync(findings, UntypedContractAnalyzerFixture.ContractId,
+            source, ".Value", ".Value", ".Value");
+    }
+
+    [Test]
     public async Task AConditionalReasonDoesNotAuthorizeItsLastInnerInvocation()
     {
         const string source = """

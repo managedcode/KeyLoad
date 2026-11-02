@@ -46,7 +46,7 @@ internal static class ZoneTreeIdentityFile
 
     private static void RequireEmptyOwnedDirectory(string directory, FileStream ownership)
     {
-        ArgumentNullException.ThrowIfNull(ownership);
+        ArgumentNullException.ThrowIfNull(ownership) /* KLD0041: BCL null validation accepts the ownership FileStream reference through its object parameter. */;
         var ownerPath = Path.GetFullPath(Path.Combine(directory, OwnerLockFileName));
         if (!ownership.CanRead || !ownership.CanWrite
             || !string.Equals(ownership.Name, ownerPath, StringComparison.Ordinal)

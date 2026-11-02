@@ -12,8 +12,8 @@ internal static class ServerFailureObserver
     /// <returns>Completion after the actual operation reaches its terminal state.</returns>
     internal static async Task ObserveAsync(Func<Task> stage, List<Exception> failures)
     {
-        ArgumentNullException.ThrowIfNull(stage);
-        ArgumentNullException.ThrowIfNull(failures);
+        ArgumentNullException.ThrowIfNull(stage) /* KLD0041: BCL null validation accepts the stage Func reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(failures) /* KLD0041: BCL null validation accepts the failures List reference through its object parameter. */;
         Task terminal;
         try
         {
@@ -52,8 +52,8 @@ internal static class ServerFailureObserver
     /// <param name="failures">Existing ordered failures to append while preserving their identities.</param>
     internal static void Observe(Action stage, List<Exception> failures)
     {
-        ArgumentNullException.ThrowIfNull(stage);
-        ArgumentNullException.ThrowIfNull(failures);
+        ArgumentNullException.ThrowIfNull(stage) /* KLD0041: BCL null validation accepts the stage Action reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(failures) /* KLD0041: BCL null validation accepts the failures List reference through its object parameter. */;
         try
         {
             stage();
@@ -76,7 +76,7 @@ internal static class ServerFailureObserver
         const int IndexEmptyCount = 0;
         const int FailuresCountValidationBoundary = 1;
 
-        ArgumentNullException.ThrowIfNull(failures);
+        ArgumentNullException.ThrowIfNull(failures) /* KLD0041: BCL null validation accepts the failures IReadOnlyList reference through its object parameter. */;
         if (failures.Count == EmptyFailuresCount)
         {
             ExceptionDispatchInfo.Capture(failures[IndexEmptyCount]).Throw();

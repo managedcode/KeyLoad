@@ -5,38 +5,41 @@ namespace KeyLoad.Storage;
 public readonly struct KeyComponent : IEquatable<KeyComponent>
 {
     private const string GuidKeyFormat = "N";
-    private readonly long bits;
-    private readonly decimal exact;
-    private readonly string? text;
-    private readonly byte[]? binary;
+    private const string BooleanRequired = "The component does not contain a boolean.";
+    private const string WholeNumberRequired = "The component does not contain an integer.";
+    private const string ExactNumberRequired = "The component does not contain an exact number.";
+    private const string RealNumberRequired = "The component does not contain a real number.";
+    private const string TimestampRequired = "The component does not contain a timestamp.";
+    private const string TextRequired = "The component does not contain text.";
+    private const string BinaryRequired = "The component does not contain binary bytes.";
+    private readonly KeyComponentScalar scalar;
+    private readonly object? /* KLD0041: This closed string-or-byte-array reference union shares storage without boxing scalar values; Kind guards each typed read. */ reference;
 
     private KeyComponent(KeyComponentKind kind, long bits = 0, decimal exact = 0, string? text = null, byte[]? binary = null)
     {
         Kind = kind;
-        this.bits = bits;
-        this.exact = exact;
-        this.text = text;
-        this.binary = binary;
+        scalar = kind == KeyComponentKind.FixedPoint ? new(exact) : new(bits);
+        reference /* KLD0041: The private constructor admits only the original string or byte-array reference into this closed union; scalar values use unmanaged storage. */ = kind == KeyComponentKind.Binary ? binary : text;
     }
 
     /// <summary>Gets the component's closed scalar kind.</summary>
     public KeyComponentKind Kind { get; }
     /// <summary>Gets a boolean component's value.</summary>
-    public bool Boolean => Kind == KeyComponentKind.Boolean ? bits != 0 : throw new InvalidOperationException("The component does not contain a boolean.");
+    public bool Boolean => Kind == KeyComponentKind.Boolean ? scalar.RawBits != 0 : throw new InvalidOperationException(BooleanRequired);
     /// <summary>Gets an integer component's normalized 64-bit value.</summary>
-    public long Integer => Kind == KeyComponentKind.WholeNumber ? bits : throw new InvalidOperationException("The component does not contain an integer.");
+    public long WholeNumber => Kind == KeyComponentKind.WholeNumber ? scalar.RawBits : throw new InvalidOperationException(WholeNumberRequired);
     /// <summary>Gets a decimal component's exact value.</summary>
-    public decimal ExactNumber => Kind == KeyComponentKind.FixedPoint ? exact : throw new InvalidOperationException("The component does not contain an exact number.");
+    public decimal ExactNumber => Kind == KeyComponentKind.FixedPoint ? scalar.ExactNumber : throw new InvalidOperationException(ExactNumberRequired);
     /// <summary>Gets a double component's finite value.</summary>
-    public double RealNumber => Kind == KeyComponentKind.FloatingPoint ? BitConverter.Int64BitsToDouble(bits) : throw new InvalidOperationException("The component does not contain a real number.");
+    public double RealNumber => Kind == KeyComponentKind.FloatingPoint ? BitConverter.Int64BitsToDouble(scalar.RawBits) : throw new InvalidOperationException(RealNumberRequired);
     /// <summary>Gets a timestamp component's UTC instant.</summary>
-    public DateTimeOffset Timestamp => Kind == KeyComponentKind.Timestamp ? new(bits, TimeSpan.Zero) : throw new InvalidOperationException("The component does not contain a timestamp.");
-    internal long UtcTicks => bits;
+    public DateTimeOffset Timestamp => Kind == KeyComponentKind.Timestamp ? new(scalar.RawBits, TimeSpan.Zero) : throw new InvalidOperationException(TimestampRequired);
+    internal long UtcTicks => scalar.RawBits;
     /// <summary>Gets a text component's original content.</summary>
-    public string Text => Kind == KeyComponentKind.Text ? text! : throw new InvalidOperationException("The component does not contain text.");
+    public string Text => Kind == KeyComponentKind.Text ? (string)reference /* KLD0041: The closed reference union holds a string for the validated Text kind. */! /* KLD0042: Kind and the private constructor guarantee this reference is a string, without boxing. */ : throw new InvalidOperationException(TextRequired);
     /// <summary>Gets the binary component's bytes without exposing a mutable array contract.</summary>
-    public ReadOnlyMemory<byte> Bytes => Kind == KeyComponentKind.Binary ? binary! : throw new InvalidOperationException("The component does not contain binary bytes.");
-    internal byte[] Binary => binary!;
+    public ReadOnlyMemory<byte> Bytes => Kind == KeyComponentKind.Binary ? Binary : throw new InvalidOperationException(BinaryRequired);
+    internal byte[] Binary => (byte[])reference /* KLD0041: Only the Binary kind reads this closed byte-array reference slot. */! /* KLD0042: The private binary factory places the original byte-array reference in this union without copying or boxing it. */;
 
     /// <summary>Gets the explicit null component.</summary>
     public static KeyComponent Null { get; } = new(KeyComponentKind.Null);
@@ -136,11 +139,12 @@ public readonly struct KeyComponent : IEquatable<KeyComponent>
 
     /// <inheritdoc />
     public bool Equals(KeyComponent other)
-        => Kind == other.Kind && bits == other.bits && exact == other.exact && Kind switch
+        => Kind == other.Kind && Kind switch
         {
+            KeyComponentKind.FixedPoint => ExactNumber == other.ExactNumber,
             KeyComponentKind.Text => string.Equals(Text, other.Text, StringComparison.Ordinal),
             KeyComponentKind.Binary => Binary.AsSpan().SequenceEqual(other.Binary),
-            _ => true
+            _ => scalar.RawBits == other.scalar.RawBits
         };
 
     /// <inheritdoc />
@@ -152,7 +156,8 @@ public readonly struct KeyComponent : IEquatable<KeyComponent>
     {
         KeyComponentKind.Text => HashCode.Combine(Kind, string.GetHashCode(Text, StringComparison.Ordinal)),
         KeyComponentKind.Binary => HashCode.Combine(Kind, Binary.Length),
-        _ => HashCode.Combine(Kind, bits, exact)
+        KeyComponentKind.FixedPoint => HashCode.Combine(Kind, ExactNumber),
+        _ => HashCode.Combine(Kind, scalar.RawBits)
     };
 
     /// <summary>Compares two components for equality.</summary>

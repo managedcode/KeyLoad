@@ -33,7 +33,7 @@ public static class ResourceEffectApply
     internal static void ValidateResourceEffectSubmission(this DatabaseEngine engine, Command<DatabaseCommand> operation, DateTimeOffset admittedAt, IResourceLifetimeWorkBinding? binding = null) => engine.ValidateResourceEffectSubmissionCore(operation, admittedAt, binding, null);
     internal static void ValidateResourceEffectSubmission(this DatabaseEngine engine, Command<DatabaseCommand> operation, DateTimeOffset admittedAt, IResourceLifetimeWorkBinding? binding, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(work);
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         engine.ValidateResourceEffectSubmissionCore(operation, admittedAt, binding, work);
     }
 
@@ -57,7 +57,7 @@ public static class ResourceEffectApply
             var selected = CommandOutcomeKeyResolver.Select(observed, operation.UserId!, operation.CommandId, scope);
             if (selected.Outcome is not null)
             {
-                _ = engine.ReadValidatedSubmissionOutcome(observed, operation);
+                _ = (engine.ReadValidatedSubmissionOutcome(observed, operation) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */);
                 binding?.Bind(current.Capture());
                 return true;
             }

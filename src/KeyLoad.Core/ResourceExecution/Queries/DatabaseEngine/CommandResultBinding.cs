@@ -8,7 +8,7 @@ public static class CommandResultBinding
     internal static bool IsResourceFreeCommandWork(OperationKind kind) => ResourceMetadataScopes.IsResourceFreeOperation(kind);
     internal static void BindAuthenticatedCommandResultLifetimes(this DatabaseEngine engine, string verifiedPrincipalId, long expectedPolicyEpoch, ImmutableArray<ResourceLifetime> lifetimes, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.AttachResourceLifetimeBinding(binding);
         if (lifetimes.IsDefault)
         {

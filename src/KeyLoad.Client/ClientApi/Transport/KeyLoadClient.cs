@@ -15,7 +15,11 @@ public sealed partial class KeyLoadClient(HttpClient http, string apiKey, IOptio
 
     internal KeyLoadClientExecutionOptions ExecutionOptions => transport.ExecutionOptions;
 
-    internal Task<Result<T>> Send<T>(string path, object? request, bool write, Guid? id, CancellationToken cancellationToken,
+    internal Task<Result<T>> Send<T, TRequest>(string path, TRequest request, bool write, Guid? id, CancellationToken cancellationToken,
+        HttpMethod? method = null) where TRequest : class
+        => transport.Send<T, TRequest>(path, request, write, id, cancellationToken, method);
+
+    internal Task<Result<T>> Send<T>(string path, bool write, Guid? id, CancellationToken cancellationToken,
         HttpMethod? method = null)
-        => transport.Send<T>(path, request, write, id, cancellationToken, method);
+        => transport.Send<T>(path, write, id, cancellationToken, method);
 }

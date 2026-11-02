@@ -7,47 +7,46 @@ internal static class OrleansTelemetryTagSanitizer
 {
     internal static void Scrub(Activity activity, int maximumTagValueCharacters)
     {
-        foreach (var (key, value) in activity.TagObjects.ToArray())
+        foreach (var (key, value) in ((activity.TagObjects /* KLD0041: Read the native Activity object-valued tags before applying the bounded Orleans telemetry privacy allowlist. */).ToArray() /* KLD0041: Snapshot native Activity tag pairs before removing or replacing tags during this privacy pass. */))
         {
-            var normalized = (Normalize(key, value, maximumTagValueCharacters)).Value;
+            if (key == OrleansTelemetryPolicy.ExceptionEscapedTag && value is bool)
+            {
+                continue;
+            }
+            var normalized = ((Normalize(key, value, maximumTagValueCharacters) /* KLD0041: Normalize this native Activity runtime value into a bounded allowed string; the validated original exception-escaped bool is retained separately. */)).Value;
             if (normalized is null)
             {
-                activity.SetTag(key, null);
+                activity.SetTag(key, null) /* KLD0041: Use the native Activity object-valued setter to remove this unapproved tag. */;
             }
-            else if (!Equals(normalized, value))
+            else if ((value is not string original /* KLD0042: Require a concrete string from the native Activity tag before comparing or publishing its bounded normalized value. */) || !string.Equals(normalized, original, StringComparison.Ordinal))
             {
-                activity.SetTag(key, normalized);
+                activity.SetTag(key, normalized) /* KLD0041: Use the native Activity object-valued setter to publish only the bounded normalized string without boxing another value. */;
             }
         }
     }
 
-    private static (bool HasValue, object? Value) Normalize(string key, object? value, int maximumTagValueCharacters)
+    private static (bool HasValue, string? Value) Normalize(string key, object? /* KLD0041: Inspect only native Activity runtime tag values to require bounded strings and publish the fixed Orleans privacy allowlist. */ value, int maximumTagValueCharacters)
     {
-        if (key == OrleansTelemetryPolicy.ExceptionEscapedTag && value is bool escaped)
+        if ((value is not string text /* KLD0042: Require a concrete string from the native Activity tag before comparing or publishing its bounded normalized value. */) || text.Length == 0 || text.Length > maximumTagValueCharacters)
         {
-            return (true, ((object?)(escaped)));
-        }
-
-        if (value is not string text || text.Length == 0 || text.Length > maximumTagValueCharacters)
-        {
-            return (false, default(object?));
+            return (false, default(string?));
         }
 
         return key switch
         {
             OrleansTelemetryPolicy.RpcSystemTag when string.Equals(text,
-                OrleansTelemetryPolicy.RpcSystemValue, StringComparison.Ordinal) => (true, ((object?)(OrleansTelemetryPolicy.RpcSystemValue))),
-            OrleansTelemetryPolicy.RpcServiceTag => (true, ((object?)(OrleansTelemetryPolicy.RpcServiceValue))),
-            OrleansTelemetryPolicy.RpcMethodTag => (true, ((object?)(NormalizeMethod(text)))),
-            OrleansTelemetryPolicy.GrainTypeTag => (true, ((object?)(OrleansTelemetryPolicy.GrainTypeValue))),
+                OrleansTelemetryPolicy.RpcSystemValue, StringComparison.Ordinal) => (true, ((string?)(OrleansTelemetryPolicy.RpcSystemValue))),
+            OrleansTelemetryPolicy.RpcServiceTag => (true, ((string?)(OrleansTelemetryPolicy.RpcServiceValue))),
+            OrleansTelemetryPolicy.RpcMethodTag => (true, ((string?)(NormalizeMethod(text)))),
+            OrleansTelemetryPolicy.GrainTypeTag => (true, ((string?)(OrleansTelemetryPolicy.GrainTypeValue))),
             OrleansTelemetryPolicy.ActivationCauseTag when string.Equals(text,
                 OrleansTelemetryPolicy.ActivationCauseNewValue, StringComparison.Ordinal)
-                => (true, ((object?)(OrleansTelemetryPolicy.ActivationCauseNewValue))),
+                => (true, ((string?)(OrleansTelemetryPolicy.ActivationCauseNewValue))),
             OrleansTelemetryPolicy.ActivationCauseTag when string.Equals(text,
                 OrleansTelemetryPolicy.ActivationCauseRehydrateValue, StringComparison.Ordinal)
-                => (true, ((object?)(OrleansTelemetryPolicy.ActivationCauseRehydrateValue))),
-            OrleansTelemetryPolicy.ExceptionTypeTag => (true, ((object?)(OrleansTelemetryPolicy.ExceptionTypeValue))),
-            _ => (false, default(object?))
+                => (true, ((string?)(OrleansTelemetryPolicy.ActivationCauseRehydrateValue))),
+            OrleansTelemetryPolicy.ExceptionTypeTag => (true, ((string?)(OrleansTelemetryPolicy.ExceptionTypeValue))),
+            _ => (false, default(string?))
         };
     }
 

@@ -1,17 +1,17 @@
 using ManagedCode.Communication;
 namespace KeyLoad.Clustering;
 
-internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
+internal sealed class OnlineTextPublicationWork<TResult>(Guid sessionId, Guid commandId)
 {
     private readonly Lock gate = new();
-    private Task<Result<object>>? original;
+    private Task<Result<TResult>>? original;
     private bool closed;
     internal Guid SessionId { get; } = sessionId;
     internal Guid CommandId { get; } = commandId;
 
-    internal Task<Result<object>> AdmitOriginal(Func<Task<Result<object>>> admit)
+    internal Task<Result<TResult>> AdmitOriginal(Func<Task<Result<TResult>>> admit)
     {
-        ArgumentNullException.ThrowIfNull(admit);
+        ArgumentNullException.ThrowIfNull(admit) /* KLD0041: BCL null validation accepts the admit Func reference through its object parameter. */;
         lock (gate)
         {
             if (original is null)
@@ -26,7 +26,7 @@ internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
         }
     }
 
-    internal Task<Result<object>>? CloseAdmissionAndCaptureOriginal()
+    internal Task<Result<TResult>>? CloseAdmissionAndCaptureOriginal()
     {
         lock (gate)
         {
@@ -35,7 +35,7 @@ internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
         }
     }
 
-    internal Task<Result<object>>? CapturedOriginal()
+    internal Task<Result<TResult>>? CapturedOriginal()
     {
         lock (gate)
         {
@@ -43,7 +43,7 @@ internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
         }
     }
 
-    internal Task<Result<object>> RequireOriginal()
+    internal Task<Result<TResult>> RequireOriginal()
     {
         lock (gate)
         {
@@ -51,7 +51,7 @@ internal sealed class OnlineTextPublicationWork(Guid sessionId, Guid commandId)
         }
     }
 
-    internal async Task<Result<object>> AwaitCallerAsync(CancellationToken token)
+    internal async Task<Result<TResult>> AwaitCallerAsync(CancellationToken token)
     {
         try
         {

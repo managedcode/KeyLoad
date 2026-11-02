@@ -28,6 +28,6 @@ internal static class GrainRequestPayloadVerification
         }
 
         codec.ValidateVerifiedScope(request);
-        return new(request, request.Payload);
+        return (new(request, (request.Payload /* KLD0041: Preserve the current generated Payload field ID and runtime type header at this request envelope boundary. */)) /* KLD0041: This verified envelope preserves its original generated payload field and native runtime type header until the closed-kind decoder reads it. */);
     }
 }

@@ -12,6 +12,6 @@ internal static class AdministratorAuthenticationRequestIssuance
             Incarnation = codec.Incarnation,
             PrincipalId = null,
             ReadKind = GrainReadKind.Authenticate,
-            Payload = GrainPayload.Strict(request)
+            Payload /* KLD0041: Preserve the current generated Payload field ID and runtime type header at this request envelope boundary. */ = GrainPayload.Strict(request)
         });
 }

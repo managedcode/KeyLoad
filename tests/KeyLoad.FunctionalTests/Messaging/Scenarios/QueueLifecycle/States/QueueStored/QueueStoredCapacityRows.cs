@@ -50,6 +50,6 @@ internal static class QueueStoredCapacityRows
             _ => throw new ArgumentOutOfRangeException(nameof(fault))
         };
 
-    private static byte[] Key(PartitionRef partition, string family, params object?[] parts)
+    private static byte[] Key(PartitionRef partition, string family, params KeyLoad.Storage.KeyComponent[] parts)
         => KeyLoad.Core.KeySpace.Partition(family, partition, [QueueEnqueueColdProtocol.Queue, .. parts]);
 }

@@ -14,10 +14,10 @@ internal static class ScriptDomQueryAdapter
         global::Microsoft.Extensions.Options.IOptions<QueryExecutionOptions> executionOptions, ReadExecutionBudget budget, int? positionalParameterCount,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(statement);
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(statement) /* KLD0041: BCL null validation accepts the statement TSqlStatement reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request QueryRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         var execution = executionOptions.Value;
         execution.Validate();
         cancellationToken.ThrowIfCancellationRequested();

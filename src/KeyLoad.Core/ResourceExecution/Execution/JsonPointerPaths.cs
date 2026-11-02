@@ -25,7 +25,7 @@ internal static class JsonPointerPaths
 
     internal static string[] Parse(string pointer)
     {
-        ArgumentNullException.ThrowIfNull(pointer);
+        ArgumentNullException.ThrowIfNull(pointer) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (pointer.Length == EmptyElementCount)
         {
             return [];
@@ -45,7 +45,7 @@ internal static class JsonPointerPaths
 
     internal static string Encode(string[] segments)
     {
-        ArgumentNullException.ThrowIfNull(segments);
+        ArgumentNullException.ThrowIfNull(segments) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return SeparatorText + string.Join(Separator, segments.Select(segment =>
             segment.Replace(EscapeText, EscapedTilde, StringComparison.Ordinal)
                 .Replace(SeparatorText, EscapedSeparator, StringComparison.Ordinal)));
@@ -53,7 +53,7 @@ internal static class JsonPointerPaths
 
     internal static bool TryArrayIndex(string segment, out int index)
     {
-        ArgumentNullException.ThrowIfNull(segment);
+        ArgumentNullException.ThrowIfNull(segment) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         index = FirstElementIndex;
         if (segment.Length == EmptyElementCount
             || segment.Length > AdjacentElementOffset && segment[FirstElementIndex] == ArrayIndexZeroDigit)

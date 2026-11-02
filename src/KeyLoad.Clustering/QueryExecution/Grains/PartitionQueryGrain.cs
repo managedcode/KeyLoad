@@ -35,7 +35,7 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
         var requestId = Guid.Empty;
         try
         {
-            ArgumentNullException.ThrowIfNull(owner);
+            ArgumentNullException.ThrowIfNull(owner) /* KLD0041: BCL null validation accepts the owner SiloAddress reference through its object parameter. */;
             cancellationToken.ThrowIfCancellationRequested();
             var request = codec.Decode(envelope);
             requestId = request.Envelope.RequestId;
@@ -46,10 +46,10 @@ internal sealed class PartitionQueryGrain(GrainRequestCodec codec, SiloDatabaseC
             }
             var partition = request.Envelope.ReadKind switch
             {
-                GrainReadKind.PartitionQueryLeaf => GrainPayload.Read<PartitionQueryOwnedLeafRequest>(
-                    request.Payload).Plan?.Partition,
-                GrainReadKind.DistributedSearchLeaf => GrainPayload.Read<DistributedSearchOwnedLeaf>(
-                    request.Payload).Search?.Partition,
+                GrainReadKind.PartitionQueryLeaf => (GrainPayload.Read<PartitionQueryOwnedLeafRequest>(
+                    (request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.Query.QueryExecution.PartitionQueryOwnedLeafRequest at this closed operation boundary before executing typed code. */).Plan?.Partition,
+                GrainReadKind.DistributedSearchLeaf => (GrainPayload.Read<DistributedSearchOwnedLeaf>(
+                    (request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.Query.QueryExecution.DistributedSearchOwnedLeaf at this closed operation boundary before executing typed code. */).Search?.Partition,
                 _ => null
             };
             if (partition is null || PartitionQueryGrainIdentity.For(partition) != this.GetPrimaryKeyString())

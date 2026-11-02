@@ -9,7 +9,7 @@ internal sealed class TextResourceReservation(TextResourceOwnership owner, strin
     {
         lock (gate)
         {
-            if (completed || !ReferenceEquals(owner, expectedOwner) || generation != Path.GetFullPath(path))
+            if (completed || !(ReferenceEquals(owner, expectedOwner) /* KLD0041: Require the exact reservation owner instance through CLR reference identity. */) || generation != Path.GetFullPath(path))
             {
                 throw TextErrors.Ownership();
             }

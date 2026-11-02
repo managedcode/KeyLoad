@@ -10,25 +10,27 @@ namespace KeyLoad.Core;
 /// <summary>Executes OnlineTextOriginalOutcome operations against the caller's database context.</summary>
 public static class OnlineTextOriginalOutcome
 {
-    internal static Result<object>? ReadOnlineTextOriginalOutcome(this DatabaseEngine engine, string principalId, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget) => engine.Store.Read(raw =>
+    internal static Result<OnlineTextIndexMaintenanceResult>? ReadOnlineTextOriginalOutcome(this DatabaseEngine engine, string principalId, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget) => engine.Store.Read(raw =>
     {
         var view = budget.CreateView(raw);
         var principal = engine.Principal(view, principalId, engine.EvaluationClock.GetUtcNow());
         return (engine.ReadOnlineTextOriginalOutcome(view, principal, request, budget)).Value;
     });
-    internal static (bool HasValue, Result<object>? Value) ReadOnlineTextOriginalOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
+    internal static (bool HasValue, Result<OnlineTextIndexMaintenanceResult>? Value) ReadOnlineTextOriginalOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget)
     {
         engine.RequireOnlineTextOriginalAuthority(view, principal, request);
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var previous = CommandOutcomeKeyResolver.Select(view, principal.Id, request.CommandId, scope).Outcome;
         if (previous is null)
         {
-            return (false, default(Result<object>?));
+            return (false, default(Result<OnlineTextIndexMaintenanceResult>?));
         }
 
         engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous);
         budget.Check();
-        return (true, ((Result<object>?)(previous.Result)));
+        var /* KLD0041: The stored publication starts at the existing heterogeneous outcome boundary before typed extraction. */ stored = previous.Result /* KLD0041: The native persisted outcome remains heterogeneous; this read boundary restores the exact publication result type. */;
+        return (true, stored.IsFailed ? Result<OnlineTextIndexMaintenanceResult>.Fail(stored.Problem)
+            : Result<OnlineTextIndexMaintenanceResult>.Succeed(stored.Get<OnlineTextIndexMaintenanceResult>() /* KLD0041: The original publication's native stored slot must contain the expected maintenance result. */));
     }
 
     internal static OnlineTextCurrentPublication? ReadOnlineTextOriginalPublication(this DatabaseEngine engine, string principalId, OnlineTextIndexMaintenanceRequest request, ReadExecutionBudget budget) => engine.Store.Read(raw =>
@@ -44,7 +46,7 @@ public static class OnlineTextOriginalOutcome
         }
 
         engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous);
-        var result = previous.Result.Get<OnlineTextIndexMaintenanceResult>();
+        var result = previous.Result /* KLD0041: This field is the existing native persisted outcome slot, whose payload type depends on its original operation kind. */.Get<OnlineTextIndexMaintenanceResult>() /* KLD0041: Publication metadata requires this exact business type from the original native stored slot. */;
         var authority = previous.OnlineTextAuthority ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         return new OnlineTextCurrentPublication(OnlineTextPublicationProtocol.CurrentFormat, principal.Id, request.CommandId, authority.ParentFingerprint, request.Consumer, request.ConsumerGeneration, authority, result.PublishedCut);
     });
@@ -77,12 +79,12 @@ public static class OnlineTextOriginalOutcome
             throw Errors.Fail(ErrorCode.PermissionDenied, OnlineTextPublicationProtocol.MissingAuthority);
         }
 
-        if (Errors.Code(previous.Result.Problem).Value is not null)
+        if (Errors.Code(previous.Result /* KLD0041: This field is the existing native persisted outcome slot, whose payload type depends on its original operation kind. */.Problem).Value is not null)
         {
             return;
         }
 
-        var original = previous.Result.Get<OnlineTextIndexMaintenanceResult>();
+        var original = previous.Result /* KLD0041: This field is the existing native persisted outcome slot, whose payload type depends on its original operation kind. */.Get<OnlineTextIndexMaintenanceResult>() /* KLD0041: Publication metadata requires this exact business type from the original native stored slot. */;
         var resource = engine.Resource(view, request.Consumer.Partition, request.Collection, ResourceKind.Collection);
         var sha = Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(resource)));
         if (original.CommandId != request.CommandId || original.Consumer != request.Consumer || original.ConsumerGeneration != request.ConsumerGeneration || original.PublishedCut.ResourceSha256 != sha || original.PublishedCut.SchemaVersion != resource.SchemaVersion)

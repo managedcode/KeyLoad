@@ -10,7 +10,7 @@ public static class DocumentStorageKeys
     /// <returns>The existing ordered document key bytes.</returns>
     public static byte[] RecordKey(EntityRef reference)
     {
-        ArgumentNullException.ThrowIfNull(reference);
+        ArgumentNullException.ThrowIfNull(reference) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return RecordKey(reference.Partition, reference.Collection, reference.Id);
     }
 
@@ -21,9 +21,9 @@ public static class DocumentStorageKeys
     /// <returns>The existing ordered document key bytes.</returns>
     public static byte[] RecordKey(PartitionRef partition, string collection, string id)
     {
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(collection);
-        ArgumentNullException.ThrowIfNull(id);
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(collection) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(id) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return KeySpace.Partition(DocumentSpace, partition, collection, id);
     }
 
@@ -33,8 +33,8 @@ public static class DocumentStorageKeys
     /// <returns>The existing collection prefix bytes.</returns>
     public static byte[] Prefix(PartitionRef partition, string collection)
     {
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(collection);
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(collection) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return KeySpace.Partition(DocumentSpace, partition, collection);
     }
 }

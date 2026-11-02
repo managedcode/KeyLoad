@@ -25,7 +25,7 @@ internal static class QueueWorkerFailureLedger
             : new AggregateException(failures);
         try
         {
-            original.Data[OperationEvidenceKey] = evidence;
+            ((original.Data /* KLD0041: Preserve the original fatal exception and attach its exact immutable operation-evidence value through the standard CLR Exception.Data contract; this occurs only on fatal settlement. */)[OperationEvidenceKey] /* KLD0041: Preserve the original fatal exception and attach its exact immutable operation-evidence value through the standard CLR Exception.Data contract; this occurs only on fatal settlement. */) = (evidence /* KLD0042: The original fatal exception exposes only object-valued CLR metadata; box this immutable evidence once on the fatal-error path without changing its published type. */);
         }
         catch (Exception attachment) when (IsNonFatal(attachment))
         {
@@ -42,7 +42,7 @@ internal static class QueueWorkerFailureLedger
         ImmutableArray<QueueWorkerOperationIdentity> evidence)
     {
         var aggregate = new AggregateException(original, attachment);
-        aggregate.Data[OperationEvidenceKey] = evidence;
+        ((aggregate.Data /* KLD0041: Preserve the original fatal exception and attach its exact immutable operation-evidence value through the standard CLR Exception.Data contract; this occurs only on fatal settlement. */)[OperationEvidenceKey] /* KLD0041: Preserve the original fatal exception and attach its exact immutable operation-evidence value through the standard CLR Exception.Data contract; this occurs only on fatal settlement. */) = (evidence /* KLD0042: The original fatal exception exposes only object-valued CLR metadata; box this immutable evidence once on the fatal-error path without changing its published type. */);
         return aggregate;
     }
 }

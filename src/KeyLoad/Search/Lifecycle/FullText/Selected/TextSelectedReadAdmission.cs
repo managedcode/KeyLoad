@@ -15,7 +15,7 @@ internal sealed class TextSelectedReadAdmission(TextResourceOwnership? resources
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextSelectedReadAdmission instance through object to preserve its runtime owner type. */;
             if (retainedFailure is not null)
             {
                 throw new AggregateException(retainedFailure);
@@ -39,7 +39,7 @@ internal sealed class TextSelectedReadAdmission(TextResourceOwnership? resources
         Task originalReaders;
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextSelectedReadAdmission instance through object to preserve its runtime owner type. */;
             if (retainedFailure is not null)
             {
                 throw new AggregateException(retainedFailure);

@@ -44,19 +44,19 @@ internal static class BackgroundStorageReadExecution
         work.AttachResourceLifetimeBinding(binding);
         try
         {
-            Result<object> result;
+            Result<object> /* KLD0041: Preserve the existing generated BackgroundReadResult.Result field and native mixed success/error shape while retaining resource lifetimes with the reply. */ result;
             try
             {
                 var value = await execute(work, binding, lifetime.Token).ConfigureAwait(true);
-                result = Result<object>.Succeed(new GrainValue(value));
+                result = (Result<object>.Succeed((new GrainValue((value /* KLD0042: Erase the typed read result only into the existing generated GrainValue wire slot; scalar reads require the current runtime type header. */)) /* KLD0041: Create the existing generated GrainValue carrier exactly once for this typed physical read result at the native reply boundary. */)) /* KLD0041: Store the existing GrainValue reply carrier in the current generated BackgroundReadResult.Result success slot. */);
                 work.Check();
             }
             catch (KeyLoadException failure)
             {
                 lifetime.PrimaryError = failure;
-                result = Result<object>.Fail(Errors.Problem(failure.Code, failure.Message));
+                result = (Result<object>.Fail(Errors.Problem(failure.Code, failure.Message)) /* KLD0041: Store the typed problem in the existing generated BackgroundReadResult.Result error shape; there is no successful object payload on this branch. */);
             }
-            return new BackgroundReadResult { Result = result, Lifetimes = binding.Capture() };
+            return new BackgroundReadResult { Result /* KLD0041: Assign the current generated BackgroundReadResult.Result field without altering its stable serializer identity or lifetime receipt shape. */ = result, Lifetimes = binding.Capture() };
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {

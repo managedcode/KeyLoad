@@ -8,8 +8,8 @@ public static class SearchIdentity
 {
     internal static Command<DatabaseCommand> CreateVerifiedBm25CorpusPublication(this DatabaseEngine engine, string administratorId, Bm25CorpusPublicationPhaseCommand phase, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(phase);
-        ArgumentNullException.ThrowIfNull(work);
+        ArgumentNullException.ThrowIfNull(phase) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var evaluatedAt = engine.EvaluationClock.GetUtcNow();
         return engine.Store.Read(raw =>
         {
@@ -21,7 +21,7 @@ public static class SearchIdentity
             }
 
             engine.RequireBm25Subject(view, administrator, phase, evaluatedAt);
-            return engine.CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId, administrator.Id, evaluatedAt, phase, work, view);
+            return engine.CreatePreparedCommand(OperationKind.Bm25CorpusPublicationPhase, phase.CommandId, administrator.Id, evaluatedAt, phase, work, view) /* KLD0041: This admission preserves the Kind-selected native payload in the existing persisted command envelope. */;
         });
     }
 

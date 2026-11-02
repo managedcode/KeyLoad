@@ -29,7 +29,7 @@ internal sealed class PreparedSimilarity : IPackedAnnSimilarity
 
     internal static PreparedSimilarity CreatePacked(PackedAnnVectors vectors, int ordinal, DistanceMetric metric)
     {
-        ArgumentNullException.ThrowIfNull(vectors);
+        ArgumentNullException.ThrowIfNull(vectors) /* KLD0041: BCL null validation accepts the vectors PackedAnnVectors reference through its object parameter. */;
         SimilarityMetricMath.ValidateMetric(metric);
         return new(vectors.Memory(ordinal), metric, metric == DistanceMetric.Cosine ? vectors.SquaredNorm(ordinal) : 0);
     }
@@ -46,7 +46,7 @@ internal sealed class PreparedSimilarity : IPackedAnnSimilarity
 
     internal double ScorePacked(PackedAnnVectors vectors, int ordinal)
     {
-        ArgumentNullException.ThrowIfNull(vectors);
+        ArgumentNullException.ThrowIfNull(vectors) /* KLD0041: BCL null validation accepts the vectors PackedAnnVectors reference through its object parameter. */;
         if (vectors.Dimension != query.Length)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVector);

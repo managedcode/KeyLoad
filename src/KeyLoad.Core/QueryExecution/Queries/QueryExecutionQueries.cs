@@ -19,16 +19,16 @@ public static class QueryExecutionQueries
     /// <param name = "read">The read.</param>
     public static T WithModelQueryView<T>(this DatabaseEngine engine, string principalId, PartitionRef partition, string resourceName, ModelQuerySource source, ReadExecutionBudget budget, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         const string WithModelQueryViewDetailText = "The model query source is unsupported.";
         const string QueueResourceNameMismatchDetail = "A queue model source must use its configured resource name.";
         const string TopicResourceNameMismatchDetail = "A topic model source must use its configured resource name.";
         const int FirstSourceGeneration = 1;
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(resourceName);
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(read);
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resourceName) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(source) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(read) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(partition);
         if (!Enum.IsDefined(source.Kind))
         {
@@ -93,10 +93,10 @@ public static class QueryExecutionQueries
     /// <param name = "accept">The accept.</param>
     public static void VisitModelQueryRows(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, ResourceDefinition resource, ModelQuerySource source, ReadExecutionBudget budget, bool explain, Action<DocumentRecord> accept)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(resource);
-        ArgumentNullException.ThrowIfNull(source);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(source) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (source.Kind == ModelQuerySourceKind.TopicEvents)
         {
             TopicModelQueryRows.VisitTopicModelRows(view, partition, resource, source, budget, explain, accept);

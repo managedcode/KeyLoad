@@ -15,7 +15,7 @@ internal static class ScriptDomCreateTableOperation
         }
         var identity = SqlOriginalMutationIdentity.Required(request.CommandId);
         var definition = ScriptDomCreateTableDefinition.Read(request.Partition, statement, checkBudget, token);
-        var operation = new McpDecodedOperation(null, OperationKind.CreateTable, identity, definition);
+        var operation = (new McpDecodedOperation(null, OperationKind.CreateTable, identity, definition) /* KLD0041: Carry the parsed concrete CreateTable definition in the existing decoded-operation slot selected by CreateTable; preserve the common authorized execution path. */);
         checkBudget();
         token.ThrowIfCancellationRequested();
         return operation;

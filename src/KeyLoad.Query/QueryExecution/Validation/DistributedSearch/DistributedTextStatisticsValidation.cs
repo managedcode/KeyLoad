@@ -8,9 +8,9 @@ internal static class DistributedTextStatisticsValidation
     internal static void Require(DistributedTextStatistics statistics, IReadOnlyList<string> terms,
         KeyLoad.Core.ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(statistics);
-        ArgumentNullException.ThrowIfNull(terms);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(statistics) /* KLD0041: BCL null validation accepts the statistics DistributedTextStatistics reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(terms) /* KLD0041: BCL null validation accepts the terms IReadOnlyList reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         if (statistics.Terms.IsDefault || statistics.DocumentFrequencies.IsDefault
             || statistics.DocumentCount < Empty || statistics.TotalLength < Empty

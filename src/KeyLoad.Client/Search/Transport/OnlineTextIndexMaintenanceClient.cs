@@ -13,9 +13,9 @@ public static class OnlineTextIndexMaintenanceClient
     public static Task<Result<OnlineTextIndexMaintenanceResult>> MaintainOnlineTextIndexAsync(this KeyLoadClient client,
         OnlineTextIndexMaintenanceRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<OnlineTextIndexMaintenanceResult>(OnlineTextIndexMaintenanceProtocol.Route,
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request OnlineTextIndexMaintenanceRequest reference through its object parameter. */;
+        return client.Send<OnlineTextIndexMaintenanceResult, OnlineTextIndexMaintenanceRequest>(OnlineTextIndexMaintenanceProtocol.Route,
             request, true, request.CommandId, cancellationToken);
     }
 }

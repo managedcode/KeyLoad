@@ -10,16 +10,16 @@ internal static class GrainReplyFactory
     private const string Unavailable = "The database request could not complete. Retry the same command ID for writes.";
     private const string InterruptedWrite = "The write outcome is unknown. Retry the same command ID.";
 
-    internal static GrainOperationReply Value(object? value) => new()
+    internal static GrainOperationReply Value<T>(T value) => new()
     {
-        Result = new GrainValue(value)
+        Result = (new GrainValue((value /* KLD0042: The current generated GrainValue field requires object for the concrete RPC result; scalar results box only at this existing wire slot. */)) /* KLD0041: This concrete authorized response enters the existing generated GrainValue slot with its original native runtime type header. */)
     };
 
     internal static GrainValue RequireValue(GrainOperationReply reply)
         => reply.Error is null && reply.Result is { } result ? result
             : throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
 
-    internal static GrainOperationReply Operation(Result<object> result, CancellationToken cancellationToken)
+    internal static GrainOperationReply Operation<T>(Result<T> result, CancellationToken cancellationToken)
     {
         if (result.IsFailed)
         {
@@ -32,7 +32,7 @@ internal static class GrainReplyFactory
 
     internal static Result<GrainOperationReply> StreamResult(GrainOperationReply reply)
     {
-        ArgumentNullException.ThrowIfNull(reply);
+        ArgumentNullException.ThrowIfNull(reply) /* KLD0041: BCL null validation accepts the reply GrainOperationReply reference through its object parameter. */;
         if (reply.Error is { } code)
         {
             if (reply.Result is not null || reply.SafeDetail is not { } detail)
@@ -54,7 +54,7 @@ internal static class GrainReplyFactory
     internal static GrainOperationReply Failure(Exception error, bool command, ILogger? diagnostics, Guid requestId = default, GrainFailureStage stage = GrainFailureStage.EnvelopeVerification, CancellationToken cancellationToken = default)
     {
         var encodingFailure = command
-            && error.Data[GrainFailureDiagnostics.StageMetadataKey] is GrainFailureStage.ReplyEncoding;
+            && ((error.Data /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */)[GrainFailureDiagnostics.StageMetadataKey] /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */) is GrainFailureStage.ReplyEncoding;
         var code = encodingFailure ? ErrorCode.UnknownWriteOutcome : FailureCode(error, command, cancellationToken);
         GrainFailureDiagnostics.Log(diagnostics, error, requestId, stage, code);
         if (encodingFailure)

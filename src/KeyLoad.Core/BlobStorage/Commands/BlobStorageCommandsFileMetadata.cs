@@ -45,20 +45,14 @@ public static class BlobStorageCommandsFileMetadata
         return upload;
     }
 
-    internal static object ChangeFileUpload(IAtomicTransaction transaction, PrincipalRecord principal, FileMetadataMutation request, DateTime evaluatedAt)
+    internal static (FileStoragePolicy Policy, byte[] Key, FileUpload Upload) ReadFileUpload(IAtomicTransaction transaction,
+        PrincipalRecord principal, FileMetadataMutation request)
     {
         var pair = ResourceDefinitionBinding.ReadBoundResourcePair(transaction, request.Address.Partition, request.Address.Resource, ResourceKind.BlobStore);
         var key = FileMetadataKeys.Upload(request.Address, pair.Lifetime.Incarnation, request.UploadId);
         var upload = transaction.GetRecord<FileUpload>(key) ?? throw Errors.Fail(ErrorCode.NotFound, FileStorageProtocol.Invalid);
         RequireFileUpload(upload, principal, request, pair.Definition, pair.Lifetime);
-        return request.Action switch
-        {
-            FileMetadataAction.Stage => StageFile(transaction, key, upload, request),
-            FileMetadataAction.Publish => FilePublication.PublishFile(transaction, key, upload, request, pair.Definition.FilePolicy, evaluatedAt),
-            FileMetadataAction.Abort => FilePublication.AbortFile(transaction, key, upload, request),
-            FileMetadataAction.Reclaim => FilePublication.ReclaimFile(transaction, key, upload),
-            _ => throw Errors.Fail(ErrorCode.Validation, FileStorageProtocol.Invalid)
-        };
+        return (pair.Definition.FilePolicy, key, upload);
     }
 
     internal static FileUpload StageFile(IAtomicTransaction transaction, byte[] key, FileUpload upload, FileMetadataMutation request)

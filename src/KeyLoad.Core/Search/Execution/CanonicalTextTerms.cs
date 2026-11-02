@@ -22,7 +22,7 @@ internal static class CanonicalTextTerms
             }
             if (Rune.IsLetterOrDigit(rune))
             {
-                word.Append(Rune.ToLowerInvariant(rune));
+                AppendRune(word, Rune.ToLowerInvariant(rune));
             }
             else if (word.Length != 0)
             {
@@ -41,6 +41,14 @@ internal static class CanonicalTextTerms
             yield return word.ToString();
         }
         budget.Check();
+    }
+
+    private static void AppendRune(StringBuilder word, Rune rune)
+    {
+        const int MaximumUtf16Units = 2;
+        Span<char> encoded = stackalloc char[MaximumUtf16Units];
+        var length = rune.EncodeToUtf16(encoded);
+        word.Append(encoded[..length]);
     }
 
     private static void ChargeToken(ref int words, int maximumWords)

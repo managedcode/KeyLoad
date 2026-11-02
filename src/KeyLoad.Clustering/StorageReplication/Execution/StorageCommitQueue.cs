@@ -7,12 +7,12 @@ namespace KeyLoad.Clustering;
 /// <summary>Joins canonical batches and background copy completion on the same ordinary owner context.</summary>
 internal sealed class StorageCommitQueue(SiloStorageCopyExecution copies)
 {
-    private readonly Queue<StorageCommitRequest> pending = new();
+    private readonly Queue<IStorageCommitRequest> pending = new();
     private Task drain = Task.CompletedTask;
 
-    internal Task<Result<object>> Submit(Command<DatabaseCommand> operation, CancellationToken token)
+    internal Task<Result<TResult>> Submit<TResult>(Command<DatabaseCommand> operation, CancellationToken token)
     {
-        var request = new StorageCommitRequest(operation, token);
+        var request = new StorageCommitRequest<TResult>(operation, token);
         pending.Enqueue(request);
         if (drain.IsCompleted)
         {
@@ -45,7 +45,7 @@ internal sealed class StorageCommitQueue(SiloStorageCopyExecution copies)
     {
         while (pending.Count > 0)
         {
-            var batch = new List<StorageCommitRequest>(pending.Count);
+            var batch = new List<IStorageCommitRequest>(pending.Count);
             while (pending.TryDequeue(out var request))
             {
                 if (request.TrySend())
@@ -73,7 +73,7 @@ internal sealed class StorageCommitQueue(SiloStorageCopyExecution copies)
     }
 
     /// <summary>Completes decided commands and returns the rest, in order, ahead of commands queued meanwhile.</summary>
-    private void Settle(List<StorageCommitRequest> batch, StorageCopyOutcome[] outcomes)
+    private void Settle(List<IStorageCommitRequest> batch, StorageCopyOutcome[] outcomes)
     {
         var waiting = pending.ToArray();
         pending.Clear();

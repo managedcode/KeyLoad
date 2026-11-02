@@ -21,8 +21,8 @@ public static class StorageOperationBatchPreparation
     public static ImmutableArray<Command<DatabaseCommand>> PrepareStorageOperations(this DatabaseEngine engine,
         IReadOnlyList<Command<DatabaseCommand>> operations, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(operations);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(operations) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (operations.Count == 0)
         {
             throw new ArgumentException(StorageOperationBatchApply.EmptyBatch, nameof(operations));

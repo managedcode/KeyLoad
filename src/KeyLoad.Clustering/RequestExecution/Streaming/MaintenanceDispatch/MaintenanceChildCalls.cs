@@ -14,19 +14,19 @@ internal sealed class MaintenanceChildCalls(DecodedGrainRequest parent,
 
     internal Task<TResult> ReadAsync<TRequest, TResult>(GrainReadKind kind, TRequest request, CancellationToken token)
         where TRequest : notnull where TResult : class
-        => CallAsync<TResult>(kind, null, Guid.Empty, request, token);
+        => CallAsync<TRequest, TResult>(kind, null, Guid.Empty, request, token);
 
     internal Task<TResult> CommandAsync<TRequest, TResult>(OperationKind kind, TRequest request,
         Guid commandId, CancellationToken token) where TRequest : notnull where TResult : class
-        => CallAsync<TResult>(null, kind, commandId, request, token);
+        => CallAsync<TRequest, TResult>(null, kind, commandId, request, token);
 
     internal Task<TResult> RunAsync<TResult>(Func<Task<TResult>> flow)
         => MaintenanceChildDispatch.RunThenAbortAsync(flow, AbortAsync);
 
     internal Task AbortAsync() => abort(SessionId);
 
-    private Task<TResult> CallAsync<TResult>(GrainReadKind? read, OperationKind? command, Guid commandId,
-        object request, CancellationToken token) where TResult : class
+    private Task<TResult> CallAsync<TRequest, TResult>(GrainReadKind? read, OperationKind? command, Guid commandId,
+        TRequest request, CancellationToken token) where TRequest : notnull where TResult : class
         => MaintenanceChildDispatch.CallAsync<TResult>(parent, (actor, principal) => codec.CreateMaintenanceChild(purpose,
                 actor, principal, read, command, commandId, request), commandId, executeChild,
             services, codec, diagnostics, binding, interrupted, token);

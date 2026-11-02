@@ -24,7 +24,7 @@ internal static class RuntimeJournalRegistration
         // A grain-scoped IDurableStateManager (the time-series chunk and ANN projection coordinators) resolves the unkeyed
         // provider, which Orleans registers only for its "Default" name; KeyLoad has exactly this one journal store.
         services.AddSingleton<IJournalStorageProvider>(provider =>
-            provider.GetRequiredKeyedService<IJournalStorageProvider>(ProviderName));
+            (provider.GetRequiredKeyedService<IJournalStorageProvider>(ProviderName) /* KLD0041: Native keyed DI uses an object key; resolve the existing Orleans journal provider with its fixed provider-name string and preserve its ownership. */));
         silo.Configure<JournaledStateManagerOptions>(options => options.JournalFormatKey = BinaryFormat);
         services.AddOptions<DurableJobsOptions>().Configure<IOptions<RuntimeDurableJobOptions>, TimeProvider>(
             (options, settings, clock) => Configure(options, settings.Value, clock));

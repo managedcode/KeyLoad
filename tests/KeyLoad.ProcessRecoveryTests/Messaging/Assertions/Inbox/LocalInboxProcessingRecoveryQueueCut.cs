@@ -65,8 +65,8 @@ internal static class LocalInboxProcessingRecoveryQueueCut
             null, JsonData.Fingerprint(enqueue));
     }
 
-    private static byte[] Key(QueueLaneRef lane, string family, params object?[] tail)
-        => KeySpace.Partition(family, lane.Partition, new object?[] { lane.Queue }.Concat(tail).ToArray());
+    private static byte[] Key(QueueLaneRef lane, string family, params ReadOnlySpan<KeyComponent> tail)
+        => KeySpace.Partition(family, lane.Partition, [lane.Queue, .. tail]);
 
     private static string Row<T>(byte[] key, T value)
         => Convert.ToHexString(key) + ":" + Convert.ToHexString(OrleansSerialization.Serialize(value));

@@ -6,7 +6,7 @@ internal static class ZoneTreeReadCutValidation
 
     internal static void Validate(ZoneTreeReadCutLimits limits, ZoneTreeStoreOptions policy)
     {
-        ArgumentNullException.ThrowIfNull(limits);
+        ArgumentNullException.ThrowIfNull(limits) /* KLD0041: BCL null validation accepts the limits ZoneTreeReadCutLimits reference through its object parameter. */;
         if (limits.MaxRecords < 1 || limits.MaxRecords > policy.MaximumReadCutRecords
             || limits.MaxExaminedBytes < 1 || limits.MaxExaminedBytes > policy.MaximumReadCutExaminedBytes
             || limits.MaxElapsed <= TimeSpan.Zero || limits.MaxElapsed > policy.MaximumReadCutElapsed)

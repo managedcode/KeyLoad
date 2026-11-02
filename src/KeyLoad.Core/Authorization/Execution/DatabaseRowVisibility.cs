@@ -7,7 +7,7 @@ public static class DatabaseRowVisibility
     internal const string AlreadyConfiguredVisibility = "The node visibility owner is already configured.";
     internal static RowVisibilityCache? ConfigureRowVisibility(this DatabaseEngine engine, ICacheMemoryBudget memory)
     {
-        ArgumentNullException.ThrowIfNull(memory);
+        ArgumentNullException.ThrowIfNull(memory) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (engine.visibilityConfigured)
         {
             throw new InvalidOperationException(AlreadyConfiguredVisibility);

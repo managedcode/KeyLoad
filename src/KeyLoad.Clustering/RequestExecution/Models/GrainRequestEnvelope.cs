@@ -48,7 +48,7 @@ public sealed record GrainRequestEnvelope
     }
     /// <summary>The typed operation input, serialized once by Orleans with the envelope.</summary>
     [Orleans.Id(GrainContracts.PayloadField)]
-    public required object Payload
+    public required object /* KLD0041: Keep the current generated envelope Payload field ID and native runtime type header; typed issuance erases only when assigning this wire slot. */ Payload
     {
         get; init;
     }

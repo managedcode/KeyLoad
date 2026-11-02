@@ -77,9 +77,9 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
     public void VerifyCandidates(IReadOnlyList<string> terms, IReadOnlyList<EntityRef> references,
         ReadExecutionBudget verificationBudget)
     {
-        ArgumentNullException.ThrowIfNull(terms);
-        ArgumentNullException.ThrowIfNull(references);
-        ArgumentNullException.ThrowIfNull(verificationBudget);
+        ArgumentNullException.ThrowIfNull(terms) /* KLD0041: BCL null validation accepts the terms IReadOnlyList reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(references) /* KLD0041: BCL null validation accepts the references IReadOnlyList reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(verificationBudget) /* KLD0041: BCL null validation accepts the verificationBudget ReadExecutionBudget reference through its object parameter. */;
         if (disposed || completed || verificationBudget != budget)
         {
             throw TextErrors.Corrupt();

@@ -15,9 +15,9 @@ internal static partial class TextSeedCollector
     internal static TextSeedCapture Capture(DatabaseEngine database, string principalId,
         TextSeedPin pin, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(pin);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(pin) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         return database.Store.Read(view => CaptureView(database, view, principalId, pin, budget));
     }
@@ -51,10 +51,10 @@ internal static partial class TextSeedCollector
         TextSeedPin pin, ReadExecutionBudget budget,
         Func<IKeyValueView, TextSeedCapture, T> capture)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(pin);
-        ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(capture);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(pin) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(capture) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         return database.Store.Read(raw =>
         {

@@ -54,8 +54,8 @@ internal static class TextOnlineCrashFlow
             var original = await work.AdmitOriginal(async () =>
             {
                 _ = await runtime.Canonical.CommitAsync<ProjectionBatchResult>(OperationKind.CommitProjectionBatch, intent, id, token);
-                return runtime.Canonical.Database.ResolveOutcome(runtime.Canonical.Database.OwnCommand(
-                    runtime.Canonical.Database.CreateCommand(OperationKind.CommitProjectionBatch, id, CrashFixtureValues.Principal, runtime.Canonical.Database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(intent, JsonDefaults.Options))));
+                return ManagedCode.Communication.Result<ProjectionBatchResult>.Succeed(runtime.Canonical.Database.ResolveOutcome(runtime.Canonical.Database.OwnCommand(
+                    runtime.Canonical.Database.CreateCommand(OperationKind.CommitProjectionBatch, id, CrashFixtureValues.Principal, runtime.Canonical.Database.EvaluationClock.GetUtcNow(), System.Text.Json.JsonSerializer.Serialize(intent, JsonDefaults.Options)))).Get<ProjectionBatchResult>());
             });
             state = await runtime.PhaseAsync(session, request, OnlineTextCapabilityKind.SettleCheckpoint, token, receipt: original.Get<ProjectionBatchResult>());
             if (!page.HasMore)

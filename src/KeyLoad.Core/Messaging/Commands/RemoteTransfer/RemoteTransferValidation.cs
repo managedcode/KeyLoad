@@ -57,7 +57,7 @@ internal static class RemoteTransferValidation
 
     internal static void ValidateTransferSource(CreateQueueTransfer request, PartitionRef partition)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         RemoteTransferInspection.ValidateTransferSource(request.SourceQueue, request.TransferId, partition);
         RemoteTransferValidation.ValidateTransferPair(request.SourceQueue, request.Destination);
     }

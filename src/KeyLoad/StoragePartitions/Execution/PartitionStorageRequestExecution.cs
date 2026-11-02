@@ -118,19 +118,19 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
         GrainRequestAuthority.RequireAdministrator(GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock));
         var id = request.Envelope.ReadKind switch
         {
-            GrainReadKind.AnnMaintenance => GrainPayload.Read<AnnMaintenanceCapabilityRequest>(request.Payload).SessionId,
-            GrainReadKind.TextMaintenance => GrainPayload.Read<TextMaintenanceCapabilityRequest>(request.Payload).SessionId,
-            GrainReadKind.OnlineTextMaintenance => GrainPayload.Read<OnlineTextCapabilityRequest>(request.Payload).SessionId,
+            GrainReadKind.AnnMaintenance => (GrainPayload.Read<AnnMaintenanceCapabilityRequest>((request.Payload /* KLD0041: Read the existing generated request payload slot only after administrator admission, then require the closed maintenance or publication request type. */)) /* KLD0041: Require AnnMaintenanceCapabilityRequest from the current generated request slot before using its session or command identity. */).SessionId,
+            GrainReadKind.TextMaintenance => (GrainPayload.Read<TextMaintenanceCapabilityRequest>((request.Payload /* KLD0041: Read the existing generated request payload slot only after administrator admission, then require the closed maintenance or publication request type. */)) /* KLD0041: Require TextMaintenanceCapabilityRequest from the current generated request slot before using its session or command identity. */).SessionId,
+            GrainReadKind.OnlineTextMaintenance => (GrainPayload.Read<OnlineTextCapabilityRequest>((request.Payload /* KLD0041: Read the existing generated request payload slot only after administrator admission, then require the closed maintenance or publication request type. */)) /* KLD0041: Require OnlineTextCapabilityRequest from the current generated request slot before using its session or command identity. */).SessionId,
             _ => Guid.Empty
         };
         if (request.Envelope.CommandKind == OperationKind.OnlineTextPublicationPhase)
         {
             id = OperationProtocol.Payload<OnlineTextPublicationPhaseCommand>(
-                GrainPayload.Read<Command<DatabaseCommand>>(request.Payload)).SessionId;
+                (GrainPayload.Read<Command<DatabaseCommand>>((request.Payload /* KLD0041: Read the existing generated request payload slot only after administrator admission, then require the closed maintenance or publication request type. */)) /* KLD0041: Require Command<DatabaseCommand from the current generated request slot before using its session or command identity. */)).SessionId;
         }
         if (checkpoint)
         {
-            var original = GrainPayload.ReadCommand<CommitProjectionBatchRequest>(request.Payload);
+            var original = (GrainPayload.ReadCommand<CommitProjectionBatchRequest>((request.Payload /* KLD0041: Read the existing generated request payload slot only after administrator admission, then require the closed maintenance or publication request type. */)) /* KLD0041: Require CommitProjectionBatchRequest from the current generated request slot before using its session or command identity. */);
             id = services.GetRequiredService<Func<IOnlineTextMaintenance>>()()
                 .TryRequireCheckpointWork(original, request.Envelope.PrincipalId!)?.SessionId
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);

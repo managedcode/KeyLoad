@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.BlobStorage;
 using ManagedCode.Communication;
 
 namespace KeyLoad.Clustering;
@@ -53,10 +54,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
             await CommandCapabilityAuthorization.ObserveAndValidateAsync(database,
                 codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken).ConfigureAwait(true);
             var original = (CommandWorkAdmission.Bind(database, request, principal, clock, work, budget)).Value;
-            var result = await SubmitCommandAsync(kind, request, principal, budget, operationToken).ConfigureAwait(true);
+            var reply = await SubmitCommandAsync(kind, request, principal, budget, context, operationToken).ConfigureAwait(true);
             stage = GrainFailureStage.ReplyEncoding;
-            await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, operationToken).ConfigureAwait(true);
-            var reply = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken);
             if (work is null || reply.Error is not null)
             {
                 return reply;
@@ -69,8 +68,8 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 request, reply, budget, work, operationToken).ConfigureAwait(true);
             if (original is not null && kind is OperationKind.Receive or OperationKind.ReceiveSubscription)
             {
-                result = database.ResolveAppliedSubmissionOutcome(original, budget);
-                var current = GrainReplyFactory.Operation(result: result, cancellationToken: operationToken);
+                var /* KLD0041: Read the already-persisted receive submission outcome in its current mixed-result representation before encoding the public reply. */ result = (database.ResolveAppliedSubmissionOutcome(original, budget) /* KLD0041: Read the already-persisted receive submission outcome in its current mixed-result representation before encoding the public reply. */);
+                var current = (GrainReplyFactory.Operation(result: result, cancellationToken: operationToken) /* KLD0041: Read the already-persisted receive submission outcome in its current mixed-result representation before encoding the public reply. */);
                 return current.Error is null ? current with { WorkProof = reply.WorkProof } : current;
             }
             return reply;
@@ -90,38 +89,81 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         }
     }
 
-    private async Task<Result<object>> SubmitCommandAsync(OperationKind kind, DecodedGrainRequest request,
-        PrincipalRecord principal, ReadExecutionBudget budget, CancellationToken operationToken)
-    {
-        return kind switch
+    private Task<GrainOperationReply> SubmitCommandAsync(OperationKind kind, DecodedGrainRequest request,
+        PrincipalRecord principal, ReadExecutionBudget budget, IGrainContext? context, CancellationToken token)
+        => kind switch
         {
-            OperationKind.DropTable => await (borrowDropTable?.Invoke()
+            OperationKind.DropTable => CompleteAsync((borrowDropTable?.Invoke()
                 ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest))
                 .ExecuteAsync(request.Envelope.RequestId, request.Envelope.CommandId, principal.Id,
-                    GrainPayload.Read<DropTableRequest>(request.Payload), operationToken).ConfigureAwait(true),
-            OperationKind.Batch => await SubmitBatchAsync(request, principal, budget, operationToken).ConfigureAwait(true),
-            OperationKind.CommitProjectionBatch => await SubmitCheckpointAsync(request, principal,
-                operationToken).ConfigureAwait(true),
-            OperationKind.OnlineTextPublicationPhase => await GrainOnlineTextPublicationCommand.SubmitAsync(
-                database, coordinator, request, principal, onlineText, operationToken).ConfigureAwait(true),
-            OperationKind.Bm25CorpusPublicationPhase => await GrainBm25CorpusPublicationCommand.SubmitAsync(
-                database, coordinator, request, principal, operationToken).ConfigureAwait(true),
-            _ => await coordinator.RuntimeSubmitAsync(kind, request.Envelope.CommandId, principal.Id,
-                GrainPayload.ReadCommandInput(kind, request.Payload), sourcePlanningBudget: budget, cancellationToken: operationToken).ConfigureAwait(true)
+                    (GrainPayload.Read<DropTableRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.DropTableRequest at this closed operation boundary before executing typed code. */), token), request, context, token),
+            OperationKind.CommitProjectionBatch => CompleteAsync(SubmitCheckpointAsync(request, principal, token), request, context, token),
+            OperationKind.OnlineTextPublicationPhase => CompleteAsync(GrainOnlineTextPublicationCommand.SubmitAsync(
+                database, coordinator, request, principal, onlineText, token), request, context, token),
+            OperationKind.Bm25CorpusPublicationPhase => CompleteAsync(GrainBm25CorpusPublicationCommand.SubmitAsync(
+                database, coordinator, request, principal, token), request, context, token),
+            OperationKind.Batch or OperationKind.Delivery or OperationKind.Processing or OperationKind.SubscriptionDelivery
+                => SubmitAsync<CommitReceipt>(kind, request, principal, budget, context, token),
+            OperationKind.Receive => SubmitAsync<ReceiveResult>(kind, request, principal, budget, context, token),
+            OperationKind.CommitInbox => SubmitAsync<CommitInboxResult>(kind, request, principal, budget, context, token),
+            OperationKind.ConfigureResource or OperationKind.CreateTable or OperationKind.SetQueueDispatch
+                => SubmitAsync<ResourceDefinition>(kind, request, principal, budget, context, token),
+            OperationKind.ConfigurePrincipal => SubmitAsync<PrincipalRecord>(kind, request, principal, budget, context, token),
+            OperationKind.ConfigureApiKey or OperationKind.SetDispatch => SubmitAsync<bool>(kind, request, principal, budget, context, token),
+            OperationKind.RuntimeJournal => SubmitAsync<RuntimeJournalMutationResult>(kind, request, principal, budget, context, token),
+            OperationKind.FileMetadata => SubmitFileMetadataAsync(request, principal, budget, context, token),
+            OperationKind.ConfigureSubscription or OperationKind.SeekSubscription or OperationKind.SetSubscriptionPaused
+                => SubmitAsync<SubscriptionInfo>(kind, request, principal, budget, context, token),
+            OperationKind.ReceiveSubscription => SubmitAsync<ReceiveSubscriptionResult>(kind, request, principal, budget, context, token),
+            OperationKind.SubscriptionProcessing => SubmitAsync<SubscriptionProcessingResult>(kind, request, principal, budget, context, token),
+            OperationKind.ConfigureProjectionConsumer or OperationKind.ReleaseProjectionConsumer
+                => SubmitAsync<ProjectionConsumerInfo>(kind, request, principal, budget, context, token),
+            OperationKind.PurgeOutbox => SubmitAsync<OutboxHead>(kind, request, principal, budget, context, token),
+            _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
+        };
+
+    private Task<GrainOperationReply> SubmitAsync<TResult>(OperationKind kind, DecodedGrainRequest request,
+        PrincipalRecord principal, ReadExecutionBudget budget, IGrainContext? context, CancellationToken token)
+        => CompleteAsync((coordinator.RuntimeSubmitAsync<TResult>(kind, request.Envelope.CommandId, principal.Id,
+            (GrainPayload.ReadCommandInput(kind, (request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as the selected canonical command input at this closed operation boundary before executing typed code. */), sourcePlanningBudget: budget, cancellationToken: token) /* KLD0041: Read the already-persisted receive submission outcome in its current mixed-result representation before encoding the public reply. */),
+            request, context, token);
+
+    private Task<GrainOperationReply> SubmitFileMetadataAsync(DecodedGrainRequest request,
+        PrincipalRecord principal, ReadExecutionBudget budget, IGrainContext? context, CancellationToken token)
+    {
+        var mutation = (GrainPayload.ReadCommand<FileMetadataMutation>((request.Payload /* KLD0041: Read the current native envelope slot only to validate the file metadata action before selecting its concrete reply type. */)) /* KLD0041: Require the exact file metadata mutation from the current envelope before selecting FileUpload, FileEntry or bool completion. */);
+        return mutation.Action switch
+        {
+            FileMetadataAction.Reserve or FileMetadataAction.Stage or FileMetadataAction.Abort
+                => SubmitAsync<FileUpload>(OperationKind.FileMetadata, request, principal, budget, context, token),
+            FileMetadataAction.Publish or FileMetadataAction.Delete
+                => SubmitAsync<FileEntry>(OperationKind.FileMetadata, request, principal, budget, context, token),
+            FileMetadataAction.Reclaim => SubmitAsync<bool>(OperationKind.FileMetadata, request, principal, budget, context, token),
+            _ => throw Errors.Fail(ErrorCode.Validation, FileStorageProtocol.Invalid)
         };
     }
 
-    private Task<Result<object>> SubmitBatchAsync(DecodedGrainRequest request, PrincipalRecord principal,
-        ReadExecutionBudget budget, CancellationToken token)
-        => coordinator.RuntimeSubmitAsync(OperationKind.Batch, request.Envelope.CommandId,
-                principal.Id, GrainPayload.ReadCommandInput(OperationKind.Batch, request.Payload), sourcePlanningBudget: budget, cancellationToken: token);
+    private async Task<GrainOperationReply> CompleteAsync<TResult>(Task<Result<TResult>> submission,
+        DecodedGrainRequest request, IGrainContext? context, CancellationToken token)
+    {
+        var result = await submission.ConfigureAwait(true);
+        try
+        {
+            await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, token).ConfigureAwait(true);
+            return GrainReplyFactory.Operation(result, token);
+        }
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            throw MarkFailure(error, GrainFailureStage.ReplyEncoding);
+        }
+    }
 
-    private Task<Result<object>> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
+    private Task<Result<ProjectionBatchResult>> SubmitCheckpointAsync(DecodedGrainRequest request, PrincipalRecord principal,
         CancellationToken cancellationToken)
         => (GrainOnlineTextCheckpointCommand.TrySubmit(database, coordinator, request, principal,
             onlineText, clock, cancellationToken)).Value
-            ?? coordinator.RuntimeSubmitAsync(OperationKind.CommitProjectionBatch, request.Envelope.CommandId,
-                principal.Id, GrainPayload.ReadCommandInput(OperationKind.CommitProjectionBatch, request.Payload), cancellationToken: cancellationToken);
+            ?? (coordinator.RuntimeSubmitAsync<ProjectionBatchResult>(OperationKind.CommitProjectionBatch, request.Envelope.CommandId,
+                principal.Id, (GrainPayload.ReadCommandInput(OperationKind.CommitProjectionBatch, (request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as the selected canonical command input at this closed operation boundary before executing typed code. */), cancellationToken: cancellationToken) /* KLD0041: Read the already-persisted receive submission outcome in its current mixed-result representation before encoding the public reply. */);
 
     private static Exception MarkFailure(Exception error, GrainFailureStage stage)
     {
@@ -129,7 +171,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
         {
             if (stage == GrainFailureStage.ReplyEncoding)
             {
-                error.Data[GrainFailureDiagnostics.StageMetadataKey] = stage;
+                ((error.Data /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */)[GrainFailureDiagnostics.StageMetadataKey] /* KLD0041: Use the CLR Exception.Data metadata slot for the closed private failure-stage enum while preserving the original exception and cause chain. */) = (stage /* KLD0042: The CLR Exception.Data slot stores the closed failure-stage enum only on the error path; validate that exact enum when reading it. */);
             }
             GrainFailureDiagnostics.Mark(error, stage);
         }

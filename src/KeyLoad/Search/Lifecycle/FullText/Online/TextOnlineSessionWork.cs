@@ -17,7 +17,7 @@ internal static class TextOnlineSessionWork
     internal static void Require(TextOnlineSession session, bool disposed, byte[] immutableRequest, Guid id,
         OnlineTextIndexMaintenanceRequest request, string principalId)
     {
-        ObjectDisposedException.ThrowIf(disposed, session);
+        ObjectDisposedException.ThrowIf(disposed, session) /* KLD0041: BCL disposal diagnostics accept the session TextOnlineSession instance through object to preserve its runtime owner type. */;
         session.Budget.Check();
         if (id != session.Id || principalId != session.PrincipalId)
         {
@@ -56,7 +56,7 @@ internal static class TextOnlineSessionWork
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static async Task JoinAsync(TextOnlineSession session, Action<Result<object>> RequirePublicationReceipt)
+    internal static async Task JoinAsync(TextOnlineSession session, Action<Result<OnlineTextIndexMaintenanceResult>> RequirePublicationReceipt)
     {
         var originalPublication = session.Publication.CloseAdmissionAndCaptureOriginal();
         var checkpoint = session.CheckpointWork;
@@ -81,7 +81,7 @@ internal static class TextOnlineSessionWork
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    internal static OnlineTextIndexMaintenanceResult RequireReceipt(Result<object> original, ref byte[]? expectedPublication, Guid commandId)
+    internal static OnlineTextIndexMaintenanceResult RequireReceipt(Result<OnlineTextIndexMaintenanceResult> original, ref byte[]? expectedPublication, Guid commandId)
     {
         var actual = original.Get<OnlineTextIndexMaintenanceResult>();
         if (expectedPublication is null || actual.CommandId != commandId

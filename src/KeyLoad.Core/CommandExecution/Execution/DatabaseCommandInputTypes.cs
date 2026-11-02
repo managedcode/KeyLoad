@@ -43,10 +43,10 @@ public static class DatabaseCommandInputTypes
         => Inputs.TryGetValue(kind, out type);
 
     /// <summary>Requires exactly the declared input contract of one command kind.</summary>
-    internal static object Require(OperationKind kind, object? input)
+    internal static object /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ Require(OperationKind kind, object? /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ input)
     {
         var type = For(kind);
-        if (input is null || input.GetType() != type)
+        if (input is null || input.GetType() /* KLD0041: This persisted input boundary must verify its exact runtime contract against the closed operation-kind map. */ != type)
         {
             throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
         }
@@ -54,10 +54,10 @@ public static class DatabaseCommandInputTypes
     }
 
     /// <summary>Admits a new command's input where it enters: its declared contract and a complete contract walk.</summary>
-    internal static object Admit(OperationKind kind, object? input)
+    internal static object /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ Admit(OperationKind kind, object? /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ input)
     {
-        var admitted = Require(kind, input);
-        ContractValidation.Validate(admitted, ValidationProfile.PublicInputElements);
+        var /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ admitted = Require(kind, input) /* KLD0041: The closed operation-kind map validates the exact runtime contract held by the existing persisted input slot. */;
+        ContractValidation.Validate(admitted, ValidationProfile.PublicInputElements) /* KLD0041: The existing native command slot must be walked against the actual Kind-selected runtime contract before admission. */;
         return admitted;
     }
 }

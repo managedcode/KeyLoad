@@ -8,7 +8,7 @@ public static class ResourceLifetimeMetadataReadBinding
     /// <summary>Binds actual authorized catalog metadata without inventing a data partition.</summary>
     internal static ResourceDefinition BindAuthorizedReadResourceMetadata(IKeyValueView alreadyChargedView, string tenantId, string databaseId, string transactionDomainId, string resourceName, ResourceKind expectedKind, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(work);
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.Check();
         JsonData.Identifier(tenantId);
         JsonData.Identifier(databaseId);

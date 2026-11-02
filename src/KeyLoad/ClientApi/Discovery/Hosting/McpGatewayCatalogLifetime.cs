@@ -20,7 +20,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
 
     internal McpGatewayCatalogLifetime(Func<CancellationToken, Task<IMcpGatewayInstance>> createInstance)
     {
-        ArgumentNullException.ThrowIfNull(createInstance);
+        ArgumentNullException.ThrowIfNull(createInstance) /* KLD0041: BCL null validation accepts the createInstance Func reference through its object parameter. */;
         _createInstance = createInstance;
         _releaseLease = Release;
     }
@@ -29,7 +29,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
     {
         lock (_sync)
         {
-            ObjectDisposedException.ThrowIf(_closing, this);
+            ObjectDisposedException.ThrowIf(_closing, this) /* KLD0041: BCL disposal diagnostics accept the this McpGatewayCatalogLifetime instance through object to preserve its runtime owner type. */;
             return _initialization ??= InitializeCoreAsync(cancellationToken);
         }
     }
@@ -38,7 +38,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
     {
         lock (_sync)
         {
-            ObjectDisposedException.ThrowIf(_closing, this);
+            ObjectDisposedException.ThrowIf(_closing, this) /* KLD0041: BCL disposal diagnostics accept the this McpGatewayCatalogLifetime instance through object to preserve its runtime owner type. */;
             if (_instance is null || _initialization?.IsCompletedSuccessfully != true)
             {
                 throw new InvalidOperationException(IndexUnavailable);
@@ -73,7 +73,7 @@ internal sealed class McpGatewayCatalogLifetime : IAsyncDisposable
         if (rejected)
         {
             await instance.DisposeAsync();
-            ObjectDisposedException.ThrowIf(true, this);
+            ObjectDisposedException.ThrowIf(true, this) /* KLD0041: BCL disposal diagnostics accept the this McpGatewayCatalogLifetime instance through object to preserve its runtime owner type. */;
         }
     }
 

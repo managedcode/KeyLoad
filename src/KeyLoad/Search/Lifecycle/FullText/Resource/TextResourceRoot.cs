@@ -9,7 +9,7 @@ internal static class TextResourceRoot
     private const int EmptyFileCount = 0;
     private const int EmptyGenerationCount = 0;
     internal static void Check(Dictionary<string, Action<ReadExecutionBudget?>> roots,
-        HashSet<string> reservations, Dictionary<object, TextResourceFileReservation> fileReservations, TextOpenFileGroups openFiles, ReadExecutionBudget? budget, IOptions<TextExecutionOptions> options)
+        HashSet<string> reservations, Dictionary<object, TextResourceFileReservation> /* KLD0041: One reservation ledger preserves string value equality for canonical paths and reference identity for TextOpenFileGroup instances; both keys are existing references. */ fileReservations, TextOpenFileGroups openFiles, ReadExecutionBudget? budget, IOptions<TextExecutionOptions> options)
     {
         var bytes = EmptyDiskBytes;
         var files = EmptyFileCount;
@@ -44,8 +44,8 @@ internal static class TextResourceRoot
                 generations++;
             }
         }
-        TextResourceFileAccounting.Check(fileReservations, ref files, ref bytes, options);
-        openFiles.Check(fileReservations, ref files, ref bytes, options);
+        TextResourceFileAccounting.Check(fileReservations, ref files, ref bytes, options) /* KLD0041: Count path reservations from the existing mixed path/group ledger; open groups are accounted by their shared physical identity separately. */;
+        openFiles.Check(fileReservations, ref files, ref bytes, options) /* KLD0041: Reconcile the same path/group ledger with open-file groups so hardlinked physical bytes are not counted twice. */;
         if (generations > options.Value.MaximumGenerations)
         {
             throw TextErrors.BoundExceeded();

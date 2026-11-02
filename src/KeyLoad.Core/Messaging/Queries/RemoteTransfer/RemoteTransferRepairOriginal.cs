@@ -18,7 +18,7 @@ public static class RemoteTransferRepairOriginal
         var partition = stage == QueueTransferRepairStage.Accept ? intent.Destination.Partition : intent.Source.Partition;
         Mutation mutation = stage == QueueTransferRepairStage.Accept ? new AcceptQueueTransfer(intent.Destination, request.IntentToken) : new CompleteQueueTransfer(intent.Source, intent.TransferId, request.ReceiptToken!);
         var command = new CommandRequest(request.AcceptCommandId, partition, [mutation]);
-        var original = engine.CreateCommand(view, OperationKind.Batch, command.CommandId, principal.Id, engine.Clock.GetUtcNow(), command);
+        var original = engine.CreateCommand(view, OperationKind.Batch, command.CommandId, principal.Id, engine.Clock.GetUtcNow(), command) /* KLD0041: Command creation admits the exact Kind-selected input into the existing native persisted envelope without JSON conversion. */;
         _ = (engine.AuthorizeOperation(view, principal, original)).Value;
         if (stage == QueueTransferRepairStage.Complete)
         {

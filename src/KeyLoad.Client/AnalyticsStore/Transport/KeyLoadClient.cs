@@ -10,7 +10,7 @@ public sealed partial class KeyLoadClient
     /// <returns>Complete authorized page with explicit continuation.</returns>
     public Task<Result<AnalyticsEventsPage>> ReadAnalyticsEventsAsync(ReadAnalyticsEventsRequest request,
         CancellationToken cancellationToken = default)
-        => Send<AnalyticsEventsPage>(AnalyticsStoreProtocol.ReadRoute, request, false, null, cancellationToken);
+        => Send<AnalyticsEventsPage, ReadAnalyticsEventsRequest>(AnalyticsStoreProtocol.ReadRoute, request, false, null, cancellationToken);
 
     /// <summary>Queries complete execution aggregates over the current authorized canonical event cut.</summary>
     /// <param name="request">Store, atomic partition, range, declared dimensions and metric selections.</param>
@@ -18,5 +18,5 @@ public sealed partial class KeyLoadClient
     /// <returns>Complete bounded groups; incomplete execution plans refuse the operation.</returns>
     public Task<Result<AnalyticsAggregateResult>> AggregateAnalyticsAsync(AggregateAnalyticsRequest request,
         CancellationToken cancellationToken = default)
-        => Send<AnalyticsAggregateResult>(AnalyticsStoreProtocol.AggregateRoute, request, false, null, cancellationToken);
+        => Send<AnalyticsAggregateResult, AggregateAnalyticsRequest>(AnalyticsStoreProtocol.AggregateRoute, request, false, null, cancellationToken);
 }

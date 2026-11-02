@@ -107,7 +107,7 @@ internal static class QueueDeadLetterSelectedSetup
 
     internal static Command<DatabaseCommand> Create<T>(DatabaseEngine database, OperationKind kind, T value, Guid id, DateTimeOffset time)
         => database.CreateCommand(kind, id, QueueDeadLetterSelectedProtocol.Administrator, time, JsonSerializer.Serialize(value, JsonDefaults.Options));
-    internal static byte[] Key(QueueLaneRef lane, string space, params object?[] suffix)
+    internal static byte[] Key(QueueLaneRef lane, string space, params KeyLoad.Storage.KeyComponent[] suffix)
         => KeySpace.Partition(space, lane.Partition, [lane.Queue, .. suffix]);
     internal static EnqueueMessage Message(string id) => new(QueueDeadLetterSelectedProtocol.Queue, id,
         QueueDeadLetterSelectedProtocol.Payload, QueueDeadLetterSelectedProtocol.Headers);

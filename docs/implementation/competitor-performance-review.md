@@ -121,7 +121,7 @@ boundary.
 
 KeyLoad retains ordered group commit, native MVCC atomicity, per-command outcomes
 and actual copy acknowledgements. Its approved ProcessDurable path now uses the
-published ZoneTree 2.0.9 synchronous WAL publication contract, with periodic disk
+published ZoneTree 2.1.0 synchronous WAL publication contract, with periodic disk
 sync owned by the engine. Explicit disk sync is separate. Current source still
 requires its own process-recovery, full solution, replicated SDK/MCP and released
 Linux benchmark qualification; native diagnostics establish no competitive gain.

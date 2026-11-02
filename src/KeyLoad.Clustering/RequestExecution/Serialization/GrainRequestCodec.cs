@@ -31,29 +31,31 @@ public sealed partial class GrainRequestCodec
         {
             throw Errors.Fail(ErrorCode.Validation, GrainRoutingProtocol.InvalidRequest);
         }
-        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(clock) /* KLD0041: BCL null validation accepts the clock TimeProvider reference through its object parameter. */;
         Incarnation = incarnation;
         this.clock = clock;
     }
 
     /// <summary>Issues a read envelope for one capability.</summary>
+    /// <typeparam name="TPayload">The original typed request input.</typeparam>
     /// <param name="requestId">The caller's request identity.</param>
     /// <param name="principalId">The verified principal, or null for authentication.</param>
     /// <param name="kind">The read capability.</param>
     /// <param name="payload">The typed request input.</param>
     /// <returns>The scoped envelope.</returns>
-    public GrainRequestEnvelope CreateRead(Guid requestId, string? principalId, GrainReadKind kind, object payload)
+    public GrainRequestEnvelope CreateRead<TPayload>(Guid requestId, string? principalId, GrainReadKind kind, TPayload payload) where TPayload : notnull
         => Issue(GrainRequestEnvelopeConstruction.Read(requestId, Incarnation,
             principalId, kind, GrainPayload.Own(payload, ReadProfile(kind))));
 
     /// <summary>Issues a command envelope with its stable command identity.</summary>
+    /// <typeparam name="TPayload">The original typed command input.</typeparam>
     /// <param name="requestId">The caller's request identity.</param>
     /// <param name="principalId">The verified principal.</param>
     /// <param name="kind">The command kind.</param>
     /// <param name="commandId">The stable command identity used for replay.</param>
     /// <param name="payload">The typed command input.</param>
     /// <returns>The scoped envelope.</returns>
-    public GrainRequestEnvelope CreateCommand(Guid requestId, string principalId, OperationKind kind, Guid commandId, object payload)
+    public GrainRequestEnvelope CreateCommand<TPayload>(Guid requestId, string principalId, OperationKind kind, Guid commandId, TPayload payload) where TPayload : notnull
         => Issue(GrainRequestEnvelopeConstruction.Command(requestId, Incarnation,
             principalId, kind, commandId, GrainPayload.Copy(payload)));
 

@@ -9,7 +9,7 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
 
     public byte[]? ReadOwnedValue(byte[] key)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
         var found = Read(key, out var value);
         runtime.ReadCounters.Point(owned: true, (long)key.Length + (found ? value.Length : 0));
         return found ? value.ToArray() : null;
@@ -17,8 +17,8 @@ internal sealed class ZoneTreeReadView(ZoneTreeStoreRuntime runtime) : IKeyValue
 
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(reader) /* KLD0041: BCL null validation accepts the reader StorageValueReader reference through its object parameter. */;
         var found = Read(key, out var value);
         var bytes = (long)key.Length + (found ? value.Length : 0);
         runtime.ReadCounters.Point(owned: false, bytes);

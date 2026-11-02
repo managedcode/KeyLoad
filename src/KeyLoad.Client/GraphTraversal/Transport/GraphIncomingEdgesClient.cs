@@ -15,8 +15,8 @@ public static class GraphIncomingEdgesClient
     public static Task<Result<GraphIncomingEdgesPage>> IncomingEdgesAsync(this KeyLoadClient client,
         ReadIncomingGraphEdgesRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<GraphIncomingEdgesPage>(IncomingRoute, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ReadIncomingGraphEdgesRequest reference through its object parameter. */;
+        return client.Send<GraphIncomingEdgesPage, ReadIncomingGraphEdgesRequest>(IncomingRoute, request, false, null, cancellationToken);
     }
 }

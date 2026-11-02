@@ -72,7 +72,7 @@ internal static class RequestWorkSettlement
             return fatal;
         }
 
-        if (primary is null || ReferenceEquals(primary, cleanup))
+        if (primary is null || (ReferenceEquals(primary, cleanup) /* KLD0041: Avoid aggregating the same primary and cleanup exception instance through CLR reference identity. */))
         {
             return cleanup ?? primary;
         }

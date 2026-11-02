@@ -16,7 +16,7 @@ public static class GraphTraversalQueriesGraphShortestPath
     /// <param name = "engine">The shared database execution context.</param>
     public static GraphShortestPathResult ShortestPath(this DatabaseEngine engine, string principalId, GraphShortestPathRequest request, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(timeProvider ?? engine.Clock, cancellationToken);
         return engine.ShortestPath(principalId, request, budget);
     }
@@ -30,7 +30,7 @@ public static class GraphTraversalQueriesGraphShortestPath
     /// <param name = "engine">The shared database execution context.</param>
     internal static GraphShortestPathResult ShortestPath(this DatabaseEngine engine, string principalId, GraphShortestPathRequest request, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         var labels = GraphShortestPathValidation.Validate(request, budget, engine.GraphExecution);
         return engine.Store.Read(view =>

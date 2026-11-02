@@ -10,8 +10,8 @@ internal static class PartitionQueryPublicMapper
     internal static PartitionQueryPage MapPublic(PartitionQueryResult result,
         ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(result);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(result) /* KLD0041: BCL null validation accepts the result PartitionQueryResult reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         var rows = MapRows(result.Rows, budget);
         var leaves = MapLeaves(result.Leaves, budget);

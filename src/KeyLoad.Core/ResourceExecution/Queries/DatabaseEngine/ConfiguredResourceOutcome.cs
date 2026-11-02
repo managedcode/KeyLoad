@@ -8,9 +8,9 @@ namespace KeyLoad.Core;
 public static class ConfiguredResourceOutcome
 {
     internal const string ConfiguredOutcomeLifetimeChanged = "The configured resource belongs to a different lifetime.";
-    internal static void ObserveConfiguredResourceOutcome(IKeyValueView view, Command<DatabaseCommand> operation, Result<object> result, ReadExecutionBudget work)
+    internal static void ObserveConfiguredResourceOutcome(IKeyValueView view, Command<DatabaseCommand> operation, Problem? problem, ReadExecutionBudget work)
     {
-        if (operation.Value!.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable) || Errors.Code(result.Problem).Value is not null)
+        if (operation.Value!.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable) || Errors.Code(problem).Value is not null)
         {
             return;
         }

@@ -55,7 +55,6 @@ internal static class ZoneTreeTreeFactory
             {
                 o.BTreeLeafSize = MutableLeafSize;
                 o.MutableSegmentBloomFilterBitsPerItem = 0;
-                o.PreserveWriteOrderAcrossSegments = true;
             })
             .ConfigureWriteAheadLogOptions(ConfigureWriteAheadLog)
             .ConfigureDiskSegmentOptions(o => o.CompressionMethod = CompressionMethod.None);
@@ -73,7 +72,7 @@ internal static class ZoneTreeTreeFactory
             })
             .ConfigureDiskSegmentOptions(o => o.CompressionMethod = CompressionMethod.None);
 
-    // ZoneTree 2.0.9 synchronously publishes records into the native mapped WAL tail before returning.
+    // SyncCompressed synchronously publishes records into the native mapped WAL tail before returning.
     // This is the ProcessDurable acknowledgement boundary; disk sync remains engine-owned background work.
     private static void ConfigureWriteAheadLog(WriteAheadLogOptions options)
     {

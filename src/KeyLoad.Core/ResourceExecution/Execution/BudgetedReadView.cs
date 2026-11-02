@@ -34,8 +34,8 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     /// <param name="budget">The shared operation budget.</param>
     public BudgetedReadView(IKeyValueView view, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         this.view = view;
         this.budget = budget;
     }
@@ -45,7 +45,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
 
     public byte[]? ReadOwnedValue(byte[] key)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         byte[]? result = null;
         ReadValue(key, value => result = value.ToArray());
         return result;
@@ -54,7 +54,7 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     /// <inheritdoc />
     public ScanPage Scan(byte[] prefix, int maxRecords, byte[]? afterKey = null)
     {
-        ArgumentNullException.ThrowIfNull(prefix);
+        ArgumentNullException.ThrowIfNull(prefix) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxRecords);
         var records = new List<KeyValueRecord>();
         var result = VisitRange(prefix, maxRecords, (key, value) =>
@@ -68,8 +68,8 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     /// <inheritdoc />
     public bool ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer = null)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(reader) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         var found = view.ReadValue(key, reader, observer);
         budget.Check();
@@ -91,8 +91,8 @@ internal sealed class BudgetedReadView : IKeyValueView, IResourceLifetimeReadBin
     private StorageScanResult VisitRangeWithDirection(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey, byte[]? untilKey, StorageReadObserver? observer, bool reverse, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(prefix);
-        ArgumentNullException.ThrowIfNull(visitor);
+        ArgumentNullException.ThrowIfNull(prefix) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maxRecords);
         budget.Check();
         using var linked = (CreateLinkedToken(cancellationToken, out var effectiveToken)).Value;

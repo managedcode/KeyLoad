@@ -11,7 +11,7 @@ internal static class SqlOperationBounds
         IOptions<QueryExecutionOptions> queryOptions, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        ArgumentNullException.ThrowIfNull(queryOptions);
+        ArgumentNullException.ThrowIfNull(queryOptions) /* KLD0041: BCL null validation accepts the queryOptions IOptions reference through its object parameter. */;
         queryOptions.Value.Validate();
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumPayloadBytes);
         if (request is null || string.IsNullOrEmpty(request.Sql))

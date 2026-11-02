@@ -7,7 +7,7 @@ internal static class AnnOwnerAdmission
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, owner);
+            ObjectDisposedException.ThrowIf(closed, owner) /* KLD0041: BCL disposal diagnostics accept the owner AnnGenerationOwner instance through object to preserve its runtime owner type. */;
             return Task.FromResult(worker.Run(() => operation(stages)));
         }
     }
@@ -18,7 +18,7 @@ internal static class AnnOwnerAdmission
         EnterPublicRead(gate);
         try
         {
-            ObjectDisposedException.ThrowIf(closed, owner);
+            ObjectDisposedException.ThrowIf(closed, owner) /* KLD0041: BCL disposal diagnostics accept the owner AnnGenerationOwner instance through object to preserve its runtime owner type. */;
             return AnnPublicReadAdmission.Reserve(slots, options, publicReads, desiredBytes, MaintenanceMemory.Bytes);
         }
         finally { gate.Exit(); }
@@ -30,7 +30,7 @@ internal static class AnnOwnerAdmission
         EnterPublicRead(gate);
         try
         {
-            ObjectDisposedException.ThrowIf(closed, owner);
+            ObjectDisposedException.ThrowIf(closed, owner) /* KLD0041: BCL disposal diagnostics accept the owner AnnGenerationOwner instance through object to preserve its runtime owner type. */;
             return AnnPublicReadAdmission.Describe(slots, key);
         }
         finally { gate.Exit(); }
@@ -49,7 +49,7 @@ internal static class AnnOwnerAdmission
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, owner);
+            ObjectDisposedException.ThrowIf(closed, owner) /* KLD0041: BCL disposal diagnostics accept the owner AnnGenerationOwner instance through object to preserve its runtime owner type. */;
             stages.Release(key);
             foreach (var slot in slots.Where(item => AnnSlotRetention.SameKey(item.Manifest, key)))
             {

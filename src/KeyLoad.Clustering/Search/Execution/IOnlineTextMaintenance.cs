@@ -7,9 +7,9 @@ internal interface IOnlineTextMaintenance
 {
     Task<OnlineTextCapabilityResult> ExecuteAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request, CancellationToken cancellationToken);
-    OnlineTextPublicationWork RequirePublicationWork(Guid sessionId,
+    OnlineTextPublicationWork<OnlineTextIndexMaintenanceResult> RequirePublicationWork(Guid sessionId,
         OnlineTextIndexMaintenanceRequest request, string principalId);
-    OnlineTextPublicationWork? TryRequireCheckpointWork(CommitProjectionBatchRequest request,
+    OnlineTextPublicationWork<ProjectionBatchResult>? TryRequireCheckpointWork(CommitProjectionBatchRequest request,
         string principalId);
     Task<OnlineTextCapabilityResult> ExecuteBoundAsync(PrincipalRecord principal,
         OnlineTextCapabilityRequest request,

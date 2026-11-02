@@ -11,7 +11,7 @@ internal static class PartitionQueryPublicExecution
         PartitionQueryRequest request, PhysicalShardRecord expectedOwner,
         TimeProvider? timeProvider, CancellationToken cancellationToken, IResourceLifetimeWorkBinding? binding = null)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: BCL null validation accepts the engine QueryEngine reference through its object parameter. */;
         ArgumentException.ThrowIfNullOrWhiteSpace(principalId);
         ValidateOwner(expectedOwner);
         var owner = engine.PartitionQueryOwner;

@@ -14,7 +14,7 @@ internal sealed class ConnectionOperationOwner : IAsyncDisposable
 
     internal ConnectionOperationOwner(IOptions<GrainRoutingOptions> options)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
         options.Value.Validate();
     }
 

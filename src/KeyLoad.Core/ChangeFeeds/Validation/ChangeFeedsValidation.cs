@@ -12,7 +12,7 @@ public static class ChangeFeedsValidation
     /// <param name = "engine">The shared database execution context.</param>
     public static OutboxHead ReadOutboxHead(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         const string InvalidHeadDetail = "The committed outbox head does not match its canonical retained range.";
         var head = view.GetRecord<OutboxHead>(KeySpace.Partition(ProjectionOutbox.OutboxHeadSpace, partition)) ?? new(ProjectionOutbox.ReadOutboxHeadTailEmptyCount, ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount, ProjectionOutbox.ReadOutboxHeadStoredRecordsEmptyCount, ProjectionOutbox.ReadOutboxHeadStoredBytesEmptyCount);
         if (head.Tail < ProjectionOutbox.ReadOutboxHeadTailEmptyCount || head.FirstAvailable < ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount || head.FirstAvailable - ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount > head.Tail || head.StoredRecords != head.Tail - (head.FirstAvailable - ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount) || head.StoredBytes < ProjectionOutbox.ReadOutboxHeadStoredBytesEmptyCount || (head.StoredRecords == ProjectionOutbox.ReadOutboxHeadStoredRecordsEmptyCount) != (head.StoredBytes == ProjectionOutbox.ReadOutboxHeadStoredBytesEmptyCount))

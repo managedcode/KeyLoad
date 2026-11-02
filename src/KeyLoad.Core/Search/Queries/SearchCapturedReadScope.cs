@@ -9,8 +9,8 @@ internal sealed class SearchCapturedReadScope : IKeyValueView
 
     internal SearchCapturedReadScope(IKeyValueView captured, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(captured);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(captured) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         // Object header and one borrowed view reference.
         this.captured = captured;
     }

@@ -16,7 +16,7 @@ internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, Tex
             {
                 continue;
             }
-            var failure = Observe(slot, ReferenceEquals(slot, current));
+            var failure = Observe(slot, (ReferenceEquals(slot, current) /* KLD0041: Identify the currently published slot instance during shutdown through CLR reference identity. */));
             state.CompleteShutdown(slot, failure);
             if (failure is not null)
             {

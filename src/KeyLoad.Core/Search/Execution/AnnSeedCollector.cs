@@ -24,9 +24,9 @@ internal static class AnnSeedCollector
         IOptions<AnnSeedOptions> configuredOptions, ReadExecutionBudget readBudget,
         AnnMaintenanceRequest? pin)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(readBudget);
-        ArgumentNullException.ThrowIfNull(configuredOptions);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(readBudget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(configuredOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var options = configuredOptions.Value;
         options.Validate();
         readBudget.Check();
@@ -48,10 +48,10 @@ internal static class AnnSeedCollector
         VectorSpace space, IOptions<AnnSeedOptions> configuredOptions, ReadExecutionBudget readBudget,
         AnnMaintenanceRequest? pin = null, AnnSeedWork? scopeWork = null, AnnReadLifetimeMetadata? sourceMetadata = null)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(readBudget);
-        ArgumentNullException.ThrowIfNull(configuredOptions);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(readBudget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(configuredOptions) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var options = configuredOptions.Value;
         options.Validate();
         var work = scopeWork ?? new AnnSeedWork(readBudget, options.MaxWorkUnits);

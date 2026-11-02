@@ -18,8 +18,8 @@ internal static class PartitionQueryMerge
         ImmutableArray<PartitionQueryLeafResult> leaves, StoreIdentity owner,
         ReadExecutionBudget budget, ImmutableArray<PhysicalShardRecord> physicalOwners = default)
     {
-        ArgumentNullException.ThrowIfNull(owner);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(owner) /* KLD0041: BCL null validation accepts the owner StoreIdentity reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         if (leaves.IsDefault || leaves.Length != plan.Leaves.Length
             || !physicalOwners.IsDefault && physicalOwners.Length != leaves.Length)
         {

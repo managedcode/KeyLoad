@@ -55,7 +55,7 @@ internal sealed class OfflineLockedFileStream : FileStream
     public override ValueTask DisposeAsync()
     {
         var completion = BeginDispose(useAsync: true, () => base.DisposeAsync());
-        GC.SuppressFinalize(this);
+        GC.SuppressFinalize(this) /* KLD0041: The standard CLR async-disposal path suppresses this stream's finalizer; its returned shared completion retains and joins the original handles. */;
         return new(completion);
     }
 

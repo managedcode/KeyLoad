@@ -22,10 +22,10 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, Dis
     internal static PackedAnnAdmission Create(VectorSpace space, IReadOnlyList<VectorRecord> records,
         PackedAnnOptions options, AnnWorkBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget AnnWorkBudget reference through its object parameter. */;
         ValidateOptions(options);
         ValidateSpace(space, budget);
-        ArgumentNullException.ThrowIfNull(records);
+        ArgumentNullException.ThrowIfNull(records) /* KLD0041: BCL null validation accepts the records IReadOnlyList reference through its object parameter. */;
         var count = records.Count;
         ValidateRecordCount(count, options);
         try
@@ -151,8 +151,8 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, Dis
 
     internal static void ValidateSpace(VectorSpace space, AnnWorkBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(space);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(space) /* KLD0041: BCL null validation accepts the space VectorSpace reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget AnnWorkBudget reference through its object parameter. */;
         if (space.Id is null || space.Model is null || space.Version is null)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidOptions);
@@ -169,7 +169,7 @@ internal readonly record struct PackedAnnAdmission(int Count, int Dimension, Dis
 
     internal static void ValidateOptions(PackedAnnOptions options)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options PackedAnnOptions reference through its object parameter. */;
         options.Validate();
     }
 

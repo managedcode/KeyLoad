@@ -17,8 +17,12 @@ public static class Errors
         {
             return (false, null);
         }
-        if (!Enum.TryParse<ErrorCode>(problem.ErrorCode, out var code) || !Enum.IsDefined(code)
-            || problem.ErrorCode != code.ToString() || problem.Title != code.ToString() || problem.Type != $"{ProblemTypePrefix}{code}"
+        if (!Enum.TryParse<ErrorCode>(problem.ErrorCode, out var code) || !Enum.IsDefined(code))
+        {
+            throw Fail(ErrorCode.Corruption, InvalidDomainProblem);
+        }
+        var name = code.ToString();
+        if (problem.ErrorCode != name || problem.Title != name || problem.Type != $"{ProblemTypePrefix}{name}"
             || problem.StatusCode != Status(code) || string.IsNullOrWhiteSpace(problem.Detail))
         {
             throw Fail(ErrorCode.Corruption, InvalidDomainProblem);
@@ -43,14 +47,18 @@ public static class Errors
     /// <param name="code">Identifies the domain error code.</param>
     /// <param name="detail">Provides safe caller-visible error detail.</param>
     /// <returns>The standard problem details for the error code.</returns>
-    public static Problem Problem(ErrorCode code, string detail) => new()
+    public static Problem Problem(ErrorCode code, string detail)
     {
-        Type = $"{ProblemTypePrefix}{code}",
-        Title = code.ToString(),
-        ErrorCode = code.ToString(),
-        Detail = detail,
-        StatusCode = Status(code)
-    };
+        var name = code.ToString();
+        return new()
+        {
+            Type = $"{ProblemTypePrefix}{name}",
+            Title = name,
+            ErrorCode = name,
+            Detail = detail,
+            StatusCode = Status(code)
+        };
+    }
     /// <summary>Creates a KeyLoad exception with the status assigned to its error code.</summary>
     /// <param name="code">Identifies the domain error code.</param>
     /// <param name="detail">Provides safe caller-visible error detail.</param>
@@ -63,7 +71,7 @@ public static class Errors
     /// <returns>The typed failure with its original cause.</returns>
     public static KeyLoadException Fail(ErrorCode code, string detail, Exception cause)
     {
-        ArgumentNullException.ThrowIfNull(cause);
+        ArgumentNullException.ThrowIfNull(cause) /* KLD0041: The standard CLR guard requires the original Exception reference before preserving its full cause chain. */;
         return new(code, detail, Status(code), cause);
     }
 

@@ -26,7 +26,7 @@ public sealed class KeyLoadQuery<T>
     /// <returns>A new builder retaining this builder's current query.</returns>
     public KeyLoadQuery<T> Where(Expression<Func<T, bool>> expression)
     {
-        ArgumentNullException.ThrowIfNull(expression);
+        ArgumentNullException.ThrowIfNull(expression) /* KLD0041: BCL null validation accepts the expression Expression reference through its object parameter. */;
         var filter = QueryPredicateExpression.Filter(expression.Body, expression.Parameters[QueryPredicateTokens.ParameterIndex], context);
         return With(query with
         {
@@ -39,7 +39,7 @@ public sealed class KeyLoadQuery<T>
     /// <returns>A new builder with the requested ordering.</returns>
     public KeyLoadQuery<T> OrderBy<TValue>(Expression<Func<T, TValue>> field)
     {
-        ArgumentNullException.ThrowIfNull(field);
+        ArgumentNullException.ThrowIfNull(field) /* KLD0041: BCL null validation accepts the field Expression reference through its object parameter. */;
         return Order(field, false, false);
     }
     /// <summary>Orders the query by one field in descending order.</summary>
@@ -48,7 +48,7 @@ public sealed class KeyLoadQuery<T>
     /// <returns>A new builder with the requested ordering.</returns>
     public KeyLoadQuery<T> OrderByDescending<TValue>(Expression<Func<T, TValue>> field)
     {
-        ArgumentNullException.ThrowIfNull(field);
+        ArgumentNullException.ThrowIfNull(field) /* KLD0041: BCL null validation accepts the field Expression reference through its object parameter. */;
         return Order(field, true, false);
     }
     /// <summary>Adds an ascending tie-breaker after existing order fields.</summary>
@@ -57,7 +57,7 @@ public sealed class KeyLoadQuery<T>
     /// <returns>A new builder with the appended ordering.</returns>
     public KeyLoadQuery<T> ThenBy<TValue>(Expression<Func<T, TValue>> field)
     {
-        ArgumentNullException.ThrowIfNull(field);
+        ArgumentNullException.ThrowIfNull(field) /* KLD0041: BCL null validation accepts the field Expression reference through its object parameter. */;
         return Order(field, false, true);
     }
     /// <summary>Adds a descending tie-breaker after existing order fields.</summary>
@@ -66,7 +66,7 @@ public sealed class KeyLoadQuery<T>
     /// <returns>A new builder with the appended ordering.</returns>
     public KeyLoadQuery<T> ThenByDescending<TValue>(Expression<Func<T, TValue>> field)
     {
-        ArgumentNullException.ThrowIfNull(field);
+        ArgumentNullException.ThrowIfNull(field) /* KLD0041: BCL null validation accepts the field Expression reference through its object parameter. */;
         return Order(field, true, true);
     }
     private KeyLoadQuery<T> Order(LambdaExpression field, bool descending, bool append)
@@ -83,7 +83,7 @@ public sealed class KeyLoadQuery<T>
     /// <returns>A new builder with an immutable field projection.</returns>
     public KeyLoadQuery<T> Select<TProjection>(Expression<Func<T, TProjection>> expression)
     {
-        ArgumentNullException.ThrowIfNull(expression);
+        ArgumentNullException.ThrowIfNull(expression) /* KLD0041: BCL null validation accepts the expression Expression reference through its object parameter. */;
         return With(query with
         {
             Projection = context.Expressions.Projection(expression.Body, expression.Parameters[QueryPredicateTokens.ParameterIndex])

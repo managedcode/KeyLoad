@@ -9,14 +9,14 @@ internal static class OperationResponseHeaders
     /// <param name="context">The new public HTTP request.</param>
     internal static void Register(HttpContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        if (context.Items.ContainsKey(ServerProtocol.ExecutionRequestItem))
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context HttpContext reference through its object parameter. */;
+        if (((context.Items /* KLD0041: Store or retrieve the existing HeaderState reference under this owner's key in ASP.NET HttpContext.Items; no operation GUID is boxed. */).ContainsKey(ServerProtocol.ExecutionRequestItem) /* KLD0041: Reject duplicate header publication registration using the owned key in ASP.NET's native request-local Items dictionary. */))
         {
             throw new InvalidOperationException(InvalidPublication);
         }
         var state = new HeaderState(context.Response);
-        context.Items[ServerProtocol.ExecutionRequestItem] = state;
-        context.Response.OnStarting(static value => ((HeaderState)value).StartAsync(), state);
+        ((context.Items /* KLD0041: Store or retrieve the existing HeaderState reference under this owner's key in ASP.NET HttpContext.Items; no operation GUID is boxed. */)[ServerProtocol.ExecutionRequestItem] /* KLD0041: Store or retrieve the existing HeaderState reference under this owner's key in ASP.NET HttpContext.Items; no operation GUID is boxed. */) = state;
+        context.Response.OnStarting(static value => (((HeaderState)value /* KLD0042: Recover the exact HeaderState reference passed to ASP.NET OnStarting so response headers publish at the framework-owned start boundary. */)).StartAsync(), state) /* KLD0041: ASP.NET OnStarting accepts object state; pass the existing HeaderState to a static callback without a closure allocation. */;
     }
 
     /// <summary>Atomically publishes the actual issued operation GUID immediately before actor dispatch.</summary>
@@ -24,8 +24,8 @@ internal static class OperationResponseHeaders
     /// <param name="requestId">The fresh server-generated operation identity.</param>
     internal static void Publish(HttpContext context, Guid requestId)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        if (requestId == Guid.Empty || context.Items[ServerProtocol.ExecutionRequestItem] is not HeaderState state)
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context HttpContext reference through its object parameter. */;
+        if (requestId == Guid.Empty || (((context.Items /* KLD0041: Store or retrieve the existing HeaderState reference under this owner's key in ASP.NET HttpContext.Items; no operation GUID is boxed. */)[ServerProtocol.ExecutionRequestItem] /* KLD0041: Store or retrieve the existing HeaderState reference under this owner's key in ASP.NET HttpContext.Items; no operation GUID is boxed. */) is not HeaderState state /* KLD0042: Require this request's concrete HeaderState from the native Items slot before publishing or observing the actual operation GUID. */))
         {
             throw new InvalidOperationException(InvalidPublication);
         }
@@ -37,8 +37,8 @@ internal static class OperationResponseHeaders
     /// <returns>The actual published GUID, or null before dispatch.</returns>
     internal static Guid? RequestId(HttpContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
-        return (context.Items[ServerProtocol.ExecutionRequestItem] as HeaderState)?.RequestId;
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context HttpContext reference through its object parameter. */;
+        return ((((context.Items /* KLD0041: Store or retrieve the existing HeaderState reference under this owner's key in ASP.NET HttpContext.Items; no operation GUID is boxed. */)[ServerProtocol.ExecutionRequestItem] /* KLD0041: Store or retrieve the existing HeaderState reference under this owner's key in ASP.NET HttpContext.Items; no operation GUID is boxed. */) as HeaderState /* KLD0042: Require this request's concrete HeaderState from the native Items slot before publishing or observing the actual operation GUID. */))?.RequestId;
     }
 
     private sealed class HeaderState(HttpResponse response)

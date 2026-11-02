@@ -40,7 +40,7 @@ public static class RemoteTransferRepairFailureRead
             throw Errors.Fail(ErrorCode.Conflict, RemoteTransferRepairProtocol.Invalid);
         }
 
-        if (Errors.Code(outcome.Result.Problem).Value != ErrorCode.PermissionDenied || outcome.Result.Value is not null)
+        if (Errors.Code(outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Problem).Value != ErrorCode.PermissionDenied || outcome.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Value /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ is not null)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, RemoteTransferRepairProtocol.Unavailable);
         }

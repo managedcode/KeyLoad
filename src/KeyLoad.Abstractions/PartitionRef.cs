@@ -34,7 +34,7 @@ public sealed record PartitionRef([property: Orleans.Id(0)] string TenantId, [pr
     }
 
     /// <summary>Equality covers the four identity components only, never the retained hash.</summary>
-    public bool Equals(PartitionRef? other) => other is not null && (ReferenceEquals(this, other)
+    public bool Equals(PartitionRef? other) => other is not null && (ReferenceEquals(this, other) /* KLD0041: Record equality first recognizes the same existing partition reference before comparing its four identity strings. */
         || string.Equals(TenantId, other.TenantId, StringComparison.Ordinal)
         && string.Equals(DatabaseId, other.DatabaseId, StringComparison.Ordinal)
         && string.Equals(TransactionDomainId, other.TransactionDomainId, StringComparison.Ordinal)
@@ -54,8 +54,8 @@ public sealed record PartitionRef([property: Orleans.Id(0)] string TenantId, [pr
             KeyCodec.Encode(source.TenantId, source.DatabaseId, source.TransactionDomainId, source.PartitionKey)));
 
         internal bool Describes(PartitionRef partition)
-            => ReferenceEquals(tenantId, partition.TenantId) && ReferenceEquals(databaseId, partition.DatabaseId)
-                && ReferenceEquals(transactionDomainId, partition.TransactionDomainId)
-                && ReferenceEquals(partitionKey, partition.PartitionKey);
+            => ReferenceEquals(tenantId, partition.TenantId) /* KLD0041: The retained hash is reused only while its original tenant string reference remains unchanged. */ && (ReferenceEquals(databaseId, partition.DatabaseId) /* KLD0041: The retained hash is reused only while its original database string reference remains unchanged. */)
+                && (ReferenceEquals(transactionDomainId, partition.TransactionDomainId) /* KLD0041: The retained hash is reused only while its original transaction-domain string reference remains unchanged. */)
+                && (ReferenceEquals(partitionKey, partition.PartitionKey) /* KLD0041: The retained hash is reused only while its original partition-key string reference remains unchanged. */);
     }
 }

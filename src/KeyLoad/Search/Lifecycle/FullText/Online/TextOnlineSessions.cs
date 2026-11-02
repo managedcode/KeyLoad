@@ -14,7 +14,7 @@ internal sealed class TextOnlineSessions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineSessions instance through object to preserve its runtime owner type. */;
             if (!work.TryAdd(id, original))
             {
                 throw TextErrors.Busy();
@@ -34,7 +34,7 @@ internal sealed class TextOnlineSessions
     {
         lock (gate)
         {
-            if (!sessions.ContainsKey(id) && ReferenceEquals(work.GetValueOrDefault(id), original))
+            if (!sessions.ContainsKey(id) && (ReferenceEquals(work.GetValueOrDefault(id), original) /* KLD0041: Remove only the original unassigned session work instance through CLR reference identity. */))
             {
                 work.Remove(id);
             }
@@ -74,8 +74,8 @@ internal sealed class TextOnlineSessions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
-            if (!ReferenceEquals(work.GetValueOrDefault(session.Id), session.Work))
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineSessions instance through object to preserve its runtime owner type. */;
+            if (!(ReferenceEquals(work.GetValueOrDefault(session.Id), session.Work) /* KLD0041: Require the exact work instance registered for this online session through CLR reference identity. */))
             {
                 throw TextErrors.Busy();
             }
@@ -90,12 +90,12 @@ internal sealed class TextOnlineSessions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineSessions instance through object to preserve its runtime owner type. */;
             return sessions.TryGetValue(id, out var original) ? original : throw TextErrors.Mismatch();
         }
     }
 
-    internal (bool HasValue, OnlineTextPublicationWork? Value) TryMatchCheckpoint(CommitProjectionBatchRequest command,
+    internal (bool HasValue, OnlineTextPublicationWork<ProjectionBatchResult>? Value) TryMatchCheckpoint(CommitProjectionBatchRequest command,
         string principalId)
     {
         lock (gate)
@@ -108,7 +108,7 @@ internal sealed class TextOnlineSessions
                     return (true, matched);
                 }
             }
-            return (false, default(OnlineTextPublicationWork?));
+            return (false, default(OnlineTextPublicationWork<ProjectionBatchResult>?));
         }
     }
 
@@ -117,7 +117,7 @@ internal sealed class TextOnlineSessions
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineSessions instance through object to preserve its runtime owner type. */;
             var originals = new List<TextOnlineSession>();
             foreach (var session in sessions.Values)
             {
@@ -131,7 +131,7 @@ internal sealed class TextOnlineSessions
         }
     }
 
-    private OnlineTextPublicationWork? TryMatchOriginal(TextOnlineSession session,
+    private OnlineTextPublicationWork<ProjectionBatchResult>? TryMatchOriginal(TextOnlineSession session,
         CommitProjectionBatchRequest command, string principalId)
     {
         lock (session.Gate)
@@ -139,7 +139,7 @@ internal sealed class TextOnlineSessions
             var matched = session.TryMatchCheckpoint(command, principalId);
             if (matched is not null)
             {
-                ObjectDisposedException.ThrowIf(closed, this);
+                ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextOnlineSessions instance through object to preserve its runtime owner type. */;
             }
             return matched;
         }
@@ -174,7 +174,7 @@ internal sealed class TextOnlineSessions
     {
         lock (gate)
         {
-            if (!sessions.TryGetValue(original.Id, out var actual) || !ReferenceEquals(actual, original))
+            if (!sessions.TryGetValue(original.Id, out var actual) || !(ReferenceEquals(actual, original) /* KLD0041: Require the exact registered online session instance through CLR reference identity. */))
             {
                 throw TextErrors.Ownership();
             }

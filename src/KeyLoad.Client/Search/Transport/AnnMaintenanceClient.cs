@@ -13,8 +13,8 @@ public static class AnnMaintenanceClient
     public static Task<Result<AnnMaintenanceResult>> MaintainAnnIndexAsync(this KeyLoadClient client,
         AnnMaintenanceRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<AnnMaintenanceResult>(AnnMaintenanceProtocol.Route, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request AnnMaintenanceRequest reference through its object parameter. */;
+        return client.Send<AnnMaintenanceResult, AnnMaintenanceRequest>(AnnMaintenanceProtocol.Route, request, true, request.CommandId, cancellationToken);
     }
 }

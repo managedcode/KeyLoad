@@ -35,7 +35,7 @@ internal sealed class ScriptDomCheckedTokens(IList<Dom.TSqlParserToken> tokens, 
             yield return this[index];
         }
     }
-    System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
+    System.Collections.IEnumerator /* KLD0041: IList<TSqlParserToken> requires the CLR non-generic enumerator bridge; parser traversal keeps the typed token iterator. */ System.Collections.IEnumerable.GetEnumerator() => GetEnumerator();
     public int IndexOf(Dom.TSqlParserToken item)
     {
         check();

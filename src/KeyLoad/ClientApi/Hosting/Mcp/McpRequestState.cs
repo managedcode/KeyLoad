@@ -57,8 +57,8 @@ internal sealed class McpRequestState : IDisposable
     /// <summary>Takes exclusive replay-body lifetime ownership.</summary>
     internal void Attach(McpFrameBody ownedBody)
     {
-        ArgumentNullException.ThrowIfNull(ownedBody);
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ArgumentNullException.ThrowIfNull(ownedBody) /* KLD0041: BCL null validation accepts the ownedBody McpFrameBody reference through its object parameter. */;
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this McpRequestState instance through object to preserve its runtime owner type. */;
         if (body is not null)
         {
             throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
@@ -69,7 +69,7 @@ internal sealed class McpRequestState : IDisposable
     /// <summary>Selects one raw execution message and its reply class before typed parameter conversion.</summary>
     internal void Admit(McpGatewayMetaSelection selection)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this McpRequestState instance through object to preserve its runtime owner type. */;
         if (admitted)
         {
             throw new InvalidOperationException(McpCatalogProtocol.InvalidOperation);
@@ -97,7 +97,7 @@ internal sealed class McpRequestState : IDisposable
     /// <summary>Wraps bounded gateway metadata without assigning a database execution identity.</summary>
     internal CallToolResult MetaSuccess(byte[] canonical, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(canonical);
+        ArgumentNullException.ThrowIfNull(canonical) /* KLD0041: BCL null validation accepts the canonical byte[] reference through its object parameter. */;
         try
         {
             RequireReplyBytes(canonical.Length);
@@ -151,7 +151,7 @@ internal sealed class McpRequestState : IDisposable
 
     private void RequireReplyBytes(int bytes)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this McpRequestState instance through object to preserve its runtime owner type. */;
         if (bytes > MaximumReplyBytes)
         {
             throw Errors.Fail(ErrorCode.ResourceExhausted, McpFramingProtocol.FrameBudgetExceeded);

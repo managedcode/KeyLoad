@@ -15,10 +15,10 @@ internal static class DistributedSearchProjectionExecution
         SearchRequest request, string tenant, DistributedTextWitness witness,
         ImmutableArray<GlobalBranchCandidate> selected, ReadExecutionBudget budget, PartitionQueryLifetimeMetadata? metadata = null)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(witness);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: BCL null validation accepts the database DatabaseEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(witness) /* KLD0041: BCL null validation accepts the witness DistributedTextWitness reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         if (selected.IsDefault || selected.Length > request.Limit)
         {

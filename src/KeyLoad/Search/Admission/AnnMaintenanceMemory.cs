@@ -34,7 +34,7 @@ internal sealed class AnnMaintenanceMemory(Lock gate, List<AnnGenerationSlot> sl
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnMaintenanceMemory instance through object to preserve its runtime owner type. */;
             if (current is not null)
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, AnnProtocol.Bound);
@@ -129,7 +129,7 @@ internal sealed class AnnMaintenanceMemory(Lock gate, List<AnnGenerationSlot> sl
         - slots.Sum(item => item.Index.RetainedBytesUpperBound));
     private void Require(AnnMaintenanceMemoryLease lease)
     {
-        if (!ReferenceEquals(current, lease))
+        if (!(ReferenceEquals(current, lease) /* KLD0041: Require the exact admitted ANN memory lease instance through CLR reference identity. */))
         {
             throw Errors.Fail(ErrorCode.Corruption, AnnProtocol.Ownership);
         }

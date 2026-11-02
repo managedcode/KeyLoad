@@ -7,13 +7,13 @@ internal static class CommandOutcomePartitionIdentity
 {
     internal static CommandOutcomePartitionScope Resolve(Command<DatabaseCommand> operation)
     {
-        ArgumentNullException.ThrowIfNull(operation);
-        if (operation.Value?.Input is not { } input || !DatabaseCommandInputTypes.TryFind(operation.Value.Kind, out var type)
-            || input.GetType() != type)
+        ArgumentNullException.ThrowIfNull(operation) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        if (operation.Value?.Input /* KLD0041: The existing persisted command slot contains the exact runtime input selected and validated by its closed Kind discriminator. */ is not { } input || !DatabaseCommandInputTypes.TryFind(operation.Value.Kind, out var type)
+            || input.GetType() /* KLD0041: This persisted input boundary must verify its exact runtime contract against the closed operation-kind map. */ != type)
         {
             return CommandOutcomePartitionScope.Unknown;
         }
-        var target = CommandPartitions.Of(operation.Value.Kind, input);
+        var target = CommandPartitions.Of(operation.Value.Kind, input) /* KLD0041: The persisted command envelope carries the input selected by Kind; this routing step verifies and reads that native input. */;
         return target.Route switch
         {
             CommandRoute.Partition => Partition(target.Partition),

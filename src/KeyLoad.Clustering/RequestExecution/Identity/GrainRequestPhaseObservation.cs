@@ -11,7 +11,7 @@ internal static class GrainRequestPhaseObservation
             return ValueTask.CompletedTask;
         }
 
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context IGrainContext reference through its object parameter. */;
         return observer.ObserveAsync(GrainRequestProbeIdentity.From(request.Envelope), phase, context, cancellationToken);
     }
 
@@ -22,7 +22,7 @@ internal static class GrainRequestPhaseObservation
         {
             return ValueTask.CompletedTask;
         }
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context IGrainContext reference through its object parameter. */;
         if (observer is IGrainRequestProducerDisposedObserver asynchronous)
         {
             return asynchronous.ProducerDisposedAsync(identity, connectionId, context);
@@ -38,7 +38,7 @@ internal static class GrainRequestPhaseObservation
         {
             return;
         }
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context IGrainContext reference through its object parameter. */;
         observer.ProducerDisposed(identity, context);
     }
 
@@ -46,7 +46,7 @@ internal static class GrainRequestPhaseObservation
         DecodedGrainRequest request, GrainRequestPhase phase,
         SiloStorageIdentityProvider actualRuntime, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(actualRuntime);
+        ArgumentNullException.ThrowIfNull(actualRuntime) /* KLD0041: BCL null validation accepts the actualRuntime SiloStorageIdentityProvider reference through its object parameter. */;
         cancellationToken.ThrowIfCancellationRequested();
         if (!Enum.IsDefined(phase) || phase == GrainRequestPhase.RequestStarted)
         {

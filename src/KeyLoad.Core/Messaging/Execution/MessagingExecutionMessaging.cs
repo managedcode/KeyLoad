@@ -111,7 +111,7 @@ public static class MessagingExecutionMessaging
     /// <param name = "engine">The shared database execution context.</param>
     public static string Sign<T>(this DatabaseEngine engine, T claims)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return CoreClaims.Sign(engine.Store.Identity.SigningKey.Span, claims);
     }
 
@@ -123,7 +123,7 @@ public static class MessagingExecutionMessaging
     /// <param name = "engine">The shared database execution context.</param>
     public static T Verify<T>(this DatabaseEngine engine, string token)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Verify<T>(token, engine.ClaimsExecution.MaximumTokenCharacters);
     }
 
@@ -136,7 +136,7 @@ public static class MessagingExecutionMessaging
     /// <param name = "engine">The shared database execution context.</param>
     public static T Verify<T>(this DatabaseEngine engine, string token, int maximumCharacters)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return CoreClaims.Verify<T>(engine.Store.Identity.SigningKey.Span, token, maximumCharacters);
     }
 

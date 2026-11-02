@@ -53,7 +53,7 @@ internal sealed class RequestWorkAdmissions
 
     internal void RequireActive(RequestWorkLease lease)
     {
-        if (!active.TryGetValue((lease.RequestId, lease.Kind), out var actual) || !ReferenceEquals(actual, lease))
+        if (!active.TryGetValue((lease.RequestId, lease.Kind), out var actual) || !(ReferenceEquals(actual, lease) /* KLD0041: Require the exact active request work lease instance through CLR reference identity. */))
         {
             throw Errors.Fail(ErrorCode.Corruption, RequestWorkLimits.LeaseIdentityMessage);
         }

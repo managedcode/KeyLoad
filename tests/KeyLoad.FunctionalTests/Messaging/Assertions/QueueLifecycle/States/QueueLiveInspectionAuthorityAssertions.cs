@@ -43,7 +43,7 @@ internal static class QueueLiveInspectionAuthorityAssertions
             await Assert.That(store.Read(view => view.ReadOwnedValue(key))!.SequenceEqual(OrleansSerialization.Serialize(body))).IsTrue();
             bytes += OrleansSerialization.Serialize(body).LongLength;
             var family = scheduled ? "scheduled" : "ready";
-            KeyComponent deadline = scheduled ? KeyComponent.FromDateTimeOffset(message.NotBefore!.Value) : KeyComponent.FromInt64(1L);
+            var deadline = scheduled ? KeyComponent.FromDateTimeOffset(message.NotBefore!.Value) : KeyComponent.FromInt64(1L);
             await Assert.That(store.Read(view => view.GetRecord<string>(KeySpace.Partition(family, lane.Partition, lane.Queue,
                 deadline, message.MessageId)))).IsEqualTo(message.MessageId);
         }

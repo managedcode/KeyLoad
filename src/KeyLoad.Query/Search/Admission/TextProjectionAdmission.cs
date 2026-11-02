@@ -8,7 +8,8 @@ internal static class TextProjectionAdmission
     internal static KeyLoadException Busy(string detail, Task availability)
     {
         var failure = Errors.Fail(ErrorCode.BudgetExceeded, detail);
-        failure.Data[typeof(TextProjectionAdmission)] = availability;
+        failure.Data /* KLD0041: The existing sealed KeyLoadException carries this local projection availability task in CLR exception metadata. */
+            [typeof(TextProjectionAdmission)] /* KLD0041: Exception.Data requires an object-valued slot for this local projection availability Task reference. */ = availability;
         return failure;
     }
 
@@ -23,9 +24,10 @@ internal static class TextProjectionAdmission
                 return execute();
             }
             catch (KeyLoadException failure) when (failure.Code == ErrorCode.BudgetExceeded
-                && failure.Data[typeof(TextProjectionAdmission)] is Task)
+                && (failure.Data /* KLD0041: Read the local projection availability signal from the existing CLR exception metadata contract. */
+                    [typeof(TextProjectionAdmission)] /* KLD0041: The CLR metadata indexer returns the projection availability task as object. */
+                    is Task availability /* KLD0042: Validate and bind the native exception metadata value to its required Task type once. */))
             {
-                var availability = (Task)failure.Data[typeof(TextProjectionAdmission)]!;
                 await availability.WaitAsync(cancellationToken);
             }
         }

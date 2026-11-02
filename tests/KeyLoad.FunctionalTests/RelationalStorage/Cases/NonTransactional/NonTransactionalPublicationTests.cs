@@ -36,7 +36,7 @@ internal sealed class NonTransactionalPublicationTests
         await Assert.That(retained!.Json).IsEqualTo(RelationalTestData.Row());
         await Assert.That(retained.Revision).IsEqualTo(1L);
         var following = Guid.NewGuid();
-        (await new EmbeddedCoordinator(database).RuntimeSubmitAsync(OperationKind.Batch, following, RelationalTestData.Root,
+        (await new EmbeddedCoordinator(database).RuntimeSubmitAsync<object>(OperationKind.Batch, following, RelationalTestData.Root,
             new CommandRequest(following, fixture.Partition, [new PutDocument(RelationalTestData.Table,
                 RelationalTestData.Second, NonTransactionalTableFixture.Row(RelationalTestData.Second, NonTransactionalTableFixture.Beta))])))
             .Get<CommitReceipt>();

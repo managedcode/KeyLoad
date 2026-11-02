@@ -42,7 +42,7 @@ public static class SampleRetentionCommands
     internal static DateTimeOffset ValidateRetention(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, ExpireSamples request, DateTimeOffset now)
     {
         const int MaximumDeletesFirstCount = 1;
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(partition);
         JsonData.Identifier(request.SeriesSet);
         JsonData.Identifier(request.SeriesId);

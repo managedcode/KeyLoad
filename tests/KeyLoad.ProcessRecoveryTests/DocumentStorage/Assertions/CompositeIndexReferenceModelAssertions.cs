@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Storage;
 
 namespace KeyLoad.ProcessRecoveryTests.DocumentStorage;
 
@@ -82,9 +83,9 @@ internal static class CompositeIndexReferenceModelAssertions
     {
         var rankOnly = index == CompositeIndexCrashContract.RankIndex;
         var keys = rows.Select(row => (Id: row.Id, Key: KeySpace.Partition(space, partition,
-            new object?[] { CompositeIndexCrashContract.Collection, index }.Concat(rankOnly ?
-                new object?[] { row.Rank } : [row.Label, row.Rank]).Concat(space == UniqueSpace ?
-                Array.Empty<object?>() : [row.Id]).ToArray()))).OrderBy(row => Convert.ToHexString(row.Key), StringComparer.Ordinal).ToArray();
+            [CompositeIndexCrashContract.Collection, index, .. rankOnly ?
+                new KeyComponent[] { row.Rank } : [row.Label, row.Rank], .. space == UniqueSpace ?
+                Array.Empty<KeyComponent>() : [row.Id]]))).OrderBy(row => Convert.ToHexString(row.Key), StringComparer.Ordinal).ToArray();
         var after = rankOnly ? rows.Where(row => row.Rank > 4m).OrderBy(row => row.Rank).Select(row => row.Id).ToArray() : [];
         return new(partition.PartitionKey, space, index, keys.Select(row => Convert.ToHexString(row.Key)).ToArray(),
             keys.Select(row => row.Id).ToArray(), after);

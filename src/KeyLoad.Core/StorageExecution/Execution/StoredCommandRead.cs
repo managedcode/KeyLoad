@@ -18,7 +18,7 @@ public static class StoredCommandRead
     /// <param name = "engine">The shared database execution context.</param>
     public static (bool HasValue, StoredCommand? Value) ReadStoredCommand(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.ReadOwnedStoredCommand(engine.OwnCommand(operation), cancellationToken);
     }
 
@@ -46,7 +46,7 @@ public static class StoredCommandRead
             }
 
             engine.ValidateStoredSubmissionIdentity(view, original, selected, outcome);
-            _ = engine.ReadValidatedSubmissionOutcome(view, original, verifiedSelection: selected);
+            _ = (engine.ReadValidatedSubmissionOutcome(view, original, verifiedSelection: selected) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */);
             StorageOperationApply.RequireStoredCanonicalSequence(view, outcome, siloLocal: false);
             var retained = engine.OwnCommand(outcome.PreparedCommand);
             if (retained.CommandId != original.CommandId || retained.UserId != original.UserId || retained.Value!.Kind != original.Value!.Kind)
@@ -66,7 +66,7 @@ public static class StoredCommandRead
     /// when that commit persisted one outcome, and none when no canonical command recorded its outcome key.</returns>
     public static ImmutableArray<StoredCommand> ReadLastCommittedCommands(this DatabaseEngine engine, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Store.Read(view =>
         {
             cancellationToken.ThrowIfCancellationRequested();

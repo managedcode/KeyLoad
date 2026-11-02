@@ -18,7 +18,7 @@ internal static class RemoteTransferRepairCoordination
             hint.Source, hint.Destination, hint.TransferId, intentToken, hint.AcceptGeneration,
             RemoteTransferRepairIdentity.CommandId(hint, stage), stage, hint.AcceptPolicyGeneration,
             hint.CompleteGeneration, receiptToken);
-        var value = (await execution.ReadAsync<RemoteTransferCoordinationReadResult>(hint.PrincipalId,
+        var value = (await execution.ReadAsync<RemoteTransferCoordinationReadResult, RemoteTransferCoordinationReadRequest>(hint.PrincipalId,
             GrainReadKind.QueueTransferCoordination, request, token).ConfigureAwait(true)).Value
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Unavailable);
         if (stage == QueueTransferRepairStage.Accept && value.TargetReceipt is not null

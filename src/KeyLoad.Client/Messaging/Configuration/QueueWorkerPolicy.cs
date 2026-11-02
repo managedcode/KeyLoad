@@ -7,7 +7,7 @@ internal static class QueueWorkerPolicy
     [ConfigurationBinding]
     internal static IOptions<QueueWorkerOptions> Snapshot(IOptions<QueueWorkerOptions> configured)
     {
-        ArgumentNullException.ThrowIfNull(configured);
+        ArgumentNullException.ThrowIfNull(configured) /* KLD0041: BCL null validation accepts the configured IOptions reference through its object parameter. */;
         var original = configured.Value;
         var snapshot = new QueueWorkerOptions
         {

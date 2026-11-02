@@ -13,7 +13,7 @@ public static class StreamTraversalExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static StreamPage ReadStream(this DatabaseEngine engine, string principalId, ReadStreamRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.ReadStreamTraversal(principalId, request, new(engine.Clock, cancellationToken));
     }
 
@@ -25,8 +25,8 @@ public static class StreamTraversalExecution
 
     internal static StreamPage ReadStreamTraversal(this DatabaseEngine engine, string principalId, ReadStreamRequest request, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Stream);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request.Stream) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (request.AfterRevision < StreamTraversalProtocol.EmptyRevision || request.Direction is not (StreamReadDirection.Forward or StreamReadDirection.Backward) || request.Cursor is not null && request.AfterRevision != StreamTraversalProtocol.EmptyRevision)
         {
             throw Errors.Fail(ErrorCode.Validation, StreamTraversalProtocol.InvalidRequest);

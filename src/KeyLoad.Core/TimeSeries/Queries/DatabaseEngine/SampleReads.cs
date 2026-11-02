@@ -19,7 +19,7 @@ public static class SampleReads
     /// <param name = "engine">The shared database execution context.</param>
     public static SampleRecord[] ReadSamples(this DatabaseEngine engine, string principalId, PartitionRef partition, string set, string seriesId, DateTimeOffset from, DateTimeOffset until, int limit = DefaultSampleReadLimit, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         budget.Check();
         var request = new ReadSamplesRequest(partition, set, seriesId, from, until, limit);

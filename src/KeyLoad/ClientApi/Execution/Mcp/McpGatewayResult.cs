@@ -8,7 +8,7 @@ internal static class McpGatewayResult
 {
     internal static (bool HasValue, CallToolResult? Value) GetOriginal(McpGatewayInvokeResult result)
     {
-        ArgumentNullException.ThrowIfNull(result);
+        ArgumentNullException.ThrowIfNull(result) /* KLD0041: BCL null validation accepts the result McpGatewayInvokeResult reference through its object parameter. */;
         return result.IsSuccess ? ((CallToolResult?)(result.McpResult)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(CallToolResult?)) : (false, default(CallToolResult?));
     }
 }

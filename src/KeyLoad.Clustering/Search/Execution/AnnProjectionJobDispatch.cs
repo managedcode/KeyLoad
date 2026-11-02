@@ -17,7 +17,7 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         try
         {
             if (binding is not IRequestWorkBinding execution
-                || !ReferenceEquals(binding.ResultRetention, execution.OriginalProducer.ResultRetention))
+                || !(ReferenceEquals(binding.ResultRetention, execution.OriginalProducer.ResultRetention) /* KLD0041: Require ANN dispatch to retain the original producer retention owner instance through CLR reference identity. */))
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
             }
@@ -55,8 +55,8 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         {
             throw Errors.Fail(error, reply.SafeDetail ?? InvalidResult);
         }
-        var value = GrainReplyFactory.RequireValue(reply).Value;
-        if (value is not AnnMaintenanceResult result || result.CommandId != original.CommandId
+        var /* KLD0041: Inspect the current generated reply slot before accepting the concrete ANN maintenance response and command identity. */ value = (GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue field only to validate the concrete RPC response or its permitted absence. */);
+        if ((value is not AnnMaintenanceResult result /* KLD0042: Validate the current generated GrainValue slot as KeyLoad.AnnMaintenanceResult before accepting this concrete RPC response. */) || result.CommandId != original.CommandId
             || result.Consumer != original.Consumer || result.IndexGeneration != original.IndexGeneration
             || result.Phase != AnnMaintenancePhase.Completed)
         {

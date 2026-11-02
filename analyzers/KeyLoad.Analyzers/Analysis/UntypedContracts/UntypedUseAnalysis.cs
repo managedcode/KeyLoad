@@ -21,7 +21,9 @@ internal static class UntypedUseAnalysis
             _ => operation.Type
         };
         if (facts.Contains(type, context.CancellationToken)
-            || operation is IInvocationOperation call && HasErasedInput(call, facts, context.CancellationToken))
+            || operation is IInvocationOperation call && HasErasedInput(call, facts, context.CancellationToken)
+            || operation is IObjectCreationOperation creation
+                && HasErasedParameters(creation.Constructor, facts, context.CancellationToken))
         {
             context.ReportDiagnostic(Diagnostic.Create(rule, operation.Syntax.GetLocation(), Kind(operation),
                 Name(operation)) /* KLD0041: Roslyn requires object message arguments for this use kind and the resolved API member identity. */);
@@ -37,7 +39,17 @@ internal static class UntypedUseAnalysis
         {
             return true;
         }
-        foreach (var parameter in call.TargetMethod.Parameters)
+        return HasErasedParameters(call.TargetMethod, facts, cancellationToken);
+    }
+
+    private static bool HasErasedParameters(IMethodSymbol? method, UntypedTypeFacts facts,
+        System.Threading.CancellationToken cancellationToken)
+    {
+        if (method is null)
+        {
+            return false;
+        }
+        foreach (var parameter in method.Parameters)
         {
             if (facts.Contains(parameter.Type, cancellationToken))
             {
@@ -60,6 +72,7 @@ internal static class UntypedUseAnalysis
         IInvocationOperation invocation => invocation.TargetMethod.ToDisplayString(),
         IPropertyReferenceOperation property => property.Property.ToDisplayString(),
         IFieldReferenceOperation field => field.Field.ToDisplayString(),
+        IObjectCreationOperation creation when creation.Constructor is { } constructor => constructor.ToDisplayString(),
         _ => operation.Type?.ToDisplayString() ?? operation.Kind.ToString()
     };
 }

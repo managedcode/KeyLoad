@@ -19,13 +19,13 @@ internal static class StorageCopyBatchOutcomes
         {
             var expected = original.Applied[index];
             if (results.Any(result => result.Applied[index].Sequence != expected.Sequence
-                || !StorageCopyAcknowledgements.Same(result.Applied[index].Result, expected.Result)))
+                || !(StorageCopyAcknowledgements.Same((result.Applied[index].Result /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */), (expected.Result /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */)) /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */)))
             {
                 Differ(outcomes, index, applied);
                 return false;
             }
 
-            outcomes[index] = StorageCopyOutcome.Completed(StorageCopyAcknowledgements.Attach(expected.Result, results.Length));
+            outcomes[index] = (StorageCopyOutcome.Completed((StorageCopyAcknowledgements.Attach((expected.Result /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */), results.Length) /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */)) /* KLD0041: Compare and acknowledge the current persisted mixed-command result slots from every required copy before advancing the shared batch cut. */);
         }
 
         return true;

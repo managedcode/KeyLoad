@@ -18,8 +18,8 @@ internal static class PartitionQueryPlanFactory
     internal static PartitionQueryPlan Create(AstQueryRequest request, StoreIdentity owner,
         ImmutableArray<PartitionRef> partitions, QueryExecutionOptions execution)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request AstQueryRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(owner) /* KLD0041: BCL null validation accepts the owner StoreIdentity reference through its object parameter. */;
         if (request.Query.Offset != EmptyElementCount)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, UnsupportedWindowMessage);

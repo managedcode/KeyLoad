@@ -20,7 +20,7 @@ internal static class McpGatewayMetaArgumentReader
 
     internal static McpGatewayMetaSelection Select(JsonRpcRequest request)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request JsonRpcRequest reference through its object parameter. */;
         if (request.Params is not JsonObject parameters
             || parameters[McpTransportProtocol.Name] is not JsonValue nameNode
             || !nameNode.TryGetValue<string>(out var name))

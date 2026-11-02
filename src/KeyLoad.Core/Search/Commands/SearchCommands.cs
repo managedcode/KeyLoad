@@ -1,13 +1,12 @@
 using KeyLoad.Core.Search;
 using KeyLoad.Storage;
-using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
 
 namespace KeyLoad.Core;
 /// <summary>Executes SearchCommands operations against the caller's database context.</summary>
 public static class SearchCommands
 {
-    internal static Result<object> ExecuteBm25CorpusPublication(this DatabaseEngine engine, IAtomicTransaction transaction, PrincipalRecord administrator, Command<DatabaseCommand> operation, long position)
+    internal static CommitReceipt ExecuteBm25CorpusPublication(this DatabaseEngine engine, IAtomicTransaction transaction, PrincipalRecord administrator, Command<DatabaseCommand> operation, long position)
     {
         var phase = OperationProtocol.Payload<Bm25CorpusPublicationPhaseCommand>(operation);
         OperationProtocol.RequireEnvelopeId(operation, phase.CommandId);
@@ -28,6 +27,6 @@ public static class SearchCommands
         }
 
         transaction.PutRecord(key, current);
-        return OperationProtocol.Result(new CommitReceipt(operation.CommandId, engine.Token(transaction, current.Partition, position), [], engine.Durability, engine.AcknowledgedPersistedCopies));
+        return new CommitReceipt(operation.CommandId, engine.Token(transaction, current.Partition, position), [], engine.Durability, engine.AcknowledgedPersistedCopies);
     }
 }

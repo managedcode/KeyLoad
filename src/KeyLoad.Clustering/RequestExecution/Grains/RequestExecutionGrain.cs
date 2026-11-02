@@ -13,7 +13,7 @@ public sealed class RequestExecutionGrain(ILocalDatabaseRuntime storage, ILocalS
     {
         try
         {
-            ArgumentNullException.ThrowIfNull(envelope);
+            ArgumentNullException.ThrowIfNull(envelope) /* KLD0041: BCL null validation accepts the envelope GrainRequestEnvelope reference through its object parameter. */;
             cancellationToken.ThrowIfCancellationRequested();
             GrainRequestScope.RequireRequestIdentity(envelope, this.GetPrimaryKey());
             GrainIdentityContext.Validate(envelope, this.GetPrimaryKey());

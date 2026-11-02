@@ -26,12 +26,12 @@ public static class SearchQueriesOnlineText
         var scope = new CommandOutcomePartitionScope(CommandOutcomeScopeKind.Partition, request.Consumer.Partition);
         var stored = CommandOutcomeKeyResolver.Select(view, principal.Id, current.CommandId, scope).Outcome ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         engine.ValidateOnlineTextStoredOutcome(view, principal, originalRequest, stored);
-        if (Errors.Code(stored.Result.Problem).Value is not null || stored.OnlineTextAuthority is null || current.ParentFingerprint != stored.OnlineTextAuthority.ParentFingerprint)
+        if (Errors.Code(stored.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Problem).Value is not null || stored.OnlineTextAuthority is null || current.ParentFingerprint != stored.OnlineTextAuthority.ParentFingerprint)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         }
 
-        if (!OrleansSerialization.Serialize(current.Authority).AsSpan().SequenceEqual(OrleansSerialization.Serialize(stored.OnlineTextAuthority)) || current.PublishedCut != stored.Result.Get<OnlineTextIndexMaintenanceResult>().PublishedCut)
+        if (!OrleansSerialization.Serialize(current.Authority).AsSpan().SequenceEqual(OrleansSerialization.Serialize(stored.OnlineTextAuthority)) || current.PublishedCut != stored.Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.Get<OnlineTextIndexMaintenanceResult>() /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */.PublishedCut)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
         }

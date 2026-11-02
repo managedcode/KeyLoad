@@ -31,7 +31,7 @@ internal static class PostgresProtocol
     internal const string Terminator = "\0";
     internal const string CommandSeparator = " ";
     internal const int MaximumParameters = 64;
-    internal const char ParameterPrefix = 'p';
+    internal const string ParameterPrefix = "p";
     internal const string Invalid = "The execution SQL message is invalid.";
     internal const string Unsupported = "The execution SQL capability is unsupported.";
     internal const string Duplicate = "The named execution SQL statement or portal already exists.";

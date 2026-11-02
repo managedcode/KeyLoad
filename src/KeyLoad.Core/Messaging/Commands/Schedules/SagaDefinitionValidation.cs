@@ -76,7 +76,7 @@ internal static class SagaDefinitionValidation
 
     internal static void ValidateTimeoutDefinition(SagaTimeoutDefinition timeout, QueueLaneRef source, PartitionRef partition, DateTimeOffset deadline)
     {
-        ArgumentNullException.ThrowIfNull(timeout);
+        ArgumentNullException.ThrowIfNull(timeout) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (timeout.Queue is null || timeout.Queue.Partition != partition || timeout.Queue.Partition != source.Partition || timeout.TimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > SagaCommands.MaximumTimeoutTtlTicks))
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);

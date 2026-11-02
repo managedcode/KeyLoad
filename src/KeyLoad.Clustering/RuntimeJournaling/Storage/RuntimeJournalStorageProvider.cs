@@ -18,7 +18,7 @@ internal sealed class RuntimeJournalStorageProvider(RuntimeJournalClient client,
 
     public IJournalStorage CreateStorage(JournalId journalId)
     {
-        ObjectDisposedException.ThrowIf(disposed != RuntimeJournalStoragePolicy.NoDisposedProvider, this);
+        ObjectDisposedException.ThrowIf(disposed != RuntimeJournalStoragePolicy.NoDisposedProvider, this) /* KLD0041: BCL disposal diagnostics accept the this RuntimeJournalStorageProvider instance through object to preserve its runtime owner type. */;
         if (journalId.IsDefault)
         {
             throw new ArgumentException(RuntimeJournalStoragePolicy.RequiredJournalIdentifier, nameof(journalId));

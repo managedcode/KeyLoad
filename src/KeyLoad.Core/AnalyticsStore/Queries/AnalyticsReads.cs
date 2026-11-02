@@ -17,15 +17,15 @@ public static class AnalyticsReads
     /// <param name = "engine">The shared database execution context.</param>
     public static AnalyticsEventsPage ReadAnalyticsEvents(this DatabaseEngine engine, string principalId, ReadAnalyticsEventsRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
         return engine.ReadAnalyticsEventsRead(principalId, request, work);
     }
 
     internal static AnalyticsEventsPage ReadAnalyticsEventsBound(this DatabaseEngine engine, string principalId, ReadAnalyticsEventsRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(work);
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.AttachResourceLifetimeBinding(binding);
         work.RequireResourceLifetimeBinding(binding);
         return engine.ReadAnalyticsEventsRead(principalId, request, work);
@@ -33,7 +33,7 @@ public static class AnalyticsReads
 
     internal static AnalyticsEventsPage ReadAnalyticsEventsRead(this DatabaseEngine engine, string principalId, ReadAnalyticsEventsRequest request, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.Check();
         AnalyticsStoreValidation.Range(request.FromInclusive, request.ToExclusive);
         if (request.Limit <= MinimumAnalyticsReadLimit)
@@ -69,15 +69,15 @@ public static class AnalyticsReads
     /// <param name = "engine">The shared database execution context.</param>
     public static AnalyticsAggregateSnapshot CaptureAnalyticsAggregate(this DatabaseEngine engine, string principalId, AggregateAnalyticsRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
         return engine.CaptureAnalyticsAggregateRead(principalId, request, work);
     }
 
     internal static AnalyticsAggregateSnapshot CaptureAnalyticsAggregateBound(this DatabaseEngine engine, string principalId, AggregateAnalyticsRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(work);
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.AttachResourceLifetimeBinding(binding);
         work.RequireResourceLifetimeBinding(binding);
         return engine.CaptureAnalyticsAggregateRead(principalId, request, work);
@@ -85,7 +85,7 @@ public static class AnalyticsReads
 
     internal static AnalyticsAggregateSnapshot CaptureAnalyticsAggregateRead(this DatabaseEngine engine, string principalId, AggregateAnalyticsRequest request, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.Check();
         return engine.Store.Read(raw =>
         {

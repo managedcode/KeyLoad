@@ -7,12 +7,12 @@ internal static class TextResourceFileAccounting
     private const long AbsentFileLength = 0;
     private const long EmptyFileLength = 0;
     private const long NoAdditionalBytes = 0;
-    internal static void Check(Dictionary<object, TextResourceFileReservation> reservations,
+    internal static void Check(Dictionary<object, TextResourceFileReservation> /* KLD0041: One reservation ledger preserves string value equality for canonical paths and reference identity for TextOpenFileGroup instances; both keys are existing references. */ reservations,
         ref int files, ref long bytes, IOptions<TextExecutionOptions> options)
     {
         foreach (var reservation in reservations.Values)
         {
-            if (reservation.Key is TextOpenFileGroup)
+            if ((reservation.Key /* KLD0041: This accounting key is either a canonical path string or the existing TextOpenFileGroup reference; distinguish shared open-file accounting without adding a key wrapper. */) is TextOpenFileGroup)
             {
                 continue;
             }

@@ -55,7 +55,7 @@ internal static class Bm25CorpusCall
         {
             work.Check();
             token.ThrowIfCancellationRequested();
-            if (GrainReplyFactory.RequireValue(reply).Value is not CommitReceipt receipt
+            if (((GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue corpus-publication reply slot once before validating its concrete receipt and command identity. */) is not CommitReceipt receipt /* KLD0042: Require the concrete CommitReceipt and original command ID from the current generated corpus-publication reply slot. */)
                 || receipt.CommandId != commandId)
             {
                 throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);

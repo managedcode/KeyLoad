@@ -7,7 +7,7 @@ internal static class ReadExecutionBudgetStorageReads
 {
     internal static byte[]? Read(ReadExecutionBudget budget, IKeyValueView view, byte[] key)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         byte[]? value = null;
         view.ReadValue(key, borrowed => value = borrowed.ToArray());
@@ -17,7 +17,7 @@ internal static class ReadExecutionBudgetStorageReads
 
     internal static T? ReadRecord<T>(ReadExecutionBudget budget, IKeyValueView view, byte[] key) where T : class
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         T? record = null;
         view.ReadValue(key, value => record = OrleansSerialization.Deserialize<T>(value));
@@ -28,7 +28,7 @@ internal static class ReadExecutionBudgetStorageReads
     internal static StorageScanResult VisitRange(ReadExecutionBudget budget, IKeyValueView view, byte[] prefix,
         int maxRecords, StorageRecordVisitor visitor, byte[]? afterKey, byte[]? untilKey)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         var result = view.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey,
             cancellationToken: budget.Cancellation);
@@ -39,7 +39,7 @@ internal static class ReadExecutionBudgetStorageReads
     internal static StorageScanResult VisitAll(ReadExecutionBudget budget, IKeyValueView view, byte[] prefix,
         StorageRecordVisitor visitor, byte[]? afterKey, byte[]? untilKey)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return StorageRangePages.VisitAll(view.MaximumRangeRecords,
             (maxRecords, pageVisitor, after) => VisitRange(budget, view, prefix, maxRecords, pageVisitor, after, untilKey),
             visitor, afterKey);

@@ -17,14 +17,14 @@ internal readonly struct PreparedPackedSimilarity : IPackedAnnSimilarity
 
     internal static PreparedPackedSimilarity Create(PackedAnnVectors vectors, int ordinal, DistanceMetric metric)
     {
-        ArgumentNullException.ThrowIfNull(vectors);
+        ArgumentNullException.ThrowIfNull(vectors) /* KLD0041: BCL null validation accepts the vectors PackedAnnVectors reference through its object parameter. */;
         SimilarityMetricMath.ValidateMetric(metric);
         return new(vectors.Memory(ordinal), metric, metric == DistanceMetric.Cosine ? vectors.SquaredNorm(ordinal) : 0);
     }
 
     internal double Score(PackedAnnVectors vectors, int ordinal)
     {
-        ArgumentNullException.ThrowIfNull(vectors);
+        ArgumentNullException.ThrowIfNull(vectors) /* KLD0041: BCL null validation accepts the vectors PackedAnnVectors reference through its object parameter. */;
         SimilarityMetricMath.ValidateMetric(metric);
         if (query.Length is < 1 or > MaxDimension || vectors.Dimension != query.Length)
         {

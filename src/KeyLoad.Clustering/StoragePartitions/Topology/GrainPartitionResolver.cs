@@ -11,10 +11,10 @@ internal static class GrainPartitionResolver
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
-        var input = kind is OperationKind.Bm25CorpusPublicationPhase or OperationKind.OnlineTextPublicationPhase
-            ? GrainPayload.Read<ManagedCode.Communication.Commands.Command<DatabaseCommand>>(request.Payload).Value!.Input
-            : GrainPayload.ReadCommandInput(kind, request.Payload);
-        var target = CommandPartitions.Of(kind, input);
+        var /* KLD0041: Read the current canonical command input slot only to select its closed operation kind and atomic partition route. */ input = kind is OperationKind.Bm25CorpusPublicationPhase or OperationKind.OnlineTextPublicationPhase
+            ? ((GrainPayload.Read<ManagedCode.Communication.Commands.Command<DatabaseCommand>>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as ManagedCode.Communication.Commands.Command<KeyLoad.DatabaseCommand> at this closed operation boundary before executing typed code. */).Value!.Input /* KLD0041: Read the current canonical DatabaseCommand.Input slot of this validated publication command only to select its atomic partition route. */)
+            : (GrainPayload.ReadCommandInput(kind, (request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as the selected canonical command input at this closed operation boundary before executing typed code. */);
+        var target = (CommandPartitions.Of(kind, input) /* KLD0041: Read the current canonical command input slot only to select its closed operation kind and atomic partition route. */);
         return target.Route switch
         {
             CommandRoute.Partition => Partition(request, target),
@@ -30,7 +30,7 @@ internal static class GrainPartitionResolver
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }
         var partition = target.Partition;
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: BCL null validation accepts the partition PartitionRef reference through its object parameter. */;
         JsonData.Identifier(partition.TenantId);
         JsonData.Identifier(partition.DatabaseId);
         JsonData.Identifier(partition.TransactionDomainId);

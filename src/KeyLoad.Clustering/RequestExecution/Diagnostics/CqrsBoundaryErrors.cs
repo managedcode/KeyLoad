@@ -10,7 +10,7 @@ internal static class CqrsBoundaryErrors
     /// <returns>False only for exceptions which must escape the producer handler.</returns>
     internal static bool IsNonFatal(Exception error)
     {
-        ArgumentNullException.ThrowIfNull(error);
+        ArgumentNullException.ThrowIfNull(error) /* KLD0041: BCL null validation accepts the error Exception reference through its object parameter. */;
         return CqrsRuntimeFailures.FindFatal(error) is null;
     }
 }

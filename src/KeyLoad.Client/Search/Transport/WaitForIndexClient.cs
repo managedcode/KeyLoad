@@ -13,8 +13,8 @@ public static class WaitForIndexClient
     public static Task<Result<WaitForIndexResult>> WaitForIndexAsync(this KeyLoadClient client, WaitForIndexRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<WaitForIndexResult>(WaitForIndexProtocol.Route, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request WaitForIndexRequest reference through its object parameter. */;
+        return client.Send<WaitForIndexResult, WaitForIndexRequest>(WaitForIndexProtocol.Route, request, false, null, cancellationToken);
     }
 }

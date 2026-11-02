@@ -25,8 +25,8 @@ internal sealed class KeyCodecTypedComponentTests
         KeyCodecValidation.Validate(typed);
         var decoded = KeyCodec.Decode(typed);
         await Assert.That(decoded[0].Text).IsEqualTo(Text);
-        await Assert.That(decoded[1].Integer).IsEqualTo(Integer);
-        await Assert.That(decoded[2].Integer).IsEqualTo((long)Small);
+        await Assert.That(decoded[1].WholeNumber).IsEqualTo(Integer);
+        await Assert.That(decoded[2].WholeNumber).IsEqualTo((long)Small);
         await Assert.That(decoded[3].Boolean).IsTrue();
         await Assert.That(decoded[4].Boolean).IsFalse();
         await Assert.That(decoded[5].ExactNumber).IsEqualTo(1.25m);

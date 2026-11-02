@@ -31,7 +31,7 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
         IGrainFactory grains, IServiceScopeFactory? scopeFactory, PartitionStorageOwnerContext context)
     {
         ownerContext = context;
-        if (!ReferenceEquals(context.Current, context.Context))
+        if (!(ReferenceEquals(context.Current, context.Context) /* KLD0041: Require the current Orleans context to be the physical session owner instance through CLR reference identity. */))
         {
             throw new InvalidOperationException(OwnerContextRequired);
         }
@@ -65,8 +65,8 @@ internal sealed class PartitionStorageSession : ISharedDatabaseSession, IAsyncDi
                 ? OrleansSerialization.Deserialize<long>(bytes) : default(long)));
     }
 
-    public Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
-        => Host.Coordinator.SubmitVerifiedAsync(operation, cancellationToken);
+    public Task<Result<TResult>> ApplyAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+        => Host.Coordinator.SubmitVerifiedAsync<TResult>(operation, cancellationToken);
 
     public Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, string? actorKey,
         IGrainContext owner, CancellationToken cancellationToken)

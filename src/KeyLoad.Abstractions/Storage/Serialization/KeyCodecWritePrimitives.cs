@@ -27,7 +27,7 @@ internal static class KeyCodecWritePrimitives
                 writer.Write(component.Boolean ? (byte)TruePayload : (byte)FalsePayload);
                 break;
             case KeyComponentKind.WholeNumber:
-                WriteInt64(ref writer, component.Integer);
+                WriteInt64(ref writer, component.WholeNumber);
                 break;
             case KeyComponentKind.FixedPoint:
                 KeyCodecDecimal.Write(ref writer, component.ExactNumber);

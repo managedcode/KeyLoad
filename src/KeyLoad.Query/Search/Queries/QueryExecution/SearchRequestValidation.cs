@@ -11,7 +11,7 @@ internal static class SearchRequestValidation
 
     internal static void Validate(SearchRequest request, bool allowNoSearchBranch, QueryExecutionOptions execution)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SearchRequest reference through its object parameter. */;
         if (request.Limit < 1 || request.Limit > execution.MaximumSearchResults || request.FusionConstant < 1
             || !double.IsFinite(request.TextWeight) || !double.IsFinite(request.VectorWeight)
             || request.TextWeight < 0 || request.VectorWeight < 0

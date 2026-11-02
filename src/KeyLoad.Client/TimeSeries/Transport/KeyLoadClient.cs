@@ -10,7 +10,7 @@ public sealed partial class KeyLoadClient
     /// <returns>Persisted UTC floor, cumulative deletion count and remaining-page status.</returns>
     public Task<Result<SampleRetentionStatus>> ReadSampleRetentionAsync(ReadSampleRetentionRequest request,
         CancellationToken cancellationToken = default)
-        => Send<SampleRetentionStatus>(TimeSeriesReadProtocol.RetentionRoute, request, false, null, cancellationToken);
+        => Send<SampleRetentionStatus, ReadSampleRetentionRequest>(TimeSeriesReadProtocol.RetentionRoute, request, false, null, cancellationToken);
 
     /// <summary>Reads the latest projected sample at an optional inclusive timestamp.</summary>
     /// <param name="request">Series identity and optional inclusive timestamp cut.</param>
@@ -18,7 +18,7 @@ public sealed partial class KeyLoadClient
     /// <returns>The latest sample wrapper, containing null when the series is absent.</returns>
     public Task<Result<LatestSampleResult>> ReadLatestSampleAsync(ReadLatestSampleRequest request,
         CancellationToken cancellationToken = default)
-        => Send<LatestSampleResult>(TimeSeriesReadProtocol.LatestRoute, request, false, null, cancellationToken);
+        => Send<LatestSampleResult, ReadLatestSampleRequest>(TimeSeriesReadProtocol.LatestRoute, request, false, null, cancellationToken);
 
     /// <summary>Reads complete finite raw statistics over a half-open UTC range.</summary>
     /// <param name="request">Series range and strict sample cap.</param>
@@ -26,7 +26,7 @@ public sealed partial class KeyLoadClient
     /// <returns>Complete statistics; overflowing the sample cap rejects the operation.</returns>
     public Task<Result<SampleAggregate>> AggregateSamplesAsync(AggregateSamplesRequest request,
         CancellationToken cancellationToken = default)
-        => Send<SampleAggregate>(TimeSeriesReadProtocol.AggregateRoute, request, false, null, cancellationToken);
+        => Send<SampleAggregate, AggregateSamplesRequest>(TimeSeriesReadProtocol.AggregateRoute, request, false, null, cancellationToken);
 
     /// <summary>Reads dense fixed-width UTC windows anchored at the requested beginning.</summary>
     /// <param name="request">Series range, positive width and sample/window caps.</param>
@@ -34,12 +34,12 @@ public sealed partial class KeyLoadClient
     /// <returns>The complete immutable window result after server input/output limits.</returns>
     public Task<Result<SampleAggregateWindowsResult>> AggregateSampleWindowsAsync(AggregateSampleWindowsRequest request,
         CancellationToken cancellationToken = default)
-        => Send<SampleAggregateWindowsResult>(TimeSeriesReadProtocol.WindowsRoute, request, false, null, cancellationToken);
+        => Send<SampleAggregateWindowsResult, AggregateSampleWindowsRequest>(TimeSeriesReadProtocol.WindowsRoute, request, false, null, cancellationToken);
 
     /// <summary>Reads a bounded page of time-series samples.</summary>
     /// <param name="request">Series identity, time range and page controls.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The typed sample page.</returns>
     public Task<Result<SampleRecord[]>> ReadSamplesAsync(ReadSamplesRequest request, CancellationToken cancellationToken = default)
-        => Send<SampleRecord[]>(ApiRoutes.SeriesRead, request, false, null, cancellationToken);
+        => Send<SampleRecord[], ReadSamplesRequest>(ApiRoutes.SeriesRead, request, false, null, cancellationToken);
 }

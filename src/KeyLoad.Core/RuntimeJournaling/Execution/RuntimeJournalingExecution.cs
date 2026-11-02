@@ -12,7 +12,7 @@ public static class RuntimeJournalingExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static void ConfigureRuntimeJournal(this DatabaseEngine engine, IOptions<RuntimeJournalOptions> options)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (engine.Store.Identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, RuntimeJournalProtocol.ReaderContractRequired);
@@ -34,7 +34,7 @@ public static class RuntimeJournalingExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static RuntimeJournalSnapshot? GetRuntimeJournalHeader(this DatabaseEngine engine, string principalId, string journalName, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.RuntimeJournal.GetHeader(principalId, journalName, cancellationToken);
     }
 
@@ -47,7 +47,7 @@ public static class RuntimeJournalingExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static RuntimeJournalPage ReadRuntimeJournal(this DatabaseEngine engine, string principalId, RuntimeJournalReadRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.RuntimeJournal.Read(principalId, request, cancellationToken);
     }
 
@@ -59,7 +59,7 @@ public static class RuntimeJournalingExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static RuntimeJournalCatalog ReadRuntimeJournalCatalog(this DatabaseEngine engine, string principalId, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.RuntimeJournal.Catalog(principalId, cancellationToken);
     }
 }

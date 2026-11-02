@@ -14,13 +14,13 @@ public static class StoragePartitionsQueries
     /// <param name = "engine">The shared database execution context.</param>
     public static AtomicPartitionPlacementResolution ReadAtomicPartitionPlacement(this DatabaseEngine engine, string principalId, PartitionRef partition)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Store.Read(view => engine.ReadAtomicPartitionPlacement(view, principalId, partition));
     }
 
     internal static AtomicPartitionPlacementResolution ReadAtomicPartitionPlacement(this DatabaseEngine engine, IKeyValueView view, string principalId, PartitionRef partition)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(partition);
         if (!engine.Principal(view, principalId, engine.Clock.GetUtcNow()).ClusterAdministrator)
         {
@@ -32,7 +32,7 @@ public static class StoragePartitionsQueries
 
     internal static AtomicPartitionPlacementResolution ReadPlacementWitness(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition)
     {
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(partition);
         var identity = engine.Store.Identity;
         return new(AtomicPartitionPlacementProtocol.CurrentVersion, partition, identity.NodeId, identity.Incarnation);

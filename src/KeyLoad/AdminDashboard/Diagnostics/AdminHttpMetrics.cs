@@ -18,7 +18,7 @@ internal sealed class AdminHttpMetrics
 
     public AdminHttpMetrics(IOptions<AdminObservationOptions> observationOptions, TimeProvider? clock = null)
     {
-        ArgumentNullException.ThrowIfNull(observationOptions);
+        ArgumentNullException.ThrowIfNull(observationOptions) /* KLD0041: BCL null validation accepts the observationOptions IOptions reference through its object parameter. */;
         var observation = observationOptions.Value;
         observation.Validate();
         time = clock ?? TimeProvider.System;

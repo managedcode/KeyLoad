@@ -16,7 +16,7 @@ internal sealed class DatabaseIdentityMiddleware(RequestDelegate next)
             return;
         }
         var principal = await DatabaseAuthenticationComposition.AuthenticateAsync(context);
-        context.Items[ServerProtocol.PrincipalItem] = principal;
+        ((context.Items /* KLD0041: Publish the verified PrincipalRecord reference in ASP.NET HttpContext.Items for this request's downstream authorization and file-storage access. */)[ServerProtocol.PrincipalItem] /* KLD0041: Publish the verified PrincipalRecord reference in ASP.NET HttpContext.Items for this request's downstream authorization and file-storage access. */) = principal;
         await next(context);
         if (context.Response.StatusCode == StatusCodes.Status413PayloadTooLarge && !context.Response.HasStarted)
         {

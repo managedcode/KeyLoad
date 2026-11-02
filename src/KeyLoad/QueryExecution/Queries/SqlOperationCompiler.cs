@@ -80,8 +80,8 @@ internal static class SqlOperationCompiler
             : SqlCompositionInsert.Compile(request, statement, positionalParameterCount, checkBudget, token);
         return Typed(McpToolNames.DocumentsCommit, command, command.CommandId, checkBudget, token);
     }
-    private static McpDecodedOperation Typed(string name, object request, Guid commandId,
-        Action checkBudget, CancellationToken token)
+    private static McpDecodedOperation Typed<TRequest>(string name, TRequest request, Guid commandId,
+        Action checkBudget, CancellationToken token) where TRequest : class
     {
         checkBudget();
         token.ThrowIfCancellationRequested();
@@ -90,7 +90,7 @@ internal static class SqlOperationCompiler
         {
             throw ScriptDomOperationErrors.Unsupported();
         }
-        return new(descriptor.ReadKind, descriptor.CommandKind, commandId, request);
+        return (new(descriptor.ReadKind, descriptor.CommandKind, commandId, request) /* KLD0041: Carry the validated concrete SQL AST/query request in the existing descriptor slot after matching the admitted route and closed operation kind. */);
     }
 }
 

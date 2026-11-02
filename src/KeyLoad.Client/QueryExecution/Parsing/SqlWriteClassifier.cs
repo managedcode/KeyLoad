@@ -23,7 +23,7 @@ internal static class SqlWriteClassifier
 
     internal static bool MayWriteRequest(SqlOperationRequest request, KeyLoadClientExecutionOptions bounds)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SqlOperationRequest reference through its object parameter. */;
         return MayWrite(request.Sql, bounds);
     }
 
@@ -31,7 +31,7 @@ internal static class SqlWriteClassifier
     /// anything that is not a complete leading SELECT inside that prefix is a possible write.</summary>
     internal static bool MayWrite(string? sql, KeyLoadClientExecutionOptions bounds)
     {
-        ArgumentNullException.ThrowIfNull(bounds);
+        ArgumentNullException.ThrowIfNull(bounds) /* KLD0041: BCL null validation accepts the bounds KeyLoadClientExecutionOptions reference through its object parameter. */;
         if (sql is null)
         {
             return true;

@@ -15,7 +15,7 @@ internal static class RuntimeMcpOutput
     /// <exception cref="KeyLoadException">The execution message exceeds its byte or structural capacity.</exception>
     internal static void Validate(JsonRpcMessage message, int maximumBytes, IOptions<McpExecutionOptions> options)
     {
-        ArgumentNullException.ThrowIfNull(message);
+        ArgumentNullException.ThrowIfNull(message) /* KLD0041: BCL null validation accepts the message JsonRpcMessage reference through its object parameter. */;
         using var stream = new McpBoundedWriteStream(maximumBytes);
         try
         {

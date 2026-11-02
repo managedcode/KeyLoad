@@ -15,7 +15,7 @@ internal static class DueWorkDiscovery
     internal static DueWorkPage ReadPage(DatabaseEngine database, DueSweepCursor? supplied,
         DateTimeOffset wakeAt, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(database);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         cancellationToken.ThrowIfCancellationRequested();
         if (wakeAt.Offset != TimeSpan.Zero)
         {

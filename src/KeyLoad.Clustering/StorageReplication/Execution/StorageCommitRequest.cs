@@ -1,17 +1,18 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
+using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>One submitted command waiting in its database's commit queue until a batch decides it.</summary>
 /// <remarks>A caller that cancels before its command joins a batch sees cancellation; once the command was sent to
 /// the copies its outcome is uncertain, so the caller receives <see cref="ErrorCode.UnknownWriteOutcome"/>.</remarks>
-internal sealed class StorageCommitRequest
+internal sealed class StorageCommitRequest<TResult> : IStorageCommitRequest
 {
     private const int Queued = 0;
     private const int Sent = 1;
     private const int Cancelled = 2;
-    private readonly TaskCompletionSource<Result<object>> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    private readonly TaskCompletionSource<Result<TResult>> completion = new(TaskCreationOptions.RunContinuationsAsynchronously);
     private readonly CancellationToken cancellationToken;
     private readonly CancellationTokenRegistration registration;
     private int state;
@@ -20,37 +21,49 @@ internal sealed class StorageCommitRequest
     {
         Operation = operation;
         this.cancellationToken = cancellationToken;
-        registration = cancellationToken.Register(static request => ((StorageCommitRequest)request!).Cancel(), this);
+        registration = (cancellationToken.Register(static request => (((StorageCommitRequest<TResult>)request! /* KLD0042: The native cancellation registration restores its original StorageCommitRequest<TResult> state reference; the static callback avoids an extra delegate capture. */)).Cancel(), this) /* KLD0041: The native cancellation registration takes object state; retain the typed request instance in its static callback without allocating a capture delegate. */);
     }
 
-    internal Command<DatabaseCommand> Operation
+    public Command<DatabaseCommand> Operation
     {
         get;
     }
 
-    internal Task<Result<object>> Completion => completion.Task;
+    internal Task<Result<TResult>> Completion => completion.Task;
 
     /// <summary>Claims a queued command for the next batch; false when its caller already cancelled it.</summary>
-    internal bool TrySend() => Interlocked.CompareExchange(ref state, Sent, Queued) == Queued;
+    public bool TrySend() => Interlocked.CompareExchange(ref state, Sent, Queued) == Queued;
 
     /// <summary>Returns a command no copy applied to the queue; false when its caller cancelled it.</summary>
-    internal bool TryReturn() => Interlocked.CompareExchange(ref state, Queued, Sent) == Sent;
+    public bool TryReturn() => Interlocked.CompareExchange(ref state, Queued, Sent) == Sent;
 
-    internal void Complete(StorageCopyOutcome outcome)
+    public void Complete(StorageCopyOutcome outcome)
     {
-        if (outcome.Failure is { } failure)
+        try
         {
-            completion.TrySetException(failure);
+            if (outcome.Failure is { } failure)
+            {
+                completion.TrySetException(failure);
+            }
+            else
+            {
+                var /* KLD0041: Read the current mixed persisted outcome only at typed queue completion, then publish the concrete Result<TResult>. */ result = (outcome.Result /* KLD0041: Read the current mixed persisted outcome only at typed queue completion, then publish the concrete Result<TResult>. */);
+                completion.TrySetResult(result.IsFailed ? Result<TResult>.Fail(result.Problem)
+                    : Result<TResult>.Succeed((result.Get<TResult>() /* KLD0041: Read the current mixed persisted outcome only at typed queue completion, then publish the concrete Result<TResult>. */)));
+            }
         }
-        else
+        catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
         {
-            completion.TrySetResult(outcome.Result);
+            completion.TrySetException(error);
         }
-        Release();
+        finally
+        {
+            Release();
+        }
     }
 
     /// <summary>Stops observing the caller's cancellation once the command is decided or abandoned.</summary>
-    internal void Release() => registration.Dispose();
+    public void Release() => registration.Dispose();
 
     private void Cancel()
     {

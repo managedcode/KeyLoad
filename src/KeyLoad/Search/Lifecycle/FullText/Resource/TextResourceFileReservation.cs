@@ -1,11 +1,11 @@
 namespace KeyLoad.Server.Search;
 
 internal sealed class TextResourceFileReservation(TextResourceOwnership owner,
-    object key, string path, long targetLength, Func<long> observeLength)
+    object /* KLD0041: One reservation ledger preserves string value equality for canonical paths and reference identity for TextOpenFileGroup instances; both keys are existing references. */ key, string path, long targetLength, Func<long> observeLength)
 {
     private readonly Lock gate = new();
     private bool completed;
-    internal object Key { get; } = key;
+    internal object /* KLD0041: One reservation ledger preserves string value equality for canonical paths and reference identity for TextOpenFileGroup instances; both keys are existing references. */ Key { get; } = key;
     internal string Path { get; } = path;
     internal long TargetLength { get; private set; } = targetLength;
     internal long ObserveLength() => observeLength();

@@ -54,7 +54,7 @@ internal static class CanonicalCredentialDispatch
             GrainReadKind.CurrentPrincipal, GrainContracts.NoDtoMarker);
         using var identity = node.OpenRequestContext(verified, requestId, Guid.Empty, connection.Token, connection.Id);
         var reply = await node.ExecuteAsync(requestId, envelope, false, connection.Token);
-        return GrainReplyFactory.RequireValue(reply).Value is PrincipalRecord current && current.Id == verified.Id
+        return ((GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue principal reply slot before checking its concrete type and subject identity. */) is PrincipalRecord current /* KLD0042: Require the concrete PrincipalRecord and match the verified subject before returning the current principal. */) && current.Id == verified.Id
             ? current : throw Errors.Fail(ErrorCode.Corruption, McpAuthentication.InvalidReply);
     }
 }

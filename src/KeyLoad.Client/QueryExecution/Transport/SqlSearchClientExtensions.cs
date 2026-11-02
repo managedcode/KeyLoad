@@ -11,8 +11,8 @@ public static class SqlSearchClientExtensions
     public static Task<Result<GraphSearchResult>> SearchSqlAsync(this KeyLoadClient client,
         SqlGraphSearchRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<GraphSearchResult>(SearchPath, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SqlGraphSearchRequest reference through its object parameter. */;
+        return client.Send<GraphSearchResult, SqlGraphSearchRequest>(SearchPath, request, false, null, cancellationToken);
     }
 }

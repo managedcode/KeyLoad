@@ -5,8 +5,8 @@ internal static class ReplayInputPolicy
     private const string ReplayInputDeniedMessage = "Complete replay input requires every raw-read and raw-use grant.";
     internal static void Require(PrincipalRecord principal, ResourceDefinition resource)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (resource.FieldPolicies.Concat(resource.HeaderPolicies)
             .Any(policy => !AuthorizationPolicy.Grant(principal, policy.RawReadGrant)
                 || !AuthorizationPolicy.Grant(principal, policy.RawUseGrant)))

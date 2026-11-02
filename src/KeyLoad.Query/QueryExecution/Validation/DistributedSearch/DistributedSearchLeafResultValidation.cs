@@ -9,9 +9,9 @@ internal static class DistributedSearchLeafResultValidation
     internal static void Require(DistributedSearchOwnedLeaf request, DistributedSearchLeafResult result,
         ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(result);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request DistributedSearchOwnedLeaf reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(result) /* KLD0041: BCL null validation accepts the result DistributedSearchLeafResult reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         if (result.Phase != request.Phase || result.Witness is null
             || result.Witness.Owner is null || result.Witness.Statistics is null

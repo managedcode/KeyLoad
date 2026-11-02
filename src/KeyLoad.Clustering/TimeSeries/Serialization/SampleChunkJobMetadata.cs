@@ -24,7 +24,7 @@ internal static class SampleChunkJobMetadata
 
     internal static SampleChunkWorkHint Read(IJobRunContext context, GrainId target)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context IJobRunContext reference through its object parameter. */;
         var job = context.Job;
         if (job is null || job.TargetGrainId != target || job.Name != SampleChunkJobProtocol.JobName
             || job.Metadata is not { } metadata || metadata.Count != SampleChunkJobProtocol.MetadataCount

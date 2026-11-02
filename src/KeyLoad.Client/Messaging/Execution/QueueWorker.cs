@@ -18,10 +18,10 @@ public static class QueueWorker
         Guid originalReceiveId, Func<QueueWorkerDeliveryContext, CancellationToken, Task> handler,
         IOptions<QueueWorkerOptions> options, TimeProvider clock, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(lane);
-        ArgumentNullException.ThrowIfNull(handler);
-        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(lane) /* KLD0041: BCL null validation accepts the lane QueueLaneRef reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(handler) /* KLD0041: BCL null validation accepts the handler Func reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(clock) /* KLD0041: BCL null validation accepts the clock TimeProvider reference through its object parameter. */;
         if (originalReceiveId == Guid.Empty)
         {
             throw new ArgumentException(QueueWorkerProtocol.InvalidReceiveId, nameof(originalReceiveId));

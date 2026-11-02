@@ -16,9 +16,9 @@ public static class QueueTransferClient
     public static Task<Result<QueueTransferReadResult>> InspectQueueTransferAsync(this KeyLoadClient client,
         InspectQueueTransferRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<QueueTransferReadResult>(InspectPath, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request InspectQueueTransferRequest reference through its object parameter. */;
+        return client.Send<QueueTransferReadResult, InspectQueueTransferRequest>(InspectPath, request, false, null, cancellationToken);
     }
 
     /// <summary>Reads the committed destination receipt without asserting source completion.</summary>
@@ -29,8 +29,8 @@ public static class QueueTransferClient
     public static Task<Result<QueueTransferReceiptReadResult>> InspectQueueTransferReceiptAsync(this KeyLoadClient client,
         InspectQueueTransferReceiptRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<QueueTransferReceiptReadResult>(ReceiptPath, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request InspectQueueTransferReceiptRequest reference through its object parameter. */;
+        return client.Send<QueueTransferReceiptReadResult, InspectQueueTransferReceiptRequest>(ReceiptPath, request, false, null, cancellationToken);
     }
 }

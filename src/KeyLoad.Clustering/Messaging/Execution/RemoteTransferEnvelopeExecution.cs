@@ -6,7 +6,7 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
     RemoteTransferCoordinationHint hint,
     IServiceProvider services, IGrainFactory grainFactory)
 {
-    internal async Task<(bool HasValue, T? Value)> ReadAsync<T>(string subject, GrainReadKind kind, object payload, CancellationToken token) where T : class
+    internal async Task<(bool HasValue, T? Value)> ReadAsync<T, TRequest>(string subject, GrainReadKind kind, TRequest payload, CancellationToken token) where T : class where TRequest : notnull
     {
         var requestId = Guid.NewGuid();
         var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
@@ -18,8 +18,8 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
         {
             throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferCoordinationProtocol.InvalidResult);
         }
-        var value = GrainReplyFactory.RequireValue(reply).Value;
-        return value is null ? (false, default(T?)) : (true, ((T?)(value as T ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCoordinationProtocol.InvalidResult))));
+        var /* KLD0041: Inspect the current generated GrainValue slot for an absent or correctly typed transfer response before using it. */ value = (GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue field only to validate the concrete RPC response or its permitted absence. */);
+        return value is null ? (false, default(T?)) : (true, ((T?)((value as T /* KLD0042: Validate the current generated GrainValue slot as T? before accepting this concrete RPC response. */) ?? throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCoordinationProtocol.InvalidResult))));
     }
 
     internal async Task<GrainOperationReply> ApplyAsync(string subject, CommandRequest request, CancellationToken token)

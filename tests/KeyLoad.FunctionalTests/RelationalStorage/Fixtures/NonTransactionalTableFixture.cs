@@ -26,7 +26,7 @@ internal sealed class NonTransactionalTableFixture(Action<CommitStage, long, int
             Partition.DatabaseId, RelationalTestData.Definition() with { Name = name, Transactional = transactional }));
 
     internal Task<Result<object>> SubmitAsync(OperationKind kind, object input, Guid? commandId = null)
-        => new EmbeddedCoordinator(Database).RuntimeSubmitAsync(kind, commandId ?? Guid.NewGuid(),
+        => new EmbeddedCoordinator(Database).RuntimeSubmitAsync<object>(kind, commandId ?? Guid.NewGuid(),
             RelationalTestData.Root, input, cancellationToken: TestContext.Current!.Execution.CancellationToken);
 
     internal Task<Result<object>> BatchAsync(Guid id, params Mutation[] mutations)

@@ -13,8 +13,8 @@ public static class DistributedSearchClient
     public static Task<Result<DistributedSearchPage>> DistributedSearchAsync(this KeyLoadClient client,
         DistributedSearchRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<DistributedSearchPage>(DistributedSearchProtocol.Route, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request DistributedSearchRequest reference through its object parameter. */;
+        return client.Send<DistributedSearchPage, DistributedSearchRequest>(DistributedSearchProtocol.Route, request, false, null, cancellationToken);
     }
 }

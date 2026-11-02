@@ -31,8 +31,8 @@ internal static class OrleansRpcFailure
         OrleansRpcFailureStage stage, OrleansRpcFailureOperation? originalOperation,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(error);
-        ArgumentNullException.ThrowIfNull(logger);
+        ArgumentNullException.ThrowIfNull(error) /* KLD0041: BCL null validation accepts the error Exception reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(logger) /* KLD0041: BCL null validation accepts the logger ILogger reference through its object parameter. */;
         if (!CqrsBoundaryErrors.IsNonFatal(error))
         {
             throw new ArgumentException(InvalidFailure, nameof(error));

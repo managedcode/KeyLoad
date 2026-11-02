@@ -12,7 +12,7 @@ internal static class AggregateReplayValidation
 
     internal static void ValidateReducer(AggregateReplayReducer reducer)
     {
-        ArgumentNullException.ThrowIfNull(reducer);
+        ArgumentNullException.ThrowIfNull(reducer) /* KLD0041: BCL null validation accepts the reducer AggregateReplayReducer reference through its object parameter. */;
         if (string.IsNullOrWhiteSpace(reducer.Version) || reducer.StateSchemaVersion <= AggregateReplayClientProtocol.InvalidSchemaVersion ||
             reducer.EventSchemaVersion <= AggregateReplayClientProtocol.InvalidSchemaVersion || reducer.Apply is null)
         {
@@ -26,7 +26,7 @@ internal static class AggregateReplayValidation
         AggregateReplayWorkerLimits limits,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(page);
+        ArgumentNullException.ThrowIfNull(page) /* KLD0041: BCL null validation accepts the page AggregateReplayPage reference through its object parameter. */;
         ValidatePageIdentity(page);
         var input = new AggregateReplayInput(limits.MaximumInputBytes, limits.MaximumJsonDepth);
         var initialState = page.Snapshot is { } snapshot

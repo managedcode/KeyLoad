@@ -10,7 +10,7 @@ internal static class AnnMaintenanceExecution
         IServiceProvider services, GrainRequestCodec codec, ILogger diagnostics,
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer, CqrsStreamPurpose purpose)
     {
-        var request = GrainPayload.ReadCommand<AnnMaintenanceRequest>(parent.Payload);
+        var request = (GrainPayload.ReadCommand<AnnMaintenanceRequest>((parent.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.AnnMaintenanceRequest at this closed operation boundary before executing typed code. */);
         purpose.EnableAnnMaintenance(request.Mode);
         var children = new MaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, purpose.WorkBinding,
             AnnMaintenanceChildScope.Purpose, AnnMaintenanceProtocol.Interrupted);

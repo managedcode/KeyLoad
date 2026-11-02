@@ -11,8 +11,8 @@ public static class QueueWorkerReconciliation
     public static async Task<QueueWorkerOperationObservation> ReconcileQueueWorkerOperationAsync(this KeyLoadClient client,
         QueueWorkerOperationObservation original, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(original);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(original) /* KLD0041: BCL null validation accepts the original QueueWorkerOperationObservation reference through its object parameter. */;
         if ((original.Receive is null) == (original.Command is null))
         {
             throw new ArgumentException(QueueWorkerProtocol.InvalidObservation, nameof(original));

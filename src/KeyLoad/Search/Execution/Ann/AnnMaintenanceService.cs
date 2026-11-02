@@ -22,7 +22,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
     public async Task<AnnProjectionEnrollment?> ReadEnrollmentBoundAsync(PrincipalRecord principal,
         AnnMaintenanceRequest initialRequest, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         work.AttachResourceLifetimeBinding(binding);
         return (await AnnEnrollmentRead.ReadAsync(database, principal, initialRequest, configured,
             clock, admitted, state.EnsureOwner, token, work, binding)).Value;
@@ -31,7 +31,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
     public Task<AnnProjectionPublication> ReadPublishedBoundAsync(PrincipalRecord principal,
         AnnMaintenanceRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         work.AttachResourceLifetimeBinding(binding);
         return AnnProjectionPublicationRead.ReadAsync(database, principal, request, configured,
             clock, admitted, state.EnsureOwner, token, work, binding);
@@ -77,7 +77,7 @@ internal sealed class AnnMaintenanceService(string directory, DatabaseEngine dat
         AnnMaintenanceCapabilityRequest request,
         IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         return ExecuteOwnedAsync(principal, request, binding, token);
     }
 

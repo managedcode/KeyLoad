@@ -22,11 +22,11 @@ public static class ChangeFeedsExecutionChangeFeeds
     /// <param name = "engine">The shared database execution context.</param>
     public static (string Cursor, long Tail) CaptureChangeFeedCursor(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(collection);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(collection) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         engine.Authorization.Require(principal, partition, collection, Capability.ChangesRead | Capability.DocumentsRead);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, collection, ResourceKind.Collection);
         var tail = engine.ReadOutboxHead(view, partition).Tail;
@@ -41,7 +41,7 @@ public static class ChangeFeedsExecutionChangeFeeds
     /// <param name = "engine">The shared database execution context.</param>
     public static ChangeFeedPage ReadChangeFeed(this DatabaseEngine engine, string principalId, ReadChangeFeedRequest request)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.ReadChangeFeed(principalId, request, CancellationToken.None);
     }
 
@@ -54,9 +54,9 @@ public static class ChangeFeedsExecutionChangeFeeds
     /// <param name = "engine">The shared database execution context.</param>
     public static ChangeFeedPage ReadChangeFeed(this DatabaseEngine engine, string principalId, ReadChangeFeedRequest request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(principalId);
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(principalId) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.ReadChangeFeedRead(principalId, request, budget);
     }
@@ -88,11 +88,11 @@ public static class ChangeFeedsExecutionChangeFeeds
     public static AuthorizedDocumentChangePage<T> ReadChangeFeedView<T>(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, ReadChangeFeedRequest request, Func<ResourceDefinition, AuthorizedDocumentChange, T?> project)
         where T : class
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(project);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(project) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var (resource, head, after) = engine.PrepareChangeRead(view, principal, request);
         return engine.ProjectChangePage(view, principal, request, project, resource, head, after);
     }

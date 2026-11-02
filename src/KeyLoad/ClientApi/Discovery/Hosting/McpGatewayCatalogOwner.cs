@@ -19,11 +19,11 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
 
     internal McpGatewayCatalogOwner(IMcpGatewayFactory factory, IHttpContextAccessor httpContextAccessor, IOptions<McpExecutionOptions> executionOptions)
     {
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         executionOptions.Value.Validate();
         this.executionOptions = executionOptions;
-        ArgumentNullException.ThrowIfNull(factory);
-        ArgumentNullException.ThrowIfNull(httpContextAccessor);
+        ArgumentNullException.ThrowIfNull(factory) /* KLD0041: BCL null validation accepts the factory IMcpGatewayFactory reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(httpContextAccessor) /* KLD0041: BCL null validation accepts the httpContextAccessor IHttpContextAccessor reference through its object parameter. */;
         _factory = factory;
         _httpContextAccessor = httpContextAccessor;
         _lifetime = new McpGatewayCatalogLifetime(BuildInstanceAsync);
@@ -76,7 +76,7 @@ internal sealed class McpGatewayCatalogOwner : IAsyncDisposable
         IReadOnlyDictionary<string, JsonElement> arguments,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(arguments);
+        ArgumentNullException.ThrowIfNull(arguments) /* KLD0041: BCL null validation accepts the arguments IReadOnlyDictionary reference through its object parameter. */;
         if (!McpOperationCatalog.TryGetTool(toolId, out var operation) || operation is null)
         {
             throw Errors.Fail(ErrorCode.Validation, McpCatalogProtocol.InvalidArguments);

@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
@@ -10,10 +11,8 @@ internal static class SubscriptionProcessingRecoveryContinuation
 {
     private const string Healthy = "healthy-processing";
 
-    internal static byte[] Key(string space, SubscriptionRef group, params object?[] suffix)
-        => KeySpace.Partition(space, group.Source.Partition, new object?[]
-        { group.Source.Resource, group.Source.Kind.ToString(), group.Source.StreamId, group.Source.Generation, group.GroupId }
-            .Concat(suffix).ToArray());
+    internal static byte[] Key(string space, SubscriptionRef group, params ReadOnlySpan<KeyComponent> suffix)
+        => KeySpace.Partition(space, group.Source.Partition, [group.Source.Resource, group.Source.Kind.ToString(), group.Source.StreamId, group.Source.Generation, group.GroupId, .. suffix]);
 
     internal static async Task RunAsync(DatabaseEngine db, ZoneTreeStore store, string path,
         Command<DatabaseCommand> original, SubscriptionProcessingResult first, CancellationToken token)

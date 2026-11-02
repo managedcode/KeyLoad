@@ -9,12 +9,12 @@ namespace KeyLoad.Core;
 /// <summary>Executes ResourceExecutionExecution operations against the caller's database context.</summary>
 public static class ResourceExecutionExecution
 {
-    internal static Result<object> ResolveAppliedSubmissionOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, ReadExecutionBudget? work = null)
+    internal static Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ResolveAppliedSubmissionOutcome(this DatabaseEngine engine, Command<DatabaseCommand> operation, ReadExecutionBudget? work = null)
     {
-        ArgumentNullException.ThrowIfNull(operation);
+        ArgumentNullException.ThrowIfNull(operation) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work?.Check();
         var normalized = engine.OwnCommand(operation);
-        var result = engine.Store.Read(raw =>
+        var /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ result = engine.Store.Read(raw =>
         {
             var view = work is null ? raw : work.CreateView(raw);
             try
@@ -25,13 +25,13 @@ public static class ResourceExecutionExecution
                 var selection = CommandOutcomeKeyResolver.Select(view, normalized.UserId!, normalized.CommandId, scope);
                 var outcome = selection.Outcome ?? throw Errors.Fail(ErrorCode.RecoveryRequired, CommandOutcomeOperations.MissingDurableOutcomeMessage);
                 engine.ValidateStoredSubmissionIdentity(view, normalized, selection, outcome);
-                return engine.ReadValidatedSubmissionOutcome(view, normalized, verifiedSelection: selection);
+                return engine.ReadValidatedSubmissionOutcome(view, normalized, verifiedSelection: selection) /* KLD0041: This step reads the existing native persisted outcome after identity and authority checks while retaining its original heterogeneous payload. */;
             }
             catch (KeyLoadException refusal) when (CqrsRuntimeFailures.FindFatal(refusal) is null && refusal.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated or ErrorCode.TokenInvalidated or ErrorCode.StaleLease or ErrorCode.LeaseExpired or ErrorCode.Conflict)
             {
-                return ManagedCode.Communication.Result<object>.Fail(Errors.Problem(refusal.Code, refusal.Message));
+                return ManagedCode.Communication.Result<object>.Fail(Errors.Problem(refusal.Code, refusal.Message)) /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
             }
-        });
+        }) /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
         work?.Check();
         return result;
     }

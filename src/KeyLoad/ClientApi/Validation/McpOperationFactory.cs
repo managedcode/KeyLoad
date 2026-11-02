@@ -19,7 +19,7 @@ internal static class McpOperationFactory
     internal static McpOperationDescriptor Command<TRequest, TResult>(string name, string route, OperationKind kind,
         Func<TRequest, Guid> commandId) where TRequest : notnull
     {
-        ArgumentNullException.ThrowIfNull(commandId);
+        ArgumentNullException.ThrowIfNull(commandId) /* KLD0041: BCL null validation accepts the commandId Func reference through its object parameter. */;
         return Create(name, route, null, kind, typeof(TRequest), typeof(TResult), false, false, McpToolHints.ForCommand(kind),
             (arguments, _) => McpArgumentDecoder.Command(arguments, kind, commandId));
     }

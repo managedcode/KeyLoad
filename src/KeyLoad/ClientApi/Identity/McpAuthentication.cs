@@ -20,6 +20,6 @@ internal static class McpAuthentication
     {
         cancellationToken.ThrowIfCancellationRequested();
         options.Value.Validate();
-        return payload.Value as PrincipalRecord ?? throw Errors.Fail(ErrorCode.Validation, InvalidReply);
+        return ((payload.Value /* KLD0041: Read the current generated GrainValue authentication slot before validating its concrete principal type. */) as PrincipalRecord /* KLD0042: Require the concrete PrincipalRecord from the existing generated authentication reply before trusting its fields. */) ?? throw Errors.Fail(ErrorCode.Validation, InvalidReply);
     }
 }

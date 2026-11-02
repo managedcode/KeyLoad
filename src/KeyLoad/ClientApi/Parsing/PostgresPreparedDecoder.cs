@@ -108,7 +108,7 @@ internal static class PostgresPreparedDecoder
             var key = PostgresProtocol.ParameterPrefix + (index + sizeof(byte)).ToString(CultureInfo.InvariantCulture);
             var format = formats.Length == PostgresProtocol.AllRows ? PostgresProtocol.TextFormat
                 : formats.Length == sizeof(byte) ? formats[PostgresProtocol.AllRows] : formats[index];
-            var value = length == PostgresProtocol.NullLength ? JsonSerializer.SerializeToElement<object?>(null, JsonDefaults.Options)
+            var value = length == PostgresProtocol.NullLength ? JsonSerializer.SerializeToElement<string?>(null, JsonDefaults.Options)
                 : PostgresParameterDecoder.Read(statement.ParameterOids[index], format, reader.Take(length), framing);
             values.Add(key, value);
             retained = checked(retained + key.Length * sizeof(char) + value.GetRawText().Length * sizeof(char));

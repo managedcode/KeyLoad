@@ -16,7 +16,7 @@ public interface ISharedDatabaseSession
     SiloStorageCut ReadCut(CancellationToken cancellationToken);
 
     /// <summary>Prepares and persists one command through the original atomic storage gate.</summary>
-    Task<Result<object>> ApplyAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
+    Task<Result<TResult>> ApplyAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken);
 
     /// <summary>Awaits the original local request Task, using the currently executing grain context.</summary>
     Task<GrainOperationReply> ExecuteAsync(GrainRequestEnvelope envelope, string? actorKey,

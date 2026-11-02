@@ -68,7 +68,7 @@ internal sealed partial class BackgroundStorageOperations
         var result = await BackgroundStorageReadExecution.RunLocalAsync<(bool HasValue, PrincipalRecord? Value)>(storage, token =>
         {
             token.ThrowIfCancellationRequested();
-            ArgumentNullException.ThrowIfNull(hint);
+            ArgumentNullException.ThrowIfNull(hint) /* KLD0041: BCL null validation accepts the hint DueWorkHint reference through its object parameter. */;
             EngineResourceAccess.ValidatePartition(hint.Lane.Partition);
             if (hint.Kind == DueWorkKind.Saga)
             {
@@ -109,7 +109,7 @@ internal sealed partial class BackgroundStorageOperations
         return BackgroundStorageReadExecution.RunLocalAsync<PrincipalRecord>(storage, token =>
         {
             token.ThrowIfCancellationRequested();
-            ArgumentNullException.ThrowIfNull(hint);
+            ArgumentNullException.ThrowIfNull(hint) /* KLD0041: BCL null validation accepts the hint RemoteTransferCoordinationHint reference through its object parameter. */;
             if (hint.Source?.Partition is null)
             {
                 throw Errors.Fail(ErrorCode.Validation, RemoteTransferCoordinationProtocol.InvalidHint);

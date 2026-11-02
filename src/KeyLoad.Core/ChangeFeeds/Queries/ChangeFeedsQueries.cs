@@ -9,18 +9,18 @@ public static class ChangeFeedsQueries
 {
     internal static ChangeFeedPage ReadChangeFeedBound(this DatabaseEngine engine, string principalId, ReadChangeFeedRequest request, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.AttachResourceLifetimeBinding(binding);
         return engine.ReadChangeFeedRead(principalId, request, budget);
     }
 
     internal static ProjectionBatch ReadProjectionBatchBound(this DatabaseEngine engine, string principalId, ReadProjectionBatchRequest request, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.AttachResourceLifetimeBinding(binding);
         budget.Check();
         return engine.Store.Read(raw =>
@@ -32,9 +32,9 @@ public static class ChangeFeedsQueries
 
     internal static OutboxStatus GetOutboxStatusBound(this DatabaseEngine engine, string principalId, PartitionRef partition, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(budget);
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.AttachResourceLifetimeBinding(binding);
         budget.Check();
         return engine.Store.Read(raw =>

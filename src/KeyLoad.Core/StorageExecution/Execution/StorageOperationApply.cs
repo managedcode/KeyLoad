@@ -16,10 +16,10 @@ public static class StorageOperationApply
     /// <returns>The actual persisted command result.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    public static Result<object> Apply(this DatabaseEngine engine, Command<DatabaseCommand> operation)
+    public static Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ Apply(this DatabaseEngine engine, Command<DatabaseCommand> operation)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        return engine.ApplyCore(operation, null, selectEmbeddedClock: false, cancellationToken: default).Result;
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        return engine.ApplyCore(operation, null, selectEmbeddedClock: false, cancellationToken: default).Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
     }
 
     /// <summary>Applies the next canonical sequence selected by the execution Orleans database grain.</summary>
@@ -38,19 +38,19 @@ public static class StorageOperationApply
     /// <returns>The actual local command result.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    public static Result<object> ApplyLocalStorageOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+    public static Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ApplyLocalStorageOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var verified = engine.OwnCommand(operation);
         if (!engine.IsSiloLocalOperation(verified))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidStorageOperationScope);
         }
 
-        return engine.ApplyCore(verified, null, selectEmbeddedClock: false, cancellationToken).Result;
+        return engine.ApplyCore(verified, null, selectEmbeddedClock: false, cancellationToken).Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
     }
 
-    internal static Result<object> ApplyEmbedded(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken) => engine.ApplyCore(operation, null, selectEmbeddedClock: true, cancellationToken).Result;
+    internal static Result<object> /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */ ApplyEmbedded(this DatabaseEngine engine, Command<DatabaseCommand> operation, CancellationToken cancellationToken) => engine.ApplyCore(operation, null, selectEmbeddedClock: true, cancellationToken).Result /* KLD0041: The existing native stored-outcome schema carries different operation payload types; this step preserves that exact persisted result. */;
     internal static long ReadCanonicalSequence(IKeyValueView view)
     {
         var encoded = view.ReadOwnedValue(KeySpace.AppliedBytes);

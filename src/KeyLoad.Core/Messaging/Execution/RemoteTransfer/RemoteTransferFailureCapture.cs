@@ -30,5 +30,5 @@ public static class RemoteTransferFailureCapture
         return (true, ((RemoteTransferAcceptFailureAuthority?)(new(claims.Source, claims.Destination, claims.TransferId, principal.Id, claims.Fingerprint, RemoteTransferCoordinationIdentity.IntentDigest(accept.IntentToken), operation.CommandId, engine.Store.Identity.Incarnation, engine.CaptureRemoteTransferDependency(view, principal, claims.Destination)))));
     }
 
-    internal static bool HasRemoteTransferCapacityFailure(Result<object> result) => Errors.Code(result.Problem).Value == ErrorCode.ResourceExhausted && result.Problem?.Detail == QueueSweepTransitions.StoredQuotaExhausted;
+    internal static bool HasRemoteTransferCapacityFailure(Problem? problem) => Errors.Code(problem).Value == ErrorCode.ResourceExhausted && problem?.Detail == QueueSweepTransitions.StoredQuotaExhausted;
 }

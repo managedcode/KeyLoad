@@ -13,7 +13,7 @@ internal static class DatabaseCredentialResolver
     internal static async Task<GrainValue> ReadAsync(HttpContext context,
         IDatabaseAuthenticationExecutionObserver? executionObserver = null)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context HttpContext reference through its object parameter. */;
         var key = context.Request.Headers.Authorization.ToString();
         if (!key.StartsWith(ServerProtocol.BearerPrefix, StringComparison.Ordinal))
         {
@@ -56,6 +56,6 @@ internal static class DatabaseCredentialResolver
                 executionObserver!.Terminal(context.TraceIdentifier, requestId, outcome);
             }
         }
-        return new GrainValue(principal);
+        return (new GrainValue(principal) /* KLD0041: The current generated GrainValue wire slot carries the verified PrincipalRecord reference; preserve its exact native serializer shape. */);
     }
 }

@@ -125,7 +125,7 @@ internal sealed class TextBoundedFileStream : Stream, IFileStream
                 failures.Add(error);
             }
         }
-        GC.SuppressFinalize(this);
+        GC.SuppressFinalize(this) /* KLD0041: The standard CLR async-disposal path suppresses this stream's finalizer after the owned close attempt; original close failures remain observed and joined. */;
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

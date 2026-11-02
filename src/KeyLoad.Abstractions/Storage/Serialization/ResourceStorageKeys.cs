@@ -19,7 +19,8 @@ internal static class ResourceStorageKeys
     private const int ResourceComponent = 5;
     private const int DatabaseComponent = 2;
     private const int FirstAddressComponent = 1;
-    private const int AddressEnd = ResourceComponent + 1;
+    private const int DomainComponent = 3;
+    private const int PartitionComponent = 4;
     private static readonly byte[][] DataPrefixes =
     [
         .. new[]
@@ -45,7 +46,8 @@ internal static class ResourceStorageKeys
             components[ResourceComponent].Text);
         if (retainScope)
         {
-            scope = KeyCodec.Encode(components.AsSpan(FirstAddressComponent, AddressEnd - FirstAddressComponent))[KeyCodecTokens.VersionBytes..];
+            scope = KeyCodec.Encode(components[FirstAddressComponent], components[DatabaseComponent],
+                components[DomainComponent], components[PartitionComponent], components[ResourceComponent])[KeyCodecTokens.VersionBytes..];
         }
         return true;
     }
@@ -62,9 +64,9 @@ internal static class ResourceStorageKeys
         return true;
     }
 
-    private static bool TryComponents(ReadOnlySpan<byte> key, out KeyComponent[] components)
+    private static bool TryComponents(ReadOnlySpan<byte> key, out DecodedKey components)
     {
-        components = [];
+        components = default;
         if (DataFamilyPrefixLength(key) == 0)
         {
             return false;

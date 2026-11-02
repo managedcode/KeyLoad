@@ -10,8 +10,8 @@ public static class SampleChunkRead
     /// <param name = "cancellationToken">The cancellation Token.</param>
     public static SampleChunkWindowResult ReadSampleChunkWindow(this DatabaseEngine engine, string principalId, ReadSampleChunkWindowRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.ReadSampleChunkWindowRead(principalId, request, budget);
     }

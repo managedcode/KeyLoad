@@ -7,7 +7,7 @@ internal static class SqlGraphSearchRequestSizer
 {
     internal static void EnsureBounded(SqlGraphSearchRequest request, int maximumParameters, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SqlGraphSearchRequest reference through its object parameter. */;
         if (request.Query is null)
         {
             throw Errors.Fail(ErrorCode.Validation, SqlGraphSearchSyntax.WrapperDetail);

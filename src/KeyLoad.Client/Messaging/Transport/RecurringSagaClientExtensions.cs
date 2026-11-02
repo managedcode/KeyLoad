@@ -12,17 +12,17 @@ public static class RecurringSagaClientExtensions
     public static Task<Result<RecurringScheduleReadResult>> InspectRecurringScheduleAsync(this KeyLoadClient client,
         InspectRecurringScheduleRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<RecurringScheduleReadResult>(SchedulePath, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request InspectRecurringScheduleRequest reference through its object parameter. */;
+        return client.Send<RecurringScheduleReadResult, InspectRecurringScheduleRequest>(SchedulePath, request, false, null, cancellationToken);
     }
 
     /// <summary>Reads a response whose Saga field is null when absent, without exposing its timeout template.</summary>
     public static Task<Result<SagaReadResult>> InspectSagaAsync(this KeyLoadClient client,
         InspectSagaRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<SagaReadResult>(SagaPath, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request InspectSagaRequest reference through its object parameter. */;
+        return client.Send<SagaReadResult, InspectSagaRequest>(SagaPath, request, false, null, cancellationToken);
     }
 }

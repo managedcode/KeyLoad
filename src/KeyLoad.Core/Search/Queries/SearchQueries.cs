@@ -10,7 +10,7 @@ public static class SearchQueries
     internal static AnnProjectionWork ReadAnnProjectionWork(this DatabaseEngine engine, ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget) => engine.Store.Read(view => engine.ReadAnnProjectionWork(view, consumer, generation, budget));
     internal static AnnProjectionWork ReadAnnProjectionWorkBound(this DatabaseEngine engine, ProjectionConsumerRef consumer, long generation, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.AttachResourceLifetimeBinding(binding);
         return engine.Store.Read(view => engine.ReadAnnProjectionWork(view, consumer, generation, budget, binding));
     }
@@ -18,7 +18,7 @@ public static class SearchQueries
     internal static AnnProjectionWorkPage ReadAnnProjectionWorkPage(this DatabaseEngine engine, byte[]? after, ReadExecutionBudget budget) => engine.ReadAnnProjectionWorkPageCore(after, budget, null);
     internal static AnnProjectionWorkPage ReadAnnProjectionWorkPageBound(this DatabaseEngine engine, byte[]? after, ReadExecutionBudget budget, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.AttachResourceLifetimeBinding(binding);
         var page = engine.ReadAnnProjectionWorkPageCore(after, budget, binding);
         return page;

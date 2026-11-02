@@ -16,7 +16,7 @@ internal static class GrainRequestScope
     {
         if (request.Incarnation != incarnation
             || request.RequestId == Guid.Empty
-            || (request.ReadKind is null) == (request.CommandKind is null) || request.Payload is null)
+            || (request.ReadKind is null) == (request.CommandKind is null) || (request.Payload /* KLD0041: Preserve the current generated Payload field ID and runtime type header at this request envelope boundary. */) is null)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
         }

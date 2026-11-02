@@ -50,7 +50,7 @@ public static class EventSources
         const string SourceHeadSpaceText = "stream-head";
         const int TailPositionEmptyCount = 0;
         const int FirstAvailablePositionSingleItemCount = 1;
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (source.Kind == EventSourceKind.Topic)
         {
             return TopicPublishReads.ReadTopicHead(view, source).Head;
@@ -143,8 +143,8 @@ public static class EventSources
     /// <param name = "engine">The shared database execution context.</param>
     public static EventSourcePage ReadEventSource(this DatabaseEngine engine, string principalId, ReadEventSourceRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         budget.Check();
         return engine.Store.Read(view => engine.ReadEventSource(view, principalId, request, budget));

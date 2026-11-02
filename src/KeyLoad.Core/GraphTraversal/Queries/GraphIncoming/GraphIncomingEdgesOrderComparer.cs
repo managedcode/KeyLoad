@@ -11,8 +11,8 @@ internal sealed class GraphIncomingEdgesOrderComparer(ReadExecutionBudget budget
     {
         const int EqualOrderIdentity = 0;
 
-        ArgumentNullException.ThrowIfNull(left);
-        ArgumentNullException.ThrowIfNull(right);
+        ArgumentNullException.ThrowIfNull(left) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(right) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         try
         {
             budget.Check();
@@ -43,7 +43,7 @@ internal sealed class GraphIncomingEdgesOrderComparer(ReadExecutionBudget budget
 
     internal void RethrowOwnedBudgetFailure(InvalidOperationException wrapper)
     {
-        if (budgetFailure is { } failure && ReferenceEquals(wrapper.InnerException, failure.SourceException))
+        if (budgetFailure is { } failure && (ReferenceEquals(wrapper.InnerException, failure.SourceException) /* KLD0041: This comparison requires CLR reference identity rather than an overridden value-equality implementation. */))
         {
             failure.Throw();
         }

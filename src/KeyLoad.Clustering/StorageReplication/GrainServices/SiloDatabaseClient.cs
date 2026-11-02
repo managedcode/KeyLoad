@@ -24,7 +24,7 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
     public async Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, GrainRequestEnvelope envelope,
         CancellationToken cancellationToken, string? actorKey = null)
     {
-        ArgumentNullException.ThrowIfNull(envelope);
+        ArgumentNullException.ThrowIfNull(envelope) /* KLD0041: BCL null validation accepts the envelope GrainRequestEnvelope reference through its object parameter. */;
         using var placement = GrainRequestIdentityScope.ForPlacement(envelope, owner, cancellationToken);
         var request = grains.GetGrain<IRequestExecutionGrain>(RequestExecutionGrainIdentity.For(envelope.RequestId));
         return await request.ExecuteAsync(owner, envelope, actorKey, cancellationToken).ConfigureAwait(true);

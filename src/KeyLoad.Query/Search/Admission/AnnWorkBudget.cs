@@ -22,7 +22,7 @@ internal sealed class AnnWorkBudget
 
     internal AnnWorkBudget(ReadExecutionBudget readBudget, long maxWorkUnits)
     {
-        ArgumentNullException.ThrowIfNull(readBudget);
+        ArgumentNullException.ThrowIfNull(readBudget) /* KLD0041: BCL null validation accepts the readBudget ReadExecutionBudget reference through its object parameter. */;
         if (maxWorkUnits <= InitialSequence)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidMaximum);

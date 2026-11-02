@@ -33,8 +33,8 @@ public static class ZoneTreeBackupCopy
         }
         var comparison = OperatingSystem.IsWindows() || OperatingSystem.IsMacOS()
             ? StringComparison.OrdinalIgnoreCase : StringComparison.Ordinal;
-        var sourcePrefix = Path.EndsInDirectorySeparator(source) ? source : source + Path.DirectorySeparatorChar;
-        var destinationPrefix = Path.EndsInDirectorySeparator(destination) ? destination : destination + Path.DirectorySeparatorChar;
+        var sourcePrefix = Path.EndsInDirectorySeparator(source) ? source : string.Concat(source.AsSpan(), [Path.DirectorySeparatorChar]);
+        var destinationPrefix = Path.EndsInDirectorySeparator(destination) ? destination : string.Concat(destination.AsSpan(), [Path.DirectorySeparatorChar]);
         if (source.Equals(destination, comparison) || source.StartsWith(destinationPrefix, comparison)
             || destination.StartsWith(sourcePrefix, comparison))
         {

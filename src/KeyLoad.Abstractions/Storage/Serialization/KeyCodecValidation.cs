@@ -8,6 +8,13 @@ namespace KeyLoad.Storage;
 internal static class KeyCodecValidation
 {
     internal static int Validate(ReadOnlySpan<byte> key)
+        => Inspect(key, validate: true);
+
+    /// <summary>Counts framed components without materializing values; Decode validates their scalar contents once.</summary>
+    internal static int Count(ReadOnlySpan<byte> key)
+        => Inspect(key, validate: false);
+
+    private static int Inspect(ReadOnlySpan<byte> key, bool validate)
     {
         if (key.IsEmpty || key[VersionOffset] != KeyCodec.Version)
         {
@@ -21,12 +28,12 @@ internal static class KeyCodecValidation
             {
                 throw BadKey();
             }
-            Component(key, ref offset);
+            Component(key, ref offset, validate);
         }
         return components;
     }
 
-    private static void Component(ReadOnlySpan<byte> key, ref int offset)
+    private static void Component(ReadOnlySpan<byte> key, ref int offset, bool validate)
     {
         switch (ReadByte(key, ref offset))
         {
@@ -42,7 +49,14 @@ internal static class KeyCodecValidation
                 _ = ReadUInt64(key, ref offset);
                 return;
             case DecimalTag:
-                _ = KeyCodecDecimal.Read(key, ref offset);
+                if (validate)
+                {
+                    _ = KeyCodecDecimal.Read(key, ref offset);
+                }
+                else
+                {
+                    KeyCodecDecimal.Skip(key, ref offset);
+                }
                 return;
             case DoubleTag:
                 _ = ReadDouble(key, ref offset);
@@ -50,14 +64,14 @@ internal static class KeyCodecValidation
             case TimestampTag:
                 _ = ReadTimestamp(key, ref offset);
                 return;
-            case TextTag:
+            case TextTag when validate:
                 if (!Utf8.IsValid(ReadEscaped(key, ref offset)))
                 {
                     throw BadKey();
                 }
                 return;
-            case BinaryTag:
-                _ = ReadEscaped(key, ref offset);
+            case TextTag or BinaryTag:
+                SkipEscaped(key, ref offset);
                 return;
             default:
                 throw BadKey();

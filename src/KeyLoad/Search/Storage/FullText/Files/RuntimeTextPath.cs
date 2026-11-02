@@ -38,7 +38,7 @@ internal static class RuntimeTextPath
         var normalizedRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(root));
         var normalizedPath = Path.GetFullPath(path);
         return string.Equals(normalizedRoot, normalizedPath, StringComparison.Ordinal)
-            || normalizedPath.StartsWith(normalizedRoot + Path.DirectorySeparatorChar, StringComparison.Ordinal);
+            || normalizedPath.StartsWith(string.Concat(normalizedRoot.AsSpan(), [Path.DirectorySeparatorChar]), StringComparison.Ordinal);
     }
 
     internal static string RelativePath(string root, string path)

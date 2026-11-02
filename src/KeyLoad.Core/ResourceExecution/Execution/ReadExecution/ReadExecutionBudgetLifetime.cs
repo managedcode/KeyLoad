@@ -35,7 +35,7 @@ internal struct ReadExecutionBudgetLifetime
     /// <summary>Retains an uncertain dispatched frame failure without inventing observed work or renewing this ledger.</summary>
     internal void FailIndeterminateMetadata(Exception original)
     {
-        ArgumentNullException.ThrowIfNull(original);
+        ArgumentNullException.ThrowIfNull(original) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         _ = Interlocked.CompareExchange(ref indeterminateMetadata, ExceptionDispatchInfo.Capture(original), null);
     }
 

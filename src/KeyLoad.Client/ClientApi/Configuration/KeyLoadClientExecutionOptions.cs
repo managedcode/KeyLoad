@@ -33,7 +33,7 @@ public sealed class KeyLoadClientExecutionOptions
     [ConfigurationBinding]
     internal static IOptions<KeyLoadClientExecutionOptions> Snapshot(IOptions<KeyLoadClientExecutionOptions> configured)
     {
-        ArgumentNullException.ThrowIfNull(configured);
+        ArgumentNullException.ThrowIfNull(configured) /* KLD0041: BCL null validation accepts the configured IOptions reference through its object parameter. */;
         var value = configured.Value;
         var copy = new KeyLoadClientExecutionOptions
         {

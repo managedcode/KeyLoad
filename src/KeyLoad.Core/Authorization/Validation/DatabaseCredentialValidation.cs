@@ -48,7 +48,7 @@ internal static class DatabaseCredentialValidation
     {
         const string PrincipalDetailText = UnavailableCredentialDetail;
 
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var principal = view.GetRecord<PrincipalRecord>(KeySpace.Principal(id));
         if (principal is null || principal.Revoked || principal.ExpiresAt <= now)
         {

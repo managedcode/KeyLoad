@@ -14,10 +14,10 @@ public static class AuthorizationExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static void Bootstrap(this DatabaseEngine engine, PrincipalRecord administrator, ApiKeyRecord apiKey)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         const string BootstrapDetailText = "Bootstrap requires a cluster administrator.";
-        ArgumentNullException.ThrowIfNull(administrator);
-        ArgumentNullException.ThrowIfNull(apiKey);
+        ArgumentNullException.ThrowIfNull(administrator) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(apiKey) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (!administrator.ClusterAdministrator || administrator.Id != apiKey.PrincipalId)
         {
             throw Errors.Fail(ErrorCode.Validation, BootstrapDetailText);
@@ -44,7 +44,7 @@ public static class AuthorizationExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static PrincipalRecord Principal(this DatabaseEngine engine, IKeyValueView view, string id, DateTimeOffset now)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return DatabaseCredentialValidation.ReadPrincipal(view, id, now);
     }
 
@@ -56,7 +56,7 @@ public static class AuthorizationExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static string Authenticate(this DatabaseEngine engine, string secret, DateTimeOffset now)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var witness = AuthorizationIdentity.IssueCredentialWitness(secret);
         return engine.Store.Read(view => AuthorizationIdentity.RevalidateCredential(view, witness, null, now).Id);
     }
@@ -80,7 +80,7 @@ public static class AuthorizationExecution
     /// <param name = "work">The work.</param>
     internal static PrincipalRecord Authenticate(this DatabaseEngine engine, string secret, DateTimeOffset now, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(work);
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.Check();
         var witness = AuthorizationIdentity.IssueCredentialWitness(secret);
         var principal = engine.Store.Read(raw => AuthorizationIdentity.RevalidateCredential(work.CreateView(raw), witness, null, now));
@@ -96,7 +96,7 @@ public static class AuthorizationExecution
     /// <returns>The persisted verifier record.</returns>
     public static ApiKeyRecord Credential(string id, string principal, string secret, DateTimeOffset? expiresAt = null)
     {
-        ArgumentNullException.ThrowIfNull(secret);
+        ArgumentNullException.ThrowIfNull(secret) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return new(id, principal, Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(secret))), expiresAt);
     }
 }

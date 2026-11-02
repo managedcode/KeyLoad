@@ -13,7 +13,7 @@ internal sealed class TextIncrementalWorker : IAsyncDisposable
         TaskCompletionSource original;
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextIncrementalWorker instance through object to preserve its runtime owner type. */;
             if (active is not null)
             {
                 throw TextErrors.BoundExceeded();
@@ -40,7 +40,7 @@ internal sealed class TextIncrementalWorker : IAsyncDisposable
             Task? pending;
             lock (gate)
             {
-                ObjectDisposedException.ThrowIf(closed, this);
+                ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this TextIncrementalWorker instance through object to preserve its runtime owner type. */;
                 pending = active?.Task;
                 if (pending is null)
                 {

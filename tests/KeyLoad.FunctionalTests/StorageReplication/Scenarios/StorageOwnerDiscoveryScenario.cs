@@ -67,7 +67,7 @@ internal static class StorageOwnerDiscoveryScenario
 
     private static Task<Result<object>> SubmitAsync(RequestCqrsHostedRuntimeFixture node, Guid id, string document,
         CancellationToken token)
-        => node.Database.Coordinator.RuntimeSubmitAsync(OperationKind.Batch, id, RequestCqrsHostedProfile.Root,
+        => node.Database.Coordinator.RuntimeSubmitAsync<object>(OperationKind.Batch, id, RequestCqrsHostedProfile.Root,
             new CommandRequest(id, node.Database.Partition,
                 [new PutDocument(Collection, document, Json)]), cancellationToken: token);
 

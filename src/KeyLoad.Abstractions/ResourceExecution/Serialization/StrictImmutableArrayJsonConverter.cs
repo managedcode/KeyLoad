@@ -13,7 +13,7 @@ internal sealed class StrictImmutableArrayJsonConverter<T> : JsonConverter<Immut
 
     public override ImmutableArray<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: The CLR guard validates the canonical JSON options reference before decoding the typed backing array. */;
         if (reader.TokenType != JsonTokenType.StartArray)
         {
             throw new JsonException(InvalidCollectionMessage);
@@ -27,8 +27,8 @@ internal sealed class StrictImmutableArrayJsonConverter<T> : JsonConverter<Immut
 
     public override void Write(Utf8JsonWriter writer, ImmutableArray<T> value, JsonSerializerOptions options)
     {
-        ArgumentNullException.ThrowIfNull(writer);
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(writer) /* KLD0041: The CLR guard validates the native JSON writer reference before serializing the typed backing array. */;
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: The CLR guard validates the canonical JSON options reference before encoding the typed backing array. */;
         var values = ImmutableCollectionsMarshal.AsArray(value)
             ?? throw new JsonException(InvalidCollectionMessage);
         // The official serializer only reads this owned backing array.

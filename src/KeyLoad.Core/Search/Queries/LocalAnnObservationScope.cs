@@ -10,7 +10,7 @@ public static class LocalAnnObservationScope
     internal static LocalAnnObservationFence CaptureLocalAnnObservation(this DatabaseEngine engine, string principalId, AnnMaintenanceRequest original, ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata = null) => engine.CaptureLocalAnnObservationCore(principalId, original, budget, sourceMetadata, bindResourceLifetime: false);
     internal static LocalAnnObservationFence CaptureLocalAnnObservationBound(this DatabaseEngine engine, string principalId, AnnMaintenanceRequest original, ReadExecutionBudget budget, AnnReadLifetimeMetadata? sourceMetadata, IResourceLifetimeWorkBinding binding)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.AttachResourceLifetimeBinding(binding);
         return engine.CaptureLocalAnnObservationCore(principalId, original, budget, sourceMetadata, bindResourceLifetime: true);
     }

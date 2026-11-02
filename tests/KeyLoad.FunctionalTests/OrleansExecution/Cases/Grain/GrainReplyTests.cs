@@ -35,7 +35,7 @@ internal sealed class GrainReplyTests
         var reply = GrainReplyFactory.Operation(Result<object>.Succeed(value), CancellationToken.None);
         await Assert.That(GrainReplyFactory.RequireValue(reply).Value).IsEqualTo(value);
         Assert.ThrowsExactly<ArgumentNullException>(() => Result<object>.Succeed((object)null!));
-        var empty = GrainReplyFactory.Value(null);
+        var empty = GrainReplyFactory.Value<object?>(null);
         await Assert.That(GrainReplyFactory.RequireValue(empty).Value).IsNull();
         using var cancellation = new CancellationTokenSource();
         await cancellation.CancelAsync();

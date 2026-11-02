@@ -11,12 +11,12 @@ internal static class DistributedTextWitnessValidation
         ResourceDefinition resource, string digest, DistributedTextWitness witness,
         PartitionRef partition, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(resource);
-        ArgumentNullException.ThrowIfNull(witness);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: BCL null validation accepts the database DatabaseEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: BCL null validation accepts the view IKeyValueView reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: BCL null validation accepts the principal PrincipalRecord reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: BCL null validation accepts the resource ResourceDefinition reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(witness) /* KLD0041: BCL null validation accepts the witness DistributedTextWitness reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         var placement = database.ReadAtomicPartitionPlacementForAuthorizedQuery(view, partition);
         PartitionQueryPlacementValidation.Validate(placement, partition, witness.Owner);

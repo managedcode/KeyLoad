@@ -11,8 +11,8 @@ internal static class AnnPublicRequestValidation
     internal static void Validate(ApproximateSearchRequest request,
         QueryExecutionOptions execution, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Search);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ApproximateSearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request.Search) /* KLD0041: BCL null validation accepts the request.Search SearchRequest reference through its object parameter. */;
         var search = request.Search;
         if (request.Version != CurrentVersion || request.RequestedMode != AnnPageMode.Approximate || request.Consumer is null
             || request.IndexGeneration <= Empty || request.Consumer.Partition != search.Partition

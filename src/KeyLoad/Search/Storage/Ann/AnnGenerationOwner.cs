@@ -58,7 +58,7 @@ internal sealed class AnnGenerationOwner : IAsyncDisposable
         budget.Check();
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnGenerationOwner instance through object to preserve its runtime owner type. */;
             AnnSlotRetention.RequireResident(slots, options, checked(seed.PeakBytesUpperBound + publicReads.Bytes));
             return Task.FromResult(worker.Run(() => BuildAndPublish(request, seed, intent, budget)));
         }
@@ -77,7 +77,7 @@ internal sealed class AnnGenerationOwner : IAsyncDisposable
         var index = PackedAnnIndex.Build(seed.Scope.Space, seed.Records, policy, budget);
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnGenerationOwner instance through object to preserve its runtime owner type. */;
             AnnSlotRetention.RequireResident(slots, options, checked(retainedSession + publicReads.Bytes + seed.OwnedBytesUpperBound + index.RetainedBytesUpperBound + index.BuildScratchBytesUpperBound));
             var completed = AnnCompletedPublication.Save(this, root, slots, options, policy, storage, request, seed, index, intent, budget, checkpointAfter);
             MaintenanceMemory.TransferIndex(index.RetainedBytesUpperBound);
@@ -89,7 +89,7 @@ internal sealed class AnnGenerationOwner : IAsyncDisposable
     {
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnGenerationOwner instance through object to preserve its runtime owner type. */;
             if (manifest.IsPending || current.CorpusSha256 != manifest.Source.CorpusSha256
                 || current.ProjectionCheckpoint != manifest.Source.ThroughSequence)
             {
@@ -120,7 +120,7 @@ internal sealed class AnnGenerationOwner : IAsyncDisposable
         AnnOwnerAdmission.EnterPublicRead(gate);
         try
         {
-            ObjectDisposedException.ThrowIf(closed, this);
+            ObjectDisposedException.ThrowIf(closed, this) /* KLD0041: BCL disposal diagnostics accept the this AnnGenerationOwner instance through object to preserve its runtime owner type. */;
             var key = new AnnOwnedKey(request.Consumer, request.IndexGeneration);
             var slot = slots.SingleOrDefault(item => !item.Retired && AnnSlotRetention.SameKey(item.Manifest, key))
                 ?? throw Errors.Fail(ErrorCode.HistoryUnavailable, AnnProtocol.MissingDependencyHistory);

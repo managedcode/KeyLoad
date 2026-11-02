@@ -20,7 +20,7 @@ internal static class KeyCodecNormalizedAssertions
                 break;
             case long integer:
                 await Assert.That(actual.Kind).IsEqualTo(KeyComponentKind.WholeNumber);
-                await Assert.That(actual.Integer).IsEqualTo(integer);
+                await Assert.That(actual.WholeNumber).IsEqualTo(integer);
                 break;
             case decimal number:
                 await Assert.That(actual.Kind).IsEqualTo(KeyComponentKind.FixedPoint);

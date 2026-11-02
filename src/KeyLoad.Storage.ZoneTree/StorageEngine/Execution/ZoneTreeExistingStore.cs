@@ -12,10 +12,10 @@ internal static class ZoneTreeExistingStore
     internal static ZoneTreeStore Open(ZoneTreeStoreOptions options, Guid expectedNodeId,
         IOptions<ZoneTreeStorageExecutionOptions> executionOptions)
     {
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options ZoneTreeStoreOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         var policy = executionOptions.Value;
-        ArgumentNullException.ThrowIfNull(policy);
+        ArgumentNullException.ThrowIfNull(policy) /* KLD0041: BCL null validation accepts the policy ZoneTreeStorageExecutionOptions reference through its object parameter. */;
         policy.Validate();
         options = options.WithExecutionSnapshot(policy);
         Validate(options, expectedNodeId);
@@ -33,7 +33,7 @@ internal static class ZoneTreeExistingStore
 
     internal static void Validate(ZoneTreeStoreOptions options, Guid expectedNodeId)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options ZoneTreeStoreOptions reference through its object parameter. */;
         ArgumentException.ThrowIfNullOrWhiteSpace(options.Directory);
         if (!Path.IsPathFullyQualified(options.Directory)
             || !string.Equals(Path.GetFullPath(options.Directory), options.Directory, StringComparison.Ordinal))

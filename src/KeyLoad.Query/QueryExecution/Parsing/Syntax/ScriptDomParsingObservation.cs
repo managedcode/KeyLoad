@@ -12,7 +12,7 @@ internal static class ScriptDomParsingObservation
         private bool disposed;
         internal Scope(Action<int> tokenAccess)
         {
-            ArgumentNullException.ThrowIfNull(tokenAccess);
+            ArgumentNullException.ThrowIfNull(tokenAccess) /* KLD0041: BCL null validation accepts the tokenAccess Action reference through its object parameter. */;
             previous = Current.Value;
             Current.Value = tokenAccess;
         }

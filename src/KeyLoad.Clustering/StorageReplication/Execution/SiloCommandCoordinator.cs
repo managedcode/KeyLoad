@@ -10,35 +10,35 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     private IDatabaseCommitGrain Owner => grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(database.Store.Identity.Incarnation));
 
     /// <inheritdoc />
-    public Task<Result<object>> SubmitAsync(OperationKind kind, Guid id, string principalId, string payloadJson,
+    public Task<Result<TResult>> SubmitAsync<TResult>(OperationKind kind, Guid id, string principalId, string payloadJson,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        return SubmitOperationAsync(database.CreateCommand(kind, id, principalId,
+        return SubmitOperationAsync<TResult>(database.CreateCommand(kind, id, principalId,
             database.EvaluationClock.GetUtcNow(), payloadJson), cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<Result<object>> RuntimeSubmitAsync(OperationKind kind, Guid id, string principalId,
-        object input, ReadExecutionBudget? sourcePlanningBudget = null,
+    public Task<Result<TResult>> RuntimeSubmitAsync<TResult>(OperationKind kind, Guid id, string principalId,
+        object /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */ input, ReadExecutionBudget? sourcePlanningBudget = null,
         CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
         var evaluatedAt = database.EvaluationClock.GetUtcNow();
         var operation = sourcePlanningBudget is null
-            ? database.CreateCommand(kind, id, principalId, evaluatedAt, input)
-            : database.CreateCommand(kind, id, principalId, evaluatedAt, input, sourcePlanningBudget);
-        return SubmitOperationAsync(operation, cancellationToken);
+            ? (database.CreateCommand(kind, id, principalId, evaluatedAt, input) /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */)
+            : (database.CreateCommand(kind, id, principalId, evaluatedAt, input, sourcePlanningBudget) /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */);
+        return SubmitOperationAsync<TResult>(operation, cancellationToken);
     }
 
     /// <inheritdoc />
-    public Task<Result<object>> SubmitVerifiedAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken,
+    public Task<Result<TResult>> SubmitVerifiedAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken,
         ReadExecutionBudget? sourcePlanningBudget = null)
     {
         cancellationToken.ThrowIfCancellationRequested();
         sourcePlanningBudget?.Check();
-        return SubmitOperationAsync(database.OwnCommand(operation), cancellationToken);
+        return SubmitOperationAsync<TResult>(database.OwnCommand(operation), cancellationToken);
     }
 
     /// <inheritdoc />
@@ -52,18 +52,18 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
         }
     }
 
-    private Task<Result<object>> SubmitOperationAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+    private Task<Result<TResult>> SubmitOperationAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
         return database.IsSiloLocalOperation(operation)
-            ? ApplyLocalAsync(operation, cancellationToken)
-            : Owner.ApplyAsync(operation, cancellationToken);
+            ? ApplyLocalAsync<TResult>(operation, cancellationToken)
+            : Owner.ApplyAsync<TResult>(operation, cancellationToken);
     }
 
-    private async Task<Result<object>> ApplyLocalAsync(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
+    private async Task<Result<TResult>> ApplyLocalAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
-        var result = (await database.ApplyCoreAsync(database.PrepareStorageOperation(operation, cancellationToken), null,
-            selectEmbeddedClock: false, cancellationToken).ConfigureAwait(true)).Result;
-        return result;
+        var /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */ result = ((await database.ApplyCoreAsync(database.PrepareStorageOperation(operation, cancellationToken), null,
+            selectEmbeddedClock: false, cancellationToken).ConfigureAwait(true)).Result /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */);
+        return result.IsFailed ? Result<TResult>.Fail(result.Problem) : Result<TResult>.Succeed((result.Get<TResult>() /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */));
     }
 }

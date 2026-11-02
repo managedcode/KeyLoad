@@ -145,7 +145,7 @@ internal sealed class ZoneTreeReadCutLeaseState
     {
         lock (sync)
         {
-            if (!ReferenceEquals(snapshot, acquired))
+            if (!(ReferenceEquals(snapshot, acquired) /* KLD0041: Release only the exact acquired native read snapshot instance through CLR reference identity. */))
             {
                 return false;
             }
@@ -201,7 +201,7 @@ internal sealed class ZoneTreeReadCutLeaseState
     {
         foreach (var existing in errors)
         {
-            if (ReferenceEquals(existing, failure))
+            if ((ReferenceEquals(existing, failure) /* KLD0041: Deduplicate the same native read-cut failure instance through CLR reference identity. */))
             {
                 return;
             }

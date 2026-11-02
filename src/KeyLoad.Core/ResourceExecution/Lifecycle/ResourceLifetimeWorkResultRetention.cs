@@ -16,7 +16,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         {
             lock (gate)
             {
-                ObjectDisposedException.ThrowIf(disposed, this);
+                ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: The BCL disposal guard accepts this owner as object to report its runtime type name. */;
                 return retained.Count;
             }
         }
@@ -30,7 +30,7 @@ internal sealed class ResourceLifetimeWorkResultRetention : IDisposable
         }
         lock (gate)
         {
-            ObjectDisposedException.ThrowIf(disposed, this);
+            ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: The BCL disposal guard accepts this owner as object to report its runtime type name. */;
             retained.UnionWith(lifetimes);
         }
     }

@@ -90,7 +90,7 @@ Current focus: removing the self-written cluster code so that Orleans alone runs
 
 [.NET profiling](docs/Features/BenchmarkComparisons.md#local-development-benchmarks-and-profiling) with `dotnet-diagnostics-mcp` guides measured bottleneck repairs.
 
-The [competitor source review](docs/implementation/competitor-performance-review.md) and [Jepsen review](docs/implementation/jepsen-particledb-review.md) document the current execution changes and their correctness and measurement limits. Scalar `EXPLAIN` describes the selected access path without scanning records; full optimizer and distributed safety qualification remain open. The current storage batch uses published ZoneTree 2.0.9 synchronous WAL publication with engine-owned periodic disk sync. Focused process-kill and SDK replay checks pass locally; exact-source Linux cluster qualification and released-image performance measurements remain open.
+The [competitor source review](docs/implementation/competitor-performance-review.md) and [Jepsen review](docs/implementation/jepsen-particledb-review.md) document the current execution changes and their correctness and measurement limits. Scalar `EXPLAIN` describes the selected access path without scanning records; full optimizer and distributed safety qualification remain open. The current storage batch uses published ZoneTree 2.1.0 synchronous WAL publication with engine-owned periodic disk sync. Local storage checks passed 187 cases and 1,000 real process-kill trials on the new engine release; exact-source Linux cluster qualification and released-image performance measurements remain open.
 
 
 | Workstream | What it does and why | State | Remaining work |

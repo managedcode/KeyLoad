@@ -33,7 +33,7 @@ internal static class AnnProjectionJobMetadata
     internal static void Require(IJobRunContext context, global::Orleans.Runtime.GrainId target,
         AnnProjectionJobState original)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context IJobRunContext reference through its object parameter. */;
         var request = original.PendingRequest ?? original.LastRequest
             ?? throw Errors.Fail(ErrorCode.Validation, AnnProjectionJobProtocol.Invalid);
         var job = context.Job;

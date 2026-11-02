@@ -14,7 +14,7 @@ internal static class DistributedSearchReadCapability
         DecodedGrainRequest request, Guid requestId, GrainRequestCodec codec, IGrainContext context,
         TimeProvider clock, IResourceLifetimeWorkBinding binding, CancellationToken token)
     {
-        ArgumentNullException.ThrowIfNull(binding);
+        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: BCL null validation accepts the binding IResourceLifetimeWorkBinding reference through its object parameter. */;
         var options = services.GetRequiredService<IOptions<QueryExecutionOptions>>();
         var execution = new DistributedSearchRemoteExecution(database, principal.Id, services, codec, request);
         Func<CancellationToken, Task>? observed = null;
@@ -23,7 +23,7 @@ internal static class DistributedSearchReadCapability
             observed = new DistributedSearchStatisticsObservation(codec, request, requestId, context).ObserveAsync;
         }
         return DistributedSearchCoordinator.ExecuteBoundAsync(database,
-            GrainPayload.Read<DistributedSearchRequest>(request.Payload), options, execution.PrepareAsync,
+            (GrainPayload.Read<DistributedSearchRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.DistributedSearchRequest at this closed operation boundary before executing typed code. */), options, execution.PrepareAsync,
             services.GetRequiredService<Func<ICommitCoordinator>>()().ReadBarrierAsync,
             clock, observed, binding, token);
     }

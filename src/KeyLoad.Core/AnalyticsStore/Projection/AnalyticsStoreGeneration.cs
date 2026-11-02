@@ -28,7 +28,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
     /// <param name="ownedEmptyDirectory">A fresh host-owned generation directory, never a caller-selected path.</param>
     public AnalyticsStoreGeneration(AnalyticsAggregateSnapshot snapshot, string ownedEmptyDirectory)
     {
-        ArgumentNullException.ThrowIfNull(snapshot);
+        ArgumentNullException.ThrowIfNull(snapshot) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         snapshot.Work.Check();
         if (snapshot.Rows.IsDefault)
         {
@@ -60,7 +60,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
     /// <returns>Complete finite execution aggregate rows.</returns>
     public AnalyticsAggregateResult Query(CancellationToken cancellationToken)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: The BCL disposal guard accepts this owner as object to report its runtime type name. */;
         if (Interlocked.Exchange(ref started, StartedState) != NotStartedState)
         {
             throw Errors.Fail(ErrorCode.Conflict, AlreadyQueried);

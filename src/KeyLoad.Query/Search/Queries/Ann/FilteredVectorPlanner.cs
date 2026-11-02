@@ -13,7 +13,7 @@ internal static class FilteredVectorPlanner
     internal static FilteredVectorPlan Create(int corpusCount, int requestedCount, int eligibleCount,
         int exactThreshold, int efSearch, int capacity, AnnWorkBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget AnnWorkBudget reference through its object parameter. */;
         budget.Charge(SingleWorkUnit);
         Validate(corpusCount, requestedCount, eligibleCount, exactThreshold, efSearch, capacity);
         var resultCount = Math.Min(requestedCount, eligibleCount);

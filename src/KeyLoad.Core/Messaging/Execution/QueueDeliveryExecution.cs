@@ -103,7 +103,7 @@ public static class QueueDeliveryExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static MessageInspection? InspectMessage(this DatabaseEngine engine, string principalId, QueueLaneRef lane, string id)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Store.Read(view => (engine.InspectMessageRead(view, principalId, lane, id)).Value);
     }
 

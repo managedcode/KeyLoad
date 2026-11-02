@@ -14,8 +14,8 @@ public static class KeyLoadClientOptionsRegistration
     public static IServiceCollection AddKeyLoadClientExecutionOptions(this IServiceCollection services,
         IConfiguration configuration)
     {
-        ArgumentNullException.ThrowIfNull(services);
-        ArgumentNullException.ThrowIfNull(configuration);
+        ArgumentNullException.ThrowIfNull(services) /* KLD0041: BCL null validation accepts the services IServiceCollection reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(configuration) /* KLD0041: BCL null validation accepts the configuration IConfiguration reference through its object parameter. */;
         services.AddOptions<KeyLoadClientExecutionOptions>()
             .Bind(configuration.GetSection(KeyLoadClientExecutionOptions.SectionName))
             .Validate(options => options.IsValid(), KeyLoadClientExecutionOptions.ValidationMessage)

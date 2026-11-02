@@ -14,8 +14,8 @@ internal static class DistributedSearchGlobalFusion
         ImmutableArray<GlobalBranchWindow> text, ImmutableArray<GlobalBranchWindow> vector,
         ImmutableArray<string> expectedWindows, GlobalBranchScope scope, ReadExecutionBudget budget, out SearchRankFusion fusion)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         var textCandidates = request.Text is null ? ImmutableArray<GlobalBranchCandidate>.Empty
             : Complete(DistributedSearchBranchNames.Text, GlobalBranchKind.Text, text, expectedWindows, scope, budget);

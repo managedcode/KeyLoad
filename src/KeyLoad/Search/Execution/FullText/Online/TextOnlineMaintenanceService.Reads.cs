@@ -53,7 +53,7 @@ internal sealed partial class TextOnlineCatalogOwner
         catch (Exception cleanup)
         {
             var failures = new List<Exception>();
-            if (primary is not null && !ReferenceEquals(primary, cleanup))
+            if (primary is not null && !(ReferenceEquals(primary, cleanup) /* KLD0041: Keep distinct primary and cleanup exception instances through CLR reference identity. */))
             {
                 failures.Add(primary);
             }

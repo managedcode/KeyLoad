@@ -12,8 +12,8 @@ public sealed partial class KeyLoadClient
     public Task<Result<DocumentReadResult>> GetAsync(EntityRef reference, CommitToken minimumToken,
         CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(minimumToken);
-        return Send<DocumentReadResult>(ApiRoutes.DocumentsGet, new GetDocumentRequest(reference, minimumToken),
+        ArgumentNullException.ThrowIfNull(minimumToken) /* KLD0041: BCL null validation accepts the minimumToken CommitToken reference through its object parameter. */;
+        return Send<DocumentReadResult, GetDocumentRequest>(ApiRoutes.DocumentsGet, new GetDocumentRequest(reference, minimumToken),
             false, null, cancellationToken);
     }
 
@@ -22,5 +22,5 @@ public sealed partial class KeyLoadClient
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>A document response whose Document field is null when absent, or a classified problem.</returns>
     public Task<Result<DocumentReadResult>> GetAsync(EntityRef reference, CancellationToken cancellationToken = default)
-        => Send<DocumentReadResult>(ApiRoutes.DocumentsGet, new GetDocumentRequest(reference), false, null, cancellationToken);
+        => Send<DocumentReadResult, GetDocumentRequest>(ApiRoutes.DocumentsGet, new GetDocumentRequest(reference), false, null, cancellationToken);
 }

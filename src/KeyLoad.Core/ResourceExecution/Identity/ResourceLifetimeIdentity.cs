@@ -15,7 +15,7 @@ internal static class ResourceLifetimeIdentity
         RequireScope(tenantId, databaseId, definition);
         if (original is null || original.CommandId == Guid.Empty
             || original.Value!.Kind is not (OperationKind.ConfigureResource or OperationKind.CreateTable)
-            || original.Value.Input is null)
+            || original.Value.Input /* KLD0041: The existing persisted command slot contains the exact runtime input selected and validated by its closed Kind discriminator. */ is null)
         {
             throw Invalid();
         }

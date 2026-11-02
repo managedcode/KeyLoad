@@ -15,8 +15,8 @@ public static class PartitionQueryClient
     public static Task<Result<PartitionQueryPage>> PartitionQueryAsync(this KeyLoadClient client,
         PartitionQueryRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<PartitionQueryPage>(Route, request, false, null, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request PartitionQueryRequest reference through its object parameter. */;
+        return client.Send<PartitionQueryPage, PartitionQueryRequest>(Route, request, false, null, cancellationToken);
     }
 }

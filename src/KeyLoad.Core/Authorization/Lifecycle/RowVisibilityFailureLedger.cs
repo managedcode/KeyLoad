@@ -17,7 +17,7 @@ internal static class RowVisibilityFailureLedger
 
     internal static void ThrowJoined(Exception? primary, Exception terminal)
     {
-        if (primary is not null && !ReferenceEquals(primary, terminal))
+        if (primary is not null && !(ReferenceEquals(primary, terminal) /* KLD0041: This comparison requires CLR reference identity rather than an overridden value-equality implementation. */))
         {
             Throw([primary, terminal]);
         }

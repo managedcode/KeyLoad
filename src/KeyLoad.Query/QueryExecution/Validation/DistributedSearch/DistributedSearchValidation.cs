@@ -14,9 +14,9 @@ internal static class DistributedSearchValidation
 
     internal static ImmutableArray<PartitionRef> Require(DistributedSearchRequest request, IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request DistributedSearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         var execution = options.Value;
         execution.Validate();

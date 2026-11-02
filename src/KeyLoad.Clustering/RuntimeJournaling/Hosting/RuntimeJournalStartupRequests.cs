@@ -16,7 +16,7 @@ internal sealed class RuntimeJournalStartupRequests(IGrainFactory grains, GrainR
         var envelope = codec.CreateRuntimeJournalRead(requestId, GrainReadKind.RuntimeJournalCatalog,
             GrainContracts.NoDtoMarker);
         var reply = await SendAsync(null, requestId, Guid.Empty, envelope, cancellationToken);
-        var value = GrainReplyFactory.RequireValue(reply).Value;
+        var /* KLD0041: Inspect the existing generated startup reply slot before accepting its concrete runtime journal catalog result. */ value = (GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue field only to validate the concrete RPC response or its permitted absence. */);
         return value switch
         {
             null => false,

@@ -10,7 +10,7 @@ internal sealed partial class BackgroundStorageOperations
         CancellationToken cancellationToken)
         => BackgroundStorageReadExecution.RunLocalAsync(storage, token =>
         {
-            ArgumentNullException.ThrowIfNull(hint);
+            ArgumentNullException.ThrowIfNull(hint) /* KLD0041: BCL null validation accepts the hint SampleChunkWorkHint reference through its object parameter. */;
             SampleChunkJobValidation.Require(hint, hint.Partition.AtomicPartitionId);
             return SampleChunkWorkRead.Current(Database, hint, token);
         }, cancellationToken);
@@ -25,7 +25,7 @@ internal sealed partial class BackgroundStorageOperations
         => BackgroundStorageReadExecution.RunLocalAsync(storage, token =>
         {
             token.ThrowIfCancellationRequested();
-            ArgumentNullException.ThrowIfNull(hint);
+            ArgumentNullException.ThrowIfNull(hint) /* KLD0041: BCL null validation accepts the hint SampleChunkWorkHint reference through its object parameter. */;
             SampleChunkJobValidation.Require(hint, hint.Partition.AtomicPartitionId);
             var principal = Database.Store.Read(view => Database.Principal(view, hint.Creator, clock.GetUtcNow()));
             if (principal.PolicyEpoch != hint.CreatorPolicyEpoch)

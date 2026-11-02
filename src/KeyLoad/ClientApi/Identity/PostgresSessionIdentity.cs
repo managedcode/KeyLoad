@@ -13,7 +13,7 @@ internal sealed class PostgresSessionIdentity(string subject, byte[] credential,
     internal async Task<PrincipalRecord> VerifyAsync(IServiceProvider services, ServerConnectionFeature owner,
         CancellationToken token, bool openingSession = false)
     {
-        ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != PostgresProtocol.AllRows, this);
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref disposed) != PostgresProtocol.AllRows, this) /* KLD0041: BCL disposal diagnostics accept the this PostgresSessionIdentity instance through object to preserve its runtime owner type. */;
         var node = services.GetRequiredService<OrleansNode>();
         var requestId = Guid.NewGuid();
         PrincipalRecord? principal = null;

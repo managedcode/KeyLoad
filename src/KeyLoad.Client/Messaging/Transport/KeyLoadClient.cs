@@ -10,8 +10,8 @@ public sealed partial class KeyLoadClient
     /// <returns>The resulting subscription information.</returns>
     public Task<Result<SubscriptionInfo>> ConfigureSubscriptionAsync(ConfigureSubscriptionRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<SubscriptionInfo>(ApiRoutes.SubscriptionsConfigure, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ConfigureSubscriptionRequest reference through its object parameter. */;
+        return Send<SubscriptionInfo, ConfigureSubscriptionRequest>(ApiRoutes.SubscriptionsConfigure, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Moves a persisted subscription cursor to a requested position.</summary>
     /// <param name="request">Subscription identity and stable command identifier.</param>
@@ -19,8 +19,8 @@ public sealed partial class KeyLoadClient
     /// <returns>The resulting subscription information.</returns>
     public Task<Result<SubscriptionInfo>> SeekSubscriptionAsync(SeekSubscriptionRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<SubscriptionInfo>(ApiRoutes.SubscriptionsSeek, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SeekSubscriptionRequest reference through its object parameter. */;
+        return Send<SubscriptionInfo, SeekSubscriptionRequest>(ApiRoutes.SubscriptionsSeek, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Changes the persisted paused state of a subscription.</summary>
     /// <param name="request">Subscription identity, pause state and stable command identifier.</param>
@@ -28,8 +28,8 @@ public sealed partial class KeyLoadClient
     /// <returns>The resulting subscription information.</returns>
     public Task<Result<SubscriptionInfo>> SetSubscriptionPausedAsync(SetSubscriptionPausedRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<SubscriptionInfo>(ApiRoutes.SubscriptionsPause, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SetSubscriptionPausedRequest reference through its object parameter. */;
+        return Send<SubscriptionInfo, SetSubscriptionPausedRequest>(ApiRoutes.SubscriptionsPause, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Receives a bounded leased page from a subscription.</summary>
     /// <param name="request">Receive identity, subscription and lease limits.</param>
@@ -37,8 +37,8 @@ public sealed partial class KeyLoadClient
     /// <returns>The leased subscription deliveries.</returns>
     public Task<Result<ReceiveSubscriptionResult>> ReceiveSubscriptionAsync(ReceiveSubscriptionRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<ReceiveSubscriptionResult>(ApiRoutes.SubscriptionsReceive, request, true, request.RequestId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ReceiveSubscriptionRequest reference through its object parameter. */;
+        return Send<ReceiveSubscriptionResult, ReceiveSubscriptionRequest>(ApiRoutes.SubscriptionsReceive, request, true, request.RequestId, cancellationToken);
     }
     /// <summary>Completes one leased subscription delivery.</summary>
     /// <param name="request">Delivery acknowledgement and stable command identifier.</param>
@@ -46,8 +46,8 @@ public sealed partial class KeyLoadClient
     /// <returns>The committed receipt.</returns>
     public Task<Result<CommitReceipt>> CompleteSubscriptionAsync(SubscriptionDeliveryCommand request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<CommitReceipt>(ApiRoutes.SubscriptionsDelivery, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SubscriptionDeliveryCommand reference through its object parameter. */;
+        return Send<CommitReceipt, SubscriptionDeliveryCommand>(ApiRoutes.SubscriptionsDelivery, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Commits one subscription projection result and delivery acknowledgement atomically.</summary>
     /// <param name="request">Projection effects, delivery token and stable command identifier.</param>
@@ -55,23 +55,23 @@ public sealed partial class KeyLoadClient
     /// <returns>The committed processing result.</returns>
     public Task<Result<SubscriptionProcessingResult>> CommitSubscriptionProcessingAsync(SubscriptionProcessingRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<SubscriptionProcessingResult>(ApiRoutes.SubscriptionsProcess, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request SubscriptionProcessingRequest reference through its object parameter. */;
+        return Send<SubscriptionProcessingResult, SubscriptionProcessingRequest>(ApiRoutes.SubscriptionsProcess, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Reads persisted subscription status.</summary>
     /// <param name="subscription">Subscription identity.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The subscription status.</returns>
     public Task<Result<SubscriptionInfo>> SubscriptionStatusAsync(SubscriptionRef subscription, CancellationToken cancellationToken = default)
-        => Send<SubscriptionInfo>(ApiRoutes.SubscriptionsStatus, new GetSubscriptionRequest(subscription), false, null, cancellationToken);
+        => Send<SubscriptionInfo, GetSubscriptionRequest>(ApiRoutes.SubscriptionsStatus, new GetSubscriptionRequest(subscription), false, null, cancellationToken);
     /// <summary>Receives a bounded leased page from a queue.</summary>
     /// <param name="request">Queue identity, receive ID and lease limits.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The leased queue deliveries.</returns>
     public Task<Result<ReceiveResult>> ReceiveAsync(ReceiveRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<ReceiveResult>(ApiRoutes.QueuesReceive, request, true, request.RequestId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ReceiveRequest reference through its object parameter. */;
+        return Send<ReceiveResult, ReceiveRequest>(ApiRoutes.QueuesReceive, request, true, request.RequestId, cancellationToken);
     }
     /// <summary>Completes one leased queue delivery.</summary>
     /// <param name="request">Delivery acknowledgement and stable command identifier.</param>
@@ -79,8 +79,8 @@ public sealed partial class KeyLoadClient
     /// <returns>The committed receipt.</returns>
     public Task<Result<CommitReceipt>> CompleteAsync(DeliveryCommand request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<CommitReceipt>(ApiRoutes.QueuesDelivery, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request DeliveryCommand reference through its object parameter. */;
+        return Send<CommitReceipt, DeliveryCommand>(ApiRoutes.QueuesDelivery, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Commits one queue-processing result and delivery acknowledgement atomically.</summary>
     /// <param name="request">Processing effects, delivery token and stable command identifier.</param>
@@ -88,13 +88,13 @@ public sealed partial class KeyLoadClient
     /// <returns>The committed receipt.</returns>
     public Task<Result<CommitReceipt>> CommitProcessingAsync(ProcessingRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        return Send<CommitReceipt>(ApiRoutes.QueuesProcess, request, true, request.CommandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request ProcessingRequest reference through its object parameter. */;
+        return Send<CommitReceipt, ProcessingRequest>(ApiRoutes.QueuesProcess, request, true, request.CommandId, cancellationToken);
     }
     /// <summary>Inspects one queue message without leasing it.</summary>
     /// <param name="request">Queue and message identity.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>An inspection response whose Message field is null when absent, or a classified problem.</returns>
     public Task<Result<MessageInspectionResult>> InspectAsync(InspectMessageRequest request, CancellationToken cancellationToken = default)
-        => Send<MessageInspectionResult>(ApiRoutes.QueuesInspect, request, false, null, cancellationToken);
+        => Send<MessageInspectionResult, InspectMessageRequest>(ApiRoutes.QueuesInspect, request, false, null, cancellationToken);
 }

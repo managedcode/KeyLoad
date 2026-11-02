@@ -22,11 +22,11 @@ internal static class PackedAnnBuilder
     internal static PackedAnnState Build(VectorSpace space, IReadOnlyList<VectorRecord> records,
         IOptions<PackedAnnOptions> configuredOptions, AnnWorkBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(space);
-        ArgumentNullException.ThrowIfNull(records);
-        ArgumentNullException.ThrowIfNull(configuredOptions);
+        ArgumentNullException.ThrowIfNull(space) /* KLD0041: BCL null validation accepts the space VectorSpace reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(records) /* KLD0041: BCL null validation accepts the records IReadOnlyList reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(configuredOptions) /* KLD0041: BCL null validation accepts the configuredOptions IOptions reference through its object parameter. */;
         var options = configuredOptions.Value;
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget AnnWorkBudget reference through its object parameter. */;
         budget.Check();
         PackedAnnAdmission.ValidateOptions(options);
         PackedAnnAdmission.ValidateRecordCount(records.Count, options);

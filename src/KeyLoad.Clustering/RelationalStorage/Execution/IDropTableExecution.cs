@@ -11,6 +11,6 @@ public interface IDropTableExecution
     /// <param name="request">The original bounded public request.</param>
     /// <param name="cancellationToken">The original request cancellation.</param>
     /// <returns>The original execution operation result; successful JSON contains DropTableResult.</returns>
-    Task<Result<object>> ExecuteAsync(Guid requestId, Guid commandId, string principalId,
+    Task<Result<DropTableResult>> ExecuteAsync(Guid requestId, Guid commandId, string principalId,
         DropTableRequest request, CancellationToken cancellationToken);
 }

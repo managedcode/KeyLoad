@@ -18,13 +18,13 @@ public static class DispatchClient
     public static Task<Result<bool>> SetDispatchAsync(this KeyLoadClient client, Guid commandId, bool paused,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
         if (commandId == Guid.Empty)
         {
             throw new ArgumentException(InvalidCommandId, nameof(commandId));
         }
         var path = string.Concat(ApiRoutes.AdminDispatch, ApiRoutes.DispatchPausedQuery,
             paused ? PausedQueryValue : UnpausedQueryValue);
-        return client.Send<bool>(path, null, true, commandId, cancellationToken, HttpMethod.Post);
+        return client.Send<bool>(path, true, commandId, cancellationToken, HttpMethod.Post);
     }
 }

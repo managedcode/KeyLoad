@@ -53,8 +53,8 @@ internal static class AggregateReplayReader
         const int StateSchemaVersionValidationBoundary = 1;
         const int MaximumEventsValidationBoundary = 1;
 
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Stream);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request.Stream) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(request.Stream.Partition);
         JsonData.Identifier(request.Stream.StreamSet);
         JsonData.Identifier(request.Stream.StreamId);

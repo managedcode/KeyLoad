@@ -57,7 +57,7 @@ internal static class QueueEnqueueProcessAssertions
             .IsEquivalentTo(expected, CollectionOrdering.Matching);
     }
 
-    internal static string Reference(string family, object sequence, string id)
+    internal static string Reference(string family, KeyComponent sequence, string id)
         => Convert.ToHexString(KeySpace.Partition(family, QueueEnqueueCrashProtocol.Partition, QueueEnqueueCrashProtocol.Queue, sequence, id))
             + QueueEnqueueCrashProtocol.ImageSeparator + Convert.ToHexString(OrleansSerialization.Serialize(id));
 }

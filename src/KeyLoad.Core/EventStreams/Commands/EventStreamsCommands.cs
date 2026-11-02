@@ -66,7 +66,7 @@ public static class EventStreamsCommands
         const int SourceRevisionValidationBoundary = 0;
         const int StateSchemaVersionValidationBoundary = 1;
         const int ExpectedSnapshotVersionValidationBoundary = 0;
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         JsonData.Identifier(request.StreamSet);
         JsonData.Identifier(request.StreamId);
         JsonData.Identifier(request.ReducerVersion);

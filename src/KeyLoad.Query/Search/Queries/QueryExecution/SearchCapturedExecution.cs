@@ -51,7 +51,7 @@ internal static class SearchCapturedExecution
             catch (Exception error) { primary = error; throw; }
             finally { owner.Dispose(); }
         }
-        catch (Exception cleanup) when (primary is not null && !ReferenceEquals(primary, cleanup))
+        catch (Exception cleanup) when (primary is not null && !(ReferenceEquals(primary, cleanup) /* KLD0041: Keep distinct captured-search primary and cleanup exception instances through CLR reference identity. */))
         {
             throw new AggregateException(primary, cleanup);
         }

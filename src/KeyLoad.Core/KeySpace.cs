@@ -38,7 +38,7 @@ public static class KeySpace
     /// <returns>The canonical independent key buffer.</returns>
     public static byte[] Partition(string space, PartitionRef partition, params ReadOnlySpan<KeyComponent> suffix)
     {
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return KeyCodec.Encode([space, partition.TenantId, partition.DatabaseId,
             partition.TransactionDomainId, partition.PartitionKey], suffix);
     }

@@ -45,7 +45,7 @@ internal static class RecurringScheduleValidation
 
     internal static RecurringScheduleDefinition NormalizeScheduleDefinition(RecurringScheduleDefinition definition)
     {
-        ArgumentNullException.ThrowIfNull(definition);
+        ArgumentNullException.ThrowIfNull(definition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (definition.Lane is null || definition.ScheduleId == Guid.Empty || definition.FirstDueAt.Offset != TimeSpan.Zero || definition.TimeZone != RecurringSagaProtocol.UtcZone || definition.Interval.Ticks is < MessagingCommandsSchedules.MinimumIntervalTicks or > MessagingCommandsSchedules.MaximumIntervalTicks || definition.Misfire != RecurringMisfirePolicy.CatchUp || definition.MessageTimeToLive is { } ttl && (ttl <= TimeSpan.Zero || ttl.Ticks > RecurringSagaProtocol.MaximumMessageTimeToLiveTicks))
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);
@@ -68,8 +68,8 @@ internal static class RecurringScheduleValidation
 
     internal static void ValidateScheduleScope(QueueLaneRef lane, Guid scheduleId, PartitionRef partition)
     {
-        ArgumentNullException.ThrowIfNull(lane);
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(lane) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (scheduleId == Guid.Empty || lane.Partition != partition)
         {
             throw Errors.Fail(ErrorCode.Validation, RecurringSagaProtocol.InvalidRequest);

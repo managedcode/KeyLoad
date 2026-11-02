@@ -55,8 +55,8 @@ internal sealed class PackedAnnVectors
 
     internal static PackedAnnVectors Copy(IReadOnlyList<VectorRecord> records, PackedAnnAdmission layout, AnnWorkBudget budget, int budgetCheckInterval)
     {
-        ArgumentNullException.ThrowIfNull(records);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(records) /* KLD0041: BCL null validation accepts the records IReadOnlyList reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget AnnWorkBudget reference through its object parameter. */;
         if (records.Count != layout.Count || layout.Dimension is < MinimumPositiveCount or > MaximumDimension)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidVectors);

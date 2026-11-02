@@ -19,12 +19,12 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "engine">The shared database execution context.</param>
     public static long DocumentEpoch(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition, string collection)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         const string DocumentEpochSpaceText = "document-epoch";
         const int InitialDocumentEpoch = 0;
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(collection);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(collection) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return view.ReadOwnedValue(KeySpace.Partition(DocumentEpochSpaceText, partition, collection)) is { } bytes ? OrleansSerialization.Deserialize<long>(bytes) : InitialDocumentEpoch;
     }
 
@@ -96,7 +96,7 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "engine">The shared database execution context.</param>
     public static DocumentResult? GetDocument(this DatabaseEngine engine, string principalId, EntityRef reference, CommitToken? minimumToken = null, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Store.Read(view =>
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -114,16 +114,16 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "engine">The shared database execution context.</param>
     public static DocumentResult Project(this DatabaseEngine engine, PrincipalRecord principal, ResourceDefinition resource, DocumentRecord record)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.ProjectWithLineage(principal, resource, record).Value;
     }
 
     internal static DocumentProjection ProjectWithLineage(this DatabaseEngine engine, PrincipalRecord principal, ResourceDefinition resource, DocumentRecord record)
     {
         const int RedactedEmptyCount = 0;
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(resource);
-        ArgumentNullException.ThrowIfNull(record);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(record) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var json = engine.Authorization.Project(principal, resource.FieldPolicies, record.Json, out var omitted);
         var visible = FieldRedactionMetadata.Visible(engine.Authorization, principal, resource, omitted);
         var value = new DocumentResult(record.Reference, record.Revision, json, omitted.Length != RedactedEmptyCount, visible);
@@ -141,7 +141,7 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "engine">The shared database execution context.</param>
     public static T WithQueryView<T>(this DatabaseEngine engine, string principalId, PartitionRef partition, string collection, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.WithQueryView(principalId, partition, collection, Capability.None, read);
     }
 
@@ -179,10 +179,10 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "engine">The shared database execution context.</param>
     public static (bool HasValue, DocumentRecord? Value) ReadVisibleDocument(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, EntityRef reference)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(reference);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(reference) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var resource = engine.Resource(view, reference.Partition, reference.Collection, ResourceKind.Collection);
         reference = EntityReferenceLifetime.Bind(view, reference, resource);
         var document = view.GetRecord<DocumentRecord>(DocumentKey(reference.Partition, reference.Collection, reference.Id));
@@ -207,7 +207,7 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "engine">The shared database execution context.</param>
     public static T WithDocuments<T>(this DatabaseEngine engine, string principalId, PartitionRef partition, string collection, Func<PrincipalRecord, ResourceDefinition, DocumentRecord[], T> read, Capability capability = Capability.DocumentsRead, string[]? fieldUses = null)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Store.Read(view =>
         {
             var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
@@ -233,7 +233,7 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "engine">The shared database execution context.</param>
     public static DocumentRecord[] ReadVisibleDocuments(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection, ReadExecutionBudget? budget = null)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget ??= new(timeProvider: engine.Clock);
         var records = new List<DocumentRecord>();
         engine.VisitVisibleDocuments(view, principal, partition, collection, budget, records.Add);
@@ -251,8 +251,8 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "engine">The shared database execution context.</param>
     public static void VisitVisibleDocuments(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, PartitionRef partition, string collection, ReadExecutionBudget budget, Action<DocumentRecord> visitor)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         VisibleDocumentReads.Visit(engine, view, principal, partition, collection, budget, visitor);
     }
 }

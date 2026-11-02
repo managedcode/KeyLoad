@@ -105,7 +105,7 @@ internal static class RuntimeJournalValidation
 
     private static int Utf8Length(string value)
     {
-        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(value) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         try
         {
             return StrictUtf8.GetByteCount(value);

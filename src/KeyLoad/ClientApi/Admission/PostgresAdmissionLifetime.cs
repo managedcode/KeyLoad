@@ -27,8 +27,8 @@ internal sealed class PostgresAdmissionLifetime
                     ?? throw Errors.Fail(ErrorCode.OwnershipLost, ServerConnectionProtocol.Unavailable);
                 var lifetime = new PostgresAdmissionLifetime { Token = deadline.Token };
                 context.Features.Set(lifetime);
-                lifetime.expiry = deadline.Token.Register(static value =>
-                    ((ServerConnectionFeature)value!).RequestClose(), owner);
+                lifetime.expiry = (deadline.Token.Register(static value =>
+                    (((ServerConnectionFeature)value! /* KLD0042: Recover the exact ServerConnectionFeature reference passed as native CancellationToken callback state; preserve the static callback. */)).RequestClose(), owner) /* KLD0041: The BCL cancellation registration accepts object state; pass the existing connection owner reference so expiry closes that owner without a captured closure. */);
                 await ServerFailureObserver.ObserveAsync(() => next(context), failures);
                 await ServerFailureObserver.ObserveAsync(() => lifetime.expiry.DisposeAsync().AsTask(), failures);
                 ServerFailureObserver.Observe(() => context.Features.Set<PostgresAdmissionLifetime>(null), failures);

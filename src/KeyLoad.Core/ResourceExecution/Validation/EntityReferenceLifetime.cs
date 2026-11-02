@@ -75,7 +75,7 @@ internal static class EntityReferenceLifetime
     private static void RequireScope(EntityRef reference, ResourceLifetime actual)
     {
         RequireReference(reference);
-        ArgumentNullException.ThrowIfNull(actual);
+        ArgumentNullException.ThrowIfNull(actual) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (reference.Partition is null || actual.Incarnation is null || !Digest(actual.Incarnation.Value))
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, MissingBinding);
@@ -89,7 +89,7 @@ internal static class EntityReferenceLifetime
 
     private static void RequireReference(EntityRef reference)
     {
-        ArgumentNullException.ThrowIfNull(reference);
+        ArgumentNullException.ThrowIfNull(reference) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (reference.Partition is null)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, MissingBinding);

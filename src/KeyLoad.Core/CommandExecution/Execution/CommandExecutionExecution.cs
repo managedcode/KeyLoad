@@ -14,33 +14,33 @@ public static class CommandExecutionExecution
     /// <returns>An owned execution command.</returns>
 
     /// <param name = "engine">The shared database execution context.</param>
-    public static Command<DatabaseCommand> CreateCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input)
+    public static Command<DatabaseCommand> CreateCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ input)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        return engine.CreateCommandCore(kind, id, principalId, evaluatedAt, input, null);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        return engine.CreateCommandCore(kind, id, principalId, evaluatedAt, input, null) /* KLD0041: Command creation admits the exact Kind-selected input into the existing native persisted envelope without JSON conversion. */;
     }
 
-    internal static Command<DatabaseCommand> CreateCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input, ReadExecutionBudget work)
+    internal static Command<DatabaseCommand> CreateCommand(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ input, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(work);
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.Check();
-        return engine.CreateCommandCore(kind, id, principalId, evaluatedAt, input, work);
+        return engine.CreateCommandCore(kind, id, principalId, evaluatedAt, input, work) /* KLD0041: Command creation admits the exact Kind-selected input into the existing native persisted envelope without JSON conversion. */;
     }
 
-    internal static Command<DatabaseCommand> CreateCommand(this DatabaseEngine engine, IKeyValueView admissionView, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input)
+    internal static Command<DatabaseCommand> CreateCommand(this DatabaseEngine engine, IKeyValueView admissionView, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ input)
     {
-        ArgumentNullException.ThrowIfNull(admissionView);
-        return engine.CreateCommandCore(kind, id, principalId, evaluatedAt, input, null, admissionView);
+        ArgumentNullException.ThrowIfNull(admissionView) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        return engine.CreateCommandCore(kind, id, principalId, evaluatedAt, input, null, admissionView) /* KLD0041: Command creation admits the exact Kind-selected input into the existing native persisted envelope without JSON conversion. */;
     }
 
-    internal static Command<DatabaseCommand> CreateCommandCore(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object input, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
+    internal static Command<DatabaseCommand> CreateCommandCore(this DatabaseEngine engine, OperationKind kind, Guid id, string principalId, DateTimeOffset evaluatedAt, object /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ input, ReadExecutionBudget? work, IKeyValueView? admissionView = null)
     {
         if (kind is OperationKind.Bm25CorpusPublicationPhase or OperationKind.OnlineTextPublicationPhase)
         {
             throw Errors.Fail(ErrorCode.UnsupportedCapability, CommandExecutionValidation.UnsupportedDatabaseCommand);
         }
 
-        var admitted = DatabaseCommandInputTypes.Admit(kind, input);
-        return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, admitted, work, admissionView);
+        var /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ admitted = DatabaseCommandInputTypes.Admit(kind, input) /* KLD0041: The closed operation-kind map validates the exact runtime contract held by the existing persisted input slot. */;
+        return engine.CreatePreparedCommand(kind, id, principalId, evaluatedAt, admitted, work, admissionView) /* KLD0041: This admission preserves the Kind-selected native payload in the existing persisted command envelope. */;
     }
 }

@@ -20,7 +20,7 @@ internal static class Bm25RequestEnvelopes
             PrincipalId = verified.UserId,
             CommandKind = verified.Value!.Kind,
             CommandId = verified.CommandId,
-            Payload = GrainPayload.Strict(verified)
+            Payload /* KLD0041: Preserve the current generated Payload field ID and runtime type header at this request envelope boundary. */ = GrainPayload.Strict(verified)
         };
     }
 }

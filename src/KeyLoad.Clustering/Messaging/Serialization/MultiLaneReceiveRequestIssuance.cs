@@ -4,7 +4,7 @@ namespace KeyLoad.Clustering;
 internal static class MultiLaneReceiveRequestIssuance
 {
     internal static GrainRequestEnvelope CreateMultiLaneReceiveChild(GrainRequestCodec codec, Guid requestId, string principalId, Guid commandId,
-        object payload)
+        ReceiveRequest payload)
     {
         var envelope = new GrainRequestEnvelope
         {
@@ -14,7 +14,7 @@ internal static class MultiLaneReceiveRequestIssuance
             Incarnation = codec.Incarnation,
             CommandKind = OperationKind.Receive,
             CommandId = commandId,
-            Payload = GrainPayload.Copy(payload)
+            Payload /* KLD0041: Preserve the current generated Payload field ID and runtime type header at this request envelope boundary. */ = GrainPayload.Copy(payload)
         };
         _ = MultiLaneReceiveChildScope.Validate(envelope);
         return codec.Issue(envelope);

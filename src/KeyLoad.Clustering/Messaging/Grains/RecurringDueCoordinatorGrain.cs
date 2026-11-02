@@ -74,7 +74,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
 
     private DueWorkHint DecodeJob(IJobRunContext context)
     {
-        ArgumentNullException.ThrowIfNull(context);
+        ArgumentNullException.ThrowIfNull(context) /* KLD0041: BCL null validation accepts the context IJobRunContext reference through its object parameter. */;
         var job = context.Job;
         if (job is null || job.Name != SagaTimeoutJobContract.JobName
             || job.TargetGrainId != this.GetGrainId())
@@ -128,7 +128,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
     }
 
     private async Task<GrainOperationReply> DispatchWithOneUncertaintyRetry(PrincipalRecord principal,
-        Guid commandId, object payload, CancellationToken cancellationToken)
+        Guid commandId, CommandRequest payload, CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
         var first = await Dispatch(principal, requestId, commandId, payload, cancellationToken).ConfigureAwait(true);
@@ -143,7 +143,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
     }
 
     private async Task<GrainOperationReply> Dispatch(PrincipalRecord principal, Guid requestId,
-        Guid commandId, object payload, CancellationToken cancellationToken)
+        Guid commandId, CommandRequest payload, CancellationToken cancellationToken)
     {
         var connectionId = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, commandId, cancellationToken, connectionId: connectionId);

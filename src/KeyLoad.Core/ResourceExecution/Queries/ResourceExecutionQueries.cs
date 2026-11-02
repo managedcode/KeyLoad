@@ -9,7 +9,7 @@ public static class ResourceExecutionQueries
     /// <param name = "engine">The shared database execution context.</param>
     public static IDisposable AdmitQuery(this DatabaseEngine engine, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.analyticalReadGate.Admit(cancellationToken);
     }
 }

@@ -12,8 +12,8 @@ public static class BackupClient
     public static Task<Result<BackupReceipt>> BackupAsync(this KeyLoadClient client,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        return client.Send<BackupReceipt>(ApiRoutes.AdminBackup, null, true, null, cancellationToken,
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        return client.Send<BackupReceipt>(ApiRoutes.AdminBackup, true, null, cancellationToken,
             HttpMethod.Post);
     }
 }

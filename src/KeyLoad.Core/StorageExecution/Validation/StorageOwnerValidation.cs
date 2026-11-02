@@ -10,8 +10,8 @@ public static class StorageOwnerValidation
     /// <param name = "cancellationToken">The cancellation Token.</param>
     public static void VerifyStorageOwner(this DatabaseEngine engine, PhysicalShardRecord owner, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(engine);
-        ArgumentNullException.ThrowIfNull(owner);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(owner) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         cancellationToken.ThrowIfCancellationRequested();
         var identity = engine.Store.Identity;
         if (owner.PhysicalShardId != identity.NodeId || owner.Incarnation != identity.Incarnation)

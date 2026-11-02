@@ -18,7 +18,7 @@ public static class RemoteTransferInspection
     /// <param name = "engine">The shared database execution context.</param>
     public static QueueTransferInspection? InspectQueueTransfer(this DatabaseEngine engine, string principalId, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.InspectQueueTransferRead(principalId, source, transferId, budget);
     }
@@ -52,15 +52,15 @@ public static class RemoteTransferInspection
     /// <param name = "engine">The shared database execution context.</param>
     public static QueueTransferReceiptInspection? InspectQueueTransferReceipt(this DatabaseEngine engine, string principalId, QueueLaneRef destination, QueueLaneRef source, Guid transferId, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         return engine.InspectQueueTransferReceiptRead(principalId, destination, source, transferId, budget);
     }
 
     internal static QueueTransferReceiptInspection? InspectQueueTransferReceiptRead(this DatabaseEngine engine, string principalId, QueueLaneRef destination, QueueLaneRef source, Guid transferId, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(destination);
-        ArgumentNullException.ThrowIfNull(source);
+        ArgumentNullException.ThrowIfNull(destination) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(source) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         JsonData.Identifier(principalId);
         RemoteTransferValidation.ValidateTransferPair(source, destination);
@@ -159,7 +159,7 @@ public static class RemoteTransferInspection
 
     internal static void ValidateTransferLane(QueueLaneRef lane)
     {
-        ArgumentNullException.ThrowIfNull(lane);
+        ArgumentNullException.ThrowIfNull(lane) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(lane.Partition);
         JsonData.Identifier(lane.Queue);
     }

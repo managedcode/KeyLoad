@@ -1,3 +1,4 @@
+using KeyLoad.Storage;
 using static KeyLoad.FunctionalTests.EventStreams.TopicRetentionCorruptionFixture;
 namespace KeyLoad.FunctionalTests.EventStreams;
 
@@ -29,7 +30,7 @@ internal sealed class TopicRetentionPinCorruptionTests
         };
         if (kind == "key")
         {
-            key = KeySpace.Partition("subscription", fixture.Owner.Partition, "topic", "Topic", null, 1L, "first", "extra");
+            key = KeySpace.Partition("subscription", fixture.Owner.Partition, "topic", "Topic", KeyComponent.Null, 1L, "first", "extra");
         }
         Write(fixture, key, kind == "alias" ? OrleansSerialization.Serialize(new TopicHead(3, 1, 1, 0)) : OrleansSerialization.Serialize(corrupt));
         var command = fixture.Purge();

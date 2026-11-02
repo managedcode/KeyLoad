@@ -23,8 +23,8 @@ public sealed partial class QueryEngine
     public QueryEngine(DatabaseEngine database, IOptions<QueryExecutionOptions> options,
         SearchEngine? searchEngine, IQueryReadCutObserver? readCutObserver)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: BCL null validation accepts the database DatabaseEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
         execution = options.Value;
         execution.Validate();
         executionOptions = options;

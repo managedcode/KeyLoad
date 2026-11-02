@@ -45,9 +45,9 @@ public sealed record ZoneTreeStoreOptions(string Directory)
     /// <returns>A descriptor whose public scalar budgets are the exact effective values used by storage and offline bindings.</returns>
     public ZoneTreeStoreOptions ResolveExecutionOptions(IOptions<ZoneTreeStorageExecutionOptions> options)
     {
-        ArgumentNullException.ThrowIfNull(options);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
         var configured = options.Value;
-        ArgumentNullException.ThrowIfNull(configured);
+        ArgumentNullException.ThrowIfNull(configured) /* KLD0041: BCL null validation accepts the configured ZoneTreeStorageExecutionOptions reference through its object parameter. */;
         configured.Validate();
         var resolved = WithExecutionSnapshot(configured);
         return resolved;

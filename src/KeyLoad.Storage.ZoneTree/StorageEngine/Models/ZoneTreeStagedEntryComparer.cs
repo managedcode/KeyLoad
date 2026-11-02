@@ -8,7 +8,7 @@ internal sealed class ZoneTreeStagedEntryComparer : IComparer<ZoneTreeStagedEntr
 
     public int Compare(ZoneTreeStagedEntry? left, ZoneTreeStagedEntry? right)
     {
-        if (ReferenceEquals(left, right))
+        if ((ReferenceEquals(left, right) /* KLD0041: Recognize the same staged entry instance before comparing its key through CLR reference identity. */))
         {
             return 0;
         }

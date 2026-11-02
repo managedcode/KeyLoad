@@ -15,7 +15,7 @@ internal sealed partial class TextOnlineSession
             original.ThroughSequence, Budget);
     }
 
-    internal OnlineTextPublicationWork? TryMatchCheckpoint(CommitProjectionBatchRequest command,
+    internal OnlineTextPublicationWork<ProjectionBatchResult>? TryMatchCheckpoint(CommitProjectionBatchRequest command,
         string actualPrincipal)
         => CheckpointWork?.TryMatch(command, actualPrincipal, Budget).Value;
 

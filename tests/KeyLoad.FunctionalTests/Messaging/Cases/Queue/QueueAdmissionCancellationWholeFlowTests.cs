@@ -37,16 +37,16 @@ internal sealed class QueueAdmissionCancellationWholeFlowTests
         var coordinator = new EmbeddedCoordinator(fixture.Database);
         Result<object>? partial = null;
         var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
-            partial = await coordinator.SubmitAsync(kind, id, "root", payload, canceled.Token));
+            partial = await coordinator.SubmitAsync<object>(kind, id, "root", payload, canceled.Token));
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.CancellationToken).IsEqualTo(canceled.Token);
         await Assert.That(partial).IsNull();
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(before, CollectionOrdering.Matching);
-        var healthy = await coordinator.SubmitAsync(kind, id, "root", payload);
+        var healthy = await coordinator.SubmitAsync<object>(kind, id, "root", payload);
         await AssertHealthyAsync(fixture, lane, kind, healthy);
         var after = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var retry = await coordinator.SubmitAsync(kind, id, "root", payload);
+        var retry = await coordinator.SubmitAsync<object>(kind, id, "root", payload);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(after, CollectionOrdering.Matching);
         if (kind == OperationKind.Receive)
         {

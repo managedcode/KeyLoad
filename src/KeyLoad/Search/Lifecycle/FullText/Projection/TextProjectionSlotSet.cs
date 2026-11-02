@@ -50,13 +50,13 @@ internal sealed class TextProjectionSlotSet
 
     internal void ClearStaged(TextGenerationSlot slot)
     {
-        if (ReferenceEquals(staged, slot))
+        if ((ReferenceEquals(staged, slot) /* KLD0041: Clear only the supplied staged slot instance through CLR reference identity. */))
         {
             staged = null;
         }
     }
 
-    internal TextPublishPlan Publish(TextGeneration generation)
+    internal TextPublishPlan Publish(TextGeneration generation, Task availability)
     {
         var slot = staged;
         if (slot?.Generation != generation || slot.Unsettled || transition)
@@ -67,7 +67,7 @@ internal sealed class TextProjectionSlotSet
         {
             if (!retired.LeaseActive)
             {
-                throw TextErrors.Busy();
+                throw TextProjectionAdmission.Busy(TextProtocol.ProjectionBusy, availability);
             }
             if (current is null)
             {
@@ -77,7 +77,7 @@ internal sealed class TextProjectionSlotSet
             }
             if (current.LeaseActive)
             {
-                throw TextErrors.Busy();
+                throw TextProjectionAdmission.Busy(TextProtocol.ProjectionBusy, availability);
             }
             transition = true;
             return new(current, true);
@@ -92,7 +92,7 @@ internal sealed class TextProjectionSlotSet
     internal void CompleteReplacement(TextGenerationSlot previous, TextGeneration generation)
     {
         var slot = staged;
-        if (!transition || !ReferenceEquals(current, previous) || slot?.Generation != generation || retired is null)
+        if (!transition || !(ReferenceEquals(current, previous) /* KLD0041: Require the expected current generation slot instance during publication through CLR reference identity. */) || slot?.Generation != generation || retired is null)
         {
             throw TextErrors.Corrupt();
         }
@@ -114,7 +114,7 @@ internal sealed class TextProjectionSlotSet
 
     internal void ClearCurrent(TextGeneration generation)
     {
-        if (ReferenceEquals(current?.Generation, generation))
+        if ((ReferenceEquals(current?.Generation, generation) /* KLD0041: Clear only the supplied current generation instance through CLR reference identity. */))
         {
             current = null;
         }
@@ -122,7 +122,7 @@ internal sealed class TextProjectionSlotSet
 
     internal void CompleteLease(TextGenerationSlot slot, Exception? failure)
     {
-        if (failure is null && ReferenceEquals(staged, slot)
+        if (failure is null && (ReferenceEquals(staged, slot) /* KLD0041: Complete only the staged slot instance that owns this lease through CLR reference identity. */)
             && (slot.Generation is null or { Published: false }))
         {
             staged = null;
@@ -131,7 +131,7 @@ internal sealed class TextProjectionSlotSet
 
     internal bool BeginRetirement(TextGenerationSlot slot)
     {
-        if (!ReferenceEquals(retired, slot) || slot.LeaseActive || slot.CleanupActive || transition)
+        if (!(ReferenceEquals(retired, slot) /* KLD0041: Retire only the supplied retired slot instance through CLR reference identity. */) || slot.LeaseActive || slot.CleanupActive || transition)
         {
             return false;
         }
@@ -142,7 +142,7 @@ internal sealed class TextProjectionSlotSet
     internal void CompleteRetirement(TextGenerationSlot slot, Exception? failure)
     {
         slot.CleanupActive = false;
-        if (failure is null && ReferenceEquals(retired, slot))
+        if (failure is null && (ReferenceEquals(retired, slot) /* KLD0041: Clear only the retired slot instance whose cleanup completed through CLR reference identity. */))
         {
             retired = null;
         }
@@ -164,15 +164,15 @@ internal sealed class TextProjectionSlotSet
 
     internal void Remove(TextGenerationSlot slot)
     {
-        if (ReferenceEquals(current, slot))
+        if ((ReferenceEquals(current, slot) /* KLD0041: Remove only this current slot instance through CLR reference identity. */))
         {
             current = null;
         }
-        if (ReferenceEquals(retired, slot))
+        if ((ReferenceEquals(retired, slot) /* KLD0041: Remove only this retired slot instance through CLR reference identity. */))
         {
             retired = null;
         }
-        if (ReferenceEquals(staged, slot))
+        if ((ReferenceEquals(staged, slot) /* KLD0041: Remove only this staged slot instance through CLR reference identity. */))
         {
             staged = null;
         }
@@ -188,7 +188,7 @@ internal sealed class TextProjectionSlotSet
 
     private void RequireStaged(TextGenerationSlot slot)
     {
-        if (!ReferenceEquals(staged, slot) || slot.Unsettled)
+        if (!(ReferenceEquals(staged, slot) /* KLD0041: Require the exact staged slot instance before changing its state through CLR reference identity. */) || slot.Unsettled)
         {
             throw TextErrors.Corrupt();
         }

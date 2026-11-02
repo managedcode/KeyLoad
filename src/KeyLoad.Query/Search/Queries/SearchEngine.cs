@@ -13,7 +13,7 @@ public sealed partial class SearchEngine
     public async Task<WaitForIndexResult> WaitForIndexAsync(string principalId, WaitForIndexRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request WaitForIndexRequest reference through its object parameter. */;
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);

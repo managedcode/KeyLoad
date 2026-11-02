@@ -15,8 +15,8 @@ internal static class SampleAggregateWindowReader
     {
         const int EmptyWindowCount = 0;
 
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         SampleAggregateReader.ValidateRange(request.From, request.UntilExclusive);
         SampleAggregateReader.ValidateSampleLimit(request.MaxSamples);
         ValidateWidth(request.Width);

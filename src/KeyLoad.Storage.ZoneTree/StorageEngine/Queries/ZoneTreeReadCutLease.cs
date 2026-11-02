@@ -38,8 +38,8 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
     private ZoneTreeReadCutVisitResult VisitPrefixCore(byte[] prefix, ZoneTreeReadCutVisitor visitor,
         Action<long, int>? admitBeforeCopy, bool copyBytes)
     {
-        ArgumentNullException.ThrowIfNull(prefix);
-        ArgumentNullException.ThrowIfNull(visitor);
+        ArgumentNullException.ThrowIfNull(prefix) /* KLD0041: BCL null validation accepts the prefix byte[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: BCL null validation accepts the visitor ZoneTreeReadCutVisitor reference through its object parameter. */;
         var source = state.BeginTraversal();
         try
         {
@@ -61,9 +61,9 @@ internal sealed class ZoneTreeReadCutLease : IDisposable
 
     internal bool ReadExact(byte[] key, StorageValueReader reader, Action<long, int> admitBeforeRead)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(reader);
-        ArgumentNullException.ThrowIfNull(admitBeforeRead);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(reader) /* KLD0041: BCL null validation accepts the reader StorageValueReader reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(admitBeforeRead) /* KLD0041: BCL null validation accepts the admitBeforeRead Action reference through its object parameter. */;
         var source = state.BeginTraversal();
         try
         {

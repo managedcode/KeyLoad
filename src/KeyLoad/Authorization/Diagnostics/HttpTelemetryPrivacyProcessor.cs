@@ -86,7 +86,7 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
     private bool ScrubTags(Activity data)
     {
         var keys = new List<string>(options.Value.MaximumTags);
-        foreach (var item in data.TagObjects)
+        foreach (var item in (data.TagObjects /* KLD0041: Inspect the native Activity object-valued tags under MaximumTags before replacing them with the bounded HTTP privacy allowlist. */))
         {
             if (keys.Count == options.Value.MaximumTags)
             {
@@ -94,27 +94,27 @@ internal sealed class HttpTelemetryPrivacyProcessor(IOptions<HttpTelemetryPrivac
             }
             keys.Add(item.Key);
         }
-        var method = HttpTelemetryPrivacyPolicy.NormalizeMethod(data.GetTagItem(HttpTelemetryPrivacyPolicy.MethodTag));
-        var status = data.GetTagItem(HttpTelemetryPrivacyPolicy.StatusTag);
-        var protocol = (HttpTelemetryPrivacyPolicy.NormalizeProtocol(data.GetTagItem(HttpTelemetryPrivacyPolicy.ProtocolTag))).Value;
+        var method = (HttpTelemetryPrivacyPolicy.NormalizeMethod((data.GetTagItem(HttpTelemetryPrivacyPolicy.MethodTag) /* KLD0041: Read the native Activity method tag for closed HTTP privacy validation. */)) /* KLD0041: Map the native Activity method tag into the fixed public HTTP method allowlist before republishing it. */);
+        var /* KLD0041: Retain the original Activity HTTP status tag box after integer-range validation so publishing the sanitized status does not box it again. */ status = (data.GetTagItem(HttpTelemetryPrivacyPolicy.StatusTag) /* KLD0041: Read the native Activity status tag for closed HTTP privacy validation. */);
+        var protocol = ((HttpTelemetryPrivacyPolicy.NormalizeProtocol((data.GetTagItem(HttpTelemetryPrivacyPolicy.ProtocolTag) /* KLD0041: Read the native Activity protocol tag for closed HTTP privacy validation. */)) /* KLD0041: Map the native Activity protocol tag into the fixed supported protocol allowlist before republishing it. */)).Value;
         foreach (var key in keys)
         {
-            data.SetTag(key, null);
+            data.SetTag(key, null) /* KLD0041: Remove this original Activity tag through the native object-valued API before publishing only approved HTTP metadata. */;
         }
-        data.SetTag(HttpTelemetryPrivacyPolicy.MethodTag, method);
-        if (status is int code and >= HttpTelemetryPrivacyPolicy.MinimumStatus and <= HttpTelemetryPrivacyPolicy.MaximumStatus)
+        data.SetTag(HttpTelemetryPrivacyPolicy.MethodTag, method) /* KLD0041: Publish the bounded normalized HTTP method string through the native Activity object-valued tag API. */;
+        if (status is int and >= HttpTelemetryPrivacyPolicy.MinimumStatus and <= HttpTelemetryPrivacyPolicy.MaximumStatus)
         {
-            data.SetTag(HttpTelemetryPrivacyPolicy.StatusTag, code);
+            data.SetTag(HttpTelemetryPrivacyPolicy.StatusTag, status) /* KLD0041: Publish the original validated status box through the native Activity object-valued tag API. */;
         }
         if (protocol is not null)
         {
-            data.SetTag(HttpTelemetryPrivacyPolicy.ProtocolTag, protocol);
+            data.SetTag(HttpTelemetryPrivacyPolicy.ProtocolTag, protocol) /* KLD0041: Publish the bounded normalized HTTP protocol string through the native Activity object-valued tag API. */;
         }
         return true;
     }
     private static void Suppress(Activity data, string reason)
     {
         data.ActivityTraceFlags &= ~ActivityTraceFlags.Recorded;
-        Suppressed.Add(HttpTelemetryPrivacyPolicy.CounterIncrement, new KeyValuePair<string, object?>(HttpTelemetryPrivacyPolicy.ReasonTag, reason));
+        Suppressed.Add(HttpTelemetryPrivacyPolicy.CounterIncrement, (new KeyValuePair<string, object?>(HttpTelemetryPrivacyPolicy.ReasonTag, reason) /* KLD0041: The native metrics tag pair carries this closed suppression-reason string without scalar boxing or caller payloads. */)) /* KLD0041: Emit one HTTP privacy suppression count with the native metrics object-valued pair containing only the closed reason string. */;
     }
 }

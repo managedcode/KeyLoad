@@ -13,7 +13,7 @@ public static class QueueRetryPreparation
     internal static Command<DatabaseCommand> PrepareQueueRetryOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation) => engine.Store.Read(view => engine.PrepareQueueRetryInView(view, operation));
     internal static Command<DatabaseCommand> PrepareQueueRetryOperation(this DatabaseEngine engine, Command<DatabaseCommand> operation, ReadExecutionBudget work)
     {
-        ArgumentNullException.ThrowIfNull(work);
+        ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         work.Check();
         var prepared = engine.Store.Read(raw => engine.PrepareQueueRetryInView(work.CreateView(raw), operation, preserveBudgetFailure: true));
         work.Check();

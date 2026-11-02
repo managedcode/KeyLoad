@@ -57,7 +57,7 @@ internal struct CapabilityCleanupFailures
 
     private static void Append(Exception? error, Exception? primary, List<Exception> failures)
     {
-        if (error is not null && !ReferenceEquals(error, primary))
+        if (error is not null && !(ReferenceEquals(error, primary) /* KLD0041: Retain distinct cleanup and primary exception instances through CLR reference identity. */))
         {
             failures.Add(error);
         }

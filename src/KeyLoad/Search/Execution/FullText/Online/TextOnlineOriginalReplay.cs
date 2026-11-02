@@ -56,7 +56,7 @@ internal sealed class TextOnlineOriginalReplay(DatabaseEngine database,
                     session.GenerationReservation = null;
                     session.CatalogCommitted = true;
                 }
-                if (!ReferenceEquals(active, generation))
+                if (!(ReferenceEquals(active, generation) /* KLD0041: Retire only the generation instance that is no longer active through CLR reference identity. */))
                 {
                     catalog.BeginRetirement(generation);
                 }

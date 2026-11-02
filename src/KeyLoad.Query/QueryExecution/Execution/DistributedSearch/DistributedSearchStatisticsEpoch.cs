@@ -16,8 +16,8 @@ internal static class DistributedSearchStatisticsEpoch
     internal static string Create(string requestDigest, ImmutableArray<DistributedTextWitness> witnesses,
         IOptions<QueryExecutionOptions> options, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         if (requestDigest is null || requestDigest.Length != SHA256.HashSizeInBytes * HexCharactersPerByte
             || witnesses.IsDefaultOrEmpty || witnesses.Length > options.Value.MaximumPartitions)

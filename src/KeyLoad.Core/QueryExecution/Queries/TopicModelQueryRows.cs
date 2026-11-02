@@ -8,7 +8,7 @@ public static class TopicModelQueryRows
 {
     internal static void VisitTopicModelRows(IKeyValueView view, PartitionRef partition, ResourceDefinition resource, ModelQuerySource modelSource, ReadExecutionBudget budget, bool explain, Action<DocumentRecord> accept)
     {
-        ArgumentNullException.ThrowIfNull(accept);
+        ArgumentNullException.ThrowIfNull(accept) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         budget.Check();
         var budgetedView = budget.CreateView(view);
         var source = new EventSourceRef(partition, resource.Name, EventSourceKind.Topic, Generation: modelSource.Generation);

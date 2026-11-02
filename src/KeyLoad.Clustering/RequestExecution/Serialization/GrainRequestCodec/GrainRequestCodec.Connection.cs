@@ -16,7 +16,7 @@ public sealed partial class GrainRequestCodec
 
     internal void ValidateConnectionClose(GrainConnectionCloseControl control, Guid connectionId)
     {
-        ArgumentNullException.ThrowIfNull(control);
+        ArgumentNullException.ThrowIfNull(control) /* KLD0041: BCL null validation accepts the control GrainConnectionCloseControl reference through its object parameter. */;
         if (connectionId == Guid.Empty || control.ConnectionId != connectionId
             || control.Purpose != ConnectionControlProtocol.Purpose
             || control.Incarnation != Incarnation)

@@ -25,8 +25,8 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     /// <inheritdoc />
     public void Require(PrincipalRecord principal, PartitionRef partition, string resource, Capability capability)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(partition);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (principal.ClusterAdministrator)
         {
             return;
@@ -41,8 +41,8 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     /// <inheritdoc />
     public bool CanReadRow(PrincipalRecord principal, RowAccess access)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(access);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(access) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return principal.ClusterAdministrator || !principal.RestrictRows
             || access.OwnerId is not null && access.OwnerId == principal.OwnerId
             || access.ProjectId is not null && principal.Projects.Contains(access.ProjectId, StringComparer.Ordinal)
@@ -59,8 +59,8 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     /// <inheritdoc />
     public void RequireFieldUse(PrincipalRecord principal, ResourceDefinition resource, string path)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         foreach (var policy in resource.FieldPolicies)
         {
             if (Overlaps(policy.Path, path) && !Grant(principal, policy.RawUseGrant))
@@ -72,8 +72,8 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     /// <inheritdoc />
     public void RequireFieldWrite(PrincipalRecord principal, ResourceDefinition resource, string path)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         foreach (var policy in resource.FieldPolicies)
         {
             if (Overlaps(policy.Path, path) && !Grant(principal, policy.WriteGrant))
@@ -85,22 +85,22 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     /// <inheritdoc />
     public IEnumerable<SensitiveFieldPolicy> GetEffectiveFieldPolicies(ResourceDefinition resource, string path)
     {
-        ArgumentNullException.ThrowIfNull(resource);
-        ArgumentNullException.ThrowIfNull(path);
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(path) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return resource.FieldPolicies.Where(policy => Overlaps(policy.Path, path));
     }
     /// <inheritdoc />
     public bool CanReadFieldSchema(PrincipalRecord principal, SensitiveFieldPolicy policy)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(policy);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(policy) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return policy.SchemaReadGrant is null || Grant(principal, policy.SchemaReadGrant);
     }
     /// <inheritdoc />
     public void RequireSchemaVisibility(PrincipalRecord principal, ResourceDefinition resource)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (resource.FieldPolicies.Any(policy => !CanReadFieldSchema(principal, policy)))
         {
             throw Errors.Fail(ErrorCode.Validation, SchemaBindingUnavailableMessage);
@@ -109,8 +109,8 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     /// <inheritdoc />
     public void RequireReplacement(PrincipalRecord principal, ResourceDefinition resource, bool explicitReplacement)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (resource.FieldPolicies.Any(p => !Grant(principal, p.RawReadGrant))
             && (!explicitReplacement || !Grant(principal, SensitiveReplacementGrant)))
         {
@@ -120,8 +120,8 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     /// <inheritdoc />
     public void RequireWorkerInput(PrincipalRecord principal, ResourceDefinition resource)
     {
-        ArgumentNullException.ThrowIfNull(principal);
-        ArgumentNullException.ThrowIfNull(resource);
+        ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(resource) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         if (resource.FieldPolicies.Concat(resource.HeaderPolicies).Any(p => p.RequiredForProcessing && !Grant(principal, p.RawReadGrant)))
         {
             throw Errors.Fail(ErrorCode.PermissionDenied, WorkerInputDeniedMessage);

@@ -130,7 +130,7 @@ public sealed class DatabasePhaseBank
 
     internal bool MatchesSettings(bool enabled, int stripeCount, int maximumCasAttempts, TimeProvider? timeProvider) =>
         _enabled == enabled && _stripeCount == stripeCount && _maximumCasAttempts == maximumCasAttempts
-        && (timeProvider is null || ReferenceEquals(_timeProvider, timeProvider));
+        && (timeProvider is null || (ReferenceEquals(_timeProvider, timeProvider) /* KLD0041: Compare the configured clock instance without invoking provider equality through CLR reference identity. */));
 
     internal static DatabasePhaseSnapshot CaptureDisabled() => new(
         false,

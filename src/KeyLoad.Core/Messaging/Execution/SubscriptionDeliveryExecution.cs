@@ -74,7 +74,7 @@ public static class SubscriptionDeliveryExecution
     /// <param name = "engine">The shared database execution context.</param>
     public static SubscriptionInfo GetSubscription(this DatabaseEngine engine, string principalId, SubscriptionRef subscription)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         return engine.Store.Read(view => engine.GetSubscriptionRead(view, principalId, subscription));
     }
 

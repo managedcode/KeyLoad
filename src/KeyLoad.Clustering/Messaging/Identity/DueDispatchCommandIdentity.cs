@@ -14,7 +14,7 @@ internal static class DueDispatchCommandIdentity
 
     internal static Guid ForDue(DueWorkHint hint, PrincipalRecord principal)
     {
-        ArgumentNullException.ThrowIfNull(hint);
+        ArgumentNullException.ThrowIfNull(hint) /* KLD0041: BCL null validation accepts the hint DueWorkHint reference through its object parameter. */;
         var partition = hint.Lane.Partition;
         var digest = SHA256.HashData(KeyCodec.Encode(DueDomain, partition.TenantId, partition.DatabaseId,
             partition.TransactionDomainId, partition.PartitionKey, hint.Lane.Queue, (int)hint.Kind, hint.Id,
@@ -24,7 +24,7 @@ internal static class DueDispatchCommandIdentity
 
     internal static Guid ForDeadline(QueueDeadlineHint hint, PrincipalRecord principal)
     {
-        ArgumentNullException.ThrowIfNull(hint);
+        ArgumentNullException.ThrowIfNull(hint) /* KLD0041: BCL null validation accepts the hint QueueDeadlineHint reference through its object parameter. */;
         var partition = hint.Lane.Partition;
         var mutation = hint.Mutation;
         var digest = SHA256.HashData(KeyCodec.Encode(DeadlineDomain, partition.TenantId, partition.DatabaseId,

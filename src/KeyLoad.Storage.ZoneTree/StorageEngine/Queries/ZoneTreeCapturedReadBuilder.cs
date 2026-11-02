@@ -20,12 +20,12 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
 
     public void CapturePrefix(byte[] prefix)
     {
-        ArgumentNullException.ThrowIfNull(prefix);
+        ArgumentNullException.ThrowIfNull(prefix) /* KLD0041: BCL null validation accepts the prefix byte[] reference through its object parameter. */;
         if (prefix.Length == 0)
         {
             throw new ArgumentException(EmptyScope, nameof(prefix));
         }
-        ObjectDisposedException.ThrowIf(transferred, this);
+        ObjectDisposedException.ThrowIf(transferred, this) /* KLD0041: BCL disposal diagnostics accept the this ZoneTreeCapturedReadBuilder instance through object to preserve its runtime owner type. */;
         if (Covers(prefix))
         {
             return;
@@ -41,12 +41,12 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
 
     public void CaptureExact(byte[] key)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(key) /* KLD0041: BCL null validation accepts the key byte[] reference through its object parameter. */;
         if (key.Length == 0)
         {
             throw new ArgumentException(EmptyScope, nameof(key));
         }
-        ObjectDisposedException.ThrowIf(transferred, this);
+        ObjectDisposedException.ThrowIf(transferred, this) /* KLD0041: BCL disposal diagnostics accept the this ZoneTreeCapturedReadBuilder instance through object to preserve its runtime owner type. */;
         if (Covers(key) || exactKeys.Any(exact => exact.AsSpan().SequenceEqual(key)))
         {
             return;
@@ -70,7 +70,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
 
     public bool ReadCapturedValue(byte[] key, StorageValueReader reader)
     {
-        ArgumentNullException.ThrowIfNull(reader);
+        ArgumentNullException.ThrowIfNull(reader) /* KLD0041: BCL null validation accepts the reader StorageValueReader reference through its object parameter. */;
         CaptureExact(key);
         var location = ZoneTreeCapturedReadLookup.Find(records, key, records.Count);
         if (location < 0)
@@ -83,7 +83,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
 
     public void VisitCapturedPrefix(byte[] prefix, StorageRecordVisitor visitor)
     {
-        ArgumentNullException.ThrowIfNull(visitor);
+        ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: BCL null validation accepts the visitor StorageRecordVisitor reference through its object parameter. */;
         CapturePrefix(prefix);
         var first = ZoneTreeCapturedReadLookup.Find(records, prefix, records.Count);
         var index = first >= 0 ? first : ~first;
@@ -101,7 +101,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
 
     internal ZoneTreeCapturedReadView Transfer()
     {
-        ObjectDisposedException.ThrowIf(transferred, this);
+        ObjectDisposedException.ThrowIf(transferred, this) /* KLD0041: BCL disposal diagnostics accept the this ZoneTreeCapturedReadBuilder instance through object to preserve its runtime owner type. */;
         original.ObserveSettledWork();
         transferred = true;
         return new(records, prefixes, exactKeys, admit);

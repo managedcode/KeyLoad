@@ -17,7 +17,7 @@ internal sealed class FilteredSearchEligibility
     internal static void ValidateRequest(ImmutableArray<string>? requested,
         ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         if (requested is null)
         {
             return;
@@ -36,7 +36,7 @@ internal sealed class FilteredSearchEligibility
 
     internal static FilteredSearchEligibility Create(ImmutableArray<string>? requested, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         if (requested is null)
         {
             return new(null);

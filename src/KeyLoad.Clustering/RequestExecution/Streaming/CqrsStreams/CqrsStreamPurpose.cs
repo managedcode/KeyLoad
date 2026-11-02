@@ -80,17 +80,17 @@ internal sealed class CqrsStreamPurpose(Func<DecodedGrainRequest>? resolve = nul
         original = null;
         if (onlineCandidate)
         {
-            _ = GrainPayload.ReadCommand<OnlineTextIndexMaintenanceRequest>(request.Payload);
+            _ = (GrainPayload.ReadCommand<OnlineTextIndexMaintenanceRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.OnlineTextIndexMaintenanceRequest at this closed operation boundary before executing typed code. */);
             IsOnlineTextMaintenance = true;
             return;
         }
         if (annCandidate)
         {
-            var ann = GrainPayload.ReadCommand<AnnMaintenanceRequest>(request.Payload);
+            var ann = (GrainPayload.ReadCommand<AnnMaintenanceRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.AnnMaintenanceRequest at this closed operation boundary before executing typed code. */);
             EnableAnnMaintenance(ann.Mode);
             return;
         }
-        var maintenance = GrainPayload.ReadCommand<TextIndexMaintenanceRequest>(request.Payload);
+        var maintenance = (GrainPayload.ReadCommand<TextIndexMaintenanceRequest>((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the received generated envelope payload as KeyLoad.TextIndexMaintenanceRequest at this closed operation boundary before executing typed code. */);
         EnableTextMaintenance(maintenance.Mode);
     }
 

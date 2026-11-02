@@ -8,13 +8,13 @@ internal sealed class AnalyticsStoreFailures : ZoneTree.Logger.ILogger
     private Exception? failure;
     public ZoneTree.Logger.LogLevel LogLevel { get; set; } = ZoneTree.Logger.LogLevel.Error;
     public void LogError(Exception error) => Interlocked.CompareExchange(ref failure, error, null);
-    public void LogWarning(object value)
+    public void LogWarning(object /* KLD0041: ZoneTree.Logger.ILogger fixes this parameter to object; this implementation discards non-error events without retaining or formatting their payloads. */ value)
     {
     }
-    public void LogInfo(object value)
+    public void LogInfo(object /* KLD0041: ZoneTree.Logger.ILogger fixes this parameter to object; this implementation discards non-error events without retaining or formatting their payloads. */ value)
     {
     }
-    public void LogTrace(object value)
+    public void LogTrace(object /* KLD0041: ZoneTree.Logger.ILogger fixes this parameter to object; this implementation discards non-error events without retaining or formatting their payloads. */ value)
     {
     }
 

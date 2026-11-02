@@ -56,7 +56,7 @@ internal static class McpSchemaFactory
     /// <returns>An owned immutable structured-output schema.</returns>
     internal static JsonElement CreateOutput(Type resultType, bool nullableResult, bool statusOnly = false)
     {
-        ArgumentNullException.ThrowIfNull(resultType);
+        ArgumentNullException.ThrowIfNull(resultType) /* KLD0041: BCL null validation accepts the resultType Type reference through its object parameter. */;
         var success = McpSchemaObjects.Closed(new JsonObject
         {
             [McpCatalogProtocol.Result] = statusOnly ? new JsonObject { [McpSchemaKeywords.Type] = McpSchemaKeywords.Null } :

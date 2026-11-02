@@ -7,8 +7,8 @@ public static class OnlineTextOperationAuthority
 {
     internal static Command<DatabaseCommand> CreateOnlineTextPublicationOperation(this DatabaseEngine engine, string principalId, DateTimeOffset evaluatedAt, OnlineTextPreparedPublication prepared, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(prepared);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(prepared) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var command = prepared.Command;
         OnlineTextPublicationShape.Require(command);
         return engine.Store.Read(raw =>
@@ -25,7 +25,7 @@ public static class OnlineTextOperationAuthority
             OnlineTextPublicationValidation.LocalSource(command, current, prepared.ValidatedSource);
             engine.ValidateOnlineTextCheckpoint(raw, principal, command.Request, command.Result.Checkpoint, prepared.CheckpointIntent);
             budget.Check();
-            return engine.CreatePreparedCommand(OperationKind.OnlineTextPublicationPhase, command.Request.CommandId, principalId, evaluatedAt, command, budget, view);
+            return engine.CreatePreparedCommand(OperationKind.OnlineTextPublicationPhase, command.Request.CommandId, principalId, evaluatedAt, command, budget, view) /* KLD0041: This admission preserves the Kind-selected native payload in the existing persisted command envelope. */;
         });
     }
 }

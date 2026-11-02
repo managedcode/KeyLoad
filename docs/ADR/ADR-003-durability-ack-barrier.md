@@ -24,7 +24,7 @@ to confirm ordered persisted apply; the returned copy count must match those
 actual acknowledgements. Missing copies refuse success. A timeout after possible
 effects is an unknown outcome and retains the stable command ID for retry.
 
-The local barrier is ZoneTree 2.0.9's `SyncCompressed` WAL publication
+The local barrier is ZoneTree 2.1.0's `SyncCompressed` WAL publication
 ([ADR-011](ADR-011-current-format.md)). Native writes publish into the mapped
 local WAL tail before returning. `IAtomicStore.Commit` and `CommitAsync` return
 after the native transaction's commit record, so data and persisted outcomes

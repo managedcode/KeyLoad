@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using System.Text.Json;
 using KeyLoad.Query;
 
 namespace KeyLoad.Client;
@@ -30,7 +31,7 @@ internal static class QueryPredicateExpression
 
         if (expression.Type == typeof(bool))
         {
-            return new Comparison(context.Expressions.Operand(expression, parameter), QueryPredicateTokens.Equal, QueryExpressions.Literal(true));
+            return new Comparison(context.Expressions.Operand(expression, parameter), QueryPredicateTokens.Equal, new ValueOperand(JsonSerializer.SerializeToElement(true, JsonDefaults.Options)));
         }
 
         throw QueryExpressions.Unsupported();

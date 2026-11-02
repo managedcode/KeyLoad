@@ -21,7 +21,7 @@ internal sealed class StrictByteMemoryJsonConverter : JsonConverter<ReadOnlyMemo
 
     public override void Write(Utf8JsonWriter writer, ReadOnlyMemory<byte> value, JsonSerializerOptions options)
     {
-        ArgumentNullException.ThrowIfNull(writer);
+        ArgumentNullException.ThrowIfNull(writer) /* KLD0041: The CLR guard validates the native JSON writer reference before base64 buffer encoding. */;
         writer.WriteBase64StringValue(value.Span);
     }
 }

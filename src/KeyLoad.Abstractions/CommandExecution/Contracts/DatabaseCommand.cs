@@ -8,6 +8,6 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 public sealed record DatabaseCommand(
     [property: Orleans.Id(DatabaseCommandFields.Kind)] OperationKind Kind,
-    [property: Orleans.Id(DatabaseCommandFields.Input), KeyLoad.InternalSerialization.PublicInput] object Input,
+    [property: Orleans.Id(DatabaseCommandFields.Input), KeyLoad.InternalSerialization.PublicInput] object /* KLD0041: This existing persisted envelope stores the exact input contract selected and validated by Kind, with native Orleans type metadata. */ Input,
     [property: Orleans.Id(DatabaseCommandFields.RetryDecisions)] ReadOnlyMemory<byte> RetryDecisions = default,
     [property: Orleans.Id(DatabaseCommandFields.ResourceAdmission)] ReadOnlyMemory<byte> ResourceAdmission = default);

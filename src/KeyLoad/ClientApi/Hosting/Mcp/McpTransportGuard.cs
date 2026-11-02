@@ -16,8 +16,8 @@ internal static class McpTransportGuard
         const int EmptyRevisionCount = 1;
         const int IndexEmptyCount = 0;
 
-        ArgumentNullException.ThrowIfNull(headers);
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(headers) /* KLD0041: BCL null validation accepts the headers IHeaderDictionary reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         var bounds = executionOptions.Value;
         bounds.Validate();
         var revision = headers[McpTransportProtocol.RevisionHeader];
@@ -176,7 +176,7 @@ internal static class McpTransportGuard
     private static KeyLoadException InvalidTransport(McpTransportStage stage)
     {
         var error = Errors.Fail(ErrorCode.Validation, McpTransportProtocol.InvalidTransport);
-        error.Data[McpTransportDiagnostics.StageMetadataKey] = stage;
+        ((error.Data /* KLD0041: Attach only the closed transport-stage enum under the owned key in the original exception's native Data dictionary. */)[McpTransportDiagnostics.StageMetadataKey] /* KLD0041: Attach only the closed transport-stage enum under the owned key in the original exception's native Data dictionary. */) = (stage /* KLD0042: Box the closed McpTransportStage enum only when creating a rejected-transport exception so sanitized diagnostics preserve the original failure. */);
         return error;
     }
 }

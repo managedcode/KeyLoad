@@ -18,18 +18,18 @@ internal sealed class TargetInboxCancellationTests
         var coordinator = new EmbeddedCoordinator(fixture.Database);
         Result<object>? partial = null;
         var failure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () => partial =
-            await coordinator.SubmitAsync(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
+            await coordinator.SubmitAsync<object>(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
                 JsonSerializer.Serialize(seed.Request, JsonDefaults.Options), caller.Token));
         await Assert.That(failure!.CancellationToken).IsEqualTo(caller.Token);
         await Assert.That(partial).IsNull();
         await Assert.That(fixture.Store.Position).IsEqualTo(position);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(before, CollectionOrdering.Matching);
-        var actual = await coordinator.SubmitAsync(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
+        var actual = await coordinator.SubmitAsync<object>(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
             JsonSerializer.Serialize(seed.Request, JsonDefaults.Options));
         await Assert.That(actual.Get<CommitInboxResult>().AlreadyProcessed).IsFalse();
         await TargetInboxAssertions.EffectsAsync(fixture.Database, seed.Request);
         var after = QueueWholeFlowStorage.Bytes(fixture.Store);
-        var replay = await coordinator.SubmitAsync(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
+        var replay = await coordinator.SubmitAsync<object>(OperationKind.CommitInbox, seed.Request.CommandId, TargetInboxUnitProtocol.Root,
             JsonSerializer.Serialize(seed.Request, JsonDefaults.Options));
         await ReplayResultAssertions.Same<CommitInboxResult>(replay, actual);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Store)).IsEquivalentTo(after, CollectionOrdering.Matching);

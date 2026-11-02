@@ -13,9 +13,9 @@ public static class MultiLaneReceiveClientExtensions
     public static Task<Result<MultiLaneReceiveResult>> ReceiveAcrossLanesAsync(this KeyLoadClient client,
         MultiLaneReceiveRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<MultiLaneReceiveResult>(MultiLaneReceiveProtocol.Route, request, true,
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request MultiLaneReceiveRequest reference through its object parameter. */;
+        return client.Send<MultiLaneReceiveResult, MultiLaneReceiveRequest>(MultiLaneReceiveProtocol.Route, request, true,
             request.RequestId, cancellationToken);
     }
 }

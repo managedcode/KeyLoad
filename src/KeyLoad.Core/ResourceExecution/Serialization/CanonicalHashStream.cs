@@ -13,7 +13,7 @@ internal sealed class CanonicalHashStream : Stream
 
     internal CanonicalHashStream(IncrementalHash hash)
     {
-        ArgumentNullException.ThrowIfNull(hash);
+        ArgumentNullException.ThrowIfNull(hash) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         this.hash = hash;
     }
 
@@ -69,6 +69,6 @@ internal sealed class CanonicalHashStream : Stream
 
     private void ThrowIfDisposed()
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: The BCL disposal guard accepts this owner as object to report its runtime type name. */;
     }
 }

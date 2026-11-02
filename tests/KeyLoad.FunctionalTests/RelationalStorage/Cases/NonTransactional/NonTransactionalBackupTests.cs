@@ -35,7 +35,7 @@ internal sealed class NonTransactionalBackupTests
         await Assert.That(database.GetDocument(RelationalTestData.Root,
             new(fixture.Partition, RelationalTestData.Table, RelationalTestData.Second))).IsNull();
         var id = Guid.NewGuid();
-        (await new EmbeddedCoordinator(database).RuntimeSubmitAsync(OperationKind.Batch, id, RelationalTestData.Root,
+        (await new EmbeddedCoordinator(database).RuntimeSubmitAsync<object>(OperationKind.Batch, id, RelationalTestData.Root,
             new CommandRequest(id, fixture.Partition, [new PutDocument(RelationalTestData.Table,
                 RelationalTestData.Second, NonTransactionalTableFixture.Row(RelationalTestData.Second, NonTransactionalTableFixture.Beta))])))
             .Get<CommitReceipt>();

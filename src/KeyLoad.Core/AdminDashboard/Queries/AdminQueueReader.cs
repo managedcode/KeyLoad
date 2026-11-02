@@ -16,8 +16,8 @@ public sealed class AdminQueueReader(DatabaseEngine database)
     /// <returns>Nonsecret metadata from one gated cut without writing any record.</returns>
     public AdminQueuePage Read(string principalId, AdminQueueRequest request, CancellationToken cancellationToken)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(request.Lane);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(request.Lane) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(request.Lane.Partition);
         JsonData.Identifier(request.Lane.Queue);
         AdminReadAuthority.ValidatePage(request.Limit, request.AfterId);

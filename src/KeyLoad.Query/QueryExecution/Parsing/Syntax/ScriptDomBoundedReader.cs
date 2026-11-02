@@ -16,7 +16,7 @@ internal sealed class ScriptDomBoundedReader(string text, Action check) : TextRe
     }
     public override int Read(char[] buffer, int index, int count)
     {
-        ArgumentNullException.ThrowIfNull(buffer);
+        ArgumentNullException.ThrowIfNull(buffer) /* KLD0041: BCL null validation accepts the buffer char[] reference through its object parameter. */;
         return Read(buffer.AsSpan(index, count));
     }
     public override int Read(Span<char> buffer)

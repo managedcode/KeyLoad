@@ -14,8 +14,8 @@ internal sealed record SampleReadScope(
     internal static SampleReadScope Open(DatabaseEngine database, IKeyValueView view, string principalId,
         PartitionRef partition, string set, string seriesId)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(view);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(partition);
         if (string.IsNullOrWhiteSpace(principalId))
         {

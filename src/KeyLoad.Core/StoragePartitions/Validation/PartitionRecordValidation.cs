@@ -16,9 +16,9 @@ internal static class PartitionRecordValidation
         int maxRecords, long maxRetainedBytes, long maxExaminedBytes,
         ReadOnlyMemory<byte> afterKey, out byte[]? ownedAfterKey)
     {
-        ArgumentNullException.ThrowIfNull(view);
-        ArgumentNullException.ThrowIfNull(partition);
-        ArgumentNullException.ThrowIfNull(family);
+        ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(partition) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        ArgumentNullException.ThrowIfNull(family) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ValidateBounds(maxRecords, maxRetainedBytes, maxExaminedBytes);
         EngineResourceAccess.ValidatePartition(partition);
         if (!ContainsFamily(family))

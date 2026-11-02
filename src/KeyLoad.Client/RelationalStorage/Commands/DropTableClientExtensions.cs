@@ -14,8 +14,8 @@ public static class DropTableClientExtensions
     public static Task<Result<DropTableResult>> DropTableAsync(this KeyLoadClient client, Guid commandId,
         DropTableRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(client);
-        ArgumentNullException.ThrowIfNull(request);
-        return client.Send<DropTableResult>(ApiRoutes.TablesDrop, request, true, commandId, cancellationToken);
+        ArgumentNullException.ThrowIfNull(client) /* KLD0041: BCL null validation accepts the client KeyLoadClient reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request DropTableRequest reference through its object parameter. */;
+        return client.Send<DropTableResult, DropTableRequest>(ApiRoutes.TablesDrop, request, true, commandId, cancellationToken);
     }
 }

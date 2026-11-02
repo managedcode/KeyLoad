@@ -13,12 +13,12 @@ internal static partial class DistributedSearchCoordinator
         CancellationToken original, Func<CancellationToken, Task>? statisticsCaptured = null,
         IResourceLifetimeWorkBinding? binding = null)
     {
-        ArgumentNullException.ThrowIfNull(database);
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(prepare);
-        ArgumentNullException.ThrowIfNull(sourceBarrier);
-        ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(database) /* KLD0041: BCL null validation accepts the database DatabaseEngine reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request DistributedSearchRequest reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options IOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(prepare) /* KLD0041: BCL null validation accepts the prepare Func reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(sourceBarrier) /* KLD0041: BCL null validation accepts the sourceBarrier Func reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(clock) /* KLD0041: BCL null validation accepts the clock TimeProvider reference through its object parameter. */;
         var budget = new ReadExecutionBudget(clock, original);
         if (binding is not null)
         {

@@ -12,9 +12,9 @@ internal static class DistributedSearchOwnedLeafValidation
     internal static void Require(DistributedSearchOwnedLeaf request,
         QueryExecutionOptions execution, ReadExecutionBudget budget)
     {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentNullException.ThrowIfNull(execution);
-        ArgumentNullException.ThrowIfNull(budget);
+        ArgumentNullException.ThrowIfNull(request) /* KLD0041: BCL null validation accepts the request DistributedSearchOwnedLeaf reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(execution) /* KLD0041: BCL null validation accepts the execution QueryExecutionOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
         if (request.Version != CurrentVersion || !Enum.IsDefined(request.Phase)
             || request.Search is null || request.Owner is null || string.IsNullOrEmpty(request.Tenant)

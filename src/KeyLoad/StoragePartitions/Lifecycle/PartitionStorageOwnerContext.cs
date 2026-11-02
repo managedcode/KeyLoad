@@ -18,7 +18,7 @@ internal sealed class PartitionStorageOwnerContext
 
     internal Task RunAsync(Func<Task> operation)
     {
-        if (ReferenceEquals(Current, context))
+        if ((ReferenceEquals(Current, context) /* KLD0041: Run directly only in the exact owning Orleans context instance through CLR reference identity. */))
         {
             return operation();
         }

@@ -15,7 +15,7 @@ public static class GraphIncomingEdges
     /// <param name = "engine">The shared database execution context.</param>
     public static GraphIncomingEdgesPage ReadIncomingGraphEdges(this DatabaseEngine engine, string principalId, ReadIncomingGraphEdgesRequest request, TimeProvider? timeProvider = null, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(timeProvider ?? engine.Clock, cancellationToken);
         return engine.ReadIncomingGraphEdgesRead(principalId, request, timeProvider ?? engine.Clock, budget);
     }

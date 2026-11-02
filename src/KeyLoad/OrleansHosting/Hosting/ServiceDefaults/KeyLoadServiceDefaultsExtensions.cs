@@ -28,12 +28,12 @@ internal static class KeyLoadServiceDefaultsExtensions
     /// <returns>The same builder, for continued composition.</returns>
     /// <exception cref="ArgumentNullException"><paramref name="builder"/> is null.</exception>
     [KeyLoad.ConfigurationBinding]
-    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : IHostApplicationBuilder
+    public static TBuilder AddServiceDefaults<TBuilder>(this TBuilder builder) where TBuilder : class, IHostApplicationBuilder
     {
-        ArgumentNullException.ThrowIfNull(builder);
+        ArgumentNullException.ThrowIfNull(builder) /* KLD0041: BCL null validation accepts the builder class-constrained host builder reference through its object parameter. */;
         builder.Services.AddServiceDiscovery();
         builder.Services.ConfigureHttpClientDefaults(http => http.AddServiceDiscovery());
-        builder.Services.AddHealthChecks().AddCheck(SelfHealthCheckName, () => HealthCheckResult.Healthy(), [LiveHealthTag]);
+        builder.Services.AddHealthChecks().AddCheck(SelfHealthCheckName, () => (HealthCheckResult.Healthy() /* KLD0041: The native health-check factory has an optional object-valued data dictionary; this liveness result passes no data and allocates no dictionary. */), [LiveHealthTag]);
         builder.Services.AddOptions<OrleansTelemetryOptions>()
             .Bind(builder.Configuration.GetSection(OrleansTelemetryOptions.SectionName))
             .Validate(options => options.IsValid(), OrleansTelemetryOptions.ValidationMessage)
@@ -78,7 +78,7 @@ internal static class KeyLoadServiceDefaultsExtensions
     /// <exception cref="ArgumentNullException"><paramref name="app"/> is null.</exception>
     public static WebApplication MapDefaultEndpoints(this WebApplication app)
     {
-        ArgumentNullException.ThrowIfNull(app);
+        ArgumentNullException.ThrowIfNull(app) /* KLD0041: BCL null validation accepts the app WebApplication reference through its object parameter. */;
         app.MapHealthChecks(LiveHealthRoute, new()
         {
             Predicate = check => check.Tags.Contains(LiveHealthTag)

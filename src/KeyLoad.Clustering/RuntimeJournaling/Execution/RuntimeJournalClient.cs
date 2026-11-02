@@ -20,18 +20,18 @@ internal sealed class RuntimeJournalClient(
     internal async Task<RuntimeJournalSnapshot?> GetHeaderAsync(string name, CancellationToken cancellationToken)
     {
         var payload = name;
-        return await ReadNullableAsync<RuntimeJournalSnapshot>(GrainReadKind.RuntimeJournalHeader, payload,
+        return await ReadNullableAsync<RuntimeJournalSnapshot, string>(GrainReadKind.RuntimeJournalHeader, payload,
             cancellationToken);
     }
 
     internal Task<RuntimeJournalPage> ReadPageAsync(RuntimeJournalSnapshot snapshot, long offset,
         CancellationToken cancellationToken)
-        => ReadAsync<RuntimeJournalPage>(GrainReadKind.RuntimeJournalPage,
+        => ReadAsync<RuntimeJournalPage, RuntimeJournalReadRequest>(GrainReadKind.RuntimeJournalPage,
             new RuntimeJournalReadRequest(snapshot.JournalName, snapshot.InstanceId,
                 snapshot.OwnerGeneration, snapshot.ContentRevision, offset), cancellationToken);
 
     internal Task<RuntimeJournalCatalog> GetCatalogAsync(CancellationToken cancellationToken)
-        => ReadAsync<RuntimeJournalCatalog>(GrainReadKind.RuntimeJournalCatalog,
+        => ReadAsync<RuntimeJournalCatalog, int>(GrainReadKind.RuntimeJournalCatalog,
             GrainContracts.NoDtoMarker, cancellationToken);
 
     internal async Task<RuntimeJournalMutationResult> MutateAsync(RuntimeJournalMutation mutation,
@@ -51,17 +51,17 @@ internal sealed class RuntimeJournalClient(
             ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
     }
 
-    private async Task<T> ReadAsync<T>(GrainReadKind kind, object payload,
-        CancellationToken cancellationToken) where T : class
-        => await ReadCoreAsync<T>(kind, payload, allowNull: false, cancellationToken: cancellationToken)
+    private async Task<T> ReadAsync<T, TPayload>(GrainReadKind kind, TPayload payload,
+        CancellationToken cancellationToken) where T : class where TPayload : notnull
+        => await ReadCoreAsync<T, TPayload>(kind, payload, allowNull: false, cancellationToken: cancellationToken)
             ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply);
 
-    private Task<T?> ReadNullableAsync<T>(GrainReadKind kind, object payload,
-        CancellationToken cancellationToken) where T : class
-        => ReadCoreAsync<T>(kind, payload, allowNull: true, cancellationToken: cancellationToken);
+    private Task<T?> ReadNullableAsync<T, TPayload>(GrainReadKind kind, TPayload payload,
+        CancellationToken cancellationToken) where T : class where TPayload : notnull
+        => ReadCoreAsync<T, TPayload>(kind, payload, allowNull: true, cancellationToken: cancellationToken);
 
-    private async Task<T?> ReadCoreAsync<T>(GrainReadKind kind, object payload,
-        bool allowNull, CancellationToken cancellationToken) where T : class
+    private async Task<T?> ReadCoreAsync<T, TPayload>(GrainReadKind kind, TPayload payload,
+        bool allowNull, CancellationToken cancellationToken) where T : class where TPayload : notnull
     {
         var token = cancellationToken;
         var codec = await PrepareAsync(token);
@@ -76,7 +76,7 @@ internal sealed class RuntimeJournalClient(
         return (Decode<T>(reply, allowNull)).Value;
     }
 
-    private async Task<GrainOperationReply> SendCommandAsync(object payload, Guid commandId,
+    private async Task<GrainOperationReply> SendCommandAsync(RuntimeJournalMutation payload, Guid commandId,
         CancellationToken cancellationToken)
     {
         var token = cancellationToken;
@@ -104,13 +104,13 @@ internal sealed class RuntimeJournalClient(
             throw Errors.Fail(error, reply.SafeDetail ?? RuntimeJournalStoragePolicy.RequestFailed);
         }
 
-        var value = GrainReplyFactory.RequireValue(reply).Value;
+        var /* KLD0041: Inspect the current generated GrainValue slot for an absent or correctly typed runtime journal response. */ value = (GrainReplyFactory.RequireValue(reply).Value /* KLD0041: Read the current generated GrainValue field only to validate the concrete RPC response or its permitted absence. */);
         if (value is null && allowNull)
         {
             return (false, default(T?));
         }
 
-        return (true, ((T?)(value as T ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply))));
+        return (true, ((T?)((value as T /* KLD0042: Validate the current generated GrainValue slot as T? before accepting this concrete RPC response. */) ?? throw Errors.Fail(ErrorCode.Corruption, RuntimeJournalStoragePolicy.InvalidReply))));
     }
 
     private static IOptions<RuntimeJournalOptions> ValidateOptions(IOptions<RuntimeJournalOptions> configuredOptions)

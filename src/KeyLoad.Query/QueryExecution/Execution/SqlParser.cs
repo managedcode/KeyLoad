@@ -20,8 +20,8 @@ public sealed class SqlParser
     internal SqlParser(string sql, IOptions<QueryExecutionOptions> executionOptions,
         ReadExecutionBudget? budget, int dialectVersion = DefaultDialectVersion)
     {
-        ArgumentNullException.ThrowIfNull(sql);
-        ArgumentNullException.ThrowIfNull(executionOptions);
+        ArgumentNullException.ThrowIfNull(sql) /* KLD0041: BCL null validation accepts the sql string reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
         var execution = executionOptions.Value;
         execution.Validate();
         if (dialectVersion != DefaultDialectVersion)

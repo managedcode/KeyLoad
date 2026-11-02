@@ -10,7 +10,7 @@ internal static class ZoneTreeStorePreparationExecution
 
     internal static T Prepare<T>(ZoneTreeStoreRuntime runtime, Func<IAtomicTransaction, long, T> prepare)
     {
-        ArgumentNullException.ThrowIfNull(prepare);
+        ArgumentNullException.ThrowIfNull(prepare) /* KLD0041: BCL null validation accepts the prepare Func reference through its object parameter. */;
         if (runtime.Operation.Value is not null)
         {
             throw new InvalidOperationException(Nested);
@@ -29,7 +29,7 @@ internal static class ZoneTreeStorePreparationExecution
     internal static T Fork<T>(ZoneTreeStoreRuntime runtime, IEnumerable<ZoneTreeStagedEntry> earlier,
         IEnumerable<ZoneTreeStagedEntry> action, Func<IAtomicTransaction, T> prepare, bool requireWriteTransaction = false)
     {
-        ArgumentNullException.ThrowIfNull(prepare);
+        ArgumentNullException.ThrowIfNull(prepare) /* KLD0041: BCL null validation accepts the prepare Func reference through its object parameter. */;
         var context = runtime.Operation.Value;
         if (context is null || requireWriteTransaction && !context.Writable)
         {

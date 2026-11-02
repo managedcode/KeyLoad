@@ -11,7 +11,7 @@ internal sealed partial class TextResourceOwnership(IOptions<TextExecutionOption
     private readonly Lock gate = new();
     private readonly Dictionary<string, Action<ReadExecutionBudget?>> roots = new(StringComparer.Ordinal);
     private readonly HashSet<string> generations = new(StringComparer.Ordinal);
-    private readonly Dictionary<object, TextResourceFileReservation> fileReservations = [];
+    private readonly Dictionary<object, TextResourceFileReservation> /* KLD0041: One reservation ledger preserves string value equality for canonical paths and reference identity for TextOpenFileGroup instances; both keys are existing references. */ fileReservations = ([] /* KLD0041: Initialize the single reservation ledger for canonical path value keys and shared open-file group reference keys; avoid an extra wrapper per reservation. */);
     private readonly TextOpenFileGroups openFiles = new();
     private int leases;
 
@@ -28,8 +28,8 @@ internal sealed partial class TextResourceOwnership(IOptions<TextExecutionOption
                 Check(null);
                 return;
             }
-            if (roots.Keys.Any(existing => root.StartsWith(existing + Path.DirectorySeparatorChar, StringComparison.Ordinal)
-                || existing.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal)))
+            if (roots.Keys.Any(existing => root.StartsWith(string.Concat(existing.AsSpan(), [Path.DirectorySeparatorChar]), StringComparison.Ordinal)
+                || existing.StartsWith(string.Concat(root.AsSpan(), [Path.DirectorySeparatorChar]), StringComparison.Ordinal)))
             {
                 throw TextErrors.Ownership();
             }
@@ -88,21 +88,21 @@ internal sealed partial class TextResourceOwnership(IOptions<TextExecutionOption
         Func<long> observeLength, TextOpenFileGroup? group = null)
     {
         var full = Path.GetFullPath(path);
-        object key = group is null ? full : group;
+        object /* KLD0041: One reservation ledger preserves string value equality for canonical paths and reference identity for TextOpenFileGroup instances; both keys are existing references. */ key = group is null ? full : group;
         lock (gate)
         {
-            if (targetLength < EmptyFileLength || fileReservations.ContainsKey(key)
-                || !roots.Keys.Any(root => full.StartsWith(root + Path.DirectorySeparatorChar, StringComparison.Ordinal)))
+            if (targetLength < EmptyFileLength || ((fileReservations /* KLD0041: Access the single ledger whose keys are canonical path strings or existing shared open-file group references; their distinct equality semantics are required. */).ContainsKey(key) /* KLD0041: Reject a second reservation for the same canonical path value or existing shared open-file group identity before effects. */)
+                || !roots.Keys.Any(root => full.StartsWith(string.Concat(root.AsSpan(), [Path.DirectorySeparatorChar]), StringComparison.Ordinal)))
             {
                 throw TextErrors.Ownership();
             }
-            var reservation = new TextResourceFileReservation(this, key, full, targetLength, observeLength);
-            fileReservations.Add(key, reservation);
+            var reservation = (new TextResourceFileReservation(this, key, full, targetLength, observeLength) /* KLD0041: Retain the original canonical path string or shared open-file group reference as this reservation's accounting identity, without another allocation. */);
+            (fileReservations /* KLD0041: Access the single ledger whose keys are canonical path strings or existing shared open-file group references; their distinct equality semantics are required. */).Add(key, reservation) /* KLD0041: Register the original path/group key in the single physical reservation ledger; no scalar value is boxed. */;
             var failures = new List<Exception>();
             ServerFailureObserver.Observe(() => Check(null), failures);
             if (failures.Count != NoFailures)
             {
-                fileReservations.Remove(key);
+                (fileReservations /* KLD0041: Access the single ledger whose keys are canonical path strings or existing shared open-file group references; their distinct equality semantics are required. */).Remove(key) /* KLD0041: Remove the original path/group reservation from the single physical accounting ledger after its owned work settles. */;
                 ServerFailureObserver.ThrowIfAny(failures);
             }
             return reservation;
@@ -113,13 +113,13 @@ internal sealed partial class TextResourceOwnership(IOptions<TextExecutionOption
     {
         lock (gate)
         {
-            if (!fileReservations.TryGetValue(reservation.Key, out var original)
-                || !ReferenceEquals(original, reservation))
+            if (!((fileReservations /* KLD0041: Access the single ledger whose keys are canonical path strings or existing shared open-file group references; their distinct equality semantics are required. */).TryGetValue((reservation.Key /* KLD0041: This accounting key is either a canonical path string or the existing TextOpenFileGroup reference; distinguish shared open-file accounting without adding a key wrapper. */), out var original) /* KLD0041: Locate the reservation using its canonical path value or existing shared open-file group identity before release or byte accounting. */)
+                || !(ReferenceEquals(original, reservation) /* KLD0041: Release only the exact registered file reservation instance through CLR reference identity. */))
             {
                 throw TextErrors.Ownership();
             }
             Check(null);
-            fileReservations.Remove(reservation.Key);
+            (fileReservations /* KLD0041: Access the single ledger whose keys are canonical path strings or existing shared open-file group references; their distinct equality semantics are required. */).Remove((reservation.Key /* KLD0041: This accounting key is either a canonical path string or the existing TextOpenFileGroup reference; distinguish shared open-file accounting without adding a key wrapper. */)) /* KLD0041: Remove the original path/group reservation from the single physical accounting ledger after its owned work settles. */;
         }
     }
 
@@ -161,5 +161,5 @@ internal sealed partial class TextResourceOwnership(IOptions<TextExecutionOption
     }
 
     private void Check(ReadExecutionBudget? budget)
-        => TextResourceRoot.Check(roots, generations, fileReservations, openFiles, budget, options);
+        => TextResourceRoot.Check(roots, generations, (fileReservations /* KLD0041: Access the single ledger whose keys are canonical path strings or existing shared open-file group references; their distinct equality semantics are required. */), openFiles, budget, options) /* KLD0041: Validate the same mixed path/group reservation ledger together with roots and open-file groups so each physical file is counted once. */;
 }

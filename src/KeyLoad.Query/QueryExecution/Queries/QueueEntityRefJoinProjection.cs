@@ -2,7 +2,6 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.Core;
-using KeyLoad.Storage;
 
 namespace KeyLoad.Query.QueryExecution;
 

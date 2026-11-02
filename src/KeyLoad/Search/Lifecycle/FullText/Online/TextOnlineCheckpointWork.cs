@@ -26,17 +26,17 @@ internal sealed class TextOnlineCheckpointWork
         Work = new(sessionId, command.CommandId);
     }
 
-    internal OnlineTextPublicationWork Work
+    internal OnlineTextPublicationWork<ProjectionBatchResult> Work
     {
         get;
     }
 
-    internal (bool HasValue, OnlineTextPublicationWork? Value) TryMatch(CommitProjectionBatchRequest command,
+    internal (bool HasValue, OnlineTextPublicationWork<ProjectionBatchResult>? Value) TryMatch(CommitProjectionBatchRequest command,
         string actualPrincipal, ReadExecutionBudget budget)
     {
         if (command.CommandId != Work.CommandId)
         {
-            return (false, default(OnlineTextPublicationWork?));
+            return (false, default(OnlineTextPublicationWork<ProjectionBatchResult>?));
         }
         budget.Check();
         if (actualPrincipal != principalId)
@@ -47,7 +47,7 @@ internal sealed class TextOnlineCheckpointWork
         {
             throw TextErrors.Mismatch();
         }
-        return (true, ((OnlineTextPublicationWork?)(Work)));
+        return (true, ((OnlineTextPublicationWork<ProjectionBatchResult>?)(Work)));
     }
 
     internal async Task<ProjectionBatchResult> RequireAcknowledgedAsync(ProjectionBatchResult acknowledged,
@@ -63,7 +63,7 @@ internal sealed class TextOnlineCheckpointWork
         return actual;
     }
 
-    internal ProjectionBatchResult RequireReceipt(Result<object> original)
+    internal ProjectionBatchResult RequireReceipt(Result<ProjectionBatchResult> original)
     {
         var actual = original.Get<ProjectionBatchResult>();
         if (actual.Receipt is null || actual.Receipt.CommandId != Work.CommandId

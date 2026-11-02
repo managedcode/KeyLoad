@@ -78,7 +78,7 @@ internal static class RuntimeJournalStorageValidation
     internal static void ValidateProperty(string key, string value, RuntimeJournalOptions options)
     {
         ValidatePropertyName(key, options);
-        ArgumentNullException.ThrowIfNull(value);
+        ArgumentNullException.ThrowIfNull(value) /* KLD0041: BCL null validation accepts the value string reference through its object parameter. */;
         if (value.Length > options.MaximumNameBytes || ByteCount(value) > options.MaximumNameBytes)
         {
             Invalid();

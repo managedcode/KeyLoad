@@ -9,11 +9,11 @@ internal static class PartitionDatabaseComposition
     internal static void ValidateHostInputs(NodeOptions options, IAuthorizationPolicy authorization,
         TimeProvider clock, global::Microsoft.Extensions.Logging.ILogger<PartitionHost> logger, IGrainFactory grains)
     {
-        ArgumentNullException.ThrowIfNull(options);
-        ArgumentNullException.ThrowIfNull(authorization);
-        ArgumentNullException.ThrowIfNull(clock);
-        ArgumentNullException.ThrowIfNull(logger);
-        ArgumentNullException.ThrowIfNull(grains);
+        ArgumentNullException.ThrowIfNull(options) /* KLD0041: BCL null validation accepts the options NodeOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(authorization) /* KLD0041: BCL null validation accepts the authorization IAuthorizationPolicy reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(clock) /* KLD0041: BCL null validation accepts the clock TimeProvider reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(logger) /* KLD0041: BCL null validation accepts the logger ILogger reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(grains) /* KLD0041: BCL null validation accepts the grains IGrainFactory reference through its object parameter. */;
         options.Validate();
     }
 

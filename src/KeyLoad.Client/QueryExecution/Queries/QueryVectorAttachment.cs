@@ -17,9 +17,9 @@ internal static class QueryVectorAttachment
         QueryTranslationContext context, Expression<Func<T, ImmutableArray<float>>> field,
         ImmutableArray<float> vector, VectorSpace space, GraphScope scope)
     {
-        ArgumentNullException.ThrowIfNull(field);
-        ArgumentNullException.ThrowIfNull(space);
-        ArgumentNullException.ThrowIfNull(scope);
+        ArgumentNullException.ThrowIfNull(field) /* KLD0041: BCL null validation accepts the field Expression reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(space) /* KLD0041: BCL null validation accepts the space VectorSpace reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(scope) /* KLD0041: BCL null validation accepts the scope GraphScope reference through its object parameter. */;
         if (query.Filter is not null || !query.Order.IsEmpty || query.Explain
             || query.Projection.Length != AllFieldsCount
             || query.Projection[FirstSelection].Path != QueryPredicateTokens.Wildcard

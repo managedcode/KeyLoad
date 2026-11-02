@@ -8,7 +8,7 @@ internal sealed partial class TextCapturedRead
 {
     public IKeyValueView CompleteSource()
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this TextCapturedRead instance through object to preserve its runtime owner type. */;
         if (captured is not null)
         {
             throw new InvalidOperationException(AlreadySettled);
@@ -40,7 +40,7 @@ internal sealed partial class TextCapturedRead
 
     public void VerifyTerminal(IReadOnlyList<EntityRef> selected)
     {
-        ObjectDisposedException.ThrowIf(disposed, this);
+        ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this TextCapturedRead instance through object to preserve its runtime owner type. */;
         if (!runtimeJoined || captured is null)
         {
             throw new InvalidOperationException(NotSettled);

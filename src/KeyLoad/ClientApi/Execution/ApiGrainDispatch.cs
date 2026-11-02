@@ -18,7 +18,7 @@ internal static class ApiGrainDispatch
             : throw Errors.Fail(ErrorCode.Validation, ServerProtocol.StableCommandRequired);
 
     internal static async Task<global::ManagedCode.Communication.Result> SubmitStatusAsync<T>(
-        HttpContext context, OperationKind kind, Guid commandId, T payload)
+        HttpContext context, OperationKind kind, Guid commandId, T payload) where T : notnull
     {
         if (kind != OperationKind.ConfigureApiKey)
         {
@@ -28,8 +28,8 @@ internal static class ApiGrainDispatch
         return global::ManagedCode.Communication.Result.Succeed();
     }
 
-    private static async Task<IResult> ExecuteAsync(HttpContext context, GrainReadKind? readKind,
-        OperationKind? commandKind, Guid commandId, object payload)
+    private static async Task<IResult> ExecuteAsync<TPayload>(HttpContext context, GrainReadKind? readKind,
+        OperationKind? commandKind, Guid commandId, TPayload payload) where TPayload : notnull
     {
         var reply = await CanonicalOperationGateway.ExecuteAsync(context, readKind, commandKind, commandId,
             payload, context.RequestAborted);

@@ -105,7 +105,7 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
             return true;
         }
         if (node is BinaryExpression { NodeType: ExpressionType.ArrayIndex } index
-            && Constant(index.Right, out var value) && value is int ordinal && ordinal >= QueryPredicateTokens.MinimumArrayOrdinal
+            && (Constant(index.Right, out var value) /* KLD0041: Extract the standard CLR constant or nested closure field before validating its concrete scalar or bounded collection meaning at this translation site. */) && (value is int ordinal /* KLD0042: The standard expression tree exposes a boxed constant; extract the array ordinal as int before enforcing its nonnegative bound. */) && ordinal >= QueryPredicateTokens.MinimumArrayOrdinal
             && WalkFieldPath(index.Left, parameter, depth + QueryPredicateTokens.DepthIncrement, parts))
         {
             parts.Add(ordinal.ToString(System.Globalization.CultureInfo.InvariantCulture));
@@ -113,7 +113,7 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
         }
         return false;
     }
-    internal bool Constant(Expression expression, out object? value, int depth = QueryPredicateTokens.FirstDepth)
+    internal bool Constant(Expression expression, out object? /* KLD0041: The standard ConstantExpression.Value and closure FieldInfo.GetValue APIs return object, including arbitrary closure targets required for nested field extraction. */ value, int depth = QueryPredicateTokens.FirstDepth)
     {
         if (depth > limits.MaximumDepth)
         {
@@ -123,12 +123,12 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
         expression = Unwrap(expression);
         if (expression is ConstantExpression constant)
         {
-            value = constant.Value;
+            value = (constant.Value /* KLD0041: Read the original CLR expression constant value through its native object-valued API before validating its supported scalar or collection shape. */);
             return true;
         }
-        if (expression is MemberExpression { Member: FieldInfo field, Expression: { } target } && Constant(target, out var instance, depth + QueryPredicateTokens.DepthIncrement))
+        if (expression is MemberExpression { Member: FieldInfo field, Expression: { } target } && (Constant(target, out var instance, depth + QueryPredicateTokens.DepthIncrement) /* KLD0041: Extract the standard CLR constant or nested closure field before validating its concrete scalar or bounded collection meaning at this translation site. */))
         {
-            value = field.GetValue(instance);
+            value = (field.GetValue(instance) /* KLD0041: Read only the admitted closure field through the native CLR reflection API; the runtime closure target and returned constant have no source-level generic type. */);
             return true;
         }
         if (expression is NewArrayExpression array && array.NodeType == ExpressionType.NewArrayInit)
@@ -138,35 +138,35 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
                 throw Errors.Fail(ErrorCode.BudgetExceeded, QueryPredicateTokens.ConstantArrayBudgetExceededMessage);
             }
 
-            var items = new List<object?>();
-            foreach (var item in array.Expressions)
+            var /* KLD0041: Expression constants already arrive as CLR object values; retain them in one bounded exact-size array for IN translation without a List or another copy. */ items = (new object?[array.Expressions.Count] /* KLD0041: Store already-boxed CLR expression constants in this bounded exact-size array, preserving their values without a List allocation or a second copy. */);
+            for (var index = 0; index < items.Length; index++)
             {
-                if (!Constant(item, out var element, depth + QueryPredicateTokens.DepthIncrement))
+                if (!(Constant(array.Expressions[index], out var element, depth + QueryPredicateTokens.DepthIncrement) /* KLD0041: Extract the standard CLR constant or nested closure field before validating its concrete scalar or bounded collection meaning at this translation site. */))
                 {
                     value = null;
                     return false;
                 }
-                items.Add(element);
+                items[index] = element;
             }
-            value = items.ToArray();
+            value = items;
             return true;
         }
         value = null;
         return false;
     }
-    internal static ValueOperand Literal(object? value)
+    internal static ValueOperand Literal(object? /* KLD0041: The standard ConstantExpression.Value and closure FieldInfo.GetValue APIs return object, including arbitrary closure targets required for nested field extraction. */ value)
     {
         if (value is not null && value is not (string or bool or decimal or byte or sbyte or short or ushort or int or uint or long or ulong or float or double or JsonElement))
         {
             throw Unsupported();
         }
 
-        if (value is float f && !float.IsFinite(f) || value is double d && !double.IsFinite(d))
+        if ((value is float f /* KLD0042: The standard expression tree exposes a boxed constant; extract float only to reject a non-finite literal before JSON serialization. */) && !float.IsFinite(f) || (value is double d /* KLD0042: The standard expression tree exposes a boxed constant; extract double only to reject a non-finite literal before JSON serialization. */) && !double.IsFinite(d))
         {
             throw Unsupported();
         }
 
-        var element = value is JsonElement json ? json.Clone() : JsonSerializer.SerializeToElement(value, JsonDefaults.Options);
+        var element = (value is JsonElement json /* KLD0042: The standard expression tree exposes constants through object; extract its JsonElement value so the literal can clone and validate owned scalar JSON. */) ? json.Clone() : (JsonSerializer.SerializeToElement(value, JsonDefaults.Options) /* KLD0041: The CLR constant has only a runtime scalar type; serialize that already-boxed value after the preceding closed-type and finite-number checks. */);
         if (element.ValueKind is not (JsonValueKind.Null or JsonValueKind.String or JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False)
             || element.ValueKind == JsonValueKind.Number && !element.TryGetDecimal(out _))
         {
@@ -176,7 +176,7 @@ internal sealed class QueryExpressions(IOptions<QueryTranslationOptions> options
         return new(element);
     }
     internal Operand Operand(Expression expression, ParameterExpression parameter)
-        => Constant(expression, out var value) ? Literal(value) : new FieldOperand(Field(expression, parameter));
+        => (Constant(expression, out var value) /* KLD0041: Extract the standard CLR constant or nested closure field before validating its concrete scalar or bounded collection meaning at this translation site. */) ? (Literal(value) /* KLD0041: Convert this original CLR constant value to a bounded validated scalar JSON operand before it enters the typed query AST. */) : new FieldOperand(Field(expression, parameter));
     public ImmutableArray<Selection> Projection(Expression expression, ParameterExpression parameter)
     {
         expression = Unwrap(expression);

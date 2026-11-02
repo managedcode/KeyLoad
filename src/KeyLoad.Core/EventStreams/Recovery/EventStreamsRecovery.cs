@@ -11,7 +11,7 @@ public static class EventStreamsRecovery
     /// <param name = "engine">The shared database execution context.</param>
     public static AggregateReplayPage ReadAggregateReplay(this DatabaseEngine engine, string principalId, ReadAggregateReplayRequest request, CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(engine);
+        ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var budget = new ReadExecutionBudget(engine.Clock, cancellationToken);
         budget.Check();
         return engine.Store.Read(view => AggregateReplayReader.Read(engine, view, principalId, request, budget));

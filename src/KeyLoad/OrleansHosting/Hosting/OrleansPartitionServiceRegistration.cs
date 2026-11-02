@@ -47,9 +47,9 @@ internal static class OrleansPartitionServiceRegistration
             Host(provider).AnnMaintenance, provider.GetService<IQueryReadCutObserver>()));
         services.AddScoped<UserAnalyticsRuntime>();
         services.AddScoped<IUserAnalytics>(provider => provider.GetRequiredService<UserAnalyticsRuntime>());
-        services.AddScoped(provider => ActivatorUtilities.CreateInstance<AdminNodeObserver>(provider, Host(provider)));
+        services.AddScoped(provider => (ActivatorUtilities.CreateInstance<AdminNodeObserver>(provider, Host(provider)) /* KLD0041: Native ActivatorUtilities composes AdminNodeObserver using the actual PartitionHost reference as its explicit params object[] argument; remaining dependencies stay DI-owned. */));
         services.AddScoped<INodeAdministration>(provider =>
-            ActivatorUtilities.CreateInstance<NodeAdministration>(provider, Host(provider)));
+            (ActivatorUtilities.CreateInstance<NodeAdministration>(provider, Host(provider)) /* KLD0041: Native ActivatorUtilities composes NodeAdministration using the actual PartitionHost reference as its explicit params object[] argument; remaining dependencies stay DI-owned. */));
         services.AddScoped<IBackgroundStorageOperations, BackgroundStorageOperations>();
         services.AddSerializer(serialization => serialization
             .AddJsonSerializer(type => type == typeof(System.Text.Json.JsonElement))

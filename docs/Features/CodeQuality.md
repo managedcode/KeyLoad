@@ -137,17 +137,21 @@ execution evidence for their rejected and permitted cases remains open.
 
 Rule behaviour follows these constraints:
 
+- KLD0041 and KLD0042 apply to product sources under `src/**/*.cs`. Test code
+  and TUnit metadata are outside this product typing policy. Compiler controls
+  enable the diagnostics explicitly for their source snippets.
 - KLD0041 resolves actual `System.Object`, aliases, nullable forms, `dynamic`,
   CLR non-generic collections and nested generic, array, tuple and delegate
   shapes. It checks returns, parameters, fields, properties and explicit or
   inferred local declarations. An invocation is checked against its constructed
   return and parameter types and its actual receiver, including reduced
-  extensions. Member access and erased value creation are checked independently.
+  extensions. Constructor inputs, member access and erased value creation are
+  checked independently.
   A typed return does not conceal an erased input. The rule reports loss of type
   information, not proof of allocation or a measured performance defect.
 - KLD0042 distinguishes value boxing and potential boxing of unconstrained
   generic values from runtime object conversions. A reference upcast is not
-  reported as boxing. Captured typed patterns from object are conversions;
+  reported as boxing. Captured typed `is` and `switch` patterns from object are conversions;
   pure type tests and identity patterns are not. Neither rule performs whole
   program flow analysis or claims to identify every runtime allocation.
 - An unavoidable site uses a trailing block comment on the exact type or
