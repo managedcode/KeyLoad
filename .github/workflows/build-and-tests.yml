@@ -143,6 +143,7 @@ jobs:
       matrix: ${{ fromJSON(needs.shards.outputs.cluster) }}
     env:
       SHARD: ${{ matrix.shard }}
+      LANE: ${{ matrix.lane }}
     steps:
       - name: Download source code
         uses: actions/checkout@v7
@@ -171,12 +172,12 @@ jobs:
           echo "SSL_CERT_DIR=$SSL_CERT_DIR" >> "$GITHUB_ENV"
           dotnet dev-certs https --trust
       - name: Test Aspire topology lanes
-        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ClusterTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results"
+        run: node scripts/Features/TestInfrastructure/ci-test-shards.mjs run "$SHARD" --lane "$LANE" --results-directory "$GITHUB_WORKSPACE/tests/KeyLoad.ClusterTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results"
       - name: Save test results
         if: ${{ always() }}
         uses: actions/upload-artifact@v7
         with:
-          name: test-results-cluster-${{ matrix.shard }}
+          name: test-results-cluster-${{ matrix.shard }}-${{ matrix.lane }}
           path: |
             tests/KeyLoad.ClusterTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/ci-results
             tests/KeyLoad.ClusterTests/bin/${{ env.KEYLOAD_TEST_CONFIGURATION }}/net10.0/aspire-diagnostics-*.log

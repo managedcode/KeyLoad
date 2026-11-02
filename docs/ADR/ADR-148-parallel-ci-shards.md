@@ -17,10 +17,10 @@ Build and Tests is a set of parallel jobs driven by one checked-in manifest, `sc
 - **Build:** governance and website inventory checks, the static shard partition check and `dotnet build KeyLoad.slnx --configuration Release -warnaserror`.
 - **Functional operations:** four descriptive shards. Each runs one process per namespace with the assembly-pinned filter `/KeyLoad.FunctionalTests/<namespace>/*/*` and ten concurrent tests, both locally and in CI.
 - **Analyzers and process recovery:** one job with filters `/KeyLoad.AnalyzerTests/*/*/*` and `/KeyLoad.ProcessRecoveryTests/*/*/*`.
-- **Aspire topology:** thirteen descriptive shards containing twenty-five lanes, with one or two lanes per runner.
-  - A lane is its own `dotnet test` process with `--maximum-parallel-tests 1` and a 45-minute deadline, so a runner holds at most two clusters.
+- **Aspire topology:** thirteen descriptive groups containing twenty-five lanes, with one lane per isolated GitHub job.
+  - A lane is its own `dotnet test` process with `--maximum-parallel-tests 1` and a 45-minute deadline. A runner owns one lane's cluster resources.
   - Lanes are typed: one keyed shared cluster, own clusters, other keyed clusters, or one long functional gate method.
-  - Every lane process owns its own keyed shared cluster, so a test that kills, restarts or cold-reopens nodes cannot affect another lane.
+  - Every lane has its own runner's network namespace. Aspire allocates every endpoint automatically; a different lane cannot claim an endpoint temporarily released by a killed server. Local whole-group execution joins each lane before starting the next.
 - **Verify test partition:** reads every shard's TRX artifact and proves that each test ran exactly once, in its assigned shard and lane.
 
 Each test job builds the whole solution with `-warnaserror` in Release and uploads its TRX reports even when tests fail. A single-project build is not enough: unit CodeQuality checks read the compiled image of every solution project, and the cold bootstrap topology test launches the KeyLoad CLI, which no test project references. The Release workflow calls Build and Tests through `workflow_call` and gates every publishing job on it.
@@ -38,7 +38,7 @@ Partition correctness is checked twice:
 ## Consequences
 
 - Original Linux reports from run 40543129654 inform whole-class balancing across the existing lanes. Every class retains its complete methods and arguments, lane isolation kind and real fixture lifetime. Browser classes retain their browser-enabled runner. Case durations exclude build, queue, shared fixture startup and teardown; speedup remains unqualified until the changed partition completes on Linux.
-- The matrix permits thirteen cluster jobs with twenty-five concurrent serial lanes, plus four functional jobs with ten concurrent tests each and one analyzers-and-process-recovery job. Build and planning are separate jobs; the final partition check waits for test results. Actual concurrency also depends on available GitHub runner capacity.
+- The matrix contains twenty-five cluster jobs, plus four functional jobs with ten concurrent tests each and one analyzers-and-process-recovery job. Build and planning are separate jobs; the final partition check waits for test results. Actual concurrency also depends on available GitHub runner capacity.
 - Adding a test class is a one-line manifest change. `inventory <suite>` shows the cluster each class uses and whether it disrupts nodes. A class missing from the manifest fails Build.
-- Product behaviour and test assertions are unchanged. No product request or admission limit is added; the bound is on concurrent test processes per runner.
+- The original test class assignments, case arguments, filters and deadlines are retained. One runner executes one cluster lane. This costs more GitHub jobs and isolates the automatic endpoint ownership of independent AppHosts, including during cold restarts.
 - Static source scanning is not runtime proof. Discovery, the TRX identities and the topology lanes are qualified only by actual Linux GitHub runs.

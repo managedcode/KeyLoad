@@ -67,7 +67,6 @@ function assignLanes(suiteId, suite, errors) {
   const classOwners = new Map();
   const methodOwners = new Map();
   for (const shard of suite.shards) {
-    if (shard.lanes.length > suite.lanesPerRunner) errors.push(`${suiteId}: shard ${shard.id} has ${shard.lanes.length} lanes; at most ${suite.lanesPerRunner} cluster lanes fit one runner.`);
     const laneIds = new Set();
     for (const lane of shard.lanes) {
       if (laneIds.has(lane.id)) errors.push(`${suiteId}: shard ${shard.id} repeats lane ${lane.id}.`);

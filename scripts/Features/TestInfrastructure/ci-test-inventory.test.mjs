@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import test from 'node:test';
 import { fileURLToPath } from 'node:url';
@@ -52,6 +52,35 @@ test('actual compiled TUnit discovery equals every source method selected by CI'
     assert.deepEqual(result.errors, []);
     console.log(`Original compiled ${suite} discovery: ${result.methods} methods, ${result.cases} cases; evidence: ${evidence}`);
   }
+});
+
+test('cluster matrix isolates every existing lane in exactly one GitHub job', () => {
+  const actual = spawnSync(process.execPath,
+    ['scripts/Features/TestInfrastructure/ci-test-shards.mjs', 'matrix', 'cluster'], { cwd: root, encoding: 'utf8' });
+  assert.equal(actual.status, 0, actual.stderr);
+  const rows = JSON.parse(actual.stdout).include;
+  const lanes = rows.map(row => `${row.shard}/${row.lane}`);
+  const required = entry.suite.shards.flatMap(shard => shard.lanes.map(lane => `${shard.id}/${lane.id}`));
+  assert.equal(new Set(lanes).size, lanes.length, 'A lane must not run twice');
+  assert.deepEqual(lanes.toSorted(), required.toSorted());
+  for (const sourceClass of entry.classes) {
+    for (const method of sourceClass.methods) {
+      const owner = entry.ownerOf(sourceClass, method.name);
+      assert.ok(lanes.includes(`${owner.shard}/${owner.lane}`), `${sourceClass.name} needs its owning job`);
+    }
+  }
+});
+
+test('unknown lane refuses before creating results or starting test resources', () => {
+  const output = path.join(root, 'tests/KeyLoad.ClusterTests/bin', executionBuildConfiguration(),
+    'net10.0', `refused-lane-${randomUUID()}`);
+  const actual = spawnSync(process.execPath, ['scripts/Features/TestInfrastructure/ci-test-shards.mjs',
+    'run', entry.suite.shards[0].id, '--lane', 'unknown-lane', '--results-directory', output],
+  { cwd: root, encoding: 'utf8' });
+  assert.notEqual(actual.status, 0);
+  assert.match(actual.stderr, /Unknown lane/u);
+  assert.equal(actual.stdout, '');
+  assert.equal(existsSync(output), false);
 });
 
 test('compiled verification rejects the original five omitted SQL classes', () => {

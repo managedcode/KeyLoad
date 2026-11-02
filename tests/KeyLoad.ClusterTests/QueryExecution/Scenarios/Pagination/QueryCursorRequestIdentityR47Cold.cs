@@ -1,4 +1,3 @@
-using Aspire.Hosting.ApplicationModel;
 using KeyLoad.ClusterTests.ClientApi;
 using KeyLoad.ClusterTests.StorageReplication;
 using KeyLoad.Server;
@@ -17,19 +16,16 @@ internal static class QueryCursorRequestIdentityR47Cold
             await ServerFailureObserver.ObserveAsync(() => fixture.KillServerAsync(node,
                 QueryCursorRequestIdentityR47Protocol.ColdScenario, token), failures);
         }
+        ServerFailureObserver.ThrowIfAny(failures);
         foreach (var node in Nodes)
         {
             await ServerFailureObserver.ObserveAsync(() => fixture.BeginProcessRestartAsync(node, token), failures);
         }
-        foreach (var node in Nodes)
-        {
-            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, token), failures);
-        }
-        foreach (var node in Nodes)
-        {
-            await ServerFailureObserver.ObserveAsync(() => fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(
-                node, WaitBehavior.WaitOnResourceUnavailable, token), failures);
-        }
         ServerFailureObserver.ThrowIfAny(failures);
+        foreach (var node in Nodes)
+        {
+            await fixture.RestartServerAsync(node, token);
+        }
+        await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture, Nodes, token);
     }
 }

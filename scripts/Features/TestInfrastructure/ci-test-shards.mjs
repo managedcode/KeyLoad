@@ -15,7 +15,7 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../../.
 const usage = [
   'Usage: node scripts/Features/TestInfrastructure/ci-test-shards.mjs <command>',
   '  matrix <suite>                                   GitHub matrix JSON for functional or cluster',
-  '  run <shard> [--results-directory <directory>]    run one shard (default results directory: TestResults)',
+  '  run <shard> [--lane <lane>] [--results-directory <directory>]    run a shard or one lane',
   '  verify [<results-directory>]                     exactly-once partition check, plus TRX identities when given',
   '  inventory <suite>                                source inventory with cluster use and lane assignment',
   '  verify-compiled <suite> <discovery.json>           compare original compiled discovery with source methods',
@@ -24,9 +24,10 @@ const usage = [
 function matrix(manifest, suiteId) {
   const suite = manifest.suites[suiteId];
   if (!suite) throw new Error(`Unknown suite: ${suiteId}`);
-  const include = suite.shards.map(shard => (suite.partition === 'class'
-    ? { shard: shard.id, name: shard.name, playwright: shard.playwright === true }
-    : { shard: shard.id, name: shard.name }));
+  const include = suite.shards.flatMap(shard => (suite.partition === 'class'
+    ? shard.lanes.map(lane => ({ shard: shard.id, lane: lane.id,
+      name: `${shard.name} / ${lane.id}`, playwright: shard.playwright === true }))
+    : [{ shard: shard.id, name: shard.name }]));
   return JSON.stringify({ include });
 }
 
@@ -79,8 +80,11 @@ function startRun(suite, run, environment, children) {
   });
 }
 
-async function runShard(manifest, shardId, resultsRoot) {
+async function runShard(manifest, shardId, resultsRoot, laneId) {
   const { suiteId, suite, shard } = findShard(manifest, shardId);
+  if (laneId !== undefined && (suite.partition !== 'class' || !shard.lanes.some(lane => lane.id === laneId))) {
+    throw new Error(`Unknown lane: ${shardId}/${laneId}`);
+  }
   const base = path.resolve(root, resultsRoot, suiteId, shard.id);
   const environment = testEnvironment();
   const children = new Set();
@@ -91,12 +95,15 @@ async function runShard(manifest, shardId, resultsRoot) {
   const outcomes = [];
   try {
     if (suite.partition === 'class') {
-      // Lanes run concurrently; each lane runs one test at a time, so a runner holds one cluster per lane.
-      const runs = shard.lanes.map(lane => ({
+      // CI selects one lane per isolated runner; a local whole-shard run joins each lane before starting the next.
+      const runs = shard.lanes.filter(lane => laneId === undefined || lane.id === laneId).map(lane => ({
         label: `${shard.id}/${lane.id}`, filter: laneFilter(suite, lane), directory: path.join(base, lane.id),
         parallelism: lane.maximumParallelTests ?? suite.parallelism,
       }));
-      outcomes.push(...await Promise.all(runs.map(run => startRun(suite, run, environment, children))));
+      for (const run of runs) {
+        if (interrupted) break;
+        outcomes.push(await startRun(suite, run, environment, children));
+      }
     } else if (suite.partition === 'namespace') {
       // One assembly-pinned process per namespace keeps every filter segment literal.
       for (const namespace of shard.namespaces) {
@@ -156,8 +163,17 @@ async function main(argumentsList) {
     process.stdout.write(`${matrix(manifest, rest[0])}\n`);
     return 0;
   }
-  if (command === 'run' && (rest.length === 1 || (rest.length === 3 && rest[1] === '--results-directory'))) {
-    return runShard(manifest, rest[0], rest[2] ?? 'TestResults');
+  if (command === 'run' && rest.length >= 1) {
+    const options = new Map();
+    for (let index = 1; index < rest.length; index += 2) {
+      const option = rest[index];
+      const value = rest[index + 1];
+      if (!['--lane', '--results-directory'].includes(option) || !value || options.has(option)) {
+        throw new Error('Invalid or duplicate test lane selection.');
+      }
+      options.set(option, value);
+    }
+    return runShard(manifest, rest[0], options.get('--results-directory') ?? 'TestResults', options.get('--lane'));
   }
   if (command === 'verify' && rest.length <= 1) return verify(manifest, rest[0]);
   if (command === 'verify-compiled' && rest.length === 2) {

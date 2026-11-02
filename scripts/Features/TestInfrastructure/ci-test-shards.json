@@ -1,5 +1,5 @@
 {
-  "description": "Self-descriptive Build and Tests execution groups. Functional tests run one assembly-pinned TUnit process per namespace; cluster groups run concurrent serial lanes with at most lanesPerRunner clusters per runner. Every test class belongs to exactly one descriptive execution group; verification rejects missing, overlapping or opaque group/lane names.",
+  "description": "Self-descriptive Build and Tests execution groups. Functional tests run one assembly-pinned TUnit process per namespace; each cluster lane runs in its own isolated GitHub job. Local whole-group execution joins lanes sequentially. Every test class belongs to exactly one descriptive execution group; verification rejects missing, overlapping or opaque group/lane names.",
   "suites": {
     "analyzers": {
       "project": "tests/KeyLoad.AnalyzerTests/KeyLoad.AnalyzerTests.csproj",
@@ -82,7 +82,6 @@
       "partition": "class",
       "parallelism": 1,
       "timeoutMinutes": 45,
-      "lanesPerRunner": 2,
       "excludedCategories": [
         "HeavyLoad"
       ],
@@ -498,6 +497,7 @@
                 "EventProjectionClusterTests",
                 "LeftFilteredJoinClusterTests",
                 "ProjectionPublicColdTests",
+                "ColdPhaseFailureClusterTests",
                 "QueueLifecyclePublicClusterTests",
                 "SagaDueClusterTests",
                 "SampleRetentionClusterRecoveryTests",
