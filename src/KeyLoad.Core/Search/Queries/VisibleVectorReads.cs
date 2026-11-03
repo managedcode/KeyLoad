@@ -24,19 +24,21 @@ internal static class VisibleVectorReads
         budget.Check();
         var resolver = sourceMetadata is null ? null : new AnnLifetimeResourceResolver(sourceMetadata,
             scopeWork ?? throw new ArgumentNullException(nameof(scopeWork)), principal);
+        var documentPrefix = DocumentStorageKeys.Prefix(partition, collection);
+        var lineageScope = (Field: field, Prefix: VectorProjectionKeys.LineagePrefix(partition, collection, field));
         var documents = new ReadExecutionRecordReader<DocumentRecord>(budget, view);
         var lineages = new ReadExecutionRecordReader<VectorProjectionLineage>(budget, view);
         _ = budget.VisitAll(view, KeySpace.Partition(VectorKeySpace, partition, collection, field), (key, value) =>
             {
                 var vector = OrleansSerialization.Deserialize<VectorRecord>(value);
-                var document = documents.Read(DocumentStorageKeys.RecordKey(partition, collection, vector.DocumentId));
+                var document = documents.Read(DocumentStorageKeys.RecordKey(documentPrefix, vector.DocumentId));
                 if (document is { Deleted: false } && document.Revision == vector.DocumentRevision
                     && database.Authorization.CanReadRow(principal, document.Access)
                     && (sourceMetadata is null || database.Authorization.CanReadRow(sourceMetadata.Principal, document.Access))
                     && VectorProjectionEligibility.IsEligible(database, view, principal, partition, collection,
-                        document, vector, budget, lineages, resolver)
+                        document, vector, budget, lineages, lineageScope, resolver)
                     && (sourceMetadata is null || VectorProjectionEligibility.IsEligible(database, view, sourceMetadata.Principal,
-                        partition, collection, document, vector, budget, lineages, resolver, sourcePolicies: true)))
+                        partition, collection, document, vector, budget, lineages, lineageScope, resolver, sourcePolicies: true)))
                 {
                     budget.Check();
                     visitor(document, vector);

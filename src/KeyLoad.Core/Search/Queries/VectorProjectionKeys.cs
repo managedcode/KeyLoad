@@ -1,3 +1,5 @@
+using KeyLoad.Storage;
+
 namespace KeyLoad.Core.Search;
 
 /// <summary>Builds private canonical keys for vector provenance and idempotent effects.</summary>
@@ -8,6 +10,12 @@ internal static class VectorProjectionKeys
 
     internal static byte[] Lineage(PartitionRef partition, string collection, string field, string id)
         => KeySpace.Partition(LineageSpace, partition, collection, field, id);
+
+    internal static byte[] LineagePrefix(PartitionRef partition, string collection, string field)
+        => KeySpace.Partition(LineageSpace, partition, collection, field);
+
+    internal static byte[] Lineage(ReadOnlySpan<byte> fieldPrefix, string id)
+        => KeyCodec.AppendComponent(fieldPrefix, id);
 
     internal static byte[] Effect(PartitionRef partition, ApplyVectorProjection request)
         => KeySpace.Partition(EffectSpace, partition, request.SourceStream.StreamSet,

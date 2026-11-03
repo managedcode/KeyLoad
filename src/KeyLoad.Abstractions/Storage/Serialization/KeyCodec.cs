@@ -71,6 +71,23 @@ public static class KeyCodec
         }
     }
 
+    /// <summary>Appends one component to a trusted encoded prefix with room for that component.</summary>
+    internal static byte[] AppendComponent(ReadOnlySpan<byte> encodedPrefix, in KeyComponent component)
+    {
+        Span<byte> initial = stackalloc byte[InitialKeyBytes];
+        var writer = new KeyBufferWriter(initial);
+        try
+        {
+            writer.Write(encodedPrefix);
+            KeyCodecWritePrimitives.Write(ref writer, in component);
+            return writer.ToArray();
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
+
     /// <summary>Decodes a sortable binary key into its components.</summary>
     /// <param name="key">The encoded key bytes.</param>
     /// <returns>The decoded components in their original order.</returns>

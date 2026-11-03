@@ -14,13 +14,16 @@ internal static class VectorProjectionEligibility
     internal static bool IsEligible(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         PartitionRef partition, string collection, DocumentRecord targetDocument, VectorRecord vector,
         ReadExecutionBudget budget, ReadExecutionRecordReader<VectorProjectionLineage> lineages,
-        AnnLifetimeResourceResolver? lifetime = null, bool sourcePolicies = false)
+        (string Field, byte[] Prefix) lineageScope, AnnLifetimeResourceResolver? lifetime = null, bool sourcePolicies = false)
     {
         if (vector.DocumentId is null || vector.Field is null || vector.Space is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
         }
-        var lineage = lineages.Read(VectorProjectionKeys.Lineage(partition, collection, vector.Field, vector.DocumentId));
+        var lineageKey = string.Equals(vector.Field, lineageScope.Field, StringComparison.Ordinal)
+            ? VectorProjectionKeys.Lineage(lineageScope.Prefix, vector.DocumentId)
+            : VectorProjectionKeys.Lineage(partition, collection, vector.Field, vector.DocumentId);
+        var lineage = lineages.Read(lineageKey);
         if (lineage is null)
         {
             return true;

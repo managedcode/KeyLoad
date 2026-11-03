@@ -30,6 +30,16 @@ internal sealed class KeyCodecGoldenContractTests
 
         var withOffset = new DateTimeOffset(2024, 2, 3, 4, 5, 6, TimeSpan.FromHours(2));
         await Assert.That(KeyCodec.Encode(withOffset).SequenceEqual(KeyCodec.Encode(withOffset.ToUniversalTime()))).IsTrue();
+
+        const string family = "Doc\0Scope";
+        var scope = new string('\u00d6', 300);
+        var prefix = KeyCodec.Encode(family, scope);
+        KeyComponent[] suffixes = ["Id", "id", "é\U0001F642\0\0", scope, KeyComponent.Null];
+        foreach (var component in suffixes)
+        {
+            var appended = KeyCodec.AppendComponent(prefix, component);
+            await Assert.That(appended.AsSpan().SequenceEqual(KeyCodec.Encode(family, scope, component))).IsTrue();
+        }
     }
 
     private static async Task AssertHexAsync(string expected, byte[] actual)

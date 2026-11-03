@@ -54,6 +54,8 @@ The original `VectorRanker.Rank` appended every eligible `SearchScore` to a list
 
 KeyLoad's benchmark requests exact cosine results. Replacing this with approximate HNSW would change the question. A normalized derived representation also needs cut/epoch validity and exact numerical/tie validation; modifying original vector bytes or introducing another storage authority is not justified by this review.
 
+Exact search now encodes the document and lineage key prefixes once per scan and appends each candidate ID using the canonical key encoder. In a local macOS Arm64 Debug A/B/B/A with 100,000 vectors, one client and 20 verified queries per arm, mean process CPU per query was 630 ms before and 471 ms after. Allocation remained about 160 MB per query. Both arms returned identical IDs, scores, revisions and JSON at the same read cut. The SDK and Orleans transport were outside this measurement. The local logs and DLL/PDB hashes are retained under the functional test binaries in `performance-investigation/orleans-request-20261103/document-point-ab-20261103/`.
+
 ## pgvector: data layout and arithmetic are separate from request overhead
 
 [vector.c](https://github.com/pgvector/pgvector/blob/v0.8.6/src/vector.c) computes exact distances over contiguous float arrays, using compiler-vectorized loops and target-specific compilation where supported. KeyLoad already has SIMD-backed `PreparedSimilarity`; the presence of SIMD alone is not the missing proof. The next vector profile must separate storage reads, record decoding, candidate selection, full sorting and metric arithmetic before changing kernels.
@@ -130,8 +132,8 @@ permission to acknowledge individual writes before their selected durability
 boundary.
 
 KeyLoad retains ordered group commit, native MVCC atomicity, per-command outcomes
-and actual copy acknowledgements. Its approved ProcessDurable path now uses the
-published ZoneTree 2.1.0 synchronous WAL publication contract, with periodic disk
-sync owned by the engine. Explicit disk sync is separate. Current source still
+and actual copy acknowledgements. ProcessDurable uses the synchronous ZoneTree
+2.1.1 WAL publication contract, including Shared WAL for transactions, with
+periodic disk sync owned by the engine. Explicit disk sync is separate. Current source still
 requires its own process-recovery, full solution, replicated SDK/MCP and released
 Linux benchmark qualification; native diagnostics establish no competitive gain.
