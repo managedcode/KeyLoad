@@ -17,12 +17,23 @@ internal sealed class ReadExecutionRecordReader<T> where T : class
         decode = Decode;
     }
 
-    internal T? Read(byte[] key)
+    internal T? Read(byte[] key) => Read(key, null, default);
+
+    internal T? Read(IOrderedPointReader cursor, ReadOnlySpan<byte> suffix) => Read(null, cursor, suffix);
+
+    private T? Read(byte[]? key, IOrderedPointReader? cursor, ReadOnlySpan<byte> suffix)
     {
         budget.Check();
         try
         {
-            view.ReadValue(key, decode);
+            if (cursor is null)
+            {
+                view.ReadValue(key!, decode);
+            }
+            else
+            {
+                cursor.Read(suffix, decode);
+            }
             budget.Check();
             return record;
         }

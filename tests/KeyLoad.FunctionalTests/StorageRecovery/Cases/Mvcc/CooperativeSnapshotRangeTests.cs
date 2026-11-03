@@ -10,6 +10,7 @@ internal sealed class CooperativeSnapshotRangeTests
     private const byte Original = 1;
     private const byte Changed = 2;
     private const int Rows = 513;
+    private const int FarRow = 1_024;
     private static readonly byte[] Prefix = [RangePrefix];
 
     [Test]
@@ -32,15 +33,8 @@ internal sealed class CooperativeSnapshotRangeTests
         var visited = new List<byte[]>();
         var before = store.GetReadDiagnostics();
         var read = context.Start(() => store.ReadAsync((view, token) =>
-            ((ICooperativeRangeReadView)view).VisitRangeAsync(Prefix, Rows, (key, value) =>
-            {
-                if (store.Position != cut || !value.SequenceEqual([Original]))
-                {
-                    throw new InvalidOperationException("The suspended native scan changed read cuts.");
-                }
-                visited.Add(key.ToArray());
-                return true;
-            }, null, token), cancellation.Token).AsTask());
+            VisitWithOrderedReadsAsync(store, (ICooperativeRangeReadView)view, cut, visited, token),
+            cancellation.Token).AsTask());
         try
         {
             await Assert.That(read.IsCompleted).IsFalse();
@@ -59,10 +53,77 @@ internal sealed class CooperativeSnapshotRangeTests
         }
         var after = store.GetReadDiagnostics();
         await Assert.That(after.RangeVisitAttempts - before.RangeVisitAttempts).IsEqualTo(1L);
-        var expected = Enumerable.Range(0, cancel ? ZoneTreeRangeReader.CooperativeSteps : Rows).Select(RowKey);
+        var expectedCount = cancel ? ZoneTreeRangeReader.CooperativeSteps : Rows;
+        await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsEqualTo((long)expectedCount);
+        var expected = Enumerable.Range(0, expectedCount).Select(RowKey);
         await Assert.That(visited.Select(Convert.ToHexString)).IsEquivalentTo(expected.Select(Convert.ToHexString), CollectionOrdering.Matching);
         var fresh = store.Read(view => view.ReadOwnedValue(RowKey(Rows - 1)));
         await Assert.That(fresh).IsEquivalentTo(new byte[] { Changed });
+    }
+
+    [Test]
+    public async Task OrderedPointsSeekAcrossSparseRangesWithoutChangingLogicalPointAccounting()
+    {
+        using var files = new CurrentStorageFixture();
+        using var store = new ZoneTreeStore(files.SourceOptions, UnitExecutionOptions.StorageExecution(
+            new() { MaximumRangeRecords = 1, MaximumRangeWorkBytes = 1 }));
+        store.Commit((transaction, _) =>
+        {
+            for (var index = 0; index < Rows - 1; index++)
+            {
+                transaction.Put(RowKey(index), [Original]);
+            }
+            transaction.Put(RowKey(Rows), [Original]);
+            transaction.Put(RowKey(FarRow), [Changed]);
+            transaction.Put([RangePrefix + 1, 0, 0], [Changed]);
+            return true;
+        });
+        var before = store.GetReadDiagnostics();
+        var keys = new[] { 0, 1, Rows - 1, Rows, Rows + 1, FarRow, FarRow + 1, ushort.MaxValue };
+        var results = store.Read(view =>
+        {
+            using var ordered = ((ICooperativeRangeReadView)view).OpenOrderedPointReader(Prefix,
+                TestContext.Current!.Execution.CancellationToken);
+            return keys.Select(key => Probe(ordered, key)).ToArray();
+        });
+        var after = store.GetReadDiagnostics();
+        byte?[] expected = [Original, Original, null, Original, null, Changed, null, null];
+        await Assert.That(results).IsEquivalentTo(expected, CollectionOrdering.Matching);
+        await Assert.That(after.BorrowedPointLookups - before.BorrowedPointLookups).IsEqualTo((long)keys.Length);
+        await Assert.That(after.PointExaminedBytes - before.PointExaminedBytes).IsEqualTo((long)keys.Length * 3 + 4);
+        await Assert.That(after.RangeVisitAttempts).IsEqualTo(before.RangeVisitAttempts);
+        await Assert.That(after.RangeBaselineEntries).IsEqualTo(before.RangeBaselineEntries);
+    }
+
+    private static async ValueTask<StorageScanResult> VisitWithOrderedReadsAsync(ZoneTreeStore store,
+        ICooperativeRangeReadView view, long cut, List<byte[]> visited, CancellationToken token)
+    {
+        using var ordered = view.OpenOrderedPointReader(Prefix, token);
+        return await view.VisitRangeAsync(Prefix, Rows, (key, value) =>
+        {
+            RequireOriginal(value);
+            if (store.Position != cut || !ordered.Read(key[Prefix.Length..], RequireOriginal))
+            {
+                throw new InvalidOperationException("The suspended native scan changed read cuts.");
+            }
+            visited.Add(key.ToArray());
+            return true;
+        }, null, token);
+    }
+
+    private static void RequireOriginal(ReadOnlySpan<byte> value)
+    {
+        if (!value.SequenceEqual([Original]))
+        {
+            throw new InvalidOperationException("The suspended native scan changed a stored value.");
+        }
+    }
+
+    private static byte? Probe(IOrderedPointReader reader, int key)
+    {
+        byte? value = null;
+        _ = reader.Read(RowKey(key).AsSpan(Prefix.Length), bytes => value = bytes[0]);
+        return value;
     }
 
     private static async Task FinishAsync(FirstYieldContext context, Task<StorageScanResult> read,

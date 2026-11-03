@@ -52,6 +52,8 @@ internal ref struct KeyBufferWriter
 
     internal readonly byte[] ToArray() => buffer[..written].ToArray();
 
+    internal readonly bool Matches(scoped ReadOnlySpan<byte> bytes) => buffer[..written].SequenceEqual(bytes);
+
     internal void Dispose()
     {
         if (rented is { } array)

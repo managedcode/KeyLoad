@@ -15,7 +15,7 @@ internal sealed class ZoneTreeSnapshotCursor : IDisposable
         snapshot = runtime.CurrentOperation.Snapshot.Retain();
         try
         {
-            var options = new TransactionIteratorOptions { ContributeToTheBlockCache = true };
+            var options = CreateTransactionalOptions();
             var transactional = reverse ? snapshot.Transaction.CreateReverseIterator(options) : snapshot.Transaction.CreateIterator(options);
             try
             {
@@ -52,6 +52,8 @@ internal sealed class ZoneTreeSnapshotCursor : IDisposable
     }
 
     internal ITransactionIterator<Memory<byte>, Memory<byte>> Iterator { get; }
+
+    internal static TransactionIteratorOptions CreateTransactionalOptions() => new() { ContributeToTheBlockCache = true };
 
     public void Dispose()
     {

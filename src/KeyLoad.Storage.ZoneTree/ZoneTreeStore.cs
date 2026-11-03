@@ -152,6 +152,8 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, ICooperativeRan
     ValueTask<StorageScanResult> ICooperativeRangeReadView.VisitRangeAsync(byte[] prefix, int maxRecords,
         StorageRecordVisitor visitor, byte[]? afterKey, CancellationToken cancellationToken)
         => ZoneTreeRangeReader.VisitAsync(runtime, prefix, maxRecords, visitor, afterKey, cancellationToken);
+    IOrderedPointReader ICooperativeRangeReadView.OpenOrderedPointReader(byte[] prefix, CancellationToken cancellationToken)
+        => new ZoneTreeOrderedPointReader(runtime, prefix, cancellationToken);
     StorageScanResult IKeyValueView.VisitRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey, byte[]? untilKey, StorageReadObserver? observer, CancellationToken cancellationToken)
         => runtime.View.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, observer, cancellationToken);

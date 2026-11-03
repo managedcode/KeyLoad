@@ -88,6 +88,31 @@ public static class KeyCodec
         }
     }
 
+    /// <summary>Compares a complete encoded component against the canonical encoding of its typed value.</summary>
+    internal static bool MatchesComponent(ReadOnlySpan<byte> encoded, in KeyComponent component)
+    {
+        Span<byte> initial = stackalloc byte[InitialKeyBytes];
+        var writer = new KeyBufferWriter(initial);
+        try
+        {
+            KeyCodecWritePrimitives.Write(ref writer, in component);
+            return writer.Matches(encoded);
+        }
+        finally
+        {
+            writer.Dispose();
+        }
+    }
+
+    /// <summary>Copies a trusted encoded prefix and its already-validated suffix into an owned seek key.</summary>
+    internal static byte[] JoinEncoded(ReadOnlySpan<byte> prefix, ReadOnlySpan<byte> suffix)
+    {
+        var key = GC.AllocateUninitializedArray<byte>(checked(prefix.Length + suffix.Length));
+        prefix.CopyTo(key);
+        suffix.CopyTo(key.AsSpan(prefix.Length));
+        return key;
+    }
+
     /// <summary>Decodes a sortable binary key into its components.</summary>
     /// <param name="key">The encoded key bytes.</param>
     /// <returns>The decoded components in their original order.</returns>

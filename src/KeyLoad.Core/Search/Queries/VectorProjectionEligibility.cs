@@ -13,11 +13,15 @@ internal static class VectorProjectionEligibility
 
     internal static VectorProjectionLineage? ReadLineage(PartitionRef partition, string collection,
         VectorStorageRecord vector, ReadExecutionRecordReader<VectorProjectionLineage> lineages,
-        (string Field, byte[] Prefix) lineageScope)
+        (string Field, byte[] Prefix) lineageScope, IOrderedPointReader? ordered, ReadOnlySpan<byte> suffix)
     {
         if (vector.DocumentId is null || vector.Field is null || vector.Space is null)
         {
             throw Errors.Fail(ErrorCode.Corruption, LineageCorrupt);
+        }
+        if (ordered is not null)
+        {
+            return lineages.Read(ordered, suffix);
         }
         var lineageKey = string.Equals(vector.Field, lineageScope.Field, StringComparison.Ordinal)
             ? VectorProjectionKeys.Lineage(lineageScope.Prefix, vector.DocumentId)
