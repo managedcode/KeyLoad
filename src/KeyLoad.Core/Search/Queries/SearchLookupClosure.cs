@@ -29,14 +29,14 @@ internal static class SearchLookupClosure
         source.VisitCapturedPrefix(prefix, (_, bytes) =>
         {
             budget.Check();
-            var vector = OrleansSerialization.Deserialize<VectorRecord>(bytes);
+            var vector = OrleansSerialization.Deserialize<VectorStorageRecord>(bytes);
             CaptureVector(database, source, principal, partition, collection, vector, budget);
             return true;
         });
     }
 
     private static void CaptureVector(DatabaseEngine database, IScopedReadCapture source, PrincipalRecord principal,
-        PartitionRef partition, string collection, VectorRecord vector, ReadExecutionBudget budget)
+        PartitionRef partition, string collection, VectorStorageRecord vector, ReadExecutionBudget budget)
     {
         budget.Check();
         var document = Read<DocumentRecord>(source, DocumentStorageKeys.RecordKey(partition, collection, vector.DocumentId));
@@ -51,7 +51,7 @@ internal static class SearchLookupClosure
         {
             return;
         }
-        VectorProjectionEligibility.ValidateLineage(lineage, partition, document, vector);
+        VectorProjectionEligibility.ValidateLineage(lineage, partition, document, vector.Materialize());
         source.CaptureExact(VectorProjectionKeys.Effect(partition, lineage));
         source.CaptureExact(KeySpace.Resource(partition.TenantId, partition.DatabaseId, lineage.SourceDocument.Collection));
         source.CaptureExact(DocumentStorageKeys.RecordKey(lineage.SourceDocument));

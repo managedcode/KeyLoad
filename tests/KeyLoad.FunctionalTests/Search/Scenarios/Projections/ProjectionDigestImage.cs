@@ -26,10 +26,10 @@ internal static class ProjectionDigestImage
                 Fingerprint = (value.Fingerprint[0] == '0' ? "1" : "0") + value.Fingerprint[1..]
             });
         }
-        var vector = OrleansSerialization.Deserialize<VectorRecord>(original);
+        var vector = OrleansSerialization.Deserialize<VectorStorageRecord>(original);
         return OrleansSerialization.Serialize(vector with
         {
-            Values = [0f, 1f]
+            PackedCoordinates = [0, 0, 0, 0, 0, 0, 128, 63]
         });
     }
 

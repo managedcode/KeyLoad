@@ -68,7 +68,7 @@ internal static class SearchTerminalPrivacy
     private static void RequireSourcePrivacy(DatabaseEngine database, IKeyValueView current, IKeyValueView captured,
         PrincipalRecord principal, EntityRef target, string field, ReadExecutionBudget budget)
     {
-        var vector = budget.ReadRecord<VectorRecord>(captured,
+        var vector = budget.ReadRecord<VectorStorageRecord>(captured,
             KeySpace.Partition(VisibleVectorReads.VectorKeySpace, target.Partition, target.Collection, field, target.Id));
         var document = budget.ReadRecord<DocumentRecord>(captured, DocumentStorageKeys.RecordKey(target));
         if (vector is null || document is null || document.Revision != vector.DocumentRevision)
@@ -81,7 +81,7 @@ internal static class SearchTerminalPrivacy
         {
             return;
         }
-        VectorProjectionEligibility.ValidateLineage(lineage, target.Partition, document, vector);
+        VectorProjectionEligibility.ValidateLineage(lineage, target.Partition, document, vector.Materialize());
         database.Authorization.Require(principal, target.Partition, lineage.SourceDocument.Collection, Capability.DocumentsRead);
         var sourceResource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(budget.CreateView(current), target.Partition,
             lineage.SourceDocument.Collection, ResourceKind.Collection);

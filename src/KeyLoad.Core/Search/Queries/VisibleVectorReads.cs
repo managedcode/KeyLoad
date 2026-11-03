@@ -13,6 +13,16 @@ internal static class VisibleVectorReads
         PartitionRef partition, string collection, string field, ReadExecutionBudget budget,
         Action<DocumentRecord, VectorRecord> visitor, AnnReadLifetimeMetadata? sourceMetadata = null, AnnSeedWork? scopeWork = null)
     {
+        ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        VisitPacked(database, view, principal, partition, collection, field, budget,
+            (document, vector, owned) => visitor(document, owned ?? vector.Materialize()), sourceMetadata, scopeWork);
+    }
+
+    internal static void VisitPacked(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
+        PartitionRef partition, string collection, string field, ReadExecutionBudget budget,
+        Action<DocumentRecord, VectorStorageRecord, VectorRecord?> visitor, AnnReadLifetimeMetadata? sourceMetadata = null,
+        AnnSeedWork? scopeWork = null)
+    {
         ArgumentNullException.ThrowIfNull(database) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentNullException.ThrowIfNull(principal) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
@@ -30,18 +40,23 @@ internal static class VisibleVectorReads
         var lineages = new ReadExecutionRecordReader<VectorProjectionLineage>(budget, view);
         _ = budget.VisitAll(view, KeySpace.Partition(VectorKeySpace, partition, collection, field), (key, value) =>
             {
-                var vector = OrleansSerialization.Deserialize<VectorRecord>(value);
+                var vector = OrleansSerialization.Deserialize<VectorStorageRecord>(value);
                 var document = documents.Read(DocumentStorageKeys.RecordKey(documentPrefix, vector.DocumentId));
-                if (document is { Deleted: false } && document.Revision == vector.DocumentRevision
-                    && database.Authorization.CanReadRow(principal, document.Access)
-                    && (sourceMetadata is null || database.Authorization.CanReadRow(sourceMetadata.Principal, document.Access))
-                    && VectorProjectionEligibility.IsEligible(database, view, principal, partition, collection,
-                        document, vector, budget, lineages, lineageScope, resolver)
+                if (document is not { Deleted: false } || document.Revision != vector.DocumentRevision
+                    || !database.Authorization.CanReadRow(principal, document.Access)
+                    || (sourceMetadata is not null && !database.Authorization.CanReadRow(sourceMetadata.Principal, document.Access)))
+                {
+                    return true;
+                }
+                var lineage = VectorProjectionEligibility.ReadLineage(partition, collection, vector, lineages, lineageScope);
+                var owned = lineage is null ? null : vector.Materialize();
+                if (lineage is null || VectorProjectionEligibility.IsEligible(database, view, principal, partition, collection,
+                        document, owned!, lineage, budget, resolver)
                     && (sourceMetadata is null || VectorProjectionEligibility.IsEligible(database, view, sourceMetadata.Principal,
-                        partition, collection, document, vector, budget, lineages, lineageScope, resolver, sourcePolicies: true)))
+                        partition, collection, document, owned!, lineage, budget, resolver, sourcePolicies: true)))
                 {
                     budget.Check();
-                    visitor(document, vector);
+                    visitor(document, vector, owned);
                 }
                 return true;
             });

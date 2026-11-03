@@ -11,8 +11,8 @@ internal sealed class AnnSeedMalformedStateTests
     public async Task MalformedMatchingVectorFailsAsCorruptionWithoutFurtherWrites()
     {
         using var database = AnnSeedTestSupport.Create(1);
-        var malformed = new VectorRecord(AnnSeedTestSupport.Id(0), AnnSeedTestSupport.Field,
-            AnnSeedTestSupport.Space(), ImmutableArray.Create(float.NaN, 1f, 2f), 1);
+        var malformed = new VectorStorageRecord(AnnSeedTestSupport.Id(0), AnnSeedTestSupport.Field,
+            AnnSeedTestSupport.Space(), VectorStorageRecord.Pack([float.NaN, 1f, 2f]), 1);
         database.Store.Commit((transaction, _) =>
         {
             transaction.PutRecord(VectorKey(database, malformed.DocumentId), malformed);
@@ -78,8 +78,8 @@ internal sealed class AnnSeedMalformedStateTests
     public async Task DuplicateRetainedDocumentIdentityFailsAsCorruption()
     {
         using var database = AnnSeedTestSupport.Create(1);
-        var duplicate = new VectorRecord(AnnSeedTestSupport.Id(0), AnnSeedTestSupport.Field,
-            AnnSeedTestSupport.Space(), ImmutableArray.Create(0.25f, 1f, -0.5f), 1);
+        var duplicate = new VectorStorageRecord(AnnSeedTestSupport.Id(0), AnnSeedTestSupport.Field,
+            AnnSeedTestSupport.Space(), VectorStorageRecord.Pack([0.25f, 1f, -0.5f]), 1);
         var aliasKey = KeySpace.Partition("vector", database.Partition, AnnSeedTestSupport.Collection,
             AnnSeedTestSupport.Field, "alternate-storage-key");
         database.Store.Commit((transaction, _) =>
@@ -118,8 +118,8 @@ internal sealed class AnnSeedMalformedStateTests
         using var database = AnnSeedTestSupport.Create(1);
         var accepted = AnnSeedTestSupport.Capture(database);
         var malformedSpace = AnnSeedTestSupport.Space(model: new string('\0', 256));
-        var malformed = new VectorRecord(AnnSeedTestSupport.Id(0), AnnSeedTestSupport.Field,
-            malformedSpace, ImmutableArray.Create(0.25f, 1f, -0.5f), 1);
+        var malformed = new VectorStorageRecord(AnnSeedTestSupport.Id(0), AnnSeedTestSupport.Field,
+            malformedSpace, VectorStorageRecord.Pack([0.25f, 1f, -0.5f]), 1);
         database.Store.Commit((transaction, _) =>
         {
             transaction.PutRecord(VectorKey(database, malformed.DocumentId), malformed);

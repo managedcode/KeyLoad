@@ -73,7 +73,7 @@ internal sealed class AnnSeedCutTests
             view.VisitRange(KeySpace.Partition("vector", database.Partition, AnnSeedTestSupport.Collection,
                 AnnSeedTestSupport.Field), 4, (key, value) =>
             {
-                ids.Add(OrleansSerialization.Deserialize<VectorRecord>(value).DocumentId);
+                ids.Add(OrleansSerialization.Deserialize<VectorStorageRecord>(value).DocumentId);
                 return true;
             });
             return ids.ToArray();

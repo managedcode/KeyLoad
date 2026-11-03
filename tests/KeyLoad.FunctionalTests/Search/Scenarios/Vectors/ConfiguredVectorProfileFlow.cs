@@ -110,9 +110,9 @@ internal static class ConfiguredVectorProfileFlow
         var target = rows.Single(row => row.Document.Reference.Id == Target).Document;
         await Assert.That(JsonDefaults.Serialize(target).SequenceEqual(JsonDefaults.Serialize(
             new DocumentResult(provenance.ExpectedReference(new(partition, Collection, Target)), UpdatedRevision, UpdatedJson, false, [])))).IsTrue();
-        var vector = owner.Store.Read(view => view.GetRecord<VectorRecord>(
+        var vector = owner.Store.Read(view => view.GetRecord<VectorStorageRecord>(
             KeySpace.Partition(VectorKeySpace, partition, Collection, Field, Target)));
-        var expectedVector = new VectorRecord(Target, Field, Space, [0, 1], UpdatedRevision);
+        var expectedVector = new VectorStorageRecord(Target, Field, Space, [0, 0, 0, 0, 0, 0, 128, 63], UpdatedRevision);
         await Assert.That(OrleansSerialization.Serialize(vector!).SequenceEqual(OrleansSerialization.Serialize(expectedVector))).IsTrue();
         var rival = rows.Single(row => row.Document.Reference.Id == Rival).Document;
         await Assert.That(JsonDefaults.Serialize(rival).SequenceEqual(JsonDefaults.Serialize(

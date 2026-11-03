@@ -77,7 +77,7 @@ internal static class ClassificationLineageWholeAssertions
         await LineageAsync(fixture, record);
         var expected = new VectorRecord(EventProjectionFixture.TargetId, EventProjectionFixture.VectorField,
             EventProjectionFixture.Space, [1, 0], DocumentRevision);
-        var actualVector = OrleansSerialization.Deserialize<VectorRecord>(vector);
+        var actualVector = OrleansSerialization.Deserialize<VectorStorageRecord>(vector).Materialize();
         await Assert.That(actualVector.DocumentId).IsEqualTo(expected.DocumentId);
         await Assert.That(actualVector.Field).IsEqualTo(expected.Field);
         await Assert.That(actualVector.Space).IsEqualTo(expected.Space);

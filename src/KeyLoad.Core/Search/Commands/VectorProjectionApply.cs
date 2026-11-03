@@ -98,7 +98,8 @@ public static class VectorProjectionApply
 
     internal static void PutCanonicalVector(IAtomicTransaction transaction, PartitionRef partition, PutVector vector, DocumentRecord document)
     {
-        var record = new VectorRecord(vector.Id, vector.Field, vector.Space, vector.Values, document.Revision);
+        var record = new VectorStorageRecord(vector.Id, vector.Field, vector.Space,
+            VectorStorageRecord.Pack(vector.Values.AsSpan()), document.Revision);
         var lineageKey = VectorProjectionKeys.Lineage(partition, vector.Collection, vector.Field, vector.Id);
         if (transaction.GetRecord<VectorProjectionLineage>(lineageKey) is { } previousLineage)
         {

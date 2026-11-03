@@ -53,7 +53,7 @@ internal static class EventProjectionRecoveryQueryOracle
         await Assert.That(durable is not null && JsonDefaults.Serialize(durable).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(receipt))).IsTrue();
         var state = EventProjectionRecoveryStoreOracle.CaptureCommittedBytes(store, operation, projection);
-        await AssertVectorBytesAsync(state.Vector, [1, 0]);
+        await AssertVectorBytesAsync(state.Vector);
     }
 
     internal static async Task ChangeSourceAndVerifyStaleAsync(string root, ZoneTreeStore store,
@@ -80,7 +80,7 @@ internal static class EventProjectionRecoveryQueryOracle
         await Assert.That(updated?.Json).IsEqualTo(EventProjectionCrashScenario.UpdatedSourceDocumentJson);
         await AssertSearchAsync(database, committed: false, cancellationToken);
         var retained = EventProjectionRecoveryStoreOracle.CaptureCommittedBytes(store, operation, projection);
-        await AssertVectorBytesAsync(retained.Vector, [1, 0]);
+        await AssertVectorBytesAsync(retained.Vector);
         await Assert.That(retained.Lineage.AsSpan().SequenceEqual(before.Lineage)).IsTrue();
         await Assert.That(retained.Effect.AsSpan().SequenceEqual(before.Effect)).IsTrue();
         await Assert.That(retained.Outcome.AsSpan().SequenceEqual(before.Outcome)).IsTrue();
@@ -99,10 +99,10 @@ internal static class EventProjectionRecoveryQueryOracle
             cancellationToken);
     }
 
-    private static async Task AssertVectorBytesAsync(byte[] actual, float[] values)
+    private static async Task AssertVectorBytesAsync(byte[] actual)
     {
-        var expected = OrleansSerialization.Serialize(new VectorRecord(EventProjectionCrashScenario.TargetId,
-            EventProjectionCrashScenario.VectorField, EventProjectionCrashScenario.Space, [.. values],
+        var expected = OrleansSerialization.Serialize(new VectorStorageRecord(EventProjectionCrashScenario.TargetId,
+            EventProjectionCrashScenario.VectorField, EventProjectionCrashScenario.Space, [0, 0, 128, 63, 0, 0, 0, 0],
             EventProjectionCrashScenario.DocumentRevision));
         await Assert.That(actual.AsSpan().SequenceEqual(expected)).IsTrue();
     }

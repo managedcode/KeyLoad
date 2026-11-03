@@ -106,8 +106,8 @@ internal static class ProjectionClassificationRepairFlow
             ReducerVersion, ReducerGeneration, [EventProjectionFixture.SourceClass]);
         await Assert.That(JsonDefaults.Serialize(fixture.Lineage()).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
-        var vector = OrleansSerialization.Deserialize<VectorRecord>(fixture.VectorBytes()
-            ?? throw new InvalidOperationException(MissingVector));
+        var vector = OrleansSerialization.Deserialize<VectorStorageRecord>(fixture.VectorBytes()
+            ?? throw new InvalidOperationException(MissingVector)).Materialize();
         var expectedVector = new VectorRecord(EventProjectionFixture.TargetId, EventProjectionFixture.VectorField,
             EventProjectionFixture.Space, [1, 0], OriginalRevision);
         await Assert.That(JsonDefaults.Serialize(vector).AsSpan()

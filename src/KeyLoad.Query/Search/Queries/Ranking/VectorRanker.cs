@@ -1,4 +1,5 @@
 using KeyLoad.Core;
+using KeyLoad.Core.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Query.Search;
@@ -12,14 +13,14 @@ internal static class VectorRanker
         var ranked = new List<SearchScore>();
         var comparer = GlobalBranchOrder.WorstFirst(budget);
         var selected = retainedLimit.HasValue ? new PriorityQueue<SearchScore, SearchScore>(comparer) : null;
-        database.VisitVisibleVectors(view, principal, request.Partition, request.Collection, request.VectorField!, budget,
-            (document, vector) =>
+        VisibleVectorReads.VisitPacked(database, view, principal, request.Partition, request.Collection, request.VectorField!, budget,
+            (document, vector, _) =>
             {
                 budget.Check();
                 if ((sourcePrincipal is null || database.Authorization.CanReadRow(sourcePrincipal, document.Access))
                     && vector.Space == request.Space && eligibility.Allows(document.Reference.Id))
                 {
-                    var candidate = new SearchScore(document.Reference, similarity.Score(vector.Values.AsMemory()));
+                    var candidate = new SearchScore(document.Reference, similarity.ScoreBorrowed(vector.Coordinates()));
                     if (selected is null)
                     {
                         ranked.Add(candidate);

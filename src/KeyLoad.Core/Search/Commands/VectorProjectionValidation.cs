@@ -128,8 +128,8 @@ internal static class VectorProjectionValidation
 
     internal static void RequireCanonicalProjectionEffect(IKeyValueView view, PartitionRef partition, PutVector target, VectorProjectionEffect effect)
     {
-        var vector = view.GetRecord<VectorRecord>(KeySpace.Partition(VisibleVectorReads.VectorKeySpace, partition, target.Collection, target.Field, target.Id));
-        if (vector is null || vector.DocumentId != target.Id || vector.Field != target.Field || vector.Space != target.Space || vector.DocumentRevision != target.ExpectedDocumentRevision || effect.Receipt.Revision != vector.DocumentRevision || !VectorProjectionPolicy.MatchesCanonicalVector(effect.Fingerprint, target.Collection, vector))
+        var vector = view.GetRecord<VectorStorageRecord>(KeySpace.Partition(VisibleVectorReads.VectorKeySpace, partition, target.Collection, target.Field, target.Id));
+        if (vector is null || vector.DocumentId != target.Id || vector.Field != target.Field || vector.Space != target.Space || vector.DocumentRevision != target.ExpectedDocumentRevision || effect.Receipt.Revision != vector.DocumentRevision || !VectorProjectionPolicy.MatchesCanonicalVector(effect.Fingerprint, target.Collection, vector.Materialize()))
         {
             throw Errors.Fail(ErrorCode.Corruption, VectorProjectionApply.ProjectionEffectCorruptMessage);
         }

@@ -11,10 +11,9 @@ internal static class VectorProjectionEligibility
 
     private const string LineageCorrupt = "The stored vector projection lineage is corrupt.";
 
-    internal static bool IsEligible(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
-        PartitionRef partition, string collection, DocumentRecord targetDocument, VectorRecord vector,
-        ReadExecutionBudget budget, ReadExecutionRecordReader<VectorProjectionLineage> lineages,
-        (string Field, byte[] Prefix) lineageScope, AnnLifetimeResourceResolver? lifetime = null, bool sourcePolicies = false)
+    internal static VectorProjectionLineage? ReadLineage(PartitionRef partition, string collection,
+        VectorStorageRecord vector, ReadExecutionRecordReader<VectorProjectionLineage> lineages,
+        (string Field, byte[] Prefix) lineageScope)
     {
         if (vector.DocumentId is null || vector.Field is null || vector.Space is null)
         {
@@ -23,12 +22,15 @@ internal static class VectorProjectionEligibility
         var lineageKey = string.Equals(vector.Field, lineageScope.Field, StringComparison.Ordinal)
             ? VectorProjectionKeys.Lineage(lineageScope.Prefix, vector.DocumentId)
             : VectorProjectionKeys.Lineage(partition, collection, vector.Field, vector.DocumentId);
-        var lineage = lineages.Read(lineageKey);
-        if (lineage is null)
-        {
-            return true;
-        }
+        return lineages.Read(lineageKey);
+    }
 
+    internal static bool IsEligible(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
+        PartitionRef partition, string collection, DocumentRecord targetDocument, VectorRecord vector,
+        VectorProjectionLineage lineage, ReadExecutionBudget budget, AnnLifetimeResourceResolver? lifetime,
+        bool sourcePolicies = false)
+    {
+        budget.Check();
         ValidateLineage(lineage, partition, targetDocument, vector);
         VectorProjectionPolicy.ValidateEffect(budget.ReadRecord<VectorProjectionEffect>(view,
             VectorProjectionKeys.Effect(partition, lineage)), lineage, vector);

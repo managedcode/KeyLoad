@@ -107,9 +107,9 @@ internal static class EventProjectionRecoveryStoreOracle
         await Assert.That(outbox.Entry?.Mutation is ApplyVectorProjection).IsTrue();
         var vectorBytes = outbox.Vector
             ?? throw new InvalidOperationException("The committed projection vector was missing.");
-        var vector = OrleansSerialization.Deserialize<VectorRecord>(vectorBytes);
+        var vector = OrleansSerialization.Deserialize<VectorStorageRecord>(vectorBytes);
         await Assert.That(vector.DocumentId).IsEqualTo(EventProjectionCrashScenario.TargetId);
-        await Assert.That(vector.Values.AsSpan().SequenceEqual(new[] { 1f, 0f })).IsTrue();
+        await Assert.That(vector.Coordinates().SequenceEqual(new[] { 1f, 0f })).IsTrue();
         await Assert.That(vector.DocumentRevision).IsEqualTo(EventProjectionCrashScenario.DocumentRevision);
     }
 
