@@ -36,6 +36,8 @@ internal sealed class KeyLoadDatabase : IAsyncDisposable
     /// <summary>The next node's client; calls spread evenly over the cluster.</summary>
     internal KeyLoadClient Client => clients[(int)((uint)Interlocked.Increment(ref next) % (uint)clients.Length)];
 
+    internal IReadOnlyList<KeyLoadClient> NodeClients => clients;
+
     internal EntityRef Entity(string collection, string id) => new(Partition, collection, id);
 
     /// <summary>Creates a resource in the job's database before any data is written.</summary>

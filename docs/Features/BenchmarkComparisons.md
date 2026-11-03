@@ -85,9 +85,10 @@ flowchart LR
 
 Each database and node count in this table is one job: 45 jobs. PostgreSQL runs
 as one deployment name, `PostgreSQL + pgvector`, for both relational and vector
-jobs. A load case counts records (vertices plus edges for the graph); the index
-case is one call that makes the loaded search dataset searchable; every other case
-counts requests.
+jobs. A load case counts records (vertices plus edges for the graph). The index
+case counts one operation to make the loaded dataset searchable across the
+deployment. KeyLoad waits for its index on every node used by the query driver.
+Every other case counts requests.
 
 ## Shared modules: change a dataset or scenario once
 

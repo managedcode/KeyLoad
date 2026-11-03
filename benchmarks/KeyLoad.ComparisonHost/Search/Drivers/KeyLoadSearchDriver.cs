@@ -32,12 +32,15 @@ internal sealed class KeyLoadSearchDriver(BenchmarkConnection connection) : ISea
         Observe((await database.CommitAsync(mutations, token)).Token);
     }
 
-    /// <summary>Returns once the lexical index covers every acknowledged insert.</summary>
+    /// <summary>Waits for the lexical index on each node that will serve measured queries.</summary>
     public async Task BuildIndexAsync(CancellationToken token)
     {
         var minimum = Volatile.Read(ref latest) ?? throw new InvalidOperationException(NothingInserted);
         var request = new WaitForIndexRequest(database.Partition, Collection, TextField, minimum);
-        _ = KeyLoadDatabase.Require(await database.Client.WaitForIndexAsync(request, token), nameof(BuildIndexAsync));
+        foreach (var client in database.NodeClients)
+        {
+            _ = KeyLoadDatabase.Require(await client.WaitForIndexAsync(request, token), nameof(BuildIndexAsync));
+        }
     }
 
     public async Task<IReadOnlyList<string>> SearchAsync(IReadOnlyList<string> terms, int limit, CancellationToken token)
