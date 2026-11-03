@@ -58,7 +58,7 @@ internal static class ZoneTreeTreeFactory
                 o.MutableSegmentBloomFilterBitsPerItem = 0;
             })
             .ConfigureWriteAheadLogOptions(ConfigureWriteAheadLog)
-            .ConfigureDiskSegmentOptions(o => o.CompressionMethod = CompressionMethod.None);
+            .ConfigureDiskSegmentOptions(ConfigureTransactionalDiskSegment);
 
     private static ZoneTreeFactory<Memory<byte>, Memory<byte>> Create(string directory)
         => new ZoneTreeFactory<Memory<byte>, Memory<byte>>()
@@ -72,7 +72,13 @@ internal static class ZoneTreeTreeFactory
                 // The transactional tree's native AutoSyncInterval syncs its complete WAL and commit state.
                 options.SyncCompressedModeOptions.EnableTailWriterJob = false;
             })
-            .ConfigureDiskSegmentOptions(o => o.CompressionMethod = CompressionMethod.None);
+            .ConfigureDiskSegmentOptions(ConfigureTransactionalDiskSegment);
+
+    private static void ConfigureTransactionalDiskSegment(DiskSegmentOptions options)
+    {
+        options.CompressionMethod = CompressionMethod.LZ4;
+        options.CompressionLevel = CompressionLevels.LZ4Fastest;
+    }
 
     // SyncCompressed synchronously publishes records into the native mapped WAL tail before returning.
     // This is the ProcessDurable acknowledgement boundary; disk sync remains engine-owned background work.
