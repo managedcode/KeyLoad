@@ -6,8 +6,8 @@ internal enum TextProviderAuditDamage
     Hash,
     SourceIncarnation,
     ScopePosition,
-    RecordId,
-    DuplicateReference,
+    RecordDigest,
+    DocumentCount,
     ForeignPartition,
     FileDigest
 }

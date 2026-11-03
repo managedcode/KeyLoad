@@ -17,6 +17,6 @@ internal interface ICapturedTextRead : IDisposable
     {
         get;
     }
-    IKeyValueView CompleteSource();
+    IKeyValueView CompleteSource(TextPostingCandidates? certified = null);
     void VerifyTerminal(IReadOnlyList<EntityRef> selected);
 }

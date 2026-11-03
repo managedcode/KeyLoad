@@ -15,9 +15,6 @@ internal sealed class TextGeneration
     private readonly Guid sourceNodeId;
     private readonly TextResourceOwnership resources;
     internal TextResourceOwnership Resources => resources;
-    private List<TextRecord>? pendingRecords = [];
-    private TextRecord[]? sealedRecords;
-    private HashSet<EntityRef>? references = [];
 
     internal TextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, TextFileStreamProvider provider, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership resources)
     {
@@ -28,6 +25,7 @@ internal sealed class TextGeneration
         Leaf = leaf;
         Path = System.IO.Path.Combine(root, leaf);
         Scope = scope;
+        Corpus = new(scope);
         CurrentIndex = RuntimeTextIndex.Open(System.IO.Path.Combine(Path, TextProtocol.RuntimeDirectoryCore), provider, executionOptions: executionOptions, walMode: WriteAheadLogMode.None);
     }
 
@@ -54,7 +52,7 @@ internal sealed class TextGeneration
     {
         get; private set;
     }
-    internal IReadOnlyList<TextRecord> Records => sealedRecords is { } records ? records : pendingRecords!;
+    internal TextGenerationCorpus Corpus { get; }
     internal bool Published
     {
         get; private set;
@@ -65,36 +63,16 @@ internal sealed class TextGeneration
 
     internal void ClearDeferredBudgetFailure() => DeferredBudgetFailure = null;
 
-    internal void AddRecord(EntityRef reference, long revision)
-    {
-        const int RevisionValidationBoundary = 0;
-        const int PendingRecordsCountStep = 1;
-
-        if (revision < RevisionValidationBoundary || reference.Partition != Scope.Partition || reference.Collection != Scope.Collection
-            || string.IsNullOrEmpty(reference.Id) || !references!.Add(reference))
-        {
-            throw TextErrors.Corrupt();
-        }
-        var record = new TextRecord((ulong)pendingRecords!.Count + PendingRecordsCountStep, reference, revision);
-        pendingRecords.Add(record);
-    }
-
-    internal TextRecord[] SealRecords()
-    {
-        if (sealedRecords is not null)
-        {
-            return sealedRecords;
-        }
-        sealedRecords = pendingRecords!.ToArray();
-        pendingRecords = null;
-        references = null;
-        return sealedRecords;
-    }
-
     internal TextFile[] CloseAndCapture(ReadExecutionBudget? budget)
+        => CloseAndCapture(budget, certificateBudget: null);
+
+    internal TextFile[] SealAndCapture(ReadExecutionBudget budget)
+        => CloseAndCapture(budget, certificateBudget: budget);
+
+    private TextFile[] CloseAndCapture(ReadExecutionBudget? budget, ReadExecutionBudget? certificateBudget)
     {
         var sealedRead = IsSealedRead;
-        CloseIndex();
+        CloseIndex(certificateBudget);
         var owner = TextFiles.ReadOwnerForProvider(root, Leaf, sourceNodeId, executionOptions: executionOptions);
         TextFile[] captured = [];
         try
@@ -141,7 +119,7 @@ internal sealed class TextGeneration
         }
     }
 
-    private void CloseIndex()
+    private void CloseIndex(ReadExecutionBudget? certificateBudget)
     {
         if (CurrentIndex is not { } current)
         {
@@ -160,11 +138,17 @@ internal sealed class TextGeneration
                 }
             }, failures);
         }
+        if (certificateBudget is not null && failures.Count == 0)
+        {
+            ServerFailureObserver.Observe(() => Corpus.Seal(current.ZoneTree1,
+                executionOptions.Value.MaximumDiskBytes, certificateBudget), failures);
+        }
         var failuresBeforeDispose = failures.Count;
         ServerFailureObserver.Observe(current.Dispose, failures);
         if (failures.Count == failuresBeforeDispose)
         {
             CurrentIndex = null;
+            Corpus.ReleasePostingBuilder();
         }
         ServerFailureObserver.ThrowIfAny(failures);
     }
@@ -200,7 +184,8 @@ internal sealed class TextGeneration
 
     internal void MarkPublished()
     {
-        references = null;
+        _ = Corpus.PostingProof;
+        _ = Corpus.RecordDigest;
         Published = true;
     }
 
@@ -213,5 +198,6 @@ internal sealed class TextGeneration
         }
         current.Dispose();
         CurrentIndex = null;
+        Corpus.ReleasePostingBuilder();
     }
 }

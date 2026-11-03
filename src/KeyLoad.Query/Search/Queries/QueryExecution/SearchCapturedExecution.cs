@@ -25,7 +25,7 @@ internal static class SearchCapturedExecution
             return new(capturedProjection.CaptureRead(view, principal, resource, request, budget), ranker, null);
         }
         return new(null, null, Rank(database, provider, view, principal, resource, request, budget,
-            similarity, eligibility, ranker, null));
+            similarity, eligibility, ranker, null, null));
     }
 
     internal static RankedDocument[] Complete(DatabaseEngine database, SearchStart original,
@@ -42,9 +42,11 @@ internal static class SearchCapturedExecution
         {
             try
             {
-                var source = owner.CompleteSource();
+                var certified = owner.OriginalProjection as ITextCertifiedProjectionLease;
+                var corpus = certified?.ReadCertifiedCandidates(original.Ranker!.Terms, budget);
+                var source = owner.CompleteSource(corpus);
                 var result = Rank(database, null, source, owner.Principal, owner.Resource, request, budget,
-                    similarity, eligibility, original.Ranker, owner);
+                    similarity, eligibility, original.Ranker, owner, corpus);
                 budget.Check();
                 return result;
             }
@@ -60,7 +62,7 @@ internal static class SearchCapturedExecution
     private static RankedDocument[] Rank(DatabaseEngine database, ITextProjection? provider, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, SearchRequest request, ReadExecutionBudget budget,
         PreparedSimilarity? similarity, FilteredSearchEligibility eligibility,
-        TextRanker? ranker, ICapturedTextRead? original)
+        TextRanker? ranker, ICapturedTextRead? original, TextPostingCandidates? corpus)
     {
         budget.Check();
         var fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget, request.Explain);
@@ -68,7 +70,8 @@ internal static class SearchCapturedExecution
         {
             var scores = original is null
                 ? SearchBranchExecution.RankTextPrepared(database, provider, view, principal, resource, request, budget, ranker)
-                : SearchBranchExecution.RankTextCaptured(database, view, principal, request, budget, ranker, original.OriginalProjection);
+                : SearchBranchExecution.RankTextCaptured(database, view, principal, request, budget, ranker,
+                    original.OriginalProjection, corpus);
             fusion.AddBranch(FilteredSearchBranch.Apply(scores, eligibility, budget), request.TextWeight, SearchBranchKind.Text);
         }
         if (similarity is not null)

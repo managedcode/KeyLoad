@@ -10,7 +10,6 @@ namespace KeyLoad.FunctionalTests.Search;
 internal static class TextReadOnlySettlementFlow
 {
     private const string Collection = "readonly-settlement";
-    private const string Payload = "{\"text\":\"needle\"}";
     private const int Rows = 256;
     private const int Limit = 10;
 
@@ -18,7 +17,7 @@ internal static class TextReadOnlySettlementFlow
     {
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit([.. Enumerable.Range(0, Rows).Select(index =>
-            (Mutation)new PutDocument(Collection, Id(index), Payload))]);
+            (Mutation)new PutDocument(Collection, Id(index), Payload(index)))]);
         var position = database.Store.Position;
         var identity = database.Store.Identity;
         var root = Path.Combine(database.Directory, "readonly-close");
@@ -144,13 +143,19 @@ internal static class TextReadOnlySettlementFlow
     private static async Task RequireAsync(TestDatabase database, SearchEngine engine, CancellationToken token)
     {
         RankedDocument[] expected = [.. Enumerable.Range(0, Limit).Select(index => new RankedDocument(
-            new(database.ExpectedReference(new(database.Partition, Collection, Id(index))), 1, Payload, false, []),
+            new(database.ExpectedReference(new(database.Partition, Collection, Id(index))), 1, Payload(index), false, []),
             1d / (61 + index)))];
         var actual = await engine.SearchAsync("root", new(database.Partition, Collection, "/text", "needle", Limit: Limit), token);
         await Assert.That(JsonDefaults.Serialize(actual)).IsEquivalentTo(JsonDefaults.Serialize(expected), CollectionOrdering.Matching);
     }
 
     private static string Id(int index) => "row-" + index.ToString("D4", CultureInfo.InvariantCulture);
+
+    private static string Payload(int index)
+    {
+        var suffix = index.ToString("D4", CultureInfo.InvariantCulture);
+        return "{\"text\":\"needle catalog" + suffix + " stock" + suffix + "\"}";
+    }
 
     private static void ExclusiveFiles(string root)
     {

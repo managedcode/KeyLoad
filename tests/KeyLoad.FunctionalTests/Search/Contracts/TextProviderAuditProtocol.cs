@@ -40,10 +40,8 @@ internal static class TextProviderAuditProtocol
     internal const int QueryLimit = 4;
     internal const int EntryBound = 256;
     internal const long RuntimeByteBound = 16_777_216L;
-    internal const int FirstRecord = 0;
-    internal const int SecondRecord = 1;
     internal const int FirstFile = 0;
-    internal const ulong NoncontiguousId = 2;
+    internal const int InvalidDocumentCount = -1;
     internal const int ScopePositionStep = 1;
     internal const string UnownedSuffix = ".unowned";
     internal const double SingleBranchScore = 1d / 61d;

@@ -47,7 +47,8 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
             throw new ArgumentException(EmptyScope, nameof(key));
         }
         ObjectDisposedException.ThrowIf(transferred, this) /* KLD0041: BCL disposal diagnostics accept the this ZoneTreeCapturedReadBuilder instance through object to preserve its runtime owner type. */;
-        if (Covers(key) || exactKeys.Any(exact => exact.AsSpan().SequenceEqual(key)))
+        var index = exactKeys.BinarySearch(key, BinaryKeyComparer.Instance);
+        if (index >= 0 || Covers(key))
         {
             return;
         }
@@ -65,7 +66,7 @@ internal sealed class ZoneTreeCapturedReadBuilder(ZoneTreeReadCutLease original,
             records.Insert(~location, new(ownedKey.ToArray(), value.ToArray()));
         }, admit);
         // Execution absence is an explicitly observed key, not permission to query any other key.
-        exactKeys.Add(ownedKey);
+        exactKeys.Insert(~index, ownedKey);
     }
 
     public bool ReadCapturedValue(byte[] key, StorageValueReader reader)

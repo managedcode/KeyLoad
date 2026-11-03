@@ -99,8 +99,9 @@ internal static class TextProjectionRecoveryAssertions
         await Assert.That(manifest.Scope.ReadGeneration).IsEqualTo(receipt.ReadGeneration);
         await Assert.That(manifest.Scope.Position).IsEqualTo(receipt.Position);
         await Assert.That(manifest.Scope).IsEquivalentTo(receipt.Scope);
-        var records = manifest.Records.Select(record =>
-            new TextCrashManifestRecord(record.Id, record.Reference, record.Revision)).ToArray();
-        await Assert.That(records).IsEquivalentTo(receipt.ManifestRecords, CollectionOrdering.Matching);
+        var records = receipt.ManifestRecords.Select(record =>
+            new TextRecord(record.Index, record.Reference, record.Revision)).ToArray();
+        await Assert.That(manifest.PostingProof.DocumentCount).IsEqualTo(records.Length);
+        await Assert.That(manifest.RecordDigest).IsEquivalentTo(TextRecordDigest.Calculate(records), CollectionOrdering.Matching);
     }
 }

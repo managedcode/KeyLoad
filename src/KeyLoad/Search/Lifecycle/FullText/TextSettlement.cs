@@ -95,21 +95,21 @@ internal static class TextSettlement
 
     private static void WriteManifest(string root, TextGeneration generation, TextFile[] files, ReadExecutionBudget? budget, IOptions<TextExecutionOptions> executionOptions)
     {
-        var records = generation.SealRecords();
+        var recordDigest = generation.Corpus.RecordDigest;
         try
         {
-            TextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, records, files, budget: generation.DeferredBudgetFailure is null ? budget : null, executionOptions: executionOptions, resources: generation.Resources);
+            TextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, recordDigest, files, generation.Corpus.PostingProof, budget: generation.DeferredBudgetFailure is null ? budget : null, executionOptions: executionOptions, resources: generation.Resources);
         }
         catch (OperationCanceledException error) when (budget is not null)
         {
             generation.DeferBudgetFailure(error);
-            TextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, records, files, executionOptions: executionOptions, resources: generation.Resources);
+            TextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, recordDigest, files, generation.Corpus.PostingProof, executionOptions: executionOptions, resources: generation.Resources);
         }
         catch (KeyLoadException error) when (budget is not null
             && error.Code == KeyLoad.ErrorCode.BudgetExceeded)
         {
             generation.DeferBudgetFailure(error);
-            TextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, records, files, executionOptions: executionOptions, resources: generation.Resources);
+            TextFiles.WritePendingManifest(root, generation.Leaf, generation.Scope, recordDigest, files, generation.Corpus.PostingProof, executionOptions: executionOptions, resources: generation.Resources);
         }
     }
 }

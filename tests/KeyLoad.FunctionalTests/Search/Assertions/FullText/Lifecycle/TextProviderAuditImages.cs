@@ -1,4 +1,3 @@
-using System.Text.Json;
 using KeyLoad.FunctionalTests.Messaging;
 using KeyLoad.FunctionalTests.StorageRecovery.Assertions;
 using KeyLoad.Query.Search;
@@ -74,8 +73,8 @@ internal static class TextProviderAuditImages
         await Assert.That(manifest.Scope).IsEqualTo(scope);
         TextRecord[] records = [new(RuntimeFirstRecordId, owner.Reference(new(owner.Source.Partition, Collection, Control)), InitialRevision),
             new(SecondRecordId, owner.Reference(new(owner.Source.Partition, Collection, Ukrainian)), ChangedRevision)];
-        await Assert.That(JsonSerializer.Serialize(manifest.Records, JsonDefaults.Options))
-            .IsEqualTo(JsonSerializer.Serialize(records, JsonDefaults.Options));
+        await Assert.That(manifest.PostingProof.DocumentCount).IsEqualTo(records.Length);
+        await Assert.That(manifest.RecordDigest).IsEquivalentTo(TextRecordDigest.Calculate(records), CollectionOrdering.Matching);
         await Assert.That(manifest.Files.Length).IsGreaterThan(RuntimeEmptyInventory);
         foreach (var file in manifest.Files)
         {

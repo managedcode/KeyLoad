@@ -7,9 +7,13 @@ namespace KeyLoad.Core.Search;
 internal static class SearchLookupClosure
 {
     internal static void Capture(DatabaseEngine database, IScopedReadCapture source, PrincipalRecord principal,
-        PartitionRef partition, string collection, string? vectorField, string? textField, string tokenizer, ReadExecutionBudget budget)
+        PartitionRef partition, string collection, string? vectorField, string? textField, string tokenizer,
+        ReadExecutionBudget budget, bool allDocuments)
     {
-        source.CapturePrefix(DocumentStorageKeys.Prefix(partition, collection));
+        if (allDocuments || vectorField is not null)
+        {
+            source.CapturePrefix(DocumentStorageKeys.Prefix(partition, collection));
+        }
         source.CaptureExact(KeySpace.Resource(partition.TenantId, partition.DatabaseId, collection));
         source.CaptureExact(ResourceLifetimeCatalog.Key(partition.TenantId, partition.DatabaseId, collection));
         if (textField is not null)

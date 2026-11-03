@@ -7,7 +7,7 @@ namespace KeyLoad.Server.Search;
 internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGeneration generation,
     TextGenerationSlot slot, ReadExecutionBudget budget, Func<string, ulong> tokenHash,
     Action<TextFaultStage>? faultObserver,
-    bool building, IOptions<TextExecutionOptions> executionOptions) : ITextProjectionLease
+    bool building, IOptions<TextExecutionOptions> executionOptions) : ITextProjectionLease, ITextCertifiedProjectionLease
 {
     private const int RecordIndexSingleItemCount = -1;
 
@@ -16,6 +16,7 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
     private int postingsSinceBoundCheck;
     private bool recordOpen;
     private bool completed;
+    private bool certifiedRead;
     private bool invalid;
     private bool disposed;
     private bool postingObserved;
@@ -34,9 +35,9 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
         {
             AddBuildingRecord(reference, revision);
         }
-        else if (recordIndex >= generation.Records.Count
-            || generation.Records[recordIndex].Reference != reference
-            || generation.Records[recordIndex].Revision != revision)
+        else if (recordIndex >= generation.Corpus.Records.Count
+            || generation.Corpus.Records[recordIndex].Reference != reference
+            || generation.Corpus.Records[recordIndex].Revision != revision)
         {
             invalid = true;
             throw TextErrors.Mismatch();
@@ -105,6 +106,39 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
         }
     }
 
+    public TextPostingCandidates? ReadCertifiedCandidates(IReadOnlyList<string> terms, ReadExecutionBudget verificationBudget)
+    {
+        if (disposed || completed || certifiedRead || recordOpen || verificationBudget != budget)
+        {
+            throw TextErrors.Corrupt();
+        }
+        if (building)
+        {
+            return null;
+        }
+        try
+        {
+            certifiedRead = true;
+            return TextCandidateReader.ReadCertified(generation, terms, budget, tokenHash);
+        }
+        catch (Exception error) when (error is not OperationCanceledException
+            && error is not KeyLoadException { Code: KeyLoad.ErrorCode.BudgetExceeded })
+        {
+            invalid = true;
+            throw;
+        }
+    }
+
+    public void SettleCertifiedCandidates(bool valid)
+    {
+        if (disposed || !certifiedRead || completed || invalid)
+        {
+            throw TextErrors.Corrupt();
+        }
+        completed = valid;
+        invalid = !valid;
+    }
+
     public void Dispose()
     {
         if (disposed)
@@ -116,12 +150,17 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
     }
 
     private void AddBuildingRecord(EntityRef reference, long revision)
-        => owner.MutatePhysical(() => generation.AddRecord(reference, revision));
+        => owner.MutatePhysical(() => generation.Corpus.AddRecord(reference, revision));
 
     private void WriteBuildingPosting(ulong hash)
     {
         const int RecordIndexStep = 1;
-        owner.MutatePhysical(() => generation.Index.UpsertRecord(hash, (ulong)recordIndex + RecordIndexStep, previousToken));
+        var ordinal = (ulong)recordIndex + RecordIndexStep;
+        owner.MutatePhysical(() =>
+        {
+            generation.Index.UpsertRecord(hash, ordinal, previousToken);
+            generation.Corpus.ObservePosting(hash, ordinal, previousToken);
+        });
     }
 
     private void VerifyCompleteVisit()
@@ -133,7 +172,7 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
             owner.CheckPhysical(budget);
             return;
         }
-        if (recordIndex + RecordIndexStep != generation.Records.Count)
+        if (recordIndex + RecordIndexStep != generation.Corpus.Records.Count)
         {
             invalid = true;
             throw TextErrors.Mismatch();

@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 
@@ -13,20 +14,17 @@ internal static class TextValidation
     internal static void ValidateManifest(TextManifest manifest, TextProjectionScope scope, IOptions<TextExecutionOptions> executionOptions)
     {
         const int EmptyFilesLength = 0;
-        const int IndexInitialValue = 0;
 
         if (manifest is null || manifest.Scope != scope
             || manifest.TokenizerVersion != TextProjectionProtocol.TokenizerVersion
-            || manifest.HashVersion != TextProjectionProtocol.HashVersion || manifest.Records is null
-            || manifest.Files is null || (manifest.Files.Length == EmptyFilesLength || manifest.Files.Length > executionOptions.Value.MaximumFiles))
+            || manifest.HashVersion != TextProjectionProtocol.HashVersion
+            || manifest.RecordDigest is not { Length: SHA256.HashSizeInBytes }
+            || manifest.PostingProof is null || manifest.Files is null
+            || (manifest.Files.Length == EmptyFilesLength || manifest.Files.Length > executionOptions.Value.MaximumFiles))
         {
             throw TextErrors.Corrupt();
         }
-        var references = new HashSet<EntityRef>();
-        for (var index = IndexInitialValue; index < manifest.Records.Length; index++)
-        {
-            ValidateRecord(manifest.Records[index], scope, index, references);
-        }
+        manifest.PostingProof.Validate(executionOptions.Value.MaximumDiskBytes);
         ValidateFiles(manifest.Files, executionOptions: executionOptions);
     }
 
@@ -90,20 +88,6 @@ internal static class TextValidation
             previous = path.RelativePath;
         }
         if (paths[PathsFirstIndex] != new TextOwnedPath(TextProtocol.RuntimeDirectoryCore, true))
-        {
-            throw TextErrors.Corrupt();
-        }
-    }
-
-    private static void ValidateRecord(TextRecord? record, TextProjectionScope scope, int index,
-        HashSet<EntityRef> references)
-    {
-        const int IndexStep = 1;
-        const int RevisionValidationBoundary = 0;
-
-        if (record is null || record.Id != (ulong)index + IndexStep || record.Revision < RevisionValidationBoundary || record.Reference is null
-            || record.Reference.Partition != scope.Partition || record.Reference.Collection != scope.Collection
-            || string.IsNullOrEmpty(record.Reference.Id) || !references.Add(record.Reference))
         {
             throw TextErrors.Corrupt();
         }

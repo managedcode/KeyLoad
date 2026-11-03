@@ -152,7 +152,7 @@ internal sealed class TextProjectionRestartTests
         await Assert.That(manifest.Scope.Partition).IsEqualTo(database.Partition);
         await Assert.That(manifest.Scope.Collection).IsEqualTo(Collection);
         await Assert.That(manifest.Scope.Field).IsEqualTo(TextPath);
-        await Assert.That(manifest.Records.Length).IsEqualTo(2);
+        await Assert.That(manifest.PostingProof.DocumentCount).IsEqualTo(2);
         var runtimeFiles = Directory.EnumerateFiles(Path.Combine(generation, RuntimeDirectoryCore), "*",
             SearchOption.AllDirectories).ToArray();
         await Assert.That(runtimeFiles.Length).IsGreaterThan(0);

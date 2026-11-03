@@ -10,6 +10,7 @@ internal static class SearchBranchExecution
     private const int FirstElementIndex = 0;
 
     private const string MissingSelectedDocument = "A selected search document is unavailable.";
+    private const string InvalidCertifiedDocument = "A certified text candidate does not match the authorized source cut.";
 
     internal static SearchScore[] RankText(DatabaseEngine database, ITextProjection? textProjection,
         IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource, SearchRequest request,
@@ -32,7 +33,8 @@ internal static class SearchBranchExecution
         Exception? primaryFailure = null;
         try
         {
-            return RankTextCaptured(database, view, principal, request, budget, ranker, lease);
+            var corpus = (lease as ITextCertifiedProjectionLease)?.ReadCertifiedCandidates(ranker.Terms, budget);
+            return RankTextCaptured(database, view, principal, request, budget, ranker, lease, corpus);
         }
         catch (Exception error)
         {
@@ -47,17 +49,26 @@ internal static class SearchBranchExecution
 
     internal static SearchScore[] RankTextCaptured(DatabaseEngine database, IKeyValueView captured,
         PrincipalRecord principal, SearchRequest request, ReadExecutionBudget budget,
-        QueryExecutionOptions execution, ITextProjectionLease? original)
+        TextRanker ranker, ITextProjectionLease? original, TextPostingCandidates? corpus)
     {
-        var ranker = new TextRanker(request.Text!, request.TextField!, budget, execution.TextBudgetCheckInterval,
-            execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode);
-        return RankTextCaptured(database, captured, principal, request, budget, ranker, original);
-    }
+        if (corpus is not null)
+        {
+            var certified = (ITextCertifiedProjectionLease)original!;
+            try
+            {
+                VisitCertifiedCandidates(database, captured, principal, budget, ranker, corpus);
+            }
+            catch (KeyLoadException error) when (error.Code == ErrorCode.Corruption)
+            {
+                certified.SettleCertifiedCandidates(valid: false);
+                throw;
+            }
+            var result = global::KeyLoad.Query.Search.Bm25CorpusReuse.Rank(
+                database, captured, principal, request, budget, ranker);
+            certified.SettleCertifiedCandidates(valid: true);
+            return result;
+        }
 
-    internal static SearchScore[] RankTextCaptured(DatabaseEngine database, IKeyValueView captured,
-        PrincipalRecord principal, SearchRequest request, ReadExecutionBudget budget,
-        TextRanker ranker, ITextProjectionLease? original)
-    {
         if (original is not null)
         {
             ranker.AttachProjection(original);
@@ -67,6 +78,23 @@ internal static class SearchBranchExecution
             database, captured, principal, request, budget, ranker);
         VerifyProjectionCandidates(original, ranker.Terms, scores, budget);
         return scores;
+    }
+
+    private static void VisitCertifiedCandidates(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
+        ReadExecutionBudget budget, TextRanker ranker, TextPostingCandidates corpus)
+    {
+        foreach (var candidate in corpus.Candidates)
+        {
+            budget.Check();
+            var document = budget.ReadRecord<DocumentRecord>(view, DocumentStorageKeys.RecordKey(candidate.Reference));
+            if (document is not { Deleted: false } || document.Reference != candidate.Reference
+                || document.Revision != candidate.Revision || !database.Authorization.CanReadRow(principal, document.Access))
+            {
+                throw Errors.Fail(ErrorCode.Corruption, InvalidCertifiedDocument);
+            }
+            ranker.Visit(document);
+        }
+        ranker.UseCertifiedCorpus(corpus);
     }
 
     internal static RankedDocument[] ProjectSelected(DatabaseEngine database, IKeyValueView view,

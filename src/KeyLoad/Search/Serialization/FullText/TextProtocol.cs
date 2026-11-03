@@ -5,6 +5,7 @@ internal static class TextProtocol
     internal const string OwnerAlias = "keyload.server.execution-text.owner";
     internal const string ManifestAlias = "keyload.server.execution-text.manifest";
     internal const string RecordAlias = "keyload.server.execution-text.record";
+    internal const string PostingProofAlias = "keyload.server.execution-text.posting-proof";
     internal const string EnvelopeAlias = "keyload.server.execution-text.envelope";
     internal const string FileAlias = "keyload.server.execution-text.file";
     internal const string OwnedPathAlias = "keyload.server.execution-text.owned-path";

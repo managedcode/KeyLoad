@@ -54,11 +54,13 @@ internal static class TextFiles
     internal static void RuntimeValidateTrackedLayout(string generationPath, TextOwnerReceipt owner, IOptions<TextExecutionOptions> executionOptions)
         => TextInventory.ValidateTrackedLayout(generationPath, owner.OwnedPaths, executionOptions: executionOptions);
 
-    internal static TextManifest WritePendingManifest(string root, string leaf, TextProjectionScope scope, TextRecord[] records, TextFile[] files, IOptions<TextExecutionOptions> executionOptions, ReadExecutionBudget? budget = null, TextResourceOwnership? resources = null)
+    internal static TextManifest WritePendingManifest(string root, string leaf, TextProjectionScope scope,
+        byte[] recordDigest, TextFile[] files, TextPostingProof proof, IOptions<TextExecutionOptions> executionOptions,
+        ReadExecutionBudget? budget = null, TextResourceOwnership? resources = null)
     {
         budget?.Check();
         var manifest = new TextManifest(scope,
-            TextProjectionProtocol.TokenizerVersion, TextProjectionProtocol.HashVersion, records, files);
+            TextProjectionProtocol.TokenizerVersion, TextProjectionProtocol.HashVersion, recordDigest, files, proof);
         TextValidation.ValidateManifest(manifest, scope, executionOptions: executionOptions);
         var encoded = TextEnvelopeCodec.Encode(manifest);
         var path = Path.Combine(root, leaf);

@@ -62,13 +62,64 @@ internal static class TextPublicationFailureFlow
     private static void Stage(TestDatabase database, TextGeneration generation)
     {
         var ordinal = 0UL;
+        var hash = TextHash.Sha256("needle");
         foreach (var id in new[] { "a", "b" })
         {
             var reference = database.ExpectedReference(new(database.Partition, Collection, id));
             var document = database.Database.GetDocument("root", reference)!;
-            generation.AddRecord(document.Reference, document.Revision);
-            generation.Index.UpsertRecord(TextHash.Sha256("needle"), ++ordinal, 0);
+            generation.Corpus.AddRecord(document.Reference, document.Revision);
+            generation.Index.UpsertRecord(hash, ++ordinal, 0);
+            generation.Corpus.ObservePosting(hash, ordinal, 0);
         }
+    }
+
+    internal static async Task RefuseDamagedPostingsAsync(TestDatabase database, string directory, CancellationToken token)
+    {
+        await RefuseDamagedPostingsAsync(database, directory, substitute: false, token);
+        await RefuseDamagedPostingsAsync(database, directory, substitute: true, token);
+    }
+
+    private static async Task RefuseDamagedPostingsAsync(TestDatabase database, string directory, bool substitute,
+        CancellationToken token)
+    {
+        var options = UnitTextOptions.Execution();
+        var resources = new TextResourceOwnership(options);
+        var scope = Scope(database);
+        var root = TextFiles.InitializeRoot(directory, scope.NodeId, options, resources);
+        var state = new TextProjectionState(options);
+        var lifecycle = new RuntimeTextProjectionLifecycle(root, scope.NodeId, state, new(), null, options, resources);
+        var reservation = state.Reserve(scope);
+        var work = new ReadExecutionBudget(cancellationToken: token);
+        TextGeneration? generation = null;
+        var failures = new List<Exception>();
+        try
+        {
+            await ServerFailureObserver.ObserveAsync(async () =>
+            {
+                generation = lifecycle.CreateGeneration(reservation.Slot, scope, work);
+                Stage(database, generation);
+                var hash = TextHash.Sha256("needle");
+                generation.Index.DeleteRecord(hash, 1, 0);
+                if (substitute)
+                {
+                    generation.Index.UpsertRecord(hash, 1, hash);
+                }
+                var failure = Assert.ThrowsExactly<KeyLoadException>(() => lifecycle.Publish(generation, work));
+                await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
+                await Assert.That(generation.CurrentIndex).IsNull();
+                await Assert.That(generation.Published).IsFalse();
+                await Assert.That(File.Exists(Path.Combine(generation.Path, TextProtocol.ManifestFile))).IsFalse();
+            }, failures);
+        }
+        finally
+        {
+            ServerFailureObserver.Observe(() => generation?.DisposeIndex(), failures);
+            ServerFailureObserver.Observe(() => state.FailAcquire(reservation, preserveOwner: true), failures);
+            ServerFailureObserver.Observe(state.BeginShutdown, failures);
+            ServerFailureObserver.Observe(() => lifecycle.Shutdown(state.SnapshotSlots()), failures);
+        }
+        ServerFailureObserver.ThrowIfAny(failures);
+        await Assert.That(Directory.EnumerateDirectories(root)).IsEmpty();
     }
 
     private static NativeFailure ArmFailure(string root, TextGeneration generation,

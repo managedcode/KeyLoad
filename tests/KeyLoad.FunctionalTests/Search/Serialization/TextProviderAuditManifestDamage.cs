@@ -32,55 +32,45 @@ internal static class TextProviderAuditManifestDamage
                     Position = checked(manifest.Scope.Position + ScopePositionStep)
                 }
             },
-            _ => ChangeRows(manifest, damage)
+            TextProviderAuditDamage.RecordDigest => manifest with
+            {
+                RecordDigest = []
+            },
+            TextProviderAuditDamage.DocumentCount => manifest with
+            {
+                PostingProof = manifest.PostingProof with
+                {
+                    DocumentCount = InvalidDocumentCount
+                }
+            },
+            TextProviderAuditDamage.ForeignPartition => ChangePartition(manifest),
+            _ => ChangeFiles(manifest)
         };
         return TextEnvelopeCodec.Encode(changed);
     }
 
-    private static TextManifest ChangeRows(TextManifest manifest, TextProviderAuditDamage damage)
+    private static TextManifest ChangePartition(TextManifest manifest)
     {
-        var records = manifest.Records.ToArray();
-        if (damage == TextProviderAuditDamage.RecordId)
-        {
-            records[FirstRecord] = records[FirstRecord] with
-            {
-                Id = NoncontiguousId
-            };
-        }
-        else if (damage == TextProviderAuditDamage.DuplicateReference)
-        {
-            records[SecondRecord] = records[SecondRecord] with
-            {
-                Reference = records[FirstRecord].Reference
-            };
-        }
-        else if (damage == TextProviderAuditDamage.ForeignPartition)
-        {
-            var reference = records[FirstRecord].Reference;
-            records[FirstRecord] = records[FirstRecord] with
-            {
-                Reference = reference with
-                {
-                    Partition = new(reference.Partition.TenantId, reference.Partition.DatabaseId,
-                        ForeignDomain, reference.Partition.PartitionKey)
-                }
-            };
-        }
-        else
-        {
-            var files = manifest.Files.ToArray();
-            files[FirstFile] = files[FirstFile] with
-            {
-                RelativePath = files[FirstFile].RelativePath + UnownedSuffix
-            };
-            return manifest with
-            {
-                Files = files
-            };
-        }
+        var partition = manifest.Scope.Partition;
         return manifest with
         {
-            Records = records
+            Scope = manifest.Scope with
+            {
+                Partition = new(partition.TenantId, partition.DatabaseId, ForeignDomain, partition.PartitionKey)
+            }
+        };
+    }
+
+    private static TextManifest ChangeFiles(TextManifest manifest)
+    {
+        var files = manifest.Files.ToArray();
+        files[FirstFile] = files[FirstFile] with
+        {
+            RelativePath = files[FirstFile].RelativePath + UnownedSuffix
+        };
+        return manifest with
+        {
+            Files = files
         };
     }
 }

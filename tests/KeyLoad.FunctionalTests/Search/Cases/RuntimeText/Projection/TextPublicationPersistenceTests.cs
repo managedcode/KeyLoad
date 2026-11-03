@@ -18,6 +18,7 @@ internal sealed class TextPublicationPersistenceTests
         var root = Path.Combine(database.Directory, "publication-close");
         var token = TestContext.Current!.Execution.CancellationToken;
         await TextPublicationFailureFlow.RefuseAsync(database, root, token);
+        await TextPublicationFailureFlow.RefuseDamagedPostingsAsync(database, root, token);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await HealthyAsync(database.Database, database.Partition, root, identity.NodeId, token);
         database.JoinOwnedResources();

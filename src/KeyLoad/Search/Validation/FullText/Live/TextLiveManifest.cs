@@ -8,20 +8,12 @@ internal static class TextLiveManifest
     {
         const int IndexInitialValue = 0;
 
-        var records = generation.Records;
         var files = generation.Files;
-        if (manifest.Scope != generation.Scope || records.Count != manifest.Records.Length
-            || files.Length != manifest.Files.Length)
+        if (manifest.Scope != generation.Scope || generation.Corpus.Records.Count != manifest.PostingProof.DocumentCount
+            || !generation.Corpus.RecordDigest.AsSpan().SequenceEqual(manifest.RecordDigest)
+            || files.Length != manifest.Files.Length || !generation.Corpus.PostingProof.Matches(manifest.PostingProof))
         {
             return false;
-        }
-        for (var index = IndexInitialValue; index < records.Count; index++)
-        {
-            budget?.Check();
-            if (records[index] != manifest.Records[index])
-            {
-                return false;
-            }
         }
         for (var index = IndexInitialValue; index < files.Length; index++)
         {

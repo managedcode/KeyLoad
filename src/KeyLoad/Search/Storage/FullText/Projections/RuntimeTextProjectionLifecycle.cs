@@ -79,12 +79,12 @@ internal sealed class RuntimeTextProjectionLifecycle
 
     internal void Publish(TextGeneration generation, ReadExecutionBudget budget)
     {
-        var files = physicalGate.Run(() => generation.CloseAndCapture(budget));
+        var files = physicalGate.Run(() => generation.SealAndCapture(budget));
         TextSettlement.ThrowDeferredBudgetFailure(generation);
         physicalGate.Run(() => TextFiles.CheckGenerationBound(generation.Path, budget: budget, executionOptions: executionOptions));
         budget.Check();
         physicalGate.Run(() => TextFiles.WritePendingManifest(Root, generation.Leaf, generation.Scope,
-            generation.SealRecords(), files, budget: budget, executionOptions: executionOptions, resources: resources));
+            generation.Corpus.RecordDigest, files, generation.Corpus.PostingProof, budget: budget, executionOptions: executionOptions, resources: resources));
         budget.Check();
         faultObserver?.Invoke(TextFaultStage.InventoryFlushed);
         budget.Check();

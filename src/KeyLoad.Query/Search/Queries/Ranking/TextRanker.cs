@@ -11,6 +11,7 @@ internal sealed class TextRanker
     private const int AdjacentElementOffset = 1;
     private const int MinimumAverageDocumentLength = 1;
     private const int ZeroScore = 0;
+    private const string IncompleteCertifiedCorpus = "The certified text corpus is incomplete.";
 
     private const double Bm25FrequencyScale = 2.2;
     private const double Bm25LengthScale = 1.2;
@@ -113,6 +114,16 @@ internal sealed class TextRanker
     }
 
     public SearchScore[] Rank() => Rank(corpusCount, totalLength, frequency);
+
+    internal void UseCertifiedCorpus(TextPostingCandidates corpus)
+    {
+        if (corpus.DocumentCount < corpusCount || corpus.TotalLength < totalLength)
+        {
+            throw Errors.Fail(ErrorCode.Corruption, IncompleteCertifiedCorpus);
+        }
+        corpusCount = corpus.DocumentCount;
+        totalLength = corpus.TotalLength;
+    }
 
     internal KeyLoad.Query.QueryExecution.DistributedTextStatistics CaptureStatistics()
     {

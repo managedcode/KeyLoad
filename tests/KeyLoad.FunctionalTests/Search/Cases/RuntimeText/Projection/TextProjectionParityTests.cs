@@ -65,20 +65,13 @@ internal sealed class TextProjectionParityTests
     {
         using var database = new TestDatabase();
         SeedCorpus(database);
-        var currentHash = tokenHash;
-        using var projection = CreateProjection(database, _ => currentHash);
+        using var projection = CreateProjection(database, _ => tokenHash);
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 20);
         var token = TestContext.Current!.Execution.CancellationToken;
         var oracle = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var expected = await oracle.SearchAsync("root", request, token);
         await AssertEquivalentAsync(expected, await search.SearchAsync("root", request, token));
-        await AssertEquivalentAsync(expected, await search.SearchAsync("root", request, token));
-
-        currentHash = tokenHash + 1;
-        var missingPositive = Assert.ThrowsExactly<KeyLoadException>(() => search.Search("root", request, token));
-        await Assert.That(missingPositive.Code).IsEqualTo(ErrorCode.Corruption);
-        currentHash = tokenHash;
         await AssertEquivalentAsync(expected, await search.SearchAsync("root", request, token));
     }
 

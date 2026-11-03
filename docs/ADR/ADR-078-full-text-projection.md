@@ -17,12 +17,11 @@ do not copy its implementation or use its unbounded/partial-cancellation search.
 Canonical records, policy, exact BM25 statistics/ranks, vector/RRF accumulation,
 selected payload projection, synchronous WAL and acknowledgement from every configured copy remain unchanged.
 
-This first provider generation is a correctness integration: canonical authorized
-corpus visitation remains the exact scoring and completeness oracle. Execution
-postings contribute bounded candidate verification. No acceleration follows from
-this wiring. Removing the canonical pass, global ranking, CDC incremental replay,
-managed ANN, async rebuild barriers and performance claims need their own accepted
-contracts and evidence; this stage does not close those distinct acceptance gates.
+Bootstrap publication visits the complete authorized corpus and verifies the
+persisted native postings against the tuples observed during tokenization.
+Searches on that sealed cut use verified postings to select canonical documents
+for exact scoring. Global ranking, CDC incremental replay, managed ANN and async
+rebuild barriers have separate contracts and qualification gates.
 
 ## Closed generation contract
 
@@ -37,11 +36,11 @@ verified generation becomes current. Never move storage into an Orleans grain.
 ```mermaid
 flowchart LR
     Request[Authorized request grain] --> Cut[Node-local committed read cut]
-    Cut --> Canonical[Exact authorized corpus and ranks]
+    Cut --> Canonical[Canonical authorized records]
     Cut --> Lease[Bounded generation lease]
-    Canonical --> Verify[Complete candidate verification]
-    Lease --> Verify
-    Verify --> Result[Projected exact result]
+    Lease --> Verify[Verify complete requested postings]
+    Verify --> Canonical
+    Canonical --> Result[Exact rank and projection]
 ```
 
 The generation scope binds source physical NodeId, Incarnation, current storage identity,
@@ -66,11 +65,17 @@ The Query-owned internal cross-assembly contract is `ITextProjection.Acquire(sco
 budget)` -> IDisposable `ITextProjectionLease`. It observes each canonical record
 with `BeginRecord(reference,revision)`, each enumerated token with `ObserveToken`,
 and validates the completed exact positive set with `VerifyCandidates(terms,
-references,budget)`. Cached generations verify the complete canonical identity /
-revision visitation and full token union; any unmapped record, missing
-canonical positive, source-scope mismatch or malformed generation fails closed.
-Known hash-collision false positives remain internal and never alter rank/output.
-Neither Limit nor provider paging can truncate branch ranks before RRF.
+references,budget)`. At seal, a single ordered native pass checks completeness
+and records each token's posting count and ordered digest with exact corpus
+totals. Sealed bootstrap reads verify every requested token, including absence,
+and point-read the union at the original authorized cut. The ranker derives
+exact term frequencies and document frequencies from that union before applying
+the match mode. The captured source of a text-only read retains those point
+records and the ranking metadata. Hybrid reads retain the vector branch's
+dependencies as well. Source-scope mismatches, malformed postings and
+inconsistent candidate revisions fail closed. Hash collisions can add candidates
+and exact token comparisons remove false matches. Neither Limit nor provider
+paging can truncate branch ranks before RRF.
 
 Use the actual primary iterator with `NoRefresh`, no block-cache
 contribution, per-token lower-bound seeks, and a checked unique record-ID union.
@@ -113,19 +118,19 @@ even plausible filenames, never become owned through directory scanning.
 Complete current files remain
 recognized after disposal so restart can validate owners and manifests before
 discard/rebuild; malformed manifests fail closed and stay preserved.
-The completed
-manifest binds the exact scope and ordered identity/revision metadata, format1,
-tokenizer/hash versions and completed source cut. Its generated contracts
-use stable aliases/IDs and an SHA256 payload checksum; no internal JSON fallback.
-Manifest Id5 adds a bounded ordered file inventory. Each generated
+The completed manifest binds the exact scope, digest of the ordered canonical
+identity and revision map, corpus and posting proof, tokenizer and hash
+versions, and completed source cut. The owner retains the ordinal map in RAM
+while the generation is live. The generated contracts use stable aliases and
+IDs and a SHA256 payload checksum. The manifest contains a bounded ordered
+file inventory. Each generated
 `keyload.server.text.file` record fixes Id0 normalized relative path and
 Id1 byte length at publication. ZoneTree owns the content of these files and
 rewrites its own metadata, so KeyLoad records and checks the owned file set,
 never file content. Capture actual files after synchronous flush and handle
 settlement before complete publication; no static guessed filename allowlist
 is used. Restart validates the exact owned path inventory before cleanup.
-Searches do not re-enumerate or re-read generation files. Reopening a completed generation
-must preserve or atomically refresh its recognized inventory at settlement.
+Reader admission and settlement verify the compact manifest and owned file set.
 An owner receipt alone cannot authorize arbitrary recursive deletion. A completed
 generation requires both an exact tracked layout and a verified closed inventory.
 An unpublished generation without a complete manifest may be discarded only

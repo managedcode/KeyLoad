@@ -7,8 +7,8 @@ internal sealed class TextProviderAuditTests
     [Arguments(TextProviderAuditDamage.Hash)]
     [Arguments(TextProviderAuditDamage.SourceIncarnation)]
     [Arguments(TextProviderAuditDamage.ScopePosition)]
-    [Arguments(TextProviderAuditDamage.RecordId)]
-    [Arguments(TextProviderAuditDamage.DuplicateReference)]
+    [Arguments(TextProviderAuditDamage.RecordDigest)]
+    [Arguments(TextProviderAuditDamage.DocumentCount)]
     [Arguments(TextProviderAuditDamage.ForeignPartition)]
     [Arguments(TextProviderAuditDamage.FileDigest)]
     public async Task ChecksumValidSemanticDamageRefusesWithoutEffectsAndExactRepairRetainsBilingualHistoryThroughCold(

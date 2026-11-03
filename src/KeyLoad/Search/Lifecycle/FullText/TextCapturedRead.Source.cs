@@ -1,3 +1,4 @@
+using KeyLoad.Core.DocumentStorage;
 using KeyLoad.Core.Search;
 using KeyLoad.Query.Search;
 using KeyLoad.Storage;
@@ -6,7 +7,7 @@ namespace KeyLoad.Server.Search;
 
 internal sealed partial class TextCapturedRead
 {
-    public IKeyValueView CompleteSource()
+    public IKeyValueView CompleteSource(TextPostingCandidates? certified = null)
     {
         ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: BCL disposal diagnostics accept the this TextCapturedRead instance through object to preserve its runtime owner type. */;
         if (captured is not null)
@@ -14,8 +15,7 @@ internal sealed partial class TextCapturedRead
             throw new InvalidOperationException(AlreadySettled);
         }
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => SearchLookupClosure.Capture(database, builder, Principal,
-            request.Partition, request.Collection, request.VectorField, request.TextField, TextProjectionProtocol.TokenizerVersion, budget), failures);
+        ServerFailureObserver.Observe(() => CaptureLookups(certified), failures);
         if (failures.Count == NoFailures)
         {
             ServerFailureObserver.Observe(RuntimeJoin, failures);
@@ -36,6 +36,22 @@ internal sealed partial class TextCapturedRead
             observed.ObserveOriginalPosting(callback);
         }
         return new SearchCapturedReadScope(captured!, budget);
+    }
+
+    private void CaptureLookups(TextPostingCandidates? certified)
+    {
+        if (certified is not null && request.VectorField is null)
+        {
+            var prefix = DocumentStorageKeys.Prefix(request.Partition, request.Collection);
+            foreach (var candidate in certified.Candidates)
+            {
+                budget.Check();
+                builder.CaptureExact(DocumentStorageKeys.RecordKey(prefix, candidate.Reference.Id));
+            }
+        }
+        SearchLookupClosure.Capture(database, builder, Principal, request.Partition, request.Collection,
+            request.VectorField, request.TextField, TextProjectionProtocol.TokenizerVersion, budget,
+            allDocuments: certified is null);
     }
 
     public void VerifyTerminal(IReadOnlyList<EntityRef> selected)
