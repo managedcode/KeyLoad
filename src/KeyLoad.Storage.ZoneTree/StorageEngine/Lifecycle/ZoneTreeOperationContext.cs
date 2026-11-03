@@ -2,15 +2,15 @@ using ZoneTree.Transactional;
 
 namespace KeyLoad.Storage.ZoneTree;
 
-/// <summary>Binds the synchronous storage callback and its position to the native transaction's snapshot.</summary>
+/// <summary>Binds storage work and its position to the native transaction's snapshot.</summary>
 internal sealed class ZoneTreeOperationContext : IDisposable
 {
     private const string NestedOperation = "A storage operation cannot enter another operation on the same owner.";
     private const string ExpiredOperation = "The native storage operation is outside its owning callback.";
     private readonly ZoneTreeStoreRuntime runtime;
     private bool active = true;
-    private byte[]? readRoutingScope;
-    private bool readRoutingPlain;
+    private byte[]? routingScope;
+    private bool routesToPlain;
 
     internal ZoneTreeOperationContext(ZoneTreeStoreRuntime runtime, IReadTransaction<Memory<byte>, Memory<byte>> transaction,
         bool ownsTransaction)
@@ -46,11 +46,10 @@ internal sealed class ZoneTreeOperationContext : IDisposable
     internal long Position { get; private set; }
     internal void Published(long position) => Position = position;
 
-    internal bool TryReadRouting(ReadOnlySpan<byte> key, int familyLength, out bool plain)
+    internal bool TryGetResourceRoute(ReadOnlySpan<byte> key, int familyLength, out bool plain)
     {
-        plain = readRoutingPlain;
-        if (Writable || readRoutingScope is null || familyLength == 0
-            || !key[familyLength..].StartsWith(readRoutingScope))
+        plain = routesToPlain;
+        if (routingScope is null || familyLength == 0 || !key[familyLength..].StartsWith(routingScope))
         {
             return false;
         }
@@ -58,13 +57,11 @@ internal sealed class ZoneTreeOperationContext : IDisposable
         return true;
     }
 
-    internal void BindReadRouting(byte[] scope, bool plain)
+    internal void BindResourceRoute(byte[] scope, bool plain)
     {
-        if (!Writable)
-        {
-            readRoutingScope = scope;
-            readRoutingPlain = plain;
-        }
+        // Publication classifies the staged keys before writing anything to the native transaction.
+        routingScope = scope;
+        routesToPlain = plain;
     }
 
     internal void Check()

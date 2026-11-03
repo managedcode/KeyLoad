@@ -18,17 +18,13 @@ internal sealed class NonTransactionalReadRoutingTests
             RelationalTestData.Second, second))).Get<CommitReceipt>();
         var atomic = DocumentStorageKeys.RecordKey(owner.Partition, NonTransactionalTableFixture.AtomicTable, RelationalTestData.Second);
         var original = owner.Store.Position;
-        var result = owner.Store.Read(view => new[]
-        {
-            view.GetRecord<DocumentRecord>(owner.RowKey())!.Json,
-            view.GetRecord<DocumentRecord>(owner.RowKey())!.Json,
-            view.GetRecord<DocumentRecord>(atomic)!.Json,
-            view.GetRecord<DocumentRecord>(atomic)!.Json,
-            view.GetRecord<DocumentRecord>(owner.RowKey())!.Json
-        });
+        var plain = owner.RowKey();
+        var expected = string.Join('|', RelationalTestData.Row(), RelationalTestData.Row(), second, second, RelationalTestData.Row());
+        var result = owner.Store.Read(view => ReadAlternatingRows(view, plain, atomic));
+        var inCommit = await owner.Store.CommitAsync((view, _) => ReadAlternatingRows(view, plain, atomic));
 
-        await Assert.That(string.Join('|', result)).IsEqualTo(string.Join('|', RelationalTestData.Row(),
-            RelationalTestData.Row(), second, second, RelationalTestData.Row()));
+        await Assert.That(result).IsEqualTo(expected);
+        await Assert.That(inCommit).IsEqualTo(expected);
         await Assert.That(owner.Store.Position).IsEqualTo(original);
         await Assert.That(owner.Database.GetDocument(RelationalTestData.Root,
             new(owner.Partition, RelationalTestData.Table, RelationalTestData.First))!.Json).IsEqualTo(RelationalTestData.Row());
@@ -47,15 +43,26 @@ internal sealed class NonTransactionalReadRoutingTests
             RelationalTestData.Row()))).Get<CommitReceipt>();
         var key = owner.RowKey();
         var malformed = key.Concat(Convert.FromHexString(tail)).ToArray();
-        var code = owner.Store.Read(view =>
-        {
-            _ = view.ReadValue(key, static _ => { });
-            var failure = Assert.ThrowsExactly<KeyLoadException>(() => view.ReadValue(malformed, static _ => { }));
-            _ = view.ReadValue(key, static _ => { });
-            return failure.Code;
-        });
+        var original = owner.Store.Position;
+        var code = owner.Store.Read(view => ReadMalformedAfterValid(view, key, malformed));
+        var inCommit = await owner.Store.CommitAsync((view, _) => ReadMalformedAfterValid(view, key, malformed));
         await Assert.That(code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(inCommit).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(owner.Store.Position).IsEqualTo(original);
         await Assert.That(owner.Database.GetDocument(RelationalTestData.Root,
             new(owner.Partition, RelationalTestData.Table, RelationalTestData.First))!.Json).IsEqualTo(RelationalTestData.Row());
+    }
+
+    private static string ReadAlternatingRows(IKeyValueView view, byte[] plain, byte[] atomic)
+        => string.Join('|', view.GetRecord<DocumentRecord>(plain)!.Json, view.GetRecord<DocumentRecord>(plain)!.Json,
+            view.GetRecord<DocumentRecord>(atomic)!.Json, view.GetRecord<DocumentRecord>(atomic)!.Json,
+            view.GetRecord<DocumentRecord>(plain)!.Json);
+
+    private static ErrorCode ReadMalformedAfterValid(IKeyValueView view, byte[] valid, byte[] malformed)
+    {
+        _ = view.ReadValue(valid, static _ => { });
+        var failure = Assert.ThrowsExactly<KeyLoadException>(() => view.ReadValue(malformed, static _ => { }));
+        _ = view.ReadValue(valid, static _ => { });
+        return failure.Code;
     }
 }

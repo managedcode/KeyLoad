@@ -17,8 +17,7 @@ internal static class CanonicalCredentialDispatch
     {
         var grains = node.DatabaseReady ? node.Grains!
             : throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
-        var user = grains.GetGrain<IUserGrain>(UserGrainIdentity.For(
-            AuthorizationIdentity.IssueCredentialWitness(credential).CredentialId));
+        var user = grains.GetGrain<IUserGrain>(UserGrainIdentity.For(AuthorizationIdentity.ReadCredentialId(credential)));
         PrincipalRecord? result = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>

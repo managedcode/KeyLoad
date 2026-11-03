@@ -11,7 +11,11 @@ public static class AuthorizationIdentity
     internal const int CredentialFirstIdentityCharacter = 0;
     internal const char CredentialIdentitySeparator = '.';
     internal const string CredentialRequired = "An API key is required.";
+
     internal static DatabaseCredentialWitness IssueCredentialWitness(string secret)
+        => new(ReadCredentialId(secret), SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
+
+    internal static string ReadCredentialId(string secret)
     {
         ArgumentNullException.ThrowIfNull(secret) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         var separator = secret.IndexOf(CredentialIdentitySeparator, StringComparison.Ordinal);
@@ -20,7 +24,7 @@ public static class AuthorizationIdentity
             throw Errors.Fail(ErrorCode.Unauthenticated, CredentialRequired);
         }
 
-        return new(secret[..separator], SHA256.HashData(Encoding.UTF8.GetBytes(secret)));
+        return secret[..separator];
     }
 
     internal static PrincipalRecord RevalidateCredential(IKeyValueView view, DatabaseCredentialWitness witness, string? expectedPrincipal, DateTimeOffset now) => DatabaseCredentialValidation.Require(view, witness, expectedPrincipal, now);

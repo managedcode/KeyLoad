@@ -35,7 +35,7 @@ internal static class ResourceStorageKeys
     internal static byte[] Catalog(string tenant, string database, string resource)
         => KeyCodec.Encode(CatalogFamily, tenant, database, resource);
 
-    internal static bool TryCatalog(ReadOnlySpan<byte> key, bool retainScope, out byte[] catalog, out byte[] scope)
+    internal static bool TryCatalog(ReadOnlySpan<byte> key, out byte[] catalog, out byte[] scope)
     {
         catalog = [];
         scope = [];
@@ -45,11 +45,8 @@ internal static class ResourceStorageKeys
         }
         catalog = Catalog(components[FirstAddressComponent].Text, components[DatabaseComponent].Text,
             components[ResourceComponent].Text);
-        if (retainScope)
-        {
-            scope = KeyCodec.Encode(components[FirstAddressComponent], components[DatabaseComponent],
-                components[DomainComponent], components[PartitionComponent], components[ResourceComponent])[KeyCodecTokens.PrefixBytes..];
-        }
+        scope = KeyCodec.Encode(components[FirstAddressComponent], components[DatabaseComponent],
+            components[DomainComponent], components[PartitionComponent], components[ResourceComponent])[KeyCodecTokens.PrefixBytes..];
         return true;
     }
 
