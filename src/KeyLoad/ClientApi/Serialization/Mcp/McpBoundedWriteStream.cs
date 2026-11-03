@@ -12,13 +12,13 @@ internal sealed class McpBoundedWriteStream : Stream
     private readonly int maximumBytes;
     private bool disposed;
 
-    /// <summary>Starts with bounded small capacity and preserves the inclusive write ceiling during growth.</summary>
+    /// <summary>Allocates capacity on the first write or borrow, subject to the inclusive byte ceiling.</summary>
     /// <param name="maximumBytes">The positive inclusive byte ceiling.</param>
     internal McpBoundedWriteStream(int maximumBytes)
     {
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(maximumBytes);
         this.maximumBytes = maximumBytes;
-        buffer = new MemoryStream(Math.Min(maximumBytes, InitialCapacity));
+        buffer = new MemoryStream();
     }
 
     /// <inheritdoc />
@@ -124,6 +124,10 @@ internal sealed class McpBoundedWriteStream : Stream
         const int StartEmptyCount = 0;
 
         ThrowIfDisposed();
+        if (buffer.Capacity == 0)
+        {
+            EnsureCapacity(Math.Min(maximumBytes, InitialCapacity));
+        }
         return buffer.GetBuffer().AsMemory(StartEmptyCount, buffer.Capacity);
     }
 
@@ -171,6 +175,11 @@ internal sealed class McpBoundedWriteStream : Stream
     {
         if (required <= buffer.Capacity)
         {
+            return;
+        }
+        if (buffer.Capacity == 0)
+        {
+            buffer.Capacity = required;
             return;
         }
         var capacity = checked((int)Math.Min(maximumBytes, Math.Max(required, (long)buffer.Capacity * GrowthFactor)));

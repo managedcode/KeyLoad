@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
@@ -6,6 +7,42 @@ namespace KeyLoad.Clustering;
 /// <summary>Retains the original verified producer and borrows its exact operation result ledger.</summary>
 internal static class BoundCqrsStreamLifetime
 {
+    internal static async Task<GrainOperationReply> RunUnaryAsync(RequestWorkOwner owner, CqrsStreamPurpose purpose,
+        Guid requestId, Func<CancellationToken, ValueTask<Result<GrainOperationReply>>> execute,
+        Func<ValueTask> settled, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var work = new BoundCqrsStreamWork();
+        GrainOperationReply reply;
+        Exception? primary = null;
+        try
+        {
+            work.Start(owner, purpose, () => owner.Acquire(requestId, RequestWorkKind.RequestProducer),
+                cancellationToken, CancellationToken.None);
+            var result = await execute(work.Token).ConfigureAwait(true);
+            work.Token.ThrowIfCancellationRequested();
+            work.AdmitPublication(result.IsSuccess ? CqrsStreamChunkKind.Completed : CqrsStreamChunkKind.Failed);
+            reply = GrainRequestStreamConsumer.ReadResult(result);
+        }
+        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            primary = error;
+            throw;
+        }
+        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error))
+        {
+            primary = error;
+            throw;
+        }
+        finally
+        {
+            work.PrepareSettlement(null, settled, primary);
+            await work.DisposeAsync().ConfigureAwait(true);
+        }
+        cancellationToken.ThrowIfCancellationRequested();
+        return reply;
+    }
+
     internal static async IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> Run(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Guid requestId, Func<ValueTask> settled, RequestWorkOwner owner, CqrsStreamPurpose purpose,

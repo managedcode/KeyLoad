@@ -1,3 +1,4 @@
+using ManagedCode.Communication;
 using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.Clustering;
@@ -20,12 +21,6 @@ internal static class GrainRequestStreamConsumer
         CancellationToken cancellationToken)
         => DrainCoreAsync(createStream, requestId, purpose, progress, cancellationToken);
 
-    /// <summary>Drains a local sequence whose bound lifetime already validates chunks and joins producer settlement.</summary>
-    internal static Task<GrainOperationReply> DrainBoundAsync(
-        IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> bound,
-        CancellationToken cancellationToken)
-        => DrainTerminalAsync(bound, null, cancellationToken, unwrapBoundFailure: true);
-
     private static Task<GrainOperationReply> DrainCoreAsync(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Guid requestId, CqrsStreamPurpose? purpose, Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
@@ -40,8 +35,7 @@ internal static class GrainRequestStreamConsumer
 
     private static async Task<GrainOperationReply> DrainTerminalAsync(
         IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> bounded,
-        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken,
-        bool unwrapBoundFailure = false)
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken)
     {
         GrainOperationReply? terminal;
         try
@@ -52,11 +46,6 @@ internal static class GrainRequestStreamConsumer
             && error.CancellationToken != cancellationToken && CqrsBoundaryErrors.IsNonFatal(error))
         {
             throw new OperationCanceledException(error.Message, error, cancellationToken);
-        }
-        catch (AggregateException error) when (unwrapBoundFailure && CqrsRuntimeFailures.FindFatal(error) is { } fatal)
-        {
-            RequestWorkSettlement.Rethrow(fatal);
-            throw;
         }
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -75,20 +64,18 @@ internal static class GrainRequestStreamConsumer
             {
                 await progress(chunk.ProgressResult!.Value.Value!, cancellationToken);
             }
-            if (chunk.Kind == CqrsStreamChunkKind.Completed)
+            if (chunk.IsTerminal)
             {
-                terminal = chunk.Final!.Value.Value!;
-            }
-            else if (chunk.Kind == CqrsStreamChunkKind.Failed)
-            {
-                var problem = chunk.Final!.Value.Problem!;
-                terminal = new GrainOperationReply
-                {
-                    Error = GrainRequestStreamProblem.ReadCode(problem),
-                    SafeDetail = problem.Detail
-                };
+                terminal = ReadResult(chunk.Final!.Value);
             }
         }
         return terminal;
     }
+
+    internal static GrainOperationReply ReadResult(Result<GrainOperationReply> result)
+        => result.IsSuccess ? result.Value : new GrainOperationReply
+        {
+            Error = GrainRequestStreamProblem.ReadCode(result.Problem),
+            SafeDetail = result.Problem.Detail
+        };
 }
