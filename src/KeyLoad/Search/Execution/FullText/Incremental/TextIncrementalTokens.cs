@@ -29,10 +29,12 @@ internal static class TextIncrementalTokens
         }
         var postings = new List<TextIncrementalPosting>();
         var previous = EmptyToken;
-        foreach (var term in CanonicalTextTerms.Enumerate(content, budget, execution.TextBudgetCheckInterval,
-                     execution.MaximumDocumentWords, execution.MaximumWordCharacters))
+        Span<char> word = stackalloc char[CanonicalTextTerms.InlineWordCapacity];
+        using var tokens = new CanonicalTextTerms(content, word, budget, execution.TextBudgetCheckInterval,
+            execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+        while (tokens.MoveNext())
         {
-            var token = TextHash.Sha256(term);
+            var token = TextHash.Sha256(tokens.Current.ToString());
             postings.Add(new(token, record, previous));
             previous = token;
         }

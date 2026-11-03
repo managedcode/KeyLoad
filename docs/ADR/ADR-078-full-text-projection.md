@@ -55,7 +55,7 @@ visible corpus statistics; hidden/deleted rows never enter the generation.
 
 Tokenization remains one canonical NFKC, Rune letter/digit, invariant-lowercase,
 short-token/repeated-token and bounded algorithm. Query enumerates each token once
-through SearchTerms and supplies that very token to the lease. Hash bytes
+through CanonicalTextTerms and supplies that very token to the lease. Hash bytes
 are SHA256 of UTF8 normalized token, first8 bytes interpreted little-endian,
 `sha256-le64`. Collisions may add candidates; exact canonical counts remove
 false positives. A collision must never remove a canonical positive. Execution

@@ -10,8 +10,8 @@ public interface ITextProjectionLease : IDisposable
     /// <param name="revision">Canonical current revision.</param>
     void BeginRecord(EntityRef reference, long revision);
     /// <summary>Observes one already charged and normalized canonical token.</summary>
-    /// <param name="token">The very token supplied to exact ranking.</param>
-    void ObserveToken(string token);
+    /// <param name="token">The borrowed token supplied to exact ranking, valid during this call.</param>
+    void ObserveToken(ReadOnlySpan<char> token);
     /// <summary>Checks the complete bounded execution token union before accepting exact ranks.</summary>
     /// <param name="terms">All distinct exact query terms.</param>
     /// <param name="references">All exact positive identities before Limit or fusion.</param>

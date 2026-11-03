@@ -83,10 +83,10 @@ internal sealed class TextSelectedProjectionLease : ITextProjectionLease, IOrigi
         }
     }
 
-    public void ObserveToken(string token)
+    public void ObserveToken(ReadOnlySpan<char> token)
     {
         budget.Check();
-        if (disposed || completed || string.IsNullOrEmpty(token))
+        if (disposed || completed || token.IsEmpty)
         {
             throw TextErrors.Corrupt();
         }

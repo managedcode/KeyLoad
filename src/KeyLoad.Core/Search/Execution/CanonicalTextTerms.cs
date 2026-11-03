@@ -1,61 +1,102 @@
+using System.Buffers;
 using System.Text;
 
 namespace KeyLoad.Core.Search;
 
-internal static class CanonicalTextTerms
+internal ref struct CanonicalTextTerms
 {
+    internal const int InlineWordCapacity = 64;
+    private const int BufferGrowthFactor = 2;
     private const string DocumentTokenExceeded = "The document text token budget is exceeded.";
     private const string WordExceeded = "The text token budget is exceeded.";
+    private readonly ReadExecutionBudget budget;
+    private readonly int checkInterval;
+    private readonly int maximumWords;
+    private readonly int maximumWordLength;
+    private StringRuneEnumerator source;
+    private Span<char> word;
+    private char[]? rented;
+    private int length;
+    private int words;
+    private int runes;
 
-    public static IEnumerable<string> Enumerate(string text, ReadExecutionBudget budget, int checkInterval,
-        int maximumWords, int maximumWordLength)
+    internal CanonicalTextTerms(string text, Span<char> word, ReadExecutionBudget budget,
+        int checkInterval, int maximumWords, int maximumWordLength)
     {
         budget.Check();
-        var word = new StringBuilder();
-        var words = 0;
-        var runes = 0;
-        foreach (var rune in text.Normalize(NormalizationForm.FormKC).EnumerateRunes())
+        source = text.Normalize(NormalizationForm.FormKC).EnumerateRunes();
+        this.word = word;
+        this.budget = budget;
+        this.checkInterval = checkInterval;
+        this.maximumWords = maximumWords;
+        this.maximumWordLength = maximumWordLength;
+    }
+
+    public readonly ReadOnlySpan<char> Current => word[..length];
+
+    public bool MoveNext()
+    {
+        length = 0;
+        while (source.MoveNext())
         {
             if (++runes % checkInterval == 0)
             {
                 budget.Check();
             }
+            var rune = source.Current;
             if (Rune.IsLetterOrDigit(rune))
             {
-                AppendRune(word, Rune.ToLowerInvariant(rune));
+                AppendRune(Rune.ToLowerInvariant(rune));
             }
-            else if (word.Length != 0)
+            else if (length != 0)
             {
-                ChargeToken(ref words, maximumWords);
-                yield return word.ToString();
-                word.Clear();
-            }
-            if (word.Length > maximumWordLength)
-            {
-                throw Errors.Fail(ErrorCode.BudgetExceeded, WordExceeded);
+                return ChargeToken();
             }
         }
-        if (word.Length != 0)
+        if (length != 0)
         {
-            ChargeToken(ref words, maximumWords);
-            yield return word.ToString();
+            return ChargeToken();
         }
         budget.Check();
+        return false;
     }
 
-    private static void AppendRune(StringBuilder word, Rune rune)
+    public void Dispose()
     {
-        const int MaximumUtf16Units = 2;
-        Span<char> encoded = stackalloc char[MaximumUtf16Units];
-        var length = rune.EncodeToUtf16(encoded);
-        word.Append(encoded[..length]);
+        if (rented is not null)
+        {
+            ArrayPool<char>.Shared.Return(rented, clearArray: true);
+            rented = null;
+        }
     }
 
-    private static void ChargeToken(ref int words, int maximumWords)
+    private void AppendRune(Rune rune)
+    {
+        var units = rune.Utf16SequenceLength;
+        if (units > maximumWordLength - length)
+        {
+            throw Errors.Fail(ErrorCode.BudgetExceeded, WordExceeded);
+        }
+        var required = length + units;
+        if (required > word.Length)
+        {
+            var capacity = (int)Math.Min(maximumWordLength, (long)word.Length * BufferGrowthFactor);
+            var enlarged = ArrayPool<char>.Shared.Rent(Math.Max(required, capacity));
+            word[..length].CopyTo(enlarged);
+            Dispose();
+            rented = enlarged;
+            word = enlarged;
+        }
+        rune.EncodeToUtf16(word[length..]);
+        length = required;
+    }
+
+    private bool ChargeToken()
     {
         if (++words > maximumWords)
         {
             throw Errors.Fail(ErrorCode.BudgetExceeded, DocumentTokenExceeded);
         }
+        return true;
     }
 }

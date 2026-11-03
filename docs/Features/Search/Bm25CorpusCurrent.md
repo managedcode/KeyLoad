@@ -38,7 +38,7 @@ Private `OperationKind.Bm25CorpusPublicationPhase = 45` uses execution `Command<
 
 SourceOwner is the node-local ZoneTree owner identity. SourcePlacement binds the atomic partition and store incarnation. Capture Position/Applied/ReadGeneration describe the originating view. BM25 publication is silo-local derived work: it advances physical Store.Position without advancing the canonical command sequence. Its acknowledgement describes actual local persistence. Existing distributed witnesses retain actual NodeId/current-cut authority.
 
-Query capture uses tokenizer `keyload-nfkc-rune-lower`, CanonicalTextTerms/SearchTerms and TextRanker.ForStatistics through the shared TextProjectionProtocol tokenizer identity.
+Query capture uses tokenizer `keyload-nfkc-rune-lower`, CanonicalTextTerms and TextRanker.ForStatistics through the shared TextProjectionProtocol tokenizer identity.
 
 Capture retains caller cancellation. The publication phase carries no expiry, and retained-family admission is independent of the capture read.
 

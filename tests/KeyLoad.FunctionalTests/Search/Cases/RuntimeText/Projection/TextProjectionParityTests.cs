@@ -1,3 +1,4 @@
+using KeyLoad.Core.Search;
 using KeyLoad.Query;
 using KeyLoad.Server.Search;
 using TUnit.Assertions.Enums;
@@ -10,6 +11,8 @@ internal sealed class TextProjectionParityTests
     private const string TextPath = "/text";
     private const string VectorPath = "/embedding";
     private const string Query = "CAFÉ 𐐨 𐐪 123 x repeated";
+    private const string PooledDocument = "pooled-word";
+    private static readonly string LongToken = new('A', 129);
     private static readonly VectorSpace Space = new("execution-text-parity", 2, DistanceMetric.DotProduct, "test", "1");
 
     [Test]
@@ -21,7 +24,8 @@ internal sealed class TextProjectionParityTests
         var oracle = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var execution = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var token = TestContext.Current!.Execution.CancellationToken;
-        var textRequest = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 20);
+        var textRequest = new SearchRequest(database.Partition, Collection, TextPath,
+            Query + " " + new string('a', LongToken.Length), Limit: 20);
         var hybridRequest = textRequest with
         {
             VectorField = VectorPath,
@@ -38,10 +42,13 @@ internal sealed class TextProjectionParityTests
 
         await AssertEquivalentAsync(expectedText, actualText);
         await AssertEquivalentAsync(expectedHybrid, actualHybrid);
+        await AssertEquivalentAsync(expectedText, await execution.SearchAsync("root", textRequest, token));
+        await AssertTokenizerBoundsAsync(token);
         await Assert.That(CurrentGeneration(database)).IsEqualTo(firstGeneration);
         await Assert.That(actualText.Select(result => result.Document.Reference.Id)).Contains("decomposed");
         await Assert.That(actualText.Select(result => result.Document.Reference.Id)).Contains("supplementary");
         await Assert.That(actualText.Select(result => result.Document.Reference.Id)).Contains("digits-short-repeat");
+        await Assert.That(actualText.Select(result => result.Document.Reference.Id)).Contains(PooledDocument);
         await Assert.That(actualText.Any(result => result.Document.Reference.Id == "missing-text")).IsFalse();
         await Assert.That(actualText.Any(result => result.Document.Reference.Id == "empty-text")).IsFalse();
         var identities = actualText.Select(result => result.Document.Reference.Id).ToArray();
@@ -58,14 +65,21 @@ internal sealed class TextProjectionParityTests
     {
         using var database = new TestDatabase();
         SeedCorpus(database);
-        using var projection = CreateProjection(database, _ => tokenHash);
+        var currentHash = tokenHash;
+        using var projection = CreateProjection(database, _ => currentHash);
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query, Limit: 20);
-        var expected = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request,
-            TestContext.Current!.Execution.CancellationToken);
-        var actual = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root", request,
-            TestContext.Current!.Execution.CancellationToken);
+        var token = TestContext.Current!.Execution.CancellationToken;
+        var oracle = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
+        var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
+        var expected = await oracle.SearchAsync("root", request, token);
+        await AssertEquivalentAsync(expected, await search.SearchAsync("root", request, token));
+        await AssertEquivalentAsync(expected, await search.SearchAsync("root", request, token));
 
-        await AssertEquivalentAsync(expected, actual);
+        currentHash = tokenHash + 1;
+        var missingPositive = Assert.ThrowsExactly<KeyLoadException>(() => search.Search("root", request, token));
+        await Assert.That(missingPositive.Code).IsEqualTo(ErrorCode.Corruption);
+        currentHash = tokenHash;
+        await AssertEquivalentAsync(expected, await search.SearchAsync("root", request, token));
     }
 
     private static void SeedCorpus(TestDatabase database)
@@ -78,6 +92,7 @@ internal sealed class TextProjectionParityTests
             new PutDocument(Collection, "tie-left", "{\"text\":\"café\"}"),
             new PutDocument(Collection, "tie-right", "{\"text\":\"CAFÉ\"}"),
             new PutDocument(Collection, "empty-text", "{\"text\":\"\"}"),
+            new PutDocument(Collection, PooledDocument, "{\"text\":\"" + LongToken + "!tail\"}"),
             new PutDocument(Collection, "missing-text", "{\"other\":\"café 123 repeated\"}"));
         database.Commit(
             new PutVector(Collection, "decomposed", VectorPath, [1, 0], Space, 1),
@@ -85,6 +100,33 @@ internal sealed class TextProjectionParityTests
             new PutVector(Collection, "digits-short-repeat", VectorPath, [1, 0], Space, 1),
             new PutVector(Collection, "tie-left", VectorPath, [0.5f, 0], Space, 1),
             new PutVector(Collection, "tie-right", VectorPath, [0.5f, 0], Space, 1));
+    }
+
+    private static async Task AssertTokenizerBoundsAsync(CancellationToken token)
+    {
+        const int MaximumWords = 2;
+        var work = new ReadExecutionBudget(cancellationToken: token);
+        await Assert.That(ReadTerms(LongToken + "!𐐀", work, MaximumWords, LongToken.Length))
+            .IsEquivalentTo(new[] { new string('a', LongToken.Length), "𐐨" }, CollectionOrdering.Matching);
+        var tooLong = Assert.ThrowsExactly<KeyLoadException>(() => ReadTerms(LongToken + "a", work, MaximumWords, LongToken.Length));
+        await Assert.That(tooLong.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        var tooMany = Assert.ThrowsExactly<KeyLoadException>(() => ReadTerms(LongToken + " x y", work, MaximumWords, LongToken.Length));
+        await Assert.That(tooMany.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+        var surrogate = Assert.ThrowsExactly<KeyLoadException>(() => ReadTerms("𐐀", work, MaximumWords, 1));
+        await Assert.That(surrogate.Code).IsEqualTo(ErrorCode.BudgetExceeded);
+    }
+
+    private static string[] ReadTerms(string text, ReadExecutionBudget work, int maximumWords, int maximumWordLength)
+    {
+        const int CheckEachRune = 1;
+        Span<char> word = stackalloc char[CanonicalTextTerms.InlineWordCapacity];
+        var result = new List<string>();
+        using var tokens = new CanonicalTextTerms(text, word, work, CheckEachRune, maximumWords, maximumWordLength);
+        while (tokens.MoveNext())
+        {
+            result.Add(tokens.Current.ToString());
+        }
+        return [.. result];
     }
 
     private static RuntimeTextProjection CreateProjection(TestDatabase database, Func<string, ulong>? tokenHash = null)

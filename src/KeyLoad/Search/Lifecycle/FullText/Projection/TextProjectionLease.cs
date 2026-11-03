@@ -45,12 +45,12 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
         recordOpen = true;
     }
 
-    public void ObserveToken(string token)
+    public void ObserveToken(ReadOnlySpan<char> token)
     {
         const int PostingsSinceBoundCheckEmptyCount = 0;
 
         budget.Check();
-        if (disposed || completed || !recordOpen || string.IsNullOrEmpty(token))
+        if (disposed || completed || !recordOpen || token.IsEmpty)
         {
             throw TextErrors.Corrupt();
         }
@@ -58,7 +58,7 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
         {
             return;
         }
-        var hash = tokenHash(token);
+        var hash = tokenHash(token.ToString());
         WriteBuildingPosting(hash);
         if (!postingObserved)
         {

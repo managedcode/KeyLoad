@@ -1,5 +1,6 @@
 using System.Text.Json;
 using KeyLoad.Core;
+using KeyLoad.Core.Search;
 
 namespace KeyLoad.Query.Search;
 
@@ -24,7 +25,7 @@ internal sealed class TextRanker
     private readonly int maximumWordCharacters;
     private ITextProjectionLease? projection;
     private readonly string[] terms;
-    private readonly Dictionary<string, int> lookup;
+    private readonly Dictionary<string, int> lookup = new(StringComparer.Ordinal);
     private readonly string[] path;
     private readonly int[] frequency;
     private readonly List<TextCandidate> candidates = [];
@@ -50,9 +51,19 @@ internal sealed class TextRanker
         this.budgetCheckInterval = budgetCheckInterval;
         this.maximumDocumentWords = maximumDocumentWords;
         this.maximumWordCharacters = maximumWordCharacters;
-        terms = SearchTerms.Enumerate(query, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters).Distinct(StringComparer.Ordinal).ToArray();
-        lookup = terms.Select((term, index) => (term, index))
-            .ToDictionary(pair => pair.term, pair => pair.index, StringComparer.Ordinal);
+        var queryTerms = new List<string>();
+        Span<char> word = stackalloc char[CanonicalTextTerms.InlineWordCapacity];
+        using var queryTokens = new CanonicalTextTerms(query, word, budget, budgetCheckInterval, maximumDocumentWords,
+            maximumWordCharacters);
+        while (queryTokens.MoveNext())
+        {
+            var text = queryTokens.Current.ToString();
+            if (lookup.TryAdd(text, queryTerms.Count))
+            {
+                queryTerms.Add(text);
+            }
+        }
+        terms = [.. queryTerms];
         frequency = new int[terms.Length];
         path = terms.Length == EqualOrder && retainCandidates ? [] : JsonData.PathSegments(field);
     }
@@ -74,11 +85,16 @@ internal sealed class TextRanker
         var length = EmptyElementCount;
         if (value is { Kind: KeyLoad.Storage.KeyComponentKind.Text, Text: var content })
         {
-            foreach (var term in SearchTerms.Enumerate(content, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters))
+            Span<char> word = stackalloc char[CanonicalTextTerms.InlineWordCapacity];
+            var tokenLookup = lookup.GetAlternateLookup<ReadOnlySpan<char>>();
+            using var tokens = new CanonicalTextTerms(content, word, budget, budgetCheckInterval, maximumDocumentWords,
+                maximumWordCharacters);
+            while (tokens.MoveNext())
             {
+                var term = tokens.Current;
                 projection?.ObserveToken(term);
                 length++;
-                if (lookup.TryGetValue(term, out var index))
+                if (tokenLookup.TryGetValue(term, out var index))
                 {
                     counts[index] = counts.GetValueOrDefault(index) + AdjacentElementOffset;
                 }
