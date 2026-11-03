@@ -31,12 +31,19 @@ internal ref struct KeyBufferWriter
     /// <summary>Writes bytes with every zero byte followed by the escape marker, then the two-zero terminator.</summary>
     internal void WriteEscaped(scoped ReadOnlySpan<byte> bytes)
     {
-        foreach (var b in bytes)
+        if (bytes.IndexOf((byte)KeyCodecTokens.EscapedZeroByte) < 0)
         {
-            Write(b);
-            if (b == KeyCodecTokens.EscapedZeroByte)
+            Write(bytes);
+        }
+        else
+        {
+            foreach (var b in bytes)
             {
-                Write((byte)KeyCodecTokens.ZeroEscapeMarker);
+                Write(b);
+                if (b == KeyCodecTokens.EscapedZeroByte)
+                {
+                    Write((byte)KeyCodecTokens.ZeroEscapeMarker);
+                }
             }
         }
         Write((byte)KeyCodecTokens.EscapedZeroByte);

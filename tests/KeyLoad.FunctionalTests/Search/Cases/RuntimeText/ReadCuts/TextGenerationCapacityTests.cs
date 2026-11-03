@@ -54,8 +54,10 @@ internal sealed class TextGenerationCapacityTests
         await ReplaceDocumentAsync(database, projection, request, cancellation);
         oldLease.VerifyCandidates(["needle"], [original[0].Document.Reference], oldBudget);
         await AssertForeignRetirementAndShutdownAsync(cleanup, projection, oldLease, root, retired);
-        var restarted = await AssertThirdLeafRestartAsync(database, cleanup, root, retired, cancellation);
+        await AssertThirdLeafRestartRefusalAsync(database, root, retired, cancellation);
         cleanup.ShutdownProjection(projection);
+        var restarted = cleanup.TrackProjection(OpenForRestart(root, database));
+        await Assert.That(GenerationPaths(root)).IsEmpty();
         var healthy = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), restarted).SearchAsync("root", request, cancellation);
         await Assert.That(healthy).HasSingleItem();
         await Assert.That(healthy[0].Document.Revision).IsGreaterThan(original[0].Document.Revision);
@@ -86,8 +88,8 @@ internal sealed class TextGenerationCapacityTests
             TestContext.Current!.Execution.CancellationToken)).SequenceEqual(ForeignBytes)).IsTrue();
     }
 
-    private static async Task<RuntimeTextProjection> AssertThirdLeafRestartAsync(TestDatabase database,
-        TextGenerationFixtureLifetime cleanup, string root, string retired, CancellationToken cancellation)
+    private static async Task AssertThirdLeafRestartRefusalAsync(TestDatabase database,
+        string root, string retired, CancellationToken cancellation)
     {
         var foreign = Path.Combine(retired, "foreign-entry.bin");
         File.Delete(foreign);
@@ -104,9 +106,6 @@ internal sealed class TextGenerationCapacityTests
         await Assert.That(GenerationPaths(root).SequenceEqual(expectedLeaves)).IsTrue();
         await Assert.That((await File.ReadAllBytesAsync(foreign, cancellation)).SequenceEqual(ForeignBytes)).IsTrue();
         File.Delete(foreign);
-        var restarted = cleanup.TrackProjection(OpenForRestart(root, database));
-        await Assert.That(GenerationPaths(root)).IsEmpty();
-        return restarted;
     }
 
     private static string InitializeRoot(TestDatabase database)
