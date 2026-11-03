@@ -113,6 +113,14 @@ The read-only close now joins the native index and verifies the existing sealed
 manifest without staging a second copy. Construction figures above measure the
 earlier checkpoint and exclude this change to the close path.
 
+The full Core replay on read-only settlement checkpoint
+`077dca26-3ce0-4c9c-bf86-c78c2c2e3956` passed on the same million-document
+dataset. The warm query verified the exact top ten and full JSON at cut 10002
+and allocated 2,980,350,560 managed bytes. The process exited successfully after
+joined shutdown. SHA-256 of the 116,984,290-byte sealed manifest matched before
+the timed query and after shutdown, with no pending manifest remaining. This
+run shared the machine with compilation and test discovery.
+
 The same Core checkpoint also ran eight warm queries on the million-document
 corpus with the exact top-ten and full-JSON oracle. A six-second allocation
 window inside that loop sampled 14,278 weighted allocation events representing
@@ -121,6 +129,19 @@ window inside that loop sampled 14,278 weighted allocation events representing
 bytes, or 19.48% of the sampled weight. Both closures belong to writes during
 construction, but the compiled methods allocate them before checking whether
 the generation is writable. The capture provides no dropped-event count.
+
+The two capturing calls now run in methods entered only during construction.
+Both sides of a separate A/B run used the same 200,000 documents, authorized
+reader and 16 warm queries. Each verified the exact ordered top ten, full JSON
+and unchanged cut 2002, then joined shutdown successfully. Timed allocation
+fell from 8,609,927,720 to 7,252,986,144 bytes, or **15.76%**. That is
+538.12 MB versus 453.31 MB per query. The baseline is the read-only settlement
+checkpoint above. The optimized KeyLoad DLL MVID is
+`56759406-4d1b-4e88-ae54-68665a330019`; its SHA-256 is
+`cf0d2fcf1c9ae7e8fe06eb9d046eb6e3cab7ed765789d7ad90477358e92fece4`.
+The separate Orleans transport annotation in the optimized build lies outside
+this direct Core workload. Compilation and test activity overlapped the runs,
+so the comparison uses allocations rather than elapsed time.
 
 Ignored local evidence lives under
 `tests/KeyLoad.FunctionalTests/bin/Debug/net10.0/performance-investigation/search-native-20261103/`:

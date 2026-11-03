@@ -38,13 +38,15 @@ KeyLoad uses one Orleans grain per actual client connection and a separate ordin
 | REQ-CLIENT-CONNECTION-002: bound retained state, disconnect/idle expiry and joined cleanup through validated typed options, with no connection or operation count limit, no operation wait queue and no completed history ([ADR-145](../ADR/ADR-145-no-request-throttling.md)). | AC-CLIENT-CONNECTION-002: a second operation on one connection runs while the first is held; a duplicate active request ID fails with `Conflict`; operation failure, cancellation, deadline and early disposal leave the connection reusable. Actual transport disconnect/idle expiry cancels and joins original operations before deactivation, observed before ordinary collection; abrupt silo loss retains original receipt/uncertain-write contracts. A short-profile grain response stream has at most two chunks; a long-running maintenance stream has no frame cap ([ADR-149](../ADR/ADR-149-no-operation-limits.md)). | `ConnectionFailureTests.AcCrs053ConnectionRunsAnotherOperationWhileTheFirstIsHeld`, ConnectionOperationTests, ConnectionSettlementTests and Aspire cluster transport, authorization, fault and lifecycle cases under ADR-125. Source/configuration is not acceptance. |
 
 `ConnectionIdleTimeout` applies while a connection has no active operations.
-Unary connection/request RPCs use Orleans' maximum response horizon
-(`TimeSpan.MaxValue`), independently of idle expiry. Original caller cancellation,
-silo failure and joined shutdown retain their existing behavior.
+Unary connection, request and remote owner execution RPCs use Orleans' maximum
+response horizon (`TimeSpan.MaxValue`), independently of idle expiry. The
+original caller cancellation governs the remote call as well.
 `ConnectionRequestLifetimeTests` holds an actual request past the previous
 120-second boundary, completes an independent command on the same connection,
 then cancels the original request and requires both request activations to retire.
-This checks request lifetime; it makes no throughput claim.
+The remote owner case uses two silos and a two-second sender default. It holds
+the actual owner past that default, releases the original response, joins the
+owner's deactivation and verifies a subsequent authorized operation.
 
 ClientApi owns transport/session registration and lifetime; QueryExecution owns actual SQL statement/portal/transaction semantics. The connection grain routes operations and returns the database owner's actual persisted-copy receipt. The silo-local Grain Service owns ZoneTree handles, and persisted credentials govern authorization. Session routing must not serialize unrelated operations accidentally or introduce blanket reentrancy.
 

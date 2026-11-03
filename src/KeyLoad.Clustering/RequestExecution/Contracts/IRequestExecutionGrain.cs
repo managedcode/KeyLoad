@@ -5,7 +5,7 @@ namespace KeyLoad.Clustering;
 public interface IRequestExecutionGrain : Orleans.IGrainWithGuidKey
 {
     /// <summary>Executes beside the selected physical owner without taking ownership of its resources.</summary>
-    [Orleans.Alias(GrainRoutingProtocol.ExecuteAlias)]
+    [Orleans.Alias(GrainRoutingProtocol.ExecuteAlias), Orleans.ResponseTimeout(GrainRoutingOptions.RequestResponseTimeout)]
     Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, GrainRequestEnvelope envelope, string? actorKey,
         CancellationToken cancellationToken);
 }

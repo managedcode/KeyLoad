@@ -32,7 +32,7 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
         recordIndex++;
         if (building)
         {
-            owner.MutatePhysical(() => generation.AddRecord(reference, revision));
+            AddBuildingRecord(reference, revision);
         }
         else if (recordIndex >= generation.Records.Count
             || generation.Records[recordIndex].Reference != reference
@@ -47,7 +47,6 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
 
     public void ObserveToken(string token)
     {
-        const int RecordIndexStep = 1;
         const int PostingsSinceBoundCheckEmptyCount = 0;
 
         budget.Check();
@@ -60,7 +59,7 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
             return;
         }
         var hash = tokenHash(token);
-        owner.MutatePhysical(() => generation.Index.UpsertRecord(hash, (ulong)recordIndex + RecordIndexStep, previousToken));
+        WriteBuildingPosting(hash);
         if (!postingObserved)
         {
             postingObserved = true;
@@ -114,6 +113,15 @@ internal sealed class TextProjectionLease(RuntimeTextProjection owner, TextGener
         }
         disposed = true;
         owner.Release(generation, slot, budget, building, invalid, completed);
+    }
+
+    private void AddBuildingRecord(EntityRef reference, long revision)
+        => owner.MutatePhysical(() => generation.AddRecord(reference, revision));
+
+    private void WriteBuildingPosting(ulong hash)
+    {
+        const int RecordIndexStep = 1;
+        owner.MutatePhysical(() => generation.Index.UpsertRecord(hash, (ulong)recordIndex + RecordIndexStep, previousToken));
     }
 
     private void VerifyCompleteVisit()
