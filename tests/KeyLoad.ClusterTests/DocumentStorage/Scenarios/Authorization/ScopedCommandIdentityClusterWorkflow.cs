@@ -1,5 +1,7 @@
 using KeyLoad.Client;
 using KeyLoad.ClusterTests.ClientApi;
+using KeyLoad.ClusterTests.StorageReplication;
+using KeyLoad.Server;
 
 namespace KeyLoad.ClusterTests.DocumentStorage;
 
@@ -64,9 +66,15 @@ internal static class ScopedCommandIdentityClusterWorkflow
     {
         foreach (var node in Nodes)
         {
+            var survivors = Nodes.Where(candidate => !StringComparer.Ordinal.Equals(candidate, node)).ToArray();
             await fixture.KillServerAsync(node, RestartScenario, cancellationToken);
-            await fixture.RestartServerAsync(node, cancellationToken);
+            var failures = new List<Exception>();
+            await ServerFailureObserver.ObserveAsync(() =>
+                ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture, survivors, cancellationToken), failures);
+            await ServerFailureObserver.ObserveAsync(() => fixture.RestartServerAsync(node, cancellationToken), failures);
+            ServerFailureObserver.ThrowIfAny(failures);
             await fixture.App.ResourceNotifications.WaitForResourceHealthyAsync(node, cancellationToken);
+            await ClusterMembershipReadiness.WaitForActiveSilosAsync(fixture, Nodes, cancellationToken);
         }
     }
 }
