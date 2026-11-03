@@ -90,15 +90,26 @@ internal sealed class OrleansTelemetryPrivacyProcessor(IOptions<OrleansTelemetry
 
     private bool ClearBoundedBaggage(Activity activity)
     {
-        var keys = new List<string>(Options.MaximumBaggageItems);
-        foreach (var (key, _) in activity.Baggage)
+        var limit = Options.MaximumBaggageItems;
+        List<string> keys;
+        using (var baggage = activity.Baggage.GetEnumerator())
         {
-            if (keys.Count == Options.MaximumBaggageItems)
+            if (!baggage.MoveNext())
             {
-                break;
+                return false;
             }
 
-            keys.Add(key);
+            if (limit == 0)
+            {
+                return true;
+            }
+
+            keys = new List<string>(limit);
+            do
+            {
+                keys.Add(baggage.Current.Key);
+            }
+            while (keys.Count < limit && baggage.MoveNext());
         }
 
         foreach (var key in keys)
