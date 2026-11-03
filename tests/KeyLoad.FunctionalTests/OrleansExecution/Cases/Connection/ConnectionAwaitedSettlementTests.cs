@@ -20,6 +20,7 @@ internal sealed class ConnectionAwaitedSettlementTests
                 var nextPrincipal = scenario.Principal();
                 await Assert.That(firstPrincipal.Id).IsNotEqualTo(nextPrincipal.Id);
                 var success = await ConnectionAwaitedSettlementFlow.SuccessAsync(scenario, observer!, firstPrincipal, "awaited-first", token);
+                await ConnectionAwaitedSettlementFlow.CancelReadAfterTerminalAsync(scenario, observer!, firstPrincipal, "awaited-first", token);
                 var cancelled = await ConnectionAwaitedSettlementFlow.CancelAsync(scenario, observer!, nextPrincipal, token);
                 var early = await ConnectionAwaitedSettlementFlow.EarlyAsync(scenario, observer!, firstPrincipal, token);
                 var fault = await ConnectionAwaitedSettlementFlow.FaultAsync(scenario, observer!, nextPrincipal, token);

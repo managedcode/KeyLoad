@@ -59,6 +59,39 @@ internal static class ConnectionAwaitedSettlementFlow
         }
     }
 
+    internal static async Task CancelReadAfterTerminalAsync(ConnectionScenario scenario,
+        ConnectionAwaitedSettlementObservation observer, PrincipalRecord principal, string document, CancellationToken token)
+    {
+        var requestId = Guid.NewGuid();
+        var callback = observer.Hold(requestId);
+        using var caller = CancellationTokenSource.CreateLinkedTokenSource(token);
+        var original = scenario.ReadAsync(principal, requestId, document, caller.Token);
+        Exception? primary = null;
+        try
+        {
+            await callback.Arrived.Task.WaitAsync(token);
+            await Assert.That(original.IsCompleted).IsFalse();
+            var owner = scenario.Observation.Read(requestId).WorkOwner;
+            await caller.CancelAsync();
+            await ConnectionAwaitedSettlementAssertions.ChargedAsync(owner, requestId);
+            callback.Release.SetResult();
+            await ConnectionAssertions.CancelledAsync(original);
+            await ConnectionAwaitedSettlementAssertions.ReleasedAsync(owner, requestId, token);
+            var healthy = await scenario.ReadAsync(principal, Guid.NewGuid(), document, token);
+            await Assert.That(ConnectionAssertions.Value<DocumentResult>(healthy).Json).IsEqualTo(ConnectionProtocol.FirstJson);
+        }
+        catch (Exception error)
+        {
+            primary = error;
+            throw;
+        }
+        finally
+        {
+            callback.Release.TrySetResult();
+            await ConnectionAwaitedSettlementCalls.JoinOriginalAsync(original, primary, allowCancellation: true);
+        }
+    }
+
     internal static async Task<Guid> EarlyAsync(ConnectionScenario scenario,
         ConnectionAwaitedSettlementObservation observer, PrincipalRecord principal, CancellationToken token)
     {

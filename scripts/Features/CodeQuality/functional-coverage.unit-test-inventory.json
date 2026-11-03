@@ -26889,9 +26889,9 @@
       "methodName": "ReusedConnectionAwaitsCleanupAcrossSuccessCancellationDisposalAndFailure",
       "instanceName": "ReusedConnectionAwaitsCleanupAcrossSuccessCancellationDisposalAndFailure",
       "sourcePath": "tests/KeyLoad.FunctionalTests/OrleansExecution/Cases/Connection/ConnectionAwaitedSettlementTests.cs",
-      "sourceSha256": "f21cb34ded3135d4a56764c5d502aa90a36469268f49637c5e2d9aa54a887c55",
+      "sourceSha256": "a0f040c01fa672e88f07c66bdf81ac553deea7da78016d8bc6eecd1ae7517a73",
       "lineNumber": 5,
-      "endLineNumber": 38,
+      "endLineNumber": 39,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [

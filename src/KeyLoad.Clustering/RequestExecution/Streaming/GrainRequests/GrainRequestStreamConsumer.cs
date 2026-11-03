@@ -20,16 +20,30 @@ internal static class GrainRequestStreamConsumer
         CancellationToken cancellationToken)
         => DrainCoreAsync(createStream, requestId, purpose, progress, cancellationToken);
 
-    private static async Task<GrainOperationReply> DrainCoreAsync(
+    /// <summary>Drains a local sequence whose bound lifetime already validates chunks and joins producer settlement.</summary>
+    internal static Task<GrainOperationReply> DrainBoundAsync(
+        IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> bound,
+        CancellationToken cancellationToken)
+        => DrainTerminalAsync(bound, null, cancellationToken, unwrapBoundFailure: true);
+
+    private static Task<GrainOperationReply> DrainCoreAsync(
         Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> createStream,
         Guid requestId, CqrsStreamPurpose? purpose, Func<GrainRequestProgress, CancellationToken, ValueTask>? progress,
         CancellationToken cancellationToken)
     {
-        GrainOperationReply? terminal;
         var bounded = CqrsStreamLifetime.RunWithPurpose(
             createStream: token => createStream(token).WithBatchSize(GrainRequestStreamProtocol.BatchSize),
             requestId: requestId, settled: static () => { }, owner: null, purpose: purpose ?? new CqrsStreamPurpose(),
             cancellationToken: cancellationToken);
+        return DrainTerminalAsync(bounded, progress, cancellationToken);
+    }
+
+    private static async Task<GrainOperationReply> DrainTerminalAsync(
+        IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>> bounded,
+        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken cancellationToken,
+        bool unwrapBoundFailure = false)
+    {
+        GrainOperationReply? terminal;
         try
         {
             terminal = await ReadTerminalAsync(bounded, progress, cancellationToken);
@@ -38,6 +52,11 @@ internal static class GrainRequestStreamConsumer
             && error.CancellationToken != cancellationToken && CqrsBoundaryErrors.IsNonFatal(error))
         {
             throw new OperationCanceledException(error.Message, error, cancellationToken);
+        }
+        catch (AggregateException error) when (unwrapBoundFailure && CqrsRuntimeFailures.FindFatal(error) is { } fatal)
+        {
+            RequestWorkSettlement.Rethrow(fatal);
+            throw;
         }
 
         cancellationToken.ThrowIfCancellationRequested();

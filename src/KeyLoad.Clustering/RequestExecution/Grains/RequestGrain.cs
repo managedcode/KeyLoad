@@ -20,6 +20,12 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
         try
         {
             var request = DecodeRequest(envelope);
+            if (request.Envelope.ReadKind == GrainReadKind.Document)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                return await GrainRequestStreamConsumer.DrainBoundAsync(
+                    CreateStream(request, envelope, cancellationToken), cancellationToken).ConfigureAwait(true);
+            }
             return await GrainRequestStreamConsumer.DrainWithPurposeAsync(
                 token => CreateStream(request, envelope, token), request.Envelope.RequestId, new CqrsStreamPurpose(() => request), cancellationToken).ConfigureAwait(true);
         }
