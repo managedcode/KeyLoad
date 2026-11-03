@@ -10,7 +10,12 @@ internal sealed class TextPhysicalCensusPause(string root, Guid node, IOptions<T
     private readonly ManualResetEventSlim resumed = new();
     private int armed;
 
-    internal void Arm() => Interlocked.Exchange(ref armed, 1);
+    internal void Arm()
+    {
+        entered.Reset();
+        resumed.Reset();
+        Interlocked.Exchange(ref armed, 1);
+    }
 
     internal void Verify(ReadExecutionBudget? budget)
     {
