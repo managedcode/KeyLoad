@@ -118,8 +118,9 @@ public static class EventStreamsExecution
         }
 
         var record = new EventRecord(stream, checked(++tail), checked(++sequence), data, now);
-        tx.PutRecord(KeySpace.Partition(EventRecordSpace, partition, append.StreamSet, append.StreamId, append.Generation, tail), record);
-        tx.PutRecord(KeySpace.Partition(EventFeedSpace, partition, sequence), record);
+        var eventKey = KeySpace.Partition(EventRecordSpace, partition, append.StreamSet, append.StreamId, append.Generation, tail);
+        tx.PutRecord(eventKey, record);
+        tx.PutRecord(KeySpace.Partition(EventFeedSpace, partition, sequence), eventKey);
         tx.PutRecord(idKey, new EventIdentity(append.StreamId, append.Generation, tail));
     }
 

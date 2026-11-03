@@ -22,14 +22,11 @@ internal static class EventQueueStateEnvelopeSourceAssertions
         await EqualAsync(fixture.Store.Read(view => view.GetRecord<StreamHead>(
             KeySpace.Partition(HeadFamily, fixture.Partition, Streams, Item))),
             new StreamHead(InitialRevision, InitialRevision, InitialGeneration));
-        foreach (var key in new[]
-        {
-            KeySpace.Partition(EventFamily, fixture.Partition, Streams, Item, InitialGeneration, InitialRevision),
-            KeySpace.Partition(FeedFamily, fixture.Partition, InitialRevision)
-        })
-        {
-            await EqualAsync(OrleansSerialization.Deserialize<EventRecord>(Required(fixture, key)), record);
-        }
+        var eventKey = KeySpace.Partition(EventFamily, fixture.Partition, Streams, Item, InitialGeneration, InitialRevision);
+        var feedKey = KeySpace.Partition(FeedFamily, fixture.Partition, InitialRevision);
+        var reference = OrleansSerialization.Deserialize<byte[]>(Required(fixture, feedKey));
+        await Assert.That(reference.AsSpan().SequenceEqual(eventKey)).IsTrue();
+        await EqualAsync(OrleansSerialization.Deserialize<EventRecord>(Required(fixture, reference)), record);
         await EqualAsync(fixture.Store.Read(view => view.GetRecord<EventIdentity>(KeySpace.Partition(
             IdentityFamily, fixture.Partition, Streams, Item, InitialGeneration, Item))),
             new EventIdentity(Item, InitialGeneration, InitialRevision));
