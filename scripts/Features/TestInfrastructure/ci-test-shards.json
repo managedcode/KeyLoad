@@ -417,7 +417,7 @@
                 "CompetingInboxPublicTests",
                 "DocumentLiveProfileClusterTests",
                 "FoundationOtlpClusterTests",
-                "QueryCapabilityVersionClusterWholeFlowTests",
+                "QueryCapabilityParityClusterWholeFlowTests",
                 "RemoteTransferThreeStageColdTests"
               ]
             },

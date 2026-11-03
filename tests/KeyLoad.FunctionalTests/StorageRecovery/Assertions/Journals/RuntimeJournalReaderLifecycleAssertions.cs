@@ -1,4 +1,3 @@
-using KeyLoad.Storage;
 using KeyLoad.Storage.ZoneTree;
 using TUnit.Assertions.Enums;
 
@@ -13,9 +12,7 @@ internal static class RuntimeJournalReaderLifecycleAssertions
 
         var restoredIdentity = await ZoneTreeStore.RestoreAsync(fixture.BackupPath, fixture.RestorePath,
             UnitExecutionOptions.StorageExecution());
-        await Assert.That(restoredIdentity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
         using var restored = fixture.Open(fixture.RestorePath, restoredIdentity.Incarnation);
-        await Assert.That(restored.Identity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
         await Assert.That(RuntimeJournalReaderFixture.Read(restored, RuntimeJournalReaderFixture.RuntimeJournalKey))
             .IsEquivalentTo(RuntimeJournalReaderFixture.RuntimeJournalValue, CollectionOrdering.Matching);
         await Assert.That(RuntimeJournalReaderFixture.Read(restored, RuntimeJournalReaderFixture.FollowupKey))

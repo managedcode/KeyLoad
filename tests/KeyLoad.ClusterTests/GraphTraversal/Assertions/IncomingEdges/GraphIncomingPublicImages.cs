@@ -30,7 +30,6 @@ internal static class GraphIncomingPublicImages
     {
         await SqlClusterProtocol.EqualAsync(before.Documents, after.Documents);
         await SqlClusterProtocol.EqualAsync(before.Outbox, after.Outbox);
-        await SqlClusterProtocol.EqualAsync(before.Incoming.Version, after.Incoming.Version);
         await SqlClusterProtocol.EqualAsync(before.Incoming.Projection, after.Incoming.Projection);
         await SqlClusterProtocol.EqualAsync(before.Incoming.Rows, after.Incoming.Rows);
         await Assert.That(after.Incoming.CutPosition).IsGreaterThanOrEqualTo(before.Incoming.CutPosition);

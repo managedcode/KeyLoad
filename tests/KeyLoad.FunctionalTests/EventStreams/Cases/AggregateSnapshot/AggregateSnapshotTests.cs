@@ -6,7 +6,6 @@ internal sealed class AggregateSnapshotTests
     private const string EventIdTwo = "aggregate-event-2";
     private const string EventIdThree = "aggregate-event-3";
     private const string BadChecksum = "bad-checksum";
-    private const int UnknownSnapshotFormat = 99;
 
     [Test]
     public async Task AcEvent008SnapshotCasRetryAndReopenPreserveVersionAndExactState()
@@ -69,24 +68,20 @@ internal sealed class AggregateSnapshotTests
     }
 
     [Test]
-    public async Task AcEvent008UnknownSnapshotFormatAndChecksumCorruptionFailClosed()
+    public async Task AcEvent008SnapshotChecksumCorruptionFailsClosed()
     {
         using var fixture = new AggregateReplayFixture();
         fixture.Append(Event(EventIdOne));
         fixture.StoreSnapshot(1);
         var snapshot = fixture.Snapshot();
 
-        fixture.StoreEnvelope(new(UnknownSnapshotFormat, snapshot));
-        var unknown = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read());
+        fixture.StoreSnapshotRecord(snapshot with
+        {
+            Checksum = BadChecksum
+        });
         var beginning = fixture.Read(maximumEvents: 1, fromBeginning: true);
-        fixture.StoreEnvelope(new(AggregateSnapshotPersistence.CurrentFormatVersion,
-            snapshot with
-            {
-                Checksum = BadChecksum
-            }));
         var checksum = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read());
 
-        await Assert.That(unknown.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(beginning.Snapshot).IsNull();
         await Assert.That(beginning.Events).HasSingleItem();
         await Assert.That(checksum.Code).IsEqualTo(ErrorCode.Corruption);

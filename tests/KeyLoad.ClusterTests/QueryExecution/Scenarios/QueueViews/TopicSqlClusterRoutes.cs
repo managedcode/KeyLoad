@@ -7,8 +7,8 @@ internal static class TopicSqlClusterRoutes
 {
     private const int Sdk = 0;
     private const int Mcp = 1;
-    private const int Q1Sdk = 2;
-    private const int Q1Mcp = 3;
+    private const int SqlSdk = 2;
+    private const int SqlMcp = 3;
 
     internal static async Task<QueryPage> QueryAsync(RequestCqrsClusterCallers callers, int route,
         TopicSqlClusterState state, bool ast, CancellationToken token)
@@ -20,8 +20,8 @@ internal static class TopicSqlClusterRoutes
             Sdk => ast ? await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAstAsync(state.Ast, token))
                 : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(state.Sql(), token)),
             Mcp => (await McpCallerAssertions.SuccessAsync<QueryPage>(await callers.Mcp.CallAsync(tool, request, token))).Value,
-            Q1Sdk => await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, SqlClusterProtocol.Call(state.Partition, tool, request), token),
-            Q1Mcp => await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, SqlClusterProtocol.Call(state.Partition, tool, request), token),
+            SqlSdk => await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, SqlClusterProtocol.Call(state.Partition, tool, request), token),
+            SqlMcp => await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, SqlClusterProtocol.Call(state.Partition, tool, request), token),
             _ => throw new ArgumentOutOfRangeException(nameof(route))
         };
     }
@@ -32,8 +32,8 @@ internal static class TopicSqlClusterRoutes
         {
             Sdk => await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.ReadEventSourceAsync(state.Read, token)),
             Mcp => (await McpCallerAssertions.SuccessAsync<EventSourcePage>(await callers.Mcp.CallAsync(McpCallerTools.EventsRead, state.Read, token))).Value,
-            Q1Sdk => await SqlClusterProtocol.SdkAsync<EventSourcePage>(callers.Sdk, SqlClusterProtocol.Call(state.Partition, McpCallerTools.EventsRead, state.Read), token),
-            Q1Mcp => await SqlClusterProtocol.McpAsync<EventSourcePage>(callers.Mcp, SqlClusterProtocol.Call(state.Partition, McpCallerTools.EventsRead, state.Read), token),
+            SqlSdk => await SqlClusterProtocol.SdkAsync<EventSourcePage>(callers.Sdk, SqlClusterProtocol.Call(state.Partition, McpCallerTools.EventsRead, state.Read), token),
+            SqlMcp => await SqlClusterProtocol.McpAsync<EventSourcePage>(callers.Mcp, SqlClusterProtocol.Call(state.Partition, McpCallerTools.EventsRead, state.Read), token),
             _ => throw new ArgumentOutOfRangeException(nameof(route))
         };
 
@@ -50,7 +50,7 @@ internal static class TopicSqlClusterRoutes
             return;
         }
         var envelope = SqlClusterProtocol.Call(state.Partition, McpCallerTools.QueryExecute, request);
-        if (route == Q1Sdk)
+        if (route == SqlSdk)
         {
             var result = await callers.Sdk.ExecuteSqlAsync(envelope, token);
             await Assert.That(result.IsFailed).IsTrue();

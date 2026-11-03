@@ -19,7 +19,7 @@ public static class OnlineTextPublicationCommands
         }
 
         var authority = OnlineTextPublicationValidation.Authority(principal.Id, command);
-        transaction.PutRecord(key, new OnlineTextCurrentPublication(OnlineTextPublicationProtocol.CurrentFormat, principal.Id, command.Request.CommandId, authority.ParentFingerprint, command.Request.Consumer, command.Request.ConsumerGeneration, authority, command.Result.PublishedCut));
+        transaction.PutRecord(key, new OnlineTextCurrentPublication(principal.Id, command.Request.CommandId, authority.ParentFingerprint, command.Request.Consumer, command.Request.ConsumerGeneration, authority, command.Result.PublishedCut));
         return command.Result;
     }
 

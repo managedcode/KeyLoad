@@ -7,7 +7,6 @@ internal static class GraphIncomingMcpProtocol
     internal const string RequestAlias = "keyload.contract.graph-incoming-edges-request";
     internal const string RowAlias = "keyload.contract.graph-incoming-edge-row";
     internal const string PageAlias = "keyload.contract.graph-incoming-edges-page";
-    internal const string Version = "version";
     internal const string Target = "target";
     internal const string Graph = "graph";
     internal const string Limit = "limit";

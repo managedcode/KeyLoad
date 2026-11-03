@@ -5,7 +5,6 @@ namespace KeyLoad.Query.Search;
 
 internal static class PackedAnnStorageFrames
 {
-    internal const int CurrentVersion = 1;
     internal const int MaximumChunkBytes = 65_536;
     internal const string InvalidSnapshot = "The packed ANN execution snapshot is invalid.";
     internal const string SnapshotExceeded = "The packed ANN execution snapshot reservation is exceeded.";

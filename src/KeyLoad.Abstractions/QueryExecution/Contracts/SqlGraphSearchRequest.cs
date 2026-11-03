@@ -1,10 +1,8 @@
 namespace KeyLoad;
 
-/// <summary>Contains one bounded versioned SQL graph-search statement.</summary>
-/// <param name="Version">The SQL graph-search profile version.</param>
+/// <summary>Contains one bounded SQL graph-search statement.</summary>
 /// <param name="Query">The bounded SQL request and its named JSON parameters.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(SqlGraphSearchContractAliases.Request)]
 public sealed record SqlGraphSearchRequest(
-    [property: Orleans.Id(0)] int Version,
     [property: Orleans.Id(1)] QueryRequest Query);

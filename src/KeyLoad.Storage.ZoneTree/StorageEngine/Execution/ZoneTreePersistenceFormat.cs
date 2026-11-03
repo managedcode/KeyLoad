@@ -2,7 +2,6 @@ namespace KeyLoad.Storage.ZoneTree;
 
 internal static class ZoneTreePersistenceFormat
 {
-    internal const int CurrentDataEpoch = 8;
     internal const int SigningKeyBytes = 32;
     internal const string OwnerLockFileName = "owner.lock";
     internal const string IdentityFileName = "identity.json";

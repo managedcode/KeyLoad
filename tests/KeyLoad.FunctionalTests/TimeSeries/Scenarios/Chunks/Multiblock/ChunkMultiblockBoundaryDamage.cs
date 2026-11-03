@@ -1,6 +1,4 @@
-using System.Security.Cryptography;
 using KeyLoad.Core.TimeSeries;
-using KeyLoad.Storage;
 
 namespace KeyLoad.FunctionalTests.TimeSeries;
 
@@ -26,46 +24,20 @@ internal static class ChunkMultiblockBoundaryDamage
         await Assert.That(manifest.RecordCount).IsEqualTo(ChunkMultiblockBoundaryData.InitialCount);
         await Assert.That(manifest.BlockDigests.Length).IsEqualTo(ExpectedBlocks);
         await Assert.That(payload.RecordCount).IsEqualTo(SecondRecords);
-        await Assert.That(payload.FormatVersion).IsEqualTo(SampleChunkWire.CurrentVersion);
         var first = fixture.Store.Read(view => view.ReadOwnedValue(SampleChunkKeys.Block(fixture.Partition,
             SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series, fixture.WindowId, Generation, FirstOrdinal)))!;
         await Assert.That(OrleansSerialization.Deserialize<SampleChunkPayload>(first).RecordCount).IsEqualTo(SampleChunkWire.MaximumRecords);
-        var fault = new ChunkMultiblockBoundaryFault(blockKey, manifestKey, block, manifestBytes);
+        var fault = new ChunkMultiblockBoundaryFault(blockKey, block);
         return fault;
     }
 
-    internal static void Inject(ChunkSelectedIntegrityFixture fixture, ChunkMultiblockBoundaryFault fault, bool unknownVersion)
-    {
-        if (!unknownVersion)
-        {
-            fixture.Store.Commit((tx, _) => { tx.Delete(fault.BlockKey); return true; });
-            return;
-        }
-        var payload = OrleansSerialization.Deserialize<SampleChunkPayload>(fault.BlockOriginal);
-        var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(fault.ManifestOriginal);
-        var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
-        var changed = OrleansSerialization.Serialize(payload with
-        {
-            FormatVersion = checked(SampleChunkWire.CurrentVersion + 1)
-        });
-        var updated = manifest with
-        {
-            BlockDigests = manifest.BlockDigests.SetItem(SecondOrdinal, SHA256.HashData(changed))
-        };
-        var encoded = OrleansSerialization.Serialize(updated);
-        fixture.Store.Commit((tx, _) =>
-        {
-            tx.Put(fault.BlockKey, changed);
-            tx.PutRecord(fault.ManifestKey, new SampleChunkManifestEnvelope(encoded, SHA256.HashData(encoded)));
-            return true;
-        });
-    }
+    internal static void Inject(ChunkSelectedIntegrityFixture fixture, ChunkMultiblockBoundaryFault fault)
+        => fixture.Store.Commit((tx, _) => { tx.Delete(fault.BlockKey); return true; });
 
     internal static void Repair(ChunkSelectedIntegrityFixture fixture, ChunkMultiblockBoundaryFault original)
         => fixture.Store.Commit((tx, _) =>
         {
             tx.Put(original.BlockKey, original.BlockOriginal);
-            tx.Put(original.ManifestKey, original.ManifestOriginal);
             return true;
         });
 }

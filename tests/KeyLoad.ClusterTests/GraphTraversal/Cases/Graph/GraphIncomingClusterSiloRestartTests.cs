@@ -11,7 +11,6 @@ internal sealed class GraphIncomingClusterSiloRestartTests(ClusterFixture fixtur
     private const string EdgeId = "incoming-survives-silo-rejoin";
     private const string Projection = "eventual-reverse";
     private const string GuidFormat = "N";
-    private const int RequestVersion = 1;
 
     [Test]
     public async Task DeliveredIncomingProjectionSurvivesOwnedSiloRestartAndRejoin()
@@ -43,7 +42,7 @@ internal sealed class GraphIncomingClusterSiloRestartTests(ClusterFixture fixtur
     }
 
     private static ReadIncomingGraphEdgesRequest Request(GraphPathClusterSeed seed)
-        => new(RequestVersion, seed.Target, GraphPathClusterScenario.Graph, 10);
+        => new(seed.Target, GraphPathClusterScenario.Graph, 10);
 
     private static async Task SeedCrossEdgeAsync(KeyLoadClient admin, GraphPathClusterSeed seed,
         PartitionRef sourcePartition, EntityRef source, CancellationToken cancellationToken)

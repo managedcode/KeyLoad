@@ -3,8 +3,6 @@ namespace KeyLoad.Core.TimeSeries;
 internal static class RuntimeSampleRollup
 {
     internal const string Alias = "keyload.core.SampleRollupState";
-    internal const int Version = 1;
-    internal const int Format = 0;
     internal const int From = 1;
     internal const int Until = 2;
     internal const int Revision = 3;

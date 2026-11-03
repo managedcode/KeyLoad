@@ -58,7 +58,7 @@ internal static class TextCrashScenario
         var partition = CreatePartition();
         SeedDatabase(database, partition);
         var boundary = new TextCrashBoundary(stage) { Armed = !replacement };
-        using var projection = new RuntimeTextProjection(Path.Combine(directory, RunAsyncPath2Text), store.Identity.NodeId, CrashExecutionOptions.RuntimeText(),
+        using var projection = new RuntimeTextProjection(Path.Combine(directory, RunAsyncPath2Text), store.Identity.NodeId, CrashExecutionOptions.RuntimeText(), new TextResourceOwnership(CrashExecutionOptions.RuntimeText()),
             faultObserver: boundary.Observe);
         var search = new SearchEngine(database, CrashExecutionOptions.QueryExecution(), projection);
         if (replacement)
@@ -129,12 +129,11 @@ internal static class TextCrashScenario
         var identity = store.Identity;
         var principalRecord = OrleansSerialization.Deserialize<PrincipalRecord>(principal);
         var resourceRecord = OrleansSerialization.Deserialize<ResourceDefinition>(resource);
-        var scope = new TextProjectionScope(identity.NodeId, identity.Incarnation, identity.FormatVersion,
-            identity.ReadGeneration, store.Position, partition, CrashFixtureValues.Orders, TextPath,
+        var scope = new TextProjectionScope(identity.NodeId, identity.Incarnation, identity.ReadGeneration, store.Position, partition, CrashFixtureValues.Orders, TextPath,
             principalRecord.Id, principalRecord.PolicyEpoch, resourceRecord.SchemaVersion);
         var manifestRecords = database.WithDocuments(CrashFixtureValues.Principal, partition,
             CrashFixtureValues.Orders, (_, _, visible) => CreateManifestRecords(visible), fieldUses: [TextPath]);
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             store.Position, partition, CrashFixtureValues.Orders, query, expectedIds, documents,
             principal, resource, authorityFiles, SHA256.HashData(credential), scope,
             manifestRecords, canonicalState);

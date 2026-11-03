@@ -23,7 +23,7 @@ internal static class AnalyticsSharedFamilies
         var receipt = await AnalyticsSharedFlow.CommitAsync(fixture, command,
             [new(AnalyticsStoreProtocol.UpsertKind, P.Store, P.EventId, 1)]);
         var roster = fixture.Store.Read(view => view.GetRecord<AtomicPartitionCatalogEntry>(AtomicPartitionRosterKeys.Partition(partition)));
-        await AnalyticsSharedAssertions.SameAsync(new AtomicPartitionCatalogEntry(1, partition, 0, receipt.Token.Position), roster);
+        await AnalyticsSharedAssertions.SameAsync(new AtomicPartitionCatalogEntry(partition, 0, receipt.Token.Position), roster);
         var lifetime = fixture.Store.Read(view => (ResourceLifetimeCatalog.Read(view, partition.TenantId, partition.DatabaseId,
             P.Store, fixture.Database.Resource(view, partition, P.Store))).Value)!;
         await Assert.That(lifetime.ResourceName).IsEqualTo(P.Store);
@@ -35,6 +35,8 @@ internal static class AnalyticsSharedFamilies
             AnalyticsStoreKeys.Event(partition, P.Store, P.EventId), OrleansSerialization.Serialize(row), token);
         await PageAsync(fixture, partition, PartitionRecordFamilies.AnalyticsGeneration,
             AnalyticsStoreKeys.Generation(partition, P.Store), OrleansSerialization.Serialize(1L), token);
+        await PageAsync(fixture, partition, PartitionRecordFamilies.AnalyticsTimestamp,
+            AnalyticsStoreKeys.Timestamp(partition, P.Store, P.Epoch, P.EventId), OrleansSerialization.Serialize(P.EventId), token);
         await Assert.That(PartitionRecordFamilies.All.SequenceEqual(PartitionRecordFamilies.All.Order(StringComparer.Ordinal))).IsTrue();
         await ProjectionAsync(fixture, partition, upsert, receipt, evaluatedAt);
     }

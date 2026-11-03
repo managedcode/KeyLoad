@@ -21,7 +21,7 @@ internal sealed class Bm25CorpusOptionalHeadTests
             var invalid = malformedBytes ? new byte[] { 0 }
                 : OrleansSerialization.Serialize(current with
                 {
-                    FormatVersion = 0
+                    Generation = Guid.Empty
                 });
             var failures = new List<Exception>();
             var restore = false;

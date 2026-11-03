@@ -12,9 +12,8 @@ Status: Accepted; implementation/qualification pending.
 ## Decision and contracts
 
 One server/database serves AI agents across documents, typed rows, graphs,
-vectors/text search, blobs, queues and events. SQL becomes the central versioned
-language. Keep the current Q1 SELECT and AST1 contracts unchanged. Add SQL operation-envelope
-version1: Q1 SELECT compiles to the existing QueryRequest; bounded
+vectors/text search, blobs, queues and events. SQL becomes the central
+language. One current SQL operation envelope carries SQL and bound parameters. Scalar SELECT compiles to the existing QueryRequest; bounded
 `CALL exact_public_operation(@arguments)` compiles using the sole public operation
 catalog's strict typed decoder and enters the same signed Orleans gateway. The
 argument is an object envelope containing existing `request` and, when required,
@@ -36,7 +35,7 @@ capability checks, cancellation, deadlines and bounds remain with target owners.
 
 ```mermaid
 flowchart LR
-    SQL[Versioned SQL and bound arguments] --> Compile[Bounded SELECT or CALL compiler]
+    SQL[SQL and bound arguments] --> Compile[Bounded SELECT or CALL compiler]
     Compile --> Catalog[Sole typed public operation catalog]
     Catalog --> Gateway[Persisted authority and signed gateway]
     Gateway --> Actor[Connection grain]
@@ -50,8 +49,8 @@ REQ-AISQL-001/003/004 -> AC-AISQL-001/005–010 in this ADR and
 [QueryExecution](../Features/QueryExecution.md);
 QueryExecution owns language, existing model slices own effects. The ordered contract is: freeze DTOs/grammar; author strict compiler tests and the compiler; preserve equality planner efficiency; then join endpoint, SDK, official MCP, conservative admission and replicated-cluster differential tests. Shared transport and authority are not altered by the compiler work.
 
-The shared SQL operation contracts live in Abstractions/Features/QueryExecution/SqlOperationContracts.cs; the compiler helpers and matching SqlOperation* unit files are new Server/Features/QueryExecution/Sql* files; the server query/catalog/admission joins and Client/Features/QueryExecution/ complete the surface. Existing DTOs/route values retain semantics. The adapter rejects unsupported versions and invalid CALL grammar, targets or argument envelopes before routing. SELECT/EXPLAIN grammar is validated once by the authorized Q1 request path before a scan or effect; the adapter does not repeat parsing. Deployment is additive; rollback removes advertisement/new route, existing Q1 remains.
+The current operation request is `src/KeyLoad.Abstractions/QueryExecution/Contracts/SqlOperationRequest.cs`. `src/KeyLoad/QueryExecution/Queries/SqlOperationCompiler.cs` compiles the Microsoft ScriptDOM tree to existing canonical operations, and `src/KeyLoad.Query/QueryExecution/` owns scalar and model query lowering. The SDK and official MCP use the same current typed request. Unsupported syntax trees, operation targets and invalid argument envelopes are refused before routing or effects; there is no envelope or dialect version selector. Parsing and operation-specific semantic validation retain the original cancellation and admission bounds.
 
-Dependencies: ADR-010/012/013/014/020/035/036/039/055. Tests: strict syntax/version/parameter/name/recursion rejection; Q1 equality; actual SDK/MCP read/write/error/retry/permission/cancellation flows on the replicated cluster; comparison measurements. GitHub exact-SHA proof and artifacts are required. No acceleration, full SQL compatibility or production claim before qualification.
+Dependencies: ADR-010/012/013/014/020/035/036/039/055. Tests: strict syntax/parameter/name/recursion rejection; scalar equality; actual SDK/MCP read/write/error/retry/permission/cancellation flows on the replicated cluster; comparison measurements. GitHub exact-SHA proof and artifacts are required. No acceleration, full SQL compatibility or production claim before qualification.
 
 Typed blob SDK methods are feature-owned public extension methods in BlobClientExtensions, invoking the same assembly-internal Send transport with unchanged route/type/command ID/write classification; client and request are validated (null guards) before transport, with no second HttpClient or retry path. REQ-AISQL-003 and AC-AISQL-007 (under AC-DBHP-012) require the generic SQL tool to report dynamic, non-read-only, non-idempotent and destructive effects and to be unreachable as a canonical operation that SQL could call recursively (`SqlToolDiscoveryTests.AcAiSql007SqlDiscoveryReportsDynamicEffectsAndCannotBeCalledRecursively`).

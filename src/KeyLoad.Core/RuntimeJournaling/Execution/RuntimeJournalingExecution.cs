@@ -1,5 +1,4 @@
 using KeyLoad.Core.RuntimeJournaling.Contracts;
-using KeyLoad.Storage;
 using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Core;
@@ -13,11 +12,6 @@ public static class RuntimeJournalingExecution
     public static void ConfigureRuntimeJournal(this DatabaseEngine engine, IOptions<RuntimeJournalOptions> options)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        if (engine.Store.Identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, RuntimeJournalProtocol.ReaderContractRequired);
-        }
-
         var configured = new RuntimeJournalOperations(engine, options);
         if (Interlocked.CompareExchange(ref engine.configuredRuntimeJournal, configured, null) is not null)
         {

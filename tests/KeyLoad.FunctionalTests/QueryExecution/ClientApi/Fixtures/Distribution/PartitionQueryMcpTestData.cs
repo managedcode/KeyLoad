@@ -18,9 +18,9 @@ internal static class PartitionQueryMcpTestData
     private const string Root = "root";
     internal static readonly PartitionRef Partition = new(Tenant, Database, Domain, PartitionKey);
 
-    internal static PartitionQueryRequest Request() => new(1, [Partition],
+    internal static PartitionQueryRequest Request() => new([Partition],
         new SelectQuery(Collection, null, [new Selection("/name", "name")], null, [], 4),
-        null, true, SqlOperationProtocol.DefaultQueryDialectVersion);
+        null, true);
 
     internal static ResourceLifetime Seed(TestDatabase fixture, PartitionQueryRequest request,
         string entityId = EntityId)
@@ -67,7 +67,6 @@ internal static class PartitionQueryMcpTestData
         var partition = request.Partitions.Single();
         var reference = PartitionQueryCreationOracle.Reference(creation, partition, entityId);
         var stored = fixture.Database.GetDocument(Root, reference)!;
-        await Assert.That(page.Version).IsEqualTo(1);
         await Assert.That(page.Complete).IsTrue();
         await Assert.That(page.Rows.Length).IsEqualTo(1);
         var row = page.Rows.Single();

@@ -17,15 +17,11 @@ internal sealed class SqlGraphSearchRejectionTests
     private const string VectorParameter = "vector";
 
     [Test]
-    public async Task InvalidVersionCursorAndFullScanFlagRejectBeforeRead()
+    public async Task CursorAndFullScanFlagRejectBeforeRead()
     {
         using var database = new TestDatabase();
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
-        await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly) with
-        {
-            Version = 2
-        });
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly, cursor: "cursor"));
         await AssertRejected(engine, SqlGraphSearchTestSupport.Request(database.Partition, GraphOnly, fullScan: false));
     }

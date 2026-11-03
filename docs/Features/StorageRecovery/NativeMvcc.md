@@ -4,8 +4,9 @@
 ZoneTree package centrally pinned in `Directory.Packages.props`.
 The silo-local physical owner opens one `ITransactionalZoneTree` through
 `OpenOrCreateTransactional` or the existing-store `OpenTransactional` operation.
-The current data epoch is 8, including internal grain request and runtime-journal
-purposes. Opening requires the current identity before the engine opens its files.
+KeyLoad uses one current identity and purpose per internal request and journal
+operation. Opening validates that identity before the engine opens its files;
+ZoneTree owns its native MVCC, WAL and backup formats.
 
 REQ-STORAGE-MVCC-001 / AC-STORAGE-MVCC-001: each prepared KeyLoad commit is one
 native transaction that applies all of its mutations and the store position record

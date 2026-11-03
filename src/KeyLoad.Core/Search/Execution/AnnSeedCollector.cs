@@ -120,8 +120,7 @@ internal static class AnnSeedCollector
         var position = database.Store.Position;
         AnnSeedValidation.ValidateCut(identity, position, applied, head, principal, resource);
         buffer.InitializeScope(principal, partition, collection, field, space, resource.SchemaVersion, now);
-        var cut = new AnnSeedCut(identity.NodeId, identity.Incarnation, identity.FormatVersion,
-            identity.KeyCodecVersion, identity.ReadGeneration, position, applied, head.Tail, head.FirstAvailable);
+        var cut = new AnnSeedCut(identity.NodeId, identity.Incarnation, identity.ReadGeneration, position, applied, head.Tail, head.FirstAvailable);
         VisibleVectorReads.Visit(database, view, principal, partition, collection, field, budget,
             (document, vector) => buffer.Observe(document, vector, partition, collection, field, space), sourceMetadata, work);
         buffer.SetCut(cut);

@@ -7,7 +7,6 @@ namespace KeyLoad.Client;
 /// <summary>Lowers one bounded vector attachment with the existing non-evaluating field translator.</summary>
 internal static class QueryVectorAttachment
 {
-    private const int Version = 1;
     private const int AllFieldsCount = 1;
     private const int FirstSelection = 0;
     private const string AttachmentLimitDetail = "The query vector attachment exceeds its item budget.";
@@ -36,7 +35,7 @@ internal static class QueryVectorAttachment
             throw Errors.Fail(ErrorCode.BudgetExceeded, AttachmentLimitDetail);
         }
         var path = context.Expressions.Field(field.Body, field.Parameters[QueryPredicateTokens.ParameterIndex]);
-        return new(Version, new(partition, query.Collection, VectorField: path, Vector: vector,
+        return new(new(partition, query.Collection, VectorField: path, Vector: vector,
             Space: space, Limit: query.Limit), Scope: scope);
     }
 }

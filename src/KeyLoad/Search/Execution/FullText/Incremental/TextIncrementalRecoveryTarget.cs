@@ -11,8 +11,7 @@ internal static class TextIncrementalRecoveryTarget
     {
         budget.Check();
         var through = original.Bootstrap ? original.SourceUpperSequence : original.ThroughSequence;
-        var target = new TextIncrementalManifest(TextIncrementalProtocol.ManifestFormatVersion,
-            original.Scope, original.Consumer, original.Generation, original.Placement, through,
+        var target = new TextIncrementalManifest(original.Scope, original.Consumer, original.Generation, original.Placement, through,
             original.AppliedPosition, original.NextRecord, original.Records, published?.Files ?? [],
             TextProjectionProtocol.TokenizerVersion, TextProjectionProtocol.HashVersion,
             original.ResourceSha256, original.Bootstrap, published?.LastSettledCheckpointRequest);

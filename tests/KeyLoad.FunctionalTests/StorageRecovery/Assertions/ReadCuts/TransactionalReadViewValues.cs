@@ -28,7 +28,7 @@ internal static class TransactionalReadViewValues
     internal static async Task CutAsync(TransactionalReadViewState state, ZoneTreeReadCut actual, long position)
     {
         var identity = state.Identity;
-        var expected = new ZoneTreeReadCut(identity.FormatVersion, identity.KeyCodecVersion, identity.NodeId,
+        var expected = new ZoneTreeReadCut(identity.NodeId,
             identity.Incarnation, identity.Durability, identity.DispatchPaused, identity.ReadGeneration, position);
         await Assert.That(actual).IsEqualTo(expected);
     }

@@ -35,7 +35,7 @@ flowchart LR
 
 ## refusal-envelope preflight correction
 
-Actual existing SqlModelViewClusterAuthorizationAssertions.AssertDeniedAsync establishes that a revoked persisted credential reaches MCP HTTP authentication before tool dispatch: official Client CallAsync throws HttpRequestException with HTTP401; no structured dispatched error is fabricated. Preserve both genuine official direct/Q1 denied calls, exact Unauthorized status, and bounded original McpUnauthorizedProbe safe Problem/no operation header under the same credential/node. Capability refusals remain dispatched PermissionDenied structured envelopes. SDK generic result no-body assertions distinguish reference Value null from JsonElement Undefined/Null, preserving the actual ExecuteSqlAsync<Result<JsonElement>> type. No fallback or accepted-success branch.
+Actual existing SqlModelViewClusterAuthorizationAssertions.AssertDeniedAsync establishes that a revoked persisted credential reaches MCP HTTP authentication before tool dispatch: official Client CallAsync throws HttpRequestException with HTTP401; no structured dispatched error is fabricated. Preserve both genuine official direct/SQL denied calls, exact Unauthorized status, and bounded original McpUnauthorizedProbe safe Problem/no operation header under the same credential/node. Capability refusals remain dispatched PermissionDenied structured envelopes. SDK generic result no-body assertions distinguish reference Value null from JsonElement Undefined/Null, preserving the actual ExecuteSqlAsync<Result<JsonElement>> type. No fallback or accepted-success branch.
 
 ## target collection privacy fence
 

@@ -6,7 +6,6 @@ internal sealed class BoundaryTests
 {
     private const string Principal = "principal";
     private const string Tenant = "tenant";
-    private const uint UnsupportedVersion = 2;
 
     [Test]
     public async Task AcIs002MalformedNullTrailingAndWrongTypesFailClosed()
@@ -18,11 +17,9 @@ internal sealed class BoundaryTests
         {
             var failure = Capture(() => OrleansSerialization.Deserialize<OutboxHead>(bytes));
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
-            await Assert.That(failure.Message).IsEqualTo(PayloadVersion.InvalidPayload);
+            await Assert.That(failure.Message).IsEqualTo(RuntimePayloadContract.InvalidPayload);
         }
         await Assert.That(Capture(() => OrleansSerialization.Deserialize<QueueCounters>(valid)).Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(Capture(() => OrleansSerialization.Deserialize<OutboxHead>(serializer.Encode(new OutboxHead(1, 1, 1, 1), UnsupportedVersion))).Code)
-            .IsEqualTo(ErrorCode.FormatUnsupported);
     }
 
     [Test]

@@ -19,10 +19,9 @@ internal static class ZoneTreeIdentityFile
         }
 
         RequireEmptyOwnedDirectory(options.Directory, ownership);
-        var identity = new StoreIdentity(CurrentDataEpoch, KeyCodec.Version,
-            Guid.NewGuid(), options.Incarnation ?? Guid.NewGuid(),
+        var identity = new StoreIdentity(Guid.NewGuid(), options.Incarnation ?? Guid.NewGuid(),
             options.SigningKey is { } configuredKey ? configuredKey.ToArray() : RandomNumberGenerator.GetBytes(SigningKeyBytes),
-            DurabilityProfile.ProcessDurable, MinimumReaderContract: StoreReaderContract.RuntimeJournal);
+            DurabilityProfile.ProcessDurable);
         Validate(identity, options);
         Write(path, identity, options.IdentityBufferBytes);
 
@@ -77,10 +76,6 @@ internal static class ZoneTreeIdentityFile
     {
         var identity = Read(Path.Combine(options.Directory, IdentityFileName), options.MaximumIdentityFileBytes, options.StreamBufferBytes);
         Validate(identity, options);
-        if (identity.FormatVersion != CurrentDataEpoch)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
-        }
         if (identity.NodeId != expectedNodeId)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, IdentityScopeInvalid);
@@ -90,12 +85,6 @@ internal static class ZoneTreeIdentityFile
 
     private static void Validate(StoreIdentity identity, ZoneTreeStoreOptions options)
     {
-        if (identity.FormatVersion != CurrentDataEpoch
-            || identity.KeyCodecVersion != KeyCodec.Version
-            || identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
-        }
 
         if (identity.SigningKey.Length != SigningKeyBytes
             || options.Incarnation is { } incarnation && incarnation != identity.Incarnation
@@ -121,11 +110,6 @@ internal static class ZoneTreeIdentityFile
         }
 
         var identity = OrleansSerialization.Deserialize<StoreIdentity>(envelope.Payload);
-        if (identity.FormatVersion != CurrentDataEpoch || identity.KeyCodecVersion != KeyCodec.Version
-            || identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
-        }
 
         if (identity.SigningKey.Length != SigningKeyBytes || identity.NodeId == Guid.Empty || identity.Incarnation == Guid.Empty
             || identity.ReadGeneration < MinimumReadGeneration || !Enum.IsDefined(identity.Durability))
@@ -139,10 +123,6 @@ internal static class ZoneTreeIdentityFile
     internal static void Write(string path, StoreIdentity identity, int identityBufferBytes)
     {
         var payload = OrleansSerialization.Serialize(identity);
-        if (identity.MinimumReaderContract != StoreReaderContract.RuntimeJournal)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, IdentityFormatUnsupported);
-        }
 
         var bytes = ZoneTreeMetadataBinary.Write(new ZoneTreeIdentityEnvelope(payload, SHA256.HashData(payload)),
             ZoneTreeMetadataBinary.IdentityMagic);

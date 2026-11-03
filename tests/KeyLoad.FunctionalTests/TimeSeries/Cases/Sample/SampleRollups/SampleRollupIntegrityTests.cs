@@ -6,7 +6,6 @@ namespace KeyLoad.FunctionalTests.TimeSeries;
 internal sealed class SampleRollupIntegrityTests
 {
     private const string FiniteFailure = "The time-series aggregate is not finite.";
-    private const int UnsupportedVersion = 2;
     [Test]
     public async Task AcSeries023FiniteOverflowRejectsAtomicStatsWithExactRetryAndHealthyEmptyBucket()
     {
@@ -23,7 +22,7 @@ internal sealed class SampleRollupIntegrityTests
         await Assert.That(healthy).IsEqualTo(new SampleRollupResult(1, new(from, until, 2, null, new(0, 0, null, null, null))));
     }
     [Test]
-    public async Task AcSeries023UnsupportedBucketFailsClosedWithoutReadEffectsAndRestoredReadIsHealthy()
+    public async Task AcSeries023CorruptBucketFailsClosedWithoutReadEffectsAndRestoredReadIsHealthy()
     {
         using var db = new TestDatabase();
         SampleRollupWholeFlow.Seed(db);
@@ -32,17 +31,9 @@ internal sealed class SampleRollupIntegrityTests
             SampleRollupWholeFlow.Start, SampleRollupWholeFlow.End);
         var original = db.Store.Read(view => SampleRollupRecords.Read(view, db.Partition, SampleRollupWholeFlow.Set,
             SampleRollupWholeFlow.Series, SampleRollupWholeFlow.Start, SampleRollupWholeFlow.End))!;
-        db.Store.Commit((tx, _) => { tx.PutRecord(key, original with { FormatVersion = UnsupportedVersion }); return 0; });
+        db.Store.Commit((tx, _) => { tx.PutRecord(key, original with { Count = -1 }); return 0; });
         var image = SampleRollupWholeFlow.Image(db);
         var position = db.Store.Position;
-        var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => SampleRollupWholeFlow.Read(db));
-        await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(unsupported.Message).IsEqualTo(SampleRollupProtocol.Unsupported);
-        await Assert.That(SampleRollupWholeFlow.Image(db)).IsEqualTo(image);
-        await Assert.That(db.Store.Position).IsEqualTo(position);
-        db.Store.Commit((tx, _) => { tx.PutRecord(key, original with { Count = -1 }); return 0; });
-        image = SampleRollupWholeFlow.Image(db);
-        position = db.Store.Position;
         var corrupt = Assert.ThrowsExactly<KeyLoadException>(() => SampleRollupWholeFlow.Read(db));
         await Assert.That(corrupt.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(corrupt.Message).IsEqualTo(SampleRollupProtocol.Corrupt);

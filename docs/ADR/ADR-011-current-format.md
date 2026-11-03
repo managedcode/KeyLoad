@@ -56,9 +56,9 @@ that add the store identity, the commit position and the restored dispatch pause
    is itself a restorable backup directory. Missing sources, overlapping paths,
    occupied destinations and pre-cancellation are refused before writing.
 7. **Format admission.** `identity.json` is a magic-tagged generated Orleans
-   envelope with a SHA-256 payload checksum, the current data epoch 8, KeyCodec v1
-   and reader capability 1. An unknown magic, epoch, codec version or capability
-   fails `FormatUnsupported`; a checksum mismatch or an invalid identity domain
+   envelope with a SHA-256 payload checksum and one current StoreIdentity shape.
+   It carries no application epoch, codec version or reader capability selector.
+   Unknown magic fails `FormatUnsupported`; a checksum mismatch or an invalid identity domain
    (empty node or incarnation, wrong signing-key length, negative read
    generation, undefined durability) fails `Corruption`. Both fail before ZoneTree
    opens or changes the tree. ZoneTree validates its own files. There is no

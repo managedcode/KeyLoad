@@ -156,7 +156,7 @@ MessagingCrashTrial ninety-second lifetime and thirty-second cleanup, with the
 operation evaluated at or after the exact persisted business ExpiresAt. The public
 autonomous test creates the persisted scoped principal through the administrator
 SDK, pauses before the due instant, refuses the original condition through
-SDK/MCP/both Q1 routes, revokes the subject before unpause, restores it, and
+SDK/MCP/both SQL routes, revokes the subject before unpause, restores it, and
 requires canonical Ready BEFORE any Receive that could otherwise advance due state.
 A null-selected service leaves the due and future messages, their receipts and
 counters unchanged across two cold restarts, while an ordinary recurring schedule

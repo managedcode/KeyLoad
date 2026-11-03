@@ -113,7 +113,7 @@ internal sealed class HybridQualityRealStoreTests
 
     private static RuntimeTextProjection CreateProjection(TestDatabase database)
         => new(Path.Combine(database.Directory, ProjectionFolder),
-            database.Store.Identity.NodeId, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
 
     private static byte[] CaptureAuthority(TestDatabase database)
     {

@@ -176,7 +176,7 @@ internal sealed class TextGenerationLifetimeTests
         => await TextGenerationInvalidationOverlap.RunAsync(TestContext.Current!.Execution.CancellationToken);
 
     private static RuntimeTextProjection NewProjection(TestDatabase database, string root)
-        => new(root, database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        => new(root, database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
 
     private static string[] GenerationPaths(string root)
         => Directory.EnumerateDirectories(root)
@@ -190,7 +190,7 @@ internal sealed class TextGenerationLifetimeTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, TextPath, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

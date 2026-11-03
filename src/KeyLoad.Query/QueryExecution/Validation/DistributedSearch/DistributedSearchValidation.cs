@@ -7,7 +7,6 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchValidation
 {
-    private const int VersionOne = 1;
     private const int FirstPartition = 0;
     private const string InvalidShape = "The distributed search shape or partition set is invalid.";
     private const string SelectedGenerationUnsupported = "Selected generations require their owning search operation.";
@@ -20,7 +19,7 @@ internal static class DistributedSearchValidation
         budget.Check();
         var execution = options.Value;
         execution.Validate();
-        if (request.Version != VersionOne || request.Search is null || request.Partitions.IsDefaultOrEmpty
+        if (request.Search is null || request.Partitions.IsDefaultOrEmpty
             || request.Partitions.Length > execution.MaximumPartitions
             || request.Search.Partition != request.Partitions[FirstPartition])
         {

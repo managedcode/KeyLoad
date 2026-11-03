@@ -21,8 +21,6 @@ internal sealed class SqlInnerJoinSourceRejectionTests
     [Arguments("missing-right", ErrorCode.NotFound)]
     [Arguments("cross-domain-right", ErrorCode.Conflict)]
     [Arguments("cross-domain-left", ErrorCode.Conflict)]
-    [Arguments("ast-other", ErrorCode.UnsupportedCapability)]
-    [Arguments("ast-unknown", ErrorCode.UnsupportedCapability)]
     [Arguments("missing-left-alias", ErrorCode.UnsupportedCapability)]
     [Arguments("missing-projection-source", ErrorCode.UnsupportedCapability)]
     [Arguments("same-alias", ErrorCode.UnsupportedCapability)]
@@ -35,7 +33,7 @@ internal sealed class SqlInnerJoinSourceRejectionTests
         SqlInnerJoinRejectionFixture.Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var before = JsonDefaults.Serialize(engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion)));
+            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true)));
         var request = InvalidRequest(SqlInnerJoinRejectionFixture.Ast(database), scenario);
         var position = database.Store.Position;
         var diagnostics = database.Store.GetReadDiagnostics();
@@ -70,8 +68,6 @@ internal sealed class SqlInnerJoinSourceRejectionTests
             "missing-right" => request with { Query = query with { InnerJoin = join with { Collection = "absent" } } },
             "cross-domain-right" => request with { Query = query with { InnerJoin = join with { Collection = "foreign" } } },
             "cross-domain-left" => request with { Query = query with { Collection = "foreign" } },
-            "ast-other" => request with { AstVersion = 2 },
-            "ast-unknown" => request with { AstVersion = 3 },
             "missing-left-alias" => request with { Query = query with { Alias = null } },
             "missing-projection-source" => request with { Query = query with { Projection = [new("/order_id", "value")] } },
             "same-alias" => request with { Query = query with { InnerJoin = join with { Alias = "l" } } },

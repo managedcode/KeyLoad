@@ -63,7 +63,7 @@ internal sealed class GraphIncomingSortCancellationTests
 
     private static GraphIncomingEdgesPage ReadPage(TestDatabase database, EntityRef target)
         => database.Database.ReadIncomingGraphEdges(GraphCrossPartitionTestSupport.Root,
-            new ReadIncomingGraphEdgesRequest(1, target, GraphCrossPartitionTestSupport.Graph, IncomingCount));
+            new ReadIncomingGraphEdgesRequest(target, GraphCrossPartitionTestSupport.Graph, IncomingCount));
 
     private static EntityRef[] CreateSources(PartitionRef partition)
     {

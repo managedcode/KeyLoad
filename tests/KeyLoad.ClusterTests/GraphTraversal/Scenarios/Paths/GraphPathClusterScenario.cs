@@ -54,7 +54,7 @@ internal static class GraphPathClusterScenario
     internal static GraphShortestPathRequest Request(GraphPathClusterSeed seed, EntityRef? from = null,
         EntityRef? to = null, int maxDepth = 16, int maxVertices = 1_000, int maxEdges = 5_000,
         ImmutableArray<string>? labels = null)
-        => new(1, seed.Partition, Graph, from ?? seed.Source, to ?? seed.Target,
+        => new(seed.Partition, Graph, from ?? seed.Source, to ?? seed.Target,
             maxDepth, maxVertices, maxEdges, labels);
 
     internal static SqlGraphPathRequest SqlRequest(GraphPathClusterSeed seed, EntityRef? from = null,
@@ -66,7 +66,7 @@ internal static class GraphPathClusterScenario
         var statement = $"SELECT * FROM GRAPH_SHORTEST_PATH('{Graph}', '{start.Collection}', '{start.Id}', "
             + $"'{finish.Collection}', '{finish.Id}', {maxDepth}, {maxVertices}, {maxEdges}"
             + (label is null ? ")" : $", '{label}')");
-        return new(1, new QueryRequest(seed.Partition, statement, AllowFullScan: true));
+        return new(new QueryRequest(seed.Partition, statement, AllowFullScan: true));
     }
 
     internal static SqlGraphPathRequest SqlRequestInPartition(GraphPathClusterSeed seed, PartitionRef partition)

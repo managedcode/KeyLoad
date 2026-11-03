@@ -1,3 +1,4 @@
+using KeyLoad.FunctionalTests.QueryExecution;
 using KeyLoad.Query;
 
 namespace KeyLoad.FunctionalTests.ResourceExecution;
@@ -10,8 +11,10 @@ internal sealed class AnalyticalAdmissionTests
     private const string InvalidSql = "invalid SQL";
     private const string SearchTerm = "needle";
     private const string SearchField = "/text";
+    private const string FirstDocument = "a";
+    private const string SecondDocument = "b";
+    private const string DocumentJson = "{\"text\":\"needle\"}";
     private const int ConcurrentReservations = 256;
-    private static readonly TimeSpan CoordinationTimeout = TimeSpan.FromSeconds(10);
 
     [Test]
     public async Task AcMp004_ConcurrentReservationsAreCountedAndNeverRefused()
@@ -66,28 +69,49 @@ internal sealed class AnalyticalAdmissionTests
     }
 
     [Test]
-    public async Task AcMp012_InFlightCancellationAtRealStoreGateReleasesAdmission()
+    public async Task AcMp012_InFlightCancellationAfterNativeReadProgressReleasesAdmission()
     {
-        var held = new RealZoneTreeWriteGateHold();
-        using var db = new TestDatabase(storeFaultObserver: held.Observer);
-        await using var heldLifetime = held;
+        var clock = new QueryObservedWorkClock();
+        using var db = new TestDatabase(timeProvider: clock);
         db.Configure(Collection, ResourceKind.Collection);
+        db.Commit(new PutDocument(Collection, FirstDocument, DocumentJson),
+            new PutDocument(Collection, SecondDocument, DocumentJson));
         var search = new SearchEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var request = new SearchRequest(db.Partition, Collection, SearchField, SearchTerm);
         using var cancellation = new CancellationTokenSource();
-        var tasks = new AnalyticalAdmissionTaskLifetime(CoordinationTimeout);
-        Task<RankedDocument[]>? admitted = null;
-        held.Start(db.Store);
-        await held.WaitUntilEnteredAsync();
-        await tasks.RunWithCleanupAsync(async () =>
+        var before = db.Store.GetReadDiagnostics();
+        var position = db.Store.Position;
+        var admitted = 0;
+        clock.Arm(() => db.Store.GetReadDiagnostics().RangeExaminedBytes > before.RangeExaminedBytes, () =>
         {
-            admitted = tasks.StartExpectedCancellation(() => search.Search(Principal, request, cancellation.Token));
-            var admissionWait = tasks.StartAdmissionWait(db.Database);
-            await Assert.That(await admissionWait.WaitAsync(CoordinationTimeout, TimeProvider.System)).IsTrue();
-        }, cancellation.CancelAsync, held.ReleaseAsync,
-            () => tasks.AssertWorkerIsCancelledAsync(admitted!));
+            admitted = db.Database.QueryReadsInFlight;
+            cancellation.Cancel();
+        });
+        RankedDocument[]? partial = null;
+        try
+        {
+            var error = Assert.ThrowsExactly<OperationCanceledException>(() =>
+                partial = search.Search(Principal, request, cancellation.Token));
+            await Assert.That(error.CancellationToken).IsEqualTo(cancellation.Token);
+        }
+        finally
+        {
+            clock.Disarm();
+        }
+        await Assert.That(clock.Triggered).IsTrue();
+        await Assert.That(admitted).IsEqualTo(1);
+        await Assert.That(db.Store.GetReadDiagnostics().RangeExaminedBytes).IsGreaterThan(before.RangeExaminedBytes);
+        await Assert.That(partial).IsNull();
         await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
-        await Assert.That(await search.SearchAsync(Principal, request)).IsEmpty();
+        await Assert.That(db.Store.Position).IsEqualTo(position);
+        var healthy = await search.SearchAsync(Principal, request);
+        await Assert.That(string.Join(',', healthy.Select(row => row.Document.Reference.Id)))
+            .IsEqualTo(FirstDocument + "," + SecondDocument);
+        await Assert.That(healthy.All(row => row.Document.Json == DocumentJson && row.Document.Revision == 1
+            && !row.Document.Redacted && row.Document.Reference == db.ExpectedReference(
+                new(db.Partition, Collection, row.Document.Reference.Id)))).IsTrue();
+        await Assert.That(db.Database.QueryReadsInFlight).IsEqualTo(0);
+        await Assert.That(db.Store.Position).IsEqualTo(position);
     }
 
 }

@@ -62,7 +62,6 @@ internal static class QueryHostedSearchAssertions
             .SequenceEqual(JsonDefaults.Serialize(expected.ToImmutableArray()))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(page.Leaves).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(leaves.ToImmutableArray()))).IsTrue();
-        await Assert.That(page.Version).IsEqualTo(QueryHostedSearchDataset.Version);
         await Assert.That(page.Complete).IsTrue();
         await Assert.That(page.StatisticsEpoch.Length).IsEqualTo(SHA256.HashSizeInBytes * HexCharactersPerByte);
         await Assert.That(page.StatisticsEpoch.All(char.IsAsciiHexDigitLower)).IsTrue();

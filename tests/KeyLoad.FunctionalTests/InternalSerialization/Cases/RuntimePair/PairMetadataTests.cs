@@ -112,6 +112,6 @@ internal sealed class PairMetadataTests
     {
         var failure = Assert.ThrowsExactly<KeyLoadException>(action);
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(failure.Message).IsEqualTo(PayloadVersion.InvalidPayload);
+        await Assert.That(failure.Message).IsEqualTo(RuntimePayloadContract.InvalidPayload);
     }
 }

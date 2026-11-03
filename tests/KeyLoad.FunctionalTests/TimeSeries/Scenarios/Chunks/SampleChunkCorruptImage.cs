@@ -45,9 +45,8 @@ internal sealed class SampleChunkCorruptImage
                         Digest = Flip(envelope.Digest.Span)
                     }));
                     break;
-                case SampleChunkCorruptionCut.ManifestVersion:
                 case SampleChunkCorruptionCut.ManifestGeneration:
-                    transaction.Put(manifestKey, ChangedManifest(cut));
+                    transaction.Put(manifestKey, ChangedManifestGeneration());
                     break;
                 case SampleChunkCorruptionCut.MissingBlock:
                     transaction.Delete(blockKey);
@@ -70,7 +69,7 @@ internal sealed class SampleChunkCorruptImage
             }
             return true;
         });
-        return cut == SampleChunkCorruptionCut.ManifestVersion ? ErrorCode.FormatUnsupported : ErrorCode.Corruption;
+        return ErrorCode.Corruption;
     }
 
     internal void Restore() => fixture.Owner.Store.Commit((transaction, _) =>
@@ -81,19 +80,14 @@ internal sealed class SampleChunkCorruptImage
         return true;
     });
 
-    private byte[] ChangedManifest(SampleChunkCorruptionCut cut)
+    private byte[] ChangedManifestGeneration()
     {
         var envelope = OrleansSerialization.Deserialize<SampleChunkManifestEnvelope>(manifest);
         var actual = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
-        var malformed = cut == SampleChunkCorruptionCut.ManifestVersion
-            ? actual with
-            {
-                Version = checked(actual.Version + ChangedBit)
-            }
-            : actual with
-            {
-                Generation = SampleChunkCanonicalFixture.MergedGeneration
-            };
+        var malformed = actual with
+        {
+            Generation = SampleChunkCanonicalFixture.MergedGeneration
+        };
         var bytes = OrleansSerialization.Serialize(malformed);
         return OrleansSerialization.Serialize(new SampleChunkManifestEnvelope(bytes, SHA256.HashData(bytes)));
     }

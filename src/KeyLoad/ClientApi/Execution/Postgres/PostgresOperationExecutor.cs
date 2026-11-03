@@ -30,8 +30,6 @@ internal static class PostgresOperationExecutor
                 admission, out var maximumJsonBytes);
             var request = new SqlOperationRequest(partition, portal.Statement.Sql, portal.Parameters,
                 AllowFullScan: portal.Statement.Rows && profile.AllowFullScan,
-                QueryDialectVersion: portal.Statement.Rows || portal.Statement.UsesProfileDialect
-                    ? profile.QueryDialectVersion : SqlOperationProtocol.DefaultQueryDialectVersion,
                 CommandId: mutationIdentity);
             var compilation = SqlOperationCompiler.CompileSessionPlan(request,
                 options.MaximumCanonicalPayloadBytes, services.GetRequiredService<IOptions<QueryExecutionOptions>>(),

@@ -76,7 +76,6 @@ internal static class GraphShortestPathAssertions
     internal static async Task MatchAsync(TestDatabase database, GraphShortestPathResult actual,
         GraphShortestPathReference expected)
     {
-        await Assert.That(actual.Version).IsEqualTo(1);
         await Assert.That(actual.Found).IsEqualTo(expected.Found);
         await Assert.That(actual.Hops).IsEqualTo(expected.Found ? expected.Edges.Length : null);
         var expectedVertices = expected.Vertices.Select(vertex =>

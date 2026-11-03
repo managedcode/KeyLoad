@@ -1,4 +1,3 @@
-using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -35,6 +34,6 @@ public static class StoragePartitionsQueries
         ArgumentNullException.ThrowIfNull(view) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         EngineResourceAccess.ValidatePartition(partition);
         var identity = engine.Store.Identity;
-        return new(AtomicPartitionPlacementProtocol.CurrentVersion, partition, identity.NodeId, identity.Incarnation);
+        return new(partition, identity.NodeId, identity.Incarnation);
     }
 }

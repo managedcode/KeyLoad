@@ -71,7 +71,7 @@ internal static class CommandResultWorkBinding
     internal static CommandWorkProof RequireProof(DecodedGrainRequest request, GrainOperationReply reply)
     {
         var proof = reply.WorkProof;
-        if (proof is null || proof.Version != CommandWorkProof.CurrentVersion
+        if (proof is null
             || proof.RequestId != request.Envelope.RequestId || proof.CommandId != request.Envelope.CommandId
             || proof.PrincipalId != request.Envelope.PrincipalId || proof.Kind != request.Envelope.CommandKind
             || proof.PolicyEpoch < CommandWorkProof.MinimumPolicyEpoch || proof.Lifetimes.IsDefault)

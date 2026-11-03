@@ -8,7 +8,6 @@ namespace KeyLoad.FunctionalTests.Authorization;
 internal static class SafeProjectorOperationCursor
 {
     private const string Purpose = "query-page";
-    private const int CursorVersion = 2;
     private const string FullScan = "bounded-full-scan";
     private const string MissingCursor = "The real safe projector bounded query cursor is absent.";
     private const string InvalidQueryCursor = "The query cursor no longer has a valid authorized read cut.";
@@ -36,7 +35,7 @@ internal static class SafeProjectorOperationCursor
             var expected = new QueryCursorClaims(Purpose, owner.Store.Identity.Incarnation, owner.Store.Identity.NodeId,
                 owner.Store.Identity.ReadGeneration, SafeProjectorOperationProtocol.Reader, policyEpoch, ResourceSchema,
                 QueryEngine.QueryHash(PageRequest(owner)), cut, documentEpoch, IdContinuationOffset, claims.ExpiresAt, admitted.Lifetime,
-                CursorVersion, SafeProjectorOperationProtocol.First);
+                SafeProjectorOperationProtocol.First);
             await SafeProjectorOperationSeed.EqualAsync(claims, expected);
             var paths = raw ? ImmutableArray<string>.Empty : SafeProjectorOperationProtocol.RedactedPaths;
             await SafeProjectorOperationSeed.EqualAsync(page, new QueryPage(

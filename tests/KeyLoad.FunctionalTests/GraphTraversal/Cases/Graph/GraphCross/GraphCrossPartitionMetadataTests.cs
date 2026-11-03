@@ -7,28 +7,28 @@ internal sealed class GraphCrossPartitionMetadataTests
     private static readonly (Type Type, string Alias, string[] Members, uint[] Ids)[] Contracts =
     [
         (typeof(GraphEdgeOwnerVersion), "keyload.contract.graph-edge-owner-version",
-            ["Version", "Revision", "Deleted"], [0, 1, 2]),
+            ["Revision", "Deleted"], [1, 2]),
         (typeof(GraphCrossPartitionDeliveryIntent), "keyload.contract.graph-cross-partition-delivery-intent",
-            ["Version", "SourcePartition", "Graph", "EdgeId", "Destination", "Revision", "Deleted", "Edge",
-                "OriginalPrincipalId", "OriginalPolicyEpoch", "Fingerprint"], [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
+            ["SourcePartition", "Graph", "EdgeId", "Destination", "Revision", "Deleted", "Edge",
+                "OriginalPrincipalId", "OriginalPolicyEpoch", "Fingerprint"], [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]),
         (typeof(ApplyCrossPartitionReverseEdge), "keyload.contract.apply-cross-partition-reverse-edge",
             ["SourcePartition", "Graph", "EdgeId", "Destination", "ExpectedRevision"], [0, 1, 2, 3, 4]),
         (typeof(CompleteCrossPartitionReverseEdge), "keyload.contract.graph-reverse-edge-completion",
             ["SourcePartition", "Graph", "EdgeId", "Destination", "ExpectedRevision"], [0, 1, 2, 3, 4]),
         (typeof(GraphCrossPartitionReceiverState), "keyload.contract.graph-cross-partition-receiver-state",
-            ["Version", "SourcePartition", "Graph", "EdgeId", "Destination", "Revision", "Deleted", "Fingerprint"],
-            [0, 1, 2, 3, 4, 5, 6, 7]),
+            ["SourcePartition", "Graph", "EdgeId", "Destination", "Revision", "Deleted", "Fingerprint"],
+            [1, 2, 3, 4, 5, 6, 7]),
         (typeof(ReadIncomingGraphEdgesRequest), "keyload.contract.graph-incoming-edges-request",
-            ["Version", "Target", "Graph", "Limit"], [0, 1, 2, 3]),
+            ["Target", "Graph", "Limit"], [1, 2, 3]),
         (typeof(GraphIncomingEdgeRow), "keyload.contract.graph-incoming-edge-row",
             ["Edge", "DeliveredRevision"], [0, 1]),
         (typeof(GraphIncomingEdgesPage), "keyload.contract.graph-incoming-edges-page",
-            ["Version", "Rows", "CutPosition", "Projection"], [0, 1, 2, 3]),
+            ["Rows", "CutPosition", "Projection"], [1, 2, 3]),
         (typeof(GraphCrossPartitionCapacity), "keyload.contract.graph-cross-partition-capacity",
-            ["Version", "Direction", "RecordCount", "EncodedBytes"], [0, 1, 2, 3]),
+            ["Direction", "RecordCount", "EncodedBytes"], [1, 2, 3]),
         (typeof(GraphCrossPartitionFingerprint), "keyload.contract.graph-cross-partition-fingerprint",
-            ["Version", "SourcePartition", "Graph", "EdgeId", "Destination", "Revision", "Deleted", "Edge"],
-            [0, 1, 2, 3, 4, 5, 6, 7])
+            ["SourcePartition", "Graph", "EdgeId", "Destination", "Revision", "Deleted", "Edge"],
+            [1, 2, 3, 4, 5, 6, 7])
     ];
 
     [Test]

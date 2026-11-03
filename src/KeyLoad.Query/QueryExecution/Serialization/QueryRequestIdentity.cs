@@ -12,7 +12,6 @@ internal static class QueryRequestIdentity
             Explain = false
         },
         request.Parameters,
-        request.AllowFullScan,
-        request.AstVersion
+        request.AllowFullScan
     });
 }

@@ -47,8 +47,7 @@ internal static class TextOwnerFiles
     {
         TextFileIO.VerifyRegularFile(path);
         var owner = TextFileIO.ReadEnvelope<TextOwnerReceipt>(path, executionOptions.Value.MaximumOwnerReceiptBytes);
-        if (owner is null || owner.OwnedPaths is null || owner.FormatVersion != TextProtocol.FormatVersion
-            || owner.RootDirectory != root || owner.GenerationLeaf != leaf || owner.SourceNodeId != sourceNodeId
+        if (owner is null || owner.OwnedPaths is null || owner.RootDirectory != root || owner.GenerationLeaf != leaf || owner.SourceNodeId != sourceNodeId
             || owner.Scope is null)
         {
             throw TextErrors.Ownership();

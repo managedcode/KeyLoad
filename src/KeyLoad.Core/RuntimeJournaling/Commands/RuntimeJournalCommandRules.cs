@@ -37,7 +37,7 @@ internal static class RuntimeJournalCommandRules
         }
         var properties = new Dictionary<string, string>(mutation.SetProperties, StringComparer.Ordinal);
         var quota = RuntimeJournalRecordAccess.RequireQuota(transaction);
-        var created = new RuntimeJournalHeader(RuntimeJournalProtocol.CurrentVersion, mutation.JournalName,
+        var created = new RuntimeJournalHeader(mutation.JournalName,
             mutation.InstanceId, RuntimeJournalProtocol.InitialOwnerGeneration, RuntimeJournalProtocol.InitialContentRevision,
             RuntimeJournalProtocol.InitialLength, mutation.InstanceId.ToString(RuntimeJournalProtocol.GuidFormat), properties);
         transaction.PutRecord(RuntimeJournalKeys.Header(created.Name), created);

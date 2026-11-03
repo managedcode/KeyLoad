@@ -25,6 +25,4 @@ public static class SampleRollupProtocol
     public const string Missing = "The time-series rollup bucket is absent.";
     /// <summary>Provides the safe invalid canonical rollup state detail.</summary>
     public const string Corrupt = "The time-series rollup state or sample is corrupt.";
-    /// <summary>Provides the safe unsupported current format detail.</summary>
-    public const string Unsupported = "The time-series rollup format is unsupported.";
 }

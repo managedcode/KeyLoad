@@ -34,6 +34,7 @@ internal static class ZoneTreeTreeFactory
             throw new DirectoryNotFoundException(OriginalTreeMissing);
         }
         var factory = Create(directory);
+        ZoneTreeWriteAheadLogAdmission.RequireStoredProcessPersistence(factory);
         var tree = requireExisting ? factory.OpenTransactional() : factory.OpenOrCreateTransactional();
         // Native commit sync also retires MVCC commit state; the engine owns its timer and joined shutdown.
         tree.AutoSyncInterval = TimeSpan.FromMilliseconds(new WriteAheadLogOptions()
@@ -67,6 +68,7 @@ internal static class ZoneTreeTreeFactory
             .ConfigureWriteAheadLogOptions(options =>
             {
                 ConfigureWriteAheadLog(options);
+                options.WriteAheadLogMode = WriteAheadLogMode.Shared;
                 // The transactional tree's native AutoSyncInterval syncs its complete WAL and commit state.
                 options.SyncCompressedModeOptions.EnableTailWriterJob = false;
             })

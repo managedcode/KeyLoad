@@ -4,7 +4,6 @@ namespace KeyLoad.Server.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(TextOnlineCatalog.SerializationAlias)]
 internal sealed record TextOnlineCatalog(
-    [property: global::Orleans.Id(0)] int FormatVersion,
     [property: global::Orleans.Id(1)] Guid NodeId,
     [property: global::Orleans.Id(2)] TextProjectionScope Scope,
     [property: global::Orleans.Id(3)] PhysicalShardRecord Placement,

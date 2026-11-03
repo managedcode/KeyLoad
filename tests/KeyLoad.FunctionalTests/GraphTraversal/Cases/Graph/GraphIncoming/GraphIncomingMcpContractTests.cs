@@ -15,7 +15,6 @@ internal sealed class GraphIncomingMcpContractTests
         var request = GraphIncomingMcpTestData.Request();
         var requestBytes = OrleansSerialization.Serialize(request);
         var runtimeRequest = OrleansSerialization.Deserialize<ReadIncomingGraphEdgesRequest>(requestBytes)!;
-        await Assert.That(runtimeRequest.Version).IsEqualTo(1);
         await Assert.That(runtimeRequest.Target).IsEqualTo(GraphIncomingMcpTestData.Target);
         await Assert.That(runtimeRequest.Graph).IsEqualTo(GraphIncomingMcpTestData.Graph);
         await Assert.That(runtimeRequest.Limit).IsEqualTo(GraphIncomingMcpTestData.Limit);
@@ -38,7 +37,6 @@ internal sealed class GraphIncomingMcpContractTests
         var execution = OrleansSerialization.Deserialize<GraphIncomingEdgesPage>(bytes)!;
         var publicPage = JsonSerializer.Deserialize<GraphIncomingEdgesPage>(
             JsonSerializer.SerializeToUtf8Bytes(page, JsonDefaults.Options), JsonDefaults.Options)!;
-        await Assert.That(execution.Version).IsEqualTo(1);
         await Assert.That(execution.CutPosition).IsEqualTo(GraphIncomingMcpTestData.CutPosition);
         await Assert.That(execution.Projection).IsEqualTo(GraphIncomingMcpTestData.Projection);
         await Assert.That(execution.Rows.Length).IsEqualTo(2);

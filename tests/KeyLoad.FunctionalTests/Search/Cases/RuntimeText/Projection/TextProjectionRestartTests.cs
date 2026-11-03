@@ -28,7 +28,7 @@ internal sealed class TextProjectionRestartTests
             TestContext.Current!.Execution.CancellationToken);
 
         var beforeRestart = new RuntimeTextProjection(indexDirectory,
-            database.Store.Identity.NodeId, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         var firstResult = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), beforeRestart).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
         await AssertEquivalentAsync(expected, firstResult);
@@ -36,7 +36,7 @@ internal sealed class TextProjectionRestartTests
         beforeRestart.Dispose();
 
         using var afterRestart = new RuntimeTextProjection(indexDirectory,
-            database.Store.Identity.NodeId, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         var rebuiltResult = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), afterRestart).SearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
 
@@ -53,7 +53,7 @@ internal sealed class TextProjectionRestartTests
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         var indexDirectory = Path.Combine(database.Directory, "execution-text");
         using (var projection = new RuntimeTextProjection(indexDirectory,
-                   database.Store.Identity.NodeId, UnitTextOptions.Execution()))
+                   database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution())))
         {
             _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root",
                 new(database.Partition, Collection, TextPath, Query));
@@ -107,7 +107,7 @@ internal sealed class TextProjectionRestartTests
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         var indexDirectory = Path.Combine(database.Directory, "execution-text");
         using (var projection = new RuntimeTextProjection(indexDirectory,
-                   database.Store.Identity.NodeId, UnitTextOptions.Execution()))
+                   database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution())))
         {
             _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root",
                 new(database.Partition, Collection, TextPath, Query));
@@ -145,7 +145,6 @@ internal sealed class TextProjectionRestartTests
             Path.Combine(generation, TextProtocol.ManifestFile), TestContext.Current!.Execution.CancellationToken));
         await Assert.That(owner.GenerationLeaf).IsEqualTo(Path.GetFileName(generation));
         await Assert.That(owner.RootDirectory).IsEqualTo(Path.GetFullPath(indexDirectory));
-        await Assert.That(manifest.FormatVersion).IsEqualTo(TextProtocol.FormatVersion);
         await Assert.That(manifest.TokenizerVersion).IsEqualTo(TextProjectionProtocol.TokenizerVersion);
         await Assert.That(manifest.HashVersion).IsEqualTo(TextProjectionProtocol.HashVersion);
         await Assert.That(manifest.Scope.NodeId).IsEqualTo(database.Store.Identity.NodeId);
@@ -162,7 +161,7 @@ internal sealed class TextProjectionRestartTests
     private static void OpenForRestart(string indexDirectory, TestDatabase database)
     {
         using var projection = new RuntimeTextProjection(indexDirectory,
-            database.Store.Identity.NodeId, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
     }
 
     private static async Task AssertEquivalentAsync(RankedDocument[] expected, RankedDocument[] actual)

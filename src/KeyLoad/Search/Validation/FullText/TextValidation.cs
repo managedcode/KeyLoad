@@ -15,7 +15,7 @@ internal static class TextValidation
         const int EmptyFilesLength = 0;
         const int IndexInitialValue = 0;
 
-        if (manifest is null || manifest.FormatVersion != TextProtocol.FormatVersion || manifest.Scope != scope
+        if (manifest is null || manifest.Scope != scope
             || manifest.TokenizerVersion != TextProjectionProtocol.TokenizerVersion
             || manifest.HashVersion != TextProjectionProtocol.HashVersion || manifest.Records is null
             || manifest.Files is null || (manifest.Files.Length == EmptyFilesLength || manifest.Files.Length > executionOptions.Value.MaximumFiles))
@@ -32,14 +32,12 @@ internal static class TextValidation
 
     internal static void ValidateScope(TextProjectionScope scope, Guid sourceNodeId)
     {
-        const int DataEpochValidationBoundary = 0;
         const int ReadGenerationValidationBoundary = 0;
         const int PositionValidationBoundary = 0;
         const int PolicyEpochValidationBoundary = 0;
         const int SchemaVersionValidationBoundary = 0;
 
-        if (scope is null || scope.NodeId != sourceNodeId || scope.Incarnation == Guid.Empty || scope.DataEpoch <= DataEpochValidationBoundary
-            || scope.ReadGeneration < ReadGenerationValidationBoundary || scope.Position < PositionValidationBoundary || scope.PolicyEpoch < PolicyEpochValidationBoundary || scope.SchemaVersion < SchemaVersionValidationBoundary
+        if (scope is null || scope.NodeId != sourceNodeId || scope.Incarnation == Guid.Empty || scope.ReadGeneration < ReadGenerationValidationBoundary || scope.Position < PositionValidationBoundary || scope.PolicyEpoch < PolicyEpochValidationBoundary || scope.SchemaVersion < SchemaVersionValidationBoundary
             || scope.Partition is null || string.IsNullOrWhiteSpace(scope.Collection)
             || string.IsNullOrWhiteSpace(scope.Field) || string.IsNullOrWhiteSpace(scope.PrincipalId))
         {

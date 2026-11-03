@@ -23,7 +23,7 @@ public static class OrleansSerialization
     /// <returns>The complete generated binary payload.</returns>
     // Internal contracts are validated once where public input enters; owned bytes are not re-walked here.
     public static byte[] Serialize<T>(T value)
-        => Serializer.SerializeToArray(new RuntimePayload { Version = PayloadVersion.Current, Value /* KLD0041: The current keyload.internal.value Id 1 slot retains runtime type headers during array encoding. */ = ((object?)value /* KLD0042: The existing generated object slot requires one value-type box here; changing it would change stored binary framing. */) });
+        => Serializer.SerializeToArray(new RuntimePayload { Value /* KLD0041: The current keyload.internal.value Id 1 slot retains runtime type headers during array encoding. */ = ((object?)value /* KLD0042: The existing generated object slot requires one value-type box here; changing it would change stored binary framing. */) });
 
     internal static T Copy<T>(T value) => Copier.Copy(value)!;
 
@@ -34,13 +34,13 @@ public static class OrleansSerialization
     public static void Serialize<T>(T value, Stream destination)
     {
         ArgumentNullException.ThrowIfNull(destination) /* KLD0041: The standard CLR guard checks the caller-owned stream reference before writing the binary frame. */;
-        Serializer.Serialize(new RuntimePayload { Version = PayloadVersion.Current, Value /* KLD0041: The current keyload.internal.value Id 1 slot retains runtime type headers during bounded-stream encoding. */ = ((object?)value /* KLD0042: The existing generated object slot requires one value-type box here; changing it would change stored binary framing. */) }, destination);
+        Serializer.Serialize(new RuntimePayload { Value /* KLD0041: The current keyload.internal.value Id 1 slot retains runtime type headers during bounded-stream encoding. */ = ((object?)value /* KLD0042: The existing generated object slot requires one value-type box here; changing it would change stored binary framing. */) }, destination);
     }
 
     internal static void SerializeToWriter<T>(T value, IBufferWriter<byte> destination)
     {
         ArgumentNullException.ThrowIfNull(destination) /* KLD0041: The standard CLR guard checks the bounded buffer-writer reference before frame encoding. */;
-        Serializer.Serialize(new RuntimePayload { Version = PayloadVersion.Current, Value /* KLD0041: The current keyload.internal.value Id 1 slot retains runtime type headers during buffer-writer encoding. */ = ((object?)value /* KLD0042: The existing generated object slot requires one value-type box here; changing it would change stored binary framing. */) }, destination);
+        Serializer.Serialize(new RuntimePayload { Value /* KLD0041: The current keyload.internal.value Id 1 slot retains runtime type headers during buffer-writer encoding. */ = ((object?)value /* KLD0042: The existing generated object slot requires one value-type box here; changing it would change stored binary framing. */) }, destination);
     }
 
     /// <summary>Decodes a generated contract and checks its owned application envelope.</summary>
@@ -69,14 +69,10 @@ public static class OrleansSerialization
         bool exactRoot)
     {
         var payload = ReadGeneratedPayload(value, session);
-        if (payload.Version != PayloadVersion.Current)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, PayloadVersion.UnsupportedVersion);
-        }
-        if (payload.Value /* KLD0041: This reads the actual generated Id 1 field from the existing versioned binary envelope. */ is not { } result || !(expectedType.IsInstanceOfType(result) /* KLD0041: CLR runtime assignability validates the decoded existing object slot before any typed extraction. */)
+        if (payload.Value /* KLD0041: This reads the actual generated Id 1 field from the generated binary envelope. */ is not { } result || !(expectedType.IsInstanceOfType(result) /* KLD0041: CLR runtime assignability validates the decoded existing object slot before any typed extraction. */)
             || exactRoot && result.GetType() /* KLD0041: Public admission requires the concrete decoded runtime type to equal the registry-selected root type. */ != expectedType)
         {
-            throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+            throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
         }
         return result;
     }
@@ -89,7 +85,7 @@ public static class OrleansSerialization
             var payload = PayloadSerializer.Deserialize(ref reader);
             if (payload is null || reader.Remaining != EmptyRemainingBytes)
             {
-                throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+                throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
             }
             return payload;
         }
@@ -97,7 +93,7 @@ public static class OrleansSerialization
             or OverflowException or InvalidCastException or FormatException or EndOfStreamException or TypeLoadException
             or InvalidOperationException)
         {
-            throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+            throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
         }
     }
 
@@ -129,7 +125,7 @@ public static class OrleansSerialization
     internal static long Measure<T>(T value, SerializerSession session)
     {
         using var buffer = new RuntimeCountingWriter();
-        Serializer.Serialize(new RuntimePayload { Version = PayloadVersion.Current, Value /* KLD0041: The current keyload.internal.value Id 1 slot retains runtime type headers during exact encoded-size measurement. */ = ((object?)value /* KLD0042: The existing generated object slot requires one value-type box here; changing it would change stored binary framing. */) }, buffer, session);
+        Serializer.Serialize(new RuntimePayload { Value /* KLD0041: The current keyload.internal.value Id 1 slot retains runtime type headers during exact encoded-size measurement. */ = ((object?)value /* KLD0042: The existing generated object slot requires one value-type box here; changing it would change stored binary framing. */) }, buffer, session);
         return buffer.Length;
     }
 

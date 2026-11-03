@@ -25,9 +25,6 @@ internal sealed class RuntimeJournalReopenFixture : IDisposable
     private const string CloseNotJoined = "The original execution runtime journal owner close is unknown; retain its root.";
 
     internal DatabaseEngine Database { get; private set; } = null!;
-    internal int MinimumReaderContract => store?.Identity.MinimumReaderContract
-        ?? throw new ObjectDisposedException(nameof(RuntimeJournalReopenFixture));
-
     internal RuntimeJournalReopenFixture()
     {
         var failures = new List<Exception>();

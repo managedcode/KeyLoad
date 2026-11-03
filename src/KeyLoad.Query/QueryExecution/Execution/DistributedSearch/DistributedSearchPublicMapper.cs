@@ -6,7 +6,6 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchPublicMapper
 {
-    private const int VersionOne = 1;
     private const int NoMatches = 0;
     private const int SingleMatch = 1;
     private const string AccessPath = "distributedCanonicalSearch";
@@ -34,7 +33,7 @@ internal static class DistributedSearchPublicMapper
             budget.Check();
             leaves.Add(new(witness.Partition, witness.CutPosition, witness.PolicyEpoch, witness.SchemaVersion, AccessPath));
         }
-        var page = new DistributedSearchPage(VersionOne, hits.MoveToImmutable(), leaves.MoveToImmutable(), epoch, true);
+        var page = new DistributedSearchPage(hits.MoveToImmutable(), leaves.MoveToImmutable(), epoch, true);
         return page;
     }
 

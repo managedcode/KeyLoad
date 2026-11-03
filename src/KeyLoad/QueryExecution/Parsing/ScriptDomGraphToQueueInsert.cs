@@ -5,12 +5,8 @@ namespace KeyLoad.Server;
 internal static class ScriptDomGraphToQueueInsert
 {
     internal static (Guid Id, Mutation Mutation) Read(Dom.QuerySpecification query,
-        ScriptDomCompositionParameters parameters, int version)
+        ScriptDomCompositionParameters parameters)
     {
-        if (version != SqlOperationProtocol.DefaultQueryDialectVersion)
-        {
-            throw ScriptDomOperationErrors.Unsupported();
-        }
         var values = ScriptDomInsertShape.Values(query, ValueCount);
         var id = parameters.Read<Guid>(values[CommandIndex]);
         var queue = parameters.Read<string>(values[QueueIndex]);

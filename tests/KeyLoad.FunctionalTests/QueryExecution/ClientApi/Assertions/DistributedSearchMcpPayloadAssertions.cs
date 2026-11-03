@@ -19,7 +19,7 @@ internal static class DistributedSearchMcpPayloadAssertions
             McpCanonicalTestData.Domain, SourcePartition);
         var destination = new PartitionRef(McpCanonicalTestData.Tenant, McpCanonicalTestData.Database,
             McpCanonicalTestData.Domain, DestinationPartition);
-        return new(DistributedSearchMcpProtocol.VersionOne, [source, destination],
+        return new([source, destination],
             new(source, McpCanonicalTestData.Resource, TextField: McpCanonicalTestData.FieldPath, Text: Term,
                 AllowedIds: [McpCanonicalTestData.Entity], Explain: true));
     }
@@ -44,8 +44,7 @@ internal static class DistributedSearchMcpPayloadAssertions
     }
 
     private static DistributedSearchPage Page(DistributedSearchRequest request)
-        => new(DistributedSearchMcpProtocol.VersionOne,
-            [new(new(new(request.Partitions[RuntimeIndex], McpCanonicalTestData.Resource, McpCanonicalTestData.Entity),
+        => new([new(new(new(request.Partitions[RuntimeIndex], McpCanonicalTestData.Resource, McpCanonicalTestData.Entity),
                 DistributedSearchMcpProtocol.Revision, DistributedSearchMcpProtocol.LiteralDocument, true, [Secret]),
                 DistributedSearchMcpProtocol.RankedScore, new(DistributedSearchMcpProtocol.FusionConstant,
                     [new(SearchBranchKind.Text, RuntimeRank, Weight, DistributedSearchMcpProtocol.RankedScore)]))],

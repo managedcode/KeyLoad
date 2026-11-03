@@ -113,8 +113,7 @@ internal static class RequestCqrsAnnPinnedLifetimeFlow
         var search = new SearchEngine(fixture.Database.Database,
             Microsoft.Extensions.Options.Options.Create(new QueryExecutionOptions { EnableApproximateSearch = true }), null, execution);
         var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => search.ApproximateSearchAsync(
-            RequestCqrsAnnTestData.Principal, new(RequestCqrsAnnTestData.Version,
-                new(fixture.Database.Partition, request.Collection, VectorField: request.Field,
+            RequestCqrsAnnTestData.Principal, new(new(fixture.Database.Partition, request.Collection, VectorField: request.Field,
                     Vector: [.. RequestCqrsAnnTestData.Query], Space: request.Space, Limit: SingleRecord),
                 request.Consumer, request.IndexGeneration), token)) ?? throw new InvalidOperationException();
         await Assert.That(error.Code).IsEqualTo(ErrorCode.HistoryUnavailable);

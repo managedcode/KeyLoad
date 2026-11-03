@@ -8,7 +8,6 @@ internal static class DistributedSearchMcpProtocol
     internal const string Boolean = "boolean";
     internal const string Number = "number";
     internal const string Closed = "additionalProperties";
-    internal const string Version = "version";
     internal const string Partitions = "partitions";
     internal const string Search = "search";
     internal const string Partition = "partition";
@@ -27,8 +26,8 @@ internal static class DistributedSearchMcpProtocol
     internal const string Contributions = "contributions";
     internal const string Fusion = "fusionConstant";
     internal const string Missing = "The distributed-search catalog operation is missing.";
-    internal static readonly string[] RequestFields = [Version, Partitions, Search];
-    internal static readonly string[] ResultFields = [Version, Hits, Leaves, Epoch, Complete];
+    internal static readonly string[] RequestFields = [Partitions, Search];
+    internal static readonly string[] ResultFields = [Hits, Leaves, Epoch, Complete];
     internal static readonly string[] SearchFields = [Partition, Collection, "textField", "text", "vectorField",
         "vector", "space", Limit, "textWeight", "vectorWeight", Fusion, "allowedIds", "explain", "textIndex"];
     internal static readonly string[] PartitionFields = ["tenantId", "databaseId", "transactionDomainId", "partitionKey"];
@@ -53,7 +52,6 @@ internal static class DistributedSearchMcpProtocol
     internal const string Rank = "runtimeRank";
     internal const string Weight = "weight";
     internal const string Contribution = "contribution";
-    internal const int VersionOne = 1;
     internal const int DefaultLimit = 10;
     internal const int FusionConstant = 60;
     internal const long Revision = 7;

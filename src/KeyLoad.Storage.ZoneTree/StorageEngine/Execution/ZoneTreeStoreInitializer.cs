@@ -37,6 +37,7 @@ internal static class ZoneTreeStoreInitializer
         ZoneTreeWriteAheadLogAdmission.RequireProcessPersistence(runtime.Tree.Maintenance.ZoneTree);
         runtime.OwnershipSettlement.BeginConstructor();
         var factory = ZoneTreeTreeFactory.Plain(plainDirectory);
+        ZoneTreeWriteAheadLogAdmission.RequireStoredProcessPersistence(factory);
         runtime.PlainTree = requireExisting ? factory.Open() : factory.OpenOrCreate();
         runtime.OwnershipSettlement.ConstructorReturned();
         ZoneTreeWriteAheadLogAdmission.RequireProcessPersistence(runtime.PlainTree);

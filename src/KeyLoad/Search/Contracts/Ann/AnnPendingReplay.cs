@@ -4,7 +4,6 @@ namespace KeyLoad.Server.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(AnnProtocol.PendingAlias)]
 internal sealed record AnnPendingReplay(
-    [property: global::Orleans.Id(0)] int Version,
     [property: global::Orleans.Id(1)] AnnManifest AdmittedUpper,
     [property: global::Orleans.Id(2)] long AfterSequence,
     [property: global::Orleans.Id(3)] long ThroughSequence,

@@ -41,33 +41,14 @@ internal sealed class SqlInnerJoinSyntaxRejectionTests
         SqlInnerJoinRejectionFixture.Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var before = JsonDefaults.Serialize(engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion)));
+            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true)));
         var position = database.Store.Position;
         var diagnostics = database.Store.GetReadDiagnostics();
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, sql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion)));
+            new(database.Partition, sql, AllowFullScan: true)));
 
         await Assert.That(failure.Code).IsEqualTo(code);
-        await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsEqualTo(diagnostics.RangeExaminedBytes);
-        await Assert.That(database.Store.Position).IsEqualTo(position);
-        await SqlInnerJoinRejectionFixture.VerifyHealthyAsync(database, engine, before, position);
-    }
-    [Test]
-    [Arguments(2)]
-    [Arguments(3)]
-    public async Task NoncurrentSqlDialectRejectsBeforeScanAndCurrentJoinFollows(int dialect)
-    {
-        using var database = new TestDatabase();
-        SqlInnerJoinRejectionFixture.Seed(database);
-        var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var before = JsonDefaults.Serialize(engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion)));
-        var position = database.Store.Position;
-        var diagnostics = database.Store.GetReadDiagnostics();
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute(SqlInnerJoinRejectionFixture.Root,
-            new(database.Partition, SqlInnerJoinRejectionFixture.HealthySql, AllowFullScan: true, QueryDialectVersion: dialect)));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(database.Store.GetReadDiagnostics().RangeExaminedBytes).IsEqualTo(diagnostics.RangeExaminedBytes);
         await Assert.That(database.Store.Position).IsEqualTo(position);
         await SqlInnerJoinRejectionFixture.VerifyHealthyAsync(database, engine, before, position);

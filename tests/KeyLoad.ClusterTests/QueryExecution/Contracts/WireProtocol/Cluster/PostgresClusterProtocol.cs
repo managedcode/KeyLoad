@@ -17,7 +17,6 @@ internal static class PostgresClusterProtocol
     internal const string Domain = "atomic";
     internal const string PartitionKey = "one";
     internal static PartitionRef Partition => new(Tenant, Database, Domain, PartitionKey);
-    internal const int ScalarDialect = 1;
     internal const int JoinDialect = 2;
     internal const long SeedRevision = 1;
     internal const string PrincipalPrefix = "c1-probe-execution-sql-";

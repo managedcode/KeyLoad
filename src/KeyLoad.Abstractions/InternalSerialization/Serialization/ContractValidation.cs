@@ -20,7 +20,7 @@ internal static class ContractValidation
         }
         if (value is null)
         {
-            throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+            throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
         }
         if (!IsScalar(typeof(T)) && !IsScalar(value.GetType()))
         {
@@ -36,7 +36,7 @@ internal static class ContractValidation
         {
             if (validation?.Required is true)
             {
-                throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+                throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
             }
             return 0;
         }
@@ -137,7 +137,7 @@ internal static class ContractValidation
         if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ImmutableArray<>)
             && CollectionDefaults.GetOrAdd(type, static current => current.GetProperty(nameof(ImmutableArray<int>.IsDefault))!).GetValue(value) /* KLD0041: ImmutableArray<T>.IsDefault is resolved from the runtime closed type; reflection returns its boolean through object. */ is true)
         {
-            throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+            throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
         }
     }
 

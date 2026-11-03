@@ -6,8 +6,8 @@ namespace KeyLoad.Client;
 
 public sealed partial class KeyLoadClient
 {
-    /// <summary>Executes one versioned SQL operation and returns its actual canonical JSON result.</summary>
-    /// <param name="request">One Q1 SELECT or CALL and its bound arguments.</param>
+    /// <summary>Executes one SQL operation and returns its actual canonical JSON result.</summary>
+    /// <param name="request">One SQL SELECT or CALL and its bound arguments.</param>
     /// <param name="cancellationToken">Caller cancellation; CALL cancellation can leave an unknown write outcome.</param>
     /// <returns>The canonical selected result or a typed problem.</returns>
     public Task<Result<JsonElement>> ExecuteSqlAsync(SqlOperationRequest request, CancellationToken cancellationToken = default)
@@ -21,7 +21,7 @@ public sealed partial class KeyLoadClient
     public Task<Result<QueryPage>> QueryAsync(QueryRequest request, CancellationToken cancellationToken = default)
         => Send<QueryPage, QueryRequest>(ApiRoutes.Query, request, false, null, cancellationToken);
     /// <summary>Executes a canonical AST query request.</summary>
-    /// <param name="request">Typed Q1 AST and requested page controls.</param>
+    /// <param name="request">Typed AST and requested page controls.</param>
     /// <param name="cancellationToken">Token that cancels the HTTP operation.</param>
     /// <returns>The typed query page.</returns>
     public Task<Result<QueryPage>> QueryAstAsync(AstQueryRequest request, CancellationToken cancellationToken = default)

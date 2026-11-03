@@ -7,10 +7,9 @@ internal static class PartitionQueryMcpSchemaAssertions
 {
     private static readonly string[] PartitionFields = [McpDiscoveryProtocol.TenantId, McpDiscoveryProtocol.DatabaseId,
         McpDiscoveryProtocol.TransactionDomainId, McpDiscoveryProtocol.PartitionKey];
-    private static readonly string[] RequestFields = [PartitionQueryMcpProtocol.Version, PartitionQueryMcpProtocol.Partitions,
-        PartitionQueryMcpProtocol.Query, PartitionQueryMcpProtocol.Parameters, PartitionQueryMcpProtocol.AllowFullScan,
-        PartitionQueryMcpProtocol.AstVersion];
-    private static readonly string[] PageFields = [PartitionQueryMcpProtocol.Version, PartitionQueryMcpProtocol.Rows,
+    private static readonly string[] RequestFields = [PartitionQueryMcpProtocol.Partitions,
+        PartitionQueryMcpProtocol.Query, PartitionQueryMcpProtocol.Parameters, PartitionQueryMcpProtocol.AllowFullScan];
+    private static readonly string[] PageFields = [PartitionQueryMcpProtocol.Rows,
         PartitionQueryMcpProtocol.Leaves, PartitionQueryMcpProtocol.Complete];
     private static readonly string[] RowFields = [PartitionQueryMcpProtocol.Reference, PartitionQueryMcpProtocol.Row];
     private static readonly string[] WitnessFields = [McpDiscoveryProtocol.Partition, PartitionQueryMcpProtocol.CutPosition,
@@ -24,8 +23,6 @@ internal static class PartitionQueryMcpSchemaAssertions
         var request = Resolve(input, input.GetProperty(PartitionQueryMcpProtocol.Definitions).GetProperty(PartitionQueryMcpProtocol.Request));
         await VerifyObjectAsync(request, RequestFields, RequestFields);
         var requestProperties = request.GetProperty(McpDiscoveryProtocol.Properties);
-        await VerifyPrimitiveAsync(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.Version), McpDiscoveryProtocol.Integer);
-        await VerifyPrimitiveAsync(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.AstVersion), McpDiscoveryProtocol.Integer);
         await VerifyPrimitiveAsync(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.AllowFullScan), McpDiscoveryProtocol.Boolean);
         await VerifyPartitionArrayAsync(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.Partitions));
         var query = Resolve(input, requestProperties.GetProperty(PartitionQueryMcpProtocol.Query));
@@ -51,7 +48,6 @@ internal static class PartitionQueryMcpSchemaAssertions
         var page = Resolve(root, root.GetProperty(PartitionQueryMcpProtocol.Definitions).GetProperty(PartitionQueryMcpProtocol.Result));
         await VerifyObjectAsync(page, PageFields, PageFields);
         var properties = page.GetProperty(McpDiscoveryProtocol.Properties);
-        await VerifyPrimitiveAsync(root, properties.GetProperty(PartitionQueryMcpProtocol.Version), McpDiscoveryProtocol.Integer);
         await VerifyPrimitiveAsync(root, properties.GetProperty(PartitionQueryMcpProtocol.Complete), McpDiscoveryProtocol.Boolean);
         var rows = Resolve(root, properties.GetProperty(PartitionQueryMcpProtocol.Rows).GetProperty(PartitionQueryMcpProtocol.Items));
         await VerifyObjectAsync(rows, RowFields, RowFields);

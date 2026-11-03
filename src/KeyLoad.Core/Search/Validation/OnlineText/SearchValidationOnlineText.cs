@@ -26,7 +26,7 @@ public static class SearchValidationOnlineText
         var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
         var placement = engine.ReadAtomicPartitionPlacement(view, principal.Id, request.Consumer.Partition);
         var resourceSha = Convert.ToHexStringLower(SHA256.HashData(OrleansSerialization.Serialize(resource)));
-        if (command.DataEpoch != engine.Store.Identity.FormatVersion || source.Incarnation != engine.Store.Identity.Incarnation || source.AppliedPosition != OrleansSerialization.Deserialize<long>(appliedBytes) || source.ThroughSequence != head.Tail || consumer.Checkpoint != source.ThroughSequence || source.PolicyEpoch != principal.PolicyEpoch || source.SchemaVersion != resource.SchemaVersion || source.ResourceSha256 != resourceSha || placement.PhysicalShardId != request.Placement.PhysicalShardId || placement.Incarnation != request.Placement.Incarnation)
+        if (source.Incarnation != engine.Store.Identity.Incarnation || source.AppliedPosition != OrleansSerialization.Deserialize<long>(appliedBytes) || source.ThroughSequence != head.Tail || consumer.Checkpoint != source.ThroughSequence || source.PolicyEpoch != principal.PolicyEpoch || source.SchemaVersion != resource.SchemaVersion || source.ResourceSha256 != resourceSha || placement.PhysicalShardId != request.Placement.PhysicalShardId || placement.Incarnation != request.Placement.Incarnation)
         {
             throw Errors.Fail(ErrorCode.OwnershipLost, OnlineTextPublicationProtocol.InvalidPublication);
         }

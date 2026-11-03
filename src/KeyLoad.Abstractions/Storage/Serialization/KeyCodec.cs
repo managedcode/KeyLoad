@@ -3,16 +3,16 @@ using static KeyLoad.Storage.KeyCodecTokens;
 
 namespace KeyLoad.Storage;
 
-/// <summary>Version 1 binary keys; strings use UTF-8 byte order and zero escaping.</summary>
+/// <summary>Sortable binary keys; strings use UTF-8 byte order and zero escaping.</summary>
 public static class KeyCodec
 {
-    /// <summary>Gets the version byte written at the start of every encoded key.</summary>
-    public const byte Version = 1;
+    /// <summary>Gets the framing marker written at the start of every encoded key.</summary>
+    public const byte PrefixMarker = 1;
     internal const int MaximumComponents = 256;
     private const string TooManyComponentsMessage = "Key component count exceeds the supported limit.";
     private const int InitialKeyBytes = 256;
 
-    /// <summary>Encodes typed components into a version 1 sortable binary key without boxing them.</summary>
+    /// <summary>Encodes typed components into a sortable binary key without boxing them.</summary>
     /// <param name="components">The key components, in their comparison order.</param>
     /// <returns>The encoded key bytes.</returns>
     /// <exception cref="KeyLoadException">A component cannot be encoded or the component count exceeds the limit.</exception>
@@ -28,7 +28,7 @@ public static class KeyCodec
         var writer = new KeyBufferWriter(initial);
         try
         {
-            writer.Write(Version);
+            writer.Write(PrefixMarker);
             foreach (var component in components)
             {
                 KeyCodecWritePrimitives.Write(ref writer, in component);
@@ -53,7 +53,7 @@ public static class KeyCodec
         var writer = new KeyBufferWriter(initial);
         try
         {
-            writer.Write(Version);
+            writer.Write(PrefixMarker);
             foreach (ref readonly var component in prefix)
             {
                 KeyCodecWritePrimitives.Write(ref writer, in component);
@@ -71,14 +71,14 @@ public static class KeyCodec
         }
     }
 
-    /// <summary>Decodes a version 1 sortable binary key into its components.</summary>
+    /// <summary>Decodes a sortable binary key into its components.</summary>
     /// <param name="key">The encoded key bytes.</param>
     /// <returns>The decoded components in their original order.</returns>
     /// <exception cref="KeyLoadException">The key is unsupported or malformed.</exception>
     public static DecodedKey Decode(ReadOnlySpan<byte> key)
     {
         var /* KLD0041: This decoder materializes the closed native scalar set into compact reference-sized slots, exposed through DecodedKey. */ values = new object?[KeyCodecValidation.Count(key)] /* KLD0041: Native scalar slots avoid a large per-component struct array for text-heavy keys. */;
-        var offset = VersionBytes;
+        var offset = PrefixBytes;
         for (var index = 0; index < values /* KLD0041: This is only the owned native slot count. */.Length; index++)
         {
             var tag = key[offset++];

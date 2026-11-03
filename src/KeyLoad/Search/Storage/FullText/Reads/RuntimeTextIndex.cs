@@ -9,7 +9,7 @@ namespace KeyLoad.Server.Search;
 
 internal static class RuntimeTextIndex
 {
-    internal static IndexOfTokenRecordPreviousToken<ulong, ulong> Open(string directory, IFileStreamProvider fileStreamProvider, IOptions<TextExecutionOptions> executionOptions)
+    internal static IndexOfTokenRecordPreviousToken<ulong, ulong> Open(string directory, IFileStreamProvider fileStreamProvider, IOptions<TextExecutionOptions> executionOptions, WriteAheadLogMode walMode)
     {
         const int DisabledBloomFilterBits = 0;
         const int DisabledBlockCacheLifetime = 0;
@@ -22,7 +22,7 @@ internal static class RuntimeTextIndex
                 factory.Options.MutableSegmentBloomFilterBitsPerItem = DisabledBloomFilterBits;
                 factory.Options.EnableSingleSegmentGarbageCollection = false;
                 factory.SetMutableSegmentMaxItemCount(executionOptions.Value.MutableSegmentMaximumItems)
-                    .ConfigureWriteAheadLogOptions(wal => wal.WriteAheadLogMode = WriteAheadLogMode.Sync);
+                    .ConfigureWriteAheadLogOptions(wal => wal.WriteAheadLogMode = walMode);
             }
         };
         var index = new IndexOfTokenRecordPreviousToken<ulong, ulong>(directory,

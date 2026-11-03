@@ -3,8 +3,8 @@ namespace KeyLoad.Storage;
 // Canonical wire identities; these values are not node admission or execution settings.
 internal static class KeyCodecTokens
 {
-    internal const int VersionOffset = 0;
-    internal const int VersionBytes = 1;
+    internal const int PrefixOffset = 0;
+    internal const int PrefixBytes = 1;
     internal const int MissingTag = 0x10;
     internal const int NullTag = 0x11;
     internal const int BooleanTag = 0x20;
@@ -21,7 +21,7 @@ internal static class KeyCodecTokens
     internal const int EscapedZeroByte = 0;
     internal const int ZeroEscapeMarker = 0xFF;
     internal const ulong SortableSignMask = 1UL << 63;
-    internal const string UnknownVersion = "Unknown key codec version.";
+    internal const string InvalidPrefix = "The encoded key prefix is invalid.";
     internal const string UnsupportedComponent = "This type is not supported by key codec.";
     internal const string NonfiniteNumber = "Indexed numbers must be finite.";
 }

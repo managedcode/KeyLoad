@@ -12,7 +12,7 @@ namespace KeyLoad.ClusterTests.Authorization;
 internal static class CredentialAuthorityFlow
 {
     private const string MissingRepairResult = "Original acknowledged credential repair is absent.";
-    private const string UnsupportedSql = "The unified SQL version, statement or target operation is unsupported.";
+    private const string UnsupportedSql = "The unified SQL statement or target operation is unsupported.";
 
     internal static async Task RunAsync(ClusterFixture fixture, CredentialAuthorityState state, bool expire, CancellationToken token)
     {

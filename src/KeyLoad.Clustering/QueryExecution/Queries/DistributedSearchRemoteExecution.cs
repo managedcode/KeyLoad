@@ -10,7 +10,6 @@ namespace KeyLoad.Clustering;
 internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, string principalId, IServiceProvider services,
     GrainRequestCodec codec, DecodedGrainRequest original)
 {
-    private const int ContractVersion = 1;
     private readonly PartitionLeafCalls leaves = new(database, principalId, services, original);
     private readonly QueryExecutionOptions options = services.GetRequiredService<IOptions<QueryExecutionOptions>>().Value;
     private readonly Dictionary<PartitionRef, (SiloAddress Address, PhysicalShardRecord Owner)> owners = [];
@@ -21,7 +20,7 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
         var source = leaves.CaptureMetadata(phase.Search.Partition, phase.Search.Collection, parent);
         var target = leaves.Target(phase.Search.Partition);
         var selected = await ResolveOwnerAsync(target, phase, parent, token).ConfigureAwait(true);
-        var request = new DistributedSearchOwnedLeaf(ContractVersion, phase.Phase, phase.Search,
+        var request = new DistributedSearchOwnedLeaf(phase.Phase, phase.Search,
             selected.Owner, phase.Search.Partition.TenantId, phase.Witness, phase.Statistics, phase.Scope, phase.SourceWindowId, phase.Selected, source.Definition, source.Coverage, source.Principal);
         var childId = Guid.NewGuid();
         var child = codec.CreateDistributedSearchLeaf(childId, principalId, request);

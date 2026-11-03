@@ -115,7 +115,6 @@ internal sealed class MissingIdentityTests
         }
         var identity = files.Initialize();
 
-        await Assert.That(identity.FormatVersion).IsEqualTo(StoreFileFixture.CurrentIdentityVersion);
         await Assert.That(Directory.EnumerateFileSystemEntries(files.DirectoryPath)
             .Select(path => Path.GetFileName(path)!).Order(StringComparer.Ordinal))
             .IsEquivalentTo([IdentityFileName, OwnerLockFileName, PlainTreeDirectoryName, TreeDirectoryName], CollectionOrdering.Matching);

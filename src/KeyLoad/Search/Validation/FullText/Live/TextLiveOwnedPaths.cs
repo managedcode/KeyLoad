@@ -46,8 +46,12 @@ internal static class TextLiveOwnedPaths
                 throw TextErrors.Ownership();
             }
         }
-        var actualPaths = actual.Select(static path => new TextOwnedPath(path.Key, path.Value));
-        if (!actualPaths.SequenceEqual(expectedPaths))
+        // Native engines can retain owned empty directories that have no manifest file parent.
+        var actualFiles = actual.Where(static path => !path.Value)
+            .Select(static path => new TextOwnedPath(path.Key, false));
+        if (!actualFiles.SequenceEqual(expectedPaths.Where(static path => !path.IsDirectory))
+            || expectedPaths.Any(path => !actual.TryGetValue(path.RelativePath, out var directory)
+                || directory != path.IsDirectory))
         {
             throw TextErrors.Corrupt();
         }

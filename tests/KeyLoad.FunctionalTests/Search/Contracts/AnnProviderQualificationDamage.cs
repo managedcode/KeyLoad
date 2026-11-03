@@ -2,7 +2,7 @@ namespace KeyLoad.FunctionalTests.Search;
 
 internal enum AnnProviderQualificationDamage
 {
-    HeaderVersion,
+    HeaderCount,
     HeaderEntryPoint,
     HeaderRetainedBytes,
     NodeOrdinal,

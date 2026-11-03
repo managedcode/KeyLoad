@@ -22,10 +22,6 @@ internal static class ScriptDomQueryAdapter
         execution.Validate();
         cancellationToken.ThrowIfCancellationRequested();
         budget.Check();
-        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
-        {
-            throw ScriptDomErrors.Unsupported();
-        }
         if (request.Parameters?.Count > execution.MaximumParameters || positionalParameterCount is < EmptyCount
             || positionalParameterCount > execution.MaximumParameters)
         {
@@ -33,11 +29,10 @@ internal static class ScriptDomQueryAdapter
         }
         var context = new ScriptDomLoweringContext(executionOptions, budget,
             request.Parameters, positionalParameterCount);
-        var query = ScriptDomSelectLowering.Read(statement, request.QueryDialectVersion, context);
+        var query = ScriptDomSelectLowering.Read(statement, context);
         cancellationToken.ThrowIfCancellationRequested();
         budget.Check();
-        return new(request.Partition, query, request.Parameters, request.AllowFullScan, request.Cursor,
-            AstVersion: request.QueryDialectVersion);
+        return new(request.Partition, query, request.Parameters, request.AllowFullScan, request.Cursor);
     }
 
     private const int EmptyCount = 0;

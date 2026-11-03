@@ -27,8 +27,7 @@ internal static class TextOnlinePublication
         var digest = TextOnlineManifestDigest.Calculate(Path.Combine(
             TextOnlinePagePreparation.RequireOwner(session).Path, TextIncrementalProtocol.ManifestFile),
             session.Budget, options.RuntimeText);
-        var command = new OnlineTextPublicationPhaseCommand(session.Request, result, current.DataEpoch,
-            session.Leaf ?? throw TextErrors.Ownership(), digest, session.GenerationId,
+        var command = new OnlineTextPublicationPhaseCommand(session.Request, result, session.Leaf ?? throw TextErrors.Ownership(), digest, session.GenerationId,
             session.ExpectedCurrentCommandId, session.Id);
         session.RegisterPublication(result);
         session.Issued = database.CreateOnlineTextPublicationOperation(session.PrincipalId, clock.GetUtcNow(),

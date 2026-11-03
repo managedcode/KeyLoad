@@ -5,7 +5,6 @@ namespace KeyLoad.Clustering;
 /// <summary>Creates the single execution grain key for a complete, case-sensitive logical partition.</summary>
 internal static class PartitionQueryGrainIdentity
 {
-    internal const int InterfaceVersion = 2;
 
     internal static string For(PartitionRef partition)
     {

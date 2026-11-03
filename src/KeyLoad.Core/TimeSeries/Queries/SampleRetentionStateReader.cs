@@ -4,9 +4,7 @@ namespace KeyLoad.Core.TimeSeries;
 
 internal static class SampleRetentionStateReader
 {
-    internal const int CurrentFormatVersion = 1;
     private const string RetentionSpace = "sample-retention";
-    private const string UnsupportedFormat = "The time-series retention format is unsupported.";
     private const string CorruptState = "The time-series retention state is corrupt.";
 
     internal static byte[] Key(PartitionRef partition, string set, string seriesId)
@@ -47,11 +45,6 @@ internal static class SampleRetentionStateReader
     internal static void Validate(SampleRetentionState state)
     {
         const int PurgedCountValidationBoundary = 0;
-
-        if (state.FormatVersion != CurrentFormatVersion)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, UnsupportedFormat);
-        }
 
         if (state.BeforeUtcTicks < DateTimeOffset.MinValue.UtcTicks
             || state.BeforeUtcTicks > DateTimeOffset.MaxValue.UtcTicks || state.PurgedCount < PurgedCountValidationBoundary)

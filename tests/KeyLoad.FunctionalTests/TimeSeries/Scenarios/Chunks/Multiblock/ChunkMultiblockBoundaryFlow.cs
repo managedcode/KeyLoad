@@ -8,18 +8,18 @@ internal static class ChunkMultiblockBoundaryFlow
     private const long FinalCorrectionRevision = 261;
     private const long FaultAndRepairCommits = 2;
 
-    internal static async Task RunAsync(bool unknownVersion)
+    internal static async Task RunAsync()
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             using var fixture = new ChunkSelectedIntegrityFixture();
-            await ServerFailureObserver.ObserveAsync(() => CompleteAsync(fixture, unknownVersion), failures);
+            await ServerFailureObserver.ObserveAsync(() => CompleteAsync(fixture), failures);
         }, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private static async Task CompleteAsync(ChunkSelectedIntegrityFixture fixture, bool unknownVersion)
+    private static async Task CompleteAsync(ChunkSelectedIntegrityFixture fixture)
     {
         fixture.Apply(fixture.Operation(new AppendSamples(SampleChunkCanonicalFixture.Set, SampleChunkCanonicalFixture.Series,
             ChunkMultiblockBoundaryData.Additional, SampleChunkCanonicalFixture.Tags)));
@@ -27,7 +27,7 @@ internal static class ChunkMultiblockBoundaryFlow
             SampleChunkCanonicalFixture.Series, fixture.WindowId, CorrectionRevision)));
         await ChunkMultiblockBoundaryRows.RequireAsync(fixture, healthy: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
-        await FaultAsync(fixture, unknownVersion);
+        await FaultAsync(fixture);
         await ChunkMultiblockBoundaryRows.RequireAsync(fixture, healthy: false);
         await ChunkSelectedIntegrityAssertions.Replay(fixture);
         fixture.Apply(fixture.Operation(new AppendSamples(SampleChunkCanonicalFixture.Set,
@@ -44,7 +44,7 @@ internal static class ChunkMultiblockBoundaryFlow
         }
     }
 
-    private static async Task FaultAsync(ChunkSelectedIntegrityFixture fixture, bool unknownVersion)
+    private static async Task FaultAsync(ChunkSelectedIntegrityFixture fixture)
     {
         var before = SampleRawIntegrityAssertions.Capture(fixture.Store);
         var fault = await ChunkMultiblockBoundaryDamage.CaptureAsync(fixture);
@@ -52,16 +52,16 @@ internal static class ChunkMultiblockBoundaryFlow
         var injected = new List<long>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
-            ChunkMultiblockBoundaryDamage.Inject(fixture, fault, unknownVersion);
+            ChunkMultiblockBoundaryDamage.Inject(fixture, fault);
             injected.Add(before.Position);
             var damaged = SampleRawIntegrityAssertions.Capture(fixture.Store);
             await Assert.That(damaged.Position).IsEqualTo(checked(before.Position + 1));
-            await ChunkMultiblockBoundaryRefusal.RunAsync(fixture, unknownVersion);
+            await ChunkMultiblockBoundaryRefusal.RunAsync(fixture);
             fixture.Reopen();
             var cold = SampleRawIntegrityAssertions.Capture(fixture.Store);
             await Assert.That(cold.Position).IsEqualTo(damaged.Position);
             await Assert.That(cold.Image).IsEqualTo(damaged.Image);
-            await ChunkMultiblockBoundaryRefusal.RunAsync(fixture, unknownVersion);
+            await ChunkMultiblockBoundaryRefusal.RunAsync(fixture);
         }, failures);
         var repairCuts = new List<SampleRawIntegrityCut>();
         await ServerFailureObserver.ObserveAsync(() =>

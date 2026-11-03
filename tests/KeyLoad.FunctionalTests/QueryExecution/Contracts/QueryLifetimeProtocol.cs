@@ -5,7 +5,6 @@ internal static class QueryLifetimeProtocol
     internal const long SourceEpoch = 5;
     internal const long TargetEpoch = 8;
     internal const long NextEpoch = 1;
-    internal const int Version = 1;
     internal const int Limit = 1;
     internal const int NoRows = 0;
     internal const int ColdCount = 2;

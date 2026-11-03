@@ -6,7 +6,7 @@ using TUnit.Assertions.Enums;
 
 namespace KeyLoad.ClusterTests.RelationalStorage;
 
-/// <summary>Exercises the same bounded Q2 join through the actual Orleans SDK and official MCP clients.</summary>
+/// <summary>Exercises the same bounded typed join through the actual Orleans SDK and official MCP clients.</summary>
 [ClassDataSource<ClusterFixture>(Shared = SharedType.Keyed, Key = McpCallerProtocol.FixtureKey)]
 [NotInParallel]
 internal sealed class RelationalSqlClusterJoinTests(ClusterFixture fixture)
@@ -20,10 +20,9 @@ internal sealed class RelationalSqlClusterJoinTests(ClusterFixture fixture)
     private const string QueryText = "SELECT l.[key] AS order_key, r.name AS customer_name, l.title AS customer_id "
         + "FROM agentrows AS l INNER JOIN joincustomers AS r ON l.title = r.id "
         + "ORDER BY l.[key] ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
-    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
 
     [Test]
-    public async Task Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster()
+    public async Task InnerJoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster()
     {
         using var deadline = McpCallerDeadline.Create();
         using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node1);
@@ -46,10 +45,8 @@ internal sealed class RelationalSqlClusterJoinTests(ClusterFixture fixture)
             new PutDocument(RightCollection, "cust-2", "{\"id\":\"cust-2\",\"name\":\"Lin\"}"),
             new PutDocument(RightCollection, "cust-1", "{\"id\":\"cust-1\",\"name\":\"Ada\"}"));
         var seed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(seedCommand, deadline.Token));
-        var query = new QueryRequest(scenario.Partition, QueryText, AllowFullScan: true,
-            QueryDialectVersion: QueryDialectVersion);
-        var sql = new SqlOperationRequest(scenario.Partition, QueryText, AllowFullScan: true,
-            QueryDialectVersion: QueryDialectVersion);
+        var query = new QueryRequest(scenario.Partition, QueryText, AllowFullScan: true);
+        var sql = new SqlOperationRequest(scenario.Partition, QueryText, AllowFullScan: true);
         var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(query, deadline.Token));
         var unified = await SqlClusterProtocol.SdkAsync<QueryPage>(sdk, sql, deadline.Token);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,

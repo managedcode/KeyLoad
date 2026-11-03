@@ -49,9 +49,8 @@ internal sealed class TextAsyncAdmissionTests
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         using var cancellation = new CancellationTokenSource();
         Task<RankedDocument[]>? active = null;
-        var lifetime = new AnalyticalAdmissionTaskLifetime(CoordinationTimeout);
 
-        await lifetime.RunWithCleanupAsync(async () =>
+        await AnalyticalAdmissionTaskLifetime.RunWithCleanupAsync(async () =>
         {
             active = Task.Run(() => search.SearchAsync("root", Request(database), cancellation.Token), CancellationToken.None);
             await postingObserved.Task.WaitAsync(CoordinationTimeout, TimeProvider.System);
@@ -104,7 +103,7 @@ internal sealed class TextAsyncAdmissionTests
     private static RuntimeTextProjection CreateProjection(TestDatabase database,
         Action<TextFaultStage>? faultObserver = null)
         => new(Path.Combine(database.Directory, "execution-text"),
-            database.Store.Identity.NodeId, UnitTextOptions.Execution(), faultObserver: faultObserver);
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()), faultObserver: faultObserver);
 
     private static SearchRequest Request(TestDatabase database) => new(database.Partition, Collection, TextPath, Query);
 

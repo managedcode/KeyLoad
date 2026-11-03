@@ -9,7 +9,7 @@ public static class PartitionQueryClient
 
     /// <summary>Reads a bounded query with full entity references and separate partition cuts.</summary>
     /// <param name="client">The authenticated database client.</param>
-    /// <param name="request">The versioned query and complete atomic partition identities.</param>
+    /// <param name="request">The query and complete atomic partition identities.</param>
     /// <param name="cancellationToken">Cancellation for the complete request.</param>
     /// <returns>A complete page or a typed transport or database problem.</returns>
     public static Task<Result<PartitionQueryPage>> PartitionQueryAsync(this KeyLoadClient client,

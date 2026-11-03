@@ -33,7 +33,7 @@ internal static class TextProviderManifestRecovery
         CancellationToken cancellationToken)
     {
         using var projection = new RuntimeTextProjection(indexDirectory, database.Store.Identity.NodeId,
-            UnitTextOptions.Execution());
+            UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var results = await search.SearchAsync(Principal,
             new(database.Partition, Collection, TextPath, Query), cancellationToken);

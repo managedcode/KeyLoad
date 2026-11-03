@@ -24,8 +24,7 @@ internal static class TableDataCleanup
             {
                 var entry = OrleansSerialization.Deserialize<AtomicPartitionCatalogEntry>(value);
                 EngineResourceAccess.ValidatePartition(entry.Partition);
-                if (entry.Version != AtomicPartitionRosterProtocol.CurrentVersion
-                    || !key.SequenceEqual(AtomicPartitionRosterKeys.Partition(entry.Partition)))
+                if (!key.SequenceEqual(AtomicPartitionRosterKeys.Partition(entry.Partition)))
                 {
                     throw Errors.Fail(ErrorCode.Corruption, Invalid);
                 }

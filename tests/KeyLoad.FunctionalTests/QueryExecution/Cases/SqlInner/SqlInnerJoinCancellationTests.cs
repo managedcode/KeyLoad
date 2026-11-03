@@ -11,7 +11,6 @@ internal sealed class SqlInnerJoinCancellationTests
     private const string QueryText = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
         + "ORDER BY l.order_id ASC";
-    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int SeedRows = 512;
     private const int WriteBatchSize = 256;
     private const int PaddingLength = 8_192;
@@ -38,7 +37,7 @@ internal sealed class SqlInnerJoinCancellationTests
         Configure(database);
         Seed(database);
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var request = new QueryRequest(database.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: Dialect);
+        var request = new QueryRequest(database.Partition, QueryText, AllowFullScan: true);
         var position = database.Store.Position;
         var before = global::KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
         var identity = Convert.ToHexString(OrleansSerialization.Serialize(database.Store.Identity));
@@ -60,7 +59,7 @@ internal sealed class SqlInnerJoinCancellationTests
         var ast = new AstQueryRequest(database.Partition, new SelectQuery(Left, LeftAlias,
             [new("/order_id", OrderIdField, LeftAlias), new("/name", NameField, RightAlias)], null,
             [new("/order_id", false)], ExpectedLeftIds.Length,
-            InnerJoin: new(Right, RightAlias, "/customer_id", "/id")), AllowFullScan: true, AstVersion: Dialect);
+            InnerJoin: new(Right, RightAlias, "/customer_id", "/id")), AllowFullScan: true);
         var astHealthy = engine.ExecuteAst("root", ast);
         await AssertHealthyJoinedRowsAsync(astHealthy);
         await SqlInnerJoinCancellationWholeState.LiteralAsync(astHealthy, ExpectedLeftIds, position);

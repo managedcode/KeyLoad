@@ -13,8 +13,7 @@ internal static class TextIncrementalEnrollmentFiles
         TextFileIO.VerifyRegularFile(file);
         var value = TextFileIO.ReadEnvelope<TextIncrementalEnrollment>(file,
             options.Value.MaximumOwnerReceiptBytes);
-        if (value is null || value.FormatVersion != TextIncrementalProtocol.FormatVersion
-            || value.BuildCommandId == Guid.Empty
+        if (value is null || value.BuildCommandId == Guid.Empty
             || value.SourceUpperSequence < TextIncrementalProtocol.InitialSequence
             || !TextIncrementalDigest.IsCanonical(value.ResourceSha256)
             || value.OriginalRequestSha256 is null

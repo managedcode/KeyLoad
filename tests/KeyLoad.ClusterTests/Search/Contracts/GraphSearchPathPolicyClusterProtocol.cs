@@ -26,7 +26,6 @@ internal static class GraphSearchPathPolicyClusterProtocol
     internal const string Label = "route";
     internal const string GenericFailure = "The database operation could not be completed.";
     internal const string MissingVertex = "The graph vertex is unavailable.";
-    internal const int Version = 1;
     internal const int Depth = 2;
     internal const int Vertices = 5;
     internal const int Edges = 3;

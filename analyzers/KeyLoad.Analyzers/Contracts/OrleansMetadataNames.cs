@@ -9,5 +9,4 @@ internal static class OrleansMetadataNames
     public const string IdAttribute = "Orleans.IdAttribute";
     public const string PersistentState = "Orleans.Runtime.IPersistentState`1";
     public const string TransactionalState = "Orleans.Transactions.Abstractions.ITransactionalState`1";
-    public const string VersionAttribute = "Orleans.CodeGeneration.VersionAttribute";
 }

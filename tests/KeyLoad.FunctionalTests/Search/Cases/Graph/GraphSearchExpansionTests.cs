@@ -21,7 +21,7 @@ internal sealed class GraphSearchExpansionTests
             AllowedIds: [GraphSearchTestSupport.FirstHit]);
 
         var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root",
-            new(1, search, Expansion: expansion), TestContext.Current!.Execution.CancellationToken);
+            new(search, Expansion: expansion), TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.Hits).HasSingleItem();
         await Assert.That(result.Hits[0].Document.Reference.Collection).IsEqualTo(GraphSearchTestSupport.Documents);
@@ -46,7 +46,7 @@ internal sealed class GraphSearchExpansionTests
         GraphSearchTestSupport.AddPath(database);
         var search = new SearchRequest(database.Partition, GraphSearchTestSupport.Documents,
             GraphSearchTestSupport.TextField, "needle", Limit: 2);
-        var request = new GraphSearchRequest(1, search,
+        var request = new GraphSearchRequest(search,
             Expansion: new(GraphSearchTestSupport.Graph, MaxDepth: 1, MaxVertices: 10, MaxEdges: 20));
 
         var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request,
@@ -87,7 +87,7 @@ internal sealed class GraphSearchExpansionTests
         var search = new SearchRequest(database.Partition, GraphSearchTestSupport.Documents,
             GraphSearchTestSupport.TextField, "needle", Limit: 1,
             AllowedIds: [GraphSearchTestSupport.FirstHit]);
-        var request = new GraphSearchRequest(1, search,
+        var request = new GraphSearchRequest(search,
             Expansion: new(ContextGraph, MaxDepth: 1, MaxVertices: 10, MaxEdges: 20));
 
         var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(GraphSearchTestSupport.Reader,

@@ -36,7 +36,6 @@ internal static class TypedEndpointJoinProtocol
     internal const string BlockedUseGrant = "join.pk.blocked";
     internal const int SourceCount = 3;
     internal const long FirstRevision = 1;
-    internal const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const int ColdCuts = 2;
     internal static string[] Messages => [MatchedMessage, MissingMessage, HiddenMessage];
 
@@ -59,7 +58,7 @@ internal static class TypedEndpointJoinProtocol
             [ToFieldKey] = JsonSerializer.SerializeToElement(mutation.ToCollection, JsonDefaults.Options),
             [LimitFieldKey] = JsonSerializer.SerializeToElement(mutation.MaxMessages, JsonDefaults.Options),
             [CommandFieldKey] = JsonSerializer.SerializeToElement(command.CommandId, JsonDefaults.Options)
-        }, QueryDialectVersion: Dialect);
+        });
     }
 
     internal static EntityRef From(PartitionRef partition) => new(partition, FromCollection, First);

@@ -1,7 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using KeyLoad.FunctionalTests.ClientApi;
-using KeyLoad.FunctionalTests.Search;
 using KeyLoad.Query;
 
 namespace KeyLoad.FunctionalTests.QueryExecution;
@@ -97,35 +96,4 @@ internal sealed class PartitionQueryMcpContractTests
         _ = await PartitionQueryMcpTestData.ExecuteAsync(fixture, allowedRequest, creation, McpCanonicalTestData.Entity);
     }
 
-    [Test]
-    public async Task InvalidPublicVersionFailsBeforeStorageRead()
-    {
-        using var fixture = new ReadCountingZoneTreeStore();
-        var valid = PartitionQueryMcpTestData.Request();
-        var position = fixture.Position;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", valid with
-            {
-                Version = 2
-            }, PartitionQueryMcpTestData.Owner(fixture.Database)));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
-        await Assert.That(fixture.ReadCalls).IsEqualTo(0);
-        await Assert.That(fixture.Position).IsEqualTo(position);
-    }
-
-    [Test]
-    public async Task UnsupportedAstVersionFailsBeforeStorageRead()
-    {
-        using var fixture = new ReadCountingZoneTreeStore();
-        var valid = PartitionQueryMcpTestData.Request();
-        var position = fixture.Position;
-        var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
-            new QueryEngine(fixture.Database, UnitExecutionOptions.QueryExecution()).QueryPartitions("root", valid with
-            {
-                AstVersion = 3
-            }, PartitionQueryMcpTestData.Owner(fixture.Database)));
-        await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(fixture.ReadCalls).IsEqualTo(0);
-        await Assert.That(fixture.Position).IsEqualTo(position);
-    }
 }

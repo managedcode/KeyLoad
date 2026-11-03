@@ -59,8 +59,6 @@ internal static class AnnSeedValidation
     internal static void ValidateCut(StoreIdentity identity, long position, long applied, OutboxHead head,
         PrincipalRecord principal, ResourceDefinition resource)
     {
-        const int FormatVersionValidationBoundary = 0;
-        const int KeyCodecVersionValidationBoundary = 0;
         const int ReadGenerationValidationBoundary = 0;
         const int PositionValidationBoundary = 0;
         const int AppliedValidationBoundary = 0;
@@ -71,7 +69,7 @@ internal static class AnnSeedValidation
         const int SchemaVersionValidationBoundary = 1;
 
         if (identity.NodeId == Guid.Empty || identity.Incarnation == Guid.Empty
-            || identity.FormatVersion <= FormatVersionValidationBoundary || identity.KeyCodecVersion <= KeyCodecVersionValidationBoundary || identity.ReadGeneration < ReadGenerationValidationBoundary
+            || identity.ReadGeneration < ReadGenerationValidationBoundary
             || position < PositionValidationBoundary || applied < AppliedValidationBoundary || head.Tail < TailValidationBoundary || head.FirstAvailable < FirstAvailableValidationBoundary
             || head.FirstAvailable - FirstAvailableStep > head.Tail || principal.PolicyEpoch < PolicyEpochValidationBoundary || resource.SchemaVersion < SchemaVersionValidationBoundary)
         {

@@ -16,7 +16,7 @@ public static class SearchQueriesOnlineText
             return (false, default(OnlineTextCurrentPublication?));
         }
 
-        if (current.FormatVersion != OnlineTextPublicationProtocol.CurrentFormat || current.PrincipalId != principal.Id || current.Consumer != request.Consumer || current.ConsumerGeneration != request.ConsumerGeneration || current.Authority.Collection != request.Collection || current.Authority.Field != request.Field)
+        if (current.PrincipalId != principal.Id || current.Consumer != request.Consumer || current.ConsumerGeneration != request.ConsumerGeneration || current.Authority.Collection != request.Collection || current.Authority.Field != request.Field)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
         }

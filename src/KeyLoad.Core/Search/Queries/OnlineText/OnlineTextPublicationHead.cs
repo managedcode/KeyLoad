@@ -15,7 +15,7 @@ public static class OnlineTextPublicationHead
             return (false, default(Guid?));
         }
 
-        if (current.FormatVersion != OnlineTextPublicationProtocol.CurrentFormat || current.CommandId == Guid.Empty || current.Consumer != request.Consumer || current.ConsumerGeneration != request.ConsumerGeneration || current.Authority.Collection != request.Collection || current.Authority.Field != request.Field || current.Authority.DataEpoch != engine.Store.Identity.FormatVersion || current.PublishedCut.Incarnation != engine.Store.Identity.Incarnation)
+        if (current.CommandId == Guid.Empty || current.Consumer != request.Consumer || current.ConsumerGeneration != request.ConsumerGeneration || current.Authority.Collection != request.Collection || current.Authority.Field != request.Field || current.PublishedCut.Incarnation != engine.Store.Identity.Incarnation)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
         }

@@ -19,7 +19,7 @@ internal static class QueueOrderedRetryRecoveryChoice
             QueueOrderedRetryCrashProtocol.One, QueueOrderedRetryCrashProtocol.One, QueueOrderedRetryCrashProtocol.Two));
         var digest = HMACSHA256.HashData(store.Identity.SigningKey.Span, seed);
         var delay = QueueOrderedRetryCrashProtocol.One + (int)(BinaryPrimitives.ReadUInt64BigEndian(digest) % (ulong)policy.RetryBaseMilliseconds);
-        var expected = new QueueRetryDecisions(QueueOrderedRetryCrashProtocol.One, new DateTimeOffset(operation.Timestamp),
+        var expected = new QueueRetryDecisions(new DateTimeOffset(operation.Timestamp),
             ImmutableArray.Create(new QueueRetryDecision(lane, QueueOrderedRetryCrashProtocol.First, QueueOrderedRetryCrashProtocol.Two,
                 QueueOrderedRetryCrashProtocol.One, QueueOrderedRetryCrashProtocol.One, QueueOrderedRetryCrashProtocol.One,
                 ReadOnlyMemory<byte>.Empty, SHA256.HashData(OrleansSerialization.Serialize(policy)), delay, new DateTimeOffset(operation.Timestamp).AddMilliseconds(delay))));

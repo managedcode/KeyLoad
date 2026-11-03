@@ -581,36 +581,6 @@
           "KeyLoad.Query"
         ],
         "operationOutcomeAndState": "official-catalog descriptor decodes actual generated request; forbidden mode returns no-read error and allowed request executes with full page verification"
-      },
-      {
-        "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
-        "methodName": "InvalidPublicVersionFailsBeforeStorageRead",
-        "instanceName": "InvalidPublicVersionFailsBeforeStorageRead",
-        "acceptance": [
-          "AC-PQUERY-001"
-        ],
-        "requirements": [
-          "REQ-PQUERY-001"
-        ],
-        "executedModules": [
-          "KeyLoad.Query"
-        ],
-        "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero execution read calls with unchanged position"
-      },
-      {
-        "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
-        "methodName": "UnsupportedAstVersionFailsBeforeStorageRead",
-        "instanceName": "UnsupportedAstVersionFailsBeforeStorageRead",
-        "acceptance": [
-          "AC-PQUERY-001"
-        ],
-        "requirements": [
-          "REQ-PQUERY-001"
-        ],
-        "executedModules": [
-          "KeyLoad.Query"
-        ],
-        "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero execution read calls with unchanged position"
       }
     ]
   },

@@ -33,7 +33,6 @@ internal static class McpCanonicalTestData
     private const string GraphSearchSql = "SELECT * FROM GRAPH_SEARCH('mcp-records', NULL, NULL, NULL, "
         + "GRAPH_RETRIEVER('mcp-records',GRAPH_SEEDS(ENTITY('mcp-records','mcp-entity')),1,2,3,NULL,1), "
         + "NULL, NULL, 10, 60)";
-    private const int ContractVersion = 1;
     private const long Generation = 1;
     private const long WaitMinimumPosition = 1;
     private const long Position = 0;
@@ -104,10 +103,10 @@ internal static class McpCanonicalTestData
         Read(McpCatalogExpectations.SagaInspect, new InspectSagaRequest(Lane, StableId)),
         Read(McpCatalogExpectations.GraphTraverse, new TraverseRequest(Partition, Resource, Reference)),
         Read(McpCatalogExpectations.GraphShortestPath,
-            new GraphShortestPathRequest(ContractVersion, Partition, Resource, Reference, Reference)),
+            new GraphShortestPathRequest(Partition, Resource, Reference, Reference)),
         Read(McpCatalogExpectations.GraphIncomingEdges, GraphIncomingMcpTestData.Request()),
         Read(McpCatalogExpectations.QueryGraphPath,
-            new SqlGraphPathRequest(ContractVersion, new QueryRequest(Partition, GraphPathSql, AllowFullScan: true))),
+            new SqlGraphPathRequest(new QueryRequest(Partition, GraphPathSql, AllowFullScan: true))),
         Read(McpCatalogExpectations.SeriesRead, new ReadSamplesRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch)),
         Read(McpCatalogExpectations.SeriesLatest, McpSeriesRequestTestData.Latest()),
         Read(McpCatalogExpectations.SeriesAggregate, McpSeriesRequestTestData.Aggregate()),
@@ -115,10 +114,10 @@ internal static class McpCanonicalTestData
         Read(McpSeriesCatalogExpectations.Entries.Single(entry =>
             entry.ReadKind == KeyLoad.Clustering.GrainReadKind.SampleChunkWindow).Name, McpSeriesRequestTestData.Chunk()),
         Read(McpCatalogExpectations.QueryExecute, new QueryRequest(Partition, Sql)),
-        Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(1, new(Partition, GraphSearchSql, AllowFullScan: true))),
+        Read(McpCatalogExpectations.QuerySearch, new SqlGraphSearchRequest(new(Partition, GraphSearchSql, AllowFullScan: true))),
         Read(McpCatalogExpectations.QueryPartitions, PartitionQuery()),
         Read(McpCatalogExpectations.QueryDistributedSearch,
-            new DistributedSearchRequest(ContractVersion, [Partition], new SearchRequest(Partition, Resource))),
+            new DistributedSearchRequest([Partition], new SearchRequest(Partition, Resource))),
         Read(McpCatalogExpectations.QueryAst, Ast()),
         Read(McpCatalogExpectations.ChangesRead, new ReadChangeFeedRequest(Partition, Resource)),
         Read(McpCatalogExpectations.QueryLiveStart, new StartLiveQueryRequest(Ast())),
@@ -130,15 +129,15 @@ internal static class McpCanonicalTestData
         Read(KeyLoad.FunctionalTests.Search.SearchMcpCatalogEntries.All.Single(entry =>
             entry.ReadKind == KeyLoad.Clustering.GrainReadKind.ApproximateSearch).Name, McpSearchRequestTestData.Search()),
         Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
-        Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(1, new(Partition, Resource),
+        Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(new(Partition, Resource),
             Retriever: new(new(Resource, [Reference])))),
         Read(McpCatalogExpectations.SeriesRollup, new ReadSampleRollupRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddMinutes(1))),
         Read(McpCatalogExpectations.SeriesRetention, new ReadSampleRetentionRequest(Partition, Resource, Entity))
     ];
 
-    private static PartitionQueryRequest PartitionQuery() => new(1, [Partition],
+    private static PartitionQueryRequest PartitionQuery() => new([Partition],
         new SelectQuery(Resource, null, [new Selection(FieldPath, Field)], null, [], Limit),
-        null, false, 1);
+        null, false);
 
     private static ImmutableArray<Mutation> Effects() => [new PutDocument(Resource, Entity, EmptyJson)];
 

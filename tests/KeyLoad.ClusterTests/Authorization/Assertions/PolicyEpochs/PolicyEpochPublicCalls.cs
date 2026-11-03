@@ -28,7 +28,7 @@ internal static class PolicyEpochPublicCalls
             PolicyEpochPublicProtocol.Ast(request.Partition, request.Cursor), token))).Value;
         }
         var sql = SqlClusterProtocol.Call(request.Partition, McpCallerTools.QueryExecute, request);
-        return route == PolicyEpochPublicProtocol.Q1Sdk
+        return route == PolicyEpochPublicProtocol.SqlSdk
             ? await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, sql, token)
             : await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, sql, token);
     }

@@ -18,9 +18,9 @@ internal static class AnnProviderQualificationDamageCodec
         }
         header = damage switch
         {
-            AnnProviderQualificationDamage.HeaderVersion => header with
+            AnnProviderQualificationDamage.HeaderCount => header with
             {
-                Version = UnsupportedFormat
+                Count = InvalidCount
             },
             AnnProviderQualificationDamage.HeaderEntryPoint => header with
             {
@@ -60,7 +60,7 @@ internal static class AnnProviderQualificationDamageCodec
             },
             AnnProviderQualificationDamage.SelfNeighbor => WithNeighbors(node, [FirstNode]),
             AnnProviderQualificationDamage.DuplicateNeighbor => WithNeighbors(node, [OtherNode, OtherNode]),
-            AnnProviderQualificationDamage.HeaderVersion or AnnProviderQualificationDamage.HeaderEntryPoint
+            AnnProviderQualificationDamage.HeaderCount or AnnProviderQualificationDamage.HeaderEntryPoint
                 or AnnProviderQualificationDamage.HeaderRetainedBytes => node,
             _ => throw new InvalidOperationException(InvalidDamage)
         };

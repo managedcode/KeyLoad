@@ -28,7 +28,7 @@ internal static class TextOnlineCapture
         var captured = session.SourcePin.CapturedMetadata;
         session.Base = captured;
         session.Current = captured;
-        session.Scope = new(request.NodeId, captured.Incarnation, captured.DataEpoch, captured.ReadGeneration,
+        session.Scope = new(request.NodeId, captured.Incarnation, captured.ReadGeneration,
             captured.Position, request.Consumer.Partition, request.Collection, request.Field,
             captured.PrincipalId, captured.PolicyEpoch, captured.SchemaVersion);
     }
@@ -44,8 +44,7 @@ internal static class TextOnlineCapture
     {
         var original = session.Base ?? throw TextErrors.Ownership();
         if (fresh.PrincipalId != original.PrincipalId || fresh.PolicyEpoch != original.PolicyEpoch
-            || fresh.Incarnation != original.Incarnation || fresh.DataEpoch != original.DataEpoch
-            || fresh.ReadGeneration != original.ReadGeneration || fresh.SchemaVersion != original.SchemaVersion
+            || fresh.Incarnation != original.Incarnation || fresh.ReadGeneration != original.ReadGeneration || fresh.SchemaVersion != original.SchemaVersion
             || fresh.ResourceSha256 != original.ResourceSha256 || fresh.Position < original.Position
             || fresh.AppliedPosition < original.AppliedPosition || fresh.UpperSequence < original.UpperSequence)
         {

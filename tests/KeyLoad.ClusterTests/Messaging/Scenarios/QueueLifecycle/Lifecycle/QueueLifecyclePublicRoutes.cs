@@ -21,8 +21,8 @@ internal static class QueueLifecyclePublicRoutes
         {
             QueueLifecyclePublicProtocol.Sdk => await McpCallerAssertions.SdkSuccessAsync(await sdk()),
             QueueLifecyclePublicProtocol.Mcp => (await McpCallerAssertions.SuccessAsync<T>(await callers.Mcp.CallAsync(tool, request, token))).Value,
-            QueueLifecyclePublicProtocol.Q1Sdk => await SqlClusterProtocol.SdkAsync<T>(callers.Sdk, SqlClusterProtocol.Call(partition, tool, request), token),
-            QueueLifecyclePublicProtocol.Q1Mcp => await SqlClusterProtocol.McpAsync<T>(callers.Mcp, SqlClusterProtocol.Call(partition, tool, request), token),
+            QueueLifecyclePublicProtocol.SqlSdk => await SqlClusterProtocol.SdkAsync<T>(callers.Sdk, SqlClusterProtocol.Call(partition, tool, request), token),
+            QueueLifecyclePublicProtocol.SqlMcp => await SqlClusterProtocol.McpAsync<T>(callers.Mcp, SqlClusterProtocol.Call(partition, tool, request), token),
             _ => throw new InvalidOperationException("Unknown fixture public route.")
         };
 

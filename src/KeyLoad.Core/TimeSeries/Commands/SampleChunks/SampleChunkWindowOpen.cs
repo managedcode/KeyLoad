@@ -28,7 +28,7 @@ internal static class SampleChunkWindowOpen
             throw Errors.Fail(ErrorCode.Conflict, SampleChunkLifecycleProtocol.Existing);
         }
         RequireEmpty(tx, partition, request);
-        var window = new SampleChunkWindow(SampleChunkLifecycleProtocol.Version, request.WindowId,
+        var window = new SampleChunkWindow(request.WindowId,
             request.From.UtcTicks, request.Until.UtcTicks, SampleChunkLifecycleProtocol.First,
             SampleChunkLifecycleProtocol.Absent, SampleChunkWindowState.Open, principal.Id, watermark.Sequence,
             ImmutableArray<SampleRecord>.Empty, ImmutableArray<long>.Empty, Guid.Empty, watermark.Floor);

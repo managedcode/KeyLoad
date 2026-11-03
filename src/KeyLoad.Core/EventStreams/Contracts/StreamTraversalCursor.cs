@@ -3,7 +3,6 @@ namespace KeyLoad.Core;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(StreamTraversalCursor.SerializerAlias)]
 internal sealed record StreamTraversalCursor(
-    [property: Orleans.Id(StreamTraversalCursorFields.Version)] int Version,
     [property: Orleans.Id(StreamTraversalCursorFields.Purpose)] string Purpose,
     [property: Orleans.Id(StreamTraversalCursorFields.Incarnation)] Guid Incarnation,
     [property: Orleans.Id(StreamTraversalCursorFields.Stream)] StreamRef Stream,

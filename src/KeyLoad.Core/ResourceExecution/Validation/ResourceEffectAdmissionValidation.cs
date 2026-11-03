@@ -12,7 +12,7 @@ internal static class ResourceEffectAdmissionValidation
             throw Errors.Fail(ErrorCode.TokenInvalidated, ResourceEffectAdmissionProtocol.Unbound);
         }
         var value = OrleansSerialization.Deserialize<ResourceEffectAdmission>(payload.ResourceAdmission.Span);
-        if (value is null || value.Version != ResourceEffectAdmissionProtocol.Version
+        if (value is null
             || value.Bindings.IsDefault
             || (value.Error is null) != (value.SafeDetail is null)
             || value.Error is { } error && (!Enum.IsDefined(error) || string.IsNullOrWhiteSpace(value.SafeDetail)

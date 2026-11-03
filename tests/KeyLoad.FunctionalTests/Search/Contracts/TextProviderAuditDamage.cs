@@ -4,7 +4,7 @@ internal enum TextProviderAuditDamage
 {
     Tokenizer,
     Hash,
-    Format,
+    SourceIncarnation,
     ScopePosition,
     RecordId,
     DuplicateReference,

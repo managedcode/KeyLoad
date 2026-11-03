@@ -89,9 +89,6 @@ internal sealed class PartitionHost : IAsyncDisposable
         get; private set;
     } = null!;
 
-    internal bool CurrentCapabilityValidated
-        => stores.Canonical.Identity.MinimumReaderContract == KeyLoad.Storage.StoreReaderContract.RuntimeJournal;
-
     /// <summary>Borrowed canonical engine; only this host disposes its underlying store.</summary>
     public DatabaseEngine Database
     {

@@ -7,7 +7,6 @@ internal sealed class GraphSearchInvalidWalkShapeTests
 {
     private const string InvalidLabel = "bad\u0000label";
     private const string PrincipalId = "root";
-    private const int VersionOne = 1;
 
     [Test]
     public async Task DefaultAndMalformedWalkShapesFailValidationWithoutChangingPosition()
@@ -41,13 +40,13 @@ internal sealed class GraphSearchInvalidWalkShapeTests
         var walk = GraphSearchTestSupport.Walk(seed);
         return
         [
-            new(VersionOne, search, Retriever: new(walk with { Seeds = default })),
-            new(VersionOne, search, Retriever: new(walk with { Labels = default(ImmutableArray<string>) })),
-            new(VersionOne, search, Retriever: new(walk with { Labels = [InvalidLabel] }))
+            new(search, Retriever: new(walk with { Seeds = default })),
+            new(search, Retriever: new(walk with { Labels = default(ImmutableArray<string>) })),
+            new(search, Retriever: new(walk with { Labels = [InvalidLabel] }))
         ];
     }
 
     private static GraphSearchRequest ValidRequest(TestDatabase database, EntityRef seed)
-        => new(VersionOne, new(database.Partition, GraphSearchTestSupport.Documents),
+        => new(new(database.Partition, GraphSearchTestSupport.Documents),
             Retriever: new(GraphSearchTestSupport.Walk(seed)));
 }

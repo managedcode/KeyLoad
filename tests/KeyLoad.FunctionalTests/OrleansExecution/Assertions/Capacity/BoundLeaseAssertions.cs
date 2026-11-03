@@ -26,9 +26,9 @@ internal static class BoundLeaseAssertions
     {
         var expected = new PartitionQueryCandidate[]
         {
-            new(K.Version, BoundLeaseReferences.Expected(state, K.FirstId),
+            new(BoundLeaseReferences.Expected(state, K.FirstId),
                 new(K.FirstId, K.Revision, K.FirstJson, false, []), []),
-            new(K.Version, BoundLeaseReferences.Expected(state, K.SecondId),
+            new(BoundLeaseReferences.Expected(state, K.SecondId),
                 new(K.SecondId, K.Revision, K.SecondJson, false, []), [])
         };
         var rows = actual.Candidates.OrderBy(row => row.Reference.Id, StringComparer.Ordinal).ToArray();
@@ -37,7 +37,6 @@ internal static class BoundLeaseAssertions
         {
             await EqualAsync(expected[index], rows[index]);
         }
-        await Assert.That(actual.Version).IsEqualTo(K.Version);
         await Assert.That(actual.Partition).IsEqualTo(K.Partition);
         await Assert.That(actual.NodeId).IsEqualTo(state.Leader.Database.Database.Store.Identity.NodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(state.PhysicalOwner.Incarnation);

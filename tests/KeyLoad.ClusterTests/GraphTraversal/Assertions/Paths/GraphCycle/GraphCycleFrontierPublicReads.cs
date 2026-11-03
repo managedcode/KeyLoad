@@ -54,7 +54,7 @@ internal static class GraphCycleFrontierPublicReads
     private static async Task IncomingAsync(RequestCqrsClusterCallers admin, RequestCqrsClusterCallers reader,
         GraphCycleFrontierPublicState state, EntityRef vertex, CancellationToken token)
     {
-        var request = new ReadIncomingGraphEdgesRequest(1, vertex, state.Seed.Graph, 7);
+        var request = new ReadIncomingGraphEdgesRequest(vertex, state.Seed.Graph, 7);
         var expected = state.Edges.Where(edge => edge.To == vertex && (!state.Hidden || edge.From != state.A))
             .OrderBy(edge => edge.From.Collection, StringComparer.Ordinal).ThenBy(edge => edge.From.Id, StringComparer.Ordinal)
             .ThenBy(edge => edge.Id, StringComparer.Ordinal).Select(edge => new GraphIncomingEdgeRow(state.Seed.StoredEdge(edge), 0L)).ToArray();
@@ -71,7 +71,6 @@ internal static class GraphCycleFrontierPublicReads
     private static async Task PageAsync(GraphIncomingEdgesPage page, GraphIncomingEdgeRow[] rows)
     {
         await SqlClusterProtocol.EqualAsync(rows, page.Rows.ToArray());
-        await Assert.That(page.Version).IsEqualTo(1);
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
         await Assert.That(page.Projection).IsEqualTo(GraphIncomingClusterScenario.Projection);
     }

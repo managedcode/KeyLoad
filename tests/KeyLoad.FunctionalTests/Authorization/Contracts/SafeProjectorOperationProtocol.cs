@@ -54,7 +54,6 @@ internal static class SafeProjectorOperationProtocol
     internal const long FullWriteEpoch = 5;
     internal const long FinalMaskedEpoch = 6;
     internal const long NextJournalIndex = 1;
-    internal const int PlacementVersion = 1;
     internal const int SingleRow = 1;
     internal const int BothRows = 2;
     internal static ImmutableArray<string> RedactedPaths { get; } = [NestedPath, LiteralPath, ArrayPath];

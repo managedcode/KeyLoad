@@ -53,10 +53,6 @@
       "classification": "executable"
     },
     {
-      "path": "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/GrainInterfaceVersionAnalyzer.cs",
-      "classification": "executable"
-    },
-    {
       "path": "analyzers/KeyLoad.Analyzers/Analyzers/LiteralMachineKeyAnalyzer.cs",
       "classification": "executable"
     },
@@ -372,12 +368,6 @@
       "diagnostic": "KLD0013",
       "sources": [
         "analyzers/KeyLoad.Analyzers/Analyzers/ProgramComposition/ProgramEndpointMappingAnalyzer.cs"
-      ]
-    },
-    {
-      "diagnostic": "KLD0014",
-      "sources": [
-        "analyzers/KeyLoad.Analyzers/Analyzers/RuntimeContracts/GrainInterfaceVersionAnalyzer.cs"
       ]
     },
     {

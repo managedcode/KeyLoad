@@ -35,7 +35,7 @@ internal sealed class PartitionQueryPublicTestSupport : IDisposable
 
     internal static PartitionQueryRequest Request(ImmutableArray<PartitionRef> partitions, int limit = 8,
         SelectQuery? query = null)
-        => new(1, partitions, query ?? Query(limit), null, true, SqlOperationProtocol.DefaultQueryDialectVersion);
+        => new(partitions, query ?? Query(limit), null, true);
 
     internal static SelectQuery Query(int limit = 8)
         => new(Collection, null, [new("/label", "label")], null,

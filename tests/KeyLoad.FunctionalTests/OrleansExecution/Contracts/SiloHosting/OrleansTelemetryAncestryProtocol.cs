@@ -16,7 +16,6 @@ internal static class OrleansTelemetryAncestryProtocol
     internal const int MaximumParentLinks = 32;
     internal const int OneLink = 1;
     internal const int NoLocalParents = 0;
-    internal const int PlacementVersion = 1;
     internal const int MaximumSelectedSpans = 64;
     internal const long FirstRevision = 1;
 }

@@ -5,7 +5,7 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class ScriptDomSelectLowering
 {
-    internal static SelectQuery Read(Dom.TSqlStatement statement, int dialectVersion, ScriptDomLoweringContext context)
+    internal static SelectQuery Read(Dom.TSqlStatement statement, ScriptDomLoweringContext context)
     {
         context.Observe(RootDepth);
         if (statement is not Dom.SelectStatement select || select.QueryExpression is not Dom.QuerySpecification query)
@@ -20,7 +20,7 @@ internal static class ScriptDomSelectLowering
         {
             throw ScriptDomErrors.Unsupported();
         }
-        var source = ScriptDomJoinLowering.Read(query.FromClause, dialectVersion, context);
+        var source = ScriptDomJoinLowering.Read(query.FromClause, context);
         context.UseDocumentMetadata = source.Model is null && source.Join is null;
         var projection = ScriptDomProjectionLowering.Read(query.SelectElements, source.Alias, source.Join, context);
         var filter = query.WhereClause is null ? null

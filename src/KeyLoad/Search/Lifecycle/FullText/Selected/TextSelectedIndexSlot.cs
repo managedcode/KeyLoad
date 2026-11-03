@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using ZoneTree;
 using ZoneTree.FullTextSearch;
 using ZoneTree.FullTextSearch.Index;
+using ZoneTree.Options;
 
 namespace KeyLoad.Server.Search;
 
@@ -39,7 +40,7 @@ internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
             try
             {
                 index ??= RuntimeTextIndex.Open(Path.Combine(root, leaf, TextProtocol.RuntimeDirectoryCore),
-                    new TextFileStreamProvider(root, leaf, node, options, resources, allowReadOnlyInventory: true), options);
+                    new TextFileStreamProvider(root, leaf, node, options, resources, allowReadOnlyInventory: true), options, WriteAheadLogMode.Sync);
                 index.IsReadOnly = true;
             }
             catch (Exception error) { failure = error; throw; }

@@ -39,7 +39,7 @@ which calls the existing capability/partition grain with a reloaded persisted pr
 
 ## Canonical operations and wire contract
 
-ADR-098 adds its direct and SQL graph-path tools as additive version-one reads;
+ADR-098 adds its direct and SQL graph-path tools as current typed reads;
 AC-MCP-001 independently verifies the complete current catalog, typed schemas
 and effect hints. Persisted administrator authorization remains enforced by the
 connection-grain path. Runtime replicated-cluster confirmation remains pending.
@@ -201,9 +201,8 @@ absent in this abstraction. No reflection discovery, duplicate catalog source or
 protocol workaround is permitted. The current discovery contract is exercised
 through its real tools and cursor boundaries.
 
-This additive version-one adapter does not change database schema or existing HTTP
-JSON. Tool names and wrappers are versioned; later incompatible contracts require
-an explicit version/ADR. Credential deployment uses existing persisted API keys,
+This adapter uses the current typed tool names and wrappers and does not change
+database schema or existing HTTP JSON. Credential deployment uses existing persisted API keys,
 never an adapter-only secret store. Rollback removes the adapter but cannot undo
 committed commands. Timeout/cancellation is not rollback. Existing HTTP source
 and tests are a baseline, not official MCP evidence. All new runtime gates remain

@@ -7,7 +7,6 @@ namespace KeyLoad.FunctionalTests.Authorization;
 
 internal static class ResourceLifetimeCursorFlow
 {
-    private const int Version = 2;
     private const int ColdPasses = 2;
     private const int First = 0;
     private const string StatusAlias = "status";
@@ -48,7 +47,6 @@ internal static class ResourceLifetimeCursorFlow
                 SafeProjectorOperationProtocol.InitialRevision, FirstJson, false, [])));
         var scalar = owner.Database.Verify<QueryCursorClaims>(page.Cursor ?? throw new InvalidOperationException());
         await SafeProjectorOperationSeed.EqualAsync(scalar.Lifetime, expected);
-        await Assert.That(scalar.Version).IsEqualTo(Version);
         await Assert.That(scalar.Purpose).IsEqualTo(ScalarPurpose);
         var liveQuery = Live(owner);
         var snapshot = engine.StartLiveQuery(SafeProjectorOperationProtocol.Reader, new(liveQuery), cancellationToken: token);
@@ -58,7 +56,6 @@ internal static class ResourceLifetimeCursorFlow
                 SafeProjectorOperationProtocol.InitialRevision, SecondJson, false, []) });
         var live = owner.Database.Verify<LiveCursorClaims>(snapshot.Cursor);
         await SafeProjectorOperationSeed.EqualAsync(live.Lifetime, expected);
-        await Assert.That(live.Version).IsEqualTo(Version);
         await Assert.That(live.Purpose).IsEqualTo(LivePurpose);
         await ResourceLifetimeCursorRefusals.RunAsync(owner, engine, PageSql, liveQuery, scalar, live, foreign);
         await ResourceLifetimeCursorDrift.RunAsync(owner, engine, PageSql, liveQuery,

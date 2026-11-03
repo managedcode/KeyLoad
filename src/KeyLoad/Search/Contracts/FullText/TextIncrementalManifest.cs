@@ -4,7 +4,6 @@ namespace KeyLoad.Server.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(TextIncrementalAliases.Manifest)]
 internal sealed record TextIncrementalManifest(
-    [property: global::Orleans.Id(0)] int FormatVersion,
     [property: global::Orleans.Id(1)] TextProjectionScope Scope,
     [property: global::Orleans.Id(2)] ProjectionConsumerRef Consumer,
     [property: global::Orleans.Id(3)] long Generation,

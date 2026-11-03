@@ -18,7 +18,6 @@ internal static class RelationalSqlClusterJoinData
     internal const string DetailColumn = "detail";
     internal const string CustomerIdColumn = "id";
     internal const string NameColumn = "name";
-    internal const int DialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const string Database = "agentdb";
     private const string TransactionDomain = "agent";
     private const string TenantPrefix = "join-budget-";
@@ -48,7 +47,7 @@ internal static class RelationalSqlClusterJoinData
         => new(TenantPrefix + suffix, Database, TransactionDomain, Guid.NewGuid().ToString("N"));
 
     internal static QueryRequest Query(PartitionRef partition)
-        => new(partition, Sql, AllowFullScan: true, QueryDialectVersion: DialectVersion);
+        => new(partition, Sql, AllowFullScan: true);
 
     internal static async Task<(EntityRefLifetime Left, EntityRefLifetime Right)> ConfigureAsync(KeyLoadClient sdk,
         PartitionRef partition, CancellationToken token)

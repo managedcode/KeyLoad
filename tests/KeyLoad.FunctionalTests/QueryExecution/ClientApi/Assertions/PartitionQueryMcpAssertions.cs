@@ -9,9 +9,9 @@ internal static class PartitionQueryMcpAssertions
     internal static async Task VerifyContractsAsync()
     {
         await VerifyAsync(typeof(PartitionQueryRequest), PartitionQueryMcpProtocol.RequestAlias,
-            [nameof(PartitionQueryRequest.Version), nameof(PartitionQueryRequest.Partitions),
+            [nameof(PartitionQueryRequest.Partitions),
                 nameof(PartitionQueryRequest.Query), nameof(PartitionQueryRequest.Parameters),
-                nameof(PartitionQueryRequest.AllowFullScan), nameof(PartitionQueryRequest.AstVersion)]);
+                nameof(PartitionQueryRequest.AllowFullScan)], firstId: 1);
         await VerifyAsync(typeof(PartitionQueryRow), PartitionQueryMcpProtocol.RowAlias,
             [nameof(PartitionQueryRow.Reference), nameof(PartitionQueryRow.Row)]);
         await VerifyAsync(typeof(PartitionQueryLeafWitness), PartitionQueryMcpProtocol.WitnessAlias,
@@ -19,11 +19,11 @@ internal static class PartitionQueryMcpAssertions
                 nameof(PartitionQueryLeafWitness.PolicyEpoch), nameof(PartitionQueryLeafWitness.SchemaVersion),
                 nameof(PartitionQueryLeafWitness.AccessPath)]);
         await VerifyAsync(typeof(PartitionQueryPage), PartitionQueryMcpProtocol.PageAlias,
-            [nameof(PartitionQueryPage.Version), nameof(PartitionQueryPage.Rows),
-                nameof(PartitionQueryPage.Leaves), nameof(PartitionQueryPage.Complete)]);
+            [nameof(PartitionQueryPage.Rows),
+                nameof(PartitionQueryPage.Leaves), nameof(PartitionQueryPage.Complete)], firstId: 1);
     }
 
-    private static async Task VerifyAsync(Type type, string alias, string[] names)
+    private static async Task VerifyAsync(Type type, string alias, string[] names, uint firstId = 0)
     {
         await Assert.That(type.IsDefined(typeof(global::Orleans.GenerateSerializerAttribute))).IsTrue();
         var attribute = type.GetCustomAttributesData().SingleOrDefault(item =>
@@ -42,7 +42,7 @@ internal static class PartitionQueryMcpAssertions
                 item.AttributeType == typeof(global::Orleans.IdAttribute));
             await Assert.That(identifier is not null).IsTrue();
             await Assert.That(Convert.ToUInt32(identifier!.ConstructorArguments.Single().Value,
-                System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo((uint)index);
+                System.Globalization.CultureInfo.InvariantCulture)).IsEqualTo(firstId + (uint)index);
         }
     }
 }

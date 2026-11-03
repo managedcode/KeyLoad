@@ -13,7 +13,6 @@ internal sealed class PreparedQuery
     private const int FirstElementIndex = 0;
     private const int EmptyElementCount = 0;
     private const int EqualOrder = 0;
-    private const int VersionOne = 1;
     private const int HeapChildCount = 2;
 
     private readonly Dictionary<string, string[]> paths;
@@ -133,7 +132,7 @@ internal sealed class PreparedQuery
         var pendingKeys = row.PendingOrderKeys!;
         var keys = ImmutableArray.CreateRange(pendingKeys.Select(static key =>
             ImmutableCollectionsMarshal.AsImmutableArray(key)));
-        var candidate = new PartitionQueryCandidate(VersionOne, row.Document.Reference, projected, keys);
+        var candidate = new PartitionQueryCandidate(row.Document.Reference, projected, keys);
         var retained = row with
         {
             SourceDocument = null,

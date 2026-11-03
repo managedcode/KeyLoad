@@ -51,8 +51,8 @@ internal sealed record PartitionQueryClusterScenario(
 
     internal PartitionQueryRequest Request(ImmutableArray<PartitionRef>? partitions = null,
         SelectQuery? query = null)
-        => new(PartitionQueryClusterProtocol.Version, partitions ?? Partitions, query ?? Query,
-            Parameters: null, AllowFullScan: true, AstVersion: PartitionQueryClusterProtocol.AstVersion);
+        => new(partitions ?? Partitions, query ?? Query,
+            Parameters: null, AllowFullScan: true);
 
     internal EntityRef ExpectedReference(PartitionQueryClusterInputRow row)
         => new(row.Partition, PartitionQueryClusterProtocol.Collection, row.Id)

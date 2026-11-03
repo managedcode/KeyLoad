@@ -3,7 +3,6 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(GraphCrossPartitionInternalAliases.Fingerprint)]
 internal sealed record GraphCrossPartitionFingerprint(
-    [property: Orleans.Id(GraphCrossPartitionFingerprintFields.Version)] int Version,
     [property: Orleans.Id(GraphCrossPartitionFingerprintFields.SourcePartition)] PartitionRef SourcePartition,
     [property: Orleans.Id(GraphCrossPartitionFingerprintFields.Graph)] string Graph,
     [property: Orleans.Id(GraphCrossPartitionFingerprintFields.EdgeId)] string EdgeId,

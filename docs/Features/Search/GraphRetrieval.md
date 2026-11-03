@@ -4,14 +4,14 @@
 
 The independent graph branch sorts shortest hops then full EntityRef and feeds one-based ordinal ranks to weightedRrfV1. Equal-hop alpha and beta contribute 1/(60+1) and 1/(60+2); adding one-hop delta precedes two-hop gamma, giving ranks 3 and 4. Hop distance is not the final fused ordinal rank, and the SQL fixture's complete expected order is derived from its declared corpus, never from production ranking output. A graph write issued after a node loss uses one unchanged command; an uncertain outcome is never retried under a new ID.
 
-## Versioned public contract
+## Typed public contract
 
 The graph executor adds an explicit `GraphSearchRequest` and `GraphSearchResult`; it does not
 change the exact array reply of existing Search. HTTP `/search/graph`, SDK
 `GraphSearchAsync` and official MCP `keyload_search_graph` invoke the same isolated
 Orleans request/read grain and one canonical authorized storage read cut.
 
-The generated v1 records, with sequential IDs starting at0, are:
+The generated records, with sequential IDs starting at0, are:
 
 - `GraphWalkSpec(Graph, Seeds, MaxDepth=3, MaxVertices=1000, MaxEdges=5000,
   Labels=null)`: immutable qualified EntityRef seeds and optional immutable
@@ -20,8 +20,8 @@ The generated v1 records, with sequential IDs starting at0, are:
 - `GraphRetriever(Walk, Weight=1)`: one independent shortest-hop ranked branch.
 - `GraphExpansion(Graph, MaxDepth=1, MaxVertices=1000, MaxEdges=5000,
   Labels=null)`: walks from the selected final hits and returns separate context.
-- `GraphSearchRequest(Version, Search, Scope=null, Retriever=null,
-  Expansion=null)`: version must equal1 and at least one graph operator is
+- `GraphSearchRequest(Search, Scope=null, Retriever=null,
+  Expansion=null)`: at least one graph operator is
   supplied. Search may omit text/vector only when Retriever is present.
 - `GraphContextDocument(Document, ShortestHops)` and
   `GraphExpansionResult(Documents, Completeness=SelectedHits)` use projected
@@ -30,14 +30,14 @@ The generated v1 records, with sequential IDs starting at0, are:
   Expansion is null when not requested and never silently changes hit ranks.
 
 Every new record uses `GenerateSerializer`, stable IDs and a literal purpose
-alias `keyload.contract.<kebab-type-name>.v1` held in feature-owned constants.
+alias `keyload.contract.<kebab-type-name>` held in feature-owned constants.
 No existing IDs/aliases are reused.
 
 All walks are outgoing, in the Search partition and a configured graph in the
 same tenant/database. Depth0..16, vertices1..10000, examined edges1..50000,
 nondefault nonempty seeds no greater than MaxVertices, finite nonnegative
 weight and valid identifiers are validated before reads; the serialized request
-has no KeyLoad byte ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). Unknown versions fail Validation. Every operator
+has no KeyLoad byte ceiling ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)). Every operator
 shares the request's cancellation and explicit expiry; its local caps never
 reset the shared operation. Limit exhaustion fails explicitly,
 with no truncated success or exact/completeness claim.
@@ -51,7 +51,7 @@ with no truncated success or exact/completeness claim.
 | REQ-GSEARCH-003: deterministic deduplicated shortest-hop ranking | AC-GSEARCH-003: graph score1/(1+shortestHops), multi-seed BFS, cycles/convergent paths contribute once per full EntityRef; weightedRrfV1 text/vector/graph matches independent exhaustive small-corpus oracle, including missing/zero-weight branches and ordinal ties. `GraphSearchOracleTests` |
 | REQ-GSEARCH-004: explicit bounded expansion output | AC-GSEARCH-004: only selected final hits seed expansion; context uses its own current collection/row/field policy, deduplicated shortest hops, explicit SelectedHits completeness and shared combined reply bounds. `GraphSearchExpansionTests` |
 | REQ-GSEARCH-005: bounded versioned admission | AC-GSEARCH-005: null/default/cross-partition seeds, invalid labels/versions/weights, exact work/byte boundaries, cancellation and next healthy request are covered. Label identifiers use the existing nonblank UTF-8 byte bound and reject control characters; internal spaces remain valid. No edge attributes or whole intermediate JSON are retained by reachability. `GraphSearchBudgetTests`, `GraphSearchInvalidWalkShapeTests`, `GraphSearchReachabilitySortBudgetTests` |
-| REQ-GSEARCH-006: public cluster and SQL parity qualification | AC-GSEARCH-006: .NET and official MCP clients agree on genuine Aspire cluster after policy/write/fault changes, and versioned SQL SEARCH compiles equivalent operators. Planned `GraphSearchClusterTests` and SQL conformance fixtures; the SQL SEARCH profile, not closed by the graph executor |
+| REQ-GSEARCH-006: public cluster and SQL parity qualification | AC-GSEARCH-006: .NET and official MCP clients agree on genuine Aspire cluster after policy/write/fault changes, and SQL SEARCH compiles equivalent operators. Planned `GraphSearchClusterTests` and SQL conformance fixtures; the SQL SEARCH profile, not closed by the graph executor |
 
 Scope intersects AllowedIds at branch output before ranking/fusion. Text corpus
 statistics remain the complete authorized corpus. Traversal never applies that
@@ -79,12 +79,12 @@ canonical adjacency/edge corruption propagates rather than becoming a hidden hit
 
 There are no new dependencies or stored-format migrations in the graph executor. Rollout admits only nodes supporting the new capability before serving the endpoint; unsupported graph requests are rejected, never silently dropped. Interactive UI is N/A: this is an SDK/SQL/MCP database capability.
 
-## Versioned SQL SEARCH profile
+## SQL SEARCH profile
 
-This is a bounded Q1.Search.v1 profile of the shared SQL language, not full SQL
+This is a bounded KeyLoad.Search profile of the shared SQL language, not full SQL
 conformance or a SQL client connection protocol. The dedicated typed
-`SqlGraphSearchRequest(Version, QueryRequest Query)` uses IDs0/1 and alias
-`keyload.contract.sql-graph-search-request`. Version must be1, Cursor must be
+`SqlGraphSearchRequest(QueryRequest Query)` uses field ID1 and alias
+`keyload.contract.sql-graph-search-request`. Cursor must be
 null and AllowFullScan must be explicitly true. The read kind,
 HTTP `/query/search`, SDK `SearchSqlAsync` and official MCP
 `keyload_query_search`; all return the existing GraphSearchResult. Current
@@ -116,7 +116,7 @@ LABELS/ALLOW IDS retain the direct API's empty-set semantics; empty/default seed
 sets reject. Weights default1, limit10, fusion60; walk caps are explicit. At least
 one graph operator is required; graph-only retrieval is valid. Duplicate,
 reordered, unknown clauses, missing/wrong-kind parameters, nonfinite/overflow
-numbers, unsupported cursor/version and trailing tokens reject Validation.
+numbers, unsupported cursor and trailing tokens reject Validation.
 No clause can be silently ignored or manufacture a different identity scope.
 
 Use the existing bounded tokenizer/token cursor and named constants, preserve
@@ -125,7 +125,7 @@ request before building arrays. Parser output is exactly GraphSearchRequest;
 the final graph-executor validation remains authoritative. Execute solely through
 SearchEngine.GraphSearchAsync with the original principal and cancellation.
 There is no second traversal implementation, extra store read or SQL-specific
-authorization path. Manifest ReadProfiles adds `graph-search`, while its Q1
+authorization path. Manifest ReadProfiles adds `graph-search`, while its scalar
 baseline and honest scalar conformance inventory remain unchanged.
 
 AC-GSEARCH-006 maps SQL SEARCH syntax and real-store direct/SQL equivalence to new
@@ -164,7 +164,7 @@ The tests (`ThreeWayHybrid*`, unit and integration) run against real ZoneTree/Co
 
 ```mermaid
 flowchart LR
-  Request[Versioned graph operators] --> Cut[One authorized read cut]
+  Request[Typed graph operators] --> Cut[One authorized read cut]
   Cut --> Scope[Bounded visible reachability]
   Cut --> Branches[Exact text vector graph branches]
   Scope --> Branches

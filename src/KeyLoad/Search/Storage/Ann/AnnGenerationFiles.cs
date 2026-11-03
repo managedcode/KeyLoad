@@ -39,7 +39,7 @@ internal static class AnnGenerationFiles
         budget.Check();
         var manifestDigest = AnnReceiptFiles.Write(Path.Combine(directory, AnnProtocol.ManifestFile), completed, options);
         AnnPaths.RequireClosedGeneration(root, manifest.GenerationLeaf);
-        return (completed, new(AnnProtocol.Version, manifest.GenerationLeaf, manifestDigest));
+        return (completed, new(manifest.GenerationLeaf, manifestDigest));
     }
 
     private static byte[] SaveIndex(string path, PackedAnnIndex index, IOptions<PackedAnnStorageOptions> storage,
@@ -81,8 +81,7 @@ internal static class AnnGenerationFiles
             AnnPaths.ExistingFile(root, pointer.GenerationLeaf, AnnProtocol.ManifestFile), options);
         AnnDigest.Require(pointer.ManifestSha256, observed.Digest);
         var manifest = observed.Value;
-        if (manifest.IsPending || pointer.Version != AnnProtocol.Version || manifest.Version != AnnProtocol.Version
-            || manifest.GenerationLeaf != pointer.GenerationLeaf || manifest.Policy != policy.Value)
+        if (manifest.IsPending || manifest.GenerationLeaf != pointer.GenerationLeaf || manifest.Policy != policy.Value)
         {
             throw Errors.Fail(ErrorCode.Corruption, AnnProtocol.Corrupt);
         }

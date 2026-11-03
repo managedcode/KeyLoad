@@ -416,7 +416,7 @@ silo-local ZoneTree owner keeps ordered apply and file ownership on its node.
 KeyLoad owns no write-ahead log, snapshot or archive format
 ([ADR-011](ADR/ADR-011-current-format.md)): a commit is one ZoneTree MVCC
 transaction holding the mutations and the `system/position` record, ZoneTree's
-write-ahead log (`SyncCompressed`, ZoneTree 2.1.0) is the only redo log, and a
+native WAL (`Shared` for MVCC, `SyncCompressed` for direct data, ZoneTree 2.1.1) is the only redo log, and a
 returned commit survives process termination. Acknowledgements await that native
 publication; ZoneTree owns periodic disk sync and MVCC commit-state retirement.
 `IAtomicStore.SyncAsync` requests an explicit disk barrier. Backups are ZoneTree live backups of the tree plus the

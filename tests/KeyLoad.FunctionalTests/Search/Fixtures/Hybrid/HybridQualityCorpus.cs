@@ -171,7 +171,7 @@ internal static class HybridQualityCorpus
             ResultLimit, BranchWeight, BranchWeight, FusionConstant, query.EligibleIds);
 
     internal static GraphSearchRequest GraphRequest(TestDatabase database, HybridQualityQuery query)
-        => new(1, SearchRequest(database, query), Retriever: query.IncludeGraph
+        => new(SearchRequest(database, query), Retriever: query.IncludeGraph
             ? new(new(Graph, [Root(database)], MaxDepth: 1, MaxVertices: 32, MaxEdges: 64), BranchWeight)
             : null);
 }

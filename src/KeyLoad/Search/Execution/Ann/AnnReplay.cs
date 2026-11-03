@@ -133,7 +133,7 @@ internal sealed class AnnReplay
         AnnSeedSort.Sort(sorted, sorted.Length, work);
         var rows = ImmutableCollectionsMarshal.AsImmutableArray(sorted);
         var digest = AnnSeedFingerprint.Compute(initial.Scope, rows, work, new byte[options.HashScratchBytes]);
-        return new(AnnProtocol.Version, admittedUpper, after, through, rows, digest, intent);
+        return new(admittedUpper, after, through, rows, digest, intent);
     }
 
     internal AnnSeed Finish(AnnSeed upper)

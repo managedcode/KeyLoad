@@ -3,7 +3,6 @@ namespace KeyLoad.Core.TimeSeries;
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(SampleChunkWire.PayloadAlias)]
 internal sealed record SampleChunkPayload(
-    [property: global::Orleans.Id(0)] int FormatVersion,
     [property: global::Orleans.Id(1)] int RecordCount,
     [property: global::Orleans.Id(2)] ReadOnlyMemory<byte> UtcTicks,
     [property: global::Orleans.Id(3)] ReadOnlyMemory<byte> Offsets,

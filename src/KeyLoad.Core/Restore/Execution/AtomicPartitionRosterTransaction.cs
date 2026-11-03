@@ -134,8 +134,7 @@ internal sealed partial class AtomicPartitionRosterTransaction : IAtomicTransact
 
             var firstSeenStorePosition = appliedIndex > AtomicPartitionRosterProtocol.NoCanonicalSequence
                 ? AtomicPartitionRosterProtocol.NoStorePosition : storePosition;
-            var entry = new AtomicPartitionCatalogEntry(AtomicPartitionRosterProtocol.CurrentVersion,
-                candidate.Key, firstSeenStorePosition, appliedIndex);
+            var entry = new AtomicPartitionCatalogEntry(candidate.Key, firstSeenStorePosition, appliedIndex);
             inner.Put(candidate.Value, OrleansSerialization.Serialize(entry));
         }
     }

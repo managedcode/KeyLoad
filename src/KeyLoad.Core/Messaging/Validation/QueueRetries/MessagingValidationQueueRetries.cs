@@ -41,7 +41,7 @@ public static class MessagingValidationQueueRetries
         }
 
         var choices = OrleansSerialization.Deserialize<QueueRetryDecisions>(payload.RetryDecisions.Span);
-        if (choices.Version != QueueRetryProtocol.Version || choices.EvaluatedAt != operation.Timestamp || choices.Items.IsDefaultOrEmpty)
+        if (choices.EvaluatedAt != operation.Timestamp || choices.Items.IsDefaultOrEmpty)
         {
             throw Errors.Fail(ErrorCode.Corruption, QueueRetryProtocol.InvalidDecision);
         }

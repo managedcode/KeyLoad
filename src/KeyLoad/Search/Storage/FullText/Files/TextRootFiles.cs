@@ -15,8 +15,7 @@ internal static class TextRootFiles
         {
             throw TextErrors.Ownership();
         }
-        TextFileIO.WriteEnvelope(path, new TextOwnerReceipt(TextProtocol.FormatVersion,
-            root, string.Empty, sourceNodeId, null, []), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
+        TextFileIO.WriteEnvelope(path, new TextOwnerReceipt(root, string.Empty, sourceNodeId, null, []), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
     }
 
     internal static void RetireRestartGenerations(string root, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
@@ -75,7 +74,7 @@ internal static class TextRootFiles
         var path = Path.Combine(root, TextProtocol.RootReceiptFile);
         TextFileIO.VerifyRegularFile(path);
         var owner = TextFileIO.ReadEnvelope<TextOwnerReceipt>(path, executionOptions.Value.MaximumOwnerReceiptBytes);
-        if (owner is null || owner.FormatVersion != TextProtocol.FormatVersion || owner.RootDirectory != root
+        if (owner is null || owner.RootDirectory != root
             || !string.IsNullOrEmpty(owner.GenerationLeaf) || owner.SourceNodeId != sourceNodeId
             || owner.Scope is not null || owner.OwnedPaths is null || owner.OwnedPaths.Length != EmptyOwnedPathsLength)
         {

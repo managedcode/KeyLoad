@@ -14,8 +14,7 @@ internal static class PostgresTcpClusterFlow
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {
-            await using var fixture = new ClusterFixture(new PostgresClusterSelection(
-                PostgresClusterProtocol.ScalarDialect, RequireTls: false));
+            await using var fixture = new ClusterFixture(new PostgresClusterSelection(RequireTls: false));
             await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
             {
                 await fixture.InitializeAsync();

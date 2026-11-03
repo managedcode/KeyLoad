@@ -6,7 +6,6 @@ internal sealed class AnnPublicStaleGenerationTests
 {
     private const int FullCorpus = 3;
     private const long Revision = 1;
-    private const int Version = 1;
     private const string Json = "{}";
     private const string UpdatedId = "seed-00000";
 
@@ -44,8 +43,7 @@ internal sealed class AnnPublicStaleGenerationTests
             image = AnnMaintenanceTestData.Snapshot(database);
             cut = database.Store.Position;
             var page = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, request);
-            var expected = new AnnSearchPage(Version,
-                [Row(database, UpdatedId, 1d / 61d), Row(database, "seed-00002", 1d / 62d),
+            var expected = new AnnSearchPage([Row(database, UpdatedId, 1d / 61d), Row(database, "seed-00002", 1d / 62d),
                  Row(database, "seed-00001", 1d / 63d)], cut, AnnPageMode.Exact, true,
                 pin.IndexGeneration, AnnPageMode.Approximate);
             await Assert.That(JsonDefaults.Serialize(page).AsSpan()

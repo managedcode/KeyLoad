@@ -25,7 +25,6 @@ internal static class PartitionAuthorityResults
     private static async Task PageAsync(PartitionQueryPage actual, PartitionAuthorityState state, long epoch)
     {
         await PartitionQueryClusterAssertions.AssertOracleAsync(actual, state.Scenario, state.Scenario.Partitions);
-        await Assert.That(actual.Version).IsEqualTo(PartitionQueryClusterProtocol.Version);
         await Assert.That(actual.Complete).IsTrue();
         ImmutableArray<PartitionQueryRow> rows = [
             new(Reference(state, PartitionAuthorityProtocol.FirstLeaf, PartitionAuthorityProtocol.FirstId), new(PartitionAuthorityProtocol.FirstId,

@@ -10,7 +10,6 @@ internal static class PartitionQueryMerge
     private const int EmptyElementCount = 0;
     private const int AdjacentElementOffset = 1;
 
-    private const int Version = 1;
     private const string InconsistentOwnerMessage = "Partition query leaves do not share one owner and policy epoch.";
     private const string IncompleteMessage = "A partition query leaf did not complete.";
 
@@ -43,7 +42,7 @@ internal static class PartitionQueryMerge
             }
         }
         var query = plan.Leaves[FirstElementIndex].Request.Query;
-        return new(Version, true, leaves, MergeRuns(leaves, query.Order, plan.Limit, budget));
+        return new(true, leaves, MergeRuns(leaves, query.Order, plan.Limit, budget));
     }
 
     private static ImmutableArray<PartitionQueryCandidate> MergeRuns(

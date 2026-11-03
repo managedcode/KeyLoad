@@ -48,10 +48,9 @@ internal sealed class TextOnlineCatalogProof : IDisposable
             TextOnlineCatalogSource.RequireOriginal(retained, current, result, budget, options);
             var fresh = CaptureSeed(database, principalId, request, budget);
             TextOnlineCatalogSource.RequireFresh(current, result, generation.Manifest, fresh, budget);
-            var scope = new TextProjectionScope(request.NodeId, fresh.Incarnation, fresh.DataEpoch,
-                fresh.ReadGeneration, fresh.Position, request.Consumer.Partition, request.Collection,
+            var scope = new TextProjectionScope(request.NodeId, fresh.Incarnation, fresh.ReadGeneration, fresh.Position, request.Consumer.Partition, request.Collection,
                 request.Field, fresh.PrincipalId, fresh.PolicyEpoch, fresh.SchemaVersion);
-            var catalog = new TextOnlineCatalog(TextProtocol.FormatVersion, request.NodeId,
+            var catalog = new TextOnlineCatalog(request.NodeId,
                 scope, request.Placement, request.Consumer, request.ConsumerGeneration,
                 current.Authority.Leaf, fresh.AppliedPosition, fresh.UpperSequence,
                 current.Authority.ManifestSha256, current.CommandId);
@@ -87,10 +86,9 @@ internal sealed class TextOnlineCatalogProof : IDisposable
                 new(request.Consumer, request.ConsumerGeneration, request.Collection, request.Field,
                     request.NodeId, request.Placement), budget);
             TextOnlineCatalogSource.RequireFresh(current, result, generation.Manifest, fresh, budget);
-            var scope = new TextProjectionScope(request.NodeId, fresh.Incarnation, fresh.DataEpoch,
-                fresh.ReadGeneration, fresh.Position, request.Consumer.Partition, request.Collection,
+            var scope = new TextProjectionScope(request.NodeId, fresh.Incarnation, fresh.ReadGeneration, fresh.Position, request.Consumer.Partition, request.Collection,
                 request.Field, fresh.PrincipalId, fresh.PolicyEpoch, fresh.SchemaVersion);
-            var catalog = new TextOnlineCatalog(TextProtocol.FormatVersion, request.NodeId,
+            var catalog = new TextOnlineCatalog(request.NodeId,
                 scope, request.Placement, request.Consumer, request.ConsumerGeneration, current.Authority.Leaf,
                 fresh.AppliedPosition, fresh.UpperSequence, current.Authority.ManifestSha256, current.CommandId);
             return new(retained, current, request, catalog, principal.Id, clock);

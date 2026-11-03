@@ -16,7 +16,7 @@ internal sealed class ReaderMalformedTests
             var syntax = Assert.ThrowsExactly<KeyLoadException>(() => OrleansSerialization.Validate(bytes.AsSpan(0, length)));
             await Assert.That(decode.Code).IsEqualTo(ErrorCode.Corruption);
             await Assert.That(syntax.Code).IsEqualTo(ErrorCode.Corruption);
-            await Assert.That(decode.Message).IsEqualTo(PayloadVersion.InvalidPayload);
+            await Assert.That(decode.Message).IsEqualTo(RuntimePayloadContract.InvalidPayload);
         }
         var actual = OrleansSerialization.Deserialize<DocumentResult>(bytes);
         await Assert.That(actual.Json).IsEqualTo(expected.Json);

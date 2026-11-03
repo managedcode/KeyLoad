@@ -46,6 +46,6 @@ internal static class SqlParserAdmissionModelPages
                 Guid.NewGuid(), "INSERT INTO [parser-typed] (id,title,amount) VALUES ('refused','private',-1 COLLATE Latin1_General_100_BIN2)", token));
             await Assert.That(partial).IsNull();
             await Assert.That(failure.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-            await Assert.That(failure.Message).IsEqualTo("The unified SQL version, statement or target operation is unsupported.");
+            await Assert.That(failure.Message).IsEqualTo("The unified SQL statement or target operation is unsupported.");
         });
 }

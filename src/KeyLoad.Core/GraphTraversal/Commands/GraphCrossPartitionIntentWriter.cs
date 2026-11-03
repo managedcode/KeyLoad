@@ -102,8 +102,7 @@ internal static class GraphCrossPartitionIntentWriter
 
         var fingerprint = GraphCrossPartitionRecords.Fingerprint(source, graph, edge.Id,
             target, edge.Revision, deleted, edge);
-        var intent = new GraphCrossPartitionDeliveryIntent(GraphCrossPartitionProtocol.CurrentVersion,
-            source, graph, edge.Id, target, edge.Revision, deleted, edge, principal.Id,
+        var intent = new GraphCrossPartitionDeliveryIntent(source, graph, edge.Id, target, edge.Revision, deleted, edge, principal.Id,
             principal.PolicyEpoch, fingerprint);
         var key = GraphCrossPartitionKeys.Intent(intent);
         var value = GraphCrossPartitionRecords.Encode(intent);

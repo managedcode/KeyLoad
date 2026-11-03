@@ -12,7 +12,7 @@ namespace KeyLoad.Query;
 /// <param name="Limit">The maximum number of rows to return.</param>
 /// <param name="Explain">Whether to return query plan information.</param>
 /// <param name="ModelSource">Optional read-only event or queue source binding.</param>
-/// <param name="InnerJoin">Optional Q2 typed-row INNER JOIN.</param>
+/// <param name="InnerJoin">Optional typed-row INNER JOIN.</param>
 /// <param name="Offset"></param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(ContractAliases.SelectQuery)]

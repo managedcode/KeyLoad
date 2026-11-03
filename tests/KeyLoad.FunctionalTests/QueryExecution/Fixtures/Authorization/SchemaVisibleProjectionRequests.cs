@@ -23,7 +23,6 @@ internal static class SchemaVisibleProjectionRequests
     private const string Order = " ORDER BY ";
     private const string JoinSql = "SELECT d.status AS exposed FROM orders d INNER JOIN eventcustomers r ON d.status = r.name";
     private const int Limit = 10;
-    private const int Q2 = SqlOperationProtocol.DefaultQueryDialectVersion;
 
     internal static IEnumerable<(QueryRequest Sql, AstQueryRequest Ast)> Restricted(PartitionRef partition)
     {
@@ -40,9 +39,8 @@ internal static class SchemaVisibleProjectionRequests
                 [new(SchemaVisibleProjectionProtocol.Star, SchemaVisibleProjectionProtocol.Star)], order: [new(path, false)]);
         }
         var join = Star(partition);
-        yield return (new(partition, JoinSql, AllowFullScan: true, QueryDialectVersion: Q2), join with
+        yield return (new(partition, JoinSql, AllowFullScan: true), join with
         {
-            AstVersion = Q2,
             Query = join.Query with
             {
                 Projection = [new(StatusPath, SchemaVisibleProjectionProtocol.ValueAlias, Alias)],

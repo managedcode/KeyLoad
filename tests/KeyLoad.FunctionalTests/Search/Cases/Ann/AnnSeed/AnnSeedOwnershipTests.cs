@@ -49,7 +49,7 @@ internal sealed class AnnSeedOwnershipTests
             ["PrincipalId", "PolicyEpoch", "Partition", "Collection", "Field", "SchemaVersion", "Space", "EvaluatedAt"],
             CollectionOrdering.Matching);
         await Assert.That(cutProperties).IsEquivalentTo(
-            ["NodeId", "Incarnation", "StoreFormatVersion", "KeyCodecVersion", "ReadGeneration", "Position",
+            ["NodeId", "Incarnation", "ReadGeneration", "Position",
              "AppliedPosition", "OutboxTail", "OutboxFirstAvailable"], CollectionOrdering.Matching);
         await Assert.That(seedProperties).IsEquivalentTo(
             ["Scope", "Cut", "Records", "CorpusSha256", "OwnedBytesUpperBound", "PeakBytesUpperBound", "WorkUnits"],

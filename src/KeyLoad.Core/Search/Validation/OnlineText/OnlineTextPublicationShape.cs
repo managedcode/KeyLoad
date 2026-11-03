@@ -8,7 +8,6 @@ internal static class OnlineTextPublicationShape
     private const long EmptyConsumerGeneration = 0;
     private const long EmptySourceCoordinate = 0;
     private const int EmptyTrackedRecords = 0;
-    private const int EmptyDataEpoch = 0;
     private const char MinimumDecimalDigit = '0';
     private const char MaximumDecimalDigit = '9';
     private const char MinimumHexLetter = 'a';
@@ -25,7 +24,7 @@ internal static class OnlineTextPublicationShape
             || command.Leaf != GenerationPrefix + command.GenerationId.ToString(GuidFormat)
             || !IsCanonicalSha(command.ManifestSha256) || !IsCanonicalSha(result.IndexSha256)
             || request.NodeId == Guid.Empty || result.BaseCut.NodeId != request.NodeId
-            || result.PublishedCut.NodeId != request.NodeId || command.DataEpoch <= EmptyDataEpoch)
+            || result.PublishedCut.NodeId != request.NodeId)
         {
             throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.InvalidPublication);
         }

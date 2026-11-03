@@ -5,7 +5,6 @@ namespace KeyLoad.Core.RuntimeJournaling.Models;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(RuntimeJournalProtocol.HeaderAlias)]
 internal sealed record RuntimeJournalHeader(
-    [property: Orleans.Id(0)] int Version,
     [property: Orleans.Id(1)] string Name,
     [property: Orleans.Id(2)] Guid InstanceId,
     [property: Orleans.Id(3)] long OwnerGeneration,

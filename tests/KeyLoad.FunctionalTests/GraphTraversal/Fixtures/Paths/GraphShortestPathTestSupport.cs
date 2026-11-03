@@ -75,7 +75,7 @@ internal static class GraphShortestPathTestSupport
         GraphShortestPathReferenceVertex from, GraphShortestPathReferenceVertex to,
         int maxDepth = 16, int maxVertices = 1_000, int maxEdges = 5_000,
         ImmutableArray<string>? labels = null)
-        => new(1, database.Partition, Graph,
+        => new(database.Partition, Graph,
             Vertex(database, from.Collection, from.Id), Vertex(database, to.Collection, to.Id),
             maxDepth, maxVertices, maxEdges, labels);
 }

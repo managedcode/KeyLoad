@@ -100,7 +100,7 @@ internal static class AnnPendingCodec
 
     private static void RequireHeader(AnnPendingReplay header, int count)
     {
-        if (header is null || header.Version != AnnProtocol.Version || header.AdmittedUpper is null || header.AdmittedUpper.Source is null
+        if (header is null || header.AdmittedUpper is null || header.AdmittedUpper.Source is null
             || count < Empty || header.AfterSequence < Empty || header.ThroughSequence <= header.AfterSequence
             || header.ThroughSequence > header.AdmittedUpper.Source.ThroughSequence
             || header.CheckpointIntent is null || header.CheckpointIntent.CommandId == Guid.Empty

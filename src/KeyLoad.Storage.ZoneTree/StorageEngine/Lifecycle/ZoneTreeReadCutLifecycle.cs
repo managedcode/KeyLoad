@@ -25,7 +25,7 @@ internal sealed class ZoneTreeReadCutLifecycle
             }
             lease.CheckAfterCapture();
             var identity = runtime.Identity;
-            var cut = new ZoneTreeReadCut(identity.FormatVersion, identity.KeyCodecVersion, identity.NodeId,
+            var cut = new ZoneTreeReadCut(identity.NodeId,
                 identity.Incarnation, identity.Durability, identity.DispatchPaused, identity.ReadGeneration, runtime.Position);
             var snapshot = new ZoneTreeSnapshotCursor(runtime, capturePlain: true);
             lease.Attach(snapshot, cut);

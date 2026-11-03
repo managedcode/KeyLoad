@@ -68,7 +68,7 @@ internal static class RuntimeJournalRecordAccess
             var offset = index * options.ChunkBytes;
             var length = Math.Min(options.ChunkBytes, data.Length - offset);
             transaction.PutRecord(RuntimeJournalKeys.Chunk(name, index),
-                new RuntimeJournalChunk(RuntimeJournalProtocol.CurrentVersion, index, data.Slice(offset, length).ToArray()));
+                new RuntimeJournalChunk(index, data.Slice(offset, length).ToArray()));
         }
         for (var index = nextChunks; index < previousChunks; index++)
         {
@@ -121,7 +121,7 @@ internal static class RuntimeJournalRecordAccess
     private static RuntimeJournalChunk RequireChunk(IKeyValueView view, string name, int index, int chunkBytes)
     {
         var chunk = ReadRecord<RuntimeJournalChunk>(view, RuntimeJournalKeys.Chunk(name, index));
-        if (chunk is null || chunk.Data is null || chunk.Version != RuntimeJournalProtocol.CurrentVersion || chunk.Index != index
+        if (chunk is null || chunk.Data is null || chunk.Index != index
             || chunk.Data.Length == RuntimeJournalProtocol.EmptyCount || chunk.Data.Length > chunkBytes)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, RuntimeJournalProtocol.InvalidState);

@@ -29,7 +29,7 @@ internal static class GraphIncomingMcpTestData
     internal static readonly EntityRef CrossSource = new(SourcePartition, Collection, CrossSourceId);
     internal static readonly EntityRef Target = new(Partition, Collection, TargetId);
 
-    internal static ReadIncomingGraphEdgesRequest Request() => new(1, Target, Graph, Limit);
+    internal static ReadIncomingGraphEdgesRequest Request() => new(Target, Graph, Limit);
 
     internal static GraphIncomingEdgesPage Page()
     {
@@ -37,6 +37,6 @@ internal static class GraphIncomingMcpTestData
             new EdgeRecord(EdgeId, Source, Target, Label, AttributesJson, SourceRevision), LocalDeliveredRevision);
         var cross = new GraphIncomingEdgeRow(
             new EdgeRecord(CrossEdgeId, CrossSource, Target, Label, AttributesJson, CrossSourceRevision), DeliveredRevision);
-        return new GraphIncomingEdgesPage(1, [local, cross], CutPosition, Projection);
+        return new GraphIncomingEdgesPage([local, cross], CutPosition, Projection);
     }
 }

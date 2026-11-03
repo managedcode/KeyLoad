@@ -152,7 +152,7 @@ effect, missing authoritative record, replay mismatch, invalid fresh analytics r
 or unknown cleanup result. A changed analytics public window leaves only that derived
 history observation UNQUALIFIED and cannot satisfy a retained-history claim.
 
-Local runtime results remain development evidence; exact-source Linux qualification is separate. Process-kill proof does not establish power-loss durability, production readiness or performance. The cold fixture uses the existing `SqlOperationProtocol.DefaultQueryDialectVersion` (1) for VALUES INSERT; SELECT remains dialect 2.
+Local runtime results remain development evidence; exact-source Linux qualification is separate. Process-kill proof does not establish power-loss durability, production readiness or performance. The cold fixture uses the same current SQL contract for VALUES INSERT and SELECT.
 
 The owning contracts remain ADR-117 test entry, ADR-125 connection execution
 and ADR-136 silo-local ZoneTree ownership. No new ADR is required for

@@ -45,7 +45,7 @@ internal static class GraphSearchLineageClusterRecipe
         var search = new SearchRequest(partition, GraphSearchLineageClusterProtocol.Collection, VectorField: GraphSearchLineageClusterProtocol.VectorField,
             Vector: [1f, 0f], Space: GraphSearchLineageClusterProtocol.Space, Limit: GraphSearchLineageClusterProtocol.ResultLimit,
             FusionConstant: GraphSearchLineageClusterProtocol.Fusion);
-        return new(GraphSearchLineageClusterProtocol.Version, search, new(early), expansion ? null : new(late),
+        return new(search, new(early), expansion ? null : new(late),
             expansion ? new(GraphSearchLineageClusterProtocol.LateGraph, GraphSearchLineageClusterProtocol.Depth,
                 GraphSearchLineageClusterProtocol.Vertices, GraphSearchLineageClusterProtocol.Edges, labels) : null);
     }

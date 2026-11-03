@@ -11,9 +11,10 @@ captures. Orleans owns request execution and the silo-local storage lifetime.
 | REQ-ANALYTICS-003 | AC-ANALYTICS-003 | Bounded event reads enforce current persisted scope, row and field policies. Aggregate inputs contain only currently visible rows, with raw-use authorization for selected dimensions and metrics. Fresh persisted subject/policy, resource lifetime, read generation and store generation are revalidated before publishing output. |
 | REQ-ANALYTICS-004 | AC-ANALYTICS-004 | The centrally pinned ZoneTree.Analytics 1.0.2 executes each aggregate from a complete authorized canonical capture in a fresh derived generation. Track, Flush, Query and Dispose calls are synchronous. accepted/processed/dropped/rejected/error counters and the complete raw-event query plan are checked. Limits refuse incomplete results rather than returning a partial aggregate. |
 | REQ-ANALYTICS-005 | AC-ANALYTICS-005 | The silo-local ZoneTree owner (the node's Orleans Grain Service) owns derived directories, engines and shutdown. Cancellation joins the actual operation and disposal; a failed join blocks subsequent generation acquisition and physical owner release. |
-| REQ-ANALYTICS-006 | AC-ANALYTICS-006 | Both canonical key families participate in bounded partition inventory, snapshots/backup and resource cleanup. Effect capture includes the store and every linked resource through the existing observed resource binder; a retired resource prevents new effects. |
+| REQ-ANALYTICS-006 | AC-ANALYTICS-006 | Event, generation and timestamp-index key families participate in bounded partition inventory, snapshots/backup and resource cleanup. Effect capture includes the store and every linked resource through the existing observed resource binder; a retired resource prevents new effects. |
 | REQ-ANALYTICS-007 | AC-ANALYTICS-007 | HTTP/SDK, official MCP and versioned T-SQL EXEC catalog calls share the same typed operations and connection-owned Orleans execution. A public functional scenario proves three independent stores through create, ingest, replacement, deletion, raw read and complete aggregate. |
 | REQ-ANALYTICS-008 | AC-ANALYTICS-008 | Full solution build, meaningful TUnit operations, real process recovery and Aspire-owned cluster SDK/MCP gates pass. No performance, endurance, production-readiness or full-SQL claim follows from source presence. |
+| REQ-ANALYTICS-009 | AC-ANALYTICS-009 | Half-open timestamp reads seek their native index and read the corresponding canonical events. Timestamp moves, deletion, reinsertion, current row policy, ordinal ID output and cold reopen preserve exact results in both storage modes. One query prepares native dimension/metric keys once before projecting its rows. |
 
 The schema declares ordinally sorted unique dimension and metric names. Events have an ID,
 UTC timestamp, string dimensions, finite numeric metrics, optional persisted row
@@ -36,6 +37,23 @@ Canonical timestamps may be ahead of system UTC. Each disposable generation
 configures the engine's ingestion skew to include its latest already captured
 timestamp. Original timestamps, capture limits and complete-ingestion checks stay
 authoritative; the requested range alone cannot expand ingestion skew.
+
+The timestamp index contains the event ID under `(store, timestamp, id)` in the
+canonical key codec. Upsert moves the index entry with its event; deletion removes
+it. Transactional resources commit event, index and generation together. Direct
+resources retain their explicit nontransactional contract: a read can encounter
+an older index hint during a concurrent replacement and validates the current
+canonical event before accepting it. The index never supplies event contents or
+permissions. Reads deduplicate IDs and retain ordinal public ordering.
+
+`AnalyticsTimestampSeekTests` exercises a two-event window among 515 events,
+requires fewer than eight examined range entries, then verifies timestamp moves,
+deletion/reinsertion and two cold opens for both storage modes. The native
+projection prepares its selected field names and numeric keys once per query,
+including repeated aggregate selections over the same source metric. The same
+canonical capture, native engine, complete-ingestion checks and publication
+revalidation remain in use. [Local investigation](../implementation/analytics-performance.md)
+records the measured work and its qualification limits.
 
 Initial entity links target existing, readable, nondeleted collection documents in
 the same atomic partition. They use the existing canonical EntityRef identity and
@@ -66,7 +84,10 @@ final validation uses the remaining original read budget; it does not renew the
 explicit expiry. The internal same-process result
 and snapshot never become an extra public or inter-grain payload. The raw execution
 files are never read as authority, do not acknowledge a database mutation and are
-excluded from canonical backup authority. Interrupted disposable
+excluded from canonical backup authority. Their raw-event, rollup and session
+stores disable WAL through the published engine options: these generations are
+rebuilt from the authorized canonical capture. Canonical data retains its own
+caller-side WAL publication and acknowledgement contract. Interrupted disposable
 generations are removed at the next opening under the acquired physical lock;
 they are never reused as trusted projections.
 

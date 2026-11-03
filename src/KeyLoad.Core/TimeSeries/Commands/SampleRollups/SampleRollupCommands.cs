@@ -27,7 +27,7 @@ internal static class SampleRollupCommands
             throw Errors.Fail(ErrorCode.HistoryUnavailable, SampleRollupProtocol.Stale);
         }
         var aggregate = SampleRollupFold.Read(tx, partition, request, watermark.Sequence);
-        var next = new SampleRollupState(RuntimeSampleRollup.Version, request.From.UtcTicks, request.UntilExclusive.UtcTicks,
+        var next = new SampleRollupState(request.From.UtcTicks, request.UntilExclusive.UtcTicks,
             checked(request.ExpectedRevision + NextRevision), watermark.Sequence, watermark.Floor, false,
             aggregate.Count, aggregate.Sum, aggregate.Minimum, aggregate.Maximum);
         tx.PutRecord(SampleRollupKeys.Bucket(partition, request.SeriesSet, request.SeriesId,

@@ -141,18 +141,7 @@ internal sealed class TextBoundedFileStream : Stream, IFileStream
     {
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(writes.JoinForDisposalAsync, failures);
-        ServerFailureObserver.Observe(() => resources.BeginCloseFile(group, original), failures);
-        var runtimeBeforeClose = failures.Count;
-        try
-        {
-            original.Dispose();
-        }
-        catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        catch (Exception error) when (!CqrsBoundaryErrors.IsNonFatal(error)) { failures.Add(error); }
-        if (failures.Count == runtimeBeforeClose)
-        {
-            ServerFailureObserver.Observe(() => resources.CloseFile(group, original), failures);
-        }
+        ServerFailureObserver.Observe(() => resources.CloseOwnedFile(group, original), failures);
         ServerFailureObserver.Observe(writes.ThrowRetained, failures);
         ServerFailureObserver.ThrowIfAny(failures);
     }

@@ -2,7 +2,6 @@ using KeyLoad.Core.TimeSeries;
 
 namespace KeyLoad.Clustering;
 
-[global::Orleans.CodeGeneration.Version(SampleChunkJobProtocol.CoordinatorInterfaceVersion)]
 internal interface ISampleChunkCoordinatorGrain : IGrainWithStringKey
 {
     Task ScheduleAsync(SampleChunkWorkHint hint, CancellationToken cancellationToken);

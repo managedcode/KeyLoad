@@ -37,7 +37,6 @@ internal static class TextIncrementalCrashProtocol
     internal const long Revision = 1;
     internal const long ChangedRevision = 2;
     internal const long HealthyRevision = 3;
-    internal const int PlacementVersion = 1;
     internal const int MaximumPages = 4;
     internal static PartitionRef Partition { get; } = new(Tenant, Database, Domain, PartitionKey);
 }

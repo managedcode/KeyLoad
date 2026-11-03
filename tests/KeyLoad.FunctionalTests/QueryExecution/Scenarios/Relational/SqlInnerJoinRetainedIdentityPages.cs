@@ -24,7 +24,6 @@ internal static class SqlInnerJoinRetainedIdentityPages
     private const string GreaterThan = ">";
     private const string AccessPath = "bounded-primary-key-inner-join";
     private const string Corrupt = "The retained relational join source is inconsistent.";
-    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int PageLimit = 10;
     private const int SingleCandidate = 1;
     private const int FalseThreshold = 100;
@@ -37,13 +36,13 @@ internal static class SqlInnerJoinRetainedIdentityPages
                                     + "WHERE l.total > 100 ORDER BY l.order_id ASC";
 
     private static QueryRequest Request(PartitionRef partition)
-        => new(partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect);
+        => new(partition, Sql, AllowFullScan: true);
 
     private static AstQueryRequest Ast(PartitionRef partition)
         => new(partition, new SelectQuery(Left, LeftAlias,
             [new(OrderPath, OrderField, LeftAlias), new(NamePath, NameField, RightAlias), new(TotalPath, GenerationField, LeftAlias)],
             null, [new(OrderPath, false)], PageLimit,
-            InnerJoin: new(Right, RightAlias, ForeignKeyPath, RightKeyPath)), AllowFullScan: true, AstVersion: Dialect);
+            InnerJoin: new(Right, RightAlias, ForeignKeyPath, RightKeyPath)), AllowFullScan: true);
 
     internal static async Task RefuseAsync(global::KeyLoad.Core.DatabaseEngine owner,
         global::KeyLoad.Storage.ZoneTree.ZoneTreeStore store, PartitionRef partition,

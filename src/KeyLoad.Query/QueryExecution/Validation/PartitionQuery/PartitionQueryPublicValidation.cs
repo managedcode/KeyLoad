@@ -9,7 +9,6 @@ internal static class PartitionQueryPublicValidation
     private const int FirstOrdinal = 1;
     private const int AdjacentElementOffset = 1;
 
-    private const int RequestVersion = 1;
     private const string InvalidRequest = "The partition query request is invalid.";
     private const string UnsupportedQuery = "The partition query contains unsupported query options.";
 
@@ -20,7 +19,7 @@ internal static class PartitionQueryPublicValidation
         var partitions = OrderPartitions(request!.Partitions, execution.MaximumPartitions);
         ValidateOptions(request.Query);
         var ast = new AstQueryRequest(partitions[FirstElementIndex], request.Query, request.Parameters,
-            request.AllowFullScan, AstVersion: request.AstVersion);
+            request.AllowFullScan);
         var normalized = QueryValidation.Normalize(ast, execution);
         return (normalized, partitions);
     }
@@ -30,14 +29,6 @@ internal static class PartitionQueryPublicValidation
         if (request is null || request.Query is null)
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
-        }
-        if (request.Version != RequestVersion)
-        {
-            throw Errors.Fail(ErrorCode.Validation, InvalidRequest);
-        }
-        if (request.AstVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, InvalidRequest);
         }
     }
 

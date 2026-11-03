@@ -32,7 +32,6 @@ internal static class GraphIncomingClusterScenario
     private const string KeyPrefix = "graph-incoming-key-";
     private const string SecretSeparator = ".";
     private const string GuidFormat = "N";
-    private const int RequestVersion = 1;
     private const int SecretBytes = 32;
 
     internal static async Task<GraphIncomingClusterSeed> CreateAsync(ClusterFixture fixture,
@@ -64,7 +63,7 @@ internal static class GraphIncomingClusterScenario
     }
 
     internal static ReadIncomingGraphEdgesRequest Request(GraphIncomingClusterSeed seed, int limit = 10)
-        => new(RequestVersion, seed.Target, seed.Graph, limit);
+        => new(seed.Target, seed.Graph, limit);
 
     internal static UpsertEdge Edge(string id, EntityRef from, EntityRef to, string label = Label,
         string? marker = null, long? expectedRevision = null)

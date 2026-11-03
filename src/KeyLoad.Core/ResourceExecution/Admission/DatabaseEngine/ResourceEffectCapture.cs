@@ -37,13 +37,13 @@ public static class ResourceEffectCapture
                 engine.ObserveCompositionPrefix(preparation, principal, operation, preparationPosition!.Value, preserveBudgetFailure);
             }
 
-            var admission = new ResourceEffectAdmission(ResourceEffectAdmissionProtocol.Version, scope.Capture(), null, null);
+            var admission = new ResourceEffectAdmission(scope.Capture(), null, null);
             scope.Activate(admission);
             return admission;
         }
         catch (KeyLoadException error) when (!preserveBudgetFailure || error.Code != ErrorCode.BudgetExceeded)
         {
-            return new(ResourceEffectAdmissionProtocol.Version, ImmutableArray<ResourceLifetime>.Empty, error.Code, error.Message);
+            return new(ImmutableArray<ResourceLifetime>.Empty, error.Code, error.Message);
         }
     }
 

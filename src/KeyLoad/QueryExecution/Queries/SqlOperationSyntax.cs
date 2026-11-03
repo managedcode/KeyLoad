@@ -4,7 +4,6 @@ namespace KeyLoad.Server;
 internal static class SqlOperationSyntax
 {
     internal const string Invalid = "The unified SQL statement or bound arguments are invalid.";
-    internal const string Unsupported = "The unified SQL version, statement or target operation is unsupported.";
     internal const string StructureExceeded = "The unified SQL parameters or syntax exceed their structural budget.";
     internal const string SequentialOnly = "The SQL byte counter supports sequential writes only.";
     internal const char ParameterPrefix = '@';
@@ -21,5 +20,4 @@ internal static class SqlOperationSyntax
     internal const int CallParameterCount = 1;
 
     internal static KeyLoadException InvalidInput() => Errors.Fail(ErrorCode.Validation, Invalid);
-    internal static KeyLoadException UnsupportedInput() => Errors.Fail(ErrorCode.UnsupportedCapability, Unsupported);
 }

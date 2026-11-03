@@ -3,7 +3,7 @@
 Canonical slice: QueryExecution. Existing REQ-QUERY-003 and AC-MP-003/AC-MP-012, ADR-013/022/125 own this continuation.
 
 ## REQ-CURSOR-IDENTITY-001
-A genuine unchanged-principal signed cursor must bind the full AST request identity: partition, AST Query (Explain=false), parameters, AllowFullScan and AstVersion. Changing the supported OFFSET from 1 to 0 must refuse the original cursor as CursorExpired. This is a public request change, not a resigned or altered token.
+A genuine unchanged-principal signed cursor must bind the full AST request identity: partition, AST Query (Explain=false), parameters and AllowFullScan. Changing the supported OFFSET from 1 to 0 must refuse the original cursor as CursorExpired. This is a public request change, not a resigned or altered token.
 
 ## AC-CURSOR-IDENTITY-001
 After the unchanged original AcSqlc006 whole flow, a genuine second SqlOffsetClusterSetup creates exactly four left and four right literal records at revision1 and the same original epoch2 Query|DocumentsRead identity. Both public clients capture real first OFFSET1 pages containing b, continue c then d at the same signed cut, and end with null cursor. The independent full four projected title rows and eight documents must match literal source values.

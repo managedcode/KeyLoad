@@ -43,7 +43,7 @@ internal static class GraphSearchLineageRecipe
         var search = new SearchRequest(partition, GraphSearchLineageProtocol.Collection, VectorField: GraphSearchLineageProtocol.VectorField,
             Vector: [1f, 0f], Space: GraphSearchLineageProtocol.Space, Limit: GraphSearchLineageProtocol.ResultLimit,
             FusionConstant: GraphSearchLineageProtocol.Fusion);
-        return new(GraphSearchLineageProtocol.Version, search, new(early), expansion ? null : new(late),
+        return new(search, new(early), expansion ? null : new(late),
             expansion ? new(GraphSearchLineageProtocol.LateGraph, GraphSearchLineageProtocol.Depth,
                 GraphSearchLineageProtocol.Vertices, GraphSearchLineageProtocol.Edges, labels) : null);
     }

@@ -1,4 +1,3 @@
-using KeyLoad.Storage;
 using TUnit.Assertions.Enums;
 
 namespace KeyLoad.FunctionalTests.StorageRecovery;
@@ -14,7 +13,6 @@ internal sealed class RuntimeJournalReaderLifecycleTests
         using var fixture = new RuntimeJournalReaderFixture();
         using (var store = fixture.Open(fixture.CanonicalPath))
         {
-            await Assert.That(store.Identity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
             RuntimeJournalReaderFixture.WriteRuntimeRecord(store, RuntimeJournalReaderFixture.RuntimeJournalKey,
                 RuntimeJournalReaderFixture.RuntimeJournalValue);
             await Assert.That(store.Position).IsEqualTo(ExpectedFirstPosition);
@@ -22,7 +20,6 @@ internal sealed class RuntimeJournalReaderLifecycleTests
 
         using (var reopened = fixture.Open(fixture.CanonicalPath))
         {
-            await Assert.That(reopened.Identity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
             await Assert.That(RuntimeJournalReaderFixture.Read(reopened, RuntimeJournalReaderFixture.RuntimeJournalKey))
                 .IsEquivalentTo(RuntimeJournalReaderFixture.RuntimeJournalValue, CollectionOrdering.Matching);
             RuntimeJournalReaderFixture.WriteRuntimeRecord(reopened, RuntimeJournalReaderFixture.FollowupKey,
@@ -31,7 +28,6 @@ internal sealed class RuntimeJournalReaderLifecycleTests
         }
 
         using var cold = fixture.Open(fixture.CanonicalPath);
-        await Assert.That(cold.Identity.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
         await Assert.That(RuntimeJournalReaderFixture.Read(cold, RuntimeJournalReaderFixture.RuntimeJournalKey))
             .IsEquivalentTo(RuntimeJournalReaderFixture.RuntimeJournalValue, CollectionOrdering.Matching);
         await Assert.That(RuntimeJournalReaderFixture.Read(cold, RuntimeJournalReaderFixture.FollowupKey))

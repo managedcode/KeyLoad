@@ -18,10 +18,6 @@ internal static class SqlOperationBounds
         {
             throw SqlOperationSyntax.InvalidInput();
         }
-        if (request.Version != SqlOperationProtocol.Version)
-        {
-            throw SqlOperationSyntax.UnsupportedInput();
-        }
         if (string.IsNullOrWhiteSpace(request.Sql))
         {
             throw SqlOperationSyntax.InvalidInput();

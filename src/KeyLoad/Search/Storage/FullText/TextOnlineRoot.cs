@@ -55,7 +55,7 @@ internal sealed class TextOnlineRoot
             System.IO.Directory.CreateDirectory(path);
             TextFileIO.VerifyDirectory(path);
             TextFileIO.SetPrivateDirectoryMode(path);
-            var owner = new TextOwnerReceipt(TextProtocol.FormatVersion, Directory, leaf, node,
+            var owner = new TextOwnerReceipt(Directory, leaf, node,
                 scope, [new(TextProtocol.RuntimeDirectoryCore, true)]);
             TextFileIO.WriteEnvelope(Path.Combine(path, TextProtocol.OwnerFile), owner,
                 options.Value.MaximumOwnerReceiptBytes, options, resources);
@@ -117,7 +117,7 @@ internal sealed class TextOnlineRoot
         } // Partial owner creation is retained; never a publication proof.
         var staging = TextFileIO.ReadEnvelope<TextOnlineStaging>(receipt,
             options.Value.MaximumOwnerReceiptBytes);
-        if (staging.FormatVersion != TextProtocol.FormatVersion || staging.NodeId != node
+        if (staging.NodeId != node
             || staging.Leaf != leaf || staging.Request.NodeId != node || staging.Request.CommandId == Guid.Empty
             || staging.CapturedCut.NodeId != node || !TextIncrementalDigest.IsCanonical(staging.ParentFingerprint))
         {

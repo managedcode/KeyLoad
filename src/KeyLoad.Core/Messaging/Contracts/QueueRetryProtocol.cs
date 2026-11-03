@@ -7,7 +7,6 @@ internal static class QueueRetryProtocol
     internal const string SeedAlias = "keyload.core.queue-retry-seed";
     internal const int Initial = 0;
     internal const int Positive = 1;
-    internal const int Version = 1;
     internal const int Field0 = 0;
     internal const int Field1 = 1;
     internal const int Field2 = 2;

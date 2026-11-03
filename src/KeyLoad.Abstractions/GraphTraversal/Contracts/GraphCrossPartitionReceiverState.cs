@@ -4,7 +4,6 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(GraphCrossPartitionAliases.ReceiverState)]
 internal sealed record GraphCrossPartitionReceiverState(
-    [property: Orleans.Id(GraphCrossPartitionFields.ReceiverVersion)] int Version,
     [property: Orleans.Id(GraphCrossPartitionFields.ReceiverSourcePartition)] PartitionRef SourcePartition,
     [property: Orleans.Id(GraphCrossPartitionFields.ReceiverGraph)] string Graph,
     [property: Orleans.Id(GraphCrossPartitionFields.ReceiverEdgeId)] string EdgeId,

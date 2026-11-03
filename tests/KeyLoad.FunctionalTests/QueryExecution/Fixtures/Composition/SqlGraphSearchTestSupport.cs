@@ -25,7 +25,7 @@ internal static class SqlGraphSearchTestSupport
 
     internal static SqlGraphSearchRequest Request(PartitionRef partition, string sql,
         Dictionary<string, JsonElement>? parameters = null, bool fullScan = true, string? cursor = null)
-        => new(1, new(partition, sql, parameters, fullScan, cursor));
+        => new(new(partition, sql, parameters, fullScan, cursor));
 
     internal static string RetrieverSql(string graph = Graph, string collection = Collection,
         string? weight = null, string? allowedIds = null)

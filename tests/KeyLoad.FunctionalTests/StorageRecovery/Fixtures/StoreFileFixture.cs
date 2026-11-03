@@ -8,7 +8,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 /// <summary>Owns one test store directory and its identity and tree helpers.</summary>
 internal sealed class StoreFileFixture : IDisposable
 {
-    internal const int CurrentIdentityVersion = 8;
     private const string DispatchPausedName = "dispatch-paused";
     private const string DirectoryPrefix = "keyload-store-files-";
     private const string GuidFormat = "N";
@@ -88,8 +87,6 @@ internal sealed class StoreFileFixture : IDisposable
 
     internal static async Task AssertPreservedIdentity(StoreIdentity expected, StoreIdentity actual)
     {
-        await Assert.That(actual.FormatVersion).IsEqualTo(CurrentIdentityVersion);
-        await Assert.That(actual.KeyCodecVersion).IsEqualTo(expected.KeyCodecVersion);
         await Assert.That(actual.NodeId).IsEqualTo(expected.NodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(expected.Incarnation);
         await Assert.That(actual.SigningKey.Span.SequenceEqual(expected.SigningKey.Span)).IsTrue();

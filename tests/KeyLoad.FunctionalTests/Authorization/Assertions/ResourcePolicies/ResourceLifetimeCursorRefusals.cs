@@ -6,13 +6,13 @@ namespace KeyLoad.FunctionalTests.Authorization;
 
 internal static class ResourceLifetimeCursorRefusals
 {
-    private const int UnsupportedFormat = 0;
+    private const string ForeignPurpose = "foreign-query";
 
     internal static async Task RunAsync(SafeProjectorOperationDatabase owner, QueryEngine engine, string sql,
         AstQueryRequest liveQuery, QueryCursorClaims scalar, LiveCursorClaims live, ResourceLifetime foreign)
     {
-        var invalidScalar = scalar with { Version = UnsupportedFormat };
-        var invalidLive = live with { Version = UnsupportedFormat };
+        var invalidScalar = scalar with { Purpose = ForeignPurpose };
+        var invalidLive = live with { Purpose = ForeignPurpose };
         foreach (var cursor in new[] { owner.Database.Sign(invalidScalar), owner.Database.Sign(scalar with { Lifetime = foreign }) })
         {
             await RefuseAsync(owner, () => engine.Execute(SafeProjectorOperationProtocol.Reader,

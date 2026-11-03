@@ -8,8 +8,6 @@ namespace KeyLoad.Core.GraphTraversal;
 internal static class GraphShortestPathValidation
 {
     private const int FirstElementIndex = 0;
-
-    private const int ContractVersion = 1;
     private const int MinimumDepth = 0;
     private const int MinimumVertices = 1;
     private const int MinimumEdges = 1;
@@ -40,7 +38,7 @@ internal static class GraphShortestPathValidation
 
     private static void ValidateShape(GraphShortestPathRequest request)
     {
-        if (request is null || request.Version != ContractVersion || request.Partition is null
+        if (request is null || request.Partition is null
             || request.Graph is null || request.From is null || request.To is null
             || request.From.Partition is null || request.To.Partition is null
             || HasNullComponents(request.Partition) || HasNullComponents(request.From.Partition)

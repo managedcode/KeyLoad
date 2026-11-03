@@ -56,7 +56,7 @@ internal static class QueryCursorExecution
         {
             throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorIsInvalidDetail);
         }
-        if (claims.Version != QueryCursorContract.CurrentVersion || claims.Lifetime != lifetime
+        if (claims.Lifetime != lifetime
             || claims.Purpose != QueryCursorContract.Purpose)
         {
             throw Errors.Fail(ErrorCode.CursorExpired, QueryCursorNoLongerHasAValidAuthorizedReadCutDetail);
@@ -72,7 +72,6 @@ internal static class QueryCursorExecution
         => next < eligibleCount ? (true, ((string?)(database.Sign(new QueryCursorClaims(QueryCursorContract.Purpose, database.Store.Identity.Incarnation,
             database.Store.Identity.NodeId, database.Store.Identity.ReadGeneration, principal.Id,
             principal.PolicyEpoch, resource.SchemaVersion, hash, cursor.Cut, cursor.SourceEpoch,
-            afterId is null ? next : InitialCursorOffset, clock.GetUtcNow().Add(cursorLifetime), cursor.Lifetime,
-            QueryCursorContract.CurrentVersion, afterId))))) : (false, default(string?));
+            afterId is null ? next : InitialCursorOffset, clock.GetUtcNow().Add(cursorLifetime), cursor.Lifetime, afterId))))) : (false, default(string?));
 }
 

@@ -32,7 +32,6 @@ internal static class GraphPathRebindR44Reads
     {
         var vertices = target == state.T ? state.TargetPath : state.BranchPath;
         var edges = target == state.T ? state.TargetEdges : state.BranchEdges;
-        await Assert.That(result.Version).IsEqualTo(1);
         await Assert.That(result.Found).IsEqualTo(vertices.Length > 0);
         await Assert.That(result.Hops).IsEqualTo(vertices.Length == 0 ? null : vertices.Length - 1);
         await SqlClusterProtocol.EqualAsync(state.Seed.StoredVertices(vertices), result.Vertices.ToArray());

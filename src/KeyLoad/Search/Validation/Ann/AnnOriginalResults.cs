@@ -87,8 +87,7 @@ internal static class AnnOriginalResults
         if (source.ThroughSequence != stored.ThroughSequence || source.PolicyEpoch != stored.PolicyEpoch
             || source.SchemaVersion != stored.SchemaVersion || source.CorpusSha256 != stored.CorpusSha256
             || source.DependencySha256 != stored.DependencySha256 || source.NodeId != stored.NodeId
-            || source.Incarnation != stored.Incarnation || source.StoreFormatVersion != stored.StoreFormatVersion
-            || source.KeyCodecVersion != stored.KeyCodecVersion || source.OutboxFirstAvailable != stored.OutboxFirstAvailable
+            || source.Incarnation != stored.Incarnation || source.OutboxFirstAvailable != stored.OutboxFirstAvailable
             || source.Position < stored.Position || source.AppliedPosition < stored.AppliedPosition
             || source.Position > current.Cut.Position || source.AppliedPosition > current.Cut.AppliedPosition
             || source.ThroughSequence != current.ProjectionCheckpoint)
@@ -109,8 +108,6 @@ internal static class AnnOriginalResults
         if (entry.LastResult?.Source is { } original && (original.NodeId != current.Cut.NodeId
             || original.Incarnation != current.Cut.Incarnation || original.PolicyEpoch != current.Scope.PolicyEpoch
             || original.SchemaVersion != current.Scope.SchemaVersion
-            || original.StoreFormatVersion != current.Cut.StoreFormatVersion
-            || original.KeyCodecVersion != current.Cut.KeyCodecVersion
             || original.Position > current.Cut.Position || original.AppliedPosition > current.Cut.AppliedPosition
             || original.ThroughSequence > current.Cut.OutboxTail))
         {

@@ -46,13 +46,7 @@ internal sealed partial class TextFileStreamProvider(string root, string leaf, G
         return inner.DirectoryExists(full);
     }
 
-    public void CreateDirectory(string path)
-    {
-        var full = pathAccess.Resolve(path);
-        pathAccess.TrackDirectoryChain(full);
-        inner.CreateDirectory(full);
-        pathAccess.SetPrivateDirectoryModes(full);
-    }
+    public void CreateDirectory(string path) => pathAccess.CreateDirectory(path, inner);
 
     public void DeleteFile(string path)
     {
@@ -92,19 +86,17 @@ internal sealed partial class TextFileStreamProvider(string root, string leaf, G
     }
 
     public string ReadAllText(string path)
-    {
-        var full = pathAccess.Resolve(path);
-        pathAccess.Require(full, directory: false);
-        TextFileIO.VerifyBoundedFile(full, executionOptions: executionOptions);
-        return inner.ReadAllText(full);
-    }
+        => inner.ReadAllText(RequireReadableFile(path));
 
     public byte[] ReadAllBytes(string path)
+        => inner.ReadAllBytes(RequireReadableFile(path));
+
+    private string RequireReadableFile(string path)
     {
         var full = pathAccess.Resolve(path);
         pathAccess.Require(full, directory: false);
         TextFileIO.VerifyBoundedFile(full, executionOptions: executionOptions);
-        return inner.ReadAllBytes(full);
+        return full;
     }
 
     public void Replace(string sourceFileName, string destinationFileName, string? destinationBackupFileName)

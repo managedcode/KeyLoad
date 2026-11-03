@@ -74,8 +74,7 @@ internal sealed class ReadCutConsistencyTests
 
     private static void AssertCut(ZoneTreeReadCut cut, StoreIdentity identity, long position)
     {
-        if (cut.Position != position || cut.FormatVersion != identity.FormatVersion
-            || cut.KeyCodecVersion != identity.KeyCodecVersion || cut.NodeId != identity.NodeId
+        if (cut.Position != position || cut.NodeId != identity.NodeId
             || cut.Incarnation != identity.Incarnation || cut.Durability != identity.Durability
             || cut.DispatchPaused != identity.DispatchPaused || cut.ReadGeneration != identity.ReadGeneration)
         {

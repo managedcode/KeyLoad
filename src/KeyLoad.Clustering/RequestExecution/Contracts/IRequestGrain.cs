@@ -3,7 +3,7 @@ using ManagedCode.Communication.CQRS;
 namespace KeyLoad.Clustering;
 
 /// <summary>One ordinary grain per admitted operation: it finds the storage owners, executes or fans out, and returns.</summary>
-[Orleans.Alias(GrainRoutingProtocol.RequestGrainAlias), Orleans.CodeGeneration.Version(GrainRoutingProtocol.RequestGrainInterfaceVersion)]
+[Orleans.Alias(GrainRoutingProtocol.RequestGrainAlias)]
 public interface IRequestGrain : Orleans.IGrainWithGuidKey
 {
     /// <summary>Runs the operation and returns its joined terminal reply.</summary>

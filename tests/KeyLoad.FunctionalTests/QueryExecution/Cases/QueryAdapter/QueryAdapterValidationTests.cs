@@ -24,14 +24,13 @@ internal sealed class QueryAdapterValidationTests
     }
 
     [Test]
-    public async Task AstRejectsUnknownVersionOperatorsAndNonScalarParametersBeforeScanning()
+    public async Task AstRejectsUnsupportedOperatorsAndNonScalarParametersBeforeScanning()
     {
         using var db = new TestDatabase();
         db.Configure("orders", ResourceKind.Collection);
         var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
         var query = new SelectQuery("orders", null, [new("*", "*")], null, [], 10);
         var request = new AstQueryRequest(db.Partition, query, AllowFullScan: true);
-        await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", request with { AstVersion = 3 })).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         var wrong = request with
         {
             Query = query with

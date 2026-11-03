@@ -4,7 +4,6 @@ namespace KeyLoad.Server.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(AnnProtocol.ManifestAlias)]
 internal sealed record AnnManifest(
-    [property: global::Orleans.Id(0)] int Version,
     [property: global::Orleans.Id(1)] string GenerationLeaf,
     [property: global::Orleans.Id(2)] ProjectionConsumerRef Consumer,
     [property: global::Orleans.Id(3)] long IndexGeneration,

@@ -15,7 +15,7 @@ internal sealed class GraphCrossPartitionReadPayloadTests
     {
         var partition = GraphCrossPartitionTestSupport.Partition(MachineKeyRequestPartition);
         var target = GraphCrossPartitionTestSupport.Vertex(partition, "execution-request-target");
-        var expected = new ReadIncomingGraphEdgesRequest(1, target, "request-graph", 17);
+        var expected = new ReadIncomingGraphEdgesRequest(target, "request-graph", 17);
 
         await GraphCrossPartitionAssertions.RoundTripsAllFields(expected);
     }
@@ -28,7 +28,7 @@ internal sealed class GraphCrossPartitionReadPayloadTests
         var to = GraphCrossPartitionTestSupport.Vertex(partition, "execution-page-to");
         var edge = new EdgeRecord(EdgeId, from, to, "page-label", "{\"field\":true}", 23);
         var row = new GraphIncomingEdgeRow(edge, 29);
-        var page = new GraphIncomingEdgesPage(1, ImmutableArray.Create(row), 37,
+        var page = new GraphIncomingEdgesPage(ImmutableArray.Create(row), 37,
             "eventual-reverse");
 
         await GraphCrossPartitionAssertions.RoundTripsAllFields(row);
@@ -43,9 +43,8 @@ internal sealed class GraphCrossPartitionReadPayloadTests
         var from = GraphCrossPartitionTestSupport.Vertex(source, "execution-fingerprint-from");
         var to = GraphCrossPartitionTestSupport.Vertex(targetPartition, "execution-fingerprint-to");
         var edge = new EdgeRecord(EdgeId, from, to, "fingerprint-label", "{\"n\":7}", 47);
-        var capacity = new GraphCrossPartitionCapacity(1,
-            GraphCrossPartitionCapacityDirection.ReceiverStates, 11, 127);
-        var fingerprint = new GraphCrossPartitionFingerprint(1, source, "fingerprint-graph",
+        var capacity = new GraphCrossPartitionCapacity(GraphCrossPartitionCapacityDirection.ReceiverStates, 11, 127);
+        var fingerprint = new GraphCrossPartitionFingerprint(source, "fingerprint-graph",
             EdgeId, to, 47, true, edge);
 
         await GraphCrossPartitionAssertions.RoundTripsAllFields(capacity);

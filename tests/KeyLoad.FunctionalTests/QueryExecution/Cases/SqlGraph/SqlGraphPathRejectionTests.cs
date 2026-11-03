@@ -9,24 +9,12 @@ internal sealed class SqlGraphPathRejectionTests
     private const string GraphParameter = "graph";
     private const string DepthParameter = "depth";
     private const string CursorToken = "cursor";
-    private const int UnsupportedVersion = 2;
     private const int MaximumParameters = 257;
     private const string SelectAll = "SELECT *";
     private const string SelectId = "SELECT id";
     private const string ExistingCollection = "orders";
     private const string UnsupportedDetail = "The SQL statement or execution clause is unsupported.";
     private const string ParameterDetail = "A named SQL graph-path parameter is missing or has the wrong scalar type.";
-
-    [Test]
-    public async Task UnsupportedVersionRejectsWithoutReadThenRetriesOnSameEngine()
-    {
-        using var database = SqlGraphPathTestSupport.CreateSeededDatabase();
-        var engine = CreateEngine(database);
-        var token = TestContext.Current!.Execution.CancellationToken;
-        await SqlGraphPathRejectionFlowAssertions.AssertRejectThenRetryAsync(database, engine,
-            SqlGraphPathTestSupport.Request(database, SqlGraphPathTestSupport.LiteralSql,
-                version: UnsupportedVersion), token);
-    }
 
     [Test]
     public async Task NonNullCursorRejectsWithoutReadThenRetriesOnSameEngine()

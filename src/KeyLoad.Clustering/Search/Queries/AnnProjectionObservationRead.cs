@@ -9,7 +9,7 @@ internal static partial class AnnProjectionObservationRead
 {
     internal static void RequireRequest(AnnProjectionObservationRequest request)
     {
-        if (request is null || request.Version != AnnProjectionObservationProtocol.Version
+        if (request is null
             || !Enum.IsDefined(request.Kind) || request.OriginalRequest is null
             || request.OriginalRequest.CommandId == Guid.Empty || request.OriginalRequest.NodeId == Guid.Empty
             || request.OriginalRequest.Consumer is null || request.OriginalRequest.Consumer.Partition is null

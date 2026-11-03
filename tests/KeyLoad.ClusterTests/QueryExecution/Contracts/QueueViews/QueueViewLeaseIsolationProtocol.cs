@@ -12,8 +12,8 @@ internal static class QueueViewLeaseIsolationProtocol
     internal const int SdkAst = 1;
     internal const int McpSql = 2;
     internal const int McpAst = 3;
-    internal const int SdkQ1 = 4;
-    internal const int McpQ1 = 5;
+    internal const int SdkSqlOperation = 4;
+    internal const int McpSqlOperation = 5;
     internal const int ColdCuts = 2;
     internal const int SourceLimit = 3;
     internal const int LeaseSeconds = 120;

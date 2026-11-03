@@ -12,11 +12,8 @@ internal static class SampleMetadataIntegrityScenario
         => new(SampleAggregateTestData.Series, Sample(index), index, SampleAggregateTestData.EmptyTags);
     internal static bool IsRetention(SampleMetadataIntegrityFault fault)
         => fault is SampleMetadataIntegrityFault.RetentionFloor or SampleMetadataIntegrityFault.RetentionCount
-            or SampleMetadataIntegrityFault.RetentionVersion or SampleMetadataIntegrityFault.RetentionRoot
+            or SampleMetadataIntegrityFault.RetentionRoot
             or SampleMetadataIntegrityFault.RetentionWire;
-    internal static ErrorCode Code(SampleMetadataIntegrityFault fault)
-        => fault is SampleMetadataIntegrityFault.RetentionVersion or SampleMetadataIntegrityFault.BucketVersion
-            ? ErrorCode.FormatUnsupported : ErrorCode.Corruption;
     internal static byte[] Key(SampleMetadataIntegrityFixture fixture, SampleMetadataIntegrityFault fault)
         => IsRetention(fault)
             ? SampleRetentionStateReader.Key(fixture.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)
@@ -35,7 +32,6 @@ internal static class SampleMetadataIntegrityScenario
             {
                 SampleMetadataIntegrityFault.RetentionFloor => OrleansSerialization.Serialize(state with { BeforeUtcTicks = -1 }),
                 SampleMetadataIntegrityFault.RetentionCount => OrleansSerialization.Serialize(state with { PurgedCount = -1 }),
-                SampleMetadataIntegrityFault.RetentionVersion => OrleansSerialization.Serialize(state with { FormatVersion = 2 }),
                 SampleMetadataIntegrityFault.RetentionRoot => OrleansSerialization.Serialize("wrong-root"),
                 SampleMetadataIntegrityFault.RetentionWire => [byte.MaxValue],
                 _ => throw new ArgumentOutOfRangeException(nameof(fault))
@@ -50,7 +46,6 @@ internal static class SampleMetadataIntegrityScenario
                 SampleMetadataIntegrityFault.BucketCount => OrleansSerialization.Serialize(state with { Count = -1 }),
                 SampleMetadataIntegrityFault.BucketSequence => OrleansSerialization.Serialize(state with { SourceSequence = -1 }),
                 SampleMetadataIntegrityFault.BucketFloor => OrleansSerialization.Serialize(state with { RetentionBeforeUtcTicks = -1 }),
-                SampleMetadataIntegrityFault.BucketVersion => OrleansSerialization.Serialize(state with { FormatVersion = 2 }),
                 _ => throw new ArgumentOutOfRangeException(nameof(fault))
             };
         }

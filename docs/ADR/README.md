@@ -16,7 +16,7 @@ source artifacts own those checks.
 | [ADR-009: Search provider and projection boundaries](ADR-009-search-provider-boundaries.md) |
 | [ADR-010: Bounded query execution and security barriers](ADR-010-query-budgets-security.md) |
 | [ADR-011: Current format, ZoneTree durability and backup restore](ADR-011-current-format.md) |
-| [ADR-012: Versioned KeyLoad SQL subset](ADR-012-sql-dialect.md) |
+| [ADR-012: Current KeyLoad SQL subset](ADR-012-sql-dialect.md) |
 | [ADR-013: One authorized query AST across interfaces](ADR-013-authorized-query-ast.md) |
 | [ADR-014: Persisted principals, scoped RBAC, and row policy](ADR-014-principals-rbac-row-policy.md) |
 | [ADR-015: Sensitive-data omission, use, and lineage](ADR-015-sensitive-data-lineage.md) |
@@ -80,7 +80,7 @@ source artifacts own those checks.
 | [ADR-096: Bounded comparable global modality windows before fusion](ADR-096-global-branch-windows.md) |
 | [ADR-097: Provider-owned read-cut leases](ADR-097-read-cut-leases.md) |
 | [ADR-098: Bounded authorized shortest paths](ADR-098-bounded-graph-paths.md) |
-| [ADR-100: Internal bounded Q1 merge across local atomic partitions](ADR-100-local-partition-query-merge.md) |
+| [ADR-100: Internal bounded scalar query merge across local atomic partitions](ADR-100-local-partition-query-merge.md) |
 | [ADR-102: Cross-partition graph edge delivery](ADR-102-cross-partition-graph-edges.md) |
 | [ADR-104: ManagedCode gateway and graph-based MCP discovery](ADR-104-mcp-gateway-tool-discovery.md) |
 | [ADR-105: Published NuGet dependency refresh](ADR-105-published-nuget-upgrade.md) |

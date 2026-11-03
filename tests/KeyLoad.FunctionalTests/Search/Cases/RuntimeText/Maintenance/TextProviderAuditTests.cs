@@ -5,7 +5,7 @@ internal sealed class TextProviderAuditTests
     [Test]
     [Arguments(TextProviderAuditDamage.Tokenizer)]
     [Arguments(TextProviderAuditDamage.Hash)]
-    [Arguments(TextProviderAuditDamage.Format)]
+    [Arguments(TextProviderAuditDamage.SourceIncarnation)]
     [Arguments(TextProviderAuditDamage.ScopePosition)]
     [Arguments(TextProviderAuditDamage.RecordId)]
     [Arguments(TextProviderAuditDamage.DuplicateReference)]

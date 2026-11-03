@@ -7,8 +7,7 @@ internal static class QueryLifetimeAssertions
     internal static async Task HealthyAsync(QueryLifetimeFlow flow)
     {
         flow.Fixture.RequireOriginalResourceBindings();
-        var expected = new PartitionQueryCandidate(QueryLifetimeProtocol.Version,
-            flow.Fixture.ExpectedDestinationReference, new(QueryFixture.DocumentId,
+        var expected = new PartitionQueryCandidate(flow.Fixture.ExpectedDestinationReference, new(QueryFixture.DocumentId,
                 QueryFixture.First, QueryFixture.ProjectedJson, true,
                 [QueryFixture.Secret]), []);
         var result = flow.Query();

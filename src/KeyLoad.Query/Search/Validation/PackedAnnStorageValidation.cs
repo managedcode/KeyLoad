@@ -12,10 +12,6 @@ internal static class PackedAnnStorageValidation
 
     internal static void Header(PackedAnnStorageHeader header, PackedAnnOptions policy, AnnWorkBudget budget)
     {
-        if (header.Version != PackedAnnStorageFrames.CurrentVersion)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, PackedAnnStorageFrames.InvalidSnapshot);
-        }
         if (header.Policy != policy || header.Count < Empty || header.Count > policy.MaxRecords)
         {
             throw Errors.Fail(ErrorCode.Corruption, PackedAnnStorageFrames.InvalidSnapshot);

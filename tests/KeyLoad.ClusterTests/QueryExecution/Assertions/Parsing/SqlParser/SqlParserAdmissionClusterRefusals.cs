@@ -33,7 +33,7 @@ internal static class SqlParserAdmissionClusterRefusals
         await Assert.That(sdk.IsFailed).IsTrue();
         await Assert.That(sdk.Value.ValueKind).IsEqualTo(JsonValueKind.Undefined);
         await SqlClusterProtocol.EqualAsync(Errors.Problem(ErrorCode.UnsupportedCapability,
-            "The unified SQL version, statement or target operation is unsupported."), sdk.Problem);
+            "The unified SQL statement or target operation is unsupported."), sdk.Problem);
         await McpAsync(await root.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), state.RootCredential, ErrorCode.UnsupportedCapability, false);
         var absent = new EntityRef(state.Partition, SqlParserAdmissionClusterState.Table, "refused");
         await SqlClusterProtocol.EqualAsync(new DocumentReadResult(null), await McpCallerAssertions.SdkSuccessAsync(await root.Sdk.GetAsync(absent, token)));

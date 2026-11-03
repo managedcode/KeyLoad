@@ -1,11 +1,9 @@
 using ManagedCode.Communication;
 using ManagedCode.Communication.Commands;
-using Orleans.CodeGeneration;
 
 namespace KeyLoad.Clustering;
 
 /// <summary>Execution Orleans scheduling for commands sharing one database's atomic metadata.</summary>
-[Version(BackgroundWorkerIdentity.InterfaceVersion)]
 public partial interface IDatabaseCommitGrain : IGrainWithGuidKey
 {
     /// <summary>Returns only after every configured data copy has persisted the same operation.</summary>

@@ -23,7 +23,7 @@ internal static class AnnRootReceipts
         {
             throw Errors.Fail(ErrorCode.Corruption, AnnProtocol.Ownership);
         }
-        var created = new AnnRootReceipt(AnnProtocol.Version, root, nodeId, incarnation, [], [], [], []);
+        var created = new AnnRootReceipt(root, nodeId, incarnation, [], [], [], []);
         AnnReceiptFiles.Write(receiptPath, created, options);
         return created;
     }

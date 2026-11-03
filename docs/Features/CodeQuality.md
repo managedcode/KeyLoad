@@ -103,7 +103,6 @@ unique and never reused.
 |---|---|---|
 | KLD0001 | Machine keys (dictionary, JSON, header, query, metadata and configuration keys) come from named constants | Error |
 | KLD0013 | `Program.cs` in the server maps endpoints only through the `MapKeyLoadApi` aggregate | Error |
-| KLD0014 | Every grain interface declares an explicit positive Orleans `Version` | Error |
 | KLD0020 | `Program.cs` shows initialization, mode selection, host composition, run and joined shutdown; a forwarding-only call to an `Application` wrapper is rejected | Error |
 | KLD0021 | Orleans DTOs have no instance constructors; `System.Exception` subclasses are exempt | Error |
 | KLD0022 | Current time and elapsed time come from `TimeProvider`, not `DateTime`/`DateTimeOffset` clocks, `Stopwatch` or `Environment.TickCount` | Error |
@@ -124,7 +123,7 @@ unique and never reused.
 | KLD0042 | Review value boxing, potential generic boxing and runtime conversions from object at each conversion | Warning, promoted to error by the build |
 
 Rule fixtures (all under `Cases/`): KLD0001 `LiteralMachineKey/`, KLD0013
-`Program/ProgramEndpointMappingTests`, KLD0014 `Grain/GrainInterfaceVersionTests`,
+`Program/ProgramEndpointMappingTests`,
 KLD0020 `Program/ProgramCompositionRootTests`, KLD0021 and KLD0023 `Orleans/`,
 KLD0022 `SystemClock/`, KLD0024 `UntypedCatch/`, KLD0030..KLD0033 `FileCode/`,
 `AggregateType/`, `ExecutableUnit/` and `ControlFlow/`, KLD0034

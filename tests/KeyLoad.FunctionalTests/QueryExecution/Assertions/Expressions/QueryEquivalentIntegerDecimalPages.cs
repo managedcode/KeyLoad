@@ -56,7 +56,7 @@ internal static class QueryEquivalentIntegerDecimalPages
                 cancellationToken: token),
              () => engine.ExecuteAst(Subject, ast, cancellationToken: token),
              () => engine.ExecuteAst(Subject, csharp, cancellationToken: token),
-             () => engine.ExecuteAst(Subject, Q2CapabilityFixtures.RuntimeRoundTrip(csharp), cancellationToken: token)];
+             () => engine.ExecuteAst(Subject, JoinCapabilityFixtures.RuntimeRoundTrip(csharp), cancellationToken: token)];
         foreach (var call in calls)
         {
             if (denied is { } error)

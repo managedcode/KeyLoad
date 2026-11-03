@@ -24,7 +24,6 @@ internal sealed class RelationalSqlClusterJoinReadCutTests(ClusterFixture fixtur
     private const string QueryText = "SELECT l.[key] AS order_key, r.name AS customer_name, l.title AS customer_id, "
         + "l.count AS left_generation, r.generation AS right_generation FROM agentrows AS l "
         + "INNER JOIN joincustomers AS r ON l.title = r.id ORDER BY l.[key] ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
-    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int FirstReaderRoute = 0;
     private const int ReaderRouteCount = 4;
     private const int SdkSqlRoute = 1;
@@ -46,8 +45,8 @@ internal sealed class RelationalSqlClusterJoinReadCutTests(ClusterFixture fixtur
         await ConfigureRightAsync(sdk, scenario, deadline.Token);
         var seed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(scenario.Command(
             PutLeft(CustomerA, FirstGeneration), PutRight(CustomerA, FirstGeneration), PutRight(CustomerB, FirstGeneration)), deadline.Token));
-        var query = new QueryRequest(scenario.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion);
-        var sql = new SqlOperationRequest(scenario.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion);
+        var query = new QueryRequest(scenario.Partition, QueryText, AllowFullScan: true);
+        var sql = new SqlOperationRequest(scenario.Partition, QueryText, AllowFullScan: true);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             fixture.AdminKey, deadline.Token);
         var previousCustomer = CustomerA;

@@ -68,7 +68,7 @@ internal static class SqlOperationCompiler
             throw ScriptDomOperationErrors.Invalid();
         }
         var query = new QueryRequest(request.Partition, request.Sql, request.Parameters,
-            request.AllowFullScan, request.Cursor, request.QueryDialectVersion);
+            request.AllowFullScan, request.Cursor);
         var ast = global::KeyLoad.Query.QueryExecution.ScriptDomQueryAdapter.Lower(statement, query, queryOptions, budget, positionalParameterCount, token);
         return Typed(McpToolNames.QueryAst, ast, Guid.Empty, budget.Check, token);
     }

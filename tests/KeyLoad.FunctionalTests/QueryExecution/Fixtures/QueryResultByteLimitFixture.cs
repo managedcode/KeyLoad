@@ -44,7 +44,7 @@ internal static class QueryResultByteLimitFixture
         return new(database.Partition, new SelectQuery(Left, join ? "l" : null,
             join && !compact ? [projection, new("/payload", "right_payload", "r")] : [projection], null,
             [new("/id", false)], 2, InnerJoin: join ? new(Right, "r", "/customer_id", "/id") : null),
-            AllowFullScan: true, AstVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
+            AllowFullScan: true);
     }
 
     internal static QueryRequest Sql(TestDatabase database, bool join, bool compact)
@@ -53,7 +53,7 @@ internal static class QueryResultByteLimitFixture
             : (join ? "l.payload AS payload, r.payload AS right_payload" : "payload AS payload");
         var from = join ? Left + " AS l INNER JOIN " + Right + " AS r ON l.customer_id = r.id" : Left;
         return new(database.Partition, "SELECT TOP (2) " + columns + " FROM " + from + " ORDER BY "
-            + (join ? "l.id" : "id") + " ASC", AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
+            + (join ? "l.id" : "id") + " ASC", AllowFullScan: true);
     }
 
     internal static byte[] Sources(TestDatabase database)

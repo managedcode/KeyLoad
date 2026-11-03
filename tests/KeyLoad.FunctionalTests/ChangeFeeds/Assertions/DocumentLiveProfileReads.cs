@@ -23,12 +23,6 @@ internal static class DocumentLiveProfileReads
     {
         await ObserveAsync(store, async () =>
         {
-            await RefuseAsync(() => queries.StartLiveQuery(DocumentLiveProfileFixture.Reader,
-                new(fixture.Model(kind) with
-                {
-                    AstVersion = 0
-                }), cancellationToken: token),
-                ErrorCode.UnsupportedCapability, "The query AST version is unsupported.");
             await RefuseAsync(() => queries.ReadLiveQuery(DocumentLiveProfileFixture.Reader,
                 new(fixture.Model(kind) with
                 {

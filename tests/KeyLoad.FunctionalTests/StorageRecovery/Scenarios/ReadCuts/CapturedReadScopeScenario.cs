@@ -83,8 +83,6 @@ internal static class CapturedReadScopeScenario
     internal static async Task RequireCutAsync(ZoneTreeReadCut cut, StoreIdentity identity, long position)
     {
         await Assert.That(cut.Position).IsEqualTo(position);
-        await Assert.That(cut.FormatVersion).IsEqualTo(identity.FormatVersion);
-        await Assert.That(cut.KeyCodecVersion).IsEqualTo(identity.KeyCodecVersion);
         await Assert.That(cut.NodeId).IsEqualTo(identity.NodeId);
         await Assert.That(cut.Incarnation).IsEqualTo(identity.Incarnation);
         await Assert.That(cut.Durability).IsEqualTo(identity.Durability);

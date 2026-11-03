@@ -64,7 +64,7 @@ internal sealed record ThreeWayHybridClusterScenario(PartitionRef Partition, Ent
         {
             Labels = labeled ? ImmutableArray.Create("related") : null
         };
-        return new(1, search,
+        return new(search,
             Scope: restricted ? new(Walk(ScopeRoot, 2)) : null,
             Retriever: new(retrieveWalk, allZero ? 0 : GraphWeight),
             Expansion: expansion ? new(ExpansionGraph, MaxDepth: 1, MaxVertices: 20, MaxEdges: 40) : null);
@@ -87,7 +87,7 @@ internal sealed record ThreeWayHybridClusterScenario(PartitionRef Partition, Ent
         {
             [VectorParameter] = JsonSerializer.SerializeToElement(new[] { 1f, 0f })
         };
-        return new(1, new(Partition, statement, parameters, AllowFullScan: true));
+        return new(new(Partition, statement, parameters, AllowFullScan: true));
     }
 
     internal async Task<McpPersistedIdentity> CreateReaderAsync(ClusterFixture fixture, bool vectorGrant,

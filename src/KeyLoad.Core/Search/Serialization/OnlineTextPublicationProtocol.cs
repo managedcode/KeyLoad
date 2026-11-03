@@ -5,7 +5,6 @@ internal static class OnlineTextPublicationProtocol
     internal const string OutcomeAuthorityAlias = "keyload.core.search.online-text-outcome-authority";
     internal const string CurrentPublicationAlias = "keyload.core.search.online-text-current-publication";
     internal const string PhaseCommandAlias = "keyload.core.search.online-text-publication-phase";
-    internal const int CurrentFormat = 1;
     internal const string CurrentFamily = "online-text-current";
     internal const string RuntimePurpose = "keyload-online-text-publication-verified";
     internal const string InvalidPublication = "The online text publication does not match its prepared canonical source.";

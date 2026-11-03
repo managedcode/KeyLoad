@@ -24,7 +24,6 @@ internal static class DeclaredResponseEofProtocol
     internal const int OneEntry = 1;
     internal const int Empty = 0;
     internal const int FirstSequence = 1;
-    internal const int PlacementVersion = 1;
     internal const long Revision = 1;
     internal const long AbsentRevision = 0;
 }

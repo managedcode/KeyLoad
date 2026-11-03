@@ -13,16 +13,12 @@ internal static class SqlCompositionInsert
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
-        {
-            throw ScriptDomOperationErrors.Unsupported();
-        }
         var (target, query) = ScriptDomInsertShape.Read(statement);
         var parameters = new ScriptDomCompositionParameters(request.Parameters, positionalParameterCount, checkBudget, token);
         var (id, mutation) = target.Equals(ScriptDomInsertShape.GraphEdges, StringComparison.OrdinalIgnoreCase)
             ? ScriptDomQueueToGraphInsert.Read(query, parameters)
             : target.Equals(ScriptDomInsertShape.QueueMessages, StringComparison.OrdinalIgnoreCase)
-                ? ScriptDomGraphToQueueInsert.Read(query, parameters, request.QueryDialectVersion)
+                ? ScriptDomGraphToQueueInsert.Read(query, parameters)
                 : throw ScriptDomOperationErrors.Unsupported();
         if (id == Guid.Empty)
         {

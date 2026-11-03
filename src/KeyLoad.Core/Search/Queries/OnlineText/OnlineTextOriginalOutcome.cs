@@ -48,7 +48,7 @@ public static class OnlineTextOriginalOutcome
         engine.ValidateOnlineTextStoredOutcome(view, principal, request, previous);
         var result = previous.Result /* KLD0041: This field is the existing native persisted outcome slot, whose payload type depends on its original operation kind. */.Get<OnlineTextIndexMaintenanceResult>() /* KLD0041: Publication metadata requires this exact business type from the original native stored slot. */;
         var authority = previous.OnlineTextAuthority ?? throw Errors.Fail(ErrorCode.Corruption, OnlineTextPublicationProtocol.MissingAuthority);
-        return new OnlineTextCurrentPublication(OnlineTextPublicationProtocol.CurrentFormat, principal.Id, request.CommandId, authority.ParentFingerprint, request.Consumer, request.ConsumerGeneration, authority, result.PublishedCut);
+        return new OnlineTextCurrentPublication(principal.Id, request.CommandId, authority.ParentFingerprint, request.Consumer, request.ConsumerGeneration, authority, result.PublishedCut);
     });
     internal static void ValidateOnlineTextCachedOutcome(this DatabaseEngine engine, IKeyValueView view, PrincipalRecord principal, Command<DatabaseCommand> operation, StoredOutcome previous)
     {
@@ -69,7 +69,7 @@ public static class OnlineTextOriginalOutcome
             throw Errors.Fail(ErrorCode.Conflict, OnlineTextPublicationProtocol.ChangedOriginal);
         }
 
-        if (previous.Incarnation != engine.Store.Identity.Incarnation || authority.DataEpoch != engine.Store.Identity.FormatVersion)
+        if (previous.Incarnation != engine.Store.Identity.Incarnation)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, OnlineTextPublicationProtocol.MissingAuthority);
         }

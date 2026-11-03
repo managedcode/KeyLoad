@@ -11,8 +11,7 @@ internal sealed class ReadOnlyCollectionContractTests
     private const string RecordJson = "{\"key\":\"AQID\",\"value\":\"BAUG\"}";
     private const string TombstoneJson = "{\"key\":\"AQID\",\"value\":null}";
     private const string EmptyValueJson = "{\"key\":\"AQID\",\"value\":\"\"}";
-    private const string IdentityJson = "{\"formatVersion\":1,\"keyCodecVersion\":2,\"nodeId\":\"00000000-0000-0000-0000-000000000001\",\"incarnation\":\"00000000-0000-0000-0000-000000000002\",\"signingKey\":\"AQID\",\"durability\":\"ProcessDurable\",\"dispatchPaused\":false,\"readGeneration\":0}";
-    private const string JournalIdentityJson = "{\"formatVersion\":1,\"keyCodecVersion\":2,\"nodeId\":\"00000000-0000-0000-0000-000000000001\",\"incarnation\":\"00000000-0000-0000-0000-000000000002\",\"signingKey\":\"AQID\",\"durability\":\"ProcessDurable\",\"dispatchPaused\":false,\"readGeneration\":0,\"minimumReaderContract\":1}";
+    private const string IdentityJson = "{\"nodeId\":\"00000000-0000-0000-0000-000000000001\",\"incarnation\":\"00000000-0000-0000-0000-000000000002\",\"signingKey\":\"AQID\",\"durability\":\"ProcessDurable\",\"dispatchPaused\":false,\"readGeneration\":0}";
 
     [Test]
     public async Task AcRoc001ExportedAbstractionsPropertiesNeverExposeArrays()
@@ -45,7 +44,7 @@ internal sealed class ReadOnlyCollectionContractTests
         var record = new KeyValueRecord(key, value);
         var tombstone = new StorageMutation(key, null);
         var empty = new StorageMutation(key, Array.Empty<byte>());
-        var identity = new StoreIdentity(1, 2,
+        var identity = new StoreIdentity(
             Guid.Parse("00000000-0000-0000-0000-000000000001"),
             Guid.Parse("00000000-0000-0000-0000-000000000002"),
             key, DurabilityProfile.ProcessDurable);
@@ -64,20 +63,4 @@ internal sealed class ReadOnlyCollectionContractTests
             .IsEqualTo(IdentityJson);
     }
 
-    [Test]
-    public async Task AcRoc002JournalReaderFenceIsRetainedInPublicIdentityJson()
-    {
-        var identity = new StoreIdentity(1, 2,
-            Guid.Parse("00000000-0000-0000-0000-000000000001"),
-            Guid.Parse("00000000-0000-0000-0000-000000000002"),
-            new byte[] { 1, 2, 3 }, DurabilityProfile.ProcessDurable,
-            MinimumReaderContract: 1);
-
-        await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(identity))).IsEqualTo(JournalIdentityJson);
-        var restored = JsonDefaults.Deserialize<StoreIdentity>(Encoding.UTF8.GetBytes(JournalIdentityJson));
-        await Assert.That(restored.MinimumReaderContract).IsEqualTo(1);
-        await Assert.That(Encoding.UTF8.GetString(JsonDefaults.Serialize(restored))).IsEqualTo(JournalIdentityJson);
-        await Assert.That(JsonDefaults.Deserialize<StoreIdentity>(Encoding.UTF8.GetBytes(IdentityJson)).MinimumReaderContract)
-            .IsEqualTo(0);
-    }
 }

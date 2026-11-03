@@ -78,7 +78,7 @@ internal sealed class AnnRootLease : IDisposable
         var lockPath = Path.Combine(root, AnnProtocol.RootLock);
         if (!File.Exists(lockPath))
         {
-            AnnReceiptFiles.Write(lockPath, AnnProtocol.Version, options);
+            AnnReceiptFiles.Write(lockPath, AnnProtocol.LockMarker, options);
         }
         FileStream? file = null;
         Exception? failure = null;

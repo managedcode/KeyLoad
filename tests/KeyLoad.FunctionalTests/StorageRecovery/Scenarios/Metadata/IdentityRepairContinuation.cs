@@ -83,8 +83,6 @@ internal static class IdentityRepairContinuation
     private static async Task RequireIdentityAsync(StoreIdentity expected, StoreIdentity actual)
     {
         await StoreFileFixture.AssertPreservedIdentity(expected, actual);
-        await Assert.That(actual.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
-        await Assert.That(actual.MinimumReaderContract).IsEqualTo(expected.MinimumReaderContract);
     }
 
     private static async Task RequireRowsAsync(ZoneTreeStore store, bool restored)

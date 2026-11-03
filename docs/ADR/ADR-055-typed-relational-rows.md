@@ -18,7 +18,7 @@ other columns reject both. Rows are closed top-level JSON objects; unknown and
 duplicate properties reject. Int64 and decimal must parse exactly into the stated
 CLR scalar range; UTC timestamps carry explicit zero offset. configured
 unique IndexDefinition constraints retain atomic-partition scope and SQL NULL
-policy remains explicitly configured by IncludeNull/IncludeMissing. Q1 metadata
+policy remains explicitly configured by IncludeNull/IncludeMissing. Scalar query metadata
 names cannot silently shadow row columns: `revision`, `*` and names starting `@`
 are reserved; `id` is permitted only as the primary key matching EntityRef.Id.
 
@@ -89,6 +89,6 @@ Join original store, same-directory reopen with original validated options and c
 
 No product/API/serializer/format/limits/deadline/trust/provider change; no migration/fallback/source-oracle expectation. Core atomic gate remains authoritative. checkOnly + pernewpath NS/reconstruction are source only. Exact original Unit method/UID/deadline unchanged; required normal SIMD execution50 compilation/formatter/analyzers/fresh discovery/runtime and Linux/process/cluster/coverage gates remain OPEN.
 
-## Q2 retained primary identity observation
+## InnerJoin retained primary identity observation
 
-Existing nonnullable Text primary-key equality with EntityRef.Id also applies to actually observed readable nondeleted retained rows in the bounded Q2 read operator. This is the same frozen canonical identity, not schema evolution or a new constraint. Check left JSON identity before left-predicate elimination and right JSON identity before bounded candidate retention. Preserve deletion/row-ACL omission and do not inspect a right row skipped by a valid false left predicate. key/reference checks, ordered apply ownership, per-operation persisted permissions, read cut, budgets and cancellation remain unchanged. Existing closed Corruption identifies inconsistent retained identity. Syntactically malformed retained JSON is converted only at this bounded retained-row parser from JsonException into the same Corruption; valid non-object JSON fails the identity guard. Generic public admission/serialization failure mapping is unchanged. Independent real raw-fault/repair/GUID replay/cold operations qualify this finite rule. Source implementation joined; compiler/runtime pending and no new format/protocol or performance/qualification claim.
+Existing nonnullable Text primary-key equality with EntityRef.Id also applies to actually observed readable nondeleted retained rows in the bounded InnerJoin read operator. This is the same frozen canonical identity, not schema evolution or a new constraint. Check left JSON identity before left-predicate elimination and right JSON identity before bounded candidate retention. Preserve deletion/row-ACL omission and do not inspect a right row skipped by a valid false left predicate. key/reference checks, ordered apply ownership, per-operation persisted permissions, read cut, budgets and cancellation remain unchanged. Existing closed Corruption identifies inconsistent retained identity. Syntactically malformed retained JSON is converted only at this bounded retained-row parser from JsonException into the same Corruption; valid non-object JSON fails the identity guard. Generic public admission/serialization failure mapping is unchanged. Independent real raw-fault/repair/GUID replay/cold operations qualify this finite rule. Source implementation joined; compiler/runtime pending and no new format/protocol or performance/qualification claim.

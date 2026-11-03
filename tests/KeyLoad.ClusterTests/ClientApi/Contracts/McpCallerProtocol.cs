@@ -49,7 +49,6 @@ internal static class McpCallerProtocol
     internal const int ToolCount = 70;
     internal const int InitialToolCount = 3;
     internal const int MaximumSearchResults = 4;
-    internal const int AstVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const int FirstRevision = 1;
     internal const int EpochIncrement = 1;
     internal const int SummaryByteLimit = 1_024;

@@ -67,10 +67,8 @@ internal static class TextProviderAuditImages
     {
         var manifest = TextEnvelopeCodec.Decode<TextManifest>(original);
         var identity = owner.Store.Identity;
-        var scope = new TextProjectionScope(identity.NodeId, identity.Incarnation, identity.FormatVersion,
-            identity.ReadGeneration, owner.Store.Position, owner.Source.Partition, Collection, Field,
+        var scope = new TextProjectionScope(identity.NodeId, identity.Incarnation, identity.ReadGeneration, owner.Store.Position, owner.Source.Partition, Collection, Field,
             Root, InitialPolicyEpoch, InitialSchemaVersion);
-        await Assert.That(manifest.FormatVersion).IsEqualTo(TextProtocol.FormatVersion);
         await Assert.That(manifest.TokenizerVersion).IsEqualTo(TextProjectionProtocol.TokenizerVersion);
         await Assert.That(manifest.HashVersion).IsEqualTo(TextProjectionProtocol.HashVersion);
         await Assert.That(manifest.Scope).IsEqualTo(scope);

@@ -19,7 +19,7 @@ internal static class GraphReferenceLifetimeRefusals
             }, Depth, Vertices,
             Edges, cancellationToken: token));
         await ReadAsync(profile, () => database.ShortestPath(PartitionStoreProtocol.AdministratorId,
-            new(GraphReferenceLifetimeProtocol.Version, DropRuntimeProtocol.Partition, OriginalGraph, anchor with
+            new(DropRuntimeProtocol.Partition, OriginalGraph, anchor with
             {
                 Lifetime = null
             },
@@ -28,7 +28,7 @@ internal static class GraphReferenceLifetimeRefusals
                     Lifetime = null
                 }, Depth, Vertices, Edges), cancellationToken: token));
         await ReadAsync(profile, () => database.ReadIncomingGraphEdges(PartitionStoreProtocol.AdministratorId,
-            new(GraphReferenceLifetimeProtocol.Version, freshTarget with
+            new(freshTarget with
             {
                 Lifetime = null
             }, OriginalGraph, Edges), cancellationToken: token));

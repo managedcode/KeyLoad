@@ -2,7 +2,6 @@ namespace KeyLoad.Core.Search;
 
 internal static class Bm25CorpusProtocol
 {
-    internal const int Format = 1;
     internal const string CurrentFamily = "bm25-corpus-current";
     internal const string CurrentAlias = "keyload.core.search.bm25-corpus-current";
     internal const string PhaseAlias = "keyload.core.search.bm25-corpus-publication-phase";

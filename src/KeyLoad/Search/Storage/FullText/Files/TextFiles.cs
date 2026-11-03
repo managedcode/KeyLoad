@@ -53,7 +53,7 @@ internal static class TextFiles
     internal static TextManifest WritePendingManifest(string root, string leaf, TextProjectionScope scope, TextRecord[] records, TextFile[] files, IOptions<TextExecutionOptions> executionOptions, ReadExecutionBudget? budget = null, TextResourceOwnership? resources = null)
     {
         budget?.Check();
-        var manifest = new TextManifest(TextProtocol.FormatVersion, scope,
+        var manifest = new TextManifest(scope,
             TextProjectionProtocol.TokenizerVersion, TextProjectionProtocol.HashVersion, records, files);
         TextValidation.ValidateManifest(manifest, scope, executionOptions: executionOptions);
         var encoded = TextEnvelopeCodec.Encode(manifest);

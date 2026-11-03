@@ -1,7 +1,7 @@
 namespace KeyLoad.Clustering;
 
 /// <summary>One API credential's verified principal, read from storage once and then served from memory.</summary>
-[Orleans.Alias(UserGrainProtocol.GrainAlias), Orleans.CodeGeneration.Version(UserGrainProtocol.InterfaceVersion)]
+[Orleans.Alias(UserGrainProtocol.GrainAlias)]
 public interface IUserGrain : Orleans.IGrainWithStringKey
 {
     /// <summary>Verifies the complete secret of this credential and returns its principal.</summary>

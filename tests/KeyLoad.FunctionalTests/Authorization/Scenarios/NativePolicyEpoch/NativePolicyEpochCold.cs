@@ -20,11 +20,8 @@ internal static class NativePolicyEpochCold
             await Assert.That(current.Incarnation).IsEqualTo(identity.Incarnation);
             await Assert.That(current.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
             await Assert.That(current.SigningKey.Span.SequenceEqual(signingKey)).IsTrue();
-            await Assert.That(current.FormatVersion).IsEqualTo(identity.FormatVersion);
-            await Assert.That(current.KeyCodecVersion).IsEqualTo(identity.KeyCodecVersion);
             await Assert.That(current.Durability).IsEqualTo(identity.Durability);
             await Assert.That(current.DispatchPaused).IsEqualTo(identity.DispatchPaused);
-            await Assert.That(current.MinimumReaderContract).IsEqualTo(identity.MinimumReaderContract);
             await NativePolicyEpochAssertions.UnchangedAsync(state, image, position);
             await NativePolicyEpochAssertions.ReadAsync(state, true, true, token);
             await NativePolicyEpochRefusals.CancelAsync(state);

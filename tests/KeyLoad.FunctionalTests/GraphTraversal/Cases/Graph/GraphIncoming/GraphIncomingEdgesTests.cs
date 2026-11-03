@@ -48,12 +48,14 @@ internal sealed class GraphIncomingEdgesTests
         using var database = GraphCrossPartitionTestSupport.CreateDatabase();
         var target = GraphCrossPartitionTestSupport.Vertex(
             GraphCrossPartitionTestSupport.Partition(MachineKeyTarget), "vertex");
-        var malformed = new ReadIncomingGraphEdgesRequest(2, target,
-            GraphCrossPartitionTestSupport.Graph, 1);
+        var malformed = new ReadIncomingGraphEdgesRequest(target,
+            GraphCrossPartitionTestSupport.Graph, 0);
+        var before = database.Store.GetReadDiagnostics();
 
         var failure = Assert.ThrowsExactly<KeyLoadException>(() =>
             database.Database.ReadIncomingGraphEdges(GraphCrossPartitionTestSupport.Root, malformed));
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.Validation);
+        await Assert.That(database.Store.GetReadDiagnostics()).IsEqualTo(before);
     }
 
     private static UpsertEdge Edge(EntityRef from, EntityRef to)

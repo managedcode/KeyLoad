@@ -18,9 +18,12 @@ internal static class TextProviderAuditManifestDamage
             {
                 HashVersion = WrongVersion
             },
-            TextProviderAuditDamage.Format => manifest with
+            TextProviderAuditDamage.SourceIncarnation => manifest with
             {
-                FormatVersion = InvalidManifestFormat
+                Scope = manifest.Scope with
+                {
+                    Incarnation = Guid.Empty
+                }
             },
             TextProviderAuditDamage.ScopePosition => manifest with
             {

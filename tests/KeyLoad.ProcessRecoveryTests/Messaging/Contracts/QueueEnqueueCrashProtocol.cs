@@ -44,7 +44,6 @@ internal static class QueueEnqueueCrashProtocol
     internal const int LeaseSeconds = 30;
     internal const int ImageRecords = 4096;
     internal const int AdjacentPosition = 1;
-    internal const int PlacementVersion = 1;
     internal const int FutureHours = 1;
     internal static readonly PartitionRef Partition = new(Tenant, Database, Domain, PartitionKey);
     internal static readonly QueueLaneRef Lane = new(Partition, Queue);

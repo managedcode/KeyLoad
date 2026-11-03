@@ -38,7 +38,7 @@ internal static class PolicyEpochPublicRefusals
             request.Partition, request.Cursor), token), code, credential);
             return;
         }
-        if (route == PolicyEpochPublicProtocol.Q1Sdk)
+        if (route == PolicyEpochPublicProtocol.SqlSdk)
         {
             await SdkAsync(await reader.Sdk.ExecuteSqlAsync(sql, token), code, credential);
             return;

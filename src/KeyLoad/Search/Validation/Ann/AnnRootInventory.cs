@@ -7,7 +7,7 @@ internal static class AnnRootInventory
     internal static void Require(string root, AnnRootReceipt receipt, Guid nodeId, Guid incarnation,
         AnnExecutionOptions options)
     {
-        if (receipt.Version != AnnProtocol.Version || receipt.Root != root || receipt.NodeId != nodeId
+        if (receipt.Root != root || receipt.NodeId != nodeId
             || receipt.Incarnation != incarnation || receipt.OwnedGenerations is null
             || receipt.OwnedGenerations.Length > options.MaximumOwnedGenerations
             || receipt.Published is null || receipt.Pending is null || receipt.OriginalOperations is null
@@ -67,7 +67,6 @@ internal static class AnnRootInventory
         {
             if (published is null || published.Key is null || published.Pointer is null
                 || !keys.Add(published.Key) || !leaves.Contains(published.Pointer.GenerationLeaf)
-                || published.Pointer.Version != AnnProtocol.Version
                 || published.Pointer.ManifestSha256 is null
                 || published.Pointer.ManifestSha256.Length != AnnDigest.Bytes)
             {

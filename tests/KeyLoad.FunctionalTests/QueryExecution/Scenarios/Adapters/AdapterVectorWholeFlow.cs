@@ -20,11 +20,11 @@ internal static class AdapterVectorWholeFlow
         + "NULL, NULL, NULL, 10, 60)";
     internal static VectorSpace Space() => new("equivalence", 2, DistanceMetric.Cosine, "model", "version");
     internal static GraphSearchRequest Typed(TestDatabase database, bool invalid = false)
-        => new(1, new(database.Partition, Collection, VectorField: "/embedding", Vector: invalid ? [1] : [1, 0], Space: Space()), Scope: new(new(ScopeGraph,
+        => new(new(database.Partition, Collection, VectorField: "/embedding", Vector: invalid ? [1] : [1, 0], Space: Space()), Scope: new(new(ScopeGraph,
             [new(database.Partition, Collection, "a"), new(database.Partition, Collection, "b")],
             0, ScopeVertices, 1)));
     internal static SqlGraphSearchRequest SqlRequest(TestDatabase database, bool invalid = false)
-        => new(1, new(database.Partition, Sql, new Dictionary<string, JsonElement>(StringComparer.Ordinal)
+        => new(new(database.Partition, Sql, new Dictionary<string, JsonElement>(StringComparer.Ordinal)
         {
             [VectorParameter] = JsonSerializer.SerializeToElement(invalid ? new[] { 1f } : new[] { 1f, 0f })
         }, AllowFullScan: true));

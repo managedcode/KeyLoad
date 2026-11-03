@@ -13,8 +13,7 @@ internal sealed class SqlGraphSearchParityTests
         GraphSearchTestSupport.AddPath(database);
         var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root));
-        var direct = new GraphSearchRequest(1,
-            new(database.Partition, SqlGraphSearchTestSupport.Collection, Limit: SqlGraphSearchTestSupport.Limit,
+        var direct = new GraphSearchRequest(new(database.Partition, SqlGraphSearchTestSupport.Collection, Limit: SqlGraphSearchTestSupport.Limit,
                 FusionConstant: SqlGraphSearchTestSupport.Fusion), Retriever: new(walk));
         var cancellationToken = TestContext.Current!.Execution.CancellationToken;
 
@@ -36,8 +35,7 @@ internal sealed class SqlGraphSearchParityTests
             GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root),
             GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, GraphSearchTestSupport.Middle)
         };
-        var direct = new GraphSearchRequest(1,
-            new(database.Partition, SqlGraphSearchTestSupport.Collection, Limit: SqlGraphSearchTestSupport.Limit,
+        var direct = new GraphSearchRequest(new(database.Partition, SqlGraphSearchTestSupport.Collection, Limit: SqlGraphSearchTestSupport.Limit,
                 FusionConstant: SqlGraphSearchTestSupport.Fusion),
             Retriever: new(new(SqlGraphSearchTestSupport.Graph, [.. seeds], SqlGraphSearchTestSupport.Depth,
                 SqlGraphSearchTestSupport.Vertices, SqlGraphSearchTestSupport.Edges)));
@@ -65,8 +63,7 @@ internal sealed class SqlGraphSearchParityTests
         GraphSearchTestSupport.AddPath(database);
         var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root));
-        var direct = new GraphSearchRequest(1,
-            new(database.Partition, SqlGraphSearchTestSupport.Collection, SqlGraphSearchTestSupport.TextField,
+        var direct = new GraphSearchRequest(new(database.Partition, SqlGraphSearchTestSupport.Collection, SqlGraphSearchTestSupport.TextField,
                 "needle", Limit: SqlGraphSearchTestSupport.Limit),
             Scope: new(walk), Expansion: new(SqlGraphSearchTestSupport.Graph, SqlGraphSearchTestSupport.Depth,
                 SqlGraphSearchTestSupport.Vertices, SqlGraphSearchTestSupport.Edges, [GraphSearchTestSupport.Label]));
@@ -88,8 +85,7 @@ internal sealed class SqlGraphSearchParityTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var direct = new GraphSearchRequest(1,
-            new(database.Partition, SqlGraphSearchTestSupport.Collection),
+        var direct = new GraphSearchRequest(new(database.Partition, SqlGraphSearchTestSupport.Collection),
             Retriever: new(GraphSearchTestSupport.Walk(
                 GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root)), 0));
         var sql = SqlGraphSearchTestSupport.RetrieverSql(weight: "0");
@@ -117,8 +113,7 @@ internal sealed class SqlGraphSearchParityTests
                 SqlGraphSearchTestSupport.VectorField, [0, 1], space, 1));
         var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root));
-        var direct = new GraphSearchRequest(1,
-            new(database.Partition, SqlGraphSearchTestSupport.Collection, SqlGraphSearchTestSupport.TextField,
+        var direct = new GraphSearchRequest(new(database.Partition, SqlGraphSearchTestSupport.Collection, SqlGraphSearchTestSupport.TextField,
                 "needle", SqlGraphSearchTestSupport.VectorField, [1, 0], space,
                 Limit: SqlGraphSearchTestSupport.Limit, FusionConstant: SqlGraphSearchTestSupport.Fusion,
                 AllowedIds: [GraphSearchTestSupport.FirstHit]),
@@ -148,18 +143,15 @@ internal sealed class SqlGraphSearchParityTests
     }
 
     [Test]
-    public async Task CapabilityManifestAdvertisesSearchProfileWithoutChangingQ1Dialect()
+    public async Task CapabilityManifestAdvertisesSearchAndJoinProfiles()
     {
         using var database = new TestDatabase();
 
         var manifest = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution()).Capabilities;
 
         await Assert.That(manifest.SqlDialect).IsEqualTo("TSQL.ScriptDOM180");
-        await Assert.That(manifest.AstVersion).IsEqualTo(1);
-        await Assert.That(manifest.SupportedAstVersions).IsEquivalentTo([1]);
-        await Assert.That(manifest.SupportedQueryDialectVersions).IsEquivalentTo([1]);
         await Assert.That(manifest.ReadProfiles).Contains("graph-search");
-        await Assert.That(manifest.ReadProfiles).Contains("Q2.InnerJoin");
+        await Assert.That(manifest.ReadProfiles).Contains("InnerJoin");
     }
 
     [Test]
@@ -168,8 +160,7 @@ internal sealed class SqlGraphSearchParityTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var direct = new GraphSearchRequest(1,
-            new(database.Partition, SqlGraphSearchTestSupport.Collection,
+        var direct = new GraphSearchRequest(new(database.Partition, SqlGraphSearchTestSupport.Collection,
                 AllowedIds: System.Collections.Immutable.ImmutableArray<string>.Empty),
             Retriever: new(GraphSearchTestSupport.Walk(
                 GraphSearchTestSupport.Vertex(database, SqlGraphSearchTestSupport.Projects, SqlGraphSearchTestSupport.Root))));

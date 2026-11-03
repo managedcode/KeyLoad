@@ -74,7 +74,7 @@ internal sealed class TextProjectionBoundsTests
     private static async Task<string> CreateGenerationAsync(TestDatabase database)
     {
         var root = Path.Combine(database.Directory, "execution-text");
-        using var projection = new RuntimeTextProjection(root, database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var projection = new RuntimeTextProjection(root, database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         _ = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync("root",
             new(database.Partition, Collection, TextPath, Query));
         return root;

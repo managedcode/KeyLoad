@@ -33,7 +33,7 @@ internal sealed class TextGenerationPublishAdmissionTests
             ITextProjectionLease? lateReader = null;
             RuntimeTextProjection? projection = null;
             projection = cleanup.TrackProjection(new(Path.Combine(database.Directory, "publish-admission"),
-                database.Store.Identity.NodeId, UnitTextOptions.Execution(), faultObserver: stage =>
+                database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()), faultObserver: stage =>
                 {
                     if (stage == TextFaultStage.PostingWritten && armed)
                     {
@@ -84,7 +84,7 @@ internal sealed class TextGenerationPublishAdmissionTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, Field, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

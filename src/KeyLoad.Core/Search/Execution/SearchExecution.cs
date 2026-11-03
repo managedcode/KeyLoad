@@ -12,7 +12,7 @@ public static class SearchExecution
         var placement = engine.ReadPlacementWitness(view, request.Partition);
         var appliedBytes = view.ReadOwnedValue(KeySpace.AppliedBytes) ?? throw Errors.Fail(ErrorCode.Corruption, Bm25CorpusProtocol.Invalid);
         var identity = engine.Store.Identity;
-        var current = new Bm25CorpusCurrent(Bm25CorpusProtocol.Format, request.Partition, request.Collection, request.TextField!, tokenizer, principal.Id, principal.PolicyEpoch, resource.SchemaVersion, Bm25CorpusDigest.Resource(resource, work), new(identity.NodeId, identity.Incarnation), engine.ReadOutboxHead(view, request.Partition).Tail, engine.Store.Position, OrleansSerialization.Deserialize<long>(appliedBytes), identity.ReadGeneration, identity.Incarnation, statistics, commandId, string.Empty);
+        var current = new Bm25CorpusCurrent(request.Partition, request.Collection, request.TextField!, tokenizer, principal.Id, principal.PolicyEpoch, resource.SchemaVersion, Bm25CorpusDigest.Resource(resource, work), new(identity.NodeId, identity.Incarnation), engine.ReadOutboxHead(view, request.Partition).Tail, engine.Store.Position, OrleansSerialization.Deserialize<long>(appliedBytes), identity.ReadGeneration, identity.Incarnation, statistics, commandId, string.Empty);
         current = current with
         {
             PayloadDigest = Bm25CorpusDigest.Compute(current, placement, work)

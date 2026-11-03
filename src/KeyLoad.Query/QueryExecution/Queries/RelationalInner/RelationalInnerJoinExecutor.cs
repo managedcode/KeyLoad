@@ -8,7 +8,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Query;
 
-/// <summary>Executes the closed bounded Q2 primary-key nested-loop join within one execution read view.</summary>
+/// <summary>Executes the closed bounded primary-key nested-loop join within one execution read view.</summary>
 internal static class RelationalInnerJoinExecutor
 {
     private const int SingleOrder = 1;

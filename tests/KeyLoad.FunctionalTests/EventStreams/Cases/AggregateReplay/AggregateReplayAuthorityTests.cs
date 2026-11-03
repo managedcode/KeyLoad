@@ -19,6 +19,7 @@ internal sealed class AggregateReplayAuthorityTests
     private const string SecretHeader = "aggregate-header-secret";
     private const string AuthEventId = "aggregate-auth-event";
     private const string PrivateEventId = "aggregate-private-event";
+    private const string InvalidSnapshotChecksum = "invalid-snapshot-checksum";
     private const string RetryCommandId = "baf8e703-3e22-4c39-b89f-ef3ee2a33f30";
 
     [Test]
@@ -68,7 +69,7 @@ internal sealed class AggregateReplayAuthorityTests
             [AggregateReplayFixture.PayloadReadGrant, AggregateReplayFixture.HeaderReadGrant,
                 AggregateReplayFixture.HeaderUseGrant]);
         var snapshot = fixture.Snapshot();
-        fixture.StoreEnvelope(new(99, snapshot));
+        fixture.StoreSnapshotRecord(snapshot with { Checksum = InvalidSnapshotChecksum });
 
         var error = Assert.ThrowsExactly<KeyLoadException>(() => fixture.Read(principal: NoRawUsePrincipal));
 
@@ -91,7 +92,7 @@ internal sealed class AggregateReplayAuthorityTests
                 AggregateReplayFixture.PayloadUseGrant, AggregateReplayFixture.HeaderReadGrant })
         };
         var snapshot = fixture.Snapshot();
-        fixture.StoreEnvelope(new(99, snapshot));
+        fixture.StoreSnapshotRecord(snapshot with { Checksum = InvalidSnapshotChecksum });
 
         foreach (var (principal, fieldGrants) in grants)
         {

@@ -2,7 +2,6 @@ namespace KeyLoad.FunctionalTests.ClientApi;
 
 internal static class SdkResponseAdmissionProtocol
 {
-    internal const int PlacementVersion = 1;
     internal const long NextCommit = 1;
     internal const long FirstSequence = 1;
     internal const int FirstOrdinal = 0;

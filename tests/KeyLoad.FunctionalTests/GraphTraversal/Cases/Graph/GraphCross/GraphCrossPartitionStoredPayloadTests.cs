@@ -12,7 +12,7 @@ internal sealed class GraphCrossPartitionStoredPayloadTests
     [Test]
     public async Task OwnerVersionRoundTripPreservesIndependentRevisionAndDeletedFields()
     {
-        var expected = new GraphEdgeOwnerVersion(1, 31, true);
+        var expected = new GraphEdgeOwnerVersion(31, true);
 
         await GraphCrossPartitionAssertions.RoundTripsAllFields(expected);
     }
@@ -25,7 +25,7 @@ internal sealed class GraphCrossPartitionStoredPayloadTests
         var from = GraphCrossPartitionTestSupport.Vertex(source, "execution-from");
         var destination = GraphCrossPartitionTestSupport.Vertex(targetPartition, "execution-to");
         var edge = new EdgeRecord(EdgeId, from, destination, "intent-label", "{\"v\":1}", 41);
-        var expected = new GraphCrossPartitionDeliveryIntent(1, source,
+        var expected = new GraphCrossPartitionDeliveryIntent(source,
             "intent-graph", EdgeId, destination, 41, true, edge, "intent-principal", 43, Fingerprint);
 
         await GraphCrossPartitionAssertions.RoundTripsAllFields(expected);
@@ -37,7 +37,7 @@ internal sealed class GraphCrossPartitionStoredPayloadTests
         var source = GraphCrossPartitionTestSupport.Partition(MachineKeyReceiverSource);
         var targetPartition = GraphCrossPartitionTestSupport.Partition(MachineKeyReceiverTarget);
         var destination = GraphCrossPartitionTestSupport.Vertex(targetPartition, "execution-receiver-to");
-        var expected = new GraphCrossPartitionReceiverState(1, source, "receiver-graph",
+        var expected = new GraphCrossPartitionReceiverState(source, "receiver-graph",
             EdgeId, destination, 53, true, Fingerprint);
 
         await GraphCrossPartitionAssertions.RoundTripsAllFields(expected);

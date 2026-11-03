@@ -4,7 +4,6 @@ internal enum SampleChunkCorruptionCut
 {
     MissingManifest,
     ManifestDigest,
-    ManifestVersion,
     ManifestGeneration,
     MissingBlock,
     BlockDigest,

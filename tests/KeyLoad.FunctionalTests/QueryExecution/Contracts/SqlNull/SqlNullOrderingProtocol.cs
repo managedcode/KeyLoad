@@ -9,7 +9,7 @@ internal static class SqlNullOrderingProtocol
     internal const string Score = "/score";
     internal const string Label = "/label";
     internal const string LabelName = "label";
-    internal const string Profile = "Q1.NullOrdering";
+    internal const string Profile = "NullOrdering";
     internal const int ResultCount = 5;
     internal const int ColdCuts = 2;
     internal const long InitialEpoch = 1;

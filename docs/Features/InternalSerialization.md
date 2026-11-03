@@ -24,7 +24,7 @@ typed operation values. Replies carry a generated `GrainValue` directly; their
 callers do not encode and decode a private byte payload inside an Orleans call,
 and replies are not measured. Mutable operation values and metadata remain independent
 of the caller. Replaced binary fields are retired and typed replacements use
-unused field IDs; aliases and application versions are unchanged.
+unused field IDs; current aliases and the remaining field IDs retain their identities.
 Only `DatabaseCommand.Input` marks the public-input element policy, so rejected
 public null elements can reach domain validation and remain in original command
 outcomes. Other members retain strict validation, including required references
@@ -41,8 +41,8 @@ the principal directly instead of a nested encoded principal buffer.
 
 REQ-IS-001..009 / AC-IS-001..009 retain active attributed DTOs and stable aliases,
 required domain values, native pooled serialization,
-versioned application/storage metadata, bounded payloads, typed grain contracts,
-signed claims, unsupported-version refusal and exact-source qualification.
+typed application/storage metadata, bounded payloads, typed grain contracts,
+signed claims, malformed-input refusal and exact-source qualification.
 Native Orleans owns its supported field evolution; KeyLoad adds no private wire
 grammar. Application validation is required before effects.
 

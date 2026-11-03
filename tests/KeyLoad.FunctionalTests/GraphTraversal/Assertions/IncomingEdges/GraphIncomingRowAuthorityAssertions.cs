@@ -5,7 +5,6 @@ namespace KeyLoad.FunctionalTests.GraphTraversal;
 
 internal static class GraphIncomingRowAuthorityAssertions
 {
-    private const int PageVersion = 1;
     private const int IncomingLimit = 10;
     private const long EdgeRevision = 1;
     private const long RepairedRevision = 2;
@@ -21,9 +20,8 @@ internal static class GraphIncomingRowAuthorityAssertions
         var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var actual = engine.ReadIncomingGraphEdges(reader,
-            new ReadIncomingGraphEdgesRequest(PageVersion, target, Graph, IncomingLimit));
-        var expected = new GraphIncomingEdgesPage(PageVersion,
-            [new(new EdgeRecord(EdgeId, source, target, Label, EmptyJson, EdgeRevision), EdgeRevision)],
+            new ReadIncomingGraphEdgesRequest(target, Graph, IncomingLimit));
+        var expected = new GraphIncomingEdgesPage([new(new EdgeRecord(EdgeId, source, target, Label, EmptyJson, EdgeRevision), EdgeRevision)],
             cut, Projection);
         await Assert.That(JsonSerializer.Serialize(actual, JsonDefaults.Options))
             .IsEqualTo(JsonSerializer.Serialize(expected, JsonDefaults.Options));
@@ -39,7 +37,7 @@ internal static class GraphIncomingRowAuthorityAssertions
         var image = CanonicalStoreImage.Bytes(store);
         var cut = store.Position;
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => engine.ReadIncomingGraphEdges(reader,
-            new ReadIncomingGraphEdgesRequest(PageVersion, target, Graph, IncomingLimit)));
+            new ReadIncomingGraphEdgesRequest(target, Graph, IncomingLimit)));
         await Assert.That(failure.Code).IsEqualTo(expected);
         await Assert.That(CanonicalStoreImage.Bytes(store)).IsEquivalentTo(image);
         await Assert.That(store.Position).IsEqualTo(cut);

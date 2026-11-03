@@ -24,8 +24,12 @@ internal sealed class TextProjectionDisposalTests
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, DocumentId, Payload));
-        var root = Path.Combine(database.Directory, Collection);
-        using var projection = new RuntimeTextProjection(root, database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        var hostRoot = Path.Combine(database.Directory, Collection);
+        var root = Path.Combine(hostRoot, TextHostResourceRoots.BootstrapDirectory);
+        var node = database.Store.Identity.NodeId;
+        var options = UnitTextOptions.Execution();
+        using var projection = new RuntimeTextProjection(root, node, options,
+            resources: TextHostResourceRoots.Register(hostRoot, node, options));
         var request = new SearchRequest(database.Partition, Collection, Field, Query);
         var cancellation = TestContext.Current!.Execution.CancellationToken;
         var original = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync(Principal, request, cancellation);
@@ -34,12 +38,26 @@ internal sealed class TextProjectionDisposalTests
         projection.Dispose();
         await Assert.ThrowsExactlyAsync<ObjectDisposedException>(() =>
             new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection).SearchAsync(Principal, request, cancellation));
-        using var reopened = new RuntimeTextProjection(root, database.Store.Identity.NodeId, UnitTextOptions.Execution());
-        var recovered = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), reopened).SearchAsync(Principal, request, cancellation);
+        await TextBootstrapColdAssertions.VerifyAsync(hostRoot, node, options, cancellation);
+        using var reopened = new RuntimeTextProjection(root, node, options,
+            resources: TextHostResourceRoots.Register(hostRoot, node, options));
+        var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), reopened);
+        var recovered = await search.SearchAsync(Principal, request, cancellation);
         await Assert.That(recovered).HasSingleItem();
         await Assert.That(recovered[0].Document.Reference).IsEqualTo(original[0].Document.Reference);
         await Assert.That(recovered[0].Document.Revision).IsEqualTo(original[0].Document.Revision);
         await Assert.That(recovered[0].Document.Json).IsEqualTo(Payload);
+        var reused = await search.SearchAsync(Principal, request, cancellation);
+        await Assert.That(reused).HasSingleItem();
+        await Assert.That(reused[0].Document.Json).IsEqualTo(Payload);
+        const string changedPayload = "{\"text\":\"needle updated\"}";
+        database.Commit(new PutDocument(Collection, DocumentId, changedPayload,
+            ExpectedRevision: original[0].Document.Revision));
+        var replaced = await search.SearchAsync(Principal, request, cancellation);
+        await Assert.That(replaced).HasSingleItem();
+        await Assert.That(replaced[0].Document.Reference).IsEqualTo(original[0].Document.Reference);
+        await Assert.That(replaced[0].Document.Revision).IsEqualTo(original[0].Document.Revision + 1);
+        await Assert.That(replaced[0].Document.Json).IsEqualTo(changedPayload);
     }
 
     private static async Task DrainConcurrentCallersAsync(TestDatabase database, RuntimeTextProjection projection,
@@ -93,7 +111,7 @@ internal sealed class TextProjectionDisposalTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal(Principal)))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, Field, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

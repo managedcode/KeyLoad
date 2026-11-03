@@ -5,7 +5,6 @@ namespace KeyLoad.ProcessRecoveryTests.Search;
 internal sealed record TextCrashReceipt(
     [property: global::Orleans.Id(0)] Guid NodeId,
     [property: global::Orleans.Id(1)] Guid Incarnation,
-    [property: global::Orleans.Id(2)] int DataEpoch,
     [property: global::Orleans.Id(3)] long ReadGeneration,
     [property: global::Orleans.Id(4)] long Position,
     [property: global::Orleans.Id(5)] KeyLoad.PartitionRef Partition,

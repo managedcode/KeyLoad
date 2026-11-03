@@ -67,7 +67,7 @@ public enum GrainReadKind
     RecurringSchedule,
     /// <summary>Inspect current projected saga state without exposing its retained timeout template.</summary>
     Saga,
-    /// <summary>Compile versioned SQL graph operators to the same authorized search executor.</summary>
+    /// <summary>Compile SQL graph operators to the same authorized search executor.</summary>
     SqlGraphSearch,
     /// <summary>Read one authorized shortest graph path inside a committed partition cut.</summary>
     GraphShortestPath,

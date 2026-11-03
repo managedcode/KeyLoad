@@ -133,5 +133,5 @@ public static class GraphMutations
         }
     }
 
-    internal static void PersistOwnerVersion(IAtomicTransaction tx, PartitionRef partition, string graph, string edgeId, long revision, bool deleted) => tx.PutRecord(GraphCrossPartitionKeys.OwnerVersion(partition, graph, edgeId), new GraphEdgeOwnerVersion(GraphCrossPartitionProtocol.CurrentVersion, revision, deleted));
+    internal static void PersistOwnerVersion(IAtomicTransaction tx, PartitionRef partition, string graph, string edgeId, long revision, bool deleted) => tx.PutRecord(GraphCrossPartitionKeys.OwnerVersion(partition, graph, edgeId), new GraphEdgeOwnerVersion(revision, deleted));
 }

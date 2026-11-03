@@ -4,7 +4,7 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer, Orleans.Alias(FileStoragePolicy.ContractAlias)]
 public sealed record FileStoragePolicy
 {
-    internal const string ContractAlias = "keyload.file.policy.v1";
+    internal const string ContractAlias = "keyload.file.policy";
     private const int MinimumCapacity = 1;
     private const long DefaultMaximumFileBytes = 274_877_906_944;
     private const long DefaultMaximumStoredBytes = 1_099_511_627_776;

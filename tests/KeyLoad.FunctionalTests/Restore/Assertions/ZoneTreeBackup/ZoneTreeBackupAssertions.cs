@@ -33,10 +33,7 @@ internal static class ZoneTreeBackupAssertions
         await Assert.That(restored.Incarnation).IsNotEqualTo(source.Incarnation);
         await Assert.That(restored.SigningKey.Span.SequenceEqual(source.SigningKey.Span)).IsFalse();
         await Assert.That(restored.DispatchPaused).IsTrue();
-        await Assert.That(restored.FormatVersion).IsEqualTo(source.FormatVersion);
-        await Assert.That(restored.KeyCodecVersion).IsEqualTo(source.KeyCodecVersion);
         await Assert.That(restored.Durability).IsEqualTo(source.Durability);
-        await Assert.That(restored.MinimumReaderContract).IsEqualTo(source.MinimumReaderContract);
     }
 
     internal static async Task RestoredCutAsync(string directory, StoreIdentity restored, long position)

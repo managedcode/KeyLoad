@@ -25,10 +25,6 @@ internal static class GraphShortestPathBudgetAssertions
     internal static async Task RequireShapeRefusalsAsync(TestDatabase database,
         GraphShortestPathRequest request, CancellationToken token)
     {
-        await AssertCode(database, request with
-        {
-            Version = 2
-        }, ErrorCode.Validation, token);
         var defaultLabels = (ImmutableArray<string>?)default(ImmutableArray<string>);
         await AssertCode(database, request with
         {

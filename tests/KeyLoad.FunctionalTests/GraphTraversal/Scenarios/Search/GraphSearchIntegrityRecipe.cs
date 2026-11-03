@@ -5,7 +5,6 @@ namespace KeyLoad.FunctionalTests.GraphTraversal;
 
 internal static class GraphSearchIntegrityRecipe
 {
-    private const int Version = 1;
     private const int SeedDepth = 0;
     private const int Fusion = 60;
     private const int FirstRank = 1;
@@ -22,7 +21,7 @@ internal static class GraphSearchIntegrityRecipe
             MaxDepth = SeedDepth,
             Labels = null
         };
-        return new(Version, new(state.SeedCommand.Partition, P.Nodes, Limit: P.MaximumVertices, FusionConstant: Fusion),
+        return new(new(state.SeedCommand.Partition, P.Nodes, Limit: P.MaximumVertices, FusionConstant: Fusion),
             Scope: selected == GraphSearchIntegrityOperator.Scope ? new(walk) : null,
             Retriever: new(selected == GraphSearchIntegrityOperator.Retriever ? walk : seed),
             Expansion: selected == GraphSearchIntegrityOperator.Expansion

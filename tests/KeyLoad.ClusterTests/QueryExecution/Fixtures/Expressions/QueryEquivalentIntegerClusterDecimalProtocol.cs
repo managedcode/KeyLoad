@@ -17,7 +17,7 @@ internal static class QueryEquivalentIntegerClusterDecimalProtocol
     internal const string Root = "root";
     internal const string MinimumParameter = "minimum";
     internal const string Scan = "bounded-full-scan";
-    internal const string Unsupported = "This expression is outside the supported Q1 C# subset.";
+    internal const string Unsupported = "This expression is outside the supported C# query subset.";
     internal const string SourcePrefix = "SELECT * FROM integer_decimal_rows d WHERE d.[";
     internal const string SourceTail = "] >= @minimum ORDER BY d.id";
     internal const string Compare = ">=";

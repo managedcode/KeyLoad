@@ -85,7 +85,6 @@ internal static class GraphIncomingPublicRoutes
         {
             await GraphIncomingClusterAssertions.AssertThreeRowsAsync(page, seed);
         }
-        await Assert.That(page.Version).IsEqualTo(GraphIncomingPublicPolicy.Version);
         await Assert.That(page.CutPosition).IsGreaterThan(GraphIncomingPublicPolicy.EmptyPosition);
     }
 }

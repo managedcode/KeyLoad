@@ -11,7 +11,7 @@ internal static class AnnLockFormat
         }
         var bytes = new byte[checked((int)file.Length)];
         file.ReadExactly(bytes);
-        if (OrleansSerialization.Deserialize<int>(bytes) != AnnProtocol.Version)
+        if (OrleansSerialization.Deserialize<int>(bytes) != AnnProtocol.LockMarker)
         {
             throw Errors.Fail(ErrorCode.FormatUnsupported, AnnProtocol.Ownership);
         }

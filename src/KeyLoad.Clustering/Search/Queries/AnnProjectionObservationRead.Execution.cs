@@ -46,7 +46,7 @@ internal static partial class AnnProjectionObservationRead
         }
         var actual = database.Store.Identity;
         work.Check();
-        var result = new AnnProjectionObservationResult(AnnProjectionObservationProtocol.Version, actual.NodeId, actual.ReadGeneration, waited,
+        var result = new AnnProjectionObservationResult(actual.NodeId, actual.ReadGeneration, waited,
             approximate);
         return result;
     }

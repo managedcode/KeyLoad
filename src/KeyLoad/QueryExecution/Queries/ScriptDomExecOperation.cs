@@ -26,10 +26,6 @@ internal static class ScriptDomExecOperation
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
-        {
-            throw ScriptDomOperationErrors.Unsupported();
-        }
         var specification = statement.ExecuteSpecification;
         if (statement.Options.Count != EmptyCount || specification.Variable is not null
             || specification.LinkedServer is not null || specification.ExecuteContext is not null

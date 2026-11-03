@@ -105,7 +105,7 @@ internal sealed class TextOnlineSourcePin : IDisposable
     {
         var actual = execution.Cut;
         if (actual.NodeId != scope.NodeId || actual.Incarnation != metadata.Incarnation
-            || actual.FormatVersion != metadata.DataEpoch || actual.ReadGeneration != metadata.ReadGeneration
+            || actual.ReadGeneration != metadata.ReadGeneration
             || actual.Position != metadata.Position)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, InvalidPin);

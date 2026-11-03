@@ -6,7 +6,7 @@ using KeyLoad.ClusterTests.StorageReplication;
 
 namespace KeyLoad.ClusterTests.QueryExecution;
 
-internal sealed record PostgresClusterSelection(int QueryDialect, bool RequireTls = true)
+internal sealed record PostgresClusterSelection(bool RequireTls = true)
 {
     private const string Prefix = "KeyLoad__RuntimeSql__";
     private const string Tcp = "tcp";
@@ -25,7 +25,6 @@ internal sealed record PostgresClusterSelection(int QueryDialect, bool RequireTl
                     scheme: Tcp, isProxied: false)
                 .WithEnvironment(Prefix + Port, node.GetEndpoint(PostgresClusterProtocol.Endpoint).Property(EndpointProperty.TargetPort))
                 .WithEnvironment(Prefix + nameof(RequireTls), RequireTls.ToString(CultureInfo.InvariantCulture))
-                .WithEnvironment(Prefix + Dialect, QueryDialect.ToString(CultureInfo.InvariantCulture))
                 .WithEnvironment(Prefix + FullScan, True)
                 .WithEnvironment(Prefix + DatabasePrefix + Tenant, partition.TenantId)
                 .WithEnvironment(Prefix + DatabasePrefix + Database, partition.DatabaseId)
@@ -35,7 +34,6 @@ internal sealed record PostgresClusterSelection(int QueryDialect, bool RequireTl
     }
 
     private const string Port = "Port";
-    private const string Dialect = "QueryDialectVersion";
     private const string FullScan = "AllowFullScan";
     private const string DatabasePrefix = "Databases__keyload__";
     private const string Tenant = "TenantId";

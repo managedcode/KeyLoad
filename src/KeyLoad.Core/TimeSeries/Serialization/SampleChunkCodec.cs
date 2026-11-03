@@ -80,10 +80,6 @@ internal static class SampleChunkCodec
         budget.Check();
         var payload = OrleansSerialization.Deserialize<SampleChunkPayload>(bytes);
         budget.Check();
-        if (payload.FormatVersion != SampleChunkWire.CurrentVersion)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkWire.UnsupportedVersion);
-        }
         ValidatePayloadShape(payload);
         SampleChunkChecksum.Verify(payload, budget, execution.HashChunkBytes);
         SampleChunkNumericValidator.Validate(payload, budget);

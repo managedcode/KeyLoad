@@ -8,7 +8,7 @@ namespace KeyLoad.Query;
 internal static class QueryValidation
 {
     private const string QueryRequestPartitionAndQueryAreRequiredDetail = "A query request, partition and query are required.";
-    private const string QueryASTVersionIsUnsupportedDetail = "The query AST version is unsupported.";
+    private const string QueryJoinShapeIsUnsupportedDetail = "The query join shape is unsupported.";
     private const int MinimumPositiveCount = 1;
     private const string QueryStructureExceedsItsBudgetDetail = "The query structure exceeds its budget.";
     private const int RootPredicateDepth = 1;
@@ -30,10 +30,6 @@ internal static class QueryValidation
         if (request is null || request.Partition is null || request.Query is null)
         {
             throw Errors.Fail(ErrorCode.Validation, QueryRequestPartitionAndQueryAreRequiredDetail);
-        }
-        if (request.AstVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
-        {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, QueryASTVersionIsUnsupportedDetail);
         }
 
         var query = request.Query;
@@ -103,7 +99,7 @@ internal static class QueryValidation
                 || StringComparer.Ordinal.Equals(query.Alias, query.InnerJoin.Alias))
             || !hasJoin && projection.Any(selection => selection.SourceAlias is not null))
         {
-            throw Errors.Fail(ErrorCode.UnsupportedCapability, QueryASTVersionIsUnsupportedDetail);
+            throw Errors.Fail(ErrorCode.UnsupportedCapability, QueryJoinShapeIsUnsupportedDetail);
         }
         ValidateJoinSources(query, projection);
     }

@@ -79,7 +79,7 @@ internal static class AnnPublicSearchExecutor
                 var documents = sourceMetadata is null
                     ? SearchBranchExecution.ProjectSelected(database, view, principal, resource, selected, budget)
                     : AnnLifetimeProjection.ProjectSelected(database, view, principal, resource, sourceMetadata, selected, budget);
-                var page = new AnnSearchPage(AnnPublicRequestValidation.CurrentVersion, ImmutableCollectionsMarshal.AsImmutableArray(documents),
+                var page = new AnnSearchPage(ImmutableCollectionsMarshal.AsImmutableArray(documents),
                     caller.Cut.Position, Mode(result.Mode), result.Mode != AnnSearchMode.Approximate,
                     request.IndexGeneration, request.RequestedMode);
                 return page;

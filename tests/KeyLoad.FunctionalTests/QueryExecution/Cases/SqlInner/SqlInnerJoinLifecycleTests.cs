@@ -16,7 +16,6 @@ internal sealed class SqlInnerJoinLifecycleTests
     private const string NameField = "name";
     private const string LeftEntityId = "a";
     private const string RightEntityId = "c1";
-    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int InitialGeneration = 1;
     private const int FirstCommittedGeneration = InitialGeneration + 1;
     private const int FinalGeneration = 33;
@@ -71,7 +70,7 @@ internal sealed class SqlInnerJoinLifecycleTests
     }
 
     [Test]
-    public async Task AcQ2RetainedIdentityFaultsRefuseWithoutEffectsAndRepairAcrossTwoColdCuts()
+    public async Task AcJoinRetainedIdentityFaultsRefuseWithoutEffectsAndRepairAcrossTwoColdCuts()
     {
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
@@ -97,7 +96,7 @@ internal sealed class SqlInnerJoinLifecycleTests
     }
 
     private static QueryRequest JoinRequest(TestDatabase database)
-        => new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion);
+        => new(database.Partition, Sql, AllowFullScan: true);
 
     private static async Task AssertPairGenerationAsync(QueryPage page, int? expectedGeneration = null)
     {

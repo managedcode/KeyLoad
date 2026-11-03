@@ -13,8 +13,7 @@ internal sealed class GraphSearchReadCutTests
         var root = new EntityRef(store.Partition, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
         var walk = new GraphWalkSpec(GraphSearchTestSupport.Graph, [root], MaxDepth: 3,
             MaxVertices: 10, MaxEdges: 20);
-        var request = new GraphSearchRequest(1,
-            new(store.Partition, GraphSearchTestSupport.Documents, Limit: 1),
+        var request = new GraphSearchRequest(new(store.Partition, GraphSearchTestSupport.Documents, Limit: 1),
             Retriever: new(walk),
             Expansion: new(GraphSearchTestSupport.Graph, MaxDepth: 1, MaxVertices: 10, MaxEdges: 20));
 

@@ -47,7 +47,7 @@ internal static class AnnPublicWholeFlow
     }
 
     internal static ApproximateSearchRequest Request(TestDatabase database, AnnMaintenanceRequest pin)
-        => new(Version, new(database.Partition, AnnSeedTestSupport.Collection,
+        => new(new(database.Partition, AnnSeedTestSupport.Collection,
             VectorField: AnnSeedTestSupport.Field, Vector: [1, 0, 0], Space: AnnSeedTestSupport.Space(), Limit: Count),
             pin.Consumer, pin.IndexGeneration);
 
@@ -62,7 +62,7 @@ internal static class AnnPublicWholeFlow
     {
         var rows = empty ? [] : new RankedDocument[]
         { Row(database, "seed-00002", 1d / 61d, redacted), Row(database, "seed-00001", 1d / 62d, redacted), Row(database, "seed-00000", 1d / 63d, redacted) };
-        var expected = new AnnSearchPage(Version, [.. rows], cut, mode, mode != AnnPageMode.Approximate,
+        var expected = new AnnSearchPage([.. rows], cut, mode, mode != AnnPageMode.Approximate,
             AnnMaintenanceTestData.Generation, AnnPageMode.Approximate);
         await Assert.That(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(page)))
             .IsEqualTo(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));

@@ -99,7 +99,7 @@ internal static partial class TextSeedCollector
         var identity = database.Store.Identity;
         return new(principal.Id, principal.PolicyEpoch, resource.SchemaVersion,
             database.Store.Position, applied, head.Tail, head.FirstAvailable, consumer.Checkpoint,
-            identity.Incarnation, identity.FormatVersion, identity.ReadGeneration, ResourceDigest(resource, budget), []);
+            identity.Incarnation, identity.ReadGeneration, ResourceDigest(resource, budget), []);
     }
 
     internal static void RequireReleased(DatabaseEngine database, string principalId,

@@ -6,7 +6,7 @@ Receiving a timeout for a creator that has protected field use/write grants but 
 
 ## Canonical record contracts
 
-Generated v1 records use sequential IDs from0 and feature-owned literal `keyload.contract.<kebab-type-name>.v1` aliases. New mutations reuse public Batch and its stable command inbox.
+Generated records use sequential IDs from0 and feature-owned literal `keyload.contract.<kebab-type-name>` aliases. New mutations reuse public Batch and its stable command inbox.
 
 `RecurringScheduleDefinition(QueueLaneRef Lane, Guid ScheduleId, DateTimeOffset FirstDueAt, TimeSpan Interval, string TimeZone, RecurringMisfirePolicy Misfire, string PayloadJson, string HeadersJson, string? OrderingKey=null, TimeSpan? MessageTimeToLive=null)` is the first fixed interval profile. TimeZone must equal ordinal `UTC`, dates have zero offset, Interval is1second..365days, and only `RecurringMisfirePolicy.CatchUp` is accepted. Unsupported timezone/calendar/misfire profiles fail explicitly. TTL, when given, is positive, no greater than365days, and is relative to the occurrence's due time; expired catch-up fails without advancing rather than silently losing work.
 

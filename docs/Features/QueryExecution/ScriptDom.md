@@ -59,7 +59,7 @@ Microsoft's [official project](https://github.com/microsoft/SqlScriptDOM) owns T
 
 ## Inventory schema
 
-REQ-TSQL-006 / AC-TSQL-006 includes the explicit machine-readable `KeyLoad.SqlConformance.Inventory` contract. `schemaVersion` is 2; `commandInventory` and `officialCommandCount` are nullable because no complete T-SQL command enumeration is claimed. Readers validate the current schema and its required fields before consuming it; other schema values are rejected. All15 stable family IDs, false full-SQL/client gates and original wire/driver boundaries remain. This is a documentation inventory, not a persisted database format or runtime SQL compatibility path.
+REQ-TSQL-006 / AC-TSQL-006 includes the machine-readable `KeyLoad.SqlConformance.Inventory` current contract. `commandInventory` and `officialCommandCount` are nullable because no complete T-SQL command enumeration is claimed. Readers validate named required fields and their types, without a schema-version selector. Stable family IDs, false full-SQL/client gates and native wire/driver boundaries remain. The inventory is documentation rather than a database storage format.
 
 Existing linked Architecture/ClientApi/status prose is updated in the same document batch. Compiled consumer lookup remains a separate finite prerequisite; no result is invented from filename-only inspection. Integration must bind the actual audit and current source guards.
 

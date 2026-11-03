@@ -4,7 +4,7 @@ namespace KeyLoad.FunctionalTests.CodeQuality.Assertions;
 
 internal static class ProductionSourceManifestContributorAssertions
 {
-    private const int ExpectedUnitRows = 40;
+    private const int ExpectedUnitRows = 31;
     private const int ExpectedClusterRows = 8;
     private const int MaximumIdentityFieldCharacters = 512;
     private const int MaximumOperationCharacters = 4096;
@@ -38,7 +38,7 @@ internal static class ProductionSourceManifestContributorAssertions
     {
         [PartitionSetMethod] = "Empty, over-eight and null leaf sets remain Validation with unchanged position; an actual valid QueryEngine request on the seeded same database returns the expected full reference, projected JSON/revision, with position preserved.",
         [OwnershipMethod] = "A wrong server-owned physical tuple returns OwnershipLost with unchanged position, then the correct owner reads the exact row. A protected sort-field denial returns PermissionDenied with unchanged position; a valid same-reader query returns the visible projection and exact persisted-redaction metadata.",
-        [InvalidRequestMethod] = "Default/empty/duplicate/over-eight/unsupported/version/AST inputs retain their typed errors and unchanged committed position on a seeded fixture; a valid same-fixture query then returns the complete expected page, full EntityRef, projected JSON and revision."
+        [InvalidRequestMethod] = "Default/empty/duplicate/over-eight partition sets and unsupported EXPLAIN retain their typed errors and unchanged committed position on a seeded fixture; a valid same-fixture query then returns the complete expected page, full EntityRef, projected JSON and revision."
     };
     private static readonly string[] CandidateIdentities =
     [

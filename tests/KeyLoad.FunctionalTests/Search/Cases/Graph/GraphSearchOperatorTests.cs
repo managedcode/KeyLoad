@@ -16,8 +16,7 @@ internal sealed class GraphSearchOperatorTests
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
-        var request = new GraphSearchRequest(1,
-            new(database.Partition, GraphSearchTestSupport.Documents, FusionConstant: FusionConstant),
+        var request = new GraphSearchRequest(new(database.Partition, GraphSearchTestSupport.Documents, FusionConstant: FusionConstant),
             Retriever: new(GraphSearchTestSupport.Walk(
                 GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root))));
 
@@ -41,8 +40,7 @@ internal sealed class GraphSearchOperatorTests
         GraphSearchTestSupport.AddPath(database);
         var walk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root));
-        var request = new GraphSearchRequest(1,
-            new(database.Partition, GraphSearchTestSupport.Documents), Retriever: new(walk, Weight: 0));
+        var request = new GraphSearchRequest(new(database.Partition, GraphSearchTestSupport.Documents), Retriever: new(walk, Weight: 0));
 
         var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request,
             TestContext.Current!.Execution.CancellationToken);
@@ -64,7 +62,7 @@ internal sealed class GraphSearchOperatorTests
             AllowedIds: [GraphSearchTestSupport.FirstHit]);
 
         var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(
-            GraphSearchTestSupport.Reader, new(1, search, Scope: scope), TestContext.Current!.Execution.CancellationToken);
+            GraphSearchTestSupport.Reader, new(search, Scope: scope), TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.Hits).HasSingleItem();
         await Assert.That(result.Hits[0].Document.Reference.Id).IsEqualTo(GraphSearchTestSupport.FirstHit);
@@ -88,7 +86,7 @@ internal sealed class GraphSearchOperatorTests
             Limit: 10, FusionConstant: FusionConstant);
 
         var result = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root",
-            new(1, search, Retriever: new(walk)), TestContext.Current!.Execution.CancellationToken);
+            new(search, Retriever: new(walk)), TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(result.Hits.Select(hit => hit.Document.Reference.Id).ToArray())
             .IsEquivalentTo([GraphSearchTestSupport.FirstHit, GraphSearchTestSupport.SecondHit],
@@ -116,7 +114,7 @@ internal sealed class GraphSearchOperatorTests
 
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(GraphSearchTestSupport.Reader,
-                new(1, search, Scope: scope), TestContext.Current!.Execution.CancellationToken)))!;
+                new(search, Scope: scope), TestContext.Current!.Execution.CancellationToken)))!;
 
         await Assert.That(failure.Code).IsEqualTo(ErrorCode.PermissionDenied);
     }

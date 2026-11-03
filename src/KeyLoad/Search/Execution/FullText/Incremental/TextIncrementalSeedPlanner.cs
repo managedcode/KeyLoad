@@ -15,8 +15,7 @@ internal static class TextIncrementalSeedPlanner
     {
         budget.Check();
         if (seed.Documents is null
-            || scope.Incarnation != seed.Incarnation || scope.DataEpoch != seed.DataEpoch
-            || scope.ReadGeneration != seed.ReadGeneration
+            || scope.Incarnation != seed.Incarnation || scope.ReadGeneration != seed.ReadGeneration
             || scope.Position != seed.Position || scope.PrincipalId != seed.PrincipalId
             || scope.PolicyEpoch != seed.PolicyEpoch || scope.SchemaVersion != seed.SchemaVersion)
         {

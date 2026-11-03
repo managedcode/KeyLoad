@@ -44,13 +44,13 @@ internal static class SqlGraphPathTestSupport
     }
 
     internal static GraphShortestPathRequest Direct(TestDatabase database, ImmutableArray<string>? labels = null)
-        => new(ContractVersion, database.Partition, Graph, Vertex(database, Orders, StartId), Vertex(database, Orders, TargetId),
+        => new(database.Partition, Graph, Vertex(database, Orders, StartId), Vertex(database, Orders, TargetId),
             PathDepth, MaximumVertices, MaximumEdges, labels);
 
     internal static SqlGraphPathRequest Request(TestDatabase database, string sql,
-        Dictionary<string, JsonElement>? parameters = null, int version = ContractVersion, bool allowFullScan = true,
+        Dictionary<string, JsonElement>? parameters = null, bool allowFullScan = true,
         string? cursor = null)
-        => new(version, new(database.Partition, sql, parameters, allowFullScan, cursor));
+        => new(new(database.Partition, sql, parameters, allowFullScan, cursor));
 
     internal static Dictionary<string, JsonElement> Parameters(params (string Name, object Value)[] values)
         => values.ToDictionary(value => value.Name, value => JsonSerializer.SerializeToElement(value.Value),

@@ -1,4 +1,4 @@
-# ADR-100: Internal bounded Q1 merge across local atomic partitions
+# ADR-100: Internal bounded scalar query merge across local atomic partitions
 
 Status: Accepted; implementation and qualification pending.
 Date: 2026-10-05. Scope: prerequisite for distributed query fan-out only.
@@ -24,7 +24,7 @@ one local authorized query. Calling several partitions on the same local
 `DatabaseEngine` a distributed query would be false evidence.
 
 The safe first code stage is therefore an internal prerequisite: exercise the
-real Q1 leaf operator on multiple atomic partitions in one `TestDatabase`, then
+real scalar leaf operator on multiple atomic partitions in one `TestDatabase`, then
 merge only its bounded owned results. It prepares generated structures
 and verifies correct order/cut/policy bookkeeping without publishing a route or
 calling another grain. The existing request envelope identity, persisted
@@ -40,12 +40,12 @@ feature: `PartitionQueryPlan`, `PartitionQueryLeafPlan`,
 `DistributedQueryExecution.md`. The plan is valid only for 1–8 unique atomic
 partitions all executed by the same actual store owner identity. It carries no
 trusted principal or caller-selected node. A leaf plan carries
-one identical normalized Q1 AST with only `PartitionRef` varied and a candidate
+one identical normalized scalar AST with only `PartitionRef` varied and a candidate
 count equal to the root limit. The executor uses the authenticated principal already passed
 to QueryEngine; each leaf reloads persisted principal/resource policy through
 the existing read path.
 
-Capture canonical encoded Q1 order keys while each document is still an
+Capture canonical encoded scalar order keys while each document is still an
 authorized pre-projection candidate. Retain only the requested local top-L,
 including full `EntityRef` and projected/redacted `QueryRow`; never export
 borrowed database views or raw unprojected documents. For every unredacted row
@@ -107,7 +107,7 @@ sequenceDiagram
     participant Z as Actual node-local ZoneTree owner
     Q->>B: Validate the plan and bind cancellation and expiry
     loop Each unique atomic partition
-        Q->>Z: Reload persisted authority and bounded Q1 read
+        Q->>Z: Reload persisted authority and bounded scalar read
         Z-->>Q: Owned top-Limit candidates, cut and policy witness
     end
     Q->>Q: Validate all witnesses and merge exact order
@@ -116,9 +116,9 @@ sequenceDiagram
 
 The accepted local top-L implementation uses a custom L+1-reference binary
 heap for the internal partition leaf, with full EntityRef ties before selection.
-The public Q1 PriorityQueue path keeps its existing UTF-8 EntityId comparator.
+The public scalar PriorityQueue path keeps its existing UTF-8 EntityId comparator.
 Draining the heap yields the ordered leaf candidates and releases its slots.
-This ADR does not authorize fresh per-leaf deadlines, changing public Q1 tie
+This ADR does not authorize fresh per-leaf deadlines, changing public scalar tie
 ordering or a configured operation limit. Execution helpers belong in
 QueryExecution/Execution.
 

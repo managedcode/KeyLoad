@@ -2,6 +2,7 @@ using KeyLoad.Core;
 using KeyLoad.Query.Search;
 using Microsoft.Extensions.Options;
 using ZoneTree.FullTextSearch.Index;
+using ZoneTree.Options;
 
 namespace KeyLoad.Server.Search;
 
@@ -11,13 +12,13 @@ internal sealed class TextGeneration
 
     private readonly string root;
     private readonly Guid sourceNodeId;
-    private readonly TextResourceOwnership? resources;
-    internal TextResourceOwnership? Resources => resources;
+    private readonly TextResourceOwnership resources;
+    internal TextResourceOwnership Resources => resources;
     private List<TextRecord>? pendingRecords = [];
     private TextRecord[]? sealedRecords;
     private HashSet<EntityRef>? references = [];
 
-    internal TextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, TextFileStreamProvider provider, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal TextGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, TextFileStreamProvider provider, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership resources)
     {
         this.executionOptions = executionOptions;
         this.resources = resources;
@@ -26,7 +27,7 @@ internal sealed class TextGeneration
         Leaf = leaf;
         Path = System.IO.Path.Combine(root, leaf);
         Scope = scope;
-        CurrentIndex = RuntimeTextIndex.Open(System.IO.Path.Combine(Path, TextProtocol.RuntimeDirectoryCore), provider, executionOptions: executionOptions);
+        CurrentIndex = RuntimeTextIndex.Open(System.IO.Path.Combine(Path, TextProtocol.RuntimeDirectoryCore), provider, executionOptions: executionOptions, walMode: WriteAheadLogMode.None);
     }
 
     internal string Leaf
@@ -157,7 +158,7 @@ internal sealed class TextGeneration
         budget.Check();
         CurrentIndex = RuntimeTextIndex.Open(System.IO.Path.Combine(Path, TextProtocol.RuntimeDirectoryCore),
             new TextFileStreamProvider(root, Leaf, sourceNodeId, executionOptions: executionOptions,
-                resources: resources, allowReadOnlyInventory: true), executionOptions: executionOptions);
+                resources: resources, allowReadOnlyInventory: true), executionOptions: executionOptions, walMode: WriteAheadLogMode.None);
         CurrentIndex.IsReadOnly = true;
         CurrentIndex.WaitForBackgroundThreads();
     }

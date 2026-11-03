@@ -39,8 +39,7 @@ internal static class TextOnlinePagePreparation
             NextRecord = plan.NextRecord,
             Bootstrap = bootstrap
         };
-        var intent = new TextIncrementalIntent(TextIncrementalProtocol.FormatVersion,
-            session.Request.CommandId, manifest.Scope, session.Request.Consumer, session.Request.ConsumerGeneration,
+        var intent = new TextIncrementalIntent(session.Request.CommandId, manifest.Scope, session.Request.Consumer, session.Request.ConsumerGeneration,
             session.Request.Placement, checkpoint, page.ThroughSequence, command, plan.Changes, plan.Records,
             plan.NextRecord, bootstrap, original.ResourceSha256, fresh.UpperSequence, fresh.AppliedPosition);
         TextIncrementalIntentValidation.Require(intent, manifest.Scope, session.Request.Consumer,

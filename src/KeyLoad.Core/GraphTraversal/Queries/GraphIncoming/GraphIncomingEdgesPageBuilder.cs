@@ -5,7 +5,6 @@ namespace KeyLoad.Core.GraphTraversal;
 internal sealed class GraphIncomingEdgesPageBuilder
 {
     private const string TooManyIncoming = "The graph incoming-edge result exceeds its limit.";
-    private const int Version = 1;
     private readonly DatabaseEngine database;
     private readonly PrincipalRecord principal;
     private readonly int limit;
@@ -51,7 +50,7 @@ internal sealed class GraphIncomingEdgesPageBuilder
             comparer.RethrowOwnedBudgetFailure(exception);
             throw;
         }
-        var result = new GraphIncomingEdgesPage(Version, rows.ToImmutable(), cutPosition,
+        var result = new GraphIncomingEdgesPage(rows.ToImmutable(), cutPosition,
             GraphCrossPartitionProtocol.EventualProjection);
         return result;
     }

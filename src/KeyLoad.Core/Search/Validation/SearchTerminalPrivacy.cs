@@ -15,7 +15,7 @@ internal static class SearchTerminalPrivacy
         var identity = database.Store.Identity;
         var applied = budget.Read(view, KeySpace.AppliedBytes)
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, Missing);
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, OrleansSerialization.Deserialize<long>(applied), principal.PolicyEpoch,
             resource.SchemaVersion, ResourceHash(resource), database.ReadPlacementWitness(view, partition));
     }
@@ -54,7 +54,7 @@ internal static class SearchTerminalPrivacy
         var identity = database.Store.Identity;
         var placement = database.ReadPlacementWitness(raw, partition);
         if (identity.NodeId != original.NodeId || identity.Incarnation != original.Incarnation
-            || identity.FormatVersion != original.DataEpoch || identity.ReadGeneration != original.ReadGeneration
+            || identity.ReadGeneration != original.ReadGeneration
             || principal.PolicyEpoch != original.PolicyEpoch || resource.SchemaVersion != original.SchemaVersion
             || ResourceHash(resource) != original.ResourceSha256
             || placement.PhysicalShardId != original.Placement.PhysicalShardId

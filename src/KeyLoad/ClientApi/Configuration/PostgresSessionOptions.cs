@@ -15,13 +15,11 @@ internal sealed class PostgresSessionOptions
     private const long MaximumTotalRetained = 134217728;
     private const int Minimum = 1;
     private const int MinimumFrame = 256;
-    internal const int RelationalDialect = SqlOperationProtocol.DefaultQueryDialectVersion;
 
     public int Port
     {
         get; set;
     }
-    public int QueryDialectVersion { get; set; } = SqlOperationProtocol.DefaultQueryDialectVersion;
     public bool AllowFullScan
     {
         get; set;
@@ -44,7 +42,6 @@ internal sealed class PostgresSessionOptions
             || MaximumPortals is < Minimum or > MaximumSlots
             || MaximumRetainedBytes is < Minimum or > MaximumRetained
             || MaximumTotalRetainedBytes is < Minimum or > MaximumTotalRetained
-            || QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion
             || MaximumRetainedBytes > MaximumTotalRetainedBytes || Databases.Count is < Minimum or > MaximumSlots
             || Databases.Any(item => string.IsNullOrWhiteSpace(item.Key) || item.Value is null
                 || string.IsNullOrWhiteSpace(item.Value.TenantId) || string.IsNullOrWhiteSpace(item.Value.DatabaseId)

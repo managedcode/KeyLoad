@@ -103,7 +103,7 @@ internal static class TextOnlineCatalogFiles
 
     private static void ValidateShape(TextOnlineCatalog catalog)
     {
-        if (catalog.FormatVersion != TextProtocol.FormatVersion || catalog.BuildCommandId == Guid.Empty
+        if (catalog.BuildCommandId == Guid.Empty
             || catalog.ConsumerGeneration <= UnissuedConsumerGeneration || catalog.AppliedPosition < InitialAppliedPosition || catalog.ThroughSequence < InitialThroughSequence
             || catalog.NodeId != catalog.Scope.NodeId || catalog.Consumer.Partition != catalog.Scope.Partition
             || !TextValidation.IsGenerationLeaf(catalog.Leaf)

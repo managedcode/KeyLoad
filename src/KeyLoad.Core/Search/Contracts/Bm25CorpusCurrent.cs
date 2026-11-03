@@ -4,7 +4,6 @@ namespace KeyLoad.Core.Search;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(Bm25CorpusProtocol.CurrentAlias)]
 internal sealed record Bm25CorpusCurrent(
-    [property: global::Orleans.Id(0)] int FormatVersion,
     [property: global::Orleans.Id(1)] PartitionRef Partition,
     [property: global::Orleans.Id(2)] string Collection,
     [property: global::Orleans.Id(3)] string Field,

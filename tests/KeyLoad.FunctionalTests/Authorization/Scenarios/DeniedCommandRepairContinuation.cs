@@ -74,11 +74,8 @@ internal static class DeniedCommandRepairContinuation
             {
                 await Assert.That(reopened.Identity.NodeId).IsEqualTo(identity.NodeId);
                 await Assert.That(reopened.Identity.Incarnation).IsEqualTo(identity.Incarnation);
-                await Assert.That(reopened.Identity.FormatVersion).IsEqualTo(identity.FormatVersion);
-                await Assert.That(reopened.Identity.KeyCodecVersion).IsEqualTo(identity.KeyCodecVersion);
                 await Assert.That(reopened.Identity.Durability).IsEqualTo(identity.Durability);
                 await Assert.That(reopened.Identity.DispatchPaused).IsEqualTo(identity.DispatchPaused);
-                await Assert.That(reopened.Identity.MinimumReaderContract).IsEqualTo(identity.MinimumReaderContract);
                 await Assert.That(reopened.Identity.SigningKey.Span.SequenceEqual(identity.SigningKey.Span)).IsTrue();
                 await Assert.That(reopened.Identity.ReadGeneration).IsGreaterThanOrEqualTo(identity.ReadGeneration);
                 await UnchangedAsync(reopened, position, bytes);

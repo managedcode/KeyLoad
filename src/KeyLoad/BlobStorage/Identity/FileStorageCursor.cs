@@ -8,7 +8,7 @@ namespace KeyLoad.Server;
 
 internal sealed class FileStorageCursor(IOptions<NodeOptions> options)
 {
-    private const string KeyDomain = "KeyLoad.FileStorageCursor.v1";
+    private const string KeyDomain = "KeyLoad.FileStorageCursor";
     private const string Invalid = "The file cursor is invalid for the current resource and policy.";
     private const char FrameSeparator = '\0';
     private const int NonceBytes = 12;

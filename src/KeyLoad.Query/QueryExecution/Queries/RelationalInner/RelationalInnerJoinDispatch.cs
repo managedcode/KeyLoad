@@ -2,7 +2,7 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Query;
 
-/// <summary>Dispatches scalar and Q2 reads inside the existing single query view.</summary>
+/// <summary>Dispatches scalar and joined reads inside the existing single query view.</summary>
 internal static class RelationalInnerJoinDispatch
 {
     internal static QueryPage Execute(QueryEngine owner, string principalId, AstQueryRequest request,

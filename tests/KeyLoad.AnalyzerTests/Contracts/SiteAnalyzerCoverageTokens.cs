@@ -61,11 +61,11 @@ internal static class SiteAnalyzerCoverageTokens
     internal const string JsonSources = "sources";
     internal const string JsonConfiguration = "configuration";
     internal const string JsonPipelines = "pipelines";
-    internal const int ExpectedSourceCount = 80;
+    internal const int ExpectedSourceCount = 79;
     internal const int ExpectedDeclarationCount = 16;
     internal const int ExpectedConfigurationCount = 10;
     internal const int ExpectedGateScriptCount = 4;
-    internal const int ExpectedPipelineCount = 21;
+    internal const int ExpectedPipelineCount = 20;
     internal const int ExpectedUniqueLineCount = (ExpectedSourceCount - ExpectedDeclarationCount) * LinesPerSource - (LinesPerSource - ShortSourceLines);
     internal const int ExpectedBelowLineCoverage = ExpectedUniqueLineCount * BelowLineBoundary / CoveragePercentageScale;
     internal const int ExpectedExactLineCoverage = ExpectedUniqueLineCount * ExactLineBoundary / CoveragePercentageScale;

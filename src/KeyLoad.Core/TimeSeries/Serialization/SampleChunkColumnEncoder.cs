@@ -20,7 +20,7 @@ internal static class SampleChunkColumnEncoder
         WriteTextColumns(records, plan, series, eventIds, tags, budget, hashChunkBytes, textCancellationCheckIntervalCodeUnits);
         SampleChunkWire.Require(utcTicks.Length > EmptyEncodedColumnBytes && offsets.Length > EmptyEncodedColumnBytes && sequences.Length > EmptyEncodedColumnBytes
             && values.Length > EmptyEncodedColumnBytes && series.Length > EmptyEncodedColumnBytes && eventIds.Length > EmptyEncodedColumnBytes && tags.Length > EmptyEncodedColumnBytes);
-        return new(SampleChunkWire.CurrentVersion, records.Length, utcTicks, offsets, sequences,
+        return new(records.Length, utcTicks, offsets, sequences,
             values, series, eventIds, tags, ReadOnlyMemory<byte>.Empty);
     }
 

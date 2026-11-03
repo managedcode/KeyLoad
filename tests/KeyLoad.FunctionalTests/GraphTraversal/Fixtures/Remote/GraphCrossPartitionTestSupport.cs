@@ -70,7 +70,7 @@ internal static class GraphCrossPartitionTestSupport
     internal static GraphIncomingEdgesPage ReadIncoming(TestDatabase database,
         EntityRef target, int limit = 10, string principal = Root)
         => database.Database.ReadIncomingGraphEdges(principal,
-            new ReadIncomingGraphEdgesRequest(1, target, Graph, limit));
+            new ReadIncomingGraphEdgesRequest(target, Graph, limit));
 
     internal static PrincipalRecord CreateRowRestrictedReader(TestDatabase database, string id)
     {

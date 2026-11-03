@@ -156,10 +156,10 @@ internal sealed class AggregateReplayFixture : IDisposable
             return true;
         });
 
-    internal void StoreEnvelope(AggregateSnapshotEnvelope envelope)
+    internal void StoreSnapshotRecord(AggregateSnapshotState snapshot)
         => Store.Commit((transaction, _) =>
         {
-            transaction.Put(SnapshotKey(), OrleansSerialization.Serialize(envelope));
+            transaction.Put(SnapshotKey(), OrleansSerialization.Serialize(snapshot));
             return true;
         });
 

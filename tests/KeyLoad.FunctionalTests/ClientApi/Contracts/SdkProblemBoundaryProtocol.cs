@@ -36,5 +36,4 @@ internal static class SdkProblemBoundaryProtocol
     internal const long HealthySequence = 3;
     internal const long InitialPolicy = 1;
     internal const int Empty = 0;
-    internal const int PlacementVersion = 1;
 }

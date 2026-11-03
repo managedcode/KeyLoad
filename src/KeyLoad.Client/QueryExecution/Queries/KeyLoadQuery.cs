@@ -5,7 +5,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Client;
 
-/// <summary>An immutable Q1 expression adapter. Expressions are translated; application delegates are never executed.</summary>
+/// <summary>An immutable query expression adapter. Expressions are translated; application delegates are never executed.</summary>
 public sealed class KeyLoadQuery<T>
 {
     private readonly PartitionRef partition;
@@ -22,7 +22,7 @@ public sealed class KeyLoadQuery<T>
     }
     private KeyLoadQuery<T> With(SelectQuery value) => new(partition, value, translationOptions);
     /// <summary>Adds a supported expression as the query filter.</summary>
-    /// <param name="expression">Predicate translated to the canonical Q1 expression tree.</param>
+    /// <param name="expression">Predicate translated to the canonical query expression tree.</param>
     /// <returns>A new builder retaining this builder's current query.</returns>
     public KeyLoadQuery<T> Where(Expression<Func<T, bool>> expression)
     {

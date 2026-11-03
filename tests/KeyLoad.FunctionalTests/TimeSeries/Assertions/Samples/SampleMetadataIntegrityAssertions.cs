@@ -29,7 +29,7 @@ internal static class SampleMetadataIntegrityAssertions
     internal static async Task Refuse(SampleMetadataIntegrityFixture fixture, SampleMetadataIntegrityFault fault,
         Command<DatabaseCommand> refresh, Command<DatabaseCommand> expiry)
     {
-        var code = SampleMetadataIntegrityScenario.Code(fault);
+        var code = ErrorCode.Corruption;
         await Failure(fixture, () => SampleMetadataIntegrityScenario.Bucket(fixture), code);
         await Failure(fixture, () => fixture.Apply(refresh), code);
         if (!SampleMetadataIntegrityScenario.IsRetention(fault))

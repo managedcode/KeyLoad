@@ -28,7 +28,7 @@ flowchart LR
   E --> M[Labelled codec microbenchmarks]
   C --> G[Linux qualification gate]
   M --> G
-  G --> P[Separate canonical layout and epoch ADR]
+  G --> P[Canonical layout and recovery contract]
 ```
 
 ## Frozen internal contract
@@ -54,14 +54,14 @@ offsets, reassociate floating-point aggregates, or use the accumulator library
 as a storage codec.
 
 The permanent private alias is `keyload.core.SampleChunkPayload`. Generated
-Orleans fields are fixed:0 FormatVersion:int,1 RecordCount:int,
+Orleans fields are fixed:1 RecordCount:int,
 2 UtcTicks:ReadOnlyMemory<byte>,3 Offsets:ReadOnlyMemory<byte>,
 4 Sequences:ReadOnlyMemory<byte>,5 Values:ReadOnlyMemory<byte>,
 6 Series:ReadOnlyMemory<byte>,7 EventIds:ReadOnlyMemory<byte>,
 8 Tags:ReadOnlyMemory<byte>,9 Checksum:ReadOnlyMemory<byte>. All typed envelope
-serialization uses OrleansSerialization and the closed raw-byte codec;
-the compressed columns deliberately have their own versioned encoding.
-FormatVersion is1. No runtime JSON fallback or alternate serializer is added.
+serialization uses OrleansSerialization and the closed raw-byte codec. The
+compressed columns have one current encoding, without a version discriminator
+or alternate reader.
 
 * UtcTicks uses minimal unsigned LEB128: first absolute UTC tick, then
   nonnegative deltas. Values must remain within DateTimeOffset's UTC range.
@@ -87,8 +87,8 @@ FormatVersion is1. No runtime JSON fallback or alternate serializer is added.
 * All columns are fully consumed; overlong varints, invalid lengths, indices,
   tuple order and trailing bytes reject. Empty or null fields reject.
 
-Checksum is32-byte SHA256 over ASCII `keyload.sample-chunk`, FormatVersion and
-RecordCount as Int32 little endian, then columns2..8 in Id order, each prefixed
+Checksum is32-byte SHA256 over ASCII `keyload.sample-chunk`, RecordCount as
+Int32 little endian, then columns2..8 in Id order, each prefixed
 with its length as Int32 little endian. Compare fixed-time. It authenticates
 integrity, not user authority; persisted policy is still checked at the owning
 read boundary before exposing records.
@@ -116,9 +116,8 @@ record arrays or text. Bound retained decoded text by actual encoded columns,
 not an unchecked declared length. A whole chunk fails; no prefix is returned.
 
 Invalid encoder content, an empty chunk or invalid maximumBytes is Validation;
-record count above256 or byte admission is BudgetExceeded. Unknown chunk or
-envelope version is FormatUnsupported.
-Malformed known-version/checksum/execution/column/shape data is Corruption.
+record count above256 or byte admission is BudgetExceeded.
+Malformed checksum/execution/column/shape data is Corruption.
 Oversized supplied envelope is BudgetExceeded before parsing.
 Operation cancellation remains OperationCanceledException and deadline/work
 exhaustion remains BudgetExceeded. Failure cannot mutate canonical source data.

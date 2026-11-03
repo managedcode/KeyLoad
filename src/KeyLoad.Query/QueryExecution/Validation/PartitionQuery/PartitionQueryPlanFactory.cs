@@ -11,7 +11,6 @@ internal static class PartitionQueryPlanFactory
     private const int AdjacentElementOffset = 1;
     private const int EqualOrder = 0;
 
-    private const int Version = 1;
     private const string InvalidPartitionsMessage = "The partition query leaf set is invalid.";
     private const string UnsupportedWindowMessage = "Partition query windows are not supported.";
 
@@ -29,13 +28,13 @@ internal static class PartitionQueryPlanFactory
         var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafPlan>(sorted.Length);
         foreach (var partition in sorted)
         {
-            leaves.Add(new(Version, partition, request with
+            leaves.Add(new(partition, request with
             {
                 Partition = partition,
                 Cursor = null
             }, limit));
         }
-        return new(Version, owner.NodeId, owner.Incarnation, owner.ReadGeneration, leaves.MoveToImmutable(), limit);
+        return new(owner.NodeId, owner.Incarnation, owner.ReadGeneration, leaves.MoveToImmutable(), limit);
     }
 
     private static PartitionRef[] ValidateAndOrderPartitions(ImmutableArray<PartitionRef> partitions, int maximumPartitions)

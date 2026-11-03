@@ -29,7 +29,7 @@ public static class MessagingCommandsQueueRetries
             return original;
         }
 
-        var decisions = OrleansSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version, original.Timestamp, choices.ToImmutableArray()));
+        var decisions = OrleansSerialization.Serialize(new QueueRetryDecisions(original.Timestamp, choices.ToImmutableArray()));
         var candidate = engine.OwnCommand(original);
         candidate.Value = payload with
         {

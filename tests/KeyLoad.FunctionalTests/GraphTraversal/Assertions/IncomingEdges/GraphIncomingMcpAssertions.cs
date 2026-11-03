@@ -9,16 +9,16 @@ internal static class GraphIncomingMcpAssertions
     internal static async Task VerifyAsync()
     {
         await VerifyTypeAsync(typeof(ReadIncomingGraphEdgesRequest), GraphIncomingMcpProtocol.RequestAlias,
-            [nameof(ReadIncomingGraphEdgesRequest.Version), nameof(ReadIncomingGraphEdgesRequest.Target),
-                nameof(ReadIncomingGraphEdgesRequest.Graph), nameof(ReadIncomingGraphEdgesRequest.Limit)]);
+            [nameof(ReadIncomingGraphEdgesRequest.Target),
+                nameof(ReadIncomingGraphEdgesRequest.Graph), nameof(ReadIncomingGraphEdgesRequest.Limit)], 1);
         await VerifyTypeAsync(typeof(GraphIncomingEdgeRow), GraphIncomingMcpProtocol.RowAlias,
-            [nameof(GraphIncomingEdgeRow.Edge), nameof(GraphIncomingEdgeRow.DeliveredRevision)]);
+            [nameof(GraphIncomingEdgeRow.Edge), nameof(GraphIncomingEdgeRow.DeliveredRevision)], 0);
         await VerifyTypeAsync(typeof(GraphIncomingEdgesPage), GraphIncomingMcpProtocol.PageAlias,
-            [nameof(GraphIncomingEdgesPage.Version), nameof(GraphIncomingEdgesPage.Rows),
-                nameof(GraphIncomingEdgesPage.CutPosition), nameof(GraphIncomingEdgesPage.Projection)]);
+            [nameof(GraphIncomingEdgesPage.Rows),
+                nameof(GraphIncomingEdgesPage.CutPosition), nameof(GraphIncomingEdgesPage.Projection)], 1);
     }
 
-    private static async Task VerifyTypeAsync(Type type, string alias, string[] propertyNames)
+    private static async Task VerifyTypeAsync(Type type, string alias, string[] propertyNames, uint firstFieldId)
     {
         await Assert.That(type.IsDefined(typeof(global::Orleans.GenerateSerializerAttribute))).IsTrue();
         var aliasAttribute = type.GetCustomAttributesData().SingleOrDefault(item =>
@@ -29,10 +29,10 @@ internal static class GraphIncomingMcpAssertions
         {
             throw new InvalidOperationException(IncompleteContract);
         }
-        await VerifyFieldsAsync(type, propertyNames);
+        await VerifyFieldsAsync(type, propertyNames, firstFieldId);
     }
 
-    private static async Task VerifyFieldsAsync(Type type, string[] propertyNames)
+    private static async Task VerifyFieldsAsync(Type type, string[] propertyNames, uint firstFieldId)
     {
         for (var index = 0; index < propertyNames.Length; index++)
         {
@@ -43,7 +43,7 @@ internal static class GraphIncomingMcpAssertions
             await Assert.That(fieldId is not null).IsTrue();
             var actual = Convert.ToUInt32(fieldId!.ConstructorArguments.Single().Value,
                 System.Globalization.CultureInfo.InvariantCulture);
-            await Assert.That(actual).IsEqualTo((uint)index);
+            await Assert.That(actual).IsEqualTo(firstFieldId + (uint)index);
         }
     }
 }

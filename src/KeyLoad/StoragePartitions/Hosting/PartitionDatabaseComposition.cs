@@ -22,7 +22,6 @@ internal static class PartitionDatabaseComposition
         TimeProvider clock, CacheMemoryBudget memory)
     {
         var core = runtimeOptions.Core;
-        RuntimeJournalStorePreparation.Prepare(stores);
         var database = new DatabaseEngine(stores.Canonical, authorization, core.DatabaseLimits,
             core.DueWork, core.EventSource, core.Messaging, core.GraphExecution, core.ChangeFeedExecution, core.RuntimeClaimsExecution, core.TimeSeriesExecution, clock);
         database.ConfigureRuntimeJournal(core.RuntimeJournal);

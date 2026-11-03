@@ -2,9 +2,6 @@ namespace KeyLoad.Core.ResourceExecution;
 
 internal static class ResourceEffectAdmissionProtocol
 {
-    internal const int Version = 1;
-    internal const int VersionId = 0;
-    // Field 1 was the operation fingerprint. It is retired and must never be reused.
     internal const int BindingsId = 2;
     internal const int ErrorId = 3;
     internal const int DetailId = 4;

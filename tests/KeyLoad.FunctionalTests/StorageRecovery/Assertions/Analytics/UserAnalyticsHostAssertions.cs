@@ -19,9 +19,6 @@ internal static class UserAnalyticsHostAssertions
         var identity = host.Database.Store.Identity;
         await Assert.That(identity.NodeId).IsEqualTo(expected.Identity.NodeId);
         await Assert.That(identity.Incarnation).IsEqualTo(expected.Identity.Incarnation);
-        await Assert.That(identity.FormatVersion).IsEqualTo(expected.Identity.FormatVersion);
-        await Assert.That(identity.KeyCodecVersion).IsEqualTo(expected.Identity.KeyCodecVersion);
-        await Assert.That(identity.MinimumReaderContract).IsEqualTo(expected.Identity.MinimumReaderContract);
         await Assert.That(identity.Durability).IsEqualTo(expected.Identity.Durability);
         await Assert.That(identity.DispatchPaused).IsEqualTo(expected.Identity.DispatchPaused);
         await Assert.That(identity.ReadGeneration).IsGreaterThanOrEqualTo(expected.Identity.ReadGeneration);

@@ -11,10 +11,6 @@ internal static class SampleChunkManifestReader
             SampleChunkKeys.Manifest(partition, set, series, window.WindowId, window.Generation));
         SampleChunkEncodedDigest.Require(envelope.Encoded.Span, envelope.Digest.Span, work, options.Value.HashChunkBytes);
         var manifest = OrleansSerialization.Deserialize<SampleChunkManifest>(envelope.Encoded.Span);
-        if (manifest.Version != SampleChunkLifecycleProtocol.Version)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkLifecycleProtocol.Unsupported);
-        }
         if (manifest.WindowId != window.WindowId || manifest.Generation != window.Generation
             || manifest.FromUtcTicks != window.FromUtcTicks || manifest.UntilUtcTicks != window.UntilUtcTicks
             || manifest.RecordCount < SampleChunkLifecycleProtocol.First || manifest.RecordCount > maximumRecords

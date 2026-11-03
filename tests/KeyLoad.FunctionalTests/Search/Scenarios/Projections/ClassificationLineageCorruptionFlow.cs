@@ -86,7 +86,7 @@ internal static class ClassificationLineageCorruptionFlow
     private static async Task HealthyAsync(EventProjectionFixture fixture)
     {
         var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore), fixture.Harness.Store.Identity.NodeId,
-            UnitTextOptions.Execution());
+            UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         try
         {
             await ClassificationLineageWholeAssertions.HealthyAsync(fixture, projection);

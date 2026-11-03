@@ -28,12 +28,11 @@ internal sealed class SqlInnerJoinExecutionTests
     private const string EmptyKeyLeft = "{\"order_id\":\"b\",\"customer_id\":\"\",\"total\":6}";
     private const string FirstRight = "{\"id\":\"c1\",\"name\":\"Ada\"}";
     private const string LastRight = "{\"id\":\"c2\",\"name\":\"Lin\"}";
-    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int ExpectedMatches = 2;
     private const int OverlongIdentifierLength = 257;
 
     [Test]
-    public async Task Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions()
+    public async Task InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions()
     {
         using var database = new TestDatabase();
         Configure(database);
@@ -49,8 +48,7 @@ internal sealed class SqlInnerJoinExecutionTests
             new PutDocument(RightCollection, "c1", FirstRight));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
-        var page = engine.Execute("root", new(database.Partition, JoinSql, AllowFullScan: true,
-            QueryDialectVersion: QueryDialectVersion));
+        var page = engine.Execute("root", new(database.Partition, JoinSql, AllowFullScan: true));
 
         await Assert.That(page.AccessPath).IsEqualTo(AccessPath);
         await Assert.That(page.Cursor).IsNull();
@@ -64,72 +62,56 @@ internal sealed class SqlInnerJoinExecutionTests
                 [new("/order_id", "order_id", LeftAlias), new("/name", "customer_name", RightAlias),
                     new("/total", "total", LeftAlias)], null, [new("/order_id", false)], 10,
                 InnerJoin: new(RightCollection, RightAlias, "/" + LeftForeignKey, "/" + RightPrimaryKey)),
-            AllowFullScan: true, AstVersion: QueryDialectVersion);
+            AllowFullScan: true);
         var astPage = engine.ExecuteAst("root", ast);
         await Assert.That(JsonDefaults.Serialize(astPage).AsSpan().SequenceEqual(JsonDefaults.Serialize(page))).IsTrue();
     }
 
     [Test]
-    public async Task NoncurrentDialectOrAstFormatsRejectBeforeReadingAndCurrentJoinStillRuns()
+    public async Task JoinExplainRejectsBeforeReadingAndCurrentJoinStillRuns()
     {
         using var database = new TestDatabase();
         Configure(database);
         database.Commit(new PutDocument(LeftCollection, "a", FirstLeft), new PutDocument(RightCollection, "c1", FirstRight));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var noncurrentDialect = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: 2)));
         var beforeUnsupported = database.Store.Position;
-        var badDialect = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: 3)));
         var ast = new AstQueryRequest(database.Partition,
             new SelectQuery(LeftCollection, LeftAlias,
                 [new("/order_id", "order_id", LeftAlias), new("/name", "name", RightAlias)], null,
                 [new("/order_id", false)], 10, InnerJoin: new(RightCollection, RightAlias, "/" + LeftForeignKey, "/" + RightPrimaryKey)),
-            AllowFullScan: true, AstVersion: 3);
+            AllowFullScan: true);
         var explain = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root",
             ast with
             {
-                AstVersion = QueryDialectVersion,
                 Query = ast.Query with
                 {
                     Explain = true
                 }
             }));
-        var badAst = Assert.ThrowsExactly<KeyLoadException>(() => engine.ExecuteAst("root", ast));
 
-        await Assert.That(noncurrentDialect.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(badDialect.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(explain.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(badAst.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(database.Store.Position).IsEqualTo(beforeUnsupported);
-        var healthy = engine.Execute("root", new(database.Partition, JoinSql, AllowFullScan: true,
-            QueryDialectVersion: QueryDialectVersion));
+        var healthy = engine.Execute("root", new(database.Partition, JoinSql, AllowFullScan: true));
         await Assert.That(healthy.Rows).HasSingleItem();
         await Assert.That(healthy.Rows[0].EntityId).IsEqualTo("a");
     }
 
     [Test]
-    public async Task Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2()
+    public async Task AliasNamedInnerAndActualInnerJoinBothRemainSupported()
     {
         using var database = new TestDatabase();
         Configure(database);
         database.Commit(new PutDocument(LeftCollection, "a", FirstLeft),
             new PutDocument(RightCollection, "c1", FirstRight));
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var q1 = engine.Execute("root", new(database.Partition,
+        var scalar = engine.Execute("root", new(database.Partition,
             "SELECT TOP (10) [inner].order_id AS order_id FROM orders AS [inner]", AllowFullScan: true));
 
-        await Assert.That(q1.Rows.Select(row => row.EntityId)).IsEquivalentTo(["a"], CollectionOrdering.Matching);
-        var beforeUnsupportedJoin = database.Store.Position;
-        var unsupported = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root",
-            new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: 2)));
-        await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(database.Store.Position).IsEqualTo(beforeUnsupportedJoin);
+        await Assert.That(scalar.Rows.Select(row => row.EntityId)).IsEquivalentTo(["a"], CollectionOrdering.Matching);
 
-        var q2 = engine.Execute("root", new(database.Partition, JoinSql, AllowFullScan: true,
-            QueryDialectVersion: QueryDialectVersion));
-        await Assert.That(q2.Rows).HasSingleItem();
-        await Assert.That(q2.Rows[0].EntityId).IsEqualTo("a");
+        var joined = engine.Execute("root", new(database.Partition, JoinSql, AllowFullScan: true));
+        await Assert.That(joined.Rows).HasSingleItem();
+        await Assert.That(joined.Rows[0].EntityId).IsEqualTo("a");
     }
 
     [Test]
@@ -149,7 +131,7 @@ internal sealed class SqlInnerJoinExecutionTests
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var beforeScopeDenial = database.Store.Position;
         var resourceDenied = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("reader",
-            new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion)));
+            new(database.Partition, JoinSql, AllowFullScan: true)));
         await Assert.That(resourceDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(database.Store.Position).IsEqualTo(beforeScopeDenial);
         var resourceGrantedReader = reader with
@@ -161,7 +143,7 @@ internal sealed class SqlInnerJoinExecutionTests
             new ConfigurePrincipalRequest(resourceGrantedReader)).Get<PrincipalRecord>();
         var beforeFieldDenial = database.Store.Position;
         var denied = Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("reader",
-            new(database.Partition, JoinSql, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion)));
+            new(database.Partition, JoinSql, AllowFullScan: true)));
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(database.Store.Position).IsEqualTo(beforeFieldDenial);
         var fieldAuthorizedReader = resourceGrantedReader with
@@ -172,8 +154,7 @@ internal sealed class SqlInnerJoinExecutionTests
         _ = database.Submit(OperationKind.ConfigurePrincipal,
             new ConfigurePrincipalRequest(fieldAuthorizedReader)).Get<PrincipalRecord>();
 
-        var page = engine.Execute("reader", new(database.Partition, JoinSql, AllowFullScan: true,
-            QueryDialectVersion: QueryDialectVersion));
+        var page = engine.Execute("reader", new(database.Partition, JoinSql, AllowFullScan: true));
 
         await Assert.That(page.Rows).HasSingleItem();
         await Assert.That(page.Rows[0].Redacted).IsTrue();
@@ -182,8 +163,7 @@ internal sealed class SqlInnerJoinExecutionTests
         using var json = JsonDocument.Parse(page.Rows[0].Json);
         await Assert.That(json.RootElement.GetProperty(CustomerNameProjectionAlias).ValueKind).IsEqualTo(JsonValueKind.Null);
         await Assert.That(page.Rows[0].Json.Contains("Ada", StringComparison.Ordinal)).IsFalse();
-        await Assert.That(engine.Execute("root", new(database.Partition, JoinSql, AllowFullScan: true,
-            QueryDialectVersion: QueryDialectVersion)).Rows).HasSingleItem();
+        await Assert.That(engine.Execute("root", new(database.Partition, JoinSql, AllowFullScan: true)).Rows).HasSingleItem();
     }
 
     private static void Configure(TestDatabase database, SensitiveFieldPolicy[]? leftPolicies = null,

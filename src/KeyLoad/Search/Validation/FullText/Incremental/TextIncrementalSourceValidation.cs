@@ -14,8 +14,7 @@ internal static class TextIncrementalSourceValidation
         if (manifest.Consumer != request.Consumer || manifest.Generation != request.IndexGeneration
             || scope.NodeId != request.NodeId || scope.Partition != request.Consumer.Partition
             || scope.Collection != request.Collection || scope.Field != request.Field
-            || scope.Incarnation != current.Incarnation || scope.DataEpoch != current.DataEpoch
-            || scope.ReadGeneration != current.ReadGeneration
+            || scope.Incarnation != current.Incarnation || scope.ReadGeneration != current.ReadGeneration
             || scope.PrincipalId != current.PrincipalId || scope.PolicyEpoch != current.PolicyEpoch
             || scope.SchemaVersion != current.SchemaVersion || scope.Position > current.Position
             || manifest.AppliedPosition > current.AppliedPosition

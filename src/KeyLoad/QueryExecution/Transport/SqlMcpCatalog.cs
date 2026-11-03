@@ -10,7 +10,7 @@ internal static class SqlMcpCatalog
     private const string Description = "Execute one bounded selected T-SQL SELECT, supported INSERT, CREATE TABLE, or EXEC of an exact public operation. "
         + "Bind values through request parameters; mutations require the caller's original stable command identity. "
         + "Results retain the selected operation's actual JSON shape and current persisted authorization. "
-        + "Supported Q1/Q2 reads retain their declared bounds; full vendor SQL is not promised. "
+        + "Supported SQL reads retain their declared bounds; full vendor SQL is not promised. "
         + "SQL uses bounded data admission; use direct control tools when the data lane is saturated.";
 
     internal static McpOperationDescriptor Entry

@@ -10,9 +10,9 @@ internal static class GraphIncomingMcpSchemaAssertions
     private const string InvalidReferenceMessage = "The incoming graph schema reference is not local.";
     private const string ExcessReferenceMessage = "The incoming graph schema reference is too deep.";
     private static readonly ImmutableArray<string> RequestFields =
-        [GraphIncomingMcpProtocol.Version, GraphIncomingMcpProtocol.Target, GraphIncomingMcpProtocol.Graph, GraphIncomingMcpProtocol.Limit];
+        [GraphIncomingMcpProtocol.Target, GraphIncomingMcpProtocol.Graph, GraphIncomingMcpProtocol.Limit];
     private static readonly ImmutableArray<string> PageFields =
-        [GraphIncomingMcpProtocol.Version, GraphIncomingMcpProtocol.Rows, GraphIncomingMcpProtocol.CutPosition, GraphIncomingMcpProtocol.Projection];
+        [GraphIncomingMcpProtocol.Rows, GraphIncomingMcpProtocol.CutPosition, GraphIncomingMcpProtocol.Projection];
     private static readonly ImmutableArray<string> RowFields =
         [GraphIncomingMcpProtocol.Edge, GraphIncomingMcpProtocol.DeliveredRevision];
     private static readonly ImmutableArray<string> EdgeFields =
@@ -31,7 +31,6 @@ internal static class GraphIncomingMcpSchemaAssertions
             .GetProperty(GraphIncomingMcpProtocol.Request));
         await VerifyObjectAsync(request, RequestFields);
         var requestProperties = request.GetProperty(GraphIncomingMcpProtocol.Properties);
-        await VerifyPrimitiveAsync(input, requestProperties.GetProperty(GraphIncomingMcpProtocol.Version), GraphIncomingMcpProtocol.Integer);
         await VerifyPrimitiveAsync(input, requestProperties.GetProperty(GraphIncomingMcpProtocol.Graph), GraphIncomingMcpProtocol.String);
         await VerifyPrimitiveAsync(input, requestProperties.GetProperty(GraphIncomingMcpProtocol.Limit), GraphIncomingMcpProtocol.Integer);
         await VerifyEntityAsync(input, requestProperties.GetProperty(GraphIncomingMcpProtocol.Target));
@@ -44,7 +43,6 @@ internal static class GraphIncomingMcpSchemaAssertions
             .GetProperty(GraphIncomingMcpProtocol.Result));
         await VerifyObjectAsync(page, PageFields);
         var properties = page.GetProperty(GraphIncomingMcpProtocol.Properties);
-        await VerifyPrimitiveAsync(output, properties.GetProperty(GraphIncomingMcpProtocol.Version), GraphIncomingMcpProtocol.Integer);
         await VerifyPrimitiveAsync(output, properties.GetProperty(GraphIncomingMcpProtocol.CutPosition), GraphIncomingMcpProtocol.Integer);
         await VerifyPrimitiveAsync(output, properties.GetProperty(GraphIncomingMcpProtocol.Projection), GraphIncomingMcpProtocol.String);
         await VerifyRowsAsync(output, properties.GetProperty(GraphIncomingMcpProtocol.Rows));

@@ -3,7 +3,6 @@ namespace KeyLoad.Clustering;
 /// <summary>Canonical pool keys; Orleans generates each stateless worker activation's actual identity.</summary>
 internal static class BackgroundWorkerIdentity
 {
-    internal const int InterfaceVersion = 3;
     private const string MessagingPool = "messaging";
     private const string AnnPool = "ann";
     private const string TimeSeriesPool = "time-series";

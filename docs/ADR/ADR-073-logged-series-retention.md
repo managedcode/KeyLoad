@@ -51,11 +51,11 @@ The frozen Command<DatabaseCommand> is persisted as binary before arming the rea
 
 Actual Aspire-owned SDK and official MCP clients verify partial purge, replay and complete logical hiding across all nodes. Stop an owned node and verify exact authorized reads from an available current copy. A new expiry page must refuse when fewer than the configured copies are available. Restart the same container, await Orleans routing, then apply the bounded expiry page with a fresh command ID and verify its complete persisted-copy receipt and public state. Cover persisted SeriesManage/SeriesRead denial and late new versus identical retained IDs through existing APIs. Every stopped container is restored and every actual process joined in finally; no direct Docker launch, mock, skip, changed numerical contract or assertion weakening. This stage does not implement rollup buckets or physical chunks. Forbidden: storage ownership changes, outcome pruning, provider substitutions, cross-partition atomicity or claims of power-loss qualification.
 
-## Current record and rollout contract
+## Current record contract
 
 The current record is scoped to the canonical partition, set and series.
-Its format discriminator is validated before use, and unknown or corrupt state
-fails closed. The feature does not alter existing sample, sequence or identity
+Its retention floor, purge count and required shape are validated before use;
+corrupt state fails closed. The feature does not alter existing sample, sequence or identity
 bytes. Rollback removes the feature only as a complete reviewed deployment change;
 it must not silently remove a persisted retention floor.
 

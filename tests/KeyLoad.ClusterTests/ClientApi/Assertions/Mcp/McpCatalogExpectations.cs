@@ -11,7 +11,7 @@ internal static class McpCatalogExpectations
     private const string TextMaintainName = "keyload_search_text_maintain";
     private static readonly string[] TextRequiredFields = ["commandId", "consumer", "collection", "field", "indexGeneration", "nodeId", "placement", "mode"];
     private const string AnnReadName = "keyload_search_ann_read";
-    private static readonly string[] AnnReadFields = ["version", "search", "consumer", "indexGeneration"];
+    private static readonly string[] AnnReadFields = ["search", "consumer", "indexGeneration"];
     private const string AnnMaintainName = "keyload_search_ann_maintain";
     private static readonly string[] AnnRequiredFields = ["commandId", "consumer", "collection", "field", "space", "indexGeneration", "nodeId", "placement", "mode"];
     private const string WaitForIndexName = "keyload_search_wait_for_index";
@@ -57,13 +57,13 @@ internal static class McpCatalogExpectations
         Read(McpCallerTools.ScheduleInspect, [McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.ScheduleId]),
         Read(McpCallerTools.SagaInspect, [McpDiscoveryProtocol.Lane, McpDiscoveryProtocol.SagaId]),
         Read(McpCallerTools.GraphTraverse, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Graph, McpDiscoveryProtocol.Start]),
-        Read(McpCallerTools.GraphShortestPath, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Partition,
+        Read(McpCallerTools.GraphShortestPath, [McpDiscoveryProtocol.Partition,
             McpDiscoveryProtocol.Graph, McpDiscoveryProtocol.FromEntity, McpDiscoveryProtocol.To],
-            [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
+            [McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
                 McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition]),
-        Read(McpCallerTools.GraphIncomingEdges, [GraphIncomingMcpProtocol.Version, GraphIncomingMcpProtocol.Target,
+        Read(McpCallerTools.GraphIncomingEdges, [GraphIncomingMcpProtocol.Target,
             GraphIncomingMcpProtocol.Graph, GraphIncomingMcpProtocol.Limit],
-            [GraphIncomingMcpProtocol.Version, GraphIncomingMcpProtocol.Rows, GraphIncomingMcpProtocol.CutPosition,
+            [GraphIncomingMcpProtocol.Rows, GraphIncomingMcpProtocol.CutPosition,
                 GraphIncomingMcpProtocol.Projection]),
         Read(McpCallerTools.SeriesRead, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId, McpDiscoveryProtocol.From, McpDiscoveryProtocol.Until]),
         Read(McpCallerTools.SeriesLatest, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Set, McpDiscoveryProtocol.SeriesId]),
@@ -81,13 +81,13 @@ internal static class McpCatalogExpectations
             BodyPropertyFields = ["partition", "set", "seriesId", "windowId", "tagPointer", "tagValue", "limit", "minimumToken"]
         },
         Read(McpCallerTools.QueryExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Sql]),
-        Read(McpCallerTools.QuerySearch, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Query]),
-        Read(McpCallerTools.QueryGraphPath, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Query],
-            [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
+        Read(McpCallerTools.QuerySearch, [McpDiscoveryProtocol.Query]),
+        Read(McpCallerTools.QueryGraphPath, [McpDiscoveryProtocol.Query],
+            [McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
                 McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition]),
-        Read(McpCallerTools.QueryPartitions, [PartitionQueryMcpProtocol.Version, PartitionQueryMcpProtocol.Partitions, PartitionQueryMcpProtocol.Query,
-                PartitionQueryMcpProtocol.Parameters, PartitionQueryMcpProtocol.AllowFullScan, PartitionQueryMcpProtocol.AstVersion],
-            [PartitionQueryMcpProtocol.Version, PartitionQueryMcpProtocol.Rows, PartitionQueryMcpProtocol.Leaves,
+        Read(McpCallerTools.QueryPartitions, [PartitionQueryMcpProtocol.Partitions, PartitionQueryMcpProtocol.Query,
+                PartitionQueryMcpProtocol.Parameters, PartitionQueryMcpProtocol.AllowFullScan],
+            [PartitionQueryMcpProtocol.Rows, PartitionQueryMcpProtocol.Leaves,
                 PartitionQueryMcpProtocol.Complete]),
         Read(McpCallerTools.QueryAst, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Query]),
         Empty(McpCallerTools.QueryCapabilities),
@@ -100,7 +100,7 @@ internal static class McpCatalogExpectations
             TextFieldProperty, MinimumTokenProperty],
             [AppliedTokenProperty, SchemaVersionProperty, PolicyEpochProperty]),
         Read(McpCallerTools.SearchExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection]),
-        Read(McpCallerTools.SearchGraph, [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Search]),
+        Read(McpCallerTools.SearchGraph, [McpDiscoveryProtocol.Search]),
         Read(WaitForAnnIndexProtocol.Tool, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection,
             "vectorField", "space", McpDiscoveryProtocol.Consumer, AnnIndexGenerationProperty, MinimumTokenProperty],
             [IndexedTokenProperty, AnnIndexGenerationProperty, SchemaVersionProperty, PolicyEpochProperty]),

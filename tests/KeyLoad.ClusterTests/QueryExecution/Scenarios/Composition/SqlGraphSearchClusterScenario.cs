@@ -1,6 +1,6 @@
 namespace KeyLoad.ClusterTests.QueryExecution;
 
-/// <summary>Builds the frozen Q1.Search statement from a real graph Orleans scenario.</summary>
+/// <summary>Builds the frozen KeyLoad.Search statement from a real graph Orleans scenario.</summary>
 internal static class SqlGraphSearchClusterScenario
 {
     internal const string QuerySearchTool = "keyload_query_search";
@@ -15,5 +15,5 @@ internal static class SqlGraphSearchClusterScenario
         + "4,30,60,GRAPH_LABELS('related'),1), NULL, NULL, 10, 60)";
 
     internal static SqlGraphSearchRequest Request(PartitionRef partition, string statement = SearchStatement)
-        => new(1, new QueryRequest(partition, statement, AllowFullScan: true));
+        => new(new QueryRequest(partition, statement, AllowFullScan: true));
 }

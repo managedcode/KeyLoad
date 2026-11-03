@@ -2,7 +2,6 @@ namespace KeyLoad.Core;
 
 internal static class StreamTraversalCursorFields
 {
-    internal const uint Version = 0;
     internal const uint Purpose = 1;
     internal const uint Incarnation = 2;
     internal const uint Stream = 3;

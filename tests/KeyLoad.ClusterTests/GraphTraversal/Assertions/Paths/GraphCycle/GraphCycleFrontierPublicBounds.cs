@@ -23,7 +23,7 @@ internal static class GraphCycleFrontierPublicBounds
         }
         if (state.Hidden)
         {
-            var request = new ReadIncomingGraphEdgesRequest(1, state.A, state.Seed.Graph, 7);
+            var request = new ReadIncomingGraphEdgesRequest(state.A, state.Seed.Graph, 7);
             var sdk = await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(reader.Sdk, request, token);
             await Assert.That(sdk.IsSuccess).IsFalse();
             await Assert.That(sdk.Problem!.ErrorCode).IsEqualTo(ErrorCode.NotFound.ToString());

@@ -4,7 +4,6 @@ internal static class GraphIncomingMcpProtocol
 {
     internal const string Tool = "keyload_graph_incoming";
     internal const string Route = "/graph/incoming";
-    internal const string Version = "version";
     internal const string Target = "target";
     internal const string Graph = "graph";
     internal const string Limit = "limit";

@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace KeyLoad.ClusterTests.QueryExecution;
 
-/// <summary>Checks additive nullable Q2 join and source-identity fields in the existing MCP schema.</summary>
+/// <summary>Checks additive nullable join and source-identity fields in the existing MCP schema.</summary>
 internal static class PartitionQueryMcpInnerJoinSchemaAssertions
 {
     private const string Object = "object";

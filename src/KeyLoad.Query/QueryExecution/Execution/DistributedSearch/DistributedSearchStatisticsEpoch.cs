@@ -7,7 +7,6 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchStatisticsEpoch
 {
-    private const int VersionOne = 1;
     private const int FirstElement = 0;
     private const int PreviousElement = 1;
     private const int HexCharactersPerByte = 2;
@@ -37,7 +36,7 @@ internal static class DistributedSearchStatisticsEpoch
             }
             DistributedTextStatisticsValidation.Require(witness.Statistics, witness.Statistics.Terms, budget);
         }
-        var input = new DistributedSearchEpochInput(VersionOne, requestDigest, witnesses);
+        var input = new DistributedSearchEpochInput(requestDigest, witnesses);
         var bytes = OrleansSerialization.Serialize(input);
         budget.Check();
         return Convert.ToHexStringLower(SHA256.HashData(bytes));

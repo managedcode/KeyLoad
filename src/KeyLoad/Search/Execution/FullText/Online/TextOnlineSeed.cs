@@ -42,8 +42,7 @@ internal static class TextOnlineSeed
         }, failures);
         ServerFailureObserver.Observe(owner.CloseAfterOperation, failures);
         ServerFailureObserver.ThrowIfAny(failures);
-        var manifest = new TextIncrementalManifest(TextIncrementalProtocol.ManifestFormatVersion,
-            scope, session.Request.Consumer, session.Request.ConsumerGeneration, session.Request.Placement,
+        var manifest = new TextIncrementalManifest(scope, session.Request.Consumer, session.Request.ConsumerGeneration, session.Request.Placement,
             seed.UpperSequence, seed.AppliedPosition, plan.NextRecord, plan.Records, files,
             TextProjectionProtocol.TokenizerVersion, TextProjectionProtocol.HashVersion, seed.ResourceSha256, true);
         TextIncrementalValidation.Manifest(manifest, scope, session.Request.Consumer,

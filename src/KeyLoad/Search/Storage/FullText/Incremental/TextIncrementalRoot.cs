@@ -76,12 +76,11 @@ internal static class TextIncrementalRoot
         TextFileIO.VerifyDirectory(path);
         TextFileIO.SetPrivateDirectoryMode(path);
         TextFileIO.WriteEnvelope(Path.Combine(path, TextProtocol.OwnerFile),
-            new TextOwnerReceipt(TextProtocol.FormatVersion, root, leaf, scope.NodeId,
+            new TextOwnerReceipt(root, leaf, scope.NodeId,
                 scope, [new(TextProtocol.RuntimeDirectoryCore, true)]),
             executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions, resources);
         var originalDigest = SHA256.HashData(OrleansSerialization.Serialize(request));
-        var enrollment = new TextIncrementalEnrollment(TextIncrementalProtocol.FormatVersion,
-            request.CommandId, scope, request.Consumer, request.IndexGeneration, request.Placement, originalDigest,
+        var enrollment = new TextIncrementalEnrollment(request.CommandId, scope, request.Consumer, request.IndexGeneration, request.Placement, originalDigest,
             sourceUpperSequence, resourceSha256);
         TextFileIO.WriteEnvelope(Path.Combine(path, TextIncrementalProtocol.EnrollmentFile),
             enrollment, executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions, resources);

@@ -11,16 +11,16 @@ internal static class SqlOrdinalClusterControls
         foreach (var ordinal in new[] { "0", "3", "2147483648", "-1", "1.0", "1e0" })
         {
             await RejectAsync(callers, state, wire, Prefix + ordinal + Tail,
-                ErrorCode.Validation, InvalidParameter, SqlOffsetClusterProtocol.Q1, token);
+                ErrorCode.Validation, InvalidParameter, token);
             await SqlOrdinalClusterOwned.SourcesAsync(fixture, state, token);
             await SqlOrdinalClusterPages.HealthyAsync(callers, state, wire, token);
             await SqlOrdinalClusterOwned.SourcesAsync(fixture, state, token);
         }
         await RejectAsync(callers, state, wire, "SELECT TOP (1) * FROM offsetleft ORDER BY 1",
-            ErrorCode.UnsupportedCapability, Unsupported, SqlOffsetClusterProtocol.Q1, token);
+            ErrorCode.UnsupportedCapability, Unsupported, token);
         await SqlOrdinalClusterOwned.SourcesAsync(fixture, state, token);
         var joined = JoinedOrdinal;
-        await RejectAsync(callers, state, wire, joined, ErrorCode.Validation, InvalidParameter, SqlOffsetClusterProtocol.Q2, token);
+        await RejectAsync(callers, state, wire, joined, ErrorCode.Validation, InvalidParameter, token);
         await SqlOrdinalClusterOwned.SourcesAsync(fixture, state, token);
         await SqlOrdinalClusterPages.HealthyAsync(callers, state, wire, token);
         await SqlOrdinalClusterOwned.SourcesAsync(fixture, state, token);
@@ -29,7 +29,7 @@ internal static class SqlOrdinalClusterControls
         PostgresClusterCaller wire, CancellationToken token)
     {
         await RejectAsync(callers, state, wire, Prefix + "2" + Tail,
-            ErrorCode.PermissionDenied, InsufficientPrivilege, SqlOffsetClusterProtocol.Q1, token);
+            ErrorCode.PermissionDenied, InsufficientPrivilege, token);
         var ast = new global::KeyLoad.Query.AstQueryRequest(state.Partition,
             new(SqlOffsetClusterProtocol.Left, null, [new("/title", "title"), new("/order_id", "order_id")],
                 null, [new("/order_id", false)], SqlOffsetClusterProtocol.PageSize, Offset: SqlOffsetClusterProtocol.InitialOffset),
@@ -41,18 +41,14 @@ internal static class SqlOrdinalClusterControls
             ErrorCode.PermissionDenied, dispatched: true)).Value;
     }
     private static async Task RejectAsync(RequestCqrsClusterCallers callers, SqlOffsetClusterState state,
-        PostgresClusterCaller wire, string sql, ErrorCode code, string sqlState, int dialect, CancellationToken token)
+        PostgresClusterCaller wire, string sql, ErrorCode code, string sqlState, CancellationToken token)
     {
-        var request = new QueryRequest(state.Partition, sql, AllowFullScan: true, QueryDialectVersion: dialect);
+        var request = new QueryRequest(state.Partition, sql, AllowFullScan: true);
         var result = await callers.Sdk.QueryAsync(request, token);
         await global::TUnit.Assertions.Assert.That(result.IsSuccess).IsFalse();
         await global::TUnit.Assertions.Assert.That(result.Problem?.ErrorCode).IsEqualTo(code.ToString());
         _ = (await McpCallerAssertions.ErrorAsync(await callers.Mcp.CallAsync(McpCallerTools.QueryExecute, request, token),
             code, dispatched: true)).Value;
-        if (dialect != SqlOffsetClusterProtocol.Q1)
-        {
-            return;
-        }
         foreach (var prepared in new[] { false, true })
         {
             var error = await global::TUnit.Assertions.Assert.ThrowsAsync<global::Npgsql.PostgresException>(

@@ -3,7 +3,6 @@ namespace KeyLoad.Query.Search;
 /// <summary>Binds a disposable text projection to one authorized canonical storage cut.</summary>
 /// <param name="NodeId">Physical source owner.</param>
 /// <param name="Incarnation">Canonical authority incarnation.</param>
-/// <param name="DataEpoch">Canonical data format epoch.</param>
 /// <param name="ReadGeneration">Nonreused canonical replacement generation.</param>
 /// <param name="Position">Committed local source position.</param>
 /// <param name="Partition">Logical atomic partition.</param>
@@ -17,7 +16,6 @@ namespace KeyLoad.Query.Search;
 public sealed record TextProjectionScope(
     [property: Orleans.Id(0)] Guid NodeId,
     [property: Orleans.Id(1)] Guid Incarnation,
-    [property: Orleans.Id(2)] int DataEpoch,
     [property: Orleans.Id(3)] long ReadGeneration,
     [property: Orleans.Id(4)] long Position,
     [property: Orleans.Id(5)] PartitionRef Partition,

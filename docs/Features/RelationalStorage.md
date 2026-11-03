@@ -1,6 +1,6 @@
 # RelationalStorage
 
-Status: Typed-row and first Q2 join source present; local operation evidence
+Status: Typed-row and current InnerJoin source present; local operation evidence
 recorded below, complete original Linux/cluster qualification pending.
 Relational data lives within one linked AI database. `ResourceDefinition.Transactional` defaults to `true`; explicitly non-transactional table data uses a separate plain ZoneTree under the [non-transactional table contract](RelationalStorage/NonTransactionalTables.md).
 [ADR-055](../ADR/ADR-055-typed-relational-rows.md) owns the typed-row stage;
@@ -44,17 +44,17 @@ REQ-REL-004 / AC-REL-004-JOIN-004/006 admitted cancellation: preserve the origin
 
 ## Rel join cluster admitted cancellation
 
-AC-REL-004-JOIN-004/006 and AC-QUERY-007-JOIN-002 retain the original pre-cancelled RelationalSqlClusterJoinCancellationTests member as a separate control. A distinct four-case whole operation with two Boolean arguments uses the existing Aspire-owned RequestCqrsClusterWave.StartProbedAsync current-image cluster lane and genuine SDK/official MCP SQL and independently constructed AST callers. The private bounded AuthorizationReload hold follows the actual ReadCapability admission and cluster read barrier, before the fresh persisted principal reload. It proves genuine admitted-operation cancellation only; it does not prove Q2 row progress. The independent original SqlInnerJoinCancellationTests RangeExaminedBytes scenario owns row-progress cancellation evidence.
+AC-REL-004-JOIN-004/006 and AC-QUERY-007-JOIN-002 retain `RelationalSqlClusterJoinCancellationTests.CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads` as the public pre-cancelled control. It covers SDK direct/SQL and official MCP direct/SQL calls, followed by healthy joined reads whose cut is at least the seed position. It does not prove cancellation after server admission or at a particular join row. The independent real-store `SqlInnerJoinCancellationTests` range-progress scenario owns local observed-work cancellation; actual admitted cancellation on the Aspire cluster remains an open qualification gate.
 
 ## Rel join retained identity
 
-REQ-REL-001/003, AC-REL-004-JOIN-002/003/006 and AC-QUERY-007-JOIN-002 use the [canonical Q2 observed-identity acceptance contract](QueryExecution.md). Its complete real-store SQL/AST regression covers six faults, full no-effect images, exact repair and two dirty plus two healthy cold continuations, preserving the original read cut, authorization, budgets and receipt. Source is implemented; required compiler, runtime, Linux and cluster gates remain open.
+REQ-REL-001/003, AC-REL-004-JOIN-002/003/006 and AC-QUERY-007-JOIN-002 use the [canonical InnerJoin observed-identity acceptance contract](QueryExecution.md). Its complete real-store SQL/AST regression covers six faults, full no-effect images, exact repair and two dirty plus two healthy cold continuations, preserving the original read cut, authorization, budgets and receipt. Source is implemented; required compiler, runtime, Linux and cluster gates remain open.
 
-REQ-REL-001/003 and ADR055 require existing typed primary JSON values to equal canonical entity identity. The next finite Q2 source packet is owned by SqlInnerJoinPrimaryIdentityTests, with ten real retained-row faults including malformed/non-object JSON, full read refusal/no-effects/repair/receipt/two-dirty and two-healthy cold operations under the canonical QueryExecution contract. Schema evolution remains unsupported; ACL, deleted rows, unread right probes, write constraints and shared budgets retain their existing contracts. Source implementation joined; execution pending.
+REQ-REL-001/003 and ADR055 require existing typed primary JSON values to equal canonical entity identity. The next bounded InnerJoin source packet is owned by SqlInnerJoinPrimaryIdentityTests, with ten real retained-row faults including malformed/non-object JSON, full read refusal/no-effects/repair/receipt/two-dirty and two-healthy cold operations under the canonical QueryExecution contract. Schema evolution remains unsupported; ACL, deleted rows, unread right probes, write constraints and shared budgets retain their existing contracts. Source implementation joined; execution pending.
 
 ## Rel retained primary uniqueness
 
-REQ-REL-001/003 and ADR-055 require one declared Text primary property, not a last-wins duplicate, in retained typed identities. Canonical row write validation already requires unique property names; Q2 retained reads and authorized typed composition endpoint reads now enforce primary uniqueness with the existing Corruption category. Full remaining schema validation/evolution is unchanged. SqlInnerJoinPrimaryIdentityTests and TypedQueueGraphPrimaryIdentityTests retain genuine raw fault/repair, original operation/receipt identity, literal healthy operations, no-effects and dirty/healthy cold ownership. Their canonical criteria are [QueryExecution](QueryExecution.md) and [DatabaseComposition](DatabaseComposition.md). Source implementation requires fresh and delivered Linux qualification.
+REQ-REL-001/003 and ADR-055 require one declared Text primary property, not a last-wins duplicate, in retained typed identities. Canonical row write validation already requires unique property names; InnerJoin retained reads and authorized typed composition endpoint reads now enforce primary uniqueness with the existing Corruption category. Full remaining schema validation/evolution is unchanged. SqlInnerJoinPrimaryIdentityTests and TypedQueueGraphPrimaryIdentityTests retain genuine raw fault/repair, original operation/receipt identity, literal healthy operations, no-effects and dirty/healthy cold ownership. Their canonical criteria are [QueryExecution](QueryExecution.md) and [DatabaseComposition](DatabaseComposition.md). Source implementation requires fresh and delivered Linux qualification.
 
 ## Create only identity
 
@@ -64,6 +64,6 @@ REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonic
 
 REQ-SQLC-006 / AC-SQLC-006, REQ-REL-001/003 and AC-TSQL-003/006 use the [canonical ordinary typed INSERT contract](RelationalStorage/OrdinarySqlInsert.md). It defines bounded VALUES/parameter lowering, original command identity, current atomic create-only authority and complete execution/public cold operation gates. General DML/full SQL and Linux/client qualification remain open.
 
-## Original public Q2 admission cancellation on selected T-SQL
+## Original public join admission cancellation on selected T-SQL
 
-AC-REL-004-JOIN-005/006 and AC-QUERY-007-JOIN-001 retain all four original SDK/official MCP and SQL/AST variants of `RelationalSqlClusterJoinAdmittedCancellationTests.SdkAndOfficialMcpQ2CancellationAfterActualAdmissionSettlesAndContinuesAtTheOriginalCut`. The shared admission seed still used retired `LIMIT 10`.
+AC-REL-004-JOIN-005/006 and AC-QUERY-007-JOIN-001 require current selected T-SQL on every public join route. The existing `RelationalSqlClusterJoinCancellationTests.CallerCancellationOnSdkAndOfficialMcpJoinPathsIsFollowedByHealthyReads` uses ordered OFFSET-FETCH and retains its actual pre-cancellation scope. After-admission cancellation and exact original-cut retention are not established by this case.

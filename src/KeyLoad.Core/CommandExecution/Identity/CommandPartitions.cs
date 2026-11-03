@@ -53,7 +53,7 @@ internal static class CommandPartitions
     private static CommandPartition Partition<T>(object /* KLD0041: This native command admission receives the exact Kind-selected business input before storing it in the existing persisted envelope. */ input, Func<T, (Guid? CommandId, PartitionRef? Partition)> select)
     {
         var (commandId, partition) = select(input is T value /* KLD0042: The admitted persisted input must match the Kind-selected business contract before its partition and command identity are read. */ ? value
-            : throw Errors.Fail(ErrorCode.Corruption, KeyLoad.InternalSerialization.PayloadVersion.InvalidPayload));
+            : throw Errors.Fail(ErrorCode.Corruption, KeyLoad.InternalSerialization.RuntimePayloadContract.InvalidPayload));
         return new(CommandRoute.Partition, commandId, partition);
     }
 }

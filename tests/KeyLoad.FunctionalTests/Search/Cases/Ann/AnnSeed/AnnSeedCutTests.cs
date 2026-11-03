@@ -20,15 +20,12 @@ internal sealed class AnnSeedCutTests
             var head = database.Database.ReadOutboxHead(view, database.Partition);
             var applied = view.ReadOwnedValue(KeySpace.Applied.ToArray()) is { } bytes
                 ? OrleansSerialization.Deserialize<long>(bytes) : 0;
-            return (identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.KeyCodecVersion,
-                identity.ReadGeneration, database.Store.Position, applied, head.Tail, head.FirstAvailable);
+            return (identity.NodeId, identity.Incarnation, identity.ReadGeneration, database.Store.Position, applied, head.Tail, head.FirstAvailable);
         });
         var repeated = AnnSeedTestSupport.Capture(database);
 
         await Assert.That(seed.Cut.NodeId).IsEqualTo(expected.NodeId);
         await Assert.That(seed.Cut.Incarnation).IsEqualTo(expected.Incarnation);
-        await Assert.That(seed.Cut.StoreFormatVersion).IsEqualTo(expected.FormatVersion);
-        await Assert.That(seed.Cut.KeyCodecVersion).IsEqualTo(expected.KeyCodecVersion);
         await Assert.That(seed.Cut.ReadGeneration).IsEqualTo(expected.ReadGeneration);
         await Assert.That(seed.Cut.Position).IsEqualTo(expected.Position);
         await Assert.That(seed.Cut.AppliedPosition).IsEqualTo(expected.applied);

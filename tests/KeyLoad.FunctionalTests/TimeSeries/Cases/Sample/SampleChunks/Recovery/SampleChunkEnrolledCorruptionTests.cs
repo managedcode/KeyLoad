@@ -7,7 +7,6 @@ internal sealed class SampleChunkEnrolledCorruptionTests
     [Test]
     [Arguments(SampleChunkCorruptionCut.MissingManifest)]
     [Arguments(SampleChunkCorruptionCut.ManifestDigest)]
-    [Arguments(SampleChunkCorruptionCut.ManifestVersion)]
     [Arguments(SampleChunkCorruptionCut.ManifestGeneration)]
     [Arguments(SampleChunkCorruptionCut.MissingBlock)]
     [Arguments(SampleChunkCorruptionCut.BlockDigest)]

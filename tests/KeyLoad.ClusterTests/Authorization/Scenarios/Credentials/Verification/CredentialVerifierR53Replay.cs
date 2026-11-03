@@ -7,7 +7,7 @@ namespace KeyLoad.ClusterTests.Authorization;
 
 internal static class CredentialVerifierR53Replay
 {
-    private const string UnsupportedSql = "The unified SQL version, statement or target operation is unsupported.";
+    private const string UnsupportedSql = "The unified SQL statement or target operation is unsupported.";
 
     internal static async Task RunAsync(KeyLoadClient root, McpOfficialClient administrator,
         CredentialSubjectReplacementState state, CredentialVerifierR53State verifier,

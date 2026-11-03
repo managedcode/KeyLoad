@@ -26,6 +26,13 @@ public interface IAtomicStore : IDisposable
     /// <param name="read">Action that must not retain the view or borrowed bytes.</param>
     /// <returns>The action's independently owned result.</returns>
     T Read<T>(Func<IKeyValueView, T> read);
+    /// <summary>Awaits a callback on one native snapshot, including awaited result delivery.</summary>
+    /// <typeparam name="T">Owned result type.</typeparam>
+    /// <param name="read">Callback whose view and borrowed bytes cannot escape its completion.</param>
+    /// <param name="cancellationToken">Original caller cancellation; the callback is joined before its snapshot closes.</param>
+    /// <returns>The callback result after native snapshot release.</returns>
+    ValueTask<T> ReadAsync<T>(Func<IKeyValueView, CancellationToken, ValueTask<T>> read,
+        CancellationToken cancellationToken = default);
     /// <summary>Runs synchronous discard-only preparation on a native read snapshot.</summary>
     /// <typeparam name="T">Independently owned result type.</typeparam>
     /// <param name="prepare">Callback receiving a scoped child transaction and actual next local position.</param>

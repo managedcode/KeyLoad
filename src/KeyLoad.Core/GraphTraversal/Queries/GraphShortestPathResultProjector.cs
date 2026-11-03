@@ -8,7 +8,6 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
     PrincipalRecord principal, ResourceDefinition graph, GraphShortestPathRequest request,
     ReadExecutionBudget budget)
 {
-    private const int ContractVersion = 1;
     private const int OneHop = 1;
     private const string EdgeSpace = "edge";
     private const string AdjacencySpace = "adjacency";
@@ -19,7 +18,7 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
     internal GraphShortestPathResult Found(EntityRef[] path,
         IReadOnlyDictionary<EntityRef, GraphPathPredecessor> predecessors, int hops)
     {
-        var envelope = new GraphShortestPathResult(ContractVersion, true, hops,
+        var envelope = new GraphShortestPathResult(true, hops,
             ImmutableArray<EntityRef>.Empty, ImmutableArray<EdgeRecord>.Empty, database.Store.Position);
         var vertices = ProjectVertices(path);
         var edges = ProjectEdges(path, predecessors);
@@ -33,7 +32,7 @@ internal sealed class GraphShortestPathResultProjector(DatabaseEngine database, 
 
     internal GraphShortestPathResult Missing()
     {
-        var result = new GraphShortestPathResult(ContractVersion, false, null, ImmutableArray<EntityRef>.Empty,
+        var result = new GraphShortestPathResult(false, null, ImmutableArray<EntityRef>.Empty,
             ImmutableArray<EdgeRecord>.Empty, database.Store.Position);
         return result;
     }

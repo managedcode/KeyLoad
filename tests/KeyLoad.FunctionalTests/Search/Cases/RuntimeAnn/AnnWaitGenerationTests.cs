@@ -60,8 +60,7 @@ internal sealed class AnnWaitGenerationTests
     {
         var page = await AnnPublicWholeFlow.Engine(database, runtime).ApproximateSearchAsync(AnnWaitWholeFlow.Root,
             AnnPublicWholeFlow.Request(database, pin), token);
-        var expected = new AnnSearchPage(AnnPublicWholeFlow.Version,
-            [Row(database, FirstRecord, FirstDenominator), Row(database, SecondRecord, SecondDenominator)],
+        var expected = new AnnSearchPage([Row(database, FirstRecord, FirstDenominator), Row(database, SecondRecord, SecondDenominator)],
             database.Store.Position, AnnPageMode.Exact, true, pin.IndexGeneration, AnnPageMode.Approximate);
         await Assert.That(System.Text.Json.JsonSerializer.Serialize(page, JsonDefaults.Options))
             .IsEqualTo(System.Text.Json.JsonSerializer.Serialize(expected, JsonDefaults.Options));

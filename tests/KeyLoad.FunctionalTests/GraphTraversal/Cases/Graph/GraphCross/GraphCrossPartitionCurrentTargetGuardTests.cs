@@ -25,7 +25,7 @@ internal sealed class GraphCrossPartitionCurrentTargetGuardTests
             new UpsertEdge(GraphCrossPartitionTestSupport.Graph, EdgeId, from, target, Label));
         var edge = new EdgeRecord(EdgeId, from, target, Label,
             GraphCrossPartitionTestSupport.EmptyJson, 1);
-        var forgedTombstone = new GraphCrossPartitionDeliveryIntent(1, source,
+        var forgedTombstone = new GraphCrossPartitionDeliveryIntent(source,
             GraphCrossPartitionTestSupport.Graph, EdgeId, target, 1, true, edge,
             GraphCrossPartitionTestSupport.Root, 0,
             GraphCrossPartitionRecords.Fingerprint(source, GraphCrossPartitionTestSupport.Graph,

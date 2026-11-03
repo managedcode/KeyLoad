@@ -17,8 +17,7 @@ internal sealed class GraphSearchBudgetTests
         GraphSearchTestSupport.AddPath(database);
         var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var root = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
-        var limited = new GraphSearchRequest(1,
-            new(database.Partition, GraphSearchTestSupport.Documents),
+        var limited = new GraphSearchRequest(new(database.Partition, GraphSearchTestSupport.Documents),
             Retriever: new(GraphSearchTestSupport.Walk(root) with
             {
                 MaxEdges = 1
@@ -39,22 +38,18 @@ internal sealed class GraphSearchBudgetTests
     }
 
     [Test]
-    public async Task UnsupportedVersionAndCrossPartitionSeedsFailValidation()
+    public async Task CrossPartitionSeedsFailValidation()
     {
         using var database = new TestDatabase();
         GraphSearchTestSupport.Configure(database);
         GraphSearchTestSupport.AddPath(database);
         var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
         var search = new SearchRequest(database.Partition, GraphSearchTestSupport.Documents);
-        var seed = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
-        var versionFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
-            "root", new(2, search, Retriever: new(GraphSearchTestSupport.Walk(seed))), Token())))!;
         var otherPartition = new PartitionRef(Tenant, DatabaseId, Domain, OtherPartitionKey);
         var invalidSeed = new EntityRef(otherPartition, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root);
         var partitionFailure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
-            "root", new(1, search, Retriever: new(GraphSearchTestSupport.Walk(invalidSeed))), Token())))!;
+            "root", new(search, Retriever: new(GraphSearchTestSupport.Walk(invalidSeed))), Token())))!;
 
-        await Assert.That(versionFailure.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(partitionFailure.Code).IsEqualTo(ErrorCode.Validation);
     }
 
@@ -65,7 +60,7 @@ internal sealed class GraphSearchBudgetTests
         GraphSearchTestSupport.Configure(database);
         var root = GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects,
             GraphSearchTestSupport.Root);
-        var request = new GraphSearchRequest(1, null!, Retriever: new(GraphSearchTestSupport.Walk(root)));
+        var request = new GraphSearchRequest(null!, Retriever: new(GraphSearchTestSupport.Walk(root)));
 
         var failure = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() =>
             new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync("root", request, Token())))!;
@@ -79,7 +74,7 @@ internal sealed class GraphSearchBudgetTests
         var walk = new GraphWalkSpec(GraphSearchTestSupport.Graph, [seed], MaxDepth: 3, MaxVertices: 10, MaxEdges: 20);
         var search = new SearchRequest(partition, GraphSearchTestSupport.Documents,
             GraphSearchTestSupport.TextField, "needle", Limit: 10);
-        return new(1, search, Retriever: new(walk));
+        return new(search, Retriever: new(walk));
     }
 
     private static CancellationToken Token() => TestContext.Current!.Execution.CancellationToken;

@@ -42,9 +42,9 @@ internal static class TextOnlineStagingFiles
         var request = new OnlineTextIndexMaintenanceRequest(current.CommandId, current.Consumer,
             current.Authority.Collection, current.Authority.Field, current.ConsumerGeneration,
             result.BaseCut.NodeId, current.Authority.Placement);
-        var expected = new TextOnlineStaging(TextProtocol.FormatVersion, result.BaseCut.NodeId,
+        var expected = new TextOnlineStaging(result.BaseCut.NodeId,
             current.Authority.Leaf, request, current.PrincipalId, current.ParentFingerprint,
-            current.Authority.ExpectedCurrentCommandId, result.BaseCut, current.Authority.DataEpoch);
+            current.Authority.ExpectedCurrentCommandId, result.BaseCut);
         if (!OrleansSerialization.Serialize(staged).AsSpan().SequenceEqual(OrleansSerialization.Serialize(expected)))
         {
             throw TextErrors.Mismatch();
@@ -57,8 +57,8 @@ internal static class TextOnlineStagingFiles
         var captured = session.Base ?? throw TextErrors.Ownership();
         var leaf = session.Leaf ?? throw TextErrors.Ownership();
         var fingerprint = OnlineTextParentIdentity.Fingerprint(session.PrincipalId, session.Request);
-        return new(TextProtocol.FormatVersion, session.Request.NodeId, leaf, session.Request,
+        return new(session.Request.NodeId, leaf, session.Request,
             session.PrincipalId, fingerprint, session.ExpectedCurrentCommandId,
-            TextOnlineCapabilityResult.Cut(session.Request.NodeId, captured), captured.DataEpoch);
+            TextOnlineCapabilityResult.Cut(session.Request.NodeId, captured));
     }
 }

@@ -32,7 +32,7 @@ internal static class ScriptDomGraphPath
             labels = builder.ToImmutable();
         }
         var partition = context.Query.Partition;
-        return new(SqlGraphPathSyntax.Version, partition, graph, new(partition, fromCollection, fromId),
+        return new(partition, graph, new(partition, fromCollection, fromId),
             new(partition, toCollection, toId), depth, vertices, edges, labels);
     }
     private const int FromIdIndex = 2;

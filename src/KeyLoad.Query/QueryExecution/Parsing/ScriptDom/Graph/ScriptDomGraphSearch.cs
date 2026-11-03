@@ -27,7 +27,7 @@ internal static class ScriptDomGraphSearch
         }
         var search = new SearchRequest(context.Query.Partition, collection, text.Field, text.Text,
             vector.Field, vector.Values, vector.Space, limit, text.Weight, vector.Weight, fusion, allowed);
-        return new(SqlGraphSearchSyntax.Version, search, scope, retriever, expansion);
+        return new(search, scope, retriever, expansion);
     }
     private const string IdsFunction = "GRAPH_IDS";
     private const int ArgumentCount = 9;

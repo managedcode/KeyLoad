@@ -14,7 +14,6 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
     private const string Sql = "SELECT TOP (10) l.order_id AS order_id, r.name AS name "
         + "FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id "
         + "ORDER BY l.order_id ASC";
-    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
 
     [Test]
     public async Task AcJoinOmitsRowsDeniedOnEitherSideAndSucceedsAfterPersistedOwnershipChanges()
@@ -37,9 +36,9 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
 
         var beforeDeniedRead = database.Store.Position;
         var before = global::KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
-        var deniedRows = engine.Execute("reader", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect));
+        var deniedRows = engine.Execute("reader", new(database.Partition, Sql, AllowFullScan: true));
         await Assert.That(database.Store.Position).IsEqualTo(beforeDeniedRead);
-        var administrativeRows = engine.Execute("root", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect));
+        var administrativeRows = engine.Execute("root", new(database.Partition, Sql, AllowFullScan: true));
 
         await Assert.That(deniedRows.Rows).IsEmpty();
         await Assert.That(deniedRows.Cursor).IsNull();
@@ -51,7 +50,7 @@ internal sealed class SqlInnerJoinRowAuthorizationTests
             new PutDocument(Right, "c2", "{\"id\":\"c2\",\"name\":\"Lin\"}", 1, new("reader")));
         var repairedPosition = database.Store.Position;
         var repairedImage = global::KeyLoad.FunctionalTests.Messaging.QueueWholeFlowStorage.Bytes(database.Store);
-        var healthy = engine.Execute("reader", new(database.Partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect));
+        var healthy = engine.Execute("reader", new(database.Partition, Sql, AllowFullScan: true));
         await Assert.That(healthy.Rows.Select(row => row.EntityId)).IsEquivalentTo(["a", "z"], CollectionOrdering.Matching);
         var expected = new QueryPage(
             [new("a", 2, "{\"order_id\":\"a\",\"name\":\"Ada\"}", false, [], [new("l", "a", 2), new("r", "c1", 1)]),

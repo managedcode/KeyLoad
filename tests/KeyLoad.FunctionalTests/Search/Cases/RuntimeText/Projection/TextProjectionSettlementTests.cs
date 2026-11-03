@@ -19,16 +19,18 @@ internal sealed class TextProjectionSettlementTests
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"settlement\"}"));
         var nodeId = database.Store.Identity.NodeId;
         var scope = CaptureScope(database);
+        var options = UnitTextOptions.Execution();
+        var resources = new TextResourceOwnership(options);
         var root = TextFiles.InitializeRoot(Path.Combine(database.Directory, "execution-text-settlement"),
-            nodeId, UnitTextOptions.Execution());
+            nodeId, options, resources);
         var leaf = TextValidation.GenerationLeaf();
-        TextFiles.WriteOwner(root, leaf, nodeId, scope, UnitTextOptions.Execution());
+        TextFiles.WriteOwner(root, leaf, nodeId, scope, options, resources: resources);
         TextGeneration? generation = null;
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             generation = new TextGeneration(root, leaf, nodeId, scope,
-                new TextFileStreamProvider(root, leaf, nodeId, UnitTextOptions.Execution()), UnitTextOptions.Execution());
+                new TextFileStreamProvider(root, leaf, nodeId, options, resources), options, resources);
             var foreignPath = Path.Combine(generation.Path, TextProtocol.RuntimeDirectoryCore, "foreign-entry.bin");
             var foreignBytes = new byte[] { 0x4b, 0x4c, 0x01, 0xff };
             await File.WriteAllBytesAsync(foreignPath, foreignBytes, TestContext.Current!.Execution.CancellationToken);
@@ -74,7 +76,7 @@ internal sealed class TextProjectionSettlementTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, TextPath, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

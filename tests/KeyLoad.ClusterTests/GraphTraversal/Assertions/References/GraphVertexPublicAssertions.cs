@@ -7,7 +7,6 @@ namespace KeyLoad.ClusterTests.GraphTraversal;
 
 internal static class GraphVertexPublicAssertions
 {
-    private const int Version = 1;
     private const int Depth = 1;
     private const int MaximumVertices = 4;
     private const int MaximumEdges = 3;
@@ -28,7 +27,7 @@ internal static class GraphVertexPublicAssertions
             await Assert.That(sdk.Edges.SequenceEqual(expectedEdges)).IsTrue();
             await Assert.That(sdk.Vertices.SequenceEqual(expectedVertices)).IsTrue();
             await SqlClusterProtocol.EqualAsync(sdk, mcp);
-            var incomingRequest = new ReadIncomingGraphEdgesRequest(Version, start, state.Seed.Graph, MaximumEdges);
+            var incomingRequest = new ReadIncomingGraphEdgesRequest(start, state.Seed.Graph, MaximumEdges);
             var incoming = await McpCallerAssertions.SdkSuccessAsync(await global::KeyLoad.Client.GraphIncomingEdgesClient.IncomingEdgesAsync(callers.Sdk, incomingRequest, token));
             var expectedIncoming = state.Edges.Where(edge => edge.To == start).OrderBy(edge => edge.From.Collection, StringComparer.Ordinal)
                 .ThenBy(edge => edge.From.Id, StringComparer.Ordinal).ThenBy(edge => edge.Id, StringComparer.Ordinal)
@@ -37,7 +36,6 @@ internal static class GraphVertexPublicAssertions
             var mcpIncoming = (await McpCallerAssertions.SuccessAsync<GraphIncomingEdgesPage>(
                 await callers.Mcp.CallAsync(McpCallerTools.GraphIncomingEdges, incomingRequest, token))).Value;
             await SqlClusterProtocol.EqualAsync(incoming.Rows, mcpIncoming.Rows);
-            await Assert.That(incoming.Version).IsEqualTo(Version);
             await Assert.That(incoming.CutPosition).IsGreaterThan(0L);
         }
     }

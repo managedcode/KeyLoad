@@ -29,7 +29,7 @@ internal static class GraphStorageReferenceAssertions
                 GraphStorageReferenceFixture.Graph, vertex, maxDepth: 1);
             await CompareAsync(outgoing.Edges, expected.Values.Where(edge => edge.From == id), database);
             var incoming = owner.ReadIncomingGraphEdges(GraphStorageReferenceFixture.Root,
-                new ReadIncomingGraphEdgesRequest(1, vertex, GraphStorageReferenceFixture.Graph, 100));
+                new ReadIncomingGraphEdgesRequest(vertex, GraphStorageReferenceFixture.Graph, 100));
             await CompareAsync(incoming.Rows.Select(row => row.Edge), expected.Values.Where(edge => edge.To == id), database);
             await Assert.That(incoming.Rows.All(row => row.DeliveredRevision == 0)).IsTrue();
         }

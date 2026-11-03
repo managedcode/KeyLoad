@@ -51,7 +51,7 @@ internal sealed record GraphSearchClusterScenario(PartitionRef Partition, Entity
         var walk = new GraphWalkSpec(Graph, seeds, MaxDepth, MaxVertices, MaxEdges, labels);
         var search = new SearchRequest(partition, Documents, Limit: limit, FusionConstant: FusionConstant,
             AllowedIds: allowedIds);
-        return new(1, search, Retriever: new(walk));
+        return new(search, Retriever: new(walk));
     }
 
     internal async Task<McpPersistedIdentity> CreateReaderAsync(ClusterFixture fixture,

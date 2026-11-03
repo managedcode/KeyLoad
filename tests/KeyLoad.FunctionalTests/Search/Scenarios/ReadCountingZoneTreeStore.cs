@@ -50,6 +50,12 @@ internal sealed class ReadCountingZoneTreeStore : IAtomicStore
     }
 
     public T Prepare<T>(Func<IAtomicTransaction, long, T> prepare) => inner.Prepare(prepare);
+    public ValueTask<T> ReadAsync<T>(Func<IKeyValueView, CancellationToken, ValueTask<T>> read,
+        CancellationToken cancellationToken = default)
+    {
+        Interlocked.Increment(ref readCalls);
+        return inner.ReadAsync(read, cancellationToken);
+    }
 
     public T Commit<T>(Func<IAtomicTransaction, long, T> compile) => inner.Commit(compile);
     public Task<T> CommitAsync<T>(Func<IAtomicTransaction, long, T> compile, CancellationToken cancellationToken = default)

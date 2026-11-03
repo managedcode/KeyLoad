@@ -63,11 +63,11 @@ internal static class SchemaVisibleProjectionClusterJoins
             var events = state.Collection + EventsSuffix;
             var target = state.Collection + TargetSuffix;
             yield return (new(state.Partition, Prefix + events + Middle + target + BeforePredicate
-                + (supported ? SupportedSql : AbsentSql) + Suffix, AllowFullScan: true, QueryDialectVersion: P.QueryDialect),
+                + (supported ? SupportedSql : AbsentSql) + Suffix, AllowFullScan: true),
                 new(state.Partition, new(events, SourceAlias, [new(NamePath, P.ValueAlias, TargetAlias)],
                     new Comparison(new FieldOperand(supported ? Supported : Absent), P.Equal, ValueOperand.Create(Probe)),
                     [new(RevisionPath, false)], P.Limit, ModelSource: new(ModelQuerySourceKind.Events, Stream, Generation),
-                    InnerJoin: new(target, TargetAlias, ReferenceOperand, EntityOperand)), AllowFullScan: true, AstVersion: P.QueryDialect));
+                    InnerJoin: new(target, TargetAlias, ReferenceOperand, EntityOperand)), AllowFullScan: true));
         }
     }
 }

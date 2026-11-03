@@ -2,7 +2,7 @@ using KeyLoad.Core;
 
 namespace KeyLoad.Query.QueryExecution;
 
-/// <summary>Compiles only the frozen Q1.GraphPath expression into the canonical Core request.</summary>
+/// <summary>Compiles only the frozen KeyLoad.GraphPath expression into the canonical Core request.</summary>
 internal static class SqlGraphPathParser
 {
     internal static GraphShortestPathRequest Parse(SqlGraphPathRequest request,
@@ -18,7 +18,7 @@ internal static class SqlGraphPathParser
 
     private static void ValidateEnvelope(SqlGraphPathRequest request)
     {
-        if (request is null || request.Version != SqlGraphPathSyntax.Version || request.Query is null
+        if (request is null || request.Query is null
             || request.Query.Partition is null || request.Query.Partition.TenantId is null
             || request.Query.Partition.DatabaseId is null || request.Query.Partition.TransactionDomainId is null
             || request.Query.Partition.PartitionKey is null || request.Query.Sql is null

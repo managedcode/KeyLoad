@@ -19,7 +19,6 @@ internal sealed class RelationalSqlClusterJoinAuthorizationTests(ClusterFixture 
     private const string CustomerIdField = "customer_id";
     private const string QueryText = "SELECT TOP (10) l.[key] AS order_key, r.name AS customer_name, l.title AS customer_id "
         + "FROM agentrows AS l INNER JOIN joincustomers AS r ON l.title = r.id ORDER BY l.[key] ASC";
-    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const long InitialPolicyEpoch = 1;
     private const long UpdatedPolicyEpoch = 2;
 
@@ -48,8 +47,8 @@ internal sealed class RelationalSqlClusterJoinAuthorizationTests(ClusterFixture 
         var missingUseSdk = new KeyLoadClient(missingUseHttp, missingUse.Secret, IntegrationClientOptions.Execution());
         await using var limitedMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, limited.Secret, deadline.Token);
         await using var missingUseMcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3, missingUse.Secret, deadline.Token);
-        var query = new QueryRequest(scenario.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion);
-        var sql = new SqlOperationRequest(scenario.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion);
+        var query = new QueryRequest(scenario.Partition, QueryText, AllowFullScan: true);
+        var sql = new SqlOperationRequest(scenario.Partition, QueryText, AllowFullScan: true);
         var beforeRows = await ReadRowsAsync(admin, scenario, deadline.Token);
         var before = await ReadAdministratorPagesAsync(fixture, admin, query, sql, deadline.Token);
         await Assert.That(before.Direct.Rows).HasSingleItem();

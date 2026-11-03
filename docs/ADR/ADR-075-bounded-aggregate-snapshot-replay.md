@@ -28,10 +28,9 @@ SourceRevision, exact ReducerVersion identifier, positive StateSchemaVersion,
 StateJson and a SHA256 checksum from JsonData.Fingerprint over the public
 AggregateSnapshotState with Checksum="". This exact frozen JSON identity,
 including original state text, is independent of serializer output.
-A private generated
-envelope includes FormatVersion=1. Preserve original state JSON bytes
-after bounded valid-JSON validation; Orleans serializers and the store's
-ZoneTree transaction persist the envelope. Never persist executable reducer code.
+Preserve original state JSON bytes after bounded valid-JSON validation.
+Generated Orleans serialization and the store's ZoneTree transaction persist the
+current AggregateSnapshotState directly. Never persist executable reducer code.
 
 `StoreAggregateSnapshot` is a normal atomic Batch mutation. It requires persisted
 EventsSnapshotsManage plus EventsRead and complete raw worker-input grants.
@@ -60,8 +59,7 @@ An incompatible reducer/state schema is FormatUnsupported; no implicit fallback.
 History that cannot bridge the source revision is HistoryUnavailable. Wrong
 generation is TokenInvalidated. Validate each event's stream identity, generation,
 key, consecutive revision, positive sequence/schema version and generation-scoped
-EventId identity. Gaps, malformed heads/envelopes or checksums are Corruption;
-unknown stored formats are FormatUnsupported.
+EventId identity. Gaps, malformed heads/snapshots or checksums are Corruption.
 
 MaximumEvents must be positive and within configured MaxResults and MaxScanRecords.
 The complete required tail must fit it or fail the whole request as BudgetExceeded.

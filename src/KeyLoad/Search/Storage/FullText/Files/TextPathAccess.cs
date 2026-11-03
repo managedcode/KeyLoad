@@ -1,4 +1,5 @@
 using Microsoft.Extensions.Options;
+using ZoneTree.AbstractFileStream;
 namespace KeyLoad.Server.Search;
 
 internal sealed class TextPathAccess(string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
@@ -47,10 +48,38 @@ internal sealed class TextPathAccess(string root, string leaf, Guid sourceNodeId
 
     internal void Track(string path, bool directory)
     {
+        if (resources is null)
+        {
+            TrackOwnedPath(path, directory);
+            return;
+        }
+        resources.MutatePhysical(() => TrackOwnedPath(path, directory));
+    }
+
+    private void TrackOwnedPath(string path, bool directory)
+    {
         lock (gate)
         {
             TextFiles.RuntimeTrackPath(root, leaf, sourceNodeId, path, directory, executionOptions: executionOptions, resources: resources);
         }
+    }
+
+    internal void CreateDirectory(string path, IFileStreamProvider provider)
+    {
+        var full = Resolve(path);
+        if (resources is null)
+        {
+            CreateOwnedDirectory(full, provider);
+            return;
+        }
+        resources.MutatePhysical(() => CreateOwnedDirectory(full, provider));
+    }
+
+    private void CreateOwnedDirectory(string path, IFileStreamProvider provider)
+    {
+        TrackDirectoryChain(path);
+        provider.CreateDirectory(path);
+        SetPrivateDirectoryModes(path);
     }
 
     internal void TrackDirectoryChain(string path)

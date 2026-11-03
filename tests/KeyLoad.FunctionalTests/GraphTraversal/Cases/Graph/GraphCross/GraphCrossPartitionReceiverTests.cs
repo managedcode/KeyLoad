@@ -49,7 +49,7 @@ internal sealed class GraphCrossPartitionReceiverTests
             new UpsertEdge(GraphCrossPartitionTestSupport.Graph, EdgeId, from, target, Label));
         var key = GraphCrossPartitionKeys.Reverse(target.Partition, GraphCrossPartitionTestSupport.Graph,
             target, source, EdgeId);
-        var conflicting = new GraphCrossPartitionReceiverState(1, source,
+        var conflicting = new GraphCrossPartitionReceiverState(source,
             GraphCrossPartitionTestSupport.Graph, EdgeId, target, 1, false, ConflictingFingerprint);
         database.Store.Commit((transaction, _) =>
         {

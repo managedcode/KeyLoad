@@ -15,5 +15,4 @@ internal sealed record QueryCursorClaims(
     [property: global::Orleans.Id(QueryCursorContract.OffsetField)] int Offset,
     [property: global::Orleans.Id(QueryCursorContract.ExpiresAtField)] DateTimeOffset ExpiresAt,
     [property: global::Orleans.Id(QueryCursorContract.LifetimeField)] ResourceLifetime Lifetime,
-    [property: global::Orleans.Id(QueryCursorContract.VersionField)] int Version,
     [property: global::Orleans.Id(QueryCursorContract.AfterIdField)] string? AfterId = null);

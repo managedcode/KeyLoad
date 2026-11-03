@@ -27,7 +27,7 @@ internal static class SampleChunkGenerationWriter
             digests.Add(SHA256.HashData(encoded));
         }
         var tags = Tags(records);
-        var manifest = new SampleChunkManifest(SampleChunkLifecycleProtocol.Version, window.WindowId,
+        var manifest = new SampleChunkManifest(window.WindowId,
             window.Generation, window.FromUtcTicks, window.UntilUtcTicks, window.SourceSequence, records.Length,
             digests.ToImmutable(), tags, window.RetentionBeforeUtcTicks);
         var manifestKey = SampleChunkKeys.Manifest(partition, set, series, window.WindowId, window.Generation);

@@ -7,8 +7,7 @@ internal static class TextEnvelopeCodec
     internal static byte[] Encode<T>(T value)
     {
         var payload = OrleansSerialization.Serialize(value);
-        return OrleansSerialization.Serialize(new TextEnvelope(TextProtocol.FormatVersion,
-            payload, SHA256.HashData(payload)));
+        return OrleansSerialization.Serialize(new TextEnvelope(payload, SHA256.HashData(payload)));
     }
 
     internal static T Decode<T>(ReadOnlySpan<byte> bytes)
@@ -16,7 +15,7 @@ internal static class TextEnvelopeCodec
         try
         {
             var envelope = OrleansSerialization.Deserialize<TextEnvelope>(bytes);
-            if (envelope is null || envelope.FormatVersion != TextProtocol.FormatVersion || envelope.Payload is null
+            if (envelope is null || envelope.Payload is null
                 || envelope.Sha256 is null || envelope.Sha256.Length != SHA256.HashSizeInBytes
                 || !CryptographicOperations.FixedTimeEquals(SHA256.HashData(envelope.Payload), envelope.Sha256))
             {

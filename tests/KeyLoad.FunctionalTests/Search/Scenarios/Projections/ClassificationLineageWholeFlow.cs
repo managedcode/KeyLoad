@@ -59,7 +59,7 @@ internal static class ClassificationLineageWholeFlow
     private static async Task WithProviderAsync(EventProjectionFixture fixture, Func<RuntimeTextProjection, Task> action)
     {
         var projection = new RuntimeTextProjection(Path.Combine(fixture.Harness.DirectoryPath, RuntimeDirectoryCore), fixture.Harness.Store.Identity.NodeId,
-            UnitTextOptions.Execution());
+            UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         try
         {
             await action(projection);

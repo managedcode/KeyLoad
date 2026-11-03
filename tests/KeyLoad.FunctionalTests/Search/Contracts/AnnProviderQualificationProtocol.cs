@@ -32,8 +32,7 @@ internal static class AnnProviderQualificationProtocol
     internal const int OtherNode = 1;
     internal const int FirstLayer = 0;
     internal const int OrdinalStep = 1;
-    internal const int UnsupportedFormat = 2;
-    internal const int PlacementVersion = 1;
+    internal const int InvalidCount = -1;
     internal const int PolicyEpoch = 1;
     internal const long NextJournalEntry = 1L;
     internal const long MissingRevision = 0L;

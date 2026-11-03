@@ -131,7 +131,7 @@ internal sealed class TextGenerationCapacityTests
             .Select(path => Path.GetFileName(path)!).Order(StringComparer.Ordinal).ToArray();
 
     private static RuntimeTextProjection OpenForRestart(string root, TestDatabase database)
-        => new(root, database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        => new(root, database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
 
     private static TextProjectionScope CaptureScope(TestDatabase database)
     {
@@ -139,7 +139,7 @@ internal sealed class TextGenerationCapacityTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, Field, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

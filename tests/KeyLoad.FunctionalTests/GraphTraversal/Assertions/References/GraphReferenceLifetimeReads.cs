@@ -25,11 +25,11 @@ internal static class GraphReferenceLifetimeReads
             graph, from, Depth, Vertices, Edges, cancellationToken: token);
         await DropRuntimeAssertions.SameAsync(new global::KeyLoad.GraphTraversal([target, anchor], [edge]), traversal);
         var path = database.ShortestPath(PartitionStoreProtocol.AdministratorId,
-            new(GraphReferenceLifetimeProtocol.Version, DropRuntimeProtocol.Partition, graph, from, to, Depth, Vertices, Edges), cancellationToken: token);
-        await DropRuntimeAssertions.SameAsync(new GraphShortestPathResult(GraphReferenceLifetimeProtocol.Version, true, Depth, [anchor, target], [edge], cut), path);
+            new(DropRuntimeProtocol.Partition, graph, from, to, Depth, Vertices, Edges), cancellationToken: token);
+        await DropRuntimeAssertions.SameAsync(new GraphShortestPathResult(true, Depth, [anchor, target], [edge], cut), path);
         var incoming = database.ReadIncomingGraphEdges(PartitionStoreProtocol.AdministratorId,
-            new(GraphReferenceLifetimeProtocol.Version, to, graph, Edges), cancellationToken: token);
-        await DropRuntimeAssertions.SameAsync(new GraphIncomingEdgesPage(GraphReferenceLifetimeProtocol.Version, [new(edge, LocalDelivery)], cut, Projection), incoming);
+            new(to, graph, Edges), cancellationToken: token);
+        await DropRuntimeAssertions.SameAsync(new GraphIncomingEdgesPage([new(edge, LocalDelivery)], cut, Projection), incoming);
         var result = await SearchAsync(profile, graph, from, token);
         await Assert.That(result.Hits.Length).IsEqualTo(Edges);
         await DropRuntimeAssertions.SameAsync(new DocumentResult(target, Revision,
@@ -41,7 +41,6 @@ internal static class GraphReferenceLifetimeReads
     internal static Task<GraphSearchResult> SearchAsync(DropRuntimeProfile profile, string graph,
         EntityRef anchor, CancellationToken token)
         => new SearchEngine(profile.Source.Database, UnitExecutionOptions.QueryExecution()).GraphSearchAsync(
-            PartitionStoreProtocol.AdministratorId, new(GraphReferenceLifetimeProtocol.Version,
-                new(DropRuntimeProtocol.Partition, DropRuntimeProtocol.Table, FusionConstant: FusionConstant),
+            PartitionStoreProtocol.AdministratorId, new(new(DropRuntimeProtocol.Partition, DropRuntimeProtocol.Table, FusionConstant: FusionConstant),
                 Retriever: new(new(graph, [anchor], Depth, Vertices, Edges))), token);
 }

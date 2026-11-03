@@ -13,10 +13,6 @@ internal static class SampleChunkWindowValidation
 
     internal static void State(SampleChunkWindow window, Guid id, int recordLimit, int correctionLimit)
     {
-        if (window.Version != SampleChunkLifecycleProtocol.Version)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, SampleChunkLifecycleProtocol.Unsupported);
-        }
         if (window.WindowId != id || id == Guid.Empty || window.FromUtcTicks < DateTimeOffset.MinValue.UtcTicks
             || window.UntilUtcTicks > DateTimeOffset.MaxValue.UtcTicks || window.FromUtcTicks >= window.UntilUtcTicks
             || window.Revision < SampleChunkLifecycleProtocol.First || window.SourceSequence < SampleChunkLifecycleProtocol.Absent

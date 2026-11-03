@@ -8,7 +8,7 @@ namespace KeyLoad.FunctionalTests.QueryExecution;
 internal sealed class VectorAttachmentScalarStateWholeFlowTests
 {
     private const string FirstId = "a";
-    private const string UnsupportedDetail = "This expression is outside the supported Q1 C# subset.";
+    private const string UnsupportedDetail = "This expression is outside the supported C# query subset.";
 
     internal enum ScalarState
     {

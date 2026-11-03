@@ -16,6 +16,7 @@ internal static class ResourceStorageKeys
     internal const string OnlineTextFamily = "online-text-current";
     internal const string AnalyticsEventFamily = "analytics-event";
     internal const string AnalyticsGenerationFamily = "analytics-generation";
+    internal const string AnalyticsTimestampFamily = "analytics-timestamp";
     private const int ResourceComponent = 5;
     private const int DatabaseComponent = 2;
     private const int FirstAddressComponent = 1;
@@ -27,7 +28,7 @@ internal static class ResourceStorageKeys
         {
             DocumentFamily, IndexFamily, UniqueFamily, DocumentEpochFamily, VisibilityEpochFamily, VectorFamily,
             VectorLineageFamily, VectorEffectFamily, Bm25Family, OnlineTextFamily,
-            AnalyticsEventFamily, AnalyticsGenerationFamily
+            AnalyticsEventFamily, AnalyticsGenerationFamily, AnalyticsTimestampFamily
         }.Concat(global::KeyLoad.TimeSeries.TimeSeriesStorageFamilies.All).Select(static family => KeyCodec.Encode(family))
     ];
 
@@ -47,7 +48,7 @@ internal static class ResourceStorageKeys
         if (retainScope)
         {
             scope = KeyCodec.Encode(components[FirstAddressComponent], components[DatabaseComponent],
-                components[DomainComponent], components[PartitionComponent], components[ResourceComponent])[KeyCodecTokens.VersionBytes..];
+                components[DomainComponent], components[PartitionComponent], components[ResourceComponent])[KeyCodecTokens.PrefixBytes..];
         }
         return true;
     }

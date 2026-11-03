@@ -19,8 +19,7 @@ internal static class Bm25CorpusShape
     internal static void Require(Bm25CorpusCurrent current)
     {
         if (current is null || current.Partition is null || current.SourceOwner is null
-            || current.Statistics is null || current.FormatVersion != Bm25CorpusProtocol.Format
-            || current.Generation == Guid.Empty || current.Incarnation == Guid.Empty
+            || current.Statistics is null || current.Generation == Guid.Empty || current.Incarnation == Guid.Empty
             || current.SourceOwner.Incarnation != current.Incarnation
             || current.SourceOwner.PhysicalShardId == Guid.Empty
             || current.PolicyEpoch < InitialPolicyEpoch || current.SchemaVersion <= UninitializedPublicationVersion

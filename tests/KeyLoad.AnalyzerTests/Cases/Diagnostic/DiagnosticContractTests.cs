@@ -8,7 +8,6 @@ internal sealed class DiagnosticContractTests
 {
     private const string MachineKeyId = "KLD0001";
     private const string EndpointMappingId = "KLD0013";
-    private const string GrainVersionId = "KLD0014";
     private const string CompositionRootId = "KLD0020";
     private const string ContractConstructorId = "KLD0021";
     private const string SystemClockId = "KLD0022";
@@ -37,7 +36,6 @@ internal sealed class DiagnosticContractTests
         {
             [MachineKeyId] = DiagnosticSeverity.Error,
             [EndpointMappingId] = DiagnosticSeverity.Error,
-            [GrainVersionId] = DiagnosticSeverity.Error,
             [CompositionRootId] = DiagnosticSeverity.Error,
             [ContractConstructorId] = DiagnosticSeverity.Error,
             [SystemClockId] = DiagnosticSeverity.Error,

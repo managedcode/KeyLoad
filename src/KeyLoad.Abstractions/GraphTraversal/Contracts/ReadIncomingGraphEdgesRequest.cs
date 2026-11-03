@@ -4,7 +4,6 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(GraphCrossPartitionAliases.IncomingRequest)]
 public sealed record ReadIncomingGraphEdgesRequest(
-    [property: Orleans.Id(GraphCrossPartitionFields.RequestVersion)] int Version,
     [property: Orleans.Id(GraphCrossPartitionFields.RequestTarget)] EntityRef Target,
     [property: Orleans.Id(GraphCrossPartitionFields.RequestGraph)] string Graph,
     [property: Orleans.Id(GraphCrossPartitionFields.RequestLimit)] int Limit);

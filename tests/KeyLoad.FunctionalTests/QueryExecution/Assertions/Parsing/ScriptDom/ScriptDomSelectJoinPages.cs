@@ -4,13 +4,13 @@ internal static class ScriptDomSelectJoinPages
 {
     internal static async Task RequireAsync(global::KeyLoad.Query.QueryEngine engine, PartitionRef partition, long position)
     {
-        var query = new QueryRequest(partition, Sql, AllowFullScan: true, QueryDialectVersion: JoinVersion);
+        var query = new QueryRequest(partition, Sql, AllowFullScan: true);
         var ast = new global::KeyLoad.Query.AstQueryRequest(partition,
             new(SqlOffsetProtocol.Left, Left, [new("/title", "title", Left), new("/name", "name", Right)],
                 new global::KeyLoad.Query.Comparison(new global::KeyLoad.Query.FieldOperand("/order_id"), "<",
                     global::KeyLoad.Query.ValueOperand.Create("c")),
                 [new("/order_id", false)], Limit, InnerJoin: new(SqlOffsetProtocol.Right, Right, "/customer_id", "/id"),
-                Offset: Offset), AllowFullScan: true, AstVersion: JoinVersion);
+                Offset: Offset), AllowFullScan: true);
         var expected = new QueryPage(
             [new("b", Revision, """{"title":"second","name":"Bee"}""", false, [],
                 [new(Left, "b", Revision), new(Right, "c2", Revision)])],
@@ -22,7 +22,6 @@ internal static class ScriptDomSelectJoinPages
     private const string Left = "l";
     private const string Right = "r";
     private const string AccessPath = "bounded-primary-key-inner-join";
-    private const int JoinVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int Limit = 1;
     private const int Offset = 1;
     private const long Revision = 1;

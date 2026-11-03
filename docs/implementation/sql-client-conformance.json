@@ -1,5 +1,4 @@
 {
-  "schemaVersion": 2,
   "ownerRequirementDate": "2026-10-03",
   "decision": "ADR-130",
   "workingDialect": "T-SQL",
@@ -28,10 +27,6 @@
       "transport": "execution Kestrel TLS ConnectionContext/Pipelines; not HTTP",
       "authentication": "same persisted API-key verifier, verified subject only, fresh credential/policy every Execute",
       "result": "one JSONB keyload_result containing entire canonical result",
-      "queryDialects": [
-        1,
-        2
-      ],
       "preparedProtocol": [
         "Parse",
         "Bind",
@@ -58,7 +53,8 @@
       "numericParameterSourceContract": "Prepared guarded source only: text/binary OID1700 exact .NET decimal96/scale28 without rounding; malformed Validation, specials/nonrepresentable/hidden-dscale precision UnsupportedCapability. Genuine Npgsql/SDK/MCP whole-flow and exact-source Linux qualification pending; no general PostgreSQL numeric compatibility.",
       "language": "Selected T-SQL lowered through ScriptDOM; PostgreSQL framing/driver contracts are independent",
       "operationLanguage": "canonical EXEC",
-      "historicalNumericAndStringEvidence": "Original positional/prepared parameter source and qualification receipts remain in the historical inventory; current T-SQL binding requires its own exact-source proof."
+      "historicalNumericAndStringEvidence": "Original positional/prepared parameter source and qualification receipts remain in the historical inventory; current T-SQL binding requires its own exact-source proof.",
+      "queryLanguage": "One current T-SQL/AST operation contract; no KeyLoad dialect selector."
     }
   },
   "inventoryStatus": "Selected T-SQL grammar; finite source execution inventory; retired PostgreSQL TABLE/LIMIT/CALL and handwritten NEXT lexical proposals are historical only; all whole-product qualification gates OPEN",
@@ -70,7 +66,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-READ",
@@ -79,7 +75,7 @@
       "execution": "Source: bounded SELECT lowering to existing typed plans; exact selected nodes only.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-JOIN",
@@ -88,7 +84,7 @@
       "execution": "Source: closed same-partition typed/model-source graph/reference profiles; arbitrary joins remain unsupported.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-GROUP",
@@ -97,7 +93,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-SET",
@@ -106,7 +102,7 @@
       "execution": "Source: bounded ordering/TOP/ordered OFFSET-FETCH lowering; general set execution is not qualified.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-DML",
@@ -115,7 +111,7 @@
       "execution": "SOURCE CANDIDATE: existing closed graph/queue composition plus bounded ordinary typed INSERT VALUES/parameters; general INSERT SELECT/UPDATE/DELETE/MERGE/OUTPUT remain OPEN.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored.",
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored.",
       "ordinaryInsertCandidate": {
         "profile": "TSQL.InsertValues",
         "contract": "docs/Features/RelationalStorage/OrdinarySqlInsert.md",
@@ -143,7 +139,7 @@
       "execution": "SOURCE CANDIDATE: bounded canonical CREATE TABLE only; full DDL family remains OPEN",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored.",
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored.",
       "createTableCandidate": {
         "profile": "TSQL.CreateTable",
         "types": [
@@ -179,7 +175,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-TXN",
@@ -188,7 +184,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-ROUTINE",
@@ -197,7 +193,7 @@
       "execution": "Source: EXEC of the canonical operation catalog with typed verified arguments; dynamic execution/general stored routines are unsupported.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-SESSION",
@@ -206,7 +202,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-AUTH",
@@ -215,7 +211,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-META",
@@ -224,7 +220,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-ADMIN",
@@ -233,7 +229,7 @@
       "execution": "OPEN: no complete family execution claim",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     },
     {
       "id": "SQLC-MODELS",
@@ -242,7 +238,7 @@
       "execution": "Source: existing typed model plans and closed declared graph/model sources; parsing broader syntax does not enable a new model plan.",
       "qualified": false,
       "requirement": "REQ-SQLC-006 / AC-SQLC-006",
-      "acceptance": "Complete independently literal success/refusal\u2192healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
+      "acceptance": "Complete independently literal success/refusal→healthy operation, current authority, original receipts, bounds/cancellation, recovery and CLUSTER evidence required; unsupported AST cannot be ignored."
     }
   ],
   "qualification": {
@@ -292,6 +288,6 @@
   "benchmarkBoundary": "PostgreSQL remains an actual execution comparison database; this syntax selection changes no competitor, topology, workload or evidence.",
   "schemaContract": {
     "id": "KeyLoad.SqlConformance.Inventory",
-    "readerContract": "Require schemaVersion 2 and all named required fields. Reject unknown schemas. Parsing is separate from executable semantics and client-protocol qualification."
+    "readerContract": "Require all named current fields and their declared types. Parsing is separate from executable semantics and client-protocol qualification."
   }
 }

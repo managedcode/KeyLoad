@@ -48,7 +48,7 @@ public static class DatabaseCommandInputTypes
         var type = For(kind);
         if (input is null || input.GetType() /* KLD0041: This persisted input boundary must verify its exact runtime contract against the closed operation-kind map. */ != type)
         {
-            throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+            throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
         }
         return input;
     }

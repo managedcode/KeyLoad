@@ -24,7 +24,7 @@ internal static class ModelJoinAliasAdmissionFlow
                     Alias = alias
                 }
             };
-            foreach (var request in new[] { Q2CapabilityFixtures.JsonRoundTrip(invalid), Q2CapabilityFixtures.RuntimeRoundTrip(invalid) })
+            foreach (var request in new[] { JoinCapabilityFixtures.JsonRoundTrip(invalid), JoinCapabilityFixtures.RuntimeRoundTrip(invalid) })
             {
                 var execution = store.GetReadDiagnostics();
                 global::KeyLoad.QueryPage? result = null;

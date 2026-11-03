@@ -3,7 +3,6 @@ namespace KeyLoad.Query.QueryExecution;
 internal static class QueryCursorContract
 {
     internal const string Alias = "keyload.query.cursor.claims";
-    internal const int CurrentVersion = 2;
     internal const string Purpose = "query-page";
     internal const int PurposeField = 0;
     internal const int IncarnationField = 1;
@@ -18,6 +17,5 @@ internal static class QueryCursorContract
     internal const int OffsetField = 10;
     internal const int ExpiresAtField = 11;
     internal const int LifetimeField = 12;
-    internal const int VersionField = 13;
     internal const int AfterIdField = 14;
 }

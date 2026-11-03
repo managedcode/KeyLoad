@@ -5,7 +5,6 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class DistributedSearchOwnedLeafValidation
 {
-    private const int CurrentVersion = 1;
     private const string InvalidPhase = "The distributed search receiving phase is invalid.";
     private const string CanonicalTextRequired = "The distributed statistics require the canonical text profile.";
 
@@ -16,7 +15,7 @@ internal static class DistributedSearchOwnedLeafValidation
         ArgumentNullException.ThrowIfNull(execution) /* KLD0041: BCL null validation accepts the execution QueryExecutionOptions reference through its object parameter. */;
         ArgumentNullException.ThrowIfNull(budget) /* KLD0041: BCL null validation accepts the budget ReadExecutionBudget reference through its object parameter. */;
         budget.Check();
-        if (request.Version != CurrentVersion || !Enum.IsDefined(request.Phase)
+        if (!Enum.IsDefined(request.Phase)
             || request.Search is null || request.Owner is null || string.IsNullOrEmpty(request.Tenant)
             || request.Search.Partition is null || request.Search.Partition.TenantId != request.Tenant
             || request.Selected.IsDefault

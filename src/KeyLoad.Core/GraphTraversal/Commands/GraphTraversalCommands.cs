@@ -66,7 +66,7 @@ public static class GraphTraversalCommands
             }
         }
 
-        var state = new GraphCrossPartitionReceiverState(GraphCrossPartitionProtocol.CurrentVersion, request.SourcePartition, request.Graph, request.EdgeId, request.Destination, intent.Revision, intent.Deleted, intent.Fingerprint);
+        var state = new GraphCrossPartitionReceiverState(request.SourcePartition, request.Graph, request.EdgeId, request.Destination, intent.Revision, intent.Deleted, intent.Fingerprint);
         var encoded = GraphCrossPartitionRecords.Encode(state);
         GraphCrossPartitionCapacityWriter.Apply(tx, targetPartition, GraphCrossPartitionCapacityDirection.ReceiverStates, GraphCrossPartitionKeys.ReversePartitionPrefix(targetPartition), [new(key, encoded)]);
         return new(ApplyReceipt, request.Graph, request.EdgeId, intent.Revision);

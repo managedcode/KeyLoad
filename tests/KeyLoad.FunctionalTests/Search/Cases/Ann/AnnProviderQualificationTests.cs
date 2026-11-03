@@ -5,7 +5,7 @@ namespace KeyLoad.FunctionalTests.Search;
 internal sealed class AnnProviderQualificationTests
 {
     [Test]
-    [Arguments(DistanceMetric.Cosine, AnnProviderQualificationDamage.HeaderVersion)]
+    [Arguments(DistanceMetric.Cosine, AnnProviderQualificationDamage.HeaderCount)]
     [Arguments(DistanceMetric.Cosine, AnnProviderQualificationDamage.HeaderEntryPoint)]
     [Arguments(DistanceMetric.Cosine, AnnProviderQualificationDamage.HeaderRetainedBytes)]
     [Arguments(DistanceMetric.Cosine, AnnProviderQualificationDamage.NodeOrdinal)]
@@ -13,7 +13,7 @@ internal sealed class AnnProviderQualificationTests
     [Arguments(DistanceMetric.Cosine, AnnProviderQualificationDamage.NonfiniteVector)]
     [Arguments(DistanceMetric.Cosine, AnnProviderQualificationDamage.SelfNeighbor)]
     [Arguments(DistanceMetric.Cosine, AnnProviderQualificationDamage.DuplicateNeighbor)]
-    [Arguments(DistanceMetric.Euclidean, AnnProviderQualificationDamage.HeaderVersion)]
+    [Arguments(DistanceMetric.Euclidean, AnnProviderQualificationDamage.HeaderCount)]
     [Arguments(DistanceMetric.Euclidean, AnnProviderQualificationDamage.HeaderEntryPoint)]
     [Arguments(DistanceMetric.Euclidean, AnnProviderQualificationDamage.HeaderRetainedBytes)]
     [Arguments(DistanceMetric.Euclidean, AnnProviderQualificationDamage.NodeOrdinal)]
@@ -21,7 +21,7 @@ internal sealed class AnnProviderQualificationTests
     [Arguments(DistanceMetric.Euclidean, AnnProviderQualificationDamage.NonfiniteVector)]
     [Arguments(DistanceMetric.Euclidean, AnnProviderQualificationDamage.SelfNeighbor)]
     [Arguments(DistanceMetric.Euclidean, AnnProviderQualificationDamage.DuplicateNeighbor)]
-    [Arguments(DistanceMetric.DotProduct, AnnProviderQualificationDamage.HeaderVersion)]
+    [Arguments(DistanceMetric.DotProduct, AnnProviderQualificationDamage.HeaderCount)]
     [Arguments(DistanceMetric.DotProduct, AnnProviderQualificationDamage.HeaderEntryPoint)]
     [Arguments(DistanceMetric.DotProduct, AnnProviderQualificationDamage.HeaderRetainedBytes)]
     [Arguments(DistanceMetric.DotProduct, AnnProviderQualificationDamage.NodeOrdinal)]

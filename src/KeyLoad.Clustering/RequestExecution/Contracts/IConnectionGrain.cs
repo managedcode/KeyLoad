@@ -3,7 +3,7 @@ using ManagedCode.Communication.CQRS;
 namespace KeyLoad.Clustering;
 
 /// <summary>One server-owned connection routes independent operations and joins their original work.</summary>
-[Orleans.Alias(GrainRoutingProtocol.RequestAlias), Orleans.CodeGeneration.Version(GrainRoutingProtocol.RequestInterfaceVersion)]
+[Orleans.Alias(GrainRoutingProtocol.RequestAlias)]
 public interface IConnectionGrain : Orleans.IGrainWithGuidKey
 {
     /// <summary>Consumes the bounded CQRS operation locally and returns its joined terminal reply.</summary>

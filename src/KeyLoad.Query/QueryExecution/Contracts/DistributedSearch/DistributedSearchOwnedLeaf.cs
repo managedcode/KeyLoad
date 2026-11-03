@@ -7,7 +7,6 @@ namespace KeyLoad.Query.QueryExecution;
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(DistributedSearchAliases.OwnedLeaf)]
 internal sealed record DistributedSearchOwnedLeaf(
-    [property: global::Orleans.Id(0)] int Version,
     [property: global::Orleans.Id(1)] DistributedSearchPhase Phase,
     [property: global::Orleans.Id(2)] SearchRequest Search,
     [property: global::Orleans.Id(3)] PhysicalShardRecord Owner,

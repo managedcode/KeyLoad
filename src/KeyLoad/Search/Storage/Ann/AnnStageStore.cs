@@ -148,7 +148,7 @@ internal sealed class AnnStageStore(AnnRootLease root, IOptions<AnnExecutionOpti
     private static void RequireProgress(AnnManifest manifest, AnnSeed current)
     {
         var through = manifest.IsPending ? manifest.ReplayThrough : manifest.Source.ThroughSequence;
-        if (manifest.Version != AnnProtocol.Version || manifest.CheckpointIntent is null
+        if (manifest.CheckpointIntent is null
             || manifest.CheckpointIntent.Consumer != manifest.Consumer || !manifest.CheckpointIntent.Effects.IsEmpty
             || manifest.ReplayAfter < Empty || through < manifest.ReplayAfter || through > manifest.Source.ThroughSequence
             || current.ProjectionCheckpoint != manifest.ReplayAfter && current.ProjectionCheckpoint != through)

@@ -6,12 +6,14 @@ AC-CQ-008 and AC-MP-001/002/012.
 This decision remains Accepted until delivered-source qualification is complete.
 
 Maintenance disposal joins (REQ-STORAGE-MAINTENANCE-JOIN-001..003 and
-AC-STORAGE-MAINTENANCE-JOIN-001..004 / AC-STORAGE-MAINTENANCE-SNAPSHOT-005 in
-StorageRecovery) require the silo-local
-ZoneTree owner to join its tracked merge threads and retire its Orleans
-maintenance timer before releasing tree and owner file handles. Cleanup calls and
-physical session close execute on the same captured Orleans owner context; no
-periodic Task or synchronous Task join schedules engine work outside that context.
+AC-STORAGE-MAINTENANCE-JOIN-001/002 / AC-STORAGE-MAINTENANCE-SNAPSHOT-005 in
+StorageRecovery) require the silo-local physical session to join retained reads
+before disposing native maintainers, trees and owner file handles. ZoneTree owns
+merge scheduling and cache cleanup through `CreateMaintainer()` for the MVCC and
+plain trees. KeyLoad owns no second maintenance timer or cache-lifetime policy.
+The actual held native merge, exclusive file access and two cold opens qualify
+the tracked-merge boundary; complete native background-job and deployed close
+qualification remain separate.
 
 ## Distinct-process owner regression
 
@@ -43,10 +45,9 @@ Orleans activations move.
 flowchart TD
     Host[Silo-local ZoneTree owner] --> Facade[ZoneTreeStore public facade]
     Facade --> Runtime[One runtime and physical ownership]
-    Runtime --> Gate[One read and apply gate]
-    Runtime --> Handles[Owner lock, identity, MVCC tree with ZoneTree's log, maintainer]
-    Gate --> Reads[View transaction range cursors and counters]
-    Gate --> Publication[One ZoneTree transaction per commit with system/position]
+    Runtime --> Reads[Native snapshot per callback with owned lifetime]
+    Runtime --> Handles[Owner lock, identity, MVCC and plain trees, native maintainers]
+    Runtime --> Publication[Native transaction with system position]
     Runtime --> Sync[SyncAsync over ZoneTree's write-ahead log]
     Runtime --> Backup[ZoneTree live backup and restore wrapper]
 ```
@@ -65,7 +66,7 @@ flowchart TD
    and maintenance have a single owner. Startup opens the tree once and ZoneTree
    replays its own log. Preserve constructor-failure and normal disposal orders with
    finally-based complete cleanup. Borrowed views, counters and budget timing stay
-   exact under the same gate.
+   exact under their native snapshot and joined callback lifetime.
 5. Review every diff against the criteria and build with all SDK/style/XML/numeric
    rules. Canonical GitHub runs real TUnit/MTP unit, process recovery and
    Docker/Aspire replicated-cluster .NET/MCP suites for the exact delivered SHA.

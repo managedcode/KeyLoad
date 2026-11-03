@@ -15,6 +15,6 @@ internal static class SerializedPayloadAssertions
         }
         await Assert.That(failure).IsNotNull();
         await Assert.That(failure!.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(failure.Message).IsEqualTo(PayloadVersion.InvalidPayload);
+        await Assert.That(failure.Message).IsEqualTo(RuntimePayloadContract.InvalidPayload);
     }
 }

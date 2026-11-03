@@ -4,7 +4,7 @@ internal static class SqlBooleanTruthClusterFlow
 {
     internal static async Task RunAsync()
     {
-        var selection = new PostgresClusterSelection(PostgresClusterProtocol.ScalarDialect);
+        var selection = new PostgresClusterSelection();
         var failures = new List<Exception>();
         await global::KeyLoad.Server.ServerFailureObserver.ObserveAsync(async () =>
         {

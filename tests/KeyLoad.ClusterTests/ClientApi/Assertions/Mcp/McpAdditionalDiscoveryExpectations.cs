@@ -10,9 +10,9 @@ internal static class McpAdditionalDiscoveryExpectations
     } =
     [
         new("keyload_query_distributed_search", true, true, false, McpExpectedBody.Object, false,
-            ["version", "partitions", "search"],
-            ["version", "hits", "leaves", "statisticsEpoch", "complete"],
-            BodyPropertyFields: ["version", "partitions", "search"]),
+            ["partitions", "search"],
+            ["hits", "leaves", "statisticsEpoch", "complete"],
+            BodyPropertyFields: ["partitions", "search"]),
         new("keyload_inbox_commit", false, true, true, McpExpectedBody.Object, false,
             ["commandId", "target", "source", "messageId", "deliveryGeneration", "handlerScope", "executionGeneration", "effects"],
             ["receipt", "alreadyProcessed", "originalEffectsToken"],

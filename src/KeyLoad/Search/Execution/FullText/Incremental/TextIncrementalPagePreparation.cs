@@ -25,14 +25,12 @@ internal static class TextIncrementalPagePreparation
         var bootstrap = session.Manifest is null || session.Manifest.Bootstrap;
         var plan = Plan(session, page, bootstrap, budget, query);
         var through = bootstrap ? session.CurrentReplayUpperSequence : page.ThroughSequence;
-        var target = new TextIncrementalManifest(TextIncrementalProtocol.ManifestFormatVersion,
-            session.Scope, session.Request.Consumer, session.Request.IndexGeneration, session.Request.Placement,
+        var target = new TextIncrementalManifest(session.Scope, session.Request.Consumer, session.Request.IndexGeneration, session.Request.Placement,
             through, session.Upper.AppliedPosition, plan.NextRecord, plan.Records,
             session.Manifest?.Files ?? [], TextProjectionProtocol.TokenizerVersion,
             TextProjectionProtocol.HashVersion, session.Upper.ResourceSha256, bootstrap,
             session.Manifest?.LastSettledCheckpointRequest);
-        var intent = new TextIncrementalIntent(TextIncrementalProtocol.FormatVersion,
-            session.Request.CommandId, session.Scope, session.Request.Consumer, session.Request.IndexGeneration,
+        var intent = new TextIncrementalIntent(session.Request.CommandId, session.Scope, session.Request.Consumer, session.Request.IndexGeneration,
             session.Request.Placement, page.Consumer.Checkpoint, page.ThroughSequence, command,
             plan.Changes, plan.Records, plan.NextRecord, bootstrap,
             session.Upper.ResourceSha256, session.CurrentReplayUpperSequence, session.Upper.AppliedPosition);

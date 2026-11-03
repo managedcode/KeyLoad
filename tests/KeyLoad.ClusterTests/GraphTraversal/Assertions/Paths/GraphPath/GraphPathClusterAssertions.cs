@@ -9,7 +9,6 @@ internal static class GraphPathClusterAssertions
     internal static async Task AssertPathAsync(GraphShortestPathResult result, EntityRef[] vertices,
         string[] edgeIds, string label, long minimumCutPosition = 1L)
     {
-        await Assert.That(result.Version).IsEqualTo(1);
         await Assert.That(result.Found).IsTrue();
         await Assert.That(result.Hops).IsEqualTo(edgeIds.Length);
         await Assert.That(result.Vertices.SequenceEqual(vertices)).IsTrue();
@@ -27,7 +26,6 @@ internal static class GraphPathClusterAssertions
     internal static async Task AssertEquivalentAsync(GraphShortestPathResult expected,
         GraphShortestPathResult actual)
     {
-        await Assert.That(actual.Version).IsEqualTo(expected.Version);
         await Assert.That(actual.Found).IsEqualTo(expected.Found);
         await Assert.That(actual.Hops).IsEqualTo(expected.Hops);
         await Assert.That(actual.Vertices.SequenceEqual(expected.Vertices)).IsTrue();
@@ -47,7 +45,6 @@ internal static class GraphPathClusterAssertions
 
     internal static async Task AssertNoPathAsync(GraphShortestPathResult result)
     {
-        await Assert.That(result.Version).IsEqualTo(1);
         await Assert.That(result.Found).IsFalse();
         await Assert.That(result.Hops).IsNull();
         await Assert.That(result.Vertices).IsEmpty();

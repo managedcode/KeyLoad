@@ -91,7 +91,7 @@ internal static class SqlOffsetPages
         => await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
     private static async Task ManifestAsync(QueryEngine engine)
         => await Assert.That(JsonDefaults.Serialize(engine.Capabilities).AsSpan()
-            .SequenceEqual(JsonDefaults.Serialize(QueryCapabilityVersionExpected.Manifest()))).IsTrue();
+            .SequenceEqual(JsonDefaults.Serialize(QueryCapabilityParityExpected.Manifest()))).IsTrue();
     internal static async Task ReplayAsync(global::KeyLoad.Core.DatabaseEngine owner, CommandRequest seed, CommitReceipt receipt)
     {
         var actual = owner.ApplyEmbedded(owner.CreateCommand(OperationKind.Batch, seed.CommandId, SqlOffsetProtocol.Root, default, global::System.Text.Json.JsonSerializer.Serialize(seed, JsonDefaults.Options)), cancellationToken: default).Get<CommitReceipt>();

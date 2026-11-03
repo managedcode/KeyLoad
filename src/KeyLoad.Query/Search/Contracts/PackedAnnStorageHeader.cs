@@ -2,7 +2,6 @@ namespace KeyLoad.Query.Search;
 
 [Orleans.GenerateSerializer, Orleans.Alias(PackedAnnStorageAliases.Header)]
 internal sealed record PackedAnnStorageHeader(
-    [property: Orleans.Id(0)] int Version,
     [property: Orleans.Id(1)] VectorSpace Space,
     [property: Orleans.Id(2)] PackedAnnOptions Policy,
     [property: Orleans.Id(3)] int Count,

@@ -12,7 +12,6 @@ internal static class AnnProjectionJobProtocol
     internal const string Invalid = "The execution ANN durable operation binding is invalid.";
     internal const string Unresolved = "The original execution ANN durable operation is unresolved.";
     internal const string Exhausted = "The execution ANN durable operation exceeds its admitted journal bound.";
-    internal const int InterfaceVersion = 1;
     internal const int MetadataCount = 1;
     internal const int FirstGeneration = 1;
 

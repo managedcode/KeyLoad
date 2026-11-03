@@ -21,7 +21,7 @@ internal static class TextGenerationCensusOverlap
         using var pause = new TextGenerationPause();
         var root = Path.Combine(database.Directory, Collection);
         using var projection = new RuntimeTextProjection(root,
-            database.Store.Identity.NodeId, UnitTextOptions.Execution(), faultObserver: pause.Observe);
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()), faultObserver: pause.Observe);
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
         var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var original = await engine.SearchAsync("root", request, cancellation);
@@ -75,7 +75,7 @@ internal static class TextGenerationCensusOverlap
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, TextPath, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

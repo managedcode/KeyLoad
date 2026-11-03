@@ -8,7 +8,7 @@ internal static class TextProjectionLifecycle
         ResourceDefinition resource, SearchRequest request)
     {
         var identity = database.Store.Identity;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, request.Partition, request.Collection, request.TextField!, principal.Id,
             principal.PolicyEpoch, resource.SchemaVersion);
     }

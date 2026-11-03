@@ -64,5 +64,5 @@ internal sealed class GraphValidationState
         }
     }
 
-    private static void Fail() => throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+    private static void Fail() => throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
 }

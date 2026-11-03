@@ -15,7 +15,6 @@ internal static class TextProtocol
     internal const string OwnerPendingFile = "owner.pending";
     internal const string RuntimeDirectoryCore = "execution";
     internal const string GenerationPrefix = "generation-";
-    internal const int FormatVersion = 1;
     internal const int KeyBytes = sizeof(ulong) * 3;
     internal const int ValueBytes = sizeof(byte);
     internal const int PostingBytes = KeyBytes + ValueBytes;

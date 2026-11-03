@@ -2,7 +2,6 @@ namespace KeyLoad.FunctionalTests.OrleansExecution;
 
 /// <summary>Exercises binary durable-state writes, activation replay, and deletion.</summary>
 [Alias(RuntimeJournalReplayProtocol.InterfaceAlias)]
-[global::Orleans.CodeGeneration.Version(1)]
 internal interface IRuntimeJournalReplayGrain : IGrainWithStringKey
 {
     /// <summary>Writes a payload to the execution journal.</summary>

@@ -2,12 +2,10 @@ namespace KeyLoad.ClusterTests.QueryExecution;
 
 internal static class PartitionQueryMcpProtocol
 {
-    internal const string Version = "version";
     internal const string Partitions = "partitions";
     internal const string Query = "query";
     internal const string Parameters = "parameters";
     internal const string AllowFullScan = "allowFullScan";
-    internal const string AstVersion = "astVersion";
     internal const string Rows = "rows";
     internal const string Leaves = "leaves";
     internal const string Complete = "complete";

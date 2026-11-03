@@ -19,7 +19,6 @@ internal static class ExistingStoreInspectionAssertions
         var receipt = await ReceiptAsync(result, successful: true);
         await Assert.That(receipt.NodeId).IsEqualTo(expectedIdentity.NodeId);
         await Assert.That(receipt.Incarnation).IsEqualTo(expectedIdentity.Incarnation);
-        await Assert.That(receipt.FormatVersion).IsEqualTo(ZoneTreeExistingStoreFixture.CurrentFormat);
         await Assert.That(receipt.Position).IsEqualTo(expectedPosition);
         await Assert.That(receipt.Value).IsEquivalentTo(expectedValue, CollectionOrdering.Matching);
         await Assert.That(receipt.FailureTypes).IsEmpty();

@@ -9,6 +9,7 @@ internal static class PartitionRecordFamilies
     internal const string AggregateSnapshot = "aggregate-snapshot";
     internal const string AnalyticsEvent = "analytics-event";
     internal const string AnalyticsGeneration = "analytics-generation";
+    internal const string AnalyticsTimestamp = global::KeyLoad.Storage.ResourceStorageKeys.AnalyticsTimestampFamily;
     internal const string Bm25CorpusCurrent = global::KeyLoad.Core.Search.Bm25CorpusProtocol.CurrentFamily;
     internal const string DeadLetter = "dead-letter";
     internal const string FileHead = global::KeyLoad.Core.BlobStorage.FileStorageProtocol.HeadFamily;
@@ -84,6 +85,7 @@ internal static class PartitionRecordFamilies
         AggregateSnapshot,
         AnalyticsEvent,
         AnalyticsGeneration,
+        AnalyticsTimestamp,
         Bm25CorpusCurrent,
         DeadLetter,
         Document,

@@ -31,11 +31,10 @@ internal static class GraphIncomingMcpCatalogAssertions
     private static async Task VerifyInputAsync(JsonElement schema)
     {
         var request = McpSchemaInspector.DefinedRequest(schema);
-        var fields = ImmutableArray.Create(GraphIncomingMcpProtocol.Version, GraphIncomingMcpProtocol.Target,
+        var fields = ImmutableArray.Create(GraphIncomingMcpProtocol.Target,
             GraphIncomingMcpProtocol.Graph, GraphIncomingMcpProtocol.Limit);
         await VerifyObjectAsync(request, fields);
         var properties = request.GetProperty(McpSchemaInspector.Properties);
-        await VerifyPrimitiveAsync(schema, properties.GetProperty(GraphIncomingMcpProtocol.Version), McpSchemaInspector.Integer);
         await VerifyPrimitiveAsync(schema, properties.GetProperty(GraphIncomingMcpProtocol.Graph), McpSchemaInspector.String);
         await VerifyPrimitiveAsync(schema, properties.GetProperty(GraphIncomingMcpProtocol.Limit), McpSchemaInspector.Integer);
         await VerifyEntityAsync(schema, properties.GetProperty(GraphIncomingMcpProtocol.Target));
@@ -44,11 +43,10 @@ internal static class GraphIncomingMcpCatalogAssertions
     private static async Task VerifyOutputAsync(JsonElement schema)
     {
         var page = Resolve(schema, schema.GetProperty(McpSchemaInspector.Defs).GetProperty(GraphIncomingMcpProtocol.Result));
-        var fields = ImmutableArray.Create(GraphIncomingMcpProtocol.Version, GraphIncomingMcpProtocol.Rows,
+        var fields = ImmutableArray.Create(GraphIncomingMcpProtocol.Rows,
             GraphIncomingMcpProtocol.CutPosition, GraphIncomingMcpProtocol.Projection);
         await VerifyObjectAsync(page, fields);
         var properties = page.GetProperty(McpSchemaInspector.Properties);
-        await VerifyPrimitiveAsync(schema, properties.GetProperty(GraphIncomingMcpProtocol.Version), McpSchemaInspector.Integer);
         await VerifyPrimitiveAsync(schema, properties.GetProperty(GraphIncomingMcpProtocol.CutPosition), McpSchemaInspector.Integer);
         await VerifyPrimitiveAsync(schema, properties.GetProperty(GraphIncomingMcpProtocol.Projection), McpSchemaInspector.String);
         await VerifyRowsAsync(schema, properties.GetProperty(GraphIncomingMcpProtocol.Rows));

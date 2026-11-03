@@ -24,7 +24,7 @@ internal static class TextProjectionRecoveryAssertions
             var request = new SearchRequest(receipt.Partition, receipt.Collection, "/text", receipt.Query, Limit: 10);
             var oracle = await new SearchEngine(database, RecoveryExecutionOptions.QueryExecution()).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
             using var projection = new RuntimeTextProjection(indexDirectory, store.Identity.NodeId,
-                RecoveryExecutionOptions.RuntimeText());
+                RecoveryExecutionOptions.RuntimeText(), new TextResourceOwnership(RecoveryExecutionOptions.RuntimeText()));
             var actual = await new SearchEngine(database, RecoveryExecutionOptions.QueryExecution(), projection).SearchAsync(CrashFixtureValues.Principal, request, cancellationToken);
 
             await AssertParityAsync(oracle, actual, receipt.ExpectedIds);
@@ -38,7 +38,6 @@ internal static class TextProjectionRecoveryAssertions
     {
         await Assert.That(store.Identity.NodeId).IsEqualTo(receipt.NodeId);
         await Assert.That(store.Identity.Incarnation).IsEqualTo(receipt.Incarnation);
-        await Assert.That(store.Identity.FormatVersion).IsEqualTo(receipt.DataEpoch);
         await Assert.That(store.Identity.ReadGeneration).IsEqualTo(receipt.ReadGeneration);
         await Assert.That(store.Position).IsEqualTo(receipt.Position);
         var canonicalState = TextCanonicalStateCapture.Capture(store);
@@ -97,7 +96,6 @@ internal static class TextProjectionRecoveryAssertions
             await File.ReadAllBytesAsync(manifestPath, cancellationToken));
         await Assert.That(manifest.Scope.NodeId).IsEqualTo(receipt.NodeId);
         await Assert.That(manifest.Scope.Incarnation).IsEqualTo(receipt.Incarnation);
-        await Assert.That(manifest.Scope.DataEpoch).IsEqualTo(receipt.DataEpoch);
         await Assert.That(manifest.Scope.ReadGeneration).IsEqualTo(receipt.ReadGeneration);
         await Assert.That(manifest.Scope.Position).IsEqualTo(receipt.Position);
         await Assert.That(manifest.Scope).IsEquivalentTo(receipt.Scope);

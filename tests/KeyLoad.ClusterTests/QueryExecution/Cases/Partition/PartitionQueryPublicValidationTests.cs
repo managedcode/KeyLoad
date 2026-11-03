@@ -12,11 +12,10 @@ namespace KeyLoad.ClusterTests.QueryExecution;
 [NotInParallel]
 internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture)
 {
-    private const int InvalidVersion = 2;
     private const int LargeValueChars = 70_000;
 
     [Test]
-    public async Task AcPquery001InvalidVersionAndLeafOverflowAreValidationWithHealthyFollowup()
+    public async Task AcPquery001InvalidPartitionsAndLeafOverflowAreValidationWithHealthyFollowup()
     {
         using var deadline = McpCallerDeadline.Create();
         var scenario = await PartitionQueryClusterScenario.CreateAsync(fixture, deadline.Token).ConfigureAwait(false);
@@ -24,16 +23,6 @@ internal sealed class PartitionQueryPublicValidationTests(ClusterFixture fixture
         var sdk = new KeyLoadClient(http, fixture.AdminKey, IntegrationClientOptions.Execution());
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             fixture.AdminKey, deadline.Token).ConfigureAwait(false);
-        await AssertFailureAsync(sdk, mcp, scenario.Request() with
-        {
-            Version = InvalidVersion
-        },
-            ErrorCode.Validation, deadline.Token).ConfigureAwait(false);
-        await AssertFailureAsync(sdk, mcp, scenario.Request() with
-        {
-            AstVersion = InvalidVersion
-        },
-            ErrorCode.UnsupportedCapability, deadline.Token).ConfigureAwait(false);
         await AssertFailureAsync(sdk, mcp, scenario.Request([]), ErrorCode.Validation, deadline.Token)
             .ConfigureAwait(false);
         await AssertFailureAsync(sdk, mcp,

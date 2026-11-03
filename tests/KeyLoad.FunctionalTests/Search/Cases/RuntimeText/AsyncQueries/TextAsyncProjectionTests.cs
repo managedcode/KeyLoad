@@ -61,7 +61,7 @@ internal sealed class TextAsyncProjectionTests
 
     private static RuntimeTextProjection CreateProjection(TestDatabase database)
         => new(Path.Combine(database.Directory, "execution-text"),
-            database.Store.Identity.NodeId, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
 
     private static int GenerationCount(TestDatabase database)
         => Directory.EnumerateDirectories(Path.Combine(database.Directory, "execution-text"))

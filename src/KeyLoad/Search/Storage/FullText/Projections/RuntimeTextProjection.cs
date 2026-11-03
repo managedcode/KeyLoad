@@ -19,11 +19,12 @@ internal sealed class RuntimeTextProjection : ITextProjection
     private readonly Func<string, ulong> tokenHash;
     private readonly Action<TextFaultStage>? faultObserver;
     private readonly Lock disposeSync = new();
-    private readonly TextResourceOwnership? resources;
+    private readonly TextResourceOwnership resources;
 
-    internal RuntimeTextProjection(string directory, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, Func<string, ulong>? tokenHash = null, Action<TextFaultStage>? faultObserver = null, TextResourceOwnership? resources = null)
+    internal RuntimeTextProjection(string directory, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership resources, Func<string, ulong>? tokenHash = null, Action<TextFaultStage>? faultObserver = null)
     {
         ArgumentNullException.ThrowIfNull(executionOptions) /* KLD0041: BCL null validation accepts the executionOptions IOptions reference through its object parameter. */;
+        ArgumentNullException.ThrowIfNull(resources) /* KLD0041: BCL null validation accepts the resources TextResourceOwnership reference through its object parameter. */;
         executionOptions.Value.Validate();
         this.executionOptions = executionOptions;
         this.resources = resources;
@@ -36,10 +37,6 @@ internal sealed class RuntimeTextProjection : ITextProjection
 
     public ITextProjectionLease Acquire(TextProjectionScope scope, ReadExecutionBudget budget)
     {
-        if (resources is null)
-        {
-            return RuntimeAcquire(scope, budget);
-        }
         var retained = resources.ReserveLease(budget);
         try
         {

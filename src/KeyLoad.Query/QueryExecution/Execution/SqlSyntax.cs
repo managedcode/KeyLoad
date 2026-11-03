@@ -1,6 +1,6 @@
 namespace KeyLoad.Query.QueryExecution;
 
-/// <summary>Canonical Q1/Q2 syntax tokens, numeric limits, and stable error details.</summary>
+/// <summary>Canonical SQL syntax tokens, numeric limits, and stable error details.</summary>
 internal static class SqlSyntax
 {
     internal const string Events = "EVENTS";
@@ -25,7 +25,7 @@ internal static class SqlSyntax
     internal const string MetadataIdPath = MetadataPrefix + MetadataId;
     internal const string MetadataRevisionPath = MetadataPrefix + MetadataRevision;
     internal const string InvalidDetail = "The SQL statement is invalid for the supported dialect.";
-    internal const string UnsupportedJoinDetail = "The query dialect does not support joins.";
+    internal const string UnsupportedJoinDetail = "This query source does not support joins.";
     internal const int DefaultLimit = 100;
 
     internal static KeyLoadException Invalid() => Errors.Fail(ErrorCode.Validation, InvalidDetail);

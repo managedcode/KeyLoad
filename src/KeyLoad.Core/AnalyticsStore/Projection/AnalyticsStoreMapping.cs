@@ -25,28 +25,6 @@ internal static class AnalyticsStoreMapping
         };
     }
 
-    internal static AnalyticsEvent Event(AnalyticsAggregateSnapshot snapshot, AnalyticsStoreDimensions dimensions, AnalyticsEventRecord row)
-    {
-        var value = new AnalyticsEvent(AnalyticsStoreOptions.Event)
-        {
-            Site = AnalyticsStoreOptions.Site,
-            Timestamp = row.Timestamp,
-            NonInteractive = true
-        };
-        foreach (var name in snapshot.Request.GroupBy)
-        {
-            value.Dimensions.Add(Dimension(snapshot.Schema, name), dimensions.ForEvent(name, row.Dimensions[name]));
-        }
-
-        foreach (var name in snapshot.Request.Metrics.Where(metric => metric.Operation != AnalyticsAggregateKind.Count)
-            .Select(metric => metric.Metric).Distinct(StringComparer.Ordinal))
-        {
-            value.Values.Add(Value(snapshot.Schema, name), row.Metrics[name]);
-        }
-
-        return value;
-    }
-
     internal static AnalyticsQuery Query(AnalyticsAggregateSnapshot snapshot)
     {
         var request = snapshot.Request;

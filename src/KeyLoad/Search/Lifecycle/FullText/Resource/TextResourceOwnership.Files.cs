@@ -1,27 +1,22 @@
+using KeyLoad.Core;
+
 namespace KeyLoad.Server.Search;
 
 internal sealed partial class TextResourceOwnership
 {
+    internal void CheckPhysical(ReadExecutionBudget? budget)
+    {
+        lock (gate)
+        {
+            Check(budget);
+        }
+    }
 
     internal TextOpenFileGroup OpenFile(string path, ZoneTree.AbstractFileStream.IFileStream stream)
         => TextOwnedFileMutation.Open(gate, openFiles, path, stream);
 
-    internal void BeginCloseFile(TextOpenFileGroup group, ZoneTree.AbstractFileStream.IFileStream stream)
-    {
-        lock (gate)
-        {
-            openFiles.BeginClose(group, stream);
-        }
-    }
-
-    internal void CloseFile(TextOpenFileGroup group, ZoneTree.AbstractFileStream.IFileStream stream)
-    {
-        lock (gate)
-        {
-            openFiles.Close(group, stream);
-            Check(null);
-        }
-    }
+    internal void CloseOwnedFile(TextOpenFileGroup group, ZoneTree.AbstractFileStream.IFileStream stream)
+        => TextOwnedFileMutation.CloseOwnedFile(gate, openFiles, () => Check(null), group, stream);
 
     internal void RequireKnownFile(string path)
     {

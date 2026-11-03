@@ -47,7 +47,7 @@ internal static class TextCapturedReadFactory
     {
         var cut = execution.Cut;
         if (cut.NodeId != original.NodeId || cut.Incarnation != original.Incarnation
-            || cut.FormatVersion != original.DataEpoch || cut.ReadGeneration != original.ReadGeneration
+            || cut.ReadGeneration != original.ReadGeneration
             || cut.Position != original.Position)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, Invalid);

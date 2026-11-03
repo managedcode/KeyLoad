@@ -27,7 +27,7 @@ internal sealed class TextProtectedRebuildColdOwner : IDisposable
         get
         {
             projection ??= new(ProjectionRoot,
-                Store.Identity.NodeId, UnitTextOptions.Execution());
+                Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
             return new(Database, UnitExecutionOptions.QueryExecution(), projection);
         }
     }

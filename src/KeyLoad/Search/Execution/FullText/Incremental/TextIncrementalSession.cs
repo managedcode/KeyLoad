@@ -28,12 +28,11 @@ internal sealed class TextIncrementalSession
         ReplayUpperSequence = replayUpperSequence;
         Budget = budget;
         Checkpoint = admitted.Checkpoint;
-        Scope = retainedScope ?? new(request.NodeId, admitted.Incarnation, admitted.DataEpoch, admitted.ReadGeneration,
+        Scope = retainedScope ?? new(request.NodeId, admitted.Incarnation, admitted.ReadGeneration,
             admitted.Position, request.Consumer.Partition, request.Collection, request.Field,
             admitted.PrincipalId, admitted.PolicyEpoch, admitted.SchemaVersion);
         TextValidation.ValidateScope(Scope, request.NodeId);
-        if (Scope.Incarnation != admitted.Incarnation || Scope.DataEpoch != admitted.DataEpoch
-            || Scope.ReadGeneration != admitted.ReadGeneration || Scope.Position > admitted.Position
+        if (Scope.Incarnation != admitted.Incarnation || Scope.ReadGeneration != admitted.ReadGeneration || Scope.Position > admitted.Position
             || Scope.PrincipalId != admitted.PrincipalId || Scope.PolicyEpoch != admitted.PolicyEpoch
             || Scope.SchemaVersion != admitted.SchemaVersion || Scope.Partition != request.Consumer.Partition
             || Scope.Collection != request.Collection || Scope.Field != request.Field)
@@ -118,8 +117,7 @@ internal sealed class TextIncrementalSession
     internal void RequireUpper(TextSeedCapture current)
     {
         Budget.Check();
-        if (current.Incarnation != Upper.Incarnation || current.DataEpoch != Upper.DataEpoch
-            || current.ReadGeneration != Upper.ReadGeneration || current.PrincipalId != Upper.PrincipalId
+        if (current.Incarnation != Upper.Incarnation || current.ReadGeneration != Upper.ReadGeneration || current.PrincipalId != Upper.PrincipalId
             || current.PolicyEpoch != Upper.PolicyEpoch || current.SchemaVersion != Upper.SchemaVersion
             || current.ResourceSha256 != Upper.ResourceSha256
             || current.UpperSequence != Upper.UpperSequence || current.AppliedPosition < Upper.AppliedPosition)

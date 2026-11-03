@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server.Search;
 
-internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership resources)
 {
     internal void Run(TextGenerationSlot?[] slots)
     {

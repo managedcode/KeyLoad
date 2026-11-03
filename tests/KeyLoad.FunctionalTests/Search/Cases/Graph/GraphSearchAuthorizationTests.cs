@@ -19,13 +19,13 @@ internal sealed class GraphSearchAuthorizationTests
         var hiddenSeedWalk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Middle));
         var hiddenSeed = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
-            GraphSearchTestSupport.Reader, new(1, RetrievalRequest(database),
+            GraphSearchTestSupport.Reader, new(RetrievalRequest(database),
                 Retriever: new(hiddenSeedWalk)), TestContext.Current!.Execution.CancellationToken)))!;
         var visibleWalk = GraphSearchTestSupport.Walk(
             GraphSearchTestSupport.Vertex(database, GraphSearchTestSupport.Projects, GraphSearchTestSupport.Root));
 
         var result = await engine.GraphSearchAsync(GraphSearchTestSupport.Reader,
-            new(1, RetrievalRequest(database), Retriever: new(visibleWalk)),
+            new(RetrievalRequest(database), Retriever: new(visibleWalk)),
             TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(hiddenSeed.Code).IsEqualTo(ErrorCode.NotFound);
@@ -49,14 +49,14 @@ internal sealed class GraphSearchAuthorizationTests
         var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution());
 
         var denied = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
-            GraphSearchTestSupport.Reader, new(1, search, Retriever: new(walk)),
+            GraphSearchTestSupport.Reader, new(search, Retriever: new(walk)),
             TestContext.Current!.Execution.CancellationToken)))!;
         var zeroWeightDenied = (await Assert.ThrowsExactlyAsync<KeyLoadException>(() => engine.GraphSearchAsync(
-            GraphSearchTestSupport.Reader, new(1, search, Retriever: new(walk, Weight: 0)),
+            GraphSearchTestSupport.Reader, new(search, Retriever: new(walk, Weight: 0)),
             TestContext.Current!.Execution.CancellationToken)))!;
         GraphSearchTestSupport.PersistReader(database, fieldGrants: [SecretGrant]);
         var allowed = await engine.GraphSearchAsync(GraphSearchTestSupport.Reader,
-            new(1, search, Retriever: new(walk)), TestContext.Current!.Execution.CancellationToken);
+            new(search, Retriever: new(walk)), TestContext.Current!.Execution.CancellationToken);
 
         await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
         await Assert.That(zeroWeightDenied.Code).IsEqualTo(ErrorCode.PermissionDenied);

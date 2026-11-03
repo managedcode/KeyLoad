@@ -2,7 +2,6 @@ namespace KeyLoad.Clustering;
 
 internal static class AnnProjectionObservationProtocol
 {
-    internal const int Version = 1;
     internal const long FirstGeneration = 1;
     internal const int NoReadWork = 0;
     internal const string KindAlias = "keyload.ann-projection-observation.kind";

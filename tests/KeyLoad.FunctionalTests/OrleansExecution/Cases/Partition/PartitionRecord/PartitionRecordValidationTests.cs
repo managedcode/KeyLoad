@@ -66,7 +66,7 @@ internal sealed class PartitionRecordValidationTests
         var row = PartitionRecordFixture.Row(Family, Partition, "row", "value");
         PartitionRecordFixture.Seed(fixture.Store, row);
         var prefix = KeySpace.Partition(Family, Partition);
-        var invalidSuffix = new byte[] { KeyCodec.Version, 0x50, 0xC0, 0x00, 0x00 };
+        var invalidSuffix = new byte[] { KeyCodec.PrefixMarker, 0x50, 0xC0, 0x00, 0x00 };
         var malformed = new byte[prefix.Length + invalidSuffix.Length - 1];
         prefix.CopyTo(malformed, 0);
         invalidSuffix.AsSpan(1).CopyTo(malformed.AsSpan(prefix.Length));

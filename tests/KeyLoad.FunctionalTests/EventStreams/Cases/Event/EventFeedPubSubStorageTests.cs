@@ -7,7 +7,6 @@ namespace KeyLoad.FunctionalTests.EventStreams;
 
 internal sealed class EventFeedPubSubStorageTests
 {
-    private const int Version = 1;
     private const long FirstRevision = 1;
     private const long SecondRevision = 2;
     private const long Coverage = 3;
@@ -24,7 +23,7 @@ internal sealed class EventFeedPubSubStorageTests
         using var storage = new EventFeedPubSubStorage(services);
         var firstId = Id(FirstKey);
         var secondId = Id(SecondKey);
-        var firstValue = new EventFeedWakeupHint(Version, Guid.NewGuid(), FirstRevision, Coverage);
+        var firstValue = new EventFeedWakeupHint(Guid.NewGuid(), FirstRevision, Coverage);
         var first = new GrainState<EventFeedWakeupHint>(firstValue);
         await storage.WriteStateAsync(EventFeedPubSubProtocol.StateName, firstId, first);
         var originalTag = first.ETag;

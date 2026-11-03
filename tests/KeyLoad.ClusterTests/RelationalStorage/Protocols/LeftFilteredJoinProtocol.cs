@@ -23,7 +23,7 @@ internal static class LeftFilteredJoinProtocol
             [MinimumFieldKey] = System.Text.Json.JsonSerializer.SerializeToElement(7)
         };
     internal static QueryRequest Query(PartitionRef partition)
-        => new(partition, Sql, Parameters(), AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
+        => new(partition, Sql, Parameters(), AllowFullScan: true);
     internal static SqlOperationRequest Request(PartitionRef partition)
-        => new(partition, Sql, Parameters(), AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
+        => new(partition, Sql, Parameters(), AllowFullScan: true);
 }

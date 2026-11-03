@@ -51,8 +51,7 @@ internal static class AnnLoadedSources
             throw Errors.Fail(ErrorCode.Corruption, AnnProtocol.Corrupt);
         }
         var source = manifest.Source;
-        var cut = new AnnSeedCut(source.NodeId, source.Incarnation, source.StoreFormatVersion,
-            source.KeyCodecVersion, source.ReadGeneration, source.Position, source.AppliedPosition,
+        var cut = new AnnSeedCut(source.NodeId, source.Incarnation, source.ReadGeneration, source.Position, source.AppliedPosition,
             source.ThroughSequence, source.OutboxFirstAvailable);
         var seed = new AnnSeed(scope, cut, snapshot.Records, digest, owned, peak, work.Units)
         {

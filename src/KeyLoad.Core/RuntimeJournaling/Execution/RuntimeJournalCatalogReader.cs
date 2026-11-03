@@ -33,7 +33,7 @@ internal static class RuntimeJournalCatalogReader
         }
         ValidateNoOrphanChunks(view, headers, options, cancellationToken);
         var quota = RuntimeJournalRecordAccess.ReadRecord<RuntimeJournalQuota>(view, RuntimeJournalKeys.Quota());
-        if (quota is not { Version: RuntimeJournalProtocol.CurrentVersion }
+        if (quota is null
             || quota.JournalCount != headers.Count || quota.TotalBytes != bytes || bytes > options.MaximumTotalBytes)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, RuntimeJournalProtocol.InvalidState);
@@ -78,7 +78,6 @@ internal static class RuntimeJournalCatalogReader
         }
         if (components.Length != RuntimeJournalProtocol.ChunkKeyComponentCount
             || components[RuntimeJournalProtocol.ChunkKeySpaceComponent] is not { Kind: KeyComponentKind.Text, Text: var space } || space != RuntimeJournalProtocol.Space
-            || components[RuntimeJournalProtocol.ChunkKeyVersionComponent] is not { Kind: KeyComponentKind.WholeNumber, WholeNumber: var version } || version != RuntimeJournalProtocol.CurrentVersion
             || components[RuntimeJournalProtocol.ChunkKeyKindComponent] is not { Kind: KeyComponentKind.Text, Text: var kind } || kind != RuntimeJournalProtocol.ChunkKey
             || components[RuntimeJournalProtocol.ChunkKeyNameComponent] is not { Kind: KeyComponentKind.Text, Text: var name }
             || components[RuntimeJournalProtocol.ChunkKeyIndexComponent] is not { Kind: KeyComponentKind.WholeNumber, WholeNumber: var index }
@@ -95,7 +94,7 @@ internal static class RuntimeJournalCatalogReader
         var chunk = Decode<RuntimeJournalChunk>(value);
         var remaining = header.Length - index * options.ChunkBytes;
         var wanted = checked((int)Math.Min(options.ChunkBytes, remaining));
-        if (chunk.Data is null || chunk.Version != RuntimeJournalProtocol.CurrentVersion
+        if (chunk.Data is null
             || chunk.Index != index || chunk.Data.Length != wanted)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, RuntimeJournalProtocol.InvalidState);
@@ -106,8 +105,7 @@ internal static class RuntimeJournalCatalogReader
 
     private static void ValidateHeader(RuntimeJournalHeader header, RuntimeJournalOptions options)
     {
-        if (header.Name is null || header.MetadataETag is null || header.Properties is null
-            || header.Version != RuntimeJournalProtocol.CurrentVersion || header.InstanceId == Guid.Empty
+        if (header.Name is null || header.MetadataETag is null || header.Properties is null || header.InstanceId == Guid.Empty
             || header.OwnerGeneration < RuntimeJournalProtocol.InitialOwnerGeneration
             || header.ContentRevision < RuntimeJournalProtocol.EmptyRevision || header.Length < RuntimeJournalProtocol.EmptyLength
             || header.Length > options.MaximumJournalBytes

@@ -62,8 +62,8 @@ internal static class QueueViewLeaseIsolationReads
             SdkAst => await McpCallerAssertions.SdkSuccessAsync(await caller.Sdk.QueryAstAsync(ast, token)),
             McpSql => (await McpCallerAssertions.SuccessAsync<QueryPage>(await caller.Mcp.CallAsync(McpCallerTools.QueryExecute, sql, token))).Value,
             McpAst => (await McpCallerAssertions.SuccessAsync<QueryPage>(await caller.Mcp.CallAsync(McpCallerTools.QueryAst, ast, token))).Value,
-            SdkQ1 => await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, new(state.Scenario.Partition, sql.Sql, AllowFullScan: true), token),
-            McpQ1 => await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, new(state.Scenario.Partition, sql.Sql, AllowFullScan: true), token),
+            SdkSqlOperation => await SqlClusterProtocol.SdkAsync<QueryPage>(caller.Sdk, new(state.Scenario.Partition, sql.Sql, AllowFullScan: true), token),
+            McpSqlOperation => await SqlClusterProtocol.McpAsync<QueryPage>(caller.Mcp, new(state.Scenario.Partition, sql.Sql, AllowFullScan: true), token),
             _ => throw new InvalidOperationException(UnknownRoute)
         };
     }

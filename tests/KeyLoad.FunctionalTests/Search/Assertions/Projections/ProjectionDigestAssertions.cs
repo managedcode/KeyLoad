@@ -104,8 +104,7 @@ internal static class ProjectionDigestAssertions
             var head = fixture.Database.ReadOutboxHead(view, fixture.Partition);
             var applied = view.ReadOwnedValue(KeySpace.AppliedBytes) is { } bytes
                 ? OrleansSerialization.Deserialize<long>(bytes) : 0L;
-            return new AnnSeedCut(identity.NodeId, identity.Incarnation, identity.FormatVersion,
-                identity.KeyCodecVersion, identity.ReadGeneration, fixture.Harness.Store.Position,
+            return new AnnSeedCut(identity.NodeId, identity.Incarnation, identity.ReadGeneration, fixture.Harness.Store.Position,
                 applied, head.Tail, head.FirstAvailable);
         });
         await Assert.That(seed.Cut).IsEqualTo(expected);

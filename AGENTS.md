@@ -15,17 +15,20 @@ and required correctness gates.
 
 KeyLoad is under development. Replace superseded implementations completely when
 adopting an approved new design. Remove their exclusive helpers, contracts, tests
-and documentation together. Keep one current implementation; do not preserve old
-formats, backward compatibility routes or conversion mechanisms. The native
-ZoneTree MVCC storage adoption uses the current data epoch across storage and
-internal request purposes.
+and documentation together. Keep one current implementation and one current
+storage and request shape. Remove artificial KeyLoad format epochs, numbered
+contract generations, old-version branches and their exclusive tests and docs.
+Do not add data migrations, backward readers, compatibility routes, automatic
+conversions or version-selecting execution. Existing development stores need no
+preservation. Native MVCC versions, entity revisions and authorization epochs
+retain their actual concurrency and security purposes.
 
 ## Product and runtime
 
 KeyLoad is one database for AI agents. Documents, typed tables, graphs,
 vectors/search, files/blobs, queues, events and time series share canonical entity
 references and can participate in the same authorized operation. SQL is the
-shared versioned language across these models. The product specification is
+shared current language across these models. The product specification is
 `docs/design/product-specification.md`; `docs/Architecture.md` maps the current
 runtime. User instructions control scope and authorization.
 
@@ -356,12 +359,22 @@ least-privilege permissions.
 
 ## Dependency ownership and delivery
 
-Version increases require the owner's explicit permission for that specific increase. This includes packages, releases, grain interfaces, protocol versions, serializer aliases and persisted/public contracts. Cleanup, refactoring, contract changes and standing delivery authorization do not authorize a version increase.
+KeyLoad is a new project under development. The owner authorizes changing the
+current storage shape and grain/protocol/serializer contracts as needed for the
+requested implementation, without repeated approval questions or artificial
+format-version increments. Existing development stores do not require preservation.
+Maintain one current implementation and remove superseded contracts and their
+exclusive support; do not add backward readers, conversion paths or version
+selection. Published product release numbering follows its existing workflow.
+
+Unrelated dependency version increases and new dependency adoption still require
+the owner's explicit permission unless a specific standing authorization below
+applies.
 
 Published `ZoneTree` package updates have standing owner authorization; apply them
 without asking for permission again. Review the release and public API changes,
 then run the affected build, WAL, recovery and performance checks. This exception
-does not authorize unrelated package or KeyLoad contract version increases.
+does not authorize unrelated package adoption or version increases.
 
 `ManagedCode.*` projects and packages are ours. A confirmed defect is fixed in its
 owning sibling repository after reading its policy. Do not replace the dependency,

@@ -8,7 +8,7 @@ Canonical persisted keys must encode resource scope, identity, and ordered range
 
 ## Rationale and consequences
 
-One codec enables deterministic storage ordering, scans, and independent providers. Ad-hoc concatenation or case/Unicode normalization would make identity ambiguous and could expose cross-resource data. The current key format is fixed by the first-release storage contract; unsupported versions fail closed. Golden vectors and rollback constraints protect the current encoding.
+One codec enables deterministic storage ordering, scans, and independent providers. Ad-hoc concatenation or case/Unicode normalization would make identity ambiguous and could expose cross-resource data. The current key encoding has one framing marker; an absent or invalid marker fails closed. Golden vectors protect exact ordered bytes and scalar normalization.
 
 ## Related requirements
 
@@ -33,15 +33,15 @@ flowchart LR
     Codec --> Golden[Golden encoding vectors]
 ```
 
-## v1 validation and ownership
+## Current validation and ownership
 
 This decision adds REQ-KEYCODEC-001..004 and AC-KEYCODEC-001..004 in
 [StorageRecovery](../Features/StorageRecovery.md). This freezes validation of
 the existing format; every byte emitted for a supported valid existing key
-remains unchanged. Identity digests, aliases/Ids, current data epoch8, the write-ahead log,
-cluster and public wire DTOs remain unchanged. Unsupported data epochs fail closed.
+remains unchanged. Identity digests, aliases/Ids, the write-ahead log,
+cluster and public wire DTOs remain unchanged. The framing marker and each scalar payload are validated before use.
 
-The v1 type order is missing10, null11, bool20, int64/normalized int30, decimal31,
+The current type order is missing10, null11, bool20, int64/normalized int30, decimal31,
 finite double32, UTC timestamp40, UTF-8 string50, and byte array60 (hex tags).
 Guid is an existing input convenience normalized to its lowercase `N` string;
 it is not a separate tagged type. Timestamps normalize their comparison identity
@@ -51,7 +51,7 @@ UTF-8 ordinal ordering, including zero escaping and composite prefix ordering.
 
 | Boundary | Frozen result |
 |---|---|
-| Encode0..256 components | Exact existing valid writer bytes; empty composite is version byte1 |
+| Encode0..256 components | Exact existing valid writer bytes; empty composite is framing marker1 |
 | Encode257+ components | ResourceExhausted before buffer creation or component encoding |
 | Unsupported CLR component | Existing UnsupportedCapability |
 | Nonfinite double or invalid UTF-16 string | Validation with a constant safe message |

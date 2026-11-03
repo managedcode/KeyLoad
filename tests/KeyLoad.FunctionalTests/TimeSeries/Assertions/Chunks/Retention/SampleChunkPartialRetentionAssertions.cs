@@ -69,7 +69,7 @@ internal static class SampleChunkPartialRetentionAssertions
         await Assert.That(manifest.BlockDigests[BlockOrdinal].Span.SequenceEqual(SHA256.HashData(block))).IsTrue();
         await Assert.That(manifest.TagJsonValues.SequenceEqual(new[]
             { SampleChunkCanonicalFixture.Tags, SampleChunkPartialRetentionFixture.LateTags })).IsTrue();
-        var expectedManifest = new SampleChunkManifest(SampleChunkLifecycleProtocol.Version, fixture.WindowId,
+        var expectedManifest = new SampleChunkManifest(fixture.WindowId,
             generation, SampleChunkCanonicalFixture.Start.UtcTicks, SampleChunkCanonicalFixture.Until.UtcTicks,
             expected[^1].Sequence, expected.Length, [SHA256.HashData(block)],
             [SampleChunkCanonicalFixture.Tags, SampleChunkPartialRetentionFixture.LateTags],

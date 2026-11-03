@@ -12,14 +12,11 @@ internal static class SharedDomainRecoveryImage
     internal static async Task IdentityAsync(IAtomicStore store, StoreIdentity digest)
     {
         var actual = store.Identity;
-        await Assert.That(actual.FormatVersion).IsEqualTo(digest.FormatVersion);
-        await Assert.That(actual.KeyCodecVersion).IsEqualTo(digest.KeyCodecVersion);
         await Assert.That(actual.NodeId).IsEqualTo(digest.NodeId);
         await Assert.That(actual.Incarnation).IsEqualTo(digest.Incarnation);
         await Assert.That(actual.Durability).IsEqualTo(digest.Durability);
         await Assert.That(actual.DispatchPaused).IsEqualTo(digest.DispatchPaused);
         await Assert.That(actual.ReadGeneration).IsEqualTo(digest.ReadGeneration);
-        await Assert.That(actual.MinimumReaderContract).IsEqualTo(digest.MinimumReaderContract);
         await Assert.That(SHA256.HashData(actual.SigningKey.Span).AsSpan().SequenceEqual(digest.SigningKey.Span)).IsTrue();
     }
 

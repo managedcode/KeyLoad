@@ -2,6 +2,7 @@ using KeyLoad.Core;
 using KeyLoad.Server;
 using KeyLoad.Server.Search;
 using ZoneTree.FullTextSearch.Index;
+using ZoneTree.Options;
 
 namespace KeyLoad.ProcessRecoveryTests.Search;
 
@@ -30,7 +31,7 @@ internal static class TextIncrementalCrashInventory
             await ServerFailureObserver.ObserveAsync(() =>
             {
                 index = RuntimeTextIndex.Open(Path.Combine(runtime.ProjectionRoot, leaf, TextProtocol.RuntimeDirectoryCore),
-                    new TextFileStreamProvider(runtime.ProjectionRoot, leaf, request.NodeId, options), options);
+                    new TextFileStreamProvider(runtime.ProjectionRoot, leaf, request.NodeId, options), options, WriteAheadLogMode.Sync);
                 var iterator = index.ZoneTree1.CreateIterator(global::ZoneTree.IteratorType.NoRefresh,
                     contributeToTheBlockCache: false);
                 var readerFailures = new List<Exception>();

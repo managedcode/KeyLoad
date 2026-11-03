@@ -38,7 +38,7 @@ internal static class CommandWorkAdmission
         {
             throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
         }
-        return new(CommandWorkProof.CurrentVersion, request.Envelope.RequestId, request.Envelope.CommandId,
+        return new(request.Envelope.RequestId, request.Envelope.CommandId,
             request.Envelope.PrincipalId!, request.Envelope.CommandKind!.Value,
             [.. work.OriginalProducer.Dependencies], policyEpoch);
     }

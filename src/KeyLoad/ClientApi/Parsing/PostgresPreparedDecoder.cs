@@ -27,10 +27,10 @@ internal static class PostgresPreparedDecoder
         reader.Complete();
         var inspection = Inspect(sql, count, token);
         var bytes = checked((name.Length + sql.Length) * sizeof(char) + oids.Length * sizeof(int));
-        return (name, new(sql, oids, inspection.Rows, bytes, inspection.UsesProfileDialect));
+        return (name, new(sql, oids, inspection, bytes));
     }
 
-    internal static (bool Rows, bool UsesProfileDialect) Inspect(string sql, int positionalParameterCount, CancellationToken token)
+    internal static bool Inspect(string sql, int positionalParameterCount, CancellationToken token)
     {
         var syntax = global::KeyLoad.QueryExecution.ScriptDomSyntax.Parse(sql,
             token.ThrowIfCancellationRequested, token);
@@ -59,15 +59,7 @@ internal static class PostgresPreparedDecoder
                 }
                 break;
         }
-        var joinedInsert = syntax is global::Microsoft.SqlServer.TransactSql.ScriptDom.InsertStatement
-        {
-            InsertSpecification.InsertSource: global::Microsoft.SqlServer.TransactSql.ScriptDom.SelectInsertSource
-            {
-                Select: global::Microsoft.SqlServer.TransactSql.ScriptDom.QuerySpecification
-                { FromClause.TableReferences: [global::Microsoft.SqlServer.TransactSql.ScriptDom.QualifiedJoin] }
-            }
-        };
-        return (rows, joinedInsert);
+        return rows;
     }
 
     private static void RequireNoPositionalParameters(int count)

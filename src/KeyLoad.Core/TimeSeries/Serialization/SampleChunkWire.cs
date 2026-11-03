@@ -5,14 +5,12 @@ internal static class SampleChunkWire
     private const int Int64SignBitIndex = 63;
 
     internal const string PayloadAlias = "keyload.core.SampleChunkPayload";
-    internal const int CurrentVersion = 1;
     internal const int MaximumRecords = 256;
     internal const int MaximumEncodedBytes = 8_388_608;
     internal const int ChecksumBytes = 32;
     internal const string InvalidMaximum = "The sample chunk byte limit is outside its supported bounds.";
     internal const string InvalidContent = "The sample chunk contains invalid sample content.";
     internal const string InvalidShape = "The sample chunk payload is malformed.";
-    internal const string UnsupportedVersion = "The sample chunk format is unsupported.";
     internal const string ExcessRecords = "The sample chunk record limit is exceeded.";
     internal const string ExcessBytes = "The sample chunk byte limit is exceeded.";
 

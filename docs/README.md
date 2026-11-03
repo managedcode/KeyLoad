@@ -57,6 +57,6 @@ flowchart LR
 - [ADR index](ADR/README.md): every architecture decision. *Accepted* means the decision is in force; implementation and qualification are tracked in the feature specs.
 - [Current status](implementation/status.json): a short record of the product state and the open qualification gates.
 - [Durability audit](implementation/durability-audit.md) and [benchmark principles](implementation/comparative-benchmarks.md).
-- Designs: [Q1 queries](design/query-q1.md), [bounded reads](design/bounded-reads.md), [change feeds](design/change-feeds.md).
+- Designs: [Queries](design/query-contract.md), [bounded reads](design/bounded-reads.md), [change feeds](design/change-feeds.md).
 
 Qualification evidence comes only from GitHub Actions runs and their original artifacts for the exact source. A document review proves no speed, power-loss durability, coverage or production readiness.

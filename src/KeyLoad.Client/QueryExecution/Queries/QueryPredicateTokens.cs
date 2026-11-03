@@ -27,7 +27,7 @@ internal static class QueryPredicateTokens
     internal const string IdentifierName = "id";
     internal const string RevisionName = "revision";
 
-    internal const string UnsupportedExpressionMessage = "This expression is outside the supported Q1 C# subset.";
+    internal const string UnsupportedExpressionMessage = "This expression is outside the supported C# query subset.";
     internal const string PredicateDepthExceededMessage = "The C# query predicate exceeds its depth budget.";
     internal const string QueryPathDepthExceededMessage = "The C# query path exceeds its depth budget.";
     internal const string ConstantDepthExceededMessage = "The C# constant expression exceeds its depth budget.";

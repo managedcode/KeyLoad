@@ -6,7 +6,7 @@ namespace KeyLoad.Query.QueryExecution;
 internal static class ScriptDomJoinLowering
 {
     internal static (string Collection, string? Alias, ModelQuerySource? Model, InnerJoinClause? Join) Read(
-        Dom.FromClause from, int dialectVersion, ScriptDomLoweringContext context)
+        Dom.FromClause from, ScriptDomLoweringContext context)
     {
         if (from.TableReferences.Count != SingleElement || from.PredictTableReference.Count != EmptyCount)
         {
@@ -18,7 +18,7 @@ internal static class ScriptDomJoinLowering
             var source = ScriptDomSourceLowering.Read(table, context);
             return (source.Collection, source.Alias, source.Model, null);
         }
-        if (dialectVersion != JoinDialectVersion || join.QualifiedJoinType != Dom.QualifiedJoinType.Inner
+        if (join.QualifiedJoinType != Dom.QualifiedJoinType.Inner
             || join.JoinHint != Dom.JoinHint.None || join.JoinHintColumnsCount is not null)
         {
             throw ScriptDomErrors.Unsupported();
@@ -54,7 +54,6 @@ internal static class ScriptDomJoinLowering
     }
     private const int PayloadIndex = 1;
     private const int TargetIndex = 2;
-    private const int JoinDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int QualifiedSegments = 2;
     private const int ReferenceSegments = 3;
     private const string Payload = "payload";

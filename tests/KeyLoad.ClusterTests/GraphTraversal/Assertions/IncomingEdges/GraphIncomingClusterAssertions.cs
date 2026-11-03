@@ -14,7 +14,6 @@ internal static class GraphIncomingClusterAssertions
     internal static async Task AssertThreeRowsAsync(GraphIncomingEdgesPage page,
         GraphIncomingClusterSeed seed)
     {
-        await Assert.That(page.Version).IsEqualTo(1);
         await Assert.That(page.CutPosition).IsGreaterThan(0L);
         await Assert.That(page.Projection).IsEqualTo(Projection);
         await Assert.That(page.Rows.Length).IsEqualTo(3);
@@ -33,7 +32,6 @@ internal static class GraphIncomingClusterAssertions
     internal static async Task AssertEquivalentAsync(GraphIncomingEdgesPage expected,
         GraphIncomingEdgesPage actual)
     {
-        await Assert.That(actual.Version).IsEqualTo(expected.Version);
         await Assert.That(actual.CutPosition).IsGreaterThan(0L);
         await Assert.That(actual.Projection).IsEqualTo(expected.Projection);
         await Assert.That(actual.Rows.Length).IsEqualTo(expected.Rows.Length);

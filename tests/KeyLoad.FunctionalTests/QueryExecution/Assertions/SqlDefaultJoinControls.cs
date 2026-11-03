@@ -32,14 +32,7 @@ internal static class SqlDefaultJoinControls
             await SqlOffsetPages.ExactAsync(engine.Execute(SqlOffsetProtocol.Root, plain), SqlOffsetPages.JoinPage(position));
             await SqlOffsetRefusals.UnchangedAsync(database.Store, image, position, identity);
         }
-        var scalar = SqlOffsetProtocol.ScalarRequest(database.Partition) with
-        {
-            Sql = plain.Sql,
-            QueryDialectVersion = 2
-        };
-        await ErrorAsync(() => engine.Execute(SqlOffsetProtocol.Root, scalar), ErrorCode.UnsupportedCapability);
-        await SqlOffsetRefusals.UnchangedAsync(database.Store, image, position, identity);
-        await SqlOffsetPages.ExactAsync(engine.Execute(SqlOffsetProtocol.Root, plain), SqlOffsetPages.JoinPage(position));
+
     }
 
     internal static async Task CancelledAsync(TestDatabase database, QueryEngine engine, CancellationToken originalToken)

@@ -4,6 +4,5 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(GraphCrossPartitionAliases.OwnerVersion)]
 internal sealed record GraphEdgeOwnerVersion(
-    [property: Orleans.Id(GraphCrossPartitionFields.OwnerVersion)] int Version,
     [property: Orleans.Id(GraphCrossPartitionFields.OwnerRevision)] long Revision,
     [property: Orleans.Id(GraphCrossPartitionFields.OwnerDeleted)] bool Deleted);

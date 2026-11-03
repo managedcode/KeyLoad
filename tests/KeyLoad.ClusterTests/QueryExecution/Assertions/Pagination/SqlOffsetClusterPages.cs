@@ -34,15 +34,15 @@ internal static class SqlOffsetClusterPages
                 : await McpCallerAssertions.SdkSuccessAsync(await callers.Sdk.QueryAsync(sql, token));
             await JoinAsync(page);
             var envelope = new SqlOperationRequest(state.Partition, sql.Sql,
-                AllowFullScan: true, QueryDialectVersion: SqlOffsetClusterProtocol.Q2);
+                AllowFullScan: true);
             var plainEnvelope = new SqlOperationRequest(state.Partition,
                 sql.Sql.Replace(" INNER JOIN ", " JOIN ", StringComparison.Ordinal),
-                AllowFullScan: true, QueryDialectVersion: SqlOffsetClusterProtocol.Q2);
+                AllowFullScan: true);
             await JoinAsync(official ? await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, plainEnvelope, token)
                 : await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, plainEnvelope, token));
             var implicitEnvelope = new SqlOperationRequest(state.Partition,
                 sql.Sql.Replace(" AS ", " ", StringComparison.Ordinal),
-                AllowFullScan: true, QueryDialectVersion: SqlOffsetClusterProtocol.Q2);
+                AllowFullScan: true);
             await JoinAsync(official ? await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, implicitEnvelope, token)
                 : await SqlClusterProtocol.SdkAsync<QueryPage>(callers.Sdk, implicitEnvelope, token));
             page = official ? await SqlClusterProtocol.McpAsync<QueryPage>(callers.Mcp, envelope, token)

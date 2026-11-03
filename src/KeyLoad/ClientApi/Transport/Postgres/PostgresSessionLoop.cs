@@ -107,8 +107,8 @@ internal sealed class PostgresSessionLoop(IServiceProvider services, global::Mic
             return;
         }
         var inspection = PostgresPreparedDecoder.Inspect(sql, PostgresProtocol.AllRows, closed);
-        var statement = new PostgresPreparedStatement(sql, [], inspection.Rows,
-            checked(sql.Length * sizeof(char)), inspection.UsesProfileDialect);
+        var statement = new PostgresPreparedStatement(sql, [], inspection,
+            checked(sql.Length * sizeof(char)));
         var portal = new PostgresBoundPortal(statement, new Dictionary<string, JsonElement>(StringComparer.Ordinal),
             PostgresProtocol.TextFormat, statement.RetainedBytes);
         await PostgresOperationDelivery.ExecuteAsync(services, writer, owner, identity, partition,

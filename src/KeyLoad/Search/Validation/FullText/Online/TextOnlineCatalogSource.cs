@@ -20,8 +20,7 @@ internal static class TextOnlineCatalogSource
             || manifest.Scope.NodeId != baseCut.NodeId || manifest.Scope.Incarnation != baseCut.Incarnation
             || manifest.Scope.ReadGeneration != baseCut.ReadGeneration || manifest.Scope.Position != baseCut.Position
             || manifest.Scope.PolicyEpoch != baseCut.PolicyEpoch || manifest.Scope.SchemaVersion != baseCut.SchemaVersion
-            || manifest.Scope.PrincipalId != current.PrincipalId || manifest.Scope.DataEpoch != current.Authority.DataEpoch
-            || manifest.ResourceSha256 != result.PublishedCut.ResourceSha256
+            || manifest.Scope.PrincipalId != current.PrincipalId || manifest.ResourceSha256 != result.PublishedCut.ResourceSha256
             || manifest.ThroughSequence != result.PublishedCut.ThroughSequence
             || manifest.AppliedPosition != result.PublishedCut.AppliedPosition)
         {
@@ -53,7 +52,7 @@ internal static class TextOnlineCatalogSource
     {
         var original = result.PublishedCut;
         if (fresh.PrincipalId != current.PrincipalId || fresh.Incarnation != original.Incarnation
-            || fresh.DataEpoch != current.Authority.DataEpoch || fresh.PolicyEpoch != original.PolicyEpoch
+            || fresh.PolicyEpoch != original.PolicyEpoch
             || fresh.SchemaVersion != original.SchemaVersion || fresh.ResourceSha256 != original.ResourceSha256
             || fresh.Position < original.Position || fresh.AppliedPosition < original.AppliedPosition
             || fresh.ReadGeneration < original.ReadGeneration || fresh.UpperSequence != original.ThroughSequence)

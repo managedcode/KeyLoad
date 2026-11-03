@@ -54,5 +54,5 @@ internal static class RequestCqrsHostedMaintenanceData
 
     internal static RuntimeTextProjection Open(RequestCqrsHostedDatabase database)
         => new(Path.Combine(database.Directory, ProjectionDirectory),
-            database.Store.Identity.NodeId, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
 }

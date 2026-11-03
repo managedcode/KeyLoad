@@ -16,6 +16,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
     private readonly AnalyticsAggregateSnapshot snapshot;
     private readonly AnalyticsOptions options;
     private readonly AnalyticsStoreDimensions dimensions;
+    private readonly AnalyticsStoreEventMapping eventMapping;
     private AnalyticsEngine? engine;
     private bool acquisitionAttempted;
     private bool disposed;
@@ -41,10 +42,10 @@ public sealed class AnalyticsStoreGeneration : IDisposable
 
         this.snapshot = snapshot;
         dimensions = new(snapshot);
+        eventMapping = new(snapshot, dimensions);
         var names = snapshot.Request.GroupBy.Select(name => AnalyticsStoreMapping.Dimension(snapshot.Schema, name)).ToArray();
         options = AnalyticsStoreOptions.Create(ownedEmptyDirectory, snapshot.Rows.Length, names,
-            snapshot.Request.Metrics.Where(value => value.Operation != AnalyticsAggregateKind.Count)
-                .Select(value => value.Metric).Distinct(StringComparer.Ordinal).Count(), failures);
+            eventMapping.MetricCount, failures);
         IncludeCapturedTimestamps();
         options.Queries.MaxGroups = snapshot.Request.MaxGroups;
     }
@@ -87,7 +88,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         {
             snapshot.Work.Check();
             token.ThrowIfCancellationRequested();
-            if (!current.Track(AnalyticsStoreMapping.Event(snapshot, dimensions, row)))
+            if (!current.Track(eventMapping.Create(row)))
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, IncompleteProjection);
             }

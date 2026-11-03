@@ -21,7 +21,7 @@ internal static class QueueOrderedRetryJitterAssertions
         var digest = HMACSHA256.HashData(database.Store.Identity.SigningKey.Span, seed);
         var delay = QueueOrderedRetryProtocol.One + (int)(BinaryPrimitives.ReadUInt64BigEndian(digest) % (ulong)policy.RetryBaseMilliseconds);
         var at = new DateTimeOffset(operation.Timestamp).AddMilliseconds(delay);
-        var expected = new QueueRetryDecisions(QueueOrderedRetryProtocol.One, new DateTimeOffset(operation.Timestamp),
+        var expected = new QueueRetryDecisions(new DateTimeOffset(operation.Timestamp),
             ImmutableArray.Create(new QueueRetryDecision(state.Lane, QueueOrderedRetryProtocol.First, QueueOrderedRetryProtocol.Two,
                 QueueOrderedRetryProtocol.One, QueueOrderedRetryProtocol.One, QueueOrderedRetryProtocol.One, ReadOnlyMemory<byte>.Empty,
                 SHA256.HashData(OrleansSerialization.Serialize(policy)), delay, at)));

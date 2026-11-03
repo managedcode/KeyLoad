@@ -9,7 +9,7 @@ Global branch windows under [ADR-096](../../ADR/ADR-096-global-branch-windows.md
 | REQ-RANK-003: bounded truthful completeness | AC-RANK-003: deadline and cancellation are checked before retention, failed/missing/approximate/truncated windows cannot be marked exhaustive; exact mode fails closed, explicit incomplete mode retains its missing-window/approximation flags; boundary failures release all owned temporary work |
 | REQ-RANK-004: real existing runtime join | AC-RANK-004: the same core candidate-order/merge kernel is consumed by current SearchRankFusion through a single-partition adapter, preserving all current exact text/vector/graph results and source-cut authorization. Single-window fast path avoids redundant materialization; unit and replicated-cluster suites pass |
 
-The internal generated v1 BranchWindow contract containing branch
+The internal generated BranchWindow contract containing branch
 name/kind, source logical window identity, comparable score-profile and corpus/
 statistics-scope witness, completion/approximation/truncation flags and finite
 candidates with full EntityRef, document revision and modality score. The merge
@@ -22,7 +22,7 @@ deduplication. A declared finite top-L window is window-complete, not exhaustive
 RRF over candidates outside that union. Results retain that distinction.
 
 Exact internal DTO freeze, with zero-based sequential generated IDs in listed
-order and aliases `keyload.query.<kebab-type-name>.v1`: GlobalBranchKind is
+order and aliases `keyload.query.<kebab-type-name>`: GlobalBranchKind is
 Text=0/Vector=1/Graph=2; GlobalBranchScope(ScoreProfile,CorpusScope,StatisticsEpoch);
 GlobalBranchCandidate(Reference,Revision,Score);
 GlobalBranchWindow(BranchName,Kind,SourceWindowId,Scope,Candidates,Complete,

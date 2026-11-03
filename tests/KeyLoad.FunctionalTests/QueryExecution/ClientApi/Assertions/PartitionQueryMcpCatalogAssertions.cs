@@ -39,14 +39,10 @@ internal static class PartitionQueryMcpCatalogAssertions
     private static async Task VerifyInputAsync(JsonElement schema)
     {
         var body = McpSchemaInspector.DefinedRequest(schema);
-        var requestFields = ImmutableArray.Create(PartitionQueryMcpProtocol.Version,
-            PartitionQueryMcpProtocol.Partitions, PartitionQueryMcpProtocol.Query,
-            PartitionQueryMcpProtocol.Parameters, PartitionQueryMcpProtocol.AllowFullScan,
-            PartitionQueryMcpProtocol.AstVersion);
+        var requestFields = ImmutableArray.Create(PartitionQueryMcpProtocol.Partitions, PartitionQueryMcpProtocol.Query,
+            PartitionQueryMcpProtocol.Parameters, PartitionQueryMcpProtocol.AllowFullScan);
         await VerifyObjectAsync(body, requestFields);
         var properties = body.GetProperty(McpSchemaInspector.Properties);
-        await VerifyPrimitiveAsync(schema, properties.GetProperty(PartitionQueryMcpProtocol.Version), McpSchemaInspector.Integer);
-        await VerifyPrimitiveAsync(schema, properties.GetProperty(PartitionQueryMcpProtocol.AstVersion), McpSchemaInspector.Integer);
         await VerifyPrimitiveAsync(schema, properties.GetProperty(PartitionQueryMcpProtocol.AllowFullScan), PartitionQueryMcpProtocol.BooleanType);
         await VerifyPartitionArrayAsync(schema, properties.GetProperty(PartitionQueryMcpProtocol.Partitions));
         var query = Resolve(schema, properties.GetProperty(PartitionQueryMcpProtocol.Query));
@@ -70,11 +66,9 @@ internal static class PartitionQueryMcpCatalogAssertions
     {
         var result = Resolve(schema,
             schema.GetProperty(McpSchemaInspector.Defs).GetProperty(Result));
-        var pageFields = ImmutableArray.Create(PartitionQueryMcpProtocol.Version,
-            PartitionQueryMcpProtocol.Rows, PartitionQueryMcpProtocol.Leaves, PartitionQueryMcpProtocol.Complete);
+        var pageFields = ImmutableArray.Create(PartitionQueryMcpProtocol.Rows, PartitionQueryMcpProtocol.Leaves, PartitionQueryMcpProtocol.Complete);
         await VerifyObjectAsync(result, pageFields);
         var properties = result.GetProperty(McpSchemaInspector.Properties);
-        await VerifyPrimitiveAsync(schema, properties.GetProperty(PartitionQueryMcpProtocol.Version), McpSchemaInspector.Integer);
         await VerifyPrimitiveAsync(schema, properties.GetProperty(PartitionQueryMcpProtocol.Complete), PartitionQueryMcpProtocol.BooleanType);
         await VerifyRowsAsync(schema, properties.GetProperty(PartitionQueryMcpProtocol.Rows));
         await VerifyLeavesAsync(schema, properties.GetProperty(PartitionQueryMcpProtocol.Leaves));

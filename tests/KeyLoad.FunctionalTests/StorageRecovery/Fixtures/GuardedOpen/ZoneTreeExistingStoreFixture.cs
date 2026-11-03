@@ -12,8 +12,6 @@ internal sealed class ZoneTreeExistingStoreFixture : IDisposable
     internal const string IdentityFile = "identity.json";
     internal const string TreeDirectory = "tree";
     internal const string OuterOwnerFile = "node.owner.lock";
-    internal const int UnsupportedFutureFormat = int.MaxValue;
-    internal const int CurrentFormat = 8;
     private const string AllEntriesPattern = "*";
     private const string TemporaryPrefix = "keyload-existing-store-";
     private const string CanonicalDirectory = "database";

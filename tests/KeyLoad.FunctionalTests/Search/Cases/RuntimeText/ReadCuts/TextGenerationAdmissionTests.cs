@@ -1,6 +1,7 @@
 using KeyLoad.Query;
 using KeyLoad.Query.Search;
 using KeyLoad.Server;
+using KeyLoad.Server.Search;
 using KeyLoad.Storage;
 
 namespace KeyLoad.FunctionalTests.Search;
@@ -27,7 +28,7 @@ internal sealed class TextGenerationAdmissionTests
         await cleanup.RunAsync(async () =>
         {
             var root = Path.Combine(database.Directory, "text-admission");
-            var projection = cleanup.TrackProjection(new(root, database.Store.Identity.NodeId, UnitTextOptions.Execution()));
+            var projection = cleanup.TrackProjection(new(root, database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution())));
             var engine = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
             var request = new SearchRequest(database.Partition, Collection, Field, Term);
             var blocker = cleanup.TrackLease(projection.Acquire(CaptureScope(database), new()));
@@ -81,7 +82,7 @@ internal sealed class TextGenerationAdmissionTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, Field, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

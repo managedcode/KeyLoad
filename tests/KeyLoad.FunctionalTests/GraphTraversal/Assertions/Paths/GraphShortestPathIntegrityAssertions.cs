@@ -4,8 +4,6 @@ namespace KeyLoad.FunctionalTests.GraphTraversal;
 
 internal static class GraphShortestPathIntegrityAssertions
 {
-    private const int Version = 1;
-
     internal static async Task Refuse(DatabaseEngine owner, ZoneTreeStore store, GraphTraversalIntegrityState state,
         bool filtered, CancellationToken token)
     {
@@ -33,7 +31,6 @@ internal static class GraphShortestPathIntegrityAssertions
         var image = CanonicalStoreImage.Bytes(store);
         var position = store.Position;
         var actual = owner.ShortestPath(GraphTraversalIntegrityFixture.Root, Request(edge, filtered), cancellationToken: token);
-        await Assert.That(actual.Version).IsEqualTo(Version);
         await Assert.That(actual.Found).IsEqualTo(!filtered);
         await Assert.That(actual.Hops).IsEqualTo(filtered ? (int?)null : 1);
         EntityRef[] vertices = filtered ? [] : [edge.From, edge.To];
@@ -45,7 +42,7 @@ internal static class GraphShortestPathIntegrityAssertions
     }
 
     private static GraphShortestPathRequest Request(EdgeRecord edge, bool filtered)
-        => new(Version, edge.From.Partition, GraphTraversalIntegrityFixture.Graph, edge.From, edge.To,
+        => new(edge.From.Partition, GraphTraversalIntegrityFixture.Graph, edge.From, edge.To,
             GraphTraversalIntegrityFixture.Depth, GraphTraversalIntegrityFixture.MaximumVertices,
             GraphTraversalIntegrityFixture.MaximumEdges)
         {

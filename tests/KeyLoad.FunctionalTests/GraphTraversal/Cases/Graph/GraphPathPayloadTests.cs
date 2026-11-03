@@ -30,10 +30,9 @@ internal sealed class GraphPathPayloadTests
         var source = new EntityRef(partition, Orders, SharedId);
         var target = new EntityRef(partition, Projects, SharedId);
         ImmutableArray<string>? labels = emptyLabels ? ImmutableArray<string>.Empty : null;
-        var request = new GraphShortestPathRequest(1, partition, Graph, source, target, Labels: labels);
+        var request = new GraphShortestPathRequest(partition, Graph, source, target, Labels: labels);
         var actual = OrleansSerialization.Deserialize<GraphShortestPathRequest>(OrleansSerialization.Serialize(request));
 
-        await Assert.That(actual.Version).IsEqualTo(request.Version);
         await Assert.That(actual.Partition).IsEqualTo(partition);
         await Assert.That(actual.Graph).IsEqualTo(Graph);
         await Assert.That(actual.From).IsEqualTo(source);
@@ -52,10 +51,9 @@ internal sealed class GraphPathPayloadTests
         var source = new EntityRef(partition, Orders, SharedId);
         var target = new EntityRef(partition, Projects, SharedId);
         var edge = new EdgeRecord("execution-edge", source, target, Label, Attributes, 7);
-        var result = new GraphShortestPathResult(1, true, 1, [source, target], [edge], 29);
+        var result = new GraphShortestPathResult(true, 1, [source, target], [edge], 29);
         var actual = OrleansSerialization.Deserialize<GraphShortestPathResult>(OrleansSerialization.Serialize(result));
 
-        await Assert.That(actual.Version).IsEqualTo(1);
         await Assert.That(actual.Found).IsTrue();
         await Assert.That(actual.Hops).IsEqualTo((int?)1);
         await Assert.That(actual.Vertices.SequenceEqual([source, target])).IsTrue();
@@ -76,10 +74,9 @@ internal sealed class GraphPathPayloadTests
         };
         var query = new QueryRequest(partition, "SELECT * FROM GRAPH_SHORTEST_PATH(...) ", parameters,
             AllowFullScan: true);
-        var request = new SqlGraphPathRequest(1, query);
+        var request = new SqlGraphPathRequest(query);
         var actual = OrleansSerialization.Deserialize<SqlGraphPathRequest>(OrleansSerialization.Serialize(request));
 
-        await Assert.That(actual.Version).IsEqualTo(1);
         await Assert.That(actual.Query.Partition).IsEqualTo(partition);
         await Assert.That(actual.Query.Sql).IsEqualTo(query.Sql);
         await Assert.That(actual.Query.AllowFullScan).IsTrue();
@@ -93,7 +90,7 @@ internal sealed class GraphPathPayloadTests
     public async Task PublicInputNullLabelSurvivesDecodeAndGetsCanonicalValidation()
     {
         using var database = new TestDatabase();
-        var request = new GraphShortestPathRequest(1, database.Partition, Graph,
+        var request = new GraphShortestPathRequest(database.Partition, Graph,
             new(database.Partition, Orders, "source"), new(database.Partition, Projects, "target"),
             Labels: ImmutableArray.Create((string)null!));
         object payload = request;
@@ -113,9 +110,9 @@ internal sealed class GraphPathPayloadTests
         using var database = new TestDatabase();
         var codec = new GrainRequestCodec(database.Database.Store.Identity.Incarnation, TimeProvider.System);
         var partition = database.Partition;
-        var direct = new GraphShortestPathRequest(1, partition, Graph,
+        var direct = new GraphShortestPathRequest(partition, Graph,
             new(partition, Orders, "source"), new(partition, Projects, "target"));
-        var sql = new SqlGraphPathRequest(1, new QueryRequest(partition, "SELECT * FROM GRAPH_SHORTEST_PATH(...) ",
+        var sql = new SqlGraphPathRequest(new QueryRequest(partition, "SELECT * FROM GRAPH_SHORTEST_PATH(...) ",
             AllowFullScan: true));
 
         await AssertEnvelopeAsync(codec, GrainReadKind.GraphShortestPath, direct);

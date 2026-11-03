@@ -92,15 +92,6 @@ internal sealed class GraphPathClusterParityTests(ClusterFixture fixture)
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node2,
             seed.Reader.Secret, deadline.Token);
         var request = GraphPathClusterScenario.Request(seed);
-        await AssertRequestErrorAsync(sdk, mcp, request with
-        {
-            Version = 2
-        }, ErrorCode.Validation, deadline.Token);
-        await AssertSqlRequestErrorAsync(sdk, mcp, GraphPathClusterScenario.SqlRequest(seed) with
-        {
-            Version = 2
-        },
-            ErrorCode.Validation, deadline.Token);
         var foreignPartition = new PartitionRef("foreign", "db", "domain", ForeignPartitionKey);
         var foreign = request with
         {

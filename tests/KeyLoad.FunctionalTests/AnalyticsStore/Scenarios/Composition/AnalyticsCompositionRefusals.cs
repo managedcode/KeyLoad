@@ -17,6 +17,7 @@ internal static class AnalyticsCompositionRefusals
     private const string EventSequenceFamily = "event-sequence";
     private const string AnalyticsFamily = "analytics-event";
     private const string GenerationFamily = "analytics-generation";
+    private const string TimestampFamily = "analytics-timestamp";
     private const string OutboxFamily = "outbox";
     private const string OutboxHeadFamily = "outbox-head";
     private const string DocumentEpochFamily = "document-epoch";
@@ -47,7 +48,7 @@ internal static class AnalyticsCompositionRefusals
     private static string[] Image(SafeProjectorOperationDatabase owner) => owner.Store.Read(view =>
     {
         string[] families = [DocumentFamily, EdgeFamily, AdjacencyFamily, EventFamily, StreamHeadFamily,
-            EventSequenceFamily, AnalyticsFamily, GenerationFamily, OutboxFamily, OutboxHeadFamily,
+            EventSequenceFamily, AnalyticsFamily, GenerationFamily, TimestampFamily, OutboxFamily, OutboxHeadFamily,
             DocumentEpochFamily, EventIdentityFamily, EventFeedFamily, GraphOwnerFamily, GraphIntentFamily];
         var result = new List<string>();
         foreach (var family in families)

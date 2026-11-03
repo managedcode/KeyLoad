@@ -8,5 +8,4 @@ internal static class DueCoordinatorAliases
     internal const string Process = nameof(IRecurringDueCoordinatorGrain.ProcessDueAsync);
     internal const string ProcessQueue = nameof(IRecurringDueCoordinatorGrain.ProcessQueueDeadlineAsync);
     internal const string ProcessTransfer = nameof(IRecurringDueCoordinatorGrain.ProcessQueueTransferAsync);
-    internal const int CoordinatorInterfaceVersion = 1;
 }

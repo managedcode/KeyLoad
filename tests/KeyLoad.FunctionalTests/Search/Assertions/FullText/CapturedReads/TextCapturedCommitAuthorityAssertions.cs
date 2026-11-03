@@ -62,10 +62,7 @@ internal static class TextCapturedCommitAuthorityAssertions
         await Assert.That(fixture.Store.Position).IsGreaterThan(originalCut);
         await Assert.That(identity.NodeId).IsEqualTo(originalIdentity.NodeId);
         await Assert.That(identity.Incarnation).IsEqualTo(originalIdentity.Incarnation);
-        await Assert.That(identity.FormatVersion).IsEqualTo(originalIdentity.FormatVersion);
-        await Assert.That(identity.KeyCodecVersion).IsEqualTo(originalIdentity.KeyCodecVersion);
         await Assert.That(identity.ReadGeneration).IsEqualTo(originalIdentity.ReadGeneration);
-        await Assert.That(identity.MinimumReaderContract).IsEqualTo(originalIdentity.MinimumReaderContract);
         await Assert.That(identity.Durability).IsEqualTo(originalIdentity.Durability);
     }
 

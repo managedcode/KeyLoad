@@ -17,8 +17,7 @@ internal static class TextIncrementalValidation
         IOptions<TextExecutionOptions> executionOptions)
     {
         budget.Check();
-        if (manifest is null || manifest.FormatVersion != TextIncrementalProtocol.ManifestFormatVersion
-            || manifest.Scope != scope || manifest.Consumer != consumer || manifest.Generation != generation
+        if (manifest is null || manifest.Scope != scope || manifest.Consumer != consumer || manifest.Generation != generation
             || manifest.Placement is null || manifest.Placement.PhysicalShardId != placement.PhysicalShardId
             || manifest.Placement.Incarnation != placement.Incarnation
             || consumer.Partition != scope.Partition || generation < TextIncrementalProtocol.InitialGeneration

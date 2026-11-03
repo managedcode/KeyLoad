@@ -7,7 +7,7 @@ namespace KeyLoad.Query;
 /// <summary>Validates and evaluates left-side predicates within the original authorized join view.</summary>
 internal static class RelationalInnerJoinLeftPredicate
 {
-    private const string UnsupportedShapeDetail = "The query AST version is unsupported.";
+    private const string UnsupportedShapeDetail = "The query join shape is unsupported.";
     private const string UnsupportedDetail = "The relational join predicate must use declared top-level left fields.";
 
     private static bool IsSupported(Predicate predicate)

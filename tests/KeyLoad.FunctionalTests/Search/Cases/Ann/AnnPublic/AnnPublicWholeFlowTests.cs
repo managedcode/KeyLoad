@@ -86,8 +86,7 @@ internal sealed class AnnPublicWholeFlowTests
                 await BoundedThenHealthyAsync(database, runtime, pin, request);
                 return;
             }
-            var expected = new AnnSearchPage(AnnPublicWholeFlow.Version,
-                [new RankedDocument(new DocumentResult(
+            var expected = new AnnSearchPage([new RankedDocument(new DocumentResult(
                     database.ExpectedReference(new(database.Partition, AnnSeedTestSupport.Collection, "seed-00000")),
                     1, "{}", false, []), 1d / 61d)], cut, mode,
                 mode != AnnPageMode.Approximate, pin.IndexGeneration, AnnPageMode.Approximate);
@@ -116,8 +115,7 @@ internal sealed class AnnPublicWholeFlowTests
         await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);
         var healthy = request with { Search = request.Search with { Limit = 1, AllowedIds = null } };
         var actual = await engine.ApproximateSearchAsync(AnnProjectionPinTestSupport.Principal, healthy);
-        var expected = new AnnSearchPage(AnnPublicWholeFlow.Version,
-            [new(new(database.ExpectedReference(new(database.Partition, AnnSeedTestSupport.Collection, "seed-00002")), 1, "{}", false, []), 1d / 61d)],
+        var expected = new AnnSearchPage([new(new(database.ExpectedReference(new(database.Partition, AnnSeedTestSupport.Collection, "seed-00002")), 1, "{}", false, []), 1d / 61d)],
             cut, AnnPageMode.Approximate, false, pin.IndexGeneration, AnnPageMode.Approximate);
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
         await AnnPublicWholeFlow.UnchangedAsync(database, image, cut);

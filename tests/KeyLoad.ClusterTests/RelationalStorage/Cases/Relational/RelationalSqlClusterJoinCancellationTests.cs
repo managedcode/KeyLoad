@@ -15,7 +15,6 @@ internal sealed class RelationalSqlClusterJoinCancellationTests(ClusterFixture f
     private const string QueryText = "SELECT l.[key] AS order_key, r.name AS customer_name, l.title AS customer_id "
         + "FROM agentrows AS l INNER JOIN joincustomers AS r ON l.title = r.id "
         + "ORDER BY l.[key] ASC OFFSET 0 ROWS FETCH NEXT 10 ROWS ONLY";
-    private const int QueryDialectVersion = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const string OrderId = "cancelled-join-order";
     private const string CustomerId = "cancelled-join-customer";
 
@@ -30,8 +29,8 @@ internal sealed class RelationalSqlClusterJoinCancellationTests(ClusterFixture f
         var seed = await McpCallerAssertions.SdkSuccessAsync(await sdk.CommitAsync(scenario.Command(
             new PutDocument(RelationalSqlClusterTokens.Table, OrderId, "{\"key\":\"cancelled-join-order\",\"title\":\"cancelled-join-customer\",\"count\":1}"),
             new PutDocument(RightCollection, CustomerId, "{\"id\":\"cancelled-join-customer\",\"name\":\"Ada\"}")), deadline.Token));
-        var query = new QueryRequest(scenario.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion);
-        var sql = new SqlOperationRequest(scenario.Partition, QueryText, AllowFullScan: true, QueryDialectVersion: QueryDialectVersion);
+        var query = new QueryRequest(scenario.Partition, QueryText, AllowFullScan: true);
+        var sql = new SqlOperationRequest(scenario.Partition, QueryText, AllowFullScan: true);
         await using var mcp = await McpOfficialClient.ConnectAsync(fixture, McpCallerProtocol.Node3,
             fixture.AdminKey, deadline.Token);
         using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(deadline.Token);

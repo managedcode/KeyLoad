@@ -6,9 +6,9 @@ namespace KeyLoad.Query;
 
 public sealed partial class QueryEngine
 {
-    /// <summary>Executes the closed Q1.GraphPath statement through the canonical shortest-path operator.</summary>
+    /// <summary>Executes the closed KeyLoad.GraphPath statement through the canonical shortest-path operator.</summary>
     /// <param name="principalId">Persisted database principal identifier.</param>
-    /// <param name="request">Versioned SQL request and exact scalar parameters.</param>
+    /// <param name="request">SQL request and exact scalar parameters.</param>
     /// <param name="timeProvider">Optional clock for the shared parse and read deadline.</param>
     /// <param name="cancellationToken">Cancellation across admission, parsing and execution reads.</param>
     /// <returns>The same bounded result and read cut produced by the direct graph-path request.</returns>

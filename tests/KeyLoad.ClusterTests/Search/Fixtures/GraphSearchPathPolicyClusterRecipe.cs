@@ -44,16 +44,16 @@ internal static class GraphSearchPathPolicyClusterRecipe
             ? [new(direct.Document, 1), new(Document(state, P.Projects, P.Middle, P.MiddleJson, state.MiddleRevision), 1),
                new(target.Document, 2)] : [new(direct.Document, 1)], GraphExpansionCompleteness.SelectedHits);
         return
-        [(new(P.Version, search, Retriever: new(walk)), new(visible ? [direct, target] : [direct], null)),
-         (new(P.Version, scopeSearch, Scope: new(walk), Retriever: new(walk)),
+        [(new(search, Retriever: new(walk)), new(visible ? [direct, target] : [direct], null)),
+         (new(scopeSearch, Scope: new(walk), Retriever: new(walk)),
              new(visible ? [target with { Score = 1d / 61d }] : [], null)),
-         (new(P.Version, rootSearch, Retriever: new(walk with { MaxDepth = 0 }),
+         (new(rootSearch, Retriever: new(walk with { MaxDepth = 0 }),
              Expansion: new(P.Graph, P.Depth, P.Vertices, P.Edges)),
              new([new(Document(state, P.Projects, P.Root, P.RootJson), 1d / 61d)], context))];
     }
 
     internal static GraphSearchRequest HiddenSeed(PartitionRef partition, string id)
-        => new(P.Version, new(partition, P.Documents, Limit: P.Results, FusionConstant: P.Fusion), Retriever: new(Walk(partition, id)));
+        => new(new(partition, P.Documents, Limit: P.Results, FusionConstant: P.Fusion), Retriever: new(Walk(partition, id)));
 
     internal static DocumentResult Document(GraphSearchPathPolicyClusterState state, string collection, string id, string json,
         long revision = 1L)

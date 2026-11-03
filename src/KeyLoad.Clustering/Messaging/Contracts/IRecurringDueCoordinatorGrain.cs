@@ -2,8 +2,7 @@ using KeyLoad.Core.Messaging;
 
 namespace KeyLoad.Clustering;
 
-[global::Orleans.Alias(DueCoordinatorAliases.Coordinator),
- global::Orleans.CodeGeneration.Version(DueCoordinatorAliases.CoordinatorInterfaceVersion)]
+[global::Orleans.Alias(DueCoordinatorAliases.Coordinator)]
 internal interface IRecurringDueCoordinatorGrain : global::Orleans.IGrainWithStringKey
 {
     [global::Orleans.Alias(DueCoordinatorAliases.Process)]

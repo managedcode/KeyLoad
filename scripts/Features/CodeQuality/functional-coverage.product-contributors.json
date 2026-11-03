@@ -193,7 +193,7 @@
       "executedModules": [
         "KeyLoad.Query"
       ],
-      "operationOutcomeAndState": "Default/empty/duplicate/over-eight/unsupported/version/AST inputs retain their typed errors and unchanged committed position on a seeded fixture; a valid same-fixture query then returns the complete expected page, full EntityRef, projected JSON and revision."
+      "operationOutcomeAndState": "Default/empty/duplicate/over-eight partition sets and unsupported EXPLAIN retain their typed errors and unchanged committed position on a seeded fixture; a valid same-fixture query then returns the complete expected page, full EntityRef, projected JSON and revision."
     },
     {
       "suite": "unit",
@@ -293,38 +293,6 @@
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
-      "methodName": "InvalidPublicVersionFailsBeforeStorageRead",
-      "instanceName": "InvalidPublicVersionFailsBeforeStorageRead",
-      "requirements": [
-        "REQ-PQUERY-001"
-      ],
-      "acceptance": [
-        "AC-PQUERY-001"
-      ],
-      "executedModules": [
-        "KeyLoad.Query"
-      ],
-      "operationOutcomeAndState": "public QueryEngine returns typed Validation and zero execution read calls with unchanged position"
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.QueryExecution.PartitionQueryMcpContractTests",
-      "methodName": "UnsupportedAstVersionFailsBeforeStorageRead",
-      "instanceName": "UnsupportedAstVersionFailsBeforeStorageRead",
-      "requirements": [
-        "REQ-PQUERY-001"
-      ],
-      "acceptance": [
-        "AC-PQUERY-001"
-      ],
-      "executedModules": [
-        "KeyLoad.Query"
-      ],
-      "operationOutcomeAndState": "public QueryEngine returns typed UnsupportedCapability and zero execution read calls with unchanged position"
-    },
-    {
-      "suite": "unit",
       "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinCancellationTests",
       "methodName": "AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
       "instanceName": "AcJoinCancellationAfterRangeProgressSettlesTheOriginalReadAndKeepsTheStoreHealthy",
@@ -347,8 +315,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinExecutionTests",
-      "methodName": "Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
-      "instanceName": "Q2InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
+      "methodName": "InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
+      "instanceName": "InnerJoinUsesRealZoneTreeRowsAndReturnsOrdinalPairsWithSourceRevisions",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -363,13 +331,13 @@
         "KeyLoad.Query",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "executes SQL and AST Q2 against real ZoneTree rows; verifies exact ordinal matches, projections, both source identities/revisions, access path and cut while null, missing, empty, unmatched and overlong keys emit no pairs"
+      "operationOutcomeAndState": "executes SQL and typed AST joins against real ZoneTree rows; verifies exact ordinal matches, projections, both source identities/revisions, access path and cut while null, missing, empty, unmatched and overlong keys emit no pairs"
     },
     {
       "suite": "unit",
       "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinExecutionTests",
-      "methodName": "NoncurrentDialectOrAstFormatsRejectBeforeReadingAndCurrentJoinStillRuns",
-      "instanceName": "NoncurrentDialectOrAstFormatsRejectBeforeReadingAndCurrentJoinStillRuns",
+      "methodName": "JoinExplainRejectsBeforeReadingAndCurrentJoinStillRuns",
+      "instanceName": "JoinExplainRejectsBeforeReadingAndCurrentJoinStillRuns",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -385,13 +353,13 @@
         "KeyLoad.Query",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "rejects Q1 join, unknown SQL/AST versions and EXPLAIN before storage position changes, then executes and verifies a healthy Q2 result"
+      "operationOutcomeAndState": "rejects join EXPLAIN as UnsupportedCapability with unchanged storage position, then executes the current join and verifies its exact healthy result"
     },
     {
       "suite": "unit",
       "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinExecutionTests",
-      "methodName": "Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2",
-      "instanceName": "Q1AliasNamedInnerStaysSupportedAndAnInnerJoinRequiresQ2",
+      "methodName": "AliasNamedInnerAndActualInnerJoinBothRemainSupported",
+      "instanceName": "AliasNamedInnerAndActualInnerJoinBothRemainSupported",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -406,7 +374,7 @@
         "KeyLoad.Query",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "executes a Q1 alias named inner, rejects the join under Q1 without changing position, then executes the same join under Q2"
+      "operationOutcomeAndState": "executes a scalar query with an alias named inner and then a real inner join; both return the same expected literal entity"
     },
     {
       "suite": "unit",
@@ -618,8 +586,8 @@
     {
       "suite": "cluster",
       "className": "KeyLoad.ClusterTests.RelationalStorage.RelationalSqlClusterJoinTests",
-      "methodName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster",
-      "instanceName": "Q2JoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster",
+      "methodName": "InnerJoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster",
+      "instanceName": "InnerJoinReturnsTheSameCommittedPairsToSdkAndOfficialMcpAcrossCluster",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -737,8 +705,8 @@
     {
       "suite": "unit",
       "className": "KeyLoad.FunctionalTests.QueryExecution.SqlInnerJoinDeclaredProjectionTests",
-      "methodName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup",
-      "instanceName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup",
+      "methodName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyScalarFollowup",
+      "instanceName": "AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyScalarFollowup",
       "requirements": [
         "REQ-REL-004",
         "REQ-QUERY-007"
@@ -756,135 +724,23 @@
         "KeyLoad.Query",
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "executes the exact accepted JOIN SQL and admitted primary-key/source_revision values on real ZoneTree; verifies complete literal projections, SQL/AST page parity, both source identities/revisions and cut, unchanged committed position and a healthy Q1 metadata read"
+      "operationOutcomeAndState": "executes the exact accepted JOIN SQL and admitted primary-key/source_revision values on real ZoneTree; verifies complete literal projections, SQL/AST page parity, both source identities/revisions and cut, unchanged committed position and a healthy scalar metadata read"
     },
     {
       "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.StorageRecovery.MaintenancePeriodicLifetimeTests",
-      "methodName": "AcStorageMaintenanceJoin002003OrleansTimerStopsBeforeOwnerFilesAndHealthyReopen",
-      "instanceName": "AcStorageMaintenanceJoin002003OrleansTimerStopsBeforeOwnerFilesAndHealthyReopen(False)",
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.MaintenanceLifetimeTests",
+      "methodName": "AcStorageMaintenanceJoin001ObservedDiskMergeSettlesBeforeOwnerFilesAndHealthyReopen",
+      "instanceName": "AcStorageMaintenanceJoin001ObservedDiskMergeSettlesBeforeOwnerFilesAndHealthyReopen",
       "requirements": [
-        "REQ-STORAGE-MAINTENANCE-JOIN-002"
+        "REQ-STORAGE-MAINTENANCE-JOIN-001"
       ],
       "acceptance": [
-        "AC-STORAGE-MAINTENANCE-JOIN-002"
+        "AC-STORAGE-MAINTENANCE-JOIN-001"
       ],
       "executedModules": [
         "KeyLoad.Storage.ZoneTree"
       ],
-      "operationOutcomeAndState": "Actual disk-backed execution cleanup held after three execution APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.StorageRecovery.MaintenancePeriodicLifetimeTests",
-      "methodName": "AcStorageMaintenanceJoin002003OrleansTimerStopsBeforeOwnerFilesAndHealthyReopen",
-      "instanceName": "AcStorageMaintenanceJoin002003OrleansTimerStopsBeforeOwnerFilesAndHealthyReopen(True)",
-      "requirements": [
-        "REQ-STORAGE-MAINTENANCE-JOIN-002"
-      ],
-      "acceptance": [
-        "AC-STORAGE-MAINTENANCE-JOIN-003"
-      ],
-      "executedModules": [
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "Actual disk-backed execution cleanup held after three execution APIs; original worker and owner join before file release; full cold state and healthy write retained, including the original cleanup-fault flow."
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
-      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
-      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(0, 600000000)",
-      "requirements": [
-        "REQ-STORAGE-MAINTENANCE-JOIN-002"
-      ],
-      "acceptance": [
-        "AC-STORAGE-MAINTENANCE-JOIN-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
-      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
-      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(-1, 600000000)",
-      "requirements": [
-        "REQ-STORAGE-MAINTENANCE-JOIN-002"
-      ],
-      "acceptance": [
-        "AC-STORAGE-MAINTENANCE-JOIN-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
-      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
-      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(1, 600000000)",
-      "requirements": [
-        "REQ-STORAGE-MAINTENANCE-JOIN-002"
-      ],
-      "acceptance": [
-        "AC-STORAGE-MAINTENANCE-JOIN-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
-      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
-      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(42949672950000, 600000000)",
-      "requirements": [
-        "REQ-STORAGE-MAINTENANCE-JOIN-002"
-      ],
-      "acceptance": [
-        "AC-STORAGE-MAINTENANCE-JOIN-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
-      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
-      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, -1)",
-      "requirements": [
-        "REQ-STORAGE-MAINTENANCE-JOIN-002"
-      ],
-      "acceptance": [
-        "AC-STORAGE-MAINTENANCE-JOIN-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
-    },
-    {
-      "suite": "unit",
-      "className": "KeyLoad.FunctionalTests.StorageRecovery.ZoneTreeMaintenancePolicyTests",
-      "methodName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen",
-      "instanceName": "InvalidMaintenanceDurationsRejectBeforeOwnershipThenHealthyCommitAndColdReopen(10000000, 42949672950000)",
-      "requirements": [
-        "REQ-STORAGE-MAINTENANCE-JOIN-002"
-      ],
-      "acceptance": [
-        "AC-STORAGE-MAINTENANCE-JOIN-004"
-      ],
-      "executedModules": [
-        "KeyLoad.Storage.ZoneTree"
-      ],
-      "operationOutcomeAndState": "Invalid execution maintenance duration rejects before physical ownership; same path accepts actual commit, complete cold state, healthy additional write and second cold reopen."
+      "operationOutcomeAndState": "Seeds and updates literal records in real native storage; holds the original native OnDiskSegmentCreated merge callback, observes actual owner close, joins the original merge before exclusive file access, then verifies unchanged complete cold state, a healthy commit and a second cold reopen."
     },
     {
       "suite": "unit",

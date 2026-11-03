@@ -34,7 +34,7 @@ public static class SampleRetentionCommands
             tx.Delete(key);
         }
 
-        var next = new SampleRetentionState(SampleRetentionStateReader.CurrentFormatVersion, before.UtcTicks, checked((previous?.PurgedCount ?? PreviousPurgedCountValidationBoundary) + deleteKeys.Count), scan.HasMore);
+        var next = new SampleRetentionState(before.UtcTicks, checked((previous?.PurgedCount ?? PreviousPurgedCountValidationBoundary) + deleteKeys.Count), scan.HasMore);
         tx.PutRecord(stateKey, next);
         return new(ExpireKindText, request.SeriesSet, request.SeriesId, next.PurgedCount);
     }

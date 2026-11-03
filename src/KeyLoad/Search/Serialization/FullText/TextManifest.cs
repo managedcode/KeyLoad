@@ -5,7 +5,6 @@ namespace KeyLoad.Server.Search;
 [global::Orleans.GenerateSerializer]
 [global::Orleans.Alias(TextProtocol.ManifestAlias)]
 internal sealed record TextManifest(
-    [property: global::Orleans.Id(0)] int FormatVersion,
     [property: global::Orleans.Id(1)] TextProjectionScope Scope,
     [property: global::Orleans.Id(2)] string TokenizerVersion,
     [property: global::Orleans.Id(3)] string HashVersion,

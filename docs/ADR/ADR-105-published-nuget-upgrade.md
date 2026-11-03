@@ -69,7 +69,7 @@ flowchart LR
 ## Rollout, rollback and failure contracts
 
 Serializer aliases/field IDs, cluster membership and node-local ownership stay
-with their current owners. The native MVCC storage format and data epoch are
+with their current owners. The ZoneTree native MVCC integration and current KeyLoad identity are
 specified in [NativeMvcc](../Features/StorageRecovery/NativeMvcc.md). The existing
 recovery/serialization tests must detect dependency integration defects. No compatibility or performance claim follows from version alignment or compilation.
 Restore failure, downgrade, analyzer failure, runtime regression or missing

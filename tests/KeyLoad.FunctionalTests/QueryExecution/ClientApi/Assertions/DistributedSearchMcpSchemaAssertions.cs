@@ -32,7 +32,6 @@ internal static class DistributedSearchMcpSchemaAssertions
         var request = Shape(root, McpSchemaInspector.DefinedRequest(root));
         await ObjectAsync(request, DistributedSearchMcpProtocol.RequestFields, DistributedSearchMcpProtocol.RequestFields);
         var fields = request.GetProperty(McpSchemaInspector.Properties);
-        await PrimitiveAsync(root, fields.GetProperty(DistributedSearchMcpProtocol.Version), McpSchemaInspector.Integer);
         var partitions = Shape(root, fields.GetProperty(DistributedSearchMcpProtocol.Partitions));
         await Assert.That(McpSchemaInspector.HasType(partitions, McpSchemaInspector.Array)).IsTrue();
         await PartitionAsync(root, partitions.GetProperty(McpSchemaInspector.Items));
@@ -66,7 +65,6 @@ internal static class DistributedSearchMcpSchemaAssertions
         var page = Shape(root, root.GetProperty(McpSchemaInspector.Defs).GetProperty(McpSchemaInspector.Result));
         await ObjectAsync(page, DistributedSearchMcpProtocol.ResultFields, DistributedSearchMcpProtocol.ResultFields);
         var fields = page.GetProperty(McpSchemaInspector.Properties);
-        await PrimitiveAsync(root, fields.GetProperty(DistributedSearchMcpProtocol.Version), McpSchemaInspector.Integer);
         await PrimitiveAsync(root, fields.GetProperty(DistributedSearchMcpProtocol.Epoch), McpSchemaInspector.String);
         await PrimitiveAsync(root, fields.GetProperty(DistributedSearchMcpProtocol.Complete), DistributedSearchMcpProtocol.Boolean);
         var hits = Shape(root, fields.GetProperty(DistributedSearchMcpProtocol.Hits));

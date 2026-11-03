@@ -17,7 +17,4 @@ internal static class GrainRoutingProtocol
     internal const string InvalidRequest = "The internal request has an invalid scope, key, expiry or operation.";
     internal const string MissingPrincipal = "The internal request requires a persisted principal.";
     internal const string AdministrationRequired = "Cluster administration is required.";
-    internal const int RequestInterfaceVersion = 7;
-    internal const int ExecutionInterfaceVersion = 1;
-    internal const int RequestGrainInterfaceVersion = 1;
 }

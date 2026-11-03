@@ -66,7 +66,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         }
         var snapshot = new LiveQuerySnapshot(page.Rows,
             database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, capture.Cursor,
-                lifetime, LiveCursorContract.CurrentVersion)), capture.Tail,
+                lifetime)), capture.Tail,
             page.CutPosition);
         return snapshot;
     }
@@ -79,7 +79,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         var lifetime = CaptureLifetime(view, query, resource, budget);
         queryEngine.Bind(principal, resource, query);
         var claims = database.Verify<LiveCursorClaims>(request.Cursor);
-        if (claims.Version != LiveCursorContract.CurrentVersion || claims.Lifetime != lifetime
+        if (claims.Lifetime != lifetime
             || claims.Purpose != LiveCursorContract.Purpose || claims.QueryHash != hash)
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, LiveQueryCursorBelongsToADifferentQueryDetail);
@@ -89,7 +89,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
             (schema, change) => (MapChange(principal, schema, change, query, prepared, budget)).Value);
         var result = new LiveQueryPage(page.Changes,
             database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, page.Cursor,
-                lifetime, LiveCursorContract.CurrentVersion)), page.ThroughSequence,
+                lifetime)), page.ThroughSequence,
             page.HasMore, page.CutPosition);
         return result;
     }

@@ -7,7 +7,6 @@ internal static class PartitionQueryWholeFlowAssertions
     internal static async Task AssertPublicRowAsync(PartitionQueryPage page, PartitionRef partition,
         string id, string label, ResourceLifetime creation)
     {
-        await Assert.That(page.Version).IsEqualTo(1);
         await Assert.That(page.Complete).IsTrue();
         await Assert.That(page.Rows.Length).IsEqualTo(1);
         await Assert.That(page.Rows[0].Reference)

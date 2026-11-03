@@ -26,7 +26,7 @@ internal static class TextBilingualAudit
         => new(partition, Collection, TextPath, text, Limit: Limit);
     internal static RuntimeTextProjection Open(TestDatabase database)
         => new(Path.Combine(database.Directory, ProjectionDirectory),
-            database.Store.Identity.NodeId, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
     internal static DatabaseEngine Owner(ZoneTreeStore store)
         => new(store, new AuthorizationPolicy(), UnitExecutionOptions.DatabaseLimits(), UnitExecutionOptions.DueWork(),
             UnitExecutionOptions.EventSource(), UnitExecutionOptions.Messaging(), UnitExecutionOptions.GraphExecution(),

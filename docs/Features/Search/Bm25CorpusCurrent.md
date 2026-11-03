@@ -16,7 +16,6 @@ Generated head alias `keyload.core.search.bm25-corpus-current` has these immutab
 
 | ID | Field | type |
 |---|---|---|
-| 0 | FormatVersion | int |
 | 1 | Partition | PartitionRef |
 | 2 | Collection | string |
 | 3 | Field | string |

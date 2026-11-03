@@ -24,7 +24,7 @@ internal static class TextIncrementalCrashQuery
         {
             using var projection = new TextSelectedProjection(new RuntimeTextProjection(
                 Path.Combine(Path.GetDirectoryName(projectionRoot)!, BootstrapDirectory),
-                database.Store.Identity.NodeId, options.RuntimeText), owner, owner);
+                database.Store.Identity.NodeId, options.RuntimeText, new TextResourceOwnership(options.RuntimeText)), owner, owner);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 var engine = new SearchEngine(database, options.Core.QueryExecution, projection);

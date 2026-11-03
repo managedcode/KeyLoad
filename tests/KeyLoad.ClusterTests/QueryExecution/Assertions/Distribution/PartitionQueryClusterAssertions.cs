@@ -9,7 +9,6 @@ internal static class PartitionQueryClusterAssertions
     internal static async Task AssertOracleAsync(PartitionQueryPage page,
         PartitionQueryClusterScenario scenario, ImmutableArray<PartitionRef> selected)
     {
-        await Assert.That(page.Version).IsEqualTo(PartitionQueryClusterProtocol.Version);
         await Assert.That(page.Complete).IsTrue();
         var expected = scenario.ExpectedRows(selected);
         await Assert.That(page.Rows.Length).IsEqualTo(expected.Length);
@@ -28,7 +27,6 @@ internal static class PartitionQueryClusterAssertions
     internal static async Task AssertSameLogicalRowsAsync(PartitionQueryPage expected,
         PartitionQueryPage actual)
     {
-        await Assert.That(actual.Version).IsEqualTo(expected.Version);
         await Assert.That(actual.Complete).IsEqualTo(expected.Complete);
         await Assert.That(actual.Rows.Length).IsEqualTo(expected.Rows.Length);
         for (var index = 0; index < expected.Rows.Length; index++)

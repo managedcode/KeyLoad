@@ -114,8 +114,7 @@ internal sealed class QueryLifetimeFlow(QueryFixture fixture, bool sourceNarrowe
     {
         var metadata = captured ?? Capture();
         var database = fixture.Destination.Database;
-        var input = new DistributedSearchOwnedLeaf(QueryLifetimeProtocol.Version,
-            DistributedSearchPhase.Statistics, new(QueryFixture.Partition,
+        var input = new DistributedSearchOwnedLeaf(DistributedSearchPhase.Statistics, new(QueryFixture.Partition,
                 QueryFixture.Collection, TextField: field,
                 Text: text, Limit: QueryLifetimeProtocol.Limit),
             fixture.DestinationOwner, QueryFixture.Tenant,

@@ -15,7 +15,7 @@ internal static class QueryEquivalentIntegerDecimalRequests
             [MinimumParameter] = JsonSerializer.SerializeToElement(minimum)
         };
     internal static AstQueryRequest Ast(PartitionRef partition, QueryEquivalentIntegerKind kind, decimal minimum)
-        => Q2CapabilityFixtures.JsonRoundTrip(new(partition,
+        => JoinCapabilityFixtures.JsonRoundTrip(new(partition,
             new(Collection, null, [new(Star, Star)], new Comparison(new FieldOperand(PathPrefix + Field(kind)),
                 Compare, new ParameterOperand(MinimumParameter)), [new(IdPath, false)], Limit),
             Parameters(minimum), AllowFullScan: true));

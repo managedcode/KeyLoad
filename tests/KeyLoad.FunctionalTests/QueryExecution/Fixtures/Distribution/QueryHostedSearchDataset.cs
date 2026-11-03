@@ -22,7 +22,7 @@ internal sealed class QueryHostedSearchDataset(RequestCqrsHostedCluster cluster)
     internal PartitionRef Second => First with { PartitionKey = "customer-2" };
     internal ResourceLifetime Creation { get; private set; } = null!;
     internal PrincipalRecord Principal { get; private set; } = null!;
-    internal DistributedSearchRequest Request => new(Version, [First, Second],
+    internal DistributedSearchRequest Request => new([First, Second],
         new(First, Collection, TextField: Title, Text: "source destination", Limit: Documents,
             FusionConstant: FusionConstant));
 

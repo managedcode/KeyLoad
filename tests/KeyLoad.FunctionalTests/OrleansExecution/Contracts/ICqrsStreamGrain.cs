@@ -2,7 +2,6 @@ using ManagedCode.Communication.CQRS;
 
 namespace KeyLoad.FunctionalTests.OrleansExecution;
 
-[global::Orleans.CodeGeneration.Version(1)]
 internal interface ICqrsStreamGrain : global::Orleans.IGrainWithGuidKey
 {
     IAsyncEnumerable<CqrsStreamChunk<CqrsProgress, CqrsResult>> AllowedAsync(

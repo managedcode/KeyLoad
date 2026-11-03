@@ -3,7 +3,7 @@ using KeyLoad.Query.QueryExecution;
 
 namespace KeyLoad.Query;
 
-/// <summary>Parses the closed Q1.Search statement into the existing graph-search request.</summary>
+/// <summary>Parses the closed KeyLoad.Search statement into the existing graph-search request.</summary>
 internal static class SqlGraphSearchParser
 {
     internal static GraphSearchRequest Parse(SqlGraphSearchRequest request, ReadExecutionBudget budget,
@@ -22,7 +22,7 @@ internal static class SqlGraphSearchParser
 
     private static void ValidateEnvelope(SqlGraphSearchRequest request)
     {
-        if (request.Version != SqlGraphSearchSyntax.Version || request.Query is null
+        if (request.Query is null
             || request.Query.Partition is null || request.Query.Sql is null
             || request.Query.Cursor is not null || !request.Query.AllowFullScan)
         {

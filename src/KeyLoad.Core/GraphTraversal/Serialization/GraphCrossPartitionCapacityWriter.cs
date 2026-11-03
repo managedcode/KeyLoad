@@ -38,7 +38,7 @@ internal static class GraphCrossPartitionCapacityWriter
         if (delta.RecordCount != NoCapacityChange || delta.EncodedBytes != NoCapacityChange || counter is null)
         {
             transaction.PutRecord(counterKey, new GraphCrossPartitionCapacity(
-                GraphCrossPartitionProtocol.CurrentVersion, direction, next.RecordCount, next.EncodedBytes));
+                direction, next.RecordCount, next.EncodedBytes));
         }
     }
 

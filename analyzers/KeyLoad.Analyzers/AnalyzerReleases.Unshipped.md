@@ -6,7 +6,6 @@ Rule ID | Category | Severity | Notes
 --------|----------|----------|------
 KLD0001 | Design | Error | Repository code quality
 KLD0013 | Architecture | Error | Repository code quality
-KLD0014 | Reliability | Error | Repository code quality
 KLD0020 | Architecture | Error | Repository code quality
 KLD0021 | Reliability | Error | Repository code quality
 KLD0022 | Reliability | Error | Repository code quality

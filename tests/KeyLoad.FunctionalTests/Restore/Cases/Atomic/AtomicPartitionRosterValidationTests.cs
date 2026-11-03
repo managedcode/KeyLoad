@@ -12,7 +12,6 @@ internal sealed class AtomicPartitionRosterValidationTests
     private const long NoStorePosition = 0;
     private const long NegativeAppliedIndex = -1;
     private const long FutureStorePositionStep = 2;
-    private const int VersionStep = 1;
     private const string RootPrincipalId = "root";
     private const string DocumentId = "invalid-roster-document";
     private const string DocumentJson = "{\"value\":1}";
@@ -23,8 +22,6 @@ internal sealed class AtomicPartitionRosterValidationTests
     {
         await AssertInvalidEntryAsync(position => Entry(position, FirstSeenIndex));
         await AssertInvalidEntryAsync(_ => Entry(NoStorePosition, FirstSeenIndex + AppliedIndexStep));
-        await AssertInvalidEntryAsync(position => Entry(position, NoStorePosition,
-            version: AtomicPartitionRosterProtocol.CurrentVersion + VersionStep));
         await AssertInvalidEntryAsync(position => Entry(position, NoStorePosition,
             partition: AtomicPartitionRosterFixture.Destination));
         await AssertInvalidEntryAsync(position => Entry(checked(position + FutureStorePositionStep), NoStorePosition));
@@ -49,8 +46,8 @@ internal sealed class AtomicPartitionRosterValidationTests
     }
 
     private static AtomicPartitionCatalogEntry Entry(long storePosition, long appliedIndex,
-        int version = AtomicPartitionRosterProtocol.CurrentVersion, PartitionRef? partition = null)
-        => new(version, partition ?? AtomicPartitionRosterFixture.Source, storePosition, appliedIndex);
+        PartitionRef? partition = null)
+        => new(partition ?? AtomicPartitionRosterFixture.Source, storePosition, appliedIndex);
 
     private static async Task AssertInvalidEntryAsync(Func<long, AtomicPartitionCatalogEntry> createEntry)
     {

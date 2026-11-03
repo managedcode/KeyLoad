@@ -49,8 +49,6 @@ internal static class RequestCqrsAnnResultAssertions
         await Assert.That(source.NodeId).IsEqualTo(fixture.Database.Store.Identity.NodeId);
         await Assert.That(source.Incarnation).IsEqualTo(fixture.Database.Store.Identity.Incarnation);
         await Assert.That(source.ReadGeneration).IsEqualTo(fixture.Database.Store.Identity.ReadGeneration);
-        await Assert.That(source.StoreFormatVersion).IsEqualTo(fixture.Database.Store.Identity.FormatVersion);
-        await Assert.That(source.KeyCodecVersion).IsEqualTo(fixture.Database.Store.Identity.KeyCodecVersion);
         await Assert.That(source.Position).IsGreaterThanOrEqualTo(before);
         await Assert.That(source.Position).IsLessThanOrEqualTo(fixture.Database.Store.Position);
         await Assert.That(source.AppliedPosition).IsLessThanOrEqualTo(fixture.Database.ReadCanonicalCut().AppliedPosition);
@@ -68,7 +66,7 @@ internal static class RequestCqrsAnnResultAssertions
         var image = QueueWholeFlowStorage.Bytes(fixture.Database.Store);
         var cut = fixture.Database.Store.Position;
         var actual = await search.ApproximateSearchAsync(RequestCqrsAnnTestData.Principal,
-            new(RequestCqrsAnnTestData.Version, new(fixture.Database.Partition, request.Collection,
+            new(new(fixture.Database.Partition, request.Collection,
                 VectorField: request.Field, Vector: [.. RequestCqrsAnnTestData.Query], Space: request.Space,
                 Limit: RequestCqrsAnnTestData.OriginalCount), request.Consumer, request.IndexGeneration), token);
         RankedDocument[] rows = changed
@@ -78,8 +76,7 @@ internal static class RequestCqrsAnnResultAssertions
                 RequestCqrsAnnTestData.OriginalRevision, RequestCqrsAnnTestData.FirstScore),
                Row(fixture, request, RequestCqrsAnnTestData.Second, RequestCqrsAnnTestData.FirstJson,
                 RequestCqrsAnnTestData.OriginalRevision, RequestCqrsAnnTestData.SecondScore)];
-        await RequestCqrsAnnAssertions.EqualAsync(new AnnSearchPage(RequestCqrsAnnTestData.Version,
-            [.. rows], cut, AnnPageMode.Exact, true, request.IndexGeneration, AnnPageMode.Approximate), actual);
+        await RequestCqrsAnnAssertions.EqualAsync(new AnnSearchPage([.. rows], cut, AnnPageMode.Exact, true, request.IndexGeneration, AnnPageMode.Approximate), actual);
         await Assert.That(fixture.Database.Store.Position).IsEqualTo(cut);
         await Assert.That(QueueWholeFlowStorage.Bytes(fixture.Database.Store).AsSpan().SequenceEqual(image)).IsTrue();
     }

@@ -36,7 +36,6 @@ internal static class GraphPathRawReadR43Reads
 
     private static async Task ResultAsync(GraphShortestPathResult result, GraphPathRawReadR43State state)
     {
-        await Assert.That(result.Version).IsEqualTo(1);
         await Assert.That(result.Found).IsTrue();
         await Assert.That(result.Hops).IsEqualTo(2);
         await SqlClusterProtocol.EqualAsync(state.StoredVertices, result.Vertices.ToArray());

@@ -20,7 +20,7 @@ internal sealed class TextProjectionScopeTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"),
             new PutDocument(Collection, "two", "{\"text\":\"needle\"}"));
-        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         var request = new SearchRequest(database.Partition, Collection, TextPath, Query);
         var oracle = await new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution()).SearchAsync("root", request);
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
@@ -64,7 +64,7 @@ internal sealed class TextProjectionScopeTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, TextPath, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

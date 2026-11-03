@@ -7,7 +7,7 @@ namespace KeyLoad.FunctionalTests.QueryExecution;
 
 internal static class QueryAdapterCollectionAssertions
 {
-    private const string Unsupported = "This expression is outside the supported Q1 C# subset.";
+    private const string Unsupported = "This expression is outside the supported C# query subset.";
     internal static async Task WaveAsync(DatabaseEngine database, ZoneTreeStore store, PartitionRef partition,
         List<(Command<DatabaseCommand> Operation, byte[] Result)> originals)
     {

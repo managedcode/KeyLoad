@@ -119,7 +119,6 @@ internal static class SampleChunkTestData
         using var hash = IncrementalHash.CreateHash(HashAlgorithmName.SHA256);
         hash.AppendData(Encoding.ASCII.GetBytes(ChecksumDomain));
         Span<byte> scalar = stackalloc byte[sizeof(int)];
-        AppendInt(payload.FormatVersion, scalar, hash);
         AppendInt(payload.RecordCount, scalar, hash);
         AppendColumn(payload.UtcTicks, scalar, hash);
         AppendColumn(payload.Offsets, scalar, hash);

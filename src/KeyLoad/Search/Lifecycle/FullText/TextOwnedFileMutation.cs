@@ -2,6 +2,27 @@ namespace KeyLoad.Server.Search;
 
 internal static class TextOwnedFileMutation
 {
+    internal static void CloseOwnedFile(Lock gate, TextOpenFileGroups openFiles, Action check,
+        TextOpenFileGroup group, ZoneTree.AbstractFileStream.IFileStream stream)
+    {
+        lock (gate)
+        {
+            var failures = new List<Exception>();
+            ServerFailureObserver.Observe(() => openFiles.BeginClose(group, stream), failures);
+            var beforeClose = failures.Count;
+            ServerFailureObserver.Observe(stream.Dispose, failures);
+            if (failures.Count == beforeClose)
+            {
+                ServerFailureObserver.Observe(() =>
+                {
+                    openFiles.Close(group, stream);
+                    check();
+                }, failures);
+            }
+            ServerFailureObserver.ThrowIfAny(failures);
+        }
+    }
+
     internal static void DeleteOwnedFile(Lock gate, TextOpenFileGroups openFiles, Action check, string path, Action mutation)
     {
         lock (gate)

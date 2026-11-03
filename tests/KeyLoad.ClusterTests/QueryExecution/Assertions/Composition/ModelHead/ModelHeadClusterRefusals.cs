@@ -41,7 +41,7 @@ internal static class ModelHeadClusterRefusals
     {
         var request = new SqlOperationRequest(state.Partition, "UPDATE [model-head-queue] SET state = 'Acked'");
         await SqlAsync(await reader.Sdk.ExecuteSqlAsync(request, token), ErrorCode.UnsupportedCapability,
-            "The unified SQL version, statement or target operation is unsupported.");
+            "The unified SQL statement or target operation is unsupported.");
         await McpAsync(await reader.Mcp.CallAsync(SqlOperationProtocol.ToolName, request, token), state, ErrorCode.UnsupportedCapability, false);
     }
     private static async Task SdkAsync<T>(Result<T> result, ErrorCode code, string detail)

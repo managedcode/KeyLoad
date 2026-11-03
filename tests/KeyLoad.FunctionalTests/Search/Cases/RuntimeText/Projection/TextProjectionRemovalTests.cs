@@ -68,7 +68,7 @@ internal sealed class TextProjectionRemovalTests
 
     private static RuntimeTextProjection Create(TestDatabase db, string root)
         => new(root, db.Store.Identity.NodeId,
-            UnitTextOptions.Execution());
+            UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
 
     private static (string Key, string Value)[] Snapshot(TestDatabase db) => db.Store.Read(view =>
     {

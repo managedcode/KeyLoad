@@ -12,10 +12,6 @@ internal static class ScriptDomValuesInsertOperation
         {
             throw ScriptDomOperationErrors.Invalid();
         }
-        if (request.QueryDialectVersion != SqlOperationProtocol.DefaultQueryDialectVersion)
-        {
-            throw ScriptDomOperationErrors.Unsupported();
-        }
         var identity = SqlOriginalMutationIdentity.Required(request.CommandId);
         var (table, columns, values) = ScriptDomValuesInsertShape.Read(statement, checkBudget, token);
         var parameters = new ScriptDomCompositionParameters(request.Parameters, positionalCount, checkBudget, token);

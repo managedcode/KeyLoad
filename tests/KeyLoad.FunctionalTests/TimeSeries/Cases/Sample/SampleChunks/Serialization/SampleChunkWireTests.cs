@@ -1,13 +1,9 @@
-using KeyLoad.FunctionalTests.InternalSerialization;
-
 namespace KeyLoad.FunctionalTests.TimeSeries;
 
 internal sealed class SampleChunkWireTests
 {
-    private const string ExpectedUnsupportedVersionMessage = "The sample chunk format is unsupported.";
-
     [Test]
-    public async Task AcChunk004ChecksumMismatchAndUnsupportedChunkVersionHaveExactErrors()
+    public async Task AcChunk004ChecksumMismatchHasExactCorruptionError()
     {
         var payload = SampleChunkTestData.Payload(SampleChunkWireCodecAssertions.Encoded(SampleChunkTestData.FixedRecords()));
         var badChecksum = payload.Checksum.ToArray();
@@ -16,33 +12,21 @@ internal sealed class SampleChunkWireTests
         {
             Checksum = badChecksum
         }));
-        var unknownPayload = payload with
-        {
-            FormatVersion = payload.FormatVersion + 1
-        };
-        var versionFailure = SampleChunkWireCodecAssertions.DecodeFailure(SampleChunkTestData.Rechecksum(unknownPayload));
 
         await Assert.That(checksumFailure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(versionFailure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
-        await Assert.That(versionFailure.Message).IsEqualTo(ExpectedUnsupportedVersionMessage);
     }
 
     [Test]
-    public async Task AcChunk004EnvelopeTruncationTrailingBytesAndUnknownVersionFailClosed()
+    public async Task AcChunk004EnvelopeTruncationAndTrailingBytesFailClosed()
     {
         var encoded = SampleChunkWireCodecAssertions.Encoded(SampleChunkTestData.FixedRecords());
         var truncated = encoded[..^1];
         var trailing = encoded.Append((byte)0).ToArray();
-        using var serializer = new SerializerFixture();
-        var payload = SampleChunkTestData.Payload(encoded);
-        var unknownVersion = serializer.Encode(payload, PayloadVersion.Current + 1);
         var truncatedFailure = SampleChunkWireCodecAssertions.DecodeFailure(truncated);
         var trailingFailure = SampleChunkWireCodecAssertions.DecodeFailure(trailing);
-        var versionFailure = SampleChunkWireCodecAssertions.DecodeFailure(unknownVersion);
 
         await Assert.That(truncatedFailure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(trailingFailure.Code).IsEqualTo(ErrorCode.Corruption);
-        await Assert.That(versionFailure.Code).IsEqualTo(ErrorCode.FormatUnsupported);
     }
 
     [Test]

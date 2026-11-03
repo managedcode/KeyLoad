@@ -19,13 +19,12 @@ internal sealed class SerializerFixture : IDisposable
         serializer = services.GetRequiredService<Serializer<RuntimePayload>>();
     }
 
-    internal byte[] Encode(object? value, uint version = PayloadVersion.Current)
-        => serializer.SerializeToArray(new RuntimePayload { Version = version, Value = value });
+    internal byte[] Encode(object? value)
+        => serializer.SerializeToArray(new RuntimePayload { Value = value });
 
     internal byte[] EncodeEnvelope(EnvelopeFault fault) => fault switch
     {
         EnvelopeFault.WrongRoot => Encode(new QueueCounters(1, 1, 1, 1, 1)),
-        EnvelopeFault.MissingVersion => Encode(new OutboxHead(1, 1, 1, 1), 0),
         EnvelopeFault.MissingValue => Encode(null),
         _ => throw new ArgumentOutOfRangeException(nameof(fault))
     };

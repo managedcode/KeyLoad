@@ -10,7 +10,7 @@ internal static class PolicyEpochPublicProtocol
     internal const int RouteCount = 6;
     internal const int Sdk = 0;
     internal const int Mcp = 1;
-    internal const int Q1Sdk = 2;
+    internal const int SqlSdk = 2;
     internal const int SdkAst = 4;
     internal const int McpAst = 5;
     internal const int QueryLimit = 1;

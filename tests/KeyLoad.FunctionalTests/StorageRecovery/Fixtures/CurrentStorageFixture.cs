@@ -4,7 +4,6 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal sealed class CurrentStorageFixture : IDisposable
 {
-    internal const int CurrentFormatVersion = 8;
     private const string RootPrefix = "keyload-current-storage-";
     private const string SourceName = "source";
     private const string BackupName = "backup";

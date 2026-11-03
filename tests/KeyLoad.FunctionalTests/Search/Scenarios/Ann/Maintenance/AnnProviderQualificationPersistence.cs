@@ -64,7 +64,6 @@ internal static class AnnProviderQualificationPersistence
         using var source = new MemoryStream(bytes, writable: false);
         var budget = AnnProviderQualificationCorpus.Budget(owner, token);
         var header = PackedAnnStorageFrames.Read<PackedAnnStorageHeader>(source, budget);
-        await Assert.That(header.Version).IsEqualTo(PackedAnnStorageFrames.CurrentVersion);
         await Assert.That(header.Space).IsEqualTo(AnnProviderQualificationCorpus.Space(state.Metric));
         await Assert.That(header.Policy).IsEqualTo(state.Policy);
         await Assert.That(header.Count).IsEqualTo(CorpusCount);

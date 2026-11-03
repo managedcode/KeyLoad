@@ -5,7 +5,7 @@ using KeyLoad.Storage;
 
 namespace KeyLoad.Query;
 
-/// <summary>Evaluates the supported Q1 scalar and three-valued predicate semantics.</summary>
+/// <summary>Evaluates the supported scalar and three-valued predicate semantics.</summary>
 public static class PredicateEvaluator
 {
     private const string OperandIsInvalidDetail = "An operand is invalid.";
@@ -43,7 +43,7 @@ public static class PredicateEvaluator
             _ => paths is null ? JsonData.Scalar(json, path) : (JsonData.Scalar(json, paths[path])).Value.Value
         };
     /// <summary>Evaluates a typed predicate with SQL-style unknown results.</summary>
-    /// <param name="predicate">Typed Q1 predicate.</param>
+    /// <param name="predicate">Typed scalar predicate.</param>
     /// <param name="document">Document supplying metadata fields.</param>
     /// <param name="json">Parsed document JSON.</param>
     /// <param name="parameters">Optional bound scalar parameters.</param>
@@ -85,7 +85,7 @@ public static class PredicateEvaluator
     }
     private static (bool HasValue, bool? Value) And(bool? left, bool? right) => left == false || right == false ? (true, (bool?)(false)) : left is null || right is null ? (false, default(bool?)) : (true, (bool?)(true));
     private static (bool HasValue, bool? Value) Or(bool? left, bool? right) => left == true || right == true ? (true, (bool?)(true)) : left is null || right is null ? (false, default(bool?)) : (true, (bool?)(false));
-    /// <summary>Compares two Q1 scalar values with type and null rules.</summary>
+    /// <summary>Compares two scalar values with type and null rules.</summary>
     /// <param name="left">Left scalar.</param>
     /// <param name="operation">Supported comparison operator.</param>
     /// <param name="right">Right scalar.</param>

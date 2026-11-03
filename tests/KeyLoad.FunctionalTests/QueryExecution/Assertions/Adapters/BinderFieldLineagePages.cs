@@ -37,8 +37,8 @@ internal static class BinderFieldLineagePages
                 [() => engine.Execute(subject, new(partition, BinderFieldLineageRequests.Sql(shape),
                         AllowFullScan: true), cancellationToken: token),
                  () => engine.ExecuteAst(subject, ast, cancellationToken: token),
-                 () => engine.ExecuteAst(subject, Q2CapabilityFixtures.JsonRoundTrip(ast), cancellationToken: token),
-                 () => engine.ExecuteAst(subject, Q2CapabilityFixtures.RuntimeRoundTrip(ast), cancellationToken: token)];
+                 () => engine.ExecuteAst(subject, JoinCapabilityFixtures.JsonRoundTrip(ast), cancellationToken: token),
+                 () => engine.ExecuteAst(subject, JoinCapabilityFixtures.RuntimeRoundTrip(ast), cancellationToken: token)];
                 foreach (var call in calls)
                 {
                     if (shape != ProjectionOnly && (mode & UseOnly) == None)

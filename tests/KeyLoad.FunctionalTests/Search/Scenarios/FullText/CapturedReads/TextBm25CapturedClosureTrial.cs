@@ -53,7 +53,7 @@ internal static class TextBm25CapturedClosureTrial
         await ServerFailureObserver.ObserveAsync(async () =>
         {
             projection = new(Path.Combine(owner.Source.Directory, "bm25-captured-text"), owner.Store.Identity.NodeId,
-                UnitTextOptions.Execution());
+                UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
             captured = owner.Database.WithQueryView(Bm25OriginalPhaseRecoveryFlow.Subject,
                 request.Partition, request.Collection, (view, principal, resource) =>
                     TextCapturedReadFactory.Capture(owner.Database, projection, view,

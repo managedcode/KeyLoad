@@ -14,10 +14,6 @@ internal static class SampleRollupValidation
 
     internal static void State(SampleRollupState state, DateTimeOffset from, DateTimeOffset until)
     {
-        if (state.FormatVersion != RuntimeSampleRollup.Version)
-        {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, SampleRollupProtocol.Unsupported);
-        }
         var empty = state.Count == Empty;
         if (state.FromUtcTicks != from.UtcTicks || state.UntilUtcTicks != until.UtcTicks
             || state.FromUtcTicks >= state.UntilUtcTicks || state.Revision < FirstRevision

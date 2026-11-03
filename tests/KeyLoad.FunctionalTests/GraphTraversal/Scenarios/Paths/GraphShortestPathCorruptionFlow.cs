@@ -15,7 +15,6 @@ internal static class GraphShortestPathCorruptionFlow
     private const string EdgeSpace = "edge";
     private const string AdjacencySpace = "adjacency";
     private const string OutDirection = "out";
-    private const int ContractVersion = 1;
     private const int OneHop = 1;
     private const int TwoVertices = 2;
     private const int WrongAdjacencyValue = 7;
@@ -34,7 +33,7 @@ internal static class GraphShortestPathCorruptionFlow
     }
 
     internal static GraphShortestPathRequest Request(EdgeRecord expected)
-        => new(ContractVersion, expected.From.Partition, GraphShortestPathTestSupport.Graph,
+        => new(expected.From.Partition, GraphShortestPathTestSupport.Graph,
             expected.From, expected.To, OneHop, TwoVertices, OneHop);
 
     internal static void Inject(ZoneTreeStore store, EdgeRecord expected, GraphShortestPathCorruptionCase testCase)
@@ -116,7 +115,6 @@ internal static class GraphShortestPathCorruptionFlow
         var image = CanonicalStoreImage.Bytes(store);
         var actual = owner.ShortestPath(GraphShortestPathTestSupport.RootPrincipal, Request(expected),
             cancellationToken: cancellationToken);
-        await Assert.That(actual.Version).IsEqualTo(ContractVersion);
         await Assert.That(actual.Found).IsTrue();
         await Assert.That(actual.Hops).IsEqualTo(OneHop);
         await Assert.That(actual.Vertices.SequenceEqual([expected.From, expected.To])).IsTrue();

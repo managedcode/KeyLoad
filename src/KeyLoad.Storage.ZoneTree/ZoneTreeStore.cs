@@ -73,6 +73,16 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     }
 
     /// <inheritdoc />
+    public async ValueTask<T> ReadAsync<T>(Func<IKeyValueView, CancellationToken, ValueTask<T>> read,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(read) /* KLD0041: The BCL null guard accepts this existing typed callback reference without copying its contents. */;
+        cancellationToken.ThrowIfCancellationRequested();
+        using var operation = new ZoneTreeOperationContext(runtime, runtime.Tree.BeginReadOnlyTransaction(), ownsTransaction: true);
+        return await read(this, cancellationToken).ConfigureAwait(true);
+    }
+
+    /// <inheritdoc />
     public T Prepare<T>(Func<IAtomicTransaction, long, T> prepare)
         => ZoneTreeStorePreparationExecution.Prepare(runtime, prepare);
 

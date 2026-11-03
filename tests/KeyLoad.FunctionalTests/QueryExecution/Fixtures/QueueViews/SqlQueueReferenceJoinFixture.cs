@@ -29,7 +29,7 @@ internal static class SqlQueueReferenceJoinFixture
         {
             [MinimumParameter] = JsonSerializer.SerializeToElement(7)
         },
-            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
+            AllowFullScan: true);
 
     internal static AstQueryRequest Ast(PartitionRef partition)
         => new(partition, new SelectQuery(Queue, "q",
@@ -40,7 +40,7 @@ internal static class SqlQueueReferenceJoinFixture
             new()
             {
                 [MinimumParameter] = JsonSerializer.SerializeToElement(7)
-            }, AllowFullScan: true, AstVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
+            }, AllowFullScan: true);
 
     internal static QueryRequest FilteredInvalidRequest(PartitionRef partition)
         => Request(partition, InvalidQueue) with

@@ -30,20 +30,18 @@ internal sealed class SqlInnerJoinDeclaredProjectionTests
     private const string MetadataRevisionAlias = "metadata_revision";
     private const string OrderJson = "{\"order_id\":\"order\",\"customer_id\":\"customer\",\"total\":7,\"source_revision\":999}";
     private const string CustomerJson = "{\"id\":\"customer\"}";
-    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int Limit = 100;
     private const int DeclaredRevision = 999;
 
     [Test]
-    public async Task AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyQ1Followup()
+    public async Task AcceptedSqlAndDeclaredColumnsUseRealRowsWithExactAstParityAndHealthyScalarFollowup()
     {
         using var database = new TestDatabase();
         Configure(database);
         database.Commit(new PutDocument(Orders, Entity, OrderJson), new PutDocument(Customers, Customer, CustomerJson));
         var before = database.Store.Position;
         var engine = new QueryEngine(database.Database, UnitExecutionOptions.QueryExecution());
-        var accepted = engine.Execute("root", new(database.Partition, AcceptedSql, AllowFullScan: true,
-            QueryDialectVersion: Dialect));
+        var accepted = engine.Execute("root", new(database.Partition, AcceptedSql, AllowFullScan: true));
         await VerifyParityAsync(engine, database, accepted,
             [new("/order_id", OrderId, Left), new("/id", CustomerId, Right), new("/total", Total, Left)]);
         using var acceptedJson = JsonDocument.Parse(accepted.Rows[0].Json);
@@ -51,8 +49,7 @@ internal sealed class SqlInnerJoinDeclaredProjectionTests
         await Assert.That(acceptedJson.RootElement.GetProperty(OrderId).GetString()).IsEqualTo(Entity);
         await Assert.That(acceptedJson.RootElement.GetProperty(CustomerId).GetString()).IsEqualTo(Customer);
         await Assert.That(acceptedJson.RootElement.GetProperty(Total).GetInt32()).IsEqualTo(7);
-        var declared = engine.Execute("root", new(database.Partition, DeclaredSql, AllowFullScan: true,
-            QueryDialectVersion: Dialect));
+        var declared = engine.Execute("root", new(database.Partition, DeclaredSql, AllowFullScan: true));
         await VerifyParityAsync(engine, database, declared,
             [new("/id", DeclaredIdAlias, Right), new("/source_revision", DeclaredRevisionAlias, Left), new("/order_id", OrderId, Left)]);
         using var declaredJson = JsonDocument.Parse(declared.Rows[0].Json);
@@ -73,7 +70,7 @@ internal sealed class SqlInnerJoinDeclaredProjectionTests
     {
         var ast = new AstQueryRequest(database.Partition,
             new SelectQuery(Orders, Left, selections, null, [new("/order_id", false)], Limit,
-                InnerJoin: new(Customers, Right, "/customer_id", "/id")), AllowFullScan: true, AstVersion: Dialect);
+                InnerJoin: new(Customers, Right, "/customer_id", "/id")), AllowFullScan: true);
         var fromAst = engine.ExecuteAst("root", ast);
         await Assert.That(JsonDefaults.Serialize(fromAst).AsSpan().SequenceEqual(JsonDefaults.Serialize(page))).IsTrue();
         await Assert.That(page.Rows).HasSingleItem();

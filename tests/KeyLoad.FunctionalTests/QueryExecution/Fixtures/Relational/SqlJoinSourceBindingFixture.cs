@@ -28,7 +28,6 @@ internal static class SqlJoinSourceBindingFixture
     private const string NameOutput = "customer_name";
     private const string Sql = "SELECT TOP (10) r.name AS customer_name FROM orders AS l INNER JOIN customers AS r ON l.customer_id = r.id ORDER BY l.order_id ASC";
     private const string ModelSelect = "SELECT TOP (10) d.name AS customer_name FROM ";
-    private const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     private const int Limit = 10;
 
     internal static (global::KeyLoad.CommandRequest Command, global::KeyLoad.CommitReceipt Receipt) Seed(TestDatabase database, string kind)
@@ -65,7 +64,7 @@ internal static class SqlJoinSourceBindingFixture
         {
             return new(partition, new global::KeyLoad.Query.SelectQuery(LeftCollection, LeftAlias, [new(NamePath, NameOutput, RightAlias)],
                 null, [new(OrderPath, false)], Limit, InnerJoin: new(RightCollection, RightAlias, ForeignPath, TargetPath)),
-                AllowFullScan: true, AstVersion: Dialect);
+                AllowFullScan: true);
         }
         var source = kind == Events ? SqlEventReferenceJoinFixture.Ast(partition) : SqlQueueReferenceJoinFixture.Ast(partition);
         return source with
@@ -81,7 +80,7 @@ internal static class SqlJoinSourceBindingFixture
     {
         if (kind == Typed)
         {
-            return new(partition, Sql, AllowFullScan: true, QueryDialectVersion: Dialect);
+            return new(partition, Sql, AllowFullScan: true);
         }
         var request = kind == Events ? SqlEventReferenceJoinFixture.Request(partition) : SqlQueueReferenceJoinFixture.Request(partition);
         var prefix = kind == Events ? SqlEventReferenceJoinFixture.Prefix : SqlQueueReferenceJoinFixture.Prefix;

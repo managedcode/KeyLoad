@@ -263,7 +263,7 @@ Business work and the matching tests stay in the owning `<SliceName>/` slice. Co
 
 ## Query output and live query pages
 
-There is no query, search or read result-byte ceiling and no query execution option that configures one ([ADR-149](../ADR/ADR-149-no-operation-limits.md)). `ReadExecutionBudget` carries only cancellation, the explicit expiry and resource-lifetime bindings; scalar, Q2, model and explain SQL, live-query snapshots and deltas, partition query leaves and merge, and text, vector, hybrid and graph search results are bounded by their own `Limit` and the data they read. SQL graph search shares one operation with the graph search it calls; its composition is in [QueryExecution](QueryExecution.md).
+There is no query, search or read result-byte ceiling and no query execution option that configures one ([ADR-149](../ADR/ADR-149-no-operation-limits.md)). `ReadExecutionBudget` carries only cancellation, the explicit expiry and resource-lifetime bindings; scalar, InnerJoin, model and explain SQL, live-query snapshots and deltas, partition query leaves and merge, and text, vector, hybrid and graph search results are bounded by their own `Limit` and the data they read. SQL graph search shares one operation with the graph search it calls; its composition is in [QueryExecution](QueryExecution.md).
 
 A live-query page is bounded by its `Limit` only. `LiveQueryResultCompositionTests.HiddenOutboxPagesResumeFromTheOriginalCursorWithLiteralPages` reads through outbox entries of a hidden collection one page at a time: each page advances the cursor without returning hidden rows, the visible change arrives exactly once and replays from its cursor, and the raw store image, position and identity stay unchanged.
 

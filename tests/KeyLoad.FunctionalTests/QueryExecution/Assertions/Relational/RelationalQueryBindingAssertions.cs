@@ -56,8 +56,8 @@ internal static class RelationalQueryBindingAssertions
         => [() => engine.Execute(Reader, new(partition, Projection + request.Suffix,
                 request.Ast.Parameters, AllowFullScan: true), cancellationToken: token),
             () => engine.ExecuteAst(Reader, request.Ast, cancellationToken: token),
-            () => engine.ExecuteAst(Reader, Q2CapabilityFixtures.JsonRoundTrip(request.Ast), cancellationToken: token),
-            () => engine.ExecuteAst(Reader, Q2CapabilityFixtures.RuntimeRoundTrip(request.Ast), cancellationToken: token)];
+            () => engine.ExecuteAst(Reader, JoinCapabilityFixtures.JsonRoundTrip(request.Ast), cancellationToken: token),
+            () => engine.ExecuteAst(Reader, JoinCapabilityFixtures.RuntimeRoundTrip(request.Ast), cancellationToken: token)];
 
     private static async Task RefusalAsync(Func<QueryPage> execute, ErrorCode code, string detail)
     {
@@ -125,7 +125,7 @@ internal static class RelationalQueryBindingAssertions
             AllowFullScan: true), cancellationToken: token);
         await BinderFieldLineagePages.EqualAsync(expected, sql);
         await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, request, cancellationToken: token));
-        await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, Q2CapabilityFixtures.JsonRoundTrip(request), cancellationToken: token));
-        await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, Q2CapabilityFixtures.RuntimeRoundTrip(request), cancellationToken: token));
+        await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, JoinCapabilityFixtures.JsonRoundTrip(request), cancellationToken: token));
+        await BinderFieldLineagePages.EqualAsync(expected, engine.ExecuteAst(Reader, JoinCapabilityFixtures.RuntimeRoundTrip(request), cancellationToken: token));
     }
 }

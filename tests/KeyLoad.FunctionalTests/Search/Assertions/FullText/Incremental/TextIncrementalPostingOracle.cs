@@ -3,6 +3,7 @@ using KeyLoad.Server.Search;
 using Microsoft.Extensions.Options;
 using TUnit.Assertions.Enums;
 using ZoneTree.FullTextSearch.Index;
+using ZoneTree.Options;
 
 namespace KeyLoad.FunctionalTests.Search;
 
@@ -21,7 +22,7 @@ internal static class TextIncrementalPostingOracle
             await ServerFailureObserver.ObserveAsync(async () =>
             {
                 index = RuntimeTextIndex.Open(Path.Combine(root, leaf, TextProtocol.RuntimeDirectoryCore),
-                    new TextFileStreamProvider(root, leaf, nodeId, options), options);
+                    new TextFileStreamProvider(root, leaf, nodeId, options), options, WriteAheadLogMode.Sync);
                 var observed = new List<(ulong Token, ulong Record, ulong Previous)>();
                 var iterator = index.ZoneTree1.CreateIterator(global::ZoneTree.IteratorType.NoRefresh,
                     contributeToTheBlockCache: false);

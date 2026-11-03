@@ -9,7 +9,7 @@ internal sealed class NonTransactionalWalAdmissionTests
     [Test]
     [Arguments(false)]
     [Arguments(true)]
-    public async Task OpenedWriterModeMustMeetTheAcknowledgementContract(bool plain)
+    public async Task StoredWalModeIsRejectedBeforeOpenWithoutRewritingItsMetadata(bool plain)
     {
         using var fixture = new NonTransactionalTableFixture();
         (await fixture.ConfigureAsync()).Get<ResourceDefinition>();
@@ -22,18 +22,21 @@ internal sealed class NonTransactionalWalAdmissionTests
 
         if (plain)
         {
-            CreateAsynchronousWriter(ZoneTreeTreeFactory.Plain(fixture.Destination(NonTransactionalTableFixture.PlainDirectory)));
+            PersistAsynchronousMode(ZoneTreeTreeFactory.Plain(fixture.Destination(NonTransactionalTableFixture.PlainDirectory)));
         }
         else
         {
-            CreateAsynchronousWriter(ZoneTreeTreeFactory.Storage(fixture.Destination("tree")));
+            PersistAsynchronousMode(ZoneTreeTreeFactory.Storage(fixture.Destination("tree")));
         }
+        var metadataPath = Path.Combine(fixture.Destination(plain ? NonTransactionalTableFixture.PlainDirectory : "tree"), "0.json");
+        var metadata = await File.ReadAllBytesAsync(metadataPath);
         var rejected = Assert.ThrowsExactly<KeyLoadException>(() =>
         {
             using var refused = NonTransactionalTableFixture.Open(fixture.Owner.Directory);
         });
         await Assert.That(rejected.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That((await File.ReadAllBytesAsync(identityPath)).SequenceEqual(identity)).IsTrue();
+        await Assert.That((await File.ReadAllBytesAsync(metadataPath)).SequenceEqual(metadata)).IsTrue();
         using (var native = ZoneTreeTreeFactory.Plain(fixture.Destination(NonTransactionalTableFixture.PlainDirectory)).Open())
         {
             await Assert.That(native.TryGet(fixture.RowKey(), out var retained)).IsTrue();
@@ -49,7 +52,7 @@ internal sealed class NonTransactionalWalAdmissionTests
             .IsEqualTo(RelationalTestData.Row());
     }
 
-    private static void CreateAsynchronousWriter<TKey, TValue>(ZoneTreeFactory<TKey, TValue> factory)
+    private static void PersistAsynchronousMode<TKey, TValue>(ZoneTreeFactory<TKey, TValue> factory)
     {
         factory.ConfigureWriteAheadLogOptions(options => options.WriteAheadLogMode = WriteAheadLogMode.AsyncCompressed);
         using var native = factory.Open();

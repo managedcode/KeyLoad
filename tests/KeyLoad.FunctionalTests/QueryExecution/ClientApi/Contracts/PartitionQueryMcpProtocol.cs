@@ -8,12 +8,10 @@ internal static class PartitionQueryMcpProtocol
     internal const string RowAlias = "keyload.contract.partition-query-row";
     internal const string WitnessAlias = "keyload.contract.partition-query-leaf-witness";
     internal const string PageAlias = "keyload.contract.partition-query-page";
-    internal const string Version = "version";
     internal const string Partitions = "partitions";
     internal const string Query = "query";
     internal const string Parameters = "parameters";
     internal const string AllowFullScan = "allowFullScan";
-    internal const string AstVersion = "astVersion";
     internal const string Rows = "rows";
     internal const string Leaves = "leaves";
     internal const string Partition = "partition";

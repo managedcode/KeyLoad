@@ -8,9 +8,7 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(PartitionQueryContractAliases.Request)]
 public sealed record PartitionQueryRequest(
-    [property: Orleans.Id(PartitionQueryRequestFieldIds.Version)] int Version,
     [property: Orleans.Id(PartitionQueryRequestFieldIds.Partitions)] ImmutableArray<PartitionRef> Partitions,
     [property: Orleans.Id(PartitionQueryRequestFieldIds.Query)] SelectQuery Query,
     [property: Orleans.Id(PartitionQueryRequestFieldIds.Parameters)] Dictionary<string, JsonElement>? Parameters,
-    [property: Orleans.Id(PartitionQueryRequestFieldIds.AllowFullScan)] bool AllowFullScan,
-    [property: Orleans.Id(PartitionQueryRequestFieldIds.AstVersion)] int AstVersion);
+    [property: Orleans.Id(PartitionQueryRequestFieldIds.AllowFullScan)] bool AllowFullScan);

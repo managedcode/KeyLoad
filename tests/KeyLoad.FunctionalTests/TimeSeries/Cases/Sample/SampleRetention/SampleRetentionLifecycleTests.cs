@@ -11,26 +11,22 @@ internal sealed class SampleRetentionLifecycleTests
     private const string CustomerId = "customer-1";
 
     [Test]
-    public async Task AcSeries016UnknownAndCorruptRetentionRecordsFailClosed()
+    public async Task AcSeries016CorruptRetentionRecordsFailClosedThenHealthyReadSucceeds()
     {
         using var db = new TestDatabase();
         SampleAggregateTestData.Configure(db);
         var key = SampleRetentionStateReader.Key(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series);
-        db.Store.Commit((tx, _) =>
-        {
-            tx.PutRecord(key, new SampleRetentionState(SampleRetentionStateReader.CurrentFormatVersion + 1,
-                SampleAggregateTestData.Start.UtcTicks, 0, false));
-            return 0;
-        });
-
-        var unknown = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadSampleRetention(
-            SampleAggregateTestData.RootPrincipal, new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)));
         db.Store.Commit((tx, _) => { tx.Put(key, [1, 2, 3]); return 0; });
+        var position = db.Store.Position;
         var corrupt = Assert.ThrowsExactly<KeyLoadException>(() => db.Database.ReadSampleRetention(
             SampleAggregateTestData.RootPrincipal, new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series)));
-
-        await Assert.That(unknown.Code).IsEqualTo(ErrorCode.FormatUnsupported);
         await Assert.That(corrupt.Code).IsEqualTo(ErrorCode.Corruption);
+        await Assert.That(db.Store.Position).IsEqualTo(position);
+        db.Store.Commit((tx, _) => { tx.Delete(key); return 0; });
+        var healthy = db.Database.ReadSampleRetention(SampleAggregateTestData.RootPrincipal,
+            new(db.Partition, SampleAggregateTestData.Set, SampleAggregateTestData.Series));
+        await Assert.That(healthy.Before).IsNull();
+        await Assert.That(healthy.PurgedCount).IsEqualTo(0L);
     }
 
     [Test]

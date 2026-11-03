@@ -28,7 +28,6 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
         await Assert.That(restored.Incarnation).IsEqualTo(incarnation);
         await Assert.That(restored.SigningKey.Span.SequenceEqual(original.SigningKey.Span)).IsFalse();
         await Assert.That(restored.DispatchPaused).IsTrue();
-        await Assert.That(restored.MinimumReaderContract).IsEqualTo(StoreReaderContract.RuntimeJournal);
         await ContinueRestoredAsync(fixture, restored, position, token);
         await ColdAsync(fixture, restored, position + RestoreIncrement + HealthyIncrement);
         await ColdAsync(fixture, restored, position + RestoreIncrement + HealthyIncrement);
@@ -62,8 +61,6 @@ internal static class RuntimeJournalReaderRepairBackupContinuation
     private static async Task RequireIdentityAsync(StoreIdentity expected, StoreIdentity actual)
     {
         await StoreFileFixture.AssertPreservedIdentity(expected, actual);
-        await Assert.That(actual.FormatVersion).IsEqualTo(expected.FormatVersion);
-        await Assert.That(actual.MinimumReaderContract).IsEqualTo(expected.MinimumReaderContract);
     }
 
     private static async Task RequireRowsAsync(ZoneTreeStore store, bool restored, bool continued)

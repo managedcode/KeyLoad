@@ -27,6 +27,7 @@ internal sealed class NonTransactionalAnalyticsTests
         var first = (await fixture.BatchAsync(id, mutation)).Get<CommitReceipt>();
         await Assert.That((await fixture.BatchAsync(id, mutation)).Get<CommitReceipt>()).IsEquivalentTo(first);
         var key = AnalyticsStoreKeys.Event(fixture.Partition, definition.Name, data.Id);
+        var indexKey = AnalyticsStoreKeys.Timestamp(fixture.Partition, definition.Name, timestamp, data.Id);
         var expected = fixture.Store.Read(view => view.ReadOwnedValue(key))!;
         fixture.Store.Dispose();
         using (var plain = ZoneTreeTreeFactory.Plain(fixture.Destination(NonTransactionalTableFixture.PlainDirectory)).Open())
@@ -36,6 +37,9 @@ internal sealed class NonTransactionalAnalyticsTests
             await Assert.That(plain.TryGet(key, out var row)).IsTrue();
             await Assert.That(row.Value.ToArray()).IsEquivalentTo(expected, CollectionOrdering.Matching);
             await Assert.That(snapshot.TryGet(key, out _)).IsFalse();
+            await Assert.That(plain.TryGet(indexKey, out var indexed)).IsTrue();
+            await Assert.That(OrleansSerialization.Deserialize<string>(indexed.Value.Span)).IsEqualTo(data.Id);
+            await Assert.That(snapshot.TryGet(indexKey, out _)).IsFalse();
             await Assert.That(snapshot.TryGet(fixture.OutcomeKey(id), out _)).IsTrue();
         }
         using var cold = NonTransactionalTableFixture.Open(fixture.Owner.Directory);

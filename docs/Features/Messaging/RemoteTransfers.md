@@ -109,7 +109,7 @@ sequenceDiagram
 REQ/AC-XFER-001/002/003/005 and ADR-088. A dedicated test on the Aspire-owned
 replicated cluster uses independently generated source and destination atomic
 partitions in one tenant/database. It reuses the .NET SDK, the official MCP client
-and Q1 CALL, a persisted administrator with exact QueuePublish/Inspect/Consume/Ack/
+and SQL EXEC, a persisted administrator with exact QueuePublish/Inspect/Consume/Ack/
 Query and raw field/header grants, and the joined cold-restart lifecycle. It is not
 a claim of distributed atomicity.
 
@@ -127,7 +127,7 @@ retained dedup (no resurrected message), then complete a fresh independent trans
 No API, schema, alias, field ID or limit change. The original Create receipt
 replays across the first cold restart. A persisted policy change (revoke then
 restore, which increments the principal policy epoch) makes the same historical
-Create return PermissionDenied on SDK, official MCP and both Q1 routes while the
+Create return PermissionDenied on SDK, official MCP and both SQL routes while the
 original source intent and receipt evidence remain retained; fresh target Accept and
 source Complete use new command IDs under current authority. A canceled caller is
 never treated as a rollback and no unknown response is manufactured.

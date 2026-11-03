@@ -7,7 +7,7 @@ internal static class AtomicPartitionRosterEntryValidation
     internal static void Validate(AtomicPartitionCatalogEntry? entry, PartitionRef expectedPartition,
         long currentStorePosition, long currentAppliedIndex)
     {
-        if (entry is null || entry.Version != AtomicPartitionRosterProtocol.CurrentVersion
+        if (entry is null
             || entry.Partition != expectedPartition || !HasValidFirstSeenPosition(entry, currentStorePosition, currentAppliedIndex))
         {
             throw Errors.Fail(ErrorCode.Corruption, AtomicPartitionRosterProtocol.InvalidEntry);

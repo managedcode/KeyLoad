@@ -1,4 +1,5 @@
 using ZoneTree.Analytics;
+using ZoneTree.Options;
 
 namespace KeyLoad.Core.AnalyticsStore;
 
@@ -22,6 +23,12 @@ internal static class AnalyticsStoreOptions
             TimeZone = TimeZoneInfo.Utc
         };
         options.Storage.Logger = failures;
+        // Disposable generations are rebuilt from the authorized canonical capture and never recovered.
+        options.Storage.RawEvents.WriteAheadLogMode = WriteAheadLogMode.None;
+        options.Storage.Rollups.WriteAheadLogMode = WriteAheadLogMode.None;
+        options.Storage.Sessions.WriteAheadLogMode = WriteAheadLogMode.None;
+        options.Storage.DimensionIndexes.Store.WriteAheadLogMode = WriteAheadLogMode.None;
+        options.Storage.RollupIndexes.Store.WriteAheadLogMode = WriteAheadLogMode.None;
         options.Storage.StoreRawEvents = true;
         options.Storage.DimensionIndexes.Dimensions.Clear();
         options.Storage.RollupIndexes.Definitions.Clear();

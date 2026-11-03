@@ -53,7 +53,7 @@ internal sealed class QueryLifetimePhaseRoundTrips(QueryLifetimeFlow flow)
         var work = DistributedSearchWorkFactory.Create(phase, [search.Partition], search,
             witness is null ? [] : [witness], statistics, scope, windows, selected, budget).Single();
         await Assert.That(work.Selected.IsDefault).IsFalse();
-        var original = new DistributedSearchOwnedLeaf(QueryLifetimeProtocol.Version, phase, work.Search,
+        var original = new DistributedSearchOwnedLeaf(phase, work.Search,
             flow.Fixture.DestinationOwner, QueryFixture.Tenant,
             work.Witness, work.Statistics, work.Scope, work.SourceWindowId, work.Selected, metadata.Definition, metadata.Coverage, metadata.Principal);
         var bytes = OrleansSerialization.Serialize(original);

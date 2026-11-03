@@ -15,13 +15,13 @@ internal static class AnnProviderQualificationCold
         state.DamagedDigest = SHA256.HashData(state.DamagedFile);
         await Assert.That(state.DamagedFile.AsSpan().SequenceEqual(state.OriginalFile)).IsFalse();
         await AnnProviderQualificationPersistence.WriteExactAsync(owner, state.DamagedFile, token);
-        await RefuseAsync(owner, state, damage, token);
+        await RefuseAsync(owner, state, token);
         await AnnProviderQualificationResults.CurrentAsync(owner, state, healthy, token);
         await AnnProviderQualificationHistoryAssertions.AllAsync(owner, state, token);
         await AnnProviderQualificationImages.SameAsync(owner, image);
         owner.Reopen();
         await AnnProviderQualificationImages.SameAsync(owner, image);
-        await RefuseAsync(owner, state, damage, token);
+        await RefuseAsync(owner, state, token);
         await AnnProviderQualificationResults.CurrentAsync(owner, state, healthy, token);
         await AnnProviderQualificationHistoryAssertions.AllAsync(owner, state, token);
         await AnnProviderQualificationPersistence.WriteExactAsync(owner, state.OriginalFile, token);
@@ -49,15 +49,14 @@ internal static class AnnProviderQualificationCold
     }
 
     private static async Task RefuseAsync(AnnProviderQualificationOwner owner, AnnProviderQualificationState state,
-        AnnProviderQualificationDamage damage, CancellationToken token)
+        CancellationToken token)
     {
         var image = AnnProviderQualificationImages.Capture(owner);
         using var source = new FileStream(owner.SnapshotPath, FileMode.Open, FileAccess.Read, FileShare.Read);
         var failure = Assert.ThrowsExactly<KeyLoadException>(() => PackedAnnIndex.Load(source, state.DamagedDigest,
             UnitExecutionOptions.PackedAnn(state.Policy), Options.Create(new PackedAnnStorageOptions()),
             AnnProviderQualificationCorpus.Budget(owner, token))) ?? throw new InvalidOperationException(ExpectedRefusal);
-        await Assert.That(failure.Code).IsEqualTo(damage == AnnProviderQualificationDamage.HeaderVersion
-            ? ErrorCode.FormatUnsupported : ErrorCode.Corruption);
+        await Assert.That(failure.Code).IsEqualTo(ErrorCode.Corruption);
         await Assert.That(failure.Message).IsEqualTo(PackedAnnStorageFrames.InvalidSnapshot);
         await AnnProviderQualificationImages.SameAsync(owner, image);
         await FileAsync(owner.SnapshotPath, state.DamagedFile, state.DamagedDigest, token);

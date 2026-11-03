@@ -5,7 +5,7 @@ internal static class GraphCrossPartitionFingerprintInput
 {
     internal static GraphCrossPartitionFingerprint Create(PartitionRef source, string graph,
         string edgeId, EntityRef destination, long revision, bool deleted, EdgeRecord edge)
-        => new(GraphCrossPartitionProtocol.CurrentVersion, Copy(source), Copy(graph), Copy(edgeId),
+        => new(Copy(source), Copy(graph), Copy(edgeId),
             Copy(destination), revision, deleted,
             new EdgeRecord(Copy(edge.Id), Copy(edge.From), Copy(edge.To), Copy(edge.Label),
                 Copy(edge.AttributesJson), edge.Revision));

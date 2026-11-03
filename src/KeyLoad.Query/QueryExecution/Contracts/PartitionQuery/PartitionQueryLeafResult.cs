@@ -5,7 +5,6 @@ namespace KeyLoad.Query.QueryExecution;
 [GenerateSerializer]
 [Alias(PartitionQuerySerializationAliases.LeafResult)]
 internal sealed record PartitionQueryLeafResult(
-    [property: Id(0)] int Version,
     [property: Id(1)] PartitionRef Partition,
     [property: Id(2)] Guid NodeId,
     [property: Id(3)] Guid Incarnation,

@@ -2,7 +2,6 @@ namespace KeyLoad.Core.TimeSeries;
 
 [global::Orleans.GenerateSerializer, global::Orleans.Alias(RuntimeSampleRollup.Alias)]
 internal sealed record SampleRollupState(
-    [property: global::Orleans.Id(RuntimeSampleRollup.Format)] int FormatVersion,
     [property: global::Orleans.Id(RuntimeSampleRollup.From)] long FromUtcTicks,
     [property: global::Orleans.Id(RuntimeSampleRollup.Until)] long UntilUtcTicks,
     [property: global::Orleans.Id(RuntimeSampleRollup.Revision)] long Revision,

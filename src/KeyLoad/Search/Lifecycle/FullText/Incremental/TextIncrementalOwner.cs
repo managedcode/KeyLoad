@@ -2,6 +2,7 @@ using KeyLoad.Core;
 using ManagedCode.Communication.CQRS;
 using Microsoft.Extensions.Options;
 using ZoneTree.FullTextSearch.Index;
+using ZoneTree.Options;
 
 namespace KeyLoad.Server.Search;
 
@@ -55,7 +56,7 @@ internal sealed class TextIncrementalOwner : IDisposable
         TextOwnedInventory.ValidateTrackedLayout(Path, owner.OwnedPaths, budget,
             runtimeAllowMissing: true, executionOptions: executionOptions);
         index = RuntimeTextIndex.Open(System.IO.Path.Combine(Path, TextProtocol.RuntimeDirectoryCore),
-            new TextFileStreamProvider(root, leaf, sourceNodeId, executionOptions, resources), executionOptions);
+            new TextFileStreamProvider(root, leaf, sourceNodeId, executionOptions, resources), executionOptions, WriteAheadLogMode.Sync);
         budget.Check();
     }
 

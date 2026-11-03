@@ -36,7 +36,7 @@ internal static class HybridQualityBranchCapture
                 AllowedIds: query.EligibleIds);
             var walk = new GraphWalkSpec(HybridQualityCorpus.Graph, [HybridQualityCorpus.Root(database)],
                 MaxDepth: 1, MaxVertices: HybridQualityCorpus.ResultLimit, MaxEdges: 64);
-            var graphRequest = new GraphSearchRequest(1, graphSearch,
+            var graphRequest = new GraphSearchRequest(graphSearch,
                 Retriever: new(walk, HybridQualityCorpus.BranchWeight));
             var result = await engine.GraphSearchAsync(HybridQualityCorpus.PrincipalId, graphRequest, cancellationToken);
             branches.Add(new("graph", GlobalBranchKind.Graph, result.Hits));

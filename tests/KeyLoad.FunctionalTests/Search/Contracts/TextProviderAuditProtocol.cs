@@ -32,7 +32,6 @@ internal static class TextProviderAuditProtocol
     internal const long InitialRevision = 1L;
     internal const long ChangedRevision = 2L;
     internal const int NextCommit = 1;
-    internal const int PlacementVersion = 1;
     internal const int InitialPolicyEpoch = 1;
     internal const int InitialSchemaVersion = 1;
     internal const ulong RuntimeFirstRecordId = 1;
@@ -45,7 +44,6 @@ internal static class TextProviderAuditProtocol
     internal const int SecondRecord = 1;
     internal const int FirstFile = 0;
     internal const ulong NoncontiguousId = 2;
-    internal const int InvalidManifestFormat = 2;
     internal const int ScopePositionStep = 1;
     internal const string UnownedSuffix = ".unowned";
     internal const double SingleBranchScore = 1d / 61d;

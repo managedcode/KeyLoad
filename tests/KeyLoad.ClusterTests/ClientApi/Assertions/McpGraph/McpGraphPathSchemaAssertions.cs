@@ -12,7 +12,7 @@ internal static class McpGraphPathSchemaAssertions
     private const string InvalidReference = "The MCP path schema reference is not local.";
     private const string ExcessReferenceDepth = "The MCP path schema reference is too deep.";
     private static readonly ImmutableArray<string> ResultProperties =
-    [McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
+    [McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Hops,
         McpDiscoveryProtocol.Vertices, McpDiscoveryProtocol.Edges, McpDiscoveryProtocol.CutPosition];
     private static readonly ImmutableArray<string> EntityProperties =
     [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection, McpDiscoveryProtocol.Id];
@@ -38,7 +38,6 @@ internal static class McpGraphPathSchemaAssertions
         await McpGraphPathInputSchemaAssertions.VerifyAsync(toolName, request, input);
         var result = Resolve(output, output.GetProperty(McpDiscoveryProtocol.Definitions).GetProperty(McpCallerProtocol.Result));
         await VerifyFieldsAsync(result, ResultProperties, requiredResult);
-        await VerifyPrimitiveAsync(result, McpDiscoveryProtocol.Version, McpDiscoveryProtocol.Integer, output);
         await VerifyPrimitiveAsync(result, McpDiscoveryProtocol.Found, McpDiscoveryProtocol.Boolean, output);
         await VerifyNullableIntegerAsync(result.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(McpDiscoveryProtocol.Hops), output);
         await VerifyPrimitiveAsync(result, McpDiscoveryProtocol.CutPosition, McpDiscoveryProtocol.Integer, output);

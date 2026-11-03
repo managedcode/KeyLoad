@@ -23,10 +23,6 @@ internal static class CodeQualityDiagnosticText
     public const string EndpointMappingMessage = "Program.cs must call only '{0}'; move direct endpoint mapping '{1}' into the host endpoint extension";
     public const string EndpointMappingDescription = "KeyLoad Program.cs is a composition root. Concrete Map* endpoint registrations belong to the MapKeyLoadApi host endpoint extension.";
 
-    public const string GrainVersionTitle = "Grain interfaces require explicit versions";
-    public const string GrainVersionMessage = "Grain interface '{0}' must declare a positive Orleans VersionAttribute";
-    public const string GrainVersionDescription = "Grain interfaces declare a positive Orleans version. Any version change requires the owner's explicit permission for that specific increase; refactoring and contract changes do not grant permission.";
-
     public const string CompositionRootTitle = "Program files show process composition";
     public const string CompositionRootMessage = "Program.cs must show process initialization and lifecycle instead of forwarding the entire entry point to '{0}'";
     public const string CompositionRootDescription = "Executable Program.cs files own visible initialization, mode selection, composition and lifecycle. Keep model operations in their owners and avoid forwarding-only Application wrappers.";

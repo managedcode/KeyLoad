@@ -6,7 +6,7 @@ internal static class SqlNullOrderingClusterProtocol
 {
     internal const string Collection = "null_ordering";
     internal const string Label = "label";
-    internal const string Profile = "Q1.NullOrdering";
+    internal const string Profile = "NullOrdering";
     internal const string ScorePath = "/score";
     internal const string LabelPath = "/label";
     internal const string BadSql = "SELECT label AS label FROM null_ordering ORDER BY score ASC NULLS MIDDLE LIMIT 5";

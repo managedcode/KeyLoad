@@ -15,7 +15,7 @@ internal static class AnnLifetimeAssertions
             : [Row(AnnLifetimeProtocol.BothTeam, AnnLifetimeProtocol.FirstScore),
                 Row(AnnLifetimeProtocol.BothProject, AnnLifetimeProtocol.SecondScore),
                 Row(AnnLifetimeProtocol.BothOwner, AnnLifetimeProtocol.ThirdScore)];
-        var expected = new AnnSearchPage(AnnPublicWholeFlow.Version, [.. rows], cut, AnnPageMode.Exact, true,
+        var expected = new AnnSearchPage([.. rows], cut, AnnPageMode.Exact, true,
             AnnMaintenanceTestData.Generation, AnnPageMode.Approximate);
         await Assert.That(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(page)))
             .IsEqualTo(System.Text.Encoding.UTF8.GetString(JsonDefaults.Serialize(expected)));

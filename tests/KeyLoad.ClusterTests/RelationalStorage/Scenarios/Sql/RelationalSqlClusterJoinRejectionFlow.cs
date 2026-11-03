@@ -6,10 +6,9 @@ using KeyLoad.ClusterTests.ResourceExecution;
 
 namespace KeyLoad.ClusterTests.RelationalStorage;
 
-/// <summary>Owns actual seed, state and four-transport result oracles for public Q2 rejection workflows.</summary>
+/// <summary>Owns actual seed, state and four-transport result oracles for public join rejection workflows.</summary>
 internal static class RelationalSqlClusterJoinRejectionFlow
 {
-    internal const int Dialect = SqlOperationProtocol.DefaultQueryDialectVersion;
     internal const string PrivateName = "public-join-rejection-private-name";
     internal const string Prefix = "SELECT TOP (10) l.[key] AS order_key, r.name AS customer_name, l.title AS customer_id FROM agentrows AS l ";
     internal const string Join = "INNER JOIN joincustomers AS r ON l.title = r.id ";
@@ -81,8 +80,8 @@ internal static class RelationalSqlClusterJoinRejectionFlow
     internal static async Task<QueryPage> ReadHealthyAsync(KeyLoadClient sdk, McpOfficialClient mcp,
         PartitionRef partition, CancellationToken cancellationToken)
     {
-        var query = new QueryRequest(partition, Healthy, AllowFullScan: true, QueryDialectVersion: Dialect);
-        var sql = new SqlOperationRequest(partition, Healthy, AllowFullScan: true, QueryDialectVersion: Dialect);
+        var query = new QueryRequest(partition, Healthy, AllowFullScan: true);
+        var sql = new SqlOperationRequest(partition, Healthy, AllowFullScan: true);
         var direct = await McpCallerAssertions.SdkSuccessAsync(await sdk.QueryAsync(query, cancellationToken));
         var unified = await SqlClusterProtocol.SdkAsync<QueryPage>(sdk, sql, cancellationToken);
         var officialQuery = (await McpCallerAssertions.SuccessAsync<QueryPage>(

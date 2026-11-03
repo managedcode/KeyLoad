@@ -2,7 +2,7 @@ namespace KeyLoad.Server.Search;
 
 internal static class AnnProtocol
 {
-    internal const int Version = 2;
+    internal const int LockMarker = 2;
     internal const string RootDirectory = "ann-indexes";
     internal const string RootReceipt = "owner.bin";
     internal const string RootLock = ".owner.lock";

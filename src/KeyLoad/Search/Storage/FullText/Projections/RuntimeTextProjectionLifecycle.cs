@@ -12,9 +12,9 @@ internal sealed class RuntimeTextProjectionLifecycle
     private readonly TextProjectionPhysicalGate physicalGate;
     private readonly Action<TextFaultStage>? faultObserver;
     private readonly TextProjectionShutdown shutdown;
-    private readonly TextResourceOwnership? resources;
+    private readonly TextResourceOwnership resources;
 
-    internal RuntimeTextProjectionLifecycle(string root, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal RuntimeTextProjectionLifecycle(string root, Guid sourceNodeId, TextProjectionState state, TextProjectionPhysicalGate physicalGate, Action<TextFaultStage>? faultObserver, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership resources)
     {
         this.executionOptions = executionOptions;
         this.resources = resources;
@@ -43,7 +43,7 @@ internal sealed class RuntimeTextProjectionLifecycle
         TextGeneration? generation = null;
         try
         {
-            slot.SharedReservation = resources?.ReserveGeneration(Root, leaf, budget);
+            slot.SharedReservation = resources.ReserveGeneration(Root, leaf, budget);
             physicalGate.Run(() =>
             {
                 state.CaptureSlots(out var first, out var second, out var third);
@@ -132,14 +132,7 @@ internal sealed class RuntimeTextProjectionLifecycle
 
     internal void Shutdown(TextGenerationSlot?[] slots) => shutdown.Run(slots);
 
-    internal void CheckPhysical(ReadExecutionBudget? budget)
-    {
-        physicalGate.Run(() =>
-        {
-            state.CaptureSlots(out var first, out var second, out var third);
-            TextPhysicalBudget.Check(Root, first, second, third, budget, executionOptions: executionOptions);
-        });
-    }
+    internal void CheckPhysical(ReadExecutionBudget? budget) => resources.CheckPhysical(budget);
 
     private void PublishVerified(TextGeneration generation)
     {

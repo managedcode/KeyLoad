@@ -17,7 +17,7 @@ internal sealed class TextProjectionLeaseTests
         using var database = new TestDatabase();
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
-        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), database.Store.Identity.NodeId, UnitTextOptions.Execution());
+        using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"), database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         var scope = CaptureScope(database);
         using (var held = projection.Acquire(scope, new()))
         {
@@ -44,7 +44,7 @@ internal sealed class TextProjectionLeaseTests
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         var publications = 0;
         using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"),
-            database.Store.Identity.NodeId, UnitTextOptions.Execution(), faultObserver: stage =>
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()), faultObserver: stage =>
             {
                 if (stage == TextFaultStage.InventoryFlushed)
                 {
@@ -83,7 +83,7 @@ internal sealed class TextProjectionLeaseTests
         database.Configure(Collection, ResourceKind.Collection);
         database.Commit(new PutDocument(Collection, "one", "{\"text\":\"needle\"}"));
         using var projection = new RuntimeTextProjection(Path.Combine(database.Directory, "execution-text"),
-            database.Store.Identity.NodeId, UnitTextOptions.Execution());
+            database.Store.Identity.NodeId, UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
         var search = new SearchEngine(database.Database, UnitExecutionOptions.QueryExecution(), projection);
         var request = new SearchRequest(database.Partition, Collection, TextPath, "needle");
         var token = TestContext.Current!.Execution.CancellationToken;
@@ -166,7 +166,7 @@ internal sealed class TextProjectionLeaseTests
         var principal = database.Store.Read(view => view.GetRecord<PrincipalRecord>(KeySpace.Principal("root")))!;
         var resource = database.Store.Read(view => view.GetRecord<ResourceDefinition>(KeySpace.Resource(
             database.Partition.TenantId, database.Partition.DatabaseId, Collection)))!;
-        return new(identity.NodeId, identity.Incarnation, identity.FormatVersion, identity.ReadGeneration,
+        return new(identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, database.Partition, Collection, TextPath, principal.Id, principal.PolicyEpoch,
             resource.SchemaVersion);
     }

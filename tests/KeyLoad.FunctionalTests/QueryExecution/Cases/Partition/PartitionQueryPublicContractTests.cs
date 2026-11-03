@@ -16,7 +16,6 @@ internal sealed class PartitionQueryPublicContractTests
         var bytes = OrleansSerialization.Serialize(result);
         var roundTrip = OrleansSerialization.Deserialize<PartitionQueryPage>(bytes);
 
-        await Assert.That(roundTrip.Version).IsEqualTo(1);
         await Assert.That(roundTrip.Complete).IsTrue();
         await Assert.That(roundTrip.Rows.Select(row => row.Reference.Id).SequenceEqual(["same", "same"])).IsTrue();
         await Assert.That(roundTrip.Rows[0].Reference.Partition).IsEqualTo(fixture.First);
@@ -63,16 +62,12 @@ internal sealed class PartitionQueryPublicContractTests
                     Explain = true
                 }
             }));
-        var badAst = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { AstVersion = 3 }));
-        var badVersion = Assert.ThrowsExactly<KeyLoadException>(() => Run(fixture, valid with { Version = 2 }));
 
         await Assert.That(empty.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(defaultArray.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(duplicate.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(oversized.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(unsupported.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(badAst.Code).IsEqualTo(ErrorCode.UnsupportedCapability);
-        await Assert.That(badVersion.Code).IsEqualTo(ErrorCode.Validation);
         await Assert.That(fixture.Position).IsEqualTo(position);
         var healthy = Run(fixture, valid);
         await PartitionQueryWholeFlowAssertions.AssertPublicRowAsync(healthy, fixture.First, "valid-leaf", "healthy", fixture.Creation);

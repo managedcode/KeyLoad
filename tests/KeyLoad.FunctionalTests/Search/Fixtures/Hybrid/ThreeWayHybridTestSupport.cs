@@ -122,7 +122,7 @@ internal static class ThreeWayHybridTestSupport
         {
             Labels = labeled ? ImmutableArray.Create("related") : null
         };
-        return new(1, search,
+        return new(search,
             Scope: scoped ? new(Walk(partition, ScopeRoot, 2)) : null,
             Retriever: new(retrieveWalk, allZero ? 0 : GraphWeight),
             Expansion: expansion ? new(ExpansionGraph, MaxDepth: 1, MaxVertices: 20, MaxEdges: 40) : null);

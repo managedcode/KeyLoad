@@ -5,7 +5,6 @@ namespace KeyLoad.Query.QueryExecution;
 
 internal static class PartitionQueryPublicMapper
 {
-    private const int VersionOne = 1;
 
     internal static PartitionQueryPage MapPublic(PartitionQueryResult result,
         ReadExecutionBudget budget)
@@ -15,7 +14,7 @@ internal static class PartitionQueryPublicMapper
         budget.Check();
         var rows = MapRows(result.Rows, budget);
         var leaves = MapLeaves(result.Leaves, budget);
-        var page = new PartitionQueryPage(VersionOne, rows, leaves, true);
+        var page = new PartitionQueryPage(rows, leaves, true);
         return page;
     }
 

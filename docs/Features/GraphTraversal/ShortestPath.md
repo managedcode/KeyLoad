@@ -19,20 +19,20 @@ ZoneTree read cut. Explicit breadth-first depth frontiers execute in the
 node-local storage owner. Orleans routes the request from the client's connection grain with ManagedCode
 CQRS. No per-edge RPC or borrowed storage value escapes the gate.
 
-`GraphShortestPathRequest` version1 generated IDs: 0 Version, 1 Partition,
+`GraphShortestPathRequest` generated IDs: 1 Partition,
 2 Graph, 3 From, 4 To, 5 MaxDepth=16, 6 MaxVertices=1000, 7 MaxEdges=5000,
 8 optional immutable Labels. Bounds: depth0..16, vertices1..10000, examined
 edges1..50000, at most64 canonical nonempty labels. Null/empty Labels admits all. A nonempty label filter is field use of graph
 `/label`: the persisted principal must hold that field policy's `RawUseGrant`;
 a separate `RawReadGrant` does not authorize filtering. Without the use grant,
 the operation returns `PermissionDenied` before adjacency traversal.
-Version/shape/identifier/label errors are Validation; invalid numeric caps are
+Shape/identifier/label errors are Validation; invalid numeric caps are
 BudgetExceeded; a foreign endpoint partition is UnsupportedCapability.
 Caller cancellation and explicit expiry apply; no KeyLoad request, read or
 result byte cap applies ([ADR-149](../../ADR/ADR-149-no-operation-limits.md)).
 Alias: `keyload.contract.graph-shortest-path-request`.
 
-`GraphShortestPathResult` generated IDs: 0 Version=1, 1 Found, 2 nullable Hops,
+`GraphShortestPathResult` generated IDs: 1 Found, 2 nullable Hops,
 3 immutable ordered Vertices, 4 immutable ordered projected Edges, 5 CutPosition.
 Found means Vertices.Length=Edges.Length+1 and Hops=Edges.Length. Vertices run
 From..To; each edge connects neighboring vertices. Authorized From=To returns
@@ -40,7 +40,7 @@ one vertex, no edges, Hops=0. No path returns Found=false, Hops=null, empty arra
 CutPosition is the actual store position captured inside the same read gate.
 Alias: `keyload.contract.graph-shortest-path-result`. Existing IDs stay stable.
 
-SQL profile `Q1.GraphPath.v1`, capability `graph-path`, compiles to the same
+SQL capability `graph-path` compiles to the same
 typed operator/result:
 
 ```sql
@@ -53,7 +53,7 @@ Each string/integer argument may use an existing named SQL parameter of its
 exact scalar type. Eight initial arguments are mandatory; trailing labels are
 optional/bounded. Reject cursor, projection, join, ordering, predicates, extra
 statements, expressions and alternate grammar. `SqlGraphPathRequest` carries
-Version/QueryRequest at generated IDs0/1 and alias
+QueryRequest at generated Id1 and alias
 `keyload.contract.sql-graph-path-request`; Cursor must be null and
 AllowFullScan=true. Parsing, validation, reads and exact output share one
 ReadExecutionBudget started before parsing. Do not reset its explicit expiry at
@@ -146,10 +146,9 @@ establishes an aggregate RSS bound.
    honestly. Focused passes cannot waive complete required suites.
 
 Frontend is N/A: a database read capability. Weighted/cross-partition paths
-require separate contracts. No canonical format, data migration or
-acknowledgement changes. Rollout adds explicit version1 reads;
-unsupported versions fail closed. Rollback removes new read registration; existing
-operations and acknowledged ZoneTree data require no rewrite.
+require separate contracts. The current graph-path read has one typed request
+and result, and unsupported syntax is refused before execution. It does not
+change canonical data or write acknowledgements.
 
 ```mermaid
 flowchart LR

@@ -25,9 +25,8 @@ internal static class SchemaVisibleProjectionClusterRequests
         var star = Star(state);
         yield return (new(state.Partition, "SELECT d.status AS exposed FROM [" + state.Collection + P.JoinMiddle
             + state.Collection + SchemaVisibleProjectionClusterJoins.TargetSuffix + "] r ON d.status = r.name",
-            AllowFullScan: true, QueryDialectVersion: P.QueryDialect), star with
+            AllowFullScan: true), star with
             {
-                AstVersion = P.QueryDialect,
                 Query = star.Query with
                 {
                     Projection = [new(S.StatusPath, P.ValueAlias, P.Alias)],

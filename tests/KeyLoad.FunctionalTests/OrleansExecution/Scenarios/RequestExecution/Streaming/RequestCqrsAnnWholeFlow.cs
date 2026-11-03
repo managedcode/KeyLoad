@@ -98,8 +98,6 @@ internal static class RequestCqrsAnnWholeFlow
         await Assert.That(source.AppliedPosition).IsGreaterThanOrEqualTo(applied);
         await Assert.That(source.AppliedPosition).IsLessThanOrEqualTo(fixture.Database.ReadCanonicalCut().AppliedPosition);
         await Assert.That(source.ReadGeneration).IsEqualTo(fixture.Database.Store.Identity.ReadGeneration);
-        await Assert.That(source.StoreFormatVersion).IsEqualTo(fixture.Database.Store.Identity.FormatVersion);
-        await Assert.That(source.KeyCodecVersion).IsEqualTo(fixture.Database.Store.Identity.KeyCodecVersion);
         await Assert.That(source.ThroughSequence).IsEqualTo(RequestCqrsAnnTestData.ChangedTail);
         await Assert.That(source.SchemaVersion).IsEqualTo(original.SchemaVersion);
         await Assert.That(source.PolicyEpoch).IsEqualTo(original.PolicyEpoch);

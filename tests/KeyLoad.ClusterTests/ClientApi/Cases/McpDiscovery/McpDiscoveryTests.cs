@@ -68,7 +68,6 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
         var second = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
-        await Assert.That(first.Value.AstVersion).IsEqualTo(McpCallerProtocol.AstVersion);
         await Assert.That(first.Value.ReadOnly).IsTrue();
         await Assert.That(JsonDefaults.Serialize(first.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(second.Value))).IsTrue();
         await Assert.That(first.RequestId).IsNotEqualTo(second.RequestId);
@@ -97,7 +96,6 @@ internal sealed class McpDiscoveryTests(ClusterFixture fixture)
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
         var second = await McpCallerAssertions.SuccessAsync<QueryCapabilityManifest>(await session.Client.InvokeKeyLoadToolAsync(
             McpCallerTools.QueryCapabilities, cancellationToken: deadline.Token));
-        await Assert.That(first.Value.AstVersion).IsEqualTo(McpCallerProtocol.AstVersion);
         await Assert.That(first.Value.ReadOnly).IsTrue();
         await Assert.That(JsonDefaults.Serialize(expected.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(first.Value))).IsTrue();
         await Assert.That(JsonDefaults.Serialize(first.Value).AsSpan().SequenceEqual(JsonDefaults.Serialize(second.Value))).IsTrue();

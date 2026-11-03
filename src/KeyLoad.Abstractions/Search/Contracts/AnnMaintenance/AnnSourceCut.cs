@@ -10,8 +10,6 @@ namespace KeyLoad;
 /// <param name="SchemaVersion">Current persisted resource schema version.</param>
 /// <param name="PolicyEpoch">Current persisted administrator policy epoch.</param>
 /// <param name="CorpusSha256">Execution canonical corpus identity digest.</param>
-/// <param name="StoreFormatVersion">Exact canonical storage format at capture.</param>
-/// <param name="KeyCodecVersion">Exact canonical key codec at capture.</param>
 /// <param name="DependencySha256">Bounded execution resource dependency/policy identity at capture.</param>
 /// <param name="OutboxFirstAvailable">Original retained-history lower boundary at this exact cut.</param>
 [Orleans.GenerateSerializer, Orleans.Alias(AnnMaintenanceAliases.Cut)]
@@ -25,7 +23,5 @@ public sealed record AnnSourceCut(
     [property: Orleans.Id(6)] long SchemaVersion,
     [property: Orleans.Id(7)] long PolicyEpoch,
     [property: Orleans.Id(8)] string CorpusSha256,
-    [property: Orleans.Id(9)] int StoreFormatVersion,
-    [property: Orleans.Id(10)] int KeyCodecVersion,
     [property: Orleans.Id(11)] string DependencySha256,
     [property: Orleans.Id(12)] long OutboxFirstAvailable);

@@ -51,5 +51,5 @@ internal static class FunctionalGateEventsProtocol
             {
                 [IterationField] = JsonSerializer.SerializeToElement(iteration)
             },
-            AllowFullScan: true, QueryDialectVersion: SqlOperationProtocol.DefaultQueryDialectVersion);
+            AllowFullScan: true);
 }

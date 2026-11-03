@@ -5,14 +5,12 @@ internal sealed class SampleMetadataIntegrityWholeFlowTests
     [Test]
     [Arguments(SampleMetadataIntegrityFault.RetentionFloor)]
     [Arguments(SampleMetadataIntegrityFault.RetentionCount)]
-    [Arguments(SampleMetadataIntegrityFault.RetentionVersion)]
     [Arguments(SampleMetadataIntegrityFault.RetentionRoot)]
     [Arguments(SampleMetadataIntegrityFault.RetentionWire)]
     [Arguments(SampleMetadataIntegrityFault.BucketEndpoint)]
     [Arguments(SampleMetadataIntegrityFault.BucketCount)]
     [Arguments(SampleMetadataIntegrityFault.BucketSequence)]
     [Arguments(SampleMetadataIntegrityFault.BucketFloor)]
-    [Arguments(SampleMetadataIntegrityFault.BucketVersion)]
     public async Task AcSeries016022023MetadataRefusesAcrossColdThenExactRepairReplayAndCorrectionStayHealthy(
         SampleMetadataIntegrityFault fault)
     {

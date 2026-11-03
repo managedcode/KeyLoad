@@ -29,13 +29,13 @@ internal sealed class SampleChunkPayloadContractTests
 
         await Assert.That(type.IsDefined(typeof(global::Orleans.GenerateSerializerAttribute))).IsTrue();
         await Assert.That(alias.ConstructorArguments[0].Value).IsEqualTo(ExpectedAlias);
-        await Assert.That(ids).IsEquivalentTo(new uint[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 }, CollectionOrdering.Matching);
+        await Assert.That(ids).IsEquivalentTo(new uint[] { 1, 2, 3, 4, 5, 6, 7, 8, 9 }, CollectionOrdering.Matching);
         await Assert.That(members).IsEquivalentTo(
-            new[] { "FormatVersion", "RecordCount", "UtcTicks", "Offsets", "Sequences", "Values", "Series", "EventIds", "Tags", "Checksum" },
+            new[] { "RecordCount", "UtcTicks", "Offsets", "Sequences", "Values", "Series", "EventIds", "Tags", "Checksum" },
             CollectionOrdering.Matching);
         await Assert.That(types).IsEquivalentTo(new[]
         {
-            typeof(int), typeof(int), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>),
+            typeof(int), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>),
             typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>),
             typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>), typeof(ReadOnlyMemory<byte>)
         }, CollectionOrdering.Matching);

@@ -8,7 +8,6 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
     ReadExecutionBudget budget, PhysicalShardRecord? expectedOwner = null, bool receivingLeaf = false)
 {
     private const int EmptyElementCount = 0;
-    private const int VersionOne = 1;
 
     internal PartitionQueryLeafResult Execute(string principalId, PartitionQueryLeafPlan plan,
         AstQueryRequest normalized)
@@ -58,7 +57,7 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         var accessPath = reader.Visit();
         var candidates = prepared.DrainCandidates(request.Query.Limit, budget);
         var identity = database.Store.Identity;
-        return new(VersionOne, plan.Partition, identity.NodeId, identity.Incarnation, identity.ReadGeneration,
+        return new(plan.Partition, identity.NodeId, identity.Incarnation, identity.ReadGeneration,
             database.Store.Position, principal.PolicyEpoch, resource.SchemaVersion, accessPath, candidates);
     }
 

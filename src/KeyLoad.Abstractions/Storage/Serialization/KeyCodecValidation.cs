@@ -16,12 +16,12 @@ internal static class KeyCodecValidation
 
     private static int Inspect(ReadOnlySpan<byte> key, bool validate)
     {
-        if (key.IsEmpty || key[VersionOffset] != KeyCodec.Version)
+        if (key.IsEmpty || key[PrefixOffset] != KeyCodec.PrefixMarker)
         {
-            throw Errors.Fail(ErrorCode.FormatUnsupported, UnknownVersion);
+            throw Errors.Fail(ErrorCode.FormatUnsupported, InvalidPrefix);
         }
         var components = 0;
-        var offset = VersionBytes;
+        var offset = PrefixBytes;
         while (offset < key.Length)
         {
             if (components++ == KeyCodec.MaximumComponents)

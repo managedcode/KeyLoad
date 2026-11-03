@@ -118,9 +118,8 @@ public sealed class RuntimeJournalOperations
         }
         RuntimeJournalRecordAccess.RequireNoRows(transaction);
         transaction.PutRecord(principalKey, RuntimeJournalCommandRules.ProtectedPrincipal());
-        transaction.PutRecord(RuntimeJournalKeys.Catalog(), new RuntimeJournalCatalogMarker(RuntimeJournalProtocol.CurrentVersion));
-        transaction.PutRecord(RuntimeJournalKeys.Quota(), new RuntimeJournalQuota(RuntimeJournalProtocol.CurrentVersion,
-            RuntimeJournalProtocol.InitialJournalCount, RuntimeJournalProtocol.InitialTotalBytes));
+        transaction.PutRecord(RuntimeJournalKeys.Catalog(), new RuntimeJournalCatalogMarker());
+        transaction.PutRecord(RuntimeJournalKeys.Quota(), new RuntimeJournalQuota(RuntimeJournalProtocol.InitialJournalCount, RuntimeJournalProtocol.InitialTotalBytes));
         return new(true, null);
     }
 
@@ -153,7 +152,7 @@ public sealed class RuntimeJournalOperations
         var quota = RuntimeJournalRecordAccess.ReadRecord<RuntimeJournalQuota>(view, RuntimeJournalKeys.Quota());
         var principal = RuntimeJournalRecordAccess.ReadRecord<PrincipalRecord>(view,
             KeySpace.Principal(RuntimeJournalIdentity.ProtectedPrincipalId));
-        if (marker?.Version != RuntimeJournalProtocol.CurrentVersion || quota?.Version != RuntimeJournalProtocol.CurrentVersion
+        if (marker is null || quota is null
             || principal is null)
         {
             throw Errors.Fail(ErrorCode.RecoveryRequired, RuntimeJournalProtocol.InvalidState);
@@ -164,8 +163,8 @@ public sealed class RuntimeJournalOperations
     private static bool MatchesBootstrap(PrincipalRecord? principal, RuntimeJournalCatalogMarker? marker,
         RuntimeJournalQuota? quota)
     {
-        if (principal is null || marker?.Version != RuntimeJournalProtocol.CurrentVersion
-            || quota?.Version != RuntimeJournalProtocol.CurrentVersion)
+        if (principal is null || marker is null
+            || quota is null)
         {
             return false;
         }

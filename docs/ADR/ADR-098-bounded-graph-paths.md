@@ -23,16 +23,15 @@ flowchart LR
 ```
 
 The implementation contract is [ShortestPath](../Features/GraphTraversal/ShortestPath.md),
-REQ-GRAPH-007..010, AC-GRAPH-006..009. It freezes new version1
+REQ-GRAPH-007..010, AC-GRAPH-006..009. It defines current
 aliases/IDs, deterministic BFS ties, empty/zero-hop results, conservative metadata
-retention, real read/time/cancellation caps, Q1.GraphPath.v1 literal/parameter
+retention, real read/time/cancellation caps, graph-path literal/parameter
 grammar and shared deadline. Existing ADR-004/005/010/014/034/082 continue to own
 committed reads, keys, persisted authority and routing/lifecycle.
 
 The official MCP join also updates ADR-039 and the independent ClientApi name/schema/hint oracle for both shortest-path tools. The current independent canonical inventory has 68 names; that inventory count is distinct from the three public gateway tools and must be checked independently before real cluster discovery qualification. Packages, shared configuration and formats stay unchanged. Neither source presence nor focused passes complete the acceptance; normal/scalar, recovery and full cluster/client gates, including failover/revocation, remain required.
 
 No canonical data, existing alias/ID, storage format or acknowledgement
-changes occur. The request does not alter canonical stored data. Rollout adds explicit v1 capabilities;
-unknown versions fail closed. Rollback removes new read registration without
-rewriting acknowledged data. Weighted/cross-partition paths, full SQL/protocol
+changes occur. The request does not alter canonical stored data. The current graph-path capability has one request shape and rejects unsupported
+syntax before execution. Weighted/cross-partition paths, full SQL/protocol
 and measured performance leadership remain separate mandatory workstreams.

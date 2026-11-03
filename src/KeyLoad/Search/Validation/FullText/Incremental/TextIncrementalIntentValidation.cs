@@ -10,8 +10,7 @@ internal static class TextIncrementalIntentValidation
         ReadExecutionBudget budget)
     {
         budget.Check();
-        if (intent is null || intent.FormatVersion != TextIncrementalProtocol.FormatVersion
-            || intent.MaintenanceCommandId == Guid.Empty || intent.Scope != scope
+        if (intent is null || intent.MaintenanceCommandId == Guid.Empty || intent.Scope != scope
             || intent.Consumer != consumer || intent.Generation != generation
             || intent.Placement is null || !SamePlacement(intent.Placement, placement)
             || consumer.Partition != scope.Partition

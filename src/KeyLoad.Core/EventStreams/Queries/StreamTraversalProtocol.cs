@@ -2,7 +2,6 @@ namespace KeyLoad.Core;
 
 internal static class StreamTraversalProtocol
 {
-    internal const int Version = 1;
     internal const string Purpose = "keyload-stream-traversal";
     internal const int UnspecifiedBytes = 0;
     internal const int LastEventOffset = 1;

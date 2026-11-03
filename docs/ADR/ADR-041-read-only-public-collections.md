@@ -68,7 +68,7 @@ Get methods are outside this rename.
 This intentionally changes CLR property/constructor/interface signatures. Rebuild
 all solution consumers together; external compiled consumers must recompile for
 the development API. Type/namespace names, JSON names/order, enum values, array/
-base64 forms, nullable defaults, signatures and persisted format versions stay
+base64 forms, nullable defaults, signatures and current persisted contracts stay
 identical. Compilation does not establish persisted-format guarantees beyond the current format.
 
 The Client query factory also moves from KeyLoadQuery<T>.From to the non-generic

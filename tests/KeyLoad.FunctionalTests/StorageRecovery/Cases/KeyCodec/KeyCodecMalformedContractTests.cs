@@ -80,16 +80,16 @@ internal sealed class KeyCodecMalformedContractTests
     }
 
     [Test]
-    public async Task EmptyAndUnknownVersionsRemainFormatUnsupported()
+    public async Task EmptyAndInvalidPrefixesRemainFormatUnsupported()
     {
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Decode([]),
-            ErrorCode.FormatUnsupported, "Unknown key codec version.");
+            ErrorCode.FormatUnsupported, "The encoded key prefix is invalid.");
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodec.Decode([2]),
-            ErrorCode.FormatUnsupported, "Unknown key codec version.");
+            ErrorCode.FormatUnsupported, "The encoded key prefix is invalid.");
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodecValidation.Validate([]),
-            ErrorCode.FormatUnsupported, "Unknown key codec version.");
+            ErrorCode.FormatUnsupported, "The encoded key prefix is invalid.");
         await KeyCodecExceptionAssertions.AssertAsync(() => KeyCodecValidation.Validate([2]),
-            ErrorCode.FormatUnsupported, "Unknown key codec version.");
+            ErrorCode.FormatUnsupported, "The encoded key prefix is invalid.");
     }
 
     [Test]

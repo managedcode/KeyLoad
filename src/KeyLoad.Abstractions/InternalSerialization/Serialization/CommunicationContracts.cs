@@ -25,7 +25,7 @@ internal static class CommunicationContracts
     {
         if (result.IsSuccess ? result.Problem is not null : result.Value /* KLD0041: A failed stored result must have no value in its existing erased payload field. */ is not null)
         {
-            throw Errors.Fail(ErrorCode.Corruption, PayloadVersion.InvalidPayload);
+            throw Errors.Fail(ErrorCode.Corruption, RuntimePayloadContract.InvalidPayload);
         }
         if (result.IsFailed)
         {

@@ -53,8 +53,6 @@ internal static class AnnProjectionJobValidation
             && published.ReadGeneration <= result.ReadGeneration && published.SchemaVersion == result.SchemaVersion
             && published.PolicyEpoch == result.PolicyEpoch && published.CorpusSha256 == result.CorpusSha256
             && published.DependencySha256 == result.DependencySha256
-            && published.StoreFormatVersion == result.StoreFormatVersion
-            && published.KeyCodecVersion == result.KeyCodecVersion
             && published.OutboxFirstAvailable == result.OutboxFirstAvailable
             && published.Position <= result.Position && published.AppliedPosition <= result.AppliedPosition;
 }

@@ -20,14 +20,9 @@ internal sealed class SqlOperationRejectionTests
     private const string InvalidIdentity = "not-a-command-id";
 
     [Test]
-    public async Task AcAiSql005RejectsUnknownVersionsTargetsCaseAndRecursiveAdapter()
+    public async Task AcAiSql005RejectsUnknownTargetsCaseAndRecursiveAdapter()
     {
         var request = SqlOperationTestData.Call(McpCatalogExpectations.QueryCapabilities);
-        await SqlOperationTestData.Reject(request with
-        {
-            Version = SqlOperationProtocol.Version + 1
-        },
-            ErrorCode.UnsupportedCapability);
         foreach (var sql in new[] { SqlOperationTestData.UnknownCall, SqlOperationTestData.WrongCaseCall,
                      SqlOperationTestData.RecursiveCall, LiteralCall, MultipleStatements, MutationSql })
         {

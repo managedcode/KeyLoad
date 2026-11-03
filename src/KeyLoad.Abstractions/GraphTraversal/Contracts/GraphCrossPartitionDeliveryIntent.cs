@@ -4,7 +4,6 @@ namespace KeyLoad;
 [Orleans.GenerateSerializer]
 [Orleans.Alias(GraphCrossPartitionAliases.DeliveryIntent)]
 internal sealed record GraphCrossPartitionDeliveryIntent(
-    [property: Orleans.Id(GraphCrossPartitionFields.IntentVersion)] int Version,
     [property: Orleans.Id(GraphCrossPartitionFields.IntentSourcePartition)] PartitionRef SourcePartition,
     [property: Orleans.Id(GraphCrossPartitionFields.IntentGraph)] string Graph,
     [property: Orleans.Id(GraphCrossPartitionFields.IntentEdgeId)] string EdgeId,

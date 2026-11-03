@@ -21,7 +21,7 @@ query-budget sections are initial engineering targets. Nothing here is a measure
 result, a prototype outcome or a qualification claim; package versions and source
 commits are pinned in the central manifests.
 
-SQL is the central versioned language for every model. Performance and SIMD
+SQL is the central language for every model. Performance and SIMD
 (.NET vector intrinsics) are first-priority work; acceleration claims require
 comparable GitHub cluster measurements. [ADR-054](../ADR/ADR-054-central-sql.md)
 and [ADR-055](../ADR/ADR-055-typed-relational-rows.md) define the first SQL
@@ -120,7 +120,7 @@ The first release covers documents, strict indexes, append-only streams with exp
 
 ### Out of scope
 
-Separate projects: full PostgreSQL SQL/wire compatibility, Cypher/SPARQL compatibility, global serializable transactions, global unique constraints across arbitrary partitions, active-active multi-region writes, OLAP with large joins, and automatic execution of arbitrary user code. The SQL subset and versioned graph/search extensions are described in Section 23.
+Separate projects: full PostgreSQL SQL/wire compatibility, Cypher/SPARQL compatibility, global serializable transactions, global unique constraints across arbitrary partitions, active-active multi-region writes, OLAP with large joins, and automatic execution of arbitrary user code. The SQL subset and current graph/search extensions are described in Section 23.
 
 ## 2. What the sources confirm
 
@@ -248,13 +248,13 @@ A document, its strict indexes, canonical vector and outbox event live in one tr
 
 ### Envelope
 
-Required fields: `FormatVersion`, `Revision`, `CreatedAtUtc`, `UpdatedAtUtc`, optional `ExpiresAtUtc`, and payload length and checksum where the recovery/backup protocol needs them. Embeddings are stored in separate typed vector fields. A plain `GetDocument` returns JSON and metadata; loading large vectors is an explicit operation.
+The current `DocumentRecord` contains `Reference`, `Revision`, `Json`, `Access`, `UpdatedAt` and `Deleted`. Recovery and backup envelopes retain their required lengths and checksums; there is no application format discriminator. Embeddings are stored in separate typed vector fields. A plain `GetDocument` returns JSON and metadata; loading large vectors is an explicit operation.
 
 Buffers become immutable once handed to the storage layer. An ArrayPool buffer may be returned only after the lifetime of all readers and storage owners has ended. The ownership contract outweighs removing one buffer copy without measurements.
 
 ### Ordered key encoding
 
-KeyCodec has its own version and golden test vectors. It defines type tags, a separate encoding for missing/null, signed integer ordering, UTC time ordering, string collation, escaping and arrays. A plain string length prefix does not guarantee lexicographic order. For floats, NaN, infinity and signed zero are defined. The index API may limit numeric types to clearly defined int64/decimal/double policies.
+KeyCodec has one current framing marker and golden test vectors. It defines type tags, a separate encoding for missing/null, signed integer ordering, UTC time ordering, string collation, escaping and arrays. A plain string length prefix does not guarantee lexicographic order. For floats, NaN, infinity and signed zero are defined. The index API may limit numeric types to clearly defined int64/decimal/double policies.
 
 Comparers and serializers are part of the persisted data format. There is one current format; data in an unsupported or corrupt format is rejected before any effect. [S2][S5]
 
@@ -424,11 +424,10 @@ Index generation swap, retry windows, outbox GC and the backup cut account for t
 
 Public query frontends: the KeyLoad SQL subset (T-SQL syntax parsed by Microsoft.SqlServer.TransactSql.ScriptDom), the JSON envelope and the C# builder. They lower into one shared typed query AST. The server performs binding, field-use authorization, capability checks and planning. `IQueryable` with arbitrary client code is not part of the network contract. The full dialect and envelope are described in Section 23 and Section 24.
 
-Proposed scalar request (`languageVersion` 1); the public schema is not yet implemented. The hybrid envelope is in Section 24.1.
+Proposed scalar operator data; the current public request is defined by `QueryRequest` and `AstQueryRequest`. The hybrid envelope is in Section 24.1.
 
 ```json
 {
-  "languageVersion": 1,
   "collection": "documents",
   "select": [
     "id",
@@ -598,10 +597,10 @@ SQL-like frontends have practical precedents: RavenDB RQL and SurrealQL. They sh
 
 | Level | Semantics |
 |---|---|
-| Q1, with the scalar core | SELECT, projection, aliases, typed parameters, WHERE, AND/OR/NOT, equality/range/IN, IS NULL, ORDER BY, TOP / OFFSET-FETCH, EXPLAIN |
-| Q2 | Budgeted GROUP BY/aggregates; time windows; graph operators; authorized EVENTS/QUEUE_MESSAGES views |
-| Q3 | SEARCH HYBRID, named retrieval branches, RRF, candidate limits, index freshness and ranking diagnostics |
-| Q4 | Bounded equijoins, CTEs, prepared statements, query profiles, a meaningful set of SQL write statements |
+| Scalar queries | SELECT, projection, aliases, typed parameters, WHERE, AND/OR/NOT, equality/range/IN, IS NULL, ORDER BY, TOP / OFFSET-FETCH, EXPLAIN |
+| Model and analytical operators | GROUP BY/aggregates; time windows; graph operators; authorized EVENTS/QUEUE_MESSAGES views |
+| Retrieval | SEARCH HYBRID, named retrieval branches, RRF, candidate limits, index freshness and ranking diagnostics |
+| Composition | Bounded equijoins, CTEs, prepared statements, query profiles, a meaningful set of SQL write statements |
 | Separate scopes outside these levels | Full T-SQL semantics, a SQL wire protocol, ODBC/JDBC, arbitrary recursive SQL, global distributed joins and arbitrary UDFs |
 
 A construct the parser accepts still passes a server-side capability check. An unsupported function, join or recursive query returns a diagnostic before execution. Automatically downloading a whole collection to the client for LINQ evaluation is forbidden.
@@ -622,7 +621,7 @@ There is no implicit string-to-number cast. Mixed numeric types follow an explic
 
 ### 23.5. Proposed language examples
 
-Scalar query Q1:
+Scalar query:
 
 ```sql
 SELECT TOP (50) d.id, d.title, d.updatedAt
@@ -635,7 +634,7 @@ ORDER BY d.updatedAt DESC, d.id;
 
 For this query the planner may use the composite index `(projectId, status, updatedAt DESC, id)` if it exists and is compatible with partitioning. Tenant and principal come from the verified request context. The projectId filter grants no rights to another project.
 
-Hybrid query Q3, **proposed KeyLoad syntax**, not yet implemented:
+Hybrid query, **proposed KeyLoad syntax**, not yet implemented:
 
 ```sql
 SELECT TOP (20) c.id, c.title, SCORE() AS score
@@ -660,7 +659,7 @@ Here `GRAPH_REACHABLE` sets the mandatory result scope. `GRAPH` inside SEARCH pr
 
 In this dialect WHERE defines eligibility **before** retrieval top-k. The planner may reorder physical operations only while preserving this contract. TOP applies to the final output. A late candidate-only filter requires a separate explicit operator and a documented approximation.
 
-Proposed time-series operator Q2:
+Proposed time-series operator:
 
 ```sql
 SELECT TIME_BUCKET(@step, s.timestamp) AS bucket,
@@ -678,11 +677,10 @@ ORDER BY bucket;
 
 ### 24.1. Single transport contract
 
-The JSON below describes the same three-branch query as the SQL in Section 23.5. The fields show the v1 design schema; the query capability manifest fixes the exact public names.
+The JSON below describes the same three-branch query as the SQL in Section 23.5. The fields show proposed operator data; the query capability manifest fixes the exact public names.
 
 ```json
 {
-  "languageVersion": 1,
   "collection": "chunks",
   "select": ["id", "title", "$score"],
   "parameters": {
@@ -768,7 +766,7 @@ When policy changes, a cursor is re-authorized or invalidated. Every new streami
 
 ### 25.1. Minimal internal interfaces
 
-The internal model separates `UnboundQuery`, `BoundQuery`, `AuthorizedLogicalPlan`, `PhysicalPlan`, `QueryFragment`, `RecordBatch` and `QueryResult`. These types belong to KeyLoad and have versioned contracts.
+The internal model separates `UnboundQuery`, `BoundQuery`, `AuthorizedLogicalPlan`, `PhysicalPlan`, `QueryFragment`, `RecordBatch` and `QueryResult`. These types belong to KeyLoad and have one current contract per capability.
 
 `IQueryBinder` binds names/paths to catalog field IDs. `IQueryAuthorizer` checks field use and adds the trusted row policy. `IQueryPlanner` selects the operations. `IShardQueryExecutor` runs a fragment over a leased committed view. `IResultProjector` applies the permitted projection and masking. `IQueryGovernor` controls actual cost.
 
@@ -1289,7 +1287,7 @@ The index advisor recommends indexes from redacted query shapes and explain stat
 
 ### 34.1. Solution boundaries
 
-The public SDK depends only on versioned contracts in `KeyLoad.Abstractions`; the SDK contains no storage, parser or search internals. `KeyLoad.Query` has Syntax/Binding/Planning/Execution; authorization evaluation lives in `KeyLoad.Core`.
+The public SDK depends only on the current contracts in `KeyLoad.Abstractions`; the SDK contains no storage, parser or search internals. `KeyLoad.Query` has Syntax/Binding/Planning/Execution; authorization evaluation lives in `KeyLoad.Core`.
 
 ```text
 KeyLoad.Client ──────────────────────── KeyLoad.Abstractions
@@ -1315,7 +1313,7 @@ silo lifecycle stages and `IHostedService` components have a defined start/stop 
 
 | ADR | Proposed decision | What the implementation must close |
 |---|---|---|
-| ADR-012 | T-SQL subset parsed by Microsoft.SqlServer.TransactSql.ScriptDom + versioned KeyLoad extensions | Grammar and semantic fixtures |
+| ADR-012 | T-SQL subset parsed by Microsoft.SqlServer.TransactSql.ScriptDom + current KeyLoad extensions | Grammar and semantic fixtures |
 | ADR-013 | SQL/JSON/C# → one authorized AST | Equivalence and unsupported-expression tests |
 | ADR-014 | RBAC + bounded row/field-use policies | Cross-interface enforcement |
 | ADR-015 | Sensitive fields omitted by default + derived lineage | Masks, mutation safety, index/reranker privacy |

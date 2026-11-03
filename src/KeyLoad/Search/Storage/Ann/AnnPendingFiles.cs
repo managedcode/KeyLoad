@@ -46,7 +46,7 @@ internal static class AnnPendingFiles
         };
         var manifestDigest = AnnReceiptFiles.Write(Path.Combine(directory, AnnProtocol.ManifestFile), manifest, options);
         AnnPaths.RequireClosedGeneration(root, leaf);
-        return (manifest, new(AnnProtocol.Version, leaf, manifestDigest));
+        return (manifest, new(leaf, manifestDigest));
     }
 
     private static byte[] Write(string path, AnnPendingReplay pending, PackedAnnStorageOptions storage,

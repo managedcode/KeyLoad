@@ -28,6 +28,11 @@ public static class AnalyticsMutations
             var links = AnalyticsStoreLinks.Bind(engine, transaction, principal, partition, value.Links);
             var row = new AnalyticsEventRecord(value.Id, value.Timestamp, value.Dimensions, value.Metrics, value.RowAccess ?? previous?.Event.RowAccess, links, checked(revision + AnalyticsRevisionStep));
             transaction.PutRecord(key, new AnalyticsStoredEvent(row, false, now));
+            if (previous is { Deleted: false } && previous.Event.Timestamp != row.Timestamp)
+            {
+                transaction.Delete(AnalyticsStoreKeys.Timestamp(partition, mutation.Store, previous.Event.Timestamp, value.Id));
+            }
+            transaction.PutRecord(AnalyticsStoreKeys.Timestamp(partition, mutation.Store, row.Timestamp, row.Id), row.Id);
         }
 
         return AdvanceAnalyticsGeneration(transaction, partition, mutation.Store, AnalyticsUpsertKind, mutation.ExpectedRevisions.Keys.Order(StringComparer.Ordinal).Last());
@@ -46,6 +51,7 @@ public static class AnalyticsMutations
             }
 
             transaction.PutRecord(key, previous with { Deleted = true, UpdatedAt = now, Event = previous.Event with { Revision = checked(expected + AnalyticsRevisionStep) } });
+            transaction.Delete(AnalyticsStoreKeys.Timestamp(partition, mutation.Store, previous.Event.Timestamp, id));
         }
 
         return AdvanceAnalyticsGeneration(transaction, partition, mutation.Store, AnalyticsDeleteKind, mutation.ExpectedRevisions.Keys.Order(StringComparer.Ordinal).Last());

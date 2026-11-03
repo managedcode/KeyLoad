@@ -25,7 +25,7 @@ internal static class TextGenerationFiles
         TextFileIO.VerifyDirectory(path);
         TextFileIO.SetPrivateDirectoryMode(path);
         TextFileIO.WriteEnvelope(Path.Combine(path, TextProtocol.OwnerFile),
-            new TextOwnerReceipt(TextProtocol.FormatVersion, root, leaf, sourceNodeId, scope,
+            new TextOwnerReceipt(root, leaf, sourceNodeId, scope,
                 [new(TextProtocol.RuntimeDirectoryCore, true)]), executionOptions.Value.MaximumOwnerReceiptBytes, executionOptions: executionOptions, resources: resources);
     }
 

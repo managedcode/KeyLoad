@@ -49,8 +49,7 @@ internal static class GraphCrossPartitionValidation
     {
         const int MinimumResultCount = 1;
 
-        if (request is null || request.Version != GraphCrossPartitionProtocol.CurrentVersion
-            || request.Target is null || request.Target.Partition is null || request.Graph is null
+        if (request is null || request.Target is null || request.Target.Partition is null || request.Graph is null
             || request.Limit < MinimumResultCount
             || HasNullPartitionPart(request.Target.Partition) || request.Target.Collection is null
             || request.Target.Id is null)
@@ -79,7 +78,7 @@ internal static class GraphCrossPartitionValidation
 
     internal static void ValidateOwnerVersion(GraphEdgeOwnerVersion? record)
     {
-        if (record is null || record.Version != GraphCrossPartitionProtocol.CurrentVersion || record.Revision <= AbsentRevision)
+        if (record is null || record.Revision <= AbsentRevision)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);
         }
@@ -102,8 +101,7 @@ internal static class GraphCrossPartitionValidation
 
     private static bool HasInvalidIntentIdentity(GraphCrossPartitionDeliveryIntent? intent,
         PartitionRef source, string graph, string edgeId, EntityRef destination)
-        => intent is null || intent.Version != GraphCrossPartitionProtocol.CurrentVersion
-            || intent.SourcePartition != source || intent.Graph != graph || intent.EdgeId != edgeId
+        => intent is null || intent.SourcePartition != source || intent.Graph != graph || intent.EdgeId != edgeId
             || intent.SourcePartition is null || HasNullPartitionPart(intent.SourcePartition)
             || intent.Destination != destination || intent.Destination.Partition is null
             || HasNullPartitionPart(intent.Destination.Partition) || intent.Destination.Collection is null
@@ -123,8 +121,7 @@ internal static class GraphCrossPartitionValidation
     internal static void ValidateReceiver(GraphCrossPartitionReceiverState? state,
         PartitionRef source, string graph, string edgeId, EntityRef destination)
     {
-        if (state is null || state.Version != GraphCrossPartitionProtocol.CurrentVersion
-            || state.SourcePartition != source || state.Graph != graph || state.EdgeId != edgeId
+        if (state is null || state.SourcePartition != source || state.Graph != graph || state.EdgeId != edgeId
             || state.SourcePartition is null || HasNullPartitionPart(state.SourcePartition)
             || state.Destination != destination || state.Destination.Partition is null
             || HasNullPartitionPart(state.Destination.Partition) || state.Destination.Collection is null
@@ -140,8 +137,7 @@ internal static class GraphCrossPartitionValidation
     internal static void ValidateCapacity(GraphCrossPartitionCapacity? capacity,
         GraphCrossPartitionCapacityDirection direction)
     {
-        if (capacity is null || capacity.Version != GraphCrossPartitionProtocol.CurrentVersion
-            || !Enum.IsDefined(capacity.Direction) || capacity.Direction != direction
+        if (capacity is null || !Enum.IsDefined(capacity.Direction) || capacity.Direction != direction
             || capacity.RecordCount < EmptyRecordCount || capacity.EncodedBytes < EmptyEncodedBytes)
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidStoredRecord);

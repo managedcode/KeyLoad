@@ -42,7 +42,7 @@ internal sealed class TextCapturedCommitAuthorityHarness : IDisposable
         try
         {
             projection = new(Path.Combine(fixture.Directory, ProjectionDirectory), fixture.Store.Identity.NodeId,
-                UnitTextOptions.Execution());
+                UnitTextOptions.Execution(), new TextResourceOwnership(UnitTextOptions.Execution()));
             Search = new(database, options, projection);
             Capture(fixture, principalId);
         }

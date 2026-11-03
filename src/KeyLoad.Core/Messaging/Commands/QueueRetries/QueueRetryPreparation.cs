@@ -77,7 +77,7 @@ public static class QueueRetryPreparation
             choices.Add(new(input.Lane, input.Metadata.Id, input.Metadata.StateVersion, input.Metadata.LeaseVersion, input.Metadata.DeliveryGeneration, input.Metadata.Attempts, input.DueIndexKey, SHA256.HashData(OrleansSerialization.Serialize(input.Policy)), delay, operation.Timestamp.AddMilliseconds(delay)));
         }
 
-        var decisions = OrleansSerialization.Serialize(new QueueRetryDecisions(QueueRetryProtocol.Version, operation.Timestamp, choices.MoveToImmutable()));
+        var decisions = OrleansSerialization.Serialize(new QueueRetryDecisions(operation.Timestamp, choices.MoveToImmutable()));
         var payload = operation.Value!;
         var prepared = engine.OwnCommand(operation);
         prepared.Value = payload with

@@ -6,7 +6,6 @@ namespace KeyLoad.FunctionalTests.ClientApi;
 /// <summary>AC-MCP-001 independently freezes both public GraphPath tool bodies, outputs and hints.</summary>
 internal sealed class McpGraphPathCatalogTests
 {
-    private const string Version = "version";
     private const string Partition = "partition";
     private const string Graph = "graph";
     private const string From = "from";
@@ -53,12 +52,11 @@ internal sealed class McpGraphPathCatalogTests
         var descriptor = Find(McpCatalogExpectations.GraphShortestPath);
         var request = McpSchemaInspector.DefinedRequest(descriptor.InputSchema);
         await VerifyObjectAsync(request,
-            [Version, Partition, Graph, From, To, McpGraphPathCatalogProtocol.MaxDepth,
+            [Partition, Graph, From, To, McpGraphPathCatalogProtocol.MaxDepth,
                 McpGraphPathCatalogProtocol.MaxVertices, McpGraphPathCatalogProtocol.MaxEdges,
                 McpGraphPathCatalogProtocol.Labels],
-            [Version, Partition, Graph, From, To]);
+            [Partition, Graph, From, To]);
         var properties = request.GetProperty(Properties);
-        await VerifyTypeAsync(descriptor.InputSchema, properties.GetProperty(Version), Integer);
         await VerifyTypeAsync(descriptor.InputSchema, properties.GetProperty(Graph), String);
         await VerifyTypeAsync(descriptor.InputSchema, properties.GetProperty(Partition), Object);
         await VerifyTypeAsync(descriptor.InputSchema, properties.GetProperty(From), Object);
@@ -76,23 +74,18 @@ internal sealed class McpGraphPathCatalogTests
     }
 
     [Test]
-    public async Task AcMcp001SqlPathSchemaHasVersionAndTypedQueryRequest()
+    public async Task AcMcp001SqlPathSchemaHasTypedQueryRequest()
     {
         var descriptor = Find(McpCatalogExpectations.QueryGraphPath);
         var request = McpSchemaInspector.DefinedRequest(descriptor.InputSchema);
-        await VerifyObjectAsync(request, [Version, Query], [Version, Query]);
+        await VerifyObjectAsync(request, [Query], [Query]);
         var properties = request.GetProperty(Properties);
-        await VerifyTypeAsync(descriptor.InputSchema, properties.GetProperty(Version), Integer);
         var query = Resolve(descriptor.InputSchema, properties.GetProperty(Query));
-        await VerifyObjectAsync(query, [Partition, McpGraphPathCatalogProtocol.Sql, McpGraphPathCatalogProtocol.Parameters, McpGraphPathCatalogProtocol.AllowFullScan, McpGraphPathCatalogProtocol.Cursor, McpGraphPathCatalogProtocol.QueryDialectVersion], [Partition, McpGraphPathCatalogProtocol.Sql]);
+        await VerifyObjectAsync(query, [Partition, McpGraphPathCatalogProtocol.Sql, McpGraphPathCatalogProtocol.Parameters, McpGraphPathCatalogProtocol.AllowFullScan, McpGraphPathCatalogProtocol.Cursor], [Partition, McpGraphPathCatalogProtocol.Sql]);
         await VerifyTypeAsync(descriptor.InputSchema, query.GetProperty(Properties).GetProperty(Partition), Object);
         await VerifyPartitionAsync(descriptor.InputSchema, query.GetProperty(Properties).GetProperty(Partition));
         await VerifyTypeAsync(descriptor.InputSchema, query.GetProperty(Properties).GetProperty(McpGraphPathCatalogProtocol.Sql), String);
         await VerifyTypeAsync(descriptor.InputSchema, query.GetProperty(Properties).GetProperty(McpGraphPathCatalogProtocol.AllowFullScan), Boolean);
-        var dialect = query.GetProperty(Properties).GetProperty(McpGraphPathCatalogProtocol.QueryDialectVersion);
-        await VerifyTypeAsync(descriptor.InputSchema, dialect, Integer);
-        await Assert.That(dialect.GetProperty(McpSchemaInspector.Default).GetInt32())
-            .IsEqualTo(McpGraphPathCatalogProtocol.DefaultQueryDialectVersion);
         await VerifyPathResultAsync(descriptor.OutputSchema);
     }
 
@@ -102,10 +95,9 @@ internal sealed class McpGraphPathCatalogTests
         var result = branch.GetProperty(Properties).GetProperty(Result);
         var resultReference = McpSchemaInspector.References(result).First();
         result = McpSchemaInspector.Resolve(schema, resultReference);
-        await VerifyObjectAsync(result, [Version, McpGraphPathCatalogProtocol.Found, McpGraphPathCatalogProtocol.Hops, McpGraphPathCatalogProtocol.Vertices, McpGraphPathCatalogProtocol.Edges, McpGraphPathCatalogProtocol.CutPosition],
-            [Version, McpGraphPathCatalogProtocol.Found, McpGraphPathCatalogProtocol.Hops, McpGraphPathCatalogProtocol.Vertices, McpGraphPathCatalogProtocol.Edges, McpGraphPathCatalogProtocol.CutPosition]);
+        await VerifyObjectAsync(result, [McpGraphPathCatalogProtocol.Found, McpGraphPathCatalogProtocol.Hops, McpGraphPathCatalogProtocol.Vertices, McpGraphPathCatalogProtocol.Edges, McpGraphPathCatalogProtocol.CutPosition],
+            [McpGraphPathCatalogProtocol.Found, McpGraphPathCatalogProtocol.Hops, McpGraphPathCatalogProtocol.Vertices, McpGraphPathCatalogProtocol.Edges, McpGraphPathCatalogProtocol.CutPosition]);
         var properties = result.GetProperty(Properties);
-        await VerifyTypeAsync(schema, properties.GetProperty(Version), Integer);
         await VerifyTypeAsync(schema, properties.GetProperty(McpGraphPathCatalogProtocol.Found), Boolean);
         await VerifyTypeAsync(schema, properties.GetProperty(McpGraphPathCatalogProtocol.CutPosition), Integer);
         await VerifyTypeAsync(schema, properties.GetProperty(McpGraphPathCatalogProtocol.Vertices), Array);

@@ -9,7 +9,7 @@ internal sealed class VectorAttachmentAdmissionWholeFlowTests
 {
     private const string Denied = "denied-vector-reader";
     private const string Tenant = "tenant";
-    private const string UnsupportedDetail = "This expression is outside the supported Q1 C# subset.";
+    private const string UnsupportedDetail = "This expression is outside the supported C# query subset.";
     private const string LimitDetail = "The query vector attachment exceeds its item budget.";
     private const string DeniedDetail = "The principal cannot perform this operation in this scope.";
 
