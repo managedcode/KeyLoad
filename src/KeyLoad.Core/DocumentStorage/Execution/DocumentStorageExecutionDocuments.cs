@@ -166,6 +166,24 @@ public static class DocumentStorageExecutionDocuments
     /// <param name = "beforeResourceAdmission">The before Resource Admission.</param>
     internal static T WithQueryView<T>(this DatabaseEngine engine, string principalId, PartitionRef partition, string collection, Capability additionalRequiredCapabilities, Func<IKeyValueView, PrincipalRecord, ResourceDefinition, T> read, ReadExecutionBudget? budget = null, Action<IKeyValueView>? beforeResourceAdmission = null) => engine.Store.Read(raw =>
     {
+        var (principal, resource) = AdmitQueryView(engine, raw, principalId, partition, collection, additionalRequiredCapabilities, budget, beforeResourceAdmission);
+        return read(raw, principal, resource);
+    });
+
+    internal static ValueTask<T> WithQueryViewAsync<T>(this DatabaseEngine engine, string principalId, PartitionRef partition,
+        string collection, Capability additionalRequiredCapabilities,
+        Func<IKeyValueView, PrincipalRecord, ResourceDefinition, ValueTask<T>> read, ReadExecutionBudget budget)
+        => engine.Store.ReadAsync((raw, _) =>
+        {
+            var (principal, resource) = AdmitQueryView(engine, raw, principalId, partition, collection,
+                additionalRequiredCapabilities, budget, null);
+            return read(raw, principal, resource);
+        }, budget.Cancellation);
+
+    private static (PrincipalRecord Principal, ResourceDefinition Resource) AdmitQueryView(DatabaseEngine engine,
+        IKeyValueView raw, string principalId, PartitionRef partition, string collection,
+        Capability additionalRequiredCapabilities, ReadExecutionBudget? budget, Action<IKeyValueView>? beforeResourceAdmission)
+    {
         EngineResourceAccess.ValidatePartition(partition);
         var view = budget?.CreateView(raw) ?? raw;
         var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
@@ -177,8 +195,8 @@ public static class DocumentStorageExecutionDocuments
 
         beforeResourceAdmission?.Invoke(view);
         var resource = ResourceLifetimeReadBinding.BindAuthorizedReadResource(view, partition, collection, ResourceKind.Collection);
-        return read(raw, principal, resource);
-    });
+        return (principal, resource);
+    }
     /// <summary>Reads one visible document from the caller's existing storage cut.</summary>
     /// <param name = "view">Current gated storage view.</param>
     /// <param name = "principal">Persisted principal.</param>

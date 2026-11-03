@@ -59,6 +59,28 @@ internal static class SearchCapturedExecution
         }
     }
 
+    internal static async ValueTask<RankedDocument[]> RankVectorAsync(DatabaseEngine database, IKeyValueView view,
+        PrincipalRecord principal, ResourceDefinition resource, SearchRequest request, ReadExecutionBudget budget,
+        PreparedSimilarity similarity, FilteredSearchEligibility eligibility)
+    {
+        RequireFields(database, principal, resource, request, similarity);
+        if (eligibility.IsEmpty)
+        {
+            return [];
+        }
+        // A dropped typed table can reuse this key prefix in the plain tree during a suspended scan.
+        if (!resource.Transactional || resource.RelationalSchema is not null
+            || view is not ICooperativeRangeReadView range || !CanRetainVectorLimit(request))
+        {
+            return Rank(database, null, view, principal, resource, request, budget, similarity, eligibility, null, null, null);
+        }
+        var scores = await VectorRanker.RankAsync(database, range, principal, request, similarity, budget,
+            eligibility, request.Limit).ConfigureAwait(true);
+        var fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget, request.Explain);
+        AddVectorBranch(fusion, request, scores);
+        return FinishRanking(database, view, principal, resource, budget, fusion, null);
+    }
+
     private static RankedDocument[] Rank(DatabaseEngine database, ITextProjection? provider, IKeyValueView view,
         PrincipalRecord principal, ResourceDefinition resource, SearchRequest request, ReadExecutionBudget budget,
         PreparedSimilarity? similarity, FilteredSearchEligibility eligibility,
@@ -76,13 +98,26 @@ internal static class SearchCapturedExecution
         }
         if (similarity is not null)
         {
-            var boundary = (double)request.FusionConstant + request.Limit;
-            // Complete rankings remain necessary for hybrid fusion and ties caused by floating-point underflow.
-            int? retained = request.Text is null && request.VectorWeight / boundary > request.VectorWeight / (boundary + 1d)
-                ? request.Limit : null;
-            fusion.AddBranch(VectorRanker.Rank(database, view, principal, request, similarity, budget, eligibility,
-                retainedLimit: retained), request.VectorWeight, SearchBranchKind.Vector);
+            int? retained = CanRetainVectorLimit(request) ? request.Limit : null;
+            AddVectorBranch(fusion, request, VectorRanker.Rank(database, view, principal, request, similarity,
+                budget, eligibility, retainedLimit: retained));
         }
+        return FinishRanking(database, view, principal, resource, budget, fusion, original);
+    }
+
+    private static bool CanRetainVectorLimit(SearchRequest request)
+    {
+        var boundary = (double)request.FusionConstant + request.Limit;
+        // Complete rankings remain necessary for hybrid fusion and ties caused by floating-point underflow.
+        return request.Text is null && request.VectorWeight / boundary > request.VectorWeight / (boundary + 1d);
+    }
+
+    private static void AddVectorBranch(SearchRankFusion fusion, SearchRequest request, SearchScore[] scores)
+        => fusion.AddBranch(scores, request.VectorWeight, SearchBranchKind.Vector);
+
+    private static RankedDocument[] FinishRanking(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
+        ResourceDefinition resource, ReadExecutionBudget budget, SearchRankFusion fusion, ICapturedTextRead? original)
+    {
         var selected = fusion.Select();
         var result = SearchBranchExecution.ProjectSelected(database, view, principal, resource, selected, budget, fusion);
         original?.VerifyTerminal(selected.Select(score => score.Reference).ToArray());

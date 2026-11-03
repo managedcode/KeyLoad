@@ -52,7 +52,7 @@ public sealed partial class SearchEngine
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await TextProjectionAdmission.ExecuteAsync(() => SearchCore(principalId, request, budget), budget, cancellationToken);
+        return await SearchCoreAsync(principalId, request, budget).ConfigureAwait(true);
     }
 
     /// <summary>Executes graph scope, retrieval and expansion inside one authorized search cut.</summary>
@@ -81,6 +81,11 @@ public sealed partial class SearchEngine
 
     private RankedDocument[] SearchCore(string principalId, SearchRequest request, ReadExecutionBudget budget)
         => ExactSearchExecution.Execute(database, textProjection, execution, principalId, request, budget);
+
+    private ValueTask<RankedDocument[]> SearchCoreAsync(string principalId, SearchRequest request, ReadExecutionBudget budget)
+        => request.Text is null
+            ? ExactSearchExecution.ExecuteVectorAsync(database, execution, principalId, request, budget)
+            : new(TextProjectionAdmission.ExecuteAsync(() => SearchCore(principalId, request, budget), budget, budget.Cancellation));
 
     /// <summary>Computes the selected vector metric using the same execution SIMD blocks and bounded scalar tails as search.</summary>
     /// <param name="left">Finite query vector.</param>

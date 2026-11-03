@@ -7,7 +7,7 @@ namespace KeyLoad.Storage.ZoneTree;
 /// ZoneTree owns transactional snapshots, plain-table records and both write-ahead logs.
 /// Transactional reads and the store position share one native MVCC snapshot.
 /// </summary>
-public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
+public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, ICooperativeRangeReadView
 {
     private const string InvalidReadCutContextMessage = "An execution read cut must be captured inside this store's native read callback.";
 
@@ -148,6 +148,10 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView
     ScanPage IKeyValueView.Scan(byte[] prefix, int maxRecords, byte[]? afterKey) => runtime.View.Scan(prefix, maxRecords, afterKey);
     bool IKeyValueView.ReadValue(byte[] key, StorageValueReader reader, StorageReadObserver? observer)
         => runtime.View.ReadValue(key, reader, observer);
+
+    ValueTask<StorageScanResult> ICooperativeRangeReadView.VisitRangeAsync(byte[] prefix, int maxRecords,
+        StorageRecordVisitor visitor, byte[]? afterKey, CancellationToken cancellationToken)
+        => ZoneTreeRangeReader.VisitAsync(runtime, prefix, maxRecords, visitor, afterKey, cancellationToken);
     StorageScanResult IKeyValueView.VisitRange(byte[] prefix, int maxRecords, StorageRecordVisitor visitor,
         byte[]? afterKey, byte[]? untilKey, StorageReadObserver? observer, CancellationToken cancellationToken)
         => runtime.View.VisitRange(prefix, maxRecords, visitor, afterKey, untilKey, observer, cancellationToken);

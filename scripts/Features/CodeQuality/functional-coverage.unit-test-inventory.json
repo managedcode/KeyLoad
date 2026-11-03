@@ -42292,6 +42292,26 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.Search.CooperativeExactVectorHostedTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.CooperativeExactVectorHostedTests",
+      "methodName": "PublicExactSearchLetsTheRequestSchedulerRunBeforeReturningTheOracleWinner",
+      "instanceName": "PublicExactSearchLetsTheRequestSchedulerRunBeforeReturningTheOracleWinner",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/Vector/CooperativeExactVectorHostedTests.cs",
+      "sourceSha256": "8c54a03313170eee9d54218cfabce0128f25f2898e2bf67b18b4e733cdf4279c",
+      "lineNumber": 19,
+      "endLineNumber": 42,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-SEARCH-001",
+        "REQ-SEARCH-003"
+      ],
+      "acceptance": [
+        "AC-SEARCH-001",
+        "AC-SEARCH-003"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.Search.EventProjectionCorruptionTests",
       "reportClassName": "KeyLoad.FunctionalTests.Search.EventProjectionCorruptionTests",
       "methodName": "AcLineage002MalformedPersistedLineageFailsClosedInsteadOfLeakingTheVector",
@@ -46645,6 +46665,46 @@
       ],
       "acceptance": [
         "AC-STORAGE-GATE-001"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.CooperativeSnapshotRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.CooperativeSnapshotRangeTests",
+      "methodName": "SuspendedNativePageRetainsItsCutAndSettlesOnCancellation",
+      "instanceName": "SuspendedNativePageRetainsItsCutAndSettlesOnCancellation(False)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/Mvcc/CooperativeSnapshotRangeTests.cs",
+      "sourceSha256": "4296276398cb3d21016f66422b92d68f363a4fce919e1ebed735f839dae30839",
+      "lineNumber": 15,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CUT-003",
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-CUT-003",
+        "AC-QUERY-009"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.StorageRecovery.CooperativeSnapshotRangeTests",
+      "reportClassName": "KeyLoad.FunctionalTests.StorageRecovery.CooperativeSnapshotRangeTests",
+      "methodName": "SuspendedNativePageRetainsItsCutAndSettlesOnCancellation",
+      "instanceName": "SuspendedNativePageRetainsItsCutAndSettlesOnCancellation(True)",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/StorageRecovery/Cases/Mvcc/CooperativeSnapshotRangeTests.cs",
+      "sourceSha256": "4296276398cb3d21016f66422b92d68f363a4fce919e1ebed735f839dae30839",
+      "lineNumber": 15,
+      "endLineNumber": 66,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CUT-003",
+        "REQ-QUERY-009"
+      ],
+      "acceptance": [
+        "AC-CUT-003",
+        "AC-QUERY-009"
       ]
     },
     {
@@ -62259,7 +62319,7 @@
     },
     {
       "groupId": "unit-functional-02",
-      "selector": "/KeyLoad.FunctionalTests/*/(AdminQ*)|(AggregateReplayWorkerP*)|(Analytica*)|(AnalyticsE*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AnnWaitG*)|(AnnWaitO*)|(As*)|(AtomicPartitionRosterRes*)|(BackupI*)|(Bm25CorpusO*)|(Bm25Po*)|(Bounda*)|(Bu*)|(CapturedReadSe*)|(Cha*)|(CommandObservedR*)|(ConnectionO*)|(ConnectionSy*)|(CoreM*)|(CqrsL*)|(CredentialS*)|(DatabaseCompositionV*)|(DistributedSearchH*)|(DocumentC*)|(DocumentPu*)|(DocumentSe*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventAppendS*)|(EventFeedPubSubF*)|(EventFeedPubSubS*)|(EventProjectionR*)|(FeedD*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(GrainFailureD*)|(GrainR*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphSearchL*)|(GraphShortestPathB*)|(GraphShortestPathS*)|(GraphTraversalP*)|(GraphTraversalR*)|(GraphTraversalT*)|(Ins*)|(Is*)|(JournalPrincipalA*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpAg*)|(McpGatewayG*)|(McpTransportG*)|(McpV*)|(Mes*)|(Metad*)|(Mix*)|(OperationO*)|(OutboxD*)|(PartitionQueryPublicA*)|(PartitionStorageA*)|(Pri*)|(ProjectionConc*)|(PublicE*)|(QueryAdapterV*)|(QueryRu*)|(QueueB*)|(QueueDeadlineW*)|(QueueRetr*)|(ReadCutB*)|(ReadCutCo*)|(RelationalA*)|(RemoteTransferRepairC*)|(RequestCqrsB*)|(RequestCqrsPu*)|(RequestD*)|(ResourceA*)|(ResourceIncarnationQ*)|(ResourceLifetimeC*)|(SagaTimeoutJ*)|(SampleAggregateI*)|(SampleChunkA*)|(SampleChunkCanonicalL*)|(SampleChunkCor*)|(SampleChunkEn*)|(SampleChunkExp*)|(SampleM*)|(SampleRetentionM*)|(SampleS*)|(SearchS*)|(Serie*)|(Sh*)|(SqlClientC*)|(SqlF*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlLex*)|(SqlModelViewA*)|(SqlOperationR*)|(SqlQ*)|(SqlTy*)|(Sta*)|(SubscriptionC*)|(SubscriptionO*)|(Suc*)|(TextBm25C*)|(TextCapturedP*)|(TextF*)|(TextProjectionD*)|(TextProjectionRes*)|(TextProjectionS*)|(TextPu*)|(TextR*)|(TextWaitObserva*)|(TopicSqlT*)|(TransactionA*)|(TransactionR*)|(TypedQueueGraphP*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!AliasesAndFieldIdsRemainExact*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!OwnedSnapshotPreservesIndependentMetadataAndBusinessTime*)&(!ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AdminQ*)|(AggregateReplayWorkerP*)|(Analytica*)|(AnalyticsE*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AnnWaitG*)|(AnnWaitO*)|(As*)|(AtomicPartitionRosterRes*)|(BackupI*)|(Bm25CorpusO*)|(Bm25Po*)|(Bounda*)|(Bu*)|(CapturedReadSe*)|(Cha*)|(CommandObservedR*)|(ConnectionO*)|(ConnectionSy*)|(CooperativeS*)|(CoreM*)|(CqrsL*)|(CredentialS*)|(DatabaseCompositionV*)|(DistributedSearchH*)|(DocumentC*)|(DocumentPu*)|(DocumentSe*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventAppendS*)|(EventFeedPubSubF*)|(EventFeedPubSubS*)|(EventProjectionR*)|(FeedD*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(GrainFailureD*)|(GrainR*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphSearchL*)|(GraphShortestPathB*)|(GraphShortestPathS*)|(GraphTraversalP*)|(GraphTraversalR*)|(GraphTraversalT*)|(Ins*)|(Is*)|(JournalPrincipalA*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpAg*)|(McpGatewayG*)|(McpTransportG*)|(McpV*)|(Mes*)|(Metad*)|(Mix*)|(OperationO*)|(OutboxD*)|(PartitionQueryPublicA*)|(PartitionStorageA*)|(Pri*)|(ProjectionConc*)|(PublicE*)|(QueryAdapterV*)|(QueryRu*)|(QueueB*)|(QueueDeadlineW*)|(QueueRetr*)|(ReadCutB*)|(ReadCutCo*)|(RelationalA*)|(RemoteTransferRepairC*)|(RequestCqrsB*)|(RequestCqrsPu*)|(RequestD*)|(ResourceA*)|(ResourceIncarnationQ*)|(ResourceLifetimeC*)|(SagaTimeoutJ*)|(SampleAggregateI*)|(SampleChunkA*)|(SampleChunkCanonicalL*)|(SampleChunkCor*)|(SampleChunkEn*)|(SampleChunkExp*)|(SampleM*)|(SampleRetentionM*)|(SampleS*)|(SearchS*)|(Serie*)|(Sh*)|(SqlClientC*)|(SqlF*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlLex*)|(SqlModelViewA*)|(SqlOperationR*)|(SqlQ*)|(SqlTy*)|(Sta*)|(SubscriptionC*)|(SubscriptionO*)|(Suc*)|(TextBm25C*)|(TextCapturedP*)|(TextF*)|(TextProjectionD*)|(TextProjectionRes*)|(TextProjectionS*)|(TextPu*)|(TextR*)|(TextWaitObserva*)|(TopicSqlT*)|(TransactionA*)|(TransactionR*)|(TypedQueueGraphP*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!AliasesAndFieldIdsRemainExact*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!OwnedSnapshotPreservesIndependentMetadataAndBusinessTime*)&(!ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminQueueTests",
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsEntityLinkLifetimeTests",
@@ -62390,6 +62450,7 @@
         "KeyLoad.FunctionalTests.Search.TextWaitObservationTests",
         "KeyLoad.FunctionalTests.StorageRecovery.AsyncSnapshotStreamTests",
         "KeyLoad.FunctionalTests.StorageRecovery.CapturedReadSelectedCancellationTests",
+        "KeyLoad.FunctionalTests.StorageRecovery.CooperativeSnapshotRangeTests",
         "KeyLoad.FunctionalTests.StorageRecovery.IssuedPurposeOperationTests",
         "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecCultureContractTests",
         "KeyLoad.FunctionalTests.StorageRecovery.MetadataEntryOpenTests",
@@ -62883,6 +62944,8 @@
         "KeyLoad.FunctionalTests.StorageRecovery.AsyncSnapshotStreamTests|EarlyConsumerDisposalJoinsTheNativeReadBeforeTwoColdOpens|EarlyConsumerDisposalJoinsTheNativeReadBeforeTwoColdOpens",
         "KeyLoad.FunctionalTests.StorageRecovery.AsyncSnapshotStreamTests|RealRowsArriveBeforeTheScanFinishesAndKeepOneSnapshotAcrossConcurrentWrites|RealRowsArriveBeforeTheScanFinishesAndKeepOneSnapshotAcrossConcurrentWrites",
         "KeyLoad.FunctionalTests.StorageRecovery.CapturedReadSelectedCancellationTests|AcCut004FrozenTraversalObservesSelectedCancellationAndPreservesBothCuts|AcCut004FrozenTraversalObservesSelectedCancellationAndPreservesBothCuts",
+        "KeyLoad.FunctionalTests.StorageRecovery.CooperativeSnapshotRangeTests|SuspendedNativePageRetainsItsCutAndSettlesOnCancellation|SuspendedNativePageRetainsItsCutAndSettlesOnCancellation(False)",
+        "KeyLoad.FunctionalTests.StorageRecovery.CooperativeSnapshotRangeTests|SuspendedNativePageRetainsItsCutAndSettlesOnCancellation|SuspendedNativePageRetainsItsCutAndSettlesOnCancellation(True)",
         "KeyLoad.FunctionalTests.StorageRecovery.IssuedPurposeOperationTests|OriginalIssuedPurposeRefusesBeforeRoutingThenSameOwnerRepairReplayAndTwoColdCuts|OriginalIssuedPurposeRefusesBeforeRoutingThenSameOwnerRepairReplayAndTwoColdCuts",
         "KeyLoad.FunctionalTests.StorageRecovery.KeyCodecCultureContractTests|DecimalV1GoldensDecodeAndEncodeIndependentOfCurrentCulture|DecimalV1GoldensDecodeAndEncodeIndependentOfCurrentCulture",
         "KeyLoad.FunctionalTests.StorageRecovery.MetadataEntryOpenTests|FifoIdentityRefusesInBoundedOriginalChildThenExactStoreRepairs|FifoIdentityRefusesInBoundedOriginalChildThenExactStoreRepairs",
@@ -64341,7 +64404,7 @@
     },
     {
       "groupId": "unit-functional-05",
-      "selector": "/KeyLoad.FunctionalTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupR*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionPo*)|(Cop*)|(CoreS*)|(CqrsI*)|(Cu*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(Gro*)|(IndexR*)|(Joi*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(Mo*)|(NativeP*)|(Nu*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextPh*)|(TextProjectionL*)|(Th*)|(TopicRetentionB*)|(TopicRetentionP*)|(TransactionT*)|(ZoneTreeE*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchAndJoinProfiles*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)&(!ValidationKeepsTheCompleteComponentLimitWithoutMaterializingText*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(Ac*)|(AdminHttpMetricsM*)|(AdminS*)|(AggregateReplayWorkerV*)|(AggregateS*)|(AnalyticsBounds*)|(AnalyticsStoreT*)|(AnalyticsT*)|(AnnLifetimeA*)|(AnnProjectionPinC*)|(AnnPublicPr*)|(AnnSeedB*)|(AtomicPartitionRosterReg*)|(Authe*)|(CanonicalJsonT*)|(CanonicalK*)|(CanonicalV*)|(CatalogA*)|(ChunkManifestC*)|(ChunkMultiblockB*)|(ChunkMultiblockR*)|(ChunkSelectedI*)|(CliBackupR*)|(ClusterStartupE*)|(CommandObservedP*)|(CommandOutcomeP*)|(ConnectionA*)|(ConnectionPo*)|(CooperativeE*)|(Cop*)|(CoreS*)|(CqrsI*)|(Cu*)|(DatabaseCompositionC*)|(DatabasePhaseB*)|(DocumentD*)|(DocumentLiv*)|(DocumentMutationImageF*)|(DocumentR*)|(DueWorkK*)|(EqualityAccessPathT*)|(Ge*)|(GraphCrossD*)|(GraphCrossPartitionD*)|(GraphP*)|(GraphSearchO*)|(GraphSearchR*)|(GraphShortestPathI*)|(Gro*)|(IndexR*)|(Joi*)|(KeyCodecG*)|(KeyCodecTy*)|(McpCommandD*)|(McpGatewayA*)|(McpRep*)|(McpU*)|(Mo*)|(NativeP*)|(Nu*)|(OutboxP*)|(PackedAnnN*)|(PackedAnnRec*)|(Pai*)|(PartitionRecordV*)|(PartitionRo*)|(PartitionStorageT*)|(Prepare*)|(ProjectionCh*)|(ProjectionD*)|(ProjectionE*)|(PublicR*)|(QueryK*)|(QueueDeadLetterS*)|(QueueEx*)|(QueueLifecycleI*)|(QueuePo*)|(QueueRea*)|(QueueV*)|(ReadCutL*)|(ReadG*)|(RequestCqrsAnnEnrollmentA*)|(RequestCqrsR*)|(RequestF*)|(ResourcePolicyUpdateR*)|(Resp*)|(RetainedA*)|(Revo*)|(RowRevisionB*)|(SagaTimeoutA*)|(SampleAggregateB*)|(SampleChunkExe*)|(SampleChunkPe*)|(SampleRetentionL*)|(SampleRollupL*)|(SdkPo*)|(SearchT*)|(SqlClientP*)|(SqlComm*)|(SqlGraphPathO*)|(SqlGraphSearchP*)|(SqlInnerJoinE*)|(SqlOf*)|(SqlParserA*)|(SqlTo*)|(StreamR*)|(SubscriptionD*)|(SubscriptionPe*)|(Tea*)|(Ten*)|(TextA*)|(TextCapturedC*)|(TextG*)|(TextPh*)|(TextProjectionL*)|(Th*)|(TopicRetentionB*)|(TopicRetentionP*)|(TransactionT*)|(ZoneTreeE*)|(ZoneTreeS*)/(*)&(!AcRoc002CanonicalSystemKeysKeepExactBytesThroughReadOnlyPublicProperties*)&(!CapabilityManifestAdvertisesSearchAndJoinProfiles*)&(!CountOnlyShapeDefaultsDepthToZero*)&(!EnabledBankStartsWithTheExactEmptyFixedSchema*)&(!MarkerValuesAreSharedClosedEnumsAndSuccessHasNoDiagnosticAllocation*)&(!SelectedTextMismatchHasClosedWriterParityAndHealthyContinuation*)&(!UniqueIndexConflictHasClosedWriterParityAndHealthyContinuation*)&(!ValidationKeepsTheCompleteComponentLimitWithoutMaterializingText*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminHttpMetricsMiddlewareTests",
         "KeyLoad.FunctionalTests.AdminDashboard.AdminStorageObservationTests",
@@ -64448,6 +64511,7 @@
         "KeyLoad.FunctionalTests.Search.AnnSeedBoundsTests",
         "KeyLoad.FunctionalTests.Search.CanonicalVectorAtomicRevisionTests",
         "KeyLoad.FunctionalTests.Search.CanonicalVectorPublicMetricTests",
+        "KeyLoad.FunctionalTests.Search.CooperativeExactVectorHostedTests",
         "KeyLoad.FunctionalTests.Search.GraphSearchOperatorTests",
         "KeyLoad.FunctionalTests.Search.GraphSearchReachabilitySortBudgetTests",
         "KeyLoad.FunctionalTests.Search.GraphSearchReadCutTests",
@@ -64936,6 +65000,7 @@
         "KeyLoad.FunctionalTests.Search.CanonicalVectorPublicMetricTests|ExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument|ExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(Cosine)",
         "KeyLoad.FunctionalTests.Search.CanonicalVectorPublicMetricTests|ExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument|ExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(DotProduct)",
         "KeyLoad.FunctionalTests.Search.CanonicalVectorPublicMetricTests|ExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument|ExactTopKMatchesLiteralMetricOrderAndCanceledReadPreservesEveryDocument(Euclidean)",
+        "KeyLoad.FunctionalTests.Search.CooperativeExactVectorHostedTests|PublicExactSearchLetsTheRequestSchedulerRunBeforeReturningTheOracleWinner|PublicExactSearchLetsTheRequestSchedulerRunBeforeReturningTheOracleWinner",
         "KeyLoad.FunctionalTests.Search.GraphSearchOperatorTests|EmptyLabelsAuthorizeFilterAndProduceNoReachableEndpoints|EmptyLabelsAuthorizeFilterAndProduceNoReachableEndpoints",
         "KeyLoad.FunctionalTests.Search.GraphSearchOperatorTests|RetrieverUsesShortestHopsAndDoesNotAmplifyConvergingPathsOrCycles|RetrieverUsesShortestHopsAndDoesNotAmplifyConvergingPathsOrCycles",
         "KeyLoad.FunctionalTests.Search.GraphSearchOperatorTests|ScopeTraversesIntermediateCollectionsAndAppliesEndpointAllowlistOnlyToHits|ScopeTraversesIntermediateCollectionsAndAppliesEndpointAllowlistOnlyToHits",

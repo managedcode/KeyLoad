@@ -45,6 +45,20 @@ internal static class ReadExecutionBudgetStorageReads
             visitor, afterKey);
     }
 
+    internal static ValueTask<StorageScanResult> VisitAllAsync(ReadExecutionBudget budget, ICooperativeRangeReadView view,
+        byte[] prefix, StorageRecordVisitor visitor)
+        => StorageRangePages.VisitAllAsync(view.MaximumRangeRecords,
+            (maxRecords, pageVisitor, after) => VisitRangeAsync(budget, view, prefix, maxRecords, pageVisitor, after), visitor);
+
+    private static async ValueTask<StorageScanResult> VisitRangeAsync(ReadExecutionBudget budget, ICooperativeRangeReadView view,
+        byte[] prefix, int maxRecords, StorageRecordVisitor visitor, byte[]? afterKey)
+    {
+        budget.Check();
+        var result = await view.VisitRangeAsync(prefix, maxRecords, visitor, afterKey, budget.Cancellation).ConfigureAwait(true);
+        budget.Check();
+        return result;
+    }
+
     internal static ScanPage Scan(ReadExecutionBudget budget, IKeyValueView view, byte[] prefix,
         int maxRecords, byte[]? afterKey)
     {

@@ -14,6 +14,8 @@ internal static class StorageRangePages
     /// <returns>The page scan result.</returns>
     internal delegate StorageScanResult PageVisit(int maxRecords, StorageRecordVisitor visitor, byte[]? afterKey);
 
+    internal delegate ValueTask<StorageScanResult> CooperativePageVisit(int maxRecords, StorageRecordVisitor visitor, byte[]? afterKey);
+
     /// <summary>Visits every live record after the optional bound until the range ends or the visitor stops.</summary>
     /// <param name="pageRecords">The provider's accepted record count for one range operation.</param>
     /// <param name="visit">Performs one page visit against the caller's gate-scoped view.</param>
@@ -26,33 +28,26 @@ internal static class StorageRangePages
         ArgumentOutOfRangeException.ThrowIfLessThan(pageRecords, FirstRecord);
         ArgumentNullException.ThrowIfNull(visit) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentNullException.ThrowIfNull(visitor) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var records = 0;
-        var bytes = 0L;
-        var after = afterKey;
-        while (true)
+        var progress = new PageProgress(pageRecords, visitor, afterKey);
+        do
         {
-            var delivered = 0;
-            byte[]? last = null;
-            var stoppedByVisitor = false;
-            var page = visit(pageRecords, (key, value) =>
-            {
-                stoppedByVisitor = !visitor(key, value);
-                if (++delivered == pageRecords)
-                {
-                    last = key.ToArray();
-                    // Continue from this key without spending the physical page's budget on lookahead.
-                    return false;
-                }
-                return !stoppedByVisitor;
-            }, after);
-            records = checked(records + page.Records);
-            bytes = checked(bytes + page.ReadBytes);
-            if (stoppedByVisitor || last is null)
-            {
-                return new(records, page.HasMore, page.StoppedByVisitor, bytes);
-            }
-            after = last;
+            progress.Finish(visit(pageRecords, progress.Visit, progress.After));
         }
+        while (progress.HasNext);
+        return progress.Result;
+    }
+
+    internal static async ValueTask<StorageScanResult> VisitAllAsync(int pageRecords, CooperativePageVisit visit,
+        StorageRecordVisitor visitor)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(pageRecords, FirstRecord);
+        var progress = new PageProgress(pageRecords, visitor, null);
+        do
+        {
+            progress.Finish(await visit(pageRecords, progress.Visit, progress.After).ConfigureAwait(true));
+        }
+        while (progress.HasNext);
+        return progress.Result;
     }
 
     /// <summary>Visits every live record of a gate-scoped view range in provider-sized pages.</summary>
@@ -85,5 +80,50 @@ internal static class StorageRangePages
             return true;
         }, afterKey);
         return [.. records];
+    }
+
+    private sealed class PageProgress
+    {
+        private readonly int pageRecords;
+        private readonly StorageRecordVisitor visitor;
+        private int delivered;
+        private byte[]? last;
+        private bool stoppedByVisitor;
+
+        internal PageProgress(int pageRecords, StorageRecordVisitor visitor, byte[]? after)
+        {
+            this.pageRecords = pageRecords;
+            this.visitor = visitor;
+            After = after;
+            Visit = VisitRecord;
+        }
+
+        internal StorageRecordVisitor Visit { get; }
+        internal byte[]? After { get; private set; }
+        internal bool HasNext { get; private set; }
+        internal StorageScanResult Result { get; private set; }
+
+        internal void Finish(StorageScanResult page)
+        {
+            Result = new(checked(Result.Records + page.Records), page.HasMore, page.StoppedByVisitor,
+                checked(Result.ReadBytes + page.ReadBytes));
+            HasNext = !stoppedByVisitor && last is not null;
+            After = last;
+            last = null;
+            delivered = 0;
+            stoppedByVisitor = false;
+        }
+
+        private bool VisitRecord(ReadOnlySpan<byte> key, ReadOnlySpan<byte> value)
+        {
+            stoppedByVisitor = !visitor(key, value);
+            if (++delivered == pageRecords)
+            {
+                // Continue from this key without spending the physical page's budget on lookahead.
+                last = key.ToArray();
+                return false;
+            }
+            return !stoppedByVisitor;
+        }
     }
 }
