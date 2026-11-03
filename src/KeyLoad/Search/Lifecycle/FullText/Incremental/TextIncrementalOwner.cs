@@ -56,7 +56,7 @@ internal sealed class TextIncrementalOwner : IDisposable
         TextOwnedInventory.ValidateTrackedLayout(Path, owner.OwnedPaths, budget,
             runtimeAllowMissing: true, executionOptions: executionOptions);
         index = RuntimeTextIndex.Open(System.IO.Path.Combine(Path, TextProtocol.RuntimeDirectoryCore),
-            new TextFileStreamProvider(root, leaf, sourceNodeId, executionOptions, resources), executionOptions, WriteAheadLogMode.Sync);
+            new TextFileStreamProvider(root, leaf, sourceNodeId, executionOptions, resources ?? throw TextErrors.Ownership()), executionOptions, WriteAheadLogMode.Sync);
         budget.Check();
     }
 

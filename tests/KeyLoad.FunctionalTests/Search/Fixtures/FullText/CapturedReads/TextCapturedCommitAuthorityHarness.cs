@@ -81,7 +81,7 @@ internal sealed class TextCapturedCommitAuthorityHarness : IDisposable
                     principal, resource, request, budget);
             });
         var ranker = new TextRanker(request.Text!, request.TextField!, budget, execution.TextBudgetCheckInterval,
-            execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+            execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode);
         original = new(captured, ranker, null);
     }
 

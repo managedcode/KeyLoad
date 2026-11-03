@@ -25,11 +25,12 @@ internal static class DistributedSearchMcpProtocol
     internal const string Explanation = "explanation";
     internal const string Contributions = "contributions";
     internal const string Fusion = "fusionConstant";
+    internal const string TextMatchMode = "textMatchMode";
     internal const string Missing = "The distributed-search catalog operation is missing.";
     internal static readonly string[] RequestFields = [Partitions, Search];
     internal static readonly string[] ResultFields = [Hits, Leaves, Epoch, Complete];
     internal static readonly string[] SearchFields = [Partition, Collection, "textField", "text", "vectorField",
-        "vector", "space", Limit, "textWeight", "vectorWeight", Fusion, "allowedIds", "explain", "textIndex"];
+        "vector", "space", Limit, "textWeight", "vectorWeight", Fusion, "allowedIds", "explain", "textIndex", TextMatchMode];
     internal static readonly string[] PartitionFields = ["tenantId", "databaseId", "transactionDomainId", "partitionKey"];
     internal const string Atomic = "atomicPartitionId";
     internal const string Vector = "vector";

@@ -41,7 +41,7 @@ internal static class DistributedSearchStatisticsFlow
                 var execution = UnitExecutionOptions.QueryExecution().Value;
                 var request = Request(witness.Partition);
                 var ranker = new TextRanker(request.Text!, request.TextField!, budget,
-                    execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+                    execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode);
                 owner.Database.VisitVisibleDocuments(view, principal, request.Partition, request.Collection, budget, ranker.Visit);
                 var scores = ranker.Rank(statistics);
                 return SearchBranchExecution.ProjectSelected(owner.Database, view, principal, resource, scores, budget);

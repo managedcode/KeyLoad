@@ -2,7 +2,7 @@ using Microsoft.Extensions.Options;
 using ZoneTree.AbstractFileStream;
 namespace KeyLoad.Server.Search;
 
-internal sealed class TextPathAccess(string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+internal sealed class TextPathAccess(string root, string leaf, Guid sourceNodeId, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership resources)
 {
     private readonly Lock gate = new();
 
@@ -48,11 +48,6 @@ internal sealed class TextPathAccess(string root, string leaf, Guid sourceNodeId
 
     internal void Track(string path, bool directory)
     {
-        if (resources is null)
-        {
-            TrackOwnedPath(path, directory);
-            return;
-        }
         resources.MutatePhysical(() => TrackOwnedPath(path, directory));
     }
 
@@ -67,11 +62,6 @@ internal sealed class TextPathAccess(string root, string leaf, Guid sourceNodeId
     internal void CreateDirectory(string path, IFileStreamProvider provider)
     {
         var full = Resolve(path);
-        if (resources is null)
-        {
-            CreateOwnedDirectory(full, provider);
-            return;
-        }
         resources.MutatePhysical(() => CreateOwnedDirectory(full, provider));
     }
 
@@ -112,16 +102,22 @@ internal sealed class TextPathAccess(string root, string leaf, Guid sourceNodeId
         }
     }
 
-    internal void PrepareReplaceTarget(string path)
+    internal void PrepareReplaceTargets(string first, string? second = null)
     {
-        if (File.Exists(path))
+        foreach (var path in second is null ? new[] { first } : new[] { first, second })
         {
-            Require(path, directory: false);
+            if (File.Exists(path))
+            {
+                Require(path, directory: false);
+            }
         }
-        else
+        resources.MutatePhysical(() =>
         {
-            Track(path, directory: false);
-        }
+            lock (gate)
+            {
+                TextFiles.RuntimeTrackFiles(root, leaf, sourceNodeId, first, second, executionOptions, resources);
+            }
+        });
     }
 
     internal void SetPrivateDirectoryModes(string path)

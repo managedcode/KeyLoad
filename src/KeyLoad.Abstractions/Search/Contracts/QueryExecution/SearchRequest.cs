@@ -17,6 +17,7 @@ namespace KeyLoad;
 /// <param name="AllowedIds">Optional canonical document IDs eligible for branch output; an empty array selects no results.</param>
 /// <param name="TextIndex">Optional exact maintained text consumer and generation; stale selection rejects without rebuilding.</param>
 /// <param name="Explain">Includes bounded per-hit contributions from the actual authorized ranking branches when true.</param>
+/// <param name="TextMatchMode">Requires any or all distinct normalized query terms in the text branch.</param>
 [Orleans.GenerateSerializer]
 [Orleans.Alias(ContractAliases.SearchRequest)]
 public sealed record SearchRequest([property: Orleans.Id(0)] PartitionRef Partition, [property: Orleans.Id(1)] string Collection, [property: Orleans.Id(2)] string? TextField = null, [property: Orleans.Id(3)] string? Text = null,
@@ -24,7 +25,8 @@ public sealed record SearchRequest([property: Orleans.Id(0)] PartitionRef Partit
     [property: Orleans.Id(8)] double TextWeight = SearchRequest.DefaultTextWeight, [property: Orleans.Id(9)] double VectorWeight = SearchRequest.DefaultVectorWeight, [property: Orleans.Id(10)] int FusionConstant = SearchRequest.DefaultFusionConstant,
     [property: Orleans.Id(11)] ImmutableArray<string>? AllowedIds = null,
     [property: Orleans.Id(12), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)] bool Explain = false,
-    [property: Orleans.Id(13), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] TextIndexSelection? TextIndex = null)
+    [property: Orleans.Id(13), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull)] TextIndexSelection? TextIndex = null,
+    [property: Orleans.Id(14), System.Text.Json.Serialization.JsonIgnore(Condition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingDefault)] TextMatchMode TextMatchMode = global::KeyLoad.TextMatchMode.Any)
 {
     private const int DefaultLimit = 10;
     private const int DefaultTextWeight = 1;

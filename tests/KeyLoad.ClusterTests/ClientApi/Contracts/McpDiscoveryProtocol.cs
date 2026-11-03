@@ -61,6 +61,10 @@ internal static class McpDiscoveryProtocol
     internal const string Sql = "sql";
     internal const string Query = "query";
     internal const string Default = "default";
+    internal const string TextMatchMode = "textMatchMode";
+    internal const string Examples = "examples";
+    internal const string Minimum = "minimum";
+    internal const string Maximum = "maximum";
     internal const string Search = "search";
     internal const string Collection = "collection";
     internal const string Cursor = "cursor";

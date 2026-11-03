@@ -18,7 +18,7 @@ internal static class SearchCapturedExecution
             return new(null, null, []);
         }
         var ranker = request.Text is not null ? new TextRanker(request.Text, request.TextField!, budget,
-            execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters) : null;
+            execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode) : null;
         if (provider is ICapturedTextProjection capturedProjection && ranker is not null
             && (ranker.HasTerms || request.TextIndex is not null))
         {

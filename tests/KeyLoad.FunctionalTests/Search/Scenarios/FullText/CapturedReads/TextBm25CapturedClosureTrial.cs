@@ -59,7 +59,7 @@ internal static class TextBm25CapturedClosureTrial
                     TextCapturedReadFactory.Capture(owner.Database, projection, view,
                         principal, resource, request, work));
             var ranker = new TextRanker(request.Text!, request.TextField!, work, execution.TextBudgetCheckInterval,
-                execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+                execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode);
             result = SearchCapturedExecution.Complete(owner.Database, new(captured, ranker, null), request,
                 work, null, FilteredSearchEligibility.Create(null, work));
             var document = TextBm25ExpectedRows.Document(owner.Source,

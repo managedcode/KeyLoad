@@ -107,8 +107,11 @@ the issue report is not a delivered repair.
 
 A new disposable bootstrap generation uses ZoneTree `WriteAheadLogMode.None`.
 It is not published while postings remain only in memory: the existing
-`EvictToDisk`, joined index close, complete owned-file inventory and manifest
-publication must finish first. A sealed bootstrap reader opens that same native
+`EvictToDisk`, joined native workers, zero native `InMemoryRecordCount`, joined
+index close, complete owned-file inventory and manifest publication must finish
+first. Native merge failures can be logged without being rethrown by the join;
+the memory-only posting check therefore precedes disposal and refuses publication.
+A sealed bootstrap reader opens that same native
 mode without creating a data WAL. Canonical database records keep their storage
 durability contract; interrupted unpublished bootstrap work is rebuilt from them.
 Incremental writers and selected incremental/online readers retain native `Sync`.
@@ -146,8 +149,18 @@ path ledger, and native directory creation participates in the same accounting
 operation. Stream writes join before close enters that gate; the actual local
 handle close, including `DeleteOnClose`, and successful ledger release stay
 together. A failed close retains its group and closing-length charge. No native
-worker is awaited while holding the accounting gate. Engine upserts keep their native scheduling; missing files are not
-ignored and limits are not relaxed.
+worker is awaited while holding the accounting gate. Engine upserts keep their
+native scheduling. Missing published files still fail validation and physical
+limits remain unchanged.
+
+The ownership receipt records current file paths, rather than every native
+segment filename ever created. Before admitting new files, the same accounting
+operation retires only receipt file entries proven absent by filesystem stat;
+directories and separately charged unlinked open handles remain. Links and
+uncertain I/O still refuse. Create, move and replace keep target admission and
+the actual mutation together; replacement destination and backup are admitted
+in one receipt update. Deleting a proven missing path is a no-effect operation
+inside the verified generation, while any present unowned path still refuses.
 
 `TextPhysicalCensusTests.PhysicalCensusJoinsNativeDeletionBeforeHealthyOwnedFilesAndCanonicalSearch`
 coordinates the real registered root verifier with the actual native file
@@ -155,6 +168,14 @@ provider deletion and `DeleteOnClose` callbacks, joins the operations, then veri
 the unchanged canonical search result and cut. It is a deterministic mechanism
 check; completed scale construction with every persisted posting verified is a
 separate required measurement.
+
+The same case creates and deletes more distinct names than the unchanged file
+quota, checks the compacted receipt, repeated missing deletion, foreign regular
+and linked paths, and healthy cold continuation.
+`TextPublicationPersistenceTests.FailedNativeMergeRefusesPublicationBeforeHealthySearchAndColdPostings`
+forces a real native merge failure through the physical file quota, observes
+remaining in-memory postings, rejects both pending and final publication,
+joins cleanup and verifies exact healthy public and cold native results.
 
 A local macOS Debug profile of the actual resource-bound provider found repeated
 root-wide file censuses inside per-posting WAL stream admission and release.

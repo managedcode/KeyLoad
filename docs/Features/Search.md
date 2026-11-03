@@ -8,6 +8,42 @@ ZoneTree.FullTextSearch is the selected full-text provider under [ADR-071](../AD
 |---|---|---|
 | REQ-ZT-003: the selected full-text provider is a bounded derived projection | AC-ZT-003: the centrally pinned ZoneTree.FullTextSearch, an authorized exact token/identity/rank oracle, nonpartial cancellation and real replay/rebuild/swap tests on the Aspire replicated cluster pass; stale or corrupt generations cannot return success | Search provider tests, process recovery and SDK/official MCP tests |
 
+## Text term matching
+
+`SearchRequest.TextMatchMode` is the optional generated Id14 field with the closed
+`TextMatchMode` values `Any` (default) and `All`. Its alias is
+`keyload.contract.text-match-mode`. `Any` admits a text candidate containing at
+least one normalized query term. `All` requires every distinct normalized query
+term before BM25 ranking, result limits and rank fusion. Canonical normalization
+and case folding apply before duplicate terms are removed. A query with no
+normalized terms returns no text matches; `All` without a text branch and an
+undefined mode are Validation errors.
+
+All visible corpus documents still contribute BM25 document count, length and
+term frequencies, including partial matches and missing fields. The mode changes
+text candidate eligibility only: vector and graph branches retain their own
+eligibility when combined. The same native text projection serves both modes;
+there is no second index or provider query language. Distributed leaf ranking
+applies the same mode, and the complete typed request digest binds it while
+corpus statistics remain independent of it.
+
+The SDK, official MCP and `EXEC keyload_search_execute @args` carry the same typed
+request. SQL graph-text syntax retains its default `Any` behavior. The comparison
+search driver uses `All`, matching the existing shared single-term and AND cases
+without changing their corpus, schedules or result oracle.
+
+REQ-SEARCH-MATCH-001 / AC-SEARCH-MATCH-001: a real canonical corpus and native text
+projection must exclude higher-ranked partial matches before `Limit=1`, preserve
+the full authorized BM25 corpus, normalized duplicates, row privacy, malformed
+mode refusal followed by healthy reads, and complete results after cold reopening.
+`TextMatchModeWholeFlowTests.AllTermsExcludeHigherRankedPartialRowsBeforeLimitAndPreservePrivacyThroughColdRead`
+owns this functional acceptance alongside REQ-SR-001/004 and AC-MP-004. The
+existing `TextClusterTests.AcFts001ActualSdkAndOfficialMcpMatchIndependentTextAndHybridOracle`
+also exercises `All` through actual SDK, official MCP and canonical SQL callers;
+the existing distributed hybrid case compares independent `All` pages before and
+after both owners reopen. The MCP enum-schema case is supporting contract evidence.
+Source presence does not replace their required runtime and Linux qualification.
+
 ## Resource contract for exact reads
 
 Decision: [ADR-035](../ADR/ADR-035-memory-performance.md). Scope: exact persisted-policy text/vector/hybrid reads under one committed apply cut. Public request/response JSON, BM25 tokenization and reciprocal-rank fusion remain identical.

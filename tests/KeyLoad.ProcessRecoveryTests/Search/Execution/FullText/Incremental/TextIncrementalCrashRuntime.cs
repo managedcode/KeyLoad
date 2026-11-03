@@ -23,6 +23,7 @@ internal sealed class TextIncrementalCrashRuntime : IAsyncDisposable
     internal string PhysicalRoot { get; }
     internal string ProjectionRoot { get; }
     internal string EvidenceRoot { get; }
+    internal TextResourceOwnership Resources { get; }
 
     internal TextIncrementalCrashRuntime(string root, Guid incarnation,
         Action<TextFaultStage>? observer = null)
@@ -42,7 +43,8 @@ internal sealed class TextIncrementalCrashRuntime : IAsyncDisposable
             registrations.AddSingleton(CrashExecutionOptions.DatabaseLimits(Database.Limits));
             services = openedServices = registrations.BuildServiceProvider();
             ProjectionRoot = Path.Combine(PhysicalRoot, TextIncrementalProtocol.RootDirectory);
-            owner = new(Database, PhysicalRoot, Store.Identity.NodeId, Options, Database.EvaluationClock, observer);
+            Resources = new TextResourceOwnership(Options.RuntimeText);
+            owner = new(Database, PhysicalRoot, Store.Identity.NodeId, Options, Database.EvaluationClock, observer, Resources);
         }
         catch (Exception primary)
         {

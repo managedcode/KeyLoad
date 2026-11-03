@@ -21,8 +21,10 @@ internal static class TextIncrementalPostingOracle
         {
             await ServerFailureObserver.ObserveAsync(async () =>
             {
+                var resources = new TextResourceOwnership(options);
+                resources.RegisterRoot(root, _ => TextRootFiles.VerifyReceipt(root, nodeId, options));
                 index = RuntimeTextIndex.Open(Path.Combine(root, leaf, TextProtocol.RuntimeDirectoryCore),
-                    new TextFileStreamProvider(root, leaf, nodeId, options), options, WriteAheadLogMode.Sync);
+                    new TextFileStreamProvider(root, leaf, nodeId, options, resources), options, WriteAheadLogMode.Sync);
                 var observed = new List<(ulong Token, ulong Record, ulong Previous)>();
                 var iterator = index.ZoneTree1.CreateIterator(global::ZoneTree.IteratorType.NoRefresh,
                     contributeToTheBlockCache: false);

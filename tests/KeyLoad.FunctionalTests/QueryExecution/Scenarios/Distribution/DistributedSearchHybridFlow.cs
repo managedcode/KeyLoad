@@ -12,10 +12,10 @@ internal static class DistributedSearchHybridFlow
     private const string DestinationWindow = "destination-owner";
     private const string ScoreProfile = "distributed-canonical";
 
-    internal static RankedDocument[] Execute(QueryFixture fixture, CancellationToken token)
+    internal static RankedDocument[] Execute(QueryFixture fixture, CancellationToken token, TextMatchMode mode = TextMatchMode.Any)
     {
-        var sourceRequest = DistributedSearchHybridSeed.Request(QueryDataset.Local);
-        var destinationRequest = DistributedSearchHybridSeed.Request(QueryFixture.Partition);
+        var sourceRequest = DistributedSearchHybridSeed.Request(QueryDataset.Local) with { TextMatchMode = mode };
+        var destinationRequest = DistributedSearchHybridSeed.Request(QueryFixture.Partition) with { TextMatchMode = mode };
         var source = Capture(fixture.Source, sourceRequest, fixture.SourceOwner, token);
         var destination = Capture(fixture.Destination, destinationRequest, fixture.DestinationOwner, token);
         var budget = Budget(fixture.Source, token);

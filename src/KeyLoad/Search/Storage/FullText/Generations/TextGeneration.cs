@@ -8,6 +8,7 @@ namespace KeyLoad.Server.Search;
 
 internal sealed class TextGeneration
 {
+    private const string UnpersistedPostings = "The native text index retained unpersisted postings after joined eviction.";
     private readonly IOptions<TextExecutionOptions> executionOptions;
 
     private readonly string root;
@@ -58,6 +59,7 @@ internal sealed class TextGeneration
     {
         get; private set;
     }
+    internal bool IsSealedRead => Published && CurrentIndex is not { IsReadOnly: false };
 
     internal void DeferBudgetFailure(Exception failure) => DeferredBudgetFailure ??= failure;
 
@@ -91,23 +93,52 @@ internal sealed class TextGeneration
 
     internal TextFile[] CloseAndCapture(ReadExecutionBudget? budget)
     {
+        var sealedRead = IsSealedRead;
         CloseIndex();
         var owner = TextFiles.ReadOwnerForProvider(root, Leaf, sourceNodeId, executionOptions: executionOptions);
+        TextFile[] captured = [];
         try
         {
-            Files = TextInventory.Capture(Path, owner.OwnedPaths, budget: budget, executionOptions: executionOptions);
+            captured = TextInventory.Capture(Path, owner.OwnedPaths, budget: budget, executionOptions: executionOptions);
         }
         catch (OperationCanceledException error)
         {
             DeferBudgetFailure(error);
-            CaptureForSettlement(owner, error);
+            CompleteForSettlement(error, () => captured = TextInventory.Capture(Path, owner.OwnedPaths, executionOptions: executionOptions));
         }
         catch (KeyLoadException error) when (error.Code == KeyLoad.ErrorCode.BudgetExceeded)
         {
             DeferBudgetFailure(error);
-            CaptureForSettlement(owner, error);
+            CompleteForSettlement(error, () => captured = TextInventory.Capture(Path, owner.OwnedPaths, executionOptions: executionOptions));
         }
-        return Files;
+        if (!sealedRead)
+        {
+            Files = captured;
+        }
+        return captured;
+    }
+
+    internal void VerifyPublished(ReadExecutionBudget? budget)
+    {
+        try
+        {
+            RequirePublished(budget);
+        }
+        catch (Exception error) when (budget is not null && error is (OperationCanceledException
+            or KeyLoadException { Code: KeyLoad.ErrorCode.BudgetExceeded }))
+        {
+            DeferBudgetFailure(error);
+            CompleteForSettlement(error, () => RequirePublished(null));
+        }
+    }
+
+    private void RequirePublished(ReadExecutionBudget? budget)
+    {
+        var manifest = TextFiles.ValidatePublishedGeneration(root, Leaf, sourceNodeId, Scope, budget, executionOptions);
+        if (!TextLiveManifest.Matches(this, manifest, budget))
+        {
+            throw TextErrors.Corrupt();
+        }
     }
 
     private void CloseIndex()
@@ -120,6 +151,14 @@ internal sealed class TextGeneration
         if (!current.IsReadOnly)
         {
             ServerFailureObserver.Observe(current.EvictToDisk, failures);
+            ServerFailureObserver.Observe(() =>
+            {
+                current.WaitForBackgroundThreads();
+                if (current.ZoneTree1.Maintenance.InMemoryRecordCount != 0)
+                {
+                    throw KeyLoad.Errors.Fail(KeyLoad.ErrorCode.Corruption, UnpersistedPostings);
+                }
+            }, failures);
         }
         var failuresBeforeDispose = failures.Count;
         ServerFailureObserver.Observe(current.Dispose, failures);
@@ -130,12 +169,12 @@ internal sealed class TextGeneration
         ServerFailureObserver.ThrowIfAny(failures);
     }
 
-    private void CaptureForSettlement(TextOwnerReceipt owner, Exception primaryFailure)
+    private void CompleteForSettlement(Exception primaryFailure, Action complete)
     {
         const int FailuresCountValidationBoundary = 0;
 
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() => Files = TextInventory.Capture(Path, owner.OwnedPaths, executionOptions: executionOptions), failures);
+        ServerFailureObserver.Observe(complete, failures);
         if (failures.Count > FailuresCountValidationBoundary)
         {
             ClearDeferredBudgetFailure();
@@ -150,11 +189,7 @@ internal sealed class TextGeneration
         {
             return;
         }
-        var manifest = TextFiles.ValidatePublishedGeneration(root, Leaf, sourceNodeId, Scope, budget, executionOptions: executionOptions);
-        if (!TextLiveManifest.Matches(this, manifest, budget))
-        {
-            throw TextErrors.Corrupt();
-        }
+        RequirePublished(budget);
         budget.Check();
         CurrentIndex = RuntimeTextIndex.Open(System.IO.Path.Combine(Path, TextProtocol.RuntimeDirectoryCore),
             new TextFileStreamProvider(root, Leaf, sourceNodeId, executionOptions: executionOptions,

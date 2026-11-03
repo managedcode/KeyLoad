@@ -41,8 +41,12 @@ internal static class TextFiles
         => TextOwnerFiles.ReadOwner(Path.Combine(root, leaf, TextProtocol.OwnerFile),
             root, leaf, sourceNodeId, executionOptions: executionOptions);
 
-    internal static void RuntimeTrackPath(string root, string leaf, Guid sourceNodeId, string path, bool directory, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership? resources = null)
+    internal static void RuntimeTrackPath(string root, string leaf, Guid sourceNodeId, string path, bool directory, IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership resources)
         => TextOwnerFiles.TrackPath(root, leaf, sourceNodeId, path, directory, executionOptions: executionOptions, resources: resources);
+
+    internal static void RuntimeTrackFiles(string root, string leaf, Guid sourceNodeId, string first, string? second,
+        IOptions<TextExecutionOptions> executionOptions, TextResourceOwnership resources)
+        => TextOwnerFiles.TrackFiles(root, leaf, sourceNodeId, first, second, executionOptions, resources);
 
     internal static void RuntimeRequirePath(string root, string leaf, Guid sourceNodeId, string path, bool directory, IOptions<TextExecutionOptions> executionOptions)
         => TextOwnerFiles.RequirePath(root, leaf, sourceNodeId, path, directory, executionOptions: executionOptions);
@@ -88,7 +92,7 @@ internal static class TextFiles
     internal static TextManifest ReadManifest(string path, TextProjectionScope scope, IOptions<TextExecutionOptions> executionOptions)
         => TextGenerationFiles.ReadManifest(path, scope, executionOptions: executionOptions);
 
-    internal static TextManifest ValidatePublishedGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, ReadExecutionBudget budget, IOptions<TextExecutionOptions> executionOptions)
+    internal static TextManifest ValidatePublishedGeneration(string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, ReadExecutionBudget? budget, IOptions<TextExecutionOptions> executionOptions)
         => TextGenerationFiles.ValidatePublished(Path.Combine(root, leaf), root, leaf, sourceNodeId,
             scope, budget, executionOptions: executionOptions);
 

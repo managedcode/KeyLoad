@@ -18,6 +18,7 @@ internal sealed class TextRanker
     private const double IdfSmoothing = 0.5;
     private readonly ReadExecutionBudget budget;
     private readonly bool retainCandidates;
+    private readonly TextMatchMode matchMode;
     private readonly int budgetCheckInterval;
     private readonly int maximumDocumentWords;
     private readonly int maximumWordCharacters;
@@ -31,19 +32,20 @@ internal sealed class TextRanker
     private long totalLength;
 
     public TextRanker(string query, string field, ReadExecutionBudget budget, int budgetCheckInterval,
-        int maximumDocumentWords, int maximumWordCharacters)
-        : this(query, field, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters, true)
+        int maximumDocumentWords, int maximumWordCharacters, TextMatchMode matchMode)
+        : this(query, field, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters, matchMode, true)
     {
     }
 
     internal static TextRanker ForStatistics(string query, string field, ReadExecutionBudget budget,
         int budgetCheckInterval, int maximumDocumentWords, int maximumWordCharacters)
-        => new(query, field, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters, false);
+        => new(query, field, budget, budgetCheckInterval, maximumDocumentWords, maximumWordCharacters, TextMatchMode.Any, false);
 
     private TextRanker(string query, string field, ReadExecutionBudget budget, int budgetCheckInterval,
-        int maximumDocumentWords, int maximumWordCharacters, bool retainCandidates)
+        int maximumDocumentWords, int maximumWordCharacters, TextMatchMode matchMode, bool retainCandidates)
     {
         this.retainCandidates = retainCandidates;
+        this.matchMode = matchMode;
         this.budget = budget;
         this.budgetCheckInterval = budgetCheckInterval;
         this.maximumDocumentWords = maximumDocumentWords;
@@ -87,7 +89,8 @@ internal sealed class TextRanker
             frequency[index]++;
         }
         totalLength += length;
-        if (retainCandidates && counts.Count != EmptyElementCount)
+        if (retainCandidates && counts.Count != EmptyElementCount
+            && (matchMode == TextMatchMode.Any || counts.Count == terms.Length))
         {
             candidates.Add(new(document.Reference, length, counts));
         }

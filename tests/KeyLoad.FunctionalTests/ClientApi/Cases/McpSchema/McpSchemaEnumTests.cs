@@ -10,8 +10,6 @@ internal sealed class McpSchemaEnumTests
     private const string OptionalKey = "optional";
     private const string GrantsKey = "grants";
     private const string OptionalGrantsKey = "optionalGrants";
-    private const string Minimum = "minimum";
-    private const string Maximum = "maximum";
     private const string NumericText = "1";
     private const string MixedCaseText = " cosine ";
     private const string CombinedText = "Cosine, Euclidean";
@@ -35,8 +33,8 @@ internal sealed class McpSchemaEnumTests
         await Assert.That(McpSchemaInspector.HasType(fields.GetProperty(OptionalGrantsKey), McpSchemaInspector.Null)).IsTrue();
         var numbers = fields.GetProperty(GrantsKey).GetProperty(McpSchemaInspector.AnyOf).EnumerateArray()
             .First(branch => McpSchemaInspector.HasType(branch, McpSchemaInspector.Integer));
-        await Assert.That(numbers.GetProperty(Minimum).GetInt64()).IsEqualTo(long.MinValue);
-        await Assert.That(numbers.GetProperty(Maximum).GetInt64()).IsEqualTo(long.MaxValue);
+        await Assert.That(numbers.GetProperty(McpSchemaInspector.Minimum).GetInt64()).IsEqualTo(long.MinValue);
+        await Assert.That(numbers.GetProperty(McpSchemaInspector.Maximum).GetInt64()).IsEqualTo(long.MaxValue);
     }
 
     /// <summary>The real canonical parser accepts numeric strings, casing, whitespace, combinations and flags.</summary>
@@ -73,6 +71,45 @@ internal sealed class McpSchemaEnumTests
         await Assert.That(McpSchemaInspector.HasType(metric, McpSchemaInspector.Integer)).IsTrue();
         await Assert.That(McpSchemaInspector.HasType(output.GetProperty(GrantsKey), McpSchemaInspector.String)).IsTrue();
         await Assert.That(McpSchemaInspector.HasType(output.GetProperty(OptionalKey), McpSchemaInspector.Null)).IsTrue();
+    }
+
+    [Test]
+    public async Task SearchTextMatchModeIsAnOptionalTypedEnumInTheActualInputSchema()
+    {
+        const string property = "textMatchMode";
+        if (!McpOperationCatalog.TryGetTool(McpCatalogExpectations.SearchExecute, out var descriptor))
+        {
+            throw new InvalidOperationException(McpCatalogExpectations.SearchExecute);
+        }
+        var request = McpSchemaInspector.DefinedRequest(descriptor!.CreateTool().InputSchema);
+        var field = request.GetProperty(McpSchemaInspector.Properties).GetProperty(property);
+        var branches = field.GetProperty(McpSchemaInspector.AnyOf).EnumerateArray().ToArray();
+        await Assert.That(branches.Length).IsEqualTo(2);
+        await Assert.That(branches.Select(branch => branch.GetProperty(McpSchemaInspector.Type).GetString()!)
+            .ToHashSet(StringComparer.Ordinal).SetEquals([McpSchemaInspector.String, McpSchemaInspector.Integer])).IsTrue();
+        var strings = branches.Single(branch => branch.GetProperty(McpSchemaInspector.Type).GetString() == McpSchemaInspector.String);
+        await Assert.That(strings.GetProperty(McpSchemaInspector.Examples).EnumerateArray().Select(item => item.GetString()!))
+            .IsEquivalentTo(new[] { "Any", "All" });
+        var numbers = branches.Single(branch => branch.GetProperty(McpSchemaInspector.Type).GetString() == McpSchemaInspector.Integer);
+        await Assert.That(numbers.GetProperty(McpSchemaInspector.Minimum).GetInt32()).IsEqualTo(int.MinValue);
+        await Assert.That(numbers.GetProperty(McpSchemaInspector.Maximum).GetInt32()).IsEqualTo(int.MaxValue);
+        await Assert.That(field.GetProperty(McpSchemaInspector.Default).GetString()).IsEqualTo("Any");
+        await Assert.That(request.GetProperty(McpSchemaInspector.Required).EnumerateArray().Select(item => item.GetString()!)
+            .ToHashSet(StringComparer.Ordinal).SetEquals(["partition", "collection"])).IsTrue();
+        var output = McpSchemaFactory.CreateOutput(typeof(TextMatchMode), false).GetProperty(McpSchemaInspector.Defs)
+            .GetProperty(McpSchemaInspector.Result);
+        var names = output.GetProperty(McpSchemaInspector.AnyOf).EnumerateArray()
+            .Single(branch => branch.TryGetProperty(McpSchemaInspector.Enum, out _));
+        await Assert.That(names.GetProperty(McpSchemaInspector.Enum).EnumerateArray().Select(item => item.GetString()!))
+            .IsEquivalentTo(new[] { "Any", "All" });
+        var any = new SearchRequest(McpCanonicalTestData.Partition, McpCanonicalTestData.Resource, "/text", "alpha beta");
+        using var json = JsonDocument.Parse(JsonDefaults.Serialize(any));
+        await Assert.That(json.RootElement.TryGetProperty(property, out _)).IsFalse();
+        await Assert.That(JsonDefaults.Deserialize<SearchRequest>(JsonDefaults.Serialize(any)).TextMatchMode)
+            .IsEqualTo(TextMatchMode.Any);
+        var all = any with { TextMatchMode = TextMatchMode.All };
+        await Assert.That(JsonDefaults.Deserialize<SearchRequest>(JsonDefaults.Serialize(all)).TextMatchMode)
+            .IsEqualTo(TextMatchMode.All);
     }
 
     private static DistanceMetric Parse(string value) =>

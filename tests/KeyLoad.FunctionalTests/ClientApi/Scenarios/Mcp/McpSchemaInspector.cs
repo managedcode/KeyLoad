@@ -15,6 +15,8 @@ internal static class McpSchemaInspector
     internal const string Required = "required";
     internal const string Default = "default";
     internal const string Examples = "examples";
+    internal const string Minimum = "minimum";
+    internal const string Maximum = "maximum";
     internal const string Ref = "$ref";
     internal const string Kind = "kind";
     internal const string Const = "const";

@@ -5,6 +5,7 @@ namespace KeyLoad.Query.Search;
 internal static class SearchRequestValidation
 {
     private const string InvalidSearch = "The search budgets or branch weights are invalid.";
+    private const string InvalidTextMatchMode = "The text match mode is invalid.";
     private const string InvalidText = "A bounded text query and field are required.";
     private const string InvalidVector = "A finite vector and a matching typed vector space are required.";
     private const int MaximumVectorDimension = 4_096;
@@ -19,6 +20,10 @@ internal static class SearchRequestValidation
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidSearch);
         }
+        if (!Enum.IsDefined(request.TextMatchMode))
+        {
+            throw Errors.Fail(ErrorCode.Validation, InvalidTextMatchMode);
+        }
         ValidateText(request, execution.MaximumSearchTextBytes);
         if (request.TextIndex is { } selected && (selected.Generation < 1 || selected.Consumer is null
             || selected.Consumer.Partition != request.Partition || string.IsNullOrWhiteSpace(selected.Consumer.Name)
@@ -31,7 +36,8 @@ internal static class SearchRequestValidation
 
     private static void ValidateText(SearchRequest request, int maximumTextBytes)
     {
-        if (request.Text is { } text && (request.TextField is null || Encoding.UTF8.GetByteCount(text) > maximumTextBytes))
+        if (request.TextMatchMode == TextMatchMode.All && request.Text is null
+            || request.Text is { } text && (request.TextField is null || Encoding.UTF8.GetByteCount(text) > maximumTextBytes))
         {
             throw Errors.Fail(ErrorCode.Validation, InvalidText);
         }

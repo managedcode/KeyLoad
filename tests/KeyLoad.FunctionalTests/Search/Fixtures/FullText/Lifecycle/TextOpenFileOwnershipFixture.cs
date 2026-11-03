@@ -21,7 +21,9 @@ internal static class TextOpenFileOwnershipFixture
         var heldPath = Path.Combine(execution, "held-original.bin");
         var healthyPath = Path.Combine(execution, "healthy-continuation.bin");
         var original = UnitTextOptions.Execution();
-        var initial = new TextFileStreamProvider(root, leaf, database.Store.Identity.NodeId, original);
+        var initialResources = new TextResourceOwnership(original);
+        initialResources.RegisterRoot(root, _ => TextRootFiles.VerifyReceipt(root, database.Store.Identity.NodeId, original));
+        var initial = new TextFileStreamProvider(root, leaf, database.Store.Identity.NodeId, original, initialResources);
         using (initial.CreateFileStream(heldPath, FileMode.CreateNew, FileAccess.Write, FileShare.None))
         {
         }

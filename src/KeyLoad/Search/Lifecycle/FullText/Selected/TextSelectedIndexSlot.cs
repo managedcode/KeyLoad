@@ -40,7 +40,7 @@ internal sealed class TextSelectedIndexSlot(string root, string leaf, Guid node,
             try
             {
                 index ??= RuntimeTextIndex.Open(Path.Combine(root, leaf, TextProtocol.RuntimeDirectoryCore),
-                    new TextFileStreamProvider(root, leaf, node, options, resources, allowReadOnlyInventory: true), options, WriteAheadLogMode.Sync);
+                    new TextFileStreamProvider(root, leaf, node, options, resources ?? throw TextErrors.Ownership(), allowReadOnlyInventory: true), options, WriteAheadLogMode.Sync);
                 index.IsReadOnly = true;
             }
             catch (Exception error) { failure = error; throw; }

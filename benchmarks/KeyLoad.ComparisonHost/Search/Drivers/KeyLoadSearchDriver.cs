@@ -8,8 +8,7 @@ namespace KeyLoad.ComparisonHost.Search;
 /// <summary>
 /// KeyLoad through its SDK: documents with a <c>text</c> field are created with <see cref="PutDocument"/> (a batch is one
 /// commit); <c>WaitForIndexAsync</c> publishes the ZoneTree.FullTextSearch lexical generation at the highest acknowledged
-/// commit, and <c>SearchAsync</c> runs the text branch with KeyLoad's BM25 ranking. KeyLoad text queries have no AND
-/// operator: any document containing at least one query term is a candidate, ranked by BM25.
+/// commit, and <c>SearchAsync</c> requires every query term before KeyLoad's BM25 ranking, matching the shared scenario.
 /// </summary>
 internal sealed class KeyLoadSearchDriver(BenchmarkConnection connection) : ISearchDriver
 {
@@ -43,7 +42,8 @@ internal sealed class KeyLoadSearchDriver(BenchmarkConnection connection) : ISea
 
     public async Task<IReadOnlyList<string>> SearchAsync(IReadOnlyList<string> terms, int limit, CancellationToken token)
     {
-        var request = new SearchRequest(database.Partition, Collection, TextField, string.Join(Separator, terms), Limit: limit);
+        var request = new SearchRequest(database.Partition, Collection, TextField, string.Join(Separator, terms), Limit: limit,
+            TextMatchMode: TextMatchMode.All);
         var found = KeyLoadDatabase.Require(await database.Client.SearchAsync(request, token), nameof(SearchAsync));
         return [.. found.Select(item => item.Document.Reference.Id)];
     }

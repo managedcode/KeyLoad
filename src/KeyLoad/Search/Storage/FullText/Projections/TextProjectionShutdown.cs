@@ -35,7 +35,7 @@ internal sealed class TextProjectionShutdown(string root, Guid sourceNodeId, Tex
         }
         var failures = new List<Exception>();
         var canDelete = true;
-        if (generation.Published && generation.CurrentIndex is not null)
+        if (generation.Published)
         {
             var beforeRefresh = failures.Count;
             ServerFailureObserver.Observe(() => TextSettlement.Refresh(root, generation,

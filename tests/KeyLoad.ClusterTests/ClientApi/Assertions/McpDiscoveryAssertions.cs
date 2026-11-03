@@ -66,6 +66,26 @@ internal static class McpDiscoveryAssertions
             await Assert.That(fields.ToHashSet(StringComparer.Ordinal).SetEquals(expected.BodyPropertyFields)).IsTrue();
         }
         await Assert.That(body.GetProperty(McpDiscoveryProtocol.Properties).EnumerateObject().Any()).IsTrue();
+        if (expected.Name == McpCallerTools.SearchExecute)
+        {
+            await TextMatchModeAsync(body.GetProperty(McpDiscoveryProtocol.Properties).GetProperty(McpDiscoveryProtocol.TextMatchMode));
+        }
+    }
+
+    private static async Task TextMatchModeAsync(JsonElement schema)
+    {
+        var branches = schema.GetProperty(McpDiscoveryProtocol.AnyOf).EnumerateArray().ToArray();
+        await Assert.That(branches.Length).IsEqualTo(2);
+        await Assert.That(branches.Select(branch => branch.GetProperty(McpDiscoveryProtocol.Type).GetString()!)
+            .ToHashSet(StringComparer.Ordinal).SetEquals([McpDiscoveryProtocol.String, McpDiscoveryProtocol.Integer])).IsTrue();
+        var strings = branches.Single(branch => branch.GetProperty(McpDiscoveryProtocol.Type).GetString() == McpDiscoveryProtocol.String);
+        var examples = strings.GetProperty(McpDiscoveryProtocol.Examples).EnumerateArray().Select(item => item.GetString()!).ToArray();
+        await Assert.That(examples.Length).IsEqualTo(2);
+        await Assert.That(examples.ToHashSet(StringComparer.Ordinal).SetEquals(["Any", "All"])).IsTrue();
+        var numbers = branches.Single(branch => branch.GetProperty(McpDiscoveryProtocol.Type).GetString() == McpDiscoveryProtocol.Integer);
+        await Assert.That(numbers.GetProperty(McpDiscoveryProtocol.Minimum).GetInt32()).IsEqualTo(int.MinValue);
+        await Assert.That(numbers.GetProperty(McpDiscoveryProtocol.Maximum).GetInt32()).IsEqualTo(int.MaxValue);
+        await Assert.That(schema.GetProperty(McpDiscoveryProtocol.Default).GetString()).IsEqualTo("Any");
     }
 
     private static async Task VerifyOutputAsync(JsonElement schema, ImmutableArray<string> resultFields)

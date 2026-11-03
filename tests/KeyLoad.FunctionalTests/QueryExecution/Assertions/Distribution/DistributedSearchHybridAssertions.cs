@@ -8,6 +8,19 @@ internal static class DistributedSearchHybridAssertions
     private const double IndependentTextWeight = 2;
     private const double IndependentVectorWeight = 1;
 
+    internal static async Task RequireAllAsync(QueryFixture fixture, CancellationToken token)
+    {
+        RankedDocument[] expected =
+        [
+            new(new(fixture.ExpectedSourceReference, QueryFixture.First,
+                QueryDataset.SourceProjected, true, [QueryFixture.Secret]), IndependentVectorWeight / FirstDenominator),
+            new(new(fixture.ExpectedDestinationReference, QueryFixture.First,
+                QueryFixture.ProjectedJson, true, [QueryFixture.Secret]), IndependentVectorWeight / SecondDenominator)
+        ];
+        var actual = DistributedSearchHybridFlow.Execute(fixture, token, TextMatchMode.All);
+        await Assert.That(JsonDefaults.Serialize(actual).AsSpan().SequenceEqual(JsonDefaults.Serialize(expected))).IsTrue();
+    }
+
     internal static async Task RequireAsync(QueryFixture fixture, CancellationToken token)
     {
         RankedDocument[] expected =

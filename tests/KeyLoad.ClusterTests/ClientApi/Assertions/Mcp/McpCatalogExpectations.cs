@@ -99,7 +99,11 @@ internal static class McpCatalogExpectations
         Read(WaitForIndexName, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection,
             TextFieldProperty, MinimumTokenProperty],
             [AppliedTokenProperty, SchemaVersionProperty, PolicyEpochProperty]),
-        Read(McpCallerTools.SearchExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection]),
+        Read(McpCallerTools.SearchExecute, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection]) with
+        {
+            BodyPropertyFields = ["partition", "collection", "textField", "text", "vectorField", "vector", "space",
+                "limit", "textWeight", "vectorWeight", "fusionConstant", "allowedIds", "explain", "textIndex", McpDiscoveryProtocol.TextMatchMode]
+        },
         Read(McpCallerTools.SearchGraph, [McpDiscoveryProtocol.Search]),
         Read(WaitForAnnIndexProtocol.Tool, [McpDiscoveryProtocol.Partition, McpDiscoveryProtocol.Collection,
             "vectorField", "space", McpDiscoveryProtocol.Consumer, AnnIndexGenerationProperty, MinimumTokenProperty],

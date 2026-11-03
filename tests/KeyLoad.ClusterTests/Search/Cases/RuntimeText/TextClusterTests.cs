@@ -1,6 +1,7 @@
 using System.Net;
 using KeyLoad.Client;
 using KeyLoad.ClusterTests.ClientApi;
+using KeyLoad.ClusterTests.QueryExecution;
 using ManagedCode.Communication;
 
 namespace KeyLoad.ClusterTests.Search;
@@ -47,6 +48,14 @@ internal sealed class TextClusterTests(ClusterFixture fixture)
             [(TextClusterScenario.FirstId, FirstHybridScore)], deadline.Token);
         await VerifyRanksAsync(sdk, mcp, scenario.Hybrid("plain", limit: 1),
             [(TextClusterScenario.SecondId, SecondCrossBranchScore)], deadline.Token);
+        await VerifyRanksAsync(sdk, mcp, scenario.Text("needle plain", limit: 1) with
+        {
+            TextMatchMode = TextMatchMode.All
+        }, [(TextClusterScenario.SecondId, FirstSingleScore)], deadline.Token);
+        await VerifySqlAllAsync(sdk, mcp, scenario.Text("needle other") with
+        {
+            TextMatchMode = TextMatchMode.All
+        }, deadline.Token);
     }
 
     [Test]
@@ -148,6 +157,14 @@ internal sealed class TextClusterTests(ClusterFixture fixture)
         }
         await Assert.That(JsonDefaults.Serialize(actual).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(official.Value))).IsTrue();
+    }
+
+    private static async Task VerifySqlAllAsync(KeyLoadClient sdk, McpOfficialClient mcp,
+        SearchRequest request, CancellationToken cancellationToken)
+    {
+        var sql = SqlClusterProtocol.Call(request.Partition, McpCallerTools.SearchExecute, request);
+        await Assert.That(await SqlClusterProtocol.SdkAsync<RankedDocument[]>(sdk, sql, cancellationToken)).IsEmpty();
+        await Assert.That(await SqlClusterProtocol.McpAsync<RankedDocument[]>(mcp, sql, cancellationToken)).IsEmpty();
     }
 
     private static async Task AssertProjectedAsync(DocumentResult document)

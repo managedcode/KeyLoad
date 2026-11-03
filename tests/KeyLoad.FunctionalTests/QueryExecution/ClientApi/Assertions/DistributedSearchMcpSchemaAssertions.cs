@@ -39,6 +39,7 @@ internal static class DistributedSearchMcpSchemaAssertions
         await ObjectAsync(search, DistributedSearchMcpProtocol.SearchFields,
             [DistributedSearchMcpProtocol.Partition, DistributedSearchMcpProtocol.Collection]);
         var searchFields = search.GetProperty(McpSchemaInspector.Properties);
+        await MatchModeAsync(searchFields.GetProperty(DistributedSearchMcpProtocol.TextMatchMode));
         await PartitionAsync(root, searchFields.GetProperty(DistributedSearchMcpProtocol.Partition));
         await PrimitiveAsync(root, searchFields.GetProperty(DistributedSearchMcpProtocol.Collection), McpSchemaInspector.String);
         foreach (var field in DistributedSearchMcpProtocol.NullableStrings)
@@ -58,6 +59,22 @@ internal static class DistributedSearchMcpSchemaAssertions
         var limit = Shape(root, searchFields.GetProperty(DistributedSearchMcpProtocol.Limit));
         await PrimitiveAsync(root, limit, McpSchemaInspector.Integer);
         await Assert.That(limit.GetProperty(McpSchemaInspector.Default).GetInt32()).IsEqualTo(DistributedSearchMcpProtocol.DefaultLimit);
+    }
+
+    private static async Task MatchModeAsync(JsonElement schema)
+    {
+        var branches = schema.GetProperty(McpSchemaInspector.AnyOf).EnumerateArray().ToArray();
+        await Assert.That(branches.Length).IsEqualTo(2);
+        await Assert.That(branches.Select(branch => branch.GetProperty(McpSchemaInspector.Type).GetString()!)
+            .ToHashSet(StringComparer.Ordinal).SetEquals([McpSchemaInspector.String, McpSchemaInspector.Integer])).IsTrue();
+        var strings = branches.Single(branch => branch.GetProperty(McpSchemaInspector.Type).GetString() == McpSchemaInspector.String);
+        var examples = strings.GetProperty(McpSchemaInspector.Examples).EnumerateArray().Select(item => item.GetString()!).ToArray();
+        await Assert.That(examples.Length).IsEqualTo(2);
+        await Assert.That(examples.ToHashSet(StringComparer.Ordinal).SetEquals(["Any", "All"])).IsTrue();
+        var numbers = branches.Single(branch => branch.GetProperty(McpSchemaInspector.Type).GetString() == McpSchemaInspector.Integer);
+        await Assert.That(numbers.GetProperty(McpSchemaInspector.Minimum).GetInt32()).IsEqualTo(int.MinValue);
+        await Assert.That(numbers.GetProperty(McpSchemaInspector.Maximum).GetInt32()).IsEqualTo(int.MaxValue);
+        await Assert.That(schema.GetProperty(McpSchemaInspector.Default).GetString()).IsEqualTo("Any");
     }
 
     private static async Task OutputAsync(JsonElement root)

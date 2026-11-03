@@ -25,8 +25,10 @@ internal sealed class TextMaintenanceTestRuntime : IAsyncDisposable
         services = registrations.BuildServiceProvider();
         try
         {
+            var options = services.GetRequiredService<ServerRuntimeOptions>();
+            var resources = new TextResourceOwnership(options.RuntimeText);
             Owner = new(database, directory, database.Store.Identity.NodeId,
-                services.GetRequiredService<ServerRuntimeOptions>(), phaseClock ?? database.EvaluationClock);
+                options, phaseClock ?? database.EvaluationClock, resources: resources);
         }
         catch (Exception primary)
         {

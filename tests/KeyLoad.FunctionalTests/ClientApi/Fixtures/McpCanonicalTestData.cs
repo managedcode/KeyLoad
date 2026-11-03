@@ -128,7 +128,8 @@ internal static class McpCanonicalTestData
         Read(WaitForAnnIndexProtocol.Tool, McpSearchRequestTestData.Wait()),
         Read(KeyLoad.FunctionalTests.Search.SearchMcpCatalogEntries.All.Single(entry =>
             entry.ReadKind == KeyLoad.Clustering.GrainReadKind.ApproximateSearch).Name, McpSearchRequestTestData.Search()),
-        Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource)),
+        Read(McpCatalogExpectations.SearchExecute, new SearchRequest(Partition, Resource, "/text", "alpha beta",
+            TextMatchMode: TextMatchMode.All)),
         Read(McpCatalogExpectations.SearchGraph, new GraphSearchRequest(new(Partition, Resource),
             Retriever: new(new(Resource, [Reference])))),
         Read(McpCatalogExpectations.SeriesRollup, new ReadSampleRollupRequest(Partition, Resource, Entity, DateTimeOffset.UnixEpoch, DateTimeOffset.UnixEpoch.AddMinutes(1))),

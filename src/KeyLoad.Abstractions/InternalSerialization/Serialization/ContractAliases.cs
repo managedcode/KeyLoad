@@ -145,6 +145,7 @@ internal static class ContractAliases
     internal const string ScanPage = "keyload.contract.scan-page";
     internal const string ScopeGrant = "keyload.contract.scope-grant";
     internal const string SearchRequest = "keyload.contract.search-request";
+    internal const string TextMatchMode = "keyload.contract.text-match-mode";
     internal const string SeekSubscriptionRequest = "keyload.contract.seek-subscription-request";
     internal const string SelectQuery = "keyload.contract.select-query";
     internal const string Selection = "keyload.contract.selection";

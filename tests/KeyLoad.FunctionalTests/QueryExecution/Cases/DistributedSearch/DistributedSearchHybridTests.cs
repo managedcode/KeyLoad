@@ -14,10 +14,12 @@ internal sealed class DistributedSearchHybridTests
             var sourcePosition = fixture.Source.Store.Position;
             var destinationPosition = fixture.Destination.Store.Position;
             await DistributedSearchHybridAssertions.RequireAsync(fixture, token);
+            await DistributedSearchHybridAssertions.RequireAllAsync(fixture, token);
             await QueryFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
             await fixture.Source.ReopenAsync();
             await fixture.Destination.ReopenAsync();
             await DistributedSearchHybridAssertions.RequireAsync(fixture, token);
+            await DistributedSearchHybridAssertions.RequireAllAsync(fixture, token);
             await QueryFixtureAssertions.StateAsync(fixture, source, destination, sourcePosition, destinationPosition);
         });
 }

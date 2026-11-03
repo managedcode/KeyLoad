@@ -21,8 +21,10 @@ internal sealed class TextFileStreamBufferPolicyTests
         var root = Directory.GetParent(generation)!.FullName;
         var execution = Path.Combine(generation, TextProtocol.RuntimeDirectoryCore);
         var options = UnitTextOptions.Execution(new TextExecutionOptions { FileBufferBytes = configuredBuffer });
+        var resources = new TextResourceOwnership(options);
+        resources.RegisterRoot(root, _ => TextRootFiles.VerifyReceipt(root, database.Store.Identity.NodeId, options));
         var provider = new TextFileStreamProvider(root, Path.GetFileName(generation),
-            database.Store.Identity.NodeId, options);
+            database.Store.Identity.NodeId, options, resources);
         var path = Path.Combine(execution, "buffer-policy.bin");
 
         var unflushedLength = WriteAndObserveUnflushedLength(provider, path, requestedBuffer);
@@ -42,7 +44,7 @@ internal sealed class TextFileStreamBufferPolicyTests
         var options = Options.Create(new TextExecutionOptions { FileBufferBytes = configuredBuffer });
 
         var failure = Assert.ThrowsExactly<OptionsValidationException>(() =>
-            _ = new TextFileStreamProvider(database.Directory, "unused-generation", database.Store.Identity.NodeId, options));
+            _ = new TextFileStreamProvider(database.Directory, "unused-generation", database.Store.Identity.NodeId, options, new TextResourceOwnership(options)));
 
         await Assert.That(failure.OptionsType).IsEqualTo(typeof(TextExecutionOptions));
         await Assert.That(Directory.EnumerateFiles(database.Directory, "*", SearchOption.AllDirectories).Count())

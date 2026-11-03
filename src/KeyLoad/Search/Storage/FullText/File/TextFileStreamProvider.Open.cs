@@ -32,6 +32,9 @@ internal sealed partial class TextFileStreamProvider
     }
 
     public void MoveFile(string sourcePath, string destinationPath)
+        => resources.MutatePhysical(() => MoveOwned(sourcePath, destinationPath));
+
+    private void MoveOwned(string sourcePath, string destinationPath)
     {
         var source = pathAccess.Resolve(sourcePath);
         var destination = pathAccess.Resolve(destinationPath);
@@ -41,15 +44,8 @@ internal sealed partial class TextFileStreamProvider
             pathAccess.Require(destination, directory: false);
             throw new IOException(OccupiedMoveDestination);
         }
-        pathAccess.PrepareReplaceTarget(destination);
-        if (resources is null)
-        {
-            inner.MoveFile(source, destination);
-        }
-        else
-        {
-            resources.ReplaceOwnedFiles(source, destination, null, () => inner.MoveFile(source, destination));
-        }
+        pathAccess.PrepareReplaceTargets(destination);
+        resources.ReplaceOwnedFiles(source, destination, null, () => inner.MoveFile(source, destination));
     }
 
     private IFileStream OpenOwned(string full, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options)

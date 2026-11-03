@@ -36,14 +36,22 @@ internal static class TextSettlement
 
     internal static void Refresh(string root, TextGeneration generation, ReadExecutionBudget? budget, Action<TextFaultStage>? faultObserver, TextProjectionPhysicalGate physicalGate, IOptions<TextExecutionOptions> executionOptions)
     {
+        var sealedRead = generation.IsSealedRead;
         var files = physicalGate.Run(() => generation.CloseAndCapture(budget));
         try
         {
             physicalGate.Run(() => CheckForSettlement(generation, budget, executionOptions: executionOptions));
-            physicalGate.Run(() => WriteManifest(root, generation, files, budget, executionOptions: executionOptions));
-            faultObserver?.Invoke(TextFaultStage.InventoryFlushed);
-            physicalGate.Run(() => TextFiles.PublishManifest(root, generation.Leaf, generation.Resources));
-            faultObserver?.Invoke(TextFaultStage.ManifestPublished);
+            if (sealedRead)
+            {
+                physicalGate.Run(() => generation.VerifyPublished(generation.DeferredBudgetFailure is null ? budget : null));
+            }
+            else
+            {
+                physicalGate.Run(() => WriteManifest(root, generation, files, budget, executionOptions: executionOptions));
+                faultObserver?.Invoke(TextFaultStage.InventoryFlushed);
+                physicalGate.Run(() => TextFiles.PublishManifest(root, generation.Leaf, generation.Resources));
+                faultObserver?.Invoke(TextFaultStage.ManifestPublished);
+            }
         }
         catch (Exception cleanupFailure) when (generation.DeferredBudgetFailure is { } primary)
         {

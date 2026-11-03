@@ -29906,9 +29906,9 @@
       "methodName": "GloballyRankedCompleteModalitiesPreserveIndependentWeightedRrfDocumentsAcrossBothColdOwners",
       "instanceName": "GloballyRankedCompleteModalitiesPreserveIndependentWeightedRrfDocumentsAcrossBothColdOwners",
       "sourcePath": "tests/KeyLoad.FunctionalTests/QueryExecution/Cases/DistributedSearch/DistributedSearchHybridTests.cs",
-      "sourceSha256": "b259229d0cd9c515f4b493fa68ab5f9e3550d277e3a86e4997c577121b1190f5",
+      "sourceSha256": "2a0dee945a010928b0394d990f891e255d7ee7a7db28c8b49846d19b85575fdb",
       "lineNumber": 6,
-      "endLineNumber": 22,
+      "endLineNumber": 24,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -44464,9 +44464,9 @@
       "methodName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests",
       "instanceName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests(1, null, 1)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamBufferPolicyTests.cs",
-      "sourceSha256": "b67e08e74a479788fbdbac370580bab99e4ecbc9e6d1ed65220845a94d256787",
+      "sourceSha256": "8f1b47f99b1a50675072dd6964ba1d13942b1d13a2a8cea27a3085fb05481222",
       "lineNumber": 9,
-      "endLineNumber": 33,
+      "endLineNumber": 35,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -44482,9 +44482,9 @@
       "methodName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests",
       "instanceName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests(4, 0, 1)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamBufferPolicyTests.cs",
-      "sourceSha256": "b67e08e74a479788fbdbac370580bab99e4ecbc9e6d1ed65220845a94d256787",
+      "sourceSha256": "8f1b47f99b1a50675072dd6964ba1d13942b1d13a2a8cea27a3085fb05481222",
       "lineNumber": 9,
-      "endLineNumber": 33,
+      "endLineNumber": 35,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -44500,9 +44500,9 @@
       "methodName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests",
       "instanceName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests(4, 1, 1)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamBufferPolicyTests.cs",
-      "sourceSha256": "b67e08e74a479788fbdbac370580bab99e4ecbc9e6d1ed65220845a94d256787",
+      "sourceSha256": "8f1b47f99b1a50675072dd6964ba1d13942b1d13a2a8cea27a3085fb05481222",
       "lineNumber": 9,
-      "endLineNumber": 33,
+      "endLineNumber": 35,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -44518,9 +44518,9 @@
       "methodName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests",
       "instanceName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests(4, 4096, 0)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamBufferPolicyTests.cs",
-      "sourceSha256": "b67e08e74a479788fbdbac370580bab99e4ecbc9e6d1ed65220845a94d256787",
+      "sourceSha256": "8f1b47f99b1a50675072dd6964ba1d13942b1d13a2a8cea27a3085fb05481222",
       "lineNumber": 9,
-      "endLineNumber": 33,
+      "endLineNumber": 35,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -44536,9 +44536,9 @@
       "methodName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests",
       "instanceName": "ConfiguredCapPreservesUnbufferedAndSmallerCallerRequests(4, null, 0)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamBufferPolicyTests.cs",
-      "sourceSha256": "b67e08e74a479788fbdbac370580bab99e4ecbc9e6d1ed65220845a94d256787",
+      "sourceSha256": "8f1b47f99b1a50675072dd6964ba1d13942b1d13a2a8cea27a3085fb05481222",
       "lineNumber": 9,
-      "endLineNumber": 33,
+      "endLineNumber": 35,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -44554,9 +44554,9 @@
       "methodName": "InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership",
       "instanceName": "InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership(0)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamBufferPolicyTests.cs",
-      "sourceSha256": "b67e08e74a479788fbdbac370580bab99e4ecbc9e6d1ed65220845a94d256787",
-      "lineNumber": 35,
-      "endLineNumber": 50,
+      "sourceSha256": "8f1b47f99b1a50675072dd6964ba1d13942b1d13a2a8cea27a3085fb05481222",
+      "lineNumber": 37,
+      "endLineNumber": 52,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -44572,9 +44572,9 @@
       "methodName": "InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership",
       "instanceName": "InvalidConfiguredBufferIsRejectedBeforeAnyFileOwnership(4097)",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/FileIo/TextFileStreamBufferPolicyTests.cs",
-      "sourceSha256": "b67e08e74a479788fbdbac370580bab99e4ecbc9e6d1ed65220845a94d256787",
-      "lineNumber": 35,
-      "endLineNumber": 50,
+      "sourceSha256": "8f1b47f99b1a50675072dd6964ba1d13942b1d13a2a8cea27a3085fb05481222",
+      "lineNumber": 37,
+      "endLineNumber": 52,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -45001,6 +45001,27 @@
       ]
     },
     {
+      "className": "KeyLoad.FunctionalTests.Search.TextMatchModeWholeFlowTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextMatchModeWholeFlowTests",
+      "methodName": "AllTermsExcludeHigherRankedPartialRowsBeforeLimitAndPreservePrivacyThroughColdRead",
+      "instanceName": "AllTermsExcludeHigherRankedPartialRowsBeforeLimitAndPreservePrivacyThroughColdRead",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/Ranking/TextMatchModeWholeFlowTests.cs",
+      "sourceSha256": "9a712a8644c9a87bb52d72f2c398d289f10ffb6c0299d025570f16f5a1ab2e46",
+      "lineNumber": 19,
+      "endLineNumber": 51,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-SEARCH-MATCH-001",
+        "REQ-SR-001",
+        "REQ-SR-004"
+      ],
+      "acceptance": [
+        "AC-SEARCH-MATCH-001",
+        "AC-MP-004"
+      ]
+    },
+    {
       "className": "KeyLoad.FunctionalTests.Search.TextOnlineFileOwnershipTests",
       "reportClassName": "KeyLoad.FunctionalTests.Search.TextOnlineFileOwnershipTests",
       "methodName": "GenuineUnlinkedHandleRetainsDiskAdmissionUntilJoinedCloseThenFullHealthyWriteAndRead",
@@ -45284,9 +45305,9 @@
       "methodName": "PhysicalCensusJoinsNativeDeletionBeforeHealthyOwnedFilesAndCanonicalSearch",
       "instanceName": "PhysicalCensusJoinsNativeDeletionBeforeHealthyOwnedFilesAndCanonicalSearch",
       "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/Maintenance/TextPhysicalCensusTests.cs",
-      "sourceSha256": "731ad69055c553b582c388c5a2f295f5b47964e5f8c5e5d809e11c6f7a891cc3",
-      "lineNumber": 14,
-      "endLineNumber": 55,
+      "sourceSha256": "d1e42a11ea0de2d63d64631ee34a0ac889b2d6002199bbe02ede17d4f44db92e",
+      "lineNumber": 15,
+      "endLineNumber": 63,
       "classification": "functional",
       "exclusionReason": null,
       "requirements": [
@@ -45964,6 +45985,46 @@
         "AC-FTS-AUDIT-002",
         "AC-FTS-AUDIT-003",
         "AC-FTS-AUDIT-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Search.TextPublicationPersistenceTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextPublicationPersistenceTests",
+      "methodName": "FailedNativeMergeRefusesPublicationBeforeHealthySearchAndColdPostings",
+      "instanceName": "FailedNativeMergeRefusesPublicationBeforeHealthySearchAndColdPostings",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/Projection/TextPublicationPersistenceTests.cs",
+      "sourceSha256": "eddc83920de5023ef86d229b7fa9363d4baa8b9932807aeafa370fabb5702287",
+      "lineNumber": 9,
+      "endLineNumber": 28,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-FTS-003",
+        "REQ-FTS-004"
+      ],
+      "acceptance": [
+        "AC-FTS-003",
+        "AC-FTS-004"
+      ]
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.Search.TextReadOnlySettlementTests",
+      "reportClassName": "KeyLoad.FunctionalTests.Search.TextReadOnlySettlementTests",
+      "methodName": "PublishedReadOnlyClosePreservesManifestAndRefusesTamperedRetryBeforeColdSearch",
+      "instanceName": "PublishedReadOnlyClosePreservesManifestAndRefusesTamperedRetryBeforeColdSearch",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/Search/Cases/RuntimeText/Projection/TextReadOnlySettlementTests.cs",
+      "sourceSha256": "85853a0571201d79a3c83db939deb8d6433b1569ca6fb7081d7aab35dbe9650e",
+      "lineNumber": 5,
+      "endLineNumber": 10,
+      "classification": "functional",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-FTS-003",
+        "REQ-FTS-004"
+      ],
+      "acceptance": [
+        "AC-FTS-003",
+        "AC-FTS-004"
       ]
     },
     {
@@ -53220,9 +53281,9 @@
       "methodName": "AcMcp003CanonicalParserStillAcceptsAllExistingEnumInputForms",
       "instanceName": "AcMcp003CanonicalParserStillAcceptsAllExistingEnumInputForms",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ClientApi/Cases/McpSchema/McpSchemaEnumTests.cs",
-      "sourceSha256": "e75bf8a73c69b5ecc24b8f84f4047854ccb9165ab8ebd41d6d2cfe4424e44729",
-      "lineNumber": 43,
-      "endLineNumber": 61,
+      "sourceSha256": "10513b2589ad14abe7793dec980181bcf868a7a0af4e1663a9286860ab7df43e",
+      "lineNumber": 41,
+      "endLineNumber": 59,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -53241,9 +53302,9 @@
       "methodName": "AcMcp003InputSchemasIncludeIntegerAndStringForNullableAndFlagsEnums",
       "instanceName": "AcMcp003InputSchemasIncludeIntegerAndStringForNullableAndFlagsEnums",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ClientApi/Cases/McpSchema/McpSchemaEnumTests.cs",
-      "sourceSha256": "e75bf8a73c69b5ecc24b8f84f4047854ccb9165ab8ebd41d6d2cfe4424e44729",
-      "lineNumber": 24,
-      "endLineNumber": 40,
+      "sourceSha256": "10513b2589ad14abe7793dec980181bcf868a7a0af4e1663a9286860ab7df43e",
+      "lineNumber": 22,
+      "endLineNumber": 38,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -53262,9 +53323,9 @@
       "methodName": "AcMcp007OutputSchemasRetainNamesNumericFormsAndNull",
       "instanceName": "AcMcp007OutputSchemasRetainNamesNumericFormsAndNull",
       "sourcePath": "tests/KeyLoad.FunctionalTests/ClientApi/Cases/McpSchema/McpSchemaEnumTests.cs",
-      "sourceSha256": "e75bf8a73c69b5ecc24b8f84f4047854ccb9165ab8ebd41d6d2cfe4424e44729",
-      "lineNumber": 64,
-      "endLineNumber": 76,
+      "sourceSha256": "10513b2589ad14abe7793dec980181bcf868a7a0af4e1663a9286860ab7df43e",
+      "lineNumber": 62,
+      "endLineNumber": 74,
       "classification": "required-non-contributor",
       "exclusionReason": null,
       "requirements": [
@@ -53276,6 +53337,26 @@
       ],
       "nonContributorReason": "required-control",
       "reviewBasis": "Retained required-control classification. This exact execution case remains mandatory in the ordinary Unit suite; its source location/hash and functional-selector separation are checked against original compiled discovery. No whole-operation contribution is claimed for this retained control."
+    },
+    {
+      "className": "KeyLoad.FunctionalTests.ClientApi.McpSchemaEnumTests",
+      "reportClassName": "KeyLoad.FunctionalTests.ClientApi.McpSchemaEnumTests",
+      "methodName": "SearchTextMatchModeIsAnOptionalTypedEnumInTheActualInputSchema",
+      "instanceName": "SearchTextMatchModeIsAnOptionalTypedEnumInTheActualInputSchema",
+      "sourcePath": "tests/KeyLoad.FunctionalTests/ClientApi/Cases/McpSchema/McpSchemaEnumTests.cs",
+      "sourceSha256": "10513b2589ad14abe7793dec980181bcf868a7a0af4e1663a9286860ab7df43e",
+      "lineNumber": 76,
+      "endLineNumber": 113,
+      "classification": "required-non-contributor",
+      "exclusionReason": null,
+      "requirements": [
+        "REQ-CLIENT-006"
+      ],
+      "acceptance": [
+        "AC-MCP-003"
+      ],
+      "nonContributorReason": "required-control",
+      "reviewBasis": "The actual generated MCP input schema and public JSON enum default round-trip remain a mandatory contract control. This case does not execute a database operation or independently prove SDK/MCP transport behavior."
     },
     {
       "className": "KeyLoad.FunctionalTests.ClientApi.McpSchemaMetadataTests",
@@ -62160,7 +62241,7 @@
     },
     {
       "groupId": "unit-functional-02",
-      "selector": "/KeyLoad.FunctionalTests/*/(AdminQ*)|(AggregateReplayWorkerP*)|(Analytica*)|(AnalyticsE*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AnnWaitG*)|(AnnWaitO*)|(As*)|(AtomicPartitionRosterRes*)|(BackupI*)|(Bm25CorpusO*)|(Bm25Po*)|(Bounda*)|(Bu*)|(CapturedReadSe*)|(Cha*)|(CommandObservedR*)|(ConnectionO*)|(ConnectionSy*)|(CoreM*)|(CqrsL*)|(CredentialS*)|(DatabaseCompositionV*)|(DistributedSearchH*)|(DocumentC*)|(DocumentPu*)|(DocumentSe*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventAppendS*)|(EventFeedPubSubF*)|(EventFeedPubSubS*)|(EventProjectionR*)|(FeedD*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(GrainFailureD*)|(GrainR*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphSearchL*)|(GraphShortestPathB*)|(GraphShortestPathS*)|(GraphTraversalP*)|(GraphTraversalR*)|(GraphTraversalT*)|(Ins*)|(Is*)|(JournalPrincipalA*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpAg*)|(McpGatewayG*)|(McpTransportG*)|(McpV*)|(Mes*)|(Metad*)|(Mix*)|(OperationO*)|(OutboxD*)|(PartitionQueryPublicA*)|(PartitionStorageA*)|(Pri*)|(ProjectionConc*)|(PublicE*)|(QueryAdapterV*)|(QueryRu*)|(QueueB*)|(QueueDeadlineW*)|(QueueRetr*)|(ReadCutB*)|(ReadCutCo*)|(RelationalA*)|(RemoteTransferRepairC*)|(RequestCqrsB*)|(RequestCqrsPu*)|(RequestD*)|(ResourceA*)|(ResourceIncarnationQ*)|(ResourceLifetimeC*)|(SagaTimeoutJ*)|(SampleAggregateI*)|(SampleChunkA*)|(SampleChunkCanonicalL*)|(SampleChunkCor*)|(SampleChunkEn*)|(SampleChunkExp*)|(SampleM*)|(SampleRetentionM*)|(SampleS*)|(SearchS*)|(Serie*)|(Sh*)|(SqlClientC*)|(SqlF*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlLex*)|(SqlModelViewA*)|(SqlOperationR*)|(SqlQ*)|(SqlTy*)|(Sta*)|(SubscriptionC*)|(SubscriptionO*)|(Suc*)|(TextBm25C*)|(TextCapturedP*)|(TextF*)|(TextProjectionD*)|(TextProjectionRes*)|(TextProjectionS*)|(TextWaitObserva*)|(TopicSqlT*)|(TransactionA*)|(TransactionR*)|(TypedQueueGraphP*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!AliasesAndFieldIdsRemainExact*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!OwnedSnapshotPreservesIndependentMetadataAndBusinessTime*)&(!ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AdminQ*)|(AggregateReplayWorkerP*)|(Analytica*)|(AnalyticsE*)|(AnnProjectionPinR*)|(AnnSeedA*)|(AnnSeedR*)|(AnnSeedV*)|(AnnWaitG*)|(AnnWaitO*)|(As*)|(AtomicPartitionRosterRes*)|(BackupI*)|(Bm25CorpusO*)|(Bm25Po*)|(Bounda*)|(Bu*)|(CapturedReadSe*)|(Cha*)|(CommandObservedR*)|(ConnectionO*)|(ConnectionSy*)|(CoreM*)|(CqrsL*)|(CredentialS*)|(DatabaseCompositionV*)|(DistributedSearchH*)|(DocumentC*)|(DocumentPu*)|(DocumentSe*)|(DueWorkD*)|(EqualityAccessPathS*)|(EventAppendS*)|(EventFeedPubSubF*)|(EventFeedPubSubS*)|(EventProjectionR*)|(FeedD*)|(FilteredSearchB*)|(GlobalBranchWindowMergeL*)|(GrainFailureD*)|(GrainR*)|(GraphIncomingM*)|(GraphIncomingP*)|(GraphIncomingS*)|(GraphSearchE*)|(GraphSearchL*)|(GraphShortestPathB*)|(GraphShortestPathS*)|(GraphTraversalP*)|(GraphTraversalR*)|(GraphTraversalT*)|(Ins*)|(Is*)|(JournalPrincipalA*)|(JsonTextA*)|(JsonTextQ*)|(KeyCodecC*)|(McpAg*)|(McpGatewayG*)|(McpTransportG*)|(McpV*)|(Mes*)|(Metad*)|(Mix*)|(OperationO*)|(OutboxD*)|(PartitionQueryPublicA*)|(PartitionStorageA*)|(Pri*)|(ProjectionConc*)|(PublicE*)|(QueryAdapterV*)|(QueryRu*)|(QueueB*)|(QueueDeadlineW*)|(QueueRetr*)|(ReadCutB*)|(ReadCutCo*)|(RelationalA*)|(RemoteTransferRepairC*)|(RequestCqrsB*)|(RequestCqrsPu*)|(RequestD*)|(ResourceA*)|(ResourceIncarnationQ*)|(ResourceLifetimeC*)|(SagaTimeoutJ*)|(SampleAggregateI*)|(SampleChunkA*)|(SampleChunkCanonicalL*)|(SampleChunkCor*)|(SampleChunkEn*)|(SampleChunkExp*)|(SampleM*)|(SampleRetentionM*)|(SampleS*)|(SearchS*)|(Serie*)|(Sh*)|(SqlClientC*)|(SqlF*)|(SqlGraphPathP*)|(SqlInnerJoinC*)|(SqlInnerJoinR*)|(SqlLex*)|(SqlModelViewA*)|(SqlOperationR*)|(SqlQ*)|(SqlTy*)|(Sta*)|(SubscriptionC*)|(SubscriptionO*)|(Suc*)|(TextBm25C*)|(TextCapturedP*)|(TextF*)|(TextProjectionD*)|(TextProjectionRes*)|(TextProjectionS*)|(TextPu*)|(TextR*)|(TextWaitObserva*)|(TopicSqlT*)|(TransactionA*)|(TransactionR*)|(TypedQueueGraphP*)/(*)&(!AcMp006WarmedPublicTextDecodeAvoidsOwnedUtf8InputPerResult*)&(!AliasesAndFieldIdsRemainExact*)&(!LocalReadCatalogMatchesIncomingToolContractAndEffectHints*)&(!OwnedSnapshotPreservesIndependentMetadataAndBusinessTime*)&(!ReservedDiscriminatorAndForgedAuthenticationShapeAreDenied*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AdminDashboard.AdminQueueTests",
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsEntityLinkLifetimeTests",
@@ -62286,6 +62367,8 @@
         "KeyLoad.FunctionalTests.Search.TextProjectionRestartTests",
         "KeyLoad.FunctionalTests.Search.TextProjectionScopeTests",
         "KeyLoad.FunctionalTests.Search.TextProjectionSettlementTests",
+        "KeyLoad.FunctionalTests.Search.TextPublicationPersistenceTests",
+        "KeyLoad.FunctionalTests.Search.TextReadOnlySettlementTests",
         "KeyLoad.FunctionalTests.Search.TextWaitObservationTests",
         "KeyLoad.FunctionalTests.StorageRecovery.AsyncSnapshotStreamTests",
         "KeyLoad.FunctionalTests.StorageRecovery.CapturedReadSelectedCancellationTests",
@@ -62774,6 +62857,8 @@
         "KeyLoad.FunctionalTests.Search.TextProjectionRestartTests|UnknownProjectionEntryIsRejectedAndPreserved|UnknownProjectionEntryIsRejectedAndPreserved",
         "KeyLoad.FunctionalTests.Search.TextProjectionScopeTests|TrustedInternalSchemaScopeMismatchCannotReuseTheCurrentGeneration|TrustedInternalSchemaScopeMismatchCannotReuseTheCurrentGeneration",
         "KeyLoad.FunctionalTests.Search.TextProjectionSettlementTests|CancellationAndUntrackedFileAreBothRetainedDuringSettlement|CancellationAndUntrackedFileAreBothRetainedDuringSettlement",
+        "KeyLoad.FunctionalTests.Search.TextPublicationPersistenceTests|FailedNativeMergeRefusesPublicationBeforeHealthySearchAndColdPostings|FailedNativeMergeRefusesPublicationBeforeHealthySearchAndColdPostings",
+        "KeyLoad.FunctionalTests.Search.TextReadOnlySettlementTests|PublishedReadOnlyClosePreservesManifestAndRefusesTamperedRetryBeforeColdSearch|PublishedReadOnlyClosePreservesManifestAndRefusesTamperedRetryBeforeColdSearch",
         "KeyLoad.FunctionalTests.Search.TextWaitObservationTests|CurrentFieldUseRefusalPrecedesObservationThenPersistedGrantPublishesLiteralHealthy|CurrentFieldUseRefusalPrecedesObservationThenPersistedGrantPublishesLiteralHealthy",
         "KeyLoad.FunctionalTests.Search.TextWaitObservationTests|OriginalMinimumRefusalPrecedesTypedObservationThenLiteralPagesRemainHealthy|OriginalMinimumRefusalPrecedesTypedObservationThenLiteralPagesRemainHealthy(False)",
         "KeyLoad.FunctionalTests.Search.TextWaitObservationTests|OriginalMinimumRefusalPrecedesTypedObservationThenLiteralPagesRemainHealthy|OriginalMinimumRefusalPrecedesTypedObservationThenLiteralPagesRemainHealthy(True)",
@@ -62824,7 +62909,7 @@
     },
     {
       "groupId": "unit-functional-03",
-      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayT*)|(AnalyticsM*)|(AnnC*)|(AnnE*)|(AnnLa*)|(AnnLin*)|(AnnO*)|(AnnPa*)|(AnnPe*)|(AnnProjectionPinA*)|(AnnPublicM*)|(AnnPublicO*)|(AnnPublicPe*)|(AnnPublicPi*)|(AnnPublicS*)|(AnnPublicW*)|(AnnSeedH*)|(AnnSeedO*)|(AnnSo*)|(AnnWaitPr*)|(Ap*)|(AtomicPartitionRosterV*)|(Autho*)|(Bm25Col*)|(Bm25CorpusP*)|(CapturedReadSc*)|(CommandOutcomeS*)|(Composite*)|(CompositionB*)|(CompositionR*)|(ConnectionFa*)|(DatabaseCompositionS*)|(Den*)|(DistributedSearchS*)|(DocumentMutationImageR*)|(DocumentSc*)|(DocumentU*)|(DueA*)|(EventM*)|(EventProjectionP*)|(Eventi*)|(FilteredSearchP*)|(Ful*)|(GlobalBranchWindowMergeV*)|(GraphCrossPartitionRea*)|(GraphL*)|(GraphRea*)|(GraphSearchB*)|(GraphShortestPathT*)|(GraphSt*)|(GraphTraversalF*)|(GraphTraversalI*)|(GraphV*)|(ImmutableQ*)|(ImmutableV*)|(Indexe*)|(JournalPrincipalP*)|(JsonE*)|(JsonTextS*)|(KeyCodecE*)|(McpAuthenticationT*)|(McpCommandC*)|(McpGatewayR*)|(McpM*)|(McpO*)|(McpRea*)|(McpSco*)|(McpTransportD*)|(Mis*)|(MultiLaneR*)|(OrleansR*)|(OutboxH*)|(PackedAnnB*)|(PackedAnnOwnedSimilarityG*)|(PackedAnnS*)|(PartitionH*)|(PartitionQueryA*)|(PartitionQueryM*)|(PartitionQueryPublicM*)|(PartitionRecordI*)|(PartitionStoragePre*)|(ProjectionPa*)|(QueryAdapterC*)|(QueryCa*)|(QueryO*)|(QueueC*)|(QueueDeadlineP*)|(QueueLe*)|(QueueLo*)|(ReadEx*)|(ReadOnlyCollectionW*)|(ReadOnlyCor*)|(Ready*)|(RecurringS*)|(RelationalR*)|(RemoteP*)|(RemoteTransferA*)|(RemoteTransferRepairA*)|(RequestCqrsAnnM*)|(ResourceIncarnationW*)|(ResourceLifetimeL*)|(ResourcePolicyUpdateT*)|(ResourcePr*)|(RetainedS*)|(RuntimeJournalQ*)|(SagaTimeoutTr*)|(SampleAggregateA*)|(SampleChunkG*)|(SampleChunkMin*)|(SampleChunkR*)|(SampleChunkStoreO*)|(SampleL*)|(SampleRetentionA*)|(SampleRollupI*)|(SampleRollupP*)|(Sc*)|(SdkR*)|(SearchRea*)|(SearchW*)|(Sig*)|(SourceR*)|(SqlBetweenT*)|(SqlE*)|(SqlGraphPathR*)|(SqlGraphSearchR*)|(SqlInnerJoinL*)|(SqlInnerJoinP*)|(SqlLef*)|(SqlModelViewR*)|(SqlNullD*)|(StorageO*)|(StorageRa*)|(StoreL*)|(StreamTr*)|(SubscriptionR*)|(SubscriptionT*)|(TargetInboxCan*)|(TextIncrementalC*)|(TextIncrementalI*)|(TextIncrementalL*)|(TextOnlineS*)|(TextOr*)|(TextProjectionB*)|(TextProjectionP*)|(TextS*)|(TextWaitT*)|(Tom*)|(TopicP*)|(TopicRetentionR*)|(TypedQueueGraphR*)|(U*)|(VectorM*)|(VectorT*)|(Vi*)/(*)&(!AcCrs060ExceptionSerializationPreservesDomainFailureAndCause*)&(!AcMcp007AbsentReadsAndDynamicSqlAllowRootResultNull*)&(!AcMcp007EveryOutputHasDisjointSuccessAndSafeFailureObjects*)&(!AcMcp007RepresentativeCanonicalResultTypesRemainDescribed*)&(!AcMcp007SafeErrorSchemaMatchesTheActualManagedCodeProblemConverter*)&(!KnownMethodCategoryIsClosed*)&(!PrincipalReadContractMatchesCurrentGeneratedIdsAndBoundedPublicPropertyNames*)&(!SeedSurfaceContainsOnlyOwnedScopeCutAndVectorValues*)",
+      "selector": "/KeyLoad.FunctionalTests/*/(AggregateReplayT*)|(AnalyticsM*)|(AnnC*)|(AnnE*)|(AnnLa*)|(AnnLin*)|(AnnO*)|(AnnPa*)|(AnnPe*)|(AnnProjectionPinA*)|(AnnPublicM*)|(AnnPublicO*)|(AnnPublicPe*)|(AnnPublicPi*)|(AnnPublicS*)|(AnnPublicW*)|(AnnSeedH*)|(AnnSeedO*)|(AnnSo*)|(AnnWaitPr*)|(Ap*)|(AtomicPartitionRosterV*)|(Autho*)|(Bm25Col*)|(Bm25CorpusP*)|(CapturedReadSc*)|(CommandOutcomeS*)|(Composite*)|(CompositionB*)|(CompositionR*)|(ConnectionFa*)|(DatabaseCompositionS*)|(Den*)|(DistributedSearchS*)|(DocumentMutationImageR*)|(DocumentSc*)|(DocumentU*)|(DueA*)|(EventM*)|(EventProjectionP*)|(Eventi*)|(FilteredSearchP*)|(Ful*)|(GlobalBranchWindowMergeV*)|(GraphCrossPartitionRea*)|(GraphL*)|(GraphRea*)|(GraphSearchB*)|(GraphShortestPathT*)|(GraphSt*)|(GraphTraversalF*)|(GraphTraversalI*)|(GraphV*)|(ImmutableQ*)|(ImmutableV*)|(Indexe*)|(JournalPrincipalP*)|(JsonE*)|(JsonTextS*)|(KeyCodecE*)|(McpAuthenticationT*)|(McpCommandC*)|(McpGatewayR*)|(McpM*)|(McpO*)|(McpRea*)|(McpSco*)|(McpTransportD*)|(Mis*)|(MultiLaneR*)|(OrleansR*)|(OutboxH*)|(PackedAnnB*)|(PackedAnnOwnedSimilarityG*)|(PackedAnnS*)|(PartitionH*)|(PartitionQueryA*)|(PartitionQueryM*)|(PartitionQueryPublicM*)|(PartitionRecordI*)|(PartitionStoragePre*)|(ProjectionPa*)|(QueryAdapterC*)|(QueryCa*)|(QueryO*)|(QueueC*)|(QueueDeadlineP*)|(QueueLe*)|(QueueLo*)|(ReadEx*)|(ReadOnlyCollectionW*)|(ReadOnlyCor*)|(Ready*)|(RecurringS*)|(RelationalR*)|(RemoteP*)|(RemoteTransferA*)|(RemoteTransferRepairA*)|(RequestCqrsAnnM*)|(ResourceIncarnationW*)|(ResourceLifetimeL*)|(ResourcePolicyUpdateT*)|(ResourcePr*)|(RetainedS*)|(RuntimeJournalQ*)|(SagaTimeoutTr*)|(SampleAggregateA*)|(SampleChunkG*)|(SampleChunkMin*)|(SampleChunkR*)|(SampleChunkStoreO*)|(SampleL*)|(SampleRetentionA*)|(SampleRollupI*)|(SampleRollupP*)|(Sc*)|(SdkR*)|(SearchRea*)|(SearchW*)|(Sig*)|(SourceR*)|(SqlBetweenT*)|(SqlE*)|(SqlGraphPathR*)|(SqlGraphSearchR*)|(SqlInnerJoinL*)|(SqlInnerJoinP*)|(SqlLef*)|(SqlModelViewR*)|(SqlNullD*)|(StorageO*)|(StorageRa*)|(StoreL*)|(StreamTr*)|(SubscriptionR*)|(SubscriptionT*)|(TargetInboxCan*)|(TextIncrementalC*)|(TextIncrementalI*)|(TextIncrementalL*)|(TextM*)|(TextOnlineS*)|(TextOr*)|(TextProjectionB*)|(TextProjectionP*)|(TextS*)|(TextWaitT*)|(Tom*)|(TopicP*)|(TopicRetentionR*)|(TypedQueueGraphR*)|(U*)|(VectorM*)|(VectorT*)|(Vi*)/(*)&(!AcCrs060ExceptionSerializationPreservesDomainFailureAndCause*)&(!AcMcp007AbsentReadsAndDynamicSqlAllowRootResultNull*)&(!AcMcp007EveryOutputHasDisjointSuccessAndSafeFailureObjects*)&(!AcMcp007RepresentativeCanonicalResultTypesRemainDescribed*)&(!AcMcp007SafeErrorSchemaMatchesTheActualManagedCodeProblemConverter*)&(!KnownMethodCategoryIsClosed*)&(!PrincipalReadContractMatchesCurrentGeneratedIdsAndBoundedPublicPropertyNames*)&(!SeedSurfaceContainsOnlyOwnedScopeCutAndVectorValues*)",
       "classNames": [
         "KeyLoad.FunctionalTests.AnalyticsStore.AnalyticsMapColdTests",
         "KeyLoad.FunctionalTests.Authorization.AuthorizationCredentialHttpExportTests",
@@ -62972,6 +63057,7 @@
         "KeyLoad.FunctionalTests.Search.TextIncrementalCorruptionTests",
         "KeyLoad.FunctionalTests.Search.TextIncrementalIntentCorruptionTests",
         "KeyLoad.FunctionalTests.Search.TextIncrementalLifecycleTests",
+        "KeyLoad.FunctionalTests.Search.TextMatchModeWholeFlowTests",
         "KeyLoad.FunctionalTests.Search.TextOnlineSeedBudgetTests",
         "KeyLoad.FunctionalTests.Search.TextOrderedStageCancellationTests",
         "KeyLoad.FunctionalTests.Search.TextProjectionBoundsTests",
@@ -63481,6 +63567,7 @@
         "KeyLoad.FunctionalTests.Search.TextIncrementalCorruptionTests|DamagedManifestRejectsWithoutCanonicalEffectsThenExactRepairRestoresHealthy|DamagedManifestRejectsWithoutCanonicalEffectsThenExactRepairRestoresHealthy",
         "KeyLoad.FunctionalTests.Search.TextIncrementalIntentCorruptionTests|DamagedDurableOriginalIntentRejectsThenExactRepairReplaysOriginalCheckpointAndLiteralColdPages|DamagedDurableOriginalIntentRejectsThenExactRepairReplaysOriginalCheckpointAndLiteralColdPages",
         "KeyLoad.FunctionalTests.Search.TextIncrementalLifecycleTests|ActualJournalSeedThenUpdateDeleteAndColdRestoreRetainExactCheckpoint|ActualJournalSeedThenUpdateDeleteAndColdRestoreRetainExactCheckpoint",
+        "KeyLoad.FunctionalTests.Search.TextMatchModeWholeFlowTests|AllTermsExcludeHigherRankedPartialRowsBeforeLimitAndPreservePrivacyThroughColdRead|AllTermsExcludeHigherRankedPartialRowsBeforeLimitAndPreservePrivacyThroughColdRead",
         "KeyLoad.FunctionalTests.Search.TextOnlineSeedBudgetTests|ActualCapturedSeedCancellationJoinsBeforeFreshFullHealthySeed|ActualCapturedSeedCancellationJoinsBeforeFreshFullHealthySeed",
         "KeyLoad.FunctionalTests.Search.TextOrderedStageCancellationTests|SuccessfulBeginThenCanceledLaterReadRetainsStoreAndHealthyBilingualResult|SuccessfulBeginThenCanceledLaterReadRetainsStoreAndHealthyBilingualResult",
         "KeyLoad.FunctionalTests.Search.TextProjectionBoundsTests|DiskLimitAcceptsExactSparseLengthAndRejectsOneByteExcess|DiskLimitAcceptsExactSparseLengthAndRejectsOneByteExcess",

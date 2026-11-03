@@ -63,7 +63,7 @@ internal static class TextBm25EligibilityPages
                 await Assert.That(current is not null).IsEqualTo(admitted);
             }
             var ranker = new TextRanker(request.Text!, request.TextField!, work, execution.TextBudgetCheckInterval,
-                execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+                execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode);
             result = SearchCapturedExecution.Complete(owner.Database, new(captured, ranker, null), request,
                 work, null, FilteredSearchEligibility.Create(null, work));
         }, failures);

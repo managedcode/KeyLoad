@@ -16,7 +16,7 @@ internal static class SearchBranchExecution
         ReadExecutionBudget budget, QueryExecutionOptions execution)
     {
         var ranker = new TextRanker(request.Text!, request.TextField!, budget, execution.TextBudgetCheckInterval,
-            execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+            execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode);
         return RankTextPrepared(database, textProjection, view, principal, resource, request, budget, ranker);
     }
 
@@ -50,7 +50,7 @@ internal static class SearchBranchExecution
         QueryExecutionOptions execution, ITextProjectionLease? original)
     {
         var ranker = new TextRanker(request.Text!, request.TextField!, budget, execution.TextBudgetCheckInterval,
-            execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+            execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode);
         return RankTextCaptured(database, captured, principal, request, budget, ranker, original);
     }
 

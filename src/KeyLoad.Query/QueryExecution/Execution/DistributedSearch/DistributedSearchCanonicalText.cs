@@ -12,7 +12,7 @@ internal static class DistributedSearchCanonicalText
         FilteredSearchEligibility eligibility, ReadExecutionBudget budget, PrincipalRecord? sourcePrincipal = null)
     {
         var ranker = new TextRanker(request.Text!, request.TextField!, budget,
-            execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters);
+            execution.TextBudgetCheckInterval, execution.MaximumDocumentWords, execution.MaximumWordCharacters, request.TextMatchMode);
         database.VisitVisibleDocuments(view, principal, request.Partition, request.Collection, budget, document =>
         {
             if (sourcePrincipal is null || database.Authorization.CanReadRow(sourcePrincipal, document.Access))

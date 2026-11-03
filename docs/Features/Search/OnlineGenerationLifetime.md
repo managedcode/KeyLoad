@@ -19,6 +19,13 @@ The native owner records a bounded live file inventory after opening its publish
 index read-only and joining native background work. Subsequent leases verify that
 inventory as well as the published manifest, scope and complete canonical corpus;
 opening bookkeeping cannot silently replace persisted publication authority.
+On retirement or shutdown, the owner joins the read-only native index and
+validates the existing sealed manifest against the owned files and corpus.
+Closing a reader does not stage or publish another manifest. If validation
+fails after the native handle closes, shutdown retains the unsettled owner and
+validates again on retry. `TextReadOnlySettlementTests` exercises a quota with
+room for only the current manifest, unchanged manifest bytes, corruption on
+repeated shutdown, and a healthy cold search after restoring the exact bytes.
 `TextProjectionLeaseTests` covers overlapping reads without per-read manifest
 publication, cancellation of one reader while another completes, and invalidation
 with a held reader followed by repeated healthy rebuilds under a one-generation

@@ -8,9 +8,9 @@ internal static class TextFileOpening
     private const long UncreatedFileBytes = 0;
 
     internal static IFileStream Open(LocalFileStreamProvider inner, TextPathAccess pathAccess,
-        TextResourceOwnership? resources, int fileBufferBytes, string full, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options)
+        TextResourceOwnership resources, int fileBufferBytes, string full, FileMode mode, FileAccess access, FileShare share, int bufferSize, FileOptions options)
     {
-        resources?.RequireKnownFile(full);
+        resources.RequireKnownFile(full);
         var exists = File.Exists(full);
         var created = false;
         if (exists)
@@ -23,22 +23,19 @@ internal static class TextFileOpening
             mode = FileMode.CreateNew;
             created = true;
         }
-        var reservation = resources?.ReserveFile(full, UncreatedFileBytes,
+        var reservation = resources.ReserveFile(full, UncreatedFileBytes,
             () => File.Exists(full) ? new FileInfo(full).Length : UncreatedFileBytes);
         IFileStream? stream = null;
         var failures = new List<Exception>();
         try
         {
             stream = inner.CreateFileStream(full, mode, access, share, Math.Min(bufferSize, fileBufferBytes), options);
-            if (resources is not null)
-            {
-                stream = new TextBoundedFileStream(stream, resources);
-            }
+            stream = new TextBoundedFileStream(stream, resources);
             if (created)
             {
                 TextFileIO.SetPrivateFileMode(full);
             }
-            reservation?.CompleteAfterJoinedWrite();
+            reservation.CompleteAfterJoinedWrite();
             return stream;
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
@@ -54,7 +51,7 @@ internal static class TextFileOpening
         {
             ServerFailureObserver.Observe(stream.Dispose, failures);
         }
-        if (failures.Count == beforeClose && reservation is not null)
+        if (failures.Count == beforeClose)
         {
             ServerFailureObserver.Observe(reservation.CompleteAfterJoinedWrite, failures);
         }

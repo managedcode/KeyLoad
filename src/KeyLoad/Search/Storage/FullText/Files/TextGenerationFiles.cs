@@ -36,9 +36,9 @@ internal static class TextGenerationFiles
         return manifest;
     }
 
-    internal static TextManifest ValidatePublished(string generationPath, string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, ReadExecutionBudget budget, IOptions<TextExecutionOptions> executionOptions)
+    internal static TextManifest ValidatePublished(string generationPath, string root, string leaf, Guid sourceNodeId, TextProjectionScope scope, ReadExecutionBudget? budget, IOptions<TextExecutionOptions> executionOptions)
     {
-        budget.Check();
+        budget?.Check();
         TextFileIO.VerifyDirectory(generationPath);
         VerifyGenerationEntries(generationPath);
         var owner = TextOwnerFiles.ReadOwner(Path.Combine(generationPath, TextProtocol.OwnerFile),
@@ -52,7 +52,7 @@ internal static class TextGenerationFiles
         var manifest = ReadManifest(Path.Combine(generationPath, TextProtocol.ManifestFile), scope, executionOptions: executionOptions);
         TextInventory.Verify(generationPath, owner.OwnedPaths, manifest.Files, budget: budget, executionOptions: executionOptions);
         TextFiles.CheckGenerationBound(generationPath, budget: budget, executionOptions: executionOptions);
-        budget.Check();
+        budget?.Check();
         return manifest;
     }
 
