@@ -33,7 +33,8 @@ internal static class UserAnalyticsHostAssertions
     {
         await Assert.That(runtime.CanReleasePhysical).IsTrue();
         var root = Path.Combine(host.DirectoryPath, P.DirectoryName);
-        await Assert.That(!Directory.Exists(root) || !Directory.EnumerateFileSystemEntries(root).Any()).IsTrue();
+        await Assert.That(Directory.Exists(root)).IsTrue();
+        await Assert.That(Directory.EnumerateFileSystemEntries(root).Any()).IsFalse();
     }
 
     internal static async Task SameAsync<T>(T expected, T actual)

@@ -24,7 +24,8 @@ resource observations before Website could show a figure. In practice:
 - **One job per database, data type and node count.** `benchmarks.yml` has a small
   `image` job that resolves `ghcr.io/managedcode/keyload:latest` to one digest and
   45 `measure` jobs: KeyLoad in all ten types at 1 and 3 nodes, and each specialist
-  database in its types at the node counts it supports. A job builds
+  database in its types at the node counts it supports. Every measure job checks
+  out the published image's OCI source revision and builds
   `benchmarks/KeyLoad.ComparisonHost` in Release, starts its database through
   `build/KeyLoad.LoadTests.AppHost` from the TUnit fixture and runs the TUnit class
   of its type.

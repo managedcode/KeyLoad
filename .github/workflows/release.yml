@@ -81,7 +81,10 @@ jobs:
           REGISTRY_TOKEN: ${{ github.token }}
         run: printf '%s' "$REGISTRY_TOKEN" | docker login "$IMAGE_REGISTRY" --username "$GITHUB_ACTOR" --password-stdin
       - name: Publish the server image with commit and latest tags
-        run: dotnet publish src/KeyLoad/KeyLoad.csproj /t:PublishContainer --configuration Release --runtime linux-x64 -warnaserror -p:ContainerRegistry="$IMAGE_REGISTRY" -p:ContainerRepository="$IMAGE_REPOSITORY" "-p:ContainerImageTags=\"$RELEASE_SHA;latest\""
+        run: >-
+          dotnet publish src/KeyLoad/KeyLoad.csproj /t:PublishContainer --configuration Release --runtime linux-x64
+          -warnaserror -p:ContainerRegistry="$IMAGE_REGISTRY" -p:ContainerRepository="$IMAGE_REPOSITORY"
+          -p:PublishRepositoryUrl=true -p:SourceRevisionId="$RELEASE_SHA" "-p:ContainerImageTags=\"$RELEASE_SHA;latest\""
       - name: Record the published image digest
         shell: bash
         run: |

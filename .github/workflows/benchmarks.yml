@@ -23,6 +23,7 @@ jobs:
     permissions: {contents: read, packages: read}
     outputs:
       reference: ${{ steps.resolve.outputs.reference }}
+      revision: ${{ steps.resolve.outputs.revision }}
     steps:
       - name: Resolve the latest released KeyLoad server image to one digest
         id: resolve
@@ -32,7 +33,9 @@ jobs:
           printf '%s' "$REGISTRY_TOKEN" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
           digest=$(docker buildx imagetools inspect ghcr.io/managedcode/keyload:latest --format '{{json .Manifest}}' | jq -er '.digest')
           [[ "$digest" =~ ^sha256:[0-9a-f]{64}$ ]]
-          printf 'reference=ghcr.io/managedcode/keyload:latest@%s\n' "$digest" >> "$GITHUB_OUTPUT"
+          reference="ghcr.io/managedcode/keyload:latest@$digest"
+          revision=$(docker buildx imagetools inspect "$reference" --format '{{json .Image.Config.Labels}}' | jq -er '."org.opencontainers.image.revision" | select(test("^[0-9a-f]{40}$"))')
+          printf 'reference=%s\nrevision=%s\n' "$reference" "$revision" >> "$GITHUB_OUTPUT"
           docker logout ghcr.io
   measure:
     name: ${{ matrix.database }} / ${{ matrix.type }} / ${{ matrix.nodes }} node(s)
@@ -98,6 +101,8 @@ jobs:
     steps:
       - name: Download source code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.image.outputs.revision }}
       - name: Set up .NET
         uses: actions/setup-dotnet@v6
         with:

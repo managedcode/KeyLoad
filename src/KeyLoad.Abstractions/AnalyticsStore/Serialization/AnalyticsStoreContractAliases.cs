@@ -12,6 +12,7 @@ internal static class AnalyticsStoreContractAliases
     internal const string AggregateKind = "keyload.analytics-store.aggregate-kind";
     internal const string Selection = "keyload.analytics-store.metric-selection";
     internal const string Aggregate = "keyload.analytics-store.aggregate-request";
+    internal const string DimensionMatch = "keyload.analytics-store.dimension-match";
     internal const string Row = "keyload.analytics-store.aggregate-row";
     internal const string Result = "keyload.analytics-store.aggregate-result";
 }

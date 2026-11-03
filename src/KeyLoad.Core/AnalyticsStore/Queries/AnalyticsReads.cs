@@ -91,7 +91,8 @@ public static class AnalyticsReads
         {
             var scope = AnalyticsStoreReadScope.Open(engine, work.CreateView(raw), principalId, request.Partition, request.Store);
             AnalyticsAggregateValidation.Require(engine, scope, request);
-            var rows = AnalyticsStoreScan.Read(engine, raw, scope, request.Partition, request.Store, request.FromInclusive, request.ToExclusive, work);
+            var rows = AnalyticsStoreScan.Read(engine, raw, scope, request.Partition, request.Store,
+                request.FromInclusive, request.ToExclusive, work, request.DimensionMatch);
             var generation = AnalyticsStoreReadScope.Generation(work.CreateView(raw), request.Partition, request.Store);
             var identity = engine.Store.Identity;
             work.Check();

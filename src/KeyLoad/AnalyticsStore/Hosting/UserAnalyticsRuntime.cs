@@ -40,7 +40,7 @@ internal sealed class UserAnalyticsRuntime() : IUserAnalytics, IAsyncDisposable
         }
     }
 
-    public Task<RuntimeAnalyticsAggregate> AggregateAsync(AnalyticsAggregateSnapshot snapshot,
+    public async Task<RuntimeAnalyticsAggregate> AggregateAsync(AnalyticsAggregateSnapshot snapshot,
         IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(snapshot) /* KLD0041: BCL null validation accepts the snapshot AnalyticsAggregateSnapshot reference through its object parameter. */;
@@ -63,7 +63,7 @@ internal sealed class UserAnalyticsRuntime() : IUserAnalytics, IAsyncDisposable
         }
         try
         {
-            return Task.FromResult(execution.Execute(snapshot, binding, cancellationToken));
+            return await execution.ExecuteAsync(snapshot, binding, cancellationToken);
         }
         finally
         {

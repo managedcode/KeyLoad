@@ -8,7 +8,7 @@ namespace KeyLoad.FunctionalTests.AnalyticsStore;
 internal static class RuntimeAnalyticsBounds
 {
     private const string Prefix = "keyload-analytics-bound-unit-";
-    internal static AnalyticsAggregateResult Query(DatabaseEngine database,
+    internal static async Task<AnalyticsAggregateResult> QueryAsync(DatabaseEngine database,
         AggregateAnalyticsRequest request, CancellationToken token)
     {
         var snapshot = database.CaptureAnalyticsAggregate(D.Root, request, token);
@@ -16,14 +16,14 @@ internal static class RuntimeAnalyticsBounds
         AnalyticsStoreGeneration? generation = null;
         AnalyticsAggregateResult? result = null;
         var failures = new List<Exception>();
-        ServerFailureObserver.Observe(() =>
+        await ServerFailureObserver.ObserveAsync(async () =>
         {
             generation = new(snapshot, path);
-            result = generation.Query(token);
+            result = await generation.QueryAsync(token);
         }, failures);
         if (generation is not null)
         {
-            ServerFailureObserver.Observe(generation.Dispose, failures);
+            await ServerFailureObserver.ObserveAsync(() => generation.DisposeAsync().AsTask(), failures);
             if (generation.HasJoinedEngine && Directory.Exists(path))
             {
                 ServerFailureObserver.Observe(() => Directory.Delete(path, true), failures);
@@ -51,10 +51,10 @@ internal static class RuntimeAnalyticsBounds
         await O.EqualAsync(outbox, db.Database.GetOutboxStatus(D.Root, db.Partition));
     }
 
-    internal static async Task<KeyLoadException> RefusedAsync(Func<AnalyticsAggregateResult> query)
+    internal static async Task<KeyLoadException> RefusedAsync(Func<Task<AnalyticsAggregateResult>> query)
     {
         AnalyticsAggregateResult? published = null;
-        var error = Assert.ThrowsExactly<KeyLoadException>(() => published = query());
+        var error = await Assert.ThrowsExactlyAsync<KeyLoadException>(async () => published = await query());
         ArgumentNullException.ThrowIfNull(error);
         await Assert.That(error.Code).IsEqualTo(ErrorCode.BudgetExceeded);
         await Assert.That(published).IsNull();

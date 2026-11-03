@@ -5,6 +5,8 @@ namespace KeyLoad.FunctionalTests.StorageRecovery;
 
 internal static class UserAnalyticsHostRuntimeTrial
 {
+    private const int ConcurrentReads = 8;
+
     internal static async Task RunAsync(PartitionHostRecoveryFixture fixture, PartitionHost host,
         Func<UserAnalyticsHostBoundRuntime, Task> body)
     {
@@ -37,8 +39,9 @@ internal static class UserAnalyticsHostRuntimeTrial
         bool updated, CancellationToken token)
     {
         var cut = UserAnalyticsHostAssertions.Capture(host, [], []);
-        await bound.Work.AggregateAsync(host, bound.Runtime, P.Query(),
-            result => UserAnalyticsHostAssertions.SameAsync(P.Expected(updated), result), token);
+        await Task.WhenAll(Enumerable.Range(0, ConcurrentReads).Select(_ =>
+            bound.Work.AggregateAsync(host, bound.Runtime, P.Query(),
+                result => UserAnalyticsHostAssertions.SameAsync(P.Expected(updated), result), token)));
         await UserAnalyticsHostAssertions.CutAsync(host, cut);
         await UserAnalyticsHostAssertions.EmptyAsync(host, bound.Runtime);
     }

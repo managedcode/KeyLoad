@@ -105,3 +105,23 @@ the diagnostic binaries in `analytics-final-20261103/`, including
 full-scan comparison. All 154 local process-recovery cases and 568 analyzer cases
 passed on the combined storage/contract batch; the complete functional execution
 and exact-source Linux release qualification remain separate.
+
+## Concurrent SDK execution
+
+Two local diagnostics used three real silo processes with separate ZoneTree
+copies, 1,000,000 events, 16 SDK clients and 768 checked requests in each of
+the regional and product cases. Both variants returned the complete expected
+counts and sums for all requests. The original process threw 81
+`IOException` events in a seven-second GroupBy window while deleting a shared
+non-empty lifetime directory. The same capture after the change recorded zero
+`IOException` events. Each query now removes only its own joined generation
+directory under the physical owner's stable root. The native ingestion, flush,
+query and disposal calls are awaited.
+
+The product query now passes `dimensionMatch`, so exactly 100 of the 10,000
+canonical window rows enter the temporary engine for each of the benchmark's
+100 products. The canonical timestamp scan and fresh permission checks still
+run. The observed product rate was 26.4 before and 31.5 requests/second after;
+GroupBy was 24.9 and 10.5. The second run overlapped unrelated browser tests
+and high swap use. These rates record the diagnostics, with Linux image runs
+required for a throughput comparison and confirmation of the original HTTP 503.

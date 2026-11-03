@@ -8,7 +8,7 @@ internal static class AnalyticsStoreScan
     private const long AbsentRevision = 0;
     internal static ImmutableArray<AnalyticsEventRecord> Read(DatabaseEngine database, IKeyValueView raw,
         AnalyticsStoreReadScope scope, PartitionRef partition, string store, DateTimeOffset from,
-        DateTimeOffset to, ReadExecutionBudget work)
+        DateTimeOffset to, ReadExecutionBudget work, AnalyticsDimensionMatch? match = null)
     {
         var rows = new Dictionary<string, AnalyticsEventRecord>(StringComparer.Ordinal);
         _ = work.VisitAll(raw, AnalyticsStoreKeys.Timestamps(partition, store),
@@ -34,7 +34,8 @@ internal static class AnalyticsStoreScan
                     throw Errors.Fail(ErrorCode.Corruption, AnalyticsStoreValidation.Invalid);
                 }
                 if (current && row.Timestamp >= from && row.Timestamp < to
-                    && database.Authorization.CanReadRow(scope.Principal, row.RowAccess ?? new()))
+                    && database.Authorization.CanReadRow(scope.Principal, row.RowAccess ?? new())
+                    && (match is null || string.Equals(row.Dimensions[match.Dimension], match.Value, StringComparison.Ordinal)))
                 {
                     rows[id] = row;
                 }

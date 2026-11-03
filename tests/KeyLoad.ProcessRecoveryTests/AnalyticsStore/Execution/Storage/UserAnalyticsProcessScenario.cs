@@ -29,14 +29,14 @@ internal static class UserAnalyticsProcessScenario
         await UserAnalyticsProcessState.WriteAsync(root, cut, token);
         using var admission = host.Database.AdmitQuery(token);
         var snapshot = host.Database.CaptureAnalyticsAggregate(PartitionStoreProtocol.AdministratorId, P.Query(), token);
-        var directory = UserAnalyticsGenerationPaths.Create(host, snapshot);
+        var directory = UserAnalyticsGenerationPaths.Create(host);
         var failures = new List<Exception>();
         try
         {
-            using var generation = new AnalyticsStoreGeneration(snapshot, directory);
+            await using var generation = new AnalyticsStoreGeneration(snapshot, directory);
             await ServerFailureObserver.ObserveAsync(async () =>
             {
-                UserAnalyticsProcessState.Equal(P.Expected(updated: false), generation.Query(token));
+                UserAnalyticsProcessState.Equal(P.Expected(updated: false), await generation.QueryAsync(token));
                 UserAnalyticsProcessState.Require(host, cut);
                 if (generation.HasJoinedEngine || !Directory.Exists(directory) || !Directory.EnumerateFileSystemEntries(directory).Any())
                 {
@@ -112,7 +112,7 @@ internal static class UserAnalyticsProcessScenario
     private static void RequireEmpty(PartitionHost host, UserAnalyticsRuntime runtime)
     {
         var directory = Path.Combine(host.DirectoryPath, UserAnalyticsGenerationPaths.DirectoryName);
-        if (!runtime.CanReleasePhysical || Directory.Exists(directory) && Directory.EnumerateFileSystemEntries(directory).Any())
+        if (!runtime.CanReleasePhysical || !Directory.Exists(directory) || Directory.EnumerateFileSystemEntries(directory).Any())
         {
             throw new InvalidOperationException(P.Invalid);
         }

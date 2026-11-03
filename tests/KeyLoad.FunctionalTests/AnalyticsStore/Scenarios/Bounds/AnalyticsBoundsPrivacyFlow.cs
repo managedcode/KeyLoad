@@ -28,6 +28,7 @@ internal static class AnalyticsBoundsPrivacyFlow
             }).Get<ResourceDefinition>());
         await PolicyAsync(db, 1, []);
         var query = P.Query(db);
+        var filtered = query with { GroupBy = [], DimensionMatch = new(D.Kind, P.Padded) };
         await N.UnchangedAsync(db, async () =>
         {
             var denied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.FromResult(
@@ -35,6 +36,9 @@ internal static class AnalyticsBoundsPrivacyFlow
             ArgumentNullException.ThrowIfNull(denied);
             await Assert.That(denied.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await Assert.That(denied.Message).IsEqualTo(UseDenied);
+            var filterDenied = await Assert.ThrowsExactlyAsync<KeyLoadException>(() => Task.FromResult(
+                db.Database.CaptureAnalyticsAggregate(D.Reader, filtered, token)));
+            await Assert.That(filterDenied!.Code).IsEqualTo(ErrorCode.PermissionDenied);
             await RawAsync(db, events, token);
         });
         await PolicyAsync(db, 2, [D.UseGrant]);
@@ -44,6 +48,9 @@ internal static class AnalyticsBoundsPrivacyFlow
             var snapshot = db.Database.CaptureAnalyticsAggregate(D.Reader, query, token);
             await AnalyticsStoreTestProjection.RunAsync(snapshot, expected, token);
             db.Database.ValidateAnalyticsAggregatePublication(snapshot);
+            var selected = db.Database.CaptureAnalyticsAggregate(D.Reader, filtered, token);
+            await Assert.That(selected.Rows.Select(row => row.Id)).IsEquivalentTo([D.First]);
+            db.Database.ValidateAnalyticsAggregatePublication(selected);
             await RawAsync(db, events, token);
         });
         var previous = db.Database.CaptureAnalyticsAggregate(D.Reader, query, token);

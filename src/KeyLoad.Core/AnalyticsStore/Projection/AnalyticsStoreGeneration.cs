@@ -4,7 +4,7 @@ using ZoneTree.Analytics;
 namespace KeyLoad.Core;
 
 /// <summary>One real engine over a host-owned empty derived generation; no canonical storage gate is retained.</summary>
-public sealed class AnalyticsStoreGeneration : IDisposable
+public sealed class AnalyticsStoreGeneration : IAsyncDisposable
 {
     private const int StartedState = 1;
     private const int NotStartedState = 0;
@@ -59,7 +59,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
     /// <summary>Builds and queries this one generation using the unchanged original request and cancellation.</summary>
     /// <param name="cancellationToken">Original operation/owner cancellation, not a new independent deadline.</param>
     /// <returns>Complete finite execution aggregate rows.</returns>
-    public AnalyticsAggregateResult Query(CancellationToken cancellationToken)
+    public async Task<AnalyticsAggregateResult> QueryAsync(CancellationToken cancellationToken)
     {
         ObjectDisposedException.ThrowIf(disposed, this) /* KLD0041: The BCL disposal guard accepts this owner as object to report its runtime type name. */;
         if (Interlocked.Exchange(ref started, StartedState) != NotStartedState)
@@ -70,7 +70,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, snapshot.Work.Cancellation);
         try
         {
-            return QueryOwned(linked.Token);
+            return await QueryOwnedAsync(linked.Token);
         }
         catch (AnalyticsQueryException error) when (AnalyticsStoreGroupLimit.Exceeded(snapshot))
         {
@@ -78,7 +78,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         }
     }
 
-    private AnalyticsAggregateResult QueryOwned(CancellationToken token)
+    private async Task<AnalyticsAggregateResult> QueryOwnedAsync(CancellationToken token)
     {
         snapshot.Work.Check();
         token.ThrowIfCancellationRequested();
@@ -88,7 +88,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         {
             snapshot.Work.Check();
             token.ThrowIfCancellationRequested();
-            if (!current.Track(eventMapping.Create(row)))
+            if (!await current.TrackAsync(eventMapping.Create(row), token))
             {
                 throw Errors.Fail(ErrorCode.ResourceExhausted, IncompleteProjection);
             }
@@ -96,10 +96,10 @@ public sealed class AnalyticsStoreGeneration : IDisposable
             tracked = checked(tracked + TrackedEventStep);
             failures.RequireHealthy();
         }
-        current.Flush(token);
+        await current.FlushAsync(token);
         failures.RequireHealthy();
         snapshot.Work.Check();
-        var result = current.Query(AnalyticsStoreMapping.Query(snapshot), token);
+        var result = await current.QueryAsync(AnalyticsStoreMapping.Query(snapshot), token);
         failures.RequireHealthy();
         snapshot.Work.Check();
         var statistics = current.GetStatistics(false);
@@ -137,7 +137,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
     }
 
     /// <summary>Joins the actual execution close; failures retain an unjoined generation for its physical owner.</summary>
-    public void Dispose()
+    public async ValueTask DisposeAsync()
     {
         disposed = true;
         if (!acquisitionAttempted)
@@ -149,7 +149,7 @@ public sealed class AnalyticsStoreGeneration : IDisposable
         {
             return;
         }
-        engine.Dispose();
+        await engine.DisposeAsync();
         engine = null;
         HasJoinedEngine = true;
     }

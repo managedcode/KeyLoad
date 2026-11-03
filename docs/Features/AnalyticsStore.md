@@ -55,6 +55,11 @@ canonical capture, native engine, complete-ingestion checks and publication
 revalidation remain in use. [Local investigation](../implementation/analytics-performance.md)
 records the measured work and its qualification limits.
 
+An aggregate can include one `dimensionMatch`. It compares the exact stored
+value of a declared dimension, including case, whitespace and empty strings.
+The caller needs field-use permission even when the dimension is absent from
+`groupBy`. Matching applies to authorized canonical rows before native ingestion.
+
 Initial entity links target existing, readable, nondeleted collection documents in
 the same atomic partition. They use the existing canonical EntityRef identity and
 fresh document/row authorization at the mutation cut. This stage does not claim a
@@ -71,13 +76,13 @@ capture, without a second authoritative database or a stale rollup fallback.
 Public schema names map to ordinal keys; public names are never truncated
 to fit identifier bounds.
 
-The generation lives under the silo-local ZoneTree owner's
-`derived-user-analytics/<lifetime-digest>/<generation>` directory. Its identity is
-resource/lifetime-specific; three stores are not three Site aliases in one shared
-engine. Core captures immutable authorized data under its read cut and releases
-the gated view before synchronous Track/Flush/Query work. The silo-local
-owner retains the original operation and engine through actual synchronous
-Dispose, then removes the disposable directory only after successful joined close.
+Each admitted generation has its own `derived-user-analytics/<generation>`
+directory under the silo-local ZoneTree owner. The physical owner keeps the root
+stable while concurrent generations open and close. Core captures immutable
+authorized data under its read cut and releases the gated view before tracking
+events and awaiting the native flush and query. The silo-local owner retains the
+original operation and engine through async disposal, then removes the generation's
+directory after successful joined close.
 The connection operation holds the shared analytical admission through the execution
 join and fresh source/authorization validation before output publication. The
 final validation uses the remaining original read budget; it does not renew the

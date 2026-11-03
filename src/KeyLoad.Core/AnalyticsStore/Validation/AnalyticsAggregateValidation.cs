@@ -17,12 +17,17 @@ internal static class AnalyticsAggregateValidation
         var schema = scope.Resource.AnalyticsSchema!;
         foreach (var name in request.GroupBy)
         {
-            AnalyticsStoreAuthorization.Field(database, scope.Principal, scope.Resource,
-                AnalyticsStoreAuthorization.Path(AnalyticsStoreValidation.Dimensions, name), false);
-            if (!schema.Dimensions.Contains(name, StringComparer.Ordinal))
+            RequireDimension(database, scope, schema, name);
+        }
+        if (request.DimensionMatch is { } match)
+        {
+            if (string.IsNullOrWhiteSpace(match.Dimension) || match.Value is null)
             {
                 throw Errors.Fail(ErrorCode.Validation, AnalyticsStoreValidation.Invalid);
             }
+
+            RequireDimension(database, scope, schema, match.Dimension);
+            _ = AnalyticsStoreDimensionValues.Require(match.Value);
         }
         foreach (var metric in request.Metrics)
         {
@@ -52,6 +57,17 @@ internal static class AnalyticsAggregateValidation
             {
                 throw Errors.Fail(ErrorCode.Validation, AnalyticsStoreValidation.Invalid);
             }
+        }
+    }
+
+    private static void RequireDimension(DatabaseEngine database, AnalyticsStoreReadScope scope,
+        AnalyticsStoreSchema schema, string name)
+    {
+        AnalyticsStoreAuthorization.Field(database, scope.Principal, scope.Resource,
+            AnalyticsStoreAuthorization.Path(AnalyticsStoreValidation.Dimensions, name), false);
+        if (!schema.Dimensions.Contains(name, StringComparer.Ordinal))
+        {
+            throw Errors.Fail(ErrorCode.Validation, AnalyticsStoreValidation.Invalid);
         }
     }
 }

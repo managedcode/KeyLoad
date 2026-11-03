@@ -8,10 +8,6 @@ namespace KeyLoad.ComparisonHost.Analytics;
 /// <see cref="AnalyticsStoreSchema"/> dimensions and metrics, one <see cref="UpsertAnalyticsEvents"/> commit per batch with
 /// expected revision zero for every new event, and server-side <c>AggregateAnalyticsAsync</c> Count and Sum selections.
 /// </summary>
-/// <remarks>
-/// <see cref="AggregateAnalyticsRequest"/> has no filter, so the product total groups by product on the server and
-/// returns that product's group.
-/// </remarks>
 internal sealed class KeyLoadAnalyticsDriver(BenchmarkConnection connection) : IAnalyticsDriver
 {
     private const int Batch = 1_000;
@@ -53,7 +49,7 @@ internal sealed class KeyLoadAnalyticsDriver(BenchmarkConnection connection) : I
     /// <summary>A product without events in the range has no group, which is a zero total.</summary>
     public async Task<GroupTotal> SumForProductAsync(string product, DateTimeOffset from, DateTimeOffset until, CancellationToken token)
     {
-        var result = await AggregateAsync(Product, AnalyticsDataset.Products, from, until, token);
+        var result = await AggregateAsync(Product, 1, from, until, token, new(Product, product));
         var row = result.Rows.FirstOrDefault(found => string.Equals(found.Dimensions[Product], product, StringComparison.Ordinal));
         return row is null ? new(product, 0, 0) : Total(row, Product);
     }
@@ -61,10 +57,13 @@ internal sealed class KeyLoadAnalyticsDriver(BenchmarkConnection connection) : I
     public ValueTask DisposeAsync() => database.DisposeAsync();
 
     private async Task<AnalyticsAggregateResult> AggregateAsync(string dimension, int groups, DateTimeOffset from,
-        DateTimeOffset until, CancellationToken token)
+        DateTimeOffset until, CancellationToken token, AnalyticsDimensionMatch? match = null)
     {
         var request = new AggregateAnalyticsRequest(database.Partition, Store, from.ToUniversalTime(), until.ToUniversalTime(),
-            [dimension], Totals, groups);
+            [dimension], Totals, groups)
+        {
+            DimensionMatch = match
+        };
         return KeyLoadDatabase.Require(await database.Client.AggregateAnalyticsAsync(request, token), nameof(AggregateAsync));
     }
 

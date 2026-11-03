@@ -19,7 +19,7 @@ internal static class AnalyticsMapColdReads
                 row.Timestamp, row.Dimensions, row.Metrics, null, [], 1)).ToImmutableArray(), false, null);
             var page = owner.Database.ReadAnalyticsEvents(D.Root, D.Read(owner.Source), token);
             await PublicRoundTripAsync(expected, page);
-            var aggregate = N.Query(owner.Database, D.Query(owner.Source), token);
+            var aggregate = await N.QueryAsync(owner.Database, D.Query(owner.Source), token);
             await PublicRoundTripAsync(new AnalyticsAggregateResult(
                 [D.Row(D.Alpha, 2, 6, 3, 2, 4), D.Row(D.Beta, 1, 8, 8, 8, 8)], 3), aggregate);
         });
@@ -47,8 +47,8 @@ internal static class AnalyticsMapColdReads
             await Assert.That(cancelledFailure.CancellationToken).IsEqualTo(cancelled.Token);
             await Assert.That(published).IsNull();
             AnalyticsAggregateResult? cancelledAggregate = null;
-            var aggregateFailure = Assert.ThrowsExactly<OperationCanceledException>(() =>
-                cancelledAggregate = N.Query(owner.Database, D.Query(owner.Source), cancelled.Token));
+            var aggregateFailure = await Assert.ThrowsExactlyAsync<OperationCanceledException>(async () =>
+                cancelledAggregate = await N.QueryAsync(owner.Database, D.Query(owner.Source), cancelled.Token));
             ArgumentNullException.ThrowIfNull(aggregateFailure);
             await Assert.That(aggregateFailure.CancellationToken).IsEqualTo(cancelled.Token);
             await Assert.That(cancelledAggregate).IsNull();

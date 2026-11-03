@@ -19,4 +19,18 @@ public sealed record AggregateAnalyticsRequest(
     [property: Orleans.Id(3)] DateTimeOffset ToExclusive,
     [property: Orleans.Id(4)] ImmutableArray<string> GroupBy,
     [property: Orleans.Id(5)] ImmutableArray<AnalyticsMetricSelection> Metrics,
-    [property: Orleans.Id(6)] int MaxGroups);
+    [property: Orleans.Id(6)] int MaxGroups)
+{
+    /// <summary>Optional exact ordinal match on a declared, authorized dimension.</summary>
+    [Orleans.Id(7)]
+    public AnalyticsDimensionMatch? DimensionMatch { get; init; }
+}
+
+/// <summary>Matches the exact stored value of one analytics dimension.</summary>
+/// <param name="Dimension">Declared dimension name.</param>
+/// <param name="Value">Case-sensitive value, including whitespace and empty strings.</param>
+[Orleans.GenerateSerializer]
+[Orleans.Alias(AnalyticsStoreContractAliases.DimensionMatch)]
+public sealed record AnalyticsDimensionMatch(
+    [property: Orleans.Id(0)] string Dimension,
+    [property: Orleans.Id(1)] string Value);

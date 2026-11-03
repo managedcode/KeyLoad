@@ -35,7 +35,10 @@ internal static class McpCatalogExpectations
         Read(AnalyticsStoreProtocol.ReadTool, ["partition", "store", "fromInclusive", "toExclusive", "limit", "afterId"],
             ["events", "hasMore", "nextAfterId"]),
         Read(AnalyticsStoreProtocol.AggregateTool, ["partition", "store", "fromInclusive", "toExclusive", "groupBy", "metrics", "maxGroups"],
-            ["rows", "eventCount"]),
+            ["rows", "eventCount"]) with
+        {
+            BodyPropertyFields = ["partition", "store", "fromInclusive", "toExclusive", "groupBy", "metrics", "maxGroups", "dimensionMatch"]
+        },
         new("keyload_tables_drop", false, true, true, McpExpectedBody.Object, true,
             ["tenantId", "databaseId", "resourceName"], ["tenantId", "databaseId", "resourceName", "receipt"]),
         .. McpAdditionalDiscoveryExpectations.Entries,

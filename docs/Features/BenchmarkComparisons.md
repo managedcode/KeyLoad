@@ -44,8 +44,8 @@ flowchart LR
   on `main` and on manual dispatch. A push starts Build and Tests, then Release;
   Benchmarks waits for publication instead of racing it. Failed or cancelled
   releases skip the benchmark jobs and Website dispatch. The `image` job resolves
-  the KeyLoad image digest. Each
-  `measure` job checks out the source, sets up .NET, builds
+  the KeyLoad image digest and reads its published OCI source revision. Each
+  `measure` job checks out that revision, sets up .NET, builds
   `benchmarks/KeyLoad.ComparisonHost` in Release with warnings as errors and runs
   the TUnit class of its type. The final `website` job dispatches Website with the
   run id, also when some measure jobs failed, provided image resolution succeeded.
