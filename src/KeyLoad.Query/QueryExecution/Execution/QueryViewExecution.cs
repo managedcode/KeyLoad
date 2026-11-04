@@ -51,12 +51,13 @@ internal static class QueryViewExecution
     {
         var query = request.Query;
         var rows = new List<QueryRow>();
+        using var projection = new QueryRowProjection(database);
         string? lastId = null;
         foreach (var row in prepared.Page(cursor.Offset, query.Limit, budget))
         {
             lastId = row.Document.Reference.Id;
             budget.Check();
-            rows.Add(QueryRowProjection.Project(database, principal, resource, row.Document, query.Projection, prepared.Paths));
+            rows.Add(projection.Project(principal, resource, row.Document, query.Projection, prepared.Paths));
         }
         var next = cursor.Offset + rows.Count;
         var token = (QueryCursorExecution.SignNext(database, cursorLifetime, principal, resource, hash,

@@ -1,3 +1,6 @@
+using System.Text.Json;
+using KeyLoad.Storage;
+
 namespace KeyLoad.Core;
 
 /// <summary>Preserves a successfully read JSON scalar, including a JSON null value.</summary>
@@ -15,4 +18,26 @@ public readonly record struct JsonScalarValue(KeyLoad.Storage.KeyComponent Value
         KeyLoad.Storage.KeyComponentKind.FixedPoint => System.Text.Json.Nodes.JsonValue.Create(Value.ExactNumber),
         _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, JsonData.UnsupportedScalarFieldDetail)
     };
+
+    internal void WriteTo(Utf8JsonWriter writer)
+    {
+        switch (Value.Kind)
+        {
+            case KeyComponentKind.Null:
+            case KeyComponentKind.Missing:
+                writer.WriteNullValue();
+                break;
+            case KeyComponentKind.Text:
+                writer.WriteStringValue(Value.Text);
+                break;
+            case KeyComponentKind.Boolean:
+                writer.WriteBooleanValue(Value.Boolean);
+                break;
+            case KeyComponentKind.FixedPoint:
+                writer.WriteNumberValue(Value.ExactNumber);
+                break;
+            default:
+                throw Errors.Fail(ErrorCode.UnsupportedCapability, JsonData.UnsupportedScalarFieldDetail);
+        }
+    }
 }

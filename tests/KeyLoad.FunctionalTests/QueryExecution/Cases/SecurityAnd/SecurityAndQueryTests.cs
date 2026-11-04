@@ -109,6 +109,29 @@ internal sealed class SecurityAndQueryTests
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => engine.Execute("root", new(db.Partition, "SELECT * FROM orders"))).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
         await Assert.That(Assert.ThrowsExactly<KeyLoadException>(() => new SqlParser("SELECT * FROM orders; DELETE FROM orders", UnitExecutionOptions.QueryExecution()).Parse()).Code).IsEqualTo(ErrorCode.UnsupportedCapability);
     }
+
+    [Test]
+    public async Task SelectedJsonPreservesOrderEscapingAndScalarRepresentations()
+    {
+        const string Source = """{"status":"é<","amount":1.2300,"flag":true,"none":null}""";
+        const string Expected = """{"z":"\u00E9\u003C","a":1.2300,"flag":true,"none":null,"absent":null}""";
+        const string Shorter = """{"z":null,"a":null,"flag":null,"none":null,"absent":null}""";
+        using var db = new TestDatabase();
+        db.Configure("orders", ResourceKind.Collection);
+        db.Commit(new PutDocument("orders", "o1", Source), new PutDocument("orders", "o2", "{}"));
+        var engine = new QueryEngine(db.Database, UnitExecutionOptions.QueryExecution());
+        var query = new SelectQuery("orders", null,
+            [new("/status", "z"), new("/amount", "a"), new("/flag", "flag"), new("/none", "none"), new("/absent", "absent")],
+            null, [], 2);
+
+        var rows = engine.ExecuteAst("root", new(db.Partition, query, AllowFullScan: true)).Rows;
+
+        await Assert.That(rows.Length).IsEqualTo(2);
+        await Assert.That(rows[0].Json).IsEqualTo(Expected);
+        await Assert.That(rows[1].Json).IsEqualTo(Shorter);
+        await Assert.That(rows[0].Redacted).IsFalse();
+    }
+
     [Test]
     public async Task WorkerRequiredProtectedInputFailsBeforeClaim()
     {

@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using KeyLoad.Core;
 using KeyLoad.Core.ResourceExecution;
 using KeyLoad.Query.ChangeFeeds;
@@ -90,8 +89,4 @@ public sealed partial class QueryEngine
     internal QueryPage ExecuteView(IKeyValueView view, PrincipalRecord principal, ResourceDefinition resource,
         AstQueryRequest request, string hash, ReadExecutionBudget budget, TimeProvider clock)
         => QueryViewExecution.Execute(database, cursorLifetime, view, principal, resource, request, hash, budget, clock);
-
-    internal QueryRow Project(PrincipalRecord principal, ResourceDefinition resource, DocumentRecord document,
-        ImmutableArray<Selection> selections, IReadOnlyDictionary<string, string[]>? paths = null)
-        => QueryRowProjection.Project(database, principal, resource, document, selections, paths);
 }

@@ -39,11 +39,12 @@ internal sealed class PartitionQueryLeafExecutor(QueryEngine engine, DatabaseEng
         }
         engine.Bind(principal, resource, request);
         ValidatePlacement(view, plan.Partition);
+        using var projection = new QueryRowProjection(database);
         PreparedQuery? prepared = null;
         prepared = new(request.Query, EmptyElementCount, plan.MaxCandidates, ordinalFullReferenceOrder: true,
             projectCandidate: document => metadata is null
-                ? engine.Project(principal, resource, document, request.Query.Projection, prepared!.Paths)
-                : QueryRowProjection.ProjectIntersection(database, metadata, principal, resource, document,
+                ? projection.Project(principal, resource, document, request.Query.Projection, prepared!.Paths)
+                : projection.ProjectIntersection(metadata, principal, resource, document,
                     request.Query.Projection, prepared!.Paths));
         var reader = new QueryCandidateReader(database, view, principal, resource, request,
             QueryAccessPlanner.Create(resource, request), budget,

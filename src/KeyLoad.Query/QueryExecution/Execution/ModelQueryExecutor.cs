@@ -86,10 +86,11 @@ internal sealed class ModelQueryExecutor(DatabaseEngine database, QueryEngine qu
         PreparedQuery prepared, ReadExecutionBudget budget, string accessPath)
     {
         var rows = ImmutableArray.CreateBuilder<QueryRow>();
+        using var projection = new QueryRowProjection(database);
         foreach (var row in prepared.Page(NoRetainedBytes, request.Query.Limit, budget))
         {
             budget.Check();
-            rows.Add(queries.Project(principal, resource, row.Document, request.Query.Projection, prepared.Paths));
+            rows.Add(projection.Project(principal, resource, row.Document, request.Query.Projection, prepared.Paths));
         }
         var page = new QueryPage(rows.ToImmutable(), null, database.Store.Position, accessPath);
         return page;

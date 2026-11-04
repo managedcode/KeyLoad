@@ -84,9 +84,10 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         {
             throw Errors.Fail(ErrorCode.TokenInvalidated, LiveQueryCursorBelongsToADifferentQueryDetail);
         }
+        using var projection = new QueryRowProjection(database);
         var page = database.ReadChangeFeedView<LiveQueryChange>(view, principal,
             new(query.Partition, query.Query.Collection, claims.ChangeCursor, Limit: request.Limit),
-            (schema, change) => (MapChange(principal, schema, change, query, prepared, budget)).Value);
+            (schema, change) => (MapChange(principal, schema, change, query, prepared, budget, projection)).Value);
         var result = new LiveQueryPage(page.Changes,
             database.Sign(new LiveCursorClaims(LiveCursorContract.Purpose, hash, page.Cursor,
                 lifetime)), page.ThroughSequence,
@@ -94,8 +95,8 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         return result;
     }
 
-    private (bool HasValue, LiveQueryChange? Value) MapChange(PrincipalRecord principal, ResourceDefinition schema,
-        AuthorizedDocumentChange change, AstQueryRequest query, PreparedQuery prepared, ReadExecutionBudget budget)
+    private static (bool HasValue, LiveQueryChange? Value) MapChange(PrincipalRecord principal, ResourceDefinition schema,
+        AuthorizedDocumentChange change, AstQueryRequest query, PreparedQuery prepared, ReadExecutionBudget budget, QueryRowProjection projection)
     {
         budget.Check();
         var matchesAfter = Matches(change.After, query, prepared);
@@ -105,7 +106,7 @@ internal sealed class LiveQueryExecutor(DatabaseEngine database, QueryEngine que
         }
         return (true, (LiveQueryChange?)(new(change.Sequence, change.Commit, matchesAfter ? LiveQueryChangeKind.Upsert : LiveQueryChangeKind.Remove,
             change.After.Reference, change.After.Revision,
-            matchesAfter ? queryEngine.Project(principal, schema, change.After, query.Query.Projection,
+            matchesAfter ? projection.Project(principal, schema, change.After, query.Query.Projection,
                 prepared.Paths) : null)));
     }
 
