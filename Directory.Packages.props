@@ -5,18 +5,18 @@
     <KeyLoadCoverageToolVersion>18.12.0</KeyLoadCoverageToolVersion>
   </PropertyGroup>
   <ItemGroup>
-    <PackageVersion Include="ZoneTree" Version="2.1.1" />
+    <PackageVersion Include="ZoneTree" Version="2.1.2" />
     <PackageVersion Include="ZoneTree.Analytics" Version="1.0.2" />
     <PackageVersion Include="ZoneTree.FullTextSearch" Version="1.1.0" />
-    <PackageVersion Include="ManagedCode.Communication" Version="10.3.21" />
-    <PackageVersion Include="ManagedCode.Communication.AspNetCore" Version="10.3.21" />
-    <PackageVersion Include="ManagedCode.Communication.Orleans" Version="10.3.21" />
+    <PackageVersion Include="ManagedCode.Communication" Version="10.3.23" />
+    <PackageVersion Include="ManagedCode.Communication.AspNetCore" Version="10.3.23" />
+    <PackageVersion Include="ManagedCode.Communication.Orleans" Version="10.3.23" />
     <PackageVersion Include="ManagedCode.TimeSeries" Version="10.1.2" />
-    <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.7" />
-    <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.7" />
-    <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.2" />
-    <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.3" />
-    <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.2.18" />
+    <PackageVersion Include="ManagedCode.Storage.FileSystem" Version="10.1.12" />
+    <PackageVersion Include="ManagedCode.Storage.Server" Version="10.1.12" />
+    <PackageVersion Include="ManagedCode.Orleans.Identity.Core" Version="10.4.6" />
+    <PackageVersion Include="ManagedCode.MCPGateway" Version="2.3.5" />
+    <PackageVersion Include="ManagedCode.MarkdownLd.Kb" Version="0.3.3" />
     <!-- Central transitive dependency used by Aspire and StreamJsonRpc. -->
     <PackageVersion Include="MessagePack" Version="3.1.12" />
     <PackageVersion Include="Microsoft.Extensions.AI" Version="10.11.0" />
@@ -24,11 +24,14 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Options" Version="10.0.14" />
     <PackageVersion Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="10.0.14" />
-    <PackageVersion Include="Microsoft.Extensions.VectorData.Abstractions" Version="10.10.0" />
+    <PackageVersion Include="Microsoft.Extensions.VectorData.Abstractions" Version="10.11.0" />
     <PackageVersion Include="Microsoft.SqlServer.TransactSql.ScriptDom" Version="180.140.0" />
     <PackageVersion Include="System.IO.Hashing" Version="10.0.14" />
-    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.3.0" />
-    <PackageVersion Include="ModelContextProtocol.Core" Version="2.3.0" />
+    <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="2.3.1" />
+    <PackageVersion Include="ModelContextProtocol.Core" Version="2.3.1" />
+    <!-- Keep MCPGateway's extensions aligned with the SDK version required by Tasks. -->
+    <PackageVersion Include="ModelContextProtocol.Extensions.Apps" Version="2.3.1" />
+    <PackageVersion Include="ModelContextProtocol.Extensions.Tasks" Version="2.3.1" />
     <PackageVersion Include="Microsoft.Orleans.Server" Version="10.4.2" />
     <PackageVersion Include="Microsoft.Orleans.Client" Version="10.4.2" />
     <PackageVersion Include="ManagedCode.Orleans.RapidMembership" Version="10.4.6" />
@@ -58,8 +61,8 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Http" Version="1.20.1" />
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.20.1" />
-    <PackageVersion Include="TUnit" Version="1.76.45" />
-    <PackageVersion Include="TUnit.Aspire" Version="1.76.45" />
+    <PackageVersion Include="TUnit" Version="1.80.0" />
+    <PackageVersion Include="TUnit.Aspire" Version="1.80.0" />
     <PackageVersion Include="Microsoft.Playwright" Version="1.64.1" />
     <PackageVersion Include="Microsoft.FluentUI.AspNetCore.Components" Version="5.0.1" />
     <!-- One Microsoft engine: MTP collects test processes; the same-version CLI collects owned CLUSTER containers. -->
@@ -70,7 +73,7 @@
     <PackageVersion Include="MySqlConnector" Version="2.6.2" />
     <PackageVersion Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <PackageVersion Include="RabbitMQ.Client" Version="7.2.2" />
-    <PackageVersion Include="StackExchange.Redis" Version="3.4.29" />
+    <PackageVersion Include="StackExchange.Redis" Version="3.4.31" />
     <PackageVersion Include="MongoDB.Driver" Version="3.13.0" />
     <PackageVersion Include="KurrentDB.Client" Version="1.6.1" />
   </ItemGroup>

@@ -121,7 +121,7 @@ transition or request-controlled durability selector.
 `TextProjectionDisposalTests.ConcurrentDisposeDrainsBorrowedLeaseAndPreservesSearchAfterReopen`
 also checks the persisted native `0.json` mode, absence of data-WAL paths and
 actual native-provider state when reopening the exact sealed generation with
-the normal three-root resource owner. In ZoneTree 2.1.1, `None` creates the
+the normal three-root resource owner. ZoneTree's `None` mode creates the
 native null WAL without registering it in the provider's active-writer table;
 an absent table entry alone is therefore insufficient evidence. The test joins
 the original owner, reads the two literal postings, preserves manifest bytes

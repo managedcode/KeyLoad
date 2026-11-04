@@ -1,7 +1,7 @@
 # ADR-105: Published NuGet dependency refresh
 
 Status: Accepted; local dependency integration checked. Complete delivered-source qualification remains open.
-Date: 2026-10-31.
+Date: 2026-11-04.
 Feature: [RepositoryGovernance](../Features/RepositoryGovernance.md).
 
 ## Context and decision
@@ -11,27 +11,19 @@ PackageVersion, including transitive pins, and the Aspire.AppHost.Sdk pin agains
 the configured NuGet.org feed. Use the newest published stable release. Do not
 introduce previews into stable package families.
 
-The owner-approved 2026-10-31 update selects ZoneTree 2.0.7; the existing feed audit selects Orleans 10.4.2, with Journaling and Durable
-Jobs at 10.4.2-alpha.1, ManagedCode.Storage.Server/FileSystem 10.1.7 and
-TUnit/TUnit.Aspire 1.76.45. The existing transitive Orleans.Client and
-Orleans.Reminders dependencies are centrally pinned to 10.4.2 so the runtime
-family remains aligned. The remaining central pins, Aspire.AppHost.Sdk and the
-existing local tools are already current.
-RapidMembership 10.4.6 is rebuilt against Orleans 10.4.1 in its owning repository.
-Its release and all three public NuGet package source commits were verified
-before consumer adoption; package publication and runtime qualification remain
-separate gates.
+The current pins live in [Directory.Packages.props](../../Directory.Packages.props).
+The feed review includes the existing prerelease channels for Orleans Journaling
+and Durable Jobs. Orleans peers and the Aspire MSBuild SDK stay aligned with
+their corresponding package families. MCPGateway's existing Apps and Tasks
+dependencies track the MCP SDK patch because Tasks requires that exact version.
 
-ZoneTree 2.0.7 is the published MIT package from source
-`a9953313613337f5ead6c3143e8da77b7103c64f`; its dependency groups are unchanged.
-Its WAL and metadata recovery changes require the guarded full-text file provider
-to implement the public non-overwriting `MoveFile` operation used by initial
-durable metadata creation. Resolve and verify both paths, track the destination
-and update the existing physical file ownership ledger after the native move.
-Occupied, unowned and outside targets must preserve the original files and ledger.
-This release does not change the MVCC mutable-leaf point-read implementation;
-the existing leaf-size tuning remains. Engine recovery changes do not establish
-KeyLoad power-loss qualification or a throughput improvement.
+[ZoneTree 2.1.2](https://github.com/ZoneTree/ZoneTree/releases/tag/release-v2.1.2)
+adds transactional and object-storage live backup support. The guarded full-text
+file provider implements the public non-overwriting `MoveFile` operation used
+by durable metadata creation. It verifies both paths and updates the ownership
+ledger after the native move. Occupied, unowned and outside targets must
+preserve the original files and ledger. KeyLoad's process-recovery and released
+performance qualification remain separate.
 
 Retain central version management, dependency APIs, .NET 10/C# 14,
 warnings-as-errors and SDK-owned Roslyn compiler assets for analyzer tests.
