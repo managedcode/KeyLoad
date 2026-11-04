@@ -86,11 +86,20 @@ public static class DocumentStorageExecutionDocuments
         }
     }
 
-    internal static (bool HasValue, KeyComponent[]? Value) IndexValues(string json, IndexDefinition index)
+    private static (bool HasValue, KeyComponent[]? Value) IndexValues(string json, IndexDefinition index)
     {
         using var document = JsonDocument.Parse(json);
-        var values = index.Fields.Select(f => JsonData.Scalar(document.RootElement, f)).ToArray();
-        return ((KeyComponent[]?)(values.Any(v => v.Kind == KeyComponentKind.Null && !index.IncludeNull || v.Kind == KeyComponentKind.Missing && !index.IncludeMissing) ? null : values)) is { } outcomeValue1 ? (true, outcomeValue1) : (false, default(KeyComponent[]?));
+        var fields = index.Fields;
+        var values = new KeyComponent[fields.Length];
+        var omitted = false;
+        for (var position = 0; position < fields.Length; position++)
+        {
+            var value = JsonData.Scalar(document.RootElement, fields[position]);
+            values[position] = value;
+            omitted |= value.Kind == KeyComponentKind.Null && !index.IncludeNull
+                || value.Kind == KeyComponentKind.Missing && !index.IncludeMissing;
+        }
+        return omitted ? (false, default(KeyComponent[]?)) : (true, values);
     }
 
     internal static byte[] IndexKey(PartitionRef partition, string collection, IndexDefinition index, KeyComponent[] values, string id) => KeySpace.Partition(nameof(index), partition, [collection, index.Name, .. values, id]);
