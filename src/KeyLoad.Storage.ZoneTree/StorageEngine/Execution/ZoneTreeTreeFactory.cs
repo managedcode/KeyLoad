@@ -15,6 +15,8 @@ internal static class ZoneTreeTreeFactory
     private const string OriginalTreeMissing = "Original store inspection requires the existing execution tree directory.";
     // MVCC point reads snapshot a mutable leaf; keep those copied key/value arrays small.
     private const int MutableLeafSize = 32;
+    // Rotate earlier so the native maintainer can retire obsolete queue and index versions.
+    private const int TransactionalMutableSegmentItems = 32_768;
 
     internal static ZoneTreeFactory<Memory<byte>, PlainValue> Plain(string directory)
         => new ZoneTreeFactory<Memory<byte>, PlainValue>()
@@ -52,6 +54,7 @@ internal static class ZoneTreeTreeFactory
             .SetValueSerializer(new VersionedValueSerializer<Memory<byte>>(new ByteArraySerializer()))
             .SetIsDeletedDelegate(static (in StorageKey _, in StorageValue value) => value.Kind == VersionedValueKind.Deleted)
             .SetMarkValueDeletedDelegate(static (ref StorageValue value) => value = StorageValue.Deleted)
+            .SetMutableSegmentMaxItemCount(TransactionalMutableSegmentItems)
             .Configure(o =>
             {
                 o.BTreeLeafSize = MutableLeafSize;
@@ -64,6 +67,7 @@ internal static class ZoneTreeTreeFactory
         => new ZoneTreeFactory<Memory<byte>, Memory<byte>>()
             .SetDataDirectory(directory).SetComparer(new KeyComparer())
             .SetKeySerializer(new ByteArraySerializer()).SetValueSerializer(new ByteArraySerializer())
+            .SetMutableSegmentMaxItemCount(TransactionalMutableSegmentItems)
             .Configure(o => o.BTreeLeafSize = MutableLeafSize)
             .ConfigureWriteAheadLogOptions(options =>
             {
