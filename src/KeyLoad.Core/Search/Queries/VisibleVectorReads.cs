@@ -106,7 +106,7 @@ internal static class VisibleVectorReads
         var suffix = key[prefix.Length..];
         try
         {
-            if (KeyCodec.MatchesComponent(suffix, id))
+            if (KeyCodec.MatchesComponents(suffix, id))
             {
                 return suffix;
             }

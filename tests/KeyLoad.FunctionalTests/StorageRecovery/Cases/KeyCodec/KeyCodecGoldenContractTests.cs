@@ -42,6 +42,23 @@ internal sealed class KeyCodecGoldenContractTests
         }
     }
 
+    [Test]
+    public async Task MatchingRequiresTheWholeCanonicalSuffix()
+    {
+        const int FramingBytes = 1;
+        const int LastByte = 1;
+        const string EscapedId = "é\0\U0001F642";
+        var timestamp = new DateTimeOffset(1969, 12, 31, 23, 0, 0, TimeSpan.FromHours(2));
+        var id = EscapedId + new string('\u00d6', 300);
+        var exact = KeyCodec.Encode(timestamp, id);
+        var longer = KeyCodec.Encode(timestamp, id, true);
+
+        await Assert.That(KeyCodec.MatchesComponents(exact.AsSpan(FramingBytes), timestamp.ToUniversalTime(), id)).IsTrue();
+        await Assert.That(KeyCodec.MatchesComponents(exact.AsSpan(FramingBytes), timestamp.AddTicks(1), id)).IsFalse();
+        await Assert.That(KeyCodec.MatchesComponents(exact.AsSpan()[FramingBytes..^LastByte], timestamp, id)).IsFalse();
+        await Assert.That(KeyCodec.MatchesComponents(longer.AsSpan(FramingBytes), timestamp, id)).IsFalse();
+    }
+
     private static async Task AssertHexAsync(string expected, byte[] actual)
         => await Assert.That(Convert.ToHexString(actual)).IsEqualTo(expected);
 }

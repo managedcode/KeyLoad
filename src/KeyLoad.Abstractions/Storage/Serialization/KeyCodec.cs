@@ -88,14 +88,17 @@ public static class KeyCodec
         }
     }
 
-    /// <summary>Compares a complete encoded component against the canonical encoding of its typed value.</summary>
-    internal static bool MatchesComponent(ReadOnlySpan<byte> encoded, in KeyComponent component)
+    /// <summary>Compares an entire suffix against the canonical encoding of its typed components.</summary>
+    internal static bool MatchesComponents(ReadOnlySpan<byte> encoded, params ReadOnlySpan<KeyComponent> components)
     {
         Span<byte> initial = stackalloc byte[InitialKeyBytes];
         var writer = new KeyBufferWriter(initial);
         try
         {
-            KeyCodecWritePrimitives.Write(ref writer, in component);
+            foreach (ref readonly var component in components)
+            {
+                KeyCodecWritePrimitives.Write(ref writer, in component);
+            }
             return writer.Matches(encoded);
         }
         finally

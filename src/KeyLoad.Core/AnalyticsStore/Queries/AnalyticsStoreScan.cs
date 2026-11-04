@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using KeyLoad.Core.ResourceExecution.Execution;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core.AnalyticsStore;
@@ -11,7 +12,10 @@ internal static class AnalyticsStoreScan
         DateTimeOffset to, ReadExecutionBudget work, AnalyticsDimensionMatch? match = null)
     {
         var rows = new Dictionary<string, AnalyticsEventRecord>(StringComparer.Ordinal);
-        _ = work.VisitAll(raw, AnalyticsStoreKeys.Timestamps(partition, store),
+        var timestamps = AnalyticsStoreKeys.Timestamps(partition, store);
+        var events = AnalyticsStoreKeys.Events(partition, store);
+        var decoder = new ReadExecutionRecordReader<AnalyticsStoredEvent>(work, raw);
+        _ = work.VisitAll(raw, timestamps,
             (key, value) =>
             {
                 work.Check();
@@ -20,7 +24,7 @@ internal static class AnalyticsStoreScan
                 {
                     throw Errors.Fail(ErrorCode.Corruption, AnalyticsStoreValidation.Invalid);
                 }
-                var stored = work.ReadRecord<AnalyticsStoredEvent>(raw, AnalyticsStoreKeys.Event(partition, store, id));
+                var stored = decoder.Read(AnalyticsStoreKeys.Event(events, id));
                 var row = stored?.Event;
                 if (row is null || row.Revision <= AbsentRevision || row.Id != id)
                 {
@@ -28,7 +32,7 @@ internal static class AnalyticsStoreScan
                 }
                 // Direct resource writes can expose an older index entry while replacing its canonical row.
                 var current = !stored!.Deleted
-                    && key.SequenceEqual(AnalyticsStoreKeys.Timestamp(partition, store, row.Timestamp, id));
+                    && AnalyticsStoreKeys.MatchesTimestamp(key, timestamps, row.Timestamp, id);
                 if (!current && scope.Resource.Transactional)
                 {
                     throw Errors.Fail(ErrorCode.Corruption, AnalyticsStoreValidation.Invalid);
