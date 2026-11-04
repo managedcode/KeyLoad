@@ -4,7 +4,7 @@ namespace KeyLoad.FunctionalTests.OrleansExecution;
 
 internal sealed record ConnectionObservedOperation(GrainRequestProbeIdentity Identity,
     IGrainContext ConnectionContext, IGrainContext ProducerContext, GrainRequestContextState ConnectionIdentity,
-    RequestWorkOwner WorkOwner)
+    RequestWorkOwner WorkOwner, CancellationToken ExecutionToken)
 {
     internal GrainId GrainId => ConnectionContext.GrainId;
     internal ActivationId ActivationId => ConnectionContext.ActivationId;

@@ -74,7 +74,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
                 throw new InvalidOperationException(ConnectionProtocol.IdentityChanged);
             }
             var workOwner = context.ActivationServices.GetRequiredService<Func<RequestWorkOwner>>()();
-            var observed = new ConnectionObservedOperation(identity, connection, context, state, workOwner);
+            var observed = new ConnectionObservedOperation(identity, connection, context, state, workOwner, cancellationToken);
             if (!operations.TryAdd(identity.RequestId, observed))
             {
                 throw new InvalidOperationException(ConnectionProtocol.DuplicateObservation);

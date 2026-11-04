@@ -71,12 +71,16 @@ internal static class ConnectionAwaitedSettlementFlow
         {
             await callback.Arrived.Task.WaitAsync(token);
             await Assert.That(original.IsCompleted).IsFalse();
-            var owner = scenario.Observation.Read(requestId).WorkOwner;
+            var operation = scenario.Observation.Read(requestId);
+            var cancellationObserved = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            using var registration = operation.ExecutionToken.Register(() => cancellationObserved.TrySetResult());
             await caller.CancelAsync();
-            await ConnectionAwaitedSettlementAssertions.ChargedAsync(owner, requestId);
+            await cancellationObserved.Task.WaitAsync(token);
+            await Assert.That(original.IsCompleted).IsFalse();
+            await ConnectionAwaitedSettlementAssertions.ChargedAsync(operation.WorkOwner, requestId);
             callback.Release.SetResult();
             await ConnectionAssertions.CancelledAsync(original);
-            await ConnectionAwaitedSettlementAssertions.ReleasedAsync(owner, requestId, token);
+            await ConnectionAwaitedSettlementAssertions.ReleasedAsync(operation.WorkOwner, requestId, token);
             var healthy = await scenario.ReadAsync(principal, Guid.NewGuid(), document, token);
             await Assert.That(ConnectionAssertions.Value<DocumentResult>(healthy).Json).IsEqualTo(ConnectionProtocol.FirstJson);
         }
