@@ -33,6 +33,28 @@ internal sealed class McpBoundedWriteStreamAllocationTests
     }
 
     [Test]
+    [Arguments(false)]
+    [Arguments(true)]
+    public async Task TransferSealsTheStreamAndReturnsOnlyWrittenBytes(bool borrow)
+    {
+        using var stream = new McpBoundedWriteStream(SecondWriteBytes);
+        var content = Enumerable.Repeat(PrivateByte, FirstWriteBytes).ToArray();
+        stream.Write(content);
+        ReadOnlyMemory<byte> view = default;
+        if (borrow)
+        {
+            view = stream.BorrowBuffer();
+        }
+
+        var owned = stream.TransferOwnedArray();
+        await Assert.That(stream.CanWrite).IsFalse();
+        Assert.ThrowsExactly<ObjectDisposedException>(() => stream.WriteByte(PrivateByte));
+        await Assert.That(view.Span.ContainsAnyExcept((byte)0)).IsFalse();
+        await stream.DisposeAsync();
+        await Assert.That(owned.AsSpan().SequenceEqual(content)).IsTrue();
+    }
+
+    [Test]
     public async Task GrowingWriteFromItsOwnBorrowedBytesRetainsTheOriginalContent()
     {
         using var stream = new McpBoundedWriteStream(FirstWriteBytes * 2);

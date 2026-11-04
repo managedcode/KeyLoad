@@ -10,6 +10,7 @@ internal sealed class McpBoundedWriteStream : Stream
     private const string UnsupportedOperation = "The canonical JSON stream supports sequential writes only.";
     private MemoryStream buffer;
     private readonly int maximumBytes;
+    private bool borrowed;
     private bool disposed;
 
     /// <summary>Allocates capacity on the first write or borrow, subject to the inclusive byte ceiling.</summary>
@@ -128,6 +129,7 @@ internal sealed class McpBoundedWriteStream : Stream
         {
             EnsureCapacity(Math.Min(maximumBytes, InitialCapacity));
         }
+        borrowed = true;
         return buffer.GetBuffer().AsMemory(StartEmptyCount, buffer.Capacity);
     }
 
@@ -147,6 +149,23 @@ internal sealed class McpBoundedWriteStream : Stream
     {
         ThrowIfDisposed();
         return buffer.ToArray();
+    }
+
+    /// <summary>Seals the stream and transfers an exact-length payload to its next owner.</summary>
+    internal byte[] TransferOwnedArray()
+    {
+        ThrowIfDisposed();
+        if (borrowed || buffer.Length != buffer.Capacity)
+        {
+            var exact = buffer.ToArray();
+            Dispose();
+            return exact;
+        }
+
+        var payload = buffer.GetBuffer();
+        disposed = true;
+        buffer.Dispose();
+        return payload;
     }
 
     /// <inheritdoc />

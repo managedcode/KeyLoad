@@ -5,7 +5,7 @@ namespace KeyLoad.Server;
 /// <summary>Produces owned canonical UTF-8 within an inclusive configured byte ceiling.</summary>
 internal static class McpBoundedJson
 {
-    /// <summary>Serializes through the execution canonical serializer and clears its private write capacity.</summary>
+    /// <summary>Serializes through the execution canonical serializer and transfers the accepted UTF-8 bytes.</summary>
     /// <typeparam name="T">The canonical value type.</typeparam>
     /// <param name="value">The actual canonical value, including any configured defaults and converters.</param>
     /// <param name="maximumBytes">The positive inclusive byte ceiling for the returned payload.</param>
@@ -16,6 +16,6 @@ internal static class McpBoundedJson
     {
         using var stream = new McpBoundedWriteStream(maximumBytes);
         JsonSerializer.Serialize(stream, value, JsonDefaults.Options);
-        return stream.ToOwnedArray();
+        return stream.TransferOwnedArray();
     }
 }
