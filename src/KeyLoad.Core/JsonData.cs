@@ -13,6 +13,7 @@ public static class JsonData
 {
     private const int EmptyElementCount = 0;
     private const int LastComponentFromEnd = 1;
+    private const string EmptyObjectJson = "{}";
 
     internal const string UnsupportedScalarFieldDetail = "This field is not a scalar value.";
     private const string ObjectRequiredDetail = "The JSON payload must be an object.";
@@ -39,6 +40,10 @@ public static class JsonData
     private static string ValidateCore(string json, bool requireObject, bool preserveContent)
     {
         ArgumentNullException.ThrowIfNull(json) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        if (json == EmptyObjectJson)
+        {
+            return json;
+        }
         try
         {
             using var document = JsonDocument.Parse(json);
