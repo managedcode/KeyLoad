@@ -120,7 +120,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
                     ((IGrainBase)this).GrainContext, token);
             }
             stage = GrainFailureStage.CapabilityExecution;
-            var owner = await storage.ReadOwnerAsync(request.Envelope.Incarnation, token);
+            var owner = await storage.RequestOwnerAsync(request.Envelope.Incarnation, token);
             var reply = await ExecuteLeafAsync(request, envelope, owner, purpose.WorkBinding,
                 token);
             if (writer is not null && ConnectionParentExecution.Handles(request.Envelope.CommandKind) && reply.Error is null)

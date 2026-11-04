@@ -68,6 +68,11 @@ token must be reached locally before reading, and current persisted credentials,
 resource permissions and projection rules still apply. Observing a cut alone
 does not prove equal data or a distributed snapshot.
 
+A request on a single configured isolated silo with only that local silo active
+in Orleans membership runs beside its local storage owner directly. The published
+storage session still admits and joins the request. Shared storage and multi-silo
+deployments resolve the canonical owner through the commit grain.
+
 Interleaved owner discovery adopts the already-published owner set. Completing a
 batch advances that same set and fences older discoveries; a different cached
 set is invalidated. A concurrent read cannot leave the next command using a

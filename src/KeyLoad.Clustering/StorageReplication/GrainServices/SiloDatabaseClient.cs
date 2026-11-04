@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Orleans.Runtime.Services;
 
 namespace KeyLoad.Clustering;
@@ -8,6 +9,8 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
 {
     private readonly IGrainFactory grains = services.GetRequiredService<IGrainFactory>();
     private readonly ILocalSiloDetails local = services.GetRequiredService<ILocalSiloDetails>();
+    private readonly IClusterMembershipService membership = services.GetRequiredService<IClusterMembershipService>();
+    private readonly IOptions<ReplicaCopyOptions> copies = services.GetRequiredService<IOptions<ReplicaCopyOptions>>();
 
     /// <summary>The current execution silo generation, independent of persisted physical storage identity.</summary>
     public SiloAddress LocalSiloAddress => local.SiloAddress;
@@ -19,6 +22,24 @@ public sealed class SiloDatabaseClient(IServiceProvider services) : GrainService
     public Task<SiloAddress> ReadOwnerAsync(Guid incarnation, CancellationToken cancellationToken)
         => grains.GetGrain<IDatabaseCommitGrain>(DatabaseGrainIdentity.For(incarnation))
             .GetReadOwnerAsync(local.SiloAddress, cancellationToken);
+
+    /// <summary>Routes requests directly to the only isolated owner; otherwise resolves the canonical copy.</summary>
+    internal ValueTask<SiloAddress> RequestOwnerAsync(Guid incarnation, CancellationToken cancellationToken)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        var address = local.SiloAddress;
+        if (copies.Value is { StorageMode: StorageAccessMode.IsolatedVolumes, SiloCount: StorageCopyContract.MinimumCount })
+        {
+            var members = membership.CurrentSnapshot.Members;
+            if (members.Count == StorageCopyContract.MinimumCount
+                && members.TryGetValue(address, out var member) && member.Status == SiloStatus.Active)
+            {
+                // Execution still borrows the published physical session and validates the original request there.
+                return ValueTask.FromResult(address);
+            }
+        }
+        return new(ReadOwnerAsync(incarnation, cancellationToken));
+    }
 
     /// <summary>Places an independent request activation beside the selected physical owner and awaits its original work.</summary>
     public async Task<GrainOperationReply> ExecuteAsync(SiloAddress owner, GrainRequestEnvelope envelope,
