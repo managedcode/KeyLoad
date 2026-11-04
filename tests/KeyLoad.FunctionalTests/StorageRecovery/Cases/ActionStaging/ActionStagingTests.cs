@@ -24,10 +24,14 @@ internal sealed class ActionStagingTests
             var observed = owner.Store.Commit((transaction, _) =>
             {
                 var staging = (IAtomicActionStaging)transaction;
-                transaction.Put(FirstKey, FirstValue);
+                var firstInput = FirstKey.ToArray();
+                transaction.Put(firstInput, FirstValue);
+                Array.Clear(firstInput);
                 staging.BeginAction();
                 transaction.Put(DiscardedKey, SecondValue);
-                transaction.Put(FirstKey, ReplacedValue);
+                var replacementInput = FirstKey.ToArray();
+                transaction.Put(replacementInput, ReplacedValue);
+                Array.Clear(replacementInput);
                 transaction.Reset();
                 var afterReset = (First: transaction.ReadOwnedValue(FirstKey), Discarded: transaction.ReadOwnedValue(DiscardedKey));
                 transaction.Put(SecondKey, SecondValue);

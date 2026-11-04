@@ -20,16 +20,14 @@ internal sealed class ZoneTreeTransactionStaging
     internal void Stage(byte[] key, byte[]? value)
     {
         var replacing = Entries.TryGetValue(new(key, null), out var previous);
-        if (!actionOriginals.ContainsKey(key))
-        {
-            actionOriginals.Add(key.ToArray(), replacing ? previous : null);
-        }
+        var ownedKey = replacing ? previous!.Key : key.ToArray();
+        actionOriginals.TryAdd(ownedKey, previous);
         if (replacing)
         {
             Entries.Remove(previous!);
         }
 
-        Entries.Add(new(key.ToArray(), value?.ToArray()));
+        Entries.Add(new(ownedKey, value?.ToArray()));
         Version++;
     }
 
