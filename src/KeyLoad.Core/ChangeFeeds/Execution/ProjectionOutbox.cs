@@ -1,4 +1,5 @@
 using KeyLoad.Core.ChangeFeeds;
+using KeyLoad.Core.StoragePartitions.Contracts;
 using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
@@ -11,7 +12,6 @@ public static class ProjectionOutbox
     internal const string PinnedOutboxHistoryDetail = "A projection consumer or rebuild pins the requested outbox history.";
     internal const string OutboxEntrySpace = "outbox";
     internal const string ProjectionConsumerSpace = "projection-consumer";
-    internal const string OutboxHeadSpace = "outbox-head";
     internal const int ReadOutboxHeadTailEmptyCount = 0;
     internal const int ReadOutboxHeadFirstAvailableSingleItemCount = 1;
     internal const int ReadOutboxHeadStoredRecordsEmptyCount = 0;
@@ -23,20 +23,19 @@ public static class ProjectionOutbox
     internal const string ProjectionReceiptSpace = "projection-receipt";
     internal const string ProjectionBatchTokenPurpose = "projection-batch";
     internal static byte[] OutboxKey(PartitionRef partition, long sequence) => KeySpace.Partition(OutboxEntrySpace, partition, sequence);
+    internal static byte[] OutboxHeadKey(PartitionRef partition) => KeySpace.Partition(PartitionRecordFamilies.OutboxHead, partition);
     internal static byte[] ConsumerKey(ProjectionConsumerRef consumer) => KeySpace.Partition(ProjectionConsumerSpace, consumer.Partition, consumer.Name);
-    internal static void AppendOutbox(this DatabaseEngine engine, IAtomicTransaction tx, PartitionRef partition, OutboxEntry entry)
+    internal static void AppendOutbox(IAtomicTransaction tx, PartitionRef partition, int ordinal, CommitToken token,
+        DateTimeOffset now, Mutation mutation, MutationReceipt receipt, DocumentRecord? before, DocumentRecord? after)
     {
         const int TailStep = 1;
-        const string AppendOutboxSpaceText = "outbox-head";
         const int AppendedRecordCount = 1;
-        var head = engine.ReadOutboxHead(tx, partition);
-        entry = entry with
-        {
-            Sequence = checked(head.Tail + TailStep)
-        };
+        var headKey = OutboxHeadKey(partition);
+        var head = ChangeFeedsValidation.ReadOutboxHead(tx, headKey);
+        var entry = new OutboxEntry(checked(head.Tail + TailStep), ordinal, token, now, mutation, receipt, before, after);
         var payload = OrleansSerialization.Serialize(entry);
         tx.Put(OutboxKey(partition, entry.Sequence), payload);
-        tx.PutRecord(KeySpace.Partition(AppendOutboxSpaceText, partition), head with { Tail = entry.Sequence, StoredRecords = head.StoredRecords + AppendedRecordCount, StoredBytes = head.StoredBytes + payload.Length });
+        tx.PutRecord(headKey, head with { Tail = entry.Sequence, StoredRecords = head.StoredRecords + AppendedRecordCount, StoredBytes = head.StoredBytes + payload.Length });
     }
 
     internal static ProjectionConsumerInfo ConfigureProjectionConsumer(this DatabaseEngine engine, IAtomicTransaction tx, ConfigureProjectionConsumerRequest request, ProjectionMaintenanceAuthority? authority)
@@ -151,7 +150,6 @@ public static class ProjectionOutbox
         const int AfterSingleItemCount = 1;
         const int SequenceStep = 1;
         const int StoredRecordsStep = 1;
-        const string PurgeOutboxSpaceText = "outbox-head";
         EngineResourceAccess.ValidatePartition(request.Partition);
         if (request.Limit < LimitValidationBoundary)
         {
@@ -189,7 +187,7 @@ public static class ProjectionOutbox
             };
         }
 
-        tx.PutRecord(KeySpace.Partition(PurgeOutboxSpaceText, request.Partition), head);
+        tx.PutRecord(OutboxHeadKey(request.Partition), head);
         return head;
     }
 

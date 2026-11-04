@@ -13,8 +13,13 @@ public static class ChangeFeedsValidation
     public static OutboxHead ReadOutboxHead(this DatabaseEngine engine, IKeyValueView view, PartitionRef partition)
     {
         ArgumentNullException.ThrowIfNull(engine) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
+        return ReadOutboxHead(view, ProjectionOutbox.OutboxHeadKey(partition));
+    }
+
+    internal static OutboxHead ReadOutboxHead(IKeyValueView view, byte[] headKey)
+    {
         const string InvalidHeadDetail = "The committed outbox head does not match its canonical retained range.";
-        var head = view.GetRecord<OutboxHead>(KeySpace.Partition(ProjectionOutbox.OutboxHeadSpace, partition)) ?? new(ProjectionOutbox.ReadOutboxHeadTailEmptyCount, ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount, ProjectionOutbox.ReadOutboxHeadStoredRecordsEmptyCount, ProjectionOutbox.ReadOutboxHeadStoredBytesEmptyCount);
+        var head = view.GetRecord<OutboxHead>(headKey) ?? new(ProjectionOutbox.ReadOutboxHeadTailEmptyCount, ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount, ProjectionOutbox.ReadOutboxHeadStoredRecordsEmptyCount, ProjectionOutbox.ReadOutboxHeadStoredBytesEmptyCount);
         if (head.Tail < ProjectionOutbox.ReadOutboxHeadTailEmptyCount || head.FirstAvailable < ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount || head.FirstAvailable - ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount > head.Tail || head.StoredRecords != head.Tail - (head.FirstAvailable - ProjectionOutbox.ReadOutboxHeadFirstAvailableSingleItemCount) || head.StoredBytes < ProjectionOutbox.ReadOutboxHeadStoredBytesEmptyCount || (head.StoredRecords == ProjectionOutbox.ReadOutboxHeadStoredRecordsEmptyCount) != (head.StoredBytes == ProjectionOutbox.ReadOutboxHeadStoredBytesEmptyCount))
         {
             throw Errors.Fail(ErrorCode.Corruption, InvalidHeadDetail);

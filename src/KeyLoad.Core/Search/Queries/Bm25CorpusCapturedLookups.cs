@@ -15,6 +15,6 @@ public static class Bm25CorpusCapturedLookups
             return;
         }
 
-        source.CaptureExact(KeySpace.Partition(ProjectionOutbox.OutboxHeadSpace, partition));
+        source.CaptureExact(ProjectionOutbox.OutboxHeadKey(partition));
     }
 }

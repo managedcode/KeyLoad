@@ -9,7 +9,6 @@ namespace KeyLoad.Core;
 /// <summary>Executes AtomicMutationApplication operations against the caller's database context.</summary>
 public static class AtomicMutationApplication
 {
-    internal const int AtomicMutationApplicationInitialSequence = 0;
     internal const int AtomicMutationApplicationAdjacentElementOffset = 1;
     internal const string UnsupportedMutationMessage = "The mutation is unsupported.";
     internal const string DocumentEpochSpace = "document-epoch";
@@ -50,7 +49,8 @@ public static class AtomicMutationApplication
 
             receipts.Add(receipt);
             var after = image?.After;
-            engine.AppendOutbox(tx, partition, new(AtomicMutationApplicationInitialSequence, receipts.Count - AtomicMutationApplicationAdjacentElementOffset, token, now, mutation, receipt, before, after));
+            ProjectionOutbox.AppendOutbox(tx, partition, receipts.Count - AtomicMutationApplicationAdjacentElementOffset,
+                token, now, mutation, receipt, before, after);
             if (before is not null && after is not null && before.Access != after.Access)
             {
                 ChangeFeedsExecutionChangeFeeds.AdvanceVisibilityEpoch(tx, partition, mutation.Resource);
