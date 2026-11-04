@@ -18,7 +18,7 @@
     <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
     <KeyLoadReleaseMajor>0</KeyLoadReleaseMajor>
     <KeyLoadReleaseMinor>1</KeyLoadReleaseMinor>
-    <Version>$(KeyLoadReleaseMajor).$(KeyLoadReleaseMinor).0-dev</Version>
+    <Version>$(KeyLoadReleaseMajor).$(KeyLoadReleaseMinor).1-dev</Version>
     <Authors>ManagedCode</Authors>
     <RepositoryUrl>https://github.com/managedcode/KeyLoad</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
