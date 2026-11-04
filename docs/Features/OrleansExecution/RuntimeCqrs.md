@@ -1,8 +1,8 @@
 # CQRS response streams
 
-The connection grain executes authorized database operations through the
+The request grain executes authorized database operations through the
 centrally pinned ManagedCode.Communication packages. Ordinary operations without
-a progress consumer drain the producer locally on the connection grain and return
+a progress consumer return
 one settled Orleans Task reply. Progress consumers and composed maintenance or
 queue operations retain the Orleans
 `IAsyncEnumerable<CqrsStreamChunk<TProgress, TResult>>` response from the same
@@ -21,8 +21,8 @@ producer. The decision is
 
 ```mermaid
 flowchart LR
-    Caller[SDK or MCP] --> Connection[Connection grain]
-    Connection --> Stream[Communication CQRS producer]
+    Caller[SDK or MCP] --> Request[Request grain]
+    Request --> Stream[Communication CQRS producer]
     Stream --> Operation[Authorized operation]
     Operation -->|Orleans call| Owner[Silo-local ZoneTree owner]
     Owner --> Stream

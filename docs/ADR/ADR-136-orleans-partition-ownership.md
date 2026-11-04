@@ -11,8 +11,8 @@ scaling. KeyLoad uses the distributed directory and activation
 repartitioner. It implements database operations and file ownership through
 ordinary grains and silo-local Grain Services.
 
-The request path is public API -> one connection grain per connected client ->
-independent request grains -> storage owners -> bounded aggregation ->
+The request path is public API -> accepted transport connection ->
+one ordinary request grain per operation -> storage owners -> bounded aggregation ->
 caller. Logical atomic partition identity is independent of activation placement
 and physical copy identity. A connection owns its response stream and independent
 request lifetimes; storage services expose self-contained typed Task calls.

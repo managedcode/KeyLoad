@@ -6,11 +6,6 @@ namespace KeyLoad.Server;
 /// <summary>Bounds one admitted execution request and its complete CQRS response stream.</summary>
 internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
 {
-    internal static Task CloseAsync(IGrainFactory grains, IServiceProvider services,
-        Guid connectionId, CancellationToken cancellationToken)
-        => grains.GetGrain<IConnectionGrain>(connectionId).CloseAsync(
-            services.GetRequiredService<GrainRequestCodec>().CreateConnectionClose(connectionId), cancellationToken);
-
     internal Task<GrainOperationReply> ExecuteAsync(IGrainFactory? factory, IServiceProvider? runtime,
         bool databaseReady, bool requireDatabaseReady,
         Guid requestId, GrainRequestEnvelope envelope, bool command, CancellationToken cancellationToken)
@@ -39,8 +34,7 @@ internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
         }
         var grains = factory ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var services = runtime ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
-        var connectionId = ConnectionExecutionIdentity.Resolve(services);
-        var reply = await DrainAsync(grains, services, connectionId, requestId, envelope, command,
+        var reply = await DrainAsync(grains, services, requestId, envelope, command,
             progress, cancellationToken);
         if (reply.Error is { } error)
         {
@@ -50,7 +44,7 @@ internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
     }
 
     private async Task<GrainOperationReply> DrainAsync(IGrainFactory grains, IServiceProvider services,
-        Guid connectionId, Guid requestId, GrainRequestEnvelope envelope, bool command,
+        Guid requestId, GrainRequestEnvelope envelope, bool command,
         Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken executionToken)
     {
         var stage = OrleansRpcFailureStage.Preparation;
@@ -63,21 +57,36 @@ internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
                 originalOperation = new(request.Envelope.CommandId, request.Envelope.ReadKind, request.Envelope.CommandKind);
                 return request;
             });
+            var actor = grains.GetGrain<IRequestGrain>(RequestExecutionGrainIdentity.For(requestId));
             stage = OrleansRpcFailureStage.Consumption;
             if (progress is null && !ConnectionParentExecution.Handles(envelope.CommandKind))
             {
                 purpose.Started();
-                return await grains.GetGrain<IConnectionGrain>(connectionId).ExecuteAsync(envelope, executionToken);
+                return await actor.ExecuteAsync(envelope, executionToken);
             }
-            Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
-                token => grains.GetGrain<IConnectionGrain>(connectionId).ExecuteStreamAsync(envelope, token);
-            return progress is null
-                ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, requestId, purpose, executionToken)
-                : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, requestId, purpose, progress, executionToken);
+            return await DrainStreamAsync(actor, envelope, purpose, progress, executionToken);
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
             throw OrleansRpcFailure.Translate(failure, command, requestId, logger, stage, originalOperation, executionToken);
         }
+    }
+
+    private static async Task<GrainOperationReply> DrainStreamAsync(IRequestGrain actor, GrainRequestEnvelope envelope,
+        CqrsStreamPurpose purpose, Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken token)
+    {
+        GrainOperationReply? reply = null;
+        var failures = new List<Exception>();
+        await ServerFailureObserver.ObserveAsync(async () =>
+        {
+            Func<CancellationToken, IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>> source =
+                execution => actor.ExecuteStreamAsync(envelope, execution);
+            reply = progress is null
+                ? await GrainRequestStreamConsumer.DrainWithPurposeAsync(source, envelope.RequestId, purpose, token)
+                : await GrainRequestStreamConsumer.DrainWithProgressAsync(source, envelope.RequestId, purpose, progress, token);
+        }, failures);
+        await ServerFailureObserver.ObserveAsync(actor.ReleaseAsync, failures);
+        ServerFailureObserver.ThrowIfAny(failures);
+        return reply ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.ReplyRejected);
     }
 }

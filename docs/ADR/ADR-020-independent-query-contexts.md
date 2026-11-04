@@ -4,14 +4,14 @@ Status: Accepted; implementation and qualification pending.
 
 ## Context and decision
 
-Each operation must have an independent query context and bounded work/deadline/cancellation state so one caller cannot block another. The optional client session facade in the product design may carry convenience state, but the connection grain (ADR-125) carries only bounded disposable session state and never becomes the source of query authority.
+Each operation has an independent query context and bounded work/deadline/cancellation state so one caller cannot block another. The server transport (ADR-125) owns disposable connection state; the operation's request grain applies current query authority.
 
 Use immutable request-scoped prepared state and one explicit execution budget. Any future SDK session facade remains client-side or delegates independent operations; it cannot freeze a shared server read cut across unrelated requests. Query context disposal releases iterators, views, and admission reservations on success, error, timeout, and cancellation.
 
 ```mermaid
 sequenceDiagram
     participant Client
-    participant Grain as Connection grain
+    participant Grain as Request grain
     participant Query as Bounded query context
     participant Store
     Client->>Grain: Independent request and stable command identity
@@ -23,7 +23,7 @@ sequenceDiagram
 
 ## Rationale, alternatives, and consequences
 
-Unbounded shared contexts risk head-of-line blocking and stale authority. The connection grain keeps no shared read cut and no cached authority, which keeps cancellation and policy reauthorization simple. Separate operation contexts cost setup work but isolate budgets and preserve current authorization boundaries.
+Unbounded shared contexts risk head-of-line blocking and stale authority. Separate request grains isolate read cuts, cancellation and authorization while preserving operation budgets.
 
 ## Related requirements and implementation contract
 
@@ -31,7 +31,7 @@ Related: `REQ-ROUTE-001/AC-ROUTE-001`, `REQ-MP-002/AC-MP-002..006`, `REQ-SEARCH-
 
 1. Freeze context lifetime, shared-versus-operation budget rules, and cancellation propagation before changing APIs.
 2. Test concurrent independent requests, cancellation at each stage, policy revocation between pages, and healthy subsequent operations using real storage and Kestrel/cluster.
-3. Implement context-local immutable preparation and scoped resources; keep every operation's context independent inside the connection grain.
+3. Implement context-local immutable preparation and scoped resources in the operation's request grain.
 4. Keep query-context changes within the current persisted format; rollback removes only the optimization and retains request isolation.
 5. Qualify real SDK and official MCP calls through GitHub TUnit/recovery/cluster suites; source-only build is not qualification.
 

@@ -32,7 +32,7 @@ entity storage so graph and vector references keep one identity
 
 ```mermaid
 flowchart LR
-    Caller[Agent SQL SDK MCP] --> Connection[Orleans connection grain]
+    Caller[Agent SQL SDK MCP] --> Connection[Transport connection]
     Connection --> Tx[Authorized same partition ordered ZoneTree transaction]
     Tx --> Source[Ready queue links or visible graph traversal]
     Source --> Refs[Canonical document and typed row references]
@@ -61,7 +61,7 @@ communication (grain calls, Grain Service calls and Orleans streams), timers,
 reminders, durable jobs and scaling. KeyLoad adds no clustering mechanism of its
 own; scaling means adding silos to the Orleans cluster.
 
-- **Connection grain.** Every connected client has one Orleans grain
+- **Transport connection.** The server owns each accepted connection
   ([ADR-125](ADR/ADR-125-connection-owned-execution.md),
   [connection ownership](Features/ClientApi.md#persistent-connection-ownership)).
   Each operation carries its own verified identity, fresh persisted
@@ -70,8 +70,7 @@ own; scaling means adding silos to the Orleans cluster.
   callers ([ADR-145](ADR/ADR-145-no-request-throttling.md)), and no configured
   operation limit refuses work
   ([ADR-149](ADR/ADR-149-no-operation-limits.md)).
-  The connection grain never caches trusted roles and never owns storage; it
-  admits each operation and hands it to that operation's request grain.
+  The transport admits each operation and dispatches it directly to its request grain.
 - **Request grains.** One `RequestGrain` per admitted operation, keyed by its
   request identity, coordinates the operation. It is an ordinary Orleans
   grain with `PreferLocalPlacement`, registered in the grain directory.
@@ -104,7 +103,7 @@ own; scaling means adding silos to the Orleans cluster.
   `KeyLoad:SynchronizationInterval` timer. Both use the same ordered copy drain;
   unrelated gaps require explicit
   recovery and general empty-copy restoration remains unqualified.
-- **Request flow.** Public API (HTTP, .NET SDK, MCP, SQL) -> connection grain ->
+- **Request flow.** Public API (HTTP, .NET SDK, MCP, SQL) -> accepted transport ->
   one request grain per operation -> ZoneTree owner on the same node, or on other
   nodes through their request execution grains -> results are gathered -> returned
   to the caller.
@@ -122,7 +121,7 @@ own; scaling means adding silos to the Orleans cluster.
 ```mermaid
 flowchart LR
     Caller[HTTP SDK MCP SQL caller] --> Api[Public API and ASP.NET Core authentication]
-    Api --> Connection[Connection grain one per client]
+    Api --> Connection[Server transport connection]
     Connection --> Partition[Request grain one per operation]
     Partition --> Gather[Gather results from several partitions]
     Partition -.->|finds target silos| Membership[Orleans membership]
@@ -224,7 +223,7 @@ NuGet publication follow root policy.
 | src/KeyLoad.Diagnostics | Models/DatabasePhaseKind.cs, Models/DatabasePhaseSnapshot.cs | BCL-only scalar phase observations, with no database state, public control endpoint or framework dependency. |
 | src/KeyLoad.Storage.ZoneTree | ZoneTreeStore.cs, StorageEngine/Execution/ZoneTreeStoreRuntime.cs, StorageEngine/Execution/ZoneTreeCommitPublication.cs, Restore/Execution/ZoneTreeBackup.cs | StorageEngine and Restore; files, ZoneTree's write-ahead log and local backups stay with the silo-local ZoneTree owner. |
 | src/KeyLoad.Query | QueryExecution/Queries/QueryEngine.cs, QueryExecution/Execution/SqlParser.cs, Search/Queries/QueryExecution/SearchEngine.cs, ChangeFeeds/Queries/LiveQueryExecutor.cs | QueryExecution, Search, ChangeFeeds; one authorized typed AST and bounded read cut. |
-| src/KeyLoad.Clustering | RequestExecution/Grains/ConnectionGrain.cs, RequestExecution/Grains/RequestExecutionGrain.cs, RequestExecution/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | OrleansExecution; connection and independent request grains route through Orleans to the silo-local ZoneTree owners. |
+| src/KeyLoad.Clustering | RequestExecution/Grains/RequestGrain.cs, RequestExecution/Grains/RequestExecutionGrain.cs, RequestExecution/Queries/Connections/ConnectionReadExecution.cs, `<SliceName>/GrainServices/` | OrleansExecution; independent request grains route through Orleans to the silo-local ZoneTree owners. |
 | src/KeyLoad | Program.cs, NodeOptions.cs, ClientApi/, OrleansHosting/Hosting/OrleansNode.Composition.cs | Composition root, Orleans host and public API; caller identity never supplies trusted roles. |
 | src/KeyLoad.Client | ClientApi/Transport/KeyLoadClient.cs, QueryExecution/Queries/KeyLoadQuery.cs | ClientApi transport; business operations mirror the same canonical slices as core, contracts, API and tests. |
 | src/KeyLoad.Cli | Program.cs, ClientApi/Transport/CliClientApi.cs, Restore/Commands/CliBackupRestore.cs | Administrative entry point with typed ClientApi and backup/restore owners. |
@@ -295,25 +294,22 @@ sequenceDiagram
     participant Caller as SDK or MCP caller
     participant API as Public API
     participant User as User grain of the credential
-    participant Conn as Connection grain
     participant Part as Request grain
     participant Owners as ZoneTree owners on ReplicaCount silos
     Caller->>API: Typed operation and credentials
     API->>User: Credential secret
     User-->>API: Principal, from memory after the first storage read
-    API->>Conn: Verified subject and bounded request
-    Conn->>Part: Admitted operation
+    API->>Part: Verified subject and bounded request
     Part->>Part: Fresh persisted authorization
     Part->>Owners: Orleans calls with the command
     Owners-->>Part: Durable local apply confirmations
-    Part-->>Conn: Outcome after every configured copy confirms
-    Conn-->>API: Public result
+    Part-->>API: Outcome after every configured copy confirms
     API-->>Caller: Contract result
 ```
 
 Authentication uses one user grain per API credential, addressed by the credential's public ID
 (`UserGrainIdentity`), never by its secret. Its first request reads the credential and principal from storage
-through the connection and request grains; later requests compare the secret's digest and expiry in memory. A
+through a request grain; later requests compare the secret's digest and expiry in memory. A
 `ConfigureApiKey` command invalidates that grain, and every operation still reads the current principal and its
 permissions in its own storage view.
 
@@ -322,7 +318,7 @@ classDiagram
     class KeyLoadClient
     class CommandRequest
     class PartitionRef
-    class ConnectionGrain
+    class ServerConnectionFeature
     class RequestGrain
     class RequestExecutionGrain
     class DatabaseEngine
@@ -330,7 +326,7 @@ classDiagram
     class IAtomicTransaction
     KeyLoadClient --> CommandRequest
     CommandRequest --> PartitionRef
-    ConnectionGrain --> RequestGrain : one per operation
+    ServerConnectionFeature --> RequestGrain : one per operation
     RequestGrain --> DatabaseEngine : borrows the local owner through DI
     RequestGrain --> RequestExecutionGrain : leaf on a remote owner silo
     RequestExecutionGrain --> DatabaseEngine : borrows that silo's owner through DI
@@ -344,7 +340,7 @@ their own Feature owners. The MCP host exposes bounded search/route/invoke tools
 through ManagedCode.MCPGateway and ManagedCode.MarkdownLd.Kb tool-metadata graphs
 ([ToolDiscovery](Features/ClientApi/ToolDiscovery.md),
 [ADR-104](ADR/ADR-104-mcp-gateway-tool-discovery.md)); the graph holds public
-operation documentation only. The connection grain consumes the bounded
+operation documentation only. The request grain consumes the bounded
 ManagedCode.Communication CQRS producer locally for ordinary operations and
 returns its settled terminal reply through one Orleans Task call. Progress
 consumers and composed operations retain Orleans `IAsyncEnumerable` responses
@@ -375,7 +371,7 @@ classDiagram
 flowchart LR
     Agent[AI agent SQL SDK MCP] --> Server[One server API]
     Server --> SQL[Versioned TSQL SELECT and EXEC compiler]
-    SQL --> Gateway[Connection grain]
+    SQL --> Gateway[Request grain]
     Gateway --> Owners[Partition grains and silo-local ZoneTree owners]
     Owners --> Entity[Canonical documents and typed rows]
     Owners --> Models[Graph search events queues series blobs]
@@ -570,7 +566,7 @@ classDiagram
 search scheduling follows
 [ADR-081](ADR/ADR-081-awaited-search-execution.md): one analytical
 reservation spans the complete awaited read and settlement while the
-connection grain yields. Index generations have bounded leases and
+request grain yields. Index generations have bounded leases and
 retirement ([OnlineGenerationLifetime](Features/Search/OnlineGenerationLifetime.md));
 global retrieval merges bounded per-modality windows before RRF
 ([GlobalBranchWindows](Features/Search/GlobalBranchWindows.md)). SIMD execution
@@ -665,7 +661,7 @@ classDiagram
 The [AdminDashboard](Features/AdminDashboard.md) slice under
 [ADR-051](ADR/ADR-051-admin-dashboard.md) hosts the read-only console in
 `src/KeyLoad/AdminDashboard/Assets/`, with shared Abstractions DTOs, Core
-catalog/queue readers and a matching Client SDK. It uses the connection grain
+catalog/queue readers and a matching Client SDK. It uses a request grain
 with call-local authorized reads; physical observations are reported per node.
 The public `site/` is its own surface. Both share one visual identity under
 [ADR-053](ADR/ADR-053-unified-visual-identity.md): the console owns the canonical
@@ -676,7 +672,7 @@ a share card.
 ```mermaid
 flowchart LR
     Admin[Same origin admin console] --> API[AdminDashboard API and MCP]
-    API --> Request[Connection grain]
+    API --> Request[Request grain]
     Request --> Read[Call-local authorized read execution]
     Read --> Core[Bounded catalog and queue readers]
     Read --> Node[Node local file and process observer]

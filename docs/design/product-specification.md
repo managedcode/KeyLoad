@@ -39,7 +39,7 @@ internal communication (grain calls, Grain Service calls, Orleans streams),
 timers, reminders, durable jobs and scaling. KeyLoad adds no consensus,
 membership, transport, placement or movement mechanism of its own.
 
-- **Connection grain.** Every connected client has one Orleans grain
+- **Transport connection.** The server owns each accepted connection
   ([ADR-125](../ADR/ADR-125-connection-owned-execution.md)). Every operation gets
   fresh persisted authorization, per-operation data bounds, cancellation and an
   idempotent command outcome; clients never supply trusted roles. The server
@@ -64,8 +64,8 @@ membership, transport, placement or movement mechanism of its own.
   ([ADR-143](../ADR/ADR-143-independent-silo-replica-topology.md)). An unfinished original command can complete on
   a missing copy through a stable-ID retry; unrelated gaps require explicit
   recovery and general empty-copy restoration remains unqualified.
-- **Request flow.** Public API (HTTP / .NET SDK / MCP / SQL) -> connection grain
-  -> partition grains -> ZoneTree owner on the same node or on other nodes
+- **Request flow.** Public API (HTTP / .NET SDK / MCP / SQL) -> transport connection
+  -> request grain -> partition grains -> ZoneTree owner on the same node or on other nodes
   through Orleans -> results are gathered -> returned.
 - **Background work.** Queue deadlines, due and recurring work, remote transfers,
   ANN projection and time-series chunk workers never check leadership. Orleans
@@ -153,7 +153,7 @@ RRF merges ranked results from different retrievers. It is a suitable starting s
 ```text
 .NET SDK / HTTP API / MCP / SQL
                  │
-     Connection grain (one per client)
+     Request grain (one per operation)
    auth, validation, operation limits
                  │
      ┌───────────┴───────────────────────┐
@@ -181,7 +181,7 @@ version + consumer checkpoint      version + consumer checkpoint
 
 ### Responsibilities
 
-`Connection grain`: one Orleans grain per connected client ([ADR-125](../ADR/ADR-125-connection-owned-execution.md)). It runs the client's independent operations with per-operation data bounds, cancellation and fresh persisted authorization for every operation; it stores no trusted roles, completed-request history or storage handles.
+`Request grain`: one ordinary Orleans grain per admitted operation ([ADR-125](../ADR/ADR-125-connection-owned-execution.md)). It executes with its own data bounds, cancellation and fresh persisted authorization. The accepted transport owns the client connection and dispatches requests directly.
 
 `Partition grain`: an ordinary Orleans grain that serializes and routes the commands of one logical partition to the ZoneTree owners on `ReplicaCount` silos. The number of grains follows the number of operational partitions. A per-document grain may be an optional facade; the base data path works with partition batches. The base architecture creates no grain per edge, sample or ANN node. Orleans may migrate a partition grain; migration does not move files.
 
@@ -262,7 +262,7 @@ Comparers and serializers are part of the persisted data format. There is one cu
 
 ### Single-node apply
 
-1. The connection grain checks auth scope, JSON, schema, size and command identity.
+1. The request grain checks auth scope, JSON, schema, size and command identity.
 2. The partition owner's ordered apply gate serializes the partition's commands; callers wait for their turn instead of being refused.
 3. A dedup lookup runs; a repeat with the same ID and a different payload ends in an explicit conflict.
 4. In one transaction: all preconditions are checked, index deltas are built, canonical records change, domain events/queue state/inbox receipt are added when the command has them, the outbox event is added, and the outcome and `lastApplied` are written. A shared TransactionDomain is checked before apply.
@@ -746,11 +746,11 @@ The lambda builder supports a whitelist of field accesses and operators that can
 
 ### 24.3. Clients and grains
 
-Each connected client has one connection grain ([ADR-125](../ADR/ADR-125-connection-owned-execution.md)) with bounded, disposable session state: subscription state and cursor references. It must not store trusted roles, completed-request history, storage handles, individual documents or unbounded client results. Disconnect or idle expiry ends the client's work and deactivates the grain.
+The accepted transport owns a bounded, disposable client session ([ADR-125](../ADR/ADR-125-connection-owned-execution.md)). It dispatches each operation to its own request grain and joins outstanding calls on disconnect or idle expiry. The session stores no trusted roles, completed-request history, storage handles or document payloads.
 
 An Orleans activation runs one turn at a time. By default a request holds a non-reentrant activation until it completes; an await alone does not open the activation to the next request. Reentrancy allows turns to interleave; it does not create CPU parallelism inside one activation. [S18][S19]
 
-The connection grain therefore runs independent operations in bounded call-local contexts, and scheduling is chosen per method ([ADR-110](../ADR/ADR-110-orleans-execution-primitives.md)). One slow request must not delay all of that client's requests.
+Independent request grains isolate the caller's operations. One slow operation must not delay the caller's other requests.
 
 StatelessWorker grains use one helper-created logical key per pool. Orleans automatically creates and retires local activations with load; individual activations are not addressable. They handle interchangeable work and activation-local buffered batches flushed on timers. Storage access follows the typed grain → ZoneTree owner path. [S20]
 
@@ -1004,7 +1004,7 @@ A write is acknowledged after durable local apply on every configured copy (see 
 
 ### 28.5. Read scaling and fan-out
 
-A point query with a partition key goes to one partition. Scalar equality on projectId or a time window must prune unneeded partitions. A query without a routing predicate may need all partitions; the planner reports the fan-out and checks the budget. The connection grain gathers results from several partitions within the operation budget.
+A point query with a partition key goes to one partition. Scalar equality on projectId or a time window must prune unneeded partitions. A query without a routing predicate may need all partitions; the planner reports the fan-out and checks the budget. The request grain gathers results from several partitions within the operation budget.
 
 The copy that serves an ANN search reports its projection watermark; the presence of a copy does not mean its search index is ready.
 
@@ -1043,7 +1043,7 @@ Admin capabilities are separated: infrastructure operations, schema/index manage
 | queue.inspect / deadletters.read/redrive | Metadata/body policy and explicit redrive |
 | subscriptions.manage / scheduler.manage | Group source/filter scope, checkpoints, schedules |
 
-The default policy is deny. Grants limit scope. An explicit deny has a defined precedence. Tenant membership comes from server-side identity mapping. The connection grain never accepts a role list or tenant authority from an arbitrary request payload.
+The default policy is deny. Grants limit scope. An explicit deny has a defined precedence. Tenant membership comes from server-side identity mapping. The server never accepts a role list or tenant authority from an arbitrary request payload.
 
 ### 29.3. Row policy
 
@@ -1319,7 +1319,7 @@ silo lifecycle stages and `IHostedService` components have a defined start/stop 
 | ADR-015 | Sensitive fields omitted by default + derived lineage | Masks, mutation safety, index/reranker privacy |
 | ADR-018 | Global per-modality windows → weightedRrfV1 | Statistics scope, ties, candidate completeness |
 | ADR-019 | Managed-first ANN; exact oracle mandatory | Qualified library/code, dependency audit |
-| ADR-020 | One connection grain per client, independent query contexts | No per-client head-of-line blocking, bounded CPU |
+| ADR-020 | Transport-owned client connections, independent query contexts | No per-client head-of-line blocking, bounded CPU |
 | ADR-022 | Current policy epoch at the request/page boundary | Revocation ACK, fail-closed cache proof |
 
 ### 36.1. Questions that remain qualification gates
@@ -1595,7 +1595,7 @@ Event/Queue Commands + Query Frontends
       ↓
 Authorization + Domain Resolver + Operation Bounds
       ↓
-Connection grain → partition grains (Orleans)
+Request grain → partition grains (Orleans)
       ↓
 ZoneTree owner Grain Service on ReplicaCount silos + ordered commit
       ↓
@@ -1612,7 +1612,7 @@ Background coordination of queues, subscription groups and the scheduler uses Or
 
 User handlers run in a .NET Worker Service, an ASP.NET application or another SDK client. Trusted host modules can process system projections under separate capability grants. Arbitrary assemblies from a client request are never loaded into the server process.
 
-A client's connection grain holds bounded subscription state; independent receive requests and handler executions have bounded concurrency. No durable actor is created per message. Workers scale independently of storage nodes; they connect to the public endpoint and receive lanes according to their current permissions.
+The client session holds bounded subscription state; independent receive requests and handler executions have bounded concurrency. No durable actor is created per message. Workers scale independently of storage nodes; they connect to the public endpoint and receive lanes according to their current permissions.
 
 The SDK helper runs receive → handler → renew when needed → CommitProcessing/Ack, with cancellation and unknown-outcome resolution. The helper must not automatically retry a non-idempotent external side effect. Handler idempotency and the external action contract are defined by the application.
 

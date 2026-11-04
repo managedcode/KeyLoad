@@ -17,7 +17,7 @@ Each silo-local Grain Service owns that silo's ZoneTree files (with ZoneTree's
 write-ahead log), locks and ordered apply gate. Grains call those services through typed Orleans calls;
 moving an activation never moves a file or open storage handle.
 
-The public API enters one connection grain per connected client. Database grains
+The public API enters one ordinary request grain per admitted operation. Database grains
 order canonical commands into batches and request operations from the required
 silo-local owners. Every queued command joins the next batch. Each owner applies a
 batch as one process-persistent native ZoneTree transaction; disk sync is

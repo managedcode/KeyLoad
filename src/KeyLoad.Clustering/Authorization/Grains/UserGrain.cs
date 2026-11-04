@@ -18,11 +18,12 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
         {
             throw Unavailable();
         }
+        var joined = loaded is null;
         var current = loaded ??= LoadAsync(secret, witness, cancellationToken);
         UserCredential credential;
         try
         {
-            credential = await current.WaitAsync(cancellationToken);
+            credential = joined ? await current : await current.WaitAsync(cancellationToken);
         }
         catch (Exception) when (current.IsFaulted || current.IsCanceled)
         {
@@ -57,7 +58,7 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
         var envelope = codec.CreateRead(state.RequestId, null, GrainReadKind.Authenticate, secret);
         using var placement = GrainRequestIdentityScope.ForPlacement(envelope,
             GrainIdentityContext.RequireOriginSilo(), cancellationToken);
-        var reply = await GrainFactory.GetGrain<IConnectionGrain>(state.ConnectionId)
+        var reply = await GrainFactory.GetGrain<IRequestGrain>(RequestExecutionGrainIdentity.For(state.RequestId))
             .ExecuteAsync(envelope, cancellationToken);
         if (reply.Error is { } error)
         {

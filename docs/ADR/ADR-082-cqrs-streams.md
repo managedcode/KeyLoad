@@ -8,11 +8,9 @@ Use the centrally pinned `ManagedCode.Communication` packages for CQRS streams.
 KeyLoad does not implement another streaming framework, producer queue, result
 envelope, HTTP stream writer or command dispatcher.
 
-The public API calls the client's Orleans connection grain. Each operation uses
-one bounded Communication producer and an independent request grain. For ordinary
-operations without a progress consumer, `ConnectionGrain.ExecuteAsync` consumes
-the producer locally and returns the settled `GrainOperationReply` through one
-Orleans Task call. Progress consumers and composed maintenance or queue operations
+The server transport calls the operation's independent request grain directly.
+For ordinary operations, `RequestGrain.ExecuteAsync` returns the settled
+`GrainOperationReply` through one Orleans Task call. Progress consumers and composed maintenance or queue operations
 use `ExecuteStreamAsync` and its
 `IAsyncEnumerable<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>`.
 Both entry points use the same producer, fresh authorization, request identity,
@@ -22,9 +20,8 @@ owner. Clustering and inter-silo communication belong to Orleans under
 
 ```mermaid
 flowchart LR
-    API[SDK or MCP API] --> Connection[Orleans connection grain]
-    Connection --> CQRS[Communication CQRS producer]
-    CQRS --> Request[Independent request grain]
+    API[SDK or MCP API] --> Request[Independent request grain]
+    Request --> CQRS[Communication CQRS producer]
     Request --> Storage[Silo-local ZoneTree owner]
     CQRS --> Local[Local consumer for ordinary operations]
     Local -->|Settled Task reply| API
@@ -41,7 +38,7 @@ flowchart LR
 | `ManagedCode.Communication.AspNetCore` | CQRS HTTP stream results when an external HTTP streaming endpoint is exposed. |
 | KeyLoad | Fresh persisted authorization; request/result identity; operation-specific progress and stream-shape validation; database effects and storage shutdown ordering. Chunks carry no byte or frame cap and concurrent operations no count limit ([ADR-145](ADR-145-no-request-throttling.md), [ADR-149](ADR-149-no-operation-limits.md)). |
 
-`ConnectionGrain` creates its shared operation producer with `CqrsStream.Create`.
+The request grain creates the operation producer with `CqrsStream.Create`.
 Its KeyLoad adapters must remain limited to the last row;
 they must not reproduce package-owned producer or transport machinery.
 Cancellation and early disposal must await the producer before releasing

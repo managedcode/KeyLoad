@@ -27,6 +27,11 @@ internal static class OrleansSiloConfiguration
             cluster.ClusterId = options.ClusterId;
             cluster.ServiceId = OrleansNodeProtocol.ServiceId;
         });
+        silo.Configure<SiloMessagingOptions>(messaging =>
+        {
+            messaging.WaitForCancellationAcknowledgement = true;
+            messaging.CancelRequestOnTimeout = true;
+        });
         OrleansClustering.Configure(silo, options, address);
         PartitionStorageRegistration.Register(silo);
         silo.Services.AddSingleton<OrleansNodeLifecycle>();

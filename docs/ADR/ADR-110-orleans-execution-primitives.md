@@ -10,7 +10,7 @@ Each KeyLoad responsibility uses exactly one Orleans primitive:
 
 | Responsibility | Primitive | Why this one |
 |---|---|---|
-| A connected client | `ConnectionGrain` (ADR-125), `[Immovable]`, `[PreferLocalPlacement]` | One activation per connection on the silo that accepted the transport; default non-reentrant turns protect session invariants; `[AlwaysInterleave]` only on close/cancel |
+| An admitted client operation | Ordinary `RequestGrain` (ADR-125), `[PreferLocalPlacement]` | The transport owns the connection; the request grain owns one independent operation |
 | A logical partition | Partition grain keyed by the canonical partition id | Serializes commands of one partition; holds no files; migration moves only in-memory values |
 | A node's ZoneTree | One DI singleton storage host per silo plus one Grain Service as its remote surface | A Grain Service is one per silo, never collected, and can be called on a specific silo with `GrainServiceClient<T>.GetGrainService(SiloAddress)` |
 | Copies of a write | The writer calls the storage Grain Service on each target silo | Orleans replicates no application data; target silos come from membership |
@@ -24,8 +24,8 @@ Each KeyLoad responsibility uses exactly one Orleans primitive:
 
 ```mermaid
 flowchart LR
-    Client[Connected client] --> Conn[ConnectionGrain]
-    Conn --> Part[Partition grain]
+    Client[Transport connection] --> Request[Request grain]
+    Request --> Part[Partition grain]
     Part -->|GetGrainService SiloAddress| Svc[Storage Grain Service on target silo]
     Membership[IClusterMembershipService] --> Part
     Svc --> Host[Storage host singleton]

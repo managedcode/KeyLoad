@@ -8,7 +8,6 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
 {
     private readonly Lock gate = new();
     private readonly BaseConnectionContext transport;
-    private readonly IServiceProvider services;
     private readonly GrainRoutingOptions settings;
     private readonly CancellationTokenSource closed = new();
     private readonly TaskCompletionSource drained = new(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -20,13 +19,11 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
     private Task? closeTask;
     private int active;
     private bool closing;
-    private bool used;
 
-    internal ServerConnectionFeature(BaseConnectionContext transport, IServiceProvider services,
+    internal ServerConnectionFeature(BaseConnectionContext transport,
         IOptions<GrainRoutingOptions> options, TimeProvider clock)
     {
         this.transport = transport;
-        this.services = services;
         settings = options.Value;
         this.clock = clock;
         lastIdleTimestamp = clock.GetTimestamp();
@@ -56,7 +53,6 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
             }
             var operation = new ServerConnectionOperation(this, cancellationToken, closed.Token);
             ++active;
-            used = true;
             idle.Change(Timeout.InfiniteTimeSpan, Timeout.InfiniteTimeSpan);
             return operation;
         }
@@ -151,11 +147,6 @@ internal sealed class ServerConnectionFeature : IAsyncDisposable
         var failures = new List<Exception>();
         await ServerFailureObserver.ObserveAsync(() => closeSignal.Task, failures);
         await drained.Task;
-        if (used)
-        {
-            await ServerFailureObserver.ObserveAsync(() => services.GetRequiredService<OrleansNode>()
-                .CloseConnectionAsync(Id, CancellationToken.None), failures);
-        }
         ServerFailureObserver.ThrowIfAny(failures);
     }
 

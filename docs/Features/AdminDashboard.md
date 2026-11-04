@@ -24,7 +24,7 @@ This is the durable requirements and acceptance contract; the decision and imple
 flowchart LR
     Operator[Operator browser or SDK] --> API[Same origin admin API]
     API --> Auth[Persisted credential authentication]
-    Auth --> Conn[Connection grain]
+    Auth --> Conn[Request grain]
     Conn --> Authority[Fresh persisted administrator authorization]
     Authority --> Catalog[Bounded catalog and queue read through partition grains]
     Authority --> Node[Silo-local node observer]
@@ -37,7 +37,7 @@ flowchart LR
 
 - Public DTO/protocol: `src/KeyLoad.Abstractions/AdminDashboard/`.
 - Gated catalog/queue behavior: `src/KeyLoad.Core/AdminDashboard/`.
-- Grain composition: the caller's connection grain, the existing read enum and the silo-local node administration service; no new durable grain state or grain-owned filesystem.
+- Grain composition: the operation's request grain, the existing read enum and the silo-local node administration service; no new durable grain state or grain-owned filesystem.
 - API, observations, Blazor Server components and exact asset hosting: `src/KeyLoad/AdminDashboard/`, with server-rendered `Components/`, circuit-owned `Execution/` and the small static `Assets/` surface. Existing shared server configuration is composition only.
 - .NET SDK: `src/KeyLoad.Client/AdminDashboard/`; official MCP/agent declarations consume these same typed capabilities.
 - Tests: `tests/KeyLoad.FunctionalTests/AdminDashboard/`, `tests/KeyLoad.ClusterTests/AdminDashboard/`.
@@ -52,7 +52,7 @@ Goal: a polished same-origin database console at `/admin`, showing real cluster 
 
 In scope: read-only runtime administration, authenticated typed HTTP/.NET SDK/official MCP operations, bounded pages and live observation. Out of scope: schema/data edits, queue receive/ack/redrive, backup buttons, public Pages publication, SMID implementation, changes to durability, replication or routing ownership, and performance supremacy. Existing database operations remain their owning slices.
 
-Actors: an operator with a current persisted administrator principal, an unauthorized/revoked/expired caller, and an unauthenticated visitor loading only the credential-free server-rendered shell. Authorization is reloaded freshly on the connection grain. The API key is submitted over the Blazor Server circuit, retained in circuit memory and cleared on disconnect/disposal. Server-owned HTTP reads target Kestrel's listening address using the existing typed SDK and Bearer authentication; every operation reloads persisted credentials and administrator authority. The browser cannot select the server destination. User enters tenant/database and atomic partition key; a resource supplies its persisted transaction-domain identity. A catalog resource is not a physical partition. Scope defaults are editable conveniences, not claims about all database tenants.
+Actors: an operator with a current persisted administrator principal, an unauthorized/revoked/expired caller, and an unauthenticated visitor loading only the credential-free server-rendered shell. Authorization is reloaded freshly on the request grain. The API key is submitted over the Blazor Server circuit, retained in circuit memory and cleared on disconnect/disposal. Server-owned HTTP reads target Kestrel's listening address using the existing typed SDK and Bearer authentication; every operation reloads persisted credentials and administrator authority. The browser cannot select the server destination. User enters tenant/database and atomic partition key; a resource supplies its persisted transaction-domain identity. A catalog resource is not a physical partition. Scope defaults are editable conveniences, not claims about all database tenants.
 
 Server composition enables the SDK's static web assets manifest for execution
 from build output, including Aspire project resources without a launch profile.
@@ -70,7 +70,7 @@ view name stays the same.
 ## Criteria and pass/fail
 
 
-- **AC-AD-001 / REQ-AD-001**: `/admin` and a finite exact static-asset whitelist load without a key; every dashboard data operation requires current persisted administrator authority. Missing credential fails unauthenticated; nonadmin/revoked/expired keys fail with safe errors. No trusted client roles, broad `/admin` authentication exemption, secrets, absolute filesystem paths, localStorage/sessionStorage or credential-bearing URLs. Dashboard APIs execute on the caller's connection grain with current read cuts.
+- **AC-AD-001 / REQ-AD-001**: `/admin` and a finite exact static-asset whitelist load without a key; every dashboard data operation requires current persisted administrator authority. Missing credential fails unauthenticated; nonadmin/revoked/expired keys fail with safe errors. No trusted client roles, broad `/admin` authentication exemption, secrets, absolute filesystem paths, localStorage/sessionStorage or credential-bearing URLs. Dashboard APIs execute on the operation's request grain with current read cuts.
 - **AC-AD-002 / REQ-AD-002**: snapshot identifies the actual executing node, incarnation, capture time, applied/read generation and configured copy count (`KeyLoad:ReplicaCount`). File lengths distinguish canonical database files, backups and the observed node total; these are physical observations, not unique logical/cluster bytes. Enumeration visits at most 2,048 entries, lasts at most a cooperative 250 ms budget, returns at most 200 file summaries, honors cancellation and never follows symlinks. Missing/changing/unreadable files or exceeded bounds are explicit incomplete/unavailable observations, never a fabricated complete zero. One concurrent filesystem observation per node; saturation fails promptly. These observational reads do not own files or mutate storage.
 - **AC-AD-003 / REQ-AD-003**: process-local HTTP counters capture completed public API requests, failed requests and elapsed duration without high-cardinality labels/payloads; dashboard polling, status observations, static, Blazor transport, health and internal routes are excluded. UI computes HTTP requests/s and average response duration only from two samples of the same node/process and monotonic counters, retaining at most 120 samples. New process, failed observation and reconnect reset/mark history unavailable. Cluster throughput is not inferred from one node.
 - **AC-AD-004 / REQ-AD-004**: catalog uses explicit tenant/database and exclusive resource-name continuation, 1..100 limit (default 50), gated read plus bounded byte/cancellation budget. It returns metadata only (name/kind/domain/schema/index count/paused), no keys or policies. Collection rows use existing authorized query AST/cursor, 25-row pages; blob pages use existing authorized metadata listing and expose actual logical published length. Empty/missing/unsupported kinds and invalid scope/limits produce clear states. Razor encodes text by default; stored HTML is text, not executable markup.

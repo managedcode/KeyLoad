@@ -4,8 +4,7 @@ using Microsoft.Extensions.Options;
 
 namespace KeyLoad.Server;
 
-internal sealed class ServerConnectionRegistry(IServiceProvider services,
-    IOptions<GrainRoutingOptions> options, TimeProvider clock)
+internal sealed class ServerConnectionRegistry(IOptions<GrainRoutingOptions> options, TimeProvider clock)
 {
     private readonly Lock gate = new();
     private readonly Dictionary<Guid, ServerConnectionFeature> connections = [];
@@ -22,7 +21,7 @@ internal sealed class ServerConnectionRegistry(IServiceProvider services,
                 transport.Abort(new ConnectionAbortedException(ServerConnectionProtocol.Closed));
                 return;
             }
-            feature = new(transport, services, options, clock);
+            feature = new(transport, options, clock);
             connections.Add(feature.Id, feature);
             transport.Features.Set(feature);
         }

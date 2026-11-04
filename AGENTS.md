@@ -37,11 +37,12 @@ distributed grain directory, placement, activation movement, scheduling, interna
 communication and scaling. Enable the distributed grain directory and
 activation repartitioner. Do not implement a second cluster runtime.
 
-The execution path is public API -> one server-owned Orleans grain per connected
-client -> database grains -> silo-local ZoneTree owners on the required nodes ->
-aggregate results -> caller. Independent operations on a connection have separate
-request IDs, cancellation and bounded resources. Stable command IDs deduplicate
-retries. Clients cannot choose trusted connection identities or roles.
+The server transport owns each public connection and dispatches each admitted
+operation directly to its own ordinary Orleans request grain. Request grains
+call the database and silo-local ZoneTree owners on the required nodes, gather
+results and return them. Each operation has its own server-issued request ID,
+cancellation and bounded resources. Stable command IDs deduplicate retries.
+Clients cannot choose trusted connection identities or roles.
 
 Storage has two explicit contracts. A shared volume exposes the same configured
 storage paths to all silos without copying data. Each physical partition still

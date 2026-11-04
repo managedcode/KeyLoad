@@ -9,7 +9,7 @@ reverse graph -> queued actions, inside one authorized bounded database request.
 
 ```mermaid
 flowchart LR
- Agent[Agent uses familiar SQL SDK MCP] --> Request[Client connection grain]
+ Agent[Agent uses familiar SQL SDK MCP] --> Request[Request grain]
  Request --> Transaction[One atomic transaction on the partition ZoneTree owners]
  Queue[Ready queue messages] --> Transaction
  Entity[Canonical documents and typed rows] --> Transaction
@@ -65,7 +65,7 @@ storage/replication format replacement and fabricated performance/publication.
 
 Actors: persisted authenticated agent/admin; public canonical command through
 HTTP/.NET/official MCP or SQL envelope. No supplied trusted roles. Requests run in the
-client's connection grain; the silo-local ZoneTree owners retain ZoneTree/WAL ownership.
+request grain; the silo-local ZoneTree owners retain ZoneTree/WAL ownership.
 
 | ID | Pass / fail conditions | Tests / review |
 |---|---|---|

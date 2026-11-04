@@ -10,7 +10,7 @@ OrleansExecution is how a public database operation reaches the data. Microsoft 
 
 In scope:
 
-- One Orleans connection grain per connected client, and per-operation execution inside it (typed request envelope identity, fresh persisted authorization, bounded admission, cancellation, backpressure, CQRS result and progress streams, idempotent command outcomes).
+- One ordinary Orleans request grain per admitted transport operation (typed request envelope identity, fresh persisted authorization, bounded admission, cancellation, backpressure, CQRS result and progress streams, idempotent command outcomes).
 - Logical partition grains: ordinary Orleans grains that serialize and route the commands of one logical partition.
 - The silo-local ZoneTree owner (an Orleans Grain Service) and its silo lifecycle: one host, ordered startup, request drain and joined shutdown before files close.
 - Copies to `KeyLoad:ReplicaCount` silos through ordinary Orleans calls, with acknowledgement from every configured copy.
@@ -22,16 +22,16 @@ Grain calls carry no per-call filters: KeyLoad registers no grain-call graph pol
 
 ## Request flow
 
-1. A public API call (HTTP, .NET SDK, MCP or SQL) is authenticated by the server and handed to the caller's connection grain.
-2. The connection grain checks fresh persisted authorization for the operation and calls the logical partition grains the operation needs.
+1. A public API call (HTTP, .NET SDK, MCP or SQL) is authenticated by the server and sent directly to its own request grain.
+2. The request grain checks fresh persisted authorization for the operation and calls the logical partition grains the operation needs.
 3. A partition grain applies a command in order and sends it through Orleans to the ZoneTree owners of its ReplicaCount copies, on its own silo or on other silos. It returns success after every configured copy confirms durable local apply.
-4. Reads call the ZoneTree owner of the relevant node through Orleans; a read spanning partitions is fanned out by the connection grain and merged within the operation's bounds.
+4. Reads call the ZoneTree owner of the relevant node through Orleans; a read spanning partitions is fanned out by the request grain and merged within the operation's bounds.
 5. Results are gathered and returned to the caller.
 
 ```mermaid
 flowchart LR
     Caller[HTTP SDK MCP SQL caller] --> Api[Public API]
-    Api --> Connection[Connection grain one per client]
+    Api --> Connection[Request grain one per operation]
     Connection --> PartitionA[Logical partition grain]
     Connection --> PartitionB[Logical partition grain]
     PartitionA -->|Orleans call| OwnerLocal[ZoneTree owner GrainService on own silo]
@@ -53,11 +53,11 @@ Only tests that exist in `tests/` are named. A criterion without a named test is
 
 | Requirement | Acceptance (pass/fail) | Existing tests |
 |---|---|---|
-| REQ-ROUTE-001: every database operation of a connected client runs through that client's connection grain, which calls the logical partition grains it needs. | AC-ROUTE-001: .NET SDK and official MCP reads and writes reach the connection grain; independent operations on one connection complete independently, each with a unique per-operation request ID and a stable command retry ID. Fails if an operation bypasses the connection grain or a retry produces a second effect. | `RequestIdReceiptTests.SdkResponsesCarryUniqueActorRequestIdsAcrossStableWriteRetryAndParallelReads`; `ConnectionClusterOverlapTests.AcCrs058OneHttp2ConnectionCompletesIndependentCommandAndCancelsOnlySelectedOperation`; `ConnectionClusterSequentialTests.AcCrs057SdkAndOfficialMcpReusePhysicalConnectionAfterFailureAndReplay`; `ConnectionClusterAuthorizationTests.AcCrs059FreshPersistedAuthorizationDoesNotLeakAcrossConnectionOperations` |
+| REQ-ROUTE-001: every admitted client operation runs on its own ordinary request grain. | AC-ROUTE-001: SDK and official MCP operations on one transport complete independently, with separate request identities and stable command retries. | `RequestIdReceiptTests`; real SDK and official MCP execution |
 | REQ-ROUTE-002: the distributed grain directory and activation repartitioner are enabled; activation migration never transfers files, file locks or write-ahead logs. | AC-ROUTE-002: the silo configuration enables both; after a real activation migration of a logical partition grain, SDK and MCP reads and writes return the same data and the same durable outcomes. | `DatabaseMigrationClusterTests.ActualIdleMigrationRejectsForeignTargetAndCancelledCallerThenStableSdkMcpColdHealthyContinuation` |
 | REQ-ROUTE-003: membership, discovery and failure detection are Orleans only (clustering provider), with no second cluster stack and no primary-node dependency. | AC-ROUTE-003: all configured silos join and become ready; with ReplicaCount 3 configured, reads and writes continue when one silo is killed. | Open |
 | REQ-ROUTE-004: logical partition identity is distinct from where activations run; it alone scopes transactions, unique indexes and command de-duplication. | AC-ROUTE-004: an equal literal partition key in different domains never shares a transaction; activation placement or migration never changes CAS, unique or de-duplication scope. | `TransactionTests.SameLiteralPartitionKeyCannotCrossTransactionDomains` |
-| REQ-ROUTE-006: the grain-call policy is default-deny and permits only declared transitions (client to connection grain, connection grain to the selected partition methods, declared Grain Service to grain methods). | AC-ROUTE-006: an operation succeeds with enforcement on; an undeclared target method or a direct client call to a partition grain is denied. | `ConnectionGraphPolicyTests.ActualServerPolicyAllowsOnlySelectedPartitionMethodsAndPreservesSignedReplay`; Graph package regressions per [GrainServiceGraph](OrleansExecution/GrainServiceGraph.md) |
+| REQ-ROUTE-006: the grain-call policy is default-deny and permits only declared transitions (transport to request grain, request grain to the selected partition methods, declared Grain Service to grain methods). | AC-ROUTE-006: an operation succeeds with enforcement on; an undeclared target method or a direct client call to a partition grain is denied. | `ConnectionGraphPolicyTests.ActualServerPolicyAllowsOnlySelectedPartitionMethodsAndPreservesSignedReplay`; Graph package regressions per [GrainServiceGraph](OrleansExecution/GrainServiceGraph.md) |
 | REQ-ROUTE-008: rejected requests produce bounded internal diagnostics without private data or changed public errors. | AC-ROUTE-008: the log records request GUID, closed stage/category and typed error code; malformed payload, typed-decode, JSON or argument failures omit payload, identity, credentials and raw exception text; successful calls allocate no diagnostic context; public outcomes are unchanged. | `GrainFailureDiagnosticsTests` (`JsonAndArgumentRejectionsKeepSafeReplyAndPrivateLogs`, `TaggedTypedPayloadFailureReportsItsStageAndSafeValidationReply`, `UnknownMetadataCannotInjectPrivateLogText`) |
 | REQ-ROUTE-009: Orleans RPC failures keep transport/outcome semantics without claiming storage damage. | AC-ROUTE-009: reads report OwnershipLost, possibly dispatched commands report UnknownWriteOutcome; caller cancellation, secret-free details and exactly one dispatch are preserved. | `OrleansRpcFailureTests.AcRoute009FrameworkFailuresUseFixedReadOrCommandOutcomes`; `OrleansRpcFailureTests.AcRoute009ForeignCancellationKeepsReadOrCommandOutcomeWithAnActiveCaller` |
 | REQ-ROUTE-010: cancellation replies use the actual incoming grain-call token. | AC-ROUTE-010: only active caller cancellation returns Cancelled; cancellation with an inactive caller token returns OwnershipLost for reads and UnknownWriteOutcome for commands; typed domain errors stay authoritative. | `GrainReplyCancellationTests` (four `AcRoute010*` cases) |
