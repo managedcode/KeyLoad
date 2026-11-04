@@ -18,31 +18,35 @@ internal static class CanonicalCredentialDispatch
         var grains = node.DatabaseReady ? node.Grains!
             : throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var user = grains.GetGrain<IUserGrain>(UserGrainIdentity.For(AuthorizationIdentity.ReadCredentialId(credential)));
-        PrincipalRecord? result = null;
-        var failures = new List<Exception>();
-        await ServerFailureObserver.ObserveAsync(async () =>
+        var identity = node.OpenRequestContext(null, requestId, Guid.Empty, connection.Token, connection.Id);
+        PrincipalRecord result;
+        try
         {
-            using var identity = node.OpenRequestContext(null, requestId, Guid.Empty, connection.Token, connection.Id);
-            await ServerFailureObserver.ObserveAsync(async () =>
+            onStarted?.Invoke();
+            try
             {
-                onStarted?.Invoke();
-                try
-                {
-                    var verified = await user.AuthenticateAsync(credential, connection.Token);
-                    result = new(verified.Id, verified.TenantId, [], []);
-                }
-                catch (Exception failure) when (failure is OrleansException or TimeoutException
-                    && CqrsBoundaryErrors.IsNonFatal(failure))
-                {
-                    throw OrleansRpcFailure.Translate(failure, false, requestId,
-                        node.RuntimeServices.GetRequiredService<ILogger<OrleansNode>>(),
-                        OrleansRpcFailureStage.Consumption,
-                        new(Guid.Empty, GrainReadKind.Authenticate, null), connection.Token);
-                }
-            }, failures);
-        }, failures);
-        ServerFailureObserver.ThrowIfAny(failures);
-        return result ?? throw Errors.Fail(ErrorCode.Corruption, PostgresProtocol.Invalid);
+                var verified = await user.AuthenticateAsync(credential, connection.Token);
+                result = new(verified.Id, verified.TenantId, [], []);
+            }
+            catch (Exception failure) when (failure is OrleansException or TimeoutException
+                && CqrsBoundaryErrors.IsNonFatal(failure))
+            {
+                throw OrleansRpcFailure.Translate(failure, false, requestId,
+                    node.RuntimeServices.GetRequiredService<ILogger<OrleansNode>>(),
+                    OrleansRpcFailureStage.Consumption,
+                    new(Guid.Empty, GrainReadKind.Authenticate, null), connection.Token);
+            }
+        }
+        catch (Exception failure)
+        {
+            if (RequestWorkSettlement.Observe(identity.Dispose).Value is { } cleanup)
+            {
+                throw new AggregateException(failure, cleanup);
+            }
+            throw;
+        }
+        identity.Dispose();
+        return result;
     }
 
     private static async Task<PrincipalRecord> ReadCurrentPrincipalAsync(OrleansNode node,
