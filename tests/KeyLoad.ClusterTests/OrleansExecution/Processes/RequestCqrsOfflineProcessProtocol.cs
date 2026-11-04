@@ -24,8 +24,10 @@ internal static class RequestCqrsOfflineProcessProtocol
     internal static ProcessStartInfo StartWaitingChild(string marker, string nonce, bool oversized,
         string? release = null)
     {
-        var script = "import { writeFileSync, existsSync } from 'node:fs'; "
-            + "writeFileSync(process.argv[1], process.pid + ':' + process.argv[2]); "
+        var script = "import { writeFileSync, renameSync, existsSync } from 'node:fs'; "
+            + "const marker = process.argv[1]; const pendingMarker = marker + '.pending'; "
+            + "writeFileSync(pendingMarker, process.pid + ':' + process.argv[2], { flag: 'wx' }); "
+            + "renameSync(pendingMarker, marker); "
             + (oversized
                 ? "await new Promise(resolve => { const poll = setInterval(() => { "
                     + "if (existsSync(process.argv[4])) { clearInterval(poll); resolve(); } }, 10); }); "
