@@ -133,6 +133,13 @@ public sealed class AuthorizationPolicy : IAuthorizationPolicy
     /// <inheritdoc />
     public string Project(PrincipalRecord principal, IReadOnlyList<SensitiveFieldPolicy> policies, string json, out string[] omitted)
     {
+        omitted = [];
+        return policies is { Count: EmptySequenceLength } ? json : ProjectWithPolicies(principal, policies, json, out omitted);
+    }
+
+    private static string ProjectWithPolicies(PrincipalRecord principal, IReadOnlyList<SensitiveFieldPolicy> policies,
+        string json, out string[] omitted)
+    {
         var hidden = policies.Where(p => !Grant(principal, p.RawReadGrant)).ToArray();
         omitted = hidden.Select(p => p.Path).ToArray();
         if (hidden.Length == EmptySequenceLength)
