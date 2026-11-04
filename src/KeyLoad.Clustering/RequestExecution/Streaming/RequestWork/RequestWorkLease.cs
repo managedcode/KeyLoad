@@ -89,21 +89,21 @@ internal sealed class RequestWorkLease : IDisposable, IAsyncDisposable, IRequest
 
     internal RequestWorkOriginalSettlement Finish()
     {
-        var failures = ImmutableArray.CreateBuilder<Exception>();
-        Add(cleanupFailure, failures);
-        Add((DisposeCancellation()).Value, failures);
-        Add((ReleaseAdmission()).Value, failures);
-        var outcome = new RequestWorkOriginalSettlement(originalFailure, failures.ToImmutable());
+        ImmutableArray<Exception>.Builder? failures = null;
+        Add(cleanupFailure, ref failures);
+        Add((DisposeCancellation()).Value, ref failures);
+        Add((ReleaseAdmission()).Value, ref failures);
+        var outcome = new RequestWorkOriginalSettlement(originalFailure, failures?.ToImmutable() ?? []);
         Volatile.Write(ref resultRetention, null);
         settlement.TrySetResult(outcome);
         return outcome;
     }
 
-    private static void Add(Exception? error, ImmutableArray<Exception>.Builder failures)
+    private static void Add(Exception? error, ref ImmutableArray<Exception>.Builder? failures)
     {
         if (error is not null)
         {
-            failures.Add(error);
+            (failures ??= ImmutableArray.CreateBuilder<Exception>()).Add(error);
         }
     }
 
