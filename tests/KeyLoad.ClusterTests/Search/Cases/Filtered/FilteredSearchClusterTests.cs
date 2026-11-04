@@ -2,6 +2,7 @@ using System.Collections.Immutable;
 using KeyLoad.Client;
 using KeyLoad.ClusterTests.ClientApi;
 using ManagedCode.Communication;
+using Microsoft.Extensions.VectorData;
 
 namespace KeyLoad.ClusterTests.Search;
 
@@ -132,6 +133,50 @@ internal sealed class FilteredSearchClusterTests(ClusterFixture fixture)
             McpCallerTools.SearchExecute, scenario.Vector(ImmutableArray.Create("a")), deadline.Token));
         await Assert.That(JsonDefaults.Serialize(healthy).AsSpan()
             .SequenceEqual(JsonDefaults.Serialize(official.Value))).IsTrue();
+    }
+
+    [Test]
+    public async Task VectorDataReturnsTheAuthorizedExactPageAndKeepsTheQueryEmbedding()
+    {
+        using var deadline = McpCallerDeadline.Create();
+        var scenario = await FilteredSearchClusterScenario.CreateAsync(fixture, deadline.Token);
+        var identity = await scenario.CreateReaderAsync(fixture, false, true, true,
+            FilteredSearchClusterScenario.OwnerB, deadline.Token);
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
+        var search = sdk.AsVectorSearchable(scenario.Partition, FilteredSearchClusterScenario.Collection,
+            FilteredSearchClusterScenario.VectorField, FilteredSearchClusterScenario.Space);
+        float[] embedding = [1, 0];
+        var stream = search.SearchAsync(embedding, 1, new() { Skip = 1 }, deadline.Token);
+        embedding[0] = -1;
+        var hits = await stream.ToArrayAsync(deadline.Token);
+
+        await Assert.That(hits).HasSingleItem();
+        await Assert.That(hits[0].Record.Reference.Id).IsEqualTo("d");
+        await Assert.That(hits[0].Record.Json).IsEqualTo("{}");
+        await Assert.That(hits[0].Record.Redacted).IsTrue();
+        await Assert.That(hits[0].Record.RedactedFields).Contains(FilteredSearchClusterScenario.TextField);
+        await Assert.That(hits[0].Score).IsEqualTo(SecondSingleScore);
+    }
+
+    [Test]
+    public async Task VectorDataPropagatesFieldDenialAndEnumeratorCancellation()
+    {
+        using var deadline = McpCallerDeadline.Create();
+        var scenario = await FilteredSearchClusterScenario.CreateAsync(fixture, deadline.Token);
+        var identity = await scenario.CreateReaderAsync(fixture, true, false, false, null, deadline.Token);
+        using var http = McpCallerHttp.Create(fixture, McpCallerProtocol.Node2);
+        var sdk = new KeyLoadClient(http, identity.Secret, IntegrationClientOptions.Execution());
+        var search = sdk.AsVectorSearchable(scenario.Partition, FilteredSearchClusterScenario.Collection,
+            FilteredSearchClusterScenario.VectorField, FilteredSearchClusterScenario.Space);
+        ReadOnlyMemory<float> embedding = new([1, 0]);
+        var stream = search.SearchAsync(embedding, 1, cancellationToken: deadline.Token);
+        var denied = await Assert.ThrowsAsync<VectorStoreException>(() => stream.ToArrayAsync(deadline.Token).AsTask());
+        await Assert.That(denied!.Message.Contains(nameof(ErrorCode.PermissionDenied), StringComparison.Ordinal)).IsTrue();
+
+        using var cancelled = new CancellationTokenSource();
+        await cancelled.CancelAsync();
+        await Assert.ThrowsAsync<OperationCanceledException>(() => stream.ToArrayAsync(cancelled.Token).AsTask());
     }
 
     private static async Task VerifyBothAsync(KeyLoadClient sdk, McpOfficialClient mcp,

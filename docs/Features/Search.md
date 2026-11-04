@@ -8,6 +8,22 @@ ZoneTree.FullTextSearch is the selected full-text provider under [ADR-071](../AD
 |---|---|---|
 | REQ-ZT-003: the selected full-text provider is a bounded derived projection | AC-ZT-003: the centrally pinned ZoneTree.FullTextSearch, an authorized exact token/identity/rank oracle, nonpartial cancellation and real replay/rebuild/swap tests on the Aspire replicated cluster pass; stale or corrupt generations cannot return success | Search provider tests, process recovery and SDK/official MCP tests |
 
+## .NET VectorData search
+
+`KeyLoadClient.AsVectorSearchable(partition, collection, vectorField, space)` exposes
+`IVectorSearchable<DocumentResult>` from [Microsoft.Extensions.VectorData.Abstractions](https://www.nuget.org/packages/Microsoft.Extensions.VectorData.Abstractions/10.10.0),
+the same .NET search interface used by the [CommunityToolkit vector connectors](https://github.com/CommunityToolkit/AI).
+Pass a `ReadOnlyMemory<float>` or `float[]` query embedding. Each enumeration issues
+one bounded exact search through the authenticated SDK and returns the authorized
+document projections and KeyLoad's reciprocal rank scores. `Skip` applies within
+that bounded server result. The adapter surfaces server failures as
+`VectorStoreException` and honors caller cancellation during both the request and enumeration.
+
+The adapter binds one vector field and exposes document retrieval. Requests for
+expression filters, vector field overrides, returned embeddings or score thresholds
+are rejected. KeyLoad's native SDK owns writes, collection administration, ANN and
+explicit document allowlists.
+
 ## Text term matching
 
 `SearchRequest.TextMatchMode` is the optional generated Id14 field with the closed
