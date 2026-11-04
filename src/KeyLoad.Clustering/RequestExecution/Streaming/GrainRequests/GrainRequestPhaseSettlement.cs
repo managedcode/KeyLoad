@@ -26,7 +26,7 @@ internal sealed class GrainRequestPhaseSettlement(GrainRequestCodec codec)
         connectionId = Guid.Empty;
         if (observed is { } value)
         {
-            await codec.ObserveProducerDisposedAsync(value, connection, context).ConfigureAwait(true);
+            await codec.ObserveProducerDisposedAsync(value, connection, context);
         }
     }
 

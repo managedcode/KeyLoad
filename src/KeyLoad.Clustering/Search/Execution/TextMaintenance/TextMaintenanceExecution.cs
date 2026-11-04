@@ -16,7 +16,6 @@ internal static class TextMaintenanceExecution
         purpose.EnableTextMaintenance(request.Mode);
         var children = new MaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, binding,
             TextMaintenanceChildScope.Purpose, TextIndexMaintenanceProtocol.Interrupted);
-        return await children.RunAsync(() => TextMaintenanceParentFlow.RunAsync(children, request, writer))
-            .ConfigureAwait(true);
+        return await children.RunAsync(() => TextMaintenanceParentFlow.RunAsync(children, request, writer));
     }
 }

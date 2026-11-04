@@ -28,7 +28,7 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
                 original.CommandId, token, connectionId: connectionId);
             try
             {
-                result = await ReadAsync(grains, envelope, requestId, original, connectionId, token).ConfigureAwait(true);
+                result = await ReadAsync(grains, envelope, requestId, original, connectionId, token);
             }
             catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
             catch (Exception failure) when (!CqrsBoundaryErrors.IsNonFatal(failure)) { failures.Add(failure); }
@@ -45,7 +45,7 @@ internal sealed class AnnProjectionJobDispatch(GrainRequestCodec codec, IService
         var actor = grains.GetGrain<IConnectionGrain>(connectionId);
         var purpose = new CqrsStreamPurpose(() => codec.Decode(envelope));
         var reply = await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-            streamToken => actor.ExecuteStreamAsync(envelope, streamToken), requestId, purpose, token).ConfigureAwait(true);
+            streamToken => actor.ExecuteStreamAsync(envelope, streamToken), requestId, purpose, token);
         return Read(reply, original);
     }
 

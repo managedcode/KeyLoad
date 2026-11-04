@@ -37,7 +37,7 @@ internal static class VisibleVectorReads
         using var lineages = view.OpenOrderedPointReader(VectorProjectionKeys.LineagePrefix(partition, collection, field), budget.Cancellation);
         var read = CreateVisitor(database, view, principal, partition, collection, field, budget, visitor, null, null,
             new(prefix, documents, lineages));
-        return await ReadExecutionBudgetStorageReads.VisitAllAsync(budget, view, prefix, read).ConfigureAwait(true);
+        return await ReadExecutionBudgetStorageReads.VisitAllAsync(budget, view, prefix, read);
     }
 
     private static StorageRecordVisitor CreateVisitor(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,

@@ -22,7 +22,7 @@ internal sealed class RuntimeJournalReplayGrain : DurableGrain, IRuntimeJournalR
     public async Task SetAsync(byte[] next)
     {
         value.Value = next;
-        await WriteStateAsync().ConfigureAwait(true);
+        await WriteStateAsync();
     }
 
     /// <inheritdoc />
@@ -40,7 +40,7 @@ internal sealed class RuntimeJournalReplayGrain : DurableGrain, IRuntimeJournalR
 
     /// <inheritdoc />
     public async Task DeleteAsync()
-        => await ((IJournaledStateManager)StateManager).DeleteStateAsync(CancellationToken.None).ConfigureAwait(true);
+        => await ((IJournaledStateManager)StateManager).DeleteStateAsync(CancellationToken.None);
 }
 
 #pragma warning restore ORLEANSEXP005

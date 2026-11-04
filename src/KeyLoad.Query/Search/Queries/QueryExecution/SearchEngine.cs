@@ -52,7 +52,7 @@ public sealed partial class SearchEngine
         var budget = new ReadExecutionBudget(database.EvaluationClock, cancellationToken);
         budget.Check();
         using var reservation = database.AdmitQuery(cancellationToken);
-        return await SearchCoreAsync(principalId, request, budget).ConfigureAwait(true);
+        return await SearchCoreAsync(principalId, request, budget);
     }
 
     /// <summary>Executes graph scope, retrieval and expansion inside one authorized search cut.</summary>

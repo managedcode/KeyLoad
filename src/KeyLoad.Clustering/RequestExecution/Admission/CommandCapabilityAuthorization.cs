@@ -12,7 +12,7 @@ internal static class CommandCapabilityAuthorization
         {
             ValidateFresh(database, request, token);
             await ObserveAndValidateAsync(database, codec, request,
-                GrainRequestPhase.AuthorizationReload, context, token).ConfigureAwait(true);
+                GrainRequestPhase.AuthorizationReload, context, token);
             return GrainRequestAuthority.ReloadForRequest(database, request.Envelope, clock);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
@@ -30,7 +30,7 @@ internal static class CommandCapabilityAuthorization
         {
             return;
         }
-        await observerCodec.ObservePhaseAsync(request, phase, context, token).ConfigureAwait(true);
+        await observerCodec.ObservePhaseAsync(request, phase, context, token);
         ValidateFresh(database, request, token);
     }
 

@@ -44,7 +44,7 @@ internal static class StorageRangePages
         var progress = new PageProgress(pageRecords, visitor, null);
         do
         {
-            progress.Finish(await visit(pageRecords, progress.Visit, progress.After).ConfigureAwait(true));
+            progress.Finish(await visit(pageRecords, progress.Visit, progress.After));
         }
         while (progress.HasNext);
         return progress.Result;

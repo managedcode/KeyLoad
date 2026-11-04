@@ -21,7 +21,7 @@ internal static class ConnectionCommandExecution
             stage = GrainFailureStage.CapabilityExecution;
             var work = new ReadExecutionBudget(clock, token);
             work.AttachResourceLifetimeBinding(binding);
-            var reply = await runOnOwner(owner, envelope, partition, token).ConfigureAwait(true);
+            var reply = await runOnOwner(owner, envelope, partition, token);
             CommandResultWorkBinding.BindReturned(request, reply, work, binding);
             return reply;
         }

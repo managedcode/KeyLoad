@@ -21,13 +21,13 @@ internal sealed class BackgroundStorageClient(GrainRequestCodec codec, SiloDatab
         }
         if (copies.Value.StorageMode == StorageAccessMode.SharedVolume)
         {
-            return await storage.ReadOwnerAsync(codec.Incarnation, token).ConfigureAwait(true);
+            return await storage.ReadOwnerAsync(codec.Incarnation, token);
         }
         foreach (var member in membership.CurrentSnapshot.Members.Values
             .Where(member => member.Status == SiloStatus.Active).OrderBy(member => member.Name, StringComparer.Ordinal))
         {
             token.ThrowIfCancellationRequested();
-            var status = await storage.On(member.SiloAddress).ReadStatusAsync(token).ConfigureAwait(true);
+            var status = await storage.On(member.SiloAddress).ReadStatusAsync(token);
             if (status.Incarnation != codec.Incarnation || !Guid.TryParse(status.NodeId, out var actual))
             {
                 throw Errors.Fail(ErrorCode.Corruption, AnnProjectionJobProtocol.Invalid);

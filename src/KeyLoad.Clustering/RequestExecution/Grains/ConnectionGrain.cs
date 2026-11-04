@@ -17,7 +17,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, IOptions<GrainRouti
     {
         var requestId = Admit(envelope);
         using var admitted = operations.Acquire(requestId);
-        return await Request(requestId).ExecuteAsync(envelope, cancellationToken).ConfigureAwait(true);
+        return await Request(requestId).ExecuteAsync(envelope, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -36,14 +36,14 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, IOptions<GrainRouti
         try
         {
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, enumerationToken);
-            await foreach (var chunk in stream.WithCancellation(linked.Token).ConfigureAwait(true))
+            await foreach (var chunk in stream.WithCancellation(linked.Token))
             {
                 yield return chunk;
             }
         }
         finally
         {
-            await Request(requestId).ReleaseAsync().ConfigureAwait(true);
+            await Request(requestId).ReleaseAsync();
         }
     }
 
@@ -64,7 +64,7 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, IOptions<GrainRouti
         codec.ValidateConnectionClose(closeControl, this.GetPrimaryKey());
         try
         {
-            await operations.CloseAsync().ConfigureAwait(true);
+            await operations.CloseAsync();
         }
         finally
         {
@@ -75,8 +75,8 @@ public sealed class ConnectionGrain(GrainRequestCodec codec, IOptions<GrainRouti
     /// <inheritdoc />
     public override async Task OnDeactivateAsync(DeactivationReason reason, CancellationToken cancellationToken)
     {
-        var owned = (await RequestWorkSettlement.JoinAsync(DisposeAsync().AsTask()).ConfigureAwait(true)).Value;
-        var execution = (await RequestWorkSettlement.JoinAsync(base.OnDeactivateAsync(reason, cancellationToken)).ConfigureAwait(true)).Value;
+        var owned = (await RequestWorkSettlement.JoinAsync(DisposeAsync().AsTask())).Value;
+        var execution = (await RequestWorkSettlement.JoinAsync(base.OnDeactivateAsync(reason, cancellationToken))).Value;
         RequestWorkSettlement.Rethrow(RequestWorkSettlement.Preserve(owned, execution));
     }
 

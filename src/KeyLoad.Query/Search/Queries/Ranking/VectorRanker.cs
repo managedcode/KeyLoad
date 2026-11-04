@@ -22,7 +22,7 @@ internal static class VectorRanker
     {
         var ranking = new Ranking(database, request, similarity, budget, eligibility, null, retainedLimit);
         _ = await VisibleVectorReads.VisitPackedAsync(database, view, principal, request.Partition, request.Collection,
-            request.VectorField!, budget, ranking.Visit).ConfigureAwait(true);
+            request.VectorField!, budget, ranking.Visit);
         return ranking.Complete();
     }
 

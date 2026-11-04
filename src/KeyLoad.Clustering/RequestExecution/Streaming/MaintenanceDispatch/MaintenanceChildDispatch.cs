@@ -19,8 +19,8 @@ internal static class MaintenanceChildDispatch
         try
         {
             admission.Open(parent, child, actorId, commandId, services, codec, binding, token);
-            await admission.ObserveStartedAsync(codec).ConfigureAwait(true);
-            result = await executeChild(child, admission.Token).ConfigureAwait(true);
+            await admission.ObserveStartedAsync(codec);
+            result = await executeChild(child, admission.Token);
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
@@ -32,9 +32,9 @@ internal static class MaintenanceChildDispatch
         }
         if (failures.Count != NoFailures || result?.Error is not null)
         {
-            await admission.CancelAsync(failures).ConfigureAwait(true);
+            await admission.CancelAsync(failures);
         }
-        await admission.JoinObservationAsync(failures).ConfigureAwait(true);
+        await admission.JoinObservationAsync(failures);
         admission.PrepareCleanup(failures);
         admission.Dispose();
         if (failures.Count != NoFailures && result?.Error is { } original)
@@ -66,7 +66,7 @@ internal static class MaintenanceChildDispatch
             {
                 invoked = true;
                 return executeChild(value, cancellation);
-            }, services, codec, binding, token).ConfigureAwait(true);
+            }, services, codec, binding, token);
         }
         catch (KeyLoadException error) when (invoked && command)
         {
@@ -93,18 +93,18 @@ internal static class MaintenanceChildDispatch
         TResult result;
         try
         {
-            result = await flow().ConfigureAwait(true);
+            result = await flow();
         }
         catch (Exception primary)
         {
             try
             {
-                await abort().ConfigureAwait(true);
+                await abort();
             }
             catch (Exception cleanup) { throw new AggregateException(primary, cleanup); }
             throw;
         }
-        await abort().ConfigureAwait(true);
+        await abort();
         return result;
     }
 

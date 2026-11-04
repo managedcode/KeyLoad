@@ -54,7 +54,7 @@ internal static class ReadExecutionBudgetStorageReads
         byte[] prefix, int maxRecords, StorageRecordVisitor visitor, byte[]? afterKey)
     {
         budget.Check();
-        var result = await view.VisitRangeAsync(prefix, maxRecords, visitor, afterKey, budget.Cancellation).ConfigureAwait(true);
+        var result = await view.VisitRangeAsync(prefix, maxRecords, visitor, afterKey, budget.Cancellation);
         budget.Check();
         return result;
     }

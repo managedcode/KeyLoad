@@ -11,8 +11,8 @@ internal static class AnnProjectionJobOperation
         T result = default!;
         await RunAsync(services, async binding =>
         {
-            result = await execute(binding).ConfigureAwait(true);
-        }, token).ConfigureAwait(true);
+            result = await execute(binding);
+        }, token);
         return result;
     }
 
@@ -25,7 +25,7 @@ internal static class AnnProjectionJobOperation
             ?? throw Errors.Fail(ErrorCode.OwnershipLost, AnnProjectionJobProtocol.Invalid);
         try
         {
-            await execute(lifetime).ConfigureAwait(true);
+            await execute(lifetime);
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {

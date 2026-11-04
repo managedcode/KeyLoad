@@ -47,7 +47,7 @@ internal sealed class RequestWorkProbe
             {
                 callbackRegistered.TrySetResult();
             }
-            await producerRelease.Task.WaitAsync(writer.CancellationToken).ConfigureAwait(true);
+            await producerRelease.Task.WaitAsync(writer.CancellationToken);
 
             return Result<GrainOperationReply>.Succeed(new GrainOperationReply { Result = new GrainValue(new byte[] { 1 }) });
         }
@@ -56,11 +56,11 @@ internal sealed class RequestWorkProbe
             finallyEntered.TrySetResult();
             try
             {
-                await producerRelease.Task.ConfigureAwait(true);
+                await producerRelease.Task;
             }
             finally
             {
-                await registration.DisposeAsync().ConfigureAwait(true);
+                await registration.DisposeAsync();
                 Interlocked.Increment(ref producerSettleCount);
                 Volatile.Write(ref producerOrder, Interlocked.Increment(ref settlementSequence));
                 producerSettled.TrySetResult();

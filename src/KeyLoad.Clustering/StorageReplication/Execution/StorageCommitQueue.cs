@@ -35,8 +35,8 @@ internal sealed class StorageCommitQueue(SiloStorageCopyExecution copies)
 
     private async Task SynchronizeAndDrainAsync(CancellationToken token)
     {
-        var synchronization = (await RequestWorkSettlement.JoinAsync(copies.SynchronizeAsync(token)).ConfigureAwait(true)).Value;
-        var queued = (await RequestWorkSettlement.JoinAsync(DrainAsync()).ConfigureAwait(true)).Value;
+        var synchronization = (await RequestWorkSettlement.JoinAsync(copies.SynchronizeAsync(token))).Value;
+        var queued = (await RequestWorkSettlement.JoinAsync(DrainAsync())).Value;
         RequestWorkSettlement.Rethrow(RequestWorkSettlement.Preserve(synchronization, queued));
     }
 
@@ -62,7 +62,7 @@ internal sealed class StorageCommitQueue(SiloStorageCopyExecution copies)
             try
             {
                 outcomes = await copies.ApplyBatchAsync([.. batch.Select(request => request.Operation)],
-                    CancellationToken.None).ConfigureAwait(true);
+                    CancellationToken.None);
             }
             catch (Exception error) when (CqrsRuntimeFailures.FindFatal(error) is null)
             {

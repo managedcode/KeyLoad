@@ -44,7 +44,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (codec.HasPhaseObserver)
         {
             await codec.ObservePhaseAsync(request, GrainRequestPhase.AuthorizationReload,
-                context, cancellationToken).ConfigureAwait(true);
+                context, cancellationToken);
             ConnectionReadExecution.ValidateFreshRequest(codec, request, requestId, cancellationToken);
         }
         if (kind == GrainReadKind.Document)
@@ -68,7 +68,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (UserAnalyticsReadExecution.Handles(kind))
         {
             return await UserAnalyticsReadExecution.ExecuteAsync(localDatabase, services, principal, kind, request,
-                binding, cancellationToken).ConfigureAwait(true);
+                binding, cancellationToken);
         }
         if (kind is GrainReadKind.PartitionQueryLeaf or GrainReadKind.DistributedSearchLeaf)
         {
@@ -78,10 +78,10 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (GrainMaintenanceReadCapabilities.Handles(kind))
         {
             return await GrainMaintenanceReadCapabilities.ExecuteAsync(services, principal,
-                kind, request, binding, cancellationToken).ConfigureAwait(true);
+                kind, request, binding, cancellationToken);
         }
         return await ReadCapabilityAsync(kind, principal, request, requestId,
-            binding, cancellationToken).ConfigureAwait(true);
+            binding, cancellationToken);
     }
 
     private async Task<GrainValue> ReadCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,
@@ -91,17 +91,17 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (kind == GrainReadKind.AnnProjectionObservation)
         {
             return new GrainValue(await AnnProjectionObservationRead.ExecuteAsync(localDatabase, services, runtimeClock,
-                principal, request, binding, cancellationToken).ConfigureAwait(true)) /* KLD0041: The current GrainValue wire slot carries this AnnProjectionObservation response with its generated runtime type header. */;
+                principal, request, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this AnnProjectionObservation response with its generated runtime type header. */;
         }
         if (kind == GrainReadKind.DistributedSearch)
         {
             return new GrainValue(await DistributedSearchReadCapability.ExecuteAsync(localDatabase, services, principal, request,
-                requestId, codec, context, runtimeClock, binding, cancellationToken).ConfigureAwait(true)) /* KLD0041: The current GrainValue wire slot carries this DistributedSearch response with its generated runtime type header. */;
+                requestId, codec, context, runtimeClock, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this DistributedSearch response with its generated runtime type header. */;
         }
         if (kind == GrainReadKind.PartitionQuery)
         {
             return new GrainValue(await PartitionQueryReadCapability.ExecuteAsync(localDatabase, services, principal, request,
-                codec, runtimeClock, binding, cancellationToken).ConfigureAwait(true)) /* KLD0041: The current GrainValue wire slot carries this PartitionQuery response with its generated runtime type header. */;
+                codec, runtimeClock, binding, cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this PartitionQuery response with its generated runtime type header. */;
         }
         if (RuntimeJournalRequestScope.Handles(kind))
         {
@@ -110,7 +110,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         if (GrainAdminDashboardCapabilities.Handles(kind))
         {
             return await GrainAdminDashboardCapabilities.ExecuteAsync(localDatabase, Administration, principal,
-                kind, request, codec, runtimeClock, cancellationToken).ConfigureAwait(true);
+                kind, request, codec, runtimeClock, cancellationToken);
         }
         if (GrainCoreReadCapabilities.Handles(kind))
         {
@@ -119,7 +119,7 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
                 kind == GrainReadKind.Stream ? services.GetRequiredService<PhysicalShardRecord>() : null);
         }
 
-        return await ReadQueryOrAdministrationAsync(kind, principal, request, binding, cancellationToken).ConfigureAwait(true);
+        return await ReadQueryOrAdministrationAsync(kind, principal, request, binding, cancellationToken);
     }
 
     private async Task<GrainValue> ReadQueryOrAdministrationAsync(GrainReadKind kind, PrincipalRecord principal,
@@ -130,10 +130,10 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             using var observation = codec.HasPhaseObserver
                 ? TextPostingObservation.Enter(token => codec.ObservePhaseAsync(request,
                     GrainRequestPhase.TextOriginalPostingRead, context, token)) : null;
-            return await Query.ExecuteAsync(kind, principal.Id, request, binding, cancellationToken).ConfigureAwait(true);
+            return await Query.ExecuteAsync(kind, principal.Id, request, binding, cancellationToken);
         }
 
-        return await ReadAdministrationAsync(kind, principal, request, cancellationToken).ConfigureAwait(true);
+        return await ReadAdministrationAsync(kind, principal, request, cancellationToken);
     }
 
     private async Task<GrainValue> ReadAdministrationAsync(GrainReadKind kind, PrincipalRecord principal,
@@ -144,8 +144,8 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         cancellationToken.ThrowIfCancellationRequested();
         var result = kind switch
         {
-            GrainReadKind.Backup => new GrainValue(await Administration.CreateBackupAsync(cancellationToken).ConfigureAwait(true)) /* KLD0041: The current GrainValue wire slot carries this Backup response with its generated runtime type header. */,
-            GrainReadKind.NodeStatus => new GrainValue(await Administration.ReadStatusAsync(cancellationToken).ConfigureAwait(true)) /* KLD0041: The current GrainValue wire slot carries this NodeStatus response with its generated runtime type header. */,
+            GrainReadKind.Backup => new GrainValue(await Administration.CreateBackupAsync(cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this Backup response with its generated runtime type header. */,
+            GrainReadKind.NodeStatus => new GrainValue(await Administration.ReadStatusAsync(cancellationToken)) /* KLD0041: The current GrainValue wire slot carries this NodeStatus response with its generated runtime type header. */,
             _ => throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest)
         };
         ConnectionReadExecution.ValidateFreshRequest(codec, request, request.Envelope.RequestId, cancellationToken);

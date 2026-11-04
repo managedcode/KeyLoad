@@ -29,15 +29,15 @@ internal sealed class RecurringDueTurnState
         next = turn == TransferTurn ? 0 : turn + 1;
         if (turn == 0)
         {
-            recurring = await runRecurring(recurring, token).ConfigureAwait(true);
+            recurring = await runRecurring(recurring, token);
         }
         else if (turn == 1 && options.Value.QueueDeadlinePrincipalId is not null)
         {
-            queue = await runQueue(queue, token).ConfigureAwait(true);
+            queue = await runQueue(queue, token);
         }
         else if (turn == TransferTurn && options.Value.TransferCoordinatorPrincipalId is not null)
         {
-            transfer = await runTransfer(transfer, token).ConfigureAwait(true);
+            transfer = await runTransfer(transfer, token);
         }
     }
 }

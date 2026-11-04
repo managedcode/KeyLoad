@@ -31,12 +31,12 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         var completed = false;
         try
         {
-            var owners = await OwnersAsync(cancellationToken).ConfigureAwait(true);
-            var maximum = await gaps.CompleteAsync(owners, cancellationToken).ConfigureAwait(true);
+            var owners = await OwnersAsync(cancellationToken);
+            var maximum = await gaps.CompleteAsync(owners, cancellationToken);
             Advance(owners, maximum);
             started = true;
             var prepared = await storage.On(owners[StorageCopyContract.FirstOwner].Address)
-                .PrepareBatchAsync(operations, cancellationToken).ConfigureAwait(true);
+                .PrepareBatchAsync(operations, cancellationToken);
             sent = prepared.Length;
             cancellationToken.ThrowIfCancellationRequested();
             // Every owner applies the same prepared commands from the same cut in one commit, so the copies persist
@@ -51,7 +51,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
             StorageBatchResult[] results;
             try
             {
-                results = await Task.WhenAll(applies).ConfigureAwait(true);
+                results = await Task.WhenAll(applies);
             }
             finally
             {
@@ -78,10 +78,10 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     }
 
     internal async Task<SiloStorageCut> ReadCutAsync(CancellationToken cancellationToken)
-        => (await ReadAvailableAsync(cancellationToken).ConfigureAwait(true)).Cut;
+        => (await ReadAvailableAsync(cancellationToken)).Cut;
 
     internal async Task<SiloAddress> GetReadOwnerAsync(SiloAddress preferredSilo, CancellationToken cancellationToken)
-        => (await ReadAvailableAsync(cancellationToken, preferredSilo).ConfigureAwait(true)).Address;
+        => (await ReadAvailableAsync(cancellationToken, preferredSilo)).Address;
 
     /// <summary>Selects up to ReplicaCount of the most advanced reachable copies. A batch requires the complete owner
     /// set; a read takes the most advanced reachable copy, so surviving copies keep serving every acknowledged write
@@ -97,7 +97,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         }
         // Reads interleave with batches; a cut read that a batch overtook must not replace the batch's owners.
         var epoch = ownersEpoch;
-        var available = await ReadAvailableCopiesAsync(cancellationToken).ConfigureAwait(true);
+        var available = await ReadAvailableCopiesAsync(cancellationToken);
         // A concurrent read can publish the owner set while this discovery awaits its RPCs. The writer must
         // advance that same set, otherwise its committed cut is lost from the cache.
         if (cachedOwners is { } published && cachedVersion.Equals(version))
@@ -123,8 +123,8 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     {
         try
         {
-            var owners = await OwnersAsync(token).ConfigureAwait(true);
-            var cut = await gaps.CompleteAsync(owners, token).ConfigureAwait(true);
+            var owners = await OwnersAsync(token);
+            var cut = await gaps.CompleteAsync(owners, token);
             Advance(owners, cut);
         }
         catch (OperationCanceledException) when (token.IsCancellationRequested)
@@ -171,7 +171,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
         {
             reads[index] = TryReadCutAsync(members[index].SiloAddress, cancellationToken);
         }
-        var cuts = await Task.WhenAll(reads).ConfigureAwait(true);
+        var cuts = await Task.WhenAll(reads);
         var available = new List<StorageCopyOwner>(members.Length);
         for (var index = StorageCopyContract.FirstOwner; index < members.Length; index++)
         {
@@ -187,7 +187,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     {
         try
         {
-            var cut = await storage.On(silo).ReadCutAsync(cancellationToken).ConfigureAwait(true);
+            var cut = await storage.On(silo).ReadCutAsync(cancellationToken);
             if (cut.Incarnation == incarnation)
             {
                 return (true, ((SiloStorageCut?)(cut)));
@@ -206,7 +206,7 @@ internal sealed class SiloStorageCopyExecution(SiloDatabaseClient storage, IClus
     private async Task<StorageCopyOwner> ReadAvailableAsync(CancellationToken cancellationToken, SiloAddress? preferredSilo = null)
     {
         StorageCopyOwner? selected = null;
-        foreach (var copy in await OwnersAsync(cancellationToken, requireComplete: false).ConfigureAwait(true))
+        foreach (var copy in await OwnersAsync(cancellationToken, requireComplete: false))
         {
             if (selected is not { } current || copy.Cut.Position > current.Cut.Position
                 || copy.Cut.Position == current.Cut.Position && copy.Address.Equals(preferredSilo))

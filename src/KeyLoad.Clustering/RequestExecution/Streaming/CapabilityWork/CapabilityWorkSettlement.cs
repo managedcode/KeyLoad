@@ -15,7 +15,7 @@ internal static class CapabilityWorkSettlement
         var failures = default(CapabilityCleanupFailures);
         Capture(telemetry, ref failures);
         Capture(activation, ref failures);
-        var preparation = (await PrepareAsync(lifetime).ConfigureAwait(true)).Value;
+        var preparation = (await PrepareAsync(lifetime)).Value;
         RequestWorkLease? lease = null;
         if (preparation is null && lifetime is not null)
         {
@@ -30,8 +30,8 @@ internal static class CapabilityWorkSettlement
             try
             {
                 lease.PrepareDisposal(primary, cleanup);
-                await lease.DisposeAsync().ConfigureAwait(true);
-                var report = await lease.Settlement.ConfigureAwait(true);
+                await lease.DisposeAsync();
+                var report = await lease.Settlement;
                 terminal = report.CleanupOrJoinFailure;
             }
             catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
@@ -55,7 +55,7 @@ internal static class CapabilityWorkSettlement
         {
             if (lifetime is not null)
             {
-                await lifetime.PrepareOwnedReleaseAsync().ConfigureAwait(true);
+                await lifetime.PrepareOwnedReleaseAsync();
             }
             return (false, default(Exception?));
         }

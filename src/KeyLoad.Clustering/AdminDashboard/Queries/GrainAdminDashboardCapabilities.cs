@@ -17,7 +17,7 @@ internal static class GrainAdminDashboardCapabilities
         if (kind == GrainReadKind.AdminDashboard)
         {
             GrainPayload.RequireNoDto((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the current generated envelope scalar NoDto marker for this capability before executing a request without a DTO. */;
-            var result = await administration.ReadDashboardAsync(cancellationToken).ConfigureAwait(true);
+            var result = await administration.ReadDashboardAsync(cancellationToken);
             ConnectionReadExecution.ValidateFreshRequest(codec, request, request.Envelope.RequestId, cancellationToken);
             GrainRequestAuthority.RequireAdministrator(GrainRequestAuthority.ReloadForRequest(database,
                 request.Envelope, clock));

@@ -31,8 +31,7 @@ internal static class MultiLaneReceiveExecution
                 continue;
             }
             ValidateParent(parent, codec, outcomes.Count, diagnostics);
-            var reply = await DispatchAsync(leaf, executeChild, services, codec, diagnostics, parent, binding, token)
-                .ConfigureAwait(true);
+            var reply = await DispatchAsync(leaf, executeChild, services, codec, diagnostics, parent, binding, token);
             var outcome = Outcome(leaf, reply, diagnostics, parent.Envelope.RequestId);
             outcomes.Add(outcome);
             halted = outcome.Status == QueueLaneReceiveStatus.Unknown;
@@ -56,7 +55,7 @@ internal static class MultiLaneReceiveExecution
                 {
                     invoked = true;
                     return executeChild(request, cancellation);
-                }, services, codec, binding, token).ConfigureAwait(true);
+                }, services, codec, binding, token);
         }
         catch (KeyLoadException error) when (invoked)
         {

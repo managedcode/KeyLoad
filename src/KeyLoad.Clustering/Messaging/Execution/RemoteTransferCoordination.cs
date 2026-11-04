@@ -15,61 +15,61 @@ internal static class RemoteTransferCoordination
         RequireHint(hint, owner, subject, codec.Incarnation);
         using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, admission.SchedulingToken, timeout.Token);
-        var source = await SourceAsync(execution, hint, lifetime.Token).ConfigureAwait(true);
+        var source = await SourceAsync(execution, hint, lifetime.Token);
         if (source is null || source.State != QueueTransferState.OutputPending)
         {
             return new(null);
         }
-        hint = await RemoteTransferAttemptCoordination.RefreshAsync(execution, hint, source.IntentToken, lifetime.Token).ConfigureAwait(true);
-        var receipt = await TargetAsync(execution, hint, lifetime.Token).ConfigureAwait(true);
+        hint = await RemoteTransferAttemptCoordination.RefreshAsync(execution, hint, source.IntentToken, lifetime.Token);
+        var receipt = await TargetAsync(execution, hint, lifetime.Token);
         if (receipt is null)
         {
             var id = RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept);
             var reply = await execution.ApplyAsync(subject, new(id, hint.Destination.Partition,
-                [new AcceptQueueTransfer(hint.Destination, source.IntentToken)]), lifetime.Token).ConfigureAwait(true);
+                [new AcceptQueueTransfer(hint.Destination, source.IntentToken)]), lifetime.Token);
             if (reply.Error is { } error)
             {
                 if (hint.AcceptAttemptCeiling is not null && error == ErrorCode.ResourceExhausted)
                 {
                     await RemoteTransferAttemptCoordination.AdvanceAsync(execution, hint, source.IntentToken,
-                        lifetime.Token).ConfigureAwait(true);
+                        lifetime.Token);
                 }
                 if (hint.RepairCeiling is not null && error == ErrorCode.PermissionDenied)
                 {
                     await RemoteTransferRepairCoordination.AdvanceAsync(execution, hint, source.IntentToken,
-                        QueueTransferRepairStage.Accept, null, lifetime.Token).ConfigureAwait(true);
+                        QueueTransferRepairStage.Accept, null, lifetime.Token);
                 }
                 return new(error);
             }
-            receipt = await TargetAsync(execution, hint, lifetime.Token).ConfigureAwait(true);
+            receipt = await TargetAsync(execution, hint, lifetime.Token);
         }
         if (receipt is null)
         {
             return new(ErrorCode.UnknownWriteOutcome);
         }
-        return await CompleteAsync(execution, hint, receipt, lifetime.Token).ConfigureAwait(true);
+        return await CompleteAsync(execution, hint, receipt, lifetime.Token);
     }
 
     private static async Task<DueDispatchResult> CompleteAsync(RemoteTransferEnvelopeExecution execution,
         RemoteTransferCoordinationHint hint, QueueTransferReceiptInspection receipt, CancellationToken token)
     {
-        var source = await SourceAsync(execution, hint, token).ConfigureAwait(true);
+        var source = await SourceAsync(execution, hint, token);
         if (source is null || source.State != QueueTransferState.OutputPending)
         {
             return new(null);
         }
-        var current = await TargetAsync(execution, hint, token).ConfigureAwait(true);
+        var current = await TargetAsync(execution, hint, token);
         if (current != receipt)
         {
             throw Errors.Fail(ErrorCode.RevisionConflict, RemoteTransferCoordinationProtocol.InvalidResult);
         }
         var id = RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Complete);
         var reply = await execution.ApplyAsync(hint.PrincipalId, new(id, hint.Source.Partition,
-            [new CompleteQueueTransfer(hint.Source, hint.TransferId, receipt.ReceiptToken)]), token).ConfigureAwait(true);
+            [new CompleteQueueTransfer(hint.Source, hint.TransferId, receipt.ReceiptToken)]), token);
         if (hint.RepairCeiling is not null && reply.Error == ErrorCode.PermissionDenied)
         {
             await RemoteTransferRepairCoordination.AdvanceAsync(execution, hint, source.IntentToken,
-                QueueTransferRepairStage.Complete, receipt.ReceiptToken, token).ConfigureAwait(true);
+                QueueTransferRepairStage.Complete, receipt.ReceiptToken, token);
         }
         return new(reply.Error);
     }
@@ -78,7 +78,7 @@ internal static class RemoteTransferCoordination
         RemoteTransferCoordinationHint hint, CancellationToken token)
     {
         var source = (await execution.ReadAsync<QueueTransferInspection, InspectQueueTransferRequest>(hint.PrincipalId, GrainReadKind.QueueTransfer,
-            new InspectQueueTransferRequest(hint.Source, hint.TransferId), token).ConfigureAwait(true)).Value;
+            new InspectQueueTransferRequest(hint.Source, hint.TransferId), token)).Value;
         if (source is not null && (source.SourceQueue != hint.Source || source.Destination != hint.Destination
             || source.TransferId != hint.TransferId || RemoteTransferCoordinationIdentity.IntentDigest(source.IntentToken) != hint.IntentDigest))
         {
@@ -91,7 +91,7 @@ internal static class RemoteTransferCoordination
         RemoteTransferCoordinationHint hint, CancellationToken token)
     {
         var receipt = (await execution.ReadAsync<QueueTransferReceiptInspection, InspectQueueTransferReceiptRequest>(hint.PrincipalId, GrainReadKind.QueueTransferReceipt,
-            new InspectQueueTransferReceiptRequest(hint.Destination, hint.Source, hint.TransferId), token).ConfigureAwait(true)).Value;
+            new InspectQueueTransferReceiptRequest(hint.Destination, hint.Source, hint.TransferId), token)).Value;
         if (receipt is not null && (receipt.SourceQueue != hint.Source || receipt.DestinationQueue != hint.Destination || receipt.TransferId != hint.TransferId))
         {
             throw Errors.Fail(ErrorCode.Corruption, RemoteTransferCoordinationProtocol.InvalidResult);

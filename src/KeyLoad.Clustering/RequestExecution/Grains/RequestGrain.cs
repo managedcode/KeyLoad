@@ -22,10 +22,10 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
             var request = DecodeRequest(envelope);
             if (request.Envelope.ReadKind == GrainReadKind.Document)
             {
-                return await ExecuteDocumentAsync(request, cancellationToken).ConfigureAwait(true);
+                return await ExecuteDocumentAsync(request, cancellationToken);
             }
             return await GrainRequestStreamConsumer.DrainWithPurposeAsync(
-                token => CreateStream(request, envelope, token), request.Envelope.RequestId, new CqrsStreamPurpose(() => request), cancellationToken).ConfigureAwait(true);
+                token => CreateStream(request, envelope, token), request.Envelope.RequestId, new CqrsStreamPurpose(() => request), cancellationToken);
         }
         finally
         {
@@ -80,7 +80,7 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
         {
             return await BoundCqrsStreamLifetime.RunUnaryAsync(owner, purpose, request.Envelope.RequestId,
                 execution => ExecuteAsync(request, request.Envelope, null, purpose, settlement, execution), settled,
-                token).ConfigureAwait(true);
+                token);
         }
         catch (OperationCanceledException error) when (token.IsCancellationRequested
             && error.CancellationToken != token && CqrsBoundaryErrors.IsNonFatal(error))
@@ -112,24 +112,24 @@ public sealed class RequestGrain(GrainRequestCodec codec, SiloDatabaseClient sto
             command = request.Envelope.CommandKind is not null;
             if (writer is not null)
             {
-                await writer.StartedAsync(new GrainRequestProgress(requestId)).ConfigureAwait(true);
+                await writer.StartedAsync(new GrainRequestProgress(requestId));
             }
             if (codec.HasPhaseObserver)
             {
                 await codec.ObservePhaseAsync(request, GrainRequestPhase.RequestStarted,
-                    ((IGrainBase)this).GrainContext, token).ConfigureAwait(true);
+                    ((IGrainBase)this).GrainContext, token);
             }
             stage = GrainFailureStage.CapabilityExecution;
-            var owner = await storage.ReadOwnerAsync(request.Envelope.Incarnation, token).ConfigureAwait(true);
+            var owner = await storage.ReadOwnerAsync(request.Envelope.Incarnation, token);
             var reply = await ExecuteLeafAsync(request, envelope, owner, purpose.WorkBinding,
-                token).ConfigureAwait(true);
+                token);
             if (writer is not null && ConnectionParentExecution.Handles(request.Envelope.CommandKind) && reply.Error is null)
             {
                 reply = await ConnectionParentExecution.ExecuteAsync(request, envelope,
                     (child, cancellation) => ExecuteLeafAsync(codec.Decode(child), child, owner,
                         purpose.WorkBinding, cancellation),
                     (kind, id) => storage.AbortMaintenanceAsync(owner, kind, id), services, codec,
-                    diagnostics, ((IGrainBase)this).GrainContext, writer, purpose).ConfigureAwait(true);
+                    diagnostics, ((IGrainBase)this).GrainContext, writer, purpose);
             }
             return GrainReplyFactory.StreamResult(reply);
         }

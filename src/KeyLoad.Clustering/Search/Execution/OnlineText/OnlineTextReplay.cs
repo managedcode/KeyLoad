@@ -14,8 +14,7 @@ internal static class OnlineTextReplay
         {
             var upper = state.CurrentCut?.ThroughSequence
                 ?? throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
-            var page = await children.ReadPageAsync(new(request.Consumer, ProjectionReplayPage.Records, upper), token)
-                .ConfigureAwait(true);
+            var page = await children.ReadPageAsync(new(request.Consumer, ProjectionReplayPage.Records, upper), token);
             if (page.ThroughSequence > upper || page.Consumer.Consumer != request.Consumer
                 || page.Consumer.Definition.IndexGeneration != request.ConsumerGeneration || page.Consumer.Released)
             {
@@ -24,11 +23,11 @@ internal static class OnlineTextReplay
             var intent = new CommitProjectionBatchRequest(OnlineTextCheckpointIdentity.Create(request.CommandId,
                 page.ThroughSequence), request.Consumer, page.Token, []);
             _ = await children.CapabilityAsync(request, OnlineTextCapabilityKind.PreparePage, token,
-                page: page, intent: intent).ConfigureAwait(true);
-            _ = await children.CapabilityAsync(request, OnlineTextCapabilityKind.ApplyIntent, token).ConfigureAwait(true);
-            var acknowledged = await children.CheckpointAsync(intent, token).ConfigureAwait(true);
+                page: page, intent: intent);
+            _ = await children.CapabilityAsync(request, OnlineTextCapabilityKind.ApplyIntent, token);
+            var acknowledged = await children.CheckpointAsync(intent, token);
             state = await children.CapabilityAsync(request, OnlineTextCapabilityKind.SettleCheckpoint, token,
-                intent: intent, acknowledged: acknowledged).ConfigureAwait(true);
+                intent: intent, acknowledged: acknowledged);
             if (state.CurrentCut is not { } current || state.ThroughSequence > current.ThroughSequence)
             {
                 throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);

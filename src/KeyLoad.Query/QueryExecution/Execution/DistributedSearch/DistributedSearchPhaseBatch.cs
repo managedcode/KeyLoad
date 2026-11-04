@@ -27,7 +27,7 @@ internal static class DistributedSearchPhaseBatch
         for (var index = FirstLeaf; index < work.Length; index++)
         {
             budget.Check();
-            prepared[index] = await prepare(work[index], budget, execution.Token).ConfigureAwait(true);
+            prepared[index] = await prepare(work[index], budget, execution.Token);
         }
         var leaves = ImmutableArray.CreateBuilder<DistributedSearchLeafResult>(work.Length);
         var concurrency = Math.Min(policy.MaximumConcurrentPartitionLeaves, work.Length);
@@ -36,13 +36,13 @@ internal static class DistributedSearchPhaseBatch
             budget.Check();
             var actual = await PartitionQueryParallelBatch.RunAsync<DistributedSearchPreparedLeaf, DistributedSearchLeafResult>(
                 prepared, offset, Math.Min(concurrency, work.Length - offset), execution,
-                static (leaf, token) => leaf.RunAsync(token)).ConfigureAwait(true);
+                static (leaf, token) => leaf.RunAsync(token));
             for (var index = FirstLeaf; index < actual.Length; index++)
             {
                 budget.Check();
                 var leaf = prepared[offset + index];
                 DistributedSearchLeafResultValidation.Require(leaf.ActualRequest, actual[index], budget);
-                await leaf.CompleteAsync(actual[index], execution.Token).ConfigureAwait(true);
+                await leaf.CompleteAsync(actual[index], execution.Token);
                 budget.Check();
                 leaves.Add(actual[index]);
             }

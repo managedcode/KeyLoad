@@ -8,8 +8,8 @@ internal sealed class SampleChunkJobDispatch(BackgroundStorageClient storage, Gr
     internal async Task<GrainOperationReply> ExecuteAsync(IGrainFactory grains, SampleChunkWorkHint hint,
         CancellationToken cancellationToken)
     {
-        var principal = await storage.Operations.ReadSampleChunkCreatorAsync(hint, cancellationToken).ConfigureAwait(true);
-        return await DispatchAsync(grains, hint, principal, cancellationToken).ConfigureAwait(true);
+        var principal = await storage.Operations.ReadSampleChunkCreatorAsync(hint, cancellationToken);
+        return await DispatchAsync(grains, hint, principal, cancellationToken);
     }
 
     private async Task<GrainOperationReply> DispatchAsync(IGrainFactory grains, SampleChunkWorkHint hint,
@@ -24,6 +24,6 @@ internal sealed class SampleChunkJobDispatch(BackgroundStorageClient storage, Gr
         var request = grains.GetGrain<IConnectionGrain>(connectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
             createStream: token => request.ExecuteStreamAsync(envelope, token),
-            requestId: requestId, cancellationToken: cancellationToken).ConfigureAwait(true);
+            requestId: requestId, cancellationToken: cancellationToken);
     }
 }

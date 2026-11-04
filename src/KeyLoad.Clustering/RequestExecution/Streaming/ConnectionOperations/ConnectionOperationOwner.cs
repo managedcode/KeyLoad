@@ -68,14 +68,14 @@ internal sealed class ConnectionOperationOwner : IAsyncDisposable
 
     private async Task CloseCoreAsync(Task originalOperations)
     {
-        var cancellationFailure = (await RequestWorkSettlement.CancelAsync(shutdown).ConfigureAwait(true)).Value;
-        var operationFailure = (await RequestWorkSettlement.JoinAsync(originalOperations).ConfigureAwait(true)).Value;
+        var cancellationFailure = (await RequestWorkSettlement.CancelAsync(shutdown)).Value;
+        var operationFailure = (await RequestWorkSettlement.JoinAsync(originalOperations)).Value;
         RequestWorkSettlement.Rethrow(RequestWorkSettlement.Preserve(cancellationFailure, operationFailure));
     }
 
     private async Task DisposeCoreAsync()
     {
-        var closeFailure = (await RequestWorkSettlement.JoinAsync(CloseAsync()).ConfigureAwait(true)).Value;
+        var closeFailure = (await RequestWorkSettlement.JoinAsync(CloseAsync())).Value;
         try
         {
             shutdown.Dispose();

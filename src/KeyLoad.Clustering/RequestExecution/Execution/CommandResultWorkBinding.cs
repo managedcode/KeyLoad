@@ -23,7 +23,7 @@ internal static class CommandResultWorkBinding
             work.RequireResourceLifetimeBinding(binding);
             var proof = RequireProof(request, reply);
             await BindCurrentAsync(database, clock, request, proof, proof.Lifetimes,
-                work, binding, token).ConfigureAwait(true);
+                work, binding, token);
             work.Check();
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))

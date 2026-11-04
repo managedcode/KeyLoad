@@ -17,6 +17,6 @@ internal static class OnlineTextExecution
         var children = new OnlineTextChildCalls(parent, parentEnvelope, executeChild, abort,
             services, codec, diagnostics, context, binding);
         return await MaintenanceChildDispatch.RunThenAbortAsync(() => OnlineTextParentFlow.RunAsync(children, request,
-            writer), children.AbortAsync).ConfigureAwait(true);
+            writer), children.AbortAsync);
     }
 }

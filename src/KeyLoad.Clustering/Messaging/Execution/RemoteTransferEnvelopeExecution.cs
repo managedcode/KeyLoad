@@ -9,11 +9,11 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
     internal async Task<(bool HasValue, T? Value)> ReadAsync<T, TRequest>(string subject, GrainReadKind kind, TRequest payload, CancellationToken token) where T : class where TRequest : notnull
     {
         var requestId = Guid.NewGuid();
-        var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
+        var principal = await CurrentPrincipalAsync(subject, token);
         var connection = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, Guid.Empty, token, connectionId: connection);
         var envelope = codec.CreateRead(requestId, principal.Id, kind, payload);
-        var reply = await DrainAsync(connection, requestId, envelope, token).ConfigureAwait(true);
+        var reply = await DrainAsync(connection, requestId, envelope, token);
         if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferCoordinationProtocol.InvalidResult);
@@ -25,16 +25,16 @@ internal sealed class RemoteTransferEnvelopeExecution(GrainRequestCodec codec, B
     internal async Task<GrainOperationReply> ApplyAsync(string subject, CommandRequest request, CancellationToken token)
     {
         var requestId = Guid.NewGuid();
-        var principal = await CurrentPrincipalAsync(subject, token).ConfigureAwait(true);
+        var principal = await CurrentPrincipalAsync(subject, token);
         var connection = ConnectionExecutionIdentity.Resolve(services);
         using var identity = new GrainRequestIdentityScope(services, principal, requestId, request.CommandId, token, connectionId: connection);
         var envelope = codec.CreateCommand(requestId, principal.Id, OperationKind.Batch, request.CommandId, request);
-        return await DrainAsync(connection, requestId, envelope, token).ConfigureAwait(true);
+        return await DrainAsync(connection, requestId, envelope, token);
     }
 
     private async Task<PrincipalRecord> CurrentPrincipalAsync(string subject, CancellationToken token)
     {
-        var principal = await storage.Operations.ReadTransferCoordinatorAsync(hint, token).ConfigureAwait(true);
+        var principal = await storage.Operations.ReadTransferCoordinatorAsync(hint, token);
         if (principal.Id != subject)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);

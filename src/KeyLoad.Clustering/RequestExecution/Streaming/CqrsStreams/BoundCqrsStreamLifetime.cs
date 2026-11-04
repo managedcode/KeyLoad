@@ -19,7 +19,7 @@ internal static class BoundCqrsStreamLifetime
         {
             work.Start(owner, purpose, () => owner.Acquire(requestId, RequestWorkKind.RequestProducer),
                 cancellationToken, CancellationToken.None);
-            var result = await execute(work.Token).ConfigureAwait(true);
+            var result = await execute(work.Token);
             work.Token.ThrowIfCancellationRequested();
             work.AdmitPublication(result.IsSuccess ? CqrsStreamChunkKind.Completed : CqrsStreamChunkKind.Failed);
             reply = GrainRequestStreamConsumer.ReadResult(result);
@@ -37,7 +37,7 @@ internal static class BoundCqrsStreamLifetime
         finally
         {
             work.PrepareSettlement(null, settled, primary);
-            await work.DisposeAsync().ConfigureAwait(true);
+            await work.DisposeAsync();
         }
         cancellationToken.ThrowIfCancellationRequested();
         return reply;
@@ -61,7 +61,7 @@ internal static class BoundCqrsStreamLifetime
             primary = creation.Error;
             while (primary is null && enumerator is not null)
             {
-                var step = await ReadNextAsync(enumerator, admission, work).ConfigureAwait(true);
+                var step = await ReadNextAsync(enumerator, admission, work);
                 if (step.Error is not null || !step.HasItem)
                 {
                     primary = step.Error;
@@ -74,7 +74,7 @@ internal static class BoundCqrsStreamLifetime
         finally
         {
             work.PrepareSettlement(enumerator, settled, primary);
-            await work.DisposeAsync().ConfigureAwait(true);
+            await work.DisposeAsync();
         }
         RequestWorkSettlement.Rethrow(primary);
     }
@@ -106,7 +106,7 @@ internal static class BoundCqrsStreamLifetime
         try
         {
             work.Token.ThrowIfCancellationRequested();
-            if (!await enumerator.MoveNextAsync().ConfigureAwait(true))
+            if (!await enumerator.MoveNextAsync())
             {
                 return new(false, null, null);
             }

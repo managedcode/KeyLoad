@@ -49,7 +49,7 @@ internal sealed class NodeAdministration(PartitionHost partition, IServiceProvid
     {
         var id = Guid.NewGuid().ToString(OrleansNodeProtocol.GuidFormat);
         var position = await partition.Database.Store.CreateBackupAsync(
-            Path.Combine(partition.DirectoryPath, BackupDirectory, id), cancellationToken).ConfigureAwait(true);
+            Path.Combine(partition.DirectoryPath, BackupDirectory, id), cancellationToken);
         return new(id, position);
     }
 

@@ -37,7 +37,7 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
 
     private async Task FlushAsync(CancellationToken token)
     {
-        after = await CycleAsync(after, token).ConfigureAwait(true);
+        after = await CycleAsync(after, token);
     }
 
     /// <summary>A refused or unreachable hint leaves the buffer; the persisted projection record remains the durable source.</summary>
@@ -46,7 +46,7 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
         try
         {
             return await AnnProjectionJobOperation.RunAsync<byte[]?>(services,
-                binding => CycleCoreAsync(after, binding), token).ConfigureAwait(true);
+                binding => CycleCoreAsync(after, binding), token);
         }
         catch (OperationCanceledException) when (!token.IsCancellationRequested)
         {
@@ -61,10 +61,10 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
         {
             var budget = new ReadExecutionBudget(clock, token);
             budget.AttachResourceLifetimeBinding(binding);
-            var targetOwner = await storage.AnnDiscoveryTargetAsync(token).ConfigureAwait(true);
+            var targetOwner = await storage.AnnDiscoveryTargetAsync(token);
             var page = await BackgroundStorageReadAccounting.ReadAsync<AnnProjectionDiscoveryPage>(budget, binding,
                 cancellation => storage.Operations.ReadAnnProjectionWorkPageAsync(targetOwner, after,
-                    cancellation), token: token).ConfigureAwait(true);
+                    cancellation), token: token);
             foreach (var rejection in page.Rejected)
             {
                 AnnProjectionJobDiagnostics.Failed(diagnostics, rejection);
@@ -79,7 +79,7 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
                 try
                 {
                     binding.OriginalProducer.AdmitPublication();
-                    await JoinAsync(target.ScheduleAsync(consumer, generation, work.NodeId, token), token).ConfigureAwait(true);
+                    await JoinAsync(target.ScheduleAsync(consumer, generation, work.NodeId, token), token);
                 }
                 catch (KeyLoadException refusal)
                 {
@@ -104,13 +104,13 @@ internal sealed class AnnProjectionWorkerGrain(BackgroundStorageClient storage,
     {
         try
         {
-            await original.WaitAsync(token).ConfigureAwait(true);
+            await original.WaitAsync(token);
         }
         catch (OperationCanceledException initiating) when (token.IsCancellationRequested)
         {
             try
             {
-                await original.ConfigureAwait(true);
+                await original;
             }
             catch (Exception cleanup) { throw new AggregateException(initiating, cleanup); }
             throw;

@@ -6,6 +6,8 @@ internal static class OrleansMetadataNames
     public const string SystemException = "System.Exception";
     public const string GrainInterface = "Orleans.IGrain";
     public const string Grain = "Orleans.Grain";
+    public const string GrainBaseInterface = "Orleans.IGrainBase";
+    public const string GrainServiceInterface = "Orleans.Services.IGrainService";
     public const string IdAttribute = "Orleans.IdAttribute";
     public const string PersistentState = "Orleans.Runtime.IPersistentState`1";
     public const string TransactionalState = "Orleans.Transactions.Abstractions.ITransactionalState`1";

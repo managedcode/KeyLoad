@@ -44,7 +44,7 @@ internal sealed partial class BackgroundStorageOperations
             var current = Database.ReadAnnProjectionWorkBound(request.Consumer, request.IndexGeneration, work, binding);
             AnnProjectionJobValidation.RequireCurrent(original, current);
             var publication = await storage.Host.AnnMaintenance.ReadPublishedBoundAsync(current.Principal,
-                request, work, binding, token).ConfigureAwait(true);
+                request, work, binding, token);
             AnnProjectionJobValidation.RequireResult(request, original.RequiredThroughSequence, result, publication);
             return true;
         }, cancellationToken);

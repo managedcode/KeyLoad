@@ -21,11 +21,11 @@ internal sealed class AnnProjectionJobExecution(BackgroundStorageClient storage,
             ?? throw Errors.Fail(ErrorCode.Validation, AnnProjectionJobProtocol.Invalid);
         var principal = await BackgroundStorageReadAccounting.ReadAsync<PrincipalRecord>(budget, binding,
             cancellation => storage.Operations.ReadAnnProjectionCreatorAsync(target, original,
-                cancellation), token: token).ConfigureAwait(true);
-        var result = await dispatch.ExecuteAsync(grains, principal, request, binding, token).ConfigureAwait(true);
+                cancellation), token: token);
+        var result = await dispatch.ExecuteAsync(grains, principal, request, binding, token);
         var validated = await BackgroundStorageReadAccounting.ReadAsync<bool>(budget, binding,
             cancellation => storage.Operations.ValidateAnnProjectionResultAsync(target, original,
-                result, cancellation), token: token).ConfigureAwait(true);
+                result, cancellation), token: token);
         if (!validated)
         {
             throw Errors.Fail(ErrorCode.Corruption, AnnProjectionJobProtocol.Invalid);

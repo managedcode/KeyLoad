@@ -22,7 +22,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(admission.Token, timeout.Token);
         var token = deadline.Token;
         ValidateHint(hint);
-        var principal = await storage.Operations.ReadDueCreatorAsync(hint, token).ConfigureAwait(true);
+        var principal = await storage.Operations.ReadDueCreatorAsync(hint, token);
 
         if (hint.Kind == DueWorkKind.Saga)
         {
@@ -30,7 +30,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
             {
                 var schedule = SagaTimeoutJobContract.CreateScheduleRequest(this.GetGrainId(),
                     clock.GetUtcNow(), hint);
-                await durableJobs.ScheduleJobAsync(schedule, token).ConfigureAwait(true);
+                await durableJobs.ScheduleJobAsync(schedule, token);
             }
 
             return new(null);
@@ -40,7 +40,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         var commandId = DueDispatchCommandIdentity.ForDue(hint, creator);
         var mutation = RecurringDueCommand.Create(hint);
         var payload = new CommandRequest(commandId, hint.Lane.Partition, [mutation]);
-        var result = await DispatchWithOneUncertaintyRetry(creator, commandId, payload, token).ConfigureAwait(true);
+        var result = await DispatchWithOneUncertaintyRetry(creator, commandId, payload, token);
         return new(result.Error);
     }
 
@@ -62,14 +62,14 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
         using var deadline = CancellationTokenSource.CreateLinkedTokenSource(attemptCancellationToken, timeout.Token);
         var token = deadline.Token;
-        var principal = await storage.Operations.ReadDueCreatorAsync(hint, token).ConfigureAwait(true);
+        var principal = await storage.Operations.ReadDueCreatorAsync(hint, token);
         if (principal is null)
         {
             return;
         }
 
-        var result = await DispatchTimeoutAsync(hint, principal, token).ConfigureAwait(true);
-        await SettleTimeoutResultAsync(hint, result, token).ConfigureAwait(true);
+        var result = await DispatchTimeoutAsync(hint, principal, token);
+        await SettleTimeoutResultAsync(hint, result, token);
     }
 
     private DueWorkHint DecodeJob(IJobRunContext context)
@@ -111,7 +111,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
 
         if (result.Error is ErrorCode.NotFound or ErrorCode.RevisionConflict or ErrorCode.UnknownWriteOutcome)
         {
-            var current = await storage.Operations.ReadDueCreatorAsync(hint, cancellationToken).ConfigureAwait(true);
+            var current = await storage.Operations.ReadDueCreatorAsync(hint, cancellationToken);
             if (current is null)
             {
                 return;
@@ -131,7 +131,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         Guid commandId, CommandRequest payload, CancellationToken cancellationToken)
     {
         var requestId = Guid.NewGuid();
-        var first = await Dispatch(principal, requestId, commandId, payload, cancellationToken).ConfigureAwait(true);
+        var first = await Dispatch(principal, requestId, commandId, payload, cancellationToken);
         if (first.Error != ErrorCode.UnknownWriteOutcome
             || options.Value.UncertaintyRetryCount == DueCoordinationOptions.NoUncertaintyRetries)
         {
@@ -139,7 +139,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         }
         cancellationToken.ThrowIfCancellationRequested();
         requestId = Guid.NewGuid();
-        return await Dispatch(principal, requestId, commandId, payload, cancellationToken).ConfigureAwait(true);
+        return await Dispatch(principal, requestId, commandId, payload, cancellationToken);
     }
 
     private async Task<GrainOperationReply> Dispatch(PrincipalRecord principal, Guid requestId,
@@ -151,7 +151,7 @@ internal sealed class RecurringDueCoordinatorGrain(GrainRequestCodec codec, Back
         var request = GrainFactory.GetGrain<IConnectionGrain>(connectionId);
         return await GrainRequestStreamConsumer.DrainAsync(
             createStream: token => request.ExecuteStreamAsync(envelope, token), requestId: requestId,
-            cancellationToken: cancellationToken).ConfigureAwait(true);
+            cancellationToken: cancellationToken);
     }
 
     private void ValidateHint(DueWorkHint hint)

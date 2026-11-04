@@ -62,25 +62,25 @@ internal static class ConnectionParentExecution
         {
             var result = await OnlineTextExecution.ExecuteAsync(request, parentEnvelope, executeChild,
                 id => abortMaintenance(GrainReadKind.OnlineTextMaintenance, id), services, codec,
-                diagnostics, context, writer, purpose.WorkBinding).ConfigureAwait(true);
+                diagnostics, context, writer, purpose.WorkBinding);
             return GrainReplyFactory.Value(result);
         }
         if (request.Envelope.CommandKind == OperationKind.MaintainTextIndex)
         {
             var result = await TextMaintenanceExecution.ExecuteAsync(request, executeChild,
                 id => abortMaintenance(GrainReadKind.TextMaintenance, id), services, codec,
-                diagnostics, writer, purpose, purpose.WorkBinding).ConfigureAwait(true);
+                diagnostics, writer, purpose, purpose.WorkBinding);
             return GrainReplyFactory.Value(result);
         }
         if (request.Envelope.CommandKind == OperationKind.MaintainAnnIndex)
         {
             var result = await AnnMaintenanceExecution.ExecuteAsync(request, executeChild,
                 id => abortMaintenance(GrainReadKind.AnnMaintenance, id), services, codec,
-                diagnostics, writer, purpose).ConfigureAwait(true);
+                diagnostics, writer, purpose);
             return GrainReplyFactory.Value(result);
         }
         var lanes = await MultiLaneReceiveExecution.ExecuteAsync(request, executeChild, services, codec,
-            diagnostics, purpose.WorkBinding, writer.CancellationToken).ConfigureAwait(true);
+            diagnostics, purpose.WorkBinding, writer.CancellationToken);
         return GrainReplyFactory.Value(lanes);
     }
 }

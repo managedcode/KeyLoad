@@ -63,7 +63,7 @@ public sealed class SiloCommandCoordinator(DatabaseEngine database, IGrainFactor
     private async Task<Result<TResult>> ApplyLocalAsync<TResult>(Command<DatabaseCommand> operation, CancellationToken cancellationToken)
     {
         var /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */ result = ((await database.ApplyCoreAsync(database.PrepareStorageOperation(operation, cancellationToken), null,
-            selectEmbeddedClock: false, cancellationToken).ConfigureAwait(true)).Result /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */);
+            selectEmbeddedClock: false, cancellationToken)).Result /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */);
         return result.IsFailed ? Result<TResult>.Fail(result.Problem) : Result<TResult>.Succeed((result.Get<TResult>() /* KLD0041: Use the current canonical DatabaseCommand input or persisted storage-result shape at this local storage boundary; RPC completion stays Result<TResult>. */));
     }
 }

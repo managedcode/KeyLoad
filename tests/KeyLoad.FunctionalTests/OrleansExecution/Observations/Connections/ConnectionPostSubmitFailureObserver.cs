@@ -22,7 +22,7 @@ internal sealed class ConnectionPostSubmitFailureObserver(ConnectionOperationObs
     public async ValueTask ObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
         IGrainContext context, CancellationToken token)
     {
-        await original.ObserveAsync(identity, phase, context, token).ConfigureAwait(true);
+        await original.ObserveAsync(identity, phase, context, token);
         if (identity.RequestId != RequestId || phase != GrainRequestPhase.SubmitReturned)
         {
             return;

@@ -47,7 +47,7 @@ internal static class BackgroundStorageReadExecution
             Result<object> /* KLD0041: Preserve the existing generated BackgroundReadResult.Result field and native mixed success/error shape while retaining resource lifetimes with the reply. */ result;
             try
             {
-                var value = await execute(work, binding, lifetime.Token).ConfigureAwait(true);
+                var value = await execute(work, binding, lifetime.Token);
                 result = (Result<object>.Succeed((new GrainValue((value /* KLD0042: Erase the typed read result only into the existing generated GrainValue wire slot; scalar reads require the current runtime type header. */)) /* KLD0041: Create the existing generated GrainValue carrier exactly once for this typed physical read result at the native reply boundary. */)) /* KLD0041: Store the existing GrainValue reply carrier in the current generated BackgroundReadResult.Result success slot. */);
                 work.Check();
             }

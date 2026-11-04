@@ -19,7 +19,7 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
         parent.Check();
         var source = leaves.CaptureMetadata(phase.Search.Partition, phase.Search.Collection, parent);
         var target = leaves.Target(phase.Search.Partition);
-        var selected = await ResolveOwnerAsync(target, phase, parent, token).ConfigureAwait(true);
+        var selected = await ResolveOwnerAsync(target, phase, parent, token);
         var request = new DistributedSearchOwnedLeaf(phase.Phase, phase.Search,
             selected.Owner, phase.Search.Partition.TenantId, phase.Witness, phase.Statistics, phase.Scope, phase.SourceWindowId, phase.Selected, source.Definition, source.Coverage, source.Principal);
         var childId = Guid.NewGuid();
@@ -39,7 +39,7 @@ internal sealed class DistributedSearchRemoteExecution(DatabaseEngine database, 
             {
                 throw Errors.Fail(ErrorCode.Corruption, GrainRoutingProtocol.InvalidRequest);
             }
-            var selected = await leaves.ResolveOwnerAsync(target, parent, token).ConfigureAwait(true);
+            var selected = await leaves.ResolveOwnerAsync(target, parent, token);
             owners.Add(phase.Search.Partition, selected);
             return selected;
         }

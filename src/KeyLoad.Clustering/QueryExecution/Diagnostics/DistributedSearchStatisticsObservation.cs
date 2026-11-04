@@ -6,7 +6,7 @@ internal sealed class DistributedSearchStatisticsObservation(GrainRequestCodec c
     internal async Task ObserveAsync(CancellationToken token)
     {
         await codec.ObservePhaseAsync(request, GrainRequestPhase.DistributedSearchStatisticsCaptured,
-            context, token).ConfigureAwait(true);
+            context, token);
         ConnectionReadExecution.ValidateFreshRequest(codec, request, requestId, token);
     }
 }

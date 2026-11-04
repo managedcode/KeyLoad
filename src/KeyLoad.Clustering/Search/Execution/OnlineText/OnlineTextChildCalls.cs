@@ -48,11 +48,11 @@ internal sealed class OnlineTextChildCalls(DecodedGrainRequest parent, GrainRequ
         token.ThrowIfCancellationRequested();
         codec.ValidateScope(parent.Envelope);
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-        await codec.ObservePhaseAsync(parent, GrainRequestPhase.OnlineTextCaptured, context, token).ConfigureAwait(true);
+        await codec.ObservePhaseAsync(parent, GrainRequestPhase.OnlineTextCaptured, context, token);
         token.ThrowIfCancellationRequested();
         codec.ValidateScope(parent.Envelope);
         GrainIdentityContext.Validate(parent.Envelope, parent.Envelope.RequestId);
-        var verified = await executeChild(parentEnvelope, token).ConfigureAwait(true);
+        var verified = await executeChild(parentEnvelope, token);
         if (verified.Error is { } failure)
         {
             throw Errors.Fail(failure, verified.SafeDetail ?? GrainRoutingProtocol.InvalidRequest);

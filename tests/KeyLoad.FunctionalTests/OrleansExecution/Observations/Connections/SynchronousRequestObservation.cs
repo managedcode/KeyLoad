@@ -58,7 +58,7 @@ internal sealed class SynchronousRequestObservation(Guid heldRequest) : IDisposa
             IGrainContext context, CancellationToken cancellationToken)
         {
             owner.Observe(identity, phase, context, cancellationToken);
-            await connection.ObserveAsync(identity, phase, context, cancellationToken).ConfigureAwait(true);
+            await connection.ObserveAsync(identity, phase, context, cancellationToken);
         }
 
         public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)

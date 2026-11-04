@@ -46,7 +46,7 @@ internal sealed class LocalStorageCommitCoordinator(DatabaseEngine database) : I
         if (database.IsSiloLocalOperation(owned))
         {
             var /* KLD0041: Hold the existing persisted StorageOperationResult.Result only until the concrete TResult is extracted at this local apply boundary. */ local = ((await database.ApplyCoreAsync(database.PrepareStorageOperation(owned, cancellationToken), null,
-                selectEmbeddedClock: false, cancellationToken).ConfigureAwait(true)).Result /* KLD0041: Read the current persisted StorageOperationResult.Result field without changing its native mixed-outcome binary shape; immediately complete the typed caller. */);
+                selectEmbeddedClock: false, cancellationToken)).Result /* KLD0041: Read the current persisted StorageOperationResult.Result field without changing its native mixed-outcome binary shape; immediately complete the typed caller. */);
             return local.IsFailed ? Result<TResult>.Fail(local.Problem) : Result<TResult>.Succeed((local.Get<TResult>() /* KLD0041: Extract the concrete TResult from the existing stored mixed outcome only at completion; the returned task remains Task<Result<TResult>>. */));
         }
         var retained = database.ReadStoredCommand(owned, cancellationToken).Value;
@@ -56,7 +56,7 @@ internal sealed class LocalStorageCommitCoordinator(DatabaseEngine database) : I
             throw Errors.Fail(ErrorCode.ResourceExhausted, SequenceExhausted);
         }
         var sequence = retained?.Sequence ?? checked(database.LastApplied + NextSequence);
-        var /* KLD0041: Hold the existing persisted StorageOperationResult.Result only until the concrete TResult is extracted at this local apply boundary. */ result = ((await database.ApplyStorageOperationsAsync([prepared], sequence, cancellationToken).ConfigureAwait(true)).Applied[0].Result /* KLD0041: Read the current persisted StorageOperationResult.Result field without changing its native mixed-outcome binary shape; immediately complete the typed caller. */);
+        var /* KLD0041: Hold the existing persisted StorageOperationResult.Result only until the concrete TResult is extracted at this local apply boundary. */ result = ((await database.ApplyStorageOperationsAsync([prepared], sequence, cancellationToken)).Applied[0].Result /* KLD0041: Read the current persisted StorageOperationResult.Result field without changing its native mixed-outcome binary shape; immediately complete the typed caller. */);
         var /* KLD0041: Hold the existing persisted StorageOperationResult.Result only until the concrete TResult is extracted at this local apply boundary. */ acknowledged = (StorageCopyAcknowledgements.Attach(result, SharedFileCopies) /* KLD0041: Attach the actual shared-file copy acknowledgement to the current persisted mixed outcome before extracting the caller's concrete TResult. */);
         return acknowledged.IsFailed ? Result<TResult>.Fail(acknowledged.Problem)
             : Result<TResult>.Succeed((acknowledged.Get<TResult>() /* KLD0041: Extract the concrete TResult from the existing stored mixed outcome only at completion; the returned task remains Task<Result<TResult>>. */));

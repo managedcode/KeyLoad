@@ -53,7 +53,7 @@ internal sealed class MaintenanceChildDispatchAdmission : IDisposable
         }
         try
         {
-            await observation.SettleAsync(observedContext).ConfigureAwait(true);
+            await observation.SettleAsync(observedContext);
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
@@ -77,7 +77,7 @@ internal sealed class MaintenanceChildDispatchAdmission : IDisposable
         {
             if (cancellation is not null)
             {
-                await cancellation.CancelAsync().ConfigureAwait(true);
+                await cancellation.CancelAsync();
             }
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))

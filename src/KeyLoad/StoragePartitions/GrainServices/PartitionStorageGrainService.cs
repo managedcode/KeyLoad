@@ -62,8 +62,8 @@ internal sealed partial class PartitionStorageGrainService(GrainId grainId, Silo
         serviceProvider.GetRequiredService<ITelemetryHostInitializer>().Initialize();
         if (!UsesSharedVolume)
         {
-            await owner.OpenAsync((IGrainContext)this).ConfigureAwait(true);
+            await owner.OpenAsync((IGrainContext)this);
         }
-        await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(CancellationToken.None).ConfigureAwait(true);
+        await serviceProvider.GetRequiredService<OrleansNode>().InitializeLocalRuntimeAsync(CancellationToken.None);
     }
 }

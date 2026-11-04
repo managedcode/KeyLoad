@@ -9,6 +9,7 @@ internal sealed class AnalyzerInitializationTests
     [Arguments(1)]
     [Arguments(2)]
     [Arguments(3)]
+    [Arguments(4)]
     public async Task NullAnalysisContextIsRejectedBeforeRegistration(int index)
     {
         DiagnosticAnalyzer analyzer = index switch
@@ -16,7 +17,8 @@ internal sealed class AnalyzerInitializationTests
             0 => new UnauthorizedImplementationTermAnalyzer(),
             1 => new SynchronousZoneTreeAccessAnalyzer(),
             2 => new NullReturnAnalyzer(),
-            _ => new ProgramCompositionRootAnalyzer()
+            3 => new ProgramCompositionRootAnalyzer(),
+            _ => new OrleansConfigureAwaitAnalyzer()
         };
         var failure = Assert.ThrowsExactly<ArgumentNullException>(() => analyzer.Initialize(null!));
         await Assert.That(failure.ParamName).IsEqualTo("context");

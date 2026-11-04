@@ -13,7 +13,7 @@ internal static class SampleChunkAdmissionTransitions
             SampleChunkWorkHint? current;
             try
             {
-                current = await storage.Operations.ReadSampleChunkCurrentAsync(entry.Value.Hint, token).ConfigureAwait(true);
+                current = await storage.Operations.ReadSampleChunkCurrentAsync(entry.Value.Hint, token);
             }
             catch (KeyLoadException failure) when (failure.Code is ErrorCode.Unauthenticated or ErrorCode.PermissionDenied)
             {
@@ -22,7 +22,7 @@ internal static class SampleChunkAdmissionTransitions
             if (current is null || current.Revision != entry.Value.Hint.Revision
                 || entry.Value.BlockedPolicyEpoch is { } epoch && current.CreatorPolicyEpoch != epoch)
             {
-                await remove(entry.Key, token).ConfigureAwait(true);
+                await remove(entry.Key, token);
             }
         }
     }

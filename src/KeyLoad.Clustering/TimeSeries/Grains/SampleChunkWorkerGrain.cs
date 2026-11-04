@@ -36,7 +36,7 @@ internal sealed class SampleChunkWorkerGrain(BackgroundStorageClient storage,
 
     private async Task FlushAsync(CancellationToken token)
     {
-        after = await CycleAsync(after, token).ConfigureAwait(true);
+        after = await CycleAsync(after, token);
     }
 
     /// <summary>A refused or unreachable hint leaves the buffer; the persisted chunk record remains the durable source.</summary>
@@ -44,11 +44,11 @@ internal sealed class SampleChunkWorkerGrain(BackgroundStorageClient storage,
     {
         try
         {
-            var page = await storage.Operations.ReadSampleChunkWorkPageAsync(after, token).ConfigureAwait(true);
+            var page = await storage.Operations.ReadSampleChunkWorkPageAsync(after, token);
             foreach (var hint in page.Hints)
             {
                 token.ThrowIfCancellationRequested();
-                await ScheduleJoinedAsync(hint, token).ConfigureAwait(true);
+                await ScheduleJoinedAsync(hint, token);
             }
             return page.AfterKey?.ToArray();
         }
@@ -70,13 +70,13 @@ internal sealed class SampleChunkWorkerGrain(BackgroundStorageClient storage,
         var original = coordinator.ScheduleAsync(hint, token);
         try
         {
-            await original.WaitAsync(token).ConfigureAwait(true);
+            await original.WaitAsync(token);
         }
         catch (OperationCanceledException initiating) when (token.IsCancellationRequested)
         {
             try
             {
-                await original.ConfigureAwait(true);
+                await original;
             }
             catch (Exception cleanup) { throw new AggregateException(initiating, cleanup); }
             throw;

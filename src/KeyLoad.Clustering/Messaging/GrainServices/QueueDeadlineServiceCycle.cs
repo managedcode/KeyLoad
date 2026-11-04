@@ -13,7 +13,7 @@ internal static class QueueDeadlineServiceCycle
     {
         try
         {
-            var discovery = await storage.Operations.ReadQueueDeadlinePageAsync(cursor, cancellationToken).ConfigureAwait(true);
+            var discovery = await storage.Operations.ReadQueueDeadlinePageAsync(cursor, cancellationToken);
             cursor = discovery.Cursor;
             if (discovery.PrefixError is { } prefixError)
             {
@@ -28,7 +28,7 @@ internal static class QueueDeadlineServiceCycle
             foreach (var hint in page.Jobs)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await DispatchAsync(factory, hint, clock, diagnostics, options, cancellationToken).ConfigureAwait(true);
+                await DispatchAsync(factory, hint, clock, diagnostics, options, cancellationToken);
             }
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -56,7 +56,7 @@ internal static class QueueDeadlineServiceCycle
         {
             var owner = factory.GetGrain<IRecurringDueCoordinatorGrain>(hint.Lane.Partition.AtomicPartitionId);
             var dispatch = owner.ProcessQueueDeadlineAsync(hint, lifetime.Token);
-            var result = await AwaitDispatchAsync(dispatch, lifetime.Token).ConfigureAwait(true);
+            var result = await AwaitDispatchAsync(dispatch, lifetime.Token);
             if (result.Error is { } code)
             {
                 RecurringDueDiagnostics.DispatchFailed(diagnostics, code);
@@ -85,11 +85,11 @@ internal static class QueueDeadlineServiceCycle
     {
         try
         {
-            return await dispatch.WaitAsync(cancellationToken).ConfigureAwait(true);
+            return await dispatch.WaitAsync(cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            await dispatch.ConfigureAwait(true);
+            await dispatch;
             throw;
         }
     }

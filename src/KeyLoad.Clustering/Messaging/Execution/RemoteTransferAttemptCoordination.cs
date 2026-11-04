@@ -13,7 +13,7 @@ internal static class RemoteTransferAttemptCoordination
             return hint;
         }
         var value = await ReadAsync(execution, hint, intentToken, RemoteTransferAttemptProtocol.SourceReadPurpose,
-            token).ConfigureAwait(true);
+            token);
         var current = value.SourceState ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Unavailable);
         if (current.Source != hint.Source || current.Destination != hint.Destination || current.TransferId != hint.TransferId
             || current.PrincipalId != hint.PrincipalId || current.Fingerprint != hint.Fingerprint
@@ -36,7 +36,7 @@ internal static class RemoteTransferAttemptCoordination
             return;
         }
         var value = await ReadAsync(execution, hint, intentToken, RemoteTransferAttemptProtocol.FailureReadPurpose,
-            token).ConfigureAwait(true);
+            token);
         if (value.TargetReceipt is not null)
         {
             return;
@@ -46,7 +46,7 @@ internal static class RemoteTransferAttemptCoordination
         var digest = claims.OutcomeDigest;
         var id = RemoteTransferAttemptIdentity.AdvanceId(hint, hint.AcceptGeneration, digest);
         var reply = await execution.ApplyAsync(hint.PrincipalId, new(id, hint.Source.Partition,
-            [new AdvanceQueueTransferAttempt(hint.Source, hint.TransferId, hint.AcceptGeneration, witness)]), token).ConfigureAwait(true);
+            [new AdvanceQueueTransferAttempt(hint.Source, hint.TransferId, hint.AcceptGeneration, witness)]), token);
         if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferAttemptProtocol.Unavailable);
@@ -60,7 +60,7 @@ internal static class RemoteTransferAttemptCoordination
             hint.TransferId, intentToken, hint.AcceptGeneration, RemoteTransferRepairIdentity.CommandId(hint, QueueTransferRepairStage.Accept),
             PolicyGeneration: hint.AcceptPolicyGeneration, CompleteGeneration: hint.CompleteGeneration);
         var result = (await execution.ReadAsync<RemoteTransferCoordinationReadResult, RemoteTransferCoordinationReadRequest>(hint.PrincipalId,
-            GrainReadKind.QueueTransferCoordination, request, token).ConfigureAwait(true)).Value
+            GrainReadKind.QueueTransferCoordination, request, token)).Value
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferAttemptProtocol.Unavailable);
         var valid = purpose == RemoteTransferAttemptProtocol.SourceReadPurpose
             ? result.SourceState is not null && result.FailureWitness is null && result.TargetReceipt is null

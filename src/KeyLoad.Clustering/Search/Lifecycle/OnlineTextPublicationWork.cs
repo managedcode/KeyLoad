@@ -55,7 +55,7 @@ internal sealed class OnlineTextPublicationWork<TResult>(Guid sessionId, Guid co
     {
         try
         {
-            return await RequireOriginal().WaitAsync(token).ConfigureAwait(true);
+            return await RequireOriginal().WaitAsync(token);
         }
         catch (OperationCanceledException)
         {

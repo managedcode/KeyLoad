@@ -24,7 +24,7 @@ internal static class GrainOnlineTextPublicationCommand
         }
         var work = maintenance.RequirePublicationWork(phase.SessionId, phase.Request, principal.Id);
         _ = work.AdmitOriginal(() => coordinator.SubmitVerifiedAsync<OnlineTextIndexMaintenanceResult>(operation, cancellationToken));
-        return await work.AwaitCallerAsync(cancellationToken).ConfigureAwait(true);
+        return await work.AwaitCallerAsync(cancellationToken);
     }
 
     private static Command<DatabaseCommand> Read(DecodedGrainRequest request)

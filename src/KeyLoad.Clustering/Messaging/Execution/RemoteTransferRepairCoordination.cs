@@ -19,7 +19,7 @@ internal static class RemoteTransferRepairCoordination
             RemoteTransferRepairIdentity.CommandId(hint, stage), stage, hint.AcceptPolicyGeneration,
             hint.CompleteGeneration, receiptToken);
         var value = (await execution.ReadAsync<RemoteTransferCoordinationReadResult, RemoteTransferCoordinationReadRequest>(hint.PrincipalId,
-            GrainReadKind.QueueTransferCoordination, request, token).ConfigureAwait(true)).Value
+            GrainReadKind.QueueTransferCoordination, request, token)).Value
             ?? throw Errors.Fail(ErrorCode.RecoveryRequired, RemoteTransferRepairProtocol.Unavailable);
         if (stage == QueueTransferRepairStage.Accept && value.TargetReceipt is not null
             && value.SourceState is null && value.FailureWitness is null && value.RepairWitness is null)
@@ -35,7 +35,7 @@ internal static class RemoteTransferRepairCoordination
         var id = RemoteTransferRepairIdentity.AdvanceId(hint, stage, witness.OutcomeDigest);
         var reply = await execution.ApplyAsync(hint.PrincipalId, new(id, hint.Source.Partition,
             [new AdvanceQueueTransferRepair(hint.Source, hint.TransferId, stage, hint.AcceptGeneration,
-                hint.AcceptPolicyGeneration, hint.CompleteGeneration, value.RepairWitness)]), token).ConfigureAwait(true);
+                hint.AcceptPolicyGeneration, hint.CompleteGeneration, value.RepairWitness)]), token);
         if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? RemoteTransferRepairProtocol.Unavailable);

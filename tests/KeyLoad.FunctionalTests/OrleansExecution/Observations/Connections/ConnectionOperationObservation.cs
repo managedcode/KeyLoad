@@ -17,7 +17,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
         {
             connections[connection.GetPrimaryKey()] = context.TargetContext;
         }
-        await context.Invoke().ConfigureAwait(true);
+        await context.Invoke();
     }
 
     internal ConnectionOperationGate Hold(Guid requestId, GrainRequestPhase phase = GrainRequestPhase.RequestStarted,
@@ -80,7 +80,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
                 throw new InvalidOperationException(ConnectionProtocol.DuplicateObservation);
             }
         }
-        await ObserveGateAsync(identity, phase, cancellationToken).ConfigureAwait(true);
+        await ObserveGateAsync(identity, phase, cancellationToken);
     }
 
     public ValueTask RuntimeObserveAsync(GrainRequestProbeIdentity identity, GrainRequestPhase phase,
@@ -107,7 +107,7 @@ internal sealed class ConnectionOperationObservation : IGrainRequestPhaseObserve
         {
             throw new IOException(ConnectionProtocol.OrdinaryFailure);
         }
-        await gate.Release.Task.WaitAsync(cancellationToken).ConfigureAwait(true);
+        await gate.Release.Task.WaitAsync(cancellationToken);
     }
 
     public void ProducerDisposed(GrainRequestProbeIdentity identity, IGrainContext context)

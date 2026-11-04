@@ -8,7 +8,7 @@ internal static class AnnMaintenanceEnrollmentAck
         if (state.EnrollmentSettlementIntent is { } original)
         {
             _ = await children.CommandAsync<CommitProjectionBatchRequest, ProjectionBatchResult>(
-                OperationKind.CommitProjectionBatch, original, original.CommandId, token).ConfigureAwait(true);
+                OperationKind.CommitProjectionBatch, original, original.CommandId, token);
             return;
         }
         if (configured.InitialAnnMaintenance is { } reserved

@@ -26,7 +26,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
             requestId = request.Envelope.RequestId;
             command = request.Envelope.CommandKind is not null;
             GrainIdentityContext.Validate(request.Envelope, requestId);
-            return await RunOwnedAsync(request, actorKey, context, token).ConfigureAwait(true);
+            return await RunOwnedAsync(request, actorKey, context, token);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -53,7 +53,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
                     sessionId = SessionId(request);
                     Register(sessionId, request.Envelope.ReadKind ?? GrainReadKind.OnlineTextMaintenance, original);
                     registered = sessionId != Guid.Empty;
-                    return await ExecuteAdmittedAsync(request, actorKey, context, work).ConfigureAwait(true);
+                    return await ExecuteAdmittedAsync(request, actorKey, context, work);
                 }
                 catch (Exception failure)
                 {
@@ -102,7 +102,7 @@ internal sealed class PartitionStorageRequestExecution(DatabaseEngine database, 
             throw Errors.Fail(ErrorCode.UnsupportedCapability, GrainRoutingProtocol.InvalidRequest);
         }
         var reader = new ConnectionReadExecution(codec, database, services, clock, workOwner, diagnostics, context);
-        return await reader.ExecuteAsync(request, work, error => work.PrimaryError = error, work.Token).ConfigureAwait(true);
+        return await reader.ExecuteAsync(request, work, error => work.PrimaryError = error, work.Token);
     }
 
     private Guid SessionId(DecodedGrainRequest request)

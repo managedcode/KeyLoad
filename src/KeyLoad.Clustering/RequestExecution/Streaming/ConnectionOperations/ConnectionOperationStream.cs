@@ -12,7 +12,7 @@ internal static class ConnectionOperationStream
     {
         using var admitted = owner.Acquire(requestId);
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, enumerationToken);
-        await foreach (var item in createStream(execution.Token).WithCancellation(execution.Token).ConfigureAwait(true))
+        await foreach (var item in createStream(execution.Token).WithCancellation(execution.Token))
         {
             yield return item;
         }

@@ -18,7 +18,7 @@ internal sealed class DistributedSearchOperation(DistributedSearchRequest reques
     {
         var initial = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Statistics, partitions,
             request.Search, default, null, null, default, default, budget);
-        var captured = await RunAsync(initial).ConfigureAwait(true);
+        var captured = await RunAsync(initial);
         var witnesses = Witnesses(captured);
         DistributedSearchStatisticsRequestBinding.Require(request.Search, witnesses, options, budget);
         var digest = DistributedSearchRequestDigest.Create(request, budget);
@@ -28,22 +28,22 @@ internal sealed class DistributedSearchOperation(DistributedSearchRequest reques
         var windows = DistributedSearchWorkFactory.WindowIds(partitions, budget);
         if (statisticsCaptured is not null)
         {
-            await statisticsCaptured(execution.Token).ConfigureAwait(true);
+            await statisticsCaptured(execution.Token);
             budget.Check();
         }
         var candidateWork = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Candidates, partitions,
             request.Search, witnesses, statistics, scope, windows, default, budget);
-        var candidates = await RunAsync(candidateWork).ConfigureAwait(true);
+        var candidates = await RunAsync(candidateWork);
         var selected = DistributedSearchGlobalFusion.Select(request.Search,
             Branches(candidates, text: true), Branches(candidates, text: false), windows, scope, budget, out var fusion);
         var projectionWork = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Projection, partitions,
             request.Search, witnesses, null, null, default, selected, budget);
-        var projected = await RunAsync(projectionWork).ConfigureAwait(true);
-        await sourceBarrier(execution.Token).ConfigureAwait(true);
+        var projected = await RunAsync(projectionWork);
+        await sourceBarrier(execution.Token);
         budget.Check();
         var finalWork = DistributedSearchWorkFactory.Create(DistributedSearchPhase.Revalidate, partitions,
             request.Search, witnesses, null, null, default, default, budget);
-        _ = await RunAsync(finalWork).ConfigureAwait(true);
+        _ = await RunAsync(finalWork);
         budget.Check();
         return DistributedSearchPublicMapper.Map(selected, projected, witnesses, epoch,
             fusion, request.Search.Explain, budget);

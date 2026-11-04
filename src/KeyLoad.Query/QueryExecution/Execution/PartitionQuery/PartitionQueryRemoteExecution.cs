@@ -30,7 +30,7 @@ internal static partial class PartitionQueryRemoteExecution
         for (var index = FirstLeafIndex; index < preparedLeaves.Length; index++)
         {
             budget.Check();
-            preparedLeaves[index] = await prepare(plan.Leaves[index], budget, cancellationToken).ConfigureAwait(true);
+            preparedLeaves[index] = await prepare(plan.Leaves[index], budget, cancellationToken);
         }
         var leaves = ImmutableArray.CreateBuilder<PartitionQueryLeafResult>(plan.Leaves.Length);
         var owners = ImmutableArray.CreateBuilder<PhysicalShardRecord>(plan.Leaves.Length);
@@ -40,15 +40,15 @@ internal static partial class PartitionQueryRemoteExecution
         {
             budget.Check();
             var actual = await PartitionQueryParallelBatch.RunAsync(preparedLeaves, offset,
-                Math.Min(concurrency, plan.Leaves.Length - offset), execution).ConfigureAwait(true);
+                Math.Min(concurrency, plan.Leaves.Length - offset), execution);
             for (var index = FirstLeafIndex; index < actual.Length; index++)
             {
-                await preparedLeaves[offset + index].CompleteAsync(actual[index], cancellationToken).ConfigureAwait(true);
+                await preparedLeaves[offset + index].CompleteAsync(actual[index], cancellationToken);
                 leaves.Add(actual[index].Result);
                 owners.Add(actual[index].Owner);
             }
         }
-        await revalidate(cancellationToken).ConfigureAwait(true);
+        await revalidate(cancellationToken);
         budget.Check();
         var result = PartitionQueryMerge.Complete(plan, leaves.MoveToImmutable(), identity, budget, owners.MoveToImmutable());
         return PartitionQueryPublicMapper.MapPublic(result, budget);

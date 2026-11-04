@@ -18,7 +18,7 @@ internal static class BackgroundStorageReadAccounting
         try
         {
             dispatched = true;
-            var response = await send(token).ConfigureAwait(true);
+            var response = await send(token);
             Require(response);
             binding.Bind(response.Lifetimes);
             imported = true;

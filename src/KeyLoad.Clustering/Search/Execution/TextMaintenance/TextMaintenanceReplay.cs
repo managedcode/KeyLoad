@@ -12,7 +12,7 @@ internal static class TextMaintenanceReplay
         while (true)
         {
             var page = await children.ReadAsync<ReadProjectionBatchRequest, ProjectionBatch>(GrainReadKind.ProjectionBatch,
-                new(request.Consumer, ProjectionReplayPage.Records, state.ReplayUpperSequence), token).ConfigureAwait(true);
+                new(request.Consumer, ProjectionReplayPage.Records, state.ReplayUpperSequence), token);
             if (page.ThroughSequence == page.Consumer.Checkpoint)
             {
                 if (page.HasMore || page.ThroughSequence != state.ReplayUpperSequence || !page.Entries.IsEmpty)
@@ -21,15 +21,15 @@ internal static class TextMaintenanceReplay
                 }
                 if (state.IndexSha256 is not null && state.ThroughSequence == state.ReplayUpperSequence)
                 {
-                    return checkpoint ?? await OriginalCheckpointAsync(children, request, state, token).ConfigureAwait(true);
+                    return checkpoint ?? await OriginalCheckpointAsync(children, request, state, token);
                 }
             }
             var commandId = TextMaintenanceChildIdentity.Create(request.CommandId,
                 TextIndexMaintenancePhase.Checkpoint, page.ThroughSequence);
             var original = new CommitProjectionBatchRequest(commandId, request.Consumer, page.Token, []);
             _ = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.PreparePage,
-                page, original, null, token).ConfigureAwait(true);
-            var completed = await ApplyAndCommitAsync(children, request, original, writer).ConfigureAwait(true);
+                page, original, null, token);
+            var completed = await ApplyAndCommitAsync(children, request, original, writer);
             state = completed.State;
             checkpoint = completed.Checkpoint;
             if (state.Checkpoint == state.ReplayUpperSequence && state.ThroughSequence == state.ReplayUpperSequence)
@@ -44,17 +44,14 @@ internal static class TextMaintenanceReplay
         ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer)
     {
         var token = writer.CancellationToken;
-        _ = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.ApplyIntent, token).ConfigureAwait(true);
-        await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.RuntimeIndex)
-            .ConfigureAwait(true);
-        await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.Publish)
-            .ConfigureAwait(true);
+        _ = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.ApplyIntent, token);
+        await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.RuntimeIndex);
+        await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.Publish);
         var acknowledged = await children.CommandAsync<CommitProjectionBatchRequest, ProjectionBatchResult>(
-            OperationKind.CommitProjectionBatch, original, original.CommandId, token).ConfigureAwait(true);
+            OperationKind.CommitProjectionBatch, original, original.CommandId, token);
         var state = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.SettleCheckpoint,
-            null, original, acknowledged, token).ConfigureAwait(true);
-        await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.Checkpoint)
-            .ConfigureAwait(true);
+            null, original, acknowledged, token);
+        await TextMaintenanceProgress.WriteAsync(writer, children.ParentRequestId, TextIndexMaintenancePhase.Checkpoint);
         return new(state, acknowledged);
     }
 
@@ -90,6 +87,6 @@ internal static class TextMaintenanceReplay
     private static async Task<ProjectionBatchResult?> ReplayOriginalCheckpointAsync(MaintenanceChildCalls children,
         CommitProjectionBatchRequest original, CancellationToken token)
         => await children.CommandAsync<CommitProjectionBatchRequest, ProjectionBatchResult>(
-            OperationKind.CommitProjectionBatch, original, original.CommandId, token).ConfigureAwait(true);
+            OperationKind.CommitProjectionBatch, original, original.CommandId, token);
 
 }

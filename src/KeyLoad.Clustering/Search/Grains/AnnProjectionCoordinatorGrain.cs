@@ -31,25 +31,25 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         var token = linked.Token;
         var budget = new ReadExecutionBudget(clock, token);
         budget.AttachResourceLifetimeBinding(binding);
-        var target = await storage.ResolveAnnOwnerAsync(nodeId, token).ConfigureAwait(true);
+        var target = await storage.ResolveAnnOwnerAsync(nodeId, token);
         var current = owner.Current;
         if (current is null)
         {
-            current = await execution.PrepareAsync(target, consumer, generation, nodeId, null, budget, binding, token).ConfigureAwait(true);
+            current = await execution.PrepareAsync(target, consumer, generation, nodeId, null, budget, binding, token);
             if (current is null)
             {
                 return;
             }
-            await WriteAsync(current, binding, token).ConfigureAwait(true);
+            await WriteAsync(current, binding, token);
         }
-        var next = await execution.PrepareAsync(target, consumer, generation, nodeId, current, budget, binding, token).ConfigureAwait(true);
+        var next = await execution.PrepareAsync(target, consumer, generation, nodeId, current, budget, binding, token);
         if (next is null)
         {
             return;
         }
         if (next != current)
         {
-            await WriteAsync(next, binding, token).ConfigureAwait(true);
+            await WriteAsync(next, binding, token);
             current = next;
         }
         if (current.JobId is not null)
@@ -60,11 +60,11 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             ?? throw Errors.Fail(ErrorCode.Corruption, AnnProjectionJobProtocol.Invalid);
         binding.OriginalProducer.AdmitPublication();
         var scheduled = await jobs.ScheduleJobAsync(AnnProjectionJobMetadata.Create(this.GetGrainId(),
-            clock.GetUtcNow(), request, journal.Value), token).ConfigureAwait(true);
+            clock.GetUtcNow(), request, journal.Value), token);
         await WriteAsync(current with
         {
             JobId = scheduled.Id
-        }, binding, token).ConfigureAwait(true);
+        }, binding, token);
     }
 
     public Task ExecuteJobAsync(IJobRunContext context, CancellationToken cancellationToken)
@@ -85,11 +85,11 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         var token = linked.Token;
         var budget = new ReadExecutionBudget(clock, token);
         budget.AttachResourceLifetimeBinding(binding);
-        var target = await storage.ResolveAnnOwnerAsync(original.PendingRequest.NodeId, token).ConfigureAwait(true);
+        var target = await storage.ResolveAnnOwnerAsync(original.PendingRequest.NodeId, token);
         AnnMaintenanceResult result;
         try
         {
-            result = await execution.ExecuteAsync(GrainFactory, target, original, budget, binding, token).ConfigureAwait(true);
+            result = await execution.ExecuteAsync(GrainFactory, target, original, budget, binding, token);
         }
         catch (KeyLoadException failure) when (failure.Code is ErrorCode.PermissionDenied or ErrorCode.Unauthenticated
             or ErrorCode.TokenInvalidated)
@@ -100,8 +100,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
                 {
                     JobId = context.Job.Id,
                     BlockedError = failure.Code
-                }, binding, token)
-                    .ConfigureAwait(true);
+                }, binding, token);
             }
             catch (Exception cleanup) { throw new AggregateException(failure, cleanup); }
             throw;
@@ -112,7 +111,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
             LastRequest = original.PendingRequest,
             PendingRequest = null,
             LastResult = result
-        }, binding, token).ConfigureAwait(true);
+        }, binding, token);
     }
 
     private async Task WriteAsync(AnnProjectionJobState value, CapabilityWorkLifetime binding,
@@ -121,7 +120,7 @@ internal sealed class AnnProjectionCoordinatorGrain(IDurableStateManager state, 
         try
         {
             binding.OriginalProducer.AdmitPublication();
-            await owner.WriteAsync(value, token).ConfigureAwait(true);
+            await owner.WriteAsync(value, token);
         }
         catch (Exception) { DeactivateOnIdle(); throw; }
     }

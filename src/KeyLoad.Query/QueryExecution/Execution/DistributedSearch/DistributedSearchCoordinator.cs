@@ -28,6 +28,6 @@ internal static partial class DistributedSearchCoordinator
         using var execution = CancellationTokenSource.CreateLinkedTokenSource(original);
         var partitions = DistributedSearchValidation.Require(request, options, budget);
         return await new DistributedSearchOperation(request, partitions, options, budget,
-            prepare, sourceBarrier, execution, statisticsCaptured).RunAsync().ConfigureAwait(true);
+            prepare, sourceBarrier, execution, statisticsCaptured).RunAsync();
     }
 }

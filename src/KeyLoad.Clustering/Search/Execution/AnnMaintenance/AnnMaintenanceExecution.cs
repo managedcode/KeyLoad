@@ -14,7 +14,6 @@ internal static class AnnMaintenanceExecution
         purpose.EnableAnnMaintenance(request.Mode);
         var children = new MaintenanceChildCalls(parent, executeChild, abort, services, codec, diagnostics, purpose.WorkBinding,
             AnnMaintenanceChildScope.Purpose, AnnMaintenanceProtocol.Interrupted);
-        return await children.RunAsync(() => AnnMaintenanceParentFlow.RunAsync(children, request, writer))
-            .ConfigureAwait(true);
+        return await children.RunAsync(() => AnnMaintenanceParentFlow.RunAsync(children, request, writer));
     }
 }

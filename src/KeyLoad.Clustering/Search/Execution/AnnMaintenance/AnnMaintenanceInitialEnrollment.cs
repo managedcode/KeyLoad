@@ -12,7 +12,7 @@ internal static class AnnMaintenanceInitialEnrollment
             return (false, default(AnnMaintenanceRequest?));
         }
         var actual = await children.ReadAsync<GetOutboxStatusRequest, OutboxStatus>(GrainReadKind.OutboxStatus,
-            new(request.Consumer.Partition), token).ConfigureAwait(true);
+            new(request.Consumer.Partition), token);
         var configured = actual.Consumers.SingleOrDefault(value => value.Consumer == request.Consumer);
         if (configured is null)
         {

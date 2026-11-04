@@ -12,8 +12,8 @@ internal static class TextMaintenanceRelease
             TextIndexMaintenancePhase.Release, InitialSequence);
         var actual = await children.CommandAsync<ReleaseProjectionConsumerRequest, ProjectionConsumerInfo>(
             OperationKind.ReleaseProjectionConsumer, new(commandId, request.Consumer, request.IndexGeneration),
-            commandId, token).ConfigureAwait(true);
-        _ = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.Release, token).ConfigureAwait(true);
+            commandId, token);
+        _ = await children.CapabilityAsync(request, TextMaintenanceCapabilityKind.Release, token);
         return new(request.CommandId, request.Consumer, request.IndexGeneration, TextIndexMaintenancePhase.Completed,
             null, EmptyRecords, null, null, actual);
     }

@@ -12,7 +12,7 @@ public sealed partial class SearchEngine
     {
         var budget = SearchLifetimeWorkBudget.Create(database, binding, token);
         using var reservation = database.AdmitQuery(token);
-        return await SearchCoreAsync(principalId, request, budget).ConfigureAwait(true);
+        return await SearchCoreAsync(principalId, request, budget);
     }
 
     internal Task<GraphSearchResult> GraphSearchBoundAsync(string principalId, GraphSearchRequest request,

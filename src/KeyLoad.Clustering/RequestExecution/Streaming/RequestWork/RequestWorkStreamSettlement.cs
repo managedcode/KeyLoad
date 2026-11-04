@@ -8,7 +8,7 @@ internal static class RequestWorkStreamSettlement
 {
     internal static async ValueTask<RequestWorkLease?> AcquireOrSettleAsync(
         RequestWorkOwner? owner, Guid requestId, Action settled)
-        => (await AcquireOrSettleAwaitedAsync(owner, requestId, () => { settled(); return ValueTask.CompletedTask; }).ConfigureAwait(true)).Value;
+        => (await AcquireOrSettleAwaitedAsync(owner, requestId, () => { settled(); return ValueTask.CompletedTask; })).Value;
 
     internal static async ValueTask<(bool HasValue, RequestWorkLease? Value)> AcquireOrSettleAwaitedAsync(
         RequestWorkOwner? owner, Guid requestId, Func<ValueTask> settled)
@@ -20,7 +20,7 @@ internal static class RequestWorkStreamSettlement
         }
 
         var failure = await SettleAndReleaseAwaitedAsync<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>(
-            null, settled, error, null).ConfigureAwait(true);
+            null, settled, error, null);
         ExceptionDispatchInfo.Capture(failure ?? error).Throw();
         return (false, default(RequestWorkLease?));
     }
@@ -49,7 +49,7 @@ internal static class RequestWorkStreamSettlement
 
     internal static async ValueTask<Exception?> SettleAndReleaseAsync<T>(IAsyncEnumerator<T>? enumerator,
         Action settled, Exception? primary, RequestWorkLease? lease)
-        => await SettleAndReleaseAwaitedAsync(enumerator, () => { settled(); return ValueTask.CompletedTask; }, primary, lease).ConfigureAwait(true);
+        => await SettleAndReleaseAwaitedAsync(enumerator, () => { settled(); return ValueTask.CompletedTask; }, primary, lease);
 
     internal static async ValueTask<Exception?> SettleAndReleaseAwaitedAsync<T>(IAsyncEnumerator<T>? enumerator,
         Func<ValueTask> settled, Exception? primary, RequestWorkLease? lease)
@@ -58,7 +58,7 @@ internal static class RequestWorkStreamSettlement
         Exception? settlementError = null;
         try
         {
-            failure = await CqrsStreamSettlement.SettleAwaitedAsync(enumerator, settled, primary).ConfigureAwait(true);
+            failure = await CqrsStreamSettlement.SettleAwaitedAsync(enumerator, settled, primary);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {

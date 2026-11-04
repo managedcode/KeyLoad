@@ -70,6 +70,7 @@ unless stated otherwise. A criterion with no automated case names its evidence.
 | REQ-CQ-MULTILINE-BLOCKS-001 | AC-CQ-MULTILINE-BLOCKS-001: executable control-flow, method and lambda braces span lines (Allman) and `IDE0055` is an error. AC-CQ-MULTILINE-BLOCKS-002: the expansion preserves behaviour, so existing whole-operation tests stay green. AC-CQ-MULTILINE-BLOCKS-003: newly compact blocks fail the formatter gate | `dotnet format KeyLoad.slnx --verify-no-changes --no-restore` and the Release build |
 | REQ-CQ-ROS-001..003 | AC-CQ-ROS-001..003 below | Tool manifest and MCP session (manual evidence for installation) |
 | REQ-CQ-NULL-001: operation outcomes use explicit results | AC-CQ-NULL-001: KLD0040 rejects null return values in statements, expression bodies, local functions, lambdas, async bodies and returned conditional/switch branches, including typed nulls, null-forgiving expressions and null-valued defaults. AC-CQ-NULL-002: resolved nullable external interface, override and API callback contracts are preserved; local contracts, unrelated methods and non-nullable external contracts remain checked. | `NullReturnTests`, `ExternalNullReturnContractTests`; complete solution build remains required |
+| REQ-CQ-ORLEANS-AWAIT-001: Orleans execution uses ordinary awaits | AC-CQ-ORLEANS-AWAIT-001: KLD0043 rejects references to framework `ConfigureAwait` overloads in authored grain and Grain Service code across projects and in authored `KeyLoad.Clustering` helpers, regardless of the argument. Ordinary awaits and async enumeration with cancellation are permitted. | `OrleansConfigureAwaitTests`, strict solution build |
 | REQ-CQ-SIMD-PROFILE-001 / AC-CQ-SIMD-PROFILE-001 | Coverage and qualification run the normal SIMD-enabled profile only; inherited intrinsics-disabling variables are refused and no scalar profile is admitted | coverage tooling tests |
 
 ## Build policy
@@ -121,6 +122,7 @@ unique and never reused.
 | KLD0040 | Return explicit `ManagedCode.Communication.Result` / `Result<T>` outcomes instead of null; preserve resolved nullable contracts from another project or API | Error |
 | KLD0041 | Keep data declarations and API inputs/outputs typed; an unavoidable erased boundary requires a reason at each exact declaration or use | Warning, promoted to error by the build |
 | KLD0042 | Review value boxing, potential generic boxing and runtime conversions from object at each conversion | Warning, promoted to error by the build |
+| KLD0043 | Use ordinary awaits in Orleans execution code | Error |
 
 Rule fixtures (all under `Cases/`): KLD0001 `LiteralMachineKey/`, KLD0013
 `Program/ProgramEndpointMappingTests`,

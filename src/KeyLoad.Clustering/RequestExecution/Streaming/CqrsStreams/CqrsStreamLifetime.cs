@@ -49,8 +49,7 @@ internal static class CqrsStreamLifetime
             : CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);
         var token = execution?.Token ?? request.Token;
         var admission = new CqrsStreamAdmission(requestId, purpose);
-        var workLease = (await RequestWorkStreamSettlement.AcquireOrSettleAwaitedAsync(owner, requestId, settled)
-            .ConfigureAwait(true)).Value;
+        var workLease = (await RequestWorkStreamSettlement.AcquireOrSettleAwaitedAsync(owner, requestId, settled)).Value;
         IAsyncEnumerator<CqrsStreamChunk<GrainRequestProgress, GrainOperationReply>>? enumerator = null;
         Exception? primary = null;
         try
@@ -60,7 +59,7 @@ internal static class CqrsStreamLifetime
             primary = (CreationFailure(creation)).Value;
             while (primary is null && enumerator is not null)
             {
-                var step = await ReadNextAsync(enumerator, admission, token).ConfigureAwait(true);
+                var step = await ReadNextAsync(enumerator, admission, token);
                 if (step.Error is not null || !step.HasItem)
                 {
                     primary = step.Error;
@@ -75,7 +74,7 @@ internal static class CqrsStreamLifetime
         finally
         {
             var settlementFailure = await RequestWorkStreamSettlement.SettleAndReleaseAwaitedAsync(enumerator,
-                settled, primary, workLease).ConfigureAwait(true);
+                settled, primary, workLease);
             RequestWorkSettlement.Rethrow(settlementFailure);
         }
 
@@ -112,7 +111,7 @@ internal static class CqrsStreamLifetime
         try
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (!await enumerator.MoveNextAsync().ConfigureAwait(true))
+            if (!await enumerator.MoveNextAsync())
             {
                 return new(false, null, null);
             }

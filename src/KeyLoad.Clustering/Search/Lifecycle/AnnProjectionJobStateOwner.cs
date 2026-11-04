@@ -26,7 +26,7 @@ internal sealed class AnnProjectionJobStateOwner(IDurableStateManager manager,
         value.Value = next;
         try
         {
-            await manager.WriteStateAsync(token).ConfigureAwait(true);
+            await manager.WriteStateAsync(token);
         }
         catch (Exception) { Open = false; throw; }
     }

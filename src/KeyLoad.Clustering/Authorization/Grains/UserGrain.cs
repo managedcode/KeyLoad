@@ -22,7 +22,7 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
         UserCredential credential;
         try
         {
-            credential = await current.WaitAsync(cancellationToken).ConfigureAwait(true);
+            credential = await current.WaitAsync(cancellationToken);
         }
         catch (Exception) when (current.IsFaulted || current.IsCanceled)
         {
@@ -58,7 +58,7 @@ public sealed class UserGrain(GrainRequestCodec codec, TimeProvider clock) : Gra
         using var placement = GrainRequestIdentityScope.ForPlacement(envelope,
             GrainIdentityContext.RequireOriginSilo(), cancellationToken);
         var reply = await GrainFactory.GetGrain<IConnectionGrain>(state.ConnectionId)
-            .ExecuteAsync(envelope, cancellationToken).ConfigureAwait(true);
+            .ExecuteAsync(envelope, cancellationToken);
         if (reply.Error is { } error)
         {
             throw Errors.Fail(error, reply.SafeDetail ?? DatabaseCredentialValidation.UnavailableCredentialDetail);

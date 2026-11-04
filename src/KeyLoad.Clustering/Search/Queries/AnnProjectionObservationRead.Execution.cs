@@ -30,13 +30,11 @@ internal static partial class AnnProjectionObservationRead
         AnnSearchPage? approximate = null;
         if (request.Kind == AnnProjectionObservationKind.Wait)
         {
-            waited = await search.WaitForAnnIndexBoundAsync(principal.Id, request.Wait!, work, metadata, binding, cancellationToken)
-                .ConfigureAwait(true);
+            waited = await search.WaitForAnnIndexBoundAsync(principal.Id, request.Wait!, work, metadata, binding, cancellationToken);
         }
         else if (request.Kind == AnnProjectionObservationKind.Approximate)
         {
-            approximate = await search.ApproximateSearchBoundAsync(principal.Id, request.Approximate!, work, metadata, binding, cancellationToken)
-                .ConfigureAwait(true);
+            approximate = await search.ApproximateSearchBoundAsync(principal.Id, request.Approximate!, work, metadata, binding, cancellationToken);
         }
         var current = GrainRequestAuthority.ReloadForRequest(database, original.Envelope, clock);
         if (current.Id != principal.Id || current.PolicyEpoch != principal.PolicyEpoch

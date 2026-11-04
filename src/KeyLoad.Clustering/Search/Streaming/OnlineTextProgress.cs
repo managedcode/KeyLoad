@@ -8,7 +8,6 @@ internal static class OnlineTextProgress
     internal static async ValueTask WriteAsync(ICqrsStreamWriter<GrainRequestProgress, GrainOperationReply> writer,
         Guid parentRequestId, OnlineTextPhase phase)
     {
-        await writer.ProgressAsync(new GrainRequestProgress(parentRequestId) { OnlineTextPhase = phase }, PhaseCompleted)
-            .ConfigureAwait(true);
+        await writer.ProgressAsync(new GrainRequestProgress(parentRequestId) { OnlineTextPhase = phase }, PhaseCompleted);
     }
 }

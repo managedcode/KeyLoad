@@ -75,7 +75,7 @@ internal static class SearchCapturedExecution
             return Rank(database, null, view, principal, resource, request, budget, similarity, eligibility, null, null, null);
         }
         var scores = await VectorRanker.RankAsync(database, range, principal, request, similarity, budget,
-            eligibility, request.Limit).ConfigureAwait(true);
+            eligibility, request.Limit);
         var fusion = new SearchRankFusion(request.FusionConstant, request.Limit, budget, request.Explain);
         AddVectorBranch(fusion, request, scores);
         return FinishRanking(database, view, principal, resource, budget, fusion, null);

@@ -77,10 +77,10 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
     {
         var settled = originalSettled ?? throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
         var cleanup = await CqrsStreamSettlement.SettleAwaitedAsync(originalEnumerator,
-            settled, null).ConfigureAwait(true);
+            settled, null);
         cleanup = DisposeCancellation(cleanup);
         var original = originalPrimary ?? originalPurpose?.OriginalFailure ?? admissionFailure;
-        var preparation = (await PrepareAsync().ConfigureAwait(true)).Value;
+        var preparation = (await PrepareAsync()).Value;
         cleanup = RequestWorkSettlement.Preserve(cleanup, preparation);
         if (preparation is not null)
         {
@@ -94,8 +94,8 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
             try
             {
                 lease.PrepareDisposal(original, cleanup);
-                await lease.DisposeAsync().ConfigureAwait(true);
-                var report = await lease.Settlement.ConfigureAwait(true);
+                await lease.DisposeAsync();
+                var report = await lease.Settlement;
                 cleanup = report.CleanupOrJoinFailure;
             }
             catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
@@ -140,7 +140,7 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
         {
             if (lease is not null)
             {
-                await lease.PrepareCompletionAsync().ConfigureAwait(true);
+                await lease.PrepareCompletionAsync();
             }
             return (false, default(Exception?));
         }

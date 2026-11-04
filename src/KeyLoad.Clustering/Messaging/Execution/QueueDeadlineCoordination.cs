@@ -27,14 +27,14 @@ internal static class QueueDeadlineCoordination
         using var timeout = new CancellationTokenSource(options.Value.DispatchDeadline, clock);
         using var lifetime = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken,
             admission.SchedulingToken, timeout.Token);
-        var principal = await storage.Operations.ReadQueueDeadlineCreatorAsync(hint, lifetime.Token).ConfigureAwait(true);
+        var principal = await storage.Operations.ReadQueueDeadlineCreatorAsync(hint, lifetime.Token);
         if (principal.Id != subject)
         {
             throw Errors.Fail(ErrorCode.Unauthenticated, GrainRoutingProtocol.MissingPrincipal);
         }
         var commandId = DueDispatchCommandIdentity.ForDeadline(hint, principal);
         var body = new CommandRequest(commandId, hint.Lane.Partition, [hint.Mutation]);
-        var reply = await dispatch(principal, commandId, body, lifetime.Token).ConfigureAwait(true);
+        var reply = await dispatch(principal, commandId, body, lifetime.Token);
         return new(reply.Error);
     }
 }

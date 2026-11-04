@@ -39,7 +39,7 @@ internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, IAnn
                 var ownInitial = AnnProjectionJobValidation.Initial(work);
                 return (true, (AnnProjectionJobState?)(new(authority, ownInitial, ownInitial, null, null, null, work.ThroughSequence, null)));
             }
-            var enrollment = await execution.ReadEnrollmentBoundAsync(work.Principal, reserved, budget, binding, token).ConfigureAwait(true);
+            var enrollment = await execution.ReadEnrollmentBoundAsync(work.Principal, reserved, budget, binding, token);
             if (enrollment is null)
             {
                 return (false, default(AnnProjectionJobState?));
@@ -67,8 +67,7 @@ internal sealed class AnnProjectionStoragePlanning(DatabaseEngine database, IAnn
         {
             return (true, ((AnnProjectionJobState?)(original)));
         }
-        var publication = await execution.ReadPublishedBoundAsync(work.Principal, original.InitialRequest, budget, binding, token)
-            .ConfigureAwait(true);
+        var publication = await execution.ReadPublishedBoundAsync(work.Principal, original.InitialRequest, budget, binding, token);
         if (publication.Source.ThroughSequence >= work.ThroughSequence)
         {
             return (false, default(AnnProjectionJobState?));

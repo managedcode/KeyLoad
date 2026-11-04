@@ -79,7 +79,7 @@ public sealed class ZoneTreeStore : IAtomicStore, IKeyValueView, ICooperativeRan
         ArgumentNullException.ThrowIfNull(read) /* KLD0041: The BCL null guard accepts this existing typed callback reference without copying its contents. */;
         cancellationToken.ThrowIfCancellationRequested();
         using var operation = new ZoneTreeOperationContext(runtime, runtime.Tree.BeginReadOnlyTransaction(), ownsTransaction: true);
-        return await read(this, cancellationToken).ConfigureAwait(true);
+        return await read(this, cancellationToken);
     }
 
     /// <inheritdoc />

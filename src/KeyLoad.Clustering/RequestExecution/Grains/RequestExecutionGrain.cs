@@ -22,7 +22,7 @@ public sealed class RequestExecutionGrain(ILocalDatabaseRuntime storage, ILocalS
                 throw Errors.Fail(ErrorCode.OwnershipLost, GrainRoutingProtocol.InvalidRequest);
             }
             return await storage.ExecuteAsync(envelope, actorKey, ((IGrainBase)this).GrainContext,
-                cancellationToken).ConfigureAwait(true);
+                cancellationToken);
         }
         finally
         {

@@ -21,7 +21,7 @@ internal sealed class StorageCopyGapCompletion(SiloDatabaseClient storage, ILogg
         }
 
         var committed = await storage.On(owners[StorageCopyContract.FirstOwner].Address)
-            .ReadLastCommittedCommandsAsync(cancellationToken).ConfigureAwait(true);
+            .ReadLastCommittedCommandsAsync(cancellationToken);
         var completed = StorageCopyContract.UnpersistedCopies;
         foreach (var owner in owners)
         {
@@ -32,7 +32,7 @@ internal sealed class StorageCopyGapCompletion(SiloDatabaseClient storage, ILogg
             cancellationToken.ThrowIfCancellationRequested();
             var missing = Missing(committed, owner.Cut.Position, maximum);
             var applied = await storage.On(owner.Address).ApplyBatchAsync(missing,
-                owner.Cut.Position + StorageCopyContract.NextSequence, cancellationToken).ConfigureAwait(true);
+                owner.Cut.Position + StorageCopyContract.NextSequence, cancellationToken);
             if (applied.Position != maximum || applied.Applied.Length != missing.Length)
             {
                 throw Errors.Fail(ErrorCode.RecoveryRequired, StorageCopyContract.RecoveryRequired);

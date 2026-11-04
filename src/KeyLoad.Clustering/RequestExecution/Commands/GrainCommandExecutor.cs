@@ -21,7 +21,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 RequestWorkKind.CommandCapability, cancellationToken)).Value;
             coreEntered = true;
             return await ExecuteCoreAsync(request, work, context,
-                work?.Token ?? cancellationToken).ConfigureAwait(true);
+                work?.Token ?? cancellationToken);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -48,13 +48,13 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 budget.AttachResourceLifetimeBinding(work);
             }
             var principal = await CommandCapabilityAuthorization.AuthorizeAsync(database,
-                clock, codec, request, context, operationToken).ConfigureAwait(true);
+                clock, codec, request, context, operationToken);
             var kind = request.Envelope.CommandKind
                 ?? throw Errors.Fail(ErrorCode.TokenInvalidated, GrainRoutingProtocol.InvalidRequest);
             await CommandCapabilityAuthorization.ObserveAndValidateAsync(database,
-                codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken).ConfigureAwait(true);
+                codec, request, GrainRequestPhase.BeforeSubmit, context, operationToken);
             var original = (CommandWorkAdmission.Bind(database, request, principal, clock, work, budget)).Value;
-            var reply = await SubmitCommandAsync(kind, request, principal, budget, context, operationToken).ConfigureAwait(true);
+            var reply = await SubmitCommandAsync(kind, request, principal, budget, context, operationToken);
             stage = GrainFailureStage.ReplyEncoding;
             if (work is null || reply.Error is not null)
             {
@@ -65,7 +65,7 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
                 WorkProof = CommandWorkAdmission.Capture(request, work, principal.PolicyEpoch)
             };
             await CommandResultWorkBinding.BindBeforePublicationAsync(database, clock,
-                request, reply, budget, work, operationToken).ConfigureAwait(true);
+                request, reply, budget, work, operationToken);
             if (original is not null && kind is OperationKind.Receive or OperationKind.ReceiveSubscription)
             {
                 var /* KLD0041: Read the already-persisted receive submission outcome in its current mixed-result representation before encoding the public reply. */ result = (database.ResolveAppliedSubmissionOutcome(original, budget) /* KLD0041: Read the already-persisted receive submission outcome in its current mixed-result representation before encoding the public reply. */);
@@ -146,10 +146,10 @@ internal sealed class GrainCommandExecutor(DatabaseEngine database, ICommitCoord
     private async Task<GrainOperationReply> CompleteAsync<TResult>(Task<Result<TResult>> submission,
         DecodedGrainRequest request, IGrainContext? context, CancellationToken token)
     {
-        var result = await submission.ConfigureAwait(true);
+        var result = await submission;
         try
         {
-            await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, token).ConfigureAwait(true);
+            await ObservePhaseAsync(request, GrainRequestPhase.SubmitReturned, context, token);
             return GrainReplyFactory.Operation(result, token);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))

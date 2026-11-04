@@ -20,7 +20,7 @@ internal static class EventFeedAdvisoryPublisher
         {
             RequestContext.Clear();
             // The execution enqueue Task is not cancellation-aware. Join its ORIGINAL settlement before restoration.
-            await actualProducer.OnNextAsync(actualHint, null).ConfigureAwait(true);
+            await actualProducer.OnNextAsync(actualHint, null);
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))
         {
@@ -36,7 +36,7 @@ internal static class EventFeedAdvisoryPublisher
                 () =>
                 {
                     RestoreContext(original) /* KLD0041: Borrow and restore the original heterogeneous Orleans RequestContext entries after the actual advisory enqueue settles. */;
-                }, nonfatal ?? fatal).ConfigureAwait(true);
+                }, nonfatal ?? fatal);
         }
         if ((settlement ?? nonfatal ?? fatal) is { } terminal)
         {

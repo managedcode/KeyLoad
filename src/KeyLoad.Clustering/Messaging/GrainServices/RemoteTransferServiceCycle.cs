@@ -13,7 +13,7 @@ internal static class RemoteTransferServiceCycle
         var next = cursor;
         try
         {
-            var page = await storage.Operations.ReadQueueTransferPendingAsync(cursor, token).ConfigureAwait(true);
+            var page = await storage.Operations.ReadQueueTransferPendingAsync(cursor, token);
             if (page is null)
             {
                 return cursor;
@@ -21,7 +21,7 @@ internal static class RemoteTransferServiceCycle
             next = page.Cursor;
             if (page.Hint is { } hint)
             {
-                await DispatchAsync(grains, hint, clock, options, token).ConfigureAwait(true);
+                await DispatchAsync(grains, hint, clock, options, token);
             }
             return page.Cursor;
         }
@@ -44,7 +44,7 @@ internal static class RemoteTransferServiceCycle
             .ProcessQueueTransferAsync(hint, lifetime.Token);
         try
         {
-            var result = await task.WaitAsync(lifetime.Token).ConfigureAwait(true);
+            var result = await task.WaitAsync(lifetime.Token);
             if (result.Error is { } error)
             {
                 throw Errors.Fail(error, RemoteTransferCoordinationProtocol.InvalidResult);
@@ -54,7 +54,7 @@ internal static class RemoteTransferServiceCycle
         {
             try
             {
-                await task.ConfigureAwait(true);
+                await task;
             }
             catch (Exception settlement) when (GrainBoundaryErrors.Handles(settlement))
             {

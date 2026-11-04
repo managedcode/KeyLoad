@@ -20,7 +20,7 @@ internal sealed class PartitionLeafCalls(DatabaseEngine database, string princip
     internal async Task<(SiloAddress Address, PhysicalShardRecord Owner)> ResolveOwnerAsync(IPartitionQueryGrain target,
         ReadExecutionBudget parent, CancellationToken token)
     {
-        var selected = await target.ResolveOwnerAsync(database.Store.Identity.Incarnation, token).ConfigureAwait(true);
+        var selected = await target.ResolveOwnerAsync(database.Store.Identity.Incarnation, token);
         parent.Check();
         if (selected.Address is null || selected.Owner is null || selected.Owner.PhysicalShardId == Guid.Empty
             || selected.Owner.Incarnation != database.Store.Identity.Incarnation)
@@ -34,7 +34,7 @@ internal sealed class PartitionLeafCalls(DatabaseEngine database, string princip
         GrainRequestEnvelope child, Guid childId, CancellationToken token) where TResult : class
     {
         using var identity = GrainRequestIdentityScope.ForChild(services, original.Envelope, childId, Guid.Empty, token);
-        var reply = await target.ExecuteAsync(address, child, token).ConfigureAwait(true);
+        var reply = await target.ExecuteAsync(address, child, token);
         token.ThrowIfCancellationRequested();
         if (reply.Error is { } error)
         {

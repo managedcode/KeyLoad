@@ -17,7 +17,7 @@ internal sealed class ConnectionAwaitedCallback(Exception? failure)
         }
         using var admission = ownerShutdown.Register(() => AdmissionClosed.TrySetResult());
         Arrived.SetResult();
-        await Release.Task.ConfigureAwait(true);
+        await Release.Task;
         if (failure is not null)
         {
             ExceptionDispatchInfo.Capture(failure).Throw();

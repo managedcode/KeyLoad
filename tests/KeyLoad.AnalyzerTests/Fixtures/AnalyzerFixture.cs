@@ -89,6 +89,7 @@ internal static class AnalyzerFixture
             .Concat([
                 typeof(Orleans.IGrain).Assembly.Location,
                 typeof(Orleans.Grain).Assembly.Location,
+                typeof(Orleans.Runtime.GrainService).Assembly.Location,
                 typeof(Orleans.GenerateSerializerAttribute).Assembly.Location,
                 typeof(Orleans.Runtime.IPersistentState<>).Assembly.Location,
                 typeof(Microsoft.AspNetCore.Builder.WebApplication).Assembly.Location,

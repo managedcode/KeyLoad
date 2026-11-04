@@ -24,11 +24,11 @@ public sealed partial class DatabaseCommitGrain
                     KeepAlive = true
                 });
             }
-            await base.OnActivateAsync(cancellationToken).ConfigureAwait(true);
+            await base.OnActivateAsync(cancellationToken);
             return;
         }
         var runtime = localRuntime ?? throw Errors.Fail(ErrorCode.OwnershipLost, SharedUnavailable);
-        var original = await runtime.OpenSharedAsync(((IGrainBase)this).GrainContext, cancellationToken).ConfigureAwait(true);
+        var original = await runtime.OpenSharedAsync(((IGrainBase)this).GrainContext, cancellationToken);
         shared = original;
         try
         {
@@ -36,13 +36,13 @@ public sealed partial class DatabaseCommitGrain
             {
                 throw Errors.Fail(ErrorCode.RecoveryRequired, SharedUnavailable);
             }
-            await base.OnActivateAsync(cancellationToken).ConfigureAwait(true);
+            await base.OnActivateAsync(cancellationToken);
         }
         catch (Exception failure)
         {
             try
             {
-                await runtime.CloseSharedAsync(original).ConfigureAwait(true);
+                await runtime.CloseSharedAsync(original);
                 shared = null;
             }
             catch (Exception cleanup)
@@ -59,15 +59,15 @@ public sealed partial class DatabaseCommitGrain
         synchronizationTimer?.Dispose();
         if (commands is { } originalCommands)
         {
-            await originalCommands.JoinAsync().ConfigureAwait(true);
+            await originalCommands.JoinAsync();
         }
         if (shared is { } original)
         {
             await (localRuntime ?? throw Errors.Fail(ErrorCode.OwnershipLost, SharedUnavailable))
-                .CloseSharedAsync(original).ConfigureAwait(true);
+                .CloseSharedAsync(original);
             shared = null;
         }
-        await base.OnDeactivateAsync(reason, cancellationToken).ConfigureAwait(true);
+        await base.OnDeactivateAsync(reason, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -105,13 +105,13 @@ public sealed partial class DatabaseCommitGrain
         }
         else
         {
-            var owner = target ?? await Copies.GetReadOwnerAsync(storage.LocalSiloAddress, cancellationToken).ConfigureAwait(true);
+            var owner = target ?? await Copies.GetReadOwnerAsync(storage.LocalSiloAddress, cancellationToken);
             if (!membership.CurrentSnapshot.Members.TryGetValue(owner, out var member) || member.Status != SiloStatus.Active)
             {
                 throw Errors.Fail(ErrorCode.OwnershipLost, SharedUnavailable);
             }
             backend = storage.On(owner);
         }
-        return await execute(backend).ConfigureAwait(true);
+        return await execute(backend);
     }
 }

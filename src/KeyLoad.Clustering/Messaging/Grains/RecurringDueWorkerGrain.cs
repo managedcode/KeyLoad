@@ -39,9 +39,9 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
 
     private async Task FlushAsync(CancellationToken token)
     {
-        due = await RunCycleAsync(due, token).ConfigureAwait(true);
-        deadlines = await RunQueueCycleAsync(deadlines, token).ConfigureAwait(true);
-        transfers = await RunTransferCycleAsync(transfers, token).ConfigureAwait(true);
+        due = await RunCycleAsync(due, token);
+        deadlines = await RunQueueCycleAsync(deadlines, token);
+        transfers = await RunTransferCycleAsync(transfers, token);
     }
 
     private Task<RemoteTransferPendingCursor?> RunTransferCycleAsync(RemoteTransferPendingCursor? cursor, CancellationToken token)
@@ -55,7 +55,7 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
     {
         try
         {
-            var discovery = await ReadAndDispatchPage(cursor, cancellationToken).ConfigureAwait(true);
+            var discovery = await ReadAndDispatchPage(cursor, cancellationToken);
             cursor = discovery.Cursor;
             if (discovery.PrefixError is { } error)
             {
@@ -80,7 +80,7 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
     private async Task<DueWorkDiscoveryResult> ReadAndDispatchPage(DueSweepCursor? cursor,
         CancellationToken cancellationToken)
     {
-        var discovery = await storage.Operations.ReadDueWorkPageAsync(cursor, cancellationToken).ConfigureAwait(true);
+        var discovery = await storage.Operations.ReadDueWorkPageAsync(cursor, cancellationToken);
         if (discovery.PrefixError is not null)
         {
             return discovery;
@@ -89,7 +89,7 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
         foreach (var hint in page.Jobs)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            await Dispatch(hint, cancellationToken).ConfigureAwait(true);
+            await Dispatch(hint, cancellationToken);
         }
         return discovery;
     }
@@ -104,7 +104,7 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
             var partition = hint.Lane.Partition.AtomicPartitionId;
             var coordinator = grainFactory.GetGrain<IRecurringDueCoordinatorGrain>(partition);
             var dispatch = coordinator.ProcessDueAsync(hint, deadline.Token);
-            var result = await AwaitDispatch(dispatch, deadline.Token).ConfigureAwait(true);
+            var result = await AwaitDispatch(dispatch, deadline.Token);
             if (result.Error is { } code)
             {
                 RecurringDueDiagnostics.DispatchFailed(diagnostics, code);
@@ -134,11 +134,11 @@ internal sealed class RecurringDueWorkerGrain(BackgroundStorageClient storage,
     {
         try
         {
-            return await dispatch.WaitAsync(cancellationToken).ConfigureAwait(true);
+            return await dispatch.WaitAsync(cancellationToken);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            await dispatch.ConfigureAwait(true);
+            await dispatch;
             throw;
         }
     }

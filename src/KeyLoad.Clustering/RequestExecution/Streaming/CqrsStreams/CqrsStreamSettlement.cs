@@ -8,7 +8,7 @@ internal static class CqrsStreamSettlement
     internal static async ValueTask<Exception?> SettleAsync<T>(IAsyncEnumerator<T>? enumerator, Action settled,
         Exception? primary)
     {
-        var disposal = (await CaptureDisposalAsync(enumerator).ConfigureAwait(true)).Value;
+        var disposal = (await CaptureDisposalAsync(enumerator)).Value;
         var activation = (CaptureActivation(settled)).Value;
         return (Combine(primary, disposal, activation)).Value;
     }
@@ -16,8 +16,8 @@ internal static class CqrsStreamSettlement
     internal static async ValueTask<Exception?> SettleAwaitedAsync<T>(IAsyncEnumerator<T>? enumerator, Func<ValueTask> settled,
         Exception? primary)
     {
-        var disposal = (await CaptureDisposalAsync(enumerator).ConfigureAwait(true)).Value;
-        var activation = (await CaptureActivationAsync(settled).ConfigureAwait(true)).Value;
+        var disposal = (await CaptureDisposalAsync(enumerator)).Value;
+        var activation = (await CaptureActivationAsync(settled)).Value;
         return (Combine(primary, disposal, activation)).Value;
     }
 
@@ -25,7 +25,7 @@ internal static class CqrsStreamSettlement
     {
         try
         {
-            await settled().ConfigureAwait(true);
+            await settled();
             return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error)) { return (true, ((Exception?)(error))); }
@@ -41,7 +41,7 @@ internal static class CqrsStreamSettlement
 
         try
         {
-            await enumerator.DisposeAsync().ConfigureAwait(true);
+            await enumerator.DisposeAsync();
             return (false, default(Exception?));
         }
         catch (Exception error) when (CqrsBoundaryErrors.IsNonFatal(error))

@@ -382,7 +382,7 @@ dotnet_diagnostic.CA1858.severity = warning
 # CS1998: Async method lacks 'await' operators; ensure async stays meaningful
 dotnet_diagnostic.CS1998.severity = error
 
-# CA2007: DISABLED - Never use ConfigureAwait(false) per AGENTS.md
+# KLD0043 requires ordinary awaits in Orleans execution code.
 dotnet_diagnostic.CA2007.severity = none
 
 # CA2008: Do not create tasks without passing a TaskScheduler
