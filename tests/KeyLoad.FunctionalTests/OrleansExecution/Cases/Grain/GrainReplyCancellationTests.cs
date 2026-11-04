@@ -116,12 +116,9 @@ internal sealed class GrainReplyCancellationTests
     private static (GrainOperationReply Reply, string Output) FailureAndCapture(Exception error, bool command,
         Guid requestId, CancellationToken cancellationToken)
     {
+        using var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger());
         using var capture = new EventSourceLogCapture();
-        GrainOperationReply reply;
-        using (var factory = LoggerFactory.Create(builder => builder.AddEventSourceLogger()))
-        {
-            reply = GrainReplyFactory.Failure(error, command, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)), requestId, GrainFailureStage.ReadBarrier, cancellationToken);
-        }
+        var reply = GrainReplyFactory.Failure(error, command, factory.CreateLogger(nameof(GrainFailureDiagnosticsTests)), requestId, GrainFailureStage.ReadBarrier, cancellationToken);
         return (reply, capture.Text);
     }
 
