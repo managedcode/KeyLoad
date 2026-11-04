@@ -41,7 +41,19 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
             return (new GrainValue(null) /* KLD0041: This concrete authorized response enters the existing generated GrainValue slot with its original native runtime type header. */);
         }
 
-        var principal = await ReloadPrincipalAsync(request, requestId, null, cancellationToken).ConfigureAwait(true);
+        if (codec.HasPhaseObserver)
+        {
+            await codec.ObservePhaseAsync(request, GrainRequestPhase.AuthorizationReload,
+                context, cancellationToken).ConfigureAwait(true);
+            ConnectionReadExecution.ValidateFreshRequest(codec, request, requestId, cancellationToken);
+        }
+        if (kind == GrainReadKind.Document)
+        {
+            return GrainCoreReadCapabilities.Execute(localDatabase, kind, request.Envelope.PrincipalId!, request,
+                new ReadExecutionBudget(runtimeClock, cancellationToken), binding, null);
+        }
+
+        var principal = GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock);
         if (kind == GrainReadKind.CurrentPrincipal)
         {
             GrainPayload.RequireNoDto((request.Payload /* KLD0041: Read this verified native envelope Payload slot only for the selected closed-kind handler to validate its concrete request type. */)) /* KLD0041: Validate the current generated envelope scalar NoDto marker for this capability before executing a request without a DTO. */;
@@ -70,20 +82,6 @@ internal sealed class ConnectionReadCapabilities(DatabaseEngine localDatabase, I
         }
         return await ReadCapabilityAsync(kind, principal, request, requestId,
             binding, cancellationToken).ConfigureAwait(true);
-    }
-
-    private async Task<PrincipalRecord> ReloadPrincipalAsync(DecodedGrainRequest request, Guid requestId,
-        ReadExecutionBudget? work, CancellationToken cancellationToken)
-    {
-        if (codec.HasPhaseObserver)
-        {
-            await codec.ObservePhaseAsync(request, GrainRequestPhase.AuthorizationReload,
-                context, cancellationToken).ConfigureAwait(true);
-            ConnectionReadExecution.ValidateFreshRequest(codec, request, requestId, cancellationToken);
-        }
-        return work is null
-            ? GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock)
-            : GrainRequestAuthority.ReloadForRequest(localDatabase, request.Envelope, runtimeClock, work);
     }
 
     private async Task<GrainValue> ReadCapabilityAsync(GrainReadKind kind, PrincipalRecord principal,

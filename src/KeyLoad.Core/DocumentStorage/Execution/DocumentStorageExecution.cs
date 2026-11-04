@@ -1,17 +1,13 @@
 using KeyLoad.Core.ResourceExecution;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Core;
 /// <summary>Executes DocumentStorageExecution operations against the caller's database context.</summary>
 public static class DocumentStorageExecution
 {
-    internal static DocumentResult? GetDocumentBound(this DatabaseEngine engine, string principalId, EntityRef reference, CommitToken? minimumToken, IResourceLifetimeWorkBinding binding, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(binding) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
-        var work = new ReadExecutionBudget(engine.EvaluationClock, cancellationToken);
-        return engine.GetDocumentBound(principalId, new GetDocumentRequest(reference, minimumToken), work, binding);
-    }
-
-    internal static DocumentResult? GetDocumentBound(this DatabaseEngine engine, string principalId, GetDocumentRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding)
+    internal static DocumentResult? GetDocumentBound(this DatabaseEngine engine, string principalId,
+        GetDocumentRequest request, ReadExecutionBudget work, IResourceLifetimeWorkBinding binding,
+        Func<DatabaseEngine, IKeyValueView, string, PrincipalRecord> readPrincipal)
     {
         ArgumentNullException.ThrowIfNull(request) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
         ArgumentNullException.ThrowIfNull(work) /* KLD0041: The BCL null guard accepts this existing reference through its object parameter without copying its contents. */;
@@ -22,7 +18,7 @@ public static class DocumentStorageExecution
         var result = engine.Store.Read(raw =>
         {
             var view = work.CreateView(raw);
-            var principal = engine.Principal(view, principalId, engine.Clock.GetUtcNow());
+            var principal = readPrincipal(engine, view, principalId);
             return engine.ReadDocumentAtCut(view, principal, request.Reference, request.MinimumToken, cancellationToken);
         });
         return result;

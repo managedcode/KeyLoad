@@ -1,5 +1,6 @@
 using KeyLoad.Core;
 using KeyLoad.Core.RuntimeJournaling.Identity;
+using KeyLoad.Storage;
 
 namespace KeyLoad.Clustering;
 
@@ -29,6 +30,20 @@ internal static class GrainRequestAuthority
         var principal = database.Store.Read(view => database.Principal(view, envelope.PrincipalId, clock.GetUtcNow()));
         RuntimeJournalIdentity.RequireProtected(principal);
         return principal;
+    }
+
+    internal static PrincipalRecord ReloadDocumentPrincipal(DatabaseEngine database, IKeyValueView view, string principalId)
+    {
+        try
+        {
+            RuntimeJournalIdentity.RequirePublicCredential(principalId);
+            return database.Principal(view, principalId, database.EvaluationClock.GetUtcNow());
+        }
+        catch (Exception error) when (GrainBoundaryErrors.Handles(error))
+        {
+            GrainFailureDiagnostics.Mark(error, GrainFailureStage.Authorization);
+            throw;
+        }
     }
 
     internal static PrincipalRecord Reload(DatabaseEngine database, string principalId, TimeProvider clock,
