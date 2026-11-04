@@ -34,19 +34,7 @@ internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
         }
         var grains = factory ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
         var services = runtime ?? throw Errors.Fail(ErrorCode.OwnershipLost, OrleansNodeProtocol.RoutingUnavailable);
-        var reply = await DrainAsync(grains, services, requestId, envelope, command,
-            progress, cancellationToken);
-        if (reply.Error is { } error)
-        {
-            throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected);
-        }
-        return reply;
-    }
-
-    private async Task<GrainOperationReply> DrainAsync(IGrainFactory grains, IServiceProvider services,
-        Guid requestId, GrainRequestEnvelope envelope, bool command,
-        Func<GrainRequestProgress, CancellationToken, ValueTask>? progress, CancellationToken executionToken)
-    {
+        GrainOperationReply reply;
         var stage = OrleansRpcFailureStage.Preparation;
         OrleansRpcFailureOperation? originalOperation = null;
         try
@@ -62,14 +50,22 @@ internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
             if (progress is null && !ConnectionParentExecution.Handles(envelope.CommandKind))
             {
                 purpose.Started();
-                return await actor.ExecuteAsync(envelope, executionToken);
+                reply = await actor.ExecuteAsync(envelope, cancellationToken);
             }
-            return await DrainStreamAsync(actor, envelope, purpose, progress, executionToken);
+            else
+            {
+                reply = await DrainStreamAsync(actor, envelope, purpose, progress, cancellationToken);
+            }
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
         {
-            throw OrleansRpcFailure.Translate(failure, command, requestId, logger, stage, originalOperation, executionToken);
+            throw OrleansRpcFailure.Translate(failure, command, requestId, logger, stage, originalOperation, cancellationToken);
         }
+        if (reply.Error is { } error)
+        {
+            throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected);
+        }
+        return reply;
     }
 
     private static async Task<GrainOperationReply> DrainStreamAsync(IRequestGrain actor, GrainRequestEnvelope envelope,
