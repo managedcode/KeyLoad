@@ -39,22 +39,16 @@ internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
         OrleansRpcFailureOperation? originalOperation = null;
         try
         {
-            var purpose = new CqrsStreamPurpose(() =>
-            {
-                var request = services.GetRequiredService<GrainRequestCodec>().DecodeRequest(envelope, requestId);
-                originalOperation = new(request.Envelope.CommandId, request.Envelope.ReadKind, request.Envelope.CommandKind);
-                return request;
-            });
             var actor = grains.GetGrain<IRequestGrain>(RequestExecutionGrainIdentity.For(requestId));
             stage = OrleansRpcFailureStage.Consumption;
             if (progress is null && !ConnectionParentExecution.Handles(envelope.CommandKind))
             {
-                purpose.Started();
+                _ = VerifyOriginal();
                 reply = await actor.ExecuteAsync(envelope, cancellationToken);
             }
             else
             {
-                reply = await DrainStreamAsync(actor, envelope, purpose, progress, cancellationToken);
+                reply = await DrainStreamAsync(actor, envelope, new CqrsStreamPurpose(VerifyOriginal), progress, cancellationToken);
             }
         }
         catch (Exception failure) when (CqrsBoundaryErrors.IsNonFatal(failure))
@@ -66,6 +60,13 @@ internal sealed class OrleansNodeRequestExecutor(ILogger<OrleansNode> logger)
             throw Errors.Fail(error, reply.SafeDetail ?? OrleansNodeProtocol.ReplyRejected);
         }
         return reply;
+
+        DecodedGrainRequest VerifyOriginal()
+        {
+            var request = services.GetRequiredService<GrainRequestCodec>().DecodeRequest(envelope, requestId);
+            originalOperation = new(request.Envelope.CommandId, request.Envelope.ReadKind, request.Envelope.CommandKind);
+            return request;
+        }
     }
 
     private static async Task<GrainOperationReply> DrainStreamAsync(IRequestGrain actor, GrainRequestEnvelope envelope,
