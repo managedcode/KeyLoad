@@ -6,6 +6,8 @@ namespace KeyLoad.Query.Search;
 
 internal static class VectorRanker
 {
+    private const int EqualOrder = 0;
+
     public static SearchScore[] Rank(DatabaseEngine database, IKeyValueView view, PrincipalRecord principal,
         SearchRequest request, PreparedSimilarity similarity, ReadExecutionBudget budget,
         FilteredSearchEligibility eligibility, PrincipalRecord? sourcePrincipal = null, int? retainedLimit = null)
@@ -27,13 +29,13 @@ internal static class VectorRanker
     }
 
     private static void Offer(PriorityQueue<SearchScore, SearchScore> selected, SearchScore candidate,
-        int limit, IComparer<SearchScore> comparer)
+        int limit)
     {
         if (selected.Count < limit)
         {
             selected.Enqueue(candidate, candidate);
         }
-        else if (comparer.Compare(candidate, selected.Peek()) > 0)
+        else if (GlobalBranchOrder.CompareScores(candidate, selected.Peek()) < EqualOrder)
         {
             selected.DequeueEnqueue(candidate, candidate);
         }
@@ -48,7 +50,6 @@ internal static class VectorRanker
         private readonly FilteredSearchEligibility eligibility;
         private readonly PrincipalRecord? sourcePrincipal;
         private readonly int? retainedLimit;
-        private readonly IComparer<SearchScore> comparer;
         private readonly List<SearchScore>? ranked;
         private readonly PriorityQueue<SearchScore, SearchScore>? selected;
 
@@ -62,8 +63,7 @@ internal static class VectorRanker
             this.eligibility = eligibility;
             this.sourcePrincipal = sourcePrincipal;
             this.retainedLimit = retainedLimit;
-            comparer = GlobalBranchOrder.WorstFirst(budget);
-            selected = retainedLimit.HasValue ? new(comparer) : null;
+            selected = retainedLimit.HasValue ? new(GlobalBranchOrder.WorstFirst(budget)) : null;
             ranked = selected is null ? [] : null;
         }
 
@@ -82,7 +82,7 @@ internal static class VectorRanker
             }
             else
             {
-                Offer(selected, candidate, retainedLimit!.Value, comparer);
+                Offer(selected, candidate, retainedLimit!.Value);
             }
         }
 
