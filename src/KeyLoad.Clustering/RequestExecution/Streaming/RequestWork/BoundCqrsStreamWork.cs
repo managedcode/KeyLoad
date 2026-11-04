@@ -26,8 +26,11 @@ internal sealed class BoundCqrsStreamWork : IAsyncDisposable
         originalToken = cancellationToken;
         try
         {
-            request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, enumerationToken);
-            execution = CancellationTokenSource.CreateLinkedTokenSource(request.Token, owner.ShutdownToken);
+            if (enumerationToken.CanBeCanceled && enumerationToken != cancellationToken)
+            {
+                request = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, enumerationToken);
+            }
+            execution = CancellationTokenSource.CreateLinkedTokenSource(request?.Token ?? cancellationToken, owner.ShutdownToken);
             lease = acquireVerified();
             ownedRetention = new();
             lease.AttachResultRetention(ownedRetention);
